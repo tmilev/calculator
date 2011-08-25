@@ -36,10 +36,7 @@ output << " \n";
 }
 void static_html4(std::stringstream& output){
 output << " <!>\n";
-output << " <!--Option-->\n";
-output << " <script type=\"text/javascript\" \n";
-output << " src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js\"  \n";
-output << " djConfig = \"parseOnLoad: true\"></script>\n";
+output << " <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
 output << " \n";
 output << "  <select name=\"textType\" id=\"textType\" onchange=\"makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();\">\n";
 output << "   <option>A</option>\n";
@@ -1071,9 +1068,9 @@ output << " for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)\n";
 output << "   Basis[tempCounter]= new Array(2);\n";
 output << " tempCounter=0;\n";
 output << " Basis[tempCounter][0]=0.3;  Basis[tempCounter][1]=0; tempCounter++; \n";
-output << " Basis[tempCounter][0]=0.4;    Basis[tempCounter][1]=-0.1; tempCounter++; \n";
-output << " Basis[tempCounter][0]=0.4;   Basis[tempCounter][1]=0.1; tempCounter++; \n";
-output << " Basis[tempCounter][0]=-0.8;  Basis[tempCounter][1]=1.4; tempCounter++; \n";
+output << " Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=-0.1; tempCounter++; \n";
+output << " Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=0.1; tempCounter++; \n";
+output << " Basis[tempCounter][0]=-0.8; Basis[tempCounter][1]=1.4; tempCounter++; \n";
 output << " Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.9; tempCounter++; \n";
 output << " Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.8; tempCounter++; \n";
 output << " Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=0.8; tempCounter++; \n";

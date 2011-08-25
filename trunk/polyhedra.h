@@ -9401,7 +9401,8 @@ class Cone
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml){return this->ElementToString(useLatex, useHtml, false, false);}
   std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant);
-  std::string DrawMeToHtml(DrawingVariables& theDrawingVariables);
+  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables);
+  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables);
   std::string DebugString;
   int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
   void ComputeDebugString(){ this->DebugString=this->ElementToString();}
@@ -9472,8 +9473,8 @@ class ConeLatticeAndShift
   Lattice theLattice;
   root theShift;
   void FindExtremaInDirectionOverLatticeOneNonParam
-    ( root& theLPToMaximizeAffine, roots& outputLPToMaximizeAffine,
-     List<ConeLatticeAndShift>& output, GlobalVariables& theGlobalVariables)
+    ( root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+     List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables)
        ;
   void operator=(const ConeLatticeAndShift& other)
   { this->theProjectivizedCone=other.theProjectivizedCone;
@@ -9482,6 +9483,18 @@ class ConeLatticeAndShift
   }
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
   int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
+};
+
+class ConeLatticeAndShiftMaxComputation
+{
+  public:
+  List<ConeLatticeAndShift> theConesLargerDim;
+  List<ConeLatticeAndShift> theConesSmallerDim;
+  List<bool> IsInfinity;
+  roots LPtoMaximize;
+  void FindExtremaInDirectionOverLatticeOneNonParam
+    (int numNonParam, GlobalVariables& theGlobalVariables)
+       ;
 };
 
 class ConeComplex : public HashedList<Cone>
@@ -9698,6 +9711,9 @@ class ParserNode
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateFindExtremaInDirectionOverLatticeOneNonParam
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateFindExtremaInDirectionOverLattice
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int  EvaluateWeylDimFormula
@@ -10014,7 +10030,8 @@ public:
   bool TokenProhibitsUnaryMinus(int theToken);
   void initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank);
   void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,
+   const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
    )
   { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, 'B', 3, inputFunctionAddress);
     assert(tempBool);

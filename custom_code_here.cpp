@@ -1053,6 +1053,53 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluateFindExtremaInDirectionOverLattice
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff& theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
+ // int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
+  //int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
+  ParserNode& theShiftNode= theNode.owner->TheObjects[theArgumentList[1]];
+  Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList[2]].theLattice.GetElement();
+  Cone& currentCone=theNode.owner->TheObjects[theArgumentList[3]].theCone.GetElement();
+  int numNonParam=theNode.owner->TheObjects[theArgumentList[4]].intValue;
+  root theShift;
+  root theNEq;
+  if(!theLinPoly.IsLinearGetRootConstantTermLastCoordinate(theNEq, (Rational) 0))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  if(theNEq.size!=currentCone.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
+    return theNode.SetError(errorDimensionProblem);
+  if (theShift.size!=theNEq.size-1)
+    return theNode.SetError(errorDimensionProblem);
+/*  if (theNEq.size!=numNonParams+numParams+1)
+    return theNode.SetError(theNode.errorBadOrNoArgument);*/
+  if (numNonParam>theShift.size-1)
+    return theNode.SetError(errorImplicitRequirementNotSatisfied);
+  GeneralizedVermaModuleCharacters tempChars;
+  List<int> nodesCurrentRoot;
+  List<roots> outputParamChambers, outputNonParamVertices;
+  PolynomialOutputFormat tempFormat;
+  std::cout << "Input data: normal: " << theNEq.ElementToString()
+//  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
+  << "; cone: " << currentCone.ElementToString(false, true, false, true);
+  List<ConeLatticeAndShift> theConeComplex;
+  List<Lattice> resultingLattices;
+  List<roots> resultingShifts;
+  roots resultingLPs;
+  ConeLatticeAndShift theCLS;
+  theCLS.theProjectivizedCone=currentCone;
+  theCLS.theLattice=currentLattice;
+  theCLS.theShift=theShift;
+  theCLS.FindExtremaInDirectionOverLatticeOneNonParam
+  (theNEq, resultingLPs, theConeComplex, theGlobalVariables);
+  std::stringstream out;
+  out << currentCone.ElementToString(false, true);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluateSliceCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Cone& theCone=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theCone.GetElement();
@@ -1103,9 +1150,26 @@ void Lattice::ApplyLinearMap(MatrixLargeRational& theMap, Lattice& output)
   output.MakeFromRoots(tempRoots);
 }
 
+void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLatticeOneNonParam
+    (int numNonParam, GlobalVariables& theGlobalVariables)
+{ for (int i=0; i<numNonParam; i++)
+  { this->theConesSmallerDim.size=0;
+    roots newLPtoMaximize;
+    while(this->theConesLargerDim.size>0)
+    { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
+      currentCLS.FindExtremaInDirectionOverLatticeOneNonParam
+        (*this->LPtoMaximize.LastObject(), newLPtoMaximize, this->theConesSmallerDim, theGlobalVariables);
+      this->theConesLargerDim.size--;
+      this->LPtoMaximize.size--;
+    }
+    this->LPtoMaximize=newLPtoMaximize;
+    this->theConesLargerDim=this->theConesSmallerDim;
+  }
+}
+
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
-    ( root& theLPToMaximizeAffine, roots& outputLPToMaximizeAffine,
-     List<ConeLatticeAndShift>& output, GlobalVariables& theGlobalVariables)
+  ( root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+    List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables)
 { root theDirection;
   int theDimProjectivized=this->GetDimProjectivized();
   theDirection.MakeEi(theDimProjectivized, 0);
@@ -1135,8 +1199,6 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   theProjectionLatticeLevel.NullifyAll();
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
-  outputLPToMaximizeAffine.SetSize(complexBeforeProjection.size);
-  output.size=0;
   for (int i=0; i<complexBeforeProjection.size; i++)
   { Cone& currentCone=complexBeforeProjection.TheObjects[i];
     int numNonPerpWalls=0;
@@ -1195,18 +1257,17 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
         tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(extraEquation);
       }
       *tempRoot.LastObject()+=theLPToMaximizeAffine.TheObjects[0]*theB;
-      outputLPToMaximizeAffine.AddObjectOnTop(tempRoot);
+      outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
       tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, theGlobalVariables);
       theProjectionLatticeLevel.ActOnAroot(representativesShifted[j], tempCLS.theShift);
-      output.AddObjectOnTop(tempCLS);
+      outputAppend.AddObjectOnTop(tempCLS);
     }
   }
   std::cout << "<hr><hr><hr>";
-  for (int i=0; i<output.size; i++)
-  { std::cout << output[i].theProjectivizedCone.ElementToString(false, true, true, true);
+  for (int i=0; i<outputAppend.size; i++)
+  { std::cout << outputAppend[i].theProjectivizedCone.ElementToString(false, true, true, true);
   }
 }
-
 
 void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
   (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
@@ -4635,7 +4696,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   tempStream9 << "convertToXYCone" << timesCalled;
   std::string functionConvertToXYName=tempStream9.str();
 
-  out << "<div style=\"width:400;height:400;border:solid 1px\" id=\"" << theCanvasId << "\"></div>";
+  out << "<div style=\"width:400;height:400;border:solid 1px\" id=\"" << theCanvasId
+  << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
+  << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\"></div>";
   out << "<script type=\"text/javascript\">\n"
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
@@ -4702,22 +4765,57 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
   << theSurfaceName << "  = dojox.gfx.createSurface(node, 400, 400);\n"
   << theDrawFunctionName << "();\n"
-  << " }\n"
-  << "dojo.addOnLoad(" << theInitFunctionName << "); "
-   << "</script>";
-   return out.str();
+  << " }\n";
+  out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
+  << "var clickTolerance=5;\n"
+  << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
+  << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
+  out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
+  << "{ divPosX=0;\n  divPosY=0;\n  thePointer= document.getElementById(\"idCanvasCone" << timesCalled << "\");\n"
+  << "  while(thePointer)  {\n  divPosX += thePointer.offsetLeft;\n  divPosY += thePointer.offsetTop;\n  thePointer = thePointer.offsetParent;\n  }"
+  << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
+  << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"=-1;\n"
+  << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "=-2;\n"
+  <<  "for (i=0;i<3;i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled << "(posx, posy, basisCone" << timesCalled << "[i][0], basisCone" << timesCalled << "[i][1]))\n"
+  << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
+  << "{ if (selectedBasisIndexCone" << timesCalled << "==-1)\n    return;\n  divPosX=0;\n  divPosY=0;\n"
+  << "  thePointer= document.getElementById(\"idCanvasCone"<< timesCalled << "\");\n  while(thePointer)\n  { divPosX += thePointer.offsetLeft;\n"
+  << "    divPosY += thePointer.offsetTop;\n    thePointer = thePointer.offsetParent;\n  }\n"
+  << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
+  << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
+  << "if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone"<< timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
+  << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
+  << "{ basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][0]=posx;\n"
+  <<  "basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][1]=-posy;\n  }\n  drawCone" << timesCalled << " ();\n}\n";
+  out  << ""//"dojo.require(\"dojo.gfx\");"
+  << " dojo.addOnLoad(" << theInitFunctionName << "); "
+  << "</script>";
+  return out.str();
 }
 
-std::string Cone::DrawMeToHtml(DrawingVariables& theDrawingVariables)
+std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables)
 { root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim());
-  theDrawingVariables.theBuffer.init();
+//  theDrawingVariables.theBuffer.init();
+  roots VerticesScaled=this->Vertices;
+  for (int i=0; i<VerticesScaled.size; i++)
+  { Rational sumAbsValuesCoords=0;
+    for (int j=0; j<this->GetDim(); j++)
+      sumAbsValuesCoords+=(VerticesScaled[i][j].IsPositive()) ? VerticesScaled[i][j] : -VerticesScaled[i][j];
+    assert(!sumAbsValuesCoords.IsEqualToZero());
+    VerticesScaled[i]/=sumAbsValuesCoords;
+  }
   for (int i=0; i<this->Vertices.size; i++)
-    for (int j=i+1; j<this->Vertices.size; j++)
-      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-      (this->Vertices[i], this->Vertices[j], theDrawingVariables.PenStyleNormal, 0, 0);
-  for (int i=0; i<this->Vertices.size; i++)
-    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, this->Vertices[i], theDrawingVariables.PenStyleNormal, 0, 0);
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, VerticesScaled[i], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180), 0);
+  for (int k=0; k<this->Normals.size; k++)
+  { root& currentNormal=this->Normals[k];
+    for (int i=0; i<this->Vertices.size; i++)
+      if (currentNormal.ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
+        for (int j=i+1; j<this->Vertices.size; j++)
+          if(currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+            theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
+  }
   return theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
 }
 
@@ -4880,6 +4978,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b> Experimental please don't use.</b>",
    "findExtremaInDirectionOverLatticeShiftedOneNonParam(-2x_1+x_2, (0,0), lattice((1,0),(0,1)), cone((-1,1,0),(1,0,0), (-2,-1,4)))",
     & ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("findExtremaInDirectionOverLatticeShifted",
+   "(Polynomial, (Rational,...), Lattice, Cone, Integer)",
+   "<b> Experimental please don't use.</b>",
+   "",
+    & ParserNode::EvaluateFindExtremaInDirectionOverLattice
    );
   this->AddOneFunctionToDictionaryNoFail
   ("lattice",

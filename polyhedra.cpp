@@ -30708,7 +30708,11 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
-    case ParserNode::typeCone: out << "a cone: " << this->theCone.GetElement().DrawMeToHtml(theGlobalVariables.theDrawingVariables); break;
+    case ParserNode::typeCone:
+      theGlobalVariables.theDrawingVariables.theBuffer.init();
+      theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, this->theCone.GetElement().GetDim(), 0);
+      out << "a cone: " << this->theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables);
+      break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
     case ParserNode::typeUndefined: out << "Undefined expression (type 0)."; break;

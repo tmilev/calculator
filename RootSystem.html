@@ -30,10 +30,7 @@ function progressReport()
 </div>
 
 <!>
-<!--Option-->
-<script type="text/javascript" 
-src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
-djConfig = "parseOnLoad: true"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js" type="text/javascript"></script>
 
  <select name="textType" id="textType" onchange="makeCartanArbitrary(document.getElementById('textType'), document.getElementById(textDim));  this.form.submit();">
   <option>A</option>
@@ -1061,9 +1058,9 @@ for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
   Basis[tempCounter]= new Array(2);
 tempCounter=0;
 Basis[tempCounter][0]=0.3;  Basis[tempCounter][1]=0; tempCounter++; 
-Basis[tempCounter][0]=0.4;    Basis[tempCounter][1]=-0.1; tempCounter++; 
-Basis[tempCounter][0]=0.4;   Basis[tempCounter][1]=0.1; tempCounter++; 
-Basis[tempCounter][0]=-0.8;  Basis[tempCounter][1]=1.4; tempCounter++; 
+Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=-0.1; tempCounter++; 
+Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=0.1; tempCounter++; 
+Basis[tempCounter][0]=-0.8; Basis[tempCounter][1]=1.4; tempCounter++; 
 Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.9; tempCounter++; 
 Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.8; tempCounter++; 
 Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=0.8; tempCounter++; 

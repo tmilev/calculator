@@ -1080,21 +1080,20 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   List<int> nodesCurrentRoot;
   List<roots> outputParamChambers, outputNonParamVertices;
   PolynomialOutputFormat tempFormat;
-  std::cout << "Input data: normal: " << theNEq.ElementToString()
+  std::stringstream out;
+  out << "Input data: normal: " << theNEq.ElementToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
   << "; cone: " << currentCone.ElementToString(false, true, false, true);
-  List<ConeLatticeAndShift> theConeComplex;
-  List<Lattice> resultingLattices;
-  List<roots> resultingShifts;
-  roots resultingLPs;
+  ConeLatticeAndShiftMaxComputation theComputation;
   ConeLatticeAndShift theCLS;
   theCLS.theProjectivizedCone=currentCone;
   theCLS.theLattice=currentLattice;
   theCLS.theShift=theShift;
-  theCLS.FindExtremaInDirectionOverLatticeOneNonParam
-  (theNEq, resultingLPs, theConeComplex, theGlobalVariables);
-  std::stringstream out;
-  out << currentCone.ElementToString(false, true);
+  theComputation.theConesLargerDim.AddObjectOnTop(theCLS);
+  theComputation.LPtoMaximizeLargerDim.AddObjectOnTop(theNEq);
+  theComputation.IsInfinity.initFillInObject(1, false);
+  theComputation.FindExtremaInDirectionOverLatticeOneNonParam(numNonParam, theGlobalVariables);
+  out << theComputation.ElementToString();
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -1150,19 +1149,40 @@ void Lattice::ApplyLinearMap(MatrixLargeRational& theMap, Lattice& output)
   output.MakeFromRoots(tempRoots);
 }
 
+std::string ConeLatticeAndShiftMaxComputation::ElementToString()
+{ std::stringstream out;
+  out << "Cones not processed: ";
+  DrawingVariables theDrawingVariables;
+  for (int i=0; i<this->theConesLargerDim.size; i++)
+  { out << this->theConesLargerDim[i].ElementToString();
+    out << "<br>" << this->LPtoMaximizeLargerDim[i].ElementToString();
+    theDrawingVariables.theBuffer.init();
+    out << this->theConesLargerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables);
+  }
+  out << "Cones processed: ";
+  for (int i=0; i<this->theConesSmallerDim.size; i++)
+  { out << this->theConesSmallerDim[i].ElementToString();
+    out << "<br>" << this->LPtoMaximizeSmallerDim[i].ElementToString();
+    out << this->theConesSmallerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables);
+  }
+  return out.str();
+}
+
 void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLatticeOneNonParam
     (int numNonParam, GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<numNonParam; i++)
+{ //std::cout << "<hr>starting complex: " << this->ElementToString();
+  for (int i=0; i<numNonParam; i++)
   { this->theConesSmallerDim.size=0;
-    roots newLPtoMaximize;
+    this->LPtoMaximizeSmallerDim.size=0;
     while(this->theConesLargerDim.size>0)
     { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
       currentCLS.FindExtremaInDirectionOverLatticeOneNonParam
-        (*this->LPtoMaximize.LastObject(), newLPtoMaximize, this->theConesSmallerDim, theGlobalVariables);
+        (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim, theGlobalVariables);
       this->theConesLargerDim.size--;
-      this->LPtoMaximize.size--;
+      this->LPtoMaximizeLargerDim.size--;
     }
-    this->LPtoMaximize=newLPtoMaximize;
+    //std::cout << "<hr><hr>" << this->ElementToString();
+    this->LPtoMaximizeLargerDim=this->LPtoMaximizeSmallerDim;
     this->theConesLargerDim=this->theConesSmallerDim;
   }
 }
@@ -1180,9 +1200,9 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     theDirection.MinusRoot();
   complexBeforeProjection.slicingDirections.AddObjectOnTop(theDirection);
   complexBeforeProjection.slicingDirections.AddObjectOnTop(-theDirection);
-  std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
+//  std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   complexBeforeProjection.Refine(theGlobalVariables);
-  std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
+//  std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   root tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine, exitNormalLatticeLevel, enteringNormalLatticeLevel;
   root theDirectionSmallerDim;
   root theShiftReduced=this->theShift;
@@ -1192,7 +1212,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   Lattice exitRougherLattice, enteringRougherLattice;
   ConeLatticeAndShift tempCLS;
   theDirectionSmallerDim.MakeEi(theDimProjectivized-1, 0);
-  std::cout << "<hr>";
+//  std::cout << "<hr>";
   MatrixLargeRational theProjectionLatticeLevel;
   MatrixLargeRational theProjectionAffine;
   theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
@@ -1212,8 +1232,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
           tempRoot[k]=currentNormal[k+1];
         tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(tempRoot);
       } else
-      { std::cout << "<hr>";
-        std::cout << "<br>currentWall: " << currentNormal.ElementToString();
+      { //std::cout << "<hr>";
+        //std::cout << "<br>currentWall: " << currentNormal.ElementToString();
         numNonPerpWalls++;
         assert(numNonPerpWalls<3);
         if (currentNormal.ScalarEuclidean(theDirection).IsNegative())
@@ -1263,10 +1283,10 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       outputAppend.AddObjectOnTop(tempCLS);
     }
   }
-  std::cout << "<hr><hr><hr>";
-  for (int i=0; i<outputAppend.size; i++)
-  { std::cout << outputAppend[i].theProjectivizedCone.ElementToString(false, true, true, true);
-  }
+//  std::cout << "<hr><hr><hr>";
+//  for (int i=0; i<outputAppend.size; i++)
+//  { std::cout << outputAppend[i].theProjectivizedCone.ElementToString(false, true, true, true);
+//  }
 }
 
 void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
@@ -2282,14 +2302,14 @@ void Lattice::IntersectWithPreimageOfLattice
 { roots startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
   roots resultNonKernelPart, resultKernelPart, result, tempRoots;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
-  std::cout << "<br>Starting basis: " << startingBasis.ElementToString();
-  std::cout << "<br>The linear map: " << theLinearMap.ElementToString(true, false);
+  //std::cout << "<br>Starting basis: " << startingBasis.ElementToString();
+  //std::cout << "<br>The linear map: " << theLinearMap.ElementToString(true, false);
   theLinearMap.ActOnRoots(startingBasis, imageStartingBasis);
-  std::cout << "<br>Image of starting basis: " << imageStartingBasis.ElementToString();
+  //std::cout << "<br>Image of starting basis: " << imageStartingBasis.ElementToString();
   Lattice ImageLattice;
   ImageLattice.MakeFromRoots(imageStartingBasis);
   ImageLattice.IntersectWith(other);
-  std::cout << "<br>Image lattice: " << ImageLattice.ElementToString(true, false);
+  //std::cout << "<br>Image lattice: " << ImageLattice.ElementToString(true, false);
   basisImageIntersection.AssignMatrixRows(ImageLattice.basisRationalForm);
   Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
   basisImageIntersection.GetVectorsRational(tempBasisImageIntersection);
@@ -2297,7 +2317,7 @@ void Lattice::IntersectWithPreimageOfLattice
   bool tempBool= tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
   ImageBasisInImageStartingBasisCoords.AssignVectorsRational(tempImageBasisInImageStartingBasisCoords);
   assert(tempBool);
-  std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ElementToString();
+  //std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ElementToString();
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i=0; i<resultNonKernelPart.size; i++)
   { root& currentRoot=resultNonKernelPart.TheObjects[i];
@@ -2305,16 +2325,16 @@ void Lattice::IntersectWithPreimageOfLattice
     for (int j=0; j<startingBasis.size; j++)
       currentRoot+=startingBasis.TheObjects[j]*ImageBasisInImageStartingBasisCoords.TheObjects[i].TheObjects[j];
   }
-  std::cout << "<br> Result non-kernel part (representatives): " << resultNonKernelPart.ElementToString();
+  //std::cout << "<br> Result non-kernel part (representatives): " << resultNonKernelPart.ElementToString();
   Lattice KernelPart;
   KernelPart=*this;
   tempRoots.AssignMatrixRows(theLinearMap);
   KernelPart.IntersectWithLinearSubspaceGivenByNormals(tempRoots);
-  std::cout << "<br>Kernel part of the result: " << KernelPart.ElementToString(true, false);
+  //std::cout << "<br>Kernel part of the result: " << KernelPart.ElementToString(true, false);
   result.AssignMatrixRows(KernelPart.basisRationalForm);
   result.AddListOnTop(resultNonKernelPart);
   this->MakeFromRoots(result);
-  std::cout << "<br> And the result is.... " << this->ElementToString(true, false);
+  //std::cout << "<br> And the result is.... " << this->ElementToString(true, false);
 }
 
 void Lattice::IntersectWith(const Lattice& other)
@@ -3874,6 +3894,22 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluateDrawConeAffine
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ theGlobalVariables.theDrawingVariables.theBuffer.init();
+  theNode.outputString= theNode.owner->TheObjects[theArgumentList[0]].theCone.GetElement().DrawMeToHtmlLastCoordAffine(theGlobalVariables.theDrawingVariables);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateDrawConeProjective
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ theGlobalVariables.theDrawingVariables.theBuffer.init();
+  theNode.outputString= theNode.owner->TheObjects[theArgumentList[0]].theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 { std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, outSltwoMainFile, out;
@@ -4474,17 +4510,17 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
   root theTrueDirection;
   theDirectionLattice.basisRationalForm.RowToRoot(0, theTrueDirection);
-  std::cout << "<br>the normal: " << theNormal.ElementToString();
-  std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
+  //std::cout << "<br>the normal: " << theNormal.ElementToString();
+  //std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
   theHyperplaneLatticeNoShift=*this;
   theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
-  std::cout << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ElementToString();
+  //std::cout << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ElementToString();
   tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
   tempRoots.AddObjectOnTop(theTrueDirection);
   outputRougherLattice.MakeFromRoots(tempRoots);
   this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
-  std::cout << "<br>the rougher lattice: " << outputRougherLattice.ElementToString();
-  std::cout << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ElementToString();
+  //std::cout << "<br>the rougher lattice: " << outputRougherLattice.ElementToString();
+  //std::cout << "<br>representatives of the quotient of the two lattices: " << outputRepresentatives.ElementToString();
   for (int i=0; i<outputRepresentatives.size; i++)
   { outputRepresentatives.TheObjects[i]+=theShift;
     outputRougherLattice.ReduceVector(outputRepresentatives.TheObjects[i]);
@@ -4492,7 +4528,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   Rational theShiftedConst, unitMovement, tempRat;
   unitMovement=theNormal.ScalarEuclidean(theTrueDirection);
   movementInDirectionPerRepresentative.SetSize(outputRepresentatives.size);
-  std::cout << "<br>Affine hyperplane per representative: ";
+  //std::cout << "<br>Affine hyperplane per representative: ";
   for (int i=0; i<outputRepresentatives.size; i++)
   { tempRat=(theNormal.ScalarEuclidean(outputRepresentatives.TheObjects[i]) - theConstOnTheOtherSide)/unitMovement;
     tempRat.AssignFracValue();
@@ -4500,7 +4536,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
     root& currentMovement=movementInDirectionPerRepresentative.TheObjects[i];
     currentMovement=theAffineHyperplane;
     *currentMovement.LastObject()=theShiftedConst;
-    std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
+    //std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
   }
 //  std::cout << "<hr>"
 }
@@ -4670,6 +4706,13 @@ std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
   return out.str();
 }
 
+std::string ConeLatticeAndShift::ElementToString()
+{ std::stringstream out;
+  out << this->theProjectivizedCone.ElementToString(false, true, true, true);
+  out << "<br>Shift+lattice: " << this->theShift.ElementToString() << " + " << this->theLattice.ElementToString();
+  return out.str();
+}
+
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
 { std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
   std::stringstream tempStream7, tempStream8, tempStream9, tempStream10;
@@ -4698,7 +4741,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 
   out << "<div style=\"width:400;height:400;border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
-  << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\"></div>";
+  << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
+  << "onmousewheel=\"mouseHandleWheelCone" <<timesCalled << "(event);\""
+  << "></div>";
   out << "<script type=\"text/javascript\">\n"
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
@@ -4731,6 +4776,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << basisName << "[7]=[-50,50];\n";
   out << "var " << shiftX << "=150;\n";
   out << "var " <<  shiftY << "=200;\n";
+  out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
   out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
   out << "resultX+=vector[i]*" << basisName << "[i][0];\n";
@@ -4787,9 +4833,54 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
   << "{ basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][0]=posx;\n"
   <<  "basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][1]=-posy;\n  }\n  drawCone" << timesCalled << " ();\n}\n";
+  out << "function mouseHandleWheelCone" << timesCalled << "(theEvent){\n"
+  << "theEvent = theEvent ? theEvent : window.event;\n theEvent.preventDefault();\ntheEvent.stopPropagation();\ntheWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
+  << "GraphicsUnitCone" << timesCalled << "+=theWheelDelta;\n"
+  << "if (GraphicsUnitCone" << timesCalled << "==0)\n GraphicsUnitCone" << timesCalled << "=3;\n"
+  << "for (i=0; i<" << theDimension << "; i++){\n "
+  << basisName << "[i][0]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
+  << basisName << "[i][1]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
+  << "}\n"
+  << theDrawFunctionName << "();\n}\n";
+
   out  << ""//"dojo.require(\"dojo.gfx\");"
   << " dojo.addOnLoad(" << theInitFunctionName << "); "
   << "</script>";
+  return out.str();
+}
+
+std::string Cone::DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables)
+{ root ZeroRoot;
+  ZeroRoot.MakeZero(this->GetDim()-1);
+//  theDrawingVariables.theBuffer.init();
+  roots VerticesScaled=this->Vertices;
+  Rational tempRat;
+  for (int i=0; i<VerticesScaled.size; i++)
+  { tempRat=*VerticesScaled[i].LastObject();
+    if (!tempRat.IsEqualToZero())
+      VerticesScaled[i]/=tempRat;
+    else
+      VerticesScaled[i]*=10000;
+    VerticesScaled[i].SetSize(this->GetDim()-1);
+  }
+  root tempRoot;
+  for (int i=0; i<this->GetDim()-1; i++)
+  { tempRoot.MakeEi(this->GetDim()-1, i);
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205), 0);
+  }
+  for (int k=0; k<this->Normals.size; k++)
+  { root& currentNormal=this->Normals[k];
+    for (int i=0; i<this->Vertices.size; i++)
+      if (currentNormal.ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
+        for (int j=i+1; j<this->Vertices.size; j++)
+          if(currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+            theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
+  }
+  std::stringstream out;
+  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
+  out << "<br>" << this->ElementToString(false, true, true, true);
   return out.str();
 }
 
@@ -4805,6 +4896,12 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables)
     assert(!sumAbsValuesCoords.IsEqualToZero());
     VerticesScaled[i]/=sumAbsValuesCoords;
   }
+  root tempRoot;
+  for (int i=0; i<this->GetDim(); i++)
+  { tempRoot.MakeEi(this->GetDim(), i);
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205), 0);
+  }
   for (int i=0; i<this->Vertices.size; i++)
     theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, VerticesScaled[i], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180), 0);
   for (int k=0; k<this->Normals.size; k++)
@@ -4816,7 +4913,10 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables)
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
             (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
   }
-  return theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
+  std::stringstream out;
+  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
+  out << "<br>" << this->ElementToString(false, true, true, false);
+  return out.str();
 }
 
 std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string& input, bool useDiv)
@@ -4972,18 +5072,18 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
    );
-  this->AddOneFunctionToDictionaryNoFail
+/*  this->AddOneFunctionToDictionaryNoFail
   ("findExtremaInDirectionOverLatticeShiftedOneNonParam",
    "(Polynomial, (Rational,...), Lattice, Cone)",
    "<b> Experimental please don't use.</b>",
    "findExtremaInDirectionOverLatticeShiftedOneNonParam(-2x_1+x_2, (0,0), lattice((1,0),(0,1)), cone((-1,1,0),(1,0,0), (-2,-1,4)))",
     & ParserNode::EvaluateFindExtremaInDirectionOverLatticeOneNonParam
-   );
+   );*/
   this->AddOneFunctionToDictionaryNoFail
   ("findExtremaInDirectionOverLatticeShifted",
    "(Polynomial, (Rational,...), Lattice, Cone, Integer)",
    "<b> Experimental please don't use.</b>",
-   "",
+   "findExtremaInDirectionOverLatticeShifted(-2x_1+x_2+x_3, (0,0,0), lattice((1,0,0),(0,1,0),(0,0,1)), cone((1,0,0,0),(0,1,0,0), (1,1,1,-4), (0,1,-1,0)),2)",
     & ParserNode::EvaluateFindExtremaInDirectionOverLattice
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -5013,6 +5113,20 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point. ",
    "sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
     & ParserNode::EvaluateSliceCone
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("drawConeProjective",
+   "(Cone)",
+   "Draws the projective cone on the page. ",
+   "drawConeProjective( cone((1,0,0),(0,1,0),(0,0,1)))",
+    & ParserNode::EvaluateDrawConeProjective
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("drawConeAffine",
+   "(Cone)",
+   "Draws the projection of the cone onto the affine hyperplane passing through (0,...,0,1) parallel to the hyperplane spanned by the vectors with last coordinate 0. ",
+   "drawConeAffine( cone((1,0,0,0),(0,1,0,0),(0,-1,1,0), (1,1,1,-5/2)))",
+    & ParserNode::EvaluateDrawConeAffine
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

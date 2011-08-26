@@ -138,7 +138,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   //std::cout << "Computation done in " << GetElapsedTimeInSeconds() << "seconds <br>";
   std::cout.flush();
-  theParser.ComputeDebugString(theGlobalVariables);
+  theParser.ComputeDebugString(false, theGlobalVariables);
 
   std::string beginMath="<div class=\"math\" scale=\"50\">";
   std::string endMath ="</div>";

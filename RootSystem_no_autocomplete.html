@@ -25,17 +25,17 @@ Root systems
   <option>6</option>
   <option>7</option>
   <option>8</option>
-</select>
+</select> Root system.
 <script type="text/javascript"> 
 function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
 </script>
 
 <script type="text/javascript" 
-src="http://ajax.googleapis.com/ajax/libs/dojo/1.4/dojo/dojo.xd.js"  
+src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js"  
 djConfig = "parseOnLoad: true"></script>
-<div style="width:400;height:400;border:solid 1px" id="canvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
+<div style="width:400;height:400;border:solid 1px" id="idCanvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
-//changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
+//changeBasis(1, 50, 50); drawOnCanvasMain();" onmousewheel="mouseHandleWheel();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
 <br>
 The basis vectors correspond to the vertices of the Dynkin diagram.<br>
 You can drag the center and the basis vectors.<button onclick="switchMenu('rotationExplanation')">More info</button>
@@ -307,13 +307,14 @@ var RootsArray;
 var ZeroRoot;
 var ButtonIsDown=false;
 var DebugString;
+var canvasMain=document.getElementById("idCanvasMain");
 for (tempCounter=0; tempCounter<MaxNumCoords; tempCounter++)
   Basis[tempCounter]= new Array(2);
 tempCounter=0;
 Basis[tempCounter][0]=0.3;  Basis[tempCounter][1]=0; tempCounter++; 
-Basis[tempCounter][0]=0.4;    Basis[tempCounter][1]=-0.1; tempCounter++; 
-Basis[tempCounter][0]=0.4;   Basis[tempCounter][1]=0.1; tempCounter++; 
-Basis[tempCounter][0]=-0.8;  Basis[tempCounter][1]=1.4; tempCounter++; 
+Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=-0.1; tempCounter++; 
+Basis[tempCounter][0]=0.4;  Basis[tempCounter][1]=0.1; tempCounter++; 
+Basis[tempCounter][0]=-0.8; Basis[tempCounter][1]=1.4; tempCounter++; 
 Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.9; tempCounter++; 
 Basis[tempCounter][0]=1.6;  Basis[tempCounter][1]=0.8; tempCounter++; 
 Basis[tempCounter][0]=1.5;  Basis[tempCounter][1]=0.8; tempCounter++; 
@@ -558,6 +559,17 @@ function solveTwoByTwoSystem(a11, a12, a21, a22, coeff1, coeff2)
   return answer;
 } 
  
+function mouseHandleWheel(theEvent)
+{ theEvent = theEvent ? theEvent : window.event;
+  theEvent.preventDefault(); 
+  theEvent.stopPropagation();
+  theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
+  //alert("mousewheel detected! delta: "+theWheelDelta);
+  GraphicsUnit+=theWheelDelta;
+  ComputeProjections();
+  drawOnCanvasMain();
+}
+
 function mouseMoveRedraw(cx, cy)
 { if (selectedBasisIndex!=-1)
   { var divPosX=0;
@@ -641,7 +653,7 @@ function drawOnCanvasMain()
 }
 
 function initDojo()
-{ node = dojo.byId(canvasMain);
+{ node = dojo.byId("idCanvasMain");
   surface = dojox.gfx.createSurface(node, 400, 400);
   initRecompute();
 }

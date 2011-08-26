@@ -9481,6 +9481,7 @@ class ConeLatticeAndShift
     this->theLattice=other.theLattice;
     this->theShift=other.theShift;
   }
+  std::string ElementToString();
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
   int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
 };
@@ -9491,7 +9492,9 @@ class ConeLatticeAndShiftMaxComputation
   List<ConeLatticeAndShift> theConesLargerDim;
   List<ConeLatticeAndShift> theConesSmallerDim;
   List<bool> IsInfinity;
-  roots LPtoMaximize;
+  std::string ElementToString();
+  roots LPtoMaximizeLargerDim;
+  roots LPtoMaximizeSmallerDim;
   void FindExtremaInDirectionOverLatticeOneNonParam
     (int numNonParam, GlobalVariables& theGlobalVariables)
        ;
@@ -9559,7 +9562,7 @@ class ParserNode
 { public:
   std::string DebugString;
   std::string outputString;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){ this->ElementToString(DebugString, theGlobalVariables); }
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, theGlobalVariables); }
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
   Parser* owner;
   int indexParentNode;
@@ -9671,6 +9674,12 @@ class ParserNode
 ;
   static int EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
+;
+  static int EvaluateDrawConeAffine
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateDrawConeProjective
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluatePrintSlTwos
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -9858,8 +9867,8 @@ public:
   SemisimpleLieAlgebraOrdered testAlgebra;
   SemisimpleLieAlgebraOrdered testSubAlgebra;
 //  SemisimpleLieAlgebra theLieAlgebra;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(DebugString, true, theGlobalVariables); }
-  void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
+  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables){this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables); }
+  void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  //=8
     tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13

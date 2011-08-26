@@ -781,7 +781,7 @@ function saec_VPF_isDelim(input)
 <!>
 <div style="width:400;height:400;border:solid 1px" id="idCanvasMain" onmousemove="mouseMoveRedraw(event.clientX, event.clientY);" onmousedown="
 clickCanvasMain(event.clientX, event.clientY);
-//changeBasis(1, 50, 50); drawOnCanvasMain();" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
+//changeBasis(1, 50, 50); drawOnCanvasMain();" DOMMouseScroll="mouseHandleWheel(event);" onmousewheel="mouseHandleWheel(event);" onmouseup="ButtonIsDown=false; selectedBasisIndex=-1;"></div>
 <br>
 The basis vectors correspond to the vertices of the Dynkin diagram.<br>
 You can drag the center and the basis vectors.<button onclick="switchMenu('rotationExplanation')">More info</button>
@@ -1304,7 +1304,20 @@ function solveTwoByTwoSystem(a11, a12, a21, a22, coeff1, coeff2)
   answer[1]=(a11*coeff2-a21*coeff1)/theDeterminant;
   return answer;
 } 
+
+
  
+function mouseHandleWheel(theEvent)
+{ theEvent = theEvent ? theEvent : window.event;
+  theEvent.preventDefault(); 
+  theEvent.stopPropagation();
+  theWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;
+  //alert("mousewheel detected! delta: "+theWheelDelta);
+  GraphicsUnit+=theWheelDelta;
+  ComputeProjections();
+  drawOnCanvasMain();
+}
+
 function mouseMoveRedraw(cx, cy)
 { if (selectedBasisIndex!=-1)
   { var divPosX=0;

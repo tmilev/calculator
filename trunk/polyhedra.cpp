@@ -24974,7 +24974,7 @@ ElementUniversalEnveloping Parser::ParseAndCompute(const std::string& input, Glo
 void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theHmm.theRange.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
   this->Parse(input);
-  this->ComputeDebugString(theGlobalVariables);
+  //this->ComputeDebugString(false, theGlobalVariables);
 }
 
 std::string Parser::ParseEvaluateAndSimplifyPart2(const std::string& input, GlobalVariables& theGlobalVariables)
@@ -25722,7 +25722,7 @@ ParserNode::ParserNode()
   this->Clear();
 }
 
-void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
+void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   std::string htmlSafish;
   if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
@@ -25748,7 +25748,10 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
   out << "\nElements:\n";
   if (useHtml)
     out << "<br>";
-  for (int i=0; i<this->size; i++)
+  int NumDisplayedNodes=this->size;
+  if(!includeLastNode)
+    NumDisplayedNodes--;
+  for (int i=0; i<NumDisplayedNodes; i++)
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables);
     out << " Index: " << i << " " << tempS << ";\n";
     if (useHtml)
@@ -25756,7 +25759,8 @@ void Parser::ElementToString(std::string& output, bool useHtml, GlobalVariables&
   }
   if (useHtml)
     out << "<br><br>";
-  out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables);
+  if (includeLastNode)
+    out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -30673,7 +30677,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
-   // case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(); break;
+    case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;
@@ -30709,9 +30713,9 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone:
-      theGlobalVariables.theDrawingVariables.theBuffer.init();
-      theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, this->theCone.GetElement().GetDim(), 0);
-      out << "a cone: " << this->theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables);
+//      theGlobalVariables.theDrawingVariables.theBuffer.init();
+//      theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, this->theCone.GetElement().GetDim(), 0);
+      out << "a cone: ";// << this->theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables);
       break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;

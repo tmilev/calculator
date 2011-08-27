@@ -9410,8 +9410,12 @@ class Cone
   (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
 ;
   bool CreateFromNormals
-  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+  (roots& inputNormals, bool AssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
+  bool CreateFromNormals
+  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+  { return this->CreateFromNormals(inputNormals, false, theGlobalVariables);
+  }
   void GetInternalPoint(root& output)
   { this->Vertices.sum(output, this->GetDim());
   }
@@ -9489,6 +9493,7 @@ class ConeLatticeAndShift
 class ConeLatticeAndShiftMaxComputation
 {
   public:
+  Controller theController;
   List<ConeLatticeAndShift> theConesLargerDim;
   List<ConeLatticeAndShift> theConesSmallerDim;
   List<bool> IsInfinity;
@@ -9530,7 +9535,7 @@ public:
   (Cone& input, List<QuasiPolynomial>& inputQPs, List<QuasiPolynomial>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
   void initFromCones
-  (List<roots>& NormalsOfCones, GlobalVariables& theGlobalVariables)
+(List<roots>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
 (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)

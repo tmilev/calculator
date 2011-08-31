@@ -30665,7 +30665,6 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
   PolynomialOutputFormat PolyFormatLocal;
 //  PolyFormatLocal.alphabet.TheObjects[0]="z";
 //  PolyFormatLocal.alphabet.TheObjects[1]="x";
-
   int i;
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
@@ -30677,7 +30676,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
-    case ParserNode:: typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false); break;
+    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, PolyFormatLocal); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;
@@ -33069,7 +33068,7 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       case ParserNode::typeQuasiPolynomial: this->theQP.GetElement()+=currentChild.theQP.GetElement();
         this->outputString=this->theQP.GetElement().ElementToString(true, false);
         break;
-      default: return this->SetError(this->errorUnknownOperation);
+      default: return this->SetError(this->errorDunnoHowToDoOperation);
     }
   }
   return this->errorNoError;

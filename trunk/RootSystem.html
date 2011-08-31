@@ -5,6 +5,54 @@ Root systems
 </title>
 </head>
 <body>
+<form method="POST" name="formCalculator" action="/cgi-bin/calculator">
+<textarea name="textInput" style="width:100px; height:50px" id="textInputID" onkeypress="if (event.keyCode == 13) {this.form.submit(); return false;}">
+Some text
+</textarea>
+<input type="submit" name="buttonGo" value="Go" onmousedown="storeSettings()">
+</form>
+<script type="text/javascript"> 
+function getCookie(c_name)
+{ VPFcookie=document.cookie.split(";");
+  for (i=0;i<VPFcookie.length;i++)
+  { x=VPFcookie[i].substr(0,VPFcookie[i].indexOf("="));
+  	y=VPFcookie[i].substr(VPFcookie[i].indexOf("=")+1);
+    x=x.replace(/^\s+|\s+$/g,"");
+    if (x==c_name)
+      return unescape(y);
+  }
+}
+function storeSettings()
+{ theCalculatorForm=document.getElementById("textInputID");  
+  //alert(theCalculatorForm.style.width);
+  addCookie("widthCalculatorText", theCalculatorForm.style.width, 100);  
+  addCookie("heightCalculatorText", theCalculatorForm.style.height, 100);
+  alert(document.cookie);
+}
+
+function addCookie(theName, theValue, exdays)
+{ exdate=new Date();
+  exdate.setDate(exdate.getDate() + exdays);
+  c_value=escape(theValue) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+  document.cookie=theName + "=" + c_value;
+}
+
+window.setTimeout("checkCookie()",1000);
+
+function checkCookie()
+{ theCalculatorForm=document.getElementById("textInputID");  
+  theOldWidth=getCookie("widthCalculatorText");
+  theOldHeight=getCookie("heightCalculatorText");
+  alert("height: " + theOldHeight +" width: " + theOldWidth);
+  theCalculatorForm.setStyle("width:"+ theOldWidth);
+//  theCalculatorForm.style.height=theOldHeight;
+
+//  theCalculatorForm.style.width=theOldWidth;
+//  theCalculatorForm.style.height=theOldHeight;
+}
+</script>
+
+
 <!>
 <script type="text/javascript"> 
 var timeOutCounter=0;
@@ -25,9 +73,7 @@ function progressReport()
 </script>
 <div id="idProgressReport">
 </div>
-</script>
-<div id="idProgressReport">
-</div>
+
 
 <!>
 <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js" type="text/javascript"></script>

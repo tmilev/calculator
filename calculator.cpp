@@ -156,7 +156,12 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  //civilizedInput=" cone(1)";
+  civilizedInput="findMaximumInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
+//  civilizedInput="findExtremaInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
+ //civilizedInput="drawConeAffine( cone((0,3,-10),(1,0,0),(-2,-1,10) ))";
+ // civilizedInput="sliceConeInUniqueExitWall( cone((1,0,0),(-1,1,0),(-2,-1,10)), (-1,0,0) )";
+  //civilizedInput="findExtremaInDirectionOverLatticeShifted(-2x_1+x_2+x_3, (0,0,0), lattice((1,0,0),(0,1,0),(0,0,1)), cone((1,0,0,0),(0,1,0,0), (1,1,1,-4), (0,1,-1,0), (0,0,0,1)),1)";
+  //civilizedInput=" 1+cone(1)";
 //  civilizedInput="drawConeAffine( cone((1,1,1),(1,0,1),(0,1,0)))";
   //civilizedInput=" findExtremaInDirectionOverLatticeShiftedOneNonParam(-2x_1+x_2, (0,0), lattice((1,0),(0,1)), cone((-1,1,0),(1,0,0), (-2,-1,4)))";
   //civilizedInput="sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )";

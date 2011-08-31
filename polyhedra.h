@@ -2469,6 +2469,22 @@ public:
         result++;
     return result;
   }
+  inline Vector<CoefficientType> GetShiftToTheLeftOnePosition(){return this->GetShiftToTheLeft(1);}
+  Vector<CoefficientType> GetShiftToTheLeft(int numPositions)
+  { Vector<CoefficientType> result;
+    assert(numPositions<=this->size);
+    result.SetSize(this->size-numPositions);
+    for (int i=0; i<result.size; i++)
+      result[i]=this->TheObjects[i+numPositions];
+    return result;
+  }
+  inline void ShiftToTheLeftOnePos(){ this->ShiftToTheLeft(1); }
+  void ShiftToTheLeft(int numPositions)
+  { assert(numPositions<=this->size);
+    for (int i=0; i<this->size-numPositions; i++)
+      this->TheObjects[i]=this->TheObjects[i+numPositions];
+    this->size-=numPositions;
+  }
   bool GetIntegralCoordsInBasisIfTheyExist
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
   Matrix<CoefficientType>& bufferMatGaussianEliminationCC,
@@ -2736,7 +2752,7 @@ public:
   void AssignWithoutLastCoordinate(root& right);
   void ReadFromFile(std::fstream& input);
   void WriteToFile(std::fstream& output);
-  inline void Assign(const root& right)
+  inline void Assign(const Vector<Rational>& right)
   { if (this->size!=right.size)
       this->SetSize(right.size);
     for (int i=0; i<this->size; i++)
@@ -2778,7 +2794,7 @@ public:
   void operator=(const std::string& input){this->AssignString(input);}
   void operator=(const char* input){std::string tempS; tempS=input; this->AssignString(input);}
   void operator=(const SelectionWithMultiplicities& other);
-  inline void operator=(const root& right){this->Assign(right); }
+  inline void operator=(const Vector<Rational>& right){this->Assign(right); }
   bool AssignString(const std::string& input)
   { unsigned int startIndex=0;
     for (; startIndex<input.size(); startIndex++)
@@ -2875,8 +2891,8 @@ public:
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot)const;
   bool ElementsHavePositiveScalarProduct(const root& theRoot)const;
   bool ElementsHaveNonPositiveScalarProduct(const root& theRoot)const;
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml){ return this->ElementsToInequalitiesString(useLatex, useHtml, false);}
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant);
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){ return this->ElementsToInequalitiesString(useLatex, useHtml, false, theFormat);}
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, PolynomialOutputFormat& theFormat);
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(root&output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(roots& inputBasis, roots& outputCoords, GlobalVariables& theGlobalVariables);
@@ -4379,6 +4395,7 @@ public:
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& coeff2);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const ElementOfCommutativeRingWithIdentity& coeff1, const ElementOfCommutativeRingWithIdentity& ConstantTerm);
   void MakeLinPolyFromRootNoConstantTerm(const root& r);
+  void MakeLinPolyFromRootLastCoordConst(const root& input);
   void TimesInteger(int a);
   void DivideBy(const Polynomial<ElementOfCommutativeRingWithIdentity>& inputDivisor, Polynomial<ElementOfCommutativeRingWithIdentity>& outputQuotient, Polynomial<ElementOfCommutativeRingWithIdentity>& outputRemainder)const;
   void TimesConstant(const ElementOfCommutativeRingWithIdentity& r);
@@ -5905,6 +5922,20 @@ bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
     if (!this->TheObjects[i].IsEqualToZero())
       return false;
   return true;
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeLinPolyFromRootLastCoordConst(const root& input)
+{ this->Nullify((int)input.size);
+  Monomial<ElementOfCommutativeRingWithIdentity> tempM;
+  for (int i=0; i<input.size-1; i++)
+  { tempM.MakeNVarFirstDegree(i, input.size, ElementOfCommutativeRingWithIdentity::TheRingUnit);
+    tempM.Coefficient.Assign(input.TheObjects[i]);
+    this->AddMonomial(tempM);
+  }
+  tempM.init(this->NumVars);
+  tempM.Coefficient=input.TheObjects[input.size-1];
+  this->AddMonomial(tempM);
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -9398,14 +9429,15 @@ class Cone
   //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
   //containing large data for the chamber, such as quasipolynomials, etc.
   //int Data;
-  std::string ElementToString(){return this->ElementToString(false, false);}
-  std::string ElementToString(bool useLatex, bool useHtml){return this->ElementToString(useLatex, useHtml, false, false);}
-  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant);
-  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables);
-  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables);
+  std::string ElementToString(PolynomialOutputFormat& theFormat){return this->ElementToString(false, false, theFormat);}
+  std::string ElementToString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){return this->ElementToString(useLatex, useHtml, false, false, theFormat);}
+  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat);
+  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DebugString;
   int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
-  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
+  void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
   void SliceInDirection
   (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
 ;
@@ -9485,24 +9517,9 @@ class ConeLatticeAndShift
     this->theLattice=other.theLattice;
     this->theShift=other.theShift;
   }
-  std::string ElementToString();
+  std::string ElementToString(PolynomialOutputFormat& theFormat);
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
   int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
-};
-
-class ConeLatticeAndShiftMaxComputation
-{
-  public:
-  Controller theController;
-  List<ConeLatticeAndShift> theConesLargerDim;
-  List<ConeLatticeAndShift> theConesSmallerDim;
-  List<bool> IsInfinity;
-  std::string ElementToString();
-  roots LPtoMaximizeLargerDim;
-  roots LPtoMaximizeSmallerDim;
-  void FindExtremaInDirectionOverLatticeOneNonParam
-    (int numNonParam, GlobalVariables& theGlobalVariables)
-       ;
 };
 
 class ConeComplex : public HashedList<Cone>
@@ -9517,8 +9534,15 @@ public:
   std::string DebugString;
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
-  void AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
+  void FindMaxmumOverNonDisjointChambers
+    (roots& theMaximaOverEachChamber, roots& outputMaxima, GlobalVariables& theGlobalVariables)
+    ;
+  int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
+  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
   void PopChamberSwapWithLast(int index);
+  bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  std::string DrawMeToHtmlLastCoordAffine
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml);
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
@@ -9536,6 +9560,9 @@ public:
   ;
   void initFromCones
 (List<roots>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void initFromCones
+(List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
 (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
@@ -9560,6 +9587,36 @@ public:
     this->flagIsRefined=other.flagIsRefined;
     this->flagChambersHaveTooFewVertices=other.flagChambersHaveTooFewVertices;
   }
+};
+
+class ConeLatticeAndShiftMaxComputation
+{
+  public:
+  Controller theController;
+  List<ConeComplex> complexStartingPerRepresentative;
+  List<ConeComplex> complexRefinedPerRepresentative;
+  List<List<roots> > theMaximaCandidates;
+  List<roots> startingLPtoMaximize;
+  List<roots> finalMaxima;
+  Lattice theStartingLattice;
+  Lattice theFinalRougherLattice;
+  root theStartingRepresentative;
+  roots theFinalRepresentatives;
+  List<ConeLatticeAndShift> theConesLargerDim;
+  List<ConeLatticeAndShift> theConesSmallerDim;
+  List<bool> IsInfinity;
+  std::string ElementToString(PolynomialOutputFormat& theFormat);
+  roots LPtoMaximizeLargerDim;
+  roots LPtoMaximizeSmallerDim;
+  void init
+  (root& theNEq, Cone& startingCone, Lattice& startingLattice, root& startingShift)
+  ;
+  void FindExtremaInDirectionOverLattice
+    (int numNonParam, GlobalVariables& theGlobalVariables)
+       ;
+  void DoTheFinalComputation
+  (GlobalVariables& theGlobalVariables)
+;
 };
 
 class Parser;
@@ -9722,9 +9779,6 @@ class ParserNode
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateSplit
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateFindExtremaInDirectionOverLatticeOneNonParam
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateFindExtremaInDirectionOverLattice

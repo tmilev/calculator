@@ -9435,6 +9435,7 @@ class Cone
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DebugString;
   int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
   void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
@@ -9542,7 +9543,14 @@ public:
   void PopChamberSwapWithLast(int index);
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+;
+  bool DrawMeProjective
+  (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+  ;
+  std::string DrawMeToHtmlProjective
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+;
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml);
   void ComputeDebugString(){this->DebugString=this->ElementToString();}

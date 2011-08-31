@@ -121,7 +121,7 @@ int main(int argc, char **argv)
   std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, Vector partition function calculator, vector partition functions, Semisimple Lie algebras, root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated " << __DATE__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
-  std::cout << "\n</head>\n<body>\n";
+  std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
 //  std::stringstream tempStreamX;
 //  static_html3(tempStreamX);
 //  static_html5(tempStreamX);
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  civilizedInput="findMaximumInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
+//  civilizedInput="findMaximumInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
 //  civilizedInput="findExtremaInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
  //civilizedInput="drawConeAffine( cone((0,3,-10),(1,0,0),(-2,-1,10) ))";
  // civilizedInput="sliceConeInUniqueExitWall( cone((1,0,0),(-1,1,0),(-2,-1,10)), (-1,0,0) )";
@@ -339,10 +339,10 @@ int main(int argc, char **argv)
   std::string civilizedInputSafish;
   if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
-  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {this.form.submit(); return false;}\">";
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {storeSettings();  this.form.submit(); return false;}\">";
   std::cout << civilizedInputSafish;
   std::cout << "</textarea>\n<br>\n";
-  std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\"	> ";
+  std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
 //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
   std::cout << "\n</FORM>";
   std::cout << "<script type=\"text/javascript\"> document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";

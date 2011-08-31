@@ -1095,7 +1095,7 @@ int ParserNode::EvaluateSliceCone
   ConeComplex theComplex;
   PolynomialOutputFormat tempFormat;
   theCone.SliceInDirection(theDirection, theComplex, theGlobalVariables);
-  theNode.outputString=theComplex.DrawMeToHtmlLastCoordAffine(theGlobalVariables.theDrawingVariables, tempFormat);
+  theNode.outputString=theComplex.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, tempFormat);
 //  theNode.outputString=theComplex.ElementToString(false, true);
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -1306,7 +1306,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& the
     std::cout << "<br>The shifted lattice representatives: " << representativesShifted.ElementToString();
     for (int j=0; j<representativesShifted.size; j++)
     { exitNormalShiftedAffineProjected=exitNormalAffine;
-      Rational tempRat=exitNormalLatticeLevel.ScalarEuclidean(representativesShifted[i]);
+      Rational tempRat=exitNormalLatticeLevel.ScalarEuclidean(representativesShifted[j]);
       if (tempRat.IsPositive())
         tempRat.Minus();
       //assert(tempRat>-1);
@@ -4937,12 +4937,39 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine
   return out.str();
 }
 
+std::string ConeComplex::DrawMeToHtmlProjective
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ bool isBad=false;
+  isBad=this->DrawMeProjective(theDrawingVariables, theFormat);
+  std::stringstream out;
+  out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
+  if (isBad)
+    out << "<hr>" << "found cones which I can't draw<hr>";
+  out << this->ElementToString(false, true);
+/*  for (int i=0; i<this->size; i++)
+  { theDrawingVariables.theBuffer.init();
+    out <<"<hr>" << this->TheObjects[i].DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+  }*/
+  return out.str();
+}
+
 bool ConeComplex::DrawMeLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
     result=this->TheObjects[i].DrawMeLastCoordAffine(theDrawingVariables, theFormat) && result;
+    //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
+  }
+  return result;
+}
+
+bool ConeComplex::DrawMeProjective
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ bool result=true;
+  for (int i=0; i<this->size; i++)
+  { //theDrawingVariables.theBuffer.init();
+    result=this->TheObjects[i].DrawMeProjective(theDrawingVariables, theFormat) && result;
     //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -5006,16 +5033,8 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
   return out.str();
 }
 
-std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ if (this->GetDim()<0)
-    return "The Cone is empty";
-  std::stringstream out;
-  if (!this->flagHasSufficientlyManyVertices)
-  { out << "The cone doesn't have a vertex at 0.<br> In order to simplify the programming, we generate no drawing in this situation.";
-    out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
-    return out.str();
-  }
-  root ZeroRoot;
+bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim());
 //  theDrawingVariables.theBuffer.init();
   roots VerticesScaled=this->Vertices;
@@ -5043,6 +5062,19 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
             (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
   }
+  return true;
+}
+
+std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ if (this->GetDim()<0)
+    return "The Cone is empty";
+  std::stringstream out;
+  if (!this->flagHasSufficientlyManyVertices)
+  { out << "The cone doesn't have a vertex at 0.<br> In order to simplify the programming, we generate no drawing in this situation.";
+    out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
+    return out.str();
+  }
+  this->DrawMeProjective(theDrawingVariables, theFormat);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
   return out.str();
@@ -5238,10 +5270,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateIntersectLatticeWithPreimageLattice
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("sliceConeInUniqueExitWall",
+  ("sliceConeUniqueExitWall",
    "(Cone, (Rational, ...))",
    "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point. ",
-   "sliceConeInUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
+   "sliceConeUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
     & ParserNode::EvaluateSliceCone
    );
    this->AddOneFunctionToDictionaryNoFail

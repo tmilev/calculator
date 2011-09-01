@@ -10105,7 +10105,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
       for (int i=0; i<matLinComb.NumRows; i++)
       { thePowers.MaxMultiplicities.TheObjects[i]=0;
         if (matLinComb.elements[i][0].IsGreaterThanOrEqualTo(ROne) || matLinComb.elements[i][0].IsNegative())
-        { int tempI=matLinComb.elements[i][0].floor();
+        { int tempI=matLinComb.elements[i][0].floorIfSmall();
           thePowersSigned.TheObjects[i]=tempI;
           if (tempI<0)
             thePowers.MaxMultiplicities.TheObjects[i]=this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].GetMultiplicityLargestElongation();

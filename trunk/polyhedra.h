@@ -2282,14 +2282,18 @@ ParallelComputing::GlobalPointerCounter++;
       this->Extended->num.sign*=-1;
   }
   double DoubleValue();
-  int floor()
-  { if (NumShort<0)
-    { if (DenShort!=1)
-        return (this->NumShort/ this->DenShort)-1;
-      else
-        return this->NumShort/ this->DenShort;
-    } else
-      return this->NumShort/this->DenShort;
+  int floorIfSmall()
+  { if (this->Extended==0)
+    { if (NumShort<0)
+      { if (DenShort!=1)
+          return (this->NumShort/ this->DenShort)-1;
+        else
+          return this->NumShort/ this->DenShort;
+      } else
+        return this->NumShort/this->DenShort;
+    }
+    assert(false);
+    return -1;
   }
   void MakeZero(){this->NumShort=0;  this->DenShort=1; this->FreeExtended(); }
   void MakeOne(){this->NumShort=1;  this->DenShort=1; this->FreeExtended(); }
@@ -6999,8 +7003,12 @@ public:
   void IntersectWithPreimageOfLattice
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
-  void GetClosestPointToHyperplaneWRTFirstCoordinate
-  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives,
+  static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
+  (root& startingPoint, root& theAffineHyperplane, root& theDirection, root& outputPoint)
+  ;
+  void GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
+  (const root& theDirection, root& outputDirectionMultipleOnLattice, root& theShift, root& theAffineHyperplane,
+   roots& outputRepresentatives,
    roots& movementInDirectionPerRepresentative,
    Lattice& outputRougherLattice,
    GlobalVariables& theGlobalVariables)

@@ -1232,40 +1232,41 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
 }
 
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables)
-{ root theDirection;
+{ root direction;
   int theDimProjectivized=this->GetDimProjectivized();
-  theDirection.MakeEi(theDimProjectivized, 0);
+  direction.MakeEi(theDimProjectivized, 0);
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.init();
   complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
-  if (theDirection.ScalarEuclidean(theLPToMaximizeAffine).IsNegative())
-    theDirection.MinusRoot();
-  complexBeforeProjection.slicingDirections.AddObjectOnTop(theDirection);
-  complexBeforeProjection.slicingDirections.AddObjectOnTop(-theDirection);
+  if (direction.ScalarEuclidean(theLPToMaximizeAffine).IsNegative())
+    direction.MinusRoot();
+  complexBeforeProjection.slicingDirections.AddObjectOnTop(direction);
+  complexBeforeProjection.slicingDirections.AddObjectOnTop(-direction);
 //  std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   complexBeforeProjection.Refine(theGlobalVariables);
 //  std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   root tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine, exitNormalLatticeLevel, enteringNormalLatticeLevel, exitNormalShiftedAffineProjected;
-  root theDirectionSmallerDim;
+  root directionSmallerDim, directionSmallerDimOnLattice;
   root theShiftReduced=this->theShift;
   this->theLattice.ReduceVector(theShiftReduced);
-  roots representativesShifted, exitRepresentatives, enteringRepresentatives, exitWallsShifted, enteringWallsShifted;
+  roots exitRepresentatives, exitWallsShifted;
   roots currentShifts;
-  Lattice exitRougherLattice, enteringRougherLattice;
+  Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
-  theDirectionSmallerDim.MakeEi(theDimProjectivized-1, 0);
+  directionSmallerDim.MakeEi(theDimProjectivized-1, 0);
 //  std::cout << "<hr>";
   MatrixLargeRational theProjectionLatticeLevel;
   MatrixLargeRational theProjectionAffine;
   theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
   theProjectionLatticeLevel.NullifyAll();
   PolynomialOutputFormat theFormat;
+  roots theNewNormals;
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
   for (int i=0; i<complexBeforeProjection.size; i++)
   { Cone& currentCone=complexBeforeProjection.TheObjects[i];
     int numNonPerpWalls=0;
-    tempCLS.theProjectivizedCone.Normals.size=0;
+    theNewNormals.size=0;
     bool foundEnteringNormal=false;
     bool foundExitNormal=false;
     for (int j=0; j<currentCone.Normals.size; j++)
@@ -1274,57 +1275,54 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& the
       { tempRoot.SetSize(theDimProjectivized-1);
         for (int k=0; k<currentNormal.size-1; k++)
           tempRoot[k]=currentNormal[k+1];
-        tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(tempRoot);
+        theNewNormals.AddObjectOnTop(tempRoot);
       } else
       { //std::cout << "<hr>";
         //std::cout << "<br>currentWall: " << currentNormal.ElementToString();
         numNonPerpWalls++;
         assert(numNonPerpWalls<3);
-        if (!currentNormal.ScalarEuclidean(theDirection).IsPositive() && !foundExitNormal)
-        { theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(theDirectionSmallerDim, theShift, currentNormal, exitRepresentatives, exitWallsShifted, exitRougherLattice, theGlobalVariables);
+        if (!currentNormal.ScalarEuclidean(direction).IsPositive() && !foundExitNormal)
+        { theLattice.GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
+            (directionSmallerDim, directionSmallerDimOnLattice, theShift, currentNormal, exitRepresentatives,
+             exitWallsShifted, exitRougherLattice, theGlobalVariables);
           exitNormalAffine=currentNormal;
           exitNormalLatticeLevel=exitNormalAffine;
           exitNormalLatticeLevel.SetSize(theDimProjectivized-1);
           foundExitNormal=true;
         } else
-        { theLattice.GetClosestPointToHyperplaneWRTFirstCoordinate(-theDirectionSmallerDim, theShift, currentNormal, enteringRepresentatives, enteringWallsShifted, enteringRougherLattice, theGlobalVariables);
-          enteringNormalAffine=currentNormal;
+        { enteringNormalAffine=currentNormal;
           foundEnteringNormal=true;
-//          enteringNormalLatticeLevel=enteringNormalAffine;
-//          enteringNormalLatticeLevel.SetSize(theDimProjectivized-1);
         }
       }
     }
-    theLattice.GetAllRepresentatives(exitRougherLattice, representativesShifted);
-    currentShifts.SetSize(representativesShifted.size);
     exitRougherLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
-    for (int j=0; j<representativesShifted.size; j++)
-      representativesShifted[j]+=theShiftReduced;
+    for (int j=0; j<exitRepresentatives.size; j++)
+    { exitRepresentatives[j]+=theShiftReduced;
+      Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
+        (exitRepresentatives[j], exitNormalAffine, directionSmallerDimOnLattice, exitRepresentatives[j]);
+    }
     std::cout << "<hr><hr><hr>" << currentCone.ElementToString(false, true, theFormat);
     std::cout << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ElementToString() : "not found");
     std::cout << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ElementToString() : "not found");
-    std::cout << "<br>The shifted lattice representatives: " << representativesShifted.ElementToString();
-    for (int j=0; j<representativesShifted.size; j++)
-    { exitNormalShiftedAffineProjected=exitNormalAffine;
-      Rational tempRat=exitNormalLatticeLevel.ScalarEuclidean(representativesShifted[j]);
-      if (tempRat.IsPositive())
-        tempRat.Minus();
-      //assert(tempRat>-1);
-      *exitNormalShiftedAffineProjected.LastObject()+=tempRat;
-      Rational FirstCoordExitShiftedWall=exitNormalShiftedAffineProjected[0];
-      exitNormalShiftedAffineProjected.ShiftToTheLeftOnePos();
+    std::cout << "<br>The shifted lattice representatives: " << exitRepresentatives.ElementToString() << "<br>exitNormalsShiftedAffineProjected";
+    for (int j=0; j<exitRepresentatives.size; j++)
+    { tempCLS.theProjectivizedCone.Normals=theNewNormals;
+      exitNormalShiftedAffineProjected=exitNormalAffine.GetShiftToTheLeftOnePosition();
+      *exitNormalShiftedAffineProjected.LastObject()=-exitNormalLatticeLevel.ScalarEuclidean(exitRepresentatives[j]);
+      std::cout << exitNormalShiftedAffineProjected.ElementToString() << ", ";
       if (foundEnteringNormal)
       { extraEquation= enteringNormalAffine.GetShiftToTheLeftOnePosition();
-        extraEquation-=exitNormalShiftedAffineProjected/FirstCoordExitShiftedWall;
+        extraEquation-=(exitNormalShiftedAffineProjected*enteringNormalAffine[0])/exitNormalAffine[0];
+        std::cout << "extra equation: " << extraEquation.ElementToString() << ", ";
         tempCLS.theProjectivizedCone.Normals.AddObjectOnTop(extraEquation);
       }
-      tempRat=theLPToMaximizeAffine[0];
+      Rational tempRat=theLPToMaximizeAffine[0];
       tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
-      tempRoot-=exitNormalShiftedAffineProjected/FirstCoordExitShiftedWall;
+      tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
       tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, false, theGlobalVariables);
       //std::cout << tempCLS.theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
-      theProjectionLatticeLevel.ActOnAroot(representativesShifted[j], tempCLS.theShift);
+      theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
       outputAppend.AddObjectOnTop(tempCLS);
     }
   }
@@ -2277,6 +2275,33 @@ bool Lattice::GetAllRepresentatives
       output.TheObjects[i]+=thePeriodVectors.TheObjects[j]*theCoeffSelection.Multiplicities.TheObjects[j];
   }
 //  std::cout << "The representatives: " << output.ElementToString(false, true, false);
+  return true;
+}
+
+bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
+  (root& startingPoint, root& theAffineHyperplane, root& theDirection, root& outputPoint)
+{ root theNormal=theAffineHyperplane;
+  theNormal.SetSize(theAffineHyperplane.size-1);
+  Rational theShift=-(*theAffineHyperplane.LastObject());
+  if (theNormal.ScalarEuclidean(startingPoint)==theShift)
+  { outputPoint=startingPoint;
+    return true;
+  }
+  if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
+    return false;
+  Rational theMovement= (theShift-startingPoint.ScalarEuclidean(theNormal))/theDirection.ScalarEuclidean(theNormal);
+  std::cout << "<br>the movement: " << theMovement.ElementToString() << ", (" << theShift.ElementToString() << " - " << startingPoint.ScalarEuclidean(theNormal).ElementToString() << ")/ " << theDirection.ScalarEuclidean(theNormal).ElementToString() << ", ";
+  if (!theMovement.IsInteger())
+  { std::cout << "the movement aint integral; ";
+    theMovement.AssignFloor();
+    if (theDirection.ScalarEuclidean(theNormal).IsPositive())
+      theMovement+=1;
+  }
+  std::cout << "the normal: " << theNormal.ElementToString() <<", the direction: " << theDirection.ElementToString() << ", the shift: " << theShift.ElementToString()
+  << ", the movement: " << theMovement.ElementToString() << ", startingPoint: " << startingPoint.ElementToString();
+  outputPoint=startingPoint;
+  outputPoint+=(theDirection*theMovement);
+  std::cout << ", finalPoint: " << outputPoint.ElementToString();
   return true;
 }
 
@@ -4563,8 +4588,9 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
   }
 }
 
-void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
-  (const root& theDirection, root& theShift, root& theAffineHyperplane, roots& outputRepresentatives,
+void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
+  (const root& theDirection, root& outputDirectionMultipleOnLattice, root& theShift, root& theAffineHyperplane,
+   roots& outputRepresentatives,
    roots& movementInDirectionPerRepresentative,
    Lattice& outputRougherLattice,
    GlobalVariables& theGlobalVariables)
@@ -4580,15 +4606,14 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
   tempRoots.AddObjectOnTop(theDirection);
   theDirectionLattice=*this;
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  root theTrueDirection;
-  theDirectionLattice.basisRationalForm.RowToRoot(0, theTrueDirection);
+  theDirectionLattice.basisRationalForm.RowToRoot(0, outputDirectionMultipleOnLattice);
   //std::cout << "<br>the normal: " << theNormal.ElementToString();
   //std::cout << "<br> the direction lattice: " << theDirectionLattice.ElementToString();
   theHyperplaneLatticeNoShift=*this;
   theHyperplaneLatticeNoShift.IntersectWithLinearSubspaceGivenByNormal(theNormal);
   //std::cout << "<br>the non-affine hyperplane intersected with the lattice: " << theHyperplaneLatticeNoShift.ElementToString();
   tempRoots.AssignMatrixRows(theHyperplaneLatticeNoShift.basisRationalForm);
-  tempRoots.AddObjectOnTop(theTrueDirection);
+  tempRoots.AddObjectOnTop(outputDirectionMultipleOnLattice);
   outputRougherLattice.MakeFromRoots(tempRoots);
   this->GetAllRepresentatives(outputRougherLattice, outputRepresentatives);
   //std::cout << "<br>the rougher lattice: " << outputRougherLattice.ElementToString();
@@ -4598,7 +4623,7 @@ void Lattice::GetClosestPointToHyperplaneWRTFirstCoordinate
     outputRougherLattice.ReduceVector(outputRepresentatives.TheObjects[i]);
   }
   Rational theShiftedConst, unitMovement, tempRat;
-  unitMovement=theNormal.ScalarEuclidean(theTrueDirection);
+  unitMovement=theNormal.ScalarEuclidean(outputDirectionMultipleOnLattice);
   movementInDirectionPerRepresentative.SetSize(outputRepresentatives.size);
   //std::cout << "<br>Affine hyperplane per representative: ";
   for (int i=0; i<outputRepresentatives.size; i++)
@@ -4620,7 +4645,7 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
   ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
-  root theAffineNormal, theRay, theShift;//, theRay;
+  root theAffineNormal, theRay, theRayMultiple, theShift;//, theRay;
   if (!theHyperplaneNode.GetRootRational(theAffineNormal, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
   if (!theDirectionNode.GetRootRational(theRay, theGlobalVariables))
@@ -4634,8 +4659,8 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
     return theNode.SetError(theNode.errorDimensionProblem);
   roots representatives, theMovements;
   Lattice theRougherLattice;
-  currentLattice.GetClosestPointToHyperplaneWRTFirstCoordinate
-  (theRay, theShift, theAffineNormal, representatives, theMovements, theRougherLattice, theGlobalVariables);
+  currentLattice.GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
+  (theRay, theRayMultiple, theShift, theAffineNormal, representatives, theMovements, theRougherLattice, theGlobalVariables);
   return theNode.errorNoError;
 }
 
@@ -4720,7 +4745,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
 (GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{/* std::stringstream out;
   this->projectivezedChambersSplitByMultFreeWalls.init();
   ConeComplex tempComplex;
   root theMultFreeWall;
@@ -4757,7 +4782,7 @@ void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
   out << this->projectivezedChambersSplitByMultFreeWalls.ElementToString(false, false);
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  theGlobalVariables.MakeReport();
+  theGlobalVariables.MakeReport();*/
 }
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)

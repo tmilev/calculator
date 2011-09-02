@@ -2734,7 +2734,7 @@ inline void roots::AddRoot(root &r)
 { this->AddObjectOnTop(r);
 }
 
-void roots::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void roots::WriteToFile(std::fstream& output)
 { int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;

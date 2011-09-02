@@ -459,23 +459,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
       break;
     case 4:
       this->FindMultiplicitiesFree(theGlobalVariables);
-      out << this->projectivezedChambersSplitByMultFreeWalls.ElementToString(false, false);
-      break;
-    case 5:
-//      this->FindMultiplicitiesExtremaStep1(theGlobalVariables);
-      break;
-    case 6:
-//      this->FindMultiplicitiesExtremaStep2(theGlobalVariables);
-      break;
-    case 7:
- //     this->FindMultiplicitiesExtremaStep3(theGlobalVariables);
-      break;
-    case 8:
-//      this->FindMultiplicitiesExtremaStep4(theGlobalVariables);
-      break;
-    case 9:
-//      this->FindMultiplicitiesExtremaStep5(theGlobalVariables);
-      break;
+    break;
     default:
       break;
   }
@@ -879,144 +863,14 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
     output.elements[l+numNonParams][l]= 1;
 }
 
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables)
-{ int theDimension=6;
-  if (this->projectivizedChamber.size>0)
-    theDimension=this->projectivizedChamber.TheObjects[0].Normals.TheObjects[0].size;
-//  this->ExtremeQPsParamSubchambers.SetSize(this->projectivizedChamber.size);
-  std::stringstream out;
-  std::fstream MultReport;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(MultReport, "/home/todor/math/vectorpartition/trunk/ReportFindMultiplicitiesExtremaStep1.txt", false, true, false);
-  MatrixLargeRational subForFindingExtrema;
-  root translationForFindingExtrema;
-  QuasiPolynomial currentExtremaCandidate;
-//  Lattice AmbientLattice;
-  int numParams=0, numNonParams=0;
-  if (this->theLinearOperators.size>0)
-  { numParams=this->theLinearOperators.TheObjects[0].NumCols+1;
-    numNonParams=this->theLinearOperators.TheObjects[0].NumRows;
-  }
-//  AmbientLattice.MakeZn(numParams);
-  List<roots> currentParamChamberList, currentNonParamVerticesList;
-  this->theMultiplicitiesExtremaCandidates.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
-  this->allParamSubChambersRepetitionsAllowedConeForm.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size*theDimension);
-  Cone currentCone;
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-  PolynomialsRationalCoeff tempSub;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-  { std::stringstream progressReport1;
-    progressReport1 << "processing chamber " << i+1;
-    theGlobalVariables.theIndicatorVariables.ProgressReportString1=progressReport1.str();
-    theGlobalVariables.MakeReport();
-    this->ProcessOneParametricChamber(this->theLinearOperators.TheObjects[0].NumRows, this->theLinearOperators.TheObjects[0].NumCols+1, this->projectivizedChamber.TheObjects[i].Normals, currentParamChamberList, currentNonParamVerticesList, theGlobalVariables);
-    for (int j=0; j<currentParamChamberList.size; j++)
-    { std::stringstream progressReport2;
-      progressReport2 << "Parametric chamber candidate " << j+1 << " out of " << currentParamChamberList.size;
-      if (currentCone.CreateFromNormals(currentParamChamberList.TheObjects[j], true,  theGlobalVariables))
-      { this->GetSubFromNonParamArray(subForFindingExtrema, translationForFindingExtrema, currentNonParamVerticesList.TheObjects[j], numParams);
-        QuasiPolynomial& currentQP=this->theMultiplicities.TheObjects[i];
-        tempSub.MakeLinearSubbedVarsCorrespondToMatRows(subForFindingExtrema, translationForFindingExtrema);
-        bool tempBool = currentQP.SubstitutionLessVariables(tempSub, currentExtremaCandidate, theGlobalVariables);
-        assert(tempBool);
-//        currentQP.Substitution(subForFindingExtrema, translationForFindingExtrema, AmbientLattice, currentExtremaCandidate, theGlobalVariables);
-        this->theMultiplicitiesExtremaCandidates.AddObjectOnTop(currentExtremaCandidate);
-        this->allParamSubChambersRepetitionsAllowedConeForm.AddObjectOnTop(currentCone);
-        MultReport << "Chamber " << i+1 << " parametric chamber candidate " << j+1 << " out of " << currentParamChamberList.size << "; candidate found: " << currentExtremaCandidate.ElementToString(false, false) << "\n";
-        progressReport2 << " is non-trivial";
-      } else
-        progressReport2 << " is trivial";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString2=progressReport2.str();
-      theGlobalVariables.MakeReport();
-    }
-  }
-}
-
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables)
-{ List<roots> tempRoots;
-  tempRoots.SetSize(this->allParamSubChambersRepetitionsAllowedConeForm.size);
-  for (int i=0; i<tempRoots.size; i++)
-    tempRoots.TheObjects[i]=this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[i].Normals;
-  this->projectivizedParamComplex.initFromCones(tempRoots, true, theGlobalVariables);
-}
-
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables)
-{ this->projectivizedParamComplex.Refine(theGlobalVariables);
-  this->projectivizedExtremaCones.SetSize(this->projectivizedParamComplex.size);
-  this->theExtrema.SetSize(this->projectivizedParamComplex.size);
-}
-
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables)
-{ this->theMultiplicitiesExtremaCandidates.SetSize(this->projectivizedParamComplex.size);
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-  (this->theMultiplicitiesMaxOutput, "/home/todor/math/vectorpartition/trunk/ExtremaOutput.txt", true, false, false);
-  for (; this->NumProcessedConesParam<this->projectivizedParamComplex.size; this->NumProcessedConesParam++)
-  { Cone& currentCone= this->projectivizedParamComplex.TheObjects[this->NumProcessedConesParam];
-    std::stringstream out3;
-    out3 << "Processing extrema in chamber " << this->NumProcessedConesParam+1 << " out of " << this->projectivizedParamComplex.size;
-    theGlobalVariables.theIndicatorVariables.ProgressReportString1=out3.str();
-    theGlobalVariables.MakeReport();
-    this->theMultiplicitiesMaxOutput << "\n\n\n\n\nChamber " << this->NumProcessedConesParam+ 1;
-    this->ProcessExtremaOneChamber(currentCone, this->projectivizedExtremaCones.TheObjects[this->NumProcessedConesParam], this->theExtrema.TheObjects[this->NumProcessedConesParam], theGlobalVariables);
-    this->thePauseController.SafePoint();
-  }
-  this->theMultiplicitiesMaxOutput.close();
-}
-
-void GeneralizedVermaModuleCharacters::ProcessExtremaOneChamber
-  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
-{ std::stringstream out3, out1, out2;
-//  int projectiveDimension=input.GetDim();
-  List<QuasiPolynomial> extremaCandidates;
-  extremaCandidates.MakeActualSizeAtLeastExpandOnTop(allParamSubChambersRepetitionsAllowedConeForm.size);
-  for (int j=0; j<this->allParamSubChambersRepetitionsAllowedConeForm.size; j++)
-    if (this->allParamSubChambersRepetitionsAllowedConeForm.TheObjects[j].IsInCone(input.GetInternalPoint()))
-      extremaCandidates.AddObjectOnTop(this->theMultiplicitiesExtremaCandidates.TheObjects[j]);
-  out3 << "# of maximum candidates: " << extremaCandidates.size;
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out3.str();
-  theGlobalVariables.MakeReport();
-  ConeComplex extremaComplex;
-  out1 << "size of required subdivision: ?";
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out1.str();
-  theGlobalVariables.MakeReport();
-  this->theMultiplicitiesMaxOutput << "\nNumber of candidates for maximum: " << extremaCandidates.size;
-  for (int i=0; i<extremaCandidates.size; i++)
-  { this->theMultiplicitiesMaxOutput << "\nCandidate "<< i+1 << ": " << extremaCandidates.TheObjects[i].ElementToString(false, false);
-  }
-  bool tempBool=  extremaComplex.findMaxQPOverConeProjective(input, extremaCandidates, theExtremaOutput, theGlobalVariables);
-  if (tempBool)
-  { this->theMultiplicitiesMaxOutput << "\n\nFound extrema: ";
-    if (extremaComplex.size>1)
-      this->theMultiplicitiesMaxOutput << "\n" << extremaComplex.size << " subchambers total";
-    for (int i=0; i<extremaComplex.size; i++)
-    { if (extremaComplex.size>1)
-        this->theMultiplicitiesMaxOutput << "Subchamber " << i+1<< ": ";
-      this->theMultiplicitiesMaxOutput << theExtremaOutput.TheObjects[i].ElementToString(false, false);
-    }
-  } else
-  { this->theMultiplicitiesMaxOutput << "\nFailed to find extrema! Something is wrong...";
-  }
-  out2 << "size of required subdivision:   " << extremaComplex.size;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out2.str();
-  theGlobalVariables.MakeReport();
-  outputSubdivision.CopyFromBase(extremaComplex);
-}
-
-bool ParserNode::ExtractArgumentList
-(List<int>& outputArgumentIndices)
-{ assert(false);
-  return true;
-}
-
 void ConeLatticeAndShiftMaxComputation::init
 (root& theNEq, Cone& startingCone, Lattice& startingLattice, root& startingShift)
 { ConeLatticeAndShift theCLS;
   theCLS.theProjectivizedCone=startingCone;
   theCLS.theLattice=startingLattice;
   theCLS.theShift=startingShift;
+  this->numNonParaM=0;
+  this->numProcessedNonParam=0;
   this->LPtoMaximizeLargerDim.size=0;
   this->LPtoMaximizeSmallerDim.size=0;
   this->theStartingRepresentative=startingShift;
@@ -1067,7 +921,9 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   << "; cone: " << currentCone.ElementToString(false, true, false, true, theFormat);
   ConeLatticeAndShiftMaxComputation theComputation;
   theComputation.init(theNEq, currentCone, currentLattice, theShift);
-  theComputation.FindExtremaInDirectionOverLattice(numNonParam, theGlobalVariables);
+  Controller pauseController;
+  theComputation.numNonParaM=numNonParam;
+  theComputation.FindExtremaInDirectionOverLattice(pauseController, theGlobalVariables);
   for (int i=0; i<MathRoutines::Minimum(theShift.size, theFormat.alphabet.size); i++)
 //    if (i<numNonParam)
   { std::stringstream tempStream;
@@ -1212,9 +1068,9 @@ void ConeLatticeAndShiftMaxComputation::DoTheFinalComputation
 }
 
 void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
-    (int numNonParam, GlobalVariables& theGlobalVariables)
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 { //std::cout << "<hr>starting complex: " << this->ElementToString();
-  for (int i=0; i<numNonParam; i++)
+  for (; this->numProcessedNonParam<this->numNonParaM; this->numProcessedNonParam++)
   { this->theConesSmallerDim.size=0;
     this->LPtoMaximizeSmallerDim.size=0;
     while(this->theConesLargerDim.size>0)
@@ -1223,6 +1079,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
         (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim, theGlobalVariables);
       this->theConesLargerDim.size--;
       this->LPtoMaximizeLargerDim.size--;
+      thePauseController.SafePoint();
     }
     //std::cout << "<hr><hr>" << this->ElementToString();
     this->LPtoMaximizeLargerDim=this->LPtoMaximizeSmallerDim;
@@ -1828,75 +1685,6 @@ int ParserNode::EvaluateCone
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size<2)
-    return this->SetError(this->errorBadOrNoArgument);
-  List<QuasiPolynomial> theQPolys;
-  theQPolys.SetSize(argumentList.size-1);
-  for (int i=0; i<argumentList.size-1; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeQuasiPolynomial, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    theQPolys.TheObjects[i]=currentNode.theQP.GetElement();
-  }
-  ParserNode& coneNode=this->owner->TheObjects[*argumentList.LastObject()];
-  if (!coneNode.ConvertToType(this->typeCone, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  Cone currentCone;
-  currentCone=coneNode.theCone.GetElement();
-  std::stringstream out;
-//  out << "input polys: ";
-//  for (int i=0; i<theQPolys.size; i++)
-//    out <<  theQPolys.TheObjects[i].ElementToString(true, false) << "<br>";
-//  out << "<br>The cone: " << currentCone.ElementToString();
-  ConeComplex theComplex;
-  List<QuasiPolynomial> output;
-  theComplex.findMaxQPOverConeProjective(currentCone, theQPolys, output, theGlobalVariables);
-  out << "<br>The complex size is: " << theComplex.size;
-
-  for (int i=0; i<theComplex.size; i++)
-  { out << "<br>over cone number " << i+1 << " with internal point " << theComplex.TheObjects[i].GetInternalPoint().ElementToString() <<  " the maximum is: " << output.TheObjects[i].ElementToString(true, false);
-  }
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
-  return this->errorNoError;
-}
-
-int ParserNode::EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size<2)
-    return this->SetError(this->errorBadOrNoArgument);
-  List<PolynomialRationalCoeff> thePolys;
-  thePolys.SetSize(argumentList.size-1);
-  for (int i=0; i<argumentList.size-1; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typePoly, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    thePolys.TheObjects[i]=currentNode.polyValue.GetElement();
-  }
-  ParserNode& coneNode=this->owner->TheObjects[*argumentList.LastObject()];
-  if (!coneNode.ConvertToType(this->typeCone, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  Cone currentCone;
-  currentCone=coneNode.theCone.GetElement();
-  std::stringstream out;
-  out << "input polys: ";
-  for (int i=0; i<thePolys.size; i++)
-    out <<  thePolys.TheObjects[i].ElementToString() << "<br>";
-  PolynomialOutputFormat theFormat;
-  out << "<br>The cone: " << currentCone.ElementToString(theFormat);
-  ConeComplex theComplex;
-  List<int> output;
-  theComplex.findMaxLFOverConeProjective(currentCone, thePolys, output, theGlobalVariables);
-  out << "<br>" << theComplex.ElementToString(false, true);
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
-  return this->errorNoError;
-}
-
 bool ConeComplex::findMaxQPOverConeProjective
   (Cone& input, List<QuasiPolynomial>& inputQPs, List<QuasiPolynomial>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
 { if (inputQPs.size==0)
@@ -2318,26 +2106,6 @@ bool Lattice::GetAllRepresentativesProjectingDownTo
   return true;
 }
 
-int ParserNode::EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=2)
-    return this->SetError(this->errorBadOrNoArgument);
-  for (int i=0; i<argumentList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeLattice, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-  }
-  Lattice& finerLattice=this->owner->TheObjects[argumentList.TheObjects[0]].theLattice.GetElement();
-  Lattice& rougherLattice=this->owner->TheObjects[argumentList.TheObjects[1]].theLattice.GetElement();
-  roots tempRoots;
-  if (!finerLattice.GetAllRepresentatives(rougherLattice, tempRoots))
-    return this->SetError(this->errorImplicitRequirementNotSatisfied);
-  this->outputString=tempRoots.ElementToString();
-  this->ExpressionType=this->typeString;
-  return this->errorNoError;
-}
-
 void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
 { if (this->AmbientLatticeReduced==latticeToRoughenBy)
     return;
@@ -2497,20 +2265,6 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
     this->AddLatticeShift(tempQP.valueOnEachLatticeShift.TheObjects[i], tempQP.LatticeShifts.TheObjects[i]);
 }
 
-int ParserNode::EvaluateInvertLattice(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=1)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& currentNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  if(!currentNode.ConvertToType(this->typeLattice, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  currentNode.theLattice.GetElement().GetDualLattice(this->theLattice.GetElement());
-  this->ExpressionType=this->typeLattice;
-  this->outputString=this->theLattice.GetElement().ElementToString();
-  return this->errorNoError;
-}
-
 std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat)
 { std::stringstream out;
   //if (useHtml)
@@ -2627,38 +2381,6 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)
     theVector+=basisRoots.TheObjects[i]*output.TheObjects[i];
   //std::cout << "the vector " << theVector.ElementToString() << " in the basis " << basisRoots.ElementToString() << " has coordinates: " << output.ElementToString();
   return true;
-}
-
-int ParserNode::EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-//  std::cout << "number of arguments: " << argumentList.size;
-  //std::cout << "<br> before evaluating your quasipoly the dim is " << this->owner->NumVariables;
-  if (argumentList.size!=3)
-    return this->SetError(this->errorBadOrNoArgument);
-  root theShift;
-  ParserNode& thePolyNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  ParserNode& theShiftNode=this->owner->TheObjects[argumentList.TheObjects[1]];
-  ParserNode& theLatticeNode=this->owner->TheObjects[argumentList.TheObjects[2]];
-  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables) )
-    return this->SetError(this->errorConversionError);
-  int theDim=theShift.size;
-  if (theDim<this->owner->NumVariables)
-    return this->SetError(this->errorDimensionProblem);
-  this->owner->NumVariables=theDim;
-  if (!thePolyNode.ConvertToType(this->typePoly, theGlobalVariables) || !theLatticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
-    return this->SetError(this->errorConversionError);
-  QuasiPolynomial& output=this->theQP.GetElement();
-//  std::cout << "Dimension: " << theDim;
- // std::cout << thePolyNode.ElementToStringValueAndType(true);
-//  if (thePolyNode.polyValue.GetElement().NumVars!=theDim)
-//    std::cout << "poly conversion failed";
-  if (thePolyNode.polyValue.GetElement().NumVars!=theDim || theLatticeNode.theLattice.GetElement().GetDim()!=theDim || theLatticeNode.theLattice.GetElement().GetRank()!=theDim)
-    return this->SetError(this->errorDimensionProblem);
-  output.MakeFromPolyShiftAndLattice(thePolyNode.polyValue.GetElement(), theShift, theLatticeNode.theLattice.GetElement(), theGlobalVariables);
-  this->outputString=output.ElementToString(true, false);
-  this->ExpressionType=this->typeQuasiPolynomial;
-  return this->errorNoError;
 }
 
 void Lattice::MakeZn(int theDim)
@@ -3266,78 +2988,6 @@ void QuasiPolynomial::operator*=(const Rational& theConst)
     this->valueOnEachLatticeShift.TheObjects[i]*=theConst;
 }
 
-int ParserNode::EvaluateReadFromFile(GlobalVariables& theGlobalVariables)
-{ std::fstream input;
-  std::string theFileName, tempS;
-  theFileName=this->owner->outputFolderPath;
-  theFileName.append("output.txt");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, theFileName, false, false, false);
-  input.seekg(0);
-  std::stringstream outString;
-  int candidateExpressionType;
-  input >> tempS >> candidateExpressionType;
-  PolynomialOutputFormat theFormat;
-  //std::cout << "header: " << tempS << " expression type: " << candidateExpressionType;
-  if (tempS!="ExpressionType:")
-  { outString << "missing header of file " << theFileName << " header read is: " << tempS;
-    this->outputString=outString.str();
-    return this->SetError(this->errorBadFileFormat);
-  }
-  switch (candidateExpressionType)
-  { case ParserNode::typeCone:
-      if(!this->theCone.GetElement().ReadFromFile(input, theGlobalVariables))
-        return this->SetError(this->errorBadFileFormat);
-      this->outputString=this->theCone.GetElement().ElementToString(false, true, theFormat);
-      break;
-    case ParserNode::typeQuasiPolynomial:
-      if(!this->theQP.GetElement().ReadFromFile(input, theGlobalVariables))
-        return this->SetError(this->errorBadFileFormat);
-      this->outputString=this->theQP.GetElement().ElementToString(true, false);
-      break;
-    case ParserNode::typeLattice:
-      if(!this->theLattice.GetElement().ReadFromFile(input, theGlobalVariables))
-        return this->SetError(this->errorBadFileFormat);
-      this->outputString=this->theLattice.GetElement().ElementToString(true, false);
-      break;
-    default: return this->SetError(this->errorBadFileFormat);
-  }
-  this->ExpressionType=candidateExpressionType;
-  return this->errorNoError;
-
-}
-
-int ParserNode::EvaluateWriteToFile(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=1)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& argument=this->owner->TheObjects[argumentList.TheObjects[0]];
-  std::fstream output;
-  std::string theFileName;
-  theFileName=this->owner->outputFolderPath;
-  theFileName.append("output.txt");
-  //std::cout  <<theFileName;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, theFileName, false, true, false);
-  std::stringstream outString;
-  output << "ExpressionType: " << argument.ExpressionType << "\n";
-  switch (argument.ExpressionType)
-  { case ParserNode::typeCone:
-      argument.theCone.GetElement().WriteToFile(output, theGlobalVariables);
-      break;
-    case ParserNode::typeQuasiPolynomial:
-      argument.theQP.GetElement().WriteToFile(output, theGlobalVariables);
-      break;
-    case ParserNode::typeLattice:
-      argument.theLattice.GetElement().WriteToFile(output, theGlobalVariables);
-      break;
-    default: return this->SetError(this->errorDunnoHowToDoOperation);
-  }
-  outString << "A latex/pdf file: <a href=\"" <<  this->owner->outputFolderDisplayPath << "output.txt\"> output.txt</a>";
-  this->outputString=outString.str();
-  this->ExpressionType=this->typeFile;
-  return this->errorNoError;
-}
-
 void Cone::WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "Cone( ";
@@ -3382,6 +3032,58 @@ bool Cone::ReadFromFile
   return tempBool;
 }
 
+void ConeLatticeAndShift::WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->theLattice.WriteToFile(output, theGlobalVariables);
+  this->theProjectivizedCone.WriteToFile(output, theGlobalVariables);
+  this->theShift.WriteToFile(output);
+}
+
+bool ConeLatticeAndShift::ReadFromFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->theLattice.ReadFromFile(output, theGlobalVariables);
+  this->theProjectivizedCone.ReadFromFile(output, theGlobalVariables);
+  this->theShift.ReadFromFile(output);
+  return true;
+}
+
+void ConeLatticeAndShiftMaxComputation::WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+{ this->complexStartingPerRepresentative.WriteToFile(output, theGlobalVariables);
+  this->complexRefinedPerRepresentative.WriteToFile(output, theGlobalVariables);
+  this->theMaximaCandidates.WriteToFile(output);
+  this->startingLPtoMaximize.WriteToFile(output);
+  this->finalMaxima.WriteToFile(output);
+  this->theStartingLattice.WriteToFile(output, theGlobalVariables);
+  this->theFinalRougherLattice.WriteToFile(output, theGlobalVariables);
+  this->theStartingRepresentative.WriteToFile(output);
+  this->theFinalRepresentatives.WriteToFile(output, theGlobalVariables);
+  this->theConesLargerDim.WriteToFile(output, theGlobalVariables);
+  this->theConesSmallerDim.WriteToFile(output, theGlobalVariables);
+  output << this->IsInfinity;
+  this->LPtoMaximizeLargerDim.WriteToFile(output, theGlobalVariables);
+  this->LPtoMaximizeSmallerDim.WriteToFile(output, theGlobalVariables);
+}
+
+bool ConeLatticeAndShiftMaxComputation::ReadFromFile
+(std::fstream& input, GlobalVariables& theGlobalVariables)
+{ this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
+  this->complexRefinedPerRepresentative.ReadFromFile(input, theGlobalVariables);
+  this->theMaximaCandidates.ReadFromFile(input, theGlobalVariables);
+  this->startingLPtoMaximize.ReadFromFile(input, theGlobalVariables);
+  this->finalMaxima.ReadFromFile(input, theGlobalVariables);
+  this->theStartingLattice.ReadFromFile(input, theGlobalVariables);
+  this->theFinalRougherLattice.ReadFromFile(input, theGlobalVariables);
+  this->theStartingRepresentative.ReadFromFile(input);
+  this->theFinalRepresentatives.ReadFromFile(input, theGlobalVariables);
+  this->theConesLargerDim.ReadFromFile(input, theGlobalVariables);
+  this->theConesSmallerDim.ReadFromFile(input, theGlobalVariables);
+  input >> this->IsInfinity;
+  this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables);
+  this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
+  return true;
+}
+
 void GeneralizedVermaModuleCharacters::WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables)
 { output << "ComputationPhase: " << this->computationPhase << "\n";
@@ -3393,9 +3095,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
   theGlobalVariables.MakeReport();
-//  this->allParamSubChambersRepetitionsAllowed.WriteToFile(output, theGlobalVariables);
-  this->allParamSubChambersRepetitionsAllowedConeForm.WriteToFile(output, theGlobalVariables);
-//  this->ExtremeQPsParamSubchambers.WriteToFile(output, theGlobalVariables);
+  this->theMaxComputation.WriteToFile(output, theGlobalVariables);
   this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
   this->theLinearOperators.WriteToFile(output);
   this->theLinearOperatorsExtended.WriteToFile(output);
@@ -3410,7 +3110,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
   theGlobalVariables.MakeReport();
   this->theMultiplicities.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
+//  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
   this->theTranslations.WriteToFile(output, theGlobalVariables);
   this->theTranslationsProjected.WriteToFile(output, theGlobalVariables);
@@ -3421,17 +3121,17 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
   this->projectivizedChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  this->projectivezedChambersSplitByMultFreeWalls.WriteToFile(output, theGlobalVariables);
+//  this->projectivezedChambersSplitByMultFreeWalls.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber extrema subcones... ";
   theGlobalVariables.MakeReport();
-  this->projectivizedExtremaCones.WriteToFile(output, theGlobalVariables);
+//  this->projectivizedExtremaCones.WriteToFile(output, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing the extrema... ";
   theGlobalVariables.MakeReport();
-  this->theExtrema.WriteToFile(output, theGlobalVariables);
+//  this->theExtrema.WriteToFile(output, theGlobalVariables);
 
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing extrema equals one cones... ";
   theGlobalVariables.MakeReport();
-  this->projectivizedExtremaEqualsOneCones.WriteToFile(output, theGlobalVariables);
+//  this->projectivizedExtremaEqualsOneCones.WriteToFile(output, theGlobalVariables);
 
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing to file done... ";
   theGlobalVariables.MakeReport();
@@ -3485,7 +3185,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
 //  this->allParamSubChambersRepetitionsAllowed.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers cone form... ";
   theGlobalVariables.MakeReport();
-  this->allParamSubChambersRepetitionsAllowedConeForm.ReadFromFile(input, theGlobalVariables);
+  this->theMaxComputation.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading more pieces of data... ";
   theGlobalVariables.MakeReport();
   this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
@@ -3496,7 +3196,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
   this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
   this->theMultiplicities.ReadFromFile(input, theGlobalVariables);
-  this->theMultiplicitiesExtremaCandidates.ReadFromFile(input, theGlobalVariables);
+//  this->theMultiplicitiesExtremaCandidates.ReadFromFile(input, theGlobalVariables);
   this->theCoeffs.ReadFromFile(input);
   this->theTranslations.ReadFromFile(input, theGlobalVariables);
   this->theTranslationsProjected.ReadFromFile(input, theGlobalVariables);
@@ -3507,16 +3207,16 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   theGlobalVariables.MakeReport();
   this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables);
   this->projectivizedChamber.ReadFromFile(input, theGlobalVariables);
-  this->projectivezedChambersSplitByMultFreeWalls.ReadFromFile(input, theGlobalVariables);
+//  this->projectivezedChambersSplitByMultFreeWalls.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param chamber extrema subcones...";
   theGlobalVariables.MakeReport();
-  this->projectivizedExtremaCones.ReadFromFile(input, theGlobalVariables);
+//  this->projectivizedExtremaCones.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading the extrema...";
   theGlobalVariables.MakeReport();
-  this->theExtrema.ReadFromFile(input, theGlobalVariables);
+//  this->theExtrema.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading the extrema equals one cones...";
   theGlobalVariables.MakeReport();
-  this->projectivizedExtremaEqualsOneCones.ReadFromFile(input, theGlobalVariables);
+//  this->projectivizedExtremaEqualsOneCones.ReadFromFile(input, theGlobalVariables);
   theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading complete... ";
   theGlobalVariables.MakeReport();
   return true;
@@ -3569,31 +3269,6 @@ int ParserNode::EvaluatePrintRootSystem
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  //std::stringstream out;
-  if (argumentList.size<2)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& latticeNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  if (!latticeNode.ConvertToType(this->typeLattice, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  roots tempRoots;
-  tempRoots.SetSize(argumentList.size-1);
-  this->theLattice.GetElement()=latticeNode.theLattice.GetElement();
-  int theDim=this->theLattice.GetElement().GetDim();
-  for (int i=1; i<argumentList.size; i++)
-  { if (!this->owner->TheObjects[argumentList.TheObjects[i]].GetRootRational(tempRoots.TheObjects[i-1], theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (tempRoots.TheObjects[i-1].size!=theDim)
-      return this->SetError(this->errorDimensionProblem);
-  }
-  this->theLattice.GetElement().IntersectWithLinearSubspaceSpannedBy(tempRoots);
-  //this->outputString=out.str();
-  this->ExpressionType=this->typeLattice;
-  return this->errorNoError;
 }
 
 template<class CoefficientType>
@@ -3668,52 +3343,6 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=3)
-    return this->SetError(this->errorBadOrNoArgument);
-  roots theLinearMap;
-  root tempRoot, theTranslation;
-  ParserNode& QPNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  ParserNode& mapNode=this->owner->TheObjects[argumentList.TheObjects[1]];
-  ParserNode& translationNode=this->owner->TheObjects[argumentList.TheObjects[2]];
-
-  if (!QPNode.ConvertToType(this->typeQuasiPolynomial, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  if (!translationNode.GetRootRational(theTranslation, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  int theDim=theTranslation.size;
-  if (theDim!=QPNode.theQP.GetElement().GetNumVars())
-    return this->SetError(this->errorDimensionProblem);
-  if (mapNode.GetRootRational(tempRoot, theGlobalVariables))
-    theLinearMap.AddObjectOnTop(tempRoot);
-  else
-    if (mapNode.ConvertToType(this->typeArray, theGlobalVariables))
-      for (int i=0; i<mapNode.children.size; i++)
-      { ParserNode& currentNode=this->owner->TheObjects[mapNode.children.TheObjects[i]];
-        if (!currentNode.GetRootRational(tempRoot, theGlobalVariables))
-          return this->SetError(this->errorBadOrNoArgument);
-        if (theDim!=tempRoot.size)
-          return this->SetError(this->errorDimensionProblem);
-        theLinearMap.AddObjectOnTop(tempRoot);
-      }
-    else
-      return this->SetError(this->errorBadOrNoArgument);
-  MatrixLargeRational theLinearMapMat;
-  theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
-  theLinearMapMat.Transpose();
-  QuasiPolynomial& currentQP=QPNode.theQP.GetElement();
-  if (currentQP.GetNumVars()!=theLinearMapMat.NumRows)
-    return this->SetError(this->errorDimensionProblem);
-  Lattice AmbientLattice;
-  AmbientLattice.MakeZn(theLinearMapMat.NumCols);
-  currentQP.Substitution(theLinearMapMat, theTranslation, AmbientLattice, this->theQP.GetElement(), theGlobalVariables);
-  this->ExpressionType=this->typeQuasiPolynomial;
-  this->outputString=this->theQP.GetElement().ElementToString(true, false);
-  return this->errorNoError;
-}
-
 void PolynomialsRationalCoeff::MakeLinearSubbedVarsCorrespondToMatRows(MatrixLargeRational& theMat, root& theConstants)
 { MatrixLargeRational tempMat;
   tempMat=theMat;
@@ -3762,27 +3391,6 @@ void Cone::IntersectAHyperplane
   bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, true, theGlobalVariables);
   assert(!tempBool);
 
-}
-
-int ParserNode::EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables)
-{ List<int> argumentList;
-  this->ExtractArgumentList(argumentList);
-  if (argumentList.size!=2)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& coneNode=this->owner->TheObjects[argumentList.TheObjects[0]];
-  ParserNode& hyperplaneNode=this->owner->TheObjects[argumentList.TheObjects[1]];
-  if (!coneNode.ConvertToType(this->typeCone, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  root tempRoot;
-  if (!hyperplaneNode.GetRootRational(tempRoot, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  if (tempRoot.size!=coneNode.theCone.GetElement().GetDim())
-    return this->SetError(this->errorDimensionProblem);
-  Cone& currentCone= coneNode.theCone.GetElement();
-  PolynomialOutputFormat theFormat;
-  currentCone.IntersectAHyperplane(tempRoot, this->theCone.GetElement(), theGlobalVariables);
-  this->outputString=this->theCone.GetElement().ElementToString(false, true, theFormat);
-  return this->errorNoError;
 }
 
 bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
@@ -4144,31 +3752,6 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
   return out.str();
 }
 
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesExtremaStep5(GlobalVariables& theGlobalVariables)
-{ if (this->NumProcessedExtremaEqualOne==0)
-    this->projectivizedExtremaEqualsOneCones.SetSize(this->theExtrema.size);
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-
-  for (; this->NumProcessedExtremaEqualOne<this->projectivizedExtremaEqualsOneCones.size; this->NumProcessedExtremaEqualOne++)
-  { this->projectivizedExtremaEqualsOneCones.TheObjects[this->NumProcessedExtremaEqualOne].SetSize(this->theExtrema.TheObjects[this->NumProcessedExtremaEqualOne].size);
-    for (int i=0; i<this->projectivizedExtremaEqualsOneCones.TheObjects[this->NumProcessedExtremaEqualOne].size; i++)
-    { std::stringstream out3, out4;
-      out3 << "Processing extrema in chamber " << this->NumProcessedExtremaEqualOne+1 << " out of " << this->theExtrema.size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1=out3.str();
-      out4 << "Subchamber " << i+1 << " out of " << this->projectivizedExtremaEqualsOneCones.TheObjects[this->NumProcessedExtremaEqualOne].size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString2=out4.str();
-      theGlobalVariables.MakeReport();
-      this->theMultiplicitiesMaxOutput << "\n\n\n\n\nChamber " << this->NumProcessedConesParam+ 1;
-      QuasiPolynomial& currentQP= this->theExtrema.TheObjects[this->NumProcessedExtremaEqualOne].TheObjects[i];
-      Cone& currentCone=this->projectivizedExtremaCones.TheObjects[this->NumProcessedExtremaEqualOne].TheObjects[i];
-      List<Cone>& currentOutput=this->projectivizedExtremaEqualsOneCones.TheObjects[this->NumProcessedExtremaEqualOne].TheObjects[i];
-      currentCone.SolveLQuasiPolyEqualsZeroIAmProjective(currentQP, currentOutput, theGlobalVariables);
-    }
-    this->thePauseController.SafePoint();
-  }
-}
-
 std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
@@ -4199,7 +3782,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
   numFoundChambers=0;
   out << "\n\\begin{longtable}{cc} ";
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
-  for (int i=0; i<this->projectivezedChambersSplitByMultFreeWalls.size; i++)
+ /* for (int i=0; i<this->projectivezedChambersSplitByMultFreeWalls.size; i++)
   { tempRoot=this->projectivezedChambersSplitByMultFreeWalls.TheObjects[i].GetInternalPoint();
     bool found=false;
     for (int j=0; j<this->projectivizedChamber.size; j++)
@@ -4233,7 +3816,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
         out << theMult.ElementToString(false, true, theFormat) << "\\\\\n";
       }
     }
-  }
+  }*/
   out << "Total number of chambers with multiplicity 1 or less: " << numFoundChambers;
   out << "\\end{longtable}\n\n\n\n";
   out << "\\end{document}";
@@ -4745,44 +4328,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 
 void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
 (GlobalVariables& theGlobalVariables)
-{/* std::stringstream out;
-  this->projectivezedChambersSplitByMultFreeWalls.init();
-  ConeComplex tempComplex;
-  root theMultFreeWall;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-  { Cone& currentCone=this->projectivizedChamber.TheObjects[i];
-    tempComplex.init();
-    tempComplex.AddNonRefinedChamberOnTopNoRepetition(currentCone);
-    assert(tempComplex.size==1);
-    tempComplex.LastObject()->LowestIndexNotCheckedForChopping=0;
-    tempComplex.LastObject()->LowestIndexNotCheckedForSlicingInDirection=0;
-    QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
-    for (int j=0; j<theMult.valueOnEachLatticeShift.size; j++)
-    { PolynomialRationalCoeff& currentPoly= theMult.valueOnEachLatticeShift.TheObjects[j];
-      theMultFreeWall.MakeZero(theMult.GetNumVars()+1);
-      for (int k=0; k< currentPoly.size; k++)
-      { Monomial<Rational>& theMon=currentPoly.TheObjects[k];
-        if (theMon.IsAConstant())
-          *theMultFreeWall.LastObject()=theMon.Coefficient-1;
-        else
-        { int theIndex=0;
-          if(!theMon.IsOneLetterFirstDegree(theIndex))
-            assert(false);
-          theMultFreeWall.TheObjects[theIndex]=theMon.Coefficient;
-        }
-      }
-      tempComplex.splittingNormals.AddObjectOnTopHash(theMultFreeWall);
-      *theMultFreeWall.LastObject()+=1025;
-      tempComplex.splittingNormals.AddObjectOnTopHash(theMultFreeWall);
-    }
-    tempComplex.Refine(theGlobalVariables);
-    assert(tempComplex.size<=2);
-    this->projectivezedChambersSplitByMultFreeWalls.AddListOnTopNoRepetitionOfObjectHash(tempComplex);
-  }
-  out << this->projectivezedChambersSplitByMultFreeWalls.ElementToString(false, false);
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  theGlobalVariables.MakeReport();*/
+{
 }
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)

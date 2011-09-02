@@ -3001,7 +3001,8 @@ public:
   bool operator==(const roots& right)const;
   void operator = (const roots& right){this->CopyFromBase(right); }
   bool ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output);}
+  void WriteToFile(std::fstream& output);
   roots(){}
   roots(int StartingSize){ this->SetSize(StartingSize);}
 };
@@ -9526,6 +9527,12 @@ class ConeLatticeAndShift
     this->theLattice=other.theLattice;
     this->theShift=other.theShift;
   }
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
   std::string ElementToString(PolynomialOutputFormat& theFormat);
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
   int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
@@ -9606,9 +9613,9 @@ public:
 };
 
 class ConeLatticeAndShiftMaxComputation
-{
-  public:
-  Controller theController;
+{ public:
+  int numNonParaM;
+  int numProcessedNonParam;
   List<ConeComplex> complexStartingPerRepresentative;
   List<ConeComplex> complexRefinedPerRepresentative;
   List<List<roots> > theMaximaCandidates;
@@ -9621,15 +9628,22 @@ class ConeLatticeAndShiftMaxComputation
   List<ConeLatticeAndShift> theConesLargerDim;
   List<ConeLatticeAndShift> theConesSmallerDim;
   List<bool> IsInfinity;
-  std::string ElementToString(PolynomialOutputFormat& theFormat);
   roots LPtoMaximizeLargerDim;
   roots LPtoMaximizeSmallerDim;
+
+  std::string ElementToString(PolynomialOutputFormat& theFormat);
   void init
   (root& theNEq, Cone& startingCone, Lattice& startingLattice, root& startingShift)
   ;
   void FindExtremaInDirectionOverLattice
-    (int numNonParam, GlobalVariables& theGlobalVariables)
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
        ;
+  void WriteToFile
+  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  ;
   void DoTheFinalComputation
   (GlobalVariables& theGlobalVariables)
 ;
@@ -9711,13 +9725,6 @@ class ParserNode
   (std::string& theLatexFileString)
   ;
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
-  int EvaluateQuasiPolynomial(GlobalVariables& theGlobalVariables);
-  int EvaluateChamberParam(GlobalVariables& theGlobalVariables);
-  int EvaluateGetAllRepresentatives(GlobalVariables& theGlobalVariables);
-  int EvaluateSubstitutionInQuasipolynomial(GlobalVariables& theGlobalVariables);
-  int EvaluateReadFromFile(GlobalVariables& theGlobalVariables);
-  int EvaluateIntersectHyperplaneByACone(GlobalVariables& theGlobalVariables);
-  bool ExtractArgumentList(List<int>& outputArgumentIndices);
   bool GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
 ;
@@ -9774,17 +9781,13 @@ class ParserNode
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, false);
   }
-  int EvaluateMaxLFOverCone(GlobalVariables& theGlobalVariables);
-  int EvaluateMaxQPOverCone(GlobalVariables& theGlobalVariables);
   int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
-  int EvaluateInvertLattice(GlobalVariables& theGlobalVariables);
   void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
   void EvaluateMinus(GlobalVariables& theGlobalVariables);
   void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
   void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
   void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
   void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
-  int EvaluateIntersectLatticeWithSubspaces(GlobalVariables& theGlobalVariables);
   static int EvaluateWeylAction
   (ParserNode& theNode,
    List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
@@ -10807,7 +10810,6 @@ public:
 class GeneralizedVermaModuleCharacters
 {
 public:
-//  bool flagUsingNewSplit;
   Controller thePauseController;
   List<MatrixLargeRational> theLinearOperators;
   //the first k variables correspond to the Cartan of the smaller Lie algebra
@@ -10823,20 +10825,17 @@ public:
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
-  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
+//  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
   partFractions thePfs;
-  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
+//  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   CombinatorialChamberContainer projectivizedChamberOld;
   ConeComplex projectivizedParamComplex;
-  List<List<QuasiPolynomial> > theExtrema;
-  List<List<Cone> > projectivizedExtremaCones;
-  List<List<List<Cone> > > projectivizedExtremaEqualsOneCones;
+  ConeLatticeAndShiftMaxComputation theMaxComputation;
   ConeComplex projectivizedChamber;
-  ConeComplex projectivezedChambersSplitByMultFreeWalls;
   std::stringstream log;
   Parser theParser;
   int computationPhase;
@@ -10870,15 +10869,7 @@ public:
   (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
   ;
   void GetProjection(int indexOperator, const root& input, root& output);
-  void FindMultiplicitiesExtremaStep1(GlobalVariables& theGlobalVariables);
-  void FindMultiplicitiesExtremaStep2(GlobalVariables& theGlobalVariables);
-  void FindMultiplicitiesExtremaStep3(GlobalVariables& theGlobalVariables);
-  void FindMultiplicitiesExtremaStep4(GlobalVariables& theGlobalVariables);
-  void FindMultiplicitiesExtremaStep5(GlobalVariables& theGlobalVariables);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
-  void ProcessExtremaOneChamber
-  (Cone& input, List<Cone>& outputSubdivision, List<QuasiPolynomial>& theExtremaOutput, GlobalVariables& theGlobalVariables)
-  ;
   void FindMultiplicitiesFree
   (GlobalVariables& theGlobalVariables)
   ;

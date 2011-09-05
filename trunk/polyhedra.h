@@ -4454,6 +4454,7 @@ public:
           return false;
     return true;
   }
+  inline bool GetRootFromLinPolyConstTermLastVariable(Vector<ElementOfCommutativeRingWithIdentity>& outputRoot, const ElementOfCommutativeRingWithIdentity& theZero){return this->IsLinearGetRootConstantTermLastCoordinate(outputRoot, theZero);}
   void Evaluate
 (const Vector<ElementOfCommutativeRingWithIdentity>& input, ElementOfCommutativeRingWithIdentity& output, const ElementOfCommutativeRingWithIdentity& theRingZero)
   ;
@@ -4920,6 +4921,7 @@ public:
   //the below constructor is very slow use for testing purposes only
   //Parsing stuff is inherently slow and I use the mighty parser
   PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
+  //bool GetRootFromLinPolyConstTermLastVariable(root& output) {return this->GetRootFromLinPolyConstTermLastVariable(output, (Rational) 0);}
   void AssignIntegerPoly(const Polynomial<LargeInt>& p);
   void Evaluate(intRoot& values, Rational& output);
   void Evaluate(root& values, Rational& output){ this->::Polynomial<Rational>::Evaluate(values, output, (Rational) 0);}
@@ -9519,8 +9521,9 @@ class ConeLatticeAndShift
   Lattice theLattice;
   root theShift;
   void FindExtremaInDirectionOverLatticeOneNonParam
-    ( root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
-     List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables)
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, bool assumeNewConesHaveSufficientlyManyProjectiveVertices,
+ GlobalVariables& theGlobalVariables)
        ;
   void operator=(const ConeLatticeAndShift& other)
   { this->theProjectivizedCone=other.theProjectivizedCone;
@@ -9635,18 +9638,21 @@ class ConeLatticeAndShiftMaxComputation
   void init
   (root& theNEq, Cone& startingCone, Lattice& startingLattice, root& startingShift)
   ;
-  void FindExtremaInDirectionOverLattice
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+  void FindExtremaParametricStep1
+    (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
        ;
+  void FindExtremaParametricStep2
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+;
+  void FindExtremaParametricStep3
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+;
   void WriteToFile
   (std::fstream& output, GlobalVariables& theGlobalVariables)
   ;
   bool ReadFromFile
   (std::fstream& input, GlobalVariables& theGlobalVariables)
   ;
-  void DoTheFinalComputation
-  (GlobalVariables& theGlobalVariables)
-;
 };
 
 class Parser;
@@ -9774,6 +9780,9 @@ class ParserNode
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluatePrintRootSAsAndSlTwos(theNode, theArgumentList, theGlobalVariables, false, true);
   }
+  static int EvaluateG2InB3Computation
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateClosestPointToHyperplaneAlongTheNormal
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -9888,9 +9897,20 @@ public:
   int (*theActualFunction)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables);
   char exampleAmbientWeylLetter;
   int exampleAmbientWeylRank;
+  bool flagVisible;
   std::string functionDescription;
   std::string functionName;
   std::string example;
+  void operator=(const ParserFunction& other)
+  { this->theArguments=other.theArguments;
+    this->theActualFunction=other.theActualFunction;
+    this->functionDescription=other.functionDescription;
+    this->functionName=other.functionName;
+    this->example=other.example;
+    this->flagVisible=other.flagVisible;
+    this->exampleAmbientWeylRank=other.exampleAmbientWeylRank;
+    this->exampleAmbientWeylLetter=other.exampleAmbientWeylLetter;
+  }
   std::string ElementToString
   (bool useHtml, bool useLatex)const
   ;
@@ -9909,15 +9929,6 @@ public:
     for(int i=0; i<numCycles; i++)
       result+=SomeRandomPrimes[i]*input[i];
     return result;
-  }
-  void operator=(const ParserFunction& other)
-  { this->theArguments=other.theArguments;
-    this->theActualFunction=other.theActualFunction;
-    this->functionDescription=other.functionDescription;
-    this->functionName=other.functionName;
-    this->example=other.example;
-    this->exampleAmbientWeylRank=other.exampleAmbientWeylRank;
-    this->exampleAmbientWeylLetter=other.exampleAmbientWeylLetter;
   }
   bool operator>(const ParserFunction& other) const
   { return this->functionName>other.functionName;
@@ -10103,9 +10114,13 @@ public:
   }
   void ParserInit(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
-  std::string ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables);
+  std::string ParseEvaluateAndSimplify
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+;
   void ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables);
-  std::string ParseEvaluateAndSimplifyPart2(const std::string& input, GlobalVariables& theGlobalVariables);
+  std::string ParseEvaluateAndSimplifyPart2
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+;
   ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
   void ParseNoInit(int indexFrom, int indexTo);
@@ -10120,17 +10135,28 @@ public:
   (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,
    const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
    )
-  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, 'B', 3, inputFunctionAddress);
+  { bool tempBool=this->AddOneFunctionToDictionary
+      (theFunctionName, theFunctionArguments, theFunctionDescription, theExample, 'B', 3, true, inputFunctionAddress);
     assert(tempBool);
   }
   void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, bool isVisible, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
    )
-  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, inputFunctionAddress);
+  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, isVisible, inputFunctionAddress);
+    assert(tempBool);
+  }
+  void AddOneFunctionToDictionaryNoFail
+  (const std::string& theFunctionName, const std::string& theFunctionArguments,
+   const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter,
+   int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+   )
+  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, true, inputFunctionAddress);
     assert(tempBool);
   }
   bool AddOneFunctionToDictionary
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
+  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,
+   const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, bool isVisible,
+   int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
 )
   { ParserFunction newFunction;
     bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
@@ -10138,6 +10164,7 @@ public:
       return false;
     this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
     this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
+    this->theFunctionList.LastObject()->flagVisible=isVisible;
     return result;
   }
   void SubAby(int newToken);
@@ -10424,6 +10451,7 @@ public:
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
   PolynomialOutputFormat thePolyFormat;
+  Controller theLocalPauseController;
 
   GlobalVariables();
   void operator=(const GlobalVariables& other)
@@ -10870,11 +10898,8 @@ public:
   ;
   void GetProjection(int indexOperator, const root& input, root& output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
-  void FindMultiplicitiesFree
+  void InitTheMaxComputation
   (GlobalVariables& theGlobalVariables)
-  ;
-  void ProcessOneParametricChamber
-  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
   ;
   void ComputeQPsFromChamberComplex
   (GlobalVariables& theGlobalVariables)

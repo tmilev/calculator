@@ -40,7 +40,7 @@
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
 #ifdef CGIversionLimitRAMuse
-int ParallelComputing::cgiLimitRAMuseNumPointersInList=1000000;
+int ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
 #endif
 
 Controller ParallelComputing::controllerLockThisMutexToSignalPause;
@@ -48,7 +48,7 @@ Controller ParallelComputing::controllerLockThisMutexToSignalPause;
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->ReadWriteRecursionDepth=0;
-  this->MaxAllowedComputationTimeInSeconds=1000;
+  this->MaxAllowedComputationTimeInSeconds=1000000;
 }
 
 bool Stop()
@@ -5822,7 +5822,7 @@ void PolynomialRationalCoeff::MakeLinPolyFromInt(int theDimension, int x1, int x
 void PolynomialRationalCoeff::operator=(const std::string& tempS)
 { Parser theParser;
   GlobalVariables tempGV;
-  theParser.ParseEvaluateAndSimplify(tempS, tempGV);
+  theParser.ParseEvaluateAndSimplify(tempS, false, tempGV);
   if (theParser.theValue.ExpressionType==ParserNode::typePoly)
     this->Assign(theParser.theValue.polyValue.GetElement());
   else
@@ -24977,20 +24977,24 @@ void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVaria
   //this->ComputeDebugString(false, theGlobalVariables);
 }
 
-std::string Parser::ParseEvaluateAndSimplifyPart2(const std::string& input, GlobalVariables& theGlobalVariables)
+std::string Parser::ParseEvaluateAndSimplifyPart2
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
 { this->Evaluate(theGlobalVariables);
   if (!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElement.GetElement().Simplify();
   if(!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   std::stringstream out;
-  out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>" << this->theValue.ElementToStringValueAndType(true, theGlobalVariables);
+  if (useHtml)
+    out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>";
+  out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables);
   return out.str();
 }
 
-std::string Parser::ParseEvaluateAndSimplify(const std::string& input, GlobalVariables& theGlobalVariables)
+std::string Parser::ParseEvaluateAndSimplify
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
 { this->ParseEvaluateAndSimplifyPart1(input, theGlobalVariables);
-  return this->ParseEvaluateAndSimplifyPart2(input, theGlobalVariables);
+  return this->ParseEvaluateAndSimplifyPart2(input, useHtml, theGlobalVariables);
 }
 
 int DebugCounter=-1;
@@ -32201,7 +32205,7 @@ void ComputationSetup::TheG2inB3Computation(ComputationSetup& inputData, GlobalV
   }
   theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
   std::string  civilizedInput="secretSauceOrdered";
-  theParser.ParseEvaluateAndSimplify(civilizedInput, theGlobalVariables);
+  theParser.ParseEvaluateAndSimplify(civilizedInput, true, theGlobalVariables);
 }
 
 void RationalFunction::gcd

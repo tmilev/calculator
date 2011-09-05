@@ -415,6 +415,12 @@ void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData
   tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.ExitComputation();
 }
 
+int ParserNode::EvaluateG2InB3Computation
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
+  return theNode.errorNoError;
+}
+
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
 { std::fstream input;
   std::string tempS;
@@ -458,8 +464,17 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
       this->ComputeQPsFromChamberComplex(theGlobalVariables);
       break;
     case 4:
-      this->FindMultiplicitiesFree(theGlobalVariables);
-    break;
+      this->InitTheMaxComputation(theGlobalVariables);
+      break;
+    case 5:
+      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseController, true, theGlobalVariables);
+      break;
+    case 6:
+      this->theMaxComputation.FindExtremaParametricStep2(this->thePauseController, theGlobalVariables);
+      break;
+    case 7:
+      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseController, theGlobalVariables);
+      break;
     default:
       break;
   }
@@ -923,7 +938,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   theComputation.init(theNEq, currentCone, currentLattice, theShift);
   Controller pauseController;
   theComputation.numNonParaM=numNonParam;
-  theComputation.FindExtremaInDirectionOverLattice(pauseController, theGlobalVariables);
+  theComputation.FindExtremaParametricStep1(pauseController, false, theGlobalVariables);
   for (int i=0; i<MathRoutines::Minimum(theShift.size, theFormat.alphabet.size); i++)
 //    if (i<numNonParam)
   { std::stringstream tempStream;
@@ -1027,8 +1042,8 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   return out.str();
 }
 
-void ConeLatticeAndShiftMaxComputation::DoTheFinalComputation
-(GlobalVariables& theGlobalVariables)
+void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 { this->theFinalRougherLattice=this->theConesLargerDim[0].theLattice;
   for (int i=1; i<this->theConesLargerDim.size; i++)
     this->theFinalRougherLattice.IntersectWith(this->theConesLargerDim[i].theLattice);
@@ -1053,7 +1068,10 @@ void ConeLatticeAndShiftMaxComputation::DoTheFinalComputation
         this->startingLPtoMaximize[i].AddObjectOnTop(this->LPtoMaximizeLargerDim[j]);
       }
     }
-  this->complexRefinedPerRepresentative.SetSize(this->theFinalRepresentatives.size);
+}
+void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+{ this->complexRefinedPerRepresentative.SetSize(this->theFinalRepresentatives.size);
   this->theMaximaCandidates.SetSize(this->theFinalRepresentatives.size);
   for (int i=0; i<this->theFinalRepresentatives.size; i++)
   { ConeComplex& currentComplex= this->complexRefinedPerRepresentative[i];
@@ -1067,8 +1085,8 @@ void ConeLatticeAndShiftMaxComputation::DoTheFinalComputation
   }
 }
 
-void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
-    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
+    (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { //std::cout << "<hr>starting complex: " << this->ElementToString();
   for (; this->numProcessedNonParam<this->numNonParaM; this->numProcessedNonParam++)
   { this->theConesSmallerDim.size=0;
@@ -1076,7 +1094,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
     while(this->theConesLargerDim.size>0)
     { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
       currentCLS.FindExtremaInDirectionOverLatticeOneNonParam
-        (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim, theGlobalVariables);
+        (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim, assumeNewConesHaveSufficientlyManyProjectiveVertices, theGlobalVariables);
       this->theConesLargerDim.size--;
       this->LPtoMaximizeLargerDim.size--;
       thePauseController.SafePoint();
@@ -1085,10 +1103,12 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaInDirectionOverLattice
     this->LPtoMaximizeLargerDim=this->LPtoMaximizeSmallerDim;
     this->theConesLargerDim=this->theConesSmallerDim;
   }
-  this->DoTheFinalComputation(theGlobalVariables);
 }
 
-void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine, List<ConeLatticeAndShift>& outputAppend, GlobalVariables& theGlobalVariables)
+void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, bool assumeNewConesHaveSufficientlyManyProjectiveVertices,
+ GlobalVariables& theGlobalVariables)
 { root direction;
   int theDimProjectivized=this->GetDimProjectivized();
   direction.MakeEi(theDimProjectivized, 0);
@@ -1177,7 +1197,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& the
       tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
       tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
-      tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, false, theGlobalVariables);
+      tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, assumeNewConesHaveSufficientlyManyProjectiveVertices, theGlobalVariables);
       //std::cout << tempCLS.theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
       theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
       outputAppend.AddObjectOnTop(tempCLS);
@@ -1187,78 +1207,6 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam(root& the
 //  for (int i=0; i<outputAppend.size; i++)
 //  { std::cout << outputAppend[i].theProjectivizedCone.ElementToString(false, true, true, true);
 //  }
-}
-
-void GeneralizedVermaModuleCharacters::ProcessOneParametricChamber
-  (int numNonParams, int numParams, roots& inputNormals, List<roots>& theParamChambers, List<roots>& theNonParamVertices, GlobalVariables& theGlobalVariables)
-{ /*roots nonParametricPart, parametricPart;
-  nonParametricPart.SetSize(input.Externalwalls.size);
-  parametricPart.SetSize(input.Externalwalls.size);
-  for (int i=0; i<input.Externalwalls.size; i++)
-  { root& currentNP=nonParametricPart.TheObjects[i];
-    root& currentP= parametricPart.TheObjects[i];
-    currentNP.SetSize(numNonParams);
-    currentP.SetSize(numParams);
-    for (int j=0; j<numNonParams; j++)
-      currentNP.TheObjects[j]=input.Externalwalls.TheObjects[i].normal.TheObjects[j];
-    for (int j=0; j<numParams; j++)
-      currentNP.TheObjects[j]=input.Externalwalls.TheObjects[i].normal.TheObjects[numNonParams+j];
-  }*/
-  Selection selectedNormals;
-  selectedNormals.init(inputNormals.size);
-  int numCycles=MathRoutines::NChooseK(inputNormals.size, numNonParams);
-  MatrixLargeRational matrixNonParams, matrixParams;
-  matrixNonParams.init(inputNormals.size, numNonParams);
-  matrixParams.init(inputNormals.size, numParams);
-  Selection NonPivotPoints;
-  roots basisRoots;
-  basisRoots.SetSize(numNonParams);
-  roots inducedParamChamber;
-  roots nonParamVertices;
-  inducedParamChamber.SetSize(inputNormals.size-numNonParams);
-  nonParamVertices.SetSize(numNonParams);
-  theParamChambers.MakeActualSizeAtLeastExpandOnTop(numCycles);
-  theNonParamVertices.MakeActualSizeAtLeastExpandOnTop(numCycles);
-  theParamChambers.size=0;
-  theNonParamVertices.size=0;
-  for (int i=0; i<numCycles; i++)
-  { selectedNormals.incrementSelectionFixedCardinality(numNonParams);
-    for (int j=0; j<numNonParams; j++)
-    { root& currentNormal=inputNormals.TheObjects[selectedNormals.elements[j]];
-      root& currentBasisElt=basisRoots.TheObjects[j];
-      currentBasisElt.SetSize(numNonParams);
-      for (int k=0; k<numNonParams; k++)
-      { matrixNonParams.elements[j][k]=currentNormal.TheObjects[k];
-        currentBasisElt.TheObjects[k]=currentNormal.TheObjects[k];
-      }
-      for (int k=0; k<numParams; k++)
-        matrixParams.elements[j][k]=currentNormal.TheObjects[k+numNonParams];
-    }
-    if (basisRoots.GetRankOfSpanOfElements(theGlobalVariables)==numNonParams)
-    { for (int j=0, counter=numNonParams; j<inputNormals.size; j++)
-        if (!selectedNormals.selected[j])
-        { root& currentNormal=inputNormals.TheObjects[j];
-          for (int k=0; k<numNonParams; k++)
-            matrixNonParams.elements[counter][k]=currentNormal.TheObjects[k];
-          for (int k=0; k<numParams; k++)
-            matrixParams.elements[counter][k]=currentNormal.TheObjects[k+numNonParams];
-          counter++;
-        }
-      MatrixLargeRational::GaussianEliminationByRows(matrixNonParams, matrixParams, NonPivotPoints);
-      for (int j=0; j<numNonParams; j++)
-        matrixParams.RowToRoot(j, nonParamVertices.TheObjects[j]);
-      for (int j=0; j<inputNormals.size-numNonParams; j++)
-        matrixParams.RowToRoot(j+numNonParams, inducedParamChamber.TheObjects[j]);
-      theNonParamVertices.AddObjectOnTop(nonParamVertices);
-      theParamChambers.AddObjectOnTop(inducedParamChamber);
-    }
-  }
-  PolynomialOutputFormat theFormat;
-  for (int i=0; i< theNonParamVertices.size; i++)
-  { std::cout << "<br>Number " << i+1 << ", vertices: " << theNonParamVertices.TheObjects[i].ElementToString();
-    std::cout << "<br>the parametric chamber: ";
-    std::cout << "<div class=\"math\">" << theParamChambers.TheObjects[i].ElementsToInequalitiesString(true, false, theFormat) << "</div>";
-  }
 }
 
 void ConeComplex::GetNewVerticesAppend
@@ -3674,7 +3622,8 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
 std::string Parser::GetFunctionDescription()
 { std::stringstream out;
   for (int i=0; i<this->theFunctionList.size; i++)
-    out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << " <br>";
+    if (this->theFunctionList.TheObjects[i].flagVisible)
+      out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << " <br>";
   return out.str();
 }
 
@@ -4326,9 +4275,21 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   return true;
 }
 
-void GeneralizedVermaModuleCharacters::FindMultiplicitiesFree
+void GeneralizedVermaModuleCharacters::InitTheMaxComputation
 (GlobalVariables& theGlobalVariables)
-{
+{ this->theMaxComputation.numNonParaM=2;
+  this->theMaxComputation.theConesLargerDim.SetSize(this->projectivizedChamber.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(this->theMultiplicities.size);
+  Lattice ZnLattice;
+  ZnLattice.MakeZn(5);
+  for (int i=0; i<this->theMaxComputation.theConesLargerDim.size; i++)
+  { ConeLatticeAndShift& currentCLS=this->theMaxComputation.theConesLargerDim[i];
+    currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
+    currentCLS.theShift.MakeZero(this->projectivizedChamber.GetDim());
+    currentCLS.theLattice=ZnLattice;
+    bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(this->theMaxComputation.LPtoMaximizeLargerDim[i], (Rational) 0);
+    assert(tempBool);
+  }
 }
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
@@ -4860,6 +4821,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "On condition that the cone lies in the non-strict upper half-plane and has a vertex at 0, draws the intersection of the cone with the affine hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate 0. ",
    "drawConeAffine( cone((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))",
     & ParserNode::EvaluateDrawConeAffine
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("RunGtwoInBthree",
+   "()",
+   "Run the G_2 in B_3 computation. Experimental, don't use.",
+   "RunGtwoInBthree",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateG2InB3Computation
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

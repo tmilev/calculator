@@ -43,7 +43,7 @@
 int ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
 #endif
 
-Controller ParallelComputing::controllerLockThisMutexToSignalPause;
+ControllerStartsRunning ParallelComputing::controllerLockThisMutexToSignalPause;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
@@ -7631,41 +7631,6 @@ inline void Rational::Invert()
   tempI.Assign(this->Extended->den);
   this->Extended->den.Assign( this->Extended->num.value);
   this->Extended->num.value.Assign(tempI);
-}
-
-void Rational::AssignString(const std::string& input)
-{ int positionInTempS=0;
-  this->MakeZero();
-  if (input=="0")
-    return;
-  if (input[0]=='-')
-    positionInTempS++;
-  LargeIntUnsigned tempNum, tempDen;
-  tempNum.MakeZero();
-  tempDen.MakeOne();
-  bool readingNumerator=true;
-  for (unsigned i=positionInTempS; i<input.length(); i++)
-  { char a= input[i];
-    if (a=='/')
-    { readingNumerator=false;
-      tempDen.MakeZero();
-    } else
-    { if (readingNumerator)
-      { tempNum.MultiplyByUInt(10);
-        unsigned int x=std::atoi(&a);
-        tempNum.AddUInt(x);
-      } else
-      { tempDen.MultiplyByUInt(10);
-        unsigned int x= std::atoi(&a);
-        tempDen.AddUInt(x);
-      }
-    }
-  }
-  this->MakeOne();
-  this->DivideByLargeIntegerUnsigned(tempDen);
-  this->MultiplyByLargeIntUnsigned(tempNum);
-  if (input[0]=='-')
-    this->Minus();
 }
 
 void Rational::ReadFromFile(std::fstream& input)
@@ -23224,8 +23189,12 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 }
 
 void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.theRootSubalgebras.controllerLProhibitingRelations.IsRunningUnsafeDeprecatedDontUse())
+{ inputData.theRootSubalgebras.controllerLProhibitingRelations.mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
+  if (inputData.theRootSubalgebras.controllerLProhibitingRelations.GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe())
+  { inputData.theRootSubalgebras.controllerLProhibitingRelations.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
     return;
+  }
+  inputData.theRootSubalgebras.controllerLProhibitingRelations.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
   rootSubalgebras& theRootSAs= inputData.theRootSubalgebras;
   inputData.theRootSubalgebras.controllerLProhibitingRelations.InitComputation();
   rootSubalgebra tempSA;
@@ -23563,8 +23532,12 @@ bool CombinatorialChamber::ElementToString(std::string& output, CombinatorialCha
 }
 
 void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.thePartialFraction.theChambers.thePauseController.IsRunningUnsafeDeprecatedDontUse())
+{ inputData.thePartialFraction.theChambers.thePauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
+  if (inputData.thePartialFraction.theChambers.thePauseController.GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe())
+  { inputData.thePartialFraction.theChambers.thePauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
     return;
+  }
+  inputData.thePartialFraction.theChambers.thePauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
   inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
   inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();

@@ -174,15 +174,15 @@ class MutexWrapper
 private:
 #ifndef WIN32
   pthread_mutex_t theMutex;
-#else
-  bool locked;
 #endif
+  bool locked;
 public:
   //locks the mutex if the mutex is free. If not it suspends calling thread until mutex becomes free and then locks it.
   inline void LockMe()
   {
 #ifndef WIN32
     pthread_mutex_lock(&this->theMutex);
+    this->locked=true;
 #else
     while(this->locked)
     {}
@@ -194,17 +194,15 @@ public:
   {
 #ifndef WIN32
     pthread_mutex_unlock(&this->theMutex);
-#else
-    this->locked=false;
 #endif
+    this->locked=false;
   }
   MutexWrapper()
   {
 #ifndef WIN32
     pthread_mutex_init(&this->theMutex, NULL);
-#else
-    this->locked=false;
 #endif
+    this->locked=false;
   }
   ~MutexWrapper()
   {
@@ -219,11 +217,11 @@ class Controller
 {
   MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
   MutexWrapper mutexSignalMeWhenReachingSafePoint;
-  MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   bool flagIsRunning;
   bool flagIsPausedWhileRunning;
   inline bool IsPausedWhileRunning(){ return this->flagIsPausedWhileRunning;}
 public:
+  MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
   inline void SafePoint()
   { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
     this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
@@ -254,11 +252,11 @@ public:
   { this->flagIsRunning=false;
     this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
   }
-  inline bool IsRunningUnsafeDeprecatedDontUse()
-  { return this->flagIsRunning;
-  }
-  inline bool IsPausedWhileRunningDeprecatedDontUse()
+  bool& GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()
   { return this->flagIsPausedWhileRunning;
+  }
+  bool& GetFlagIsRunningUnsafeUseWithMutexHoldMe()
+  { return this->flagIsRunning;
   }
   Controller()
   { this->flagIsRunning=false;
@@ -266,12 +264,20 @@ public:
   }
 };
 
+class ControllerStartsRunning: public Controller
+{
+  public:
+    ControllerStartsRunning()
+    { this->InitComputation();
+    }
+};
+
 class ParallelComputing
 {
 public:
   static int GlobalPointerCounter;
   static int PointerCounterPeakRamUse;
-  static Controller controllerLockThisMutexToSignalPause;
+  static ControllerStartsRunning controllerLockThisMutexToSignalPause;
 #ifdef CGIversionLimitRAMuse
   static int cgiLimitRAMuseNumPointersInList;
   inline static void CheckPointerCounters()
@@ -1918,7 +1924,8 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
-  void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); }
+  inline void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); }
+  void AssignString(const std::string& input);
   int GetUnsignedIntValueTruncated();
   int operator%(unsigned int x);
   inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
@@ -3445,18 +3452,6 @@ void List<Object>::WriteToFile(std::fstream& output)
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].WriteToFile(output);
     output << " ";
-  }
-}
-
-template <class Object>
-void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
-{ int NumWritten=this->size;
-  if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
-    NumWritten=UpperLimitForDebugPurposes;
-  output << "List_size: " << NumWritten << "\n";
-  for (int i=0; i<NumWritten; i++)
-  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
-    output << "\n";
   }
 }
 
@@ -10838,7 +10833,7 @@ public:
 class GeneralizedVermaModuleCharacters
 {
 public:
-  Controller thePauseController;
+  Controller thePauseControlleR;
   List<MatrixLargeRational> theLinearOperators;
   //the first k variables correspond to the Cartan of the smaller Lie algebra
   //the next l variables correspond to the Cartan of the larger Lie algebra
@@ -10871,10 +10866,12 @@ public:
   int NumProcessedExtremaEqualOne;
   void ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
   void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
-  void IncrementComputation(GlobalVariables& theGlobalVariables);
+  void IncrementComputation
+(GlobalVariables& theGlobalVariables)
+;
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
   GeneralizedVermaModuleCharacters()
-  { this->UpperLimitChambersForDebugPurposes=33;
+  { this->UpperLimitChambersForDebugPurposes=-1;
     this->computationPhase=0;
     this->NumProcessedConesParam=0;
     this->NumProcessedExtremaEqualOne=0;
@@ -11212,10 +11209,24 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalV
         default: break;
       }
       theGlobalVariables.MakeReport();
+      theGlobalVariables.theLocalPauseController.SafePoint();
     }
   }
   theGlobalVariables.ReadWriteRecursionDepth--;
   return true;
+}
+
+template <class Object>
+void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
+{ int NumWritten=this->size;
+  if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
+    NumWritten=UpperLimitForDebugPurposes;
+  output << "List_size: " << NumWritten << "\n";
+  for (int i=0; i<NumWritten; i++)
+  { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
+    output << "\n";
+    theGlobalVariables.theLocalPauseController.SafePoint();
+  }
 }
 
 #endif

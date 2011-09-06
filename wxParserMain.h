@@ -19,7 +19,7 @@
 
 #include "wxParserOutput.h"
 #include "wxIndicatorWindow.h"
-#include "wxVPDrawPanel.h"
+#include "wxVPDrawCanvas.h"
 #include "polyhedra.h"
 #include "wx/stdpaths.h"
 #include "wx/dcclient.h"
@@ -30,10 +30,9 @@ DEFINE_EVENT_TYPE(wxEVT_ComputationProgressReport)
 class wxParserDialog: public wxDialog
 {
     public:
-        MutexWrapper mutexRun;
-        bool flagComputationInProgress;
+        MutexWrapper mutexRuN;
         wxParserOutput* frameParserOutput;
-        wxVPDrawPanel* frameDrawPanel;
+        wxVPDrawCanvas* frameDrawCanvas;
         wxIndicatorWindow* frameIndicatorWindow;
         std::string thePath;
         std::string theSettingsFileName;
@@ -42,6 +41,7 @@ class wxParserDialog: public wxDialog
         wxCommandEvent eventProgressReport;
         wxParserDialog(wxWindow* parent,wxWindowID id = -1);
         std::string ProgressReportString;
+        std::string StatusString;
         virtual ~wxParserDialog();
 
     private:
@@ -50,16 +50,19 @@ class wxParserDialog: public wxDialog
         void OnQuit(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
         void OnInit(wxInitDialogEvent& event);
+        void OnButton2Click(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(wxParserDialog)
         static const long ID_TEXTCTRL1;
         static const long ID_BUTTON1;
+        static const long ID_BUTTON2;
         //*)
 
         //(*Declarations(wxParserDialog)
         wxButton* Button1;
         wxBoxSizer* BoxSizer2;
+        wxButton* Button2;
         wxBoxSizer* BoxSizer1;
         wxTextCtrl* TextCtrl1;
         //*)

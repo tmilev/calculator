@@ -22,6 +22,7 @@ wxVPDrawPanel::wxVPDrawPanel(wxWindow* parent,wxWindowID id,const wxPoint& pos,c
 	Move(wxDefaultPosition);
 	Panel1 = new wxPanel(this, ID_PANEL1, wxPoint(120,240), wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL1"));
 	//*)
+	Connect(ID_PANEL1, wxEVT_PAINT,  (wxObjectEventFunction)&wxVPDrawPanel::OnPaint);
 }
 
 wxVPDrawPanel::~wxVPDrawPanel()

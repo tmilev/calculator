@@ -32,6 +32,52 @@ void ComputationSetup::ComputeCharaterFormulas(ComputationSetup& inputData, Glob
   }
 }
 
+void LargeIntUnsigned::AssignString(const std::string& input)
+{ if (input.size()<10)
+  { unsigned int x=std::atoi(input.c_str());
+    this->AssignShiftedUInt(x, 0);
+    return;
+  }
+  this->MakeZero();
+  for (unsigned int i=0; i<input.size(); i++)
+  { this->operator*=(10);
+    this->operator+=((unsigned) MathRoutines::GetIntFromDigit(input[i]));
+  }
+}
+
+void Rational::AssignString(const std::string& input)
+{ this->MakeZero();
+  if (input=="0")
+    return;
+  bool inputIsNegative=false;
+  int positionInTempS=0;
+  if (input[0]=='-')
+  { positionInTempS++;
+    inputIsNegative=true;
+  }
+  std::string buffer;
+  buffer.reserve(input.size());
+  LargeIntUnsigned reader;
+  bool readingNumerator=true;
+  for (unsigned i=positionInTempS; i<input.length(); i++)
+  { char a= input[i];
+    if (a=='/')
+    { readingNumerator=false;
+      reader.AssignString(buffer);
+      this->operator=(reader);
+      buffer="";
+    } else
+      buffer.push_back(input[i]);
+  }
+  reader.AssignString(buffer);
+  if (readingNumerator)
+    this->operator=(reader);
+  else
+    this->operator/=(reader);
+  if (inputIsNegative)
+    this->Minus();
+}
+
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, root& startingNormal, root& outputNormal)
 { MatrixLargeRational theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
@@ -337,8 +383,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   PolynomialOutputFormat theFormat;
   root tempRoot;
   QPSub theSub;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent
-  (this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKnegativeWeights, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -347,56 +392,52 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   out << "=" << this->thePfs.DebugString;
   int totalDim=this->theTranslations.TheObjects[0].size+this->theTranslationsProjected.TheObjects[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChamber.size);
-  this->theMultiplicities.SetSize(this->projectivizedChamber.size);
   this->thePfs.theChambers.init();
   this->thePfs.theChambers.theDirections=this->GmodKnegativeWeights;
   this->thePfs.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
+  this->theQPsSubstituted.SetSize(this->thePfs.theChambers.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
+  Lattice theExtendedIntegralLatticeMatForm;
+  theExtendedIntegralLatticeMatForm.MakeZn(totalDim);
+  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
+      this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
       this->thePfs.GetVectorPartitionFunction(currentQPNoSub, this->thePfs.theChambers.TheObjects[i]->InternalPoint, theGlobalVariables);
       out << "\nChamber " << i+1 << " with internal point " << this->thePfs.theChambers.TheObjects[i]->InternalPoint.ElementToString() << " the quasipoly is: " << currentQPNoSub.ElementToString(false, false);
+      for (int k=0; k<this->theLinearOperators.size; k++)
+      { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
+        std::stringstream tempStream;
+        theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
+        theGlobalVariables.MakeReport();
+        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjected.TheObjects[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
+        out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
+        out << "\nthe sub is: " << theSub.ElementToString();
+      }
     }
-  QuasiPolynomial theQPNoSub;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
-  Lattice theExtendedIntegralLatticeMatForm;
 //  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
   //out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
   //this->theMultiplicitiesMaxOutputReport2.flush();
-  theExtendedIntegralLatticeMatForm.MakeZn(totalDim);
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-  { this->theQPsSubstituted.TheObjects[i].SetSize(this->theLinearOperators.size);
-    for (int k=0; k<this->theLinearOperators.size; k++)
-    { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
-      this->GetProjection(k, this->projectivizedChamber.TheObjects[i].GetInternalPoint(), tempRoot);
-      tempRoot-=this->NonIntegralOriginModification;
-      int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
-      if (theIndex==-1)
-        theQPNoSub.MakeZeroLatticeZn(tempRoot.size);
-      else
-        theQPNoSub=this->theQPsNonSubstituted.TheObjects[theIndex];
-      std::stringstream tempStream;
-      tempStream << "chamber " << i+1 << " linear opeator " << k+1;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
-      theGlobalVariables.MakeReport();
-      out << "\nChamber " << i << " translation " << k << ": " << theQPNoSub.ElementToString(false, false);
-      this->theMultiplicitiesMaxOutputReport2.flush();
-      theQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjected.TheObjects[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
-      out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
-      out << "\nthe sub is: " << theSub.ElementToString();
-    }
-  }
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   QuasiPolynomial tempQP;
+  this->theMultiplicities.SetSize(this->projectivizedChamber.size);
   for (int i=0; i<this->projectivizedChamber.size; i++)
   { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
     currentSum.MakeZeroLatticeZn(totalDim);
     for (int k=0; k<this->theLinearOperators.size; k++)
-    { tempQP=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
-      tempQP*=this->theCoeffs.TheObjects[k];
-      currentSum+=tempQP;
+    { this->GetProjection(k, this->projectivizedChamber.TheObjects[i].GetInternalPoint(), tempRoot);
+      tempRoot-=this->NonIntegralOriginModification;
+      int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
+      if (theIndex!=-1)
+      { tempQP=this->theQPsSubstituted.TheObjects[theIndex].TheObjects[k];
+        tempQP*=this->theCoeffs.TheObjects[k];
+        currentSum+=tempQP;
+      }
+      std::stringstream tempStream;
+      tempStream << " Chamber " << i+1 << " translation " << k+1;
+      theGlobalVariables.theIndicatorVariables.ProgressReportString1=tempStream.str();
+      theGlobalVariables.MakeReport();
     }
     out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
     out << "\nThe chamber is: " << this->projectivizedChamber.TheObjects[i].ElementToString(theFormat);
@@ -409,15 +450,10 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->theMultiplicitiesMaxOutputReport2 << out.str();
 }
 
-void ComputationSetup::ComputeGenVermaCharaterG2inB3(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.InitComputation();
-  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
-  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseController.ExitComputation();
-}
-
 int ParserNode::EvaluateG2InB3Computation
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation(theGlobalVariables);
+{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
+    (theGlobalVariables);
   return theNode.errorNoError;
 }
 
@@ -441,8 +477,11 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables& theGl
   this->WriteToFile(output, theGlobalVariables);
 }
 
-void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::IncrementComputation
+  (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
+  PolynomialRationalCoeff::PreferredHashSize=10;
+  this->thePauseControlleR.InitComputation();
   this->ReadFromDefaultFile(theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
@@ -467,13 +506,13 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
       this->InitTheMaxComputation(theGlobalVariables);
       break;
     case 5:
-      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseController, true, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true, theGlobalVariables);
       break;
     case 6:
-      this->theMaxComputation.FindExtremaParametricStep2(this->thePauseController, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep2(this->thePauseControlleR, theGlobalVariables);
       break;
     case 7:
-      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseController, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
       break;
     default:
       break;
@@ -487,6 +526,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation(GlobalVariables& the
   theGlobalVariables.MakeReport();
   if (this->computationPhase < 30)
     this->WriteToDefaultFile(theGlobalVariables);
+  this->thePauseControlleR.ExitComputation();
 }
 
 void CombinatorialChamberContainer::initCharacterComputation
@@ -4283,13 +4323,14 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
   Lattice ZnLattice;
   ZnLattice.MakeZn(5);
   for (int i=0; i<this->theMaxComputation.theConesLargerDim.size; i++)
-  { ConeLatticeAndShift& currentCLS=this->theMaxComputation.theConesLargerDim[i];
-    currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
-    currentCLS.theShift.MakeZero(this->projectivizedChamber.GetDim());
-    currentCLS.theLattice=ZnLattice;
-    bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(this->theMaxComputation.LPtoMaximizeLargerDim[i], (Rational) 0);
-    assert(tempBool);
-  }
+    if (! this->theMultiplicities[i].IsEqualToZero())
+    { ConeLatticeAndShift& currentCLS=this->theMaxComputation.theConesLargerDim[i];
+      currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
+      currentCLS.theShift.MakeZero(this->projectivizedChamber.GetDim());
+      currentCLS.theLattice=ZnLattice;
+      bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(this->theMaxComputation.LPtoMaximizeLargerDim[i], (Rational) 0);
+      assert(tempBool);
+    }
 }
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)

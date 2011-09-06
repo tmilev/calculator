@@ -26,8 +26,9 @@ class wxVPDrawPanel: public wxDialog
 	private:
 
 		//(*Handlers(wxVPDrawPanel)
-		//*)
 
+		//*)
+    void OnPaint(wxPaintEvent& ev);
 		DECLARE_EVENT_TABLE()
 };
 

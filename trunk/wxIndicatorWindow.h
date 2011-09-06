@@ -2,6 +2,7 @@
 #define WXINDICATORWINDOW_H
 
 //(*Headers(wxIndicatorWindow)
+#include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include <wx/dialog.h>
 //*)
@@ -14,12 +15,14 @@ class wxIndicatorWindow: public wxDialog
 		virtual ~wxIndicatorWindow();
 
 		//(*Declarations(wxIndicatorWindow)
+		wxTextCtrl* TextCtrl2;
 		wxTextCtrl* TextCtrl1;
 		//*)
 
 	protected:
 
 		//(*Identifiers(wxIndicatorWindow)
+		static const long ID_TEXTCTRL2;
 		static const long ID_TEXTCTRL1;
 		//*)
 

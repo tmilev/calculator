@@ -35,12 +35,11 @@
 		<Unit filename="wxParserMain.h" />
 		<Unit filename="wxParserOutput.cpp" />
 		<Unit filename="wxParserOutput.h" />
-		<Unit filename="wxVPDrawPanel.cpp" />
-		<Unit filename="wxVPDrawPanel.h" />
+		<Unit filename="wxVPDrawCanvas.cpp" />
+		<Unit filename="wxVPDrawCanvas.h" />
 		<Unit filename="wxsmith/wxIndicatorWindow.wxs" />
 		<Unit filename="wxsmith/wxParserOutput.wxs" />
 		<Unit filename="wxsmith/wxParserdialog.wxs" />
-		<Unit filename="wxsmith/wxVPDrawPanel.wxs" />
 		<Extensions>
 			<envvars />
 			<code_completion />
@@ -49,9 +48,9 @@
 				<resources>
 					<wxDialog wxs="wxsmith/wxParserdialog.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserDialog" language="CPP" />
 					<wxFrame wxs="wxsmith/wxParserOutput.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
-					<wxPanel wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" name="wxDrawPanel" language="CPP" />
 					<wxDialog wxs="wxsmith/wxIndicatorWindow.wxs" src="wxIndicatorWindow.cpp" hdr="wxIndicatorWindow.h" name="wxIndicatorWindow" language="CPP" />
 					<wxDialog wxs="wxsmith/wxPanel.wxs" src="wxPanel.cpp" hdr="wxPanel.h" name="wxPanel" language="CPP" />
+					<wxDialog wxs="wxsmith/wxVPDrawCanvas.wxs" src="wxVPDrawCanvas.cpp" hdr="wxVPDrawCanvas.h" name="wxVPDrawCanvas" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

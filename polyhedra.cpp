@@ -1251,12 +1251,12 @@ void ComputationSetup::Run()
   this->thePartialFraction.flagUsingOrlikSolomonBasis=false;
   if (this->flagUsingProverDoNotCallOthers)
   { if (this->flagSavingProverData)
-    { this->theProverFixedK.WriteToFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
-      this->theProver.WriteToFileAppend(*this->theGlobalVariablesContainer->Default());
+    { this->theProverFixedK.WriteToFile(this->theProverFixedK.ProverFileName, this->theGlobalVariablesContainer->Default());
+      this->theProver.WriteToFileAppend(this->theGlobalVariablesContainer->Default());
       this->flagSavingProverData=false;
     }  else if (this->flagOpenProverData)
-    { this->theProverFixedK.ReadFromFile(this->theProverFixedK.ProverFileName, *this->theGlobalVariablesContainer->Default());
-      this->theProver.ReadFromFile(*this->theGlobalVariablesContainer->Default());
+    { this->theProverFixedK.ReadFromFile(this->theProverFixedK.ProverFileName, this->theGlobalVariablesContainer->Default());
+      this->theProver.ReadFromFile(this->theGlobalVariablesContainer->Default());
       this->flagOpenProverData=false;
     } else
     { GlobalVariables* tgv= this->theGlobalVariablesContainer->Default();
@@ -2735,17 +2735,17 @@ inline void roots::AddRoot(root &r)
 }
 
 void roots::WriteToFile(std::fstream& output)
-{ int theDimension=0;
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  int theDimension=0;
   if (this->size>0)
     theDimension= this->TheObjects[0].size;
-  output << "Num_roots|Dim: " << this->size << " " << theDimension << " ";
-  if (this->size<1)
-    return;
+  output << "size|dim: " << this->size << " " << theDimension << " ";
   for (int i=0; i<this->size; i++)
     for (int j=0; j<theDimension; j++)
     { this->TheObjects[i].TheObjects[j].WriteToFile(output);
       output << " ";
     }
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   output << "\n";
 }
 
@@ -2782,22 +2782,30 @@ void roots::ReadCivilizedHumanReadableFormat(std::stringstream& input)
   }
 }
 
-bool roots::ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
+bool roots::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
+{ int numReadWords;
+  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  std::string tempS;
   input >> tempS;
-  assert (tempS=="Num_roots|Dim:");
-  if (tempS!="Num_roots|Dim:")
+  assert (tempS=="size|dim:");
+  if (tempS!="size|dim:")
     return false;
-  int theDim, theSize;
-  input >> theSize >> theDim;
-  if (theSize<0)
-    theSize=0;
-  this->SetSize(theSize);
-  for (int i=0; i<this->size; i++)
+  int theDim, theActualSize;
+  input >> theActualSize >> theDim;
+  if (theActualSize<0)
+    theActualSize=0;
+  int cappedSize=theActualSize;
+  if (UpperLimitDebugPurposes>0 && UpperLimitDebugPurposes>theActualSize)
+    cappedSize=UpperLimitDebugPurposes;
+  this->SetSize(cappedSize);
+  root tempRoot;
+  for (int i=0; i<cappedSize; i++)
   { this->TheObjects[i].SetSize(theDim);
     for (int j=0; j<theDim; j++)
-      this->TheObjects[i].TheObjects[j].ReadFromFile(input);
+       this->TheObjects[i].TheObjects[j].ReadFromFile(input);
   }
+  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  assert(numReadWords==0 || cappedSize<theActualSize);
   return true;
 }
 
@@ -4196,8 +4204,8 @@ void CombinatorialChamberContainer::MakeReportOneSlice(GlobalVariables& theGloba
   std::stringstream out4;
   out4 << "Direction index: " << currentIndex << " out of " << totalRoots << " current direction: " << theCurrentDirection.ElementToString();
   out5 << "Chamber index: " << this->indexNextChamberToSlice << " Explored " << this->NumExplored << " out of " << this->GetNumNonZeroPointers();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -4206,7 +4214,7 @@ void CombinatorialChamberContainer::MakeReportGlueing(GlobalVariables& theGlobal
     return;
   std::stringstream out3;
   out3 << "Glueing: checking chamber index: " << currentIndex << " out of " << this->size << " Total glueings: " << TotalNumGlueingsSoFar;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -4706,7 +4714,7 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
 //    this->ComputeDebugString();
 }*/
 
-void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "Flags_and_indices: ";
   output << this->flagHasZeroPolynomiaL << " " << this->flagExplored << " " << this->flagPermanentlyZero << " ";
   output << this->IndexInOwnerComplex << " " << this->IndexStartingCrossSectionNormal << " " << this->DisplayNumber << "\nVertices:\n";
@@ -4722,7 +4730,7 @@ void CombinatorialChamber::WriteToFile(std::fstream& output, GlobalVariables& th
   }
 }
 
-bool CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner)
+bool CombinatorialChamber::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, CombinatorialChamberContainer& owner)
 { if (!input.is_open())
     return false;
   std::string tempS;
@@ -4780,11 +4788,11 @@ void WallData::ReadFromFile(std::fstream& input, CombinatorialChamberContainer& 
   }
 }
 
-void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { this->WriteToFile("./theChambers.txt", theGlobalVariables);
 }
 
-bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false);
   this->WriteToFile(tempF, theGlobalVariables);
@@ -4792,17 +4800,19 @@ bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, Glo
   return true;
 }
 
-bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
   if (!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, false, false))
     return false;
   this->ReadFromFile(tempF, theGlobalVariables);
-  assert(this->ConsistencyCheck(false, theGlobalVariables));
+  if (theGlobalVariables!=0)
+  { assert(this->ConsistencyCheck(false, *theGlobalVariables));
+  }
   tempF.close();
   return true;
 }
 
-bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
+bool CombinatorialChamberContainer::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { return this->ReadFromFile("./theChambers.txt", theGlobalVariables);
 }
 
@@ -4820,14 +4830,14 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(GlobalVariables& theG
   this->flagIsRunning=false;
 }
 
-void ConeGlobal::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void ConeGlobal::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->roots::WriteToFile(output, theGlobalVariables);
   output << "\nChamberTestArray: " << this->ChamberTestArray.size << " ";
   for (int i=0; i<this->ChamberTestArray.size; i++)
     output << this->ChamberTestArray.TheObjects[i] << " ";
 }
 
-void ConeGlobal::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void ConeGlobal::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
   this->roots::ReadFromFile(input, theGlobalVariables);
   input >> tempS >> tempI;
@@ -4836,7 +4846,7 @@ void ConeGlobal::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVar
     input >> this->ChamberTestArray.TheObjects[i];
 }
 
-void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->theFacets.WriteToFile(output);
   output << "\nConesHavingFixedNormal: ";
   output << this->ConesHavingFixedNormal.size << " ";
@@ -4852,7 +4862,7 @@ void simplicialCones::WriteToFile(std::fstream& output, GlobalVariables& theGlob
   }
 }
 
-void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
   this->theFacets.ReadFromFile(input);
   input >> tempS;
@@ -6329,21 +6339,6 @@ void rootsCollection::ComputeDebugString()
   }
 }
 
-void rootsCollection::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "Num_collections: " << this->size << "\n";
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].WriteToFile(output, theGlobalVariables);
-}
-
-void rootsCollection::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
-  int tempI;
-  input >> tempS >> tempI;
-  this->SetSize(tempI);
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
-}
-
 void rootsCollection::Average(root& output, int Number, int theDimension)
 { root tempRoot; output.MakeZero(theDimension);
   if (this->size==0)
@@ -7588,7 +7583,7 @@ void SortedQPs::AddToEntry(int x, int y, int z, QuasiMonomial &QM)
 void Rational::WriteToFile(std::fstream& output)
 { std::string tempS;
   this->ElementToString(tempS);
-  output << tempS << " ";
+  output << tempS;
 }
 
 inline void Rational::RaiseToPower(int x)
@@ -8339,7 +8334,7 @@ void partFractionPolynomials::ComputeQuasiPolynomial(QuasiPolynomialOld& output,
   { if (RecordNumMonomials)
     { std::stringstream out;
       out<<i<<" out of "<<this->size<<" accounted for";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4= out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out.str();
     }
     QuasiPolynomialOld& tempQP = theGlobalVariables.QPComputeQuasiPolynomial;
     QuasiNumber& tempQN = theGlobalVariables.QNComputeQuasiPolynomial;
@@ -8687,7 +8682,7 @@ int partFraction::GetNumMonomialsInNumerator()
     return this->CoefficientNonExpanded.size;
 }
 
-void partFraction::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void partFraction::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "Fraction_start: " << this->size << "\n";
   for (int j=0; j<this->size; j++)
   { output <<this->TheObjects[j].Multiplicities.size <<" ";
@@ -8699,7 +8694,7 @@ void partFraction::WriteToFile(std::fstream& output, GlobalVariables& theGlobalV
   output<<"Fraction_end\n";
 }
 
-void partFraction::ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables& theGlobalVariables, int theDimension)
+void partFraction::ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension)
 { std::string tempS;
   int tempI;
   input >> tempS >> tempI;
@@ -9362,7 +9357,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   }
   if (this->FileStoragePosition!=-1)
   { partFraction::TheBigDump.seekg(this->FileStoragePosition);
-    output.ReadFromFile(partFraction::TheBigDump, theGlobalVariables);
+    output.ReadFromFile(partFraction::TheBigDump, &theGlobalVariables);
     if (RecordNumMonomials && ! this->AlreadyAccountedForInGUIDisplay)
     { this->AlreadyAccountedForInGUIDisplay=true;
       partFractions::NumProcessedForVPFMonomialsTotal+=this->Coefficient.size;
@@ -9394,8 +9389,8 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
       out4 <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size <<" processed";
       partFractions::NumProcessedForVPFMonomialsTotal++;
       out3  <<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4= out4.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
@@ -9595,7 +9590,7 @@ void partFractions::UncoverBracketsNumerators(GlobalVariables& theGlobalVariable
   { if (this->flagMakingProgressReport)
     { std::stringstream out;
       out << "Uncovering brackets" << i+1 << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out.str();
       changeOfNumMonomials-=this->TheObjects[i].Coefficient.size;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
@@ -9606,7 +9601,7 @@ void partFractions::UncoverBracketsNumerators(GlobalVariables& theGlobalVariable
     { changeOfNumMonomials+=this->TheObjects[i].Coefficient.size;
       std::stringstream out;
       out << "Number actual monomials" << changeOfNumMonomials;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString5=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
@@ -9658,8 +9653,8 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
       std::stringstream out1, out2;
       out1 << "Starting checksum: " << tempS1;
       out2 << "  Ending checksum: " << tempS2;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1= out1.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out1.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
       theGlobalVariables.MakeReport();
     }
     assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
@@ -10375,15 +10370,15 @@ void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
   if (this->NumRelevantNonReducedFractions!=0)
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
   out1 << " out of "<< this->size << " total fractions";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1= out1.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out1.str();
   out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
           << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions << " out of " << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
   if (this->NumGeneratorsInTheNumerators!=0)
   { out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = " << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions << " out of " << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
-    theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
   } else
-    theGlobalVariables.theIndicatorVariables.ProgressReportString3.clear();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2].clear();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -10395,8 +10390,8 @@ void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariabl
   out2  << "Processed " << this->NumProcessedForVPFfractions << " out of " << this->NumberRelevantReducedFractions << " relevant fractions";
 //  out3  << "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2= out2.str();
-  //::theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -10413,14 +10408,14 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
     if (this->flagMakingProgressReport)
     { std::stringstream out;
       out << "Checksum " << i+1 << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4= out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
   if (this->flagMakingProgressReport)
   { std::stringstream out;
     out << "Checksum: " << output.ElementToString();
-    theGlobalVariables.theIndicatorVariables.ProgressReportString5= out.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]= out.str();
     theGlobalVariables.MakeReport();
   }
 }
@@ -10504,7 +10499,7 @@ void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariable
       if (this->flagMakingProgressReport)
       { std::stringstream out;
         out << "Elongating denominator " << i+1 << " out of " << this->size;
-        theGlobalVariables.theIndicatorVariables.ProgressReportString3=out.str();
+        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out.str();
         theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
       }
      }
@@ -10526,7 +10521,7 @@ void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables
     if (this->flagMakingProgressReport)
     { std::stringstream out;
       out << "Elongating denominator " << i+1 << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
@@ -10558,7 +10553,7 @@ bool partFractions::partFractionsToPartitionFunctionAdaptedToRoot(QuasiPolynomia
 { if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
   { theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
     theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
-    theGlobalVariables.theIndicatorVariables.ProgressReportString5="Indicator modified to regular";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]="Indicator modified to regular";
     theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   } else
     theGlobalVariables.theIndicatorVariables.flagRootIsModified=false;
@@ -10672,7 +10667,7 @@ void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalV
   this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, true, true, theGlobalVariables, theFormat);
 }
 
-void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   output << "Dimension: ";
   output << this->AmbientDimension << "\n";
@@ -10690,7 +10685,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables& theGlobal
     this->TheObjects[i].WriteToFile(output, theGlobalVariables);
 }
 
-void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void partFractions::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { intRoots tempRoots;
   this->PrepareIndicatorVariables();
   PolynomialOutputFormat PolyFormatLocal;
@@ -10735,8 +10730,14 @@ void partFractions::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
   this->MakeActualSizeAtLeastExpandOnTop(tempI);
   for(int i=0; i<tempI; i++)
   { tempFrac.ReadFromFile(*this, input, theGlobalVariables, this->AmbientDimension);
-    this->AddAlreadyReduced(tempFrac, theGlobalVariables, 0);
-    this->MakeProgressVPFcomputation(theGlobalVariables);
+    if (theGlobalVariables!=0)
+    { this->AddAlreadyReduced(tempFrac, *theGlobalVariables, 0);
+      this->MakeProgressVPFcomputation(*theGlobalVariables);
+    } else
+    { GlobalVariables tempGlobalVariables;
+      this->AddAlreadyReduced(tempFrac, tempGlobalVariables, 0);
+      this->MakeProgressVPFcomputation(tempGlobalVariables);
+    }
   }
 }
 
@@ -12819,268 +12820,6 @@ void OneVarPolynomials::ElementToString(std::string& output, int KLindex)
   output= out.str();
 }
 
-void rootFKFTcomputation::initA2A1A1inD5()
-{  //  int j=0;
-  intRoot tempRoot;
-  tempRoot.initFromInt(5, 0, 0, 1, 0, 0); //eps_3-\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 1, 1, 0, 0); //\eps_2-\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 1, 1, 0); //eps_3-\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 1, 0, 1); //eps_3+\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 1, 1, 0, 0); //eps_1-\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 1, 1, 1, 0); //eps_2-\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 1, 1, 0, 1); //eps_2+\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 1, 1, 1); //eps_3+\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 1, 1, 1, 0); //eps_1-\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 1, 1, 0, 1); //eps_1+\eps_5
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 1, 1, 1, 1); //eps_2+\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 1, 1, 1, 1); //eps_1+\eps_4
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 1, 2, 1, 1); //eps_2+\eps_3
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 1, 2, 1, 1); //eps_1+\eps_3
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 1, 2, 2, 1, 1); //eps_1+\eps_2
-  this->nilradicalA2A1A1inD5.AddObjectOnTop(tempRoot);
-  this->AlgorithmBasisA2A1A1inD5.CopyFromBase(this->nilradicalA2A1A1inD5);
-  tempRoot.initFromInt(5, 0, 1, 0, 0, 0); //\eps_2-\eps_3
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 0, 1, 0); //\eps_4-\eps_5
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 0, 0, 1); //\eps_4+\eps_5
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 2, 2, 1, 1); //2\eps_2
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 2, 1, 1); //2\eps_3
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 0, 1, 1); //2\eps_4
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 0, 0, 0, -1, 1); //2\eps_5
-  this->AlgorithmBasisA2A1A1inD5.AddObjectOnTop(tempRoot);
-  tempRoot.initFromInt(5, 10000, 1000, 100, 8, 10);
-  this->AlgorithmBasisA2A1A1inD5.BubbleSort(&tempRoot);
-  this->AlgorithmBasisA2A1A1inD5.ComputeDebugString();
-}
-
-rootFKFTcomputation::rootFKFTcomputation()
-{ this->OutputFile = "C:/math/output.txt";
-  this->TheGlobalVariables= new GlobalVariables;
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter++;
-  ParallelComputing::CheckPointerCounters();
-#endif
-}
-
-rootFKFTcomputation::~rootFKFTcomputation()
-{ delete this->TheGlobalVariables;
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter--;
-  ParallelComputing::CheckPointerCounters();
-#endif
-}
-
-void rootFKFTcomputation::RunA2A1A1inD5beta12221()
-{  this->initA2A1A1inD5();
-//  RandomCodeIDontWantToDelete::SomeRandomTests2();
-  if (this->useOutputFileForFinalAnswer)
-  { std::fstream tempFile;
-    tempFile.open(this->OutputFile.c_str(), std::fstream::in | std::fstream::out | std::fstream::app);
-    QuasiPolynomialOld tempQP;
-    GlobalVariables theGlobalVariables;
-    tempQP.ReadFromFile(tempFile, theGlobalVariables);
-    tempFile.close();
-    this->processA2A1A1inD5beta12221Answer(tempQP);
-    return;
-  }
-  std::fstream KLDump;
-  std::fstream PartialFractionsFile;
-  bool KLDumpIsPresent =this->OpenDataFileOrCreateIfNotPresent2(KLDump, this->KLCoeffFileString, false, false);
-  bool PFfileIsPresent=this->OpenDataFileOrCreateIfNotPresent2(PartialFractionsFile, this->PartialFractionsFileString, false, false);
-  bool VPIndexIsPresent= this->OpenDataFileOrCreateIfNotPresent2(partFractions::ComputedContributionsList, this->VPIndexFileString, false, false);
-  this->OpenDataFileOrCreateIfNotPresent2(partFraction::TheBigDump, this->VPEntriesFileString, true, false);
-  assert(partFraction::TheBigDump.is_open());
-  assert(KLDump.is_open());
-  assert(PartialFractionsFile.is_open());
-  assert(partFractions::ComputedContributionsList.is_open());
-  List<partFraction>::ListActualSizeIncrement=13000;
-  partFractions theVPfunction;
-  //theVPfunction.SetSize(8723);
-  //assert(theVPfunction.VerifyFileComputedContributions());
-
-  WeylGroup D5;
-  D5.MakeDn(5);
-//  D5.MakeAn(3);
-  intRoots tempRoots1; roots tempRootsRat;
-  D5.ComputeWeylGroup();
-  D5.ComputeDebugString();
-  VermaModulesWithMultiplicities tempV;
-  tempV.initFromWeyl(&D5);
-  root beta;
-  beta.InitFromIntegers(5, 10, 20, 20, 20, 10);
-  List<int> KLcoeff;
-//  int TopIndex=
-  tempV.ChamberIndicatorToIndex(beta);
-  if (KLDumpIsPresent)
-  { tempV.ReadKLCoeffsFromFile(KLDump, KLcoeff);
-  }
-  else
-  { tempV.ComputeKLcoefficientsFromChamberIndicator(beta, KLcoeff);
-    tempV.KLPolys.ReleaseMemory();
-    tempV.RPolys.ReleaseMemory();
-    tempV.WriteKLCoeffsToFile(KLDump, KLcoeff, tempV.ChamberIndicatorToIndex(beta));
-  }
-  KLDump.flush();
-  KLDump.close();
-//  tempV.ComputeDebugString();
-  std::string tempS;
-  //tempV.KLcoeffsToString(KLcoeff, tempS);
-//  tempV.ComputeDebugString();
-
-//  theVPfunction.initFromRootSystem(tempRoots1, tempRoots1, 0);
- /* partFractions tempTest;
-  QuasiPolynomialOld tempQPtest;
-  //tempTest.ComputeKostantFunctionFromWeylGroup('A', 3, tempQPtest, 0, false, false);
-  this->OpenDataFileOrCreateIfNotPresent(PartialFractionsFile, this->PartialFractionsFileString, false);
-  //tempTest.WriteToFile(PartialFractionsFile);
-  tempTest.ReadFromFile(PartialFractionsFile);
-  PartialFractionsFile.flush();
-  PartialFractionsFile.close();
-  tempTest.ComputeDebugString();
-*/
-  if(!PFfileIsPresent )
-  { theVPfunction.ComputeDebugString(*this->TheGlobalVariables);
-    theVPfunction.initFromRootSystem(  this->nilradicalA2A1A1inD5, this->AlgorithmBasisA2A1A1inD5, 0, *this->TheGlobalVariables);
-    theVPfunction.splitClassicalRootSystem(true, *this->TheGlobalVariables, 0);
-    theVPfunction.WriteToFile(PartialFractionsFile, *this->TheGlobalVariables);
-  }
-  else
-    theVPfunction.ReadFromFile(PartialFractionsFile, *this->TheGlobalVariables);
-  PartialFractionsFile.flush();
-  PartialFractionsFile.close();
-//  theVPfunction.ComputeDebugString();
-  for (int i=0; i<theVPfunction.size; i++)
-    assert(theVPfunction.TheObjects[i].IndicesNonZeroMults.size==5);
-  QuasiPolynomialOld tempQP;
-  beta.MultiplyByInteger(100);
-  beta.Add(D5.rho);
-  roots tempRoots;
-  tempRoots.AssignIntRoots(this->nilradicalA2A1A1inD5);
-  if (!VPIndexIsPresent)
-    theVPfunction.WriteToFileComputedContributions(theVPfunction.ComputedContributionsList, *this->TheGlobalVariables);
-  this->MakeTheRootFKFTSum(beta, theVPfunction, KLcoeff,  tempQP, tempV, tempRoots);
-  std::fstream tempFile;
-  tempFile.open(this->OutputFile.c_str(), std::fstream::out | std::fstream::trunc);
-  tempQP.WriteToFile(tempFile);
-  tempFile.close();
-  this->processA2A1A1inD5beta12221Answer(tempQP);
-  PartialFractionsFile.close();
-}
-
-void rootFKFTcomputation::processA2A1A1inD5beta12221Answer(QuasiPolynomialOld& theAnswer)
-{ theAnswer.ComputeDebugString();
-  root beta;
-  beta.InitFromIntegers(5, 1, 2, 2, 2, 1);
-  QPSub theSub;
-  this->MakeRootFKFTsub(beta, theSub);
-  QuasiPolynomialOld tempQP2;
-  theAnswer.RationalLinearSubstitution(theSub, tempQP2);
-  std::fstream tempFile;
-  tempFile.open("C:/math/outSub.txt", std::fstream::out | std::fstream::trunc);
-  tempQP2.WriteToFile(tempFile);
-  tempFile.close();
-  tempQP2.ComputeDebugString();
-}
-
-bool rootFKFTcomputation::OpenDataFile(std::fstream& theFile, std::string& theFileName)
-{ theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
-  if(theFile.is_open())
-  { theFile.clear();
-    theFile.seekp(0, std::ios_base::end);
-    int tempI=theFile.tellp();
-    if (tempI>=1)
-    { theFile.seekg(0);
-      return true;
-    }
-  }
-  return false;
-}
-
-bool rootFKFTcomputation::OpenDataFileOrCreateIfNotPresent2
-  (std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary)
-{ if (OpenInAppendMode)
-  { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
-    else
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app);
-  } else
-  { if (openAsBinary)
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out| std::fstream::binary);
-    else
-      theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out);
-  }
-  if(theFile.is_open())
-  { theFile.clear(std::ios::goodbit); // false);
-    theFile.seekp(0, std::ios_base::end);
-    int tempI=theFile.tellp();
-    if (tempI>=1)
-      return true;
-  }
-  theFile.close();
-  theFile.open(theFileName.c_str(), std::fstream::out |std::fstream::in| std::fstream::trunc);
-  theFile.clear();
-  return false;
-}
-
-void rootFKFTcomputation::MakeRootFKFTsub(root& direction, QPSub& theSub)
-{ MatrixIntTightMemoryFit tempMat;
-  tempMat.init(5+2, 5);
-  tempMat.NullifyAll();
-  int tempLCM=direction.FindLCMDenominatorsTruncateToInt();
-  for (int i=0; i<5; i++)
-  { tempMat.elements[i][i]=1;
-    Rational tempRat;
-    tempRat.Assign(direction.TheObjects[i]);
-    tempRat.MultiplyByInt(tempLCM);
-    tempMat.elements[5][i]=tempRat.NumShort;
-    tempMat.elements[5+1][i]=0;
-  }
-  theSub.MakeSubFromMatrixIntAndDen(tempMat, tempLCM);
-}
-
-void rootFKFTcomputation::MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs,  QuasiPolynomialOld& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical)
-{ PolynomialsRationalCoeffCollection TheChambersInTheGame;
-  PolynomialsRationalCoeff StartingRoot;
-  //::theGlobalVariables.theIndicatorVariables.TotalNumMonomials = theBVdecomposition.NumMonomialsInTheNumerators();
-  ConeGlobal TheNilradicalCone;
-  TheNilradicalCone.ComputeFromDirections(theNilradical, *this->TheGlobalVariables, 5);
-  TheNilradicalCone.ComputeDebugString();
-  StartingRoot.MakeIdSubstitution(5, (Rational) 1);
-  theHighestWeights.TheWeylGroup->GenerateOrbitAlg(ChamberIndicator, StartingRoot, TheChambersInTheGame, true, false, &TheNilradicalCone, true);
-  QuasiPolynomialOld tempQP1, Accum;
-  Accum.Nullify(5);
-  for (int i=0; i<TheChambersInTheGame.size; i++)
-    if (theKLCoeffs.TheObjects[i]!=0)
-    { tempQP1.Nullify(5);
-      theBVdecomposition.partFractionsToPartitionFunctionAdaptedToRoot(tempQP1, TheChambersInTheGame.ChamberIndicators.TheObjects[i], true, true, *this->TheGlobalVariables, false);
-//      tempQP1.ComputeDebugString();
-      tempQP1.TimesInteger(theKLCoeffs.TheObjects[i]);
-      Accum.AddPolynomial(tempQP1);
-//      Accum.ComputeDebugString();
-    }
-  output.CopyFromPoly(Accum);
-  output.Simplify();
-}
-
 void OneVarIntPolynomial::AddMonomial(int coeff, int power)
 { if (power<0)
   { power=-power;
@@ -13927,8 +13666,8 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
   std::stringstream out4, out5;
   out5 << progress+1 << " out of " << outOf << " checked; ";
   out5 << found << " found pos. generators";
-  //::theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -13937,8 +13676,8 @@ void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVar
     return;
   std::stringstream out5;
   out5 << "Computing pairing table: " << index+1 << " out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -13960,12 +13699,12 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
       out4 << "Num cone condition failures: " << owner.NumConeConditionFailures;
       out5 << "Num failures to find l-prohibiting relations: " << owner.theBadRelations.size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
     }
-    theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
-    theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
-    theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
     theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   }
 }
@@ -14548,11 +14287,11 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
       tempOut=&out4;
   }
   out5 << "Included root " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -14565,8 +14304,8 @@ void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGrou
   if (theSubgroup.truncated)
     out4 << "truncated ";
   out4 << "group preserving k: " << theSubgroup.size;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -14604,7 +14343,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Computing action of element " << i+1 << " out of " << theSubgroup.size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString4 = out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3] = out.str();
       theGlobalVariables.MakeReport();
     }
   }
@@ -15776,16 +15515,8 @@ void PolynomialRationalCoeff::Evaluate(intRoot& values, Rational& output)
 }
 
 void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
-{ this->ProgressReportString1=right.ProgressReportString1;
-  this->ProgressReportString2= right.ProgressReportString2;
-  this->ProgressReportString3= right.ProgressReportString3;
-  this->ProgressReportString4= right.ProgressReportString4;
-  this->ProgressReportString5= right.ProgressReportString5;
-  this->String1NeedsRefresh=right.String1NeedsRefresh;
-  this->String2NeedsRefresh=right.String2NeedsRefresh;
-  this->String3NeedsRefresh=right.String3NeedsRefresh;
-  this->String4NeedsRefresh=right.String4NeedsRefresh;
-  this->String5NeedsRefresh=right.String5NeedsRefresh;
+{ this->ProgressReportStrings=right.ProgressReportStrings;
+  this->ProgressReportStringsNeedRefresh=right.ProgressReportStringsNeedRefresh;
   this->StatusString1=right.StatusString1;
   this->StatusString1NeedsRefresh=right.StatusString1NeedsRefresh;
   this->flagRootIsModified= right.flagRootIsModified;
@@ -17717,8 +17448,8 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables&
     return;
   std::stringstream out;
   out << index <<" out of "<< outOf <<" =3^8-1 computed";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -18213,10 +17944,9 @@ void SemisimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int fo
   std::stringstream out2, out3;
   out2 << "found " << found << " out of " << progress+1 << " processed out of total " << outOf<<" candidates";
   out3 << foundGood << " good subalgebras realizing " << DifferentHs << " different h's";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -18225,8 +17955,8 @@ void SemisimpleLieAlgebra::MakeSl2ProgressReportNumCycles(  int progress, int ou
     return;
   std::stringstream out4;
   out4 << "Searching fixed characteristic: " << progress << " out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -18237,11 +17967,10 @@ void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Tota
   int x=(i*Total*Total+j*Total+k+1);
   out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
   //if (x%100==0)
-  { theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-    theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+  { theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   } //else
   //{ theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
    // theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
@@ -18518,12 +18247,12 @@ bool minimalRelationsProverStateFixedK::ComputeStateReturnFalseIfDubious(GlobalV
 void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
   out5 << checked+1 << " checked out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
-  //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
-  theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -18531,12 +18260,12 @@ void minimalRelationsProverState::MakeProgressReportCanBeShortened(int checked, 
 void minimalRelationsProverStateFixedK::MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables)
 { std::stringstream out5;
   out5 << checked+1 << " checked out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString5=out5.str();
-  //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
   //::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
-  theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
+  //::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -18607,7 +18336,7 @@ bool minimalRelationsProverStateFixedK::IsSeparatingCones(root& input, roots& th
   return true;
 }
 
-void minimalRelationsProverStateFixedK::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStateFixedK::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output <<"\n\n\n\nNum_isos: " << this->indicesIsosRespectingInitialNilradicalChoice.size<<"\n";
   for (int i=0; i<this->indicesIsosRespectingInitialNilradicalChoice.size; i++)
     output <<this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i]<<" ";
@@ -18634,39 +18363,39 @@ void minimalRelationsProverStateFixedK::WriteToFile(std::fstream& output, Global
   this->nonBetas.WriteToFile(output, theGlobalVariables);
 }
 
-void ::minimalRelationsProverStateFixedK::ReadFromFile(std::fstream &input, GlobalVariables&  theGlobalVariables)
+void ::minimalRelationsProverStateFixedK::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   int tempI;
-  input>>tempS >> tempI;  assert(tempS=="Num_isos:");
+  input >> tempS >> tempI;  assert(tempS=="Num_isos:");
   this->indicesIsosRespectingInitialNilradicalChoice.SetSize(tempI);
   for (int i=0; i<this->indicesIsosRespectingInitialNilradicalChoice.size; i++)
-    input>>this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i];
-  input >>tempS;
+    input >> this->indicesIsosRespectingInitialNilradicalChoice.TheObjects[i];
+  input >> tempS;
   this->PartialRelation.Alphas.ReadFromFile(input, theGlobalVariables);
   input >> tempS;
   this->PartialRelation.Betas.ReadFromFile(input, theGlobalVariables);
-  input>>tempS;
+  input >> tempS;
   this->SeparatingNormalUsed.ReadFromFile(input);
-  input >>tempS >> tempI;
+  input >> tempS >> tempI;
   this->PossibleChildStates.SetSize(tempI);
-  input >>tempS >> this->activeChild;
-  input >>tempS;
+  input >> tempS >> this->activeChild;
+  input >> tempS;
   for (int i=0; i<this->PossibleChildStates.size; i++)
-    input >>this->PossibleChildStates.TheObjects[i];
-  input>>tempS;
+    input >> this->PossibleChildStates.TheObjects[i];
+  input >> tempS;
   this->theChoicesWeMake.ReadFromFile(input, theGlobalVariables);
-  input>>tempS;
+  input >> tempS;
   this->theGmodLmodules.ReadFromFile(input);
-  input>>tempS;
+  input >> tempS;
   this->theNilradicalModules.ReadFromFile(input);
-  input>>tempS;
+  input >> tempS;
   this->nonAlphas.ReadFromFile(input, theGlobalVariables);
-  input>>tempS;
+  input >> tempS;
   this->nonBetas.ReadFromFile(input, theGlobalVariables);
   assert(tempS=="Non-betas:");
 }
 
-void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables)
+void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output<< "\nAlphas: ";
   this->PartialRelation.Alphas.WriteToFile(output, theGlobalVariables);
   output<<"\nBetas: ";
@@ -18710,52 +18439,22 @@ void minimalRelationsProverState::WriteToFile(std::fstream& output, GlobalVariab
   this->PositiveKroots.WriteToFile(output, theGlobalVariables); */
 }
 
-void minimalRelationsProverState::ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables)
+void minimalRelationsProverState::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
-  input>> tempS;
+  input >> tempS;
   this->PartialRelation.Alphas.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
+  input >> tempS;
   this->PartialRelation.Betas.ReadFromFile(input, theGlobalVariables);
-  input>> tempS >> this->activeChild>>tempI;
+  input >> tempS >> this->activeChild >> tempI;
   this->PossibleChildStates.SetSize(tempI);
   for (int i=0; i<this->PossibleChildStates.size; i++)
-    input>> this->PossibleChildStates.TheObjects[i];
-  input>> tempS;
+    input >> this->PossibleChildStates.TheObjects[i];
+  input >> tempS;
   this->theChoicesWeMake.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
+  input >> tempS;
   this->ChosenPositiveKroots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS>>this->StateIsInternallyPossible;
+  input >> tempS >> this->StateIsInternallyPossible;
   assert(tempS=="State_possible:");
-/*
-  input>> tempS;
-  this->BKSingularGmodLRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->currentSeparatingNormalEpsilonForm.ReadFromFile(input);
-  input>> tempS>>this->flagNeedsAdditionOfPositiveKroots;
-  input>> tempS;
-  this->NilradicalRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonAlphas.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonBetas.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonBKSingularGmodLRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonKRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonLNonSingularRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonLNonSingularRootsInNeedOfPosKroots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonLNonSingularsAleviatedByChosenPosKRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonLRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonNilradicalRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->nonPositiveKRoots.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
-  this->PositiveKroots.ReadFromFile(input, theGlobalVariables); */
 }
 
 void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots(roots& outputAGmodLhighest, roots& outputNilradicalRoots, WeylGroup& theWeyl)
@@ -18768,13 +18467,13 @@ void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots
   }
 }
 
-void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.CartanSymmetric.NumRows<<"\n";
   output<<"Simple_basis_K: ";
   //this->theK.SimpleBasisK.ComputeDebugString();
   this->theK.SimpleBasisK.WriteToFile(output, theGlobalVariables);
   this->theIsos.WriteToFile(output, theGlobalVariables);
-  output<<"\nState_stack_size: "<< this->theIndexStack.size<<" ";
+  output << "\nState_stack_size: "<< this->theIndexStack.size<<" ";
   for (int i=0; i<this->theIndexStack.size; i++)
     output << this->theIndexStack.TheObjects[i]<<" ";
   output<<"\nNum_states: "<< this->size<<"\n";
@@ -18783,7 +18482,7 @@ void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, Glo
   this->theK.WriteMultTableAndOppositeKmodsToFile(output, this->theK.theMultTable, this->theK.theOppositeKmods);
 }
 
-void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   int tempI;
   input >> tempS >> this->theWeylGroup.WeylLetter >> tempS >> tempI;
@@ -18806,36 +18505,46 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
   }
   this->theK.ReadMultTableAndOppositeKmodsFromFile(input, this->theK.theMultTable, this->theK.theOppositeKmods);
   this->theWeylGroup.ComputeRho(true);
-  this->initShared(this->theWeylGroup, theGlobalVariables);
-  this->theIsos.ComputeSubGroupFromGeneratingReflections(this->theIsos.simpleGenerators, this->theIsos.ExternalAutomorphisms, theGlobalVariables, -1, false);
+  if (theGlobalVariables!=0)
+  { this->initShared(this->theWeylGroup, *theGlobalVariables);
+    this->theIsos.ComputeSubGroupFromGeneratingReflections
+    (this->theIsos.simpleGenerators, this->theIsos.ExternalAutomorphisms, *theGlobalVariables, -1, false);
+  }
+  else
+  { GlobalVariables tempGlobalVars;
+    this->initShared(this->theWeylGroup, tempGlobalVars);
+    this->theIsos.ComputeSubGroupFromGeneratingReflections
+    (this->theIsos.simpleGenerators, this->theIsos.ExternalAutomorphisms, tempGlobalVars, -1, false);
+  }
   this->theK.ComputeAll();
   this->flagComputationIsInitialized=true;
-  if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-    if (this->theIndexStack.size>0)
-    { int tempI= *this->theIndexStack.LastObject();
-      this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
-      theGlobalVariables.theIndicatorVariables.StatusString1=this->TheObjects[tempI].DebugString;
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-    }
+  if (theGlobalVariables!=0)
+    if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
+      if (this->theIndexStack.size>0)
+      { int tempI= *this->theIndexStack.LastObject();
+        this->TheObjects[tempI].ComputeDebugString(this->theWeylGroup, *theGlobalVariables);
+        theGlobalVariables->theIndicatorVariables.StatusString1=this->TheObjects[tempI].DebugString;
+        theGlobalVariables->theIndicatorVariables.StatusString1NeedsRefresh=true;
+        theGlobalVariables->FeedIndicatorWindow(theGlobalVariables->theIndicatorVariables);
+      }
   //this->theK.GenerateKmodMultTable(this->theK.theMultTable, this->theK.theOppositeKmods, theGlobalVariables);
 }
 
-void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
+void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables* theGlobalVariables)
 { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, true, false);
   this->WriteToFile(this->theFile, theGlobalVariables);
   this->theFile.close();
 }
 
-void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables&  theGlobalVariables)
-{ if(!rootFKFTcomputation::OpenDataFile(this->theFile, fileName))
+void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables* theGlobalVariables)
+{ if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false, false))
     return;
   this->ReadFromFile(this->theFile, theGlobalVariables);
   this->theFile.close();
 }
 
-void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGlobalVariables)
-{ if (this->size-this->sizeByLastPurge >200)
+void minimalRelationsProverStates::WriteToFileAppend(GlobalVariables* theGlobalVariables)
+{ if (this->size-this->sizeByLastPurge>200)
   { this->sizeByLastSave=0;
     this->PurgeImpossibleStates();
   }
@@ -18850,25 +18559,25 @@ void minimalRelationsProverStates::WriteToFileAppend( GlobalVariables&  theGloba
   this->theFileBody.close();
 }
 
-void minimalRelationsProverStates::ReadFromFile(GlobalVariables&  theGlobalVariables)
-{ if(!rootFKFTcomputation::OpenDataFile(this->theFileBody, this->FileBodyString))
+void minimalRelationsProverStates::ReadFromFile(GlobalVariables* theGlobalVariables)
+{ if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, false, false))
     return;
-  if(!rootFKFTcomputation::OpenDataFile(this->theFileHeader, this->FileHeaderString))
+  if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, false, false))
     return;
   this->ReadFromFile(this->theFileHeader, this->theFileBody, theGlobalVariables);
   this->theFileHeader.close();
   this->theFileBody.close();
 }
 
-void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables& theGlobalVariables)
-{ outputHeader <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.CartanSymmetric.NumRows<<"\n" <<"\nNum_states: "<<this->size;
-  outputHeader<<"\nState_stack_size: "<< this->theIndexStack.size<<" ";
+void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables* theGlobalVariables)
+{ outputHeader << "Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.CartanSymmetric.NumRows<<"\n" <<"\nNum_states: "<<this->size;
+  outputHeader << "\nState_stack_size: "<< this->theIndexStack.size <<" ";
   for (int i=0; i<this->theIndexStack.size; i++)
     outputHeader << this->theIndexStack.TheObjects[i]<<" ";
-  outputHeader<<"\nActive_child_list: ";
+  outputHeader << "\nActive_child_list: ";
   for (int i=0; i<this->size; i++)
-    outputHeader<<this->TheObjects[i].activeChild<<" ";
-  outputHeader<< "\nTree_structure_excluding_complete_states: ";
+    outputHeader << this->TheObjects[i].activeChild<<" ";
+  outputHeader << "\nTree_structure_excluding_complete_states: ";
   for(int i=0; i<this->size; i++)
   { outputHeader<<"\nChild_index "<<i<<" size: "<< this->TheObjects[i].PossibleChildStates.size<<" ";
     for (int j=0; j<this->TheObjects[i].PossibleChildStates.size; j++)
@@ -18884,27 +18593,28 @@ void minimalRelationsProverStates::WriteToFileAppend(std::fstream& outputHeader,
   for (int i=this->sizeByLastSave; i<this->size; i++)
   { outputBody<<"\n\n\nState_index: "<< i<<" \n";
     this->TheObjects[i].WriteToFile(outputBody, theGlobalVariables);
-    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-    { std::stringstream out3;
-      out3<< i+1<<" out of "<< this->size<< " states stored to disk";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
-      theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-    }
+    if (theGlobalVariables!=0)
+      if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
+      { std::stringstream out3;
+        out3 << i+1 << " out of " << this->size << " states stored to disk";
+        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[2]= out3.str();
+        theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+        theGlobalVariables->FeedIndicatorWindow(theGlobalVariables->theIndicatorVariables);
+      }
   }
   this->sizeByLastSave=this->size;
 }
 
-void minimalRelationsProverStates::ReadFromFile(std::fstream& inputHeader, std::fstream& inputBody, GlobalVariables& theGlobalVariables)
+void minimalRelationsProverStates::ReadFromFile(std::fstream& inputHeader, std::fstream& inputBody, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
-  inputHeader >>tempS >> this->theWeylGroup.WeylLetter >>tempS>> tempI;
+  inputHeader >> tempS >> this->theWeylGroup.WeylLetter >> tempS >> tempI;
   this->theWeylGroup.MakeArbitrary(this->theWeylGroup.WeylLetter, tempI);
-  inputHeader>>tempS>>tempI;
+  inputHeader >> tempS >> tempI;
   this->SetSize(tempI);
-  inputHeader >>tempS>> tempI;
+  inputHeader >> tempS >> tempI;
   this->theIndexStack.SetSize(tempI);
   for (int i=0; i<this->theIndexStack.size; i++)
-    inputHeader>>this->theIndexStack.TheObjects[i];
+    inputHeader >> this->theIndexStack.TheObjects[i];
   List<int> theActiveChildren;
   List< List<int> > thePossibleChildStates, theCompleteChildStates;
   theActiveChildren.SetSize(this->size);
@@ -18913,51 +18623,58 @@ void minimalRelationsProverStates::ReadFromFile(std::fstream& inputHeader, std::
   inputHeader>>tempS;
   assert(tempS=="Active_child_list:");
   for (int i=0; i<this->size; i++)
-    inputHeader>>theActiveChildren.TheObjects[i];
-  inputHeader>> tempS;
+    inputHeader >>theActiveChildren.TheObjects[i];
+  inputHeader >> tempS;
   for(int i=0; i<this->size; i++)
-  { inputHeader>>tempS>>tempI>> tempS>>tempI;
+  { inputHeader >> tempS >> tempI >> tempS >> tempI;
     assert(tempS=="size:");
     thePossibleChildStates.TheObjects[i].SetSize(tempI);
     for (int j=0; j<tempI; j++)
-      inputHeader>> thePossibleChildStates.TheObjects[i].TheObjects[j];
+      inputHeader >> thePossibleChildStates.TheObjects[i].TheObjects[j];
   }
-  inputHeader>> tempS;
+  inputHeader >> tempS;
   assert(tempS=="Tree_structure_complete_states:");
   for(int i=0; i<this->size; i++)
-  { inputHeader>>tempS>>tempI>> tempS>>tempI;
+  { inputHeader >> tempS >> tempI >> tempS >> tempI;
     assert(tempS=="size:");
     theCompleteChildStates.TheObjects[i].SetSize(tempI);
     for (int j=0; j<tempI; j++)
-      inputHeader>> theCompleteChildStates.TheObjects[i].TheObjects[j];
-    inputHeader>>tempS>>this->TheObjects[i].NumImpossibleChildren;
+      inputHeader >> theCompleteChildStates.TheObjects[i].TheObjects[j];
+    inputHeader >> tempS >> this->TheObjects[i].NumImpossibleChildren;
     assert(tempS=="Num_impossible:");
   }
   for (int i=0; i<this->size; i++)
-  { inputBody>> tempS>>tempI;
+  { inputBody >> tempS >> tempI;
     assert(tempI==i);
     this->TheObjects[i].ReadFromFile(inputBody, theGlobalVariables);
     this->TheObjects[i].owner=this;
     this->TheObjects[i].activeChild=theActiveChildren.TheObjects[i];
     this->TheObjects[i].PossibleChildStates.CopyFromBase(thePossibleChildStates.TheObjects[i]);
     this->TheObjects[i].CompleteChildStates.CopyFromBase(theCompleteChildStates.TheObjects[i]);
-    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-    { std::stringstream out3;
-      out3<< i+1<<" out of "<< this->size<< " states read from disk";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
-      theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+    if (theGlobalVariables!=0)
+      if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
+      { std::stringstream out3;
+        out3 << i+1 << " out of " << this->size << " states read from disk";
+        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[2]= out3.str();
+        theGlobalVariables->theIndicatorVariables.StatusString1NeedsRefresh=false;
+        theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+        theGlobalVariables->FeedIndicatorWindow(theGlobalVariables->theIndicatorVariables);
+      }
+  }
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.StatusString1NeedsRefresh=true;
+    this->initShared(this->theWeylGroup, *theGlobalVariables);
+  } else
+  { GlobalVariables tempGlobalVars;
+    this->initShared(this->theWeylGroup, tempGlobalVars);
+  }
+  if (theGlobalVariables!=0)
+    if (this->theIndexStack.size>0)
+    { int currentI=*this->theIndexStack.LastObject();
+      this->TheObjects[currentI].ComputeDebugString(this->theWeylGroup, *theGlobalVariables);
+      this->MakeProgressReportCurrentState(currentI, *theGlobalVariables, this->theWeylGroup);
+      this->MakeProgressReportStack(*theGlobalVariables, this->theWeylGroup);
     }
-  }
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  this->initShared(this->theWeylGroup, theGlobalVariables);
-  if (this->theIndexStack.size>0)
-  { int currentI=*this->theIndexStack.LastObject();
-    this->TheObjects[currentI].ComputeDebugString(this->theWeylGroup, theGlobalVariables);
-    this->MakeProgressReportCurrentState(currentI, theGlobalVariables, this->theWeylGroup);
-    this->MakeProgressReportStack(theGlobalVariables, this->theWeylGroup);
-  }
   this->sizeByLastSave=this->size;
 }
 
@@ -19093,25 +18810,16 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportCurrentState(  int in
 
 void minimalRelationsProverStates::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out3;
-  out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-  //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+  out3 <<"Searching for automorphisms: " << progress+1 << " from " << this->size << " states; " << numSearchedWithinState+1 << " out of " << outOf << " possibilities within current state";
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void minimalRelationsProverStatesFixedK::MakeProgressReportIsos(int progress, int numSearchedWithinState, int outOf, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
 { std::stringstream out3;
-  out3 <<"Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-  //::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
-  //::theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
+  out3 << "Searching for automorphisms: " << progress+1 << " from "<< this->size << " states; "<< numSearchedWithinState+1<<" out of "<< outOf <<" possibilities within current state";
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -19119,12 +18827,12 @@ void minimalRelationsProverStates::MakeProgressReportChildStates(int numSearched
 { this->MakeProgressReportStack(theGlobalVariables, theWeyl);
   std::stringstream out4;
   out4<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; "<< this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible ";
-  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
-//  ::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+//  ::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
@@ -19133,12 +18841,12 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportChildStates(int numSe
   std::stringstream out4;
   out4<<"Computing children states: "<< numSearched+1<<" out of "<< outOf << "; " << this->TheObjects[*this->theIndexStack.LastObject()].PossibleChildStates.size<<" possible, "
         << this->TheObjects[*this->theIndexStack.LastObject()].ImpossibleChildStates.size<<" impossible ";
-  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
-//  ::theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=false;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+//  ::theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
 //  ::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 void minimalRelationsProverStates::MakeProgressReportStack(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl)
@@ -19153,16 +18861,12 @@ void minimalRelationsProverStates::MakeProgressReportStack(GlobalVariables& theG
   }
   if (theIndexStack.size!=0)
     (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size<<" alphas + ... = "<<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size<<" betas + ...";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
   if (this->theIndexStack.size>8)
-    theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
-//  ::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -19179,16 +18883,12 @@ void minimalRelationsProverStatesFixedK::MakeProgressReportStack(GlobalVariables
   }
   if (theIndexStack.size!=0)
     (*tempOut1)<< this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Alphas.size <<" alphas + ... = " <<this->TheObjects[*this->theIndexStack.LastObject()].PartialRelation.Betas.size <<" betas + ...";
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1=out1.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString2=out2.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
   if (this->theIndexStack.size>8)
-    theGlobalVariables.theIndicatorVariables.ProgressReportString3=out3.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportString4=out4.str();
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
-//  ::theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=false;
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=false;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -19604,7 +19304,7 @@ void minimalRelationsProverStates::initShared(WeylGroup& theWeyl, GlobalVariable
 void minimalRelationsProverStates::GenerateStartingState(ComputationSetup& theSetup, GlobalVariables& theGlobalVariables, char WeylLetter, int theDimension)
 { if (this->flagComputationIsInitialized)
     return;
-  this->WriteToFileAppend(theGlobalVariables);
+  this->WriteToFileAppend(&theGlobalVariables);
   minimalRelationsProverState tempState;
   this->theWeylGroup.MakeArbitrary(WeylLetter, theDimension);
   this->PreferredDualBasis.size=0;
@@ -20225,8 +19925,8 @@ void minimalRelationsProverStates::ReduceMemoryUse(GlobalVariables& theGlobalVar
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Releasing memory " << i+1 << " out of " << this->size << " states";
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
-      theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }
   }
@@ -20292,10 +19992,10 @@ void minimalRelationsProverStates::ComputeLastStackIndex(WeylGroup& theWeyl, Glo
           this->size=oldSize;
           this->TheObjects[index].PossibleChildStates.size=0;
           if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-          { theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+          { theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
             std::stringstream out3;
             out3 << counter+1 << " out of " << NumNormalsToCheck << " normals tested, best hit " << minNumChildren << " children";
-            theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+            theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
             theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
           }
         }
@@ -20316,7 +20016,7 @@ void minimalRelationsProverStates::TheFullRecursion(WeylGroup& theWeyl, GlobalVa
     if (this->theIndexStack.size>0)
       this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), theGlobalVariables, theWeyl);
     this->CheckConsistencyOfTree();
-    this->WriteToFileAppend(theGlobalVariables);
+    this->WriteToFileAppend(&theGlobalVariables);
     this->CheckConsistencyOfTree();
   }
 }
@@ -20326,7 +20026,7 @@ void minimalRelationsProverStatesFixedK::TheFullRecursionFixedK(WeylGroup& theWe
   { this->RecursionStepFixedK(theWeyl, theGlobalVariables);
     if (this->theIndexStack.size>0)
       this->MakeProgressReportCurrentState(*this->theIndexStack.LastObject(), theGlobalVariables, theWeyl);
-    this->WriteToFile(this->ProverFileName, theGlobalVariables);
+    this->WriteToFile(this->ProverFileName, &theGlobalVariables);
   }
 }
 
@@ -20690,14 +20390,14 @@ void minimalRelationsProverStatesFixedK::GenerateStartingStatesFixedK(Computatio
   this->flagComputationIsInitialized=true;
 }
 
-void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 {  output << "generator_reflections: ";
   this->simpleGenerators.WriteToFile(output, theGlobalVariables);
-  output <<"\nouter_generators: ";
+  output << "\nouter_generators: ";
   this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   input>> tempS;
   this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
@@ -20950,10 +20650,10 @@ void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& 
           this->size=oldSize;
           this->TheObjects[index].PossibleChildStates.size=0;
           if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
-          { theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
+          { theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
             std::stringstream out3;
-            out3<< i+1 <<" out of  "<< theWeyl.RootsOfBorel.size<<" normals tested, best hit "<<minNumChildren<<" children";
-            theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+            out3 << i+1 << " out of  " << theWeyl.RootsOfBorel.size << " normals tested, best hit " << minNumChildren << " children";
+            theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
             theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
           }
         }
@@ -22629,7 +22329,7 @@ void DrawingVariables::drawLineDirectly(double X1, double Y1, double X2, double 
 }
 
 void ComputationSetup::DyckPathPolytopeComputation(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromFile("./DyckPathPolytope.txt", theGlobalVariables);
+{ inputData.flagDyckPathComputationLoaded=inputData.thePartialFraction.theChambers.ReadFromFile("./DyckPathPolytope.txt", &theGlobalVariables);
   inputData.thePartialFraction.theChambers.ComputeDebugString();
   assert(inputData.thePartialFraction.theChambers.ConsistencyCheck(false, theGlobalVariables));
   IrreducibleFiniteDimensionalModule theModule;
@@ -22975,7 +22675,7 @@ void WeylGroup::MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, 
   }
 }
 
-void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->LabelChamberIndicesProperly();
   output << "Num_pointers: " << this->size << "\n";
 ///////////////////////////////////////////////////
@@ -23005,7 +22705,7 @@ void CombinatorialChamberContainer::WriteToFile(std::fstream& output, GlobalVari
       output << "Empty\n";
 }
 
-void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   input.seekg(0);
   this->KillAllElements();
@@ -23041,9 +22741,11 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
       this->TheObjects[i]=0;
     }
     std::stringstream out;
-    out << "reading chamber " << i+1 <<" out of " << this->size;
-    theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
-    theGlobalVariables.MakeReport();
+    out << "reading chamber " << i+1 << " out of " << this->size;
+    if (theGlobalVariables!=0)
+    { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]=out.str();
+      theGlobalVariables->MakeReport();
+    }
   }
   this->flagIsRunning=false;
   this->flagMustStop=false;
@@ -23211,7 +22913,7 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theRootSubalgebras.theGoodRelations.flagIncludeSubalgebraDataInDebugString=false;
   inputData.theRootSubalgebras.theBadRelations.flagIncludeSubalgebraDataInDebugString=false;
   if (!inputData.theRootSubalgebras.flagNilradicalComputationInitialized)
-    if (!inputData.theRootSubalgebras.ReadFromDefaultFileNilradicalGeneration(theGlobalVariables))
+    if (!inputData.theRootSubalgebras.ReadFromDefaultFileNilradicalGeneration(&theGlobalVariables))
     { inputData.theRootSubalgebras.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, inputData.WeylGroupLetter, inputData.WeylGroupIndex, true, true);
       inputData.theRootSubalgebras.initForNilradicalGeneration();
     }
@@ -23262,7 +22964,7 @@ void ComputationSetup::LProhibitingWeightsComputation(ComputationSetup& inputDat
   inputData.theRootSubalgebras.controllerLProhibitingRelations.ExitComputation();
 }
 
-bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables)
+bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
   if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
@@ -23272,13 +22974,13 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables& t
   return false;
 }
 
-void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables)
+void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 
-void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->AmbientWeyl.WriteToFile(output);
   output << "Number_subalgebras: " << this->size << "\n";
   //////////////////////////////////////////////////////////////////////////////////////
@@ -23299,7 +23001,7 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
   this->theBadRelations.WriteToFile(output, theGlobalVariables);
 }
 
-void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
   this->AmbientWeyl.ReadFromFile(input);
   this->AmbientWeyl.ComputeRho(true);
@@ -23325,12 +23027,12 @@ void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, Glob
   this->flagNilradicalComputationInitialized=true;
 }
 
-void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { output << "Simple_basis_k: ";
   this->SimpleBasisK.WriteToFile(output, theGlobalVariables);
 }
 
-void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS;
   input >> tempS;
   assert(tempS=="Simple_basis_k:");
@@ -23404,13 +23106,13 @@ void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Se
   }
 }
 
-void coneRelations::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void coneRelations::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "num_rels: " << this->size << "\n";
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].WriteToFile(output, theGlobalVariables);
 }
 
-void coneRelations::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+void coneRelations::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS; int tempI;
   this->ClearTheObjects();
   input >> tempS >> tempI;
@@ -23421,7 +23123,7 @@ void coneRelations::ReadFromFile(std::fstream& input, GlobalVariables& theGlobal
   }
 }
 
-void coneRelation::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void coneRelation::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->AlphaCoeffs.WriteToFile(output);
   this->Alphas.WriteToFile(output, theGlobalVariables);
   output << this->AlphaKComponents;
@@ -23431,7 +23133,7 @@ void coneRelation::WriteToFile(std::fstream& output, GlobalVariables& theGlobalV
   output << "Index_owner_root_SA: " << this->IndexOwnerRootSubalgebra << " ";
 }
 
-void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner)
+void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS;
   this->AlphaCoeffs.ReadFromFile(input);
   this->Alphas.ReadFromFile(input, theGlobalVariables);
@@ -23539,7 +23241,7 @@ void ComputationSetup::ChamberSlice(ComputationSetup& inputData, GlobalVariables
   }
   inputData.thePartialFraction.theChambers.thePauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
   inputData.thePartialFraction.theChambers.thePauseController.InitComputation();
-  inputData.thePartialFraction.theChambers.ReadFromDefaultFile(theGlobalVariables);
+  inputData.thePartialFraction.theChambers.ReadFromDefaultFile(&theGlobalVariables);
   inputData.thePartialFraction.theChambers.theDirections.ReverseOrderElements();
   root tempRoot;
   tempRoot.MakeZero(inputData.thePartialFraction.theChambers.AmbientDimension);
@@ -23876,7 +23578,7 @@ bool CombinatorialChamberContainer::GrandMasterConsistencyCheck(GlobalVariables&
           }
         std::stringstream out;
         out << "Checking consistency chamber " << i+1 << " out of " << this->size << " cone " << j+1 << " out of " << this->startingCones.size;
-        theGlobalVariables.theIndicatorVariables.ProgressReportString1= out.str();
+        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out.str();
         theGlobalVariables.MakeReport();
       }
     }
@@ -23928,8 +23630,8 @@ bool roots::ElementsHavePositiveScalarProduct(const root& theRoot) const
 }
 
 void ComputationSetup::ProverOpenAndGo(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ inputData.theProverFixedK.ReadFromFile(inputData.theProverFixedK.ProverFileName, theGlobalVariables);
-  inputData.theProver.ReadFromFile(theGlobalVariables);
+{ inputData.theProverFixedK.ReadFromFile(inputData.theProverFixedK.ProverFileName, &theGlobalVariables);
+  inputData.theProver.ReadFromFile(&theGlobalVariables);
   inputData.theProver.TheFullRecursion(inputData.theProver.theWeylGroup, theGlobalVariables);
 }
 
@@ -27562,8 +27264,8 @@ void RationalFunction::TransformToReducedGroebnerBasis
         if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
         { std::stringstream out;
           out << "<br> Exploring element " << lowestNonExplored+1 << " out of " << theBasis.size;
-          theGlobalVariables->theIndicatorVariables.String1NeedsRefresh=true;
-          theGlobalVariables->theIndicatorVariables.ProgressReportString1=out.str();
+          theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+          theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]=out.str();
           theGlobalVariables->MakeReport();
         }
     }

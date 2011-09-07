@@ -144,6 +144,7 @@ class MonomialUniversalEnveloping;
 class rootPoly;
 class PolynomialRationalCoeff;
 class ConeComplex;
+class XMLRoutines;
 
 
 
@@ -363,6 +364,70 @@ public:
   }
 };
 
+struct XMLRoutines
+{
+private:
+  static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string result="<";
+    result.append(tagNameNoSpacesNoForbiddenCharacters);
+    result.append(">");
+    return result;
+  }
+  static std::string GetCloseTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string result="</";
+    result.append(tagNameNoSpacesNoForbiddenCharacters);
+    result.append(">");
+    return result;
+  }
+  public:
+  static std::string GetOpenTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string result=" <";
+    result.append(tagNameNoSpacesNoForbiddenCharacters);
+    result.append("> ");
+    return result;
+  }
+  static std::string GetCloseTagNoInputCheckAppendSpacE(const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string result=" </";
+    result.append(tagNameNoSpacesNoForbiddenCharacters);
+    result.append("> ");
+    return result;
+  }
+  static bool ReadThroughFirstOpenTag
+  (std::istream& streamToMoveIn, int& NumReadWordsExcludingTag,
+   const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string tagOpen=XMLRoutines::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+    std::string tempS;
+    NumReadWordsExcludingTag=0;
+    while (!streamToMoveIn.eof())
+    { streamToMoveIn >> tempS;
+      if (tempS==tagOpen)
+        return true;
+      NumReadWordsExcludingTag++;
+    }
+    return false;
+  }
+  static bool ReadEverythingPassedTagOpenUntilTagClose
+  (std::istream& streamToMoveIn, int& NumReadWordsExcludingTag,
+   const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { std::string tagClose=XMLRoutines::GetCloseTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+    std::string tagOpen=XMLRoutines::GetOpenTagNoInputCheck(tagNameNoSpacesNoForbiddenCharacters);
+    int TagDepth=1;
+    std::string tempS;
+    NumReadWordsExcludingTag=0;
+    while (!streamToMoveIn.eof())
+    { streamToMoveIn >> tempS;
+      if (tempS==tagClose)
+        TagDepth--;
+      if (tempS==tagOpen)
+        TagDepth++;
+      if (TagDepth==0)
+        return true;
+      NumReadWordsExcludingTag++;
+    }
+    return false;
+  }
+};
+
 class DrawElementInputOutput
 {
  public:
@@ -566,6 +631,11 @@ public:
     this->TheActualObjects=0;
     this->CopyFromBase(other);
   }
+  inline static std::string GetXMLClassName()
+  { std::string result="List_";
+    result.append(Object::GetXMLClassName());
+    return result;
+  }
   static int ListActualSizeIncrement;
   Object* TheObjects;
   int size;
@@ -602,12 +672,12 @@ public:
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint)const;
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){ return this->IndexOfObject(o)!=-1; }
-  bool ReadFromFile(std::fstream& input);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}
-  void WriteToFile(std::fstream& output);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes);
+  bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}
+  void WriteToFile(std::fstream& output){this->WriteToFile(output, 0, -1);}
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
   inline Object* LastObject();
@@ -710,6 +780,11 @@ protected:
   void ClearHashes();
   List<int>* TheHashedArrays;
 public:
+  inline static std::string GetXMLClassName()
+  { std::string result="HashedList_";
+    result.append(Object::GetXMLClassName());
+    return result;
+  }
   static int PreferredHashSize;
   int HashSize;
   void initHash();
@@ -918,6 +993,11 @@ template <typename Element>
 class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 {
 public:
+  inline static std::string GetXMLClassName()
+  { std::string result="Matrix_";
+    result.append(Element::GetXMLClassName());
+    return result;
+  }
   Matrix(const Matrix<Element>& other){this->Assign(other);}
   void operator=(const Matrix<Element>& other){this->Assign(other);}
   Matrix(){}
@@ -1110,7 +1190,8 @@ void NonPivotPointsToEigenVector
   { this->Subtract(other);
   }
   void WriteToFile(std::fstream& output);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables){return this->ReadFromFile(input);}
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){return this->ReadFromFile(input);}
   bool ReadFromFile(std::fstream& input);
   void operator/=(const Element& input)
   { for (int j=0; j<this->NumRows; j++)
@@ -1275,6 +1356,7 @@ public:
 class Selection
 {
 public:
+  inline static std::string GetXMLClassName(){ return "Selection";}
   int MaxSize;
   int* elements;
 //  int* elementsInverseSelection;
@@ -1309,7 +1391,9 @@ public:
   void incrementSelectionFixedCardinality(int card, int& IndexLastZeroWithOneBefore, int& NumOnesAfterLastZeroWithOneBefore);
   void Assign(const Selection& right);
   void WriteToFile(std::fstream& output);
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);
+  inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ this->ReadFromFile(input);}
   inline void operator=(const Selection& right){this->Assign(right); }
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
@@ -1418,21 +1502,26 @@ ParallelComputing::GlobalPointerCounter-=this->NumRows*this->NumCols+this->NumRo
 
 template <typename Element>
 void Matrix<Element>::WriteToFile(std::fstream& output)
-{ output << "Matrix_NumRows: " << this->NumRows << " Matrix_NumCols: " << this->NumCols << "\n";
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << "r: " << this->NumRows << " c: " << this->NumCols << "\n";
   for (int i=0; i<this->NumRows; i++)
   { for (int j=0; j<this->NumCols; j++)
     { this->elements[i][j].WriteToFile(output);
       output << " ";
     }
-    output <<"\n";
+    output << "\n";
   }
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
 template <typename Element>
 bool Matrix<Element>::ReadFromFile(std::fstream& input)
 { int r, c; std::string tempS;
+  int NumReadWords;
+  XMLRoutines::ReadThroughFirstOpenTag(input, NumReadWords, this->GetXMLClassName());
+  assert(NumReadWords==0);
   input >> tempS >> r >> tempS >> c;
-  if (tempS!="Matrix_NumCols:")
+  if (tempS!="c:")
   { assert(false);
     return false;
   }
@@ -1440,6 +1529,8 @@ bool Matrix<Element>::ReadFromFile(std::fstream& input)
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
       this->elements[i][j].ReadFromFile(input);
+  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumReadWords, this->GetXMLClassName());
+  assert(NumReadWords==0);
   return true;
 }
 
@@ -1951,6 +2042,7 @@ class LargeInt
   { LargeInt tempI; tempI=right; return left*tempI;
   }
 public:
+  inline static const std::string GetXMLClassName(){ return "LInt";}
   signed char sign;
   LargeIntUnsigned value;
   void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
@@ -1959,6 +2051,7 @@ public:
   inline std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
   bool IsPositive()const{return this->sign==1 && (this->value.IsPositive()); }
   bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
+  inline bool BeginsWithMinus(){return this->IsNegative();}
   inline bool IsNonNegative()const{return !this->IsNegative(); }
   inline bool IsNonPositive()const{return !this->IsPositive(); }
   bool IsEqualTo(const LargeInt& x)const;
@@ -2142,6 +2235,7 @@ ParallelComputing::GlobalPointerCounter++;
   //grrr the below function is not needed for the gcc but needed for the MS compiler
   //that is bull(on MS's part), one shouldn't need to call an extra copy constructor.
 public:
+  inline static std::string GetXMLClassName(){ return "Rational";}
   int NumShort;
   //the requirement that the below be unsigned caused a huge problem, so I
   //changed it back to int. Grrrrr.
@@ -2160,6 +2254,7 @@ public:
     else
       output.Assign(this->Extended->den);
   }
+  bool BeginsWithMinus(){ return this->IsNegative();}
   inline void GetNum(LargeInt& output)
   { this->GetNumUnsigned(output.value);
     output.sign=1;
@@ -2306,7 +2401,9 @@ ParallelComputing::GlobalPointerCounter++;
   void MakeOne(){this->NumShort=1;  this->DenShort=1; this->FreeExtended(); }
   void MakeMOne(){this->NumShort=-1; this->DenShort=1; this->FreeExtended(); }
   void WriteToFile(std::fstream& output);
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);
+  inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){this->ReadFromFile(input);}
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   inline void AssignAbsoluteValue(){if(this->IsNegative())this->Minus(); }
   static Rational NChooseK(int n, int k);
@@ -2701,6 +2798,7 @@ class Vectors: public List<Vector<CoefficientType> >
 class root: public Vector<Rational>
 {
 public:
+  inline static std::string GetXMLClassName(){ return "root";}
 //the below is to facilitate operator overloading
   root(const root& right){this->Assign(right); };
   void MultiplyByLargeRational(const Rational& a);
@@ -3007,8 +3105,11 @@ public:
   bool ComputeNormalFromSelectionAndTwoExtraRoots(root& output, root& ExtraRoot1, root& ExtraRoot2, Selection& theSelection, GlobalVariables& theGlobalVariables);
   bool operator==(const roots& right)const;
   void operator = (const roots& right){this->CopyFromBase(right); }
-  bool ReadFromFile(std::fstream &input, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output);}
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
+;
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ return this->ReadFromFile(input, theGlobalVariables, -1);}
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void WriteToFile(std::fstream& output);
   roots(){}
   roots(int StartingSize){ this->SetSize(StartingSize);}
@@ -3179,8 +3280,8 @@ public:
   void ChamberNumberToString(std::string& output, CombinatorialChamberContainer& owner);
   bool ConsistencyCheck(int theDimension, bool checkVertices, CombinatorialChamberContainer& ownerComplex, GlobalVariables& theGlobalVariables);
   //bool FacetIsInternal(Facet* f);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, CombinatorialChamberContainer& owner);
   void LabelWallIndicesProperly();
   void GetWallNormals(roots& output);
   int GetHashFromSortedNormals();
@@ -3444,28 +3545,6 @@ template <class Object>
 void List<Object>::SetSize(int theSize)
 { this->MakeActualSizeAtLeastExpandOnTop(theSize);
   this->size=theSize;
-}
-
-template <class Object>
-void List<Object>::WriteToFile(std::fstream& output)
-{ output << "List_size: " << this->size << "\n";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].WriteToFile(output);
-    output << " ";
-  }
-}
-
-template <class Object>
-bool List<Object>::ReadFromFile(std::fstream& input)
-{ std::string tempS; int tempI;
-  input >> tempS >> tempI;
-  assert(tempS=="List_size:");
-  if(tempS!="List_size:")
-    return false;
-  this->SetSize(tempI);
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i].ReadFromFile(input);
-  return true;
 }
 
 template <class Object>
@@ -3922,8 +4001,6 @@ public:
   void ResetCounters();
   void CollectionToRoots(roots& output);
   ~rootsCollection(){}
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
 };
 
 class hashedRoots: public HashedList<root>
@@ -3961,8 +4038,8 @@ public:
   //returns 0 if root is on cone border, +1 if it is strictly inside the cone, -1 in the remaining case.
   int GetSignWRTCone(const root& r);
   //bool SeparatesPoints()
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   static bool PointIsAVertex(const roots& coneNormals, root& thePoint, GlobalVariables& theGlobalVariables);
   bool PointIsAVertex(root& thePoint, GlobalVariables& theGlobalVariables){ return this->PointIsAVertex(*this, thePoint, theGlobalVariables);}
 //  int HashFunction() const;
@@ -3982,8 +4059,8 @@ public:
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   void initFromDirections(roots& directions, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer& owner);
   bool SeparatePoints(root& point1, root& point2, root* PreferredNormal);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
 };
 
 class CombinatorialChamberContainer: public ListPointers<CombinatorialChamber>
@@ -4106,12 +4183,12 @@ public:
   void WriteReportToFile(DrawingVariables& TDV, roots& directions, std::fstream& output);
   void WriteReportToFile(std::fstream& output, bool DoPurgeZeroPointers);
   void WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers);
-  void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  bool WriteToFile(const std::string& FileName, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
-  bool ReadFromFile(const std::string& FileName, GlobalVariables& theGlobalVariables);
-  bool ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
+  void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool WriteToFile(const std::string& FileName, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(const std::string& FileName, GlobalVariables* theGlobalVariables);
+  bool ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
   bool ConsistencyCheckNextIndicesToSlice();
   int RootBelongsToChamberIndex(root& input, std::string* outputString);
   void MakeStartingChambers(roots& directions, root* theIndicatorRoot, GlobalVariables& theGlobalVariables);
@@ -4192,6 +4269,7 @@ private:
   Monomial(Monomial<ElementOfCommutativeRingWithIdentity>&){assert(false); }
 //  int DegreesToIndexRecursive(int MaxDeg, int index);
 public:
+  inline static std::string GetXMLClassName(){ std::string result ="Monomial_"; result.append(ElementOfCommutativeRingWithIdentity::GetXMLClassName()); return result; }
   int NumVariables;
   int* degrees;
   static bool InitWithZero;
@@ -4344,8 +4422,8 @@ public:
   void RaiseToPower(int d,  const ElementOfCommutativeRingWithIdentity& theRingUniT);
   void AddPolynomial(const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& p);
   void WriteToFile(std::fstream& output);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables){return this->WriteToFile(output);}
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){return this->WriteToFile(output);}
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   int HasSameExponentMonomial(TemplateMonomial& m);
   void operator= (const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& right);
   bool operator== (const TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>& right);
@@ -4535,7 +4613,7 @@ public:
   void MakeConst(const ElementOfCommutativeRingWithIdentity& theConstant, int theNumVars);
   bool IsEqualToZero();
   void WriteToFile(std::fstream& output);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
 };
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -4584,7 +4662,7 @@ void PolynomialLight<ElementOfCommutativeRingWithIdentity>::WriteToFile(std::fst
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
-void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+void PolynomialLight<ElementOfCommutativeRingWithIdentity>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { Polynomial<ElementOfCommutativeRingWithIdentity> ComputationalBuffer;
   ComputationalBuffer.ReadFromFile(input, theGlobalVariables);
   this->AssignPolynomial(ComputationalBuffer);
@@ -4915,7 +4993,7 @@ public:
   bool checkConsistency(){return true;}
   //the below constructor is very slow use for testing purposes only
   //Parsing stuff is inherently slow and I use the mighty parser
-  PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
+  //PolynomialRationalCoeff(const char* input){ std::string tempS=input; this->operator=(tempS);}
   //bool GetRootFromLinPolyConstTermLastVariable(root& output) {return this->GetRootFromLinPolyConstTermLastVariable(output, (Rational) 0);}
   void AssignIntegerPoly(const Polynomial<LargeInt>& p);
   void Evaluate(intRoot& values, Rational& output);
@@ -5410,12 +5488,12 @@ ParallelComputing::GlobalPointerCounter+=nv-this->NumVariables;
   ParallelComputing::CheckPointerCounters();
 #endif
   if(this->NumVariables!=nv)
-  { NumVariables=nv;
-    delete [] degrees;
-    degrees= new int[this->NumVariables];
+  { this->NumVariables=nv;
+    delete [] this->degrees;
+    this->degrees= new int[this->NumVariables];
   }
   for (int i=0; i<this->NumVariables; i++)
-    degrees[i]=0;
+    this->degrees[i]=0;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -5758,55 +5836,65 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::WriteToFile
 (std::fstream& output)
-{ output << "NumVars: " << this->NumVars << "\n";
-  output << "|/-- " << this->size << "\n";
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << "nv: " << this->NumVars << " numMons: " << this->size;
   for (int i=0; i<this->size; i++)
-  { output << "| ";
+  { output << " ";
+    if (i>0)
+      if (! this->TheObjects[i].Coefficient.BeginsWithMinus())
+        output << "+ ";
     this->TheObjects[i].Coefficient.WriteToFile(output);
-    output << " | ";
     for (int j=0; j<this->NumVars; j++)
-      output << this->TheObjects[i].degrees[j] << " ";
-    output << "\n";
+      if(this->TheObjects[i].degrees[j]!=0)
+        output << " x_ " << j+1 << " ^ " << this->TheObjects[i].degrees[j];
   }
-  output << "|\\--" << "\n";
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
 inline bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>::ReadFromFile
-(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
-  int candidateVars;
-  input >> tempS >> candidateVars;
-  if (tempS!="NumVars:" || candidateVars<0)
+(std::fstream& input, GlobalVariables* theGlobalVariables)
+{ int numReadWords, candidateVars, varIndex, targetSize;
+  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  std::string ReaderString;
+  bool result=true;
+  input >> ReaderString >> candidateVars >> ReaderString >> targetSize;
+  if (ReaderString!="numMons:" || candidateVars<0)
   { assert(false);
     return false;
   }
-  TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity> Buffer;
-  Buffer.Nullify(candidateVars);
+  this->Nullify(candidateVars);
   TemplateMonomial tempM;
   tempM.init(candidateVars);
-  input >> tempS;
-  assert (tempS=="|/--");
-  if (tempS!="|/--")
-    return false;
-  int tempSize;
-  input >> tempSize;
-  Buffer.MakeActualSizeAtLeastExpandOnTop(tempSize);
-  for (int i=0; i<tempSize; i++)
-  { input >> tempS;
+  this->MakeActualSizeAtLeastExpandOnTop(targetSize);
+  input.ignore();
+  for (int i=0; i<targetSize; i++)
+  { if (input.peek()=='+')
+      input >> ReaderString;
+    tempM.init(candidateVars);
     tempM.Coefficient.ReadFromFile(input);
-//    tempM.Coefficient.ComputeDebugString();
-    input >> tempS;
+    input.ignore();
     for (int j=0; j<candidateVars; j++)
-      input >> tempM.degrees[j];
-    Buffer.AddMonomial(tempM);
+    { if (input.peek()!='x')
+        break;
+      input >> ReaderString;
+      assert(ReaderString=="x_");
+      input >> varIndex;
+      varIndex--;
+      if (varIndex>=candidateVars)
+      { result=false;
+        break;
+      }
+      input >> ReaderString >> tempM.degrees[varIndex];
+      input.ignore();
+    }
+    if (!result)
+      break;
+    this->AddMonomial(tempM);
   }
-  input >> tempS;
-  assert(tempS=="|\\--");
-  if (tempS!="|\\--")
-    return false;
-  this->CopyFromPoly(Buffer);
-  return true;
+  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  assert(numReadWords==0);
+  return result;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -6532,6 +6620,7 @@ class BasicQN
 private:
   int GaussianEliminationByRowsCol(int Col, bool MoveToRight);
 public:
+  inline static const std::string GetXMLClassName(){ return "BasicQN";}
   static int NumTotalCreated;
   static ListPointers<BasicQN> GlobalCollectorsBasicQuasiNumbers;
   int CreationNumber;
@@ -6625,6 +6714,13 @@ public:
   void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
+  bool BeginsWithMinus()
+  { std::string tempS;
+    this->ElementToString(tempS);
+    if (tempS=="")
+      return false;
+    return tempS[0]=='-';
+  }
 //  int NumNonZeroElements();
   QuasiNumber(int numVars){this->NumVariables=numVars; }
   QuasiNumber(){this->NumVariables=0; }
@@ -6989,6 +7085,7 @@ class Lattice
 {
   void TestGaussianEliminationEuclideanDomainRationals(MatrixLargeRational& output);
 public:
+  inline static const std::string GetXMLClassName(){ return "Lattice";}
   MatrixLargeRational basisRationalForm;
   Matrix<LargeInt> basis;
   LargeIntUnsigned Den;
@@ -7067,10 +7164,10 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
     this->basisRationalForm=other.basisRationalForm;
   }
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
   void MakeZn(int theDim);
   void RefineByOtherLattice(const Lattice& other);
@@ -7085,6 +7182,7 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
 class QuasiPolynomial
 {
 public:
+  inline static std::string GetXMLClassName(){ return "Quasipolynomial";}
   int GetNumVars()const{return this->AmbientLatticeReduced.basis.NumRows;}
   GlobalVariables* buffers;
   Lattice AmbientLatticeReduced;
@@ -7120,8 +7218,8 @@ public:
   ;
   void operator+=(const QuasiPolynomial& other);
   QuasiPolynomial(){this->buffers=0;}
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  bool ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   QuasiPolynomial(const QuasiPolynomial& other){this->operator=(other);}
   void operator*=(const Rational& theConst);
   void operator=(const QuasiPolynomial& other)
@@ -7249,8 +7347,8 @@ public:
    PolynomialOutputFormat& PolyFormatLocal)
    ;
   int ElementToStringBasisChange(partFractions& owner, MatrixIntTightMemoryFit& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables&  theGlobalVariables, int theDimension);
-  void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+  void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   int GetNumMonomialsInNumerator();
   int SizeWithoutDebugString();
 };
@@ -7347,8 +7445,8 @@ public:
   bool VerifyFileComputedContributions(GlobalVariables& theGlobalVariables);
   void WriteToFileComputedContributions(std::fstream& output, GlobalVariables&  theGlobalVariables);
   int ReadFromFileComputedContributions(std::fstream& input, GlobalVariables&  theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void UncoverBracketsNumerators(GlobalVariables& theGlobalVariables, root* Indicator);
   void ResetRelevanceIsComputed(){for (int i=0; i<this->size; i++){this->TheObjects[i].RelevanceIsComputed=false; }; }
   partFractions();
@@ -7623,8 +7721,8 @@ public:
   void ActByElement(int index, root& theRoot);
   void ActByElement(int index, root& input, root& output);
   void ActByElement(int index, roots& input, roots& output);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void Assign(const ReflectionSubgroupWeylGroup& other);
   void operator=(const ReflectionSubgroupWeylGroup& other){ this->Assign(other); }
 };
@@ -7738,8 +7836,8 @@ public:
   DynkinDiagramRootSubalgebra theDiagramRelAndK;
   std::string DebugString;
   std::string stringConnectedComponents;
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner);
   void ComputeDiagramRelAndK(rootSubalgebra& owner);
   void FixRepeatingRoots(roots& theRoots, List<Rational>& coeffs);
@@ -7794,8 +7892,8 @@ public:
   void ElementToString (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
   void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables){ this->ElementToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables);}
   void ComputeDebugString(rootSubalgebras& owners, GlobalVariables& theGlobalVariables){ this->ComputeDebugString(owners, 0, 0, theGlobalVariables); };
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
   void AddRelationNoRepetition(coneRelation& input, rootSubalgebras& owners, int indexInRootSubalgebras);
   coneRelations()
   { this->NumAllowedLatexLines=40;
@@ -7896,8 +7994,8 @@ public:
   void GeneratePossibleNilradicalsRecursive(Controller& PauseMutex, GlobalVariables& theGlobalVariables, multTableKmods& multTable, List<Selection>& impliedSelections, List<int>& oppositeKmods, rootSubalgebras& owner, int indexInOwner);
   void GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner);
   void GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter);
-  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
-  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables, rootSubalgebras& owner);
+  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
+  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations);
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, roots& NilradicalRoots, roots& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
@@ -7990,10 +8088,10 @@ public:
   void SortDescendingOrderBySSRank();
   void pathToHtmlFileNameElements(int index, std::string* htmlPathServer, std::string& output, bool includeDotHtml);
   void pathToHtmlReference(int index, std::string& DisplayString, std::string* htmlPathServer, std::string& output);
-  void WriteToDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
-  bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables& theGlobalVariables);
-  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables& theGlobalVariables);
+  void WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);
+  bool ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables);
+  void WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables);
   void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, roots& input, GlobalVariables& theGlobalVariables);
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables);
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
@@ -8033,46 +8131,6 @@ public:
   }
 };
 
-class rootFKFTcomputation
-{
-public:
-  intRoots nilradicalA2A1A1inD5;
-  intRoots AlgorithmBasisA2A1A1inD5;
-  intRoot weights;
-  GlobalVariables* TheGlobalVariables;
-  partFractions partitionA2A1A1inD5;
-  std::string OutputFile;
-  bool useOutputFileForFinalAnswer;
-//  bool useOldKLData;
-  bool useOldPartialFractionDecompositionData;
-  bool useVPFstoredData;
-  std::string KLCoeffFileString;
-  std::string PartialFractionsFileString;
-  std::string VPEntriesFileString;
-  std::string VPIndexFileString;
-  rootFKFTcomputation();
-  ~rootFKFTcomputation();
-  void SearchForMinimalRelations(std::string& output);
-  bool PartialRelationCouldBeMinimal(coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables);
-  void GetImpliedMembers(coneRelation& thePartialRelation, GlobalVariables& TheGlobalVariables, roots& impliedNilradical, roots& impliedK, roots& impliedGmodL, roots impliedBKSingular);
-  static bool OpenDataFile(std::fstream& theFileOutput, std::string& theFileName);
-  static bool OpenDataFileOrCreateIfNotPresent2(std::fstream& theFile, std::string& theFileName, bool OpenInAppendMode, bool openAsBinary);
-  void MakeRootFKFTsub(root& direction, QPSub& theSub);
-  void initA2A1A1inD5();
-  void RunA2A1A1inD5beta12221();
-  void processA2A1A1inD5beta12221Answer(QuasiPolynomialOld& theAnswer);
-  //format: the polynomials must be root::AmbientDimension in count
-  //these are the coordinates in simple basis of the vector.
-  //They are allowed to be arbitrary
-  //polynomials. The chamberIndicator indicates which chamber
-  //(in the partition function sense) is the input vector located.
-  //setting PositiveWeightsOnly makes the program generate only elements
-  //of the orbit with Borel-positive weights
-  //give a Limiting cone if you want only to observe weights lying in a
-  //certain cone. Set 0 if there is no particular cone of interest.
-  void MakeTheRootFKFTSum(root& ChamberIndicator, partFractions& theBVdecomposition, List<int>& theKLCoeffs, QuasiPolynomialOld& output, VermaModulesWithMultiplicities& theHighestWeights, roots& theNilradical);
-};
-
 struct IndicatorWindowVariables
 {
 public:
@@ -8083,28 +8141,17 @@ public:
   bool flagRootIsModified;
   bool Pause;
   IndicatorWindowVariables(){this->Nullify(); }
-  bool String1NeedsRefresh;
-  bool String2NeedsRefresh;
-  bool String3NeedsRefresh;
-  bool String4NeedsRefresh;
-  bool String5NeedsRefresh;
-  std::string ProgressReportString1;
-  std::string ProgressReportString2;
-  std::string ProgressReportString3;
-  std::string ProgressReportString4;
-  std::string ProgressReportString5;
-  std::string StatusString1;
+  bool ProgressReportStringsNeedRefresh;
   bool StatusString1NeedsRefresh;
+  List<std::string> ProgressReportStrings;
+  std::string StatusString1;
   void Assign(IndicatorWindowVariables& right);
   void Nullify()
   { this->Busy=false;
     this->Pause=true;
-    this->String1NeedsRefresh=true;
-    this->String2NeedsRefresh=true;
-    this->String3NeedsRefresh=true;
-    this->String4NeedsRefresh=true;
-    this->String5NeedsRefresh=true;
     this->StatusString1NeedsRefresh=false;
+    this->ProgressReportStringsNeedRefresh=false;
+    this->ProgressReportStrings.SetSize(5);
     this->NumProcessedMonomialsCurrentFraction=0;
     this->NumProcessedMonomialsTotal=0;
     this->modifiedRoot.MakeZero(1);
@@ -8919,8 +8966,8 @@ public:
   void operator=(const minimalRelationsProverStateFixedK& right){this->Assign(right); }
   minimalRelationsProverStateFixedK();
   void MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables&  theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables&  theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
 };
 
 class minimalRelationsProverStatesFixedK: public List<minimalRelationsProverStateFixedK>
@@ -8976,10 +9023,10 @@ public:
     this->flagSearchForOptimalSeparatingRoot=true;
     this->theWeylGroup.CartanSymmetric.NumRows=-1;
   }
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::string& fileName, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::string& fileName, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::string& fileName, GlobalVariables* theGlobalVariables);
+  void ReadFromFile(std::string& fileName, GlobalVariables* theGlobalVariables);
 };
 
 class minimalRelationsProverStates;
@@ -9048,8 +9095,8 @@ public:
   void operator=(const minimalRelationsProverState& right){this->Assign(right); }
   minimalRelationsProverState();
   void MakeProgressReportCanBeShortened(int checked, int outOf, GlobalVariables& theGlobalVariables);
-  void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables);
-  void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
+  void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
 };
 
 class minimalRelationsProverStates: public List<minimalRelationsProverState>
@@ -9116,10 +9163,10 @@ public:
     this->sizeByLastPurge=0;
     this->NumFullyComputed=0;
   }
-  void ReadFromFile(std::fstream &inputHeader, std::fstream& inputBody, GlobalVariables& theGlobalVariables);
-  void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables& theGlobalVariables);
-  void WriteToFileAppend(GlobalVariables& theGlobalVariables);
-  void ReadFromFile (GlobalVariables& theGlobalVariables);
+  void ReadFromFile(std::fstream &inputHeader, std::fstream& inputBody, GlobalVariables* theGlobalVariables);
+  void WriteToFileAppend(std::fstream& outputHeader, std::fstream& outputBody, GlobalVariables* theGlobalVariables);
+  void WriteToFileAppend(GlobalVariables* theGlobalVariables);
+  void ReadFromFile (GlobalVariables* theGlobalVariables);
   void PurgeImpossibleStates();
 };
 
@@ -9426,7 +9473,8 @@ public:
 
 class Cone
 {
-  public:
+public:
+  inline static const std::string GetXMLClassName(){ return "Cone";}
   roots Vertices;
   roots Normals;
   bool flagHasSufficientlyManyVertices;
@@ -9474,12 +9522,15 @@ class Cone
     }
     return true;
   }
-  void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
-  ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
-  ;
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+;
+  void WriteToFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+;
+  bool ReadFromFile
+  (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
+;
   void operator=(const Cone& other)
   { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->Vertices=other.Vertices;
@@ -9512,6 +9563,7 @@ class Cone
 class ConeLatticeAndShift
 {
   public:
+  inline static std::string GetXMLClassName(){ return "ConeLatticeShift";}
   Cone theProjectivizedCone;
   Lattice theLattice;
   root theShift;
@@ -9526,10 +9578,10 @@ class ConeLatticeAndShift
     this->theShift=other.theShift;
   }
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
   std::string ElementToString(PolynomialOutputFormat& theFormat);
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
@@ -9594,12 +9646,16 @@ public:
   void init(){this->splittingNormals.ClearTheObjects(); this->slicingDirections.size=0; this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
   ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  (std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimit)
+  (std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
+  { return this->ReadFromFile(input, theGlobalVariables, -1);
+  }
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
   ;
   void operator=(const ConeComplex& other)
   { this->:: HashedList<Cone>::operator=(other);
@@ -9612,6 +9668,7 @@ public:
 
 class ConeLatticeAndShiftMaxComputation
 { public:
+  inline static const std::string GetXMLClassName(){ return "ConeLatticeAndShiftMaxComputation";}
   int numNonParaM;
   int numProcessedNonParam;
   List<ConeComplex> complexStartingPerRepresentative;
@@ -9643,10 +9700,10 @@ class ConeLatticeAndShiftMaxComputation
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 ;
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
   ;
 };
 
@@ -10833,6 +10890,7 @@ public:
 class GeneralizedVermaModuleCharacters
 {
 public:
+  inline static const std::string GetXMLClassName(){ return "GeneralizedVermaCharacters";}
   Controller thePauseControlleR;
   List<MatrixLargeRational> theLinearOperators;
   //the first k variables correspond to the Cartan of the smaller Lie algebra
@@ -10864,8 +10922,6 @@ public:
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
-  void ReadFromDefaultFile(GlobalVariables& theGlobalVariables);
-  void WriteToDefaultFile(GlobalVariables& theGlobalVariables);
   void IncrementComputation
 (GlobalVariables& theGlobalVariables)
 ;
@@ -10876,19 +10932,26 @@ public:
     this->NumProcessedConesParam=0;
     this->NumProcessedExtremaEqualOne=0;
   }
+  void ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
+  void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
   void WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;
   bool ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
   { std::string tempS;
+    int numReadWords;
+    XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
     input >> tempS >> this->computationPhase;
-    if (tempS!="ComputationPhase:")
-      return false;
-    return this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+    assert(tempS=="ComputationPhase:");
+    bool result=true;
+    if (this->computationPhase!=0)
+      result= this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
+    XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+    return result;
   }
   bool ReadFromFileNoComputationPhase
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
   std::string PrepareReportOneCone
   (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
@@ -11146,8 +11209,8 @@ void Vectors<CoefficientType>::SelectABasis
   { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
-      theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
       theGlobalVariables.MakeReport();
     }
     for (int j=0; j<theDim; j++)
@@ -11164,8 +11227,8 @@ void Vectors<CoefficientType>::SelectABasis
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1=out.str();
-      theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
       theGlobalVariables.MakeReport();
     }
     if (currentRow==theDim)
@@ -11174,59 +11237,59 @@ void Vectors<CoefficientType>::SelectABasis
 }
 
 template <class Object>
-bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
-{ std::string tempS; int tempI;
-  input >> tempS >> tempI;
-  assert(tempS=="List_size:");
-  if(tempS!="List_size:")
-    return false;
-  theGlobalVariables.ReadWriteRecursionDepth++;
-  this->SetSize(tempI);
-  for (int i=0; i<this->size; i++)
-  { if (UpperLimitForDebugPurposes>0 && i>=UpperLimitForDebugPurposes)
-      break;
-    this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
-    if (this->size>30)
-    { std::stringstream report;
-      report << "Reading object number " << i+1 << " out of " << this->size;
-      switch(theGlobalVariables.ReadWriteRecursionDepth)
-      { case 1:
-          theGlobalVariables.theIndicatorVariables.ProgressReportString2=report.str();
-          theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=true;
-          break;
-        case 2:
-          theGlobalVariables.theIndicatorVariables.ProgressReportString3=report.str();
-          theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=true;
-          break;
-        case 3:
-          theGlobalVariables.theIndicatorVariables.ProgressReportString4=report.str();
-          theGlobalVariables.theIndicatorVariables.String4NeedsRefresh=true;
-          break;
-        case 4:
-          theGlobalVariables.theIndicatorVariables.ProgressReportString5=report.str();
-          theGlobalVariables.theIndicatorVariables.String5NeedsRefresh=true;
-          break;
-        default: break;
-      }
-      theGlobalVariables.MakeReport();
-      theGlobalVariables.theLocalPauseController.SafePoint();
-    }
-  }
-  theGlobalVariables.ReadWriteRecursionDepth--;
-  return true;
-}
-
-template <class Object>
-void List<Object>::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimitForDebugPurposes)
+void List<Object>::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)
 { int NumWritten=this->size;
   if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<NumWritten)
     NumWritten=UpperLimitForDebugPurposes;
-  output << "List_size: " << NumWritten << "\n";
+  output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << "size: " << NumWritten << "\n";
   for (int i=0; i<NumWritten; i++)
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
     output << "\n";
-    theGlobalVariables.theLocalPauseController.SafePoint();
+    if (theGlobalVariables!=0)
+      theGlobalVariables->theLocalPauseController.SafePoint();
   }
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
+}
+
+template <class Object>
+bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes)
+{ std::string tempS;
+  int ActualListSize; int NumWordsBeforeTag;
+  XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsBeforeTag, this->GetXMLClassName());
+  assert(NumWordsBeforeTag==0);
+  input >> tempS >> ActualListSize;
+  assert(tempS=="size:");
+  if(tempS!="size:")
+    return false;
+  if (theGlobalVariables!=0)
+    theGlobalVariables->ReadWriteRecursionDepth++;
+  int CappedListSize = ActualListSize;
+  if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<CappedListSize)
+    CappedListSize=UpperLimitForDebugPurposes;
+  this->SetSize(CappedListSize);
+  for (int i=0; i<CappedListSize; i++)
+  { this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
+    //<reporting_and_safepoint_duties>
+    if (theGlobalVariables!=0)
+    { if (ActualListSize>30 && theGlobalVariables->ReadWriteRecursionDepth < theGlobalVariables->theIndicatorVariables.ProgressReportStrings.size)
+      { std::stringstream report;
+        report << "Reading object number " << i+1 << " out of " << ActualListSize;
+        if (CappedListSize<ActualListSize)
+          report << " capped at " << CappedListSize;
+        theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ReadWriteRecursionDepth]=report.str();
+        theGlobalVariables->MakeReport();
+      }
+      theGlobalVariables->theLocalPauseController.SafePoint();
+    }
+    //</reporting_and_safepoint_duties>
+  }
+  bool tempBool= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
+  assert(tempBool);
+  if (theGlobalVariables!=0)
+    theGlobalVariables->ReadWriteRecursionDepth--;
+  return true;
 }
 
 #endif

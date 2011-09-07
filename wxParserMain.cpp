@@ -92,11 +92,8 @@ extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLo
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
 { theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
-  out << output.ProgressReportString1 << "\n";
-  out << output.ProgressReportString2 << "\n";
-  out << output.ProgressReportString3 << "\n";
-  out << output.ProgressReportString4 << "\n";
-  out << output.ProgressReportString5 << "\n";
+  for (int i=0; i<output.ProgressReportStrings.size; i++)
+    out << output.ProgressReportStrings[i] << "\n";
   theMainWindow->ProgressReportString=out.str();
   theMainWindow->StatusString=output.StatusString1;
   wxPostEvent(theMainWindow->GetEventHandler(), theMainWindow->eventProgressReport);
@@ -284,7 +281,7 @@ void wxParserDialog::OnButton2Click(wxCommandEvent& event)
     } else
     { theController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
       theController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
-      tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.WriteToDefaultFile(theGlobalVariables);
+      tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.WriteToDefaultFile(&theGlobalVariables);
     }
   }
   theController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();

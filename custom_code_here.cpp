@@ -400,7 +400,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   out << "\n\nThe vector partition functions in each chamber follow.";
   Lattice theExtendedIntegralLatticeMatForm;
   theExtendedIntegralLatticeMatForm.MakeZn(totalDim);
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
@@ -410,7 +410,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
       for (int k=0; k<this->theLinearOperators.size; k++)
       { QuasiPolynomial& currentQPSub=this->theQPsSubstituted.TheObjects[i].TheObjects[k];
         std::stringstream tempStream;
-        theGlobalVariables.theIndicatorVariables.ProgressReportString1= tempStream.str();
+        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
         currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjected.TheObjects[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
@@ -436,7 +436,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
       }
       std::stringstream tempStream;
       tempStream << " Chamber " << i+1 << " translation " << k+1;
-      theGlobalVariables.theIndicatorVariables.ProgressReportString1=tempStream.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
       theGlobalVariables.MakeReport();
     }
     out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
@@ -457,21 +457,18 @@ int ParserNode::EvaluateG2InB3Computation
   return theNode.errorNoError;
 }
 
-void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  std::string tempS;
+  if (!CGIspecificRoutines::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
+  { this->computationPhase=0;
+    return;
+  }
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
-  int candidatePhase;
-  input >> tempS >> candidatePhase;
-  if (tempS=="ComputationPhase:")
-  { this->computationPhase=candidatePhase;
-    this->ReadFromFileNoComputationPhase(input, theGlobalVariables);
-  } else
-    this->computationPhase=0;
+  this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
-void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables& theGlobalVariables)
+void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
@@ -482,7 +479,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
 { std::stringstream out;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
-  this->ReadFromDefaultFile(theGlobalVariables);
+  this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
       this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
@@ -525,7 +522,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
   if (this->computationPhase < 30)
-    this->WriteToDefaultFile(theGlobalVariables);
+    this->WriteToDefaultFile(&theGlobalVariables);
   this->thePauseControlleR.ExitComputation();
 }
 
@@ -2436,8 +2433,8 @@ void partFraction::GetVectorPartitionFunction
 //      out4 << "Current fraction: " << i+1<< " out of " << this->Coefficient.size << " processed";
 //      partFractions::NumProcessedForVPFMonomialsTotal++;
 //      out3  << " Processed " << partFractions::NumProcessedForVPFMonomialsTotal << " out of " << partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
-//      theGlobalVariables.theIndicatorVariables.ProgressReportString4= out4.str();
-//      theGlobalVariables.theIndicatorVariables.ProgressReportString3= out3.str();
+//      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
+//      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
 //      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 //    }
   }
@@ -2461,7 +2458,7 @@ bool partFractions::GetVectorPartitionFunction
 { if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
   { theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
     theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
-    theGlobalVariables.theIndicatorVariables.ProgressReportString5="Indicator modified to regular";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]="Indicator modified to regular";
     theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   } else
     theGlobalVariables.theIndicatorVariables.flagRootIsModified=false;
@@ -2977,8 +2974,9 @@ void QuasiPolynomial::operator*=(const Rational& theConst)
 }
 
 void Cone::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "Cone( ";
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << "Cone( ";
   for (int i=0; i<this->Normals.size; i++)
   { output << "(";
     for (int j=0; j<this->Normals.TheObjects[i].size; j++)
@@ -2991,17 +2989,30 @@ void Cone::WriteToFile
       output << ", ";
   }
   output << " ) ";
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+}
+
+bool Cone::ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+{ if (theGlobalVariables!=0)
+    return this->ReadFromFile(output, theGlobalVariables->rootsConeWriteToFileBuffer, theGlobalVariables);
+  else
+  { roots tempRoots;
+    return this->ReadFromFile(output, tempRoots, 0);
+  }
 }
 
 bool Cone::ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
 { std::string tempS, rootString;
+  int NumWordsRead;
+  XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
+  assert(NumWordsRead==0);
   input >> tempS;
-  roots& buffer=theGlobalVariables.rootsConeWriteToFileBuffer;
   buffer.size=0;
   root tempRoot;
   if (tempS!="Cone(")
   { std::cout << "tempS was instead " << tempS;
+    XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
   }
   for (input >> tempS; tempS!=")" && tempS!=""; input >> tempS)
@@ -3010,25 +3021,36 @@ bool Cone::ReadFromFile
     //std::cout << "vector input " << tempS << " read as " << tempRoot.ElementToString();
   }
   if (buffer.size<1)
+  { XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
     return false;
+  }
   int theDim=buffer.TheObjects[0].size;
   for (int i=1; i<buffer.size; i++)
     if (buffer.TheObjects[i].size!=theDim)
+    { XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
       return false;
-  bool tempBool=this->CreateFromNormals(buffer, false, theGlobalVariables);
-  assert(tempBool);
-  return tempBool;
+    }
+  bool result;
+  if (theGlobalVariables!=0)
+    result=this->CreateFromNormals(buffer, false, *theGlobalVariables);
+  else
+  { GlobalVariables tempGlobalVariables;
+    result=this->CreateFromNormals(buffer, false, tempGlobalVariables);
+  }
+  result= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
+//  assert(tempBool);
+  return result;
 }
 
 void ConeLatticeAndShift::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->theLattice.WriteToFile(output, theGlobalVariables);
   this->theProjectivizedCone.WriteToFile(output, theGlobalVariables);
   this->theShift.WriteToFile(output);
 }
 
 bool ConeLatticeAndShift::ReadFromFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->theLattice.ReadFromFile(output, theGlobalVariables);
   this->theProjectivizedCone.ReadFromFile(output, theGlobalVariables);
   this->theShift.ReadFromFile(output);
@@ -3036,8 +3058,9 @@ bool ConeLatticeAndShift::ReadFromFile
 }
 
 void ConeLatticeAndShiftMaxComputation::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
-{ this->complexStartingPerRepresentative.WriteToFile(output, theGlobalVariables);
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  this->complexStartingPerRepresentative.WriteToFile(output, theGlobalVariables);
   this->complexRefinedPerRepresentative.WriteToFile(output, theGlobalVariables);
   this->theMaximaCandidates.WriteToFile(output);
   this->startingLPtoMaximize.WriteToFile(output);
@@ -3051,52 +3074,143 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile
   output << this->IsInfinity;
   this->LPtoMaximizeLargerDim.WriteToFile(output, theGlobalVariables);
   this->LPtoMaximizeSmallerDim.WriteToFile(output, theGlobalVariables);
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
 
 bool ConeLatticeAndShiftMaxComputation::ReadFromFile
-(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
+(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
+{ int numReadWords;
+  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->ReadWriteRecursionDepth++;
+    theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading complex starting per representative...";
+    theGlobalVariables->MakeReport();
+  }
+  this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading complex refined per representative...";
+    theGlobalVariables->MakeReport();
+  }
   this->complexRefinedPerRepresentative.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading the max candidates...";
+    theGlobalVariables->MakeReport();
+  }
   this->theMaximaCandidates.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading starting linear polys...";
+    theGlobalVariables->MakeReport();
+  }
   this->startingLPtoMaximize.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading final maxima...";
+    theGlobalVariables->MakeReport();
+  }
   this->finalMaxima.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading starting lattice...";
+    theGlobalVariables->MakeReport();
+  }
   this->theStartingLattice.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading final rougher lattice...";
+    theGlobalVariables->MakeReport();
+  }
   this->theFinalRougherLattice.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading starting representative...";
+    theGlobalVariables->MakeReport();
+  }
   this->theStartingRepresentative.ReadFromFile(input);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading final representatives...";
+    theGlobalVariables->MakeReport();
+  }
   this->theFinalRepresentatives.ReadFromFile(input, theGlobalVariables);
-  this->theConesLargerDim.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading cones larger dim...";
+    theGlobalVariables->MakeReport();
+  }
+  this->theConesLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading cones smaller dim...";
+    theGlobalVariables->MakeReport();
+  }
   this->theConesSmallerDim.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading IsInfinite array...";
+    theGlobalVariables->MakeReport();
+  }
   input >> this->IsInfinity;
-  this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading LPtoMaximizeLargerDim...";
+    theGlobalVariables->MakeReport();
+  }
+  this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
+
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[1]="Loading LPtoMaximizeSmallerDim...";
+    theGlobalVariables->MakeReport();
+  }
   this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
+  if (theGlobalVariables!=0)
+    theGlobalVariables->ReadWriteRecursionDepth--;
+  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  assert(numReadWords==0);
   return true;
 }
 
 void GeneralizedVermaModuleCharacters::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "ComputationPhase: " << this->computationPhase << "\n";
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
+  output << "ComputationPhase: " << this->computationPhase << "\n";
   output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
   output << "NumProcessedExtremaEqualOne: " << this->NumProcessedExtremaEqualOne << "\n";
   output << "NormalConstAdjustment: ";
   this->NonIntegralOriginModification.WriteToFile(output);
+
+  PolynomialRationalCoeff tempP;
+  tempP="(x_1-x_2+1)^3";
+  tempP.WriteToFile(output);
+
   output << "\n";
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+    theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing small data... ";
+    theGlobalVariables->MakeReport();
+  }
   this->theMaxComputation.WriteToFile(output, theGlobalVariables);
   this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
   this->theLinearOperators.WriteToFile(output);
   this->theLinearOperatorsExtended.WriteToFile(output);
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
   this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing QP's non-subbed... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing QP's non-subbed... ";
+    theGlobalVariables->MakeReport();
+  }
   this->theQPsNonSubstituted.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing QP's subbed... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing QP's subbed... ";
+    theGlobalVariables->MakeReport();
+  }
   this->theQPsSubstituted.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing small data... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing small data... ";
+    theGlobalVariables->MakeReport();
+  }
   this->theMultiplicities.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
 //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
@@ -3105,60 +3219,55 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   this->thePfs.WriteToFile(output, theGlobalVariables);
 //  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
 //  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber complex... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing param chamber complex... ";
+    theGlobalVariables->MakeReport();
+  }
   this->projectivizedParamComplex.WriteToFile(output, theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing projectivized chamber complex... ";
+    theGlobalVariables->MakeReport();
+  }
   this->projectivizedChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-//  this->projectivezedChambersSplitByMultFreeWalls.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing param chamber extrema subcones... ";
-  theGlobalVariables.MakeReport();
-//  this->projectivizedExtremaCones.WriteToFile(output, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing the extrema... ";
-  theGlobalVariables.MakeReport();
-//  this->theExtrema.WriteToFile(output, theGlobalVariables);
-
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing extrema equals one cones... ";
-  theGlobalVariables.MakeReport();
-//  this->projectivizedExtremaEqualsOneCones.WriteToFile(output, theGlobalVariables);
-
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Writing to file done... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing to file done...";
+    theGlobalVariables->MakeReport();
+  }
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-void QuasiPolynomial::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+void QuasiPolynomial::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { this->valueOnEachLatticeShift.WriteToFile(output, theGlobalVariables);
   this->AmbientLatticeReduced.WriteToFile(output, theGlobalVariables);
   this->LatticeShifts.WriteToFile(output, theGlobalVariables);
 }
 
-bool QuasiPolynomial::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+bool QuasiPolynomial::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { this->valueOnEachLatticeShift.ReadFromFile(input, theGlobalVariables);
   this->AmbientLatticeReduced.ReadFromFile(input, theGlobalVariables);
   this->LatticeShifts.ReadFromFile(input, theGlobalVariables);
-  this->buffers=&theGlobalVariables;
+  this->buffers=theGlobalVariables;
   return true;
 }
 
-void Lattice::WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
-{ output << "Lattice: ";
+void Lattice::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+{ output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
   this->basisRationalForm.WriteToFile(output);
+  output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName());
 }
 
-bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
-{ std::string tempS;
-  input >> tempS;
-  if (tempS!="Lattice:")
-  { assert(false);
-    return false;
-  }
-  if(!this->basisRationalForm.ReadFromFile(input))
-    return false;
+bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+{ int numReadWords;
+  XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+  bool result=this->basisRationalForm.ReadFromFile(input);
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
-  return true;
+  XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
+  assert(numReadWords==0);
+  return result;
 }
 
 bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
   input >> tempS >> this->NumProcessedConesParam;
   input >> tempS >> this->NumProcessedExtremaEqualOne;
@@ -3167,15 +3276,29 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { assert(false);
     return false;
   }
+  if (theGlobalVariables!=0)
+    theGlobalVariables->ReadWriteRecursionDepth=1;
   this->NonIntegralOriginModification.ReadFromFile(input);
-  this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.String1NeedsRefresh=true;
-//  this->allParamSubChambersRepetitionsAllowed.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param subchambers cone form... ";
-  theGlobalVariables.MakeReport();
-  this->theMaxComputation.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading more pieces of data... ";
-  theGlobalVariables.MakeReport();
+
+  PolynomialRationalCoeff tempP;
+  tempP.ReadFromFile(input, theGlobalVariables);
+
+  if (theGlobalVariables!=0)
+    this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
+  else
+  { GlobalVariables tempGlobalVars;
+    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
+  }
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+    theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading param subchambers cone form... ";
+    theGlobalVariables->MakeReport();
+  }
+  this->theMaxComputation.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading more pieces of data... ";
+    theGlobalVariables->MakeReport();
+  }
   this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperatorsExtended.ReadFromFile(input, theGlobalVariables);
@@ -3183,43 +3306,46 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
   this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
-  this->theMultiplicities.ReadFromFile(input, theGlobalVariables);
-//  this->theMultiplicitiesExtremaCandidates.ReadFromFile(input, theGlobalVariables);
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading multiplicities... ";
+    theGlobalVariables->MakeReport();
+  }
+  this->theMultiplicities.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   this->theCoeffs.ReadFromFile(input);
   this->theTranslations.ReadFromFile(input, theGlobalVariables);
   this->theTranslationsProjected.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading partial fractions... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading partial fractions... ";
+    theGlobalVariables->MakeReport();
+  }
   this->thePfs.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading projectivized param complex... ";
-  theGlobalVariables.MakeReport();
-  this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables);
-  this->projectivizedChamber.ReadFromFile(input, theGlobalVariables);
-//  this->projectivezedChambersSplitByMultFreeWalls.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading param chamber extrema subcones...";
-  theGlobalVariables.MakeReport();
-//  this->projectivizedExtremaCones.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading the extrema...";
-  theGlobalVariables.MakeReport();
-//  this->theExtrema.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading the extrema equals one cones...";
-  theGlobalVariables.MakeReport();
-//  this->projectivizedExtremaEqualsOneCones.ReadFromFile(input, theGlobalVariables);
-  theGlobalVariables.theIndicatorVariables.ProgressReportString1="Loading complete... ";
-  theGlobalVariables.MakeReport();
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading projectivized param complex... ";
+    theGlobalVariables->MakeReport();
+  }
+  this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables, -1);
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading the complex... ";
+    theGlobalVariables->MakeReport();
+  }
+  this->projectivizedChamber.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  if (theGlobalVariables!=0)
+  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Loading complete... ";
+    theGlobalVariables->MakeReport();
+  }
   return true;
 }
 
 void ConeComplex::WriteToFile
-  (std::fstream& output, GlobalVariables& theGlobalVariables, int UpperLimit)
+  (std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit)
 { this->List<Cone>::WriteToFile(output, theGlobalVariables, UpperLimit);
   output << "IndexLowestNonRefined: " << this->indexLowestNonRefinedChamber << "\n";
   this->splittingNormals.WriteToFile(output);
 }
 
 bool ConeComplex::ReadFromFile
-  (std::fstream& input, GlobalVariables& theGlobalVariables)
-{ if(!this->List<Cone>::ReadFromFile(input, theGlobalVariables))
+  (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
+{ if(!this->List<Cone>::ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes))
   { assert(false);
     return false;
   }
@@ -3229,7 +3355,13 @@ bool ConeComplex::ReadFromFile
   { assert(false);
     return false;
   }
-  return this->splittingNormals.ReadFromFile(input);
+  if (!this->splittingNormals.ReadFromFile(input))
+  { assert(false);
+    return false;
+  }
+  //!!!!!!!!The following needs to be fixed!
+  this->slicingDirections.size=0;
+  return true;
 }
 
 void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
@@ -4153,8 +4285,8 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
 /*    if (theGlobalVariables!=0)
     { std::stringstream out;
       out << "processing prime " << thePrime << " (" << i+1 << " out of " << primesBelowX.size << ").";
-      theGlobalVariables->theIndicatorVariables.ProgressReportString1=out.str();
-      theGlobalVariables->theIndicatorVariables.String1NeedsRefresh=true;
+      theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]=out.str();
+      theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
       theGlobalVariables->MakeReport();
     }*/
   }

@@ -90,7 +90,8 @@ void makeReport(IndicatorWindowVariables& input)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, reportFileName, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
-  theFile << input.ProgressReportString1 << "<br>" << input.ProgressReportString2;
+  for (int i=0; i<input.ProgressReportStrings.size; i++)
+    theFile << input.ProgressReportStrings[i] << "<br>";
 }
 
 int main(int argc, char **argv)
@@ -138,7 +139,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -319,7 +320,7 @@ int main(int argc, char **argv)
 
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
-  std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, theGlobalVariables);
+  std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, true, theGlobalVariables);
   TimeEvaluation=GetElapsedTimeInSeconds()-TimeParsing;
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;

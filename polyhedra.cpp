@@ -47,7 +47,7 @@ ControllerStartsRunning ParallelComputing::controllerLockThisMutexToSignalPause;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
-  this->ReadWriteRecursionDepth=0;
+  this->ProgressReportDepth=-1;
   this->MaxAllowedComputationTimeInSeconds=1000000;
 }
 

@@ -392,6 +392,16 @@ private:
     result.append("> ");
     return result;
   }
+  inline static bool ReadThroughFirstOpenTag
+  (std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { int tempInt;
+    return XMLRoutines::ReadThroughFirstOpenTag(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+  }
+  inline static bool ReadEverythingPassedTagOpenUntilTagClose
+  (std::istream& streamToMoveIn, const std::string& tagNameNoSpacesNoForbiddenCharacters)
+  { int tempInt;
+    return XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(streamToMoveIn, tempInt, tagNameNoSpacesNoForbiddenCharacters);
+  }
   static bool ReadThroughFirstOpenTag
   (std::istream& streamToMoveIn, int& NumReadWordsExcludingTag,
    const std::string& tagNameNoSpacesNoForbiddenCharacters)
@@ -10350,7 +10360,7 @@ class GlobalVariables
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
 public:
-  int ReadWriteRecursionDepth;
+  int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
   roots rootsGeneralPurposeBuffer1;
   roots rootsGeneralPurposeBuffer2;
@@ -10506,6 +10516,10 @@ public:
   Controller theLocalPauseController;
 
   GlobalVariables();
+  inline void IncrementReadWriteDepth()
+  { this->ProgressReportDepth++;
+    this->theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(5,  this->ProgressReportDepth+1));
+  }
   void operator=(const GlobalVariables& other)
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
     this->theDrawingVariables=other.theDrawingVariables;
@@ -10908,6 +10922,7 @@ public:
   List<QuasiPolynomial> theMultiplicities;
 //  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
+  int numNonZeroMults;
   List<Rational> theCoeffs;
   roots theTranslations;
   roots theTranslationsProjected;
@@ -10931,6 +10946,7 @@ public:
     this->computationPhase=0;
     this->NumProcessedConesParam=0;
     this->NumProcessedExtremaEqualOne=0;
+    this->numNonZeroMults=0;
   }
   void ReadFromDefaultFile(GlobalVariables* theGlobalVariables);
   void WriteToDefaultFile(GlobalVariables* theGlobalVariables);
@@ -10941,7 +10957,16 @@ public:
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   { std::string tempS;
     int numReadWords;
+    if (theGlobalVariables!=0)
+    { this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
+      this->initFromHomomorphism(this->theParser.theHmm, *theGlobalVariables);
+    }
+    { GlobalVariables tempGlobalVars;
+      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
+      this->initFromHomomorphism(this->theParser.theHmm, tempGlobalVars);
+    }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
+
     input >> tempS >> this->computationPhase;
     assert(tempS=="ComputationPhase:");
     bool result=true;
@@ -11263,7 +11288,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   if(tempS!="size:")
     return false;
   if (theGlobalVariables!=0)
-    theGlobalVariables->ReadWriteRecursionDepth++;
+    theGlobalVariables->IncrementReadWriteDepth();
   int CappedListSize = ActualListSize;
   if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<CappedListSize)
     CappedListSize=UpperLimitForDebugPurposes;
@@ -11272,13 +11297,13 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   { this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
     //<reporting_and_safepoint_duties>
     if (theGlobalVariables!=0)
-    { if (ActualListSize>30 && theGlobalVariables->ReadWriteRecursionDepth < theGlobalVariables->theIndicatorVariables.ProgressReportStrings.size)
+    { if (ActualListSize>30)
       { std::stringstream report;
         report << "Reading object number " << i+1 << " out of " << ActualListSize;
         if (CappedListSize<ActualListSize)
           report << " capped at " << CappedListSize;
         theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ReadWriteRecursionDepth]=report.str();
+        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]=report.str();
         theGlobalVariables->MakeReport();
       }
       theGlobalVariables->theLocalPauseController.SafePoint();
@@ -11288,7 +11313,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   bool tempBool= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
   assert(tempBool);
   if (theGlobalVariables!=0)
-    theGlobalVariables->ReadWriteRecursionDepth--;
+    theGlobalVariables->ProgressReportDepth--;
   return true;
 }
 

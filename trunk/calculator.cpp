@@ -462,9 +462,11 @@ int main(int argc, char **argv)
   std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
   for (int i=0; i<theParser.theFunctionList.size; i++)
   { ParserFunction& currentFun=theParser.theFunctionList.TheObjects[i];
-    std::cout << "\"" << currentFun.functionName << "\"";
-    if (i!=theParser.theFunctionList.size-1)
-      std::cout << ",";
+    if (currentFun.flagVisible)
+    { std::cout << "\"" << currentFun.functionName << "\"";
+      if (i!=theParser.theFunctionList.size-1)
+        std::cout << ",";
+    }
   }
   std::cout << ");</script>";
   std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";

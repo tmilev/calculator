@@ -3872,7 +3872,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     out << "\">  Redirecting to the requested page: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
   }
   else
-  { out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... (you wil be redirected automatically)</b><br><br><META http-equiv=\"refresh\" content=\"0; url="
+  { out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection. Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical (Apache server configuration) problem.</b><br><br><META http-equiv=\"refresh\" content=\"0; url="
           << "/cgi-bin/calculator?"
           << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
     if (redirectToSlTwos)
@@ -4593,6 +4593,180 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
   out << this->theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
   out << "<br>Shift+lattice: " << this->theShift.ElementToString() << " + " << this->theLattice.ElementToString();
   return out.str();
+}
+
+std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
+  (bool useEpsilonNotation, bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS;
+  if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
+    return "0";
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { int theIndex=this->NonZeroElements.elements[i];
+    int DisplayIndex=owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(theIndex);
+    if (!this->coeffsRootSpaces.TheObjects[theIndex].IsNegative()&& i!=0)
+      out << "+";
+    tempS=this->coeffsRootSpaces.TheObjects[theIndex].ElementToString();
+    if (tempS=="1")
+      tempS="";
+    if (tempS=="-1")
+      tempS="-";
+    if (!useEpsilonNotation)
+      out << tempS << "g_{" << DisplayIndex << "}";
+    else
+      out << tempS << "g_{" << owner.ElementToStringRootIndexToEpsForm(theIndex, theGlobalVariables) << "}";
+  }
+  if (this->Hcomponent.IsEqualToZero())
+    return out.str();
+ /* if (useCompactRootNotation && owner.theWeyl.RootSystem.ContainsObjectHash(this->Hcomponent))
+  { root tempRoot=this->Hcomponent;
+    if (tempRoot.IsNegativeOrZero())
+    { out << "-";
+      tempRoot.MinusRoot();
+    }
+    out << "h_{" << owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(owner.theWeyl.RootSystem.IndexOfObjectHash(tempRoot)) << "}";
+    return out.str();
+  }*/
+  if (useRootNotation)
+    tempS=this->Hcomponent.ElementToStringLetterFormat("\\alpha", true);
+  else
+    tempS=this->Hcomponent.ElementToStringLetterFormat("h", true);
+  if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
+    out << "+";
+  if (useRootNotation)
+    out << "h_{" << tempS << "}";
+  else
+    out << tempS;
+  return out.str();
+}
+
+void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
+  (std::string& output, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS;
+  root tempRoot;
+  std::string beginMath;
+  std::string endMath;
+  if (!usePNG)
+  { beginMath="<DIV class=\"math\" scale=\"50\">\\begin{array}{";
+    endMath="\\end{array}</DIV>";
+  } else
+  { beginMath="\\begin{tabular}{";
+    endMath="\\end{tabular}";
+  }
+  int numRoots=this->theWeyl.RootSystem.size;
+  int numPosRoots=this->theWeyl.RootsOfBorel.size;
+  int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  ElementSimpleLieAlgebra tempElt1, tempElt2, tempElt3;
+//  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
+  if (usePNG)
+  { out << "\\begin{tabular}{cc}";
+    out << "\\hline generator &corresponding root space\\\\\\hline";
+    for (int i=0; i<numRoots+theDimension; i++)
+    { if (i==numPosRoots)
+      { out << "\\hline\\begin{tabular}{c}$h_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}[g_{i},g_{-i}]$\\\\$h_i$ is dual to the i$^{th}$ root $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
+//        out << "  \\\\\\hline";
+        //out << "\\hline generator & corresponding root space\\\\\\hline";
+        i+=theDimension;
+      }
+      out << "$" << this->GetLetterFromGeneratorIndex(i, false);
+      int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
+      if (useEpsilonNotation)
+        out << ":=g_{" << this->ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables) << "}";
+      out << "$&";
+      out << this->theWeyl.RootSystem.TheObjects[rootIndex].ElementToString() << "\\\\";
+    }
+    out << "\\end{tabular}";
+  }
+  out << beginMath;
+//  ElementUniversalEnveloping tempSSElt1, tempSSElt2, tempSSElt3;
+  for (int i=0; i<numRoots+theDimension+1; i++)
+    out << "c";
+  out << "}";
+  std::string tempHeader=out.str();
+  if(usePNG)
+    out << "$";
+  out << "[\\bullet, \\bullet]\n";
+  if(usePNG)
+    out << "$";
+  for (int i=0; i<numRoots+theDimension; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+    out << " & ";
+    if(usePNG)
+      out << "$";
+    out << tempS;
+    if(usePNG)
+      out << "$";
+  }
+  out << "\\\\\n";
+  Rational tempRat;
+  for (int i=0; i<numRoots+theDimension; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,*this);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+    if(usePNG)
+      out << "$";
+    out << tempS;
+    if(usePNG)
+      out << "$";
+    for (int j=0; j<numRoots+theDimension; j++)
+    { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this);
+      this->LieBracket(tempElt1, tempElt2, tempElt3);
+      tempS=tempElt3.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+      out << "& ";
+      if(usePNG)
+        out << "$";
+      out << tempS;
+      if(usePNG)
+        out << "$";
+    }
+    out << "\\\\\n";
+    //the below is a hack to avoid a latex crash due to memory overuse
+    //if (usePNG && i%130==129)
+    //  out << "\\end{tabular}\n\n\n" << tempHeader;
+  }
+  out << endMath;
+  output=out.str();
+}
+
+void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
+{ std::stringstream out; std::string tempS;
+  if (this->IsEqualToZero())
+    out << "0";
+  if (useLatex)
+    out << "$";
+  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
+  { this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].ElementToString(tempS);
+    if (tempS=="1")
+      tempS="";
+    if (tempS=="-1")
+      tempS="-";
+    if (i!=0)
+    { if (tempS!="")
+      { if (tempS[0]!='-')
+          out << "+";
+      } else
+        out << "+";
+    }
+    out << tempS << "g_{" << this->NonZeroElements.elements[i]+1 << "}";
+  }
+  for (int i=0; i<this->Hcomponent.size; i++)
+    if (!this->Hcomponent.TheObjects[i].IsEqualToZero())
+    { this->Hcomponent.TheObjects[i].ElementToString(tempS);
+      if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (tempS!="")
+      { if (tempS[0]!='-')
+          out << "+";
+      } else
+        out << "+";
+      out << tempS << "h_{\\alpha_{" << i+1 << "}}";
+    }
+  if(useLatex)
+    out << "$";
+  output= out.str();
 }
 
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)

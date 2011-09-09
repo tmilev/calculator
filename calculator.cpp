@@ -438,7 +438,7 @@ int main(int argc, char **argv)
     tempS=tempCommand.str();
     system(tempS.c_str());
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, true, true, theGlobalVariables);
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, true, true, theGlobalVariables);
     lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     lieBracketFile.close();
     std::stringstream tempStreamLatex, tempStreamPNG;

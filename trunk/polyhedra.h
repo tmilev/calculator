@@ -2844,6 +2844,7 @@ public:
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex){ return this->ElementToStringLetterFormat(inputLetter, useLatex, false);}
   std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
+  std::string ElementToStringEpsilonForm(){std::string result; this->ElementToStringEpsilonForm(result, true, false); return result;}
   void ElementToString(std::string& output, bool useLaTeX)const;
   bool CheckForElementSanity();
   //void RootToLinPolyToString(std::string& output, PolynomialOutputFormat& PolyOutput);
@@ -7631,8 +7632,9 @@ public:
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
   void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoords(root& input, root& output, GlobalVariables& theGlobalVariables);
+  void GetEpsilonCoords(const root& input, root& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
+  root GetEpsilonCoords(const root& input, GlobalVariables& theGlobalVariables){root tempRoot; this->GetEpsilonCoords(input, tempRoot, theGlobalVariables); return tempRoot;}
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
@@ -8177,7 +8179,9 @@ public:
   bool ElementToStringNeedsBracketsForMultiplication()const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);}
-  std::string ElementToStringNegativeRootSpacesFirst(bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner);
+  std::string ElementToStringNegativeRootSpacesFirst
+  (bool useEpsilonNotation, bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+;
   void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  }
   Selection NonZeroElements;
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
@@ -8361,10 +8365,13 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); }
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
-  void ElementToStringNegativeRootSpacesFirst(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables);
-  std::string ElementToStringNegativeRootSpacesFirst(bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToStringNegativeRootSpacesFirst(tempS, useHtml, useLatex, usePNG, theGlobalVariables); return tempS;}
+  void ElementToStringNegativeRootSpacesFirst
+  (std::string& output, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables)
+  ;
+  std::string ElementToStringNegativeRootSpacesFirst(bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToStringNegativeRootSpacesFirst(tempS, useEpsilonNotation, useHtml, useLatex, usePNG, theGlobalVariables); return tempS;}
   std::string ElementToStringLieBracketPairing();
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); }
+  std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables) {return this->theWeyl.GetEpsilonCoords(this->theWeyl.RootSystem[theIndex], theGlobalVariables).ElementToStringEpsilonForm();}
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //List<VermaModuleWord> VermaWords;
@@ -8546,8 +8553,8 @@ public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
   std::string ElementToString()const{PolynomialOutputFormat PolyFormatLocal; return this->ElementToString(false, true, PolyFormatLocal);}
-  std::string ElementToString(bool useLatex, bool useGeneratorLetters, const PolynomialOutputFormat& PolyFormatLocal)const;
-  void ComputeDebugString(){ PolynomialOutputFormat PolyFormatLocal; this->DebugString=this->ElementToString(false, true, PolyFormatLocal);}
+  std::string ElementToString(bool useLatex, bool useGeneratorLetters, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const;
+  void ComputeDebugString(){ GlobalVariables theGlobalVariables; PolynomialOutputFormat PolyFormatLocal; this->DebugString=this->ElementToString(false, true, PolyFormatLocal, theGlobalVariables);}
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -8607,14 +8614,16 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<CoefficientType>;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal);}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal, theGlobalVariables);}
   void ElementToString
-  (std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal)const;
-  std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(bool useLatex, const PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal); return tempS;}
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{std::string tempS; this->ElementToString(tempS, true, PolyFormatLocal); return tempS;}
+  (std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  ;
+  std::string ElementToString(GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS;}
+  std::string ElementToString(bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal, theGlobalVariables); return tempS;}
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, true, PolyFormatLocal, theGlobalVariables); return tempS;}
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{GlobalVariables theGlobalVariables; return this->ElementToString(PolyFormatLocal, theGlobalVariables); }
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
-  void ComputeDebugString(){this->ElementToString(this->DebugString);}
+  void ComputeDebugString(){GlobalVariables theGlobalVariables; this->ElementToString(this->DebugString, theGlobalVariables);}
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input);
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);

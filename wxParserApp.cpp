@@ -2,7 +2,7 @@
  * Name:      wxParserApp.cpp
  * Purpose:   Code for Application Class
  * Author:    todor milev (todor.milev@gmail.com)
- * Created:   2011-09-05
+ * Created:   2011-09-13
  * Copyright: todor milev ()
  * License:
  **************************************************************/
@@ -23,10 +23,9 @@ bool wxParserApp::OnInit()
     wxInitAllImageHandlers();
     if ( wxsOK )
     {
-    	wxParserDialog Dlg(0);
-    	SetTopWindow(&Dlg);
-    	Dlg.ShowModal();
-    	wxsOK = false;
+    	wxParserFrame* Frame = new wxParserFrame(0);
+    	Frame->Show();
+    	SetTopWindow(Frame);
     }
     //*)
     return wxsOK;

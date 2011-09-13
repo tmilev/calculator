@@ -9509,6 +9509,19 @@ class DrawOperations
     }
   //  this->draw();
   }
+  void click(int x, int y)
+  { x-=(int)this->centerX;
+    y =((int)this->centerY)-y;
+    this->SelectedIndex=-2;
+    if (this->AreWithinClickTolerance(x, y, 0, 0))
+      this->SelectedIndex=-1;
+    int theDim=this->theBilinearForm.NumRows;
+    for (int i=0; i<theDim; i++)
+      if (this->AreWithinClickTolerance(x, y, (int) this->PreferredBasis[i][0], (int) this->PreferredBasis[i][1] ))
+      { this->SelectedIndex=i;
+        return;
+      }
+  }
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
@@ -9564,6 +9577,7 @@ public:
   { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
   enum TextStyles
   { TextStyleNormal, TextStyleInvisible, TextStyleChamber, TextStyleZeroChamber, TextStylePermanentlyZeroChamber };
+  MutexWrapper LockedWhileDrawing;
   int ColorDashes;
   bool flagLaTeXDraw;
   bool flag2DprojectionDraw;

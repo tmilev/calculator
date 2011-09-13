@@ -11,7 +11,7 @@ class wxParserOutput: public wxFrame
 {
 	public:
 
-		wxParserOutput(wxWindow* parent,wxWindowID id=wxID_ANY);
+		wxParserOutput(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~wxParserOutput();
 
 		//(*Declarations(wxParserOutput)

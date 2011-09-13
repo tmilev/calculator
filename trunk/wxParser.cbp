@@ -24,33 +24,18 @@
 		<Linker>
 			<Add option="`wx-config --libs`" />
 		</Linker>
-		<Unit filename="custom_code_here.cpp" />
-		<Unit filename="polyhedra.cpp" />
-		<Unit filename="polyhedra.h" />
-		<Unit filename="wxIndicatorWindow.cpp" />
-		<Unit filename="wxIndicatorWindow.h" />
 		<Unit filename="wxParserApp.cpp" />
 		<Unit filename="wxParserApp.h" />
 		<Unit filename="wxParserMain.cpp" />
 		<Unit filename="wxParserMain.h" />
-		<Unit filename="wxParserOutput.cpp" />
-		<Unit filename="wxParserOutput.h" />
-		<Unit filename="wxVPDrawCanvas.cpp" />
-		<Unit filename="wxVPDrawCanvas.h" />
-		<Unit filename="wxsmith/wxIndicatorWindow.wxs" />
-		<Unit filename="wxsmith/wxParserOutput.wxs" />
-		<Unit filename="wxsmith/wxParserdialog.wxs" />
+		<Unit filename="wxsmith/wxParserframe.wxs" />
 		<Extensions>
 			<envvars />
 			<code_completion />
 			<wxsmith version="1">
-				<gui name="wxWidgets" src="wxParserApp.cpp" main="wxParserDialog" init_handlers="necessary" language="CPP" />
+				<gui name="wxWidgets" src="wxParserApp.cpp" main="wxParserFrame" init_handlers="necessary" language="CPP" />
 				<resources>
-					<wxDialog wxs="wxsmith/wxParserdialog.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserDialog" language="CPP" />
-					<wxFrame wxs="wxsmith/wxParserOutput.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
-					<wxDialog wxs="wxsmith/wxIndicatorWindow.wxs" src="wxIndicatorWindow.cpp" hdr="wxIndicatorWindow.h" name="wxIndicatorWindow" language="CPP" />
-					<wxDialog wxs="wxsmith/wxPanel.wxs" src="wxPanel.cpp" hdr="wxPanel.h" name="wxPanel" language="CPP" />
-					<wxDialog wxs="wxsmith/wxVPDrawCanvas.wxs" src="wxVPDrawCanvas.cpp" hdr="wxVPDrawCanvas.h" name="wxVPDrawCanvas" language="CPP" />
+					<wxFrame wxs="wxsmith/wxParserframe.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserFrame" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

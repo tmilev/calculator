@@ -2,7 +2,7 @@
  * Name:      wxParserApp.h
  * Purpose:   Defines Application Class
  * Author:    todor milev (todor.milev@gmail.com)
- * Created:   2011-09-05
+ * Created:   2011-09-13
  * Copyright: todor milev ()
  * License:
  **************************************************************/

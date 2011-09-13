@@ -21813,7 +21813,8 @@ void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inp
 }
 
 void DrawingVariables::drawBuffer()
-{ double x1, x2, y1, y2; int currentPenStyle, currentTextStyle;
+{ this->LockedWhileDrawing.LockMe();
+  double x1, x2, y1, y2; int currentPenStyle, currentTextStyle;
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
     switch (this->theBuffer.TypeNthDrawOperation.TheObjects[i])
     { case DrawOperations::typeDrawText:
@@ -21857,6 +21858,7 @@ void DrawingVariables::drawBuffer()
         break;
       default: break;
     }
+  this->LockedWhileDrawing.UnlockMe();
 }
 
 int DrawingVariables::GetActualPenStyleFromFlagsAnd(int inputPenStyle)

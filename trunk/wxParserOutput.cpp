@@ -14,15 +14,17 @@ BEGIN_EVENT_TABLE(wxParserOutput,wxFrame)
 	//*)
 END_EVENT_TABLE()
 
-wxParserOutput::wxParserOutput(wxWindow* parent,wxWindowID id)
+wxParserOutput::wxParserOutput(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	//(*Initialize(wxParserOutput)
 	wxBoxSizer* BoxSizer1;
 	
-	Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER, _T("wxID_ANY"));
+	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+	SetClientSize(wxDefaultSize);
+	Move(wxDefaultPosition);
 	BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
 	TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
-	BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 10);
+	BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);

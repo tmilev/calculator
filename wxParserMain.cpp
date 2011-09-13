@@ -109,7 +109,7 @@ wxParserDialog::wxParserDialog(wxWindow* parent,wxWindowID id)
     SetClientSize(wxSize(800,600));
     BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer2 = new wxBoxSizer(wxVERTICAL);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("RunGtwoInBthree"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("drawRootSystem"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer2->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(62,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -121,6 +121,7 @@ wxParserDialog::wxParserDialog(wxWindow* parent,wxWindowID id)
     SetSizer(BoxSizer1);
     BoxSizer1->SetSizeHints(this);
 
+    Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_UPDATED,(wxObjectEventFunction)&wxParserDialog::OnTextCtrl1Text);
     Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserDialog::OnAbout);
     Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserDialog::OnButton2Click);
     Connect(wxID_ANY,wxEVT_INIT_DIALOG,(wxObjectEventFunction)&wxParserDialog::OnInit);
@@ -138,6 +139,8 @@ wxParserDialog::wxParserDialog(wxWindow* parent,wxWindowID id)
     this->eventProgressReport.SetEventObject(this);
     this->eventProgressReport.SetEventType(wxEVT_ComputationProgressReport);
     theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
+    theParser.DefaultWeylRank=8;
+    theParser.DefaultWeylLetter='E';
     theMainWindow=this;
 }
 
@@ -285,4 +288,8 @@ void wxParserDialog::OnButton2Click(wxCommandEvent& event)
     }
   }
   theController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
+}
+
+void wxParserDialog::OnTextCtrl1Text(wxCommandEvent& event)
+{
 }

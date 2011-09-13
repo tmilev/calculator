@@ -90,6 +90,7 @@ void makeReport(IndicatorWindowVariables& input)
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, reportFileName, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
+  theFile <<"<hr>" << input.StatusString1 << "<hr>";
   for (int i=0; i<input.ProgressReportStrings.size; i++)
     theFile << input.ProgressReportStrings[i] << "<br>";
 }
@@ -139,7 +140,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -157,6 +158,9 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  theParser.DefaultWeylRank=6;
+  theParser.DefaultWeylLetter='E';
+  civilizedInput="drawRootSystem";
   //civilizedInput="findMaximumInDirectionOverLatticeShifted(-2x_1+x_2+x_3, (0,0,0), lattice((1,0,0),(0,1,0),(0,0,1)), cone((1,0,0,0),(0,1,0,0), (1,1,1,-4), (0,1,-1,0), (0,0,0,1)),2)";
 //  civilizedInput="findMaximumInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
 //  civilizedInput="findExtremaInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
@@ -423,31 +427,50 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketNoEnding=tempStream.str();
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << " <hr><b>Chevalley-Weyl basis.</b><br> Simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << ". <a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/" << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img>";
+  std::cout << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(theParser.DefaultWeylLetter, theParser.DefaultWeylRank) << ").</b><br>";
+  std::cout << "Notation formats: <button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+    << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";
+  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+    << " onclick=\"hideItem('ChevalleyWeylBasis'); showItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Simple basis format</button> ";
+  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+    << " onclick=\"hideItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); showItem('ChevalleyWeylBasisEpsFormat'); \">Epsilon format</button> ";
+  std::cout << "<div id=\"ChevalleyWeylBasis\" ><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
+    << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
+    << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img></div>";
+  std::cout << "<div id=\"ChevalleyWeylBasisRootFormat\" style=\"display: none\"><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
+    << "/" << fileNameLieBracketNoEnding << "RootFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
+    << tempStream2.str() << fileNameLieBracketNoEnding << "RootFormat.png\"></img></div>";
+  std::cout << "<div id=\"ChevalleyWeylBasisEpsFormat\" style=\"display: none\"><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
+    << "/" << fileNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
+    << tempStream2.str() << fileNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
   std::string latexCommandTemp;
   std::string fileNameLieBracketFullPathPNGEnding;
   fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
   fileNameLieBracketFullPathPNGEnding.append(".png");
   if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
   { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
-    std::fstream lieBracketFile;
-    std::string tempFileName= fileNameLieBracketFullPathNoEnding;
-    tempFileName.append(".tex");
+    std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
     std::stringstream tempCommand;
     tempCommand << "mkdir " << inputPath;
     tempS=tempCommand.str();
     system(tempS.c_str());
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile, tempFileName, false, true, false);
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, true, true, theGlobalVariables);
-    lieBracketFile << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    lieBracketFile.close();
-    std::stringstream tempStreamLatex, tempStreamPNG;
-    tempStreamLatex << "latex  -output-directory=" << inputPath << " " << inputPath << fileNameLieBracketNoEnding << ".tex";
-    latexCommandTemp=tempStreamLatex.str();
-    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
-    tempStreamPNG << "dvipng " << fileNameLieBracketFullPathNoEnding << ".dvi -o " << fileNameLieBracketFullPathNoEnding << ".png -T tight";
-    latexCommandTemp= tempStreamPNG.str();
-    theParser.SystemCommands.AddObjectOnTop(latexCommandTemp);
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
+    PolynomialOutputFormat tempFormat;
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +".tex");
+    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"RootFormat.tex");
+    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"EpsFormat.tex");
+    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + ".dvi -o " + fileNameLieBracketFullPathNoEnding + ".png -T tight");
+    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
+    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
   }
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";

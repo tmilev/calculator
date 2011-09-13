@@ -51,6 +51,7 @@ class wxParserDialog: public wxDialog
         void OnAbout(wxCommandEvent& event);
         void OnInit(wxInitDialogEvent& event);
         void OnButton2Click(wxCommandEvent& event);
+        void OnTextCtrl1Text(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(wxParserDialog)

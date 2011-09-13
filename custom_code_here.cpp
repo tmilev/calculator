@@ -21,17 +21,6 @@
 // To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
 // did something useful with it! Cheers!
 
-void ComputationSetup::ComputeCharaterFormulas(ComputationSetup& inputData, GlobalVariables& theGlobalVariables)
-{ if (inputData.thePartialFraction.theChambers.flagSliceWithAWallInitDone)
-    while (inputData.thePartialFraction.theChambers.oneStepChamberSlice(theGlobalVariables)){}
-  else
-  { WeylGroup A2test;
-    A2test.MakeArbitrary('G', 2);
-    A2test.ComputeRho(true);
-    inputData.thePartialFraction.theChambers.initCharacterComputation(A2test, A2test.RootsOfBorel, theGlobalVariables);
-  }
-}
-
 void LargeIntUnsigned::AssignString(const std::string& input)
 { if (input.size()<10)
   { unsigned int x=std::atoi(input.c_str());
@@ -284,12 +273,17 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 }
 
 void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatrix)
+{ assert(theIndex<this->size);
+  this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
+}
+
+void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix)
 { root tempRoot;
   int theDim=this->CartanSymmetric.NumRows;
   outputMatrix.init(theDim, theDim);
   for (int i=0; i<theDim; i++)
   { tempRoot.MakeEi(theDim, i);
-    this->ActOn(theIndex, tempRoot, false, false, (Rational) 0);
+    this->ActOn(input, tempRoot, false, false, (Rational) 0);
     for (int j=0; j<theDim; j++)
       outputMatrix.elements[j][i]=tempRoot.TheObjects[j];
   }
@@ -1197,7 +1191,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     bool foundExitNormal=false;
     for (int j=0; j<currentCone.Normals.size; j++)
     { root& currentNormal=currentCone.Normals.TheObjects[j];
-      if (currentNormal[0]==0)
+      if (currentNormal[0].IsEqualToZero())
       { tempRoot.SetSize(theDimProjectivized-1);
         for (int k=0; k<currentNormal.size-1; k++)
           tempRoot[k]=currentNormal[k+1];
@@ -1659,7 +1653,7 @@ int ParserNode::EvaluateRelations
   out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out3.str());
   out << "<br>Resulting relations:";
   std::stringstream out2;
-  theFormat.MakeAlphabetArbitraryWithIndex("u");
+  theFormat.MakeAlphabetArbitraryWithIndex("u", "v");
   for(int i=0; i<outputRelations.size; i++)
     out2 << outputRelations.TheObjects[i].ElementToString(theFormat) << ", ";
   out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out2.str());
@@ -4064,7 +4058,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
 
 std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)
 { PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex(inputLetter);
+  tempFormat.MakeAlphabetArbitraryWithIndex(inputLetter, tempFormat.alphabetBases[1]);
   return this->ElementToStringLetterFormat(tempFormat, useLatex, DontIncludeLastVar);
 }
 
@@ -4596,7 +4590,7 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
 }
 
 std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (bool useEpsilonNotation, bool useCompactRootNotation, bool useRootNotation, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
+  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
@@ -4611,37 +4605,55 @@ std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
       tempS="";
     if (tempS=="-1")
       tempS="-";
-    if (!useEpsilonNotation)
-      out << tempS << "g_{" << DisplayIndex << "}";
+    if (!useRootNotation)
+      out << tempS << thePolyFormat.alphabetBases[0] << "_{" << DisplayIndex << "}";
     else
-      out << tempS << "g_{" << owner.ElementToStringRootIndexToEpsForm(theIndex, theGlobalVariables) << "}";
+    { out << tempS << thePolyFormat.alphabetBases[0] << "_{";
+      if (useEpsilonNotation)
+        out << owner.ElementToStringRootIndexToEpsForm(theIndex, theGlobalVariables);
+      else
+        out << owner.ElementToStringRootIndexToSimpleBasis(theIndex, theGlobalVariables);
+      out << "}";
+    }
   }
   if (this->Hcomponent.IsEqualToZero())
     return out.str();
- /* if (useCompactRootNotation && owner.theWeyl.RootSystem.ContainsObjectHash(this->Hcomponent))
+  if (useRootNotation)
   { root tempRoot=this->Hcomponent;
-    if (tempRoot.IsNegativeOrZero())
-    { out << "-";
-      tempRoot.MinusRoot();
-    }
-    out << "h_{" << owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(owner.theWeyl.RootSystem.IndexOfObjectHash(tempRoot)) << "}";
-    return out.str();
-  }*/
-  if (useRootNotation)
-    tempS=this->Hcomponent.ElementToStringLetterFormat("\\alpha", true);
-  else
-    tempS=this->Hcomponent.ElementToStringLetterFormat("h", true);
-  if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
-    out << "+";
-  if (useRootNotation)
-    out << "h_{" << tempS << "}";
-  else
+    if (useEpsilonNotation)
+      tempRoot=owner.theWeyl.GetEpsilonCoords(this->Hcomponent, theGlobalVariables);
+    bool isEmpty=(this->NonZeroElements.CardinalitySelection==0);
+    for (int i=0; i<tempRoot.size; i++)
+      if (!tempRoot.TheObjects[i].IsEqualToZero())
+      { tempRoot.TheObjects[i].ElementToString(tempS);
+        if (tempS=="1")
+          tempS="";
+        if (tempS=="-1")
+          tempS="-";
+        if (!isEmpty)
+        { if (tempS!="")
+          { if (tempS[0]!='-')
+               out << "+";
+          } else
+            out << "+";
+        }
+        out << tempS << "h_{";
+        out << ((useEpsilonNotation) ? "\\varepsilon" : "\\alpha");
+        out << "_{" << i+1 << "}}";
+        isEmpty=false;
+      }
+  } else
+  { tempS=this->Hcomponent.ElementToStringLetterFormat(thePolyFormat.alphabetBases[1] , true);
+    if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
+      out << "+";
     out << tempS;
+  }
   return out.str();
 }
 
 void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (std::string& output, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables)
+  (std::string& output, bool useRootNotation, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG,
+   PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   root tempRoot;
@@ -4657,6 +4669,16 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   int numRoots=this->theWeyl.RootSystem.size;
   int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
+  int NumRowsToDisplayLargeTable=theDimension+numRoots;
+  bool TableTrimmed=false;
+  if (NumRowsToDisplayLargeTable>100)
+  { //to avoid the goddamned latex BUGS YES THEY ARE setting RAM use bound to 3MB is re-fucking-tarded and IS A BUG
+    useRootNotation=false; useEpsilonNotation=false;
+    NumRowsToDisplayLargeTable=70;
+    TableTrimmed=true;
+    //note appologies to whoever is reading this, but the fucking latex wasted 2 hours of my precious time,
+    //not to mention I have a deadline coming soon.
+  }
   ElementSimpleLieAlgebra tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   if (usePNG)
@@ -4664,25 +4686,45 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     out << "\\hline generator &corresponding root space\\\\\\hline";
     for (int i=0; i<numRoots+theDimension; i++)
     { if (i==numPosRoots)
-      { out << "\\hline\\begin{tabular}{c}$h_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}[g_{i},g_{-i}]$\\\\$h_i$ is dual to the i$^{th}$ root $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
+      { if (useRootNotation)
+          out << "\\hline\\begin{tabular}{c}$"
+          << theFormat.alphabetBases[1] << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
+          << theFormat.alphabetBases[0] << "_{\\alpha},"
+          << theFormat.alphabetBases[0] << "_{-\\alpha}]$\\\\$"
+          << theFormat.alphabetBases[1] << "_\\alpha$ is dual to the root $\\alpha$\\end{tabular} & 0 \\\\\\hline";
+        else
+          out << "\\hline\\begin{tabular}{c}$"
+          << theFormat.alphabetBases[1] << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
+          << theFormat.alphabetBases[0] << "_{i},"
+          << theFormat.alphabetBases[0] << "_{-i}]$\\\\$"
+          << theFormat.alphabetBases[1] << "_i$ is dual to the root $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
 //        out << "  \\\\\\hline";
+
         //out << "\\hline generator & corresponding root space\\\\\\hline";
         i+=theDimension;
       }
-      out << "$" << this->GetLetterFromGeneratorIndex(i, false);
+      out << "$" << this->GetLetterFromGeneratorIndex(i, false, theFormat);
       int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
-      if (useEpsilonNotation)
-        out << ":=g_{" << this->ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables) << "}";
+      if (useRootNotation)
+      { out << ":=" << theFormat.alphabetBases[0] << "_{";
+        if (useEpsilonNotation)
+          out << this->ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables);
+        else
+          out << this->ElementToStringRootIndexToSimpleBasis(rootIndex, theGlobalVariables);
+        out<< "}";
+      }
       out << "$&";
-      out << this->theWeyl.RootSystem.TheObjects[rootIndex].ElementToString() << "\\\\";
+      if (!useEpsilonNotation)
+        out << this->theWeyl.RootSystem.TheObjects[rootIndex].ElementToString() << "\\\\";
+      else
+        out << "$" << this->theWeyl.GetEpsilonCoords(this->theWeyl.RootSystem.TheObjects[rootIndex], theGlobalVariables).ElementToStringEpsilonForm() << "$\\\\";
     }
     out << "\\end{tabular}";
   }
-  out << beginMath;
-//  ElementUniversalEnveloping tempSSElt1, tempSSElt2, tempSSElt3;
   for (int i=0; i<numRoots+theDimension+1; i++)
-    out << "c";
-  out << "}";
+    beginMath+="c";
+  beginMath+="}\n";
+  out << beginMath;
   std::string tempHeader=out.str();
   if(usePNG)
     out << "$";
@@ -4691,7 +4733,8 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     out << "$";
   for (int i=0; i<numRoots+theDimension; i++)
   { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this);
-    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
+    (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
     out << " & ";
     if(usePNG)
       out << "$";
@@ -4701,9 +4744,11 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   }
   out << "\\\\\n";
   Rational tempRat;
-  for (int i=0; i<numRoots+theDimension; i++)
+  //int lineCounter=0;
+  for (int i=0; i<NumRowsToDisplayLargeTable; i++)
   { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,*this);
-    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
+    (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
     if(usePNG)
       out << "$";
     out << tempS;
@@ -4712,7 +4757,8 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     for (int j=0; j<numRoots+theDimension; j++)
     { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
-      tempS=tempElt3.ElementToStringNegativeRootSpacesFirst(useEpsilonNotation, true, false, *this, theGlobalVariables);
+      tempS=tempElt3.ElementToStringNegativeRootSpacesFirst
+        (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
       out << "& ";
       if(usePNG)
         out << "$";
@@ -4721,9 +4767,14 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
         out << "$";
     }
     out << "\\\\\n";
-    //the below is a hack to avoid a latex crash due to memory overuse
-    //if (usePNG && i%130==129)
-    //  out << "\\end{tabular}\n\n\n" << tempHeader;
+    if (TableTrimmed && i==NumRowsToDisplayLargeTable-1)
+      out << "Table was trimmed to circumvent a LaTeX memory bug.";
+    //the below is to avoid a latex crash due to memory overuse
+    //lineCounter++;
+   //if (lineCounter>100)
+    //{ out << "Due to a latex memory Bug I cannot display the entire table. ";
+    //  break;
+    //}
   }
   out << endMath;
   output=out.str();
@@ -4776,15 +4827,15 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   int timesCalled=this->NumHtmlGraphics;
   tempStream1 << "drawConeInit" << timesCalled;
   std::string theInitFunctionName= tempStream1.str();
-  tempStream5 << "drawCone" << timesCalled;
+  tempStream5 << "drawAll" << timesCalled;
   std::string theDrawFunctionName= tempStream5.str();
   tempStream2 << "idCanvasCone" << timesCalled;
   std::string theCanvasId= tempStream2.str();
-  tempStream3 << "surfaceCone" << timesCalled;
+  tempStream3 << "surf" << timesCalled;
   std::string theSurfaceName=tempStream3.str();
-  tempStream4 << "points1Array" << timesCalled;
+  tempStream4 << "pts1" << timesCalled;
   std::string Points1ArrayName=tempStream4.str();
-  tempStream10 << "points2Array" << timesCalled;
+  tempStream10 << "pts2" << timesCalled;
   std::string Points2ArrayName=tempStream10.str();
   tempStream6 << "basisCone" << timesCalled;
   std::string basisName = tempStream6.str();
@@ -4792,14 +4843,14 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   std::string shiftX=tempStream7.str();
   tempStream8 << "shiftYCone" << timesCalled;
   std::string shiftY=tempStream8.str();
-  tempStream9 << "convertToXYCone" << timesCalled;
+  tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName=tempStream9.str();
 
-  out << "<div style=\"width:400;height:400;border:solid 1px\" id=\"" << theCanvasId
+  out << "<div style=\"width:" << this->DefaultHtmlWidth << ";height:" << this->DefaultHtmlHeight << ";border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" <<timesCalled << "(event);\""
-  << "></div>";
+  << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "show/hide");
   out << "<script type=\"text/javascript\">\n"
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
@@ -4821,17 +4872,20 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-  out  << "var " << basisName << "=new Array(8);\n";
-  out << basisName << "[0]=[100,0];\n";
-  out << basisName << "[1]=[0,-100];\n";
-  out << basisName << "[2]=[50,50];\n";
-  out << basisName << "[3]=[-50,50];\n";
-  out << basisName << "[4]=[-50,50];\n";
-  out << basisName << "[5]=[-50,50];\n";
-  out << basisName << "[6]=[-50,50];\n";
-  out << basisName << "[7]=[-50,50];\n";
-  out << "var " << shiftX << "=150;\n";
-  out << "var " <<  shiftY << "=200;\n";
+  if (this->theBuffer.ProjectionsEiVectors.size< theDimension);
+  { int oldSize=this->theBuffer.ProjectionsEiVectors.size;
+    this->theBuffer.ProjectionsEiVectors.SetSize(theDimension);
+    for (int i=oldSize; i<theDimension; i++)
+    { this->theBuffer.ProjectionsEiVectors[i].SetSize(2);
+       this->theBuffer.ProjectionsEiVectors[i][0]=0;
+       this->theBuffer.ProjectionsEiVectors[i][1]=0;
+    }
+  }
+  out  << "var " << basisName << "=new Array(" << theDimension << ");\n";
+  for (int i=0; i<theDimension; i++)
+    out << basisName << "[" << i << "]=[" << this->theBuffer.ProjectionsEiVectors[i][0] << "," << this->theBuffer.ProjectionsEiVectors[i][1] << "];\n";
+  out << "var " << shiftX << "=" << this->theBuffer.centerX << ";\n";
+  out << "var " <<  shiftY << "=" << this->theBuffer.centerY << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
   out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
@@ -5064,6 +5118,14 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   return out.str();
 }
 
+std::string CGIspecificRoutines::GetHtmlButton
+(const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
+{ std::stringstream out;
+  out << "\n<button id=\"" << buttonID << "\" " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+    << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
+  return out.str();
+}
+
 std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string& input, bool useDiv)
 { std::stringstream out;
   CGIspecificRoutines::GlobalFormulaIdentifier++;
@@ -5087,6 +5149,402 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
         << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
         << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
   return out.str();
+}
+
+void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
+{ root lowest;
+  this->ComputeRho(false);
+//  std::cout << "rho: " << this->rho.ElementToString() << "<hr>";
+  this->GetLowestElementInOrbit(this->rho, lowest, outputWeylElt, false, false);
+  //std::stringstream out;
+  //out << outputWeylElt;
+//  out << "\n<br>";
+  //MatrixLargeRational tempMat;
+  //this->GetMatrixOfElement(outputWeylElt, tempMat);
+  //out << tempMat.ElementToString(true, false);
+  //std::cout << out.str();
+  //std::cout << outputWeylElt;
+ //std::cout << this->GetMatrixOfElement(
+}
+
+void WeylGroup::GetLowestElementInOrbit
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho)
+{ assert(& input!=&output);
+  output=input;
+  roots eiBasis;
+  eiBasis.MakeEiBasis(this->GetDim());
+  outputWeylElt.size=0;
+  for (bool found = true; found; )
+  { found=false;
+    for (int i=0; i<this->GetDim(); i++)
+      if (this->RootScalarCartanRoot(output, eiBasis[i]).IsPositive())
+      { found=true;
+        this->SimpleReflection<Rational>(i, output, RhoAction, UseMinusRho, (Rational) 0);
+        outputWeylElt.AddObjectOnTop(i);
+      }
+  }
+}
+
+bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(root& input)
+{ ElementWeylGroup tempElt;
+  this->GetCoxeterElement(tempElt);
+  MatrixLargeRational matCoxeterElt;
+  this->GetMatrixOfElement(tempElt, matCoxeterElt);
+  root tempRoot=input;
+  for (int i=0; i<this->GetDim(); i++)
+    matCoxeterElt.ActOnAroot(tempRoot);
+  return tempRoot==input;
+}
+
+void MatrixLargeRational::ApproximateLargestEigenSpace
+  (roots& outputBasis, const Rational& DesiredError, int SuggestedOrder, int numIterations)
+{ assert(false);
+  /*assert(this->NumRows==this->NumCols && this->NumRows>0);
+  outputBasis.SetSize(2);
+  outputBasis[0].MakeEi(this->NumCols,0);
+  outputBasis[1]=outputBasis[0];
+  root* r1=&outputBasis[0];
+  root* r2=&outputBasis[1];
+  if (numIterations<=0)
+    numIterations=1000;
+  //if (SuggestedOrder<1)
+  for (int i=0; i< numIterations; i++)
+  { this->ActOnAroot(*r1, *r2);
+    if (!r2->IsEqualToZero())
+      (*r2)/=r2->ScalarEuclidean(*r2);
+    MathRoutines::swap(r1, r2);
+  }*/
+}
+
+template<class Base>
+class Complex
+{
+  static bool EqualityIsApproximate;
+  static double EqualityPrecision;
+  public:
+  Base Im;
+  Base Re;
+  std::string ElementToString()
+  { std::stringstream tempStream;
+    tempStream << *this;
+    return tempStream.str();
+  }
+  void ElementToString(std::string& output){ output=this->ElementToString(); }
+  friend std::iostream& operator<< <Base>(std::iostream& output, const Complex<Base>& input);
+  void operator*=(const Complex<Base>& other)
+  { Complex Accum;
+    Accum.Re=this->Re*other.Re-this->Im*other.Im;
+    Accum.Im=this->Re*other.Im+ this->Im*other.Re;
+    this->operator=(Accum);
+  }
+  void operator=(const Complex<Base>& other)
+  { this->Re=other.Re;
+    this->Im=other.Im;
+  }
+  void operator+=(const Complex<Base>& other)
+  { this->Re+=other.Re;
+    this->Im+=other.Im;
+  }
+  void operator-=(const Complex<Base>& other)
+  { this->Re-=other.Re;
+    this->Im-=other.Im;
+  }
+  void operator=(int other)
+  { this->Re=other;
+    this->Im=0;
+  }
+  void operator=(double other)
+  { this->Re=other;
+    this->Im=0;
+  }
+  void Invert()
+  { Base numerator;
+    numerator=this->Re*this->Re+this->Im* this->Im;
+    this->Re/=numerator;
+    numerator*=-1;
+    this->Im/=numerator;
+  }
+  bool IsEqualToZero()const
+  { if(!Complex<Base>::EqualityIsApproximate)
+      return this->Im==0 && this->Re==0;
+    else
+      return
+      this->Im<Complex<Base>::EqualityPrecision && -this->Im<Complex<Base>::EqualityPrecision
+      &&
+      this->Re<Complex<Base>::EqualityPrecision && -this->Re<Complex<Base>::EqualityPrecision
+      ;
+  }
+  inline void Minus(){this->Im=-this->Im; this->Re=-this->Re;}
+  Complex(){}
+  Complex(int other){this->operator=(other);}
+  Complex(double other){this->operator=(other);}
+};
+
+template < > bool  Complex<double>::EqualityIsApproximate=true;
+template < > double Complex<double>::EqualityPrecision=0.00000001;
+
+
+template<class Base>
+std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
+{ if (input.IsEqualToZero())
+  { output << "0";
+    return output;
+  }
+  if (input.Re!=0)
+  { output << input.Re;
+    if (input.Im!=0)
+      output << " + ";
+  }
+  if (input.Im!=0)
+    output << "i";
+  if (input.Im<0)
+    output << "(";
+  if (input.Im!=1)
+    output << input.Im;
+  if (input.Im<0)
+    output << ")";
+  return output;
+}
+
+double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
+{ double result;
+  if (x!=0)
+   result= atan(y/x);
+  else
+    if (y>0)
+      result= MathRoutines::Pi/2;
+    else
+      result= MathRoutines::Pi/(-2);
+  return result;
+}
+
+void DrawOperations::RotateOutOfPlane
+  (std::stringstream& logger, Vector<double>& input, Vector<double>& output,
+   Vector<double>& orthoBasis1, Vector<double>& orthoBasis2, double oldTanSquared, double newTanSquared)
+{ Vector<double> projection= orthoBasis1;
+  Vector<double> vComponent= input;
+  double scal1= this->theBilinearForm.ScalarProduct(orthoBasis1, input);
+  double scal2= this->theBilinearForm.ScalarProduct(orthoBasis2, input);
+  projection*=scal1;
+  projection+= orthoBasis2*scal2;
+  vComponent-=projection;
+  logger << "\ngetScalarProd=" << this->theBilinearForm.ScalarProduct(projection, vComponent);
+  if (oldTanSquared<0 || newTanSquared<0)
+    return;
+  double oldAngle=atan(sqrt(oldTanSquared));
+  double newAngle=atan(sqrt(newTanSquared));
+  double angleChange=-oldAngle+newAngle;
+  projection=orthoBasis1;
+  projection*=cos(angleChange)*scal1-sin(angleChange)*scal2;
+  projection+=orthoBasis2*(sin(angleChange)*scal1+sin(angleChange)*scal2);
+  output = vComponent;
+  output+=projection;
+}
+
+void DrawOperations::ModifyToOrthonormalNoShiftSecond
+(Vector<double>& root1, Vector<double>& root2)
+{ //if  (this->getScalarProduct(root2, root2)==0)
+  //  root2.MakeEi(this->theWeyl.CartanSymmetric.NumRows,1);
+  double theScalar= this->theBilinearForm.ScalarProduct(root1, root2)/this->theBilinearForm.ScalarProduct(root2, root2);
+  root1-=root2*theScalar;
+  this->ScaleToUnitLength(root1);
+  this->ScaleToUnitLength(root2);
+}
+
+void DrawOperations::ComputeProjections()
+{ for (int i=0; i<this->theDrawLineBetweenTwoRootsOperations.size; i++)
+    this->theDrawLineBetweenTwoRootsOperations[i].ComputeXYcoords(this->ProjectionsEiVectors);
+}
+
+
+void DrawLineBetweenTwoRootsOperation::ComputeXYcoords
+(List<List<double> >& ProjectionsEiVectors)
+{ this->flagIsPrecomputed=true;
+  this->precomputedX1=0;
+  this->precomputedX2=0;
+  this->precomputedY1=0;
+  this->precomputedY2=0;
+  assert(this->v1.size==this->v2.size && this->v1.size==ProjectionsEiVectors.size);
+  for (int i=0; i<ProjectionsEiVectors.size; i++)
+  { this->precomputedX1+=ProjectionsEiVectors[i][0]*this->v1[i].DoubleValue();
+    this->precomputedY1+=ProjectionsEiVectors[i][1]*this->v1[i].DoubleValue();
+    this->precomputedX2+=ProjectionsEiVectors[i][0]*this->v2[i].DoubleValue();
+    this->precomputedY2+=ProjectionsEiVectors[i][1]*this->v2[i].DoubleValue();
+  }
+}
+
+void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
+{ if (newX==0 && newY==0)
+    return;
+  std::stringstream out;
+  Vector<double>& selectedRoot=this->PreferredBasis[this->SelectedIndex];
+  double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
+  double oldX=this->PreferredBasis[this->SelectedIndex][0];
+  double oldY=this->PreferredBasis[this->SelectedIndex][1];
+  double oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
+  double newAngle= getAngleFromXandY(newX, newY, oldX, oldY);
+  double AngleChange= -newAngle+oldAngle;
+  double epsilon=0.000000000001;
+  while (AngleChange>MathRoutines::Pi/2+epsilon)
+  { AngleChange-=MathRoutines::Pi;
+  }
+  while (AngleChange<=MathRoutines::Pi/(-2)-epsilon)
+  { AngleChange+=MathRoutines::Pi;
+  }
+  out << "\nold angle:" << oldAngle;
+  out << "\nnew angle: " << newAngle;
+  Vector<double> NewVectorE1, NewVectorE2;
+  //NewVectorE1.ComputeDebugString();
+  NewVectorE1= this->BasisProjectionPlane[0]*cos(AngleChange);
+  //NewVectorE1.ComputeDebugString();
+  NewVectorE1+=this->BasisProjectionPlane[1]*sin(AngleChange);
+  //NewVectorE1.ComputeDebugString();
+  //NewVectorE1.ComputeDebugString();
+  //NewVectorE2.ComputeDebugString();
+  NewVectorE2= this->BasisProjectionPlane[1]*cos(AngleChange);
+  //NewVectorE2.ComputeDebugString();
+  NewVectorE2+=this->BasisProjectionPlane[0]*(-sin(AngleChange));
+  //NewVectorE2.ComputeDebugString();
+  //NewVectorE2.ComputeDebugString();
+  this->BasisProjectionPlane[0]=NewVectorE1;
+  this->BasisProjectionPlane[1]=NewVectorE2;
+  this->BasisProjectionPlane[0].ComputeDebugString();
+  this->BasisProjectionPlane[1].ComputeDebugString();
+  double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[0]);
+  double RootTimesE2=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[1]);
+  Vector<double> vOrthogonal=selectedRoot;
+  Vector<double> vProjection=this->BasisProjectionPlane[0]*RootTimesE1;
+  vProjection+=this->BasisProjectionPlane[1]*RootTimesE2;
+  vOrthogonal-= vProjection;
+  double oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);
+  double newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);
+  out << "\noldRatio: " << oldRatioProjectionOverHeightSquared;
+  out << "\nnewRatio: " << newRatioProjectionOverHeightSquared;
+  if (this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)>epsilon || this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal)<-epsilon)
+  { this->ScaleToUnitLength(vProjection);
+    this->ScaleToUnitLength(vOrthogonal);
+    out << "\nscaled vOrthogonal=" << vOrthogonal.ElementToString() << "->" << this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal);
+    out << "\nscaled vProjection=" << vProjection.ElementToString() << "->" <<this->theBilinearForm.ScalarProduct(vProjection, vProjection);
+    out << "\ntheScalarProd: " << this->theBilinearForm.ScalarProduct(vOrthogonal, vProjection);
+    this->RotateOutOfPlane(out, this->BasisProjectionPlane[0], this->BasisProjectionPlane[0], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    this->RotateOutOfPlane(out, this->BasisProjectionPlane[1], this->BasisProjectionPlane[1], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+  }
+//  this->e1.ComputeDebugString();
+//  this->e2.ComputeDebugString();
+  this->ModifyToOrthonormalNoShiftSecond(this->BasisProjectionPlane[0], this->BasisProjectionPlane[1]);
+//  this->e1.ComputeDebugString();
+//  this->e2.ComputeDebugString();
+  out << "\ne1=" << this->BasisProjectionPlane[0].ElementToString();
+  out << "\ne2=" << this->BasisProjectionPlane[1].ElementToString();
+  out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(this->BasisProjectionPlane[0], this->BasisProjectionPlane[1]);
+  this->ComputeProjections();
+  this->DebugString= out.str();
+}
+
+
+int ParserNode::EvaluateDrawRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  root ZeroRoot;
+  int theDimension= theWeyl.GetDim();
+  ZeroRoot.MakeZero(theDimension);
+  ElementWeylGroup tempElt;
+  theWeyl.GetCoxeterElement(tempElt);
+  MatrixLargeRational matCoxeterElt, tempMat;
+  theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
+  std::cout << matCoxeterElt.ElementToString(true, false);
+  tempMat=matCoxeterElt;
+  int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
+  for (int i=0; i<coxeterNumber-1; i++)
+    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+  Complex<double> theEigenValue;
+  theEigenValue.Re= cos(2*MathRoutines::Pi/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi/coxeterNumber);
+  Matrix<Complex<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<List<Complex<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
+  Vectors<Complex<double> > theEigenSpace;
+  Vectors<double> theEigenSpaceReal;
+  theEigenSpace.operator=(theEigenSpaceList);
+  theEigenSpaceReal.SetSizeMakeMatrix(2, theDimension);
+  theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
+  Vector<double> tempRoot;
+  if (theEigenSpace.size>0)
+  { for (int j=0; j<theDimension; j++)
+    { theEigenSpaceReal[0][j]=theEigenSpace[0][j].Re;
+      theEigenSpaceReal[1][j]=theEigenSpace[0][j].Im;
+    }
+    double ReLength=sqrt(theWeyl.RootScalarCartanRoot(theEigenSpaceReal[0],theEigenSpaceReal[0]));
+    double ImLength=sqrt(theWeyl.RootScalarCartanRoot(theEigenSpaceReal[1],theEigenSpaceReal[1]));
+    theEigenSpaceReal[0]/=ReLength;
+    theEigenSpaceReal[1]/=ImLength;
+    for (int i=0; i<theDimension; i++)
+    { tempRoot.MakeEi(theDimension, i, 1, 0);
+      theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors[i][0]=
+        theWeyl.RootScalarCartanRoot(theEigenSpaceReal[0], tempRoot)*250;
+      theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors[i][1]=
+        theWeyl.RootScalarCartanRoot(theEigenSpaceReal[1], tempRoot)*250;
+    }
+  }
+  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
+  std::stringstream tempStream;
+  tempStream << "<hr>the eigen mat:";
+  tempStream << eigenMat;
+  std::cout << tempStream.str();
+  roots RootSystemSorted;
+  RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
+  List<double> lengths;
+  lengths.SetSize(RootSystemSorted.size);
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { tempRoot.SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+      tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
+    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theEigenSpaceReal[0]);
+    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theEigenSpaceReal[1]);
+    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
+  }
+  for (int i=0; i<RootSystemSorted.size; i++)
+    for (int j=i; j<RootSystemSorted.size; j++)
+      if (lengths[i]<lengths[j])
+      { MathRoutines::swap(lengths[i], lengths[j]);
+        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
+      }
+  root differenceRoot;
+  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
+  Rational minLength= theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  for (int i=2; i<RootSystemSorted.size; i++)
+  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
+    if (minLength> theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot))
+      minLength=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  }
+  std::cout << "<hr>the min length is: " << minLength.ElementToString();
+  Rational tempRat;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
+  theGlobalVariables.theDrawingVariables.theBuffer.centerX=325;
+  theGlobalVariables.theDrawingVariables.theBuffer.centerY=325;
+  for (int i=0; i<RootSystemSorted.size; i++)
+  { int color=CGIspecificRoutines::RedGreenBlue(255, 0, 0);
+    theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    for (int j=i+1; j<RootSystemSorted.size; j++)
+    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
+      tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+      if (minLength== tempRat)
+        theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
+    }
+  }
+  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
+  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
@@ -5281,6 +5739,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "RunGtwoInBthree",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2InB3Computation
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("drawRootSystem",
+   "()",
+   "<b>Experimental.</b> Draw the root system.",
+   "drawRootSystem",
+   DefaultWeylLetter, DefaultWeylRank,
+    & ParserNode::EvaluateDrawRootSystem
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

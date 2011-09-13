@@ -58,7 +58,19 @@ function progressReport()
   <option>8</option>
 </select> Root system.
 <script type="text/javascript"> 
-function switchMenu(obj){ var el = document.getElementById(obj);	if ( el.style.display != "none" ) { el.style.display = 'none'; } else { el.style.display = '';}}
+function switchMenu(obj)
+{ var el = document.getElementById(obj);	
+  if ( el.style.display != "none" ) 
+    el.style.display = 'none';
+  else 
+    el.style.display = '';
+}
+function hideItem(obj)
+{ document.getElementById(obj).style.display="none";
+}
+function showItem(obj)
+{ document.getElementById(obj).style.display="";
+}
 </script>
 <script type="text/javascript"> 
 function getCookie(c_name)

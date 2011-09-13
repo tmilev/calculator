@@ -12,8 +12,9 @@
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
 						<object class="wxTextCtrl" name="ID_TEXTCTRL1" variable="TextCtrl1" member="yes">
-							<value>RunGtwoInBthree</value>
+							<value>drawRootSystem</value>
 							<style>wxTE_MULTILINE</style>
+							<handler function="OnTextCtrl1Text" entry="EVT_TEXT" />
 						</object>
 						<flag>wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL</flag>
 						<border>5</border>

@@ -20,8 +20,8 @@ wxDrawPanel::wxDrawPanel(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
 {
 	//(*Initialize(wxDrawPanel)
 	wxBoxSizer* BoxSizer1;
-
-	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+	
+	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCAPTION|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
 	BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);
@@ -30,12 +30,12 @@ wxDrawPanel::wxDrawPanel(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
-
+	
 	Panel1->Connect(wxEVT_PAINT,(wxObjectEventFunction)&wxDrawPanel::OnPaint,0,this);
 	Panel1->Connect(wxEVT_LEFT_DOWN,(wxObjectEventFunction)&wxDrawPanel::OnPanel1LeftDown,0,this);
 	Panel1->Connect(wxEVT_LEFT_UP,(wxObjectEventFunction)&wxDrawPanel::OnPanel1LeftUp,0,this);
 	Panel1->Connect(wxEVT_MOTION,(wxObjectEventFunction)&wxDrawPanel::OnPanel1MouseMove,0,this);
-	Connect(wxEVT_PAINT,(wxObjectEventFunction)&wxDrawPanel::OnPaint);
+	Panel1->Connect(wxEVT_MOUSEWHEEL,(wxObjectEventFunction)&wxDrawPanel::OnPanel1MouseWheel,0,this);
 	//*)
 }
 
@@ -44,5 +44,3 @@ wxDrawPanel::~wxDrawPanel()
 	//(*Destroy(wxDrawPanel)
 	//*)
 }
-
-

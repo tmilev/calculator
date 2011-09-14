@@ -24,10 +24,19 @@
 		<Linker>
 			<Add option="`wx-config --libs`" />
 		</Linker>
+		<Unit filename="custom_code_here.cpp" />
+		<Unit filename="polyhedra.cpp" />
+		<Unit filename="polyhedra.h" />
+		<Unit filename="wxDrawPanel.cpp" />
+		<Unit filename="wxDrawPanel.h" />
 		<Unit filename="wxParserApp.cpp" />
 		<Unit filename="wxParserApp.h" />
 		<Unit filename="wxParserMain.cpp" />
 		<Unit filename="wxParserMain.h" />
+		<Unit filename="wxParserOutput.cpp" />
+		<Unit filename="wxParserOutput.h" />
+		<Unit filename="wxStatus.cpp" />
+		<Unit filename="wxStatus.h" />
 		<Unit filename="wxsmith/wxParserframe.wxs" />
 		<Extensions>
 			<envvars />
@@ -36,6 +45,9 @@
 				<gui name="wxWidgets" src="wxParserApp.cpp" main="wxParserFrame" init_handlers="necessary" language="CPP" />
 				<resources>
 					<wxFrame wxs="wxsmith/wxParserframe.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserFrame" language="CPP" />
+					<wxFrame wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" name="wxDrawPanel" language="CPP" />
+					<wxFrame wxs="wxsmith/wxParserOutput1.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
+					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" name="wxStatus" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

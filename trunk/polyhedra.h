@@ -2570,12 +2570,12 @@ Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vec
 
 template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
-{ 
-//To M$: that YOU can't inline template functions is YOUR compiler's problem, not a problem of 
+{
+//To M$: that YOU can't inline template functions is YOUR compiler's problem, not a problem of
 //my code!!!!!
-#pragma warning(disable:4396)
-  inline friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
-#pragma warning(default:4396)
+//#pragma warning(disable:4396)
+  friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
+//#pragma warning(default:4396)
 public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);}

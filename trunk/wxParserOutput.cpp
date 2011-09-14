@@ -19,7 +19,7 @@ wxParserOutput::wxParserOutput(wxWindow* parent,wxWindowID id,const wxPoint& pos
 	//(*Initialize(wxParserOutput)
 	wxBoxSizer* BoxSizer1;
 	
-	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCAPTION|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
 	BoxSizer1 = new wxBoxSizer(wxHORIZONTAL);

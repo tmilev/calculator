@@ -140,7 +140,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -158,9 +158,9 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theParser.DefaultWeylRank=6;
-  theParser.DefaultWeylLetter='E';
-  civilizedInput="drawRootSystem";
+  //theParser.DefaultWeylRank=6;
+  //theParser.DefaultWeylLetter='E';
+  //civilizedInput="drawRootSystem";
   //civilizedInput="findMaximumInDirectionOverLatticeShifted(-2x_1+x_2+x_3, (0,0,0), lattice((1,0,0),(0,1,0),(0,0,1)), cone((1,0,0,0),(0,1,0,0), (1,1,1,-4), (0,1,-1,0), (0,0,0,1)),2)";
 //  civilizedInput="findMaximumInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
 //  civilizedInput="findExtremaInDirectionOverLatticeShifted(x_1, (0,0), lattice((2,0),(1,1)), cone((1,0,0),(-1,1,0),(-2,-1,10)),1)";
@@ -444,11 +444,11 @@ int main(int argc, char **argv)
     << "/" << fileNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
     << tempStream2.str() << fileNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
   std::string latexCommandTemp;
-  std::string fileNameLieBracketFullPathPNGEnding;
-  fileNameLieBracketFullPathPNGEnding=fileNameLieBracketFullPathNoEnding;
-  fileNameLieBracketFullPathPNGEnding.append(".png");
-  if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathPNGEnding))
-  { std::cout << "<br>the file: " << fileNameLieBracketFullPathPNGEnding << " does not exist<br>";
+  if (!CGIspecificRoutines::FileExists(fileNameLieBracketNoEnding+".png") ||
+      !CGIspecificRoutines::FileExists(fileNameLieBracketNoEnding+"RootFromat.png" ) ||
+      !CGIspecificRoutines::FileExists(fileNameLieBracketFullPathNoEnding+"EpsFormat.png")
+      )
+  { std::cout << "<br>the file: " << fileNameLieBracketNoEnding << ".png" << " does not exist<br>";
     std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
     std::stringstream tempCommand;
     tempCommand << "mkdir " << inputPath;

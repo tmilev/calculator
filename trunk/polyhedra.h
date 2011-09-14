@@ -300,8 +300,9 @@ public:
   }
 };
 
-typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2,  unsigned long thePenStyle, int ColorIndex);
+typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
+typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
 
 class MathRoutines
@@ -9424,29 +9425,28 @@ public:
 class DrawLineBetweenTwoRootsOperation
 {
 public:
-  root v1;
-  root v2;
+  Vector<double> v1;
+  Vector<double> v2;
   int thePenStyle;
   int ColorIndex;
   double precomputedX1, precomputedY1, precomputedX2, precomputedY2;
-  bool flagIsPrecomputed;
   void init(root& input1, root& input2, unsigned long PenStyle, int colorIndex)
-  { this->v1=input1;
-    this->v2=input2;
+  { assert(input1.size==input2.size);
+    int theDimension=input1.size;
+    this->v1.SetSize(theDimension);
+    this->v2.SetSize(theDimension);
+    for (int i=0; i<theDimension; i++)
+    { this->v1[i]=input1.TheObjects[i].DoubleValue();
+      this->v2[i]=input2.TheObjects[i].DoubleValue();
+    }
     this->thePenStyle=PenStyle;
     this->ColorIndex=colorIndex;
-    this->flagIsPrecomputed=false;
   }
-  void ComputeXYcoords
-  (List<List<double> >& ProjectionsEiVectors)
-  ;
-
   void operator=(const DrawLineBetweenTwoRootsOperation& other)
   { this->v1=other.v1;
     this->v2=other.v2;
     this->thePenStyle=other.thePenStyle;
     this->ColorIndex=other.ColorIndex;
-    this->flagIsPrecomputed=other.flagIsPrecomputed;
     this->precomputedX1=other.precomputedX1;
     this->precomputedY1=other.precomputedY1;
     this->precomputedX2=other.precomputedX2;
@@ -9457,36 +9457,119 @@ public:
 class DrawTextAtVectorOperation
 {
 public:
-  root theVector;
+  Vector<double> theVector;
   std::string theText;
   int ColorIndex;
   int fontSize;
   int TextStyle;
-  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle){ this->theVector=input; this->ColorIndex=colorIndex; this->theText=inputText; this->fontSize=theFontSize; this->TextStyle=theTextStyle; }
-  void operator=(const DrawTextAtVectorOperation& other){ this->theVector=other.theVector; this->ColorIndex=other.ColorIndex; this->theText=other.theText; this->fontSize=other.fontSize; this->TextStyle=other.TextStyle;}
+  double precomputedX, precomputedY;
+  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
+  { this->theVector.SetSize(input.size);
+    for (int i=0; i<input.size; i++)
+      this->theVector[i]=input.TheObjects[i].DoubleValue();
+    this->ColorIndex=colorIndex;
+    this->theText=inputText;
+    this->fontSize=theFontSize;
+    this->TextStyle=theTextStyle;
+  }
+  void operator=(const DrawTextAtVectorOperation& other)
+  { this->theVector=other.theVector;
+    this->ColorIndex=other.ColorIndex;
+    this->theText=other.theText;
+    this->fontSize=other.fontSize;
+    this->TextStyle=other.TextStyle;
+    this->precomputedX=other.precomputedX;
+    this->precomputedY=other.precomputedY;
+  }
+};
+
+class DrawCircleAtVectorOperation
+{
+public:
+  Vector<double> theVector;
+  double radius;
+  int ColorIndex;
+  int thePenStyle;
+  double precomputedX, precomputedY;
+  void init(root& input, double theRadius, unsigned long thePenStylE, int colorIndex)
+  { this->theVector.SetSize(input.size);
+    for (int i=0; i<input.size; i++)
+      this->theVector[i]=input.TheObjects[i].DoubleValue();
+    this->ColorIndex=colorIndex;
+    this->thePenStyle=thePenStylE;
+    this->radius=theRadius;
+  }
+  void operator=(const DrawCircleAtVectorOperation& other)
+  { this->theVector=other.theVector;
+    this->ColorIndex=other.ColorIndex;
+    this->thePenStyle=other.thePenStyle;
+    this->radius=other.radius;
+    this->precomputedX=other.precomputedX;
+    this->precomputedY=other.precomputedY;
+  }
 };
 
 class DrawOperations
 {
-  public:
+private:
+  void changeBasisPreserveAngles(double newX, double newY);
+public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
   List<DrawTextOperation> theDrawTextOperations;
   List<DrawLineOperation> theDrawLineOperations;
   List<DrawLineBetweenTwoRootsOperation> theDrawLineBetweenTwoRootsOperations;
   List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
+  List<DrawCircleAtVectorOperation> theDrawCircleAtVectorOperations;
   List<List<double> > ProjectionsEiVectors;
   Vectors<double> BasisProjectionPlane;
   int SelectedIndex; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
-  Vectors<double> PreferredBasis;
+  Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
-  int ClickToleranceX;
-  int ClickToleranceY;
+  double ClickToleranceX;
+  double ClickToleranceY;
   double centerX;
   double centerY;
+  double GraphicsUnit;
   bool flagRotatingPreservingAngles;
+  bool flagAnimatingMovingCoordSystem;
   std::string DebugString;
-  bool AreWithinClickTolerance(int x1, int y1, int x2, int y2)
+  void initDimensions
+  (MatrixLargeRational& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane)
+  { this->theBilinearForm.init(bilinearForm.NumRows, bilinearForm.NumCols);
+    for (int i=0; i<bilinearForm.NumRows; i++)
+      for (int j=0; j<bilinearForm.NumCols; j++)
+        this->theBilinearForm.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
+    this->BasisToDrawCirclesAt=draggableBasis;
+    this->BasisProjectionPlane=startingPlane;
+    this->ComputeProjectionsEiVectors();
+  }
+  void initDimensions(int theDim);
+  int GetDimFirstDimensionDependentOperation();
+  inline void GetCoordsForDrawing(Vector<double>& input, double& X1, double& Y1)
+  { X1=0; Y1=0;
+    for (int j=0; j<input.size; j++)
+    { X1+=this->ProjectionsEiVectors[j][0]*input[j];
+      Y1+=this->ProjectionsEiVectors[j][1]*input[j];
+    }
+    X1=X1*this->GraphicsUnit+this->centerX;
+    Y1=Y1*this->GraphicsUnit+this->centerY;
+  }
+  inline void GetCoordsForDrawing(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2)
+  { X1=0; X2=0; Y1=0; Y2=0;
+    for (int j=0; j<input1.size; j++)
+    { X1+=this->ProjectionsEiVectors[j][0]*input1[j];
+      Y1+=this->ProjectionsEiVectors[j][1]*input1[j];
+      X2+=this->ProjectionsEiVectors[j][0]*input2[j];
+      Y2+=this->ProjectionsEiVectors[j][1]*input2[j];
+    }
+    X1=X1*this->GraphicsUnit+this->centerX;
+    X2=X2*this->GraphicsUnit+this->centerX;
+    Y1=Y1*this->GraphicsUnit+this->centerY;
+    Y2=Y2*this->GraphicsUnit+this->centerY;
+  }
+  void EnsureProperInitialization();
+  bool AreWithinClickTolerance(double x1, double y1, double x2, double y2)
   { x1-=x2;
     y1-=y2;
     if (x1<0)
@@ -9495,7 +9578,6 @@ class DrawOperations
       y1=-y1;
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
   };
-  void changeBasisPreserveAngles(double newX, double newY);
   void mouseMoveRedraw(int X, int Y)
   { if (this->SelectedIndex==-2)
       return;
@@ -9505,28 +9587,17 @@ class DrawOperations
     }
     if (this->SelectedIndex>=0)
     { if (this->flagRotatingPreservingAngles)
-        this->changeBasisPreserveAngles(double (this->centerX-X), double (Y-this->centerY));
+        this->changeBasisPreserveAngles((double) X , (double) Y);
     }
   //  this->draw();
   }
-  void click(int x, int y)
-  { x-=(int)this->centerX;
-    y =((int)this->centerY)-y;
-    this->SelectedIndex=-2;
-    if (this->AreWithinClickTolerance(x, y, 0, 0))
-      this->SelectedIndex=-1;
-    int theDim=this->theBilinearForm.NumRows;
-    for (int i=0; i<theDim; i++)
-      if (this->AreWithinClickTolerance(x, y, (int) this->PreferredBasis[i][0], (int) this->PreferredBasis[i][1] ))
-      { this->SelectedIndex=i;
-        return;
-      }
-  }
+  void click(double x, double y);
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
   void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
   void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  double  getAngleFromXandY(double x, double y, double neighborX, double neighborY);
+  void drawCircleAtVectorBuffer(root& input, double radius, unsigned long thePenStyle, int theColor);
+  double getAngleFromXandY(double x, double y, double neighborX, double neighborY);
   void ScaleToUnitLength(Vector<double>& theRoot)
   { double theLength=this->theBilinearForm.ScalarProduct(theRoot, theRoot);
     theLength=sqrt(theLength);
@@ -9539,21 +9610,30 @@ class DrawOperations
   void ModifyToOrthonormalNoShiftSecond
 (Vector<double>& root1, Vector<double>& root2)
 ;
-  void ComputeProjections()
+  void ComputeXYsFromProjectionsEisAndGraphicsUnit()
   ;
+  void ComputeProjectionsEiVectors();
   void init()
   { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
     this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
     this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(160000);
     this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(15000);
-    this->IndexNthDrawOperation.size=0; this->TypeNthDrawOperation.size=0;
-    this->theDrawTextOperations.size=0; this->theDrawLineOperations.size=0; this->theDrawLineBetweenTwoRootsOperations.size=0; this->theDrawTextAtVectorOperations.size=0;
+    this->theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(1000);
+    this->IndexNthDrawOperation.size=0;
+    this->TypeNthDrawOperation.size=0;
+    this->theDrawTextOperations.size=0;
+    this->theDrawLineOperations.size=0;
+    this->theDrawLineBetweenTwoRootsOperations.size=0;
+    this->theDrawTextAtVectorOperations.size=0;
+    this->theDrawCircleAtVectorOperations.size=0;
     this->centerX=300;
     this->centerY=300;
     this->ClickToleranceX=5;
     this->ClickToleranceY=5;
     this->SelectedIndex=-2;
+    this->GraphicsUnit=100;
     this->flagRotatingPreservingAngles=true;
+    this->flagAnimatingMovingCoordSystem=false;
     this->ProjectionsEiVectors.SetSizeMakeMatrix(8,2);
     ProjectionsEiVectors[0][0]=100; ProjectionsEiVectors[0][1]=0;
     ProjectionsEiVectors[1][0]=0; ProjectionsEiVectors[1][1]=100;
@@ -9564,7 +9644,7 @@ class DrawOperations
     ProjectionsEiVectors[6][0]=0; ProjectionsEiVectors[6][1]=-100;
     ProjectionsEiVectors[7][0]=-60; ProjectionsEiVectors[7][1]=-60;
   }
-  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, };
+  enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector,};
 };
 
 class DrawingVariables
@@ -9572,6 +9652,7 @@ class DrawingVariables
 private:
   drawLineFunction theDrawLineFunction;
   drawTextFunction theDrawTextFunction;
+  drawCircleFunction theDrawCircleFunction;
 public:
   enum PenStyles
   { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
@@ -9591,7 +9672,6 @@ public:
   int textY;
   int fontSizeNormal;
   int fontSizeSubscript;
-  double scale;
   int ColorTextDefault;
   int ColorTextZeroChamber;
   int ColorTextPermanentlyZeroChamber;
@@ -9604,15 +9684,11 @@ public:
   DrawingVariables(){this->initDrawingVariables(100, 100); };
   void SetDrawLineFunction(drawLineFunction theFunction){ this->theDrawLineFunction=theFunction; }
   void SetDrawTextFunction(drawTextFunction theFunction){ this->theDrawTextFunction=theFunction; }
+  void SetDrawCircleFunction(drawCircleFunction theFunction){ this->theDrawCircleFunction=theFunction; }
   int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
   static void GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y);
   static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
   void ApplyScale(double inputScale);
-  void SetCoordsOrthogonal();
-  void SetCoordsForG2();
-  void SetCoordsForB2();
-  void SetCoordsForA2();
-  void SetCoordsForC2();
   std::string GetColorHtmlFromColorIndex(int colorIndex);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
@@ -9625,12 +9701,15 @@ public:
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
-  void drawBuffer();
+  void drawBufferNoInit();
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor){this->drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor,0);}
   void drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
+  void drawCircleAtVectorBuffer
+  (root& point, double radius, unsigned long thePenStyle, int theColor)
+;
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction=other.theDrawLineFunction;
     this->theDrawTextFunction=other.theDrawTextFunction;
@@ -10037,6 +10116,9 @@ class ParserNode
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateSliceCone
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
+  static int EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
@@ -10634,8 +10716,8 @@ public:
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
     this->theDrawingVariables=other.theDrawingVariables;
   }
-  inline void DrawBuffer()
-  { this->theDrawingVariables.drawBuffer();
+  inline void DrawBufferNoInit()
+  { this->theDrawingVariables.drawBufferNoInit();
   }
   inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)
   { this->FeedDataToIndicatorWindowDefault=input;

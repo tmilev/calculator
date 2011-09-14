@@ -31,6 +31,7 @@ class wxDrawPanel: public wxFrame
 		void OnPanel1MouseMove(wxMouseEvent& event);
 		void OnPanel1LeftDown(wxMouseEvent& event);
 		void OnPanel1LeftUp(wxMouseEvent& event);
+		void OnPanel1MouseWheel(wxMouseEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()

@@ -15,12 +15,14 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/frame.h>
+#include <wx/timer.h>
 //*)
 
 #include "wxDrawPanel.h"
 #include "wxParserOutput.h"
 #include "wxStatus.h"
 #include <wx/dcclient.h>
+#include <wx/dcmemory.h>
 #include "wx/stdpaths.h"
 #include "polyhedra.h"
 
@@ -44,6 +46,12 @@ class wxParserFrame: public wxFrame
         std::string StatusString;
         wxCommandEvent eventComputationOver;
         wxCommandEvent eventProgressReport;
+        List<wxBitmap*> theBitmapList;
+        int currentBitmap;
+        int bitmapH, bitmapW;
+        bool Quitting;
+        void StartTimer(){this->Timer1.Start();}
+        wxTimer& GetTimer(){return this->Timer1;}
     private:
 
         //(*Handlers(wxParserFrame)
@@ -51,18 +59,21 @@ class wxParserFrame: public wxFrame
         void OnClose(wxCloseEvent& event);
         void OnButton2Click(wxCommandEvent& event);
         void OnButton1Click(wxCommandEvent& event);
+        void OnTimer1Trigger(wxTimerEvent& event);
         //*)
 
         //(*Identifiers(wxParserFrame)
         static const long ID_TEXTCTRL1;
         static const long ID_BUTTON1;
         static const long ID_BUTTON2;
+        static const long ID_TIMER1;
         //*)
 
         //(*Declarations(wxParserFrame)
         wxButton* Button1;
         wxButton* Button2;
         wxTextCtrl* TextCtrl1;
+        wxTimer Timer1;
         //*)
         void OnComputationOver(wxCommandEvent& ev);
         void OnProgressReport(wxCommandEvent& ev);

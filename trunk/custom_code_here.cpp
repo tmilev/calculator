@@ -4669,16 +4669,6 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   int numRoots=this->theWeyl.RootSystem.size;
   int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  int NumRowsToDisplayLargeTable=theDimension+numRoots;
-  bool TableTrimmed=false;
-  if (NumRowsToDisplayLargeTable>100)
-  { //to avoid the goddamned latex BUGS YES THEY ARE setting RAM use bound to 3MB is re-fucking-tarded and IS A BUG
-    useRootNotation=false; useEpsilonNotation=false;
-    NumRowsToDisplayLargeTable=70;
-    TableTrimmed=true;
-    //note appologies to whoever is reading this, but the fucking latex wasted 2 hours of my precious time,
-    //not to mention I have a deadline coming soon.
-  }
   ElementSimpleLieAlgebra tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   if (usePNG)
@@ -4721,45 +4711,22 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     }
     out << "\\end{tabular}";
   }
-  for (int i=0; i<numRoots+theDimension+1; i++)
-    beginMath+="c";
-  beginMath+="}\n";
-  out << beginMath;
-  std::string tempHeader=out.str();
-  if(usePNG)
-    out << "$";
-  out << "[\\bullet, \\bullet]\n";
-  if(usePNG)
-    out << "$";
-  for (int i=0; i<numRoots+theDimension; i++)
-  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this);
-    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
-    (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
-    out << " & ";
+  if (numRoots+theDimension<100)
+  { for (int i=0; i<numRoots+theDimension+1; i++)
+      beginMath+="c";
+    beginMath+="}\n";
+    out << beginMath;
+    std::string tempHeader=out.str();
     if(usePNG)
       out << "$";
-    out << tempS;
+    out << "[\\bullet, \\bullet]\n";
     if(usePNG)
       out << "$";
-  }
-  out << "\\\\\n";
-  Rational tempRat;
-  //int lineCounter=0;
-  for (int i=0; i<NumRowsToDisplayLargeTable; i++)
-  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,*this);
-    tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
-    (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
-    if(usePNG)
-      out << "$";
-    out << tempS;
-    if(usePNG)
-      out << "$";
-    for (int j=0; j<numRoots+theDimension; j++)
-    { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this);
-      this->LieBracket(tempElt1, tempElt2, tempElt3);
-      tempS=tempElt3.ElementToStringNegativeRootSpacesFirst
-        (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
-      out << "& ";
+    for (int i=0; i<numRoots+theDimension; i++)
+    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this);
+      tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
+      (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+      out << " & ";
       if(usePNG)
         out << "$";
       out << tempS;
@@ -4767,16 +4734,35 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
         out << "$";
     }
     out << "\\\\\n";
-    if (TableTrimmed && i==NumRowsToDisplayLargeTable-1)
-      out << "Table was trimmed to circumvent a LaTeX memory bug.";
-    //the below is to avoid a latex crash due to memory overuse
-    //lineCounter++;
-   //if (lineCounter>100)
-    //{ out << "Due to a latex memory Bug I cannot display the entire table. ";
-    //  break;
-    //}
-  }
-  out << endMath;
+    Rational tempRat;
+    //int lineCounter=0;
+    for (int i=0; i<theDimension+numRoots; i++)
+    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,*this);
+      tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
+      (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+      if(usePNG)
+        out << "$";
+      out << tempS;
+      if(usePNG)
+        out << "$";
+      for (int j=0; j<numRoots+theDimension; j++)
+      { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this);
+        this->LieBracket(tempElt1, tempElt2, tempElt3);
+        tempS=tempElt3.ElementToStringNegativeRootSpacesFirst
+          (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+        out << "& ";
+        if(usePNG)
+          out << "$";
+        out << tempS;
+        if(usePNG)
+          out << "$";
+      }
+      out << "\\\\\n";
+    }
+    out << endMath;
+  } else
+    out << "\\begin{tabular}{c} table trimmed to avoid LaTeX/browser memory issues.\\end{tabular}";
+
   output=out.str();
 }
 
@@ -4855,18 +4841,18 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
-  { root& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
-    root& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
+  { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
+    Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
     out << Points1ArrayName << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
-    { out << current1[j].ElementToString();
+    { out << current1[j];
       if (j!=theDimension-1)
         out << ",";
     }
     out << "];\n";
     out << Points2ArrayName << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
-    { out << current2[j].ElementToString();
+    { out << current2[j];
       if (j!=theDimension-1)
         out << ",";
     }
@@ -5151,6 +5137,27 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormula (const std::string&
   return out.str();
 }
 
+int DrawOperations::GetDimFirstDimensionDependentOperation()
+{ if (this->theDrawLineBetweenTwoRootsOperations.size>0)
+    return this->theDrawLineBetweenTwoRootsOperations[0].v1.size;
+  if (this->theDrawTextAtVectorOperations.size>0)
+    return this->theDrawTextAtVectorOperations[0].theVector.size;
+  return 2;
+}
+
+void DrawOperations::initDimensions(int theDim)
+{ this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
+  this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
+  this->BasisProjectionPlane.SetSizeMakeMatrix(2, theDim);
+  this->BasisToDrawCirclesAt.MakeEiBasis(theDim, 1, 0);
+}
+
+void DrawOperations::EnsureProperInitialization()
+{ int theDim=this->GetDimFirstDimensionDependentOperation();
+  if (this->theBilinearForm.NumRows!=theDim || this->ProjectionsEiVectors.size!=theDim|| this->BasisProjectionPlane[0].size!=theDim)
+    this->initDimensions(theDim);
+}
+
 void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 { root lowest;
   this->ComputeRho(false);
@@ -5283,7 +5290,6 @@ class Complex
 template < > bool  Complex<double>::EqualityIsApproximate=true;
 template < > double Complex<double>::EqualityPrecision=0.00000001;
 
-
 template<class Base>
 std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
 { if (input.IsEqualToZero())
@@ -5316,6 +5322,22 @@ double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, d
     else
       result= MathRoutines::Pi/(-2);
   return result;
+}
+
+void DrawOperations::click(double x , double y)
+{ this->EnsureProperInitialization();
+  this->SelectedIndex=-2;
+  if (this->AreWithinClickTolerance(x, y, this->centerX, this->centerY))
+    this->SelectedIndex=-1;
+  int theDim=this->theBilinearForm.NumRows;
+  for (int i=0; i<theDim; i++)
+  { double Xbasis, Ybasis;
+    this->GetCoordsForDrawing(this->BasisToDrawCirclesAt[i], Xbasis, Ybasis);
+    if (this->AreWithinClickTolerance(x, y, Xbasis, Ybasis))
+    { this->SelectedIndex=i;
+      return;
+    }
+  }
 }
 
 void DrawOperations::RotateOutOfPlane
@@ -5351,36 +5373,45 @@ void DrawOperations::ModifyToOrthonormalNoShiftSecond
   this->ScaleToUnitLength(root2);
 }
 
-void DrawOperations::ComputeProjections()
-{ for (int i=0; i<this->theDrawLineBetweenTwoRootsOperations.size; i++)
-    this->theDrawLineBetweenTwoRootsOperations[i].ComputeXYcoords(this->ProjectionsEiVectors);
+void DrawOperations::ComputeProjectionsEiVectors()
+{ int theDimension=this->theBilinearForm.NumRows;
+  this->ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
+  Vector<double> tempRoot;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i, 1, 0);
+    this->ProjectionsEiVectors[i][0]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[0]);
+    this->ProjectionsEiVectors[i][1]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[1]);
+  }
 }
 
-
-void DrawLineBetweenTwoRootsOperation::ComputeXYcoords
-(List<List<double> >& ProjectionsEiVectors)
-{ this->flagIsPrecomputed=true;
-  this->precomputedX1=0;
-  this->precomputedX2=0;
-  this->precomputedY1=0;
-  this->precomputedY2=0;
-  assert(this->v1.size==this->v2.size && this->v1.size==ProjectionsEiVectors.size);
-  for (int i=0; i<ProjectionsEiVectors.size; i++)
-  { this->precomputedX1+=ProjectionsEiVectors[i][0]*this->v1[i].DoubleValue();
-    this->precomputedY1+=ProjectionsEiVectors[i][1]*this->v1[i].DoubleValue();
-    this->precomputedX2+=ProjectionsEiVectors[i][0]*this->v2[i].DoubleValue();
-    this->precomputedY2+=ProjectionsEiVectors[i][1]*this->v2[i].DoubleValue();
+void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
+{ for (int i=0; i<this->theDrawLineBetweenTwoRootsOperations.size; i++)
+  { DrawLineBetweenTwoRootsOperation& theOperation= this->theDrawLineBetweenTwoRootsOperations[i];
+    this->GetCoordsForDrawing(theOperation.v1, theOperation.v2, theOperation.precomputedX1, theOperation.precomputedY1, theOperation.precomputedX2, theOperation.precomputedY2);
+  }
+  for (int i=0; i<this->theDrawTextAtVectorOperations.size; i++)
+  { DrawTextAtVectorOperation& theTextOperation=this->theDrawTextAtVectorOperations[i];
+    this->GetCoordsForDrawing(theTextOperation.theVector, theTextOperation.precomputedX, theTextOperation.precomputedY);
+  }
+  for (int i=0; i<this->theDrawCircleAtVectorOperations.size; i++)
+  { DrawCircleAtVectorOperation& theCircleOperation=this->theDrawCircleAtVectorOperations[i];
+    this->GetCoordsForDrawing(theCircleOperation.theVector, theCircleOperation.precomputedX, theCircleOperation.precomputedY);
   }
 }
 
 void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
-{ if (newX==0 && newY==0)
+{ newX=(newX-this->centerX)/this->GraphicsUnit;
+  newY=(newY-this->centerY)/this->GraphicsUnit;
+  if (newX==0 && newY==0)
     return;
   std::stringstream out;
-  Vector<double>& selectedRoot=this->PreferredBasis[this->SelectedIndex];
+  Vector<double>& selectedRoot=this->BasisToDrawCirclesAt[this->SelectedIndex];
   double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
-  double oldX=this->PreferredBasis[this->SelectedIndex][0];
-  double oldY=this->PreferredBasis[this->SelectedIndex][1];
+  double oldX, oldY;
+  this->GetCoordsForDrawing(selectedRoot, oldX, oldY);
+  oldX=(oldX- this->centerX)/this->GraphicsUnit;
+  oldY=(oldY- this->centerY)/this->GraphicsUnit;
+
   double oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
   double newAngle= getAngleFromXandY(newX, newY, oldX, oldY);
   double AngleChange= -newAngle+oldAngle;
@@ -5391,25 +5422,15 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   while (AngleChange<=MathRoutines::Pi/(-2)-epsilon)
   { AngleChange+=MathRoutines::Pi;
   }
-  out << "\nold angle:" << oldAngle;
-  out << "\nnew angle: " << newAngle;
+  out << "\nold angle: " << oldAngle;
+  out << "\nnew angle:  " << newAngle;
   Vector<double> NewVectorE1, NewVectorE2;
-  //NewVectorE1.ComputeDebugString();
   NewVectorE1= this->BasisProjectionPlane[0]*cos(AngleChange);
-  //NewVectorE1.ComputeDebugString();
   NewVectorE1+=this->BasisProjectionPlane[1]*sin(AngleChange);
-  //NewVectorE1.ComputeDebugString();
-  //NewVectorE1.ComputeDebugString();
-  //NewVectorE2.ComputeDebugString();
   NewVectorE2= this->BasisProjectionPlane[1]*cos(AngleChange);
-  //NewVectorE2.ComputeDebugString();
   NewVectorE2+=this->BasisProjectionPlane[0]*(-sin(AngleChange));
-  //NewVectorE2.ComputeDebugString();
-  //NewVectorE2.ComputeDebugString();
   this->BasisProjectionPlane[0]=NewVectorE1;
   this->BasisProjectionPlane[1]=NewVectorE2;
-  this->BasisProjectionPlane[0].ComputeDebugString();
-  this->BasisProjectionPlane[1].ComputeDebugString();
   double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[0]);
   double RootTimesE2=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[1]);
   Vector<double> vOrthogonal=selectedRoot;
@@ -5437,10 +5458,16 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   out << "\ne1=" << this->BasisProjectionPlane[0].ElementToString();
   out << "\ne2=" << this->BasisProjectionPlane[1].ElementToString();
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(this->BasisProjectionPlane[0], this->BasisProjectionPlane[1]);
-  this->ComputeProjections();
+  this->ComputeProjectionsEiVectors();
   this->DebugString= out.str();
 }
 
+int ParserNode::EvaluateAnimateRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);
+  theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem=true;
+  return result;
+}
 
 int ParserNode::EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -5453,11 +5480,11 @@ int ParserNode::EvaluateDrawRootSystem
   MatrixLargeRational matCoxeterElt, tempMat;
   theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
   std::cout << matCoxeterElt.ElementToString(true, false);
-  tempMat=matCoxeterElt;
+   tempMat=matCoxeterElt;
   int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
   for (int i=0; i<coxeterNumber-1; i++)
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
-  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
   Complex<double> theEigenValue;
   theEigenValue.Re= cos(2*MathRoutines::Pi/coxeterNumber);
   theEigenValue.Im= sin(2*MathRoutines::Pi/coxeterNumber);
@@ -5472,33 +5499,27 @@ int ParserNode::EvaluateDrawRootSystem
   List<List<Complex<double> > > theEigenSpaceList;
   eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
   Vectors<Complex<double> > theEigenSpace;
-  Vectors<double> theEigenSpaceReal;
+  DrawOperations& theDrawOperators=theGlobalVariables.theDrawingVariables.theBuffer;
+  theDrawOperators.init();
+  theDrawOperators.initDimensions(theDimension);
+  theDrawOperators.GraphicsUnit=100;
   theEigenSpace.operator=(theEigenSpaceList);
-  theEigenSpaceReal.SetSizeMakeMatrix(2, theDimension);
-  theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
   Vector<double> tempRoot;
   if (theEigenSpace.size>0)
   { for (int j=0; j<theDimension; j++)
-    { theEigenSpaceReal[0][j]=theEigenSpace[0][j].Re;
-      theEigenSpaceReal[1][j]=theEigenSpace[0][j].Im;
+    { theDrawOperators.BasisProjectionPlane[0][j]=theEigenSpace[0][j].Re;
+      theDrawOperators.BasisProjectionPlane[1][j]=theEigenSpace[0][j].Im;
     }
-    double ReLength=sqrt(theWeyl.RootScalarCartanRoot(theEigenSpaceReal[0],theEigenSpaceReal[0]));
-    double ImLength=sqrt(theWeyl.RootScalarCartanRoot(theEigenSpaceReal[1],theEigenSpaceReal[1]));
-    theEigenSpaceReal[0]/=ReLength;
-    theEigenSpaceReal[1]/=ImLength;
-    for (int i=0; i<theDimension; i++)
-    { tempRoot.MakeEi(theDimension, i, 1, 0);
-      theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors[i][0]=
-        theWeyl.RootScalarCartanRoot(theEigenSpaceReal[0], tempRoot)*250;
-      theGlobalVariables.theDrawingVariables.theBuffer.ProjectionsEiVectors[i][1]=
-        theWeyl.RootScalarCartanRoot(theEigenSpaceReal[1], tempRoot)*250;
-    }
+    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0], theDrawOperators.BasisProjectionPlane[1]);
   }
-  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
-  std::stringstream tempStream;
-  tempStream << "<hr>the eigen mat:";
-  tempStream << eigenMat;
-  std::cout << tempStream.str();
+//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
+//  std::stringstream tempStream;
+//  tempStream << "<hr>the eigen mat:";
+//  tempStream << eigenMat;
+//  std::cout << tempStream.str();
   roots RootSystemSorted;
   RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
   List<double> lengths;
@@ -5507,8 +5528,8 @@ int ParserNode::EvaluateDrawRootSystem
   { tempRoot.SetSize(theDimension);
     for (int j=0; j<theDimension; j++)
       tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
-    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theEigenSpaceReal[0]);
-    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theEigenSpaceReal[1]);
+    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0]);
+    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[1]);
     lengths[i]=sqrt(Length1*Length1+Length2*Length2);
   }
   for (int i=0; i<RootSystemSorted.size; i++)
@@ -5532,14 +5553,20 @@ int ParserNode::EvaluateDrawRootSystem
   theGlobalVariables.theDrawingVariables.theBuffer.centerX=325;
   theGlobalVariables.theDrawingVariables.theBuffer.centerY=325;
   for (int i=0; i<RootSystemSorted.size; i++)
-  { int color=CGIspecificRoutines::RedGreenBlue(255, 0, 0);
+  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
     theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    theGlobalVariables.theDrawingVariables.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength== tempRat)
         theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
     }
+  }
+  root tempRootRat;
+  for (int i=0; i<theDimension; i++)
+  { tempRootRat.MakeEi(theDimension, i);
+    theGlobalVariables.theDrawingVariables.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
   }
   theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
   theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
@@ -5747,6 +5774,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "drawRootSystem",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluateDrawRootSystem
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("animateRootSystem",
+   "()",
+   "<b>Experimental.</b> Animate the root system.",
+   "animateRootSystem",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateAnimateRootSystem
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

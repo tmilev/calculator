@@ -457,6 +457,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->DefaultHtmlWidth=400;
   this->theDrawLineFunction=0;
   this->theDrawTextFunction=0;
+  this->theDrawCircleFunction=0;
   this->NumHtmlGraphics=0;
   this->fontSizeNormal=10;
   this->fontSizeSubscript=6;
@@ -477,56 +478,16 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->textY=15;
   this->theBuffer.centerX= (double) cX1; //(double(X2)-double(X1));
   this->theBuffer.centerY= (double) cY1;
-  this->scale=1;
+  this->theBuffer.GraphicsUnit=100;
   this->theBuffer.init();
   this->ApplyScale(1);
-}
-
-void DrawingVariables::SetCoordsForA2()
-{ this->scale=1;
-  this->theBuffer.ProjectionsEiVectors[0][0]=100;
-  this->theBuffer.ProjectionsEiVectors[0][1]=0;
-  this->theBuffer.ProjectionsEiVectors[1][0]=-50;
-  this->theBuffer.ProjectionsEiVectors[1][1]=87;
-}
-
-void DrawingVariables::SetCoordsOrthogonal()
-{ this->scale=1;
-  this->theBuffer.ProjectionsEiVectors[0][0]=100;
-  this->theBuffer.ProjectionsEiVectors[0][1]=0;
-  this->theBuffer.ProjectionsEiVectors[1][0]=0;
-  this->theBuffer.ProjectionsEiVectors[1][1]=100;
-}
-
-void DrawingVariables::SetCoordsForB2()
-{ this->scale=1;
-  this->theBuffer.ProjectionsEiVectors[0][0]=120;
-  this->theBuffer.ProjectionsEiVectors[0][1]=0;
-  this->theBuffer.ProjectionsEiVectors[1][0]=-60;
-  this->theBuffer.ProjectionsEiVectors[1][1]=60;
-}
-
-void DrawingVariables::SetCoordsForC2()
-{ this->scale=1;
-  this->theBuffer.ProjectionsEiVectors[0][0]=100;
-  this->theBuffer.ProjectionsEiVectors[0][1]=0;
-  this->theBuffer.ProjectionsEiVectors[1][0]=-100;
-  this->theBuffer.ProjectionsEiVectors[1][1]=100;
-}
-
-void DrawingVariables::SetCoordsForG2()
-{ this->scale=1;
-  this->theBuffer.ProjectionsEiVectors[0][0]=120;
-  this->theBuffer.ProjectionsEiVectors[0][1]=0;
-  this->theBuffer.ProjectionsEiVectors[1][0]=-60;
-  this->theBuffer.ProjectionsEiVectors[1][1]=34;
 }
 
 void DrawingVariables::ApplyScale(double inputScale)
 { if (inputScale==0)
     return;
-  double ScaleChange= inputScale/this->scale;
-  this->scale= inputScale;
+  double ScaleChange= inputScale/this->theBuffer.GraphicsUnit;
+  this->theBuffer.GraphicsUnit= inputScale;
   for (int i =0; i<7; i++)
   { this->theBuffer.ProjectionsEiVectors[i][0]*=ScaleChange;
     this->theBuffer.ProjectionsEiVectors[i][1]*=ScaleChange;
@@ -757,6 +718,12 @@ void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double
 void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
 { this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
 }
+
+void DrawingVariables::drawCircleAtVectorBuffer
+(root& point, double radius, unsigned long thePenStyle, int theColor)
+{ this->theBuffer.drawCircleAtVectorBuffer(point, radius, thePenStyle, theColor);
+}
+
 
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
 { if (this->theDrawTextFunction!=0)
@@ -21791,6 +21758,14 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector
   this->theDrawLineBetweenTwoRootsOperations.LastObject()->init(vector1, vector2, thePenStyle, ColorIndex);
 }
 
+void DrawOperations::drawCircleAtVectorBuffer
+(root& input, double radius, unsigned long thePenStyle, int theColor)
+{ this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawCircleAtVector);
+  this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawCircleAtVectorOperations.size);
+  this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
+  this->theDrawCircleAtVectorOperations.LastObject()->init(input, radius, thePenStyle, theColor);
+}
+
 void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextAtVectorOperations.size);
@@ -21812,9 +21787,13 @@ void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inp
   this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
-void DrawingVariables::drawBuffer()
+void DrawingVariables::drawBufferNoInit
+()
 { this->LockedWhileDrawing.LockMe();
-  double x1, x2, y1, y2; int currentPenStyle, currentTextStyle;
+  this->theBuffer.EnsureProperInitialization();
+  this->theBuffer.ComputeProjectionsEiVectors();
+  this->theBuffer.ComputeXYsFromProjectionsEisAndGraphicsUnit();
+  int currentPenStyle, currentTextStyle;
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
     switch (this->theBuffer.TypeNthDrawOperation.TheObjects[i])
     { case DrawOperations::typeDrawText:
@@ -21841,9 +21820,7 @@ void DrawingVariables::drawBuffer()
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
-          this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v1, x1, y1);
-          this->GetCoordsForDrawing(*this, theDrawLineBnTwoOp.v2, x2, y2);
-          this->theDrawLineFunction(x1, y1, x2, y2, currentPenStyle, theDrawLineBnTwoOp.ColorIndex);
+          this->theDrawLineFunction(theDrawLineBnTwoOp.precomputedX1, theDrawLineBnTwoOp.precomputedY1, theDrawLineBnTwoOp.precomputedX2, theDrawLineBnTwoOp.precomputedY2, currentPenStyle, theDrawLineBnTwoOp.ColorIndex);
         }
         break;
       case DrawOperations::typeDrawTextAtVector:
@@ -21852,9 +21829,18 @@ void DrawingVariables::drawBuffer()
           currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
           if (currentTextStyle==this->TextStyleInvisible)
             break;
-          this->GetCoordsForDrawing(*this, theDrawTextOp.theVector, x1, y1);
-          this->theDrawTextFunction(x1, y1, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
+          this->theDrawTextFunction(theDrawTextOp.precomputedX, theDrawTextOp.precomputedY, theDrawTextOp.theText.c_str(), theDrawTextOp.theText.size(), theDrawTextOp.ColorIndex, theDrawTextOp.fontSize);
         }
+        break;
+      case DrawOperations::typeDrawCircleAtVector:
+        if (this->theDrawCircleFunction!=0)
+        { DrawCircleAtVectorOperation& theDrawCircleOp= this->theBuffer.theDrawCircleAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+          currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
+          if (currentTextStyle==this->TextStyleInvisible)
+            break;
+          this->theDrawCircleFunction(theDrawCircleOp.precomputedX, theDrawCircleOp.precomputedY, theDrawCircleOp.radius, theDrawCircleOp.thePenStyle, theDrawCircleOp.ColorIndex);
+        }
+        break;
         break;
       default: break;
     }

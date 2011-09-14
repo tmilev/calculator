@@ -15,8 +15,8 @@ class wxStatus: public wxFrame
 		virtual ~wxStatus();
 
 		//(*Declarations(wxStatus)
-		wxTextCtrl* TextCtrl2;
-		wxTextCtrl* TextCtrl1;
+		wxTextCtrl* TextCtrlStatusString;
+		wxTextCtrl* TextCtrlProgressString;
 		//*)
 
 	protected:

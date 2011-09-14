@@ -4858,7 +4858,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-  if (this->theBuffer.ProjectionsEiVectors.size< theDimension);
+  if (this->theBuffer.ProjectionsEiVectors.size< theDimension)
   { int oldSize=this->theBuffer.ProjectionsEiVectors.size;
     this->theBuffer.ProjectionsEiVectors.SetSize(theDimension);
     for (int i=oldSize; i<theDimension; i++)
@@ -5318,9 +5318,9 @@ double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, d
    result= atan(y/x);
   else
     if (y>0)
-      result= MathRoutines::Pi/2;
+      result= MathRoutines::Pi()/2;
     else
-      result= MathRoutines::Pi/(-2);
+      result= MathRoutines::Pi()/(-2);
   return result;
 }
 
@@ -5416,11 +5416,11 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   double newAngle= getAngleFromXandY(newX, newY, oldX, oldY);
   double AngleChange= -newAngle+oldAngle;
   double epsilon=0.000000000001;
-  while (AngleChange>MathRoutines::Pi/2+epsilon)
-  { AngleChange-=MathRoutines::Pi;
+  while (AngleChange>MathRoutines::Pi()/2+epsilon)
+  { AngleChange-=MathRoutines::Pi();
   }
-  while (AngleChange<=MathRoutines::Pi/(-2)-epsilon)
-  { AngleChange+=MathRoutines::Pi;
+  while (AngleChange<=MathRoutines::Pi()/(-2)-epsilon)
+  { AngleChange+=MathRoutines::Pi();
   }
   out << "\nold angle: " << oldAngle;
   out << "\nnew angle:  " << newAngle;
@@ -5486,8 +5486,8 @@ int ParserNode::EvaluateDrawRootSystem
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
   Complex<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi/coxeterNumber);
+  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
   Matrix<Complex<double> > eigenMat, idMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)

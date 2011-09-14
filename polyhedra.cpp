@@ -6787,7 +6787,7 @@ inline void Rational::RaiseToPower(int x)
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
   int theSign= (this->IsPositive() || x%2==0) ? 1 :-1;
   this->AllocateExtended();
-  this->Extended->num.sign=theSign;
+  this->Extended->num.sign=(signed char)theSign;
   this->Extended->den=tempDen;
   this->Extended->num.value=tempNum;
   this->ShrinkExtendedPartIfPossible();
@@ -21836,7 +21836,7 @@ void DrawingVariables::drawBufferNoInit
         if (this->theDrawCircleFunction!=0)
         { DrawCircleAtVectorOperation& theDrawCircleOp= this->theBuffer.theDrawCircleAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
-          if (currentTextStyle==this->TextStyleInvisible)
+          if (currentPenStyle==this->PenStyleInvisible)
             break;
           this->theDrawCircleFunction(theDrawCircleOp.precomputedX, theDrawCircleOp.precomputedY, theDrawCircleOp.radius, theDrawCircleOp.thePenStyle, theDrawCircleOp.ColorIndex);
         }
@@ -30810,7 +30810,7 @@ std::string slTwoInSlN::ElementModuleIndexToString(int input, bool useHtml)
   MatrixLargeRational& currentHW=this->theHighestWeightVectors.TheObjects[input];
   int currentEtaHw=this->theGmodKModules.TheObjects[input].size-1;
   //currentEtaHw-=currentEtaHw/2;
-  int firstNonZeroRow, firstNonZeroColumn;
+  int firstNonZeroRow=-1, firstNonZeroColumn=-1;
   bool found=false;
   for (int i=0; i<currentHW.NumRows; i++)
   { if (found)

@@ -338,7 +338,9 @@ public:
     }
     return result;
   }
-  static const double Pi=3.141592653589793238462643383279;
+  static inline double Pi(){return 3.141592653589793238462643383279;}
+// the MS compiler refuses to compile the following, hence the above line.
+//  static const double Pi=(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   inline static int parity(int n){if (n%2==0) return 1; else return -1; }
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
@@ -370,7 +372,7 @@ public:
   }
 };
 
-struct XMLRoutines
+class XMLRoutines
 {
 private:
   static std::string GetOpenTagNoInputCheck(const std::string& tagNameNoSpacesNoForbiddenCharacters)
@@ -2556,7 +2558,7 @@ ParallelComputing::GlobalPointerCounter++;
 };
 
 template<class CoefficientType>
-inline Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right)
+Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right)
 { Vector<CoefficientType> result;
   result.SetSize(left.size);
   for (int i=0; i<left.size; i++)
@@ -2568,7 +2570,12 @@ inline Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, co
 
 template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
-{ friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
+{ 
+//To M$: that YOU can't inline template functions is YOUR compiler's problem, not a problem of 
+//my code!!!!!
+#pragma warning(disable:4396)
+  inline friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
+#pragma warning(default:4396)
 public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);}

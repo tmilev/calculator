@@ -417,6 +417,9 @@ void wxParserFrame::OnButton1Click(wxCommandEvent& event)
 void wxParserFrame::OnTimer1Trigger(wxTimerEvent& event)
 { if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
     return;
-  this->currentBitmap=(this->currentBitmap+1)% this->theBitmapList.size;
+  if (this->currentBitmap==this->theBitmapList.size-1)
+    theMainWindow->Timer1.Stop();
+  else
+    this->currentBitmap=(this->currentBitmap+1)% this->theBitmapList.size;
   this->theDrawPanel->Refresh();
 }

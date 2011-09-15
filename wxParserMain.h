@@ -47,7 +47,6 @@ class wxParserFrame: public wxFrame
         wxCommandEvent eventComputationOver;
         wxCommandEvent eventProgressReport;
         List<wxBitmap*> theBitmapList;
-        int currentBitmap;
         int bitmapH, bitmapW;
         bool Quitting;
         void StartTimer(){this->Timer1.Start();}

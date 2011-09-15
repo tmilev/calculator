@@ -72,7 +72,7 @@ extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLo
 void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
   wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theMainWindow->currentBitmap]);
+  dc.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -96,7 +96,7 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
   wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theMainWindow->currentBitmap]);
+  dc.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -115,6 +115,14 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
   dc.SetPen(tempPen);
   dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
   dc.SelectObject(wxNullBitmap);
+}
+
+void drawClearScreen()
+{ wxMemoryDC tempDC;
+  tempDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
+  tempDC.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
+  tempDC.Clear();
+  tempDC.SelectObject(wxNullBitmap);
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
@@ -171,6 +179,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
     theGlobalVariables.theDrawingVariables.SetDrawLineFunction(&drawline);
     theGlobalVariables.theDrawingVariables.SetDrawCircleFunction(&drawCircle);
+    theGlobalVariables.theDrawingVariables.SetDrawClearFunction(&drawClearScreen);
     theParser.DefaultWeylRank=4;
     theParser.DefaultWeylLetter='F';
 
@@ -183,13 +192,14 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->theStatus->Show();
     this->theParserOutput->Show();
     this->theDrawPanel->Show();
-    theBitmapList.SetSize(500);
+    theGlobalVariables.theDrawingVariables.theBuffer.initDimensions(theParser.DefaultWeylRank, 50);
+    theBitmapList.SetSize(theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size);
 //    this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
     this->bitmapH=600;
     this->bitmapW=600;
     for (int i=0; i<theBitmapList.size; i++)
       this->theBitmapList[i]= new wxBitmap(this->bitmapW, this->bitmapH);
-    this->currentBitmap=0;
+    theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane=0;
     this->Quitting=false;
 }
 
@@ -216,16 +226,11 @@ void wxDrawPanel::OnPaint(wxPaintEvent& event)
   if (theMainWindow->Quitting)
     return;
   theMainWindow->mutexRuN.LockMe();
-  wxBitmap& theBM=*theMainWindow->theBitmapList[theMainWindow->currentBitmap];
-  assert(theMainWindow->currentBitmap>=0 && theMainWindow->currentBitmap< theMainWindow->theBitmapList.size);
-  if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
-  { wxMemoryDC tempDC;
-    tempDC.SelectObject(theBM);
-    tempDC.Clear();
-    tempDC.SelectObject(wxNullBitmap);
+  wxBitmap& theBM=*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane];
+  assert(theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane>=0 && theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane< theMainWindow->theBitmapList.size);
+  if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem || theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating)
     theGlobalVariables.DrawBufferNoInit();
-  }
-  dc.DrawBitmap(theBM,0,0);
+  dc.DrawBitmap(theBM, 0, 0);
   theMainWindow->mutexRuN.UnlockMe();
 }
 
@@ -249,7 +254,7 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
-{ if (theGlobalVariables.theDrawingVariables.theBuffer.SelectedIndex==-2)
+{ if (theGlobalVariables.theDrawingVariables.theBuffer.SelectedCircleMinus2noneMinus1Center==-2)
     return;
   theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
   theGlobalVariables.theDrawingVariables.theBuffer.mouseMoveRedraw(event.GetX(), event.GetY());
@@ -260,7 +265,7 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
-{ theGlobalVariables.theDrawingVariables.theBuffer.SelectedIndex=-2;
+{ theGlobalVariables.theDrawingVariables.theBuffer.SelectedCircleMinus2noneMinus1Center=-2;
 }
 
 void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
@@ -275,29 +280,28 @@ void Animate()
   int theDim=theParser.theHmm.theRange.GetRank();
   DrawOperations& theOps=theGlobalVariables.theDrawingVariables.theBuffer;
   target1.MakeEi(theDim, 0, 1, 0);
-  target2.MakeEi(theDim, 1, 1, 0);
-  start1=theOps.BasisProjectionPlane[0];
-  start2=theOps.BasisProjectionPlane[1];
+  target2.MakeEi(theDim, (theDim>2)? 2 : 1, 1, 0);
+  start1=theOps.BasisProjectionPlane[0][0];
+  start2=theOps.BasisProjectionPlane[0][1];
   theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
-  for (theMainWindow->currentBitmap=0; theMainWindow->currentBitmap<theMainWindow->theBitmapList.size; theMainWindow->currentBitmap++)
-  { double fraction=((double) theMainWindow->currentBitmap)/((double)(theMainWindow->theBitmapList.size-1));
-    wxMemoryDC tempDC;
-    tempDC.SelectObject(*theMainWindow->theBitmapList[theMainWindow->currentBitmap]);
-    tempDC.Clear();
-    tempDC.SelectObject(wxNullBitmap);
-    theOps.BasisProjectionPlane[0]=start1*(1-fraction);
-    theOps.BasisProjectionPlane[1]=start2*(1-fraction);
-    theOps.BasisProjectionPlane[0]+=target1*fraction;
-    theOps.BasisProjectionPlane[1]+=target2*fraction;
-    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[0], theOps.BasisProjectionPlane[1]);
+  int& indexBitMap=theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane;
+  int NumFrames=theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size;
+  assert(theMainWindow->theBitmapList.size==NumFrames);
+  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
+  { double fraction=((double) indexBitMap)/((double)(NumFrames-1));
+    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
+    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
+    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
     theGlobalVariables.DrawBufferNoInit();
     std::stringstream tempStream;
-    tempStream << "Computing frame " << theMainWindow->currentBitmap+1 << " out of " << theMainWindow->theBitmapList.size << " desired frames.\n Please wait!";
+    tempStream << "Computing frame " << indexBitMap+1 << " out of " << NumFrames << " desired frames.\n Please wait!";
     wxString reportString( std::string(tempStream.str()).c_str(), wxConvUTF8);
     theMainWindow->theStatus->TextCtrlProgressString->SetValue(reportString);
     theMainWindow->theStatus->TextCtrlProgressString->Update();
   }
-  theMainWindow->currentBitmap=0;
+  indexBitMap=0;
   theMainWindow->StartTimer();
 }
 
@@ -386,14 +390,17 @@ void wxParserFrame::RunTheComputation()
 }
 
 void wxParserFrame::OnButton2Click(wxCommandEvent& event)
-{ if (theMainWindow->GetTimer().IsRunning())
-  { theMainWindow->GetTimer().Stop();
-    theMainWindow->Button2->SetLabel(wxT("Continue"));
-  } else
-  { theMainWindow->GetTimer().Start();
-    theMainWindow->Button2->SetLabel(wxT("Pause"));
+{ if (theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
+  { if (theMainWindow->GetTimer().IsRunning())
+    { theMainWindow->GetTimer().Stop();
+      theMainWindow->Button2->SetLabel(wxT("Continue"));
+      theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=true;
+    } else
+    { theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=false;
+      theMainWindow->GetTimer().Start();
+      theMainWindow->Button2->SetLabel(wxT("Pause"));
+    }
   }
-
   return;
   Controller& theController=  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseControlleR;
   theController.mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
@@ -417,9 +424,14 @@ void wxParserFrame::OnButton1Click(wxCommandEvent& event)
 void wxParserFrame::OnTimer1Trigger(wxTimerEvent& event)
 { if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
     return;
-  if (this->currentBitmap==this->theBitmapList.size-1)
-    theMainWindow->Timer1.Stop();
+  int& frameIndex=theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane;
+  assert(theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size==this->theBitmapList.size);
+  if (frameIndex==this->theBitmapList.size-1)
+  { theMainWindow->Timer1.Stop();
+    theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=true;
+    frameIndex=0;
+  }
   else
-    this->currentBitmap=(this->currentBitmap+1)% this->theBitmapList.size;
+    frameIndex=(frameIndex+1)% this->theBitmapList.size;
   this->theDrawPanel->Refresh();
 }

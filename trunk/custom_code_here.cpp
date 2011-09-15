@@ -801,11 +801,11 @@ int ParserNode::EvaluateWeylAction
   if (theArgumentList.size!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
   int theDim=theArgumentList.size;
-  int numVars=MathRoutines::Maximum(theDim, theNode.owner->NumVariables);
-  theWeight.SetSize(theArgumentList.size);
+  theNode.impliedNumVars=theNode.GetMaxImpliedNumVarsChildren();
+  theWeight.SetSize(theDim);
   for (int i=0; i<theArgumentList.size; i++)
   { theWeight.TheObjects[i]=theNode.owner->TheObjects[theArgumentList.TheObjects[i]].ratFunction.GetElement();
-    theWeight.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(numVars);
+    theWeight.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
   }
   std::stringstream out;
   theWeyl.ComputeWeylGroup(51840);
@@ -815,7 +815,7 @@ int ParserNode::EvaluateWeylAction
   out << "Number of elements: " << theWeyl.size << "<br>";
   Vector<RationalFunction> theOrbitElement;
   RationalFunction RFZero;
-  RFZero.Nullify(numVars, &theGlobalVariables);
+  RFZero.Nullify(theNode.impliedNumVars, &theGlobalVariables);
   for (int i=0; i<theWeyl.size; i++)
   { theOrbitElement=theWeight;
     if (!DualAction)
@@ -2331,7 +2331,7 @@ bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVaria
 bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariables)
 { if (this->ExpressionType!=this->typeArray)
   { output.SetSize(1);
-    if (!this->ConvertToType(this->typeRational, theGlobalVariables))
+    if (!this->ConvertToType(this->typeRational, 0, theGlobalVariables))
       return false;
     output.TheObjects[0]=this->rationalValue;
     return true;
@@ -2339,7 +2339,7 @@ bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariabl
   output.SetSize(this->children.size);
   for (int i=0; i<output.size; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeRational, theGlobalVariables))
+    if (!currentNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
       return false;
     output.TheObjects[i]=currentNode.rationalValue;
   }
@@ -3652,7 +3652,7 @@ bool ParserFunctionArgumentTree::ConvertOneArgumentIndex
     lowestNestedIndexNonExplored++;
     return this->nestedArgumentsOfArguments.TheObjects[lowestNestedIndexNonExplored-1].ConvertArguments(theNode, tempList, theGlobalVariables);
   }
-  return theNode.ConvertToType(theType, theGlobalVariables);
+  return theNode.ConvertToType(theType, theNode.impliedNumVars, theGlobalVariables);
 }
 
 bool ParserFunctionArgumentTree::ConvertArguments
@@ -5145,17 +5145,35 @@ int DrawOperations::GetDimFirstDimensionDependentOperation()
   return 2;
 }
 
-void DrawOperations::initDimensions(int theDim)
+int DrawOperations::GetDimFromBilinearForm()
+{ return this->theBilinearForm.NumRows;
+}
+
+void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
 { this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
-  this->BasisProjectionPlane.SetSizeMakeMatrix(2, theDim);
+  Vectors<double> tempBasis;
+  tempBasis.SetSizeMakeMatrix(2, theDim);
+  this->BasisProjectionPlane.initFillInObject(numAnimationFrames, tempBasis);
   this->BasisToDrawCirclesAt.MakeEiBasis(theDim, 1, 0);
+  this->SelectedPlane=0;
+  this->SelectedCircleMinus2noneMinus1Center=-2;
 }
 
 void DrawOperations::EnsureProperInitialization()
 { int theDim=this->GetDimFirstDimensionDependentOperation();
-  if (this->theBilinearForm.NumRows!=theDim || this->ProjectionsEiVectors.size!=theDim|| this->BasisProjectionPlane[0].size!=theDim)
-    this->initDimensions(theDim);
+  bool isGood=(this->ProjectionsEiVectors.size==theDim && this->theBilinearForm.NumRows==theDim);
+  int numFrames=this->BasisProjectionPlane.size;
+  if (this->SelectedPlane>= this->BasisProjectionPlane.size)
+  { numFrames=this->SelectedPlane+1;
+    isGood=false;
+  }
+  if (isGood)
+    isGood=(this->BasisProjectionPlane[this->SelectedPlane].size==2);
+  if (isGood)
+    isGood=(this->BasisProjectionPlane[this->SelectedPlane][0].size==theDim);
+  if (!isGood)
+    this->initDimensions(theDim, numFrames);
 }
 
 void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
@@ -5326,15 +5344,15 @@ double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, d
 
 void DrawOperations::click(double x , double y)
 { this->EnsureProperInitialization();
-  this->SelectedIndex=-2;
+  this->SelectedCircleMinus2noneMinus1Center=-2;
   if (this->AreWithinClickTolerance(x, y, this->centerX, this->centerY))
-    this->SelectedIndex=-1;
+    this->SelectedCircleMinus2noneMinus1Center=-1;
   int theDim=this->theBilinearForm.NumRows;
   for (int i=0; i<theDim; i++)
   { double Xbasis, Ybasis;
     this->GetCoordsForDrawing(this->BasisToDrawCirclesAt[i], Xbasis, Ybasis);
     if (this->AreWithinClickTolerance(x, y, Xbasis, Ybasis))
-    { this->SelectedIndex=i;
+    { this->SelectedCircleMinus2noneMinus1Center=i;
       return;
     }
   }
@@ -5379,8 +5397,8 @@ void DrawOperations::ComputeProjectionsEiVectors()
   Vector<double> tempRoot;
   for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i, 1, 0);
-    this->ProjectionsEiVectors[i][0]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[0]);
-    this->ProjectionsEiVectors[i][1]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[1]);
+    this->ProjectionsEiVectors[i][0]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][0]);
+    this->ProjectionsEiVectors[i][1]=this->theBilinearForm.ScalarProduct(tempRoot, this->BasisProjectionPlane[this->SelectedPlane][1]);
   }
 }
 
@@ -5405,7 +5423,7 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   if (newX==0 && newY==0)
     return;
   std::stringstream out;
-  Vector<double>& selectedRoot=this->BasisToDrawCirclesAt[this->SelectedIndex];
+  Vector<double>& selectedRoot=this->BasisToDrawCirclesAt[this->SelectedCircleMinus2noneMinus1Center];
   double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
   double oldX, oldY;
   this->GetCoordsForDrawing(selectedRoot, oldX, oldY);
@@ -5425,17 +5443,18 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   out << "\nold angle: " << oldAngle;
   out << "\nnew angle:  " << newAngle;
   Vector<double> NewVectorE1, NewVectorE2;
-  NewVectorE1= this->BasisProjectionPlane[0]*cos(AngleChange);
-  NewVectorE1+=this->BasisProjectionPlane[1]*sin(AngleChange);
-  NewVectorE2= this->BasisProjectionPlane[1]*cos(AngleChange);
-  NewVectorE2+=this->BasisProjectionPlane[0]*(-sin(AngleChange));
-  this->BasisProjectionPlane[0]=NewVectorE1;
-  this->BasisProjectionPlane[1]=NewVectorE2;
-  double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[0]);
-  double RootTimesE2=this->theBilinearForm.ScalarProduct(selectedRoot, this->BasisProjectionPlane[1]);
+  Vectors<double>& currentBasisPlane=this->BasisProjectionPlane[this->SelectedPlane];
+  NewVectorE1= currentBasisPlane[0]*cos(AngleChange);
+  NewVectorE1+=currentBasisPlane[1]*sin(AngleChange);
+  NewVectorE2= currentBasisPlane[1]*cos(AngleChange);
+  NewVectorE2+=currentBasisPlane[0]*(-sin(AngleChange));
+  currentBasisPlane[0]=NewVectorE1;
+  currentBasisPlane[1]=NewVectorE2;
+  double RootTimesE1=this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[0]);
+  double RootTimesE2=this->theBilinearForm.ScalarProduct(selectedRoot, currentBasisPlane[1]);
   Vector<double> vOrthogonal=selectedRoot;
-  Vector<double> vProjection=this->BasisProjectionPlane[0]*RootTimesE1;
-  vProjection+=this->BasisProjectionPlane[1]*RootTimesE2;
+  Vector<double> vProjection=currentBasisPlane[0]*RootTimesE1;
+  vProjection+=currentBasisPlane[1]*RootTimesE2;
   vOrthogonal-= vProjection;
   double oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);
   double newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);
@@ -5447,17 +5466,17 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
     out << "\nscaled vOrthogonal=" << vOrthogonal.ElementToString() << "->" << this->theBilinearForm.ScalarProduct(vOrthogonal, vOrthogonal);
     out << "\nscaled vProjection=" << vProjection.ElementToString() << "->" <<this->theBilinearForm.ScalarProduct(vProjection, vProjection);
     out << "\ntheScalarProd: " << this->theBilinearForm.ScalarProduct(vOrthogonal, vProjection);
-    this->RotateOutOfPlane(out, this->BasisProjectionPlane[0], this->BasisProjectionPlane[0], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
-    this->RotateOutOfPlane(out, this->BasisProjectionPlane[1], this->BasisProjectionPlane[1], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    this->RotateOutOfPlane(out, currentBasisPlane[0], currentBasisPlane[0], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
+    this->RotateOutOfPlane(out, currentBasisPlane[1], currentBasisPlane[1], vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);
   }
 //  this->e1.ComputeDebugString();
 //  this->e2.ComputeDebugString();
-  this->ModifyToOrthonormalNoShiftSecond(this->BasisProjectionPlane[0], this->BasisProjectionPlane[1]);
+  this->ModifyToOrthonormalNoShiftSecond(currentBasisPlane[0], currentBasisPlane[1]);
 //  this->e1.ComputeDebugString();
 //  this->e2.ComputeDebugString();
-  out << "\ne1=" << this->BasisProjectionPlane[0].ElementToString();
-  out << "\ne2=" << this->BasisProjectionPlane[1].ElementToString();
-  out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(this->BasisProjectionPlane[0], this->BasisProjectionPlane[1]);
+  out << "\ne1=" << currentBasisPlane[0].ElementToString();
+  out << "\ne2=" << currentBasisPlane[1].ElementToString();
+  out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
   this->ComputeProjectionsEiVectors();
   this->DebugString= out.str();
 }
@@ -5466,6 +5485,9 @@ int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);
   theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem=true;
+  theGlobalVariables.theDrawingVariables.theBuffer.GraphicsUnit=200;
+  theGlobalVariables.theDrawingVariables.theBuffer.centerX=300;
+  theGlobalVariables.theDrawingVariables.theBuffer.centerY=300;
   return result;
 }
 
@@ -5501,19 +5523,22 @@ int ParserNode::EvaluateDrawRootSystem
   Vectors<Complex<double> > theEigenSpace;
   DrawOperations& theDrawOperators=theGlobalVariables.theDrawingVariables.theBuffer;
   theDrawOperators.init();
-  theDrawOperators.initDimensions(theDimension);
+  theDrawOperators.initDimensions(theDimension, theDrawOperators.BasisProjectionPlane.size);
   theDrawOperators.GraphicsUnit=100;
   theEigenSpace.operator=(theEigenSpaceList);
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
   Vector<double> tempRoot;
+  theDrawOperators.SelectedPlane=0;
+  Vectors<double>& theTwoPlane= theDrawOperators.BasisProjectionPlane[0];
+  assert(theTwoPlane.size==2);
   if (theEigenSpace.size>0)
   { for (int j=0; j<theDimension; j++)
-    { theDrawOperators.BasisProjectionPlane[0][j]=theEigenSpace[0][j].Re;
-      theDrawOperators.BasisProjectionPlane[1][j]=theEigenSpace[0][j].Im;
+    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
+      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
     }
-    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0], theDrawOperators.BasisProjectionPlane[1]);
+    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0][0], theDrawOperators.BasisProjectionPlane[0][1]);
   }
 //  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
 //  std::stringstream tempStream;
@@ -5528,8 +5553,8 @@ int ParserNode::EvaluateDrawRootSystem
   { tempRoot.SetSize(theDimension);
     for (int j=0; j<theDimension; j++)
       tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
-    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0]);
-    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[1]);
+    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][0]);
+    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][1]);
     lengths[i]=sqrt(Length1*Length1+Length2*Length2);
   }
   for (int i=0; i<RootSystemSorted.size; i++)

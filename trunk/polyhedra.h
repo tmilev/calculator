@@ -304,6 +304,7 @@ typedef void (*drawLineFunction)(double X1, double Y1, double X2, double Y2, uns
 typedef void (*drawTextFunction)(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize);
 typedef void (*drawCircleFunction)(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex);
 typedef void (*FeedDataToIndicatorWindow)(IndicatorWindowVariables& input);
+typedef void (*drawClearScreenFunction)();
 
 class MathRoutines
 {
@@ -4573,6 +4574,17 @@ public:
   void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, Polynomial<ElementOfCommutativeRingWithIdentity>& output, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   void Substitution(const List<Polynomial<ElementOfCommutativeRingWithIdentity> >& TheSubstitution, int NumVarTarget, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   int TotalDegree()const;
+  bool IsAConstant(ElementOfCommutativeRingWithIdentity& whichConstant)const
+  { if (this->size>1)
+      return false;
+    if (this->size==0)
+    { whichConstant=0;
+      return true;
+    }
+    Monomial<ElementOfCommutativeRingWithIdentity>& theMon=this->TheObjects[0];
+    whichConstant=theMon.Coefficient;
+    return theMon.IsAConstant();
+  }
   bool IsAConstant()const
   { if (this->size>1)
       return false;
@@ -4642,6 +4654,7 @@ template <class ElementOfCommutativeRingWithIdentity>
 class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> >
 {
   public:
+  //One of the main purposes of this class is to be used for carrying out substitutions.
   //the general format of the substitution is:
   // the i^th element denotes the image of x_i,
   // For example, if polynomials is the array
@@ -4652,6 +4665,7 @@ class Polynomials: public List<Polynomial<ElementOfCommutativeRingWithIdentity> 
   // x_2-> (x_1x_3+2)
   // to produce a polynomial in three variables
   void MakeIdSubstitution(int numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit);
+  void MakeIdLikeInjectionSub(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const ElementOfCommutativeRingWithIdentity& theRingUnit);
   //In the following function we have that:
   //the format of the linear substitution is:
   //theSub is a  whose number of rows minus 1 must equal the # number of
@@ -5986,7 +6000,9 @@ inline bool TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomial<ElementOfCommutativeRingWithIdentity>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
-{ Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
+{ if (newNumVars==this->NumVars)
+    return;
+  Polynomial<ElementOfCommutativeRingWithIdentity> Accum;
   Accum.Nullify(newNumVars);
   Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
@@ -6617,10 +6633,18 @@ void Polynomials<ElementOfCommutativeRingWithIdentity>::PrintPolys(std::string &
 
 template <class ElementOfCommutativeRingWithIdentity>
 void Polynomials<ElementOfCommutativeRingWithIdentity>::MakeIdSubstitution(int numVars, const ElementOfCommutativeRingWithIdentity& theRingUnit)
-{ this->SetSize(numVars);
+{ this->MakeIdLikeInjectionSub(numVars, numVars, theRingUnit);
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Polynomials<ElementOfCommutativeRingWithIdentity>::
+MakeIdLikeInjectionSub
+(int numStartingVars, int numTargetVarsMustBeLargerOrEqual, const ElementOfCommutativeRingWithIdentity& theRingUnit)
+{ assert(numStartingVars<=numTargetVarsMustBeLargerOrEqual);
+  this->SetSize(numStartingVars);
   for (int i=0; i<this->size; i++)
   { Polynomial<ElementOfCommutativeRingWithIdentity>& currentPoly=this->TheObjects[i];
-    currentPoly.MakeNVarDegOnePoly(numVars, i, theRingUnit);
+    currentPoly.MakeNVarDegOnePoly(numTargetVarsMustBeLargerOrEqual, i, theRingUnit);
   }
 }
 
@@ -9356,6 +9380,7 @@ public:
   void ElementToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
   void ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
   std::string ElementToString(bool useLatex){std::string tempS; this->ElementToString(tempS, false, useLatex, false); return tempS;}
+  //NumVariables must equal 2*StandardOrder.NumVars
   int NumVariables;
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
@@ -9529,8 +9554,8 @@ public:
   List<DrawTextAtVectorOperation> theDrawTextAtVectorOperations;
   List<DrawCircleAtVectorOperation> theDrawCircleAtVectorOperations;
   List<List<double> > ProjectionsEiVectors;
-  Vectors<double> BasisProjectionPlane;
-  int SelectedIndex; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
+  List<Vectors<double> > BasisProjectionPlane;
+  int SelectedCircleMinus2noneMinus1Center; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
   double ClickToleranceX;
@@ -9540,19 +9565,53 @@ public:
   double GraphicsUnit;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
+  bool flagIsPausedWhileAnimating;
+  int SelectedPlane;
   std::string DebugString;
+  void operator=(const DrawOperations& other)
+  { this->IndexNthDrawOperation=other.IndexNthDrawOperation;
+    this->TypeNthDrawOperation=other.TypeNthDrawOperation;
+    this->theDrawTextOperations=other.theDrawTextOperations;
+    this->theDrawLineOperations=other.theDrawLineOperations;
+    this->theDrawLineBetweenTwoRootsOperations=other.theDrawLineBetweenTwoRootsOperations;
+    this->theDrawTextAtVectorOperations=other.theDrawTextAtVectorOperations;
+    this->theDrawCircleAtVectorOperations=other.theDrawCircleAtVectorOperations;
+    this->ProjectionsEiVectors=other.ProjectionsEiVectors;
+    this->BasisProjectionPlane=other.BasisProjectionPlane;
+    this->SelectedCircleMinus2noneMinus1Center=other.SelectedCircleMinus2noneMinus1Center;
+    this->BasisToDrawCirclesAt=other.BasisToDrawCirclesAt;
+    this->theBilinearForm=other.theBilinearForm;
+    this->ClickToleranceX=other.ClickToleranceX;
+    this->ClickToleranceY=other.ClickToleranceY;
+    this->centerX=other.centerX;
+    this->centerY=other.centerY;
+    this->GraphicsUnit=other.GraphicsUnit;
+    this->flagRotatingPreservingAngles=other.flagRotatingPreservingAngles;
+    this->flagAnimatingMovingCoordSystem=other.flagAnimatingMovingCoordSystem;
+    this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
+    this->SelectedPlane=other.SelectedPlane;
+    this->DebugString=other.DebugString;
+  }
   void initDimensions
-  (MatrixLargeRational& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane)
+  (Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
+  { this->theBilinearForm=bilinearForm;
+    this->BasisToDrawCirclesAt=draggableBasis;
+    this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
+    this->ComputeProjectionsEiVectors();
+  }
+  void initDimensions
+  (MatrixLargeRational& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
   { this->theBilinearForm.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i=0; i<bilinearForm.NumRows; i++)
       for (int j=0; j<bilinearForm.NumCols; j++)
         this->theBilinearForm.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
     this->BasisToDrawCirclesAt=draggableBasis;
-    this->BasisProjectionPlane=startingPlane;
+    this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
     this->ComputeProjectionsEiVectors();
   }
-  void initDimensions(int theDim);
+  void initDimensions(int theDim, int numAnimationFrames);
   int GetDimFirstDimensionDependentOperation();
+  int GetDimFromBilinearForm();
   inline void GetCoordsForDrawing(Vector<double>& input, double& X1, double& Y1)
   { X1=0; Y1=0;
     for (int j=0; j<input.size; j++)
@@ -9586,13 +9645,13 @@ public:
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
   };
   void mouseMoveRedraw(int X, int Y)
-  { if (this->SelectedIndex==-2)
+  { if (this->SelectedCircleMinus2noneMinus1Center==-2)
       return;
-    if (this->SelectedIndex==-1)
+    if (this->SelectedCircleMinus2noneMinus1Center==-1)
     { this->centerX=X;
       this->centerY=Y;
     }
-    if (this->SelectedIndex>=0)
+    if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
         this->changeBasisPreserveAngles((double) X , (double) Y);
     }
@@ -9620,6 +9679,10 @@ public:
   void ComputeXYsFromProjectionsEisAndGraphicsUnit()
   ;
   void ComputeProjectionsEiVectors();
+  DrawOperations()
+  { this->SelectedPlane=0;
+    this->BasisProjectionPlane.SetSize(2);
+  }
   void init()
   { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
     this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
@@ -9633,23 +9696,15 @@ public:
     this->theDrawLineBetweenTwoRootsOperations.size=0;
     this->theDrawTextAtVectorOperations.size=0;
     this->theDrawCircleAtVectorOperations.size=0;
+    this->GraphicsUnit=100;
     this->centerX=300;
     this->centerY=300;
     this->ClickToleranceX=5;
     this->ClickToleranceY=5;
-    this->SelectedIndex=-2;
-    this->GraphicsUnit=100;
+    this->SelectedCircleMinus2noneMinus1Center=-2;
     this->flagRotatingPreservingAngles=true;
     this->flagAnimatingMovingCoordSystem=false;
-    this->ProjectionsEiVectors.SetSizeMakeMatrix(8,2);
-    ProjectionsEiVectors[0][0]=100; ProjectionsEiVectors[0][1]=0;
-    ProjectionsEiVectors[1][0]=0; ProjectionsEiVectors[1][1]=100;
-    ProjectionsEiVectors[2][0]=60; ProjectionsEiVectors[2][1]=60;
-    ProjectionsEiVectors[3][0]=-60; ProjectionsEiVectors[3][1]=60;
-    ProjectionsEiVectors[4][0]=60; ProjectionsEiVectors[4][1]=-60;
-    ProjectionsEiVectors[5][0]= -100; ProjectionsEiVectors[5][1]=0;
-    ProjectionsEiVectors[6][0]=0; ProjectionsEiVectors[6][1]=-100;
-    ProjectionsEiVectors[7][0]=-60; ProjectionsEiVectors[7][1]=-60;
+    this->flagIsPausedWhileAnimating=false;
   }
   enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector,};
 };
@@ -9660,6 +9715,7 @@ private:
   drawLineFunction theDrawLineFunction;
   drawTextFunction theDrawTextFunction;
   drawCircleFunction theDrawCircleFunction;
+  drawClearScreenFunction theDrawClearScreenFunction;
 public:
   enum PenStyles
   { PenStyleInvisible, PenStyleDashed, PenStyleDotted, PenStyleNormal, PenStyleZeroChamber, PenStylePermanentlyZeroChamber, PenStyleLinkToOriginZeroChamber, PenStyleLinkToOrigin, PenStyleLinkToOriginPermanentlyZeroChamber };
@@ -9692,10 +9748,10 @@ public:
   void SetDrawLineFunction(drawLineFunction theFunction){ this->theDrawLineFunction=theFunction; }
   void SetDrawTextFunction(drawTextFunction theFunction){ this->theDrawTextFunction=theFunction; }
   void SetDrawCircleFunction(drawCircleFunction theFunction){ this->theDrawCircleFunction=theFunction; }
+  void SetDrawClearFunction(drawClearScreenFunction theFunction){ this->theDrawClearScreenFunction=theFunction; }
   int GetColorFromChamberIndex(int index, std::fstream* LaTexOutput);
   static void GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y);
   static void ProjectOnToHyperPlaneGraphics(root& input, root& output, roots& directions);
-  void ApplyScale(double inputScale);
   std::string GetColorHtmlFromColorIndex(int colorIndex);
   DrawOperations theBuffer;
   inline int GetActualPenStyleFromFlagsAnd(int inputPenStyle);
@@ -10024,7 +10080,12 @@ class ConeLatticeAndShiftMaxComputation
 
 class Parser;
 class ParserNode
-{ public:
+{
+private:
+  bool ConvertToNextType
+(int GoalType, int GoalNumVariables, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
+;
+public:
   std::string DebugString;
   std::string outputString;
   void ComputeDebugString(GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, theGlobalVariables); }
@@ -10036,6 +10097,7 @@ class ParserNode
   int ExpressionType;
   int ErrorType;
   SemisimpleLieAlgebra* ContextLieAlgebra;
+  int impliedNumVars;
   bool Evaluated;
   MemorySaving<PolynomialRationalCoeff> polyValue;
   MemorySaving<ElementWeylAlgebra> WeylAlgebraElement;
@@ -10048,25 +10110,25 @@ class ParserNode
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
   MemorySaving<partFractions> thePFs;
+  MemorySaving<DrawOperations> theAnimation;
   List<int> children;
   int intValue;
   Rational rationalValue;
   void operator=(const ParserNode& other);
   void Clear();
+  int GetMaxImpliedNumVarsChildren();
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
   void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
   void CopyValue(const ParserNode& other);
   bool ConvertToType
-(int theType, GlobalVariables& theGlobalVariables)
+(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
   ;
-  bool ConvertToNextType
-(int GoalType, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
-;
-  bool ConvertChildrenToType(int theType, GlobalVariables& theGlobalVariables);
+  bool ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
   typeArray, typeQuasiPolynomial, typePartialFractions, //=17
+  typeAnimation,
   typeFile, typeDots,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
@@ -10324,6 +10386,7 @@ public:
   std::string outputFolderDisplayPath;
   char DefaultWeylLetter;
   int DefaultWeylRank;
+  int MaxFoundVars;
   ParserNode theValue;
   HomomorphismSemisimpleLieAlgebra theHmm;
   SemisimpleLieAlgebraOrdered testAlgebra;
@@ -10356,7 +10419,6 @@ public:
   List<int> ValueStack;
   List<int> NodeIndexStack;
   int numEmptyTokensAtBeginning;
-  int NumVariables;
   bool flagFunctionListInitialized;
 //  ElementSimpleLieAlgebra LieAlgebraValue;
 //  ElementWeylAlgebra WeylAlgebraValue;
@@ -10550,7 +10612,6 @@ public:
   bool LookUpInDictionaryAndAdd(std::string& input);
   void TokenToStringStream(std::stringstream& out, int theToken);
   void Clear();
-  void ComputeNumberOfVariablesAndAdjustNodes();
   Parser(){ this->flagFunctionListInitialized=false;}
 };
 

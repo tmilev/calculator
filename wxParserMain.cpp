@@ -503,7 +503,7 @@ void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
 void wxPNGdispaly::OnPaint(wxPaintEvent& event)
 { wxImage theImage;
 
-  theImage.LoadFile(wxString((theMainWindow->thePath+"jacobs_logo.png").c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
+//  theImage.LoadFile(wxString((theMainWindow->thePath+"jacobs_logo.png").c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
   wxPaintDC theDC(this);
-  theDC.DrawBitmap(wxBitmap(theImage), 0, 0);
+//  theDC.DrawBitmap(wxBitmap(theImage), 0, 0);
 }

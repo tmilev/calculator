@@ -9563,6 +9563,9 @@ public:
   List<double> centerX;
   List<double> centerY;
   List<double> GraphicsUnit;
+  List<int> FramesWithStrings;
+  List<std::string> theProgressStrings;
+  List<std::string> theStatusStrings;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
   bool flagIsPausedWhileAnimating;
@@ -9586,12 +9589,16 @@ public:
     this->centerX=other.centerX;
     this->centerY=other.centerY;
     this->GraphicsUnit=other.GraphicsUnit;
+    this->FramesWithStrings=other.FramesWithStrings;
+    this->theProgressStrings=other.theProgressStrings;
+    this->theStatusStrings=other.theStatusStrings;
     this->flagRotatingPreservingAngles=other.flagRotatingPreservingAngles;
     this->flagAnimatingMovingCoordSystem=other.flagAnimatingMovingCoordSystem;
     this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
     this->SelectedPlane=other.SelectedPlane;
     this->DebugString=other.DebugString;
   }
+  void operator+=(const DrawingVariables& other);
   void initDimensions
   (Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
   { this->theBilinearForm=bilinearForm;

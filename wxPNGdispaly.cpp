@@ -1,4 +1,4 @@
-#include "wxPNGdispaly.h"
+#include "wxPNGdisplay.h"
 
 //(*InternalHeaders(wxPNGdispaly)
 #include <wx/intl.h>

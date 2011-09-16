@@ -52,6 +52,7 @@ class wxParserFrame: public wxFrame
         wxCommandEvent eventComputationOver;
         wxCommandEvent eventProgressReport;
         List<wxBitmap*> theBitmapList;
+        List<wxImage> theSlides;
         int currentPngIndex;
         int bitmapH, bitmapW;
         bool Quitting;

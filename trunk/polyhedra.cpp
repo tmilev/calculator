@@ -477,9 +477,6 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->Selected=-2;
   this->textX=0;
   this->textY=15;
-  this->theBuffer.centerX= (double) cX1; //(double(X2)-double(X1));
-  this->theBuffer.centerY= (double) cY1;
-  this->theBuffer.GraphicsUnit=100;
   this->theBuffer.init();
 }
 
@@ -662,8 +659,8 @@ void CGIspecificRoutines::WeylGroupToHtml(WeylGroup& input, std::string& path)
 }
 
 void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r, double& x, double& y)
-{ x=TDV.theBuffer.centerX;
-  y=TDV.theBuffer.centerY;
+{ x=TDV.theBuffer.centerX[0];
+  y=TDV.theBuffer.centerY[0];
   for (int k=0; k<r.size; k++)
   { x+=(r.TheObjects[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][0]);
     y-=(r.TheObjects[k].DoubleValue())*(TDV.theBuffer.ProjectionsEiVectors[k][1]);
@@ -21742,20 +21739,20 @@ void DrawOperations::drawTextBuffer(double X1, double Y1, const std::string& inp
   this->theDrawTextOperations.LastObject()->init(X1, Y1, inputText, ColorIndex, theFontSize, theTextStyle);
 }
 
-void DrawingVariables::drawBufferNoInit
-()
+void DrawingVariables::drawBufferNoIniT
+(DrawOperations& theOps)
 { this->LockedWhileDrawing.LockMe();
-  this->theBuffer.EnsureProperInitialization();
-  this->theBuffer.ComputeProjectionsEiVectors();
-  this->theBuffer.ComputeXYsFromProjectionsEisAndGraphicsUnit();
+  theOps.EnsureProperInitialization();
+  theOps.ComputeProjectionsEiVectors();
+  theOps.ComputeXYsFromProjectionsEisAndGraphicsUnit();
   int currentPenStyle, currentTextStyle;
   if (this->theDrawClearScreenFunction!=0)
     this->theDrawClearScreenFunction();
-  for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
-    switch (this->theBuffer.TypeNthDrawOperation.TheObjects[i])
+  for (int i=0; i<theOps.IndexNthDrawOperation.size; i++)
+    switch (theOps.TypeNthDrawOperation.TheObjects[i])
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!=0)
-        { DrawTextOperation& theDrawTextOp= this->theBuffer.theDrawTextOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+        { DrawTextOperation& theDrawTextOp= theOps.theDrawTextOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentTextStyle=this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
           if (currentTextStyle==this->TextStyleInvisible)
             break;
@@ -21764,7 +21761,7 @@ void DrawingVariables::drawBufferNoInit
         break;
       case DrawOperations::typeDrawLine:
         if (this->theDrawLineFunction!=0)
-        { DrawLineOperation& theDrawLineOp= this->theBuffer.theDrawLineOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+        { DrawLineOperation& theDrawLineOp= theOps.theDrawLineOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
@@ -21773,7 +21770,7 @@ void DrawingVariables::drawBufferNoInit
         break;
       case DrawOperations::typeDrawLineBetweenTwoVectors:
         if (this->theDrawLineFunction!=0)
-        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= this->theBuffer.theDrawLineBetweenTwoRootsOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+        { DrawLineBetweenTwoRootsOperation& theDrawLineBnTwoOp= theOps.theDrawLineBetweenTwoRootsOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawLineBnTwoOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
@@ -21782,7 +21779,7 @@ void DrawingVariables::drawBufferNoInit
         break;
       case DrawOperations::typeDrawTextAtVector:
         if (this->theDrawTextFunction!=0)
-        { DrawTextAtVectorOperation& theDrawTextOp= this->theBuffer.theDrawTextAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+        { DrawTextAtVectorOperation& theDrawTextOp= theOps.theDrawTextAtVectorOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentTextStyle= this->GetActualTextStyleFromFlagsAnd(theDrawTextOp.TextStyle);
           if (currentTextStyle==this->TextStyleInvisible)
             break;
@@ -21791,7 +21788,7 @@ void DrawingVariables::drawBufferNoInit
         break;
       case DrawOperations::typeDrawCircleAtVector:
         if (this->theDrawCircleFunction!=0)
-        { DrawCircleAtVectorOperation& theDrawCircleOp= this->theBuffer.theDrawCircleAtVectorOperations.TheObjects[this->theBuffer.IndexNthDrawOperation.TheObjects[i]];
+        { DrawCircleAtVectorOperation& theDrawCircleOp= theOps.theDrawCircleAtVectorOperations.TheObjects[theOps.IndexNthDrawOperation.TheObjects[i]];
           currentPenStyle= this->GetActualPenStyleFromFlagsAnd(theDrawCircleOp.thePenStyle);
           if (currentPenStyle==this->PenStyleInvisible)
             break;
@@ -25563,8 +25560,16 @@ void CGIspecificRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theR
       theWeylLetter='A';
   if (theRank>8 || theRank<1)
     theRank=1;
+  if (theWeylLetter!='A' && theRank==1)
+    theRank=2;
   if (theWeylLetter=='E' && theRank<6)
     theRank=6;
+  if (theWeylLetter=='F')
+    theRank=4;
+  if (theWeylLetter=='G')
+    theRank=2;
+  if (theWeylLetter=='D' && theRank <4)
+    theRank=4;
 }
 
 void CGIspecificRoutines::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
@@ -28797,7 +28802,11 @@ bool ParserNode::ConvertToType
     case ParserNode::typeWeylAlgebraElement:
       this->WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(GoalNumVars); break;
     case ParserNode::typeAnimation:
-
+      if (this->theAnimation.GetElement().GetDimFromBilinearForm()!=this->impliedNumVars)
+      { this->SetError(this->errorDimensionProblem);
+        return false;
+      }
+      break;
     case ParserNode::typeQuasiPolynomial:
       if (GoalNumVars!=this->theQP.GetElement().GetNumVars())
       { this->SetError(this->errorDimensionProblem);

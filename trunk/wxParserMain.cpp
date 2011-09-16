@@ -201,6 +201,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->theDrawPanel= new wxDrawPanel(this);
     this->theParserOutput= new wxParserOutput(this);
     this->theStatus= new wxStatus(this);
+    this->thePNGdisplay= new wxPNGdispaly(this);
     this->Timer1.Stop();
 
     this->Connect(id, wxEVT_ComputationOverMakeReport, (wxObjectEventFunction)&wxParserFrame::OnComputationOver);
@@ -219,14 +220,19 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     theParser.DefaultWeylLetter='F';
 
     this->thePath=std::string(wxStandardPaths::Get().GetExecutablePath().mb_str());
-    this->theSettingsFileName=this->thePath;
-    this->theSettingsFileName.append("Settings.txt");
+    for (unsigned i=this->thePath.size()-1; i>=0; i--)
+    { if (this->thePath[i]=='/' || this->thePath[i]=='\\')
+        break;
+      thePath.resize(thePath.size()-1);
+    }
+    this->theSettingsFileName=this->thePath+"Settings.txt";
     this->ReadSettings();
 
     theMainWindow=this;
     this->theStatus->Show();
     this->theParserOutput->Show();
     this->theDrawPanel->Show();
+    this->thePNGdisplay->Show();
 //    this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
     this->bitmapH=600;
     this->bitmapW=600;
@@ -348,6 +354,8 @@ void wxParserFrame::WriteSettings()
   << this->theStatus->GetRect().width << " " << this->theStatus->GetRect().height << "\n";
   fileSettings << "outputDialogX_Y_Width_Height: " <<  this->theParserOutput->GetRect().x << " " << this->theParserOutput->GetRect().y << " "
   << this->theParserOutput->GetRect().width << " " << this->theParserOutput->GetRect().height << "\n";
+  fileSettings << "outputDialogX_Y_Width_Height: " <<  this->thePNGdisplay->GetRect().x << " " << this->thePNGdisplay->GetRect().y << " "
+  << this->thePNGdisplay->GetRect().width << " " << this->thePNGdisplay->GetRect().height << "\n";
 }
 
 void wxParserFrame::ReadSettings()
@@ -365,6 +373,8 @@ void wxParserFrame::ReadSettings()
   this->theStatus->SetSize(tempRect);
   fileSettings >> tempS >> tempRect.x >> tempRect.y >> tempRect.width >> tempRect.height;
   this->theParserOutput->SetSize(tempRect);
+  fileSettings >> tempS >> tempRect.x >> tempRect.y >> tempRect.width >> tempRect.height;
+  this->thePNGdisplay->SetSize(tempRect);
 }
 
 #ifdef WIN32
@@ -488,4 +498,12 @@ void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
     this->UpdateChoices();
+}
+
+void wxPNGdispaly::OnPaint(wxPaintEvent& event)
+{ wxImage theImage;
+
+  theImage.LoadFile(wxString((theMainWindow->thePath+"jacobs_logo.png").c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
+  wxPaintDC theDC(this);
+  theDC.DrawBitmap(wxBitmap(theImage), 0, 0);
 }

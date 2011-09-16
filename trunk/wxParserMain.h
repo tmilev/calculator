@@ -23,9 +23,11 @@
 #include "wxDrawPanel.h"
 #include "wxParserOutput.h"
 #include "wxStatus.h"
+#include "wxPNGdisplay.h"
 #include <wx/dcclient.h>
 #include <wx/dcmemory.h>
 #include "wx/stdpaths.h"
+#include <wx/image.h>
 #include "polyhedra.h"
 
 
@@ -41,6 +43,7 @@ class wxParserFrame: public wxFrame
         wxDrawPanel* theDrawPanel;
         wxParserOutput* theParserOutput;
         wxStatus* theStatus;
+        wxPNGdispaly* thePNGdisplay;
         MutexWrapper mutexRuN;
         std::string thePath;
         std::string theSettingsFileName;
@@ -49,6 +52,7 @@ class wxParserFrame: public wxFrame
         wxCommandEvent eventComputationOver;
         wxCommandEvent eventProgressReport;
         List<wxBitmap*> theBitmapList;
+        int currentPngIndex;
         int bitmapH, bitmapW;
         bool Quitting;
         void StartTimer(){this->Timer1.Start();}

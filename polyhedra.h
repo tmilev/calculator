@@ -9560,9 +9560,9 @@ public:
   Matrix<double> theBilinearForm;
   double ClickToleranceX;
   double ClickToleranceY;
-  double centerX;
-  double centerY;
-  double GraphicsUnit;
+  List<double> centerX;
+  List<double> centerY;
+  List<double> GraphicsUnit;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
   bool flagIsPausedWhileAnimating;
@@ -9597,31 +9597,39 @@ public:
   { this->theBilinearForm=bilinearForm;
     this->BasisToDrawCirclesAt=draggableBasis;
     this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
+    this->centerX.initFillInObject(NumAnimationFrames, 300);
+    this->centerY.initFillInObject(NumAnimationFrames, 300);
+    this->GraphicsUnit.initFillInObject(NumAnimationFrames, 100);
     this->ComputeProjectionsEiVectors();
   }
   void initDimensions
   (MatrixLargeRational& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
-  { this->theBilinearForm.init(bilinearForm.NumRows, bilinearForm.NumCols);
+  { Matrix<double> tempMat;
+    tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i=0; i<bilinearForm.NumRows; i++)
       for (int j=0; j<bilinearForm.NumCols; j++)
         this->theBilinearForm.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
-    this->BasisToDrawCirclesAt=draggableBasis;
-    this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
-    this->ComputeProjectionsEiVectors();
+    this->initDimensions(tempMat, draggableBasis, startingPlane, NumAnimationFrames);
   }
   void initDimensions(int theDim, int numAnimationFrames);
   int GetDimFirstDimensionDependentOperation();
   int GetDimFromBilinearForm();
-  inline void GetCoordsForDrawing(Vector<double>& input, double& X1, double& Y1)
+  inline void GetCoordsDrawingComputeAll(Vector<double>& input, double& X1, double& Y1)
+  { X1=this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][0]);
+    Y1=this->theBilinearForm.ScalarProduct(input, this->BasisProjectionPlane[this->SelectedPlane][1]);
+    X1=X1*this->GraphicsUnit[this->SelectedPlane] +this->centerX[this->SelectedPlane];
+    Y1=Y1*this->GraphicsUnit[this->SelectedPlane] +this->centerY[this->SelectedPlane] ;
+  }
+  inline void GetCoordsForDrawingProjectionsComputed(Vector<double>& input, double& X1, double& Y1)
   { X1=0; Y1=0;
     for (int j=0; j<input.size; j++)
     { X1+=this->ProjectionsEiVectors[j][0]*input[j];
       Y1+=this->ProjectionsEiVectors[j][1]*input[j];
     }
-    X1=X1*this->GraphicsUnit+this->centerX;
-    Y1=Y1*this->GraphicsUnit+this->centerY;
+    X1=X1*this->GraphicsUnit[this->SelectedPlane] +this->centerX[this->SelectedPlane];
+    Y1=Y1*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
   }
-  inline void GetCoordsForDrawing(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2)
+  inline void GetCoordsForDrawingProjectionsComputed(Vector<double>& input1, Vector<double>& input2, double& X1, double& Y1, double& X2, double& Y2)
   { X1=0; X2=0; Y1=0; Y2=0;
     for (int j=0; j<input1.size; j++)
     { X1+=this->ProjectionsEiVectors[j][0]*input1[j];
@@ -9629,10 +9637,10 @@ public:
       X2+=this->ProjectionsEiVectors[j][0]*input2[j];
       Y2+=this->ProjectionsEiVectors[j][1]*input2[j];
     }
-    X1=X1*this->GraphicsUnit+this->centerX;
-    X2=X2*this->GraphicsUnit+this->centerX;
-    Y1=Y1*this->GraphicsUnit+this->centerY;
-    Y2=Y2*this->GraphicsUnit+this->centerY;
+    X1=X1*this->GraphicsUnit[this->SelectedPlane]+this->centerX[this->SelectedPlane];
+    X2=X2*this->GraphicsUnit[this->SelectedPlane]+this->centerX[this->SelectedPlane];
+    Y1=Y1*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
+    Y2=Y2*this->GraphicsUnit[this->SelectedPlane]+this->centerY[this->SelectedPlane];
   }
   void EnsureProperInitialization();
   bool AreWithinClickTolerance(double x1, double y1, double x2, double y2)
@@ -9648,8 +9656,8 @@ public:
   { if (this->SelectedCircleMinus2noneMinus1Center==-2)
       return;
     if (this->SelectedCircleMinus2noneMinus1Center==-1)
-    { this->centerX=X;
-      this->centerY=Y;
+    { this->centerX[this->SelectedPlane]=X;
+      this->centerY[this->SelectedPlane]=Y;
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
@@ -9681,7 +9689,8 @@ public:
   void ComputeProjectionsEiVectors();
   DrawOperations()
   { this->SelectedPlane=0;
-    this->BasisProjectionPlane.SetSize(2);
+    this->initDimensions(2, 2);
+    this->flagAnimatingMovingCoordSystem=false;
   }
   void init()
   { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(160000);
@@ -9696,12 +9705,13 @@ public:
     this->theDrawLineBetweenTwoRootsOperations.size=0;
     this->theDrawTextAtVectorOperations.size=0;
     this->theDrawCircleAtVectorOperations.size=0;
-    this->GraphicsUnit=100;
-    this->centerX=300;
-    this->centerY=300;
+    this->centerX.initFillInObject(this->BasisProjectionPlane.size, 300);
+    this->centerY.initFillInObject(this->BasisProjectionPlane.size, 300);
+    this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, 100);
     this->ClickToleranceX=5;
     this->ClickToleranceY=5;
     this->SelectedCircleMinus2noneMinus1Center=-2;
+    this->SelectedPlane=0;
     this->flagRotatingPreservingAngles=true;
     this->flagAnimatingMovingCoordSystem=false;
     this->flagIsPausedWhileAnimating=false;
@@ -9764,7 +9774,10 @@ public:
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile);
-  void drawBufferNoInit();
+  void drawBufferNoIniT
+(DrawOperations& theOps)
+;
+  void drawBufferNoIniT(){this->drawBufferNoIniT(this->theBuffer);}
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
   void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
@@ -10784,8 +10797,8 @@ public:
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
     this->theDrawingVariables=other.theDrawingVariables;
   }
-  inline void DrawBufferNoInit()
-  { this->theDrawingVariables.drawBufferNoInit();
+  inline void DrawBufferNoIniT()
+  { this->theDrawingVariables.drawBufferNoIniT();
   }
   inline void SetFeedDataToIndicatorWindowDefault(FeedDataToIndicatorWindow input)
   { this->FeedDataToIndicatorWindowDefault=input;

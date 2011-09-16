@@ -42,6 +42,8 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 //(*IdInit(wxParserFrame)
+const long wxParserFrame::ID_CHOICE1 = wxNewId();
+const long wxParserFrame::ID_SPINCTRL1 = wxNewId();
 const long wxParserFrame::ID_TEXTCTRL1 = wxNewId();
 const long wxParserFrame::ID_BUTTON1 = wxNewId();
 const long wxParserFrame::ID_BUTTON2 = wxNewId();
@@ -69,10 +71,22 @@ Parser theParser;
 GlobalVariables theGlobalVariables;
 extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
+void EnsureBitmapsSuffice()
+{ DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  int oldSize=theMainWindow->theBitmapList.size;
+  if (oldSize<=theOps.SelectedPlane)
+  { theMainWindow->theBitmapList.SetSize(theOps.SelectedPlane+50);
+    for (int i=oldSize; i<theMainWindow->theBitmapList.size; i++)
+      theMainWindow->theBitmapList[i]=new wxBitmap(theMainWindow->bitmapW, theMainWindow->bitmapW);
+  }
+}
+
 void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
+  DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  EnsureBitmapsSuffice();
   wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
+  dc.SelectObject(*theMainWindow->theBitmapList[theOps.SelectedPlane]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -95,8 +109,10 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
 
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
+  DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  EnsureBitmapsSuffice();
   wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
+  dc.SelectObject(*theMainWindow->theBitmapList[theOps.SelectedPlane]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -118,9 +134,11 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
 }
 
 void drawClearScreen()
-{ wxMemoryDC tempDC;
+{ DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  EnsureBitmapsSuffice();
+  wxMemoryDC tempDC;
   tempDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-  tempDC.SelectObject(*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane]);
+  tempDC.SelectObject(*theMainWindow->theBitmapList[theOps.SelectedPlane]);
   tempDC.Clear();
   tempDC.SelectObject(wxNullBitmap);
 }
@@ -141,10 +159,25 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     //(*Initialize(wxParserFrame)
     wxBoxSizer* BoxSizer2;
     wxBoxSizer* BoxSizer1;
+    wxBoxSizer* BoxSizer3;
 
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystem"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    Choice1 = new wxChoice(this, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
+    Choice1->Append(_("A"));
+    Choice1->Append(_("B"));
+    Choice1->Append(_("C"));
+    Choice1->Append(_("D"));
+    Choice1->Append(_("E"));
+    Choice1->SetSelection( Choice1->Append(_("F")) );
+    Choice1->Append(_("G"));
+    BoxSizer3->Add(Choice1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("4"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 4, _T("ID_SPINCTRL1"));
+    SpinCtrl1->SetValue(_T("4"));
+    BoxSizer3->Add(SpinCtrl1, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(50)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -158,6 +191,8 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     BoxSizer1->Fit(this);
     BoxSizer1->SetSizeHints(this);
 
+    Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
+    Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
     Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
     Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton2Click);
     Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&wxParserFrame::OnTimer1Trigger);
@@ -192,14 +227,11 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->theStatus->Show();
     this->theParserOutput->Show();
     this->theDrawPanel->Show();
-    theGlobalVariables.theDrawingVariables.theBuffer.initDimensions(theParser.DefaultWeylRank, 50);
-    theBitmapList.SetSize(theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size);
 //    this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
     this->bitmapH=600;
     this->bitmapW=600;
-    for (int i=0; i<theBitmapList.size; i++)
-      this->theBitmapList[i]= new wxBitmap(this->bitmapW, this->bitmapH);
-    theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane=0;
+    theBitmapList.SetSize(1);
+    this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
     this->Quitting=false;
 }
 
@@ -226,16 +258,19 @@ void wxDrawPanel::OnPaint(wxPaintEvent& event)
   if (theMainWindow->Quitting)
     return;
   theMainWindow->mutexRuN.LockMe();
-  wxBitmap& theBM=*theMainWindow->theBitmapList[theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane];
-  assert(theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane>=0 && theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane< theMainWindow->theBitmapList.size);
-  if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem || theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating)
-    theGlobalVariables.DrawBufferNoInit();
+  EnsureBitmapsSuffice();
+  DrawOperations& theOps= theParser.theValue.theAnimation.GetElement();
+  wxBitmap& theBM=*theMainWindow->theBitmapList[theOps.SelectedPlane];
+  assert(theOps.SelectedPlane>=0 && theOps.SelectedPlane<theMainWindow->theBitmapList.size);
+  if (!theOps.flagAnimatingMovingCoordSystem || theOps.flagIsPausedWhileAnimating)
+    theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
   dc.DrawBitmap(theBM, 0, 0);
   theMainWindow->mutexRuN.UnlockMe();
 }
 
 void wxDrawPanel::OnPanel1LeftDown(wxMouseEvent& event)
-{ theGlobalVariables.theDrawingVariables.theBuffer.click(event.GetX(), event.GetY());
+{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement();
+  theOps.click(event.GetX(), event.GetY());
 }
 
 void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
@@ -244,7 +279,8 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
     return;
   int rot = event.GetWheelRotation()/event.GetWheelDelta();
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
-  theGlobalVariables.theDrawingVariables.theBuffer.GraphicsUnit+=rot*5;
+  DrawOperations& theOps= theParser.theValue.theAnimation.GetElement();
+  theOps.GraphicsUnit[theOps.SelectedPlane]+=rot*5;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
   //wxPaintDC dc(this);
   //dc.SetBackground(theMainWindow->GetBackgroundColour());
@@ -254,18 +290,20 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
-{ if (theGlobalVariables.theDrawingVariables.theBuffer.SelectedCircleMinus2noneMinus1Center==-2)
+{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement();
+  if (theOps.SelectedCircleMinus2noneMinus1Center==-2)
     return;
   theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
-  theGlobalVariables.theDrawingVariables.theBuffer.mouseMoveRedraw(event.GetX(), event.GetY());
+  theOps.mouseMoveRedraw(event.GetX(), event.GetY());
   theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
   theMainWindow->theStatus->TextCtrlStatusString->SetValue
-  (wxString(theGlobalVariables.theDrawingVariables.theBuffer.DebugString.c_str(), wxConvUTF8));
+  (wxString(theOps.DebugString.c_str(), wxConvUTF8));
   this->Refresh();
 }
 
 void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
-{ theGlobalVariables.theDrawingVariables.theBuffer.SelectedCircleMinus2noneMinus1Center=-2;
+{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement();
+  theOps.SelectedCircleMinus2noneMinus1Center=-2;
 }
 
 void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
@@ -276,32 +314,15 @@ void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
 }
 
 void Animate()
-{ Vector<double> target1, target2, start1, start2;
-  int theDim=theParser.theHmm.theRange.GetRank();
-  DrawOperations& theOps=theGlobalVariables.theDrawingVariables.theBuffer;
-  target1.MakeEi(theDim, 0, 1, 0);
-  target2.MakeEi(theDim, (theDim>2)? 2 : 1, 1, 0);
-  start1=theOps.BasisProjectionPlane[0][0];
-  start2=theOps.BasisProjectionPlane[0][1];
-  theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
-  int& indexBitMap=theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane;
-  int NumFrames=theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size;
-  assert(theMainWindow->theBitmapList.size==NumFrames);
-  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
-  { double fraction=((double) indexBitMap)/((double)(NumFrames-1));
-    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
-    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
-    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
-    theGlobalVariables.DrawBufferNoInit();
+{ DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  for (theOps.SelectedPlane=0;  theOps.SelectedPlane<theOps.BasisProjectionPlane.size; theOps.SelectedPlane++)
+  { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
     std::stringstream tempStream;
-    tempStream << "Computing frame " << indexBitMap+1 << " out of " << NumFrames << " desired frames.\n Please wait!";
-    wxString reportString( std::string(tempStream.str()).c_str(), wxConvUTF8);
-    theMainWindow->theStatus->TextCtrlProgressString->SetValue(reportString);
+    tempStream << "Computing frame " << theOps.SelectedPlane+1 << " out of " << theOps.BasisProjectionPlane.size;
+    std::string tempS=tempStream.str();
+    theMainWindow->theStatus->TextCtrlProgressString->SetValue(wxString(tempS.c_str(), wxConvUTF8));
     theMainWindow->theStatus->TextCtrlProgressString->Update();
   }
-  indexBitMap=0;
   theMainWindow->StartTimer();
 }
 
@@ -309,9 +330,9 @@ void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
 { this->mutexRuN.LockMe();
   this->theParserOutput->TextCtrl1->SetValue(wxString(theParser.DebugString.c_str(), wxConvUTF8));
   this->GetButton1()->SetLabel(wxT("Go"));
-  if (theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
-  { Animate();
-  }
+  DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  if (theOps.flagAnimatingMovingCoordSystem)
+    Animate();
   theMainWindow->theDrawPanel->Panel1->Refresh();
   this->mutexRuN.UnlockMe();
 }
@@ -390,13 +411,14 @@ void wxParserFrame::RunTheComputation()
 }
 
 void wxParserFrame::OnButton2Click(wxCommandEvent& event)
-{ if (theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
+{ DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  if (theOps.flagAnimatingMovingCoordSystem)
   { if (theMainWindow->GetTimer().IsRunning())
     { theMainWindow->GetTimer().Stop();
       theMainWindow->Button2->SetLabel(wxT("Continue"));
-      theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=true;
+      theOps.flagIsPausedWhileAnimating=true;
     } else
-    { theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=false;
+    { theOps.flagIsPausedWhileAnimating=false;
       theMainWindow->GetTimer().Start();
       theMainWindow->Button2->SetLabel(wxT("Pause"));
     }
@@ -422,16 +444,48 @@ void wxParserFrame::OnButton1Click(wxCommandEvent& event)
 }
 
 void wxParserFrame::OnTimer1Trigger(wxTimerEvent& event)
-{ if (!theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem)
+{ DrawOperations& theOps=theParser.theValue.theAnimation.GetElement();
+  if (!theOps.flagAnimatingMovingCoordSystem)
     return;
-  int& frameIndex=theGlobalVariables.theDrawingVariables.theBuffer.SelectedPlane;
-  assert(theGlobalVariables.theDrawingVariables.theBuffer.BasisProjectionPlane.size==this->theBitmapList.size);
-  if (frameIndex==this->theBitmapList.size-1)
+  int& frameIndex=theParser.theValue.theAnimation.GetElement().SelectedPlane;
+  assert(theOps.BasisProjectionPlane.size<=this->theBitmapList.size);
+  if (frameIndex==theOps.BasisProjectionPlane.size-2)
   { theMainWindow->Timer1.Stop();
-    theGlobalVariables.theDrawingVariables.theBuffer.flagIsPausedWhileAnimating=true;
-    frameIndex=0;
+    theOps.flagIsPausedWhileAnimating=true;
+    theMainWindow->Button2->SetLabel(wxT("Continue"));
   }
-  else
-    frameIndex=(frameIndex+1)% this->theBitmapList.size;
+  frameIndex=(frameIndex+1)% theOps.BasisProjectionPlane.size;
   this->theDrawPanel->Refresh();
+}
+
+void wxParserFrame::UpdateChoices()
+{ theMainWindow->SpinCtrl1->SetValue(theParser.DefaultWeylRank);
+  theMainWindow->Choice1->SetSelection(theParser.DefaultWeylLetter- 'A');
+}
+
+void wxParserFrame::OnChoice1Select(wxCommandEvent& event)
+{ switch(this->Choice1->GetSelection())
+  { case 0: theParser.DefaultWeylLetter='A'; break;
+    case 1: theParser.DefaultWeylLetter='B'; break;
+    case 2: theParser.DefaultWeylLetter='C'; break;
+    case 3: theParser.DefaultWeylLetter='D'; break;
+    case 4: theParser.DefaultWeylLetter='E'; break;
+    case 5: theParser.DefaultWeylLetter='F'; break;
+    case 6: theParser.DefaultWeylLetter='G'; break;
+    default: break;
+  }
+  char oldLetter=theParser.DefaultWeylLetter;
+  int oldRank = theParser.DefaultWeylRank;
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
+    this->UpdateChoices();
+}
+
+void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
+{ theParser.DefaultWeylRank=this->SpinCtrl1->GetValue();
+  char oldLetter=theParser.DefaultWeylLetter;
+  int oldRank = theParser.DefaultWeylRank;
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
+    this->UpdateChoices();
 }

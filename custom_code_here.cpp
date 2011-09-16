@@ -4870,8 +4870,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out  << "var " << basisName << "=new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
     out << basisName << "[" << i << "]=[" << this->theBuffer.ProjectionsEiVectors[i][0] << "," << this->theBuffer.ProjectionsEiVectors[i][1] << "];\n";
-  out << "var " << shiftX << "=" << this->theBuffer.centerX << ";\n";
-  out << "var " <<  shiftY << "=" << this->theBuffer.centerY << ";\n";
+  out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
+  out << "var " <<  shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
   out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
@@ -5158,6 +5158,9 @@ void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
   this->BasisToDrawCirclesAt.MakeEiBasis(theDim, 1, 0);
   this->SelectedPlane=0;
   this->SelectedCircleMinus2noneMinus1Center=-2;
+  this->centerX.initFillInObject(numAnimationFrames, 300);
+  this->centerY.initFillInObject(numAnimationFrames, 300);
+  this->GraphicsUnit.initFillInObject(numAnimationFrames, 100);
 }
 
 void DrawOperations::EnsureProperInitialization()
@@ -5345,12 +5348,12 @@ double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, d
 void DrawOperations::click(double x , double y)
 { this->EnsureProperInitialization();
   this->SelectedCircleMinus2noneMinus1Center=-2;
-  if (this->AreWithinClickTolerance(x, y, this->centerX, this->centerY))
+  if (this->AreWithinClickTolerance(x, y, this->centerX[this->SelectedPlane], this->centerY[this->SelectedPlane]))
     this->SelectedCircleMinus2noneMinus1Center=-1;
   int theDim=this->theBilinearForm.NumRows;
   for (int i=0; i<theDim; i++)
   { double Xbasis, Ybasis;
-    this->GetCoordsForDrawing(this->BasisToDrawCirclesAt[i], Xbasis, Ybasis);
+    this->GetCoordsDrawingComputeAll(this->BasisToDrawCirclesAt[i], Xbasis, Ybasis);
     if (this->AreWithinClickTolerance(x, y, Xbasis, Ybasis))
     { this->SelectedCircleMinus2noneMinus1Center=i;
       return;
@@ -5405,30 +5408,30 @@ void DrawOperations::ComputeProjectionsEiVectors()
 void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
 { for (int i=0; i<this->theDrawLineBetweenTwoRootsOperations.size; i++)
   { DrawLineBetweenTwoRootsOperation& theOperation= this->theDrawLineBetweenTwoRootsOperations[i];
-    this->GetCoordsForDrawing(theOperation.v1, theOperation.v2, theOperation.precomputedX1, theOperation.precomputedY1, theOperation.precomputedX2, theOperation.precomputedY2);
+    this->GetCoordsForDrawingProjectionsComputed(theOperation.v1, theOperation.v2, theOperation.precomputedX1, theOperation.precomputedY1, theOperation.precomputedX2, theOperation.precomputedY2);
   }
   for (int i=0; i<this->theDrawTextAtVectorOperations.size; i++)
   { DrawTextAtVectorOperation& theTextOperation=this->theDrawTextAtVectorOperations[i];
-    this->GetCoordsForDrawing(theTextOperation.theVector, theTextOperation.precomputedX, theTextOperation.precomputedY);
+    this->GetCoordsForDrawingProjectionsComputed(theTextOperation.theVector, theTextOperation.precomputedX, theTextOperation.precomputedY);
   }
   for (int i=0; i<this->theDrawCircleAtVectorOperations.size; i++)
   { DrawCircleAtVectorOperation& theCircleOperation=this->theDrawCircleAtVectorOperations[i];
-    this->GetCoordsForDrawing(theCircleOperation.theVector, theCircleOperation.precomputedX, theCircleOperation.precomputedY);
+    this->GetCoordsForDrawingProjectionsComputed(theCircleOperation.theVector, theCircleOperation.precomputedX, theCircleOperation.precomputedY);
   }
 }
 
 void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
-{ newX=(newX-this->centerX)/this->GraphicsUnit;
-  newY=(newY-this->centerY)/this->GraphicsUnit;
+{ newX=(newX-this->centerX[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
+  newY=(newY-this->centerY[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
   if (newX==0 && newY==0)
     return;
   std::stringstream out;
   Vector<double>& selectedRoot=this->BasisToDrawCirclesAt[this->SelectedCircleMinus2noneMinus1Center];
   double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
   double oldX, oldY;
-  this->GetCoordsForDrawing(selectedRoot, oldX, oldY);
-  oldX=(oldX- this->centerX)/this->GraphicsUnit;
-  oldY=(oldY- this->centerY)/this->GraphicsUnit;
+  this->GetCoordsDrawingComputeAll(selectedRoot, oldX, oldY);
+  oldX=(oldX- this->centerX[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
+  oldY=(oldY- this->centerY[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
 
   double oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
   double newAngle= getAngleFromXandY(newX, newY, oldX, oldY);
@@ -5483,11 +5486,36 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
 
 int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);
-  theGlobalVariables.theDrawingVariables.theBuffer.flagAnimatingMovingCoordSystem=true;
-  theGlobalVariables.theDrawingVariables.theBuffer.GraphicsUnit=200;
-  theGlobalVariables.theDrawingVariables.theBuffer.centerX=300;
-  theGlobalVariables.theDrawingVariables.theBuffer.centerY=300;
+{ int NumFrames=theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  if(NumFrames<2)
+    NumFrames=2;
+  int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);
+  if (result==theNode.typeError)
+    return result;
+  theNode.ExpressionType=theNode.typeAnimation;
+  DrawOperations& theOps=theNode.theAnimation.GetElement();
+  theOps.flagAnimatingMovingCoordSystem=true;
+  Vectors<double> theFirstBasis=theOps.BasisProjectionPlane[0];
+  Matrix<double> theForm=theOps.theBilinearForm;
+  Vectors<double> theDraggableBasis=theOps.BasisToDrawCirclesAt;
+  theOps.initDimensions(theForm, theDraggableBasis, theFirstBasis, NumFrames);
+  Vector<double> target1, target2, start1, start2;
+  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  target1.MakeEi(theDim, 0, 1, 0);
+  target2.MakeEi(theDim, (theDim>2)? 2 : 1, 1, 0);
+  start1=theOps.BasisProjectionPlane[0][0];
+  start2=theOps.BasisProjectionPlane[0][1];
+  theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
+  int& indexBitMap=theOps.SelectedPlane;
+  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
+  { double fraction=((double) indexBitMap)/((double)(NumFrames-1));
+    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
+    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
+    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
+  }
+  indexBitMap=0;
   return result;
 }
 
@@ -5496,13 +5524,14 @@ int ParserNode::EvaluateDrawRootSystem
 { WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
   root ZeroRoot;
   int theDimension= theWeyl.GetDim();
+  theNode.impliedNumVars=theDimension;
   ZeroRoot.MakeZero(theDimension);
   ElementWeylGroup tempElt;
   theWeyl.GetCoxeterElement(tempElt);
   MatrixLargeRational matCoxeterElt, tempMat;
   theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
   std::cout << matCoxeterElt.ElementToString(true, false);
-   tempMat=matCoxeterElt;
+  tempMat=matCoxeterElt;
   int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
   for (int i=0; i<coxeterNumber-1; i++)
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
@@ -5521,9 +5550,9 @@ int ParserNode::EvaluateDrawRootSystem
   List<List<Complex<double> > > theEigenSpaceList;
   eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
   Vectors<Complex<double> > theEigenSpace;
-  DrawOperations& theDrawOperators=theGlobalVariables.theDrawingVariables.theBuffer;
+  DrawOperations& theDrawOperators=theNode.theAnimation.GetElement();
   theDrawOperators.init();
-  theDrawOperators.initDimensions(theDimension, theDrawOperators.BasisProjectionPlane.size);
+  theDrawOperators.initDimensions(theDimension, 1);
   theDrawOperators.GraphicsUnit=100;
   theEigenSpace.operator=(theEigenSpaceList);
   for (int i=0; i<theDimension; i++)
@@ -5575,24 +5604,25 @@ int ParserNode::EvaluateDrawRootSystem
   Rational tempRat;
   theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
   theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
-  theGlobalVariables.theDrawingVariables.theBuffer.centerX=325;
-  theGlobalVariables.theDrawingVariables.theBuffer.centerY=325;
+  theDrawOperators.centerX[0]=325;
+  theDrawOperators.centerY[0]=325;
   for (int i=0; i<RootSystemSorted.size; i++)
   { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
-    theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
-    theGlobalVariables.theDrawingVariables.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    theDrawOperators.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength== tempRat)
-        theGlobalVariables.theDrawingVariables.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
+        theDrawOperators.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
     }
   }
   root tempRootRat;
   for (int i=0; i<theDimension; i++)
   { tempRootRat.MakeEi(theDimension, i);
-    theGlobalVariables.theDrawingVariables.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
   }
+  theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
   theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
   theNode.ExpressionType=theNode.typeString;
@@ -5801,10 +5831,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateDrawRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("animateRootSystem",
-   "()",
-   "<b>Experimental.</b> Animate the root system.",
-   "animateRootSystem",
+  ("animateRootSystemDefault",
+   "(Integer)",
+   "<b>Experimental.</b> Animate the root system. The argument is the number of frames.",
+   "animateRootSystemDefault(50)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSystem
    );

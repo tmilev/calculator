@@ -9700,10 +9700,10 @@ public:
     this->flagAnimatingMovingCoordSystem=false;
   }
   void init()
-  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(1600);
-    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(1600);
-    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(1600);
-    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(150);
+  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(10000);
+    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(10000);
+    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(10000);
+    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(15);
     this->theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(280);
     this->IndexNthDrawOperation.size=0;
     this->TypeNthDrawOperation.size=0;

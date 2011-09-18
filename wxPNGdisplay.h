@@ -1,30 +1,31 @@
-#ifndef WXPNGDISPALY_H
-#define WXPNGDISPALY_H
+#ifndef WXPNGDISPLAY_H
+#define WXPNGDISPLAY_H
 
-//(*Headers(wxPNGdispaly)
+//(*Headers(wxPNGdisplay)
 #include <wx/sizer.h>
 #include <wx/frame.h>
 //*)
 
-class wxPNGdispaly: public wxFrame
+class wxPNGdisplay: public wxFrame
 {
 	public:
 
-		wxPNGdispaly(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
-		virtual ~wxPNGdispaly();
+		wxPNGdisplay(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
+		virtual ~wxPNGdisplay();
 
-		//(*Declarations(wxPNGdispaly)
+		//(*Declarations(wxPNGdisplay)
 		//*)
 
 	protected:
 
-		//(*Identifiers(wxPNGdispaly)
+		//(*Identifiers(wxPNGdisplay)
 		//*)
 
 	private:
 
-		//(*Handlers(wxPNGdispaly)
+		//(*Handlers(wxPNGdisplay)
 		void OnPaint(wxPaintEvent& event);
+		void OnMouseWheel(wxMouseEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()

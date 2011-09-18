@@ -730,7 +730,7 @@ public:
         return false;
     return true;
   }
-  inline Object& operator[](int i){return this->TheObjects[i];}
+  inline Object& operator[](int i)const{return this->TheObjects[i];}
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
   inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
   bool operator>(const List<Object>& other)const;
@@ -3616,7 +3616,8 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o)
 template <class Object>
 void List<Object>::SetSize(int theSize)
 { this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  this->size=theSize;
+  if (theSize>=0)
+    this->size=theSize;
 }
 
 template <class Object>
@@ -5830,10 +5831,10 @@ ParallelComputing::GlobalPointerCounter-=increment;
 #endif
   int* newDegrees= new int[NumVariables-increment];
   for(int i=0; i<this->NumVariables-increment; i++)
-    newDegrees[i]=degrees[i];
+    newDegrees[i]=this->degrees[i];
   this->NumVariables-=increment;
-  delete [] degrees;
-  degrees= newDegrees;
+  delete [] this->degrees;
+  this->degrees= newDegrees;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -9555,6 +9556,7 @@ public:
   List<DrawCircleAtVectorOperation> theDrawCircleAtVectorOperations;
   List<List<double> > ProjectionsEiVectors;
   List<Vectors<double> > BasisProjectionPlane;
+  static const int GraphicsUnitDefault=150;
   int SelectedCircleMinus2noneMinus1Center; //-2= none, -1=center of coordinate system, nonnegative integers= selectedindex
   Vectors<double> BasisToDrawCirclesAt;
   Matrix<double> theBilinearForm;
@@ -9563,9 +9565,6 @@ public:
   List<double> centerX;
   List<double> centerY;
   List<double> GraphicsUnit;
-  List<int> FramesWithStrings;
-  List<std::string> theProgressStrings;
-  List<std::string> theStatusStrings;
   bool flagRotatingPreservingAngles;
   bool flagAnimatingMovingCoordSystem;
   bool flagIsPausedWhileAnimating;
@@ -9589,16 +9588,13 @@ public:
     this->centerX=other.centerX;
     this->centerY=other.centerY;
     this->GraphicsUnit=other.GraphicsUnit;
-    this->FramesWithStrings=other.FramesWithStrings;
-    this->theProgressStrings=other.theProgressStrings;
-    this->theStatusStrings=other.theStatusStrings;
     this->flagRotatingPreservingAngles=other.flagRotatingPreservingAngles;
     this->flagAnimatingMovingCoordSystem=other.flagAnimatingMovingCoordSystem;
     this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
     this->SelectedPlane=other.SelectedPlane;
     this->DebugString=other.DebugString;
   }
-  void operator+=(const DrawingVariables& other);
+  void operator+=(const DrawOperations& other);
   void initDimensions
   (Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
   { this->theBilinearForm=bilinearForm;
@@ -9606,7 +9602,7 @@ public:
     this->BasisProjectionPlane.initFillInObject(NumAnimationFrames, startingPlane);
     this->centerX.initFillInObject(NumAnimationFrames, 300);
     this->centerY.initFillInObject(NumAnimationFrames, 300);
-    this->GraphicsUnit.initFillInObject(NumAnimationFrames, 100);
+    this->GraphicsUnit.initFillInObject(NumAnimationFrames, DrawOperations::GraphicsUnitDefault);
     this->ComputeProjectionsEiVectors();
   }
   void initDimensions
@@ -9659,17 +9655,21 @@ public:
       y1=-y1;
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
   };
-  void mouseMoveRedraw(int X, int Y)
+  bool mouseMoveRedraw(int X, int Y)
   { if (this->SelectedCircleMinus2noneMinus1Center==-2)
-      return;
+      return false;
     if (this->SelectedCircleMinus2noneMinus1Center==-1)
     { this->centerX[this->SelectedPlane]=X;
       this->centerY[this->SelectedPlane]=Y;
+      return true;
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
-        this->changeBasisPreserveAngles((double) X , (double) Y);
+      { this->changeBasisPreserveAngles((double) X , (double) Y);
+        return true;
+      }
     }
+    return false;
   //  this->draw();
   }
   void click(double x, double y);
@@ -9714,7 +9714,7 @@ public:
     this->theDrawCircleAtVectorOperations.size=0;
     this->centerX.initFillInObject(this->BasisProjectionPlane.size, 300);
     this->centerY.initFillInObject(this->BasisProjectionPlane.size, 300);
-    this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, 100);
+    this->GraphicsUnit.initFillInObject(this->BasisProjectionPlane.size, DrawOperations::GraphicsUnitDefault);
     this->ClickToleranceX=5;
     this->ClickToleranceY=5;
     this->SelectedCircleMinus2noneMinus1Center=-2;
@@ -9724,6 +9724,48 @@ public:
     this->flagIsPausedWhileAnimating=false;
   }
   enum DrawOperationType{ typeDrawLine, typeDrawText, typeDrawLineBetweenTwoVectors, typeDrawTextAtVector, typeDrawCircleAtVector,};
+};
+
+class VirtualDrawOp
+{
+public:
+  int theVirtualOp;
+  int indexPhysicalFrame;
+  int indexPhysicalDrawOp;
+  int selectedPlaneInPhysicalDrawOp;
+  void operator=(const VirtualDrawOp& other)
+  { this->theVirtualOp=other.theVirtualOp;
+    this->indexPhysicalFrame=other.indexPhysicalFrame;
+    this->indexPhysicalDrawOp=other.indexPhysicalDrawOp;
+    this->selectedPlaneInPhysicalDrawOp=other.selectedPlaneInPhysicalDrawOp;
+  }
+};
+
+class AnimationBuffer
+{
+public:
+  DrawOperations stillFrame;
+  List<DrawOperations> thePhysicalDrawOps;
+  List<VirtualDrawOp> theVirtualOpS;
+  bool flagAnimating;
+  bool flagIsPausedWhileAnimating;
+  int indexVirtualOp;
+  bool IncrementOpReturnNeedsRedraw();
+  int GetIndexCurrentPhysicalFrame();
+  void DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables);
+  AnimationBuffer();
+  DrawOperations& GetCurrentDrawOps();
+  DrawOperations& GetLastDrawOps();
+  int GetIndexCurrentDrawOps();
+  int GetNumPhysicalFrames();
+  void MakeZero();
+  void operator+=(const AnimationBuffer& other);
+  void operator+=(const DrawOperations& other);
+  void AddPause(int numFrames);
+  void AddCloneLastFrameAppendOperations(const DrawOperations& other);
+  void AddFrameShift(int numFrames);
+  void operator=(const AnimationBuffer& other);
+  enum{typeDrawOps, typePause, typeClearScreen, typeCloneLastFrameAddOps,};
 };
 
 class DrawingVariables
@@ -10130,7 +10172,7 @@ public:
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
   MemorySaving<partFractions> thePFs;
-  MemorySaving<DrawOperations> theAnimation;
+  MemorySaving<AnimationBuffer> theAnimation;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -10186,6 +10228,19 @@ public:
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateAnimationPause
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateAnimationClearScreen
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+
+  static int EvaluateAnimationDots
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateAnimationClonePreviousFrameDrawExtraLine
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateGroebner
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -10207,8 +10262,15 @@ public:
   static int EvaluateSliceCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
+  static int EvaluateAnimateRootSystemBluePoint
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return ParserNode::EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, 0);
+  }
+  static int EvaluateAnimateRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
   ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
@@ -10216,8 +10278,10 @@ public:
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 ;
+  static int EvaluateDrawRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);}
   static int EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 ;
@@ -11596,6 +11660,71 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
     theGlobalVariables->ProgressReportDepth--;
   return true;
 }
+
+template<class Base>
+class Complex
+{
+  static bool EqualityIsApproximate;
+  static double EqualityPrecision;
+  public:
+  Base Im;
+  Base Re;
+  std::string ElementToString()
+  { std::stringstream tempStream;
+    tempStream << *this;
+    return tempStream.str();
+  }
+  void ElementToString(std::string& output){ output=this->ElementToString(); }
+  friend std::iostream& operator<< <Base>(std::iostream& output, const Complex<Base>& input);
+  void operator*=(const Complex<Base>& other)
+  { Complex Accum;
+    Accum.Re=this->Re*other.Re-this->Im*other.Im;
+    Accum.Im=this->Re*other.Im+ this->Im*other.Re;
+    this->operator=(Accum);
+  }
+  void operator=(const Complex<Base>& other)
+  { this->Re=other.Re;
+    this->Im=other.Im;
+  }
+  void operator+=(const Complex<Base>& other)
+  { this->Re+=other.Re;
+    this->Im+=other.Im;
+  }
+  void operator-=(const Complex<Base>& other)
+  { this->Re-=other.Re;
+    this->Im-=other.Im;
+  }
+  void operator=(int other)
+  { this->Re=other;
+    this->Im=0;
+  }
+  void operator=(double other)
+  { this->Re=other;
+    this->Im=0;
+  }
+  void Invert()
+  { Base numerator;
+    numerator=this->Re*this->Re+this->Im* this->Im;
+    this->Re/=numerator;
+    numerator*=-1;
+    this->Im/=numerator;
+  }
+  bool IsEqualToZero()const
+  { if(!Complex<Base>::EqualityIsApproximate)
+      return this->Im==0 && this->Re==0;
+    else
+      return
+      this->Im<Complex<Base>::EqualityPrecision && -this->Im<Complex<Base>::EqualityPrecision
+      &&
+      this->Re<Complex<Base>::EqualityPrecision && -this->Re<Complex<Base>::EqualityPrecision
+      ;
+  }
+  inline void Minus(){this->Im=-this->Im; this->Re=-this->Re;}
+  Complex(){}
+  Complex(int other){this->operator=(other);}
+  Complex(double other){this->operator=(other);}
+};
+
 
 #endif
 

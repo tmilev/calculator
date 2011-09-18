@@ -2,8 +2,6 @@
 #define WXDRAWPANEL_H
 
 //(*Headers(wxDrawPanel)
-#include <wx/sizer.h>
-#include <wx/panel.h>
 #include <wx/frame.h>
 //*)
 
@@ -15,13 +13,11 @@ class wxDrawPanel: public wxFrame
 		virtual ~wxDrawPanel();
 
 		//(*Declarations(wxDrawPanel)
-		wxPanel* Panel1;
 		//*)
 
 	protected:
 
 		//(*Identifiers(wxDrawPanel)
-		static const long ID_PANEL1;
 		//*)
 
 	private:

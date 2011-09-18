@@ -23,6 +23,7 @@ wxStatus::wxStatus(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSiz
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCAPTION|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
+	SetBackgroundColour(wxColour(255,255,255));
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	TextCtrlProgressString = new wxTextCtrl(this, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
 	BoxSizer1->Add(TextCtrlProgressString, 2, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);

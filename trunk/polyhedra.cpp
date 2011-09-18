@@ -260,6 +260,11 @@ template < > int List<QPSub>::ListActualSizeIncrement=1000;
 template < > int List<ParserFunction>::ListActualSizeIncrement=20;
 template < > int List<ParserFunctionArgumentTree>::ListActualSizeIncrement=3;
 template < > int List<ConeLatticeAndShift>::ListActualSizeIncrement=50;
+template < > int List<DrawOperations>::ListActualSizeIncrement=5;
+template < > int List<VirtualDrawOp>::ListActualSizeIncrement=1000;
+
+template < > bool  Complex<double>::EqualityIsApproximate=true;
+template < > double Complex<double>::EqualityPrecision=0.00000001;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -21748,7 +21753,10 @@ void DrawingVariables::drawBufferNoIniT
   int currentPenStyle, currentTextStyle;
   if (this->theDrawClearScreenFunction!=0)
     this->theDrawClearScreenFunction();
-  for (int i=0; i<theOps.IndexNthDrawOperation.size; i++)
+  int numOps=theOps.IndexNthDrawOperation.size;
+  //the bad debugline is here:
+  //numOps=(numOps>10)? 10: numOps;
+  for (int i=0; i<numOps; i++)
     switch (theOps.TypeNthDrawOperation.TheObjects[i])
     { case DrawOperations::typeDrawText:
         if (this->theDrawTextFunction!=0)
@@ -21794,7 +21802,6 @@ void DrawingVariables::drawBufferNoIniT
             break;
           this->theDrawCircleFunction(theDrawCircleOp.precomputedX, theDrawCircleOp.precomputedY, theDrawCircleOp.radius, theDrawCircleOp.thePenStyle, theDrawCircleOp.ColorIndex);
         }
-        break;
         break;
       default: break;
     }
@@ -23267,6 +23274,7 @@ void Parser::ParserInit(const std::string& input)
   this->numEmptyTokensAtBeginning=6;
   this->SystemCommands.size=0;
   this->initFunctionList(this->DefaultWeylLetter, this->DefaultWeylRank);
+  this->theValue.theAnimation.GetElement().flagAnimating=false;
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;
@@ -23710,11 +23718,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->theQP.GetElement().MakeZeroLatticeZn(this->impliedNumVars);
       break;
     case ParserNode::typeAnimation:
-      assert(this->children.size>0);
-      this->theAnimation.GetElement().initDimensions
-        (this->owner->TheObjects[this->children[0]].theAnimation.GetElement().theBilinearForm,
-         this->owner->TheObjects[this->children[0]].theAnimation.GetElement().BasisToDrawCirclesAt,
-         this->owner->TheObjects[this->children[0]].theAnimation.GetElement().BasisProjectionPlane[0], 0);
+      this->theAnimation.GetElement().MakeZero();
       break;
     default:
       break;
@@ -28697,7 +28701,15 @@ bool ParserNode::ConvertToNextType
     return true;
   }
   if (this->ExpressionType==this->typeRational)
-  { this->polyValue.GetElement().MakeNVarConst(GoalNumVariables, this->rationalValue);
+  { if (GoalType<this->typeRational)
+    { if (this->rationalValue.IsSmallInteger())
+      { this->ExpressionType=this->typeIntegerOrIndex;
+        this->intValue=this->rationalValue.NumShort;
+        return true;
+      }
+      return false;
+    }
+    this->polyValue.GetElement().MakeNVarConst(GoalNumVariables, this->rationalValue);
     this->ExpressionType=this->typePoly;
     return true;
   }
@@ -28802,10 +28814,6 @@ bool ParserNode::ConvertToType
     case ParserNode::typeWeylAlgebraElement:
       this->WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(GoalNumVars); break;
     case ParserNode::typeAnimation:
-      if (this->theAnimation.GetElement().GetDimFromBilinearForm()!=this->impliedNumVars)
-      { this->SetError(this->errorDimensionProblem);
-        return false;
-      }
       break;
     case ParserNode::typeQuasiPolynomial:
       if (GoalNumVars!=this->theQP.GetElement().GetNumVars())
@@ -28813,6 +28821,7 @@ bool ParserNode::ConvertToType
         return false;
       }
       break;
+    default: break;
   }
   bool ConversionError;
   while (this->ConvertToNextType(theType, GoalNumVars, ConversionError, theGlobalVariables))
@@ -31278,7 +31287,7 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
         this->outputString=this->theQP.GetElement().ElementToString(true, false);
         break;
       case ParserNode::typeAnimation:
-        this->theAnimation.GetElement().BasisProjectionPlane.AddListOnTop(currentChild.theAnimation.GetElement().BasisProjectionPlane);
+        this->theAnimation.GetElement()+=currentChild.theAnimation.GetElement();
         break;
       default: return this->SetError(this->errorDunnoHowToDoOperation);
     }

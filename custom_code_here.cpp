@@ -5160,7 +5160,7 @@ void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
   this->SelectedCircleMinus2noneMinus1Center=-2;
   this->centerX.initFillInObject(numAnimationFrames, 300);
   this->centerY.initFillInObject(numAnimationFrames, 300);
-  this->GraphicsUnit.initFillInObject(numAnimationFrames, 100);
+  this->GraphicsUnit.initFillInObject(numAnimationFrames, DrawOperations::GraphicsUnitDefault);
 }
 
 void DrawOperations::EnsureProperInitialization()
@@ -5244,72 +5244,7 @@ void MatrixLargeRational::ApproximateLargestEigenSpace
   }*/
 }
 
-template<class Base>
-class Complex
-{
-  static bool EqualityIsApproximate;
-  static double EqualityPrecision;
-  public:
-  Base Im;
-  Base Re;
-  std::string ElementToString()
-  { std::stringstream tempStream;
-    tempStream << *this;
-    return tempStream.str();
-  }
-  void ElementToString(std::string& output){ output=this->ElementToString(); }
-  friend std::iostream& operator<< <Base>(std::iostream& output, const Complex<Base>& input);
-  void operator*=(const Complex<Base>& other)
-  { Complex Accum;
-    Accum.Re=this->Re*other.Re-this->Im*other.Im;
-    Accum.Im=this->Re*other.Im+ this->Im*other.Re;
-    this->operator=(Accum);
-  }
-  void operator=(const Complex<Base>& other)
-  { this->Re=other.Re;
-    this->Im=other.Im;
-  }
-  void operator+=(const Complex<Base>& other)
-  { this->Re+=other.Re;
-    this->Im+=other.Im;
-  }
-  void operator-=(const Complex<Base>& other)
-  { this->Re-=other.Re;
-    this->Im-=other.Im;
-  }
-  void operator=(int other)
-  { this->Re=other;
-    this->Im=0;
-  }
-  void operator=(double other)
-  { this->Re=other;
-    this->Im=0;
-  }
-  void Invert()
-  { Base numerator;
-    numerator=this->Re*this->Re+this->Im* this->Im;
-    this->Re/=numerator;
-    numerator*=-1;
-    this->Im/=numerator;
-  }
-  bool IsEqualToZero()const
-  { if(!Complex<Base>::EqualityIsApproximate)
-      return this->Im==0 && this->Re==0;
-    else
-      return
-      this->Im<Complex<Base>::EqualityPrecision && -this->Im<Complex<Base>::EqualityPrecision
-      &&
-      this->Re<Complex<Base>::EqualityPrecision && -this->Re<Complex<Base>::EqualityPrecision
-      ;
-  }
-  inline void Minus(){this->Im=-this->Im; this->Re=-this->Re;}
-  Complex(){}
-  Complex(int other){this->operator=(other);}
-  Complex(double other){this->operator=(other);}
-};
 
-template < > bool  Complex<double>::EqualityIsApproximate=true;
-template < > double Complex<double>::EqualityPrecision=0.00000001;
 
 template<class Base>
 std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
@@ -5421,8 +5356,11 @@ void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
 }
 
 void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
-{ newX=(newX-this->centerX[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
-  newY=(newY-this->centerY[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
+{ double bufferCenterX=this->centerX[this->SelectedPlane];
+  double bufferCenterY=this->centerY[this->SelectedPlane];
+  double bufferGraphicsUnit=this->GraphicsUnit[this->SelectedPlane];
+  newX=(newX-bufferCenterX)/bufferGraphicsUnit;
+  newY=(newY-bufferCenterY)/bufferGraphicsUnit;
   if (newX==0 && newY==0)
     return;
   std::stringstream out;
@@ -5430,8 +5368,8 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   double selectedRootLength=this->theBilinearForm.ScalarProduct(selectedRoot, selectedRoot);
   double oldX, oldY;
   this->GetCoordsDrawingComputeAll(selectedRoot, oldX, oldY);
-  oldX=(oldX- this->centerX[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
-  oldY=(oldY- this->centerY[this->SelectedPlane])/this->GraphicsUnit[this->SelectedPlane];
+  oldX=(oldX- bufferCenterX)/bufferGraphicsUnit;
+  oldY=(oldY- bufferCenterY)/bufferGraphicsUnit;
 
   double oldAngle= getAngleFromXandY(oldX, oldY, newX, newY);
   double newAngle= getAngleFromXandY(newX, newY, oldX, oldY);
@@ -5484,151 +5422,6 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   this->DebugString= out.str();
 }
 
-int ParserNode::EvaluateAnimateRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ int NumFrames=theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  if(NumFrames<2)
-    NumFrames=2;
-  int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);
-  if (result==theNode.typeError)
-    return result;
-  theNode.ExpressionType=theNode.typeAnimation;
-  DrawOperations& theOps=theNode.theAnimation.GetElement();
-  theOps.flagAnimatingMovingCoordSystem=true;
-  Vectors<double> theFirstBasis=theOps.BasisProjectionPlane[0];
-  Matrix<double> theForm=theOps.theBilinearForm;
-  Vectors<double> theDraggableBasis=theOps.BasisToDrawCirclesAt;
-  theOps.initDimensions(theForm, theDraggableBasis, theFirstBasis, NumFrames);
-  Vector<double> target1, target2, start1, start2;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
-  target1.MakeEi(theDim, 0, 1, 0);
-  target2.MakeEi(theDim, (theDim>2)? 2 : 1, 1, 0);
-  start1=theOps.BasisProjectionPlane[0][0];
-  start2=theOps.BasisProjectionPlane[0][1];
-  theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
-  int& indexBitMap=theOps.SelectedPlane;
-  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
-  { double fraction=((double) indexBitMap)/((double)(NumFrames-1));
-    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
-    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
-    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
-  }
-  indexBitMap=0;
-  return result;
-}
-
-int ParserNode::EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
-  root ZeroRoot;
-  int theDimension= theWeyl.GetDim();
-  theNode.impliedNumVars=theDimension;
-  ZeroRoot.MakeZero(theDimension);
-  ElementWeylGroup tempElt;
-  theWeyl.GetCoxeterElement(tempElt);
-  MatrixLargeRational matCoxeterElt, tempMat;
-  theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
-  std::cout << matCoxeterElt.ElementToString(true, false);
-  tempMat=matCoxeterElt;
-  int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
-  for (int i=0; i<coxeterNumber-1; i++)
-    tempMat.MultiplyOnTheLeft(matCoxeterElt);
-//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
-  Complex<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
-  Matrix<Complex<double> > eigenMat, idMat;
-  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
-  for (int i =0; i<eigenMat.NumRows; i++)
-    for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
-      if (i==j)
-        eigenMat.elements[i][i]-=theEigenValue;
-    }
-  List<List<Complex<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
-  Vectors<Complex<double> > theEigenSpace;
-  DrawOperations& theDrawOperators=theNode.theAnimation.GetElement();
-  theDrawOperators.init();
-  theDrawOperators.initDimensions(theDimension, 1);
-  theDrawOperators.GraphicsUnit=100;
-  theEigenSpace.operator=(theEigenSpaceList);
-  for (int i=0; i<theDimension; i++)
-    for (int j=0; j<theDimension; j++)
-      theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
-  Vector<double> tempRoot;
-  theDrawOperators.SelectedPlane=0;
-  Vectors<double>& theTwoPlane= theDrawOperators.BasisProjectionPlane[0];
-  assert(theTwoPlane.size==2);
-  if (theEigenSpace.size>0)
-  { for (int j=0; j<theDimension; j++)
-    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
-      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
-    }
-    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0][0], theDrawOperators.BasisProjectionPlane[0][1]);
-  }
-//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
-//  std::stringstream tempStream;
-//  tempStream << "<hr>the eigen mat:";
-//  tempStream << eigenMat;
-//  std::cout << tempStream.str();
-  roots RootSystemSorted;
-  RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
-  List<double> lengths;
-  lengths.SetSize(RootSystemSorted.size);
-  for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { tempRoot.SetSize(theDimension);
-    for (int j=0; j<theDimension; j++)
-      tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
-    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][0]);
-    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][1]);
-    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
-  }
-  for (int i=0; i<RootSystemSorted.size; i++)
-    for (int j=i; j<RootSystemSorted.size; j++)
-      if (lengths[i]<lengths[j])
-      { MathRoutines::swap(lengths[i], lengths[j]);
-        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
-      }
-  root differenceRoot;
-  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
-  Rational minLength= theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-  for (int i=2; i<RootSystemSorted.size; i++)
-  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
-    if (minLength> theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot))
-      minLength=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-  }
-  std::cout << "<hr>the min length is: " << minLength.ElementToString();
-  Rational tempRat;
-  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
-  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
-  theDrawOperators.centerX[0]=325;
-  theDrawOperators.centerY[0]=325;
-  for (int i=0; i<RootSystemSorted.size; i++)
-  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
-    theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
-    theDrawOperators.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-    for (int j=i+1; j<RootSystemSorted.size; j++)
-    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
-      tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-      if (minLength== tempRat)
-        theDrawOperators.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
-    }
-  }
-  root tempRootRat;
-  for (int i=0; i<theDimension; i++)
-  { tempRootRat.MakeEi(theDimension, i);
-    theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-  }
-  theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
-  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
-  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
-}
-
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
 { if (this->flagFunctionListInitialized)
     return;
@@ -5645,7 +5438,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("slTwoInSlN",
    "(Integer,...)",
-   "Prints out sl(2) embedden in sl(N) according to the partition described by the arguments.",
+   "Prints out sl(2) embedded in sl(N) according to the partition described by the arguments.",
    "slTwoInSlN(2,3)",
     & ParserNode::EvaluateSlTwoInSlN
    );
@@ -5674,7 +5467,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeyl",
    "(RF,...)",
-   "Act by the weyl group on a weight vector whose coordinates are given in simple basis coordinates. For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the first and second simple roots, and x_1 is a variable. The coordinates are allowed to be arbitrary rational functions. ",
+   "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the first and second simple roots, and x_1 is a variable. The coordinates are allowed to be arbitrary rational functions. ",
    "actByWeyl(x_1, x_2, x_3)",
     & ParserNode::EvaluateWeylAction
    );
@@ -5824,7 +5617,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystem",
-   "()",
+   "(Integer, Integer)",
    "<b>Experimental.</b> Draw the root system.",
    "drawRootSystem",
    DefaultWeylLetter, DefaultWeylRank,
@@ -5832,11 +5625,35 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
   this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystemDefault",
-   "(Integer)",
-   "<b>Experimental.</b> Animate the root system. The argument is the number of frames.",
+   "(Integer, Integer, Integer)",
+   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
    "animateRootSystemDefault(50)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSystem
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("animatePause",
+   "(Integer)",
+   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "animatePause(50)",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateAnimationPause
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("animateClearScreen",
+   "(Integer, Integer)",
+   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "animateClearScreen(0,2)",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateAnimationClearScreen
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("animateRootSystemBlueDot",
+   "(Integer, Integer, Integer, (Rational,...))",
+   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "animateRootSystemBlueDot(0,2, 16777216, ((1,0),(0,1)))",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateAnimateRootSystemBluePoint
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

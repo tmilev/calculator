@@ -29,7 +29,7 @@
 		<Unit filename="polyhedra.h" />
 		<Unit filename="wxDrawPanel.cpp" />
 		<Unit filename="wxDrawPanel.h" />
-		<Unit filename="wxPNGdispaly.cpp" />
+		<Unit filename="wxPNGdisplay.cpp" />
 		<Unit filename="wxPNGdisplay.h" />
 		<Unit filename="wxParserApp.cpp" />
 		<Unit filename="wxParserApp.h" />
@@ -50,7 +50,7 @@
 					<wxFrame wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" name="wxDrawPanel" language="CPP" />
 					<wxFrame wxs="wxsmith/wxParserOutput1.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
 					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" name="wxStatus" language="CPP" />
-					<wxFrame wxs="wxsmith/wxPNGdispaly.wxs" src="wxPNGdispaly.cpp" hdr="wxPNGdispaly.h" name="wxPNGdispaly" language="CPP" />
+					<wxFrame wxs="wxsmith/wxPNGdisplay.wxs" src="wxPNGdisplay.cpp" hdr="wxPNGdisplay.h" name="wxPNGdisplay" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

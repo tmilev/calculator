@@ -9733,6 +9733,7 @@ public:
   int indexPhysicalFrame;
   int indexPhysicalDrawOp;
   int selectedPlaneInPhysicalDrawOp;
+  std::string ElementToString();
   void operator=(const VirtualDrawOp& other)
   { this->theVirtualOp=other.theVirtualOp;
     this->indexPhysicalFrame=other.indexPhysicalFrame;
@@ -9750,6 +9751,7 @@ public:
   bool flagAnimating;
   bool flagIsPausedWhileAnimating;
   int indexVirtualOp;
+  std::string ElementToString();
   bool IncrementOpReturnNeedsRedraw();
   int GetIndexCurrentPhysicalFrame();
   void DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables);
@@ -9757,14 +9759,14 @@ public:
   DrawOperations& GetCurrentDrawOps();
   DrawOperations& GetLastDrawOps();
   int GetIndexCurrentDrawOps();
-  int GetNumPhysicalFrames();
+  int GetNumPhysicalFramesNoStillFrame();
   void MakeZero();
   void operator+=(const AnimationBuffer& other);
   void operator+=(const DrawOperations& other);
+  void operator=(const AnimationBuffer& other);
   void AddPause(int numFrames);
   void AddCloneLastFrameAppendOperations(const DrawOperations& other);
   void AddFrameShift(int numFrames);
-  void operator=(const AnimationBuffer& other);
   enum{typeDrawOps, typePause, typeClearScreen, typeCloneLastFrameAddOps,};
 };
 

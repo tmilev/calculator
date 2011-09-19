@@ -76,7 +76,7 @@ extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLo
 void EnsureBitmapsSuffice()
 { AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   int oldSize=theMainWindow->theBitmapList.size;
-  int currentPhysicalFrame=theOps.GetNumPhysicalFrames();
+  int currentPhysicalFrame=theOps.GetNumPhysicalFramesNoStillFrame();
   if (oldSize<=currentPhysicalFrame)
   { theMainWindow->theBitmapList.SetSize(currentPhysicalFrame+50);
     for (int i=oldSize; i<theMainWindow->theBitmapList.size; i++)
@@ -186,7 +186,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(4,6,1)\n+animatePause(384)\n+animateRootSystemBlueDot(0,2,1, (1,0))\n+animatePause(50)\n+animateRootSystemBlueDot(0,2,1, (1,1))\n+animatePause(20)\n+animateRootSystemBlueDot(0,2,1, (0,1))\n+animatePause(20)\n+animateRootSystemBlueDot(0,2,1, (-1,0))\n+animatePause(20)\n+animateRootSystemBlueDot(0,2,1, (-1,-1))\n+animatePause(20)\n+animateRootSystemBlueDot(0,2,1, (0,-1))\n+animatePause(20)\n+animateRootSystemDefault(0,2,1)\n+animatePause(80)\n+animateRootSystemDefault(1,3,100)\n+animatePause(20)\n+animateRootSystemDefault(2,4,100)\n+animatePause(20)\n+animateRootSystemDefault(3,5,1)\n+animatePause(80)\n+animateRootSystemDefault(6,2,1)\n+animatePause(30)\n+animateRootSystemDefault(5,4,1)\n+animatePause(60)\n+animateRootSystemDefault(4,6,1)\n+animatePause(60)\n+animateRootSystemDefault(4,7,1)\n+animatePause(60)\n+animateRootSystemDefault(4,8,1)\n+animatePause(60)\n+animateRootSystemDefault(6,2,1)\n+animatePause(80)\n+animateRootSystemDefault(4,8,1)\n+animatePause(120)\n+animateRootSystemDefault(4,7,1)\n+animatePause(120)\n+animateRootSystemDefault(5,4,100)\n+animatePause(1)\n+animateRootSystemDefault(4,6,100)\n+animatePause(230)\n"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(2,4,2)+animatePause(100)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -374,7 +374,7 @@ void AnimationBuffer::operator+=(const DrawOperations& other)
 
 void AnimationBuffer::AddPause(int numFrames)
 { VirtualDrawOp theVOp;
-  theVOp.indexPhysicalFrame=this->GetNumPhysicalFrames()-1;
+  theVOp.indexPhysicalFrame=this->GetNumPhysicalFramesNoStillFrame()-1;
   theVOp.selectedPlaneInPhysicalDrawOp=0;
   theVOp.theVirtualOp=this->typePause;
   theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
@@ -391,6 +391,35 @@ void AnimationBuffer::MakeZero()
   this->flagIsPausedWhileAnimating=false;
 }
 
+std::string VirtualDrawOp::ElementToString()
+{ std::stringstream out;
+  switch(this->theVirtualOp)
+  { case AnimationBuffer::typeDrawOps:
+      out << "draw operations; ";
+      break;
+    case AnimationBuffer::typeClearScreen:
+      out << "clear screen;";
+      break;
+    case AnimationBuffer::typePause:
+      out << "pause;";
+      break;
+    default:
+      out << "type of draw function not documented";
+      break;
+  }
+  out << " draw op: " << this->indexPhysicalDrawOp;
+  out << " sel. plane: " << this->selectedPlaneInPhysicalDrawOp;
+  out << " phys. frame index: " << this->indexPhysicalFrame;
+  return out.str();
+}
+
+std::string AnimationBuffer::ElementToString()
+{ std::stringstream out;
+  for (int i=0; i<this->theVirtualOpS.size; i++)
+    out << "Frame " << i << ": " << this->theVirtualOpS[i].ElementToString() << "\n";
+  return out.str();
+}
+
 void AnimationBuffer::operator+=(const AnimationBuffer& other)
 { if (other.theVirtualOpS.size<=0)
     return;
@@ -398,17 +427,12 @@ void AnimationBuffer::operator+=(const AnimationBuffer& other)
   int physicalFrameShift=0;
   if (this->theVirtualOpS.size>0)
     physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  int startIndex=0;
   this->thePhysicalDrawOps.MakeActualSizeAtLeastExpandOnTop(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
-  /*if (other.theVirtualOpS[0].theVirtualOp== typeCloneLastFrameAddOps)
-  { this->AddCloneLastFrameAppendOperations(other.thePhysicalDrawOps[0]);
-    startIndex=1;
-  }*/
-  for (int i=startIndex; i<other.thePhysicalDrawOps.size; i++)
+  for (int i=0; i<other.thePhysicalDrawOps.size; i++)
     this->thePhysicalDrawOps.AddObjectOnTop(other.thePhysicalDrawOps[i]);
-  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.theVirtualOpS.size-startIndex);
+  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.theVirtualOpS.size);
   VirtualDrawOp currentOp;
-  for (int i=startIndex; i<other.theVirtualOpS.size; i++)
+  for (int i=0; i<other.theVirtualOpS.size; i++)
   { currentOp=other.theVirtualOpS[i];
     currentOp.indexPhysicalDrawOp+=physicalOpShift;
     currentOp.indexPhysicalFrame+=physicalFrameShift;
@@ -438,9 +462,9 @@ DrawOperations& AnimationBuffer::GetCurrentDrawOps()
   return result;
 }
 
-int AnimationBuffer::GetNumPhysicalFrames()
+int AnimationBuffer::GetNumPhysicalFramesNoStillFrame()
 { if (this->theVirtualOpS.size<=0)
-    return 1;
+    return 0;
   int result = this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
   if (result<=0)
     result=1;
@@ -470,7 +494,7 @@ int AnimationBuffer::GetIndexCurrentPhysicalFrame()
 void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables)
 { theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   int indexCurrentFrame=-2;
-  int numTotalPhysicalFrames=this->GetNumPhysicalFrames();
+  int numTotalPhysicalFrames=this->GetNumPhysicalFramesNoStillFrame();
   for (this->indexVirtualOp=0;  this->indexVirtualOp<this->theVirtualOpS.size; this->indexVirtualOp++)
     if (this->GetIndexCurrentPhysicalFrame()!=indexCurrentFrame)
     { indexCurrentFrame=this->GetIndexCurrentPhysicalFrame();
@@ -495,6 +519,7 @@ void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
   { theOps.flagAnimating=true;
 
     theOps.DrawNoInit(theGlobalVariables.theDrawingVariables, theGlobalVariables);
+//    this->theStatus->TextCtrlStatusString->SetValue(wxString(theOps.ElementToString().c_str() , wxConvUTF8));
     theMainWindow->StartTimer();
   } else
     theOps.flagAnimating=false;

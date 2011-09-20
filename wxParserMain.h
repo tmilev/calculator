@@ -4,7 +4,7 @@
  * Author:    todor milev (todor.milev@gmail.com)
  * Created:   2011-09-13
  * Copyright: todor milev ()
- * License:
+ * License: use however you wish
  **************************************************************/
 
 #ifndef WXPARSERMAIN_H
@@ -67,8 +67,6 @@ class wxParserFrame: public wxFrame
         void UpdateChoices();
         friend class AnimationBuffer;
         friend class wxDrawPanel;
-        bool flagUseBitmapBufferForDrawing;
-        wxBitmap *bitmapBuffer;
     private:
 
         //(*Handlers(wxParserFrame)

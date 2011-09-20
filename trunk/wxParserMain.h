@@ -66,6 +66,9 @@ class wxParserFrame: public wxFrame
         wxTimer& GetTimer(){return this->Timer1;}
         void UpdateChoices();
         friend class AnimationBuffer;
+        friend class wxDrawPanel;
+        bool flagUseBitmapBufferForDrawing;
+        wxBitmap *bitmapBuffer;
     private:
 
         //(*Handlers(wxParserFrame)

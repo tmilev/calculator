@@ -4,7 +4,7 @@
  * Author:    todor milev (todor.milev@gmail.com)
  * Created:   2011-09-13
  * Copyright: todor milev ()
- * License:
+ * License: use however you wish
  **************************************************************/
 
 #include "wxParserMain.h"
@@ -88,16 +88,16 @@ void EnsureBitmapsSuffice()
 void drawtext(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize)
 { AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   EnsureBitmapsSuffice();
-  if (!theMainWindow->flagUseBitmapBufferForDrawing)
+//  if (!theMainWindow->flagUseBitmapBufferForDrawing)
   { wxMemoryDC dc;
     dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
     dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
     dc.SelectObject(wxNullBitmap);
   }
-  else
-  { wxPaintDC dc(theMainWindow->theDrawPanel);
-    dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
-  }//  wxPen tempPen;
+//  else
+//  { wxPaintDC dc(theMainWindow->theDrawPanel);
+//    dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
+//  }//  wxPen tempPen;
 //  tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
 //  dc.SetPen(tempPen);
 }
@@ -121,18 +121,11 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
       return;
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
-  if (!theMainWindow->flagUseBitmapBufferForDrawing)
-  { wxMemoryDC dc;
-    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
-    dc.SetPen(tempPen);
-    dc.DrawCircle((int)X1, (int)Y1, radius);
-    dc.SelectObject(wxNullBitmap);
-  }
-  else
-  { wxPaintDC dc(theMainWindow->theDrawPanel);
-    dc.SetPen(tempPen);
-    dc.DrawCircle((int)X1, (int)Y1, radius);
-  }
+  wxMemoryDC dc;
+  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+  dc.SetPen(tempPen);
+  dc.DrawCircle((int)X1, (int)Y1, radius);
+  dc.SelectObject(wxNullBitmap);
 }
 
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
@@ -154,36 +147,20 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
       return;
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
-  if (!theMainWindow->flagUseBitmapBufferForDrawing)
-  { wxMemoryDC dc;
-    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
-    dc.SetPen(tempPen);
-    dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
-    dc.SelectObject(wxNullBitmap);
-  }
-  else
-  { wxPaintDC dc(theMainWindow->theDrawPanel);
-    dc.SetPen(tempPen);
-    dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
-  }
+  wxMemoryDC dc(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+  dc.SetPen(tempPen);
+  dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
+  dc.SelectObject(wxNullBitmap);
 }
 
 void drawClearScreen()
 { AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   EnsureBitmapsSuffice();
-  if (!theMainWindow->flagUseBitmapBufferForDrawing)
-  { wxMemoryDC dc;
-    dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
-    dc.Clear();
-    dc.SelectObject(wxNullBitmap);
-  }
-  else
-  { wxPaintDC dc(theMainWindow->theDrawPanel);
-    dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-    dc.Clear();
-  }
-
+  wxMemoryDC dc;
+  dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
+  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+  dc.Clear();
+  dc.SelectObject(wxNullBitmap);
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
@@ -226,7 +203,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(2,4,2)+animatePause(100)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(2,4,50)+animatePause(100)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -293,13 +270,11 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->bitmapW=600;
     this->theBitmapList.SetSize(1);
     this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
-    this->bitmapBuffer=new wxBitmap(this->bitmapW, this->bitmapH);
-    wxMemoryDC tmpDC;
+  wxMemoryDC tmpDC;
     tmpDC.SelectObject(*this->theBitmapList[0]);
     tmpDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
     tmpDC.Clear();
     tmpDC.SelectObject(wxNullBitmap);
-    this->flagUseBitmapBufferForDrawing=false;
     this->Quitting=false;
 }
 
@@ -368,18 +343,19 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
     return;
 //  theMainWindow->flagUseBitmapBufferForDrawing=true;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
-  theMainWindow->flagUseBitmapBufferForDrawing=true;
+//  theMainWindow->flagUseBitmapBufferForDrawing=false;
   if (theOps.mouseMoveRedraw(event.GetX(), event.GetY()))
   { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
   }
-  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
+//  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
   wxPaintDC otherDC(theMainWindow->theDrawPanel);
-  dc.Blit(0,0, theMainWindow->bitmapW, theMainWindow->bitmapH, &otherDC,0,0 );
-  theMainWindow->flagUseBitmapBufferForDrawing=false;
+  otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
+//  dc.Blit(0,0, theMainWindow->bitmapW, theMainWindow->bitmapH, &otherDC,0,0 );
+//  theMainWindow->flagUseBitmapBufferForDrawing=false;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
 //  theMainWindow->theStatus->TextCtrlStatusString->SetValue
 //  (wxString(theOps.DebugString.c_str(), wxConvUTF8));
-  this->Refresh();
+ // this->Refresh();
 }
 
 void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
@@ -1181,7 +1157,7 @@ void wxParserFrame::OnSpinCtrl2Change(wxSpinEvent& event)
   int candidate= this->SpinCtrl2->GetValue();
   if (candidate<theOps.theVirtualOpS.size && candidate>=0)
   { theOps.indexVirtualOp=candidate;
-    this->Refresh();
+    this->theDrawPanel->Refresh();
   }
   if (candidate>=theOps.theVirtualOpS.size)
   { this->SpinCtrl2->SetRange(0, theOps.theVirtualOpS.size-1);

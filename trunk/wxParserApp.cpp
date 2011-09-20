@@ -4,7 +4,7 @@
  * Author:    todor milev (todor.milev@gmail.com)
  * Created:   2011-09-13
  * Copyright: todor milev ()
- * License:
+ * License: use however you wish
  **************************************************************/
 
 #include "wxParserApp.h"

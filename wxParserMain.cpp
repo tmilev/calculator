@@ -84,12 +84,28 @@ void EnsureBitmapsSuffice()
   }
 }
 
+
+void drawtext(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize)
+{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+  EnsureBitmapsSuffice();
+  if (!theMainWindow->flagUseBitmapBufferForDrawing)
+  { wxMemoryDC dc;
+    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+    dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
+    dc.SelectObject(wxNullBitmap);
+  }
+  else
+  { wxPaintDC dc(theMainWindow->theDrawPanel);
+    dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
+  }//  wxPen tempPen;
+//  tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
+//  dc.SetPen(tempPen);
+}
+
 void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
   AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   EnsureBitmapsSuffice();
-  wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -105,17 +121,24 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
       return;
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
-  dc.SetPen(tempPen);
-  dc.DrawCircle((int)X1, (int)Y1, radius);
-  dc.SelectObject(wxNullBitmap);
+  if (!theMainWindow->flagUseBitmapBufferForDrawing)
+  { wxMemoryDC dc;
+    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+    dc.SetPen(tempPen);
+    dc.DrawCircle((int)X1, (int)Y1, radius);
+    dc.SelectObject(wxNullBitmap);
+  }
+  else
+  { wxPaintDC dc(theMainWindow->theDrawPanel);
+    dc.SetPen(tempPen);
+    dc.DrawCircle((int)X1, (int)Y1, radius);
+  }
 }
 
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
   AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   EnsureBitmapsSuffice();
-  wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -131,19 +154,36 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
       return;
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
-  dc.SetPen(tempPen);
-  dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
-  dc.SelectObject(wxNullBitmap);
+  if (!theMainWindow->flagUseBitmapBufferForDrawing)
+  { wxMemoryDC dc;
+    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+    dc.SetPen(tempPen);
+    dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
+    dc.SelectObject(wxNullBitmap);
+  }
+  else
+  { wxPaintDC dc(theMainWindow->theDrawPanel);
+    dc.SetPen(tempPen);
+    dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
+  }
 }
 
 void drawClearScreen()
 { AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   EnsureBitmapsSuffice();
-  wxMemoryDC tempDC;
-  tempDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-  tempDC.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
-  tempDC.Clear();
-  tempDC.SelectObject(wxNullBitmap);
+  if (!theMainWindow->flagUseBitmapBufferForDrawing)
+  { wxMemoryDC dc;
+    dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
+    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+    dc.Clear();
+    dc.SelectObject(wxNullBitmap);
+  }
+  else
+  { wxPaintDC dc(theMainWindow->theDrawPanel);
+    dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
+    dc.Clear();
+  }
+
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
@@ -228,6 +268,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     theGlobalVariables.theDrawingVariables.SetDrawLineFunction(&drawline);
     theGlobalVariables.theDrawingVariables.SetDrawCircleFunction(&drawCircle);
     theGlobalVariables.theDrawingVariables.SetDrawClearFunction(&drawClearScreen);
+    theGlobalVariables.theDrawingVariables.SetDrawTextFunction(&drawtext);
     theParser.DefaultWeylRank=4;
     theParser.DefaultWeylLetter='F';
 
@@ -250,13 +291,15 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->indexCurrentPng=-1;
     this->bitmapH=600;
     this->bitmapW=600;
-    theBitmapList.SetSize(1);
+    this->theBitmapList.SetSize(1);
     this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
+    this->bitmapBuffer=new wxBitmap(this->bitmapW, this->bitmapH);
     wxMemoryDC tmpDC;
     tmpDC.SelectObject(*this->theBitmapList[0]);
     tmpDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
     tmpDC.Clear();
     tmpDC.SelectObject(wxNullBitmap);
+    this->flagUseBitmapBufferForDrawing=false;
     this->Quitting=false;
 }
 
@@ -294,6 +337,10 @@ void wxDrawPanel::OnPaint(wxPaintEvent& event)
 
 void wxDrawPanel::OnPanel1LeftDown(wxMouseEvent& event)
 { DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
+  if (theMainWindow->GetTimer().IsRunning())
+  { theMainWindow->GetTimer().Stop();
+    theMainWindow->Button2->SetLabel(wxT("Continue animation"));
+  }
   theOps.click(event.GetX(), event.GetY());
 }
 
@@ -303,6 +350,7 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
     return;
   int rot = event.GetWheelRotation()/event.GetWheelDelta();
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
+
   DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
   theOps.GraphicsUnit[theOps.SelectedPlane]+=rot*5;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
@@ -314,16 +362,23 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
-{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
+{ AnimationBuffer& theAniBuffer=theParser.theValue.theAnimation.GetElement();
+  DrawOperations& theOps= theAniBuffer.GetCurrentDrawOps();
   if (theOps.SelectedCircleMinus2noneMinus1Center==-2)
     return;
+//  theMainWindow->flagUseBitmapBufferForDrawing=true;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
+  theMainWindow->flagUseBitmapBufferForDrawing=true;
   if (theOps.mouseMoveRedraw(event.GetX(), event.GetY()))
   { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
   }
+  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
+  wxPaintDC otherDC(theMainWindow->theDrawPanel);
+  dc.Blit(0,0, theMainWindow->bitmapW, theMainWindow->bitmapH, &otherDC,0,0 );
+  theMainWindow->flagUseBitmapBufferForDrawing=false;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
-  theMainWindow->theStatus->TextCtrlStatusString->SetValue
-  (wxString(theOps.DebugString.c_str(), wxConvUTF8));
+//  theMainWindow->theStatus->TextCtrlStatusString->SetValue
+//  (wxString(theOps.DebugString.c_str(), wxConvUTF8));
   this->Refresh();
 }
 
@@ -375,7 +430,7 @@ void AnimationBuffer::operator+=(const DrawOperations& other)
 void AnimationBuffer::AddPause(int numFrames)
 { VirtualDrawOp theVOp;
   theVOp.indexPhysicalFrame=this->GetNumPhysicalFramesNoStillFrame()-1;
-  theVOp.selectedPlaneInPhysicalDrawOp=0;
+  theVOp.selectedPlaneInPhysicalDrawOp=-1;
   theVOp.theVirtualOp=this->typePause;
   theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
   this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+numFrames);
@@ -454,11 +509,12 @@ int AnimationBuffer::GetIndexCurrentDrawOps()
 DrawOperations& AnimationBuffer::GetCurrentDrawOps()
 { int theIndex=this->GetIndexCurrentDrawOps();
   if (theIndex==-1)
-    return this->stillFrame;
+  { return this->stillFrame;
+  }
   DrawOperations& result=this->thePhysicalDrawOps[theIndex];
   result.SelectedPlane=this->theVirtualOpS[this->indexVirtualOp].selectedPlaneInPhysicalDrawOp;
   if (result.SelectedPlane<0 || result.BasisProjectionPlane.size<=result.SelectedPlane)
-    result.SelectedPlane=0;
+    result.SelectedPlane=result.BasisProjectionPlane.size-1;
   return result;
 }
 
@@ -563,7 +619,7 @@ void wxParserFrame::ReadSettings()
   this->thePNGdisplay->SetSize(tempRect);
   std::string newFileName, oldfileName;
   //int framecount=0, tempInt;
-  this->theSlides.MakeActualSizeAtLeastExpandOnTop(100);
+/*  this->theSlides.MakeActualSizeAtLeastExpandOnTop(100);
   List<std::string>& slides=this->theSlidesFileNames;
   List<int>& ind=this->theSlideFrameIndices;
   int s=0;
@@ -599,7 +655,7 @@ void wxParserFrame::ReadSettings()
   for (int i=0; i<s-1; i++)
   { slides[i]=this->thePath+slides[i];
     this->theSlides[i].LoadFile(wxString(slides[i].c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
-  }
+  }*/
   /*
   while (!fileSettings.eof())
   { tempInt=0;
@@ -747,7 +803,7 @@ void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
 }
 
 void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
-{ double rot = event.GetWheelRotation()/event.GetWheelDelta();
+{ /*double rot = event.GetWheelRotation()/event.GetWheelDelta();
   theMainWindow->scalePNG+=(rot/100);
   for (int i=0; i<theMainWindow->theSlides.size; i++)
   { theMainWindow->theSlides[i].LoadFile(wxString((theMainWindow->theSlidesFileNames[i]).c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
@@ -760,7 +816,7 @@ void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
     tmpImg.Rescale(newWidth, newHeight, wxIMAGE_QUALITY_HIGH);
     theMainWindow->theSlides[i]=tmpImg;
   }
-  this->Refresh();
+  this->Refresh();*/
 }
 
 void wxPNGdisplay::OnPaint(wxPaintEvent& event)
@@ -977,6 +1033,8 @@ int ParserNode::EvaluateAnimateRootSystem
     theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
   }
   indexBitMap=0;
+  theOps.drawTextBuffer(0, 15, "center can be moved", 0, 10, DrawingVariables::TextStyleNormal);
+  theOps.drawTextBuffer(0, 30, "basis(=darker red dots) can be rotated", 0, 10, DrawingVariables::TextStyleNormal);
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theOps;
   theNode.theAnimation.GetElement().flagAnimating=true;
@@ -1105,6 +1163,9 @@ int ParserNode::EvaluateDrawRootSystem
   { tempRootRat.MakeEi(theDimension, i);
     theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
   }
+  std::stringstream tempStream;
+  tempStream << theWeyl.WeylLetter << theWeyl.GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theWeyl.GetDim()) << ")";
+  theDrawOperators.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
 //  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
   theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
   theNode.theAnimation.GetElement().MakeZero();

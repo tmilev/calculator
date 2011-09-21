@@ -91,7 +91,15 @@ void drawtext(double X1, double Y1, const char* theText, int length, int ColorIn
 //  if (!theMainWindow->flagUseBitmapBufferForDrawing)
   { wxMemoryDC dc;
     dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+#ifndef WIN32
+//wtf???? I thought wxWidgets was cross-platform???????? why the f it says "error C2039: 'DrawTextA': Ist kein Element von 'wxMemoryDC'"?
     dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
+#else
+    wxString tempS(theText, wxConvUTF8);
+    theMainWindow->theStatus->TextCtrlStatusString->AppendText(wxT("\n"));
+    theMainWindow->theStatus->TextCtrlStatusString->AppendText(tempS);
+#endif
+
     dc.SelectObject(wxNullBitmap);
   }
 //  else
@@ -161,6 +169,10 @@ void drawClearScreen()
   dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
   dc.Clear();
   dc.SelectObject(wxNullBitmap);
+#ifdef WIN32
+  theMainWindow->theStatus->TextCtrlStatusString->SetValue(wxT(""));
+#endif
+
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
@@ -348,7 +360,7 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
   { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
   }
 //  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
-  wxPaintDC otherDC(theMainWindow->theDrawPanel);
+  wxClientDC otherDC(theMainWindow->theDrawPanel);
   otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
 //  dc.Blit(0,0, theMainWindow->bitmapW, theMainWindow->bitmapH, &otherDC,0,0 );
 //  theMainWindow->flagUseBitmapBufferForDrawing=false;

@@ -28982,6 +28982,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
     case ParserNode::typeUndefined: out << "Undefined expression (type 0)."; break;
+    case ParserNode::typeAnimation: out << "Animation."; break;
     default: out << "Expression type " << this->ExpressionType << "; the programmer(s) have forgotten to enter a type description. "; break;
   }
   if (stringValueOnly!="")

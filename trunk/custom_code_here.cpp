@@ -5268,6 +5268,435 @@ std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
   return output;
 }
 
+int ParserNode::EvaluateAnimateRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
+  theWeylLetter+='A';
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  int NumFrames=theNode.owner->TheObjects[theArgumentList[2]].intValue;
+  if(NumFrames<1)
+    NumFrames=1;
+  int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables, bluePoint);
+  if (result==theNode.typeError)
+    return result;
+  theNode.ExpressionType=theNode.typeAnimation;
+  DrawOperations theOps;
+  theOps=theNode.theAnimation.GetElement().thePhysicalDrawOps[0];
+  theOps.flagAnimatingMovingCoordSystem=true;
+  Vectors<double> theFirstBasis=theOps.BasisProjectionPlane[0];
+  Matrix<double> theForm=theOps.theBilinearForm;
+  Vectors<double> theDraggableBasis=theOps.BasisToDrawCirclesAt;
+  theOps.initDimensions(theForm, theDraggableBasis, theFirstBasis, NumFrames);
+  Vector<double> target1, target2, start1, start2;
+  target1.MakeEi(theDim, 0, 1, 0);
+  target2.MakeEi(theDim, ((theDim>2)? 2 : 1), 1, 0);
+  start1=theOps.BasisProjectionPlane[0][0];
+  start2=theOps.BasisProjectionPlane[0][1];
+  theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
+  int& indexBitMap=theOps.SelectedPlane;
+  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
+  { double fraction=0;
+    if (NumFrames>1)
+      fraction=((double) indexBitMap)/((double)(NumFrames-1));
+    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
+    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
+    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
+    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
+  }
+  indexBitMap=0;
+  theOps.drawTextBuffer(0, 15, "center can be moved", 0, 10, DrawingVariables::TextStyleNormal);
+  theOps.drawTextBuffer(0, 30, "basis(=darker red dots) can be rotated", 0, 10, DrawingVariables::TextStyleNormal);
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=theOps;
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  theNode.theAnimation.GetElement().indexVirtualOp=0;
+  return result;
+}
+
+void AnimationBuffer::operator=(const AnimationBuffer& other)
+{ this->stillFrame=other.stillFrame;
+  this->thePhysicalDrawOps=other.thePhysicalDrawOps;
+  this->theVirtualOpS=other.theVirtualOpS;
+  this->flagAnimating=other.flagAnimating;
+  this->flagIsPausedWhileAnimating=other.flagIsPausedWhileAnimating;
+  this->indexVirtualOp=other.indexVirtualOp;
+  assert(this->indexVirtualOp<this->theVirtualOpS.size);
+
+}
+
+AnimationBuffer::AnimationBuffer()
+{ this->stillFrame.init();
+  this->MakeZero();
+}
+
+void AnimationBuffer::operator+=(const DrawOperations& other)
+{ VirtualDrawOp theOp;
+  theOp.theVirtualOp=this->typeDrawOps;
+  theOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size;
+  this->thePhysicalDrawOps.AddObjectOnTop(other);
+  theOp.indexPhysicalFrame=0;
+  if (this->theVirtualOpS.size>0)
+    theOp.indexPhysicalFrame=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
+  theOp.selectedPlaneInPhysicalDrawOp=0;
+  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
+  for (int i=0; i<other.BasisProjectionPlane.size; i++)
+  { this->theVirtualOpS.AddObjectOnTop(theOp);
+    theOp.indexPhysicalFrame++;
+    theOp.selectedPlaneInPhysicalDrawOp++;
+  }
+}
+
+void AnimationBuffer::AddPause(int numFrames)
+{ VirtualDrawOp theVOp;
+  theVOp.indexPhysicalFrame=this->GetNumPhysicalFramesNoStillFrame()-1;
+  theVOp.selectedPlaneInPhysicalDrawOp=-1;
+  theVOp.theVirtualOp=this->typePause;
+  theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
+  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+numFrames);
+  for (int i=0; i<numFrames; i++)
+    this->theVirtualOpS.AddObjectOnTop(theVOp);
+}
+
+void AnimationBuffer::MakeZero()
+{ this->theVirtualOpS.size=0;
+  this->thePhysicalDrawOps.size=0;
+  this->indexVirtualOp=-1;
+  this->flagAnimating=false;
+  this->flagIsPausedWhileAnimating=false;
+}
+
+std::string VirtualDrawOp::ElementToString()
+{ std::stringstream out;
+  switch(this->theVirtualOp)
+  { case AnimationBuffer::typeDrawOps:
+      out << "draw operations; ";
+      break;
+    case AnimationBuffer::typeClearScreen:
+      out << "clear screen;";
+      break;
+    case AnimationBuffer::typePause:
+      out << "pause;";
+      break;
+    default:
+      out << "type of draw function not documented";
+      break;
+  }
+  out << " draw op: " << this->indexPhysicalDrawOp;
+  out << " sel. plane: " << this->selectedPlaneInPhysicalDrawOp;
+  out << " phys. frame index: " << this->indexPhysicalFrame;
+  return out.str();
+}
+
+std::string AnimationBuffer::ElementToString()
+{ std::stringstream out;
+  for (int i=0; i<this->theVirtualOpS.size; i++)
+    out << "Frame " << i << ": " << this->theVirtualOpS[i].ElementToString() << "\n";
+  return out.str();
+}
+
+void AnimationBuffer::operator+=(const AnimationBuffer& other)
+{ if (other.theVirtualOpS.size<=0)
+    return;
+  int physicalOpShift=this->thePhysicalDrawOps.size;
+  int physicalFrameShift=0;
+  if (this->theVirtualOpS.size>0)
+    physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
+  this->thePhysicalDrawOps.MakeActualSizeAtLeastExpandOnTop(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
+  for (int i=0; i<other.thePhysicalDrawOps.size; i++)
+    this->thePhysicalDrawOps.AddObjectOnTop(other.thePhysicalDrawOps[i]);
+  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.theVirtualOpS.size);
+  VirtualDrawOp currentOp;
+  for (int i=0; i<other.theVirtualOpS.size; i++)
+  { currentOp=other.theVirtualOpS[i];
+    currentOp.indexPhysicalDrawOp+=physicalOpShift;
+    currentOp.indexPhysicalFrame+=physicalFrameShift;
+    this->theVirtualOpS.AddObjectOnTop(currentOp);
+  }
+  if (this->thePhysicalDrawOps.size>0)
+    this->indexVirtualOp=0;
+  if (other.flagAnimating)
+    this->flagAnimating=true;
+}
+
+int AnimationBuffer::GetIndexCurrentDrawOps()
+{ if (!this->flagAnimating || this->thePhysicalDrawOps.size==0 || this->indexVirtualOp<0)
+    return -1;
+  assert(this->indexVirtualOp<this->theVirtualOpS.size);
+  return this->theVirtualOpS[this->indexVirtualOp].indexPhysicalDrawOp;
+}
+
+DrawOperations& AnimationBuffer::GetCurrentDrawOps()
+{ int theIndex=this->GetIndexCurrentDrawOps();
+  if (theIndex==-1)
+  { return this->stillFrame;
+  }
+  DrawOperations& result=this->thePhysicalDrawOps[theIndex];
+  result.SelectedPlane=this->theVirtualOpS[this->indexVirtualOp].selectedPlaneInPhysicalDrawOp;
+  if (result.SelectedPlane<0 || result.BasisProjectionPlane.size<=result.SelectedPlane)
+    result.SelectedPlane=result.BasisProjectionPlane.size-1;
+  return result;
+}
+
+int AnimationBuffer::GetNumPhysicalFramesNoStillFrame()
+{ if (this->theVirtualOpS.size<=0)
+    return 0;
+  int result = this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
+  if (result<=0)
+    result=1;
+  return result;
+}
+
+bool AnimationBuffer::IncrementOpReturnNeedsRedraw()
+{ if (!this->flagAnimating)
+    return false;
+  if (this->theVirtualOpS.size<=0)
+    return false;
+  int oldPhysicalFrame=this->GetIndexCurrentPhysicalFrame();
+  this->indexVirtualOp=(this->indexVirtualOp+1)% this->theVirtualOpS.size;
+  return (oldPhysicalFrame!=this->GetIndexCurrentPhysicalFrame());
+}
+
+int AnimationBuffer::GetIndexCurrentPhysicalFrame()
+{ if (this->theVirtualOpS.size<=0 || this->indexVirtualOp<0)
+    return 0;
+  assert(this->indexVirtualOp<this->theVirtualOpS.size);
+  int result=this->theVirtualOpS[this->indexVirtualOp].indexPhysicalFrame;
+  if (result<0)
+    result=0;
+  return result;
+}
+
+void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables)
+{ theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+  int indexCurrentFrame=-2;
+  int numTotalPhysicalFrames=this->GetNumPhysicalFramesNoStillFrame();
+  for (this->indexVirtualOp=0;  this->indexVirtualOp<this->theVirtualOpS.size; this->indexVirtualOp++)
+    if (this->GetIndexCurrentPhysicalFrame()!=indexCurrentFrame)
+    { indexCurrentFrame=this->GetIndexCurrentPhysicalFrame();
+      std::stringstream tempStream;
+      tempStream << "Computing frame " << indexCurrentFrame+1 << " out of " << numTotalPhysicalFrames << " physical frames.";
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
+      theDrawingVariables.drawBufferNoIniT(this->GetCurrentDrawOps());
+    }
+  this->indexVirtualOp=0;
+}
+
+int ParserNode::EvaluateAnimateRootSystemBluePoint
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root tempRoot;
+  ParserNode& aNode=theNode.owner->TheObjects[theArgumentList[3]];
+  aNode.GetRootRational(tempRoot, theGlobalVariables);
+  return theNode.EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, & tempRoot);
+}
+
+int ParserNode::EvaluateAnimationPause
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ int NumFrames=theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  if(NumFrames<0)
+    NumFrames=0;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement().AddPause(NumFrames);
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateAnimationDots
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
+  theWeylLetter+='A';
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  WeylGroup theWeyl;
+  theWeyl.MakeArbitrary('A', 2);
+  DrawOperations theDrawOps;
+  Vectors<double> theFirstBasis;
+  theDim=2;
+  theFirstBasis.MakeEiBasis(theDim, 1, 0);
+  Vectors<double> theDraggableBasis;
+  theDraggableBasis.MakeEiBasis(theDim, 1, 0);
+  theDrawOps.init();
+  theDrawOps.initDimensions(theWeyl.CartanSymmetric, theDraggableBasis, theFirstBasis, 1);
+  theDrawOps.flagAnimatingMovingCoordSystem=true;
+  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[3]];
+  roots dots;
+  int thenewDim;
+  if (!weightNode.GetRootsEqualDimNoConversionNoEmptyArgument(weightNode.children, dots, thenewDim))
+    return theNode.SetError(errorDimensionProblem);
+  if (thenewDim!=theDim)
+    return theNode.SetError(errorDimensionProblem);
+  LargeIntUnsigned tempInt;
+  Rational tempRat=theNode.owner->TheObjects[theArgumentList[2]].rationalValue;
+  tempRat.GetNumUnsigned(tempInt);
+  int theColor=tempInt.TheObjects[0];
+//  for(int i=0; i<theArgumentList.size-3; i++)
+//    extraDot[i]= theNode.owner->TheObjects[theArgumentList[i+3]].rationalValue;
+  dots.MakeEiBasis(2);
+  for (int i=0; i<dots.size;i++)
+    theDrawOps.drawCircleAtVectorBuffer(dots[i], 2, DrawingVariables::PenStyleNormal, theColor);
+  theDrawOps.SelectedPlane=0;
+  theDrawOps.GraphicsUnit=10;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=(theDrawOps);
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  theNode.ExpressionType=theNode.typeAnimation;
+
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateAnimationClearScreen
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
+  theWeylLetter+='A';
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  WeylGroup theWeyl;
+  theWeyl.MakeArbitrary(theWeylLetter, theDim);
+  theWeyl.ComputeRho(true);
+  DrawOperations theOps;
+  Vectors<double> theFirstBasis;
+  theFirstBasis.MakeEiBasis(theDim, 1, 0);
+  Vectors<double> theDraggableBasis;
+  theDraggableBasis.MakeEiBasis(theDim, 1, 0);
+  theOps.init();
+  theOps.initDimensions(theWeyl.CartanSymmetric, theDraggableBasis, theFirstBasis, 1);
+  theOps.flagAnimatingMovingCoordSystem=true;
+
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=theOps;
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateDrawRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+{ WeylGroup theWeyl;
+  char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
+  theWeylLetter+='A';
+  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
+  theWeyl.MakeArbitrary(theWeylLetter, theDimension);
+  theWeyl.ComputeRho(true);
+  root ZeroRoot;
+  theNode.impliedNumVars=theDimension;
+  ZeroRoot.MakeZero(theDimension);
+  ElementWeylGroup tempElt;
+  theWeyl.GetCoxeterElement(tempElt);
+  MatrixLargeRational matCoxeterElt, tempMat;
+  theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
+  std::cout << matCoxeterElt.ElementToString(true, false);
+  tempMat=matCoxeterElt;
+  int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
+  for (int i=0; i<coxeterNumber-1; i++)
+    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+  Complex<double> theEigenValue;
+  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  Matrix<Complex<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<List<Complex<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
+  Vectors<Complex<double> > theEigenSpace;
+  DrawOperations theDrawOperators;
+  theDrawOperators.init();
+  theDrawOperators.initDimensions(theDimension, 1);
+  theDrawOperators.GraphicsUnit=DrawOperations::GraphicsUnitDefault;
+  theEigenSpace.operator=(theEigenSpaceList);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
+  Vector<double> tempRoot;
+  theDrawOperators.SelectedPlane=0;
+  Vectors<double>& theTwoPlane= theDrawOperators.BasisProjectionPlane[0];
+  assert(theTwoPlane.size==2);
+  if (theEigenSpace.size>0)
+  { for (int j=0; j<theDimension; j++)
+    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
+      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
+    }
+    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0][0], theDrawOperators.BasisProjectionPlane[0][1]);
+  }
+//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
+//  std::stringstream tempStream;
+//  tempStream << "<hr>the eigen mat:";
+//  tempStream << eigenMat;
+//  std::cout << tempStream.str();
+  roots RootSystemSorted;
+  RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
+  List<double> lengths;
+  lengths.SetSize(RootSystemSorted.size);
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { tempRoot.SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+      tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
+    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][0]);
+    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][1]);
+    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
+  }
+  for (int i=0; i<RootSystemSorted.size; i++)
+    for (int j=i; j<RootSystemSorted.size; j++)
+      if (lengths[i]<lengths[j])
+      { MathRoutines::swap(lengths[i], lengths[j]);
+        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
+      }
+  root differenceRoot;
+  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
+  Rational minLength= theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  for (int i=2; i<RootSystemSorted.size; i++)
+  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
+    if (minLength> theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot))
+      minLength=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  }
+  std::cout << "<hr>the min length is: " << minLength.ElementToString();
+  Rational tempRat;
+  if (bluePoint!=0)
+  { theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+  }
+  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
+  theDrawOperators.centerX[0]=325;
+  theDrawOperators.centerY[0]=325;
+  for (int i=0; i<RootSystemSorted.size; i++)
+  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
+    theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    theDrawOperators.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    for (int j=i+1; j<RootSystemSorted.size; j++)
+    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
+      tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+      if (minLength== tempRat)
+        theDrawOperators.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
+    }
+  }
+  root tempRootRat;
+  for (int i=0; i<theDimension; i++)
+  { tempRootRat.MakeEi(theDimension, i);
+    theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+  }
+  std::stringstream tempStream;
+  tempStream << theWeyl.WeylLetter << theWeyl.GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theWeyl.GetDim()) << ")";
+  theDrawOperators.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+//  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
+  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=theDrawOperators;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  theNode.theAnimation.GetElement().flagIsPausedWhileAnimating=true;
+  return theNode.errorNoError;
+}
+
 double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
 { double result;
   if (x!=0)

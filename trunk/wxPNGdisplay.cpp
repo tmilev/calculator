@@ -27,6 +27,8 @@ wxPNGdisplay::wxPNGdisplay(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
+
+	Connect(wxEVT_PAINT,(wxObjectEventFunction)&wxPNGdisplay::OnPaint);
 	//*)
 }
 

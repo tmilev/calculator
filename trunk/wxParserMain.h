@@ -52,6 +52,7 @@ class wxParserFrame: public wxFrame
         std::string StatusString;
         wxCommandEvent eventComputationOver;
         wxCommandEvent eventProgressReport;
+        wxPaintEvent eventPNGrepaint;
         List<wxBitmap*> theBitmapList;
         List<wxImage> theSlides;
         List<std::string> theSlidesFileNames;

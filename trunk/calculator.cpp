@@ -158,15 +158,18 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-/*  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(384)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(50)\
-    +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(20)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(20)+animateRootSystemBlueDot(0,2,1, (-1,0))\
-    +animatePause(20)+animateRootSystemBlueDot(0,2,1, (-1,-1))+animatePause(20)+animateRootSystemBlueDot(0,2,1, (0,-1))\
-    +animatePause(20)+animateRootSystemDefault(0,2,1)+animatePause(80)+animateRootSystemDefault(1,3,100)+animatePause(20) \
-    +animateRootSystemDefault(2,4,100)+animatePause(20)+animateRootSystemDefault(3,5,1)+animatePause(80)+animateRootSystemDefault(6,2,1)\
-    +animatePause(30)+animateRootSystemDefault(5,4,1)+animatePause(60)+animateRootSystemDefault(4,6,1)+animatePause(60)\
-    +animateRootSystemDefault(4,7,1)+animatePause(60)+animateRootSystemDefault(4,8,1)+animatePause(60)+animateRootSystemDefault(6,2,1)\
-    +animatePause(80)+animateRootSystemDefault(4,8,1)+animatePause(120)+animateRootSystemDefault(4,7,1)+animatePause(120)\
-    +animateRootSystemDefault(5,4,100)+animatePause(1)+animateRootSystemDefault(4,6,100)+animatePause(230)";*/
+//  civilizedInput="latticeImprecise((1, 0.000000001), (1.00000000001, 1.00000000001))";
+/*  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)
+    +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(19)
++animateRootSystemBlueDot(0,2,1, (-1,0))+animatePause(19)
++animateRootSystemBlueDot(0,2,1, (-1,-1))
+    +animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,-1))
+    +animatePause(19)+animateRootSystemDefault(0,2,1)+animatePause(79)+animateRootSystemDefault(1,3,100)+animatePause(20)
+    +animateRootSystemDefault(2,4,100)+animatePause(20)+animateRootSystemDefault(3,5,1)+animatePause(79)+animateRootSystemDefault(6,2,1)
+    +animatePause(29)+animateRootSystemDefault(5,4,1)+animatePause(59)+animateRootSystemDefault(4,6,1)+animatePause(59)
+    +animateRootSystemDefault(4,7,1)+animatePause(59)+animateRootSystemDefault(4,8,1)+animatePause(59)+animateRootSystemDefault(6,2,1)
+    +animatePause(99)+animateRootSystemDefault(4,8,1)+animatePause(119)+animateRootSystemDefault(4,7,1)+animatePause(119)
+    +animateRootSystemDefault(5,4,100)+animatePause(50)+animateRootSystemDefault(4,6,100)+animatePause(230)";*/
   //civilizedInput="(x_1\\mapsto factorial(10):x_1)";
   //civilizedInput="getWeylDim(0,0,(x_1\\mapsto 10: x_1))";
   //civilizedInput="factorial(100)/2";

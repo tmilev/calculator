@@ -185,7 +185,7 @@ template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<CombinatorialChamber*>::ListActualSizeIncrement=1000;
 template < > int List<ComplexQN>::ListActualSizeIncrement=1;
-template < > int List<int>::ListActualSizeIncrement=1000;
+template < > int List<int>::ListActualSizeIncrement=10;
 template < > int List<char>::ListActualSizeIncrement=5;
 template < > int List<Monomial<CompositeComplexQN> >::ListActualSizeIncrement=10;
 template < > int List<BasicQN*>::ListActualSizeIncrement=1000;
@@ -7012,7 +7012,7 @@ bool Rational::IsInteger()const
     return this->Extended->den.IsEqualToOne();
 }
 
-double Rational::DoubleValue()
+double Rational::DoubleValue()const
 { if (this->Extended==0)
     return (double)this->NumShort/(double)this->DenShort;
   else
@@ -7233,7 +7233,7 @@ bool LargeInt::CheckForConsistensy()
 }
 
 double LargeInt::GetDoubleValue()
-{ return this->GetIntValueTruncated();
+{ return this->sign* this->value.GetDoubleValue();
 }
 
 void LargeInt::ElementToString(std::string& output)const
@@ -7311,8 +7311,10 @@ bool LargeIntUnsigned::IsEqualTo(const LargeIntUnsigned &right)const
 }
 
 double LargeIntUnsigned::GetDoubleValue()
-{ //must be rewritten
-  return this->GetUnsignedIntValueTruncated();
+{ double result=0;
+  for (int i=this->size-1; i>=0; i--)
+    result=result*LargeIntUnsigned::CarryOverBound+this->TheObjects[i];
+  return result;
 }
 
 void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
@@ -23425,7 +23427,7 @@ bool Parser::ApplyRules(int lookAheadToken)
     return this->ReplaceXYCZXbyE(this->tokenLieBracket);
   if (tokenLast==this->tokenCloseLieBracket && tokenSecondToLast==this->tokenExpression && tokenThirdToLast==this->tokenOpenLieBracket && tokenFourthToLast==this->tokenExpression)
     return this->ReplaceEXEXbyE(this->tokenDereferenceArray);
-  if (tokenLast==this->tokenDigit && lookAheadToken!=this->tokenDigit)
+  if (tokenLast==this->tokenDigit && lookAheadToken!=this->tokenDigit && lookAheadToken!=this->tokenDot)
     return this->ReplaceDdotsDbyEdoTheArithmetic();
   if (tokenLast==this->tokenPartialDerivative || tokenLast==this->tokenG || tokenLast==this->tokenF || tokenLast==this->tokenX || tokenLast==this->tokenH || tokenLast== this->tokenC || tokenLast==this->tokenVariable)
     return this->ReplaceObyE();
@@ -23518,7 +23520,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateInteger(GlobalVariables& theGlobalVariables)
-{ if (this->rationalValue.Extended!=0)
+{ if (!this->rationalValue.IsSmallInteger())
     this->ExpressionType=this->typeRational;
   else
   { this->ExpressionType= this->typeIntegerOrIndex;
@@ -24535,6 +24537,7 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     case ']': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseLieBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '(': this->TokenBuffer.AddObjectOnTop(Parser::tokenOpenBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
     case ',': this->TokenBuffer.AddObjectOnTop(Parser::tokenComma); this->ValueBuffer.AddObjectOnTop(0); return true;
+    case '.': this->TokenBuffer.AddObjectOnTop(Parser::tokenDot); this->ValueBuffer.AddObjectOnTop(0); return true;
     case ')': this->TokenBuffer.AddObjectOnTop(Parser::tokenCloseBracket); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '^': this->TokenBuffer.AddObjectOnTop(Parser::tokenPower); this->ValueBuffer.AddObjectOnTop(0); return true;
     case '+': this->TokenBuffer.AddObjectOnTop(Parser::tokenPlus); this->ValueBuffer.AddObjectOnTop(0); return true;
@@ -29400,20 +29403,45 @@ bool Parser::StackTopIsAVector(int& outputDimension)
 }
 
 bool Parser::ReplaceDdotsDbyEdoTheArithmetic()
-{ int numDigits=0;
+{ int numTotalDigits=0;
+  int indexFirstDoT=this->TokenStack.size;
   for (int i= this->TokenStack.size-1; i>=0; i--)
     if(this->TokenStack.TheObjects[i]!=this->tokenDigit)
-      break;
+    { if (this->TokenStack.TheObjects[i]==this->tokenDot)
+      { if (indexFirstDoT!=this->TokenStack.size)
+          return false;
+        indexFirstDoT=i;
+      } else
+        break;
+    }
     else
-      numDigits++;
-  assert(numDigits>0);
-  LargeInt LargeIntegerReader;
+      numTotalDigits++;
+  int numXs=numTotalDigits;
+  if (indexFirstDoT!=this->TokenStack.size)
+    numXs++;
+  assert(numTotalDigits>0);
+  LargeIntUnsigned LargeIntegerReader;
   LargeIntegerReader.MakeZero();
-  for (int i=this->ValueStack.size-numDigits; i<this->ValueStack.size; i++)
-    LargeIntegerReader=LargeIntegerReader*10 + this->ValueStack.TheObjects[i];
+
+  for (int i=this->ValueStack.size-numXs; i<indexFirstDoT; i++)
+  { LargeIntegerReader*=10;
+    LargeIntegerReader+= this->ValueStack.TheObjects[i];
+  }
+  for (int i=indexFirstDoT+1; i<this->ValueStack.size; i++)
+  { LargeIntegerReader*=10;
+    LargeIntegerReader+= this->ValueStack.TheObjects[i];
+  }
+  Rational denominator=1;
+  if (this->TokenStack.size>indexFirstDoT)
+  { denominator=10;
+    MathRoutines::RaiseToPower(denominator, this->TokenStack.size-indexFirstDoT-1, (Rational) 1);
+    denominator.Invert();
+  }
   this->ExpandOnTopIncreaseStacks(this->tokenInteger, this->tokenExpression, 0);
   this->LastObject()->rationalValue=LargeIntegerReader;
-  this->TransformRepeatXAtoA(numDigits);
+  if (!denominator.IsEqualToOne())
+    this->LastObject()->rationalValue*=denominator;
+  this->TransformRepeatXAtoA(numXs);
   return true;
 }
 

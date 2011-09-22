@@ -82,6 +82,7 @@ class wxParserFrame: public wxFrame
         void OnTextCtrl1Text1(wxCommandEvent& event);
         void OnTextCtrl1Text2(wxCommandEvent& event);
         void OnSpinCtrl2Change(wxSpinEvent& event);
+        void OnTextCtrl1Text3(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(wxParserFrame)

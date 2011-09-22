@@ -5394,7 +5394,7 @@ int ParserNode::EvaluateDrawRootSystem
 
 int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
-{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
@@ -5628,7 +5628,7 @@ int ParserNode::EvaluateAnimationPause
 
 int ParserNode::EvaluateAnimationDots
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
@@ -5672,7 +5672,7 @@ int ParserNode::EvaluateAnimationDots
 
 int ParserNode::EvaluateAnimationClearScreen
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
@@ -5697,7 +5697,7 @@ int ParserNode::EvaluateAnimationClearScreen
 
 int ParserNode::EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
-{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);

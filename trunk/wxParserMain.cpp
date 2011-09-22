@@ -176,7 +176,9 @@ void drawClearScreen()
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
-{ theMainWindow->mutexRuN.LockMe();
+{ if (theMainWindow->mutexRuN.isLockedUnsafeUseForWINguiOnly())
+    return;
+  theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
   for (int i=0; i<output.ProgressReportStrings.size; i++)
     out << output.ProgressReportStrings[i] << "\n";
@@ -392,7 +394,9 @@ void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
 }
 
 void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
-{ this->mutexRuN.LockMe();
+{ if (this->mutexRuN.isLockedUnsafeUseForWINguiOnly())
+    return;
+  this->mutexRuN.LockMe();
   this->theStatus->TextCtrlProgressString->SetValue(wxString(theMainWindow->ProgressReportString.c_str(), wxConvUTF8));
   this->theStatus->TextCtrlStatusString->SetValue(wxString(theMainWindow->StatusString.c_str(), wxConvUTF8));
   this->mutexRuN.UnlockMe();
@@ -487,7 +491,8 @@ void wxParserFrame::ReadSettings()
   this->theSlides.SetSize(s);
   for (int i=0; i<s-1; i++)
   { slides[i]=this->thePath+slides[i];
-    this->theSlides[i].LoadFile(wxString(slides[i].c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
+    if (::CGIspecificRoutines::FileExists(slides[i]))
+      this->theSlides[i].LoadFile(wxString(slides[i].c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
   }
   /*
   while (!fileSettings.eof())
@@ -654,8 +659,9 @@ void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
 
 void wxPNGdisplay::OnPaint(wxPaintEvent& event)
 { wxPaintDC theDC(this);
-  if (theMainWindow->indexCurrentPng!=-1)
-    theDC.DrawBitmap(wxBitmap(theMainWindow->theSlides[theMainWindow->indexCurrentPng]), 0, 0);
+  if (theMainWindow->indexCurrentPng>=0 && theMainWindow->indexCurrentPng<theMainWindow->theSlides.size)
+    if (theMainWindow->theSlides[theMainWindow->indexCurrentPng].IsOk())  
+      theDC.DrawBitmap(wxBitmap(theMainWindow->theSlides[theMainWindow->indexCurrentPng]), 0, 0);
 }
 
 

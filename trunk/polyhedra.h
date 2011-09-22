@@ -182,6 +182,7 @@ private:
 #endif
   bool locked;
 public:
+  bool isLockedUnsafeUseForWINguiOnly(){return this->locked;}
   //locks the mutex if the mutex is free. If not it suspends calling thread until mutex becomes free and then locks it.
   inline void LockMe()
   {

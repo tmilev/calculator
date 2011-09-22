@@ -4554,6 +4554,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
       currentCLS.theShift.MakeZero(this->projectivizedChamber.GetDim());
       currentCLS.theLattice=ZnLattice;
       bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(this->theMaxComputation.LPtoMaximizeLargerDim[i], (Rational) 0);
+      this->theMaxComputation.LPtoMaximizeLargerDim[i].size--;
       assert(tempBool);
       this->numNonZeroMults++;
       std::stringstream out;
@@ -5268,6 +5269,129 @@ std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
   return output;
 }
 
+int ParserNode::EvaluateDrawRootSystem
+  (ParserNode& theNode, char theWeylLetter, int theDimension, GlobalVariables& theGlobalVariables, root* bluePoint)
+{ WeylGroup theWeyl;
+  theWeyl.MakeArbitrary(theWeylLetter, theDimension);
+  theWeyl.ComputeRho(true);
+  root ZeroRoot;
+  theNode.impliedNumVars=theDimension;
+  ZeroRoot.MakeZero(theDimension);
+  ElementWeylGroup tempElt;
+  theWeyl.GetCoxeterElement(tempElt);
+  MatrixLargeRational matCoxeterElt, tempMat;
+  theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
+  std::cout << matCoxeterElt.ElementToString(true, false);
+  tempMat=matCoxeterElt;
+  int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
+  for (int i=0; i<coxeterNumber-1; i++)
+    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+  Complex<double> theEigenValue;
+  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  Matrix<Complex<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<List<Complex<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
+  Vectors<Complex<double> > theEigenSpace;
+  DrawOperations theDrawOperators;
+  theDrawOperators.init();
+  theDrawOperators.initDimensions(theDimension, 1);
+  theDrawOperators.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
+  theEigenSpace.operator=(theEigenSpaceList);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
+  Vector<double> tempRoot;
+  theDrawOperators.SelectedPlane=0;
+  Vectors<double>& theTwoPlane= theDrawOperators.BasisProjectionPlane[0];
+  assert(theTwoPlane.size==2);
+  if (theEigenSpace.size>0)
+  { for (int j=0; j<theDimension; j++)
+    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
+      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
+    }
+    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0][0], theDrawOperators.BasisProjectionPlane[0][1]);
+  }
+//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
+//  std::stringstream tempStream;
+//  tempStream << "<hr>the eigen mat:";
+//  tempStream << eigenMat;
+//  std::cout << tempStream.str();
+  roots RootSystemSorted;
+  RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
+  List<double> lengths;
+  lengths.SetSize(RootSystemSorted.size);
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { tempRoot.SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+      tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
+    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][0]);
+    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][1]);
+    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
+  }
+  for (int i=0; i<RootSystemSorted.size; i++)
+    for (int j=i; j<RootSystemSorted.size; j++)
+      if (lengths[i]<lengths[j])
+      { MathRoutines::swap(lengths[i], lengths[j]);
+        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
+      }
+  root differenceRoot;
+  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
+  Rational minLength= theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  for (int i=2; i<RootSystemSorted.size; i++)
+  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
+    if (minLength> theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot))
+      minLength=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+  }
+  std::cout << "<hr>the min length is: " << minLength.ElementToString();
+  Rational tempRat;
+  if (bluePoint!=0)
+  { theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+  }
+  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
+  theDrawOperators.centerX[0]=325;
+  theDrawOperators.centerY[0]=325;
+  for (int i=0; i<RootSystemSorted.size; i++)
+  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
+    theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
+    theDrawOperators.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    for (int j=i+1; j<RootSystemSorted.size; j++)
+    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
+      tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
+      if (minLength== tempRat)
+        theDrawOperators.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
+    }
+  }
+  root tempRootRat;
+  for (int i=0; i<theDimension; i++)
+  { tempRootRat.MakeEi(theDimension, i);
+    theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+  }
+  std::stringstream tempStream;
+  tempStream << theWeyl.WeylLetter << theWeyl.GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theWeyl.GetDim()) << ")";
+  theDrawOperators.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+//  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
+  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=theDrawOperators;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  theNode.theAnimation.GetElement().flagIsPausedWhileAnimating=true;
+  return theNode.errorNoError;
+
+}
+
 int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 { char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
@@ -5573,128 +5697,11 @@ int ParserNode::EvaluateAnimationClearScreen
 
 int ParserNode::EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
-{ WeylGroup theWeyl;
-  char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
+{ char theWeylLetter= theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
-  theWeyl.MakeArbitrary(theWeylLetter, theDimension);
-  theWeyl.ComputeRho(true);
-  root ZeroRoot;
-  theNode.impliedNumVars=theDimension;
-  ZeroRoot.MakeZero(theDimension);
-  ElementWeylGroup tempElt;
-  theWeyl.GetCoxeterElement(tempElt);
-  MatrixLargeRational matCoxeterElt, tempMat;
-  theWeyl.GetMatrixOfElement(tempElt, matCoxeterElt);
-  std::cout << matCoxeterElt.ElementToString(true, false);
-  tempMat=matCoxeterElt;
-  int coxeterNumber=theWeyl.RootSystem.LastObject()->SumCoordinates().NumShort+1;
-  for (int i=0; i<coxeterNumber-1; i++)
-    tempMat.MultiplyOnTheLeft(matCoxeterElt);
-//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
-  Complex<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
-  Matrix<Complex<double> > eigenMat, idMat;
-  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
-  for (int i =0; i<eigenMat.NumRows; i++)
-    for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
-      if (i==j)
-        eigenMat.elements[i][i]-=theEigenValue;
-    }
-  List<List<Complex<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
-  Vectors<Complex<double> > theEigenSpace;
-  DrawOperations theDrawOperators;
-  theDrawOperators.init();
-  theDrawOperators.initDimensions(theDimension, 1);
-  theDrawOperators.GraphicsUnit=DrawOperations::GraphicsUnitDefault;
-  theEigenSpace.operator=(theEigenSpaceList);
-  for (int i=0; i<theDimension; i++)
-    for (int j=0; j<theDimension; j++)
-      theDrawOperators.theBilinearForm.elements[i][j]=theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
-  Vector<double> tempRoot;
-  theDrawOperators.SelectedPlane=0;
-  Vectors<double>& theTwoPlane= theDrawOperators.BasisProjectionPlane[0];
-  assert(theTwoPlane.size==2);
-  if (theEigenSpace.size>0)
-  { for (int j=0; j<theDimension; j++)
-    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
-      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
-    }
-    theDrawOperators.ModifyToOrthonormalNoShiftSecond(theDrawOperators.BasisProjectionPlane[0][0], theDrawOperators.BasisProjectionPlane[0][1]);
-  }
-//  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
-//  std::stringstream tempStream;
-//  tempStream << "<hr>the eigen mat:";
-//  tempStream << eigenMat;
-//  std::cout << tempStream.str();
-  roots RootSystemSorted;
-  RootSystemSorted.CopyFromBase(theWeyl.RootSystem);
-  List<double> lengths;
-  lengths.SetSize(RootSystemSorted.size);
-  for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { tempRoot.SetSize(theDimension);
-    for (int j=0; j<theDimension; j++)
-      tempRoot[j]=theWeyl.RootSystem[i][j].DoubleValue();
-    double Length1 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][0]);
-    double Length2 = theWeyl.RootScalarCartanRoot(tempRoot, theDrawOperators.BasisProjectionPlane[0][1]);
-    lengths[i]=sqrt(Length1*Length1+Length2*Length2);
-  }
-  for (int i=0; i<RootSystemSorted.size; i++)
-    for (int j=i; j<RootSystemSorted.size; j++)
-      if (lengths[i]<lengths[j])
-      { MathRoutines::swap(lengths[i], lengths[j]);
-        MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
-      }
-  root differenceRoot;
-  differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
-  Rational minLength= theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-  for (int i=2; i<RootSystemSorted.size; i++)
-  { differenceRoot=RootSystemSorted[0]-RootSystemSorted[i];
-    if (minLength> theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot))
-      minLength=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-  }
-  std::cout << "<hr>the min length is: " << minLength.ElementToString();
-  Rational tempRat;
-  if (bluePoint!=0)
-  { theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
-    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
-    theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
-  }
-  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
-  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
-  theDrawOperators.centerX[0]=325;
-  theDrawOperators.centerY[0]=325;
-  for (int i=0; i<RootSystemSorted.size; i++)
-  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
-    theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
-    theDrawOperators.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-    for (int j=i+1; j<RootSystemSorted.size; j++)
-    { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
-      tempRat=theWeyl.RootScalarCartanRoot(differenceRoot, differenceRoot);
-      if (minLength== tempRat)
-        theDrawOperators.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
-    }
-  }
-  root tempRootRat;
-  for (int i=0; i<theDimension; i++)
-  { tempRootRat.MakeEi(theDimension, i);
-    theDrawOperators.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-  }
-  std::stringstream tempStream;
-  tempStream << theWeyl.WeylLetter << theWeyl.GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theWeyl.GetDim()) << ")";
-  theDrawOperators.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
-//  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
-  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
-  theNode.theAnimation.GetElement().MakeZero();
-  theNode.theAnimation.GetElement()+=theDrawOperators;
-  theNode.ExpressionType=theNode.typeAnimation;
-  theNode.theAnimation.GetElement().flagAnimating=true;
-  theNode.theAnimation.GetElement().flagIsPausedWhileAnimating=true;
-  return theNode.errorNoError;
+  return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
 }
 
 double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
@@ -5847,6 +5854,8 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   out << "\ne1=" << currentBasisPlane[0].ElementToString();
   out << "\ne2=" << currentBasisPlane[1].ElementToString();
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
+  if (this->specialOperationsOnBasisChange!=0)
+    this->specialOperationsOnBasisChange(*this);
   this->ComputeProjectionsEiVectors();
   this->DebugString= out.str();
 }
@@ -6083,6 +6092,22 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "animateRootSystemBlueDot(0,2, 16777216, ((1,0),(0,1)))",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSystemBluePoint
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("latticeImprecise",
+   "((Rational,...),...)",
+   "<b>Experimental.</b> Draws G2 in B3.",
+   "latticeImprecise((1, 0.000000001), (1.00000000001, 1.00000000001), (1/2, 1/2))",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateLatticeImprecise
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("drawGtwoInBthree",
+   "()",
+   "<b>Experimental.</b> Draws G2 in B3.",
+   "drawGtwoInBthree",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateDrawG2InB3
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

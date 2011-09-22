@@ -2095,7 +2095,13 @@ public:
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
   LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; }
+//  LargeIntUnsigned(unsigned int value){this->operator=(value); }
 //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
+  static inline LargeIntUnsigned GetOne()
+  { LargeIntUnsigned tempI;
+    tempI.MakeOne();
+    return tempI;
+  }
   inline bool operator<(const LargeIntUnsigned& other)const{return !this->IsGEQ(other);}
   //must be rewritten:
   double GetDoubleValue();
@@ -2452,7 +2458,7 @@ ParallelComputing::GlobalPointerCounter++;
     else
       this->Extended->num.sign*=-1;
   }
-  double DoubleValue();
+  double DoubleValue()const;
   int floorIfSmall()
   { if (this->Extended==0)
     { if (NumShort<0)
@@ -9520,6 +9526,7 @@ class DrawCircleAtVectorOperation
 {
 public:
   Vector<double> theVector;
+  int theMultiplicity;
   double radius;
   int ColorIndex;
   int thePenStyle;
@@ -9531,6 +9538,7 @@ public:
     this->ColorIndex=colorIndex;
     this->thePenStyle=thePenStylE;
     this->radius=theRadius;
+    this->theMultiplicity=1;
   }
   void operator=(const DrawCircleAtVectorOperation& other)
   { this->theVector=other.theVector;
@@ -9539,6 +9547,7 @@ public:
     this->radius=other.radius;
     this->precomputedX=other.precomputedX;
     this->precomputedY=other.precomputedY;
+    this->theMultiplicity=other.theMultiplicity;
   }
 };
 
@@ -9570,8 +9579,13 @@ public:
   bool flagIsPausedWhileAnimating;
   int SelectedPlane;
   std::string DebugString;
+  int indexStartingModifiableTextCommands;
+  void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
+  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
   void operator=(const DrawOperations& other)
-  { this->IndexNthDrawOperation=other.IndexNthDrawOperation;
+  { this->indexStartingModifiableTextCommands=other.indexStartingModifiableTextCommands;
+    this->specialOperationsOnBasisChange=other.specialOperationsOnBasisChange;
+    this->IndexNthDrawOperation=other.IndexNthDrawOperation;
     this->TypeNthDrawOperation=other.TypeNthDrawOperation;
     this->theDrawTextOperations=other.theDrawTextOperations;
     this->theDrawLineOperations=other.theDrawLineOperations;
@@ -9698,6 +9712,8 @@ public:
   { this->SelectedPlane=0;
     this->initDimensions(2, 2);
     this->flagAnimatingMovingCoordSystem=false;
+    this->specialOperationsOnBasisChange=0;
+    this->indexStartingModifiableTextCommands=0;
   }
   void init()
   { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(10000);
@@ -10249,6 +10265,12 @@ public:
   static int EvaluateRelations
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateLatticeImprecise
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateDrawG2InB3
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateWeylAction
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, false, false);}
@@ -10280,10 +10302,14 @@ public:
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystem
+  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, root* bluePoint)
+  ;
+
+  static int EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 ;
   static int EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables);}
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables,0);}
   static int EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 ;
@@ -10486,7 +10512,9 @@ public:
     tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, //=19
     tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, //=23
     tokenH, tokenC, tokenEmbedding, tokenVariable, //=27
-    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray, tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
+    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray,
+    tokenDot,
+    tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
   };
   HashedList<ParserFunction> theFunctionList;
   enum functionList

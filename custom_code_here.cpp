@@ -479,7 +479,7 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGl
 void GeneralizedVermaModuleCharacters::IncrementComputation
   (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  this->UpperLimitChambersForDebugPurposes=100;
+  this->UpperLimitChambersForDebugPurposes=-1;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
   this->ReadFromDefaultFile(&theGlobalVariables);
@@ -489,30 +489,28 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       this->initFromHomomorphism(this->theParser.theHmm, theGlobalVariables);
       this->TransformToWeylProjectiveStep1(theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
-      break;
-    case 1:
       this->TransformToWeylProjectiveStep2(theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 2:
+    case 1:
       this->projectivizedChamber.Refine(theGlobalVariables);
       out << this->projectivizedChamber.ElementToString(false, false);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 3:
+    case 2:
       this->ComputeQPsFromChamberComplex(theGlobalVariables);
       break;
-    case 4:
+    case 3:
       this->InitTheMaxComputation(theGlobalVariables);
       break;
-    case 5:
+    case 4:
       this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true, theGlobalVariables);
       out << "num non-zero mults: " << this->numNonZeroMults;
       break;
-    case 6:
+    case 5:
       this->theMaxComputation.FindExtremaParametricStep2(this->thePauseControlleR, theGlobalVariables);
       break;
-    case 7:
+    case 6:
       this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
       break;
     default:
@@ -5248,7 +5246,7 @@ void MatrixLargeRational::ApproximateLargestEigenSpace
 
 
 template<class Base>
-std::iostream& operator<< (std::iostream& output, const Complex<Base>& input)
+std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
 { if (input.IsEqualToZero())
   { output << "0";
     return output;
@@ -5287,10 +5285,10 @@ int ParserNode::EvaluateDrawRootSystem
   for (int i=0; i<coxeterNumber-1; i++)
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
-  Complex<double> theEigenValue;
+  CompleX<double> theEigenValue;
   theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
   theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
-  Matrix<Complex<double> > eigenMat, idMat;
+  Matrix<CompleX<double> > eigenMat, idMat;
   eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
   for (int i =0; i<eigenMat.NumRows; i++)
     for (int j=0; j<eigenMat.NumCols; j++)
@@ -5298,9 +5296,9 @@ int ParserNode::EvaluateDrawRootSystem
       if (i==j)
         eigenMat.elements[i][i]-=theEigenValue;
     }
-  List<List<Complex<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (Complex<double>) 1, (Complex<double>) -1, (Complex<double>) 0, theGlobalVariables);
-  Vectors<Complex<double> > theEigenSpace;
+  List<List<CompleX<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0, theGlobalVariables);
+  Vectors<CompleX<double> > theEigenSpace;
   DrawOperations theDrawOperators;
   theDrawOperators.init();
   theDrawOperators.initDimensions(theDimension, 1);
@@ -5791,7 +5789,7 @@ void DrawOperations::ComputeXYsFromProjectionsEisAndGraphicsUnit()
   }
 }
 
-void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
+void DrawOperations::changeBasisPreserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables)
 { double bufferCenterX=this->centerX[this->SelectedPlane];
   double bufferCenterY=this->centerY[this->SelectedPlane];
   double bufferGraphicsUnit=this->GraphicsUnit[this->SelectedPlane];
@@ -5855,9 +5853,221 @@ void DrawOperations::changeBasisPreserveAngles(double newX, double newY)
   out << "\ne2=" << currentBasisPlane[1].ElementToString();
   out << "\ne1*e2=" << this->theBilinearForm.ScalarProduct(currentBasisPlane[0], currentBasisPlane[1]);
   if (this->specialOperationsOnBasisChange!=0)
-    this->specialOperationsOnBasisChange(*this);
+    this->specialOperationsOnBasisChange(*this, theGlobalVariables);
   this->ComputeProjectionsEiVectors();
   this->DebugString= out.str();
+}
+
+class ImpreciseDouble
+{
+  private:
+  double precision;
+  double theValue;
+  public:
+  void ElementToString(std::string& output)
+  { output=this->ElementToString();
+  }
+  std::string ElementToString()
+  { std::stringstream out;
+    out << this->theValue;
+    return out.str();
+  }
+  void operator=(const ImpreciseDouble& other)
+  { this->theValue=other.theValue;
+    this->precision=other.precision;
+  }
+  void operator=(double other)
+  { this->theValue=other;
+  }
+  ImpreciseDouble(const ImpreciseDouble& other)
+  { this->operator=(other);
+  }
+  ImpreciseDouble()
+  { this->theValue=0;
+    this->precision=0.1;
+  }
+  ImpreciseDouble(double other)
+  { this->operator=(other);
+  }
+  void operator+=(const ImpreciseDouble& other)
+  { if (!other.IsEqualToZero())
+      this->theValue+=other.theValue;
+  }
+  void operator-=(const ImpreciseDouble& other)
+  { if (!other.IsEqualToZero())
+      this->theValue-=other.theValue;
+  }
+  void operator=(const Rational& other)
+  { this->theValue=other.DoubleValue();
+  }
+  bool IsEqualToZero()const
+  { if (this->theValue<0)
+      return (-theValue)< this->precision;
+    return this->theValue<this->precision;
+  }
+  inline bool operator<=(const ImpreciseDouble& other)
+  { return ! (other<*this);
+  }
+  bool IsPositive()const
+  { return this->theValue>this->precision;
+  }
+  inline bool IsNegative()const
+  { return *this<this->GetZero();
+  }
+  bool operator<(const ImpreciseDouble& other)const
+  { ImpreciseDouble temp=other;
+    temp-=*this;
+    return temp.IsPositive();
+  }
+  void AssignFloor()
+  { this->theValue=floor(this->theValue);
+  }
+  inline ImpreciseDouble operator/(const ImpreciseDouble& other)const
+  { ImpreciseDouble result;
+    result=*this;
+    if (other.IsEqualToZero())
+    { //the below is written like this to avoid this->theValue/0;
+      //If the user attempts to divide by zero, I want a regular division by zero exception to be generated
+      result.theValue=this->theValue/(other.theValue-other.theValue);
+      return result;
+    }
+    result.theValue/=other.theValue;
+    return result;
+  }
+  void operator*=(const ImpreciseDouble& other)
+  { if (!other.IsEqualToZero())
+      this->theValue*=other.theValue;
+    else
+      this->theValue=0;
+  }
+  bool operator==(const ImpreciseDouble& other)const
+  { int diff=this->theValue-other.theValue;
+    if (diff<0)
+      diff=-diff;
+    return diff<this->precision;
+  }
+  static inline ImpreciseDouble GetMinusOne()
+  { return -1;
+  }
+  static inline ImpreciseDouble GetOne()
+  { return 1;
+  }
+  static inline ImpreciseDouble GetZero()
+  { return 0;
+  }
+};
+template < > std::string Matrix<ImpreciseDouble>::MatrixElementSeparator="";
+
+int ParserNode::EvaluateLatticeImprecise
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots tempRoots;
+  int theDim=-1;
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, tempRoots, theDim))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  Matrix<ImpreciseDouble> theMat;
+  theMat.init(tempRoots.size, theDim);
+  for (int i=0; i<theMat.NumRows; i++)
+    for (int j=0; j<theMat.NumCols; j++)
+      theMat.elements[i][j]=tempRoots[i][j];
+  std::cout << "starting matrix: " << theMat.ElementToString(true, false);
+  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  std::cout << "<br>final matrix: " << theMat.ElementToString(true, false);
+  return theNode.errorNoError;
+}
+
+void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps, GlobalVariables& theGlobalVariables)
+{ Matrix<ImpreciseDouble> theMat;
+  int theDim=theOps.theBilinearForm.NumRows;
+  theMat.init(theDim, 2);
+//we assume that the ComputeProjectionsEiVectors has been called
+//  theOps.ComputeProjectionsEiVectors();
+  for(int i=0; i<theOps.ProjectionsEiVectors.size; i++)
+    for (int j=0; j<2; j++)
+      theMat.elements[i][j]=theOps.ProjectionsEiVectors[i][j];
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  std::stringstream out;
+  out << "before elimination:\n" << theMat.ElementToString(false, false);
+  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  out << "after elimination:\n" << theMat.ElementToString(false, false);
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+  theGlobalVariables.MakeReport();
+
+}
+
+int ParserNode::EvaluateDrawG2InB3
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  AnimationBuffer& Ani=theNode.theAnimation.GetElement();
+  theNode.EvaluateDrawRootSystem(theNode, 'B', 3, theGlobalVariables, 0);
+  SelectionWithMaxMultiplicity theSel;
+  int theDim=3;
+  int multSize=9;
+  theSel.initMaxMultiplicity(theDim, multSize);
+  int numPoints= theSel.NumSelectionsTotal();
+  root tempRoot;
+  DrawOperations& theOps=Ani.thePhysicalDrawOps[0];
+  root highestWeight;
+  highestWeight.MakeZero(theDim);
+  hashedRoots theWeights;
+  for (int i=0; i<numPoints; i++, theSel.IncrementSubset())
+  { tempRoot=theSel;
+    tempRoot.MinusRoot();
+    theWeights.AddObjectOnTopHash(tempRoot);
+    theOps.drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
+  }
+  theOps.indexStartingModifiableTextCommands=theOps.theDrawTextAtVectorOperations.size;
+  theOps.specialOperationsOnBasisChange=&theOps.projectionMultiplicityMergeOnBasisChange;
+  return theNode.errorNoError;
+}
+
+void DrawOperations::operator+=(const DrawOperations& other)
+{ if (this->theBilinearForm.NumRows!=other.theBilinearForm.NumRows)
+    return;
+  this->TypeNthDrawOperation.AddListOnTop(other.TypeNthDrawOperation);
+  int shiftDrawText=this->theDrawTextOperations.size;
+  int shiftDrawTextAtVector=this->theDrawTextAtVectorOperations.size;
+  int shiftDrawLine=this->theDrawLineOperations.size;
+  int shiftDrawLineBnVectors=this->theDrawLineBetweenTwoRootsOperations.size;
+  int shiftDrawCircleAtVector=this->theDrawCircleAtVectorOperations.size;
+  this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop
+  (this->IndexNthDrawOperation.size+other.IndexNthDrawOperation.size);
+  for (int i=0; i<other.TypeNthDrawOperation.size; i++)
+    switch(other.TypeNthDrawOperation[i])
+    { case DrawOperations::typeDrawCircleAtVector:
+        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawCircleAtVector);
+        break;
+      case DrawOperations::typeDrawLine:
+        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawLine);
+        break;
+      case DrawOperations::typeDrawLineBetweenTwoVectors:
+        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawLineBnVectors);
+        break;
+      case DrawOperations::typeDrawText:
+        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawText);
+        break;
+      case DrawOperations::typeDrawTextAtVector:
+        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawTextAtVector);
+        break;
+      default:
+        assert(false);
+        break;
+    }
+  this->theDrawTextOperations.AddListOnTop(other.theDrawTextOperations);
+  this->theDrawLineOperations.AddListOnTop(other.theDrawLineOperations);
+  this->theDrawLineBetweenTwoRootsOperations.AddListOnTop(other.theDrawLineBetweenTwoRootsOperations);
+  this->theDrawTextAtVectorOperations.AddListOnTop(other.theDrawTextAtVectorOperations);
+  this->theDrawCircleAtVectorOperations.AddListOnTop(other.theDrawCircleAtVectorOperations);
+  //this->BasisProjectionPlane.AddListOnTop(other.BasisProjectionPlane);
+  //this->centerX.AddListOnTop(other.centerX);
+  //this->centerY.AddListOnTop(other.centerY);
+  //this->GraphicsUnit.AddListOnTop(other.GraphicsUnit);
+  this->SelectedPlane=0;
+}
+
+DrawOperations& AnimationBuffer::GetLastDrawOps()
+{ if (this->thePhysicalDrawOps.size<=0)
+    return this->stillFrame;
+  return *this->thePhysicalDrawOps.LastObject();
 }
 
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)

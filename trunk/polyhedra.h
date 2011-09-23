@@ -148,7 +148,7 @@ class PolynomialRationalCoeff;
 class ConeComplex;
 class XMLRoutines;
 template<class Base>
-class Complex;
+class CompleX;
 class RationalFunction;
 
 
@@ -1020,7 +1020,7 @@ public:
 };
 
 template<class Base>
-std::iostream& operator<<(std::iostream& output, const Complex<Base>& input);
+std::iostream& operator<<(std::iostream& output, const CompleX<Base>& input);
 
 template <typename Element>
 std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat)
@@ -9555,7 +9555,7 @@ public:
 class DrawOperations
 {
 private:
-  void changeBasisPreserveAngles(double newX, double newY);
+  void changeBasisPreserveAngles(double newX, double newY, GlobalVariables& theGlobalVariables);
 public:
   List<int> IndexNthDrawOperation;
   List<int> TypeNthDrawOperation;
@@ -9581,8 +9581,8 @@ public:
   int SelectedPlane;
   std::string DebugString;
   int indexStartingModifiableTextCommands;
-  void (*specialOperationsOnBasisChange)(DrawOperations& theOps);
-  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps);
+  void (*specialOperationsOnBasisChange)(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
+  static void projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps, GlobalVariables& theGlobalVariables);
   void operator=(const DrawOperations& other)
   { this->indexStartingModifiableTextCommands=other.indexStartingModifiableTextCommands;
     this->specialOperationsOnBasisChange=other.specialOperationsOnBasisChange;
@@ -9670,7 +9670,7 @@ public:
       y1=-y1;
     return x1<=this->ClickToleranceX && y1<=this->ClickToleranceY;
   };
-  bool mouseMoveRedraw(int X, int Y)
+  bool mouseMoveRedraw(int X, int Y, GlobalVariables& theGlobalVariables)
   { if (this->SelectedCircleMinus2noneMinus1Center==-2)
       return false;
     if (this->SelectedCircleMinus2noneMinus1Center==-1)
@@ -9680,7 +9680,7 @@ public:
     }
     if (this->SelectedCircleMinus2noneMinus1Center>=0)
     { if (this->flagRotatingPreservingAngles)
-      { this->changeBasisPreserveAngles((double) X , (double) Y);
+      { this->changeBasisPreserveAngles((double) X , (double) Y, theGlobalVariables);
         return true;
       }
     }
@@ -11335,7 +11335,7 @@ public:
     if (theGlobalVariables!=0)
     { this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
       this->initFromHomomorphism(this->theParser.theHmm, *theGlobalVariables);
-    }
+    } else
     { GlobalVariables tempGlobalVars;
       this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
       this->initFromHomomorphism(this->theParser.theHmm, tempGlobalVars);
@@ -11693,7 +11693,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
 }
 
 template<class Base>
-class Complex
+class CompleX
 {
   static bool EqualityIsApproximate;
   static double EqualityPrecision;
@@ -11706,22 +11706,22 @@ class Complex
     return tempStream.str();
   }
   void ElementToString(std::string& output){ output=this->ElementToString(); }
-  friend std::iostream& operator<< <Base>(std::iostream& output, const Complex<Base>& input);
-  void operator*=(const Complex<Base>& other)
-  { Complex Accum;
+  friend std::iostream& operator<< <Base>(std::iostream& output, const CompleX<Base>& input);
+  void operator*=(const CompleX<Base>& other)
+  { CompleX Accum;
     Accum.Re=this->Re*other.Re-this->Im*other.Im;
     Accum.Im=this->Re*other.Im+ this->Im*other.Re;
     this->operator=(Accum);
   }
-  void operator=(const Complex<Base>& other)
+  void operator=(const CompleX<Base>& other)
   { this->Re=other.Re;
     this->Im=other.Im;
   }
-  void operator+=(const Complex<Base>& other)
+  void operator+=(const CompleX<Base>& other)
   { this->Re+=other.Re;
     this->Im+=other.Im;
   }
-  void operator-=(const Complex<Base>& other)
+  void operator-=(const CompleX<Base>& other)
   { this->Re-=other.Re;
     this->Im-=other.Im;
   }
@@ -11741,19 +11741,19 @@ class Complex
     this->Im/=numerator;
   }
   bool IsEqualToZero()const
-  { if(!Complex<Base>::EqualityIsApproximate)
+  { if(!CompleX<Base>::EqualityIsApproximate)
       return this->Im==0 && this->Re==0;
     else
       return
-      this->Im<Complex<Base>::EqualityPrecision && -this->Im<Complex<Base>::EqualityPrecision
+      this->Im<CompleX<Base>::EqualityPrecision && -this->Im<CompleX<Base>::EqualityPrecision
       &&
-      this->Re<Complex<Base>::EqualityPrecision && -this->Re<Complex<Base>::EqualityPrecision
+      this->Re<CompleX<Base>::EqualityPrecision && -this->Re<CompleX<Base>::EqualityPrecision
       ;
   }
   inline void Minus(){this->Im=-this->Im; this->Re=-this->Re;}
-  Complex(){}
-  Complex(int other){this->operator=(other);}
-  Complex(double other){this->operator=(other);}
+  CompleX(){}
+  CompleX(int other){this->operator=(other);}
+  CompleX(double other){this->operator=(other);}
 };
 
 

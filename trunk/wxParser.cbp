@@ -18,11 +18,13 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="`wx-config --cflags`" />
 			<Add option="-Wall" />
+			<Add option="`wx-config --cflags`" />
 		</Compiler>
 		<Linker>
 			<Add option="`wx-config --libs`" />
+			<Add library="GL" />
+			<Add library="X11" />
 		</Linker>
 		<Unit filename="custom_code_here.cpp" />
 		<Unit filename="polyhedra.cpp" />

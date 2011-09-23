@@ -21,6 +21,7 @@
 #include <wx/timer.h>
 //*)
 
+//#include "openglXP.h"
 #include "wxDrawPanel.h"
 #include "wxParserOutput.h"
 #include "wxStatus.h"
@@ -30,6 +31,8 @@
 #include "wx/stdpaths.h"
 #include <wx/image.h>
 #include "polyhedra.h"
+
+
 
 
 DEFINE_EVENT_TYPE(wxEVT_ComputationOverMakeReport)
@@ -45,6 +48,7 @@ class wxParserFrame: public wxFrame
         wxParserOutput* theParserOutput;
         wxStatus* theStatus;
         wxPNGdisplay* thePNGdisplay;
+//        openglXP theOpenGLXP;
         MutexWrapper mutexRuN;
         std::string thePath;
         std::string theSettingsFileName;
@@ -113,5 +117,6 @@ class wxParserFrame: public wxFrame
         void WriteSettings();
         DECLARE_EVENT_TABLE()
 };
+
 
 #endif // WXPARSERMAIN_H

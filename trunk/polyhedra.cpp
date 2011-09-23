@@ -51,10 +51,6 @@ GlobalVariables::GlobalVariables()
   this->MaxAllowedComputationTimeInSeconds=1000000;
 }
 
-bool Stop()
-{ return true;
-}
-
 int ParallelComputing::GlobalPointerCounter=0;
 int ParallelComputing::PointerCounterPeakRamUse=0;
 
@@ -263,8 +259,8 @@ template < > int List<ConeLatticeAndShift>::ListActualSizeIncrement=50;
 template < > int List<DrawOperations>::ListActualSizeIncrement=5;
 template < > int List<VirtualDrawOp>::ListActualSizeIncrement=1000;
 
-template < > bool  Complex<double>::EqualityIsApproximate=true;
-template < > double Complex<double>::EqualityPrecision=0.00000001;
+template < > bool  CompleX<double>::EqualityIsApproximate=true;
+template < > double CompleX<double>::EqualityPrecision=0.00000001;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
@@ -3055,9 +3051,7 @@ int CombinatorialChamber::GetIndexWallWithNormal(root& theNormal)
 }
 
 bool CombinatorialChamber::GetNonSeparableChamberIndicesOrReturnFalseIfUnionNotConvex(CombinatorialChamberContainer& owner, List<int>& outputIndicesChambersToGlue, roots& outputRedundantNormals, GlobalVariables& theGlobalVariables)
-{ if (this->GetHashFromSortedNormals()==58238520)
-    Stop();
-  outputIndicesChambersToGlue.size=0;
+{ outputIndicesChambersToGlue.size=0;
   outputIndicesChambersToGlue.AddObjectOnTop(this->IndexInOwnerComplex);
   outputRedundantNormals.size=0;
   if (!this->GetNonSeparableChamberIndicesAppendList(owner, outputIndicesChambersToGlue, theGlobalVariables))
@@ -4430,8 +4424,6 @@ bool WallData::ConsistencyCheck(CombinatorialChamber& owner, CombinatorialChambe
   for (int i=0; i<this->NeighborsAlongWall.size; i++)
     if (this->NeighborsAlongWall.TheObjects[i]!=0)
     { WallData& otherWall= this->NeighborsAlongWall.TheObjects[i]->Externalwalls.TheObjects[this->IndicesMirrorWalls.TheObjects[i]];
-      if (!otherWall.ContainsNeighborExactlyOnce(&owner))
-        Stop();
       assert(otherWall.ContainsNeighborExactlyOnce(&owner));
       assert(this->ContainsNeighborExactlyOnce(this->NeighborsAlongWall.TheObjects[i]));
       root tempRoot; tempRoot.Assign(this->normal);
@@ -6215,9 +6207,6 @@ void BasicQN::MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& colum
   }
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
   { this->ComputeDebugString();
-    if (this->DebugString=="\\tau_{6}[(3a+5b=1)(4b=2)]")
-    { Stop();
-    }
   }
   this->Simplify();
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -7541,10 +7530,7 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
       tempRat.MultiplyBy(rootLatticeIndicator.TheObjects[j]);
       tempRoot.TheObjects[i]+=(tempRat);
       if (partFraction::MakingConsistencyCheck)
-      { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-        { Stop();
-        }
-        tempRat2.AssignInteger(partFraction::theVectorToBePartitioned.TheObjects[j]);
+      { tempRat2.AssignInteger(partFraction::theVectorToBePartitioned.TheObjects[j]);
         tempRat2.MultiplyBy(this->theNormals.elements[i][j]);
         tempRoot2.TheObjects[i]+=(tempRat2);
       }
@@ -8523,13 +8509,12 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
   { this->ComputeDebugString(owner, theGlobalVariables);
     normals.ComputeDebugString();
-    Stop();
   }
   for (int i=0; i<this->Coefficient.size; i++)
   { this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, i, normals, SplitPowerSeriesCoefficient, theDimension);
     if (RecordNumMonomials)
     { std::stringstream out4, out3;
-      out4 <<"Current fraction: "<<i+1<<" out of "<<this->Coefficient.size <<" processed";
+      out4 << "Current fraction: "<<i+1<<" out of "<<this->Coefficient.size <<" processed";
       partFractions::NumProcessedForVPFMonomialsTotal++;
       out3  <<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
@@ -8538,9 +8523,6 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
     }
   }
   SplitPowerSeriesCoefficient->ComputeQuasiPolynomial(output, RecordNumMonomials, theDimension, theGlobalVariables);
-  if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-  { Stop();
-  }
   if (partFraction::MakingConsistencyCheck)
   { Rational tempLRat;
     output.Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
@@ -9155,17 +9137,11 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
 { partFraction tempFrac;
   //tempFrac.Assign(*this);
   Rational StartCheckSum, theDiff;
-  int ProblemCounter=-1;
   if (this->flagAnErrorHasOccurredTimeToPanic)
   { owner.ComputeOneCheckSum(StartCheckSum, theGlobalVariables);
     this->ComputeOneCheckSum(owner, theDiff, owner.AmbientDimension, theGlobalVariables);
     this->ComputeDebugString(owner, theGlobalVariables);
     owner.NumRunsReduceMonomialByMonomial++;
-    ProblemCounter=owner.NumRunsReduceMonomialByMonomial;
-    if (ProblemCounter==8)
-    { Stop();
-      owner.ComputeDebugString(theGlobalVariables);
-    }
   }
   MatrixLargeRational& tempMat= theGlobalVariables.matReduceMonomialByMonomial;
   MatrixLargeRational& startAsIdMat = theGlobalVariables.matIdMatrix;
@@ -9239,9 +9215,7 @@ void partFraction::ReduceMonomialByMonomial(partFractions& owner, int myIndex, G
           tempFrac.ComputeOneCheckSum(owner, tempDiff, owner.AmbientDimension, theGlobalVariables);
         }
         for (int l=0; l<numSummands; l++)
-        { if (ProblemCounter==8 )
-            Stop();
-          tempFrac.AssignDenominatorOnly(*this);
+        { tempFrac.AssignDenominatorOnly(*this);
           if (this->flagAnErrorHasOccurredTimeToPanic)
             thePowers.ComputeDebugString();
           tempFrac.ReduceMonomialByMonomialModifyOneMonomial(owner, theGlobalVariables, thePowers, thePowersSigned, tempMon);
@@ -10108,7 +10082,6 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum(Rational& outpu
   }
   if (output.IsEqualToZero())
   { std::string tempS;
-    Stop();
   }
   output.Invert();
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -11544,7 +11517,6 @@ void VermaModulesWithMultiplicities::Check()
     for (int j=0; j<this->size; j++)
     { if (this->TheMultiplicities.TheObjects[i]!=0 && this->TheMultiplicities.TheObjects[i]!=1 && this->TheMultiplicities.TheObjects[i]!=-1)
       { this->ComputeDebugString();
-        Stop();
       }
     }
   }
@@ -12345,7 +12317,6 @@ void thePFcomputation::Run()
   this->ComputeTableAllowed();
   this->ComputeDebugString();
   this->EnumerateRecursively(0, 0, 6);
-  Stop();
 }
 
 void thePFcomputation::ComputeDebugString()
@@ -14637,7 +14608,6 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
       if (foundBadCombination)
       { std::string tempS;
         this->LinCombToString(TestedRootAlpha, x, linComb, tempS);
-        Stop();
       }
     }
   }
@@ -15697,7 +15667,6 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& Nil
     return false;
   if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
   {//  assert(false);
-    Stop();
   }
   ReflectionSubgroupWeylGroup tempSubgroup;
   tempSubgroup.AmbientWeyl.Assign(owner.AmbientWeyl);
@@ -15744,7 +15713,6 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
   if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="$A_1$")
   { this->ComputeDiagramRelAndK(owner);
     assert(false);
-    Stop();
   }
   this->SortRelation(owner);
   this->FixRepeatingRoots(this->Alphas, this->AlphaCoeffs);
@@ -16016,12 +15984,11 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
 void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml)
 { std::stringstream out1, out2; std::string tempS;
   if (useHtml)
-  { out1 <<"<table border=\"1\">\n <colgroup>";
+  { out1 << "<table border=\"1\">\n <colgroup>";
     for (int i=0; i<this->NumColsPerTableLatex; i++)
-    { out1<<"<col width=\"80\">";
-    }
-    out1<<"</colgroup><tr>";
-    out2 <<"</td></tr></table>";
+      out1<< "<col width=\"80\">";
+    out1<< "</colgroup><tr>";
+    out2 << "</td></tr></table>";
   }
   if (useLatex)
   { out1 << "\n\n \\begin{tabular}{";
@@ -16090,7 +16057,7 @@ void rootSubalgebras::pathToHtmlReference(int index, std::string& DisplayString,
   }
   std::stringstream out; std::string tempS;
   this->pathToHtmlFileNameElements(index, htmlPathServer, tempS, true);
-  out << "<a href=\""<<tempS <<"\">"<<DisplayString<<"</a>";
+  out << "<a href=\"" << tempS << "\">" << DisplayString << "</a>";
   output=out.str();
 }
 
@@ -16469,7 +16436,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
   root& minusZeta=this->theWeyl.RootSystem.TheObjects[indexMinusZeta];
   assert(eta==gamma+delta);
   assert(this->theWeyl.IsARoot(eta+minusEpsilon));
-  assert( this->Computed.elements[indexDelta][indexMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma] && this->Computed.elements[indexGamma][indexDelta] );
+  assert(this->Computed.elements[indexDelta][indexMinusEpsilon] && this->Computed.elements[indexMinusEpsilon][indexGamma] && this->Computed.elements[indexGamma][indexDelta] );
   assert(!this->ChevalleyConstants.elements[indexGamma][indexDelta].IsEqualToZero());
   int indexDeltaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(delta+minusEpsilon);
   int indexGammaMinusEpsilon= this->theWeyl.RootSystem.IndexOfObjectHash(gamma+minusEpsilon);
@@ -16591,7 +16558,7 @@ void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables&
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out;
-  out << index <<" out of "<< outOf <<" =3^8-1 computed";
+  out << index << " out of " << outOf << " =3^8-1 computed";
   theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
   theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -20433,13 +20400,13 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
 { std::stringstream out;
   std::string tempS;
   if (useLatex)
-    out<<"$";
+    out << "$";
   if (useHtml)
-  { out <<"<table><tr><td align=\"center\">Char.</td>";
+  { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
       CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
-      out << "<td align=\"center\">Decomp. " << tempS <<"</td>";
+      out << "<td align=\"center\">Decomp. " << tempS << "</td>";
     }
     out << "</tr>\n";
   }
@@ -20448,11 +20415,11 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
     CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DebugString, tempS);
     if (useHtml)
-      out <<"<td align=\"center\">";
+      out << "<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
     { if (this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]>1)
         out << this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i];
-      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]<<"}";
+      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i] << "}";
       if (i!=this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size-1)
         out << "+";
     }

@@ -217,7 +217,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)\n    +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(19)\n+animateRootSystemBlueDot(0,2,1, (-1,0))+animatePause(19)\n+animateRootSystemBlueDot(0,2,1, (-1,-1))\n    +animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,-1))\n    +animatePause(19)+animateRootSystemDefault(0,2,1)+animatePause(79)+animateRootSystemDefault(1,3,100)+animatePause(20)\n    +animateRootSystemDefault(2,4,100)+animatePause(20)+animateRootSystemDefault(3,5,1)+animatePause(79)+animateRootSystemDefault(6,2,1)\n    +animatePause(29)+animateRootSystemDefault(5,4,1)+animatePause(59)+animateRootSystemDefault(4,6,1)+animatePause(59)\n    +animateRootSystemDefault(4,7,1)+animatePause(59)+animateRootSystemDefault(4,8,1)+animatePause(59)+animateRootSystemDefault(6,2,1)\n    +animatePause(99)+animateRootSystemDefault(4,8,1)+animatePause(119)+animateRootSystemDefault(4,7,1)+animatePause(119)\n    +animateRootSystemDefault(5,4,100)+animatePause(50)+animateRootSystemDefault(4,6,100)+animatePause(230)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("RunGtwoInBthree"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -244,6 +244,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->theParserOutput= new wxParserOutput(this);
     this->theStatus= new wxStatus(this);
     this->thePNGdisplay= new wxPNGdisplay(this);
+//    this->theOpenGLXP=new openglXP(this);
     this->Timer1.Stop();
     this->TimerReady=true;
 
@@ -368,7 +369,7 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
 //  theMainWindow->flagUseBitmapBufferForDrawing=true;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
 //  theMainWindow->flagUseBitmapBufferForDrawing=false;
-  if (theOps.mouseMoveRedraw(event.GetX(), event.GetY()))
+  if (theOps.mouseMoveRedraw(event.GetX(), event.GetY(), theGlobalVariables))
   { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
   }
 //  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
@@ -394,8 +395,9 @@ void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
 }
 
 void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
-{ if (this->mutexRuN.isLockedUnsafeUseForWINguiOnly())
-    return;
+{
+//  if (this->mutexRuN.isLockedUnsafeUseForWINguiOnly())
+//    return;
   this->mutexRuN.LockMe();
   this->theStatus->TextCtrlProgressString->SetValue(wxString(theMainWindow->ProgressReportString.c_str(), wxConvUTF8));
   this->theStatus->TextCtrlStatusString->SetValue(wxString(theMainWindow->StatusString.c_str(), wxConvUTF8));
@@ -660,60 +662,10 @@ void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
 void wxPNGdisplay::OnPaint(wxPaintEvent& event)
 { wxPaintDC theDC(this);
   if (theMainWindow->indexCurrentPng>=0 && theMainWindow->indexCurrentPng<theMainWindow->theSlides.size)
-    if (theMainWindow->theSlides[theMainWindow->indexCurrentPng].IsOk())  
+    if (theMainWindow->theSlides[theMainWindow->indexCurrentPng].IsOk())
       theDC.DrawBitmap(wxBitmap(theMainWindow->theSlides[theMainWindow->indexCurrentPng]), 0, 0);
 }
 
-
-void DrawOperations::operator+=(const DrawOperations& other)
-{ if (this->theBilinearForm.NumRows!=other.theBilinearForm.NumRows)
-    return;
-  this->TypeNthDrawOperation.AddListOnTop(other.TypeNthDrawOperation);
-  int shiftDrawText=this->theDrawTextOperations.size;
-  int shiftDrawTextAtVector=this->theDrawTextAtVectorOperations.size;
-  int shiftDrawLine=this->theDrawLineOperations.size;
-  int shiftDrawLineBnVectors=this->theDrawLineBetweenTwoRootsOperations.size;
-  int shiftDrawCircleAtVector=this->theDrawCircleAtVectorOperations.size;
-  this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop
-  (this->IndexNthDrawOperation.size+other.IndexNthDrawOperation.size);
-  for (int i=0; i<other.TypeNthDrawOperation.size; i++)
-    switch(other.TypeNthDrawOperation[i])
-    { case DrawOperations::typeDrawCircleAtVector:
-        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawCircleAtVector);
-        break;
-      case DrawOperations::typeDrawLine:
-        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawLine);
-        break;
-      case DrawOperations::typeDrawLineBetweenTwoVectors:
-        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawLineBnVectors);
-        break;
-      case DrawOperations::typeDrawText:
-        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawText);
-        break;
-      case DrawOperations::typeDrawTextAtVector:
-        this->IndexNthDrawOperation.AddObjectOnTop(other.IndexNthDrawOperation[i]+shiftDrawTextAtVector);
-        break;
-      default:
-        assert(false);
-        break;
-    }
-  this->theDrawTextOperations.AddListOnTop(other.theDrawTextOperations);
-  this->theDrawLineOperations.AddListOnTop(other.theDrawLineOperations);
-  this->theDrawLineBetweenTwoRootsOperations.AddListOnTop(other.theDrawLineBetweenTwoRootsOperations);
-  this->theDrawTextAtVectorOperations.AddListOnTop(other.theDrawTextAtVectorOperations);
-  this->theDrawCircleAtVectorOperations.AddListOnTop(other.theDrawCircleAtVectorOperations);
-  //this->BasisProjectionPlane.AddListOnTop(other.BasisProjectionPlane);
-  //this->centerX.AddListOnTop(other.centerX);
-  //this->centerY.AddListOnTop(other.centerY);
-  //this->GraphicsUnit.AddListOnTop(other.GraphicsUnit);
-  this->SelectedPlane=0;
-}
-
-DrawOperations& AnimationBuffer::GetLastDrawOps()
-{ if (this->thePhysicalDrawOps.size<=0)
-    return this->stillFrame;
-  return *this->thePhysicalDrawOps.LastObject();
-}
 /*
 void AnimationBuffer::AddCloneLastFrameAppendOperations
 (const DrawOperations& other)
@@ -782,170 +734,4 @@ void wxParserFrame::OnSpinCtrl2Change(wxSpinEvent& event)
   { this->SpinCtrl2->SetRange(0, theOps.theVirtualOpS.size-1);
     this->SpinCtrl2->SetValue(theOps.theVirtualOpS.size-1);
   }
-}
-
-
-
-class ImpreciseDouble
-{
-  private:
-  double precision;
-  double theValue;
-  public:
-  void ElementToString(std::string& output)
-  { output=this->ElementToString();
-  }
-  std::string ElementToString()
-  { std::stringstream out;
-    out << this->theValue;
-    return out.str();
-  }
-  void operator=(const ImpreciseDouble& other)
-  { this->theValue=other.theValue;
-    this->precision=other.precision;
-  }
-  void operator=(double other)
-  { this->theValue=other;
-  }
-  ImpreciseDouble(const ImpreciseDouble& other)
-  { this->operator=(other);
-  }
-  ImpreciseDouble()
-  { this->theValue=0;
-    this->precision=0.1;
-  }
-  ImpreciseDouble(double other)
-  { this->operator=(other);
-  }
-  void operator+=(const ImpreciseDouble& other)
-  { if (!other.IsEqualToZero())
-      this->theValue+=other.theValue;
-  }
-  void operator-=(const ImpreciseDouble& other)
-  { if (!other.IsEqualToZero())
-      this->theValue-=other.theValue;
-  }
-  void operator=(const Rational& other)
-  { this->theValue=other.DoubleValue();
-  }
-  bool IsEqualToZero()const
-  { if (this->theValue<0)
-      return (-theValue)< this->precision;
-    return this->theValue<this->precision;
-  }
-  inline bool operator<=(const ImpreciseDouble& other)
-  { return ! (other<*this);
-  }
-  bool IsPositive()const
-  { return this->theValue>this->precision;
-  }
-  inline bool IsNegative()const
-  { return *this<this->GetZero();
-  }
-  bool operator<(const ImpreciseDouble& other)const
-  { ImpreciseDouble temp=other;
-    temp-=*this;
-    return temp.IsPositive();
-  }
-  void AssignFloor()
-  { this->theValue=floor(this->theValue);
-  }
-  inline ImpreciseDouble operator/(const ImpreciseDouble& other)const
-  { ImpreciseDouble result;
-    result=*this;
-    if (other.IsEqualToZero())
-    { //the below is written like this to avoid this->theValue/0;
-      //If the user attempts to divide by zero, I want a regular division by zero exception to be generated
-      result.theValue=this->theValue/(other.theValue-other.theValue);
-      return result;
-    }
-    result.theValue/=other.theValue;
-    return result;
-  }
-  void operator*=(const ImpreciseDouble& other)
-  { if (!other.IsEqualToZero())
-      this->theValue*=other.theValue;
-    else
-      this->theValue=0;
-  }
-  bool operator==(const ImpreciseDouble& other)const
-  { int diff=this->theValue-other.theValue;
-    if (diff<0)
-      diff=-diff;
-    return diff<this->precision;
-  }
-  static inline ImpreciseDouble GetMinusOne()
-  { return -1;
-  }
-  static inline ImpreciseDouble GetOne()
-  { return 1;
-  }
-  static inline ImpreciseDouble GetZero()
-  { return 0;
-  }
-};
-template < > std::string Matrix<ImpreciseDouble>::MatrixElementSeparator="";
-
-int ParserNode::EvaluateLatticeImprecise
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots tempRoots;
-  int theDim=-1;
-  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, tempRoots, theDim))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  Matrix<ImpreciseDouble> theMat;
-  theMat.init(tempRoots.size, theDim);
-  for (int i=0; i<theMat.NumRows; i++)
-    for (int j=0; j<theMat.NumCols; j++)
-      theMat.elements[i][j]=tempRoots[i][j];
-  std::cout << "starting matrix: " << theMat.ElementToString(true, false);
-  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
-  std::cout << "<br>final matrix: " << theMat.ElementToString(true, false);
-  return theNode.errorNoError;
-}
-
-void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& theOps)
-{ Matrix<ImpreciseDouble> theMat;
-  int theDim=theOps.theBilinearForm.NumRows;
-  theMat.init(theDim, 2);
-//we assume that the ComputeProjectionsEiVectors has been called
-//  theOps.ComputeProjectionsEiVectors();
-  for(int i=0; i<theOps.ProjectionsEiVectors.size; i++)
-    for (int j=0; j<2; j++)
-      theMat.elements[i][j]=theOps.ProjectionsEiVectors[i][j];
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  std::stringstream out;
-  out << "before elimination:\n" << theMat.ElementToString(false, false);
-  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
-  out << "after elimination:\n" << theMat.ElementToString(false, false);
-  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  theGlobalVariables.MakeReport();
-
-}
-
-//void ComputeMultRecursive(List<int>&
-
-int ParserNode::EvaluateDrawG2InB3
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  AnimationBuffer& Ani=theNode.theAnimation.GetElement();
-  theNode.EvaluateDrawRootSystem(theNode, 'B', 3, theGlobalVariables, 0);
-  SelectionWithMaxMultiplicity theSel;
-  int theDim=3;
-  int multSize=9;
-  theSel.initMaxMultiplicity(theDim, multSize);
-  int numPoints= theSel.NumSelectionsTotal();
-  root tempRoot;
-  DrawOperations& theOps=Ani.thePhysicalDrawOps[0];
-  root highestWeight;
-  highestWeight.MakeZero(theDim);
-  hashedRoots theWeights;
-  for (int i=0; i<numPoints; i++, theSel.IncrementSubset())
-  { tempRoot=theSel;
-    tempRoot.MinusRoot();
-    theWeights.AddObjectOnTopHash(tempRoot);
-    theOps.drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
-  }
-  theOps.indexStartingModifiableTextCommands=theOps.theDrawTextAtVectorOperations.size;
-  theOps.specialOperationsOnBasisChange=&theOps.projectionMultiplicityMergeOnBasisChange;
-  return theNode.errorNoError;
 }

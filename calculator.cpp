@@ -82,8 +82,8 @@ Parser theParser;
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
-  if (counter%10!=0)
-    return;
+//  if (counter%10!=0)
+//    return;
   std::fstream theFile;
   std::string reportFileName=theParser.outputFolderPath;
   reportFileName.append("report.txt");
@@ -93,6 +93,8 @@ void makeReport(IndicatorWindowVariables& input)
   theFile <<"<hr>" << input.StatusString1 << "<hr>";
   for (int i=0; i<input.ProgressReportStrings.size; i++)
     theFile << input.ProgressReportStrings[i] << "<br>";
+  theFile.flush();
+  theFile.close();
 }
 
 int main(int argc, char **argv)
@@ -158,6 +160,8 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  //civilizedInput="drawConeAffine( cone((1,0,0,0)))";
+//  civilizedInput="RunGtwoInBthree";
 //  civilizedInput="latticeImprecise((1, 0.000000001), (1.00000000001, 1.00000000001))";
 /*  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)
     +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(19)

@@ -119,7 +119,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
     for (int j=0; j<currentAffineCone.Normals.size; j++)
       this->TransformToWeylProjective(0, currentAffineCone.Normals.TheObjects[j], tempRoots.TheObjects[j]);
     tempRoots.AddListOnTop(this->PreimageWeylChamberLargerAlgebra);
-    currentProjectiveCone.CreateFromNormals(tempRoots, true, theGlobalVariables);
+    currentProjectiveCone.CreateFromNormals(tempRoots, theGlobalVariables);
     projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.size; i++)
@@ -479,7 +479,7 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGl
 void GeneralizedVermaModuleCharacters::IncrementComputation
   (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  this->UpperLimitChambersForDebugPurposes=-1;
+  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
   this->ReadFromDefaultFile(&theGlobalVariables);
@@ -947,7 +947,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   Cone& currentCone=theNode.owner->TheObjects[theArgumentList[3]].theCone.GetElement();
   int numNonParam=theNode.owner->TheObjects[theArgumentList[4]].intValue;
   root theShift;
-  root theNEqBeforeCheck, theNEq;;
+  root theNEqBeforeCheck, theNEq;
   if(!theLinPoly.IsLinearGetRootConstantTermLastCoordinate(theNEqBeforeCheck, (Rational) 0))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   if(theNEqBeforeCheck.size>currentCone.GetDim())
@@ -972,6 +972,9 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   std::stringstream out;
   PolynomialOutputFormat theFormat;
   out << "Input data: normal: " << theNEq.ElementToString()
+//  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
+  << "; cone: " << currentCone.ElementToString(false, true, false, true, theFormat);
+  std::cout << "Input data: normal: " << theNEq.ElementToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
   << "; cone: " << currentCone.ElementToString(false, true, false, true, theFormat);
   ConeLatticeAndShiftMaxComputation theComputation;
@@ -1065,7 +1068,7 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   { out << "";// << this->theConesLargerDim[i].ElementToString(theFormat);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].ElementToString();
     theDrawingVariables.theBuffer.init();
-    out <<"<br>" << this->theConesLargerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+    out << "<br>" << this->theConesLargerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
     out << "<br>over " << this->theConesLargerDim[i].theShift.ElementToString() << " + " << this->theConesLargerDim[i].theLattice.ElementToString();
     tempP.MakeLinPolyFromRootLastCoordConst(this->LPtoMaximizeLargerDim[i]);
     out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.ElementToString(theFormat) << "<hr><hr>";
@@ -1128,17 +1131,25 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
 void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
     (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { //std::cout << "<hr>starting complex: " << this->ElementToString();
+  PolynomialOutputFormat tempFormat;
   for (; this->numProcessedNonParam<this->numNonParaM; this->numProcessedNonParam++)
   { while(this->theConesLargerDim.size>0)
     { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
+      assert(this->LPtoMaximizeLargerDim.LastObject()->size==currentCLS.GetDimAffine()+1);
       if (!this->LPtoMaximizeLargerDim.LastObject()->IsEqualToZero())
         currentCLS.FindExtremaInDirectionOverLatticeOneNonParam
-          (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim, assumeNewConesHaveSufficientlyManyProjectiveVertices, theGlobalVariables);
+          (*this->LPtoMaximizeLargerDim.LastObject(), this->LPtoMaximizeSmallerDim, this->theConesSmallerDim,
+           theGlobalVariables);
       this->theConesLargerDim.size--;
       this->LPtoMaximizeLargerDim.size--;
       thePauseController.SafePoint();
     }
     //std::cout << "<hr><hr>" << this->ElementToString();
+    std::stringstream out;
+    out << "" << this->ElementToString(tempFormat);
+    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
+    theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+    theGlobalVariables.MakeReport();
     this->LPtoMaximizeLargerDim=this->LPtoMaximizeSmallerDim;
     this->theConesLargerDim=this->theConesSmallerDim;
     this->theConesSmallerDim.size=0;
@@ -1148,11 +1159,19 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
 
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 (root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
- List<ConeLatticeAndShift>& outputAppend, bool assumeNewConesHaveSufficientlyManyProjectiveVertices,
+ List<ConeLatticeAndShift>& outputAppend,
  GlobalVariables& theGlobalVariables)
 { root direction;
+  PolynomialOutputFormat theFormat;
   int theDimProjectivized=this->GetDimProjectivized();
   direction.MakeEi(theDimProjectivized, 0);
+  if (outputAppend.size>=10)
+  { std::stringstream tempStream;
+    tempStream << "<hr><hr><hr><hr>The bad cone:" << this->theProjectivizedCone.ElementToString(theFormat);
+    theGlobalVariables.theIndicatorVariables.StatusString1=tempStream.str();
+    theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+    theGlobalVariables.MakeReport();
+  }
   ConeComplex complexBeforeProjection;
   complexBeforeProjection.init();
   complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone);
@@ -1177,7 +1196,6 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   MatrixLargeRational theProjectionAffine;
   theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
   theProjectionLatticeLevel.NullifyAll();
-  PolynomialOutputFormat theFormat;
   roots theNewNormals;
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
@@ -1190,9 +1208,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     for (int j=0; j<currentCone.Normals.size; j++)
     { root& currentNormal=currentCone.Normals.TheObjects[j];
       if (currentNormal[0].IsEqualToZero())
-      { tempRoot.SetSize(theDimProjectivized-1);
-        for (int k=0; k<currentNormal.size-1; k++)
-          tempRoot[k]=currentNormal[k+1];
+      { tempRoot=currentNormal.GetShiftToTheLeftOnePosition();
         theNewNormals.AddObjectOnTop(tempRoot);
       } else
       { //std::cout << "<hr>";
@@ -1223,6 +1239,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     std::cout << "<br>Entering normal: " << ((foundEnteringNormal) ? enteringNormalAffine.ElementToString() : "not found");
     std::cout << "<br>Exit normal: " << ((foundExitNormal) ? exitNormalAffine.ElementToString() : "not found");
     std::cout << "<br>The shifted lattice representatives: " << exitRepresentatives.ElementToString() << "<br>exitNormalsShiftedAffineProjected";
+    assert(theNewNormals.size>0);
     for (int j=0; j<exitRepresentatives.size; j++)
     { tempCLS.theProjectivizedCone.Normals=theNewNormals;
       exitNormalShiftedAffineProjected=exitNormalAffine.GetShiftToTheLeftOnePosition();
@@ -1238,9 +1255,34 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
       tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
-      tempCLS.theProjectivizedCone.CreateFromNormals(tempCLS.theProjectivizedCone.Normals, assumeNewConesHaveSufficientlyManyProjectiveVertices, theGlobalVariables);
+      assert(tempCLS.theProjectivizedCone.Normals.size>0);
+      roots tempTempRoots=tempCLS.theProjectivizedCone.Normals;
+      bool tempBool=tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
+      if (!tempBool)
+      { std::stringstream tempStream;
+        tempStream << "The bad starting cone:" << this->ElementToString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.ElementToString(theFormat);
+        tempStream <<"<br>\n\n" << this->theProjectivizedCone.Normals.ElementToString(false, false, false);
+        tempStream <<"\n\n<br>\n\n" << complexBeforeProjection.ElementToString(false, false);
+        if (!foundEnteringNormal)
+          tempStream <<"<hr>not found entering normal!!!!!!<hr>";
+        if (!foundExitNormal)
+          tempStream <<"<hr>not found exit normal!!!!!!<hr>";
+        Cone tempCone;
+        tempCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
+        tempStream << "\n\n\n\n<br><br><hr>The bad normals: " << tempTempRoots.ElementToString();
+        tempStream << "\n\n\n\n<br><br><hr>The bad normals after creation: " << tempCLS.theProjectivizedCone.Normals.ElementToString();
+        theGlobalVariables.theIndicatorVariables.StatusString1=tempStream.str();
+        theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+        theGlobalVariables.MakeReport();
+        for (int i=0; i<10000000; i++)
+          if (i%3==0)
+            i=i+2;
+        while(true){}
+      }
+      assert(tempBool);
       //std::cout << tempCLS.theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
       theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
+      assert(tempCLS.GetDimProjectivized()==theDimProjectivized-1);
       outputAppend.AddObjectOnTop(tempCLS);
     }
   }
@@ -1292,14 +1334,14 @@ void ConeComplex::GetNewVerticesAppend
 bool ConeComplex::SplitChamber
 (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
 { Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
-  if (!myDyingCone.flagHasSufficientlyManyVertices)
+/*  if (!myDyingCone.flagHasSufficientlyManyVertices)
   { this->flagChambersHaveTooFewVertices=true;
     return false;
-  }
+  }*/
   Cone& newPlusCone= theGlobalVariables.coneBuffer1NewSplit;
   Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
-  newPlusCone.flagHasSufficientlyManyVertices=true;
-  newMinusCone.flagHasSufficientlyManyVertices=true;
+//  newPlusCone.flagHasSufficientlyManyVertices=true;
+//  newMinusCone.flagHasSufficientlyManyVertices=true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
   newMinusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
   newPlusCone.LowestIndexNotCheckedForChopping=myDyingCone.LowestIndexNotCheckedForChopping;
@@ -1386,18 +1428,9 @@ void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
   }
 }
 
-bool Cone::CreateFromNormals
-  (roots& inputNormals, bool AssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-{ this->Normals.CopyFromBase(inputNormals);
-//o  this->Data=inputData;
-//  roots& candidateVertices=theGlobalVariables.rootsGeneralPurposeBuffer1;
-  this->Vertices.size=0;
-  if (AssumeConeHasSufficientlyManyProjectiveVertices)
-    this->flagHasSufficientlyManyVertices=true;
-  else
-    this->flagHasSufficientlyManyVertices=(this->Normals.GetRankOfSpanOfElements(theGlobalVariables)==this->GetDim());
-  if (this->Normals.size==0)
-    return false;
+void Cone::ComputeVerticesFromNormalsNoFakeVertices
+(GlobalVariables& theGlobalVariables)
+{ this->Vertices.size=0;
   Selection theSel, nonPivotPoints;
   for (int i=0; i<this->Normals.size; i++)
     this->Normals.TheObjects[i].ScaleByPositiveRationalToIntegralMinHeight();
@@ -1429,9 +1462,38 @@ bool Cone::CreateFromNormals
       }
     }
   }
+}
+
+bool Cone::CreateFromNormalS
+  (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+{ this->Normals.CopyFromBase(inputNormals);
+  if (this->Normals.size==0)
+    return false;
+  int numAddedFakeWalls=0;
+  int theDim=this->GetDim();
+  if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
+    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(theGlobalVariables)<theDim; i++)
+    { root tempRoot;
+      tempRoot.MakeEi(theDim, i);
+      if(!this->Normals.LinSpanContainsRoot(tempRoot, theGlobalVariables))
+      { numAddedFakeWalls++;
+        this->Normals.AddObjectOnTop(tempRoot);
+      }
+    }
+  this->ComputeVerticesFromNormalsNoFakeVertices(theGlobalVariables);
+  if (numAddedFakeWalls>0)
+  { this->Normals.SetSize(this->Normals.size-numAddedFakeWalls);
+    root tempRoot;
+    int originalSize=this->Vertices.size;
+    for (int i=0; i<originalSize; i++)
+    { tempRoot=-this->Vertices[i];
+      if (this->IsInCone(tempRoot))
+        this->Vertices.AddObjectOnTop(tempRoot);
+    }
+  }
   //time to eliminate possible fake walls
   roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
-  if (this->flagHasSufficientlyManyVertices && theDim!=1)
+  if (theDim!=1)
     for (int i=0; i<this->Normals.size; i++)
     { root& currentNormal=this->Normals.TheObjects[i];
       verticesOnWall.size=0;
@@ -1453,16 +1515,27 @@ bool Cone::CreateFromNormals
         i--;
       }
     }
+  //eliminate identical normals
+  this->Normals.QuickSortAscending();
+  int currentUniqueElementIndex=0;
+  for (int i=1; i<this->Normals.size; i++)
+    if (this->Normals[currentUniqueElementIndex]!=this->Normals[i])
+    { currentUniqueElementIndex++;
+      this->Normals.SwapTwoIndices(currentUniqueElementIndex, i);
+    }
+  this->Normals.SetSize(currentUniqueElementIndex+1);
   if (this->Normals.size==0 || this->Vertices.size==0)
   { if (this->Normals.size==0)
       this->Vertices.size=0;
     return false;
   }
-  this->Normals.QuickSortAscending();
+//  this->Vertices.QuickSortAscending();
   //this->ComputeDebugString();
   for (int i=0; i<this->Normals.size; i++)
     if (!(this->Vertices.HasAnElementWithNegativeScalarProduct(this->Normals.TheObjects[i])||this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals.TheObjects[i])))
+    { assert(false);
       return false;
+    }
   return true;
 }
 
@@ -1476,7 +1549,7 @@ void ConeComplex::initFromCones
 }
 
 void ConeComplex::initFromCones
-(List<roots>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+(List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { Cone tempCone;
   this->ClearTheObjects();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -1485,7 +1558,7 @@ void ConeComplex::initFromCones
   theGlobalVariables.MakeReport();
 //  for (int i=0; i<10000000; i++){int j=i*i*i;}
   for (int i=0; i<NormalsOfCones.size; i++)
-  { if (tempCone.CreateFromNormals(NormalsOfCones.TheObjects[i], AssumeConesHaveSufficientlyManyProjectiveVertices, theGlobalVariables))
+  { if (tempCone.CreateFromNormalS(NormalsOfCones.TheObjects[i], UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, theGlobalVariables))
       this->AddNonRefinedChamberOnTopNoRepetition(tempCone);
     std::stringstream out;
     out << "Initializing cone " << i+1 << " out of " << NormalsOfCones.size;
@@ -1667,7 +1740,7 @@ int ParserNode::EvaluateCone
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theNormals, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
   Cone& currentCone=theNode.theCone.GetElement();
-  currentCone.CreateFromNormals(theNormals, false, theGlobalVariables);
+  currentCone.CreateFromNormals(theNormals, theGlobalVariables);
   PolynomialOutputFormat theFormat;
   theNode.outputString=currentCone.ElementToString(false, true, theFormat);
   theNode.ExpressionType=theNode.typeCone;
@@ -2356,6 +2429,7 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice
 
 bool Lattice::ReduceVector(Vector<Rational>& theVector)
 { root output;
+  assert(theVector.size==this->GetDim());
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
   //std::cout <<  "the basis: " << basisRoots.ElementToString();
@@ -3036,10 +3110,10 @@ bool Cone::ReadFromFile
     }
   bool result;
   if (theGlobalVariables!=0)
-    result=this->CreateFromNormals(buffer, false, *theGlobalVariables);
+    result=this->CreateFromNormals(buffer, *theGlobalVariables);
   else
   { GlobalVariables tempGlobalVariables;
-    result=this->CreateFromNormals(buffer, false, tempGlobalVariables);
+    result=this->CreateFromNormals(buffer, tempGlobalVariables);
   }
   result= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName()) && result;
 //  assert(tempBool);
@@ -3596,7 +3670,7 @@ void Cone::IntersectAHyperplane
   theProjection.Resize(theDimension-1, theDimension, false);
   roots newNormals=this->Normals;
   theProjection.ActOnRoots(newNormals);
-  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, true, theGlobalVariables);
+  bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, theGlobalVariables);
   assert(!tempBool);
 
 }
@@ -4538,36 +4612,40 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation
 (GlobalVariables& theGlobalVariables)
 { this->theMaxComputation.numNonParaM=2;
-  this->theMaxComputation.theConesLargerDim.SetSize(this->projectivizedChamber.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.MakeActualSizeAtLeastExpandOnTop(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.SetSize(0);
+  this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
   Lattice ZnLattice;
   int theAffineDim=5;
+//  int theProjectivizedDim=theAffineDim+1;
   ZnLattice.MakeZn(theAffineDim);
   this->numNonZeroMults=0;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  for (int i=0; i<this->theMaxComputation.theConesLargerDim.size; i++)
+  ConeLatticeAndShift currentCLS;
+  root theLPtoMax;
+  for (int i=0; i<this->theMultiplicities.size; i++)
     if (! this->theMultiplicities[i].IsEqualToZero())
-    { ConeLatticeAndShift& currentCLS=this->theMaxComputation.theConesLargerDim[i];
-      currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
-      currentCLS.theShift.MakeZero(this->projectivizedChamber.GetDim());
+    { currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
+      currentCLS.theShift.MakeZero(theAffineDim);
       currentCLS.theLattice=ZnLattice;
-      bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(this->theMaxComputation.LPtoMaximizeLargerDim[i], (Rational) 0);
-      this->theMaxComputation.LPtoMaximizeLargerDim[i].size--;
+      bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax, (Rational) 0);
       assert(tempBool);
+      this->theMaxComputation.theConesLargerDim.AddObjectOnTop(currentCLS);
+      this->theMaxComputation.LPtoMaximizeLargerDim.AddObjectOnTop(theLPtoMax);
       this->numNonZeroMults++;
       std::stringstream out;
       out << "Initialized " << i+1 << " out of " << this->theMaxComputation.theConesLargerDim.size << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
       theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
       theGlobalVariables.MakeReport();
-    } else
-      this->theMaxComputation.LPtoMaximizeLargerDim[i].MakeZero(5);
+    }
 }
 
 std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
 { std::stringstream out;
-  int r=colorIndex/65536;
+  int r=(colorIndex/65536)%256;
   int g=(colorIndex/256)%256;
-  int b=colorIndex%65536;
+  int b=colorIndex%256;
   out << "#";
   if (r<16)
     out << 0;
@@ -4834,7 +4912,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "<div style=\"width:" << this->DefaultHtmlWidth << ";height:" << this->DefaultHtmlHeight << ";border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
-  << "onmousewheel=\"mouseHandleWheelCone" <<timesCalled << "(event);\""
+  << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
   << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "show/hide");
   out << "<script type=\"text/javascript\">\n"
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
@@ -4857,25 +4935,39 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-  if (this->theBuffer.ProjectionsEiVectors.size< theDimension)
-  { int oldSize=this->theBuffer.ProjectionsEiVectors.size;
-    this->theBuffer.ProjectionsEiVectors.SetSize(theDimension);
-    for (int i=oldSize; i<theDimension; i++)
-    { this->theBuffer.ProjectionsEiVectors[i].SetSize(2);
-       this->theBuffer.ProjectionsEiVectors[i][0]=0;
-       this->theBuffer.ProjectionsEiVectors[i][1]=0;
+  if (this->theBuffer.ProjectionsEiVectors.size!= theDimension)
+  { this->theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
+    if (theDimension>3)
+      for (int i=0; i<theDimension; i++)
+      { this->theBuffer.ProjectionsEiVectors[i][0]=sin((double)i/(double)theDimension* MathRoutines::Pi());
+        this->theBuffer.ProjectionsEiVectors[i][1]=cos((double)i/(double)theDimension* MathRoutines::Pi());
+      }
+    else
+    { this->theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
+      this->theBuffer.ProjectionsEiVectors[0][0]=1;
+      this->theBuffer.ProjectionsEiVectors[0][1]=0;
+      this->theBuffer.ProjectionsEiVectors[1][0]=0;
+      this->theBuffer.ProjectionsEiVectors[1][1]=-1;
+      this->theBuffer.ProjectionsEiVectors[2][0]=.7;
+      this->theBuffer.ProjectionsEiVectors[2][1]=-0.4;
     }
   }
   out  << "var " << basisName << "=new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
     out << basisName << "[" << i << "]=[" << this->theBuffer.ProjectionsEiVectors[i][0] << "," << this->theBuffer.ProjectionsEiVectors[i][1] << "];\n";
-  out << "var " << shiftX << "=" << this->theBuffer.centerX[0] << ";\n";
-  out << "var " <<  shiftY << "=" << this->theBuffer.centerY[0] << ";\n";
+  out << "var " << shiftX << "=" <<
+  //this->theBuffer.centerX[0]
+  100
+  << ";\n";
+  out << "var " <<  shiftY << "=" <<
+  //this->theBuffer.centerY[0]
+  100
+  << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
   out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
-  out << "resultX+=vector[i]*" << basisName << "[i][0];\n";
-  out << "resultY+=vector[i]*" << basisName << "[i][1];\n}\n";
+  out << "resultX+=vector[i]*" << basisName << "[i][0]*GraphicsUnitCone" << timesCalled << ";\n";
+  out << "resultY+=vector[i]*" << basisName << "[i][1]*GraphicsUnitCone" << timesCalled << ";\n}\n";
   out << "result=[resultX, resultY];\n";
   out << "return result;\n";
   out << "}\n";
@@ -4917,7 +5009,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
   << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"=-1;\n"
   << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "=-2;\n"
-  <<  "for (i=0;i<3;i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled << "(posx, posy, basisCone" << timesCalled << "[i][0], basisCone" << timesCalled << "[i][1]))\n"
+  <<  "for (i=0;i<3;i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
+  << "(posx, posy, basisCone" << timesCalled << "[i][0]*GraphicsUnitCone" << timesCalled << ", basisCone"
+  << timesCalled << "[i][1]*GraphicsUnitCone" << timesCalled << "))\n"
   << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
   << "{ if (selectedBasisIndexCone" << timesCalled << "==-1)\n    return;\n  divPosX=0;\n  divPosY=0;\n"
   << "  thePointer= document.getElementById(\"idCanvasCone"<< timesCalled << "\");\n  while(thePointer)\n  { divPosX += thePointer.offsetLeft;\n"
@@ -4926,8 +5020,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
   << "if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone"<< timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
-  << "{ basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][0]=posx;\n"
-  <<  "basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][1]=-posy;\n  }\n  drawCone" << timesCalled << " ();\n}\n";
+  << "{ basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][0]=posx/GraphicsUnitCone" << timesCalled << ";\n"
+  <<  "basisCone" << timesCalled << "[selectedBasisIndexCone" << timesCalled << "][1]=-posy/GraphicsUnitCone" << timesCalled << ";\n  }\n  "
+  << theDrawFunctionName << " ();\n}\n";
   out << "function mouseHandleWheelCone" << timesCalled << "(theEvent){\n"
   << "theEvent = theEvent ? theEvent : window.event;\n theEvent.preventDefault();\ntheEvent.stopPropagation();\ntheWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
   << "GraphicsUnitCone" << timesCalled << "+=theWheelDelta;\n"
@@ -5042,11 +5137,6 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
 { if (this->GetDim()<=0)
     return "The cone is empty";
   std::stringstream out;
-  if (!this->flagHasSufficientlyManyVertices)
-  { out << "The cone intersected with the hyperplane through (0,...,0,1) doesn't have sufficiently many vertices (including vertices at infinity). <br>In order to simplify the programming, we generate no drawing in this situation.";
-    out << "<br>" << this->ElementToString(false, true, true, true, theFormat);
-    return out.str();
-  }
   bool foundBadVertex=this->DrawMeLastCoordAffine(theDrawingVariables, theFormat);
   if (foundBadVertex)
     out << "<br>The cone does not lie in the upper half-space. ";
@@ -5092,11 +5182,6 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
 { if (this->GetDim()<0)
     return "The Cone is empty";
   std::stringstream out;
-  if (!this->flagHasSufficientlyManyVertices)
-  { out << "The cone doesn't have a vertex at 0.<br> In order to simplify the programming, we generate no drawing in this situation.";
-    out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
-    return out.str();
-  }
   this->DrawMeProjective(theDrawingVariables, theFormat);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ElementToString(false, true, true, false, theFormat);

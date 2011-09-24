@@ -3622,9 +3622,10 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o)
 
 template <class Object>
 void List<Object>::SetSize(int theSize)
-{ this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  if (theSize>=0)
-    this->size=theSize;
+{ if (theSize<0)
+    theSize=0;
+  this->MakeActualSizeAtLeastExpandOnTop(theSize);
+  this->size=theSize;
 }
 
 template <class Object>
@@ -9925,11 +9926,12 @@ public:
 
 class Cone
 {
+  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
 public:
   inline static const std::string GetXMLClassName(){ return "Cone";}
   roots Vertices;
   roots Normals;
-  bool flagHasSufficientlyManyVertices;
+//  bool flagHasSufficientlyManyVertices;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
   //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
@@ -9943,17 +9945,21 @@ public:
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DebugString;
-  int GetDim(){if (this->Normals.size==0) return 0; return this->Normals.TheObjects[0].size;}
+  int GetDim()
+  { if (this->Normals.size==0)
+      return 0;
+    return this->Normals.TheObjects[0].size;
+  }
   void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
   void SliceInDirection
   (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
 ;
-  bool CreateFromNormals
-  (roots& inputNormals, bool AssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  bool CreateFromNormalS
+  (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   bool CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
-  { return this->CreateFromNormals(inputNormals, false, theGlobalVariables);
+  { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
   }
   void GetInternalPoint(root& output)
   { this->Vertices.sum(output, this->GetDim());
@@ -9984,13 +9990,17 @@ public:
   (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
 ;
   void operator=(const Cone& other)
-  { this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
+  { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
     this->Vertices=other.Vertices;
     this->Normals=other.Normals;
     this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
     this->LowestIndexNotCheckedForChopping=other.LowestIndexNotCheckedForChopping;
   }
-  Cone(){this->LowestIndexNotCheckedForSlicingInDirection=0; this->LowestIndexNotCheckedForChopping=0; this->flagHasSufficientlyManyVertices=true;}
+  Cone()
+  { this->LowestIndexNotCheckedForSlicingInDirection=0;
+    this->LowestIndexNotCheckedForChopping=0;
+    //this->flagHasSufficientlyManyVertices=true;
+  }
   void IntersectAHyperplane
   (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
   ;
@@ -10021,7 +10031,7 @@ class ConeLatticeAndShift
   root theShift;
   void FindExtremaInDirectionOverLatticeOneNonParam
 (root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
- List<ConeLatticeAndShift>& outputAppend, bool assumeNewConesHaveSufficientlyManyProjectiveVertices,
+ List<ConeLatticeAndShift>& outputAppend,
  GlobalVariables& theGlobalVariables)
        ;
   void operator=(const ConeLatticeAndShift& other)
@@ -10084,10 +10094,10 @@ public:
   (Cone& input, List<QuasiPolynomial>& inputQPs, List<QuasiPolynomial>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
   void initFromCones
-(List<roots>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+(List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   void initFromCones
-(List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+(List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
   bool SplitChamber
 (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)

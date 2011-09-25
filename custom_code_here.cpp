@@ -4956,12 +4956,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   for (int i=0; i<theDimension; i++)
     out << basisName << "[" << i << "]=[" << this->theBuffer.ProjectionsEiVectors[i][0] << "," << this->theBuffer.ProjectionsEiVectors[i][1] << "];\n";
   out << "var " << shiftX << "=" <<
-  //this->theBuffer.centerX[0]
-  100
+  this->theBuffer.centerX[0]
+  //100
   << ";\n";
   out << "var " <<  shiftY << "=" <<
-  //this->theBuffer.centerY[0]
-  100
+  this->theBuffer.centerY[0]
+  //100
   << ";\n";
   out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
@@ -4996,7 +4996,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "}\n"
   << "function " << theInitFunctionName << "(){\n"
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
-  << theSurfaceName << "  = dojox.gfx.createSurface(node, 400, 400);\n"
+  << theSurfaceName << "  = dojox.gfx.createSurface(node," << this->DefaultHtmlWidth << "," << this->DefaultHtmlHeight << ");\n"
   << theDrawFunctionName << "();\n"
   << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
@@ -5118,7 +5118,7 @@ bool Cone::DrawMeLastCoordAffine
   for (int i=0; i<this->GetDim()-1; i++)
   { tempRoot.MakeEi(this->GetDim()-1, i);
     theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205), 0);
+    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
   }
   for (int k=0; k<this->Normals.size; k++)
   { root& currentNormal=this->Normals[k];
@@ -5127,7 +5127,7 @@ bool Cone::DrawMeLastCoordAffine
         for (int j=i+1; j<this->Vertices.size; j++)
           if(DrawVertex[j] && currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
+            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
   }
   return foundBadVertex;
 }
@@ -5162,10 +5162,10 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
   for (int i=0; i<this->GetDim(); i++)
   { tempRoot.MakeEi(this->GetDim(), i);
     theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205), 0);
+    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
   }
   for (int i=0; i<this->Vertices.size; i++)
-    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, VerticesScaled[i], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180), 0);
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, VerticesScaled[i]*10000, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
   for (int k=0; k<this->Normals.size; k++)
   { root& currentNormal=this->Normals[k];
     for (int i=0; i<this->Vertices.size; i++)
@@ -5173,13 +5173,13 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
         for (int j=i+1; j<this->Vertices.size; j++)
           if(currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0), 0);
+            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
   }
   return true;
 }
 
 std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ if (this->GetDim()<0)
+{ if (this->GetDim()<=0)
     return "The Cone is empty";
   std::stringstream out;
   this->DrawMeProjective(theDrawingVariables, theFormat);
@@ -5441,10 +5441,10 @@ int ParserNode::EvaluateDrawRootSystem
     theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
     theDrawOperators.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
   }
-  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=750;
-  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=750;
-  theDrawOperators.centerX[0]=325;
-  theDrawOperators.centerY[0]=325;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
+  theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
+  theDrawOperators.centerX[0]=300;
+  theDrawOperators.centerY[0]=300;
   for (int i=0; i<RootSystemSorted.size; i++)
   { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
     theDrawOperators.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);

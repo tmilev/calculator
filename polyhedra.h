@@ -9471,7 +9471,7 @@ public:
   int thePenStyle;
   int ColorIndex;
   double precomputedX1, precomputedY1, precomputedX2, precomputedY2;
-  void init(root& input1, root& input2, unsigned long PenStyle, int colorIndex)
+  void init(const root& input1, const root& input2, unsigned long PenStyle, int colorIndex)
   { assert(input1.size==input2.size);
     int theDimension=input1.size;
     this->v1.SetSize(theDimension);
@@ -9504,7 +9504,7 @@ public:
   int fontSize;
   int TextStyle;
   double precomputedX, precomputedY;
-  void init(root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
+  void init(const root& input, const std::string& inputText, int colorIndex, int theFontSize, int theTextStyle)
   { this->theVector.SetSize(input.size);
     for (int i=0; i<input.size; i++)
       this->theVector[i]=input.TheObjects[i].DoubleValue();
@@ -9533,7 +9533,7 @@ public:
   int ColorIndex;
   int thePenStyle;
   double precomputedX, precomputedY;
-  void init(root& input, double theRadius, unsigned long thePenStylE, int colorIndex)
+  void init(const root& input, double theRadius, unsigned long thePenStylE, int colorIndex)
   { this->theVector.SetSize(input.size);
     for (int i=0; i<input.size; i++)
       this->theVector[i]=input.TheObjects[i].DoubleValue();
@@ -9691,9 +9691,9 @@ public:
   void click(double x, double y);
   void drawLineBuffer(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex);
   void drawTextBuffer(double X1, double Y1, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex);
-  void drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
-  void drawCircleAtVectorBuffer(root& input, double radius, unsigned long thePenStyle, int theColor);
+  void drawLineBetweenTwoVectorsBuffer(const root& vector1, const root& vector2, unsigned long thePenStyle, int ColorIndex);
+  void drawTextAtVectorBuffer(const root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle);
+  void drawCircleAtVectorBuffer(const root& input, double radius, unsigned long thePenStyle, int theColor);
   double getAngleFromXandY(double x, double y, double neighborX, double neighborY);
   void ScaleToUnitLength(Vector<double>& theRoot)
   { double theLength=this->theBilinearForm.ScalarProduct(theRoot, theRoot);
@@ -9849,9 +9849,8 @@ public:
   void drawBufferNoIniT(){this->drawBufferNoIniT(this->theBuffer);}
   //if the LatexOutFile is zero then the procedure defaults to the screen
   void drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile);
-  void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile);
-  void drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor){this->drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor,0);}
-  void drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
+  inline void drawLineBetweenTwoVectorsBuffer(const root& r1, const root& r2, int PenStyle, int PenColor){this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);}
+  void drawTextAtVectorBuffer(const root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawCircleAtVectorBuffer
   (root& point, double radius, unsigned long thePenStyle, int theColor)
 ;
@@ -9881,7 +9880,6 @@ public:
   static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static void drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2,  unsigned long thePenStyle,  int r, int g, int b);
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);

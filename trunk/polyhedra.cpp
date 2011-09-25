@@ -454,8 +454,8 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
 }
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
-{ this->DefaultHtmlHeight=400;
-  this->DefaultHtmlWidth=400;
+{ this->DefaultHtmlHeight=750;
+  this->DefaultHtmlWidth=750;
   this->theDrawLineFunction=0;
   this->theDrawTextFunction=0;
   this->theDrawCircleFunction=0;
@@ -506,25 +506,6 @@ void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::st
     else
       out << "\\simeq ";
   output=out.str();
-}
-
-void CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(root& r1, root& r2, unsigned long thePenStyle, int r, int g, int b)
-{ if (thePenStyle!=DrawingVariables::PenStyleInvisible)
-  { //do not add extra spaces in the following string! we use the fact that the string is one piece later in the code with the stringstream::operator>>
-    CGIspecificRoutines::outputStream << thePenStyle << " [" << r << "," << g << "," << b << "] ";
-    for (int i=0; i<r1.size; i++)
-      CGIspecificRoutines::outputStream << (int)(CGIspecificRoutines::scale* r1.TheObjects[i].DoubleValue()) << " " << (int)(CGIspecificRoutines::scale* r2.TheObjects[i].DoubleValue()) << " ";
-    CGIspecificRoutines::numLinesAll++;
-    switch(thePenStyle)
-    { case DrawingVariables::PenStyleNormal: CGIspecificRoutines::numRegularLines++; break;
-      case DrawingVariables::PenStyleLinkToOrigin:
-      case DrawingVariables::PenStyleDashed: CGIspecificRoutines::numDashedLines++; break;
-      case DrawingVariables::PenStyleZeroChamber:
-      case DrawingVariables::PenStyleLinkToOriginZeroChamber:
-      case DrawingVariables::PenStyleDotted: CGIspecificRoutines::numDottedLines++; break;
-      default: CGIspecificRoutines::numDottedLines++; break;
-    }
-  }
 }
 
 void CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
@@ -668,22 +649,6 @@ void DrawingVariables::GetCoordsForDrawing(DrawingVariables& TDV, root& r, doubl
   }
 }
 
-void DrawingVariables::drawLineBetweenTwoVectorsBuffer(root& r1, root& r2, int PenStyle, int PenColor, std::fstream* LatexOutFile)
-{ if (this->flag2DprojectionDraw)
-  { this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);
-    if (LatexOutFile!=0)
-    {//to do: this block of code!
-    }
-  }
-  else
-  { int r, g, b;
-    r=PenColor/65536;
-    g=(PenColor/256)%256;
-    b=PenColor%256;
-    ::CGIspecificRoutines::drawlineInOutputStreamBetweenTwoRoots(r1, r2, PenStyle, r, g, b);
-  }
-}
-
 void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimension, std::fstream* LatexOutFile)
 { for (int i=0; i<theDimension; i++)
   { root tempRoot;
@@ -702,7 +667,7 @@ void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double
     LaTeXProcedures::drawline(X1, Y1, X2, Y2, thePenStyle, ColorIndex, *LatexOutFile, *this);
 }
 
-void DrawingVariables::drawTextAtVectorBuffer(root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
+void DrawingVariables::drawTextAtVectorBuffer(const root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile)
 { this->theBuffer.drawTextAtVectorBuffer(point, inputText, textColor, this->fontSizeNormal, theTextStyle);
 }
 
@@ -729,12 +694,12 @@ void CombinatorialChamberContainer::drawFacetVerticesMethod2(DrawingVariables& T
     if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[i]))
     { tempRoot.Assign(r.TheObjects[i]);
       TDV.ProjectOnToHyperPlaneGraphics(tempRoot, Projection1, directions);
-      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes, outputLatex);
+      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, Projection1, DrawingStyleDashes, TDV.ColorDashes);
       for (int j=i+1; j<r.size; j++)
         if (TheFacet.IsInFacetNoBoundaries(r.TheObjects[j]))
         { tempRoot2.Assign(r.TheObjects[j]);
           TDV.ProjectOnToHyperPlaneGraphics(tempRoot2, Projection2, directions);
-          TDV.drawLineBetweenTwoVectorsBuffer(Projection1, Projection2,  DrawingStyle, TDV.GetColorFromChamberIndex(ChamberIndex, outputLatex), outputLatex);
+          TDV.drawLineBetweenTwoVectorsBuffer(Projection1, Projection2,  DrawingStyle, TDV.GetColorFromChamberIndex(ChamberIndex, outputLatex));
         }
     }
 }
@@ -835,7 +800,7 @@ void CombinatorialChamberContainer::DrawOutputProjective(DrawingVariables& TDV, 
       root zeroRoot; zeroRoot.MakeZero(this->AmbientDimension);
       TDV.ProjectOnToHyperPlaneGraphics(ChamberIndicator, tempRootX, this->theDirections);
       TDV.drawTextAtVectorBuffer(tempRootX, "Indicator", TDV.ColorTextDefault, TDV.TextStyleNormal, 0);
-      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRootX, TDV.PenStyleNormal, TDV.ColorChamberIndicator, 0);
+      TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRootX, TDV.PenStyleNormal, TDV.ColorChamberIndicator);
     }
   }
   TDV.drawCoordSystemBuffer(TDV, this->AmbientDimension, outputLatex);
@@ -2715,7 +2680,7 @@ void CombinatorialChamber::drawOutputAffine(DrawingVariables& TDV, Combinatorial
           penStyle= TDV.PenStyleInvisible;
         if (owner.AffineWallsOfWeylChambers.IndexOfObjectHash(*AreInAWall)!=-1)
           color = TDV.ColorWeylChamberWalls;
-        TDV.drawLineBetweenTwoVectorsBuffer(this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j], penStyle, color, LaTeXoutput);
+        TDV.drawLineBetweenTwoVectorsBuffer(this->affineVertices.TheObjects[i], this->affineVertices.TheObjects[j], penStyle, color);
         root tempRoot; this->ComputeAffineInternalPoint(tempRoot, owner.AmbientDimension-1);
         std::stringstream out;
         out << this->DisplayNumber;
@@ -21677,7 +21642,7 @@ void CombinatorialChamberContainer::ReadFromFile(std::fstream& input, GlobalVari
   this->flagReachSafePointASAP=false;
 }
 
-void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector2, unsigned long thePenStyle, int ColorIndex)
+void DrawOperations::drawLineBetweenTwoVectorsBuffer(const root& vector1, const root& vector2, unsigned long thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
   this->theDrawLineBetweenTwoRootsOperations.AddObjectOnTopCreateNew();
@@ -21685,14 +21650,14 @@ void DrawOperations::drawLineBetweenTwoVectorsBuffer(root& vector1, root& vector
 }
 
 void DrawOperations::drawCircleAtVectorBuffer
-(root& input, double radius, unsigned long thePenStyle, int theColor)
+(const root& input, double radius, unsigned long thePenStyle, int theColor)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawCircleAtVector);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawCircleAtVectorOperations.size);
   this->theDrawCircleAtVectorOperations.AddObjectOnTopCreateNew();
   this->theDrawCircleAtVectorOperations.LastObject()->init(input, radius, thePenStyle, theColor);
 }
 
-void DrawOperations::drawTextAtVectorBuffer(root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
+void DrawOperations::drawTextAtVectorBuffer(const root& input, const std::string& inputText, int ColorIndex, int theFontSize, int theTextStyle)
 { this->TypeNthDrawOperation.AddObjectOnTop(this->typeDrawTextAtVector);
   this->IndexNthDrawOperation.AddObjectOnTop(this->theDrawTextAtVectorOperations.size);
   this->theDrawTextAtVectorOperations.AddObjectOnTopCreateNew();

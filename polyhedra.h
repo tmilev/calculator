@@ -9610,6 +9610,7 @@ public:
     this->SelectedPlane=other.SelectedPlane;
     this->DebugString=other.DebugString;
   }
+  void MakeMeAStandardBasis(int theDim);
   void operator+=(const DrawOperations& other);
   void initDimensions
   (Matrix<double>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
@@ -9925,8 +9926,10 @@ public:
 class Cone
 {
   void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
+  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables);
 public:
   inline static const std::string GetXMLClassName(){ return "Cone";}
+  bool flagIsTheZeroCone;
   roots Vertices;
   roots Normals;
 //  bool flagHasSufficientlyManyVertices;
@@ -9955,12 +9958,17 @@ public:
   bool CreateFromNormalS
   (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
   ;
+  //returns false if the cone is non-proper, i.e. when either
+  //1) the cone is empty or is of smaller dimension than it should be
+  //2) the resulting cone is the entire space
   bool CreateFromNormals
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
   { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
   }
   void GetInternalPoint(root& output)
-  { this->Vertices.sum(output, this->GetDim());
+  { if (this->Vertices.size<=0)
+      return;
+    this->Vertices.sum(output, this->Vertices[0].size);
   }
   root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
   int HashFunction()const
@@ -9970,7 +9978,9 @@ public:
   (root& SlicingDirection, root& normal1, root& normal2, root& output)
   ;
   bool IsInCone(const root& point)const
-  { Rational tempRat;
+  { if (this->flagIsTheZeroCone)
+      return point.IsEqualToZero();
+    Rational tempRat;
     for (int i=0; i<this->Normals.size; i++)
     { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
       if (tempRat.IsNegative())
@@ -9989,6 +9999,7 @@ public:
 ;
   void operator=(const Cone& other)
   { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
+    this->flagIsTheZeroCone=other.flagIsTheZeroCone;
     this->Vertices=other.Vertices;
     this->Normals=other.Normals;
     this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
@@ -9997,6 +10008,7 @@ public:
   Cone()
   { this->LowestIndexNotCheckedForSlicingInDirection=0;
     this->LowestIndexNotCheckedForChopping=0;
+    this->flagIsTheZeroCone=true;
     //this->flagHasSufficientlyManyVertices=true;
   }
   void IntersectAHyperplane
@@ -10011,12 +10023,12 @@ public:
    )
   ;
   bool SolveLQuasiPolyEqualsZeroIAmProjective
-  ( QuasiPolynomial& inputLQP,
+  (QuasiPolynomial& inputLQP,
    List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables
    )
   ;
   bool operator==(const Cone& other)const
-  { return this->Normals==other.Normals;
+  { return this->flagIsTheZeroCone==other.flagIsTheZeroCone && this->Normals==other.Normals;
   }
 };
 

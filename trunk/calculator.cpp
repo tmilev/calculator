@@ -160,7 +160,11 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  //civilizedInput="drawConeAffine( cone((1,0,0,0)))";
+  civilizedInput="cone ((2, -2, -2, 2, -21), (0, 1, 2, -1, -12), (-1, 2, -2, 2, 0), (0, -2, 1, 0, 2), (-1, 2, 0, -2, 24) )";
+ // civilizedInput="drawConeProjective( cone((1,0),(-1,0), (1, -1), (1,1)) )";
+//  civilizedInput="drawConeProjective( cone((1,0),(-1,0), (1, -1)) )";
+ // civilizedInput="cone((1,0),(-1,0))";
+//  civilizedInput="drawConeAffine( cone((1,0,0,0)))";
 //  civilizedInput="RunGtwoInBthree";
 //  civilizedInput="latticeImprecise((1, 0.000000001), (1.00000000001, 1.00000000001))";
 /*  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)

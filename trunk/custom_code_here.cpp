@@ -1006,6 +1006,10 @@ int ParserNode::EvaluateSliceCone
     return theNode.errorProgramming;
   if (theCone.GetDim()!=theDirection.size)
     return theNode.errorDimensionProblem;
+  if (theCone.flagIsTheZeroCone || theCone.Normals.size==0)
+  { theNode.outputString="Error: the cone to be sliced is either empty or is the entire space.";
+    return theNode.errorImplicitRequirementNotSatisfied;
+  }
   ConeComplex theComplex;
   PolynomialOutputFormat tempFormat;
   theCone.SliceInDirection(theDirection, theComplex, theGlobalVariables);
@@ -1258,15 +1262,15 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       assert(tempCLS.theProjectivizedCone.Normals.size>0);
       roots tempTempRoots=tempCLS.theProjectivizedCone.Normals;
       bool tempBool=tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
-      if (!tempBool)
+      /*if (!tempBool)
       { std::stringstream tempStream;
-        tempStream << "The bad starting cone:" << this->ElementToString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.ElementToString(theFormat);
-        tempStream <<"<br>\n\n" << this->theProjectivizedCone.Normals.ElementToString(false, false, false);
-        tempStream <<"\n\n<br>\n\n" << complexBeforeProjection.ElementToString(false, false);
+        tempStream << "The bad starting cone (cone number " << i+1 << "):" << this->ElementToString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.ElementToString(theFormat);
+        tempStream << "<br>\n\n" << this->theProjectivizedCone.Normals.ElementToString(false, false, false);
+        tempStream << "\n\n<br>\n\n" << complexBeforeProjection.ElementToString(false, true);
         if (!foundEnteringNormal)
-          tempStream <<"<hr>not found entering normal!!!!!!<hr>";
+          tempStream << "<hr>not found entering normal!!!!!!<hr>";
         if (!foundExitNormal)
-          tempStream <<"<hr>not found exit normal!!!!!!<hr>";
+          tempStream << "<hr>not found exit normal!!!!!!<hr>";
         Cone tempCone;
         tempCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
         tempStream << "\n\n\n\n<br><br><hr>The bad normals: " << tempTempRoots.ElementToString();
@@ -1278,12 +1282,14 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
           if (i%3==0)
             i=i+2;
         while(true){}
-      }
-      assert(tempBool);
+      }*/
+      //assert(tempBool);
       //std::cout << tempCLS.theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
-      theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
-      assert(tempCLS.GetDimProjectivized()==theDimProjectivized-1);
-      outputAppend.AddObjectOnTop(tempCLS);
+      if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
+      { theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
+        outputAppend.AddObjectOnTop(tempCLS);
+        assert(tempCLS.GetDimProjectivized()==theDimProjectivized-1);
+      }
     }
   }
 //  std::cout << "<hr><hr><hr>";
@@ -1346,6 +1352,8 @@ bool ConeComplex::SplitChamber
   newMinusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
   newPlusCone.LowestIndexNotCheckedForChopping=myDyingCone.LowestIndexNotCheckedForChopping;
   newMinusCone.LowestIndexNotCheckedForChopping=myDyingCone.LowestIndexNotCheckedForChopping;
+  newPlusCone.flagIsTheZeroCone=false;
+  newMinusCone.flagIsTheZeroCone=false;
   if (weAreChopping)
   { newPlusCone.LowestIndexNotCheckedForChopping++;
     newMinusCone.LowestIndexNotCheckedForChopping++;
@@ -1464,11 +1472,93 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
   }
 }
 
+bool Cone::EliminateFakeNormalsUsingVertices
+(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables)
+{ if(this->Vertices.size==0)
+  { this->flagIsTheZeroCone=true;
+    this->Normals.SetSize(0);
+    return false;
+  }
+  roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
+  int DesiredRank=theDiM;
+  if (numAddedFakeWalls!=0)
+  { //we modify the normals so that they lie in the subspace spanned by the vertices
+    MatrixLargeRational tempMat, matNormals, gramMatrixInverted;
+    tempMat.AssignRootsToRowsOfMatrix(this->Vertices);
+    roots NormalsToSubspace;
+    tempMat.FindZeroEigenSpace(NormalsToSubspace, theGlobalVariables);
+    matNormals.AssignRootsToRowsOfMatrix(NormalsToSubspace);
+    gramMatrixInverted=matNormals;
+    gramMatrixInverted.Transpose();
+    gramMatrixInverted.MultiplyOnTheLeft(matNormals);
+    gramMatrixInverted.Invert(theGlobalVariables);
+    root tempRoot;
+    for (int i=0; i<this->Normals.size; i++)
+    { matNormals.ActOnAroot(this->Normals[i], tempRoot);
+      gramMatrixInverted.ActOnAroot(tempRoot);
+      for (int j=0; j<tempRoot.size; j++)
+        this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
+      this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
+      if (this->Normals[i].IsEqualToZero())
+      { this->Normals.PopIndexSwapWithLast(i);
+        i--;
+      }
+    }
+    //all normals should now lie in the subspace spanned by the vertices
+    DesiredRank=theDiM-NormalsToSubspace.size;
+    //add the walls needed to go down to the subspace
+    this->Normals.MakeActualSizeAtLeastExpandOnTop(this->Normals.size+2*NormalsToSubspace.size);
+    for (int i=0; i<NormalsToSubspace.size; i++)
+    { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
+      this->Normals.AddObjectOnTop(NormalsToSubspace[i]);
+      this->Normals.AddObjectOnTop(-NormalsToSubspace[i]);
+    }
+  }
+  if (DesiredRank>1)
+    for (int i=0; i<this->Normals.size; i++)
+    { root& currentNormal=this->Normals.TheObjects[i];
+      verticesOnWall.size=0;
+      bool wallIsGood=false;
+      for (int j=0; j<this->Vertices.size; j++)
+        if (root::RootScalarEuclideanRoot(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
+        { verticesOnWall.AddObjectOnTop(this->Vertices.TheObjects[j]);
+          int theRank=verticesOnWall.GetRankOfSpanOfElements(theGlobalVariables);
+          if (theRank< verticesOnWall.size)
+            verticesOnWall.PopLastObject();
+          else
+            if (theRank==DesiredRank-1)
+            { wallIsGood=true;
+              break;
+            }
+        }
+      if (!wallIsGood)
+      { this->Normals.PopIndexSwapWithLast(i);
+        i--;
+      }
+    }
+  //eliminate identical normals
+  this->Normals.QuickSortAscending();
+  int currentUniqueElementIndex=0;
+  for (int i=1; i<this->Normals.size; i++)
+    if (this->Normals[currentUniqueElementIndex]!=this->Normals[i])
+    { currentUniqueElementIndex++;
+      this->Normals.SwapTwoIndices(currentUniqueElementIndex, i);
+    }
+  if (this->Normals.size>0)
+    this->Normals.SetSize(currentUniqueElementIndex+1);
+  for (int i=0; i<this->Vertices.size; i++)
+    if (this->Normals.HasAnElementWithNegativeScalarProduct(this->Vertices[i]))
+      assert(false);
+  for (int i=0; i<this->Normals.size; i++)
+    if (!this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals.TheObjects[i]))
+      return false;
+  return numAddedFakeWalls==0;
+}
+
 bool Cone::CreateFromNormalS
   (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { this->Normals.CopyFromBase(inputNormals);
-  if (this->Normals.size==0)
-    return false;
+  this->flagIsTheZeroCone=false;
   int numAddedFakeWalls=0;
   int theDim=this->GetDim();
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
@@ -1491,52 +1581,7 @@ bool Cone::CreateFromNormalS
         this->Vertices.AddObjectOnTop(tempRoot);
     }
   }
-  //time to eliminate possible fake walls
-  roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
-  if (theDim!=1)
-    for (int i=0; i<this->Normals.size; i++)
-    { root& currentNormal=this->Normals.TheObjects[i];
-      verticesOnWall.size=0;
-      bool wallIsGood=false;
-      for (int j=0; j<this->Vertices.size; j++)
-        if (root::RootScalarEuclideanRoot(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
-        { verticesOnWall.AddObjectOnTop(this->Vertices.TheObjects[j]);
-          int theRank=verticesOnWall.GetRankOfSpanOfElements(theGlobalVariables);
-          if (theRank< verticesOnWall.size)
-            verticesOnWall.PopLastObject();
-          else
-            if (theRank==theDim-1)
-            { wallIsGood=true;
-              break;
-            }
-        }
-      if (!wallIsGood)
-      { this->Normals.PopIndexSwapWithLast(i);
-        i--;
-      }
-    }
-  //eliminate identical normals
-  this->Normals.QuickSortAscending();
-  int currentUniqueElementIndex=0;
-  for (int i=1; i<this->Normals.size; i++)
-    if (this->Normals[currentUniqueElementIndex]!=this->Normals[i])
-    { currentUniqueElementIndex++;
-      this->Normals.SwapTwoIndices(currentUniqueElementIndex, i);
-    }
-  this->Normals.SetSize(currentUniqueElementIndex+1);
-  if (this->Normals.size==0 || this->Vertices.size==0)
-  { if (this->Normals.size==0)
-      this->Vertices.size=0;
-    return false;
-  }
-//  this->Vertices.QuickSortAscending();
-  //this->ComputeDebugString();
-  for (int i=0; i<this->Normals.size; i++)
-    if (!(this->Vertices.HasAnElementWithNegativeScalarProduct(this->Normals.TheObjects[i])||this->Vertices.HasAnElementWithPositiveScalarProduct(this->Normals.TheObjects[i])))
-    { assert(false);
-      return false;
-    }
-  return true;
+  return this->EliminateFakeNormalsUsingVertices(theDim, numAddedFakeWalls, theGlobalVariables);
 }
 
 void ConeComplex::initFromCones
@@ -1583,6 +1628,10 @@ void ConeComplex::initFromCones
 
 std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat)
 { std::stringstream out;
+  if (this->flagIsTheZeroCone)
+    out << "The cone is the zero cone.";
+  else if(this->Normals.size==0)
+    out << "The cone is the entire space";
   if (!PrepareMathReport)
   { out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForChopping << "\n";
     out << "<br>\nIndex next direction to slice in: " << this->LowestIndexNotCheckedForSlicingInDirection;
@@ -1625,7 +1674,7 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   }
   for (int i=0; i<this->size; i++)
   { if (useHtml)
-      out << "<br>";
+      out << "<hr>";
     out << "\nChamber " << i+1 << ":\n";
     if (useHtml)
       out << "<br>";
@@ -4883,6 +4932,28 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml,
   output= out.str();
 }
 
+void DrawOperations::MakeMeAStandardBasis(int theDim)
+{ if (theDim<1)
+    return;
+  if (theDim>3)
+  { this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
+    for (int i=0; i<theDim; i++)
+    { this->ProjectionsEiVectors[i][0]=sin((double)i/(double)theDim* MathRoutines::Pi());
+      this->ProjectionsEiVectors[i][1]=cos((double)i/(double)theDim* MathRoutines::Pi());
+    }
+  }
+  else
+  { this->ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
+    this->ProjectionsEiVectors[0][0]=1;
+    this->ProjectionsEiVectors[0][1]=0;
+    this->ProjectionsEiVectors[1][0]=0;
+    this->ProjectionsEiVectors[1][1]=-1;
+    this->ProjectionsEiVectors[2][0]=.7;
+    this->ProjectionsEiVectors[2][1]=-0.4;
+    this->ProjectionsEiVectors.SetSize(theDim);
+  }
+}
+
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
 { std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
   std::stringstream tempStream7, tempStream8, tempStream9, tempStream10;
@@ -4936,22 +5007,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << "];\n";
   }
   if (this->theBuffer.ProjectionsEiVectors.size!= theDimension)
-  { this->theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(theDimension, 2);
-    if (theDimension>3)
-      for (int i=0; i<theDimension; i++)
-      { this->theBuffer.ProjectionsEiVectors[i][0]=sin((double)i/(double)theDimension* MathRoutines::Pi());
-        this->theBuffer.ProjectionsEiVectors[i][1]=cos((double)i/(double)theDimension* MathRoutines::Pi());
-      }
-    else
-    { this->theBuffer.ProjectionsEiVectors.SetSizeMakeMatrix(3, 2);
-      this->theBuffer.ProjectionsEiVectors[0][0]=1;
-      this->theBuffer.ProjectionsEiVectors[0][1]=0;
-      this->theBuffer.ProjectionsEiVectors[1][0]=0;
-      this->theBuffer.ProjectionsEiVectors[1][1]=-1;
-      this->theBuffer.ProjectionsEiVectors[2][0]=.7;
-      this->theBuffer.ProjectionsEiVectors[2][1]=-0.4;
-    }
-  }
+    this->theBuffer.MakeMeAStandardBasis(theDimension);
   out  << "var " << basisName << "=new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
     out << basisName << "[" << i << "]=[" << this->theBuffer.ProjectionsEiVectors[i][0] << "," << this->theBuffer.ProjectionsEiVectors[i][1] << "];\n";
@@ -5057,11 +5113,11 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine
 
 std::string ConeComplex::DrawMeToHtmlProjective
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ bool isBad=false;
-  isBad=this->DrawMeProjective(theDrawingVariables, theFormat);
+{ bool isGood=true;
+  isGood=this->DrawMeProjective(theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
-  if (isBad)
+  if (!isGood)
     out << "<hr>" << "found cones which I can't draw<hr>";
   out << this->ElementToString(false, true);
 /*  for (int i=0; i<this->size; i++)
@@ -5087,7 +5143,7 @@ bool ConeComplex::DrawMeProjective
 { bool result=true;
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
-    result=this->TheObjects[i].DrawMeProjective(theDrawingVariables, theFormat) && result;
+    result=(this->TheObjects[i].DrawMeProjective(theDrawingVariables, theFormat) && result);
     //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -5097,6 +5153,7 @@ bool Cone::DrawMeLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
+  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
   roots VerticesScaled=this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
@@ -5134,7 +5191,11 @@ bool Cone::DrawMeLastCoordAffine
 
 std::string Cone::DrawMeToHtmlLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ if (this->GetDim()<=0)
+{ if (this->flagIsTheZeroCone)
+    return "The cone is empty.";
+  if (this->Normals.size<1)
+    return "The cone is the entire space";
+  if (this->Vertices.size<1)
     return "The cone is empty";
   std::stringstream out;
   bool foundBadVertex=this->DrawMeLastCoordAffine(theDrawingVariables, theFormat);
@@ -5151,6 +5212,7 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
   ZeroRoot.MakeZero(this->GetDim());
 //  theDrawingVariables.theBuffer.init();
   roots VerticesScaled=this->Vertices;
+  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
   for (int i=0; i<VerticesScaled.size; i++)
   { Rational sumAbsValuesCoords=0;
     for (int j=0; j<this->GetDim(); j++)
@@ -5179,9 +5241,15 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
 }
 
 std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ if (this->GetDim()<=0)
-    return "The Cone is empty";
+{ if (this->flagIsTheZeroCone)
+    return "The cone is the zero cone (i.e. contains only the origin).";
+  if (this->Normals.size<=0)
+    return "The cone is the entire space.";
   std::stringstream out;
+  if (this->Vertices.size<1)
+  { out << "There has been a programming error. The cone is empty.<br>" << this->ElementToString(false, true, true, false, theFormat);
+    return out.str();
+  }
   this->DrawMeProjective(theDrawingVariables, theFormat);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ElementToString(false, true, true, false, theFormat);

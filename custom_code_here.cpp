@@ -1147,10 +1147,17 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
       this->theConesLargerDim.size--;
       this->LPtoMaximizeLargerDim.size--;
       thePauseController.SafePoint();
+      std::stringstream tempStream1, tempStream2, tempStream3;
+      tempStream1 << "Processing " << this->numProcessedNonParam+1 << " out of " << this->numNonParaM;
+      tempStream2 << "Processing cone " << this->theConesLargerDim.size;
+      tempStream3 << "Cones smaller dim total: " << this->theConesSmallerDim.size;
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream1.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream2.str();
+      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=tempStream3.str();
+      theGlobalVariables.MakeReport();
     }
     //std::cout << "<hr><hr>" << this->ElementToString();
     std::stringstream out;
-    out << "" << this->ElementToString(tempFormat);
     theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
     theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
     theGlobalVariables.MakeReport();
@@ -1161,6 +1168,47 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
   }
 }
 
+void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, MatrixLargeRational& theProjectionLatticeLevel,
+ GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational matVertices;
+  matVertices.AssignRootsToRowsOfMatrix(this->theProjectivizedCone.Vertices);
+  roots theNormals;
+  matVertices.FindZeroEigenSpace(theNormals, theGlobalVariables);
+  root preferredNormal;
+  for (int i=0; i<theNormals.size; i++)
+    if (!theNormals[i][0].IsEqualToZero())
+    { preferredNormal=theNormals[i];
+      break;
+    }
+  Rational firstCoord=preferredNormal[0];
+  preferredNormal.ShiftToTheLeftOnePos();
+  preferredNormal/=-firstCoord;
+  ConeLatticeAndShift tempCLS;
+  roots newNormals=this->theProjectivizedCone.Normals;
+  Rational firstCoordNewNormal, tempRat;
+  for (int i=0; i<newNormals.size; i++)
+  { firstCoordNewNormal=newNormals[i][0];
+    newNormals[i].ShiftToTheLeftOnePos();
+    newNormals[i]+=preferredNormal*firstCoordNewNormal;
+  }
+  //bool tempBool=
+  tempCLS.theProjectivizedCone.CreateFromNormals(newNormals, theGlobalVariables);
+  tempCLS.theShift=this->theShift;
+  tempCLS.theShift.ShiftToTheLeftOnePos();
+  this->theLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
+  root tempRoot;
+  tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
+  //root tempRoot2;
+  //tempRoot2=preferredNormal;
+  tempRoot+=(preferredNormal*theLPToMaximizeAffine[0]);
+  if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
+  { outputAppend.AddObjectOnTop(tempCLS);
+    outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
+  }
+}
+
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 (root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
  List<ConeLatticeAndShift>& outputAppend,
@@ -1168,7 +1216,19 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 { root direction;
   PolynomialOutputFormat theFormat;
   int theDimProjectivized=this->GetDimProjectivized();
+  MatrixLargeRational theProjectionLatticeLevel;
+  MatrixLargeRational theProjectionAffine;
+  theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
+  theProjectionLatticeLevel.NullifyAll();
+  for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
+    theProjectionLatticeLevel.elements[i][i+1]=1;
   direction.MakeEi(theDimProjectivized, 0);
+  if (!this->theProjectivizedCone.Vertices.LinSpanContainsRoot(direction, theGlobalVariables))
+  { this->FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
+      (theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel,
+       theGlobalVariables);
+    return;
+  }
   if (outputAppend.size>=10)
   { std::stringstream tempStream;
     tempStream << "<hr><hr><hr><hr>The bad cone:" << this->theProjectivizedCone.ElementToString(theFormat);
@@ -1196,13 +1256,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   ConeLatticeAndShift tempCLS;
   directionSmallerDim.MakeEi(theDimProjectivized-1, 0);
 //  std::cout << "<hr>";
-  MatrixLargeRational theProjectionLatticeLevel;
-  MatrixLargeRational theProjectionAffine;
-  theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
-  theProjectionLatticeLevel.NullifyAll();
   roots theNewNormals;
-  for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
-    theProjectionLatticeLevel.elements[i][i+1]=1;
   for (int i=0; i<complexBeforeProjection.size; i++)
   { Cone& currentCone=complexBeforeProjection.TheObjects[i];
     int numNonPerpWalls=0;
@@ -1261,7 +1315,8 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       outputAppendLPToMaximizeAffine.AddObjectOnTop(tempRoot);
       assert(tempCLS.theProjectivizedCone.Normals.size>0);
       roots tempTempRoots=tempCLS.theProjectivizedCone.Normals;
-      bool tempBool=tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
+      //bool tempBool=
+      tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
       /*if (!tempBool)
       { std::stringstream tempStream;
         tempStream << "The bad starting cone (cone number " << i+1 << "):" << this->ElementToString(theFormat) << "<hr><hr><hr><hr>The bad cone:" << tempCLS.ElementToString(theFormat);
@@ -1288,6 +1343,12 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
       { theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
         outputAppend.AddObjectOnTop(tempCLS);
+        if (tempCLS.GetDimProjectivized()==0)
+        { theGlobalVariables.theIndicatorVariables.StatusString1=tempTempRoots.ElementToString();
+          theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+          theGlobalVariables.MakeReport();
+          while(true) {}
+        }
         assert(tempCLS.GetDimProjectivized()==theDimProjectivized-1);
       }
     }
@@ -1480,7 +1541,6 @@ bool Cone::EliminateFakeNormalsUsingVertices
     return false;
   }
   roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
-  int DesiredRank=theDiM;
   if (numAddedFakeWalls!=0)
   { //we modify the normals so that they lie in the subspace spanned by the vertices
     MatrixLargeRational tempMat, matNormals, gramMatrixInverted;
@@ -1505,7 +1565,6 @@ bool Cone::EliminateFakeNormalsUsingVertices
       }
     }
     //all normals should now lie in the subspace spanned by the vertices
-    DesiredRank=theDiM-NormalsToSubspace.size;
     //add the walls needed to go down to the subspace
     this->Normals.MakeActualSizeAtLeastExpandOnTop(this->Normals.size+2*NormalsToSubspace.size);
     for (int i=0; i<NormalsToSubspace.size; i++)
@@ -1514,6 +1573,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
       this->Normals.AddObjectOnTop(-NormalsToSubspace[i]);
     }
   }
+  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(theGlobalVariables);
   if (DesiredRank>1)
     for (int i=0; i<this->Normals.size; i++)
     { root& currentNormal=this->Normals.TheObjects[i];

@@ -10052,6 +10052,11 @@ class ConeLatticeAndShift
   void WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;
+  void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, MatrixLargeRational& theProjectionLatticeLevel,
+ GlobalVariables& theGlobalVariables)
+ ;
   bool ReadFromFile
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
@@ -11775,7 +11780,4 @@ class CompleX
   CompleX(int other){this->operator=(other);}
   CompleX(double other){this->operator=(other);}
 };
-
-
 #endif
-

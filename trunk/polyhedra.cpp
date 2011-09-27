@@ -23398,12 +23398,14 @@ void Parser::ParseAndCompute(const std::string& input, std::string& output, Glob
 
 void Parser::Evaluate(GlobalVariables& theGlobalVariables)
 { if (this->TokenStack.size== this->numEmptyTokensAtBeginning+1)
-    if (*this->TokenStack.LastObject()==this->tokenExpression)
+  { if (*this->TokenStack.LastObject()==this->tokenExpression)
     { this->TheObjects[this->NodeIndexStack.TheObjects[this->numEmptyTokensAtBeginning]].Evaluate(theGlobalVariables);
 //      this->WeylAlgebraValue.Assign(this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].WeylAlgebraElement);
 //      this->LieAlgebraValue= this->TheObjects[this->ValueStack.TheObjects[this->numEmptyTokensAtBeginning]].LieAlgebraElement;
       this->theValue=this->TheObjects[this->NodeIndexStack.TheObjects[this->numEmptyTokensAtBeginning]];
-    }
+    } else
+      this->theValue.SetError(ParserNode::errorBadSyntax);
+  }
   if (this->TokenStack.size>this->numEmptyTokensAtBeginning+1)
     this->theValue.SetError(ParserNode::errorBadSyntax);
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);

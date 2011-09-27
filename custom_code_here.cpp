@@ -5592,7 +5592,9 @@ int ParserNode::EvaluateDrawRootSystem
   std::stringstream tempStream;
   tempStream << theWeyl.WeylLetter << theWeyl.GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theWeyl.GetDim()) << ")";
   theDrawOperators.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
-//  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
+  theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
+  theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
+  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
   theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theDrawOperators;
@@ -6479,15 +6481,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystem",
    "(Integer, Integer)",
-   "<b>Experimental.</b> Draw the root system.",
-   "drawRootSystem",
+   "<b>Experimental.</b> Draw the root system. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank. The example draws E6.",
+   "drawRootSystem(4,6)",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluateDrawRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystemDefault",
    "(Integer, Integer, Integer)",
-   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. Third argument= number of frames.",
    "animateRootSystemDefault(50)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSystem

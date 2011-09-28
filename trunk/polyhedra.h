@@ -341,7 +341,7 @@ public:
     return result;
   }
   static inline double Pi(){return 3.141592653589793238462643383279;}
-// the MS compiler refuses to compile the following, hence the above line.
+// the MS compiler refuses to compile the following (WTF?), hence the above line.
 //  static const double Pi=(double)3.141592653589793238462643383279;
   static int KToTheNth(int k, int n);
   inline static int parity(int n){if (n%2==0) return 1; else return -1; }
@@ -803,10 +803,6 @@ private:
   void ShiftUpExpandOnTop(int StartingIndex);
   void PopLastObject();
 protected:
-  friend class partFractions;
-  friend class QuasiMonomial;
-  friend class CombinatorialChamber;
-  friend class QuasiPolynomialOld;
   void ClearHashes();
   List<int>* TheHashedArrays;
 public:
@@ -10170,10 +10166,13 @@ class ConeLatticeAndShiftMaxComputation
   void FindExtremaParametricStep1
     (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
        ;
-  void FindExtremaParametricStep2
+  void FindExtremaParametricStep2TrimChamberForMultOne
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 ;
   void FindExtremaParametricStep3
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+;
+  void FindExtremaParametricStep4
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 ;
   void WriteToFile
@@ -11720,7 +11719,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
 template<class Base>
 class CompleX
 {
-  static bool EqualityIsApproximate;
+  static bool flagEqualityIsApproximate;
   static double EqualityPrecision;
   public:
   Base Im;
@@ -11766,7 +11765,7 @@ class CompleX
     this->Im/=numerator;
   }
   bool IsEqualToZero()const
-  { if(!CompleX<Base>::EqualityIsApproximate)
+  { if(!CompleX<Base>::flagEqualityIsApproximate)
       return this->Im==0 && this->Re==0;
     else
       return

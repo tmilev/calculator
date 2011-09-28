@@ -479,10 +479,11 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGl
 void GeneralizedVermaModuleCharacters::IncrementComputation
   (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  this->UpperLimitChambersForDebugPurposes=5;
+//  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
-  this->ReadFromDefaultFile(&theGlobalVariables);
+  if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
+    this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
       this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
@@ -508,10 +509,13 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       out << "num non-zero mults: " << this->numNonZeroMults;
       break;
     case 5:
-      this->theMaxComputation.FindExtremaParametricStep2(this->thePauseControlleR, theGlobalVariables);
+//      this->theMaxComputation.FindExtremaParametricStep2TrimChamberForMultOne(this->thePauseControlleR, theGlobalVariables);
       break;
     case 6:
       this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
+      break;
+    case 7:
+      this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR, theGlobalVariables);
       break;
     default:
       break;
@@ -523,7 +527,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
   }
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.MakeReport();
-  if (this->UpperLimitChambersForDebugPurposes<0)
+  if (this->UpperLimitChambersForDebugPurposes<=0)
     if (this->computationPhase < 30)
       this->WriteToDefaultFile(&theGlobalVariables);
   this->thePauseControlleR.ExitComputation();
@@ -1089,11 +1093,17 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   return out.str();
 }
 
-void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2
+void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 { this->theFinalRougherLattice=this->theConesLargerDim[0].theLattice;
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   for (int i=1; i<this->theConesLargerDim.size; i++)
-    this->theFinalRougherLattice.IntersectWith(this->theConesLargerDim[i].theLattice);
+  { this->theFinalRougherLattice.IntersectWith(this->theConesLargerDim[i].theLattice);
+    std::stringstream tempStream;
+    tempStream << "intersecing lattice " << i+1 << " out of " << this->theConesLargerDim.size;
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
+    theGlobalVariables.MakeReport();
+  }
   this->theFinalRepresentatives.size=0;
   roots tempRoots, tempRoots2;
   tempRoots2.SetSize(1);
@@ -1101,6 +1111,11 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2
   { tempRoots2[0]=this->theConesLargerDim[i].theShift;
     this->theConesLargerDim[i].theLattice.GetAllRepresentativesProjectingDownTo(this->theFinalRougherLattice, tempRoots2, tempRoots);
     this->theFinalRepresentatives.AddRootSnoRepetition(tempRoots);
+    std::stringstream tempStream;
+    tempStream << "Computing representative " << i+1 << " out of " << this->theConesLargerDim.size;
+    tempStream << "\nSo far " << this->theFinalRepresentatives.size << " found.";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream.str();
+    theGlobalVariables.MakeReport();
   }
   this->complexStartingPerRepresentative.SetSize(this->theFinalRepresentatives.size);
   this->startingLPtoMaximize.SetSize(this->theFinalRepresentatives.size);
@@ -1116,13 +1131,49 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2
       }
     }
 }
-void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
+
+/*void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2TrimChamberForMultOne
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+{ Cone trimmedCone;
+  roots tempRoots;
+  root multFreeWall;
+  int startingNumCones=this->theConesLargerDim.size;
+  int numKilledCones=0;
+  for (int i=0; i<this->theConesLargerDim.size; i++)
+  { trimmedCone.Normals=this->theConesLargerDim[i].theProjectivizedCone.Normals;
+    multFreeWall=this->LPtoMaximizeLargerDim[i];
+    multFreeWall.MinusRoot();
+    *multFreeWall.LastObject()+=1;
+    trimmedCone.Normals.AddObjectOnTop(multFreeWall);
+    trimmedCone.CreateFromNormals(trimmedCone.Normals, theGlobalVariables);
+    if (!trimmedCone.flagIsTheZeroCone)
+      this->theConesLargerDim[i].theProjectivizedCone=trimmedCone;
+    else
+    { this->theConesLargerDim.PopIndexSwapWithLast(i);
+      this->LPtoMaximizeLargerDim.PopIndexSwapWithLast(i);
+      i--;
+      numKilledCones++;
+    }
+    std::stringstream tempStream;
+    tempStream << "Processed " << i+numKilledCones << " out of " << startingNumCones;
+    tempStream << "\nKilled " << numKilledCones << " cones so far";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=tempStream.str();
+    theGlobalVariables.MakeReport();
+  }
+}
+*/
+
+void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep4
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 { this->complexRefinedPerRepresentative.SetSize(this->theFinalRepresentatives.size);
   this->theMaximaCandidates.SetSize(this->theFinalRepresentatives.size);
   for (int i=0; i<this->theFinalRepresentatives.size; i++)
   { ConeComplex& currentComplex= this->complexRefinedPerRepresentative[i];
     currentComplex.initFromCones(this->complexStartingPerRepresentative[i], true, theGlobalVariables);
+    std::stringstream tempStream;
+    tempStream << "Processing representative " << i+1 << " out of " << this->theFinalRepresentatives.size;
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
+    theGlobalVariables.MakeReport();
     currentComplex.Refine(theGlobalVariables);
     this->theMaximaCandidates[i].SetSize(currentComplex.size);
     for (int j=0; j<currentComplex.size; j++)
@@ -1149,7 +1200,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
       thePauseController.SafePoint();
       std::stringstream tempStream1, tempStream2, tempStream3;
       tempStream1 << "Processing " << this->numProcessedNonParam+1 << " out of " << this->numNonParaM;
-      tempStream2 << "Processing cone " << this->theConesLargerDim.size;
+      tempStream2 << "Remaining cones: " << this->theConesLargerDim.size;
       tempStream3 << "Cones smaller dim total: " << this->theConesSmallerDim.size;
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream1.str();
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream2.str();

@@ -259,7 +259,7 @@ template < > int List<ConeLatticeAndShift>::ListActualSizeIncrement=50;
 template < > int List<DrawOperations>::ListActualSizeIncrement=5;
 template < > int List<VirtualDrawOp>::ListActualSizeIncrement=1000;
 
-template < > bool  CompleX<double>::EqualityIsApproximate=true;
+template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>

@@ -3191,7 +3191,7 @@ public:
   void SubSelection(Selection& theSelection, roots& output);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
-  void ComputeNormal(root& output);
+  bool ComputeNormal(root& output);
   bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
   bool ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
   bool ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
@@ -9961,6 +9961,9 @@ public:
   (roots& inputNormals, GlobalVariables& theGlobalVariables)
   { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
   }
+  bool CreateFromVertices
+  (roots& inputVertices, GlobalVariables& theGlobalVariables)
+  ;
   void GetInternalPoint(root& output)
   { if (this->Vertices.size<=0)
       return;
@@ -10080,6 +10083,9 @@ public:
   bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
   void PopChamberSwapWithLast(int index);
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  void InitFromDirectionsAndRefine
+  (roots& inputVectors, GlobalVariables& theGlobalVariables)
+  ;
   std::string DrawMeToHtmlLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 ;
@@ -10133,6 +10139,7 @@ public:
   void operator=(const ConeComplex& other)
   { this->:: HashedList<Cone>::operator=(other);
     this->splittingNormals=other.splittingNormals;
+    this->slicingDirections=other.slicingDirections;
     this->indexLowestNonRefinedChamber=other.indexLowestNonRefinedChamber;
     this->flagIsRefined=other.flagIsRefined;
     this->flagChambersHaveTooFewVertices=other.flagChambersHaveTooFewVertices;
@@ -10290,6 +10297,10 @@ public:
   static int EvaluateRelations
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateCreateFromDirectionsAndSalamiSlice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+
   static int EvaluateLatticeImprecise
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -10322,6 +10333,7 @@ public:
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
   ;
   static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
+  static int EvaluateConeFromVertices(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
   static int EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -11313,9 +11325,10 @@ public:
   root NonIntegralOriginModification;
   std::fstream theMultiplicitiesMaxOutput;
   std::fstream theMultiplicitiesMaxOutputReport2;
-  roots GmodKnegativeWeights;
-  ConeGlobal PreimageWeylChamberLargerAlgebra;
-  ConeGlobal PreimageWeylChamberSmallerAlgebra;
+  roots GmodKnegativeWeightS;
+  roots GmodKNegWeightsBasisChanged;
+  Cone PreimageWeylChamberLargerAlgebra;
+  Cone PreimageWeylChamberSmallerAlgebra;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
@@ -11323,14 +11336,14 @@ public:
   int UpperLimitChambersForDebugPurposes;
   int numNonZeroMults;
   List<Rational> theCoeffs;
-  roots theTranslations;
-  roots theTranslationsProjected;
+  roots theTranslationS;
+  roots theTranslationsProjecteD;
   partFractions thePfs;
 //  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
-  CombinatorialChamberContainer projectivizedChamberOld;
   ConeComplex projectivizedParamComplex;
   ConeLatticeAndShiftMaxComputation theMaxComputation;
-  ConeComplex projectivizedChamber;
+  ConeComplex smallerAlgebraChamber;
+  ConeComplex projectivizedChambeR;
   std::stringstream log;
   Parser theParser;
   int computationPhase;

@@ -2039,9 +2039,9 @@ void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMa
   MatrixLargeRational::GaussianEliminationByRows(inputMatrix, matOutputEmpty, outputNonPivotPoints);
 }
 
-void roots::ComputeNormal(root& output)
+bool roots::ComputeNormal(root& output)
 { if (this->size==0)
-    return;
+    return false;
   int theDimension= this->TheObjects[0].size;
   MatrixLargeRational tempMatrix;
   Selection NonPivotPoints;
@@ -2049,8 +2049,9 @@ void roots::ComputeNormal(root& output)
   output.SetSize(theDimension);
   this->GaussianEliminationForNormalComputation(tempMatrix, NonPivotPoints, theDimension);
   if (NonPivotPoints.CardinalitySelection!=1)
-    return;
+    return false;
   tempMatrix.NonPivotPointsToRoot(NonPivotPoints, output);
+  return true;
 }
 
 bool roots::IsRegular(root& r, GlobalVariables& theGlobalVariables, int theDimension)

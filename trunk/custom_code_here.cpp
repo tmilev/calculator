@@ -1632,30 +1632,33 @@ bool Cone::EliminateFakeNormalsUsingVertices
     tempMat.AssignRootsToRowsOfMatrix(this->Vertices);
     roots NormalsToSubspace;
     tempMat.FindZeroEigenSpace(NormalsToSubspace, theGlobalVariables);
-    matNormals.AssignRootsToRowsOfMatrix(NormalsToSubspace);
-    gramMatrixInverted=matNormals;
-    gramMatrixInverted.Transpose();
-    gramMatrixInverted.MultiplyOnTheLeft(matNormals);
-    gramMatrixInverted.Invert(theGlobalVariables);
-    root tempRoot;
-    for (int i=0; i<this->Normals.size; i++)
-    { matNormals.ActOnAroot(this->Normals[i], tempRoot);
-      gramMatrixInverted.ActOnAroot(tempRoot);
-      for (int j=0; j<tempRoot.size; j++)
-        this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
-      this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
-      if (this->Normals[i].IsEqualToZero())
-      { this->Normals.PopIndexSwapWithLast(i);
-        i--;
+    if (NormalsToSubspace.size>0)
+    { matNormals.AssignRootsToRowsOfMatrix(NormalsToSubspace);
+//      std::cout << "<br>Normals to the subspace spanned by the vertices: " << NormalsToSubspace.ElementToString();
+      gramMatrixInverted=matNormals;
+      gramMatrixInverted.Transpose();
+      gramMatrixInverted.MultiplyOnTheLeft(matNormals);
+      gramMatrixInverted.Invert(theGlobalVariables);
+      root tempRoot;
+      for (int i=0; i<this->Normals.size; i++)
+      { matNormals.ActOnAroot(this->Normals[i], tempRoot);
+        gramMatrixInverted.ActOnAroot(tempRoot);
+        for (int j=0; j<tempRoot.size; j++)
+          this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
+        this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
+        if (this->Normals[i].IsEqualToZero())
+        { this->Normals.PopIndexSwapWithLast(i);
+          i--;
+        }
       }
-    }
-    //all normals should now lie in the subspace spanned by the vertices
-    //add the walls needed to go down to the subspace
-    this->Normals.MakeActualSizeAtLeastExpandOnTop(this->Normals.size+2*NormalsToSubspace.size);
-    for (int i=0; i<NormalsToSubspace.size; i++)
-    { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
-      this->Normals.AddObjectOnTop(NormalsToSubspace[i]);
-      this->Normals.AddObjectOnTop(-NormalsToSubspace[i]);
+      //all normals should now lie in the subspace spanned by the vertices
+      //add the walls needed to go down to the subspace
+      this->Normals.MakeActualSizeAtLeastExpandOnTop(this->Normals.size+2*NormalsToSubspace.size);
+      for (int i=0; i<NormalsToSubspace.size; i++)
+      { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
+        this->Normals.AddObjectOnTop(NormalsToSubspace[i]);
+        this->Normals.AddObjectOnTop(-NormalsToSubspace[i]);
+      }
     }
   }
   int DesiredRank=this->Vertices.GetRankOfSpanOfElements(theGlobalVariables);
@@ -1771,7 +1774,9 @@ bool Cone::CreateFromNormalS
         this->Normals.AddObjectOnTop(tempRoot);
       }
     }
+//  std::cout << "<br>Normals (" << inputNormals.size << " input " << numAddedFakeWalls << " fake): " << this->Normals.ElementToString();
   this->ComputeVerticesFromNormalsNoFakeVertices(theGlobalVariables);
+//  std::cout << "<br>Vertices before adding minus vertices: " << this->Vertices.ElementToString();
   if (numAddedFakeWalls>0)
   { this->Normals.SetSize(this->Normals.size-numAddedFakeWalls);
     root tempRoot;
@@ -1779,9 +1784,10 @@ bool Cone::CreateFromNormalS
     for (int i=0; i<originalSize; i++)
     { tempRoot=-this->Vertices[i];
       if (this->IsInCone(tempRoot))
-        this->Vertices.AddObjectOnTop(tempRoot);
+        this->Vertices.AddOnTopNoRepetition(tempRoot);
     }
   }
+//  std::cout << "<br>Vertices: " << this->Vertices.ElementToString();
   return this->EliminateFakeNormalsUsingVertices(theDim, numAddedFakeWalls, theGlobalVariables);
 }
 

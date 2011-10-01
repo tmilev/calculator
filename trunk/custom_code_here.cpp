@@ -271,7 +271,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
    //   tempRoot.TheObjects[j+input.theDomain.GetRank()]=tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i]=tempRoot;
   }
-  this->NonIntegralOriginModification="(0,0)";
+  this->NonIntegralOriginModification="(1/2,0)";
   tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
   this->PreimageWeylChamberLargerAlgebra.Normals.AddObjectOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
@@ -1887,9 +1887,11 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
 int ParserNode::EvaluateGroebner
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { List<PolynomialRationalCoeff> inputBasis, outputGroebner;
+  theNode.impliedNumVars= theNode.GetMaxImpliedNumVarsChildren();
   for (int i=0; i<theArgumentList.size; i++)
-  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
-    outputGroebner.AddObjectOnTop(currentNode.polyValue.GetElement());
+  { PolynomialRationalCoeff& currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
+    currentPoly.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
+    outputGroebner.AddObjectOnTop(currentPoly);
   }
   inputBasis=outputGroebner;
   PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
@@ -1958,19 +1960,20 @@ void RationalFunction::GetRelations
 int ParserNode::EvaluateRelations
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { List<PolynomialRationalCoeff> inputBasis, outputRelations;
+  theNode.impliedNumVars= theNode.GetMaxImpliedNumVarsChildren();
   for (int i=0; i<theArgumentList.size; i++)
-  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList.TheObjects[i]];
-    outputRelations.AddObjectOnTop(currentNode.polyValue.GetElement());
+  { PolynomialRationalCoeff& currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
+    currentPoly.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
+    outputRelations.AddObjectOnTop(currentPoly);
   }
   inputBasis=outputRelations;
   RationalFunction::GetRelations(outputRelations, theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting elements:";
-  int numVariables= inputBasis.TheObjects[0].NumVars;
   PolynomialOutputFormat theFormat;
   std::stringstream out3;
   for(int i=0; i<inputBasis.size; i++)
-    out3 << "u_{" << i+numVariables+1 << "}:=" << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
+    out3 << " u_{" << i+1+theNode.impliedNumVars << "}:=" << inputBasis[i].ElementToString(theFormat) << ", ";
   out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out3.str());
   out << "<br>Resulting relations:";
   std::stringstream out2;

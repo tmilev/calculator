@@ -70,8 +70,8 @@ void Rational::AssignString(const std::string& input)
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, root& startingNormal, root& outputNormal)
 { MatrixLargeRational theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
-  root& theTranslation=this->theTranslationsProjected.TheObjects[indexOperator];
-  Rational theConst=root::RootScalarEuclideanRoot(theTranslation+this->NonIntegralOriginModification, startingNormal);
+  root& theTranslation=this->theTranslationsProjecteD.TheObjects[indexOperator];
+  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModification-theTranslation, startingNormal);
   theOperatorExtended.Transpose();
   outputNormal=startingNormal;
   theOperatorExtended.ActOnAroot(outputNormal);
@@ -81,24 +81,11 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
 
 void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep1
 (GlobalVariables& theGlobalVariables)
-{ this->projectivizedChamberOld.flagSliceWithAWallInitDone=true;
-  this->projectivizedChamberOld.theDirections=this->GmodKnegativeWeights;
-  this->projectivizedChamberOld.init();
-  this->projectivizedChamberOld.SliceTheEuclideanSpace(theGlobalVariables, false);
-  this->projectivizedChamberOld.drawOutput(theGlobalVariables.theDrawingVariables, this->projectivizedChamberOld.IndicatorRoot, 0);
-  List<roots> tempChambers;
-  tempChambers.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamberOld.size);
-  for (int j=0; j<this->projectivizedChamberOld.size; j++)
-    if (this->projectivizedChamberOld.TheObjects[j]!=0)
-      if (!this->projectivizedChamberOld.TheObjects[j]->flagPermanentlyZero)
-      { CombinatorialChamber& current=*this->projectivizedChamberOld.TheObjects[j];
-        tempChambers.SetSize(tempChambers.size+1);
-        current.GetWallNormals(*tempChambers.LastObject());
-      }
-  this->projectivizedChamber.initFromCones(tempChambers, true, theGlobalVariables);
-  this->projectivizedChamber.splittingNormals.ClearTheObjects();
-  this->projectivizedChamber.splittingNormals.AddListOnTopNoRepetitionOfObjectHash(this->projectivizedChamberOld.theHyperplanes);
-  this->log << this->projectivizedChamber.ElementToString(false, false);
+{ this->smallerAlgebraChamber.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
+  theGlobalVariables.theIndicatorVariables.StatusString1=this->smallerAlgebraChamber.ElementToString(false, false);
+  theGlobalVariables.MakeReport();
+  this->log << "Directions for making the chamber basis changed: " << this->GmodKNegWeightsBasisChanged.ElementToString()
+  << "\n Resulting chamber before projectivization:\n " << this->smallerAlgebraChamber.ElementToString(false, false);
   theGlobalVariables.theIndicatorVariables.StatusString1=this->log.str();
 }
 
@@ -113,25 +100,27 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 //  int dimLargerAlgebra=this->theLinearOperators.TheObjects[0].NumCols;
 //  int dimFinal=dimSmallerAlgebra+dimLargerAlgebra+1;
   projectivizedChamberFinal.init();
-  for (int i=0; i<this->projectivizedChamber.size; i++)
-  { Cone& currentAffineCone=this->projectivizedChamber.TheObjects[i];
+  for (int i=0; i<this->smallerAlgebraChamber.size; i++)
+  { Cone& currentAffineCone=this->smallerAlgebraChamber.TheObjects[i];
     tempRoots.SetSize(currentAffineCone.Normals.size);
     for (int j=0; j<currentAffineCone.Normals.size; j++)
-      this->TransformToWeylProjective(0, currentAffineCone.Normals.TheObjects[j], tempRoots.TheObjects[j]);
-    tempRoots.AddListOnTop(this->PreimageWeylChamberLargerAlgebra);
+      this->TransformToWeylProjective(0, currentAffineCone.Normals[j], tempRoots[j]);
+    tempRoots.AddListOnTop(this->PreimageWeylChamberLargerAlgebra.Normals);
+    theGlobalVariables.theIndicatorVariables.StatusString1=tempRoots.ElementToString();
+    theGlobalVariables.MakeReport();
     currentProjectiveCone.CreateFromNormals(tempRoots, theGlobalVariables);
     projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone);
   }
-  for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.size; i++)
-    projectivizedChamberFinal.splittingNormals.AddObjectOnTopHash(this->PreimageWeylChamberSmallerAlgebra.TheObjects[i]);
+  for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
+    projectivizedChamberFinal.splittingNormals.AddObjectOnTopHash(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
   out << "projectivized chamber before chopping non-dominant part:\n"  << projectivizedChamberFinal.ElementToString(false, false);
   projectivizedChamberFinal.Refine(theGlobalVariables);
   out << "Refined projectivized chamber before chopping non-dominant part:\n"  << projectivizedChamberFinal.ElementToString(false, false);
   for (int i=0; i<projectivizedChamberFinal.size; i++)
-  { Cone& currentCone=projectivizedChamberFinal.TheObjects[i];
+  { Cone& currentCone=projectivizedChamberFinal[i];
     bool isNonDominant=false;
-    for (int j=0; j< this->PreimageWeylChamberSmallerAlgebra.size; j++)
-      if (root::RootScalarEuclideanRoot(currentCone.GetInternalPoint(), this->PreimageWeylChamberSmallerAlgebra.TheObjects[j]).IsNegative())
+    for (int j=0; j< this->PreimageWeylChamberSmallerAlgebra.Normals.size; j++)
+      if (currentCone.GetInternalPoint().ScalarEuclidean(this->PreimageWeylChamberSmallerAlgebra.Normals[j]).IsNegative())
       { isNonDominant=true;
         break;
       }
@@ -140,21 +129,20 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
       i--;
     }
   }
-  projectivizedChamberFinal.indexLowestNonRefinedChamber=0;
-  this->projectivizedChamber=projectivizedChamberFinal;
-  for (int k=1; k<this->theLinearOperators.size; k++)
-    for (int i=0; i<this->projectivizedChamberOld.size; i++)
-      if (this->projectivizedChamberOld.TheObjects[i]!=0)
-        for (int j=0; j<this->projectivizedChamberOld.TheObjects[i]->Externalwalls.size; j++)
-        { this->TransformToWeylProjective(k, this->projectivizedChamberOld.TheObjects[i]->Externalwalls.TheObjects[j].normal, wallToSliceWith);
-          wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-          this->projectivizedChamber.splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
-        }
-  out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChamber.ElementToString(false, false);
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  this->projectivizedChamberOld.NumAffineHyperplanesProcessed=-1;
+  theGlobalVariables.MakeReport();
 
-//  this->projectivizedChamberOld.NewHyperplanesToSliceWith.size=1;
+  projectivizedChamberFinal.indexLowestNonRefinedChamber=0;
+  this->projectivizedChambeR=projectivizedChamberFinal;
+  for (int k=1; k<this->theLinearOperators.size; k++)
+    for (int i=0; i<this->smallerAlgebraChamber.size; i++)
+      for (int j=0; j<this->smallerAlgebraChamber[i].Normals.size; j++)
+      { this->TransformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
+        wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
+        this->projectivizedChambeR.splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(wallToSliceWith);
+      }
+  out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.ElementToString(false, false);
+  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
@@ -166,47 +154,69 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theWeyl.ComputeWeylGroup();
   this->theLinearOperators.SetSize(theWeyl.size);
   this->theLinearOperatorsExtended.SetSize(theWeyl.size);
-  this->theTranslations.SetSize(theWeyl.size);
-  this->theTranslationsProjected.SetSize(theWeyl.size);
+  this->theTranslationS.SetSize(theWeyl.size);
+  this->theTranslationsProjecteD.SetSize(theWeyl.size);
   this->theCoeffs.SetSize(theWeyl.size);
   MatrixLargeRational theProjection;
-  theProjection.init(input.theDomain.GetRank(), input.theRange.GetRank());
   root startingWeight, projectedWeight;
+  PolynomialOutputFormat theFormat;
   SSalgebraModule tempM;
   std::stringstream tempStream;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
   tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
-  input.GetWeightsGmodK(this->GmodKnegativeWeights, theGlobalVariables);
+  input.GetWeightsGmodK(this->GmodKnegativeWeightS, theGlobalVariables);
+//  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ElementToString();
   MatrixLargeRational tempMat;
   tempMat=input.theDomain.theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
-  tempMat.ActOnRoots(this->GmodKnegativeWeights);
-  this->log << this->GmodKnegativeWeights.ElementToString();
-  for (int i=0; i<this->GmodKnegativeWeights.size; i++)
-    if (this->GmodKnegativeWeights.TheObjects[i].IsPositiveOrZero())
-    { this->GmodKnegativeWeights.PopIndexSwapWithLast(i);
+  tempMat.ActOnRoots(this->GmodKnegativeWeightS);
+  this->log << this->GmodKnegativeWeightS.ElementToString();
+  roots preferredBasis;
+  preferredBasis.SetSize(2);
+  preferredBasis[0]=-this->GmodKnegativeWeightS[1];
+  preferredBasis[1]=-this->GmodKnegativeWeightS[2];
+  MatrixLargeRational preferredBasisChange, preferredBasisChangeInverse;
+  preferredBasisChange.AssignRootsToRowsOfMatrix(preferredBasis);
+  preferredBasisChange.Transpose();
+  preferredBasisChangeInverse=preferredBasisChange;
+  preferredBasisChangeInverse.Invert();
+  preferredBasisChangeInverse.ActOnRoots(this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
+  this->log <<"\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
+  for (int i=0; i<this->GmodKnegativeWeightS.size; i++)
+    if (this->GmodKnegativeWeightS[i].IsPositiveOrZero())
+    { this->GmodKnegativeWeightS.PopIndexSwapWithLast(i);
       i--;
     }
+  for (int i=0; i<this->GmodKNegWeightsBasisChanged.size; i++)
+    if (this->GmodKNegWeightsBasisChanged[i].IsPositiveOrZero())
+    { this->GmodKNegWeightsBasisChanged.PopIndexSwapWithLast(i);
+      i--;
+    }
+  this->log <<"\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
+  theProjection.init(input.theDomain.GetRank(), input.theRange.GetRank());
   for (int i=0; i<input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
+    preferredBasisChangeInverse.ActOnAroot(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
-      theProjection.elements[j][i]=projectedWeight.TheObjects[j];
+      theProjection.elements[j][i]=projectedWeight[j];
   }
   this->log << "\nMatrix form of the elements of W(B_3) (" << theWeyl.size << " elements):\n";
   for (int i=0; i<theWeyl.size; i++)
-  { MatrixLargeRational& currentLinearOperator=this->theLinearOperators.TheObjects[i];
+  { MatrixLargeRational& currentLinearOperator=this->theLinearOperators[i];
     theWeyl.GetMatrixOfElement(i, currentLinearOperator);
+//    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.ElementToString(false, false);
-    this->theTranslations.TheObjects[i]=theWeyl.rho;
-    theWeyl.ActOn(i, this->theTranslations.TheObjects[i], true, false, (Rational) 0);
-    this->theTranslations.TheObjects[i]-=theWeyl.rho;
-    this->theTranslations.TheObjects[i].MinusRoot();
-    theProjection.ActOnAroot(this->theTranslations.TheObjects[i], this->theTranslationsProjected.TheObjects[i]);
-    if (theWeyl.TheObjects[i].size%2==0)
-      this->theCoeffs.TheObjects[i]=1;
+    this->theTranslationS[i]=theWeyl.rho;
+    assert(!this->theTranslationS[i].IsEqualToZero());
+    theWeyl.ActOn(i, this->theTranslationS[i], true, false, (Rational) 0);
+    this->theTranslationS[i]-=theWeyl.rho;
+    this->theTranslationS[i].MinusRoot();
+    theProjection.ActOnAroot(this->theTranslationS[i], this->theTranslationsProjecteD[i]);
+    if (theWeyl[i].size%2==0)
+      this->theCoeffs[i]=1;
     else
-      this->theCoeffs.TheObjects[i]=-1;
+      this->theCoeffs[i]=-1;
   }
   this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
@@ -215,33 +225,35 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[k];
     MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
     currentLO.MultiplyOnTheLeft(theProjection);
+    currentLO*=-1;
     //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
     currentLOExtended.MakeIdMatrix(currentLO.NumRows);
     currentLOExtended.Resize(currentLO.NumRows, currentLO.NumRows+currentLO.NumCols, true);
     for (int i=0; i<currentLO.NumRows; i++)
       for (int j=0; j<currentLO.NumCols; j++)
-        currentLOExtended.elements[i][j+currentLO.NumRows]=-currentLO.elements[i][j];
+        currentLOExtended.elements[i][j+currentLO.NumRows]=currentLO.elements[i][j];
     this->log << "\n\n" << currentLOExtended.ElementToString(false, false);
-    this->log << this->theTranslations.TheObjects[k].ElementToString() << ";   " << this->theTranslationsProjected.TheObjects[k].ElementToString();
+    this->log << this->theTranslationS[k].ElementToString() << ";   " << this->theTranslationsProjecteD[k].ElementToString();
   }
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   tempMat=theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
-  this->PreimageWeylChamberLargerAlgebra.ComputeFromDirections(tempRoots, theGlobalVariables, theWeyl.GetDim());
-  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString() << "\n";
+  this->PreimageWeylChamberLargerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
+  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
   root tempRoot;
-  for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.size; i++)
+  for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
   { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     for (int j=0; j<input.theRange.GetRank(); j++)
-      tempRoot.TheObjects[j+input.theDomain.GetRank()]=this->PreimageWeylChamberLargerAlgebra.TheObjects[i].TheObjects[j];
-    this->PreimageWeylChamberLargerAlgebra.TheObjects[i]=tempRoot;
+      tempRoot.TheObjects[j+input.theDomain.GetRank()]=this->PreimageWeylChamberLargerAlgebra.Normals[i][j];
+    this->PreimageWeylChamberLargerAlgebra.Normals[i]=tempRoot;
   }
   tempMat=input.theDomain.theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
-  this->PreimageWeylChamberSmallerAlgebra.ComputeFromDirections(tempRoots, theGlobalVariables, input.theDomain.GetRank());
-  this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString() << "\n";
+  preferredBasisChangeInverse.ActOnRoots(tempRoots);
+  this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
+  this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
   this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[0].ElementToString(false, false) << "\n";
   this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[1].ElementToString(false, false) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
@@ -251,21 +263,19 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   { this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].SetSize(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     *this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].LastObject()=0;
   }*/
-  for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.size; i++)
+  for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
   { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     for (int j=0; j<input.theDomain.GetRank(); j++)
-      tempRoot.TheObjects[j]=this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].TheObjects[j];
+      tempRoot.TheObjects[j]=this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
   //  for (int j=0; j<input.theRange.GetRank(); j++)
    //   tempRoot.TheObjects[j+input.theDomain.GetRank()]=tempRoot2.TheObjects[j];
-    this->PreimageWeylChamberSmallerAlgebra.TheObjects[i]=tempRoot;
+    this->PreimageWeylChamberSmallerAlgebra.Normals[i]=tempRoot;
   }
-  this->NonIntegralOriginModification.SetSize(input.theDomain.GetRank());
-  for (int i=0; i<this->NonIntegralOriginModification.size; i++)
-    this->NonIntegralOriginModification.TheObjects[i].AssignNumeratorAndDenominator(1,2);
+  this->NonIntegralOriginModification="(0,0)";
   tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
-  this->PreimageWeylChamberLargerAlgebra.AddObjectOnTop(tempRoot);
-  this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString() << "\n";
-  this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ElementToString() << "\n";
+  this->PreimageWeylChamberLargerAlgebra.Normals.AddObjectOnTop(tempRoot);
+  this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
+  this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
 
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=this->log.str();
@@ -293,7 +303,7 @@ GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObje
 
 void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const root& input, root& output)
 { MatrixLargeRational& currentOperator=this->theLinearOperators.TheObjects[indexOperator];
-  root& currentTranslation=this->theTranslations.TheObjects[indexOperator];
+  root& currentTranslation=this->theTranslationS[indexOperator];
   root tempRoot2;
   tempRoot2.SetSize(currentOperator.NumCols);
   output.MakeZero(currentOperator.NumRows);
@@ -345,7 +355,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex(QPSub& output, int theInd
 { MatrixLargeRational& theOperator=this->theLinearOperators.TheObjects[theIndex];
   int dimLargerAlgebra=theOperator.NumCols;
   int dimSmallerAlgebra=theOperator.NumRows;
-  root& theTranslation=this->theTranslations.TheObjects[theIndex];
+  root& theTranslation=this->theTranslationS[theIndex];
   MatrixLargeRational tempMat;
   tempMat.init(dimLargerAlgebra+dimSmallerAlgebra+1, dimSmallerAlgebra);
   tempMat.NullifyAll();
@@ -378,16 +388,16 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   root tempRoot;
   QPSub theSub;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
-  this->thePfs.initFromRoots(this->GmodKnegativeWeights, theGlobalVariables);
+  this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
   this->thePfs.split(theGlobalVariables, 0);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << "=" << this->thePfs.DebugString;
-  int totalDim=this->theTranslations.TheObjects[0].size+this->theTranslationsProjected.TheObjects[0].size;
-  this->theQPsSubstituted.SetSize(this->projectivizedChamber.size);
+  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
+  this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
   this->thePfs.theChambers.init();
-  this->thePfs.theChambers.theDirections=this->GmodKnegativeWeights;
+  this->thePfs.theChambers.theDirections=this->GmodKNegWeightsBasisChanged;
   this->thePfs.theChambers.SliceTheEuclideanSpace(theGlobalVariables, false);
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
   this->theQPsSubstituted.SetSize(this->thePfs.theChambers.size);
@@ -407,7 +417,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
         tempStream << "Processing chamber " << i+1 << " linear operator " << k+1;
         theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
-        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjected.TheObjects[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
+        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjecteD[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
         out << "\nthe sub is: " << theSub.ElementToString();
       }
@@ -416,13 +426,13 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   //out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
   //this->theMultiplicitiesMaxOutputReport2.flush();
   QuasiPolynomial tempQP;
-  this->theMultiplicities.SetSize(this->projectivizedChamber.size);
+  this->theMultiplicities.SetSize(this->projectivizedChambeR.size);
   this->numNonZeroMults=0;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
+  for (int i=0; i<this->projectivizedChambeR.size; i++)
   { QuasiPolynomial& currentSum=this->theMultiplicities.TheObjects[i];
     currentSum.MakeZeroLatticeZn(totalDim);
     for (int k=0; k<this->theLinearOperators.size; k++)
-    { this->GetProjection(k, this->projectivizedChamber.TheObjects[i].GetInternalPoint(), tempRoot);
+    { this->GetProjection(k, this->projectivizedChambeR.TheObjects[i].GetInternalPoint(), tempRoot);
       tempRoot-=this->NonIntegralOriginModification;
       int theIndex= this->thePfs.theChambers.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex!=-1)
@@ -438,11 +448,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     if (!currentSum.IsEqualToZero())
       this->numNonZeroMults++;
     std::stringstream tempStream;
-    tempStream << " So far " << i+1 << " out of " << this->projectivizedChamber.size << " processed " << this->numNonZeroMults << " non-zero total.";
+    tempStream << " So far " << i+1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numNonZeroMults << " non-zero total.";
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream.str();
     theGlobalVariables.MakeReport();
     out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
-    out << "\nThe chamber is: " << this->projectivizedChamber.TheObjects[i].ElementToString(theFormat);
+    out << "\nThe chamber is: " << this->projectivizedChambeR.TheObjects[i].ElementToString(theFormat);
   }
 //  this->projectivizedChamber.ComputeDebugString();
 //  out << "\n\n" << this->projectivizedChamber.DebugString;
@@ -450,6 +460,20 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
   this->theMultiplicitiesMaxOutputReport2 << out.str();
+}
+
+int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots tempRoots;
+  int theDim;
+  if(!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, tempRoots, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
+  ConeComplex tempComplex;
+  tempComplex.InitFromDirectionsAndRefine(tempRoots, theGlobalVariables);
+  PolynomialOutputFormat tempFormat;
+  theNode.outputString=tempComplex.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, tempFormat);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateG2InB3Computation
@@ -482,6 +506,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
 //  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
+  if (false)
   if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
     this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
@@ -494,8 +519,8 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 1:
-      this->projectivizedChamber.Refine(theGlobalVariables);
-      out << this->projectivizedChamber.ElementToString(false, false);
+      this->projectivizedChambeR.Refine(theGlobalVariables);
+      out << this->projectivizedChambeR.ElementToString(false, false);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 2:
@@ -1537,6 +1562,15 @@ void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
   this->indexLowestNonRefinedChamber++;
 }
 
+void ConeComplex::InitFromDirectionsAndRefine(roots& inputVectors, GlobalVariables& theGlobalVariables)
+{ this->init();
+  Cone startingCone;
+  startingCone.CreateFromVertices(inputVectors, theGlobalVariables);
+  this->AddNonRefinedChamberOnTopNoRepetition(startingCone);
+  this->slicingDirections.AddListOnTop(inputVectors);
+  this->Refine(theGlobalVariables);
+}
+
 void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
 { while (this->indexLowestNonRefinedChamber<this->size)
   { this->RefineOneStep(theGlobalVariables);
@@ -1666,10 +1700,66 @@ bool Cone::EliminateFakeNormalsUsingVertices
   return numAddedFakeWalls==0;
 }
 
+bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVariables)
+{ this->LowestIndexNotCheckedForChopping=0;
+  this->LowestIndexNotCheckedForSlicingInDirection=0;
+  this->flagIsTheZeroCone=false;
+  if (inputVertices.size<=0)
+  { this->Normals.size=0;
+    this->Vertices.size=0;
+    this->flagIsTheZeroCone=true;
+    return false;
+  }
+  this->Normals.size=0;
+  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(theGlobalVariables);
+  int theDim=inputVertices.GetDimensionOfElements();
+  roots extraVertices;
+  if (rankVerticesSpan<theDim)
+  { MatrixLargeRational tempMat;
+    tempMat.AssignRootsToRowsOfMatrix(inputVertices);
+    tempMat.FindZeroEigenSpace(extraVertices);
+    for (int i=0; i<extraVertices.size; i++)
+    { this->Normals.AddObjectOnTop(extraVertices[i]);
+      this->Normals.AddObjectOnTop(-extraVertices[i]);
+    }
+  }
+  int NumCandidates = MathRoutines::NChooseK(inputVertices.size, rankVerticesSpan-1);
+  Selection theSelection;
+  theSelection.init(inputVertices.size);
+  root normalCandidate;
+  for (int i=0; i<NumCandidates; i++)
+  { theSelection.incrementSelectionFixedCardinality(rankVerticesSpan-1);
+    for (int j=0; j<theSelection.CardinalitySelection; j++)
+      extraVertices.AddObjectOnTop(inputVertices[theSelection.elements[j]]);
+    if (extraVertices.ComputeNormal(normalCandidate))
+    { bool hasPositive; bool hasNegative;
+      hasPositive=false; hasNegative=false;
+      for (int j=0; j<inputVertices.size; j++)
+      { Rational tempRat= normalCandidate.ScalarEuclidean(inputVertices[j]);
+        if (tempRat.IsNegative())
+          hasNegative=true;
+        if (tempRat.IsPositive())
+          hasPositive=true;
+        if (hasNegative && hasPositive)
+          break;
+      }
+      normalCandidate.ScaleByPositiveRationalToIntegralMinHeight();
+      if ((hasNegative && !hasPositive))
+        normalCandidate.MinusRoot();
+      if (!(hasNegative && hasPositive))
+        this->Normals.AddOnTopNoRepetition(normalCandidate);
+    }
+    extraVertices.size=theDim-rankVerticesSpan;
+  }
+  return this->CreateFromNormals(this->Normals, theGlobalVariables);
+}
+
 bool Cone::CreateFromNormalS
   (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { this->Normals.CopyFromBase(inputNormals);
   this->flagIsTheZeroCone=false;
+  this->LowestIndexNotCheckedForChopping=0;
+  this->LowestIndexNotCheckedForSlicingInDirection=0;
   int numAddedFakeWalls=0;
   int theDim=this->GetDim();
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
@@ -1902,7 +1992,21 @@ int ParserNode::EvaluateCone
   Cone& currentCone=theNode.theCone.GetElement();
   currentCone.CreateFromNormals(theNormals, theGlobalVariables);
   PolynomialOutputFormat theFormat;
-  theNode.outputString=currentCone.ElementToString(false, true, theFormat);
+  theNode.outputString=currentCone.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, theFormat);
+  theNode.ExpressionType=theNode.typeCone;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateConeFromVertices
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ roots theVertices;
+  int theDim;
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVertices, theDim))
+    return theNode.SetError(theNode.errorDimensionProblem);
+  Cone& currentCone=theNode.theCone.GetElement();
+  currentCone.CreateFromVertices(theVertices, theGlobalVariables);
+  PolynomialOutputFormat theFormat;
+  theNode.outputString=currentCone.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, theFormat);
   theNode.ExpressionType=theNode.typeCone;
   return theNode.errorNoError;
 }
@@ -3505,7 +3609,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile
     theGlobalVariables->MakeReport();
   }
   this->theMaxComputation.WriteToFile(output, theGlobalVariables);
-  this->GmodKnegativeWeights.WriteToFile(output, theGlobalVariables);
+  this->GmodKnegativeWeightS.WriteToFile(output, theGlobalVariables);
+  this->GmodKNegWeightsBasisChanged.WriteToFile(output, theGlobalVariables);
   this->theLinearOperators.WriteToFile(output);
   this->theLinearOperatorsExtended.WriteToFile(output);
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
@@ -3532,8 +3637,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE("theMultiplicities");
 //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
-  this->theTranslations.WriteToFile(output, theGlobalVariables);
-  this->theTranslationsProjected.WriteToFile(output, theGlobalVariables);
+  this->theTranslationS.WriteToFile(output, theGlobalVariables);
+  this->theTranslationsProjecteD.WriteToFile(output, theGlobalVariables);
   this->thePfs.WriteToFile(output, theGlobalVariables);
 //  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
 //  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
@@ -3546,7 +3651,8 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing projectivized chamber complex... ";
     theGlobalVariables->MakeReport();
   }
-  this->projectivizedChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->smallerAlgebraChamber.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->projectivizedChambeR.WriteToFile(output, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing to file done...";
     theGlobalVariables->MakeReport();
@@ -3616,7 +3722,8 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading more pieces of data... ";
     theGlobalVariables->MakeReport();
   }
-  this->GmodKnegativeWeights.ReadFromFile(input, theGlobalVariables);
+  this->GmodKnegativeWeightS.ReadFromFile(input, theGlobalVariables);
+  this->GmodKNegWeightsBasisChanged.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperatorsExtended.ReadFromFile(input, theGlobalVariables);
   this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input, theGlobalVariables);
@@ -3633,8 +3740,8 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->theMultiplicities.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
   this->theCoeffs.ReadFromFile(input);
-  this->theTranslations.ReadFromFile(input, theGlobalVariables);
-  this->theTranslationsProjected.ReadFromFile(input, theGlobalVariables);
+  this->theTranslationS.ReadFromFile(input, theGlobalVariables);
+  this->theTranslationsProjecteD.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading partial fractions... ";
     theGlobalVariables->MakeReport();
@@ -3649,7 +3756,8 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading the complex... ";
     theGlobalVariables->MakeReport();
   }
-  this->projectivizedChamber.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->smallerAlgebraChamber.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
+  this->projectivizedChambeR.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading complete... ";
     theGlobalVariables->MakeReport();
@@ -4210,13 +4318,13 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
   out << "Normals& Multiplicity of module with highest weight $(x_1,x_2)$\\endhead\n";
   int numFoundChambers=0;
   List<int> DisplayIndicesprojectivizedChambers;
-  for (int i=0; i<this->projectivizedChamber.size; i++)
+  for (int i=0; i<this->projectivizedChambeR.size; i++)
   { QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
     if (!theMult.IsEqualToZero())
     { numFoundChambers++;
       out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
       DisplayIndicesprojectivizedChambers.AddObjectOnTop(numFoundChambers);
-      out << this->PrepareReportOneCone(theFormat, this->projectivizedChamber.TheObjects[i], theGlobalVariables) << "&";
+      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR.TheObjects[i], theGlobalVariables) << "&";
       out << theMult.ElementToString(false, true, theFormat) << "\\\\\n";
     } else
       DisplayIndicesprojectivizedChambers.AddObjectOnTop(-1);
@@ -4772,7 +4880,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation
 (GlobalVariables& theGlobalVariables)
 { this->theMaxComputation.numNonParaM=2;
-  this->theMaxComputation.theConesLargerDim.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChamber.size);
+  this->theMaxComputation.theConesLargerDim.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChambeR.size);
   this->theMaxComputation.LPtoMaximizeLargerDim.MakeActualSizeAtLeastExpandOnTop(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.SetSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
@@ -4786,7 +4894,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
   root theLPtoMax;
   for (int i=0; i<this->theMultiplicities.size; i++)
     if (! this->theMultiplicities[i].IsEqualToZero())
-    { currentCLS.theProjectivizedCone=this->projectivizedChamber.TheObjects[i];
+    { currentCLS.theProjectivizedCone=this->projectivizedChambeR.TheObjects[i];
       currentCLS.theShift.MakeZero(theAffineDim);
       currentCLS.theLattice=ZnLattice;
       bool tempBool= this->theMultiplicities[i].valueOnEachLatticeShift[0].GetRootFromLinPolyConstTermLastVariable(theLPtoMax, (Rational) 0);
@@ -5289,14 +5397,12 @@ bool Cone::DrawMeLastCoordAffine
     (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
   }
   for (int k=0; k<this->Normals.size; k++)
-  { root& currentNormal=this->Normals[k];
     for (int i=0; i<this->Vertices.size; i++)
-      if (DrawVertex[i] && currentNormal.ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
+      if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
         for (int j=i+1; j<this->Vertices.size; j++)
-          if(DrawVertex[j] && currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+          if(DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
             (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
-  }
   return foundBadVertex;
 }
 
@@ -5338,16 +5444,15 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
     (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
   }
   for (int i=0; i<this->Vertices.size; i++)
-    theDrawingVariables.drawLineBetweenTwoVectorsBuffer(ZeroRoot, VerticesScaled[i]*10000, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
+    theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+    (ZeroRoot, VerticesScaled[i]*10000, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
   for (int k=0; k<this->Normals.size; k++)
-  { root& currentNormal=this->Normals[k];
     for (int i=0; i<this->Vertices.size; i++)
-      if (currentNormal.ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
+      if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
         for (int j=i+1; j<this->Vertices.size; j++)
-          if(currentNormal.ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
+          if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
             (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
-  }
   return true;
 }
 
@@ -6342,12 +6447,27 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->flagFunctionListInitialized=true;
   ParserFunction theFunction;
   this->AddOneFunctionToDictionaryNoFail
-  ("cone",
+  ("coneFromNormals",
    "((Rational,...),...)",
    "A polyhedron in n dimensions such that all of its walls pass through zero. The argument vectors describe the normals of the cone walls. \
    To each such polyhedron C we assign the affine polyhedron obtained by intersecting C with the hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate zero.",
-   "cone((1,0),(0,1)) ",
+   "coneFromNormals((1,0),(0,1)) ",
     & ParserNode::EvaluateCone
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("coneFromVertices",
+   "((Rational,...),...)",
+   "Create the cone spanned over the non-negative rationals by the input vectors. You can use the alias name cone, for example cone((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)).",
+   "coneFromVertices((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)) ",
+    & ParserNode::EvaluateConeFromVertices
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("cone",
+   "((Rational,...),...)",
+   "Alias for coneFromVertices.",
+   "cone((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)) ",
+    DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateConeFromVertices
    );
   this->AddOneFunctionToDictionaryNoFail
   ("slTwoInSlN",
@@ -6504,21 +6624,29 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("sliceConeUniqueExitWall",
    "(Cone, (Rational, ...))",
    "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point. ",
-   "sliceConeUniqueExitWall( cone((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
+   "sliceConeUniqueExitWall( coneFromNormals((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
     & ParserNode::EvaluateSliceCone
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("sliceDirections",
+   "((Rational, ...),...)",
+   "Exit wall slice. ",
+   "sliceDirections( (1,0,0),(0,1,0),(0,0,1),(1,1,0), (0,1,1),(1,1,1) )",
+    DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
    );
    this->AddOneFunctionToDictionaryNoFail
   ("drawConeProjective",
    "(Cone)",
    "On condition that the cone has a vertex at 0, draws a picture corresponding to the polyhedron with walls passing through 0 represented by the argument. ",
-   "drawConeProjective( cone((1,0,0),(0,1,0),(0,0,1)))",
+   "drawConeProjective( coneFromNormals((1,0,0),(0,1,0),(0,0,1)))",
     & ParserNode::EvaluateDrawConeProjective
    );
    this->AddOneFunctionToDictionaryNoFail
   ("drawConeAffine",
    "(Cone)",
    "On condition that the cone lies in the non-strict upper half-plane and has a vertex at 0, draws the intersection of the cone with the affine hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate 0. ",
-   "drawConeAffine( cone((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))",
+   "drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))",
     & ParserNode::EvaluateDrawConeAffine
    );
   this->AddOneFunctionToDictionaryNoFail

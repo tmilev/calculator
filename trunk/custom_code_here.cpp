@@ -113,9 +113,9 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
     projectivizedChamberFinal.splittingNormals.AddObjectOnTopHash(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
-  out << "projectivized chamber before chopping non-dominant part:\n"  << projectivizedChamberFinal.ElementToString(false, false);
+  out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ElementToString(false, false);
   projectivizedChamberFinal.Refine(theGlobalVariables);
-  out << "Refined projectivized chamber before chopping non-dominant part:\n"  << projectivizedChamberFinal.ElementToString(false, false);
+  out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ElementToString(false, false);
   for (int i=0; i<projectivizedChamberFinal.size; i++)
   { Cone& currentCone=projectivizedChamberFinal[i];
     bool isNonDominant=false;
@@ -157,6 +157,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->theTranslationS.SetSize(theWeyl.size);
   this->theTranslationsProjecteD.SetSize(theWeyl.size);
   this->theCoeffs.SetSize(theWeyl.size);
+  this->NonIntegralOriginModification="(1/2,1/2)";
   MatrixLargeRational theProjection;
   root startingWeight, projectedWeight;
   PolynomialOutputFormat theFormat;
@@ -271,7 +272,6 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
    //   tempRoot.TheObjects[j+input.theDomain.GetRank()]=tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i]=tempRoot;
   }
-  this->NonIntegralOriginModification="(1/2,0)";
   tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
   this->PreimageWeylChamberLargerAlgebra.Normals.AddObjectOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
@@ -1592,7 +1592,24 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
   theSel.init(this->Normals.size);
   int numCycles=theSel.GetNumCombinationsFixedCardinality(theDim-1);
   if (theDim==1)
-    numCycles=0;
+  { numCycles=0;
+    bool foundNegative=false;
+    bool foundPositive=false;
+    for (int i=0; i<this->Normals.size; i++)
+    { if(this->Normals[i].IsPositiveOrZero())
+        foundPositive=true;
+      if (this->Normals[i].IsNegativeOrZero())
+        foundNegative=true;
+    }
+    if (foundNegative xor foundPositive)
+    { this->Vertices.SetSizeMakeMatrix(1,1);
+      if (foundNegative)
+        this->Vertices[0][0]=-1;
+      else
+        this->Vertices[0][0]=1;
+    }
+    return;
+  }
   MatrixLargeRational& theMat=theGlobalVariables.matComputeNormalFromSelection;
   MatrixLargeRational emptyMat;
   root tempRoot;
@@ -1706,6 +1723,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
 bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVariables)
 { this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
+ // std::cout << inputVertices.ElementToString();
   this->flagIsTheZeroCone=false;
   if (inputVertices.size<=0)
   { this->Normals.size=0;
@@ -1754,17 +1772,25 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
     }
     extraVertices.size=theDim-rankVerticesSpan;
   }
+//  std::cout << "<br>Candidate normals: " << this->Normals.ElementToString();
   return this->CreateFromNormals(this->Normals, theGlobalVariables);
 }
 
 bool Cone::CreateFromNormalS
   (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-{ this->Normals.CopyFromBase(inputNormals);
-  this->flagIsTheZeroCone=false;
+{ this->flagIsTheZeroCone=false;
   this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
+  int theDim=1;
+  if (inputNormals.size>0)
+    theDim=inputNormals[0].size;
+  this->Normals=inputNormals;
+  for (int i=0; i<this->Normals.size; i++)
+    if (this->Normals[i].IsEqualToZero())
+    { this->Normals.PopIndexSwapWithLast(i);
+      i--;
+    }
   int numAddedFakeWalls=0;
-  int theDim=this->GetDim();
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
     for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(theGlobalVariables)<theDim; i++)
     { root tempRoot;

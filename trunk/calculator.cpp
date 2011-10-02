@@ -160,7 +160,7 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  civilizedInput="coneFromVertices((1,0), (0,1)) ";
+//  civilizedInput="coneFromVertices((1,0), (0,1)) ";
 //  civilizedInput="coneFromNormals(0) ";
 //  civilizedInput="coneFromVertices((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)) ";
  //civilizedInput="cone( (3, -2, 1, -8), (-1, 1, 0, -3), (-1, 2, -1, 0), (-2, -2, 2, 3), (1, 0, -1, 5) )";

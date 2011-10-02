@@ -523,7 +523,7 @@ public:
     for (int i=0; i<this->size; i++)
       this->TheObjects[i]=o;
   }
-  inline Object& operator[](int i){return this->TheObjects[i];}
+  inline Object& operator[](int i)const{return this->TheObjects[i];}
   void operator = (const ListLight<Object>& right);
   void operator = (const List<Object>& right)
   { this->SetSize(right.size);
@@ -1460,6 +1460,8 @@ public:
   void ReadFromFile(std::fstream& input);
   inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ this->ReadFromFile(input);}
   inline void operator=(const Selection& right){this->Assign(right); }
+  void operator=(const root& other);
+//  void operator=(const std::string& other);
   //warning: to call the comparison operator sucessfully, cardinalitySelection must
   //be properly computed!
   inline bool operator==(const Selection& right) const
@@ -7855,8 +7857,11 @@ public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(DebugString); }
   void ElementToString(std::string& output);
+  void MakeParabolicFromSelectionSimpleRoots
+(WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+  ;
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
-  void ComputeSubGroupFromGeneratingReflections(roots& generators, rootsCollection& ExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
+  void ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, root& theRoot);
   void ActByElement(int index, root& input, root& output);
@@ -11335,6 +11340,7 @@ public:
 //  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   int numNonZeroMults;
+  Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
   List<Rational> theCoeffs;
   roots theTranslationS;
   roots theTranslationsProjecteD;

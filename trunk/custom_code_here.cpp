@@ -1,7 +1,7 @@
 #include "polyhedra.h"
 // This file is meant to be for people to modify if they do not want to modify the main files polyhedra.cpp or polyhedra.h
-// The reason I would recommend that is because the file polyhedra.cpp compiles very slowly (around 30 seconds), so small modifications
-// take a long time to check. Using a separate file and linking it to the GUI is the solution I chose (may not be the best, see below for discussion).
+// The reason I would recommend that is because the file polyhedra.cpp compiles very slowly (around 90 seconds), so small modifications
+// take a long time to check. Using a separate file is the solution I chose (may not be the best, see below for discussion).
 // If the code you write here reaches the mature phase where you have realized all functions you think it should have
 // and you are generally satisfied with it, simply cut & paste it in the main files (the class declarations in polyhedra.h and the implementation in polyhedra.cpp).
 
@@ -11,7 +11,7 @@
 //   2) this would certainly create additional maintainance work 3) this will increase the learning curve for a person wanting to just use the program and wanting to eventually
 //   modify some tiny bit and 4) I got an advice on the c++ forum www.cplusplus.com that partitioning the .h file will eventually lead to slower compile times,
 //   especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
-//   greater maturity (see also point (1) ).
+//   greater maturity (see also the first paragraph).
 //2. Use precompiled headers or some other voodoo. I am tocally against that. Those are compiler specific, will require me to learn extra unnecessary info which might
 //    be out of date in a few years, and will make even higher entry learning curve for another to join the project. This is bad.
 //    I should mention in favor of Microsoft that their IDE does recompile very quickly small modifications of the file polyhedra.cpp. I believe it does so by
@@ -71,7 +71,8 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, root& startingNormal, root& outputNormal)
 { MatrixLargeRational theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
   root& theTranslation=this->theTranslationsProjecteD.TheObjects[indexOperator];
-  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModification-theTranslation, startingNormal);
+  //the goddamned sign in front of theTranslation is now checked: it should be + and not -
+  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModification+theTranslation, startingNormal);
   theOperatorExtended.Transpose();
   outputNormal=startingNormal;
   theOperatorExtended.ActOnAroot(outputNormal);
@@ -148,16 +149,11 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
   (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
-  WeylGroup& theWeyl=input.theRange.theWeyl;
+  WeylGroup& theWeyL=input.theRange.theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ElementToString();
-  theWeyl.ComputeWeylGroup();
-  this->theLinearOperators.SetSize(theWeyl.size);
-  this->theLinearOperatorsExtended.SetSize(theWeyl.size);
-  this->theTranslationS.SetSize(theWeyl.size);
-  this->theTranslationsProjecteD.SetSize(theWeyl.size);
-  this->theCoeffs.SetSize(theWeyl.size);
-  this->NonIntegralOriginModification="(1/2,1/2)";
+  theWeyL.ComputeWeylGroup();
+  this->NonIntegralOriginModification="(0,0)";
   MatrixLargeRational theProjection;
   root startingWeight, projectedWeight;
   PolynomialOutputFormat theFormat;
@@ -202,19 +198,29 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     for (int j=0; j<projectedWeight.size; j++)
       theProjection.elements[j][i]=projectedWeight[j];
   }
-  this->log << "\nMatrix form of the elements of W(B_3) (" << theWeyl.size << " elements):\n";
-  for (int i=0; i<theWeyl.size; i++)
+  ReflectionSubgroupWeylGroup theSubgroup;
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(1,0,0)";
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots
+  (theWeyL, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
+
+  this->theLinearOperators.SetSize(theSubgroup.size);
+  this->theLinearOperatorsExtended.SetSize(theSubgroup.size);
+  this->theTranslationS.SetSize(theSubgroup.size);
+  this->theTranslationsProjecteD.SetSize(theSubgroup.size);
+  this->theCoeffs.SetSize(theSubgroup.size);
+
+  this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic (" << theSubgroup.size << " elements):\n";
+
+  for (int i=0; i<theSubgroup.size; i++)
   { MatrixLargeRational& currentLinearOperator=this->theLinearOperators[i];
-    theWeyl.GetMatrixOfElement(i, currentLinearOperator);
+    theSubgroup.AmbientWeyl.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.ElementToString(false, false);
-    this->theTranslationS[i]=theWeyl.rho;
-    assert(!this->theTranslationS[i].IsEqualToZero());
-    theWeyl.ActOn(i, this->theTranslationS[i], true, false, (Rational) 0);
-    this->theTranslationS[i]-=theWeyl.rho;
+    currentLinearOperator.ActOnAroot(theWeyL.rho, this->theTranslationS[i]);
+    this->theTranslationS[i]-=theWeyL.rho;
     this->theTranslationS[i].MinusRoot();
     theProjection.ActOnAroot(this->theTranslationS[i], this->theTranslationsProjecteD[i]);
-    if (theWeyl[i].size%2==0)
+    if (theSubgroup[i].size%2==0)
       this->theCoeffs[i]=1;
     else
       this->theCoeffs[i]=-1;
@@ -237,7 +243,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     this->log << this->theTranslationS[k].ElementToString() << ";   " << this->theTranslationsProjecteD[k].ElementToString();
   }
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
-  tempMat=theWeyl.CartanSymmetric;
+  tempMat=theWeyL.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
   this->PreimageWeylChamberLargerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
@@ -285,6 +291,20 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatrix)
 { assert(theIndex<this->size);
   this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
+}
+
+void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
+(WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+{ roots selectedRoots;
+  selectedRoots.MakeActualSizeAtLeastExpandOnTop(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+  this->AmbientWeyl=inputWeyl;
+  for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
+    if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
+    { selectedRoots.SetSize(selectedRoots.size+1);
+      selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
+    }
+  rootsCollection tempRootsCol;
+  this->ComputeSubGroupFromGeneratingReflections(selectedRoots, tempRootsCol, theGlobalVariables, UpperLimitNumElements, true);
 }
 
 void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix)
@@ -379,6 +399,15 @@ std::string QPSub::ElementToString()
   for (int i=0; i<this->RationalPolyForm.size; i++)
     out << "x_" << i+1 << "->" << this->RationalPolyForm.TheObjects[i].ElementToString() << ", ";
   return out.str();
+}
+
+
+void Selection::operator=(const root& other)
+{ this->init(other.size);
+  for (int i=0; i<other.size; i++)
+    if (!other[i].IsEqualToZero())
+      this->selected[i]=true;
+  this->ComputeIndicesFromSelection();
 }
 
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
@@ -3636,7 +3665,9 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   output << "NumProcessedExtremaEqualOne: " << this->NumProcessedExtremaEqualOne << "\n";
   output << "NormalConstAdjustment: ";
   this->NonIntegralOriginModification.WriteToFile(output);
-
+  output << "\n";
+  output << "ChamberIndicatorHighestWeightLargerAlgebra: ";
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
   output << "\n";
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
@@ -3736,10 +3767,11 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { assert(false);
     return false;
   }
+  this->NonIntegralOriginModification.ReadFromFile(input);
+  input >> tempS;
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
   if (theGlobalVariables!=0)
     theGlobalVariables->IncrementReadWriteDepth();
-  this->NonIntegralOriginModification.ReadFromFile(input);
-
   if (theGlobalVariables!=0)
     this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
   else

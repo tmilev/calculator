@@ -19402,7 +19402,7 @@ void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariab
   this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots& generators, rootsCollection& ExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,  bool recomputeAmbientRho)
+void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,  bool recomputeAmbientRho)
 { hashedRoots& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
   this->truncated=false;
   this->ClearTheObjects();
@@ -19411,7 +19411,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
     return;
   if (recomputeAmbientRho)
     this->AmbientWeyl.ComputeRho(false);
-  this->simpleGenerators.CopyFromBase(generators);
+  this->simpleGenerators.CopyFromBase(inputGenerators);
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
   this->ComputeRootSubsystem();
   ElementWeylGroup tempEW;
@@ -19437,8 +19437,8 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
         tempEW.PopLastObject();
       }
     }
-    for (int j=1; j<ExternalAutos.size; j++)
-    { ExternalAutos.TheObjects[j].MakeBasisChange(orbitRho.TheObjects[i], currentRoot);
+    for (int j=1; j<inputExternalAutos.size; j++)
+    { inputExternalAutos.TheObjects[j].MakeBasisChange(orbitRho.TheObjects[i], currentRoot);
       if (!orbitRho.ContainsObjectHash(currentRoot))
       { orbitRho.AddObjectOnTopHash(currentRoot);
         tempEW.AddObjectOnTop(j+this->simpleGenerators.size);

@@ -11212,17 +11212,6 @@ void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& othe
   this->AmbientWeyl.Assign(other.AmbientWeyl);
 }
 
-void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
-{ std::stringstream out; std::string tempS;
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
-    out << tempS<<"\n";
-  }
-  this->ExternalAutomorphisms.ElementToStringGeneric(tempS);
-  out << tempS;
-  output=out.str();
-}
-
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 { this->RootSubsystem.ClearTheObjects();
   this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
@@ -11246,13 +11235,6 @@ bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
     if (this->TheObjects[i]!=right.TheObjects[i])
       return false;
   return true;
-}
-
-void ElementWeylGroup::ElementToString(std::string& output)
-{ std::stringstream out;
-  for (int i=0; i<this->size; i++)
-    out <<this->TheObjects[i]<<", ";
-  output= out.str();
 }
 
 int ElementWeylGroup::HashFunction() const
@@ -19396,9 +19378,9 @@ void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariab
 
 void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
-  input>> tempS;
+  input >> tempS;
   this->simpleGenerators.ReadFromFile(input, theGlobalVariables);
-  input>> tempS;
+  input >> tempS;
   this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
@@ -19689,7 +19671,7 @@ void minimalRelationsProverStates::InvokeExtensionOfState(int index, int UpperLi
       if (this->TheObjects[index].PossibleChildStates.size>=UpperLimitChildren)
         return;
     this->TestAddingExtraRoot( index, theWeyl, theGlobalVariables, theWeyl.RootSystem.TheObjects[i], addFirstAlpha, i, NormalSeparatingCones, oneBetaIsPositive);
-    this->MakeProgressReportChildStates( i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
+    this->MakeProgressReportChildStates(i, theWeyl.RootSystem.size*2, this->TheObjects[index].PossibleChildStates.size, theGlobalVariables, theWeyl);
   }
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { if (UpperLimitChildren>=0)

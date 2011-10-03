@@ -189,7 +189,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     { this->GmodKNegWeightsBasisChanged.PopIndexSwapWithLast(i);
       i--;
     }
-  this->log <<"\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
+  this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
   theProjection.init(input.theDomain.GetRank(), input.theRange.GetRank());
   for (int i=0; i<input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
@@ -6508,6 +6508,157 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
   return *this->thePhysicalDrawOps.LastObject();
 }
 
+std::string ElementWeylGroup::ElementToString
+  (bool useLatex, bool useHtml, const std::string& simpleRootLetter)
+{ if (this->size==0)
+    return "id";
+  std::stringstream out;
+  for (int i=this->size-1; i>=0; i--)
+    out << "s_{" << simpleRootLetter << "_{" << this->TheObjects[i]+1 << "} }";
+  return out.str();
+}
+
+void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
+{ std::stringstream out; std::string tempS;
+  int currentSize=0;
+  out << "\\begin{array}{c}";
+  for (int i=0; i<this->size; i++)
+  { out << this->TheObjects[i].ElementToString();
+    if (i!=this->size-1)
+    { if (currentSize<this->TheObjects[i+1].size)
+      { currentSize=this->TheObjects[i+1].size;
+        out << "\\\\";
+      } else out << ",";
+    }
+  }
+  out << "\\end{array}";
+
+  this->ExternalAutomorphisms.ElementToStringGeneric(tempS);
+  out << tempS;
+  output=out.str();
+}
+
+int ParserNode::EvaluateParabolicWeylGroups
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  Selection parabolicSel;
+  parabolicSel.init(theAmbientWeyl.GetDim());
+  int numCycles=MathRoutines::TwoToTheNth(parabolicSel.MaxSize);
+  ReflectionSubgroupWeylGroup theSubgroup;
+  std::stringstream out;
+  for (int i=0; i<numCycles; i++, parabolicSel.incrementSelection())
+  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 2000);
+    out << "<hr>" << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(theSubgroup.ElementToString());
+  }
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
+{ if (this->size<1)
+    return "Error, non-initialized group";
+  if (this->size==1)
+    return "id";
+  List<List<List<int> > > arrows;
+  List<List<int> > Layers;
+  root tempRoot;
+  Layers.MakeActualSizeAtLeastExpandOnTop(this->size);
+  int GraphWidth=1;
+  int oldLayerElementLength=-1;
+  for (int i=0; i< this->size; i++)
+  { if (this->TheObjects[i].size!=oldLayerElementLength)
+    { Layers.SetSize(Layers.size+1);
+      oldLayerElementLength=this->TheObjects[i].size;
+    }
+    Layers.LastObject()->AddObjectOnTop(i);
+    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
+  }
+  hashedRoots orbit;
+  orbit.MakeActualSizeAtLeastExpandOnTop(this->size);
+  for (int i=0; i<this->size; i++)
+  { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
+    orbit.AddObjectOnTopHash(tempRoot);
+  }
+  arrows.SetSize(Layers.size);
+  for (int i=0; i< Layers.size; i++)
+  { arrows[i].SetSize(Layers[i].size);
+    for (int j=0; j<Layers[i].size; j++)
+      for (int k=0; k<this->simpleGenerators.size; k++)
+      { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
+        int index=orbit.IndexOfObjectHash(tempRoot);
+        assert(index!=-1);
+        if (this->TheObjects[index].size>this->TheObjects[Layers[i][j]].size)
+          arrows[i][j].AddObjectOnTop(index);
+      }
+  }
+  std::stringstream out;
+  std::cout << this->simpleGenerators.ElementToString();
+  out << "\\xymatrix{";
+  for (int i=0; i<Layers.size; i++)
+  { int currentRowOffset=(GraphWidth-Layers[i].size)/2;
+    int nextRowOffset=-1;
+    if (i<Layers.size-1)
+      nextRowOffset=(GraphWidth-Layers[i+1].size)/2;
+    for (int j=0; j<currentRowOffset; j++)
+      out << "&";
+    for (int j=0; j<Layers[i].size; j++)
+    { out << this->TheObjects[Layers[i][j]].ElementToString();
+      for (int k=0; k<arrows[i][j].size; k++)
+      { out << " \\ar[d";
+        int indexInLayer=Layers[i+1].IndexOfObject(arrows[i][j][k]);
+        assert(indexInLayer!=-1);
+        int actualOffset=-(j-indexInLayer+currentRowOffset-nextRowOffset);
+        for (int l=0; l<actualOffset; l++)
+          out << "r";
+        for (int l=0; l>actualOffset; l--)
+          out << "l";
+        out << "]";
+      }
+      out << " & ";
+    }
+    out << " \\\\\n";
+  }
+  out << "}";
+  return out.str();
+}
+
+int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  Selection parabolicSel;
+  parabolicSel.init(theAmbientWeyl.GetDim());
+  int numCycles=MathRoutines::TwoToTheNth(parabolicSel.MaxSize);
+  ReflectionSubgroupWeylGroup theSubgroup;
+  std::stringstream out;
+//  for (int i=0; i<numCycles; i++, parabolicSel.incrementSelection())
+//  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 2000);
+//    out << "<hr>" << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(theSubgroup.ElementToStringBruhatGraph());
+//  }
+
+
+  std::fstream outputFile;
+  std::string fileName;
+  fileName.append(theNode.owner->outputFolderPath);
+  fileName.append("output");
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 2000);
+  outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+  outputFile << "\n\\end{document}";
+  out << "A png file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+  out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.png\"> output.png</a>";
+  theNode.outputString=out.str();
+//  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
+
+  theNode.owner->SystemCommands.AddObjectOnTop("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + fileName + ".tex");
+
+  theNode.owner->SystemCommands.AddObjectOnTop("dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight");
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
 { if (this->flagFunctionListInitialized)
     return;
@@ -6779,6 +6930,22 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "drawGtwoInBthree",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateDrawG2InB3
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("parabolicsInfo",
+   "()",
+   "Makes a table with information about the parabolic subalgebras of the ambient Lie algebra.",
+   "parabolicsInfo",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateParabolicWeylGroups
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("parabolicsInfoBruhatGraph",
+   "()",
+   "<b>Experimental, please don't use.</b>Makes a table with information about the parabolic subalgebras of the ambient Lie algebra.",
+   "parabolicsInfoBruhatGraph",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

@@ -7582,7 +7582,11 @@ class ElementWeylGroup: public List<int>
 {
 public:
   std::string DebugString;
-  void ElementToString(std::string& output);
+  void ElementToString(std::string& output){output=this->ElementToString();}
+  std::string ElementToString() {return this->ElementToString(false, true, "\\eta");}
+  std::string ElementToString
+  (bool useLatex, bool useHtml, const std::string& simpleRootLetter)
+  ;
   void ComputeDebugString();
   int HashFunction() const;
   void operator=(const ElementWeylGroup& right);
@@ -7857,6 +7861,8 @@ public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(DebugString); }
   void ElementToString(std::string& output);
+  std::string ElementToStringBruhatGraph();
+  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   void MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
@@ -10303,6 +10309,12 @@ public:
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateCreateFromDirectionsAndSalamiSlice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateParabolicWeylGroups
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
 

@@ -142,7 +142,7 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -160,7 +160,9 @@ int main(int argc, char **argv)
   //For debugging:
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  civilizedInput="parabolicsInfoBruhatGraph";
+  //civilizedInput="parabolicsInfoBruhatGraph(0,0,0)";
+  //civilizedInput="vpf((1, 0, 0),(0, 1, 0),(0, 0, 1),(1, 1, 0),(0, 1, 1),(1, 1, 1),(0, 1, 2),(1, 1, 2),(1, 2, 2))";
+  //civilizedInput="parabolicsInfoBruhatGraph";
 //  civilizedInput="coneFromVertices((1,0), (0,1)) ";
 //  civilizedInput="coneFromNormals(0) ";
 //  civilizedInput="coneFromVertices((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)) ";

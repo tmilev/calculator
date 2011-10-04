@@ -415,7 +415,6 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
-  QPSub theSub;
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
@@ -448,7 +447,6 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
         theGlobalVariables.MakeReport();
         currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjecteD[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
-        out << "\nthe sub is: " << theSub.ElementToString();
       }
     }
 //  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
@@ -554,22 +552,23 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       break;
     case 2:
       this->ComputeQPsFromChamberComplex(theGlobalVariables);
+      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 3:
       this->InitTheMaxComputation(theGlobalVariables);
+      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 4:
       this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true, theGlobalVariables);
-      out << "num non-zero mults: " << this->numNonZeroMults;
+      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 5:
-//      this->theMaxComputation.FindExtremaParametricStep2TrimChamberForMultOne(this->thePauseControlleR, theGlobalVariables);
+      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
+      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 6:
-      this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
-      break;
-    case 7:
       this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR, theGlobalVariables);
+      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     default:
       break;
@@ -1015,7 +1014,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
     for (int i=0; i<theNEqBeforeCheck.size; i++)
       theNEq[i]=theNEqBeforeCheck[i];
   }
-  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
+  if (!theShiftNode.GetRootRationalDontUseForFunctionArguments(theShift, theGlobalVariables))
     return theNode.SetError(errorDimensionProblem);
   if (theShift.size!=theNEq.size-1)
     return theNode.SetError(errorDimensionProblem);
@@ -1060,7 +1059,7 @@ int ParserNode::EvaluateSliceCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Cone& theCone=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theCone.GetElement();
   root theDirection;
-  if (! theNode.owner->TheObjects[theArgumentList.TheObjects[1]].GetRootRational(theDirection, theGlobalVariables))
+  if (! theNode.owner->TheObjects[theArgumentList.TheObjects[1]].GetRootRationalDontUseForFunctionArguments(theDirection, theGlobalVariables))
     return theNode.errorProgramming;
   if (theCone.GetDim()!=theDirection.size)
     return theNode.errorDimensionProblem;
@@ -1937,7 +1936,7 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   for (int i=0; i<this->size; i++)
   { if (useHtml)
       out << "<hr>";
-    out << "\nChamber " << i+1 << ":\n";
+    out << "\n\n\nChamber " << i+1 << ":\n";
     if (useHtml)
       out << "<br>";
     out << this->TheObjects[i].ElementToString(useLatex, useHtml, theFormat) << "\n\n\n";
@@ -2727,7 +2726,19 @@ bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVaria
   return true;
 }
 
-bool ParserNode::GetRootRational(root& output, GlobalVariables& theGlobalVariables)
+bool ParserNode::GetRootRationalFromFunctionArguments
+(//List<int>& argumentList,
+ root& output, GlobalVariables& theGlobalVariables)
+{ roots tempRoots;
+  int theDim;
+  this->GetRootsEqualDimNoConversionNoEmptyArgument(this->children, tempRoots, theDim);
+  if (tempRoots.size!=1)
+    return false;
+  output = tempRoots[0];
+  return true;
+}
+
+bool ParserNode::GetRootRationalDontUseForFunctionArguments(root& output, GlobalVariables& theGlobalVariables)
 { if (this->ExpressionType!=this->typeArray)
   { output.SetSize(1);
     if (!this->ConvertToType(this->typeRational, 0, theGlobalVariables))
@@ -4847,11 +4858,11 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
   root theAffineNormal, theRay, theRayMultiple, theShift;//, theRay;
-  if (!theHyperplaneNode.GetRootRational(theAffineNormal, theGlobalVariables))
+  if (!theHyperplaneNode.GetRootRationalDontUseForFunctionArguments(theAffineNormal, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
-  if (!theDirectionNode.GetRootRational(theRay, theGlobalVariables))
+  if (!theDirectionNode.GetRootRationalDontUseForFunctionArguments(theRay, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
-  if (!theShiftNode.GetRootRational(theShift, theGlobalVariables))
+  if (!theShiftNode.GetRootRationalDontUseForFunctionArguments(theShift, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
 //  if (!theRayNode.GetRootRational(theRay, theGlobalVariables))
 //    return theNode.SetError(theNode.errorProgramming);
@@ -6047,7 +6058,7 @@ int ParserNode::EvaluateAnimateRootSystemBluePoint
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { root tempRoot;
   ParserNode& aNode=theNode.owner->TheObjects[theArgumentList[3]];
-  aNode.GetRootRational(tempRoot, theGlobalVariables);
+  aNode.GetRootRationalDontUseForFunctionArguments(tempRoot, theGlobalVariables);
   return theNode.EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, & tempRoot);
 }
 
@@ -6509,12 +6520,18 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
 }
 
 std::string ElementWeylGroup::ElementToString
-  (bool useLatex, bool useHtml, const std::string& simpleRootLetter)
+  (bool useLatex, bool useHtml, const std::string& simpleRootLetter, List<int>* DisplayIndicesOfSimpleRoots)
 { if (this->size==0)
     return "id";
   std::stringstream out;
   for (int i=this->size-1; i>=0; i--)
-    out << "s_{" << simpleRootLetter << "_{" << this->TheObjects[i]+1 << "} }";
+  { out << "s_{" << simpleRootLetter << "_{";
+    if (DisplayIndicesOfSimpleRoots==0)
+      out << this->TheObjects[i]+1;
+    else
+      out << (*DisplayIndicesOfSimpleRoots)[this->TheObjects[i]];
+    out << "} }";
+  }
   return out.str();
 }
 
@@ -6593,8 +6610,15 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
       }
   }
   std::stringstream out;
-  std::cout << this->simpleGenerators.ElementToString();
+//  std::cout << this->simpleGenerators.ElementToString();
+  List<int> DisplayIndicesSimpleGenerators;
+  DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+  for (int i=0; i<this->simpleGenerators.size; i++)
+    DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
   out << "\\xymatrix{";
+  bool GraphWidthIsOdd=((GraphWidth%2)!=0);
+  if (!GraphWidthIsOdd)
+    GraphWidth++;
   for (int i=0; i<Layers.size; i++)
   { int currentRowOffset=(GraphWidth-Layers[i].size)/2;
     int nextRowOffset=-1;
@@ -6603,12 +6627,20 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     for (int j=0; j<currentRowOffset; j++)
       out << "&";
     for (int j=0; j<Layers[i].size; j++)
-    { out << this->TheObjects[Layers[i][j]].ElementToString();
+    { out << this->TheObjects[Layers[i][j]].ElementToString(true, false, "\\eta", &DisplayIndicesSimpleGenerators);
+      int currentOffset=j+currentRowOffset;
+      if (Layers[i].size%2==0)
+        if (currentOffset>=GraphWidth/2)
+          currentOffset++;
       for (int k=0; k<arrows[i][j].size; k++)
       { out << " \\ar[d";
         int indexInLayer=Layers[i+1].IndexOfObject(arrows[i][j][k]);
         assert(indexInLayer!=-1);
-        int actualOffset=-(j-indexInLayer+currentRowOffset-nextRowOffset);
+        int nextOffset=indexInLayer+nextRowOffset;
+        if (Layers[i+1].size%2==0)
+          if (nextOffset>=GraphWidth/2)
+            nextOffset++;
+        int actualOffset=-currentOffset+nextOffset;
         for (int l=0; l<actualOffset; l++)
           out << "r";
         for (int l=0; l>actualOffset; l--)
@@ -6616,6 +6648,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
         out << "]";
       }
       out << " & ";
+      if (Layers[i].size%2==0 && j==Layers[i].size/2-1)
+        out << " & ";
     }
     out << " \\\\\n";
   }
@@ -6626,17 +6660,15 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
 int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  root tempRoot;
+  if (!theNode.GetRootRationalFromFunctionArguments(tempRoot, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (tempRoot.size!=theAmbientWeyl.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
   Selection parabolicSel;
-  parabolicSel.init(theAmbientWeyl.GetDim());
-  int numCycles=MathRoutines::TwoToTheNth(parabolicSel.MaxSize);
+  parabolicSel=tempRoot;
   ReflectionSubgroupWeylGroup theSubgroup;
   std::stringstream out;
-//  for (int i=0; i<numCycles; i++, parabolicSel.incrementSelection())
-//  { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 2000);
-//    out << "<hr>" << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(theSubgroup.ElementToStringBruhatGraph());
-//  }
-
-
   std::fstream outputFile;
   std::string fileName;
   fileName.append(theNode.owner->outputFolderPath);
@@ -6941,10 +6973,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
   this->AddOneFunctionToDictionaryNoFail
   ("parabolicsInfoBruhatGraph",
-   "()",
-   "<b>Experimental, please don't use.</b>Makes a table with information about the parabolic subalgebras of the ambient Lie algebra.",
-   "parabolicsInfoBruhatGraph",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   "(Integer,...)",
+   "<b>Experimental, please don't use.</b>Makes a table with information about the parabolic subalgebras of the ambient Lie algebra. The input must have as many integers as there are simple roots in the ambient \
+   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding coordinate. Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
+   calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple roots \
+   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. You will get your output as a .png file link, you must click onto the link to see the end result. ",
+   "parabolicsInfoBruhatGraph(0,0,0)",
+//   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );
 /*   this->AddOneFunctionToDictionaryNoFail

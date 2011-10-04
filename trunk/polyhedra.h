@@ -7583,9 +7583,9 @@ class ElementWeylGroup: public List<int>
 public:
   std::string DebugString;
   void ElementToString(std::string& output){output=this->ElementToString();}
-  std::string ElementToString() {return this->ElementToString(false, true, "\\eta");}
+  std::string ElementToString() {return this->ElementToString(false, true, "\\eta", 0);}
   std::string ElementToString
-  (bool useLatex, bool useHtml, const std::string& simpleRootLetter)
+  (bool useLatex, bool useHtml, const std::string& simpleRootLetter, List<int>* DisplayIndicesOfSimpleRoots)
   ;
   void ComputeDebugString();
   int HashFunction() const;
@@ -10268,7 +10268,13 @@ public:
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
-  bool GetRootRational(root& output, GlobalVariables& theGlobalVariables);
+  bool GetRootRationalDontUseForFunctionArguments
+  (root& output, GlobalVariables& theGlobalVariables)
+  ;
+bool GetRootRationalFromFunctionArguments
+(//List<int>& argumentList,
+ root& output, GlobalVariables& theGlobalVariables)
+;
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
@@ -10302,6 +10308,7 @@ public:
   static int EvaluateAnimationClonePreviousFrameDrawExtraLine
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+
   static int EvaluateGroebner
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -11811,3 +11818,4 @@ class CompleX
   CompleX(double other){this->operator=(other);}
 };
 #endif
+

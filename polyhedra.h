@@ -1050,7 +1050,6 @@ public:
   std::string DebugString;
   static bool flagComputingDebugInfo;
   static bool flagAnErrorHasOccurredTimeToPanic;
-  static std::string MatrixElementSeparator;
   void Transpose()
   { if (this->NumCols==this->NumRows)
     { for (int i=0; i<this->NumRows; i++)
@@ -1712,18 +1711,17 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
         out << "<td>";
       out << tempS;
       if (useLatex)
-      { if (j!=this->NumCols-1)
+        if (j!=this->NumCols-1)
           out << " & ";
-      }
-      else
-         out << this->MatrixElementSeparator;
       if (useHtml)
         out << "</td>";
+      if (!useHtml && !useLatex)
+        out << ", \t ";
     }
     if (useHtml)
       out << "</tr>";
     if (useLatex)
-      out << "\\\\\n";
+      out << "\\\\";
     out << "\n";
   }
   if (useHtml)
@@ -3207,6 +3205,7 @@ public:
   std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
   std::string ElementToString(bool useLatex, bool useHtml, bool makeTable)const{std::string tempS; this->ElementToString(tempS, useLatex, useHtml, makeTable); return tempS;};
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable);
+  std::string ElementToStringEpsilonForm(){std::string tempS; this->ElementToStringEpsilonForm(tempS, false, false, false); return tempS;}
   void ElementToString(std::string& output, bool useLaTeX, bool useHtml, bool makeTable)const;
   std::string* ElementToStringDebuggerCallOnly(){ this->ComputeDebugString(); return &this->DebugString;}
   //The below function is required to preserve the order of elements given by theSelection.elements.
@@ -7335,7 +7334,8 @@ public:
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
   void MakeFromPolyShiftAndLattice(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
-  void MakeZeroLatticeZn(int theDim);
+  void MakeZeroLatTiceZn(int theDim);
+  void MakeZeroOverLattice(Lattice& theLattice);
 //  bool ExtractLinearMapAndTranslationFromSub
 //  ()
  // ;
@@ -7770,6 +7770,7 @@ public:
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
+  void GetFundamentalWeightsInSimpleCoordinates(roots& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
   void ComputeWeylGroup(int UpperLimitNumElements);
   void ComputeWeylGroupAndRootsOfBorel(roots& output);
@@ -9912,14 +9913,22 @@ public:
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
   static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
-  static std::string GetHtmlMathDivFromLatexFormula
+  static std::string GetHtmlMathDivFromLatexFormulA
   (const std::string& input)
-  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, true);}
-  static std::string GetHtmlMathSpanFromLatexFormula
-  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormula(input, false);}
-  static std::string GetHtmlMathFromLatexFormula
-  (const std::string& input, bool useDiv)
-  ;
+  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", true, false);}
+
+  static std::string GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
+  (const std::string& input)
+  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);}
+
+    static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
+  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);}
+    static std::string GetHtmlMathSpanFromLatexFormula
+  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);}
+
+  static std::string GetHtmlMathFromLatexFormulA
+  (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
+;
   static std::string GetStyleButtonLikeHtml(){return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";}
   static std::string GetHtmlButton
   (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
@@ -10143,8 +10152,10 @@ public:
   bool findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
   ;
-  bool findMaxQPOverConeProjective
-  (Cone& input, List<QuasiPolynomial>& inputQPs, List<QuasiPolynomial>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  bool findMaxLFOverConeProjective
+  (Cone& input, roots& inputLFsLastCoordConst,
+   List<int>& outputMaximumOverEeachSubChamber,
+   GlobalVariables& theGlobalVariables)
   ;
   void initFromCones
 (List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
@@ -10218,6 +10229,10 @@ class ConeLatticeAndShiftMaxComputation
   void FindExtremaParametricStep4
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 ;
+  void FindExtremaParametricStep5
+    (Controller& thePauseController, GlobalVariables& theGlobalVariables)
+;
+
   void WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables)
   ;

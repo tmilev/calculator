@@ -268,10 +268,6 @@ template < > int List<TensorProductMonomial<ElementVermaModuleOrdered<Polynomial
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
-template < > std::string Matrix<Rational>::MatrixElementSeparator= ", \t";
-template < > std::string Matrix<LargeInt>::MatrixElementSeparator= ", \t";
-template < > std::string Matrix<PolynomialRationalCoeff>::MatrixElementSeparator= ", \t";
-template < > std::string Matrix<RationalFunction>::MatrixElementSeparator= ", \t";
 
 //template < > int ListPointers<partFraction>::MemoryAllocationIncrement=100;
 ListPointers<partFraction> partFraction::GlobalCollectorPartFraction;
@@ -1546,18 +1542,20 @@ void roots::ElementToLinearCombinationString(std::string& output)
 
 void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml, bool makeTable)
 { std::string tempS; std::stringstream out;
+  if (useLatex)
+    useHtml=false;
   if (useHtml && makeTable)
     out << "<table>";
   if (useLatex && makeTable)
-    out << "\\begin{tabular}{c}";
+    out << "\\begin{array}{l}";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToStringEpsilonForm(tempS, useLatex, useHtml);
     if (useHtml && makeTable)
       out << "<tr><td>";
-    if (!useLatex || useHtml)
+    if (!useLatex && useHtml)
       out << "(";
     out << tempS;
-    if (!useLatex || useHtml)
+    if (!useLatex && useHtml)
       out << ")";
     if (useLatex && makeTable)
       out << "\\\\";
@@ -1570,10 +1568,10 @@ void roots::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool 
     else
       out << "\n";
   }
+  if (useLatex && makeTable)
+    out << "\\end{array}";
   if (useHtml && makeTable)
     out << "</table>";
-  if (useLatex && makeTable)
-    out << "\\end{tabular}";
   output=out.str();
 }
 
@@ -15959,12 +15957,12 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
-  output << "<HTML><title> Root subsystems of " << this->AmbientWeyl.WeylLetter << this->AmbientWeyl.CartanSymmetric.NumRows << "</title>";
+  output << "<html><title> Root subsystems of " << this->AmbientWeyl.WeylLetter << this->AmbientWeyl.CartanSymmetric.NumRows << "</title>";
   output << "<meta name=\"keywords\" content=\"" << this->AmbientWeyl.WeylLetter << this->AmbientWeyl.CartanSymmetric.NumRows << " root subsystems, root subsystems, root systems";
   if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
     output << ", exceptional Lie algebra";
   output << " \">";
-  output << "<BODY>" << header << this->DebugString << "</BODY></HTML>";
+  output << "<body>" << header << this->DebugString << "</body></html>";
   output.close();
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
@@ -15973,7 +15971,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
 void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   if (useHtml)
-    out << "<a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    out << " <a href=\"/cgi-bin/calculator\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);
@@ -21147,7 +21145,8 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::stringstream out, outNotation;
   std::string fileName;
   std::fstream theFile, fileFlas;
-  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a><br> <a href=\"../rootHtml.html\">Root subsystem table</a><br>";
+  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a>"
+  << "<br> <a href=\"/cgi-bin/calculator\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out << tempS;
@@ -23634,7 +23633,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->ratFunction.GetElement().Nullify(this->impliedNumVars, theContext);
       break;
     case ParserNode::typeQuasiPolynomial:
-      this->theQP.GetElement().MakeZeroLatticeZn(this->impliedNumVars);
+      this->theQP.GetElement().MakeZeroLatTiceZn(this->impliedNumVars);
       break;
     case ParserNode::typeAnimation:
       this->theAnimation.GetElement().MakeZero();
@@ -28909,7 +28908,7 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
   { if (!useHtml)
       out << stringValueOnly;
     else
-      out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(stringValueOnly);
+      out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(stringValueOnly);
   }
   if (this->outputString!="" && this->ExpressionType!=this->typeString)
     out << "<br>In addition, the program generated the following printout. ";

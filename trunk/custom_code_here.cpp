@@ -199,7 +199,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       theProjection.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(1,0,0)";
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(0,1,0)";
   theSubgroup.MakeParabolicFromSelectionSimpleRoots
   (theWeyL, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
 
@@ -242,10 +242,55 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     this->log << "\n\n" << currentLOExtended.ElementToString(false, false);
     this->log << this->theTranslationS[k].ElementToString() << ";   " << this->theTranslationsProjecteD[k].ElementToString();
   }
+
+  List<int> displayIndicesReflections;
+  for (int i=0; i<this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize; i++)
+    if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i])
+      displayIndicesReflections.AddObjectOnTop(i+1);
+  Matrix<PolynomialRationalCoeff> tempMatPoly;
+  Vector<PolynomialRationalCoeff> tempVect, tempVect2;
+  tempVect.SetSize(input.theDomain.theWeyl.GetDim()+input.theRange.theWeyl.GetDim());
+  for (int i=0; i<tempVect.size; i++)
+    tempVect[i].MakeMonomialOneLetter(tempVect.size, i, 1, (Rational) 1);
+  tempMatPoly.init(input.theDomain.theWeyl.GetDim(), tempVect.size);
+  PolynomialRationalCoeff polyZero;
+  polyZero.Nullify(tempVect.size);
+  theFormat.alphabet[0]="x_1";
+  theFormat.alphabet[1]="x_2";
+  theFormat.alphabet[2]="y_1";
+  theFormat.alphabet[3]="y_2";
+  theFormat.alphabet[4]="y_3";
+  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ" << tempVect.ElementToString(theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
+  for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
+  { MatrixLargeRational& currentLoExt=this->theLinearOperatorsExtended[i];
+    for (int j=0; j<currentLoExt.NumRows; j++)
+      for (int k=0; k<currentLoExt.NumCols; k++)
+        tempMatPoly.elements[j][k].MakeNVarConst(tempVect.size, currentLoExt.elements[j][k]);
+    tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
+    for (int j=0; j<tempVect2.size; j++)
+      tempVect2[j]+=this->theTranslationsProjecteD[i][j];
+    this->log << "\n$" <<  theSubgroup[i].ElementToString(true, false, "\\eta", & displayIndicesReflections) << "$&$"
+    << tempVect2.ElementToString(theFormat) << "$\\\\";
+  }
+  this->log <<"\\end{longtable}\n\n";
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   tempMat=theWeyL.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.AssignMatrixRows(tempMat);
+  roots rootsGeneratingExtendedLattice;
+  int totalDim=input.theRange.GetRank()+input.theDomain.GetRank();
+  rootsGeneratingExtendedLattice.SetSize(totalDim);
+  Lattice tempLattice;
+  theWeyL.GetIntegralLatticeInSimpleCoordinates(tempLattice);
+  for (int i=0; i<input.theDomain.GetRank(); i++)
+    rootsGeneratingExtendedLattice[i].MakeEi(totalDim,i);
+  for (int i=0; i<input.theRange.GetRank(); i++)
+  { tempLattice.basisRationalForm.RowToRoot(i, rootsGeneratingExtendedLattice[i+input.theDomain.GetRank()]);
+    rootsGeneratingExtendedLattice[i+input.theDomain.GetRank()].ShiftToTheRightInsertZeroes(input.theDomain.GetRank(), (Rational) 0);
+  }
+  this->theExtendedIntegralLatticeMatForM.MakeFromRoots(rootsGeneratingExtendedLattice);
+  this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
+  this->log << this->theExtendedIntegralLatticeMatForM.ElementToString(false, false);
   this->PreimageWeylChamberLargerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
   root tempRoot;
@@ -278,6 +323,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
    //   tempRoot.TheObjects[j+input.theDomain.GetRank()]=tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i]=tempRoot;
   }
+
   tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
   this->PreimageWeylChamberLargerAlgebra.Normals.AddObjectOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
@@ -322,19 +368,15 @@ void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational&
 GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
 void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const root& input, root& output)
-{ MatrixLargeRational& currentOperator=this->theLinearOperators.TheObjects[indexOperator];
-  root& currentTranslation=this->theTranslationS[indexOperator];
-  root tempRoot2;
-  tempRoot2.SetSize(currentOperator.NumCols);
-  output.MakeZero(currentOperator.NumRows);
-  for (int i=0; i<currentOperator.NumCols; i++)
-    tempRoot2.TheObjects[i]=input.TheObjects[currentOperator.NumRows+i];
-  for (int j=0; j<currentOperator.NumRows; j++)
-    output.TheObjects[j]=input.TheObjects[j];
-  currentOperator.ActOnAroot(tempRoot2);
-  output-=tempRoot2;
-  currentOperator.ActOnAroot(currentTranslation, tempRoot2);
-  output-=tempRoot2;
+{ MatrixLargeRational& currentExtendedOperator=this->theLinearOperatorsExtended[indexOperator];
+  root& currentTranslation=this->theTranslationsProjecteD[indexOperator];
+  assert (!input.LastObject()->IsEqualToZero());
+  output=input;
+  Rational tempRat=*output.LastObject();
+  output/=tempRat;
+  output.size--;
+  currentExtendedOperator.ActOnAroot(output);
+  output+=currentTranslation;
 }
 
 void MatrixLargeRational::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
@@ -430,8 +472,6 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->theQPsNonSubstituted.SetSize(this->thePfs.theChambers.size);
   this->theQPsSubstituted.SetSize(this->thePfs.theChambers.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
-  Lattice theExtendedIntegralLatticeMatForm;
-  theExtendedIntegralLatticeMatForm.MakeZn(totalDim);
   theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   for (int i=0; i<this->thePfs.theChambers.size; i++)
     if (this->thePfs.theChambers.TheObjects[i]!=0)
@@ -445,7 +485,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
         tempStream << "Processing chamber " << i+1 << " linear operator " << k+1;
         theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
-        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjecteD[k], theExtendedIntegralLatticeMatForm, currentQPSub, theGlobalVariables);
+        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjecteD[k], this->theExtendedIntegralLatticeMatForM, currentQPSub, theGlobalVariables);
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       }
     }
@@ -527,6 +567,41 @@ void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGl
   this->WriteToFile(output, theGlobalVariables);
 }
 
+std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesReport
+(GlobalVariables& theGlobalVariables)
+{ assert(this->theMultiplicities.size== this->projectivizedChambeR.size);
+  std::stringstream out;
+  PolynomialOutputFormat theFormat;
+  theFormat.alphabet[0]="x_1";
+  theFormat.alphabet[1]="x_2";
+  theFormat.alphabet[2]="y_1";
+  theFormat.alphabet[3]="y_2";
+  theFormat.alphabet[4]="y_3";
+  out << "Number chambers: " << projectivizedChambeR.size << "  of them " << this->numNonZeroMults << " non-zero.";
+  int numInequalities=0;
+  for (int i=0; i<this->projectivizedChambeR.size; i++)
+  { numInequalities+=this->projectivizedChambeR[i].Normals.size;
+  }
+  out << "\nNumber of inequalities: " << numInequalities;
+
+  out << this->PrepareReport(theGlobalVariables);
+  return out.str();
+}
+
+void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGlobalVariables)
+{ List<Cone> tempList;
+  tempList=this->projectivizedChambeR;
+  tempList.QuickSortAscending();
+  List<QuasiPolynomial> tempQPlist;
+  tempQPlist.SetSize(this->theMultiplicities.size);
+  for (int i=0; i<this->theMultiplicities.size; i++)
+    tempQPlist[i]=this->theMultiplicities[this->projectivizedChambeR.IndexOfObjectHash(tempList[i])];
+  this->theMultiplicities=tempQPlist;
+  this->projectivizedChambeR.ClearTheObjects();
+  for (int i=0; i<tempList.size; i++)
+    this->projectivizedChambeR.AddObjectOnTopHash(tempList[i]);
+}
+
 void GeneralizedVermaModuleCharacters::IncrementComputation
   (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -547,12 +622,13 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       break;
     case 1:
       this->projectivizedChambeR.Refine(theGlobalVariables);
+      this->SortMultiplicities(theGlobalVariables);
       out << this->projectivizedChambeR.ElementToString(false, false);
 //      out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
     case 2:
       this->ComputeQPsFromChamberComplex(theGlobalVariables);
-      out << theGlobalVariables.theIndicatorVariables.StatusString1;
+      out << this->ElementToStringMultiplicitiesReport(theGlobalVariables);
       break;
     case 3:
       this->InitTheMaxComputation(theGlobalVariables);
@@ -865,12 +941,17 @@ int ParserNode::EvaluateWeylAction
   std::stringstream out;
   theWeyl.ComputeWeylGroup(51840);
 //  std::cout << theWeight.ElementToString();
+  out << "We denote the Weyl group elements by using their minimal-length expressions using simple reflections.<br>"
+  << " In what follows, s_{\\eta_ i} denotes the reflection with respect to the i^th simple root. <br>The elements of the Weyl group are given in Bruhat order, "
+  << "i.e. are sorted according to the length of their expression using simple reflections.<br>";
   if (theWeyl.size>=51840)
     out << "Only the first 51840 elements have been computed. <br> If you want a larger computation <br> please use the C++ code directly.";
   out << "Number of elements: " << theWeyl.size << "<br>";
   Vector<RationalFunction> theOrbitElement;
   RationalFunction RFZero;
   RFZero.Nullify(theNode.impliedNumVars, &theGlobalVariables);
+  std::stringstream tempStream;
+  tempStream << "\\begin{array}{rcl}";
   for (int i=0; i<theWeyl.size; i++)
   { theOrbitElement=theWeight;
     if (!DualAction)
@@ -878,8 +959,10 @@ int ParserNode::EvaluateWeylAction
     else
     {
     }
-    out << theOrbitElement.ElementToString() << "<br>";
+    tempStream << theWeyl[i].ElementToString() << "\\circ " << theWeight.ElementToString() << " &=& " << theOrbitElement.ElementToString() << " \\\\ <br>";
   }
+  tempStream << "\\end{array}";
+  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormula(tempStream.str());
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -1597,6 +1680,20 @@ void ConeComplex::InitFromDirectionsAndRefine(roots& inputVectors, GlobalVariabl
   this->AddNonRefinedChamberOnTopNoRepetition(startingCone);
   this->slicingDirections.AddListOnTop(inputVectors);
   this->Refine(theGlobalVariables);
+}
+
+void ConeComplex::Sort(GlobalVariables& theGlobalVariables)
+{ List<Cone> tempList;
+  tempList=*this;
+  tempList.QuickSortAscending();
+  this->ClearTheObjects();
+  for (int i=0; i<tempList.size; i++)
+    this->AddObjectOnTopHash(tempList[i]);
+}
+
+void ConeComplex::RefineAndSort(GlobalVariables& theGlobalVariables)
+{ this->Refine(theGlobalVariables);
+  this->Sort(theGlobalVariables);
 }
 
 void ConeComplex::Refine(GlobalVariables& theGlobalVariables)
@@ -3680,6 +3777,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   output << "ChamberIndicatorHighestWeightLargerAlgebra: ";
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
   output << "\n";
+  this->theExtendedIntegralLatticeMatForM.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
     theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing small data... ";
@@ -3781,6 +3879,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->NonIntegralOriginModification.ReadFromFile(input);
   input >> tempS;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
+  this->theExtendedIntegralLatticeMatForM.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
     theGlobalVariables->IncrementReadWriteDepth();
   if (theGlobalVariables!=0)
@@ -3874,8 +3973,13 @@ bool ConeComplex::ReadFromFile
 
 void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
 { output.basisRationalForm=this->CartanSymmetric;
+  root tempRoot;
+  for (int i=0; i<this->GetDim(); i++)
+  { tempRoot.MakeEi(this->GetDim(), i);
+    output.basisRationalForm.RowTimesScalar(i, 2/this->RootScalarCartanRoot(tempRoot, tempRoot));
+  }
   output.basisRationalForm.Invert();
-  output.basisRationalForm.GetMatrixIntWithDen(output.basis, output.Den);
+  output.MakeFromMat(output.basisRationalForm);
   output.Reduce();
 }
 
@@ -3889,6 +3993,9 @@ int ParserNode::EvaluatePrintRootSystem
   tempMat = theWeyl.CartanSymmetric;
   tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
   out  << "The determinant of the symmetric Cartan matrix is: " << tempRat.ElementToString();
+  Lattice tempLattice;
+  theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
+  out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ElementToString(true, false);
   out << "<br>Root system:";
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { root& current=theNode.owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
@@ -4397,12 +4504,12 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
   int numFoundChambers=0;
   List<int> DisplayIndicesprojectivizedChambers;
   for (int i=0; i<this->projectivizedChambeR.size; i++)
-  { QuasiPolynomial& theMult=this->theMultiplicities.TheObjects[i];
+  { QuasiPolynomial& theMult=this->theMultiplicities[i];
     if (!theMult.IsEqualToZero())
     { numFoundChambers++;
       out << "\\hline\\multicolumn{2}{c}{Chamber " << numFoundChambers << "}\\\\\n";
       DisplayIndicesprojectivizedChambers.AddObjectOnTop(numFoundChambers);
-      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR.TheObjects[i], theGlobalVariables) << "&";
+      out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR[i], theGlobalVariables) << "&";
       out << theMult.ElementToString(false, true, theFormat) << "\\\\\n";
     } else
       DisplayIndicesprojectivizedChambers.AddObjectOnTop(-1);
@@ -6754,6 +6861,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the first and second simple roots, and x_1 is a variable. The coordinates are allowed to be arbitrary rational functions. ",
    "actByWeyl(x_1, x_2, x_3)",
     & ParserNode::EvaluateWeylAction
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("actByWeylRho",
+   "(RF,...)",
+   "Act using the \\rho-modified action on a weight vector whose coordinates are given in simple basis coordinates. For an element of the Weyl group w, the \\rho-modified action of w on \\alpha is given by w(\\alpha+\\rho)-\\rho, where \\rho is the half-sum of the positive roots of the ambient root system. \
+   This function is the affine \\rho-modification of the function ActByWeyl. The following example calls the action of the Weyl group of so(7); the half-sum of the positive roots of so(7) in simple coordinates equals (5,8,9).",
+   "actByWeylRho(x_1-5/2, x_2-8/2,x_3-9/2)",
+    & ParserNode::EvaluateWeylRhoAction
    );
   this->AddOneFunctionToDictionaryNoFail
   ("partialFraction",

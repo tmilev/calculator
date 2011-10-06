@@ -531,7 +531,7 @@ public:
       this->TheObjects[i]=right[i];
   }
   void operator == (const ListLight<Object>& right);
-  inline Object* LastObject(){return &this->TheObjects[this->size-1]; }
+  inline Object* LastObject()const{return &this->TheObjects[this->size-1]; }
   ListLight();
   ~ListLight();
 };
@@ -2598,8 +2598,20 @@ public:
     out << ")";
     output=out.str();
   }
+  void ElementToString(std::string& output, PolynomialOutputFormat& theFormat)
+  { std::stringstream out;
+    out << "(";
+    for(int i=0; i<this->size; i++)
+    { out << this->TheObjects[i].ElementToString(theFormat);
+      if (i!=this->size-1)
+        out << ", ";
+    }
+    out << ")";
+    output=out.str();
+  }
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; }
+  std::string ElementToString(PolynomialOutputFormat& theFormat){ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
   CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero) const
   { CoefficientType result, tempElt;
@@ -2670,6 +2682,14 @@ public:
     for (int i=0; i<this->size-numPositions; i++)
       this->TheObjects[i]=this->TheObjects[i+numPositions];
     this->size-=numPositions;
+  }
+  void ShiftToTheRightInsertZeroes(int numPositions, const CoefficientType& theRingZero)
+  { assert(numPositions>=0);
+    this->SetSize(this->size+numPositions);
+    for (int i=this->size-1; i>=numPositions; i--)
+      this->TheObjects[i]=this->TheObjects[i-numPositions];
+    for(int i=0; i<numPositions; i++)
+      this->TheObjects[i]=theRingZero;
   }
   bool GetIntegralCoordsInBasisIfTheyExist
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
@@ -10037,6 +10057,9 @@ public:
    List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables
    )
   ;
+  bool operator>(const Cone& other)const
+  { return this->Normals>other.Normals;
+  }
   bool operator==(const Cone& other)const
   { return this->flagIsTheZeroCone==other.flagIsTheZeroCone && this->Normals==other.Normals;
   }
@@ -10087,6 +10110,8 @@ public:
   std::string DebugString;
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
+  void Sort(GlobalVariables& theGlobalVariables);
+  void RefineAndSort(GlobalVariables& theGlobalVariables);
   void FindMaxmumOverNonDisjointChambers
     (roots& theMaximaOverEachChamber, roots& outputMaxima, GlobalVariables& theGlobalVariables)
     ;
@@ -11353,6 +11378,7 @@ public:
   roots GmodKNegWeightsBasisChanged;
   Cone PreimageWeylChamberLargerAlgebra;
   Cone PreimageWeylChamberSmallerAlgebra;
+  Lattice theExtendedIntegralLatticeMatForM;
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
@@ -11374,6 +11400,9 @@ public:
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
+  std::string ElementToStringMultiplicitiesReport
+  (GlobalVariables& theGlobalVariables)
+  ;
   void IncrementComputation
 (GlobalVariables& theGlobalVariables)
 ;
@@ -11427,6 +11456,7 @@ public:
   (GlobalVariables& theGlobalVariables)
   ;
   void GetSubFromIndex(QPSub& output, int theIndex);
+  void SortMultiplicities(GlobalVariables& theGlobalVariables);
   void GetSubFromNonParamArray
 (MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
   ;

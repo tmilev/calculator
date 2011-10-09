@@ -146,6 +146,37 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
 }
 
+void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
+  (ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output)
+{ assert(&output!=&input);
+  output.Nullify(this->theRange);
+  for (int i=0; i<input.NonZeroElements.CardinalitySelection; i++)
+  { int currentIndex=input.NonZeroElements.elements[i];
+    output+=this->imagesAllChevalleyGenerators[currentIndex]*input.coeffsRootSpaces[currentIndex];
+  }
+  output.Hcomponent.MakeZero(this->theRange.GetRank());
+  for (int i=0; i<input.Hcomponent.size; i++)
+    output.Hcomponent+=
+    this->imagesAllChevalleyGenerators
+    [this->theDomain.CartanIndexToChevalleyGeneratorIndex(i)].Hcomponent  *input.Hcomponent[i];
+  output.ComputeNonZeroElements();
+}
+
+void HomomorphismSemisimpleLieAlgebra::
+GetMapSmallCartanDualToLargeCartanDual
+(MatrixLargeRational& output)
+{ output.init(this->theRange.GetRank(), this->theDomain.GetRank());
+  ElementSimpleLieAlgebra domainElt, imageElt;
+  domainElt.Nullify(this->theDomain);
+  for (int i=0; i<this->theDomain.GetRank(); i++)
+  { domainElt.Hcomponent.MakeEi(this->theDomain.GetRank(), i);
+//    std::string tempS=domainElt.ElementToString();
+    this->ApplyHomomorphism(domainElt, imageElt);
+//    std::string tempS2=imageElt.ElementToString();
+    output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.Hcomponent);
+  }
+}
+
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
   (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
@@ -178,7 +209,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   preferredBasisChangeInverse=preferredBasisChange;
   preferredBasisChangeInverse.Invert();
   preferredBasisChangeInverse.ActOnRoots(this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
-  this->log <<"\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
+  this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
   for (int i=0; i<this->GmodKnegativeWeightS.size; i++)
     if (this->GmodKnegativeWeightS[i].IsPositiveOrZero())
     { this->GmodKnegativeWeightS.PopIndexSwapWithLast(i);
@@ -199,7 +230,21 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       theProjection.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(1,0,0)";
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(0,1,1)";
+  MatrixLargeRational DualCartanEmbedding;
+  input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
+  root ParabolicEvaluationRootImage, tempRoot;
+  ParabolicEvaluationRootImage=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
+  this->ParabolicSelectionSmallerAlgebra.init(input.theDomain.GetRank());
+  for (int i=0; i<input.theDomain.GetRank(); i++)
+  { DualCartanEmbedding.ColToRoot(i, tempRoot);
+    if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).IsPositive())
+      this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
+  }
+  this->log << "\nDual cartan embedding smaller into larger:\n" << DualCartanEmbedding.ElementToString(false, false);
+  this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ElementToString();
+  tempRoot= this->ParabolicSelectionSmallerAlgebra;
+  this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ElementToString();
   theSubgroup.MakeParabolicFromSelectionSimpleRoots
   (theWeyL, this->ParabolicLeviPartRootSpacesZeroStandsForSelected, theGlobalVariables, -1);
 
@@ -281,16 +326,23 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat=theWeyL.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
-  tempRoots.AssignMatrixRows(tempMat);
+  roots WallsWeylChamberLargerAlgebra;
+  for (int i=0; i<tempMat.NumRows; i++)
+  { tempMat.RowToRoot(i, tempRoot);
+    if(ParabolicEvaluationRootImage[i].IsEqualToZero())
+    { WallsWeylChamberLargerAlgebra.SetSize(WallsWeylChamberLargerAlgebra.size+1);
+      *WallsWeylChamberLargerAlgebra.LastObject()=tempRoot;
+    }
+  }
+  this->log << "\n\n\n**************\nParabolic selection larger algebra:" << ParabolicEvaluationRootImage.ElementToString() << "\nWalls Weyl chamber larger algebra: " << WallsWeylChamberLargerAlgebra.ElementToString();
+  this->log << "\n**************\n\n";
   roots rootsGeneratingExtendedLattice;
   int totalDim=input.theRange.GetRank()+input.theDomain.GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
-
   this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ElementToString(false, false);
-  this->PreimageWeylChamberLargerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
+  this->PreimageWeylChamberLargerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
-  root tempRoot;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
   { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     for (int j=0; j<input.theRange.GetRank(); j++)
@@ -299,10 +351,23 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   tempMat=input.theDomain.theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
-  tempRoots.AssignMatrixRows(tempMat);
+  tempRoots.size=0;
+  root ParabolicEvaluationRootSmallerAlgebra;
+  ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
+  for (int i=0; i<tempMat.NumRows; i++)
+  { input.theDomain.theWeyl.CartanSymmetric.RowToRoot(i, tempRoot);
+    if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).IsEqualToZero())
+    { tempRoots.SetSize(tempRoots.size+1);
+      tempMat.RowToRoot(i, *tempRoots.LastObject());
+    }
+  }
   preferredBasisChangeInverse.ActOnRoots(tempRoots);
+  this->log << "**********************\n\n\n";
+  this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ElementToString();
+  this->log << "the roots generating the chamber walls: " << tempRoots.ElementToString();
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
+  this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[0].ElementToString(false, false) << "\n";
   this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[1].ElementToString(false, false) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
@@ -461,7 +526,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   this->thePfs.split(theGlobalVariables, 0);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << "=" << this->thePfs.DebugString;
-  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
+//  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
   this->thePfs.theChambers.init();
   this->thePfs.theChambers.theDirections=this->GmodKNegWeightsBasisChanged;
@@ -1322,15 +1387,21 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep4
 
 void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep5
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
-{ ConeComplex tempComplex;
+{ this->finalMaximaChambers.SetSize(this->theFinalRepresentatives.size);
+  this->finalMaximaChambersIndicesMaxFunctions.SetSize(this->theFinalRepresentatives.size);
   for (int i=0; i<1; i++ )//this->theFinalRepresentatives.size; i++)
+  { this->finalMaximaChambers[i].SetSize(this->complexRefinedPerRepresentative[i].size);
+    this->theFinalRepresentatives[i].SetSize(this->complexRefinedPerRepresentative[i].size);
     for(int j=0; j<1; j++)//this->complexRefinedPerRepresentative[i].size; j++)
     { Cone& currentCone=this->complexRefinedPerRepresentative[i][j];
-      tempComplex.init();
-      List<int> output;
-//      tempComplex.findMaxLFOverConeProjective(
+      this->finalMaximaChambers[i][j].init();
+      this->finalMaximaChambers[i][j]
+      .findMaxLFOverConeProjective
+      (currentCone, this->theMaximaCandidates[i][j],
+      this->finalMaximaChambersIndicesMaxFunctions[i][j], theGlobalVariables);
      // tempComplex.a
     }
+  }
 }
 
 void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
@@ -1608,6 +1679,7 @@ bool ConeComplex::SplitChamber
   }*/
   Cone& newPlusCone= theGlobalVariables.coneBuffer1NewSplit;
   Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
+  bool needToRecomputeVertices=(myDyingCone.Normals.GetRankOfSpanOfElements(theGlobalVariables)<this->GetDim());
 //  newPlusCone.flagHasSufficientlyManyVertices=true;
 //  newMinusCone.flagHasSufficientlyManyVertices=true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -1654,6 +1726,10 @@ bool ConeComplex::SplitChamber
   assert(tempCone.Vertices.size==newMinusCone.Vertices.size);
 */
   this->PopChamberSwapWithLast(indexChamberBeingRefined);
+  if (needToRecomputeVertices)
+  { newPlusCone.CreateFromNormals(newPlusCone.Normals, theGlobalVariables);
+    newMinusCone.CreateFromNormals(newMinusCone.Normals, theGlobalVariables);
+  }
   this->AddNonRefinedChamberOnTopNoRepetition(newPlusCone);
   this->AddNonRefinedChamberOnTopNoRepetition(newMinusCone);
   return true;
@@ -2006,7 +2082,9 @@ std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathR
     out << "The cone is the entire space";
   if (!PrepareMathReport)
   { out << "Index next wall to refine by: " << this->LowestIndexNotCheckedForChopping << "\n";
-    out << "<br>\nIndex next direction to slice in: " << this->LowestIndexNotCheckedForSlicingInDirection;
+    if (useHtml)
+      out << "<br>";
+    out << "\nIndex next direction to slice in: " << this->LowestIndexNotCheckedForSlicingInDirection << "\n";
   }
   if (useHtml)
     out << "<br>";
@@ -2187,10 +2265,7 @@ int ParserNode::EvaluateConeFromVertices
 
 bool ConeComplex::findMaxLFOverConeProjective
   (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
-{ this->init();
-  //std::cout << "Starting cone: " << input.ElementToString(false, true);
-  this->AddNonRefinedChamberOnTopNoRepetition(input);
-  roots HyperPlanesCorrespondingToLF;
+{ roots HyperPlanesCorrespondingToLF;
   if (input.Normals.size<1 || inputLinPolys.size<1)
     return false;
   int theDim=input.Normals.TheObjects[0].size;
@@ -2210,15 +2285,26 @@ bool ConeComplex::findMaxLFOverConeProjective
           break;
         }
   }
+  return this->findMaxLFOverConeProjective
+  (input, HyperPlanesCorrespondingToLF,
+   outputMaximumOverEeachSubChamber, theGlobalVariables);
+}
+
+bool ConeComplex::findMaxLFOverConeProjective
+  (Cone& input, roots& inputLFsLastCoordConst,
+   List<int>& outputMaximumOverEeachSubChamber,
+   GlobalVariables& theGlobalVariables)
+{ this->init();
+  this->AddNonRefinedChamberOnTopNoRepetition(input);
   root tempRoot;
-  for (int i=0; i<HyperPlanesCorrespondingToLF.size; i++)
-    for (int j=i+1; j<HyperPlanesCorrespondingToLF.size; j++)
-    { tempRoot=HyperPlanesCorrespondingToLF.TheObjects[i]-HyperPlanesCorrespondingToLF.TheObjects[j];
+  for (int i=0; i<inputLFsLastCoordConst.size; i++)
+    for (int j=i+1; j<inputLFsLastCoordConst.size; j++)
+    { tempRoot=inputLFsLastCoordConst[i]-inputLFsLastCoordConst[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       if (!tempRoot.IsEqualToZero())
         this->splittingNormals.AddObjectOnTopNoRepetitionOfObjectHash(tempRoot);
     }
-//  std::cout << this->ElementToString(false, true);
+  std::cout << this->ElementToString(false, true);
   this->Refine(theGlobalVariables);
   outputMaximumOverEeachSubChamber.SetSize(this->size);
   Rational theMax=0;
@@ -2226,10 +2312,10 @@ bool ConeComplex::findMaxLFOverConeProjective
   { this->TheObjects[i].GetInternalPoint(tempRoot);
     bool isInitialized=false;
     tempRoot.ComputeDebugString();
-    for (int j=0; j<HyperPlanesCorrespondingToLF.size; j++)
-      if (!isInitialized || tempRoot.ScalarEuclidean(HyperPlanesCorrespondingToLF.TheObjects[j], (Rational) 0)>theMax)
-      { HyperPlanesCorrespondingToLF.TheObjects[j].ComputeDebugString();
-        theMax=tempRoot.ScalarEuclidean(HyperPlanesCorrespondingToLF.TheObjects[j], (Rational) 0);
+    for (int j=0; j<inputLFsLastCoordConst.size; j++)
+      if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0)>theMax)
+      { inputLFsLastCoordConst.TheObjects[j].ComputeDebugString();
+        theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0);
         outputMaximumOverEeachSubChamber.TheObjects[i]=j;
         isInitialized=true;
       }
@@ -3712,6 +3798,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   output << "\n";
   output << "ChamberIndicatorHighestWeightLargerAlgebra: ";
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
+  this->ParabolicSelectionSmallerAlgebra.WriteToFile(output);
   output << "\n";
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
@@ -3815,6 +3902,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->NonIntegralOriginModification.ReadFromFile(input);
   input >> tempS;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
+  this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
   this->theExtendedIntegralLatticeMatForM.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
     theGlobalVariables->IncrementReadWriteDepth();
@@ -6790,12 +6878,20 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 2000);
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 500);
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
-  outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
-  outputFile << "\n\\end{document}";
-  out << "A png file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
-  out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.png\"> output.png</a>";
+  if (theSubgroup.size>498)
+  { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <= theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
+      out << "Even I can't handle the truth, when it is so large<br>";
+    else
+      out << "LaTeX can't handle handle the truth, when it is so large. <br>";
+  }
+  else
+ { outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+   outputFile << "\n\\end{document}";
+   out << "A png file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+   out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.png\"> output.png</a>";
+ }
   theNode.outputString=out.str();
 //  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
 

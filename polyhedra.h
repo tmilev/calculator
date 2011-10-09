@@ -1035,6 +1035,7 @@ std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat)
 }
 
 template <typename Element>
+
 class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 { friend std::iostream& operator<< <Element>(std::iostream& output, const Matrix<Element>& theMat);
 //  friend std::iostream& operator>> <Element>(std::iostream& input, Matrix<Element>& theMat);
@@ -1133,6 +1134,7 @@ public:
       }
     return Result;
   }
+  void ColToRoot(int colIndex, Vector<Element>& output)const;
   void RowToRoot(int rowIndex, Vector<Element>& output)const;
   int FindPivot(int columnIndex, int RowStartIndex, int RowEndIndex);
   bool FindFirstNonZeroElementSearchEntireRow(Element& output)
@@ -1187,6 +1189,16 @@ void NonPivotPointsToEigenVector
   { this->init(input.size, 1);
     for (int i=0; i<input.size; i++)
       this->elements[i][0]=input.TheObjects[i];
+  }
+  void AssignVectorToRowKeepOtherRowsIntactNoInit(int rowIndex, const Vector<Element>& input)
+  { assert(input.size==this->NumCols && rowIndex<this->NumRows && rowIndex>=0);
+    for (int i=0; i<this->NumCols; i++)
+      this->elements[rowIndex][i]=input[i];
+  }
+  void AssignVectorToColumnKeepOtherColsIntactNoInit(int colIndex, const Vector<Element>& input)
+  { assert(input.size==this->NumRows && colIndex<this->NumCols && colIndex>=0);
+    for (int i=0; i<this->NumRows; i++)
+      this->elements[i][colIndex]=input[i];
   }
   void AssignVectorRow(const Vector<Element>& input)
   { this->init(1, input.size);
@@ -1444,6 +1456,7 @@ public:
   int HashFunction() const;
   std::string DebugString;
   void ComputeDebugString();
+  std::string ElementToString() {std::string tempS; this->ElementToString(tempS); return tempS;}
   void ElementToString(std::string& output);
   void incrementSelection();
   int SelectionToIndex();
@@ -2766,6 +2779,14 @@ public:
     for(int i=0; i<other.size; i++)
       this->TheObjects[i]=other.TheObjects[i];
   }
+  void operator=(const Selection& other)
+  { this->SetSize(other.MaxSize);
+    for(int i=0; i<other.MaxSize; i++)
+      if (other.selected[i])
+        this->TheObjects[i]=1;
+      else
+        this->TheObjects[i]=0;
+  }
   bool IsEqualToZero()const
   { for (int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsEqualToZero())
@@ -3017,6 +3038,7 @@ public:
   void operator=(const char* input){std::string tempS; tempS=input; this->AssignString(input);}
   void operator=(const SelectionWithMultiplicities& other);
   inline void operator=(const Vector<Rational>& right){this->Assign(right); }
+  inline void operator=(const Selection& other){this->::Vector<Rational>::operator=(other); }
   bool AssignString(const std::string& input)
   { unsigned int startIndex=0;
     for (; startIndex<input.size(); startIndex++)
@@ -3086,8 +3108,15 @@ inline root operator-(const root& right)
 template<typename Element>
 void Matrix<Element>::RowToRoot(int rowIndex, Vector<Element>& output)const
 { output.SetSize(this->NumCols);
-    for (int i=0; i<this->NumCols; i++)
-      output.TheObjects[i]=this->elements[rowIndex][i];
+  for (int i=0; i<this->NumCols; i++)
+    output.TheObjects[i]=this->elements[rowIndex][i];
+}
+
+template<typename Element>
+void Matrix<Element>::ColToRoot(int colIndex, Vector<Element>& output)const
+{ output.SetSize(this->NumRows);
+  for (int i=0; i<this->NumRows; i++)
+    output[i]=this->elements[i][colIndex];
 }
 
 class roots : public List<root>
@@ -8398,6 +8427,8 @@ public:
   void SetCoefficient(const root& indexingRoot, int theCoeff, const  SemisimpleLieAlgebra& owner);
   //range is the image of the vectors e_i
   bool IsEqualToZero()const;
+  ElementSimpleLieAlgebra(const ElementSimpleLieAlgebra& other){ this->operator=(other);}
+  ElementSimpleLieAlgebra(){}
   void operator=(const ElementSimpleLieAlgebra& other)
   { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
@@ -8413,7 +8444,12 @@ public:
   void Nullify
   (int numRoots, int theAlgebraRank)
 ;
-
+  ElementSimpleLieAlgebra operator*(const Rational& other)
+  { ElementSimpleLieAlgebra result;
+    result=*this;
+    result.TimesConstant(other);
+    return result;
+  }
   void TimesConstant(const Rational& input);
   bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);}
   void operator+=(const ElementSimpleLieAlgebra& other);
@@ -8686,12 +8722,16 @@ public:
   void MakeGinGWithId(char theWeylLetter, int theWeylDim, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(roots& input, roots& output, GlobalVariables& theGlobalVariables);
+  void GetMapSmallCartanDualToLargeCartanDual(MatrixLargeRational& output);
   void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);}
   void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, useHtml, theGlobalVariables);}
   std::string ElementToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS; }
   void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(roots& output, GlobalVariables& theGlobalVariables);
   bool ComputeHomomorphismFromImagesSimpleChevalleyGenerators(GlobalVariables& theGlobalVariables);
   bool CheckClosednessLieBracket(GlobalVariables& theGlobalVariables);
+  void ApplyHomomorphism
+  (ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output)
+  ;
   bool ApplyHomomorphism(ElementUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
   bool ApplyHomomorphism(MonomialUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
 };
@@ -10209,6 +10249,8 @@ class ConeLatticeAndShiftMaxComputation
   roots theFinalRepresentatives;
   List<ConeLatticeAndShift> theConesLargerDim;
   List<ConeLatticeAndShift> theConesSmallerDim;
+  List<List<ConeComplex> > finalMaximaChambers;
+  List<List<List<int> > > finalMaximaChambersIndicesMaxFunctions;
   List<bool> IsInfinity;
   roots LPtoMaximizeLargerDim;
   roots LPtoMaximizeSmallerDim;
@@ -11401,6 +11443,7 @@ public:
   int UpperLimitChambersForDebugPurposes;
   int numNonZeroMults;
   Selection ParabolicLeviPartRootSpacesZeroStandsForSelected;
+  Selection ParabolicSelectionSmallerAlgebra;
   List<Rational> theCoeffs;
   roots theTranslationS;
   roots theTranslationsProjecteD;

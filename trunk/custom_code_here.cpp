@@ -180,6 +180,8 @@ GetMapSmallCartanDualToLargeCartanDual
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
   (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
+  this->WeylLarger=input.theRange.theWeyl;
+  this->WeylSmaller=input.theDomain.theWeyl;
   WeylGroup& theWeyL=input.theRange.theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ElementToString();
@@ -199,16 +201,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   tempMat.Invert(theGlobalVariables);
   tempMat.ActOnRoots(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.ElementToString();
-  roots preferredBasis;
-  preferredBasis.SetSize(2);
-  preferredBasis[0]=-this->GmodKnegativeWeightS[1];
-  preferredBasis[1]=-this->GmodKnegativeWeightS[2];
-  MatrixLargeRational preferredBasisChange, preferredBasisChangeInverse;
-  preferredBasisChange.AssignRootsToRowsOfMatrix(preferredBasis);
-  preferredBasisChange.Transpose();
-  preferredBasisChangeInverse=preferredBasisChange;
-  preferredBasisChangeInverse.Invert();
-  preferredBasisChangeInverse.ActOnRoots(this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
+  this->preferredBasiS.SetSize(2);
+  this->preferredBasiS[0]=-this->GmodKnegativeWeightS[1];
+  this->preferredBasiS[1]=-this->GmodKnegativeWeightS[2];
+  this->preferredBasisChangE.AssignRootsToRowsOfMatrix(this->preferredBasiS);
+  this->preferredBasisChangE.Transpose();
+  this->preferredBasisChangeInversE=this->preferredBasisChangE;
+  this->preferredBasisChangeInversE.Invert();
+  this->preferredBasisChangeInversE.ActOnRoots(this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
   this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
   for (int i=0; i<this->GmodKnegativeWeightS.size; i++)
     if (this->GmodKnegativeWeightS[i].IsPositiveOrZero())
@@ -225,12 +225,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   for (int i=0; i<input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
-    preferredBasisChangeInverse.ActOnAroot(projectedWeight);
+    this->preferredBasisChangeInversE.ActOnAroot(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
       theProjection.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(0,1,1)";
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(0,0,0)";
   MatrixLargeRational DualCartanEmbedding;
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   root ParabolicEvaluationRootImage, tempRoot;
@@ -341,8 +341,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ElementToString(false, false);
-  this->PreimageWeylChamberLargerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
-  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
+  this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
+  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
+  this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
   { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     for (int j=0; j<input.theRange.GetRank(); j++)
@@ -361,7 +362,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       tempMat.RowToRoot(i, *tempRoots.LastObject());
     }
   }
-  preferredBasisChangeInverse.ActOnRoots(tempRoots);
+  this->preferredBasisChangeInversE.ActOnRoots(tempRoots);
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ElementToString();
   this->log << "the roots generating the chamber walls: " << tempRoots.ElementToString();
@@ -650,6 +651,33 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   return out.str();
 }
 
+int ParserNode::EvaluateG2InB3MultsParabolic
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root highestWeight, parSel;
+  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
+  if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+  if (!nodeSel.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+  if (highestWeight.size!=3 || parSel.size!=3)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  theNode.outputString=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis
+  .ComputeMultsLargerAlgebraHighestWeight(highestWeight, parSel, *theNode.owner, theGlobalVariables);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
+  ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
+   )
+{ std::stringstream out;
+  out << "Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
+  out << "<br> Input parabolics selections: " << parabolicSel.ElementToString();
+  return out.str();
+}
+
+
 void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGlobalVariables)
 { List<Cone> tempList;
   tempList=this->projectivizedChambeR;
@@ -664,13 +692,198 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
     this->projectivizedChambeR.AddObjectOnTopHash(tempList[i]);
 }
 
+std::string DynkinDiagramRootSubalgebra::ElementToStringNoDollarSigns(bool CombineIsoComponents)
+{ std::string tempS, result;
+  this->ElementToString(tempS, CombineIsoComponents);
+  CGIspecificRoutines::clearDollarSigns(tempS, result);
+  return result;
+}
+
+void DynkinDiagramRootSubalgebra::ComputeDynkinString
+(int indexComponent, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+{ assert(indexComponent<this->SimpleBasesConnectedComponents.size);
+  std::stringstream out;
+  roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
+  List<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
+  if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
+  {//type D or E
+    //in type D first comes the triple node, then the long string, then the one-root strings
+    // the long string is oriented with the end that is connected to the triple node having
+    //smaller index
+    //in type E similarly the longest string comes first oriented with the root that is linked to the triple node having smaller index
+    // then comes the second longest string (oriented in the same fashion)
+    // and last the one-root string
+    root tripleNode;
+    int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
+    tripleNode.Assign( currentComponent.TheObjects[tripleNodeindex]);
+    roots tempRoots;
+    tempRoots.CopyFromBase(currentComponent);
+    tempRoots.PopIndexSwapWithLast(tripleNodeindex);
+    DynkinDiagramRootSubalgebra  tempDiagram;
+    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl, IncludeAlgebraNames);
+    assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
+    List<int> indicesLongComponents;
+    indicesLongComponents.size=0;
+    Rational tempRat;
+    for (int i=0; i<3; i++)
+    { if(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size>1)
+        indicesLongComponents.AddObjectOnTop(i);
+      theWeyl.RootScalarCartanRoot(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].TheObjects[0], currentComponent.TheObjects[tripleNodeindex], tempRat);
+      if (tempRat.IsEqualToZero())
+        tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].ReverseOrderElements();
+    }
+    for(int i=0; i<3; i++)
+      for(int j=i+1; j<3; j++)
+        if (tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size<tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
+        { tempRoots.CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+          tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
+          tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].CopyFromBase(tempRoots);
+        }
+    currentComponent.size=0;
+    currentComponent.AddObjectOnTop(tripleNode);
+    for (int i=0; i<3; i++)
+      currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+    if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
+      out << this->GetNameFrom('D', currentComponent.size, IncludeAlgebraNames);
+    else
+    {//type E
+      assert(indicesLongComponents.size==2);
+      out << this->GetNameFrom('E', currentComponent.size, IncludeAlgebraNames);
+    }
+  }else
+  { Rational length1, length2, tempRat;
+    theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[0], currentComponent.TheObjects[0], length1);
+    int numLength1=1; int numLength2=0;
+    for(int i=1; i<currentComponent.size; i++)
+    { theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[i], currentComponent.TheObjects[i],  tempRat);
+      if (tempRat.IsEqualTo(length1))
+        numLength1++;
+      else
+      { numLength2++;
+        length2.Assign(tempRat);
+      }
+    }
+    if (numLength2==0 )
+    { //type A
+      out << this->GetNameFrom('A', numLength1, IncludeAlgebraNames);
+      if (!length1.IsEqualTo(theWeyl.LongRootLength))
+        out << "'";
+    }
+    else
+    {//the longer root should have smaller index
+      Rational greaterlength, tempRat;
+      int numGreaterLength=numLength2;
+      int numSmallerLength=numLength1;
+      greaterlength.Assign(length2);
+      if (length1.IsGreaterThan(length2))
+      { greaterlength.Assign(length1);
+        numGreaterLength=numLength1;
+        numSmallerLength=numLength2;
+      }
+      theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[currentEnds.TheObjects[0]], currentComponent.TheObjects[currentEnds.TheObjects[0]], tempRat);
+      if (greaterlength.IsGreaterThan(tempRat))
+        currentEnds.SwapTwoIndices(0, 1);
+      if (numLength1==numLength2)
+      {//B2, C2, F4 or G2
+        if (numLength1!=1)
+        { out << this->GetNameFrom('F', 4, IncludeAlgebraNames);
+          assert(numLength1==2);
+        } else
+        { if (length1.NumShort==6 || length2.NumShort==6)
+            out << this->GetNameFrom('G', 2, IncludeAlgebraNames);
+          else
+            out << this->GetNameFrom('B', 2, IncludeAlgebraNames);
+        }
+      } else
+      { if (numGreaterLength>numSmallerLength)
+          out << this->GetNameFrom('B', currentComponent.size, IncludeAlgebraNames);
+        else
+          out << this->GetNameFrom('C', currentComponent.size, IncludeAlgebraNames);
+      }
+    }
+    currentComponent.SwapTwoIndices(0, currentEnds.TheObjects[0]);
+    for (int i=0; i<currentComponent.size; i++)
+      for (int j=i+1; j<currentComponent.size; j++)
+      { theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[i], currentComponent.TheObjects[j], tempRat);
+        if (!tempRat.IsEqualToZero())
+        { currentComponent.SwapTwoIndices(i+1, j);
+          break;
+        }
+      }
+  }
+  this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
+}
+
+std::string DynkinDiagramRootSubalgebra::GetNameFrom
+  (char WeylLetter, int WeylRank, bool IncludeAlgebraNames)
+{ std::stringstream out;
+  out << WeylLetter << "_" << WeylRank;
+  if (IncludeAlgebraNames)
+    out << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetter, WeylRank) << ")";
+  return out.str();
+}
+
+void DynkinDiagramRootSubalgebra::ElementToString
+  (std::string& output, bool CombineIsoComponents, bool useDollarSigns, bool IncludeAlgebraNames)
+{ std::stringstream out;
+  if (!CombineIsoComponents)
+    for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    { out << this->DynkinTypeStrings.TheObjects[i];
+      if (i!=this->SimpleBasesConnectedComponents.size-1)
+        out << "+";
+    }
+  else
+    for (int j=0; j<this->sameTypeComponents.size; j++)
+    { int numSameTypeComponents= this->sameTypeComponents.TheObjects[j].size;
+      if (numSameTypeComponents!=1)
+        out << numSameTypeComponents;
+      out << this->DynkinTypeStrings.TheObjects[this->sameTypeComponents.TheObjects[j].TheObjects[0]];
+      if (j!=this->sameTypeComponents.size-1)
+        out << "+";
+    }
+  output=out.str();
+}
+
+void WeylGroup::GetWeylChamber
+(Cone& output, GlobalVariables& theGlobalVariables)
+{ MatrixLargeRational tempMat;
+  tempMat=this->CartanSymmetric;
+  tempMat.Invert();
+  roots tempRoots;
+  tempRoots.AssignMatrixRows(tempMat);
+  output.CreateFromNormals(tempRoots, theGlobalVariables);
+}
+
+std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
+  (GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  int totalDimAffine=this->WeylLarger.GetDim()+this->WeylSmaller.GetDim();
+  int smallDim=this->WeylSmaller.GetDim();
+  root normal;
+  normal.MakeZero(totalDimAffine+1);
+  roots newWalls;
+  ConeComplex tempComplex;
+  tempComplex=this->projectivizedChambeR;
+  for (int i=0; i<this->WeylChamberSmallerAlgebra.Normals.size; i++)
+  { for (int j=0; j<smallDim; j++)
+      normal[j]=this->WeylChamberSmallerAlgebra.Normals[i][j];
+    newWalls.AddObjectOnTop(normal);
+    tempComplex.splittingNormals.AddObjectOnTopHash(normal);
+  }
+  tempComplex.indexLowestNonRefinedChamber=0;
+  tempComplex.Refine(theGlobalVariables);
+  out << "Number chambers with new walls: " << tempComplex.size;
+  out << "\n" << tempComplex.ElementToString();
+  return out.str();
+}
+
 void GeneralizedVermaModuleCharacters::IncrementComputation
   (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 //  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
-  if (false)
+//  if (false)
   if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
     this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
@@ -693,22 +906,25 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
       out << this->ElementToStringMultiplicitiesReport(theGlobalVariables);
       break;
     case 3:
+//      out << this->CheckMultiplicitiesVsOrbits(theGlobalVariables);
+      break;
+    case 4:
       this->InitTheMaxComputation(theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 4:
+    case 5:
       this->theMaxComputation.FindExtremaParametricStep1(this->thePauseControlleR, true, theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 5:
+    case 6:
       this->theMaxComputation.FindExtremaParametricStep3(this->thePauseControlleR, theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 6:
+    case 7:
       this->theMaxComputation.FindExtremaParametricStep4(this->thePauseControlleR, theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
-    case 7:
+    case 8:
       this->theMaxComputation.FindExtremaParametricStep5(this->thePauseControlleR, theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       break;
@@ -1418,7 +1634,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
            theGlobalVariables);
       this->theConesLargerDim.size--;
       this->LPtoMaximizeLargerDim.size--;
-      thePauseController.SafePoint();
+      thePauseController.SafePointDontCallMeFromDestructors();
       std::stringstream tempStream1, tempStream2, tempStream3;
       tempStream1 << "Processing " << this->numProcessedNonParam+1 << " out of " << this->numNonParaM;
       tempStream2 << "Remaining cones: " << this->theConesLargerDim.size;
@@ -3800,6 +4016,11 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
   this->ParabolicSelectionSmallerAlgebra.WriteToFile(output);
   output << "\n";
+  this->WeylLarger.WriteToFile(output);
+  this->WeylSmaller.WriteToFile(output);
+  this->preferredBasiS.WriteToFile(output);
+  this->preferredBasisChangE.WriteToFile(output);
+  this->preferredBasisChangeInversE.WriteToFile(output);
   this->theExtendedIntegralLatticeMatForM.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
@@ -3813,6 +4034,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   this->theLinearOperatorsExtended.WriteToFile(output);
   this->PreimageWeylChamberLargerAlgebra.WriteToFile(output, theGlobalVariables);
   this->PreimageWeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.WriteToFile(output, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[0]="Writing QP's non-subbed... ";
     theGlobalVariables->MakeReport();
@@ -3903,6 +4125,11 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   input >> tempS;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
   this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
+  this->WeylLarger.ReadFromFile(input);
+  this->WeylSmaller.ReadFromFile(input);
+  this->preferredBasiS.ReadFromFile(input, theGlobalVariables);
+  this->preferredBasisChangE.ReadFromFile(input, theGlobalVariables);
+  this->preferredBasisChangeInversE.ReadFromFile(input);
   this->theExtendedIntegralLatticeMatForM.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
     theGlobalVariables->IncrementReadWriteDepth();
@@ -3929,6 +4156,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->theLinearOperatorsExtended.ReadFromFile(input, theGlobalVariables);
   this->PreimageWeylChamberLargerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->PreimageWeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
+  this->WeylChamberSmallerAlgebra.ReadFromFile(input, theGlobalVariables);
   this->theQPsNonSubstituted.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
   this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
@@ -7200,6 +7428,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. You will get your output as a .png file link, you must click onto the link to see the end result. ",
    "parabolicsInfoBruhatGraph(0,0,0)",
 //   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("GtwoInBthreeMultsParabolic",
+   "((Rational,...), (Rational,...))",
+   "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
+   The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
+   "GtwoInBthreeMultsParabolic((10,0,0), (1,0,0) )",
+   DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );
 /*   this->AddOneFunctionToDictionaryNoFail

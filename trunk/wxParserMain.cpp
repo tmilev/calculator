@@ -176,8 +176,8 @@ void drawClearScreen()
 }
 
 void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
-{ if (theMainWindow->mutexRuN.isLockedUnsafeUseForWINguiOnly())
-    return;
+{ //if (theMainWindow->mutexRuN.isLockedUnsafeUseForWINguiOnly())
+  //  return;
   theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
   for (int i=0; i<output.ProgressReportStrings.size; i++)

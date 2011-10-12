@@ -145,11 +145,13 @@ class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping;
 class rootPoly;
 class PolynomialRationalCoeff;
+class Cone;
 class ConeComplex;
 class XMLRoutines;
 template<class Base>
 class CompleX;
 class RationalFunction;
+struct CGIspecificRoutines;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +230,7 @@ class Controller
   inline bool IsPausedWhileRunning(){ return this->flagIsPausedWhileRunning;}
 public:
   MutexWrapper mutexHoldMeWhenReadingOrWritingInternalFlags;
-  inline void SafePoint()
+  inline void SafePointDontCallMeFromDestructors()
   { this->mutexSignalMeWhenReachingSafePoint.UnlockMe();
     this->mutexLockMeToPauseCallersOfSafePoint.LockMe();
     this->mutexSignalMeWhenReachingSafePoint.LockMe();
@@ -283,21 +285,33 @@ class ParallelComputing
 public:
   static int GlobalPointerCounter;
   static int PointerCounterPeakRamUse;
-  static ControllerStartsRunning controllerLockThisMutexToSignalPause;
+  static ControllerStartsRunning controllerSignalPauseUseForNonGraciousExitOnly;
 #ifdef CGIversionLimitRAMuse
   static int cgiLimitRAMuseNumPointersInList;
+  static bool flagUngracefulExitInitiated;
   inline static void CheckPointerCounters()
   { if (ParallelComputing::GlobalPointerCounter>::ParallelComputing::cgiLimitRAMuseNumPointersInList)
-    { std::cout << "<b>Error:</b> Number of pointers allocated exceeded allowed limit of " <<
-      ParallelComputing::cgiLimitRAMuseNumPointersInList;
+    { static MutexWrapper tempMutex;
+      tempMutex.LockMe();
+      if (ParallelComputing::flagUngracefulExitInitiated)
+      { tempMutex.UnlockMe();
+        return;
+      }
+      flagUngracefulExitInitiated=true;
+      tempMutex.UnlockMe();
+      std::cout << "<b>Error:</b> Number of pointers allocated exceeded allowed <b>limit of " <<
+      ParallelComputing::cgiLimitRAMuseNumPointersInList << ".</b>\n<br><b>Signalling ungraceful exit...</b>";
+      std::cout.flush();
+      ParallelComputing::SafePointDontCallMeFromDestructors();
+      ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
       std::exit(0);
     }
     if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
       ParallelComputing::PointerCounterPeakRamUse=ParallelComputing::GlobalPointerCounter;
   }
 #endif
-  inline static void SafePoint()
-  { ParallelComputing::controllerLockThisMutexToSignalPause.SafePoint();
+  inline static void SafePointDontCallMeFromDestructors()
+  { ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SafePointDontCallMeFromDestructors();
   }
 };
 
@@ -2103,8 +2117,8 @@ public:
   inline void operator+=(const LargeIntUnsigned& other){this->Add(other);}
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
-  LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); }
-  LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; }
+  LargeIntUnsigned(const LargeIntUnsigned& x){ this->Assign(x); ParallelComputing::SafePointDontCallMeFromDestructors();}
+  LargeIntUnsigned(){this->SetSize(1); this->TheObjects[0]=0; ParallelComputing::SafePointDontCallMeFromDestructors(); }
 //  LargeIntUnsigned(unsigned int value){this->operator=(value); }
 //  LargeIntUnsigned(unsigned int x) {this->AssignShiftedUInt(x,0);}
   static inline LargeIntUnsigned GetOne()
@@ -2502,12 +2516,12 @@ ParallelComputing::GlobalPointerCounter++;
   static Rational TheRingMUnit;
   //don't ever call the below manually or you can get memory leak (extended must be nullified here by
   //default!
-  Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n, d); }
-  Rational(){this->Extended=0; }
-  Rational(int n){this->Extended=0; this->AssignNumeratorAndDenominator(n, 1); }
-  Rational(const Rational& right){this->Extended=0; this->Assign(right); }
+  Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n, d); ParallelComputing::SafePointDontCallMeFromDestructors();}
+  Rational(){this->Extended=0; ParallelComputing::SafePointDontCallMeFromDestructors();}
+  Rational(int n){this->Extended=0; this->AssignNumeratorAndDenominator(n, 1); ParallelComputing::SafePointDontCallMeFromDestructors(); }
+  Rational(const Rational& right){this->Extended=0; this->Assign(right); ParallelComputing::SafePointDontCallMeFromDestructors();}
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
-  ~Rational(){this->FreeExtended(); }
+  ~Rational(){this->FreeExtended();}
   //the below must be called only with positive arguments!
   static int gcd(int a, int b)
   { int temp;
@@ -3652,7 +3666,7 @@ void List<Object>::CopyFromBase(const List<Object>& From)
 template <class Object>
 void List<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
 { if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
-  { ParallelComputing::SafePoint();
+  { ParallelComputing::SafePointDontCallMeFromDestructors();
     this->ExpandArrayOnTop(this->IndexOfVirtualZero+theSize- this->ActualSize);
   }
 }
@@ -6099,7 +6113,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::Evaluate
     for (int j=0; j<this->NumVars; j++)
       for (int k=0; k<this->TheObjects[i].degrees[j]; k++)
       { tempElt*=input.TheObjects[j];
-        ParallelComputing::SafePoint();
+        ParallelComputing::SafePointDontCallMeFromDestructors();
       }
     output+=(tempElt);
   }
@@ -6131,7 +6145,7 @@ inline void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIde
 //      tempM.ComputeDebugString(PolyFormatLocal);
 //      Accum.ComputeDebugString();
       bufferPoly.AddMonomial(bufferMon);
-      ParallelComputing::SafePoint();
+      ParallelComputing::SafePointDontCallMeFromDestructors();
 //      Accum.ComputeDebugString();
     }
   output.CopyFromPoly(bufferPoly);
@@ -6242,7 +6256,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
       tempS1->append(tempS);
       tempS1->append("\n");
     }*/
-    ParallelComputing::SafePoint();
+    ParallelComputing::SafePointDontCallMeFromDestructors();
     this->AddMonomial(p.TheObjects[i]);
   }
   /*if (IntegerPoly::flagAnErrorHasOccurredTimeToPanic)
@@ -7798,6 +7812,9 @@ public:
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
+  void GetWeylChamber
+  (Cone& output, GlobalVariables& theGlobalVariables)
+  ;
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(roots& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
@@ -7983,10 +8000,18 @@ public:
 class DynkinDiagramRootSubalgebra
 {
 public:
-  std::string DebugString;
-  void ElementToString(std::string& output, bool CombineIsoComponents);
-  void ComputeDebugString(){this->ElementToString(this->DebugString, false); };
-  void ComputeDebugString(bool CombineIsoComponents){this->ElementToString(this->DebugString, CombineIsoComponents); }
+  std::string DynkinString;
+  void ElementToString
+  (std::string& output, bool CombineIsoComponents, bool useDollarSigns, bool IncludeAlgebraNames)
+  ;
+  std::string GetNameFrom
+  (char WeylLetter, int WeylRank, bool IncludeAlgebraNames)
+  ;
+  inline void ElementToString(std::string& output, bool CombineIsoComponents){ this->ElementToString(output, CombineIsoComponents, false, false);  }
+  inline std::string ElementToString(bool CombineIsoComponents){ std::string result; this->ElementToString(result, CombineIsoComponents); return result;}
+  std::string ElementToStringNoDollarSigns(bool CombineIsoComponents);
+  void ComputeDynkinString(){this->ElementToString(this->DynkinString, false); };
+  void ComputeDynkinString(bool CombineIsoComponents){this->ElementToString(this->DynkinString, CombineIsoComponents); }
   rootsCollection SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -8003,11 +8028,20 @@ public:
   //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
   //root subsystem. Note: the simleBasisInput is required to be a set of simple roots. The procedure calls a
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't simple as required!
-  inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl){ theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput); this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl); }
+  inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+  { theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
+    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl, IncludeAlgebraNames);
+  }
   //the below function is just as the above but doesn't modify simpleBasisInput
-  void ComputeDiagramTypeKeepInput(const roots& simpleBasisInput, WeylGroup& theWeyl);
-  void ComputeDynkinStrings(WeylGroup& theWeyl);
-  void ComputeDynkinString(int indexComponent, WeylGroup& theWeyl);
+  void ComputeDiagramTypeKeepInput
+  (const roots& simpleBasisInput, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+  ;
+  void ComputeDynkinStrings
+  (WeylGroup& theWeyl, bool useDollarSigns, bool IncludeAlgebraNames)
+  ;
+  void ComputeDynkinString
+(int indexComponent, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+  ;
   void GetKillingFormMatrixUseBourbakiOrder(MatrixLargeRational& output, WeylGroup& theWeyl);
   int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
   void Assign(const DynkinDiagramRootSubalgebra& right);
@@ -10021,6 +10055,7 @@ public:
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  void ChangeBasis(MatrixLargeRational& theLinearMap);
   std::string DebugString;
   int GetDim()
   { if (this->Normals.size==0)
@@ -10392,6 +10427,9 @@ bool GetRootRationalFromFunctionArguments
 ;
 
   static int EvaluateGroebner
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateG2InB3MultsParabolic
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateRelations
@@ -11433,7 +11471,11 @@ public:
   std::fstream theMultiplicitiesMaxOutputReport2;
   roots GmodKnegativeWeightS;
   roots GmodKNegWeightsBasisChanged;
+  MatrixLargeRational preferredBasisChangE;
+  MatrixLargeRational preferredBasisChangeInversE;
+  roots preferredBasiS;
   Cone PreimageWeylChamberLargerAlgebra;
+  Cone WeylChamberSmallerAlgebra;
   Cone PreimageWeylChamberSmallerAlgebra;
   Lattice theExtendedIntegralLatticeMatForM;
   List<QuasiPolynomial> theQPsNonSubstituted;
@@ -11455,9 +11497,18 @@ public:
   ConeComplex projectivizedChambeR;
   std::stringstream log;
   Parser theParser;
+  WeylGroup WeylSmaller;
+  WeylGroup WeylLarger;
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
+  std::string ComputeMultsLargerAlgebraHighestWeight
+  ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
+   )
+  ;
+  std::string CheckMultiplicitiesVsOrbits
+  (GlobalVariables& theGlobalVariables)
+  ;
   std::string ElementToStringMultiplicitiesReport
   (GlobalVariables& theGlobalVariables)
   ;
@@ -11797,7 +11848,7 @@ void List<Object>::WriteToFile(std::fstream& output, GlobalVariables* theGlobalV
   { this->TheObjects[i].WriteToFile(output, theGlobalVariables);
     output << "\n";
     if (theGlobalVariables!=0)
-      theGlobalVariables->theLocalPauseController.SafePoint();
+      theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
   }
   output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
@@ -11831,7 +11882,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
         theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]=report.str();
         theGlobalVariables->MakeReport();
       }
-      theGlobalVariables->theLocalPauseController.SafePoint();
+      theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
     }
     //</reporting_and_safepoint_duties>
   }

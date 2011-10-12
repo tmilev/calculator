@@ -56,6 +56,7 @@ bool ComputationComplete;
 timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
 
 GlobalVariables theGlobalVariables;
+Parser theParser;
 
 double GetElapsedTimeInSeconds()
 { gettimeofday(&LastMeasureOfCurrentTime, NULL);
@@ -71,14 +72,15 @@ void* RunTimer(void* ptr)
   }
   if (!ComputationComplete)
   { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
-    std::cout << "<br>The maximum allowed computation time is <b>" << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds</b>. Please use an offline version of the calculator. ";
+    std::cout << "<br>The maximum allowed computation time is <b>" << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds</b>. Please use an offline version of the calculator. <br><b>Signalling ungraceful exit...</b> ";
+    ParallelComputing::SafePointDontCallMeFromDestructors();
+    ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
     std::exit(0);
   } else
     pthread_exit(NULL);
 }
 #endif
 
-Parser theParser;
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
@@ -98,7 +100,11 @@ void makeReport(IndicatorWindowVariables& input)
 }
 
 int main(int argc, char **argv)
-{ std::string inputString, inputPath;
+{ ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+  HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+
+  std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
 #ifndef WIN32
@@ -142,7 +148,6 @@ int main(int argc, char **argv)
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
@@ -158,8 +163,10 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-  ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  //civilizedInput="printSlTwosAndRootSAsFORCERecompute";
+//  civilizedInput="actByWeylRho(x_1, x_2,x_3, x_4, x_5, x_6)";
+//  theParser.DefaultWeylRank=6;
+//  theParser.DefaultWeylLetter='E';
   //civilizedInput="parabolicsInfoBruhatGraph(0,0,0)";
   //civilizedInput="vpf((1, 0, 0),(0, 1, 0),(0, 0, 1),(1, 1, 0),(0, 1, 1),(1, 1, 1),(0, 1, 2),(1, 1, 2),(1, 2, 2))";
   //civilizedInput="parabolicsInfoBruhatGraph";

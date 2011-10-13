@@ -178,7 +178,7 @@ GetMapSmallCartanDualToLargeCartanDual
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
-  (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  (root& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
   this->WeylLarger=input.theRange.theWeyl;
   this->WeylSmaller=input.theDomain.theWeyl;
@@ -230,7 +230,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       theProjection.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
-  this->ParabolicLeviPartRootSpacesZeroStandsForSelected="(0,0,0)";
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected=theParabolicSel;
   MatrixLargeRational DualCartanEmbedding;
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   root ParabolicEvaluationRootImage, tempRoot;
@@ -608,8 +608,10 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
 
 int ParserNode::EvaluateG2InB3Computation
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
-    (theGlobalVariables);
+{ root parSel="(0,0,0)";
+  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
+    (parSel, theGlobalVariables)
+    ;
   return theNode.errorNoError;
 }
 
@@ -672,6 +674,45 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
    )
 { std::stringstream out;
+  WeylGroup& LargerWeyl=theParser.theHmm.theRange.theWeyl;
+  WeylGroup& SmallerWeyl=theParser.theHmm.theDomain.theWeyl;
+  if (LargerWeyl.GetDim()!=3 || LargerWeyl.WeylLetter!='B')
+    return "Error: algebra is not so(7).";
+  this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
+  MatrixLargeRational tempMat;
+  tempMat=LargerWeyl.CartanSymmetric;
+  tempMat.Invert();
+  tempMat.ActOnAroot(highestWeightLargerAlg);
+  root tempRoot, ZeroRoot;
+  DrawingVariables& drawOps=theGlobalVariables.theDrawingVariables;
+  int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
+  drawOps.theBuffer.initDimensions(theSmallDim, 1);
+  drawOps.theBuffer.MakeMeAStandardBasis(theSmallDim);
+  PolynomialOutputFormat tempFormat;
+  drawOps.theBuffer.ProjectionsEiVectors[0][0]=0.5;  drawOps.theBuffer.ProjectionsEiVectors[0][1]=-0.87;
+  drawOps.theBuffer.ProjectionsEiVectors[1][0]=-0.5; drawOps.theBuffer.ProjectionsEiVectors[1][1]=-0.87;
+  drawOps.theBuffer.GraphicsUnit[0]=50;
+  ConeComplex tempComplex;
+  tempComplex.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
+  ZeroRoot.MakeZero(theSmallDim);
+  for (int i=0; i<theSmallDim; i++)
+  { tempRoot.MakeEi(theSmallDim, i);
+    drawOps.theBuffer.drawLineBetweenTwoVectorsBuffer
+    (ZeroRoot, tempRoot, drawOps.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
+  }
+
+  for (int i=0; i<this->theLinearOperators.size; i++)
+  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, tempRoot);
+    tempRoot.MinusRoot();
+    tempRoot-=this->theTranslationsProjecteD[i];
+    drawOps.
+    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,100));
+    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(240, 240, 240));
+    tempComplex.DrawMeProjective(&tempRoot, false, drawOps, tempFormat);
+    out << tempRoot.ElementToString();
+  }
+  drawOps.drawCoordSystemBuffer(drawOps, 3, 0);
+  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   out << "Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
   out << "<br> Input parabolics selections: " << parabolicSel.ElementToString();
   return out.str();
@@ -877,18 +918,19 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
 }
 
 void GeneralizedVermaModuleCharacters::IncrementComputation
-  (GlobalVariables& theGlobalVariables)
+  (root& parabolicSel, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 //  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
 //  if (false)
+  this->ParabolicLeviPartRootSpacesZeroStandsForSelected=parabolicSel;
   if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
     this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
       this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
-      this->initFromHomomorphism(this->theParser.theHmm, theGlobalVariables);
+      this->initFromHomomorphism(parabolicSel, this->theParser.theHmm, theGlobalVariables);
       this->TransformToWeylProjectiveStep1(theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
       this->TransformToWeylProjectiveStep2(theGlobalVariables);
@@ -4281,7 +4323,7 @@ int ParserNode::EvaluatePrintRootSystem
     << "</td></tr>";
   }
   out << "</table>";
-  out << "<hr>The fundamental weights (the j^th fundamental weight is the weight that has scalar product 1 with the j^th simple root, and 0 with the remaining simple roots): ";
+  out << "<hr>The fundamental weights (the j^th fundamental weight is the weight that has scalar product 1 with the j^th simple root times 2 divided by the root length squared, and 0 with the remaining simple roots): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm, theGlobalVariables);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
@@ -4742,15 +4784,18 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   if (mustRecompute)
   { if (showIndicator)
     { out << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. <br>Appologies for this technical (Apache server configuration) problem. <br>Hope to alleviate it soon.</b>"
-      << "<br><br> Below is an indicator for the progress of the computation."
+      << "<br>Below is an indicator for the progress of the computation."
+      << "<br> The computation is slow, up to around 10 minutes for E_8."
       << "<br>Once it is done, you should be redirected automatically to the result page."
-      << "<br>To go back to the calculator main page use the back button on your browser."
-      << "<META http-equiv=\"refresh\" content=\"0; url=";
+      << "<br>To go back to the calculator main page use the back button on your browser.";
+      std::stringstream afterSystemCommands;
       std::stringstream noindicatorLink;
+      afterSystemCommands << "<META http-equiv=\"refresh\" content=\"0; url=";
       noindicatorLink << "/cgi-bin/calculator?"
       << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput="
       << CGIspecificRoutines::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
-      out << noindicatorLink.str() << "\">";
+      afterSystemCommands << noindicatorLink.str() << "\">";
+      theNode.owner->afterSystemCommands=afterSystemCommands.str();
       out << "\n<br>\nComputing ...<br>" << theNode.owner->javaScriptDisplayingIndicator;
       theGlobalVariables.ClearIndicatorVars();
       theGlobalVariables.MakeReport();
@@ -4766,12 +4811,14 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
     }
   }
+//  std::stringstream afterSystemCommands;
   out << "<META http-equiv=\"refresh\" content=\"0; url=";
   if (!redirectToSlTwos)
     out << outRootHtmlDisplayName.str();
   else
     out << outSltwoFileDisplayName.str();
   out << "\">";
+  //theNode.owner->afterSystemCommands=afterSystemCommands.str();
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
 //  theGlobalVariables.MaxAllowedComputationTimeInSeconds=oldMaxAllowedComputationTimeInSeconds;
@@ -5745,7 +5792,7 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
 
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
 { std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
-  std::stringstream tempStream7, tempStream8, tempStream9, tempStream10;
+  std::stringstream tempStream7, tempStream8, tempStream9, tempStream10, tempStream11;
   this->NumHtmlGraphics++;
   int timesCalled=this->NumHtmlGraphics;
   tempStream1 << "drawConeInit" << timesCalled;
@@ -5760,6 +5807,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   std::string Points1ArrayName=tempStream4.str();
   tempStream10 << "pts2" << timesCalled;
   std::string Points2ArrayName=tempStream10.str();
+  tempStream11<< "circ" << timesCalled;
+  std::string circArrayName=tempStream11.str();
   tempStream6 << "basisCone" << timesCalled;
   std::string basisName = tempStream6.str();
   tempStream7 << "shiftXCone" << timesCalled;
@@ -5773,10 +5822,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "show/hide");
+  << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<script type=\"text/javascript\">\n"
   << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
-  << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n";
+  << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
+  << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n";
   for (int i=0; i<this->theBuffer.theDrawLineBetweenTwoRootsOperations.size; i++)
   { Vector<double>& current1=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v1;
     Vector<double>& current2=theBuffer.theDrawLineBetweenTwoRootsOperations[i].v2;
@@ -5795,6 +5845,16 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
+  for (int i=0; i<this->theBuffer.theDrawCircleAtVectorOperations.size; i++)
+  { Vector<double>& current1=theBuffer.theDrawCircleAtVectorOperations[i].theVector;
+    out << circArrayName << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << current1[j];
+      if (j!=theDimension-1)
+        out << ",";
+    }
+    out << "];\n";
+  }
   if (this->theBuffer.ProjectionsEiVectors.size!= theDimension)
     this->theBuffer.MakeMeAStandardBasis(theDimension);
   out  << "var " << basisName << "=new Array(" << theDimension << ");\n";
@@ -5808,7 +5868,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   this->theBuffer.centerY[0]
   //100
   << ";\n";
-  out << "var GraphicsUnitCone" << timesCalled << "=100;\n";
+  out << "var GraphicsUnitCone" << timesCalled << "=" << this->theBuffer.GraphicsUnit[0] << ";\n";
   out << "function " << functionConvertToXYName << "(vector){\n";
   out << "resultX=" << shiftX << "; resultY=" << shiftY << ";\nfor (i=0; i<" << theDimension << "; i++){\n";
   out << "resultX+=vector[i]*" << basisName << "[i][0]*GraphicsUnitCone" << timesCalled << ";\n";
@@ -5833,6 +5893,18 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
               << " y2 :" << functionConvertToXYName << "( " << Points2ArrayName << "["
               << currentIndex << "])[1] }).setStroke({color : \""
               << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawLineBetweenTwoRootsOperations[currentIndex].ColorIndex)
+              << "\"});\n";
+        break;
+      case DrawOperations::typeDrawCircleAtVector:
+        out << theSurfaceName << ".createEllipse({"
+              << " cx :" << functionConvertToXYName << "( " << circArrayName << "["
+              << currentIndex<< "])[0],"
+              << " cy :" << functionConvertToXYName << "( " << circArrayName << "["
+              << currentIndex << "])[1],"
+              << " rx : "  <<  this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius << ","
+              << " ry :" << this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].radius
+              << " }).setStroke({color : \""
+              << this->GetColorHtmlFromColorIndex(this->theBuffer.theDrawCircleAtVectorOperations[currentIndex].ColorIndex)
               << "\"});\n";
         break;
       default: break;
@@ -5903,7 +5975,7 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine
 std::string ConeComplex::DrawMeToHtmlProjective
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool isGood=true;
-  isGood=this->DrawMeProjective(theDrawingVariables, theFormat);
+  isGood=this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   if (!isGood)
@@ -5928,11 +6000,25 @@ bool ConeComplex::DrawMeLastCoordAffine
 }
 
 bool ConeComplex::DrawMeProjective
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
+  if (InitDrawVars)
+  { root tempRoot, coordCenter, ZeroRoot;
+    ZeroRoot.MakeZero(this->GetDim());
+    if (coordCenterTranslation==0)
+      coordCenter=ZeroRoot;
+    else
+      coordCenter=*coordCenterTranslation;
+    theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
+    for (int i=0; i<this->GetDim(); i++)
+    { tempRoot.MakeEi(this->GetDim(), i);
+      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+    }
+  }
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
-    result=(this->TheObjects[i].DrawMeProjective(theDrawingVariables, theFormat) && result);
+    result=(this->TheObjects[i].DrawMeProjective(coordCenterTranslation, false, theDrawingVariables, theFormat) && result);
     //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -5994,12 +6080,16 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
   return out.str();
 }
 
-bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ root ZeroRoot;
+bool Cone::DrawMeProjective
+(root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ root ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
+  if (coordCenterTranslation==0)
+    coordCenter=ZeroRoot;
+  else
+    coordCenter=*coordCenterTranslation;
 //  theDrawingVariables.theBuffer.init();
   roots VerticesScaled=this->Vertices;
-  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
   for (int i=0; i<VerticesScaled.size; i++)
   { Rational sumAbsValuesCoords=0;
     for (int j=0; j<this->GetDim(); j++)
@@ -6008,21 +6098,24 @@ bool Cone::DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOut
     VerticesScaled[i]/=sumAbsValuesCoords;
   }
   root tempRoot;
-  for (int i=0; i<this->GetDim(); i++)
-  { tempRoot.MakeEi(this->GetDim(), i);
-    theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+  if (initTheDrawVars)
+  { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
+    for (int i=0; i<this->GetDim(); i++)
+    { tempRoot.MakeEi(this->GetDim(), i);
+      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+    }
   }
   for (int i=0; i<this->Vertices.size; i++)
     theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, VerticesScaled[i]*10000, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
+    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
   for (int k=0; k<this->Normals.size; k++)
     for (int i=0; i<this->Vertices.size; i++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
         for (int j=i+1; j<this->Vertices.size; j++)
           if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
+            (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
   return true;
 }
 
@@ -6036,7 +6129,7 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   { out << "There has been a programming error. The cone is empty.<br>" << this->ElementToString(false, true, true, false, theFormat);
     return out.str();
   }
-  this->DrawMeProjective(theDrawingVariables, theFormat);
+  this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
   return out.str();
@@ -7395,14 +7488,16 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("sliceConeUniqueExitWall",
    "(Cone, (Rational, ...))",
-   "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point. ",
+   "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will \
+   exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point). This slice can be named the \"salami\"-slice, as a piece of salami can be cut at an arbitrary angle, \
+   however the ends of the salami should always consist of a single plane.",
    "sliceConeUniqueExitWall( coneFromNormals((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
     & ParserNode::EvaluateSliceCone
    );
   this->AddOneFunctionToDictionaryNoFail
   ("sliceDirections",
    "((Rational, ...),...)",
-   "Exit wall slice. ",
+   "Exit wall slice. Slices the cone spanned by the input vectors so as to satisfy the salami slice condition inductively with respect to each new added vector. ",
    "sliceDirections( (1,0,0),(0,1,0),(0,0,1),(1,1,0), (0,1,1),(1,1,1) )",
     DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
@@ -7511,7 +7606,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
    "gTwoInBthreeMultsParabolic((10,0,0), (1,0,0) )",
    DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
+    & ParserNode::EvaluateG2InB3MultsParabolic
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

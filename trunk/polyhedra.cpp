@@ -11133,12 +11133,12 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
   { // longer roots have smaller indices
     output.init(3, 2);
     output.NullifyAll();
-    output.elements[0][0]=1;
-    output.elements[1][0]=-1;
+    output.elements[0][0]=-2;
+    output.elements[1][0]=1;
+    output.elements[2][0]=1;
 
-    output.elements[0][1]=-1; output.elements[0][1].DivideByInteger(3);
-    output.elements[1][1]=2; output.elements[1][1].DivideByInteger(3);
-    output.elements[2][1]=-1; output.elements[2][1].DivideByInteger(3);
+    output.elements[0][1]=1;
+    output.elements[1][1]=-1;
   }
 }
 

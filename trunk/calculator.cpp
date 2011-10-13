@@ -121,8 +121,8 @@ int main(int argc, char **argv)
 		inputString=getenv("QUERY_STRING");
 //		inputString=::getenv("QUERY_STRING");
 #endif
+    IPAdressCaller=getenv("REMOTE_ADDR");
 	}
-	IPAdressCaller=getenv("REMOTE_ADDR");
 	getPath(argv[0], inputPath);
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
@@ -553,6 +553,7 @@ int main(int argc, char **argv)
     system(theParser.SystemCommands.TheObjects[i].c_str());
   }
   std::cout << "-->";
+  std::cout << theParser.afterSystemCommands;
 	return 0;   // To avoid Apache errors.
 }
 

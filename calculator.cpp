@@ -81,20 +81,20 @@ void* RunTimer(void* ptr)
 }
 #endif
 
+
+std::string IPAdressCaller;
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
 //  if (counter%10!=0)
 //    return;
   std::fstream theFile;
-  std::string reportFileName=theParser.outputFolderPath;
-  reportFileName.append("report.txt");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, reportFileName, false, true, false);
+  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
-  theFile <<"<hr>" << input.StatusString1 << "<hr>";
+  theFile << "<hr>\n\n" << input.StatusString1 << "<hr>\n\n";
   for (int i=0; i<input.ProgressReportStrings.size; i++)
-    theFile << input.ProgressReportStrings[i] << "<br>";
+    theFile << "\n" << input.ProgressReportStrings[i] << "\n<br>\n";
   theFile.flush();
   theFile.close();
 }
@@ -103,7 +103,6 @@ int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
-
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -123,6 +122,7 @@ int main(int argc, char **argv)
 //		inputString=::getenv("QUERY_STRING");
 #endif
 	}
+	IPAdressCaller=getenv("REMOTE_ADDR");
 	getPath(argv[0], inputPath);
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
@@ -132,6 +132,7 @@ int main(int argc, char **argv)
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
+  //std::cout << IPAdressCaller;
 //  std::stringstream tempStreamX;
 //  static_html3(tempStreamX);
 //  static_html5(tempStreamX);
@@ -275,14 +276,16 @@ int main(int argc, char **argv)
   theParser.outputFolderPath.append(inputPath);
   theParser.outputFolderPath.append("../htdocs/tmp/");
   theParser.outputFolderDisplayPath="/tmp/";
-  std::string indicatorFileString;
-  indicatorFileString=theParser.outputFolderPath;
-  indicatorFileString.append("indicator.html");
-  if (!CGIspecificRoutines::FileExists(indicatorFileString))
+  theParser.indicatorFileName=theParser.outputFolderPath + IPAdressCaller+ "indicator.html" ;
+  theParser.indicatorFileNameDisplay=theParser.outputFolderDisplayPath + IPAdressCaller+ "indicator.html" ;
+  theParser.indicatorReportFileName=theParser.outputFolderPath + IPAdressCaller+ "report.txt" ;
+  theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller+ "report.txt" ;
+  theParser.InitJavaScriptDisplayIndicator();
+  if (!CGIspecificRoutines::FileExists(theParser.indicatorFileName))
   { std::stringstream tempStreamX;
     static_html3(tempStreamX);
     std::fstream tempFile;
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempFile, indicatorFileString, false, true, false);
+    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
     tempFile << tempStreamX.str();
   }
   if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
@@ -540,7 +543,13 @@ int main(int argc, char **argv)
   std::cout << "<!--";
   std::cout.flush();
   for(int i=0; i<theParser.SystemCommands.size; i++)
-  { std::cout << "\n\ncommand: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
+  { theGlobalVariables.ClearIndicatorVars();
+    std::stringstream tempStream;
+    tempStream << "Executing command " << i+1 << " out of " << theParser.SystemCommands.size;
+    theGlobalVariables.theIndicatorVariables.StatusString1="Executing LaTeX/system commands.";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= "Current command: " + theParser.SystemCommands.TheObjects[i];
+    theGlobalVariables.MakeReport();
     system(theParser.SystemCommands.TheObjects[i].c_str());
   }
   std::cout << "-->";

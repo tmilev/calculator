@@ -2097,6 +2097,13 @@ public:
     output.DivPositive(tempUI, output, tempUI2);
     assert(!output.IsEqualToZero());
   }
+  int HashFunction()
+  { int numCycles=MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
+    int result=0;
+    for (int i=0; i<numCycles; i++)
+      result+=this->TheObjects[i]*SomeRandomPrimes[i];
+    return result;
+  }
   void MultiplyBy(const LargeIntUnsigned& right);
   inline void operator*=(const LargeIntUnsigned& right){this->MultiplyBy(right);}
   inline void operator*=(unsigned int x){this->MultiplyByUInt(x);}
@@ -2170,6 +2177,9 @@ public:
   void MakeZero();
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
   void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
+  int HashFunction()
+  { return this->value.HashFunction()+this->sign+3;
+  }
   int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated(); }
   double GetDoubleValue();
   int operator %(int x);
@@ -2402,7 +2412,11 @@ ParallelComputing::GlobalPointerCounter++;
     *this-=tempRat;
   }
   void MultiplyBy(const Rational& r);
-  int HashFunction() const{return this->NumShort*::SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1]; }
+  int HashFunction() const
+  { if (this->Extended==0)
+      return this->NumShort*SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1];
+    return this->Extended->num.HashFunction()*SomeRandomPrimes[0]+this->Extended->den.HashFunction()*SomeRandomPrimes[1];
+  }
   //void MultiplyByLargeRational(int num, int den);
   void MultiplyByInt(int x);
   void MultiplyByLargeInt(LargeInt& x);
@@ -2978,6 +2992,7 @@ public:
   void ElementToString(std::string& output)const;
   std::string ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar);
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter){return this->ElementToStringLetterFormat(inputLetter, false, false);}
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex){ return this->ElementToStringLetterFormat(inputLetter, useLatex, false);}
   std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; };
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
@@ -8000,22 +8015,32 @@ public:
 class DynkinDiagramRootSubalgebra
 {
 public:
-  std::string DynkinString;
-  void ElementToString
-  (std::string& output, bool CombineIsoComponents, bool useDollarSigns, bool IncludeAlgebraNames)
+  std::string DynkinStrinG;
+  void ElementToStrinG
+  (std::string& output, bool useDollarSigns, bool IncludeAlgebraNames)
   ;
-  std::string GetNameFrom
-  (char WeylLetter, int WeylRank, bool IncludeAlgebraNames)
+  std::string ElementToStrinG
+  (bool useDollarSigns, bool IncludeAlgebraNames)
+  { std::string result;
+    this->ElementToStrinG(result, useDollarSigns, IncludeAlgebraNames);
+    return result;
+  }
+  void ComputeDynkinStrinG()
+  { this->ElementToStrinG(this->DynkinStrinG, false, false);
+  }
+  std::string SetComponent
+  (const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
   ;
-  inline void ElementToString(std::string& output, bool CombineIsoComponents){ this->ElementToString(output, CombineIsoComponents, false, false);  }
-  inline std::string ElementToString(bool CombineIsoComponents){ std::string result; this->ElementToString(result, CombineIsoComponents); return result;}
-  std::string ElementToStringNoDollarSigns(bool CombineIsoComponents);
-  void ComputeDynkinString(){this->ElementToString(this->DynkinString, false); };
-  void ComputeDynkinString(bool CombineIsoComponents){this->ElementToString(this->DynkinString, CombineIsoComponents); }
+  static std::string GetNameFrom
+  (const std::string& WeylLetterWithLength, int WeylRank, bool IncludeAlgebraNames)
+  ;
+  static std::string GetDiagramAndAlgebraName(const std::string& WeylLetterWithLength, int WeylRank){return DynkinDiagramRootSubalgebra::GetNameFrom(WeylLetterWithLength, WeylRank, true);}
   rootsCollection SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
   List<std::string> DynkinTypeStrings;
+  List<int> ComponentRanks;
+  List<std::string> ComponentLetters;
   List<int> indicesThreeNodes;
   List<List<int> > indicesEnds;
   List<List<int> > sameTypeComponents;
@@ -8024,23 +8049,24 @@ public:
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();
+  void SwapDynkinStrings(int i, int j);
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
   //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
   //root subsystem. Note: the simleBasisInput is required to be a set of simple roots. The procedure calls a
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't simple as required!
-  inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+  inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl)
   { theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
-    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl, IncludeAlgebraNames);
+    this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl);
   }
   //the below function is just as the above but doesn't modify simpleBasisInput
   void ComputeDiagramTypeKeepInput
-  (const roots& simpleBasisInput, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+  (const roots& simpleBasisInput, WeylGroup& theWeyl)
   ;
   void ComputeDynkinStrings
-  (WeylGroup& theWeyl, bool useDollarSigns, bool IncludeAlgebraNames)
+  (WeylGroup& theWeyl)
   ;
   void ComputeDynkinString
-(int indexComponent, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+(int indexComponent, WeylGroup& theWeyl)
   ;
   void GetKillingFormMatrixUseBourbakiOrder(MatrixLargeRational& output, WeylGroup& theWeyl);
   int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
@@ -10677,14 +10703,21 @@ public:
   List<std::string> SystemCommands;
   std::string outputFolderPath;
   std::string outputFolderDisplayPath;
+  std::string indicatorFileName;
+  std::string indicatorFileNameDisplay;
+  std::string indicatorReportFileName;
+  std::string indicatorReportFileNameDisplay;
   char DefaultWeylLetter;
   int DefaultWeylRank;
   int MaxFoundVars;
+  bool flagDisplayIndicator;
   ParserNode theValue;
   HomomorphismSemisimpleLieAlgebra theHmm;
   SemisimpleLieAlgebraOrdered testAlgebra;
   SemisimpleLieAlgebraOrdered testSubAlgebra;
+  std::string javaScriptDisplayingIndicator;
 //  SemisimpleLieAlgebra theLieAlgebra;
+  void InitJavaScriptDisplayIndicator();
   void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables){this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables); }
   void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   enum tokenTypes
@@ -10842,7 +10875,7 @@ public:
     this->TransformRepeatXAtoA(1);
     return true;
   }
-  void ParserInit(const std::string& input);
+  void InitAndTokenize(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify
   (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
@@ -10907,7 +10940,7 @@ public:
   bool LookUpInDictionaryAndAdd(std::string& input);
   void TokenToStringStream(std::stringstream& out, int theToken);
   void Clear();
-  Parser(){ this->flagFunctionListInitialized=false;}
+  Parser(){ this->flagFunctionListInitialized=false; this->flagDisplayIndicator=true;}
 };
 
 class GlobalVariables
@@ -11091,6 +11124,13 @@ public:
   inline void FeedIndicatorWindow(IndicatorWindowVariables& input)
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(input);
+  }
+  void ClearIndicatorVars()
+  { this->ProgressReportDepth=0;
+    this->theIndicatorVariables.ProgressReportStrings.SetSize(5);
+    for (int i=0; i<this->theIndicatorVariables.ProgressReportStrings.size; i++)
+      this->theIndicatorVariables.ProgressReportStrings[i]="";
+    this->theIndicatorVariables.StatusString1="";
   }
   inline void MakeReport()
   { if (this->FeedDataToIndicatorWindowDefault!=0)

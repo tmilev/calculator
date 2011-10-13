@@ -27,7 +27,7 @@ function progressReport()
   oRequest.send(null)
   if (oRequest.status==200)
     newReportString= oRequest.responseText;
-  el = document.getElementById("idProgressReport").innerHTML= "Number of clock ticks since last open: "+ timeOutCounter+"<br>Status file content:<br>" +newReportString;
+  el = document.getElementById("idProgressReport").innerHTML= "Refreshing indicator each second. Number of seconds: "+ timeOutCounter+"<br>Status file content:<br>" +newReportString;
   window.setTimeout("progressReport()",1000);
 }
 </script>

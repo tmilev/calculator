@@ -31,7 +31,7 @@ output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
 output << "   oRequest.send(null)\n";
 output << "   if (oRequest.status==200)\n";
 output << "     newReportString= oRequest.responseText;\n";
-output << "   el = document.getElementById(\"idProgressReport\").innerHTML= \"Number of clock ticks since last open: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+output << "   el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
 output << "   window.setTimeout(\"progressReport()\",1000);\n";
 output << " }\n";
 output << " </script>\n";

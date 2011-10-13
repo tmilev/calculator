@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 { std::string tempS2, tempS3;
   getPathTemp(argv[0], thePath);
   thePath.append("../../");
-  writeStatic("vector_partition.html", "vector_partition.html.cpp", 1);
+//  writeStatic("vector_partition.html", "vector_partition.html.cpp", 1);
   writeStatic("RootSystem.html", "RootSystem.html.cpp", 2);
   return 0;
 }

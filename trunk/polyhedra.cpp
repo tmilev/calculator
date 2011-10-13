@@ -220,7 +220,7 @@ template < > int List<rootsWithMultiplicity>::ListActualSizeIncrement=10;
 template < > int List<Rational>::ListActualSizeIncrement=10;
 template < > int List<coneRelation>::ListActualSizeIncrement=1000;
 template < > int List<DynkinDiagramRootSubalgebra>::ListActualSizeIncrement=100;
-template < > int List<rootSubalgebra>::ListActualSizeIncrement=77;
+template < > int List<rootSubalgebra>::ListActualSizeIncrement=78;
 template < > int List<List<int> >::ListActualSizeIncrement=10;
 template < > int List<List<char> >::ListActualSizeIncrement=30;
 template < > int List<slTwo>::ListActualSizeIncrement=1000;
@@ -6856,7 +6856,8 @@ void Rational::Assign(const Rational& r)
 { this->NumShort = r.NumShort;
   this->DenShort = r.DenShort;
   if (r.Extended==0)
-  { if (this->Extended==0) return;
+  { if (this->Extended==0)
+      return;
     this->FreeExtended();
     return;
   }
@@ -10920,7 +10921,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   roots& simpleBasis = theGlobalVariables.rootsGetEpsCoords2;
   roots& coordsInNewBasis = theGlobalVariables.rootsGetEpsCoords3;
   simpleBasis.CopyFromBase(generators);
-  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this, false);
+  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
   bool tempBool = true;
   if (generators.size==0)
     tempBool = false;
@@ -12355,12 +12356,12 @@ void thePFcomputation::SelectionToMatrixRational(MatrixLargeRational& output, in
 
 void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
 { this->SimpleBasisK.CopyFromBase(this->genK);
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl, false);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
   this->SimpleBasisCentralizerRoots.size=0;
   for (int i=0; i<this->AmbientWeyl.RootsOfBorel.size; i++)
     if (this->rootIsInCentralizer(this->AmbientWeyl.RootsOfBorel.TheObjects[i]))
       this->SimpleBasisCentralizerRoots.AddObjectOnTop(this->AmbientWeyl.RootsOfBorel.TheObjects[i]);
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl, false);
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl);
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
@@ -12372,8 +12373,8 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl, false);
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl, false);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl);
 }
 
 void rootSubalgebra::ComputeAll()
@@ -12750,13 +12751,13 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
   if (this->flagMakingProgressReport)
   { std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting)
-    { out1 << "Counting ss part " << this->theDynkinDiagram.DynkinString;
+    { out1 << "Counting ss part " << this->theDynkinDiagram.DynkinStrinG;
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     }
     else
-    { out1 << "Computing ss part " << this->theDynkinDiagram.DynkinString;
+    { out1 << "Computing ss part " << this->theDynkinDiagram.DynkinStrinG;
       out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
@@ -12776,6 +12777,11 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
 { output.SetSize(this->kModules.size);
   oppositeKmods.SetSize(this->kModules.size);
   int numTotal= this->kModules.size* this->kModules.size;
+  std::stringstream out;
+  out << "Computing pairing table for the module decomposition of the root subalgebra of type "
+  << this->theDynkinDiagram.ElementToStrinG(false, true)
+  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(false, true);
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out.str();
   for (int i=0; i<this->kModules.size; i++)
   { output.TheObjects[i].SetSize(this->kModules.size);
     for (int j=0; j<this->kModules.size; j++)
@@ -13080,7 +13086,7 @@ void rootSubalgebra::ExtractRelations(MatrixLargeRational& matA, MatrixLargeRati
     theRel.MakeLookCivilized(*this, NilradicalRoots);
     theRel.ComputeDebugString(owner, true, true);
     if (false)
-      if (theRel.theDiagram.DynkinString=="C_3")
+      if (theRel.theDiagram.DynkinStrinG=="C_3")
       { Selection tempSel;
         tempSel.init(Ksingular.size);
         int tempNum=MathRoutines::NChooseK(Ksingular.size, 2);
@@ -13139,9 +13145,9 @@ bool rootSubalgebra::AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, ro
           chosenAlphas.AddListOnTop(theRel.Betas);
           //chosenAlphas.ComputeDebugString();
           //theRel.Betas.ComputeDebugString();
-          theDiagram.ComputeDiagramTypeModifyInput(chosenAlphas, this->AmbientWeyl, false);
+          theDiagram.ComputeDiagramTypeModifyInput(chosenAlphas, this->AmbientWeyl);
           int theRank=theDiagram.RankTotal();
-          if (theRank>4 || theDiagram.DynkinString=="B_4" || theDiagram.DynkinString=="C_4")
+          if (theRank>4 || theDiagram.DynkinStrinG=="B_4" || theDiagram.DynkinStrinG=="C_4")
           { int goalNumBetas= 2;
             theRel.Betas.size=0; theRel.BetaCoeffs.size=0;
             for (int l=goalNumBetas-1; l<startNumBetas; l++)
@@ -13320,7 +13326,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
     if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
     { bufferSAs.TheObjects[RecursionDepth].genK.AddObjectOnTop(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
       bufferSAs.TheObjects[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
-      this->MakeProgressReportGenerationSubalgebras(bufferSAs, RecursionDepth, theGlobalVariables, k, bufferSAs.TheObjects[RecursionDepth-1].kModules.size/2);
+      this->MakeProgressReportGenerationSubalgebras(bufferSAs, RecursionDepth, theGlobalVariables, k, bufferSAs.TheObjects[RecursionDepth-1].kModules.size);
       int indexSA= this->IndexSubalgebra(theGlobalVariables.rootSAsGenerateAll.TheObjects[RecursionDepth], theGlobalVariables);
       if (indexSA==-1)
       { bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
@@ -13332,37 +13338,11 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
     }
 }
 
-void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
-  std::stringstream out1, out2, out3, out4, out5;
-  std::stringstream* tempOut;
-  tempOut=&out1;
-  for (int i=0; i<=RecursionDepth; i++)
-  { (*tempOut) << bufferSAs.TheObjects[i].theDynkinDiagram.DynkinString;
-    if (i!=RecursionDepth)
-      (*tempOut) << ": ";
-    if (i==4)
-      tempOut=&out2;
-    if (i==6)
-      tempOut=&out3;
-    if (i==8)
-      tempOut=&out4;
-  }
-  out5 << "Included root " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
 void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out4, out1;
-  out1 << "k_ss: " << theRootSA.theDynkinDiagram.DynkinString << " C(k_ss): " << theRootSA.theCentralizerDiagram.DynkinString;
+  out1 << "k_ss: " << theRootSA.theDynkinDiagram.DynkinStrinG << " C(k_ss): " << theRootSA.theCentralizerDiagram.DynkinStrinG;
   out4 << "Num elements ";
   if (theSubgroup.truncated)
     out4 << "truncated ";
@@ -13484,14 +13464,12 @@ bool rootSubalgebras::ApproveSelAgainstOneGenerator(List<int>& generator, Select
 
 int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& theGlobalVariables)
 { this->ProblemCounter++;
-  //if (this->ProblemCounter==49)
-    //Stop();
   int result=-1;
   for (int j=0; j<this->size; j++)
   { rootSubalgebra& right=this->TheObjects[j];
-    if (input.theDynkinDiagram.DynkinString == right.theDynkinDiagram.DynkinString && input.theCentralizerDiagram.DynkinString == right.theCentralizerDiagram.DynkinString)
+    if (input.theDynkinDiagram.DynkinStrinG == right.theDynkinDiagram.DynkinStrinG && input.theCentralizerDiagram.DynkinStrinG == right.theCentralizerDiagram.DynkinStrinG)
     { result=j;
-      if (!this->flagUseDynkinClassificationForIsomorphismComputation)
+      if (!this->flagUseDynkinClassificationForIsomorphismComputation || (this->AmbientWeyl.WeylLetter=='E' && this->AmbientWeyl.GetDim()==7))
       { input.ComputeAllButAmbientWeyl();
         if(!input.GenerateIsomorphismsPreservingBorel(right, theGlobalVariables, 0, false))
           result=-1;
@@ -13570,7 +13548,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer(roots& Domain, r
   leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
   leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
   if (RecursionDepth!=0)
-    if (leftSA.theDynkinDiagram.DynkinString!=rightSA.theDynkinDiagram.DynkinString || leftSA.theCentralizerDiagram.DynkinString!=rightSA.theCentralizerDiagram.DynkinString || rightSA.kModules.size!=leftSA.kModules.size)
+    if (leftSA.theDynkinDiagram.DynkinStrinG!=rightSA.theDynkinDiagram.DynkinStrinG || leftSA.theCentralizerDiagram.DynkinStrinG!=rightSA.theCentralizerDiagram.DynkinStrinG || rightSA.kModules.size!=leftSA.kModules.size)
     { if (abortKmodule!=0)
         *abortKmodule=true;
       return false;
@@ -13676,7 +13654,7 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
-  << " root subalgebra of type " << this->theDynkinDiagram.ElementToString(true) << "</title>";
+  << " root subalgebra of type " << this->theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
   output << "<meta name=\"keywords\" content=\"" << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim()) << " root subsystems, root subsystems, root systems";
   if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
     output << ", exceptional Lie algebra";
@@ -13721,13 +13699,11 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  this->theDynkinDiagram.ElementToString(tempS, true);
+  this->theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
-  { out << "k_{ss}: ";
-    CGIspecificRoutines::clearDollarSigns(tempS, tempS);
-  }
+    out << "k_{ss}: ";
   out << tempS;
   if (sl2s!=0)
   { out <<" &nbsp&nbsp&nbsp Contained in: ";
@@ -13735,7 +13711,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     { if (useHtml)
         out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK.TheObjects[i] << ".html\">";
       rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
-      CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DynkinString, tempS);
+      CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << tempS;
       if (useHtml)
         out << "</a>, ";
@@ -13755,7 +13731,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(tempS, useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  this->theCentralizerDiagram.ElementToString(tempS, true);
+  this->theCentralizerDiagram.ElementToStrinG(tempS, false, true);
   if(!useLatex)
     CGIspecificRoutines::clearDollarSigns(tempS, tempS);
   if (useLatex)
@@ -13966,19 +13942,26 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, ro
   }
 }
 
+void DynkinDiagramRootSubalgebra::SwapDynkinStrings(int i, int j)
+{ this->DynkinTypeStrings.SwapTwoIndices(i, j);
+  this->SimpleBasesConnectedComponents.SwapTwoIndices(i, j);
+  this->ComponentLetters.SwapTwoIndices(i, j);
+  this->ComponentRanks.SwapTwoIndices(i, j);
+  this->indicesThreeNodes.SwapTwoIndices(i, j);
+  this->indicesEnds.SwapTwoIndices(i, j);
+}
+
 void DynkinDiagramRootSubalgebra::Sort()
 { //doing bubble sort
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     for (int j=i+1; j<this->SimpleBasesConnectedComponents.size; j++)
     { bool tempBool=false;
-      if (this->SimpleBasesConnectedComponents.TheObjects[i].size<this->SimpleBasesConnectedComponents.TheObjects[j].size)
+      if (this->SimpleBasesConnectedComponents[i].size<this->SimpleBasesConnectedComponents[j].size)
         tempBool=true;
-      if (this->SimpleBasesConnectedComponents.TheObjects[i].size==this->SimpleBasesConnectedComponents.TheObjects[j].size)
-        tempBool=((this->DynkinTypeStrings.TheObjects[i])<(this->DynkinTypeStrings.TheObjects[j]));
+      if (this->SimpleBasesConnectedComponents[i].size==this->SimpleBasesConnectedComponents[j].size)
+        tempBool=((this->DynkinTypeStrings[i])<(this->DynkinTypeStrings[j]));
       if (tempBool)
-      { this->DynkinTypeStrings.SwapTwoIndices(i, j);
-        this->SimpleBasesConnectedComponents.SwapTwoIndices(i, j);
-      }
+        this->SwapDynkinStrings(i, j);
     }
   this->sameTypeComponents.size=0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
@@ -13986,19 +13969,19 @@ void DynkinDiagramRootSubalgebra::Sort()
   this->sameTypeComponents.MakeActualSizeAtLeastExpandOnTop(this->SimpleBasesConnectedComponents.size);
   std::string LastString="";
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-  { if (!(this->DynkinTypeStrings.TheObjects[i]==LastString))
+  { if (!(this->DynkinTypeStrings[i]==LastString))
     { this->sameTypeComponents.SetSize(this->sameTypeComponents.size+1);
       this->sameTypeComponents.LastObject()->size=0;
-      LastString=this->DynkinTypeStrings.TheObjects[i];
+      LastString=this->DynkinTypeStrings[i];
     }
     this->sameTypeComponents.LastObject()->AddObjectOnTop(i);
-    this->indexUniComponent.TheObjects[i]=this->sameTypeComponents.size-1;
-    this->indexInUniComponent.TheObjects[i]=this->sameTypeComponents.LastObject()->size-1;
+    this->indexUniComponent[i]=this->sameTypeComponents.size-1;
+    this->indexInUniComponent[i]=this->sameTypeComponents.LastObject()->size-1;
   }
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
-(const roots& simpleBasisInput, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+(const roots& simpleBasisInput, WeylGroup& theWeyl)
 { this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.MakeActualSizeAtLeastExpandOnTop(simpleBasisInput.size);
   std::string tempS= simpleBasisInput.ElementToString();
@@ -14024,20 +14007,9 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
       this->SimpleBasesConnectedComponents.LastObject()->AddObjectOnTop(simpleBasisInput.TheObjects[i]);
     }
   }
-//  this->SimpleBasesConnectedComponents.ComputeDebugString();
-  this->indicesThreeNodes.SetSize(this->SimpleBasesConnectedComponents.size);
-//  this->SimpleBasesConnectedComponents.ComputeDebugString();
-  this->DynkinTypeStrings.SetSize(this->SimpleBasesConnectedComponents.size);
-//  this->SimpleBasesConnectedComponents.ComputeDebugString();
-  this->indicesEnds.SetSize(this->SimpleBasesConnectedComponents.size);
-//  this->SimpleBasesConnectedComponents.ComputeDebugString();
-  this->ComputeDynkinStrings(theWeyl, IncludeAlgebraNames, IncludeAlgebraNames);
-  this->ComputeDynkinString();
-  this->SimpleBasesConnectedComponents.ComputeDebugString();
-
+  this->ComputeDynkinStrings(theWeyl);
   this->Sort();
-  //this->SimpleBasesConnectedComponents.ComputeDebugString();
-  this->ComputeDynkinString();
+  this->ComputeDynkinStrinG();
 }
 
 bool DynkinDiagramRootSubalgebra::LetterIsDynkinGreaterThanLetter(char letter1, char letter2)
@@ -14069,7 +14041,7 @@ bool DynkinDiagramRootSubalgebra::IsGreaterThan(DynkinDiagramRootSubalgebra& rig
     if (this->LetterIsDynkinGreaterThanLetter(right.DynkinTypeStrings[i].at(0), this->DynkinTypeStrings[i].at(0)))
       return false;
   }
-  return this->DynkinString>right.DynkinString;
+  return this->DynkinStrinG>right.DynkinStrinG;
 }
 
 void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& range, List<int>& thePerm, List<List<List<int > > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right)
@@ -14085,9 +14057,14 @@ void DynkinDiagramRootSubalgebra::GetMapFromPermutation(roots& domain, roots& ra
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinStrings
-  (WeylGroup& theWeyl, bool useDollarSigns, bool IncludeAlgebraNames)
-{ for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    this->ComputeDynkinString(i, theWeyl, IncludeAlgebraNames);
+  (WeylGroup& theWeyl)
+{ this->indicesThreeNodes.SetSize(this->SimpleBasesConnectedComponents.size);
+  this->DynkinTypeStrings.SetSize(this->SimpleBasesConnectedComponents.size);
+  this->indicesEnds.SetSize(this->SimpleBasesConnectedComponents.size);
+  this->ComponentLetters.SetSize(this->SimpleBasesConnectedComponents.size);
+  this->ComponentRanks.SetSize(this->SimpleBasesConnectedComponents.size);
+  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
+    this->ComputeDynkinString(i, theWeyl);
 }
 
 bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& right) const
@@ -14102,7 +14079,9 @@ bool DynkinDiagramRootSubalgebra::operator==(const DynkinDiagramRootSubalgebra& 
 }
 
 void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& right)
-{ this->DynkinString.assign(right.DynkinString);
+{ this->ComponentLetters=right.ComponentLetters;
+  this->ComponentRanks=right.ComponentRanks;
+  this->DynkinStrinG=right.DynkinStrinG;
   this->DynkinTypeStrings.CopyFromBase(right.DynkinTypeStrings);
   this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
   this->SimpleBasesConnectedComponents.CopyFromBase(right.SimpleBasesConnectedComponents);
@@ -14115,18 +14094,18 @@ void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& righ
 
 void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int index)
 { roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[index];
-  std::string& currentString=this->DynkinTypeStrings.TheObjects[index];
+  std::string& currentStrinG=this->DynkinTypeStrings.TheObjects[index];
   List<int> thePermutation;
   thePermutation.SetSize(currentComponent.size);
   output.size=0;
   for (int i=0; i<currentComponent.size; i++)
     thePermutation.TheObjects[i]=i;
   output.AddObjectOnTop(thePermutation);
-  if (currentString[1]=='A' && currentComponent.size!=1)
+  if (currentStrinG[0]=='A' && currentComponent.size!=1)
   { thePermutation.ReverseOrderElements();
     output.AddObjectOnTop(thePermutation);
   }
-  if (currentString[1]=='D')
+  if (currentStrinG[0]=='D')
   { if (currentComponent.size==4)
     {//the automorphism group of the Dynkin Diagram is S3
       thePermutation.TheObjects[1]=2; thePermutation.TheObjects[2]=3; thePermutation.TheObjects[3]=1;
@@ -14145,7 +14124,7 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
       output.AddObjectOnTop(thePermutation);
     }
   }
-  if (currentString=="E_6")
+  if (currentStrinG=="E_6")
   { thePermutation.TheObjects[1]=3; thePermutation.TheObjects[2]=4;
     thePermutation.TheObjects[3]=1; thePermutation.TheObjects[4]=2;
     output.AddObjectOnTop(thePermutation);
@@ -14155,7 +14134,7 @@ void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int 
 void DynkinDiagramRootSubalgebra::GetAutomorphisms(List<List<List<int> > >& output)
 { output.SetSize(this->SimpleBasesConnectedComponents.size);
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    this->GetAutomorphism( output.TheObjects[i], i);
+    this->GetAutomorphism(output.TheObjects[i], i);
 }
 
 int DynkinDiagramRootSubalgebra::RankTotal()
@@ -15432,9 +15411,9 @@ int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, 
   out << tempS;
   if (useLatex)
     out << " & ";
-  this->theDiagram.ElementToString(tempS, true);
+  this->theDiagram.ElementToStrinG(tempS, useLatex, true);
   out << tempS;
-  this->theDiagramRelAndK.ElementToString(tempS, true);
+  this->theDiagramRelAndK.ElementToStrinG(tempS, useLatex, true);
   if (useLatex)
     out << " & ";
   out << tempS;
@@ -15488,8 +15467,8 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, roots& Nil
   tempRoots.AddListOnTop(this->Betas);
   tempRoots.AddListOnTop(owner.genK);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl, false);
-  if (this->theDiagram.DynkinString=="F_4")
+  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
+  if (this->theDiagram.DynkinStrinG=="F_4")
     return false;
   if (this->theDiagram.DynkinTypeStrings[0]=="A_1")
   {//  assert(false);
@@ -15522,7 +15501,7 @@ void coneRelation::ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner)
 { roots tempRoots;
   tempRoots.CopyFromBase(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl, false);
+  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
   this->ComputeDiagramRelAndK(owner);
 }
 
@@ -15535,7 +15514,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, roots& NilradicalRoo
   tempRoots.CopyFromBase(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl, false);
+  this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
   if (this->theDiagram.DynkinTypeStrings.TheObjects[0]=="A_1")
   { this->ComputeDiagramRelAndK(owner);
     assert(false);
@@ -15550,10 +15529,10 @@ void coneRelation::GetEpsilonCoords(roots& input, roots& output, WeylGroup& theW
 { output.SetSize(input.size);
   roots& tempRoots=theGlobalVariables.rootsGetEpsilonCoords;
   root tempRoot;
-  if (this->theDiagram.DynkinString=="")
+  if (this->theDiagram.DynkinStrinG=="")
     return;
   int WeylRank=this->theDiagram.RankTotal();
-  char WeylLetter=this->theDiagram.DynkinString.at(0);
+  char WeylLetter=this->theDiagram.DynkinStrinG.at(0);
   for(int i=0; i<input.size; i++)
   { this->theDiagram.SimpleBasesConnectedComponents.CollectionToRoots(tempRoots);
     input.TheObjects[i].GetCoordsInBasis(tempRoots, tempRoot, theGlobalVariables);
@@ -15652,7 +15631,7 @@ void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
   for (int i=0; i<this->theDiagram.SimpleBasesConnectedComponents.size; i++)
     tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
-  this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl, false);
+  this->theDiagramRelAndK.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
 }
 
 void coneRelation::FixRepeatingRoots(roots& theRoots, List<Rational>& coeffs)
@@ -15707,7 +15686,7 @@ void coneRelations::AddRelationNoRepetition(coneRelation& input, rootSubalgebras
       return;
   }
   if (!this->flagIncludeSmallerRelations)
-    if (input.theDiagramRelAndK.DynkinString!=owners.TheObjects[0].theDynkinDiagram.DynkinString)
+    if (input.theDiagramRelAndK.DynkinStrinG!=owners.TheObjects[0].theDynkinDiagram.DynkinStrinG)
       return;
   this->AddObjectOnTopHash(input);
   if (this->flagIncludeCoordinateRepresentation)
@@ -15839,8 +15818,12 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
   CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
-  output << "<html><title> Root subsystems of " << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim()) << "</title>";
-  output << "<meta name=\"keywords\" content=\"" << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim()) << " root subsystems, root subsystems, root systems";
+  output << "<html><title> Root subsystems of "
+  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
+  << "</title>";
+  output << "<meta name=\"keywords\" content=\""
+  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
+  << " root subsystems, root subsystems, root systems";
   if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
     output << ", exceptional Lie algebra";
   output << " \">";
@@ -15894,22 +15877,20 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
   std::string tooltipSAs="h - fixed Cartan subalgebra. k - subalgebra containing h. k_{ss}=[k, k] - regular semisimple subalgebra in the sense of Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a root subsytem of \\Delta(g). C(k_{ss}) consists root spaces with roots strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   this->GetTableHeaderAndFooter(header, footer, useLatex, useHtml);
   int col=0; int row=0;
-  this->TheObjects[0].theDynkinDiagram.ElementToString(tempS, true);
+  this->TheObjects[0].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
   if (useLatex)
     out << "$\\mathfrak{g}$: ";
   else
-  { out << "g: ";
-    CGIspecificRoutines::clearDollarSigns(tempS, tempS);
-  }
-  out << tempS << "\n\n";
+    out << "g: ";
+  out << tempS << "  (Number of table entries: " << this->size-2 << " larger than the Cartan subalgebra + the Cartan subalgebra)\n\n";
   for (int i=1; i<this->size; i++)
   { if (col==0 && row==0)
     { out << header;
       if (useHtml)
         out << "<td title=\"" << tooltipSAs << "\">";
     }
-    this->TheObjects[i].theDynkinDiagram.ElementToString(tempS, true);
-    this->TheObjects[i].theCentralizerDiagram.ElementToString(tempS2, true);
+    this->TheObjects[i].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+    this->TheObjects[i].theCentralizerDiagram.ElementToStrinG(tempS2, useLatex, true);
     if (tempS=="") tempS="-";
     if (useLatex)
     { CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
@@ -15952,7 +15933,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     int counter=0;
     for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
     { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
-      this->TheObjects[tempI].theDynkinDiagram.ElementToString(tempS, true);
+      this->TheObjects[tempI].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
       if (useLatex)
         CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
       counter+=(signed)tempS.length();
@@ -16025,7 +16006,7 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
     { oldIndex=this->TheObjects[i].IndexOwnerRootSubalgebra;
       if (useLatex)
         out << "\\hline\\multicolumn{5}{c}{$\\mathfrak{k}$-semisimple type: "
-        << owners.TheObjects[oldIndex].theDynkinDiagram.DynkinString << "}\\\\\n\\hline\\hline";
+        << owners.TheObjects[oldIndex].theDynkinDiagram.DynkinStrinG << "}\\\\\n\\hline\\hline";
       //if (useHtml)
       //{ out << "<table>" << "<tr>"<< owners.TheObjects[oldIndex].theDynkinDiagram.DebugString
        //     <<"</tr>";
@@ -18254,9 +18235,9 @@ bool minimalRelationsProverStates::ExtendToIsomorphismRootSystem(minimalRelation
     return false;
   DynkinDiagramRootSubalgebra diagram1, diagram2;
   roots tempRoots; tempRoots.CopyFromBase(theState.PositiveKroots);
-  diagram1.ComputeDiagramTypeModifyInput(tempRoots, theWeyl, false);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots, theWeyl);
   tempRoots.CopyFromBase(theState.PositiveKroots);
-  diagram2.ComputeDiagramTypeModifyInput(tempRoots, theWeyl, false);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots, theWeyl);
   if (!(diagram1==diagram2))
     return false;
   List<int> tempList;
@@ -18395,7 +18376,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(roots& Domain, roots& Range, 
   theRangeRootSA.genK.CopyFromBase(Range);
   theDomainRootSA.ComputeAllButAmbientWeyl();
   theRangeRootSA.ComputeAllButAmbientWeyl();
-  if (theDomainRootSA.theDynkinDiagram.DynkinString!= theRangeRootSA.theDynkinDiagram.DynkinString || theDomainRootSA.theCentralizerDiagram.DynkinString!=theRangeRootSA.theCentralizerDiagram.DynkinString)
+  if (theDomainRootSA.theDynkinDiagram.DynkinStrinG!= theRangeRootSA.theDynkinDiagram.DynkinStrinG || theDomainRootSA.theCentralizerDiagram.DynkinStrinG!=theRangeRootSA.theCentralizerDiagram.DynkinStrinG)
   { if (DomainAndRangeGenerateNonIsoSAs!=0)
       *DomainAndRangeGenerateNonIsoSAs=true;
     return false;
@@ -18406,7 +18387,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(roots& Domain, roots& Range, 
   SelectionWithDifferentMaxMultiplicities tempAutosCentralizer;
   List<List<List<int> > > CentralizerDiagramAutomorphisms;
   theDomainRootSA.theCentralizerDiagram.GetAutomorphisms(CentralizerDiagramAutomorphisms);
-  theDomainRootSA.theCentralizerDiagram.ComputeDynkinString();
+  theDomainRootSA.theCentralizerDiagram.ComputeDynkinStrinG();
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
   for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
     tempAutosCentralizer.MaxMultiplicities.TheObjects[i] = CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
@@ -19100,9 +19081,9 @@ bool minimalRelationsProverStatesFixedK::GetNormalSeparatingConesFromPreferredBa
 
 int rootSubalgebra::ProblemCounter=0;
 bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly)
-{ if (this->theDynkinDiagram.DynkinString!= right.theDynkinDiagram.DynkinString)
+{ if (this->theDynkinDiagram.DynkinStrinG!= right.theDynkinDiagram.DynkinStrinG)
     return false;
-  if (this->theCentralizerDiagram.DynkinString!= right.theCentralizerDiagram.DynkinString)
+  if (this->theCentralizerDiagram.DynkinStrinG!= right.theCentralizerDiagram.DynkinStrinG)
     return false;
   if (outputAutomorphisms!=0)
   { outputAutomorphisms->ExternalAutomorphisms.size=0;
@@ -19391,21 +19372,21 @@ bool minimalRelationsProverStatesFixedK::ExtendToIsomorphismRootSystemFixedK(min
   DynkinDiagramRootSubalgebra diagram1, diagram2;
   roots tempRoots1, tempRoots2;
   tempRoots1.CopyFromBase(this->theK.SimpleBasisK);  tempRoots1.AddListOnTop(theAlphas);
-  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup, false);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.CopyFromBase(this->theK.SimpleBasisK); tempRoots2.AddListOnTop(theOtherAlphas);
-  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup, false);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   tempRoots1.AddListOnTop(theBetas);
-  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup, false);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.AddListOnTop(theOtherBetas);
-  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup, false);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   tempRoots1.CopyFromBase(this->theK.SimpleBasisK);  tempRoots1.AddListOnTop(theBetas);
-  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup, false);
+  diagram1.ComputeDiagramTypeModifyInput(tempRoots1, this->theWeylGroup);
   tempRoots2.CopyFromBase(this->theK.SimpleBasisK); tempRoots2.AddListOnTop(theOtherBetas);
-  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup, false);
+  diagram2.ComputeDiagramTypeModifyInput(tempRoots2, this->theWeylGroup);
   if (!(diagram1==diagram2))
     return false;
   List<int> tempList;
@@ -19894,7 +19875,7 @@ void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& stand
 { std::stringstream out;
   this->ComputeDebugString(false, false);
   standsOnTheLeft.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&&["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
+  out << "\\begin{eqnarray*}&& ["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
   this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
   this->ComputeDebugString(false, false);
   out << this->DebugString<<"\\end{eqnarray*}\n";
@@ -19905,7 +19886,7 @@ void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& stan
 { std::stringstream out;
   this->ComputeDebugString(false, false);
   standsOnTheRight.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&&["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
+  out << "\\begin{eqnarray*}&& ["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
   this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
   this->ComputeDebugString(false, false);
   out << this->DebugString<<"\\end{eqnarray*}\n";
@@ -19975,7 +19956,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>&
   std::string tempS;
   int numLettersSinceLastNewLine=0;
   if (useLatex && useBeginEqnArray)
-    out << "\\begin{eqnarray*}&&";
+    out << "\\begin{eqnarray*}&& ";
   if (this->StandardOrder.IsEqualToZero())
     out << 0;
   for (int i=0; i<this->StandardOrder.size; i++)
@@ -20234,7 +20215,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
-      CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinString, tempS);
+      CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<td align=\"center\">Decomp. " << tempS << "</td>";
     }
     out << "</tr>\n";
@@ -20242,7 +20223,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ElementToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
-    CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinString, tempS);
+    CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
     if (useHtml)
       out << "<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
@@ -20308,7 +20289,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
     if (useHtml)
     { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
-      currentSA.theDynkinDiagram.ElementToString(tempS, true);
+      currentSA.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
       CGIspecificRoutines::clearDollarSigns(tempS, tempS);
     }
     currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
@@ -20387,7 +20368,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
         tempStreamActual << "\n\n";
     }
     else
-      tempStreamActual << "\\noindent \\begin{eqnarray*}&&" << tempS << "=0\\end{eqnarray*}\n\n";
+      tempStreamActual << "\\noindent \\begin{eqnarray*}&& " << tempS << "=0\\end{eqnarray*}\n\n";
   }
   out << "\nThe system we need to solve:\n";
   if (useHtml)
@@ -20417,7 +20398,11 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
   theGlobalVariables.MakeReport();
   for (int i=0; i<output.theRootSAs.size-1; i++)
   { output.theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]="Exploring root subalgebra number "+(i+1);
+    theGlobalVariables.ClearIndicatorVars();
+    std::stringstream tempStream;
+    tempStream << "Exploring root subalgebra number " << (i+1) << " out of " << output.theRootSAs.size-1 << " non-trivial";
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
+    theGlobalVariables.MakeReport();
   }
   for (int i=0; i<output.size; i++)
   { slTwo& theSl2= output.TheObjects[i];
@@ -20474,7 +20459,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
       tempRoots.AddObjectOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
-    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->AmbientWeyl, false);
+    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->AmbientWeyl);
     int theSlack=0;
     RootsWithCharacteristic2.size=0;
     for (int j=0; j<relativeRootSystem.size; j++)
@@ -20525,7 +20510,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
         output.BadHCharacteristics.AddObjectOnTop(theSl2.theH.Hcomponent);
     }
     std::stringstream out;
-    out << "Exploring Dynkin characteristics possibility " << i+1 << " out of " << numCycles;
+    out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out.str();
     theGlobalVariables.MakeReport();
   }
@@ -20700,13 +20685,13 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
   tempRoots.CopyFromBase(MinimalContainingRegularSubalgebra.SimpleBasisK);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
   DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl, false);
+  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
   theDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
   this->IndicesContainingRootSAs.AddObjectOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.Hcomponent);
   DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl, false);
+  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
   tempDiagram.GetSimpleBasisInBourbakiOrder(this->preferredAmbientSimpleBasis);
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
@@ -20965,14 +20950,14 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
     }
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesMinimalContainingRootSA.TheObjects[j]];
-      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinString, tempS);
+      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[j]];
-      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinString, tempS);
+      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
@@ -21012,6 +20997,9 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   physicalPathSAs.append("../");
   htmlPathServerSAs= htmlPathServer;
   htmlPathServerSAs.append("../");
+  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
+  theGlobalVariables.theIndicatorVariables.StatusString1= "Preparing html pages for sl(2) subalgebras. This might take a while.";
+  theGlobalVariables.MakeReport();
   std::string tempS;
   this->theRootSAs.ElementToHtml(tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
   if(usePNG)
@@ -21038,7 +21026,18 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
     fileName.append("sl2s.html");
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
-    theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+    theFile << "<HMTL>"
+    << "<title>sl(2)-subalgebras of "
+    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true) <<  "</title>";
+    theFile << "<meta name=\"keywords\" content=\""
+    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"
+    << " nilpotent orbits of "
+    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    << ", sl(2)-triples of "
+    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    << " \">";
+    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
     theFile.close();
   }
   fileName= physicalPath;
@@ -21089,13 +21088,13 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";
-    current.theDynkinDiagram.ElementToString(tempS, true);
+    current.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
     out << tempS;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    current.theCentralizerDiagram.ElementToString(tempS, true);
+    current.theCentralizerDiagram.ElementToStrinG(tempS, useLatex, true);
     out << tempS;
     if (useHtml)
       out << "</td><td>";
@@ -22409,7 +22408,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
         out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n";
       else
         out << "\\hline\\begin{tabular}{r}";
-      out << "$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DynkinString << "; ";
+      out << "$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DynkinStrinG << "; ";
       if (!includeMatrixForm)
         out <<"\\\\";
       currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2, theGlobalVariables);
@@ -23046,7 +23045,7 @@ std::string Parser::ParseEvaluateAndSimplifyPart2
     this->theValue.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   std::stringstream out;
   if (useHtml)
-    out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&&" << this->StringBeingParsed << "\\end{eqnarray*} = </div>";
+    out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&& " << this->StringBeingParsed << "\\end{eqnarray*} = </div>";
   out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables);
   return out.str();
 }
@@ -23059,7 +23058,7 @@ std::string Parser::ParseEvaluateAndSimplify
 
 int DebugCounter=-1;
 
-void Parser::ParserInit(const std::string& input)
+void Parser::InitAndTokenize(const std::string& input)
 { this->TokenStack.MakeActualSizeAtLeastExpandOnTop(input.size());
   this->ValueStack.MakeActualSizeAtLeastExpandOnTop(input.size());
   this->MakeActualSizeAtLeastExpandOnTop(input.size());
@@ -23074,6 +23073,7 @@ void Parser::ParserInit(const std::string& input)
   this->SystemCommands.size=0;
   this->initFunctionList(this->DefaultWeylLetter, this->DefaultWeylRank);
   this->theValue.theAnimation.GetElement().flagAnimating=false;
+  this->flagDisplayIndicator=true;
   std::string buffer;
   int theLength=(signed) input.size();
   char LookAheadChar;
@@ -23133,7 +23133,7 @@ bool Parser::IsAWordSeparatingCharacter(char c)
 }
 
 void Parser::Parse(const std::string& input)
-{ this->ParserInit(input);
+{ this->InitAndTokenize(input);
   //std::cout << "Num vars before actual parsing: " << this->NumVariables;
   this->ParseNoInit(0, this->TokenBuffer.size-1);
 }
@@ -23253,7 +23253,7 @@ bool Parser::ApplyRules(int lookAheadToken)
 void Parser::ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   this->Parse(input);
-  out << "\\begin{eqnarray*}&&" << input << " = \\\\\n";
+  out << "\\begin{eqnarray*}&& " << input << " = \\\\\n";
   this->Evaluate(theGlobalVariables);
 //  this->WeylAlgebraValue.ElementToString(tempS, false, true, false);
   out << tempS;
@@ -24356,6 +24356,10 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     else
       this->TokenBuffer.AddObjectOnTop(Parser::tokenFunction);
     this->ValueBuffer.AddObjectOnTop(functionIndex);
+    return true;
+  }
+  if (input=="NoIndicator")
+  { this->flagDisplayIndicator=false;
     return true;
   }
   if (input=="x")
@@ -26324,13 +26328,13 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
     tempElt2.Simplify(&theGlobalVariables);
     std::cout << "<br>" << tempElt1.ElementToString(theGlobalVariables);
-    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
     out << "[" << tempElt1.ElementToString(true, PolyFormatLocal, theGlobalVariables) << "," << theElt.ElementToString(true, PolyFormatLocal, theGlobalVariables) << "]=" << tempElt2.ElementToString(true, PolyFormatLocal, theGlobalVariables);
     out << "\\end{eqnarray*}</div>";
     std::cout << "<br>" << tempElt2.ElementToString(theGlobalVariables);
     tempElt2.ModOutVermaRelationS(&theGlobalVariables, polyOne);
     out << "mod Verma rels:";
-    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
     out << tempElt2.ElementToString(true, PolyFormatLocal, theGlobalVariables);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTargetOrdered(theParser, NodeIndex, theElt, tempElt2, out, theGlobalVariables);
@@ -26370,12 +26374,12 @@ std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered
   { tempElt1.AssignElementLieAlgebra(theParser.theHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theRangeRank+numRangePosRoots, theParser.theHmm.theRange);
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
     tempElt2.Simplify();
-    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
     out << "[" << tempElt1.ElementToString(true) << "," << theElt.ElementToString(true) << "]=" << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
     tempElt2.ModOutVermaRelations();
     out << "mod Verma rels:";
-    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&&";
+    out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
     out << tempElt2.ElementToString(true);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTarget(theParser, theElt, tempElt2, out, theGlobalVariables);
@@ -26424,7 +26428,7 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
     this->GetDiffOperatorFromShiftAndCoefficient(theMon.Coefficient, currentShift, tempWeyl, theGlobalVariables);
     currentOperator.Add(tempWeyl);
   }
-  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
+  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&& " << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
   root tempRoot;
   RationalFunction ZeroRF;//, RFOne;
   ZeroRF.MakeNVarConst(numCoeffVars, (Rational) 0, &theGlobalVariables);
@@ -26505,13 +26509,13 @@ void EigenVectorComputation::DetermineEquationsFromResultLieBracketEquationsPerT
     currentTargetShifts.GetCoordsInBasis(tempRoots, tempRoots2, theGlobalVariables);
     out << "<br> in the above unimodular basis the coordinates are:<br> " << tempRoots2.ElementToString(false, true, true);
   }
-  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&&" << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
+  out << "<br>... and the operator is... <div class=\"math\" scale=\"50\"> \\begin{eqnarray*}&& " << currentOperator.ElementToString(true) << "\\end{eqnarray*}</div>";
   GeneralizedPolynomialRational tempGP;
   GeneralizedMonomialRational tempGM;
   tempGM.MakeGenericMon(numRangePosRoots+theRangeRank, theRangeRank);
   out << "<br>...and the generic monomial is: " << tempGM.ElementToString(PolyFormatLocal);
   this->WeylElementActsOnGeneralizedMonomial(currentOperator, tempGM, tempGP);
-  out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&&" << tempGP.ElementToString(PolyFormatLocal) << "\\end{eqnarray*}</div>";
+  out << "<br> ...and the action on the generic monomial is: <div class=\"math\">\\begin{eqnarray*}&& " << tempGP.ElementToString(PolyFormatLocal) << "\\end{eqnarray*}</div>";
 
   /*root tempRoot;
   RationalFunction ZeroRF;
@@ -27569,7 +27573,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
       AccumOrdered.operator+=(tempEltOrdered);
     }
     out << endMath << "<br>";
-    out << "Corresponding ordered expression: " << "<div class=\"math\">\\begin{eqnarray*}&&" << AccumOrdered.ElementToString(true, polyformatLocal, theGlobalVariables) << "\\end{eqnarray*}</div><br>";
+    out << "Corresponding ordered expression: " << "<div class=\"math\">\\begin{eqnarray*}&& " << AccumOrdered.ElementToString(true, polyformatLocal, theGlobalVariables) << "\\end{eqnarray*}</div><br>";
   }
   return out.str();
 }

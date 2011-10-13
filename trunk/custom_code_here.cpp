@@ -692,15 +692,8 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
     this->projectivizedChambeR.AddObjectOnTopHash(tempList[i]);
 }
 
-std::string DynkinDiagramRootSubalgebra::ElementToStringNoDollarSigns(bool CombineIsoComponents)
-{ std::string tempS, result;
-  this->ElementToString(tempS, CombineIsoComponents);
-  CGIspecificRoutines::clearDollarSigns(tempS, result);
-  return result;
-}
-
 void DynkinDiagramRootSubalgebra::ComputeDynkinString
-(int indexComponent, WeylGroup& theWeyl, bool IncludeAlgebraNames)
+(int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   std::stringstream out;
   roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
@@ -719,8 +712,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     roots tempRoots;
     tempRoots.CopyFromBase(currentComponent);
     tempRoots.PopIndexSwapWithLast(tripleNodeindex);
-    DynkinDiagramRootSubalgebra  tempDiagram;
-    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl, IncludeAlgebraNames);
+    DynkinDiagramRootSubalgebra tempDiagram;
+    tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl);
     assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
     List<int> indicesLongComponents;
     indicesLongComponents.size=0;
@@ -744,11 +737,11 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     for (int i=0; i<3; i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
-      out << this->GetNameFrom('D', currentComponent.size, IncludeAlgebraNames);
+      out << this->SetComponent("D", currentComponent.size, indexComponent);
     else
     {//type E
       assert(indicesLongComponents.size==2);
-      out << this->GetNameFrom('E', currentComponent.size, IncludeAlgebraNames);
+      out << this->SetComponent("E", currentComponent.size, indexComponent);
     }
   }else
   { Rational length1, length2, tempRat;
@@ -765,9 +758,10 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     }
     if (numLength2==0 )
     { //type A
-      out << this->GetNameFrom('A', numLength1, IncludeAlgebraNames);
-      if (!length1.IsEqualTo(theWeyl.LongRootLength))
-        out << "'";
+      if (length1.IsEqualTo(theWeyl.LongRootLength))
+        out << this->SetComponent("A", numLength1, indexComponent);
+      else
+        out << this->SetComponent("A'", numLength1, indexComponent);
     }
     else
     {//the longer root should have smaller index
@@ -786,19 +780,19 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       if (numLength1==numLength2)
       {//B2, C2, F4 or G2
         if (numLength1!=1)
-        { out << this->GetNameFrom('F', 4, IncludeAlgebraNames);
+        { out << this->SetComponent("F", 4, indexComponent);
           assert(numLength1==2);
         } else
         { if (length1.NumShort==6 || length2.NumShort==6)
-            out << this->GetNameFrom('G', 2, IncludeAlgebraNames);
+            out << this->SetComponent("G", 2, indexComponent);
           else
-            out << this->GetNameFrom('B', 2, IncludeAlgebraNames);
+            out << this->SetComponent("B", 2, indexComponent);
         }
       } else
       { if (numGreaterLength>numSmallerLength)
-          out << this->GetNameFrom('B', currentComponent.size, IncludeAlgebraNames);
+          out << this->SetComponent("B", currentComponent.size, indexComponent);
         else
-          out << this->GetNameFrom('C', currentComponent.size, IncludeAlgebraNames);
+          out << this->SetComponent("C", currentComponent.size, indexComponent);
       }
     }
     currentComponent.SwapTwoIndices(0, currentEnds.TheObjects[0]);
@@ -814,33 +808,38 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
   this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
 }
 
+std::string DynkinDiagramRootSubalgebra::SetComponent(const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
+{ this->ComponentLetters[componentIndex]=WeylLetterWithLength;
+  this->ComponentRanks[componentIndex]=WeylRank;
+  std::string result=this->GetNameFrom(WeylLetterWithLength, WeylRank, false);
+  this->DynkinTypeStrings[componentIndex]=result;
+  return result;
+}
+
 std::string DynkinDiagramRootSubalgebra::GetNameFrom
-  (char WeylLetter, int WeylRank, bool IncludeAlgebraNames)
+  (const std::string& WeylLetterWithLength , int WeylRank, bool IncludeAlgebraNames)
 { std::stringstream out;
-  out << WeylLetter << "_" << WeylRank;
-  if (IncludeAlgebraNames)
-    out << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetter, WeylRank) << ")";
+  out << WeylLetterWithLength << "_" << WeylRank;
+  if (IncludeAlgebraNames && (WeylLetterWithLength[0]=='A' || WeylLetterWithLength[0]=='B' || WeylLetterWithLength[0]=='C' || WeylLetterWithLength[0]=='D'))
+    out << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetterWithLength[0], WeylRank) << ")";
   return out.str();
 }
 
-void DynkinDiagramRootSubalgebra::ElementToString
-  (std::string& output, bool CombineIsoComponents, bool useDollarSigns, bool IncludeAlgebraNames)
+void DynkinDiagramRootSubalgebra::ElementToStrinG
+  (std::string& output, bool useDollarSigns, bool IncludeAlgebraNames)
 { std::stringstream out;
-  if (!CombineIsoComponents)
-    for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    { out << this->DynkinTypeStrings.TheObjects[i];
-      if (i!=this->SimpleBasesConnectedComponents.size-1)
-        out << "+";
-    }
-  else
-    for (int j=0; j<this->sameTypeComponents.size; j++)
-    { int numSameTypeComponents= this->sameTypeComponents.TheObjects[j].size;
-      if (numSameTypeComponents!=1)
-        out << numSameTypeComponents;
-      out << this->DynkinTypeStrings.TheObjects[this->sameTypeComponents.TheObjects[j].TheObjects[0]];
-      if (j!=this->sameTypeComponents.size-1)
-        out << "+";
-    }
+  for (int j=0; j<this->sameTypeComponents.size; j++)
+  { int numSameTypeComponents= this->sameTypeComponents.TheObjects[j].size;
+    if (useDollarSigns)
+      out << "$";
+    if (numSameTypeComponents!=1)
+      out << numSameTypeComponents;
+    out << this->GetNameFrom(this->ComponentLetters[this->sameTypeComponents[j][0]], this->ComponentRanks[this->sameTypeComponents[j][0]], IncludeAlgebraNames);
+    if (useDollarSigns)
+      out << "$";
+    if (j!=this->sameTypeComponents.size-1)
+      out << "+";
+  }
   output=out.str();
 }
 
@@ -4299,8 +4298,7 @@ int ParserNode::EvaluatePrintRootSystem
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { root& current=theNode.owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
     out << "<tr><td>" << current.ElementToString() << "</td><td>=</td><td>"
-    << CGIspecificRoutines::GetHtmlMathFromLatexFormulA
-    (rootSystemEpsCoords[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
+    << rootSystemEpsCoords[i].ElementToStringLetterFormat("e")
     << "</td></tr>";
   }
   out << "</table>";
@@ -4653,30 +4651,113 @@ int ParserNode::EvaluateDrawConeProjective
   return theNode.errorNoError;
 }
 
+void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+    return;
+  for (int i=0; i<=RecursionDepth; i++)
+  { int lineIndex=i/3;
+    theGlobalVariables.theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(lineIndex+1, 5));
+    std::string& currentLine=theGlobalVariables.theIndicatorVariables.ProgressReportStrings[lineIndex];
+    if (i%3==0)
+      currentLine="";
+    currentLine+= bufferSAs.TheObjects[i].theDynkinDiagram.DynkinStrinG;
+    if (i!=RecursionDepth)
+      currentLine+=": ";
+  }
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(theGlobalVariables.theIndicatorVariables.ProgressReportStrings.size+1, 5));
+  std::stringstream out;
+  out << "Included root " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
+  *theGlobalVariables.theIndicatorVariables.ProgressReportStrings.LastObject()=out.str();
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+}
+
+void Parser::InitJavaScriptDisplayIndicator()
+{ std::stringstream output;
+  output << " <!>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " var timeOutCounter=0;\n";
+  output << " window.setTimeout(\"progressReport()\",1000);\n";
+  output << " var newReportString=\"\";\n";
+  output << " function progressReport()\n";
+  output << " { timeOutCounter++;\n";
+  output << "   var oRequest = new XMLHttpRequest();\n";
+  output << "   var sURL  = \"" << this->indicatorReportFileNameDisplay << "\";\n";
+  output << "   oRequest.open(\"GET\",sURL,false);\n";
+  output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
+  output << "   oRequest.send(null)\n";
+  output << "   if (oRequest.status==200)\n";
+  output << "   { newReportString= oRequest.responseText;\n";
+  output << "     el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+  output << "   }\n";
+  output << "   window.setTimeout(\"progressReport()\",1000);\n";
+  output << " }\n";
+  output << " </script>\n";
+  output << " <div id=\"idProgressReport\">\n";
+  output << " </div>\n";
+  output << " \n";
+  output << " \n";
+  this->javaScriptDisplayingIndicator=output.str();
+}
+
 int ParserNode::EvaluatePrintRootSAsAndSlTwos
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
-{ std::stringstream out1, out2, outSltwoPath, outSltwoDisplayPath, outSltwoMainFile, out;
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos,
+   bool forceRecompute)
+{ std::stringstream outSltwoPath, outMainPath, out, outSltwoDisplayPath, outMainDisplayPath;
   CGIspecificRoutines::SetCGIServerIgnoreUserAbort();
-  //double oldMaxAllowedComputationTimeInSeconds= theGlobalVariables.MaxAllowedComputationTimeInSeconds;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   char weylLetter=theNode.owner->DefaultWeylLetter;
   int theRank=theNode.owner->DefaultWeylRank;
-  out1 << theNode.owner->outputFolderPath << weylLetter << theRank << "/rootHtml.html";
-  out2 << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/rootHtml.html";
-  outSltwoPath << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s/";
-  outSltwoDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/sl2s/";
-  outSltwoMainFile << outSltwoPath.str() << "sl2s_nopng.html";
-  //std::string tempS=outSltwoMainFile.str();
-  bool NeedASecondRun=false;
-  if (!CGIspecificRoutines::FileExists(out1.str()) || !CGIspecificRoutines::FileExists(outSltwoMainFile.str()) || forceRecompute)
+  outMainPath << theNode.owner->outputFolderPath <<  weylLetter << theRank << "/";
+  outMainDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/";
+  outSltwoPath << outMainPath.str() << "sl2s/";
+  outSltwoDisplayPath << outMainDisplayPath.str() << "sl2s/";
+  bool NeedToCreateFolders=(!CGIspecificRoutines::FileExists(outMainPath.str()) || !CGIspecificRoutines::FileExists(outSltwoPath.str()));
+  if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank;
-    outMkDirCommand2 << "mkdir " << theNode.owner->outputFolderPath << weylLetter << theRank << "/sl2s";
+    outMkDirCommand1 << "mkdir " << outMainPath.str();
+    outMkDirCommand2 << "mkdir " << outSltwoPath.str();
     theNode.owner->SystemCommands.AddObjectOnTop(outMkDirCommand1.str());
     theNode.owner->SystemCommands.AddObjectOnTop(outMkDirCommand2.str());
-    if (!CGIspecificRoutines::FileExists(outSltwoPath.str()))
-      NeedASecondRun=true;
-    else
+    out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection."
+    <<  " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
+    << "(Apache server configuration) problem.</b><br><br>"
+    << "<META http-equiv=\"refresh\" content=\"3; url="
+    << "/cgi-bin/calculator?"
+    << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
+    out << CGIspecificRoutines::UnCivilizeStringCGI(theNode.owner->StringBeingParsed);
+    out << "\">  Redirecting in 3 seconds";
+    theNode.outputString=out.str();
+    theNode.ExpressionType=theNode.typeString;
+    return theNode.errorNoError;
+  }
+  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
+  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
+  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
+  outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
+  outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
+  bool mustRecompute=forceRecompute;
+  if (!CGIspecificRoutines::FileExists(outSltwoMainFile.str()) || !CGIspecificRoutines::FileExists(outRootHtmlFileName.str()))
+    mustRecompute=true;
+  bool showIndicator=theNode.owner->flagDisplayIndicator;
+  if (mustRecompute)
+  { if (showIndicator)
+    { out << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. <br>Appologies for this technical (Apache server configuration) problem. <br>Hope to alleviate it soon.</b>"
+      << "<br><br> Below is an indicator for the progress of the computation."
+      << "<br>Once it is done, you should be redirected automatically to the result page."
+      << "<br>To go back to the calculator main page use the back button on your browser."
+      << "<META http-equiv=\"refresh\" content=\"0; url=";
+      std::stringstream noindicatorLink;
+      noindicatorLink << "/cgi-bin/calculator?"
+      << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput="
+      << CGIspecificRoutines::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
+      out << noindicatorLink.str() << "\">";
+      out << "\n<br>\nComputing ...<br>" << theNode.owner->javaScriptDisplayingIndicator;
+      theGlobalVariables.ClearIndicatorVars();
+      theGlobalVariables.MakeReport();
+      theNode.outputString=out.str();
+      theNode.ExpressionType=theNode.typeString;
+      return theNode.errorNoError;
+    } else
     { SltwoSubalgebras theSl2s;
       theSl2s.owner.FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
       std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
@@ -4685,24 +4766,12 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
     }
   }
-  if (!NeedASecondRun)
-  { out << "<META http-equiv=\"refresh\" content=\"0; url=";
-    if (!redirectToSlTwos)
-      out << out2.str();
-    else
-      out << outSltwoDisplayPath.str() << "sl2s.html";
-    out << "\">  Redirecting to the requested page: <br><br> <a href=\"" <<  out2.str() << "\">"  << out1.str() << "</a>.<br><br>";
-  }
+  out << "<META http-equiv=\"refresh\" content=\"0; url=";
+  if (!redirectToSlTwos)
+    out << outRootHtmlDisplayName.str();
   else
-  { out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection. Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical (Apache server configuration) problem.</b><br><br><META http-equiv=\"refresh\" content=\"0; url="
-          << "/cgi-bin/calculator?"
-          << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
-    if (redirectToSlTwos)
-      out << CGIspecificRoutines::UnCivilizeStringCGI("printSlTwos");
-    else
-      out << CGIspecificRoutines::UnCivilizeStringCGI("printRootSubalgebras");
-    out << "\">";
-  }
+    out << outSltwoFileDisplayName.str();
+  out << "\">";
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
 //  theGlobalVariables.MaxAllowedComputationTimeInSeconds=oldMaxAllowedComputationTimeInSeconds;
@@ -7255,10 +7324,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluatePrintSlTwos
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("printSlTwosAndRootSAsFORCERecompute",
+  ("zprintSlTwosAndRootSAsFORCERecompute",
    "()",
-   "<b>Use only if there are broken links in root subalgebra/sl(2)-database. When executing this command, please be patient and do not click any links until automatically redirected. </b> I have a problem with setting up the Apache server and the way it handles SIGABORT signals (this is what happens when you don't wait for the computation to finish and click on a link prematurely). This function is a temporary solution to this (minor) technical problem.",
-   "printSlTwosAndRootSAsFORCERecompute",
+   "<b>Use only if there are broken links in root subalgebra/sl(2)-database. \
+   When executing this command, please be patient and do not click any links until automatically redirected. </b> \
+   I have a problem with setting up the Apache server and the way it handles SIGABORT signals \
+   (this is what happens when you don't wait for the computation to finish and click on a link prematurely). \
+   This function is a temporary solution to this (minor) technical problem. \
+   The function name starts with z because it is meant to be used rarely.",
+   "zprintSlTwosAndRootSAsFORCERecompute",
     DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSAsForceRecompute
    );
@@ -7431,12 +7505,12 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("GtwoInBthreeMultsParabolic",
+  ("gTwoInBthreeMultsParabolic",
    "((Rational,...), (Rational,...))",
    "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
-   "GtwoInBthreeMultsParabolic((10,0,0), (1,0,0) )",
-   DefaultWeylLetter, DefaultWeylRank, false,
+   "gTwoInBthreeMultsParabolic((10,0,0), (1,0,0) )",
+   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );
 /*   this->AddOneFunctionToDictionaryNoFail

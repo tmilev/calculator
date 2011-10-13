@@ -10080,7 +10080,9 @@ public:
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  bool DrawMeProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeProjective
+(root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+  ;
   void ChangeBasis(MatrixLargeRational& theLinearMap);
   std::string DebugString;
   int GetDim()
@@ -10236,7 +10238,7 @@ public:
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 ;
   bool DrawMeProjective
-  (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
   ;
   std::string DrawMeToHtmlProjective
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
@@ -10716,6 +10718,7 @@ public:
   SemisimpleLieAlgebraOrdered testAlgebra;
   SemisimpleLieAlgebraOrdered testSubAlgebra;
   std::string javaScriptDisplayingIndicator;
+  std::string afterSystemCommands;
 //  SemisimpleLieAlgebra theLieAlgebra;
   void InitJavaScriptDisplayIndicator();
   void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables){this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables); }
@@ -11553,8 +11556,8 @@ public:
   (GlobalVariables& theGlobalVariables)
   ;
   void IncrementComputation
-(GlobalVariables& theGlobalVariables)
-;
+  (root& parabolicSel, GlobalVariables& theGlobalVariables)
+  ;
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
   GeneralizedVermaModuleCharacters()
   { this->UpperLimitChambersForDebugPurposes=-1;
@@ -11572,13 +11575,14 @@ public:
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   { std::string tempS;
     int numReadWords;
+    root parSel; parSel=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
     if (theGlobalVariables!=0)
     { this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
-      this->initFromHomomorphism(this->theParser.theHmm, *theGlobalVariables);
+      this->initFromHomomorphism(parSel, this->theParser.theHmm, *theGlobalVariables);
     } else
     { GlobalVariables tempGlobalVars;
       this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
-      this->initFromHomomorphism(this->theParser.theHmm, tempGlobalVars);
+      this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
     }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
 
@@ -11613,7 +11617,7 @@ public:
   (GlobalVariables& theGlobalVariables)
   ;
   void initFromHomomorphism
-  (HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  (root& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
   ;
   void TransformToWeylProjectiveStep1
   (GlobalVariables& theGlobalVariables)

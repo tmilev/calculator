@@ -2663,6 +2663,9 @@ public:
     }
     return result;
   }
+  CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other) const
+  { return this->ScalarEuclidean(other, (CoefficientType) 0);
+  }
   void MakeEi(int DesiredDimension, int NonZeroIndex, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
@@ -2777,6 +2780,7 @@ public:
     Matrix<CoefficientType> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
   }
+  Vector<CoefficientType> GetProjectivizedNormal(Vector<CoefficientType>& affinePoint);
   Vector<CoefficientType> operator*(const CoefficientType& other)
   { Vector<CoefficientType> result;
     result.SetSize(this->size);
@@ -8694,7 +8698,9 @@ public:
   int ChevalleyGeneratorIndexToElementCartanIndex(int theIndex){ return theIndex-this->theWeyl.RootsOfBorel.size;}
   int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const{ return this->RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(this->ChevalleyGeneratorIndexToRootIndex(theIndex));}
   bool AreOrderedProperly(int leftIndex, int rightIndex);
-  std::string GetLetterFromGeneratorIndex(int theIndex, bool useLatex, PolynomialOutputFormat& theFormat);
+  std::string GetLetterFromGeneratorIndex
+  (int theIndex, bool useLatex, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+;
   void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
@@ -9022,11 +9028,13 @@ class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping
 {
 private:
-  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnveloping& output);
+  void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
 public:
   std::string DebugString;
-  std::string ElementToString(bool useLatex);
-  void ComputeDebugString(){this->DebugString=this->ElementToString(false);}
+  std::string ElementToString
+  (bool useLatex, bool useEpsilonCoords, GlobalVariables& theGlobalVariables)
+  ;
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->DebugString=this->ElementToString(false, false, theGlobalVariables);}
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -9038,7 +9046,7 @@ public:
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
-  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
   void GetDegree(PolynomialRationalCoeff& output)
@@ -9048,7 +9056,9 @@ public:
   }
   bool CommutingLeftIndexAroundRightIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
   bool CommutingRightIndexAroundLeftIndexAllowed(PolynomialRationalCoeff& theLeftPower, int leftGeneratorIndex, PolynomialRationalCoeff& theRightPower, int rightGeneratorIndex);
-  bool SwitchConsecutiveIndicesIfTheyCommute(int theLeftIndex, MonomialUniversalEnveloping& output);
+  bool SwitchConsecutiveIndicesIfTheyCommute
+(int theLeftIndex, MonomialUniversalEnveloping& output, GlobalVariables& theGlobalVariables)
+  ;
   void MakeConst(const PolynomialRationalCoeff& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;}
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very convenient for computing with Verma modules
@@ -9057,7 +9067,7 @@ public:
   //The order of the positive roots is the same as the order in which roots are kept in WeylGroup::RootSystem
   // The order of the negative roots is reverse to the order in which they are kept in WeylGroup::RootSystem
   // with the "zero level roots" - i.e. the elements of the Cartan subalgebra - put in between.
-  void Simplify(ElementUniversalEnveloping& output);
+  void Simplify(ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables);
   void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnveloping& output);
   void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnveloping& output);
   MonomialUniversalEnveloping(){this->owner=0;}
@@ -9078,11 +9088,12 @@ private:
   friend class MonomialUniversalEnveloping;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output){this->ElementToString(output, true);}
-  void ElementToString(std::string& output, bool useLatex);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(bool useLatex){std::string tempS; this->ElementToString(tempS, useLatex); return tempS;}
-  void ComputeDebugString(){this->ElementToString(this->DebugString);}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables){this->ElementToString(output, true, false, theGlobalVariables);}
+  void ElementToString(std::string& output, bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables);
+  std::string ElementToString(GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS;}
+  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, useLatex, false, theGlobalVariables); return tempS;}
+  std::string ElementToString(bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables); return tempS;}
+  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);}
   SemisimpleLieAlgebra* owner;
   void AddMonomial(const MonomialUniversalEnveloping& input);
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebra& theOwner);
@@ -9093,7 +9104,7 @@ public:
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& theOwner);
   void MakeConst(const PolynomialRationalCoeff& coeff, SemisimpleLieAlgebra& theOwner){this->Nullify(theOwner); MonomialUniversalEnveloping tempMon; tempMon.MakeConst(coeff, theOwner); this->AddMonomial(tempMon);};
-  void Simplify();
+  void Simplify(GlobalVariables& theGlobalVariables);
   int GetNumVariables()
   { if (this->size==0)
       return 0;
@@ -9101,8 +9112,8 @@ public:
       return this->TheObjects[0].Coefficient.NumVars;
   }
   inline void MultiplyBy(const ElementUniversalEnveloping& other){this->operator*=(other);}
-  void ModOutVermaRelations(){ this->ModOutVermaRelations(false);}
-  void ModOutVermaRelations(bool SubHighestWeightWithZeroes);
+  void ModOutVermaRelations(GlobalVariables& theGlobalVariables){ this->ModOutVermaRelations(false, theGlobalVariables);}
+  void ModOutVermaRelations(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   static void GetCoordinateFormOfSpanOfElements
   (int numVars, List<ElementUniversalEnveloping>& theElements, List<rootPoly>& outputCoordinates, ElementUniversalEnveloping& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
 ;
@@ -10079,7 +10090,7 @@ public:
   std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   bool DrawMeProjective
 (root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
   ;
@@ -10227,12 +10238,18 @@ public:
   void FindMaxmumOverNonDisjointChambers
     (roots& theMaximaOverEachChamber, roots& outputMaxima, GlobalVariables& theGlobalVariables)
     ;
+  void MakeAffineAndTransformToProjectiveDimPlusOne
+  (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
+  ;
   int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
   bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
   void PopChamberSwapWithLast(int index);
-  bool DrawMeLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   void InitFromDirectionsAndRefine
   (roots& inputVectors, GlobalVariables& theGlobalVariables)
+  ;
+  void InitFromAffineDirectionsAndRefine
+  (roots& inputDirections, roots& inputAffinePoints, GlobalVariables& theGlobalVariables)
   ;
   std::string DrawMeToHtmlLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)

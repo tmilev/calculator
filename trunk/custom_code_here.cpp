@@ -670,6 +670,53 @@ int ParserNode::EvaluateG2InB3MultsParabolic
   return theNode.errorNoError;
 }
 
+void ConeComplex::InitFromAffineDirectionsAndRefine
+  (roots& inputDirections, roots& inputAffinePoints, GlobalVariables& theGlobalVariables)
+{ assert(inputDirections.size==inputAffinePoints.size);
+  assert(inputDirections.size>0);
+  roots projectivizedDirections;
+  projectivizedDirections.SetSize(inputDirections.size*2);
+  int theAffineDim= inputDirections[0].size;
+  for (int i=0; i<inputDirections.size; i++)
+  { projectivizedDirections[i]=inputDirections[i];
+    projectivizedDirections[i].SetSize(theAffineDim+1);
+    *projectivizedDirections[i].LastObject()=0;
+  }
+  for (int i=0; i<inputAffinePoints.size; i++)
+  { projectivizedDirections[i+inputAffinePoints.size]=inputAffinePoints[i];
+    projectivizedDirections[i+inputAffinePoints.size].SetSize(theAffineDim+1);
+    *projectivizedDirections[i+inputAffinePoints.size].LastObject()=1;
+  }
+  this->InitFromDirectionsAndRefine(projectivizedDirections, theGlobalVariables);
+}
+
+void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne
+  (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
+{ assert(&output!=this);
+  output.init();
+  Cone tempCone;
+  roots newNormals;
+  root tempRoot;
+  int theAffineDim=affinePoint.size;
+  for (int i=0; i<this->size; i++)
+  { newNormals.SetSize(this->TheObjects[i].Normals.size+1);
+    for (int j=0; j<this->TheObjects[i].Normals.size; j++)
+      newNormals[j]= this->TheObjects[i].Normals[j].GetProjectivizedNormal(affinePoint);
+    newNormals.LastObject()->MakeEi(theAffineDim+1, theAffineDim);
+    tempCone.CreateFromNormals(newNormals, theGlobalVariables);
+    output.AddNonRefinedChamberOnTopNoRepetition(tempCone);
+  }
+}
+
+template<class CoefficientType>
+Vector<CoefficientType> Vector<CoefficientType>::GetProjectivizedNormal(Vector<CoefficientType>& affinePoint)
+{ Vector<CoefficientType> result=*this;
+  result.SetSize(this->size+1);
+  *result.LastObject()=-affinePoint.ScalarEuclidean(*this);
+  return result;
+}
+
+
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
   ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
    )
@@ -679,6 +726,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   if (LargerWeyl.GetDim()!=3 || LargerWeyl.WeylLetter!='B')
     return "Error: algebra is not so(7).";
   this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
+  this->TransformToWeylProjectiveStep1(theGlobalVariables);
+  this->TransformToWeylProjectiveStep2(theGlobalVariables);
   MatrixLargeRational tempMat;
   tempMat=LargerWeyl.CartanSymmetric;
   tempMat.Invert();
@@ -688,19 +737,37 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
   drawOps.theBuffer.initDimensions(theSmallDim, 1);
   drawOps.theBuffer.MakeMeAStandardBasis(theSmallDim);
-  PolynomialOutputFormat tempFormat;
-  drawOps.theBuffer.ProjectionsEiVectors[0][0]=0.5;  drawOps.theBuffer.ProjectionsEiVectors[0][1]=-0.87;
-  drawOps.theBuffer.ProjectionsEiVectors[1][0]=-0.5; drawOps.theBuffer.ProjectionsEiVectors[1][1]=-0.87;
+  PolynomialOutputFormat theFormat;
+  drawOps.theBuffer.ProjectionsEiVectors[0][0]=0.87;  drawOps.theBuffer.ProjectionsEiVectors[0][1]=-0.5;
+  drawOps.theBuffer.ProjectionsEiVectors[1][0]=-0.87; drawOps.theBuffer.ProjectionsEiVectors[1][1]=-0.5;
   drawOps.theBuffer.GraphicsUnit[0]=50;
-  ConeComplex tempComplex;
+  ConeComplex tempComplex, refinedProjectivized;
   tempComplex.InitFromDirectionsAndRefine(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
-  ZeroRoot.MakeZero(theSmallDim);
-  for (int i=0; i<theSmallDim; i++)
-  { tempRoot.MakeEi(theSmallDim, i);
-    drawOps.theBuffer.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, tempRoot, drawOps.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
+  root hwProjected;
+  this->theLinearOperators[0].ActOnAroot(highestWeightLargerAlg,  hwProjected);
+  hwProjected.MinusRoot();
+  tempComplex.MakeAffineAndTransformToProjectiveDimPlusOne(hwProjected, refinedProjectivized, theGlobalVariables);
+  out << "Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
+  out << "<br> Input parabolics selections: " << parabolicSel.ElementToString();
+  //out << "<br>refined projectivized: " << refinedProjectivized.ElementToString(false, true);
+  refinedProjectivized.DrawMeLastCoordAffine(false, drawOps, theFormat);
+  drawOps.drawCoordSystemBuffer(drawOps, 2, 0);
+//  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  for (int i=1; i<this->theLinearOperators.size; i++)
+  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, hwProjected);
+    hwProjected.MinusRoot();
+    hwProjected-=this->theTranslationsProjecteD[i];
+    for (int j=0; j<tempComplex.size; j++)
+      for (int k=0; k<tempComplex[j].Normals.size; k++)
+      { tempRoot= tempComplex[j].Normals[k].GetProjectivizedNormal(hwProjected);
+        refinedProjectivized.splittingNormals.AddObjectOnTopHash(tempRoot);
+      }
   }
-
+  refinedProjectivized.Refine(theGlobalVariables);
+  refinedProjectivized.DrawMeLastCoordAffine(false, drawOps, theFormat);
+  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  out << refinedProjectivized.ElementToString(false, true);
+/*
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, tempRoot);
     tempRoot.MinusRoot();
@@ -712,9 +779,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     out << tempRoot.ElementToString();
   }
   drawOps.drawCoordSystemBuffer(drawOps, 3, 0);
-  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-  out << "Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
-  out << "<br> Input parabolics selections: " << parabolicSel.ElementToString();
+  out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);*/
+
   return out.str();
 }
 
@@ -5655,7 +5721,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
         //out << "\\hline generator & corresponding root space\\\\\\hline";
         i+=theDimension;
       }
-      out << "$" << this->GetLetterFromGeneratorIndex(i, false, theFormat);
+      out << "$" << this->GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables);
       int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
       if (useRootNotation)
       { out << ":=" << theFormat.alphabetBases[0] << "_{";
@@ -5959,7 +6025,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 std::string ConeComplex::DrawMeToHtmlLastCoordAffine
 (DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool isBad=false;
-  isBad=this->DrawMeLastCoordAffine(theDrawingVariables, theFormat);
+  isBad=this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   if (isBad)
@@ -5989,11 +6055,11 @@ std::string ConeComplex::DrawMeToHtmlProjective
 }
 
 bool ConeComplex::DrawMeLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
-    result=this->TheObjects[i].DrawMeLastCoordAffine(theDrawingVariables, theFormat) && result;
+    result=this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
     //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -6025,10 +6091,9 @@ bool ConeComplex::DrawMeProjective
 }
 
 bool Cone::DrawMeLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
-  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
   roots VerticesScaled=this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
@@ -6047,10 +6112,13 @@ bool Cone::DrawMeLastCoordAffine
     }
   }
   root tempRoot;
-  for (int i=0; i<this->GetDim()-1; i++)
-  { tempRoot.MakeEi(this->GetDim()-1, i);
-    theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+  if (InitDrawVars)
+  { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
+    for (int i=0; i<this->GetDim()-1; i++)
+    { tempRoot.MakeEi(this->GetDim()-1, i);
+      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+      (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+    }
   }
   for (int k=0; k<this->Normals.size; k++)
     for (int i=0; i<this->Vertices.size; i++)
@@ -6071,7 +6139,8 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
   if (this->Vertices.size<1)
     return "The cone is empty";
   std::stringstream out;
-  bool foundBadVertex=this->DrawMeLastCoordAffine(theDrawingVariables, theFormat);
+
+  bool foundBadVertex=this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
   if (foundBadVertex)
     out << "<br>The cone does not lie in the upper half-space. ";
   else
@@ -7604,7 +7673,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "((Rational,...), (Rational,...))",
    "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
-   "gTwoInBthreeMultsParabolic((10,0,0), (1,0,0) )",
+   "gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateG2InB3MultsParabolic
    );

@@ -164,6 +164,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
+//  civilizedInput="gTwoInBthreeMultsParabolic((3,0,0), (1,0,0) )";
   //civilizedInput="printSlTwosAndRootSAsFORCERecompute";
 //  civilizedInput="actByWeylRho(x_1, x_2,x_3, x_4, x_5, x_6)";
 //  theParser.DefaultWeylRank=6;
@@ -499,7 +500,7 @@ int main(int argc, char **argv)
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    tempFormat.MakeAlphabetArbitraryWithIndex("g'", "h'");
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);

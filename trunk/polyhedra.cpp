@@ -28767,7 +28767,7 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
-    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, PolyFormatLocal); break;
+//    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, PolyFormatLocal); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;

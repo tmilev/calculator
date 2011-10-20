@@ -608,7 +608,7 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
 
 int ParserNode::EvaluateG2InB3Computation
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root parSel="(0,0,0)";
+{ root parSel="(1,1,1)";
   tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
     (parSel, theGlobalVariables)
     ;
@@ -989,8 +989,8 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
 //  this->UpperLimitChambersForDebugPurposes=5;
   PolynomialRationalCoeff::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
-//  if (false)
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=parabolicSel;
+  if (false)
   if (this->UpperLimitChambersForDebugPurposes==0 || this->theLinearOperators.size==0)
     this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
@@ -7370,15 +7370,18 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("coneFromNormals",
    "((Rational,...),...)",
-   "A polyhedron in n dimensions such that all of its walls pass through zero. The argument vectors describe the normals of the cone walls. \
-   To each such polyhedron C we assign the affine polyhedron obtained by intersecting C with the hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate zero.",
+   "A polyhedron in n dimensions such that all of its walls pass through zero. \
+   The argument vectors describe the normals of the cone walls. \
+   To each such polyhedron C we assign the affine polyhedron obtained by intersecting C with the hyperplane passing through \
+   (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate zero.",
    "coneFromNormals((1,0),(0,1)) ",
     & ParserNode::EvaluateCone
    );
   this->AddOneFunctionToDictionaryNoFail
   ("coneFromVertices",
    "((Rational,...),...)",
-   "Create the cone spanned over the non-negative rationals by the input vectors. You can use the alias name cone, for example cone((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)).",
+   "Create the cone spanned over the non-negative rationals by the input vectors. You can use the alias name cone, \
+   for example cone((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)).",
    "coneFromVertices((1,0,0),(0,1,0), (0,0,1),(0,1,1), (1,1,0),(1,1,1)) ",
     & ParserNode::EvaluateConeFromVertices
    );
@@ -7422,22 +7425,29 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeyl",
    "(RF,...)",
-   "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the first and second simple roots, and x_1 is a variable. The coordinates are allowed to be arbitrary rational functions. ",
+   "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. \
+   For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the\
+    first and second simple roots, and x_1 is a variable. The coordinates can be arbitrary polynomials \
+    (rational functions work too but *very* slow). ",
    "actByWeyl(x_1, x_2, x_3)",
     & ParserNode::EvaluateWeylAction
    );
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeylRho",
    "(RF,...)",
-   "Act using the \\rho-modified action on a weight vector whose coordinates are given in simple basis coordinates. For an element of the Weyl group w, the \\rho-modified action of w on \\alpha is given by w(\\alpha+\\rho)-\\rho, where \\rho is the half-sum of the positive roots of the ambient root system. \
-   This function is the affine \\rho-modification of the function ActByWeyl. The following example calls the action of the Weyl group of so(7); the half-sum of the positive roots of so(7) in simple coordinates equals (5,8,9).",
+   "Act using the \\rho-modified action on a weight vector whose coordinates are given in simple basis coordinates. \
+   For an element of the Weyl group w, the \\rho-modified action of w on \\alpha is given by w(\\alpha+\\rho)-\\rho, \
+   where \\rho is the half-sum of the positive roots of the ambient root system. \
+   This function is the affine \\rho-modification of the function ActByWeyl. The following example calls the action of the Weyl group\
+    of so(7); the half-sum of the positive roots of so(7) in simple coordinates equals (5/2,8/2,9/2).",
    "actByWeylRho(x_1-5/2, x_2-8/2,x_3-9/2)",
     & ParserNode::EvaluateWeylRhoAction
    );
   this->AddOneFunctionToDictionaryNoFail
   ("partialFraction",
    "((Rational,...),...)",
-   "Gives the partial fraction corresponding to the vector partition function of the arguments.<br> The arguments must be non-zero vectors with non-negative integral coordinates.",
+   "Gives the partial fraction corresponding to the vector partition function of the arguments.<br> \
+   The arguments must be non-zero vectors with non-negative integral coordinates.",
    "partialFraction((1,0), (0,1), (1,1))",
     & ParserNode::EvaluatePartialFractions
    );
@@ -7451,28 +7461,33 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("vpf",
    "((Rational,...),...)",
-   "Computes the vector partition function with respect to the input vectors, according to this <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>.",
+   "Computes the vector partition function with respect to the input vectors, according to this \
+   <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>.",
    "vpf((1,0), (0,1), (1,1))",
     & ParserNode::EvaluateVectorPFIndicator
    );
    this->AddOneFunctionToDictionaryNoFail
   ("transformToReducedGroebnerBasis",
    "(Polynomial,...)",
-   "<b> This function is largely untested. If you use it make sure to double-check the output. </b> Transforms to reduced Groebner basis using Buchberger's algorithm with respect to the lexicographic monomial ordering x_1^l&lt; x_2^m&lt;x_3^n&lt;....",
+   "<b> This function is largely untested. If you use it make sure to double-check the output. \
+   </b> Transforms to reduced Groebner basis using Buchberger's algorithm with respect to the lexicographic monomial \
+   ordering x_1^l&lt; x_2^m&lt;x_3^n&lt;....",
    "transformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2, x_2^3)",
     & ParserNode::EvaluateGroebner
    );
    this->AddOneFunctionToDictionaryNoFail
   ("getRelations",
    "(Polynomial,...)",
-   "<b> This function is largely untested. If you use it make sure to double-check the output. </b>Get the algebraic relations between the input polynomials.",
+   "<b> This function is largely untested. If you use it make sure to double-check the output. </b>\
+   Get the algebraic relations between the input polynomials.",
    "getRelations(x_1^2, x_1x_2, x_2^2)",
     & ParserNode::EvaluateRelations
    );
   this->AddOneFunctionToDictionaryNoFail
   ("printRootSubalgebras",
    "()",
-   "Computes all root subalgebras. The computation is served from the hard disk if it is already computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "Computes all root subalgebras. The computation is served from the hard disk if it is already computed. \
+   The function will redirect you to a new page, to return to the calculator use the back button.",
    "printRootSubalgebras",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSAs
@@ -7480,7 +7495,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("printSlTwos",
    "()",
-   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. The computation is served from the hard disk if it is already computed. The function will redirect you to a new page, to return to the calculator use the back button.",
+   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) over the complex numbers. \
+   The computation is served from the hard disk if it is already computed. \
+   The function will redirect you to a new page, to return to the calculator use the back button.",
    "printSlTwos",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintSlTwos
@@ -7515,7 +7532,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("invariantsSlTwoOfDegree",
    "(Integer, (Integer,...))",
-   "Given an sl(2)-representation  V_1+...+V_n , computes the symmetric tensor algebra invariants of sl(2). Input: the first variable is the degree, followed by a vector describing the dimensions of  each V_i.",
+   "Given an sl(2)-representation  V_1+...+V_n , computes the symmetric tensor algebra invariants of sl(2). \
+   Input: the first variable is the degree, followed by a vector describing the dimensions of  each V_i.",
    "invariantsSlTwoOfDegree(2,(2,2))",
     & ParserNode::EvaluateInvariantsSl2DegreeM
    );
@@ -7550,15 +7568,20 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("intersectLatticeWithPreimageOfLattice",
    "(Lattice, Lattice, ((Rational,...),...))",
-   "Intersects the first lattice with the preimage of the second lattice under the linear map described by the third argument. Suppose the dimension of vector space of the first lattice is m, and the dimension of the vector space of the second lattice is n. Then the linear map should be given by a list of m vectors, with n coordinates each. The i^th of these vectors should give the image of the i^th basis vector of the vector space of the first lattice. ",
+   "Intersects the first lattice with the preimage of the second lattice under the linear map described by the third argument. \
+   Suppose the dimension of vector space of the first lattice is m, and the dimension of the vector space of the second lattice is n. \
+   Then the linear map should be given by a list of m vectors, with n coordinates each. \
+   The i^th of these vectors should give the image of the i^th basis vector of the vector space of the first lattice. ",
    "intersectLatticeWithPreimageOfLattice(  lattice((1,1), (0,2)), lattice(26/5), ( (1), (1/5)) )",
     & ParserNode::EvaluateIntersectLatticeWithPreimageLattice
    );
   this->AddOneFunctionToDictionaryNoFail
   ("sliceConeUniqueExitWall",
    "(Cone, (Rational, ...))",
-   "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, tracing a ray in the direction opposite to the one given by the second argument will \
-   exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point). This slice can be named the \"salami\"-slice, as a piece of salami can be cut at an arbitrary angle, \
+   "Slices the projective cone into smaller projective cones such that in each piece, for all point inside that piece, \
+   tracing a ray in the direction opposite to the one given by the second argument will \
+   exit the cone from a unique wall (i.e. the exit wall does not depend on the starting point). \
+   This slice can be named the \"salami\"-slice, as a piece of salami can be cut at an arbitrary angle, \
    however the ends of the salami should always consist of a single plane.",
    "sliceConeUniqueExitWall( coneFromNormals((1,0,0),(0,1,0),(0,0,1)), (1,1,1) )",
     & ParserNode::EvaluateSliceCone

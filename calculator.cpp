@@ -500,7 +500,7 @@ int main(int argc, char **argv)
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("g'", "h'");
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);

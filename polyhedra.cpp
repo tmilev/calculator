@@ -656,7 +656,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     tempRoot.ElementToString(tempS);
     out << tempS;
     tempS=out.str();
-    TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(220,220,220));
+    TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(210,210,210));
     TDV.drawTextAtVectorBuffer(tempRoot, tempS, 0, TDV.TextStyleNormal, LatexOutFile);
   }
 }
@@ -1379,7 +1379,7 @@ void MatrixLargeRational::DivideByRational(Rational& x)
 { this->operator/=(x);
 }
 
-void MatrixLargeRational::ActOnAroot(root& input, root& output)const
+void MatrixLargeRational::ActOnAroot(const root& input, root& output)const
 { assert(this->NumCols==input.size);
   root result;
   result.MakeZero(this->NumRows);
@@ -1394,7 +1394,7 @@ void MatrixLargeRational::ActOnRoots(roots& theRoots)const
     this->ActOnAroot(theRoots.TheObjects[i]);
 }
 
-void MatrixLargeRational::ActOnRoots(roots& input, roots& output)const
+void MatrixLargeRational::ActOnRoots(const roots& input, roots& output)const
 { output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     this->ActOnAroot(input.TheObjects[i], output.TheObjects[i]);
@@ -11226,6 +11226,15 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
       this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], currentRoot, false, currentRoot);
       this->RootSubsystem.AddObjectOnTopNoRepetitionOfObjectHash(currentRoot);
     }
+  roots tempRoots;
+  tempRoots.CopyFromBase(this->RootSubsystem);
+  tempRoots.QuickSortAscending();
+  this->RootSubsystem.AssignList(tempRoots);
+  assert(this->RootSubsystem.size%2==0);
+  int numPosRoots=this->RootSubsystem.size/2;
+  this->RootsOfBorel.SetSize(numPosRoots);
+  for (int i=0; i<numPosRoots; i++)
+    this->RootsOfBorel[i]=this->RootSubsystem[i+numPosRoots];
 }
 
 void ElementWeylGroup::operator =(const ElementWeylGroup& right)
@@ -19418,14 +19427,13 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, root& theRoot)
   theRoot.Assign(tempRoot);
 }
 
-void ReflectionSubgroupWeylGroup::ActByElement(int index, root& input, root& output)
+void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, root& input, root& output)
 { assert(&input!=&output);
-  ElementWeylGroup& tempEW= this->TheObjects[index];
-  int NumElts=tempEW.size;
+  int NumElts=theElement.size;
   root tempRoot;
   output.Assign(input);
   for (int i=0; i<NumElts; i++)
-  { int tempI=tempEW.TheObjects[i];
+  { int tempI=theElement.TheObjects[i];
     if(tempI<this->simpleGenerators.size)
       this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
     else
@@ -19436,11 +19444,11 @@ void ReflectionSubgroupWeylGroup::ActByElement(int index, root& input, root& out
   }
 }
 
-void ReflectionSubgroupWeylGroup::ActByElement(int index, roots& input, roots& output)
+void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, roots& input, roots& output)
 { assert(&input!=&output);
   output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
-    this->ActByElement(index, input.TheObjects[i], output.TheObjects[i]);
+    this->ActByElement(theElement, input.TheObjects[i], output.TheObjects[i]);
 }
 
 void minimalRelationsProverStatesFixedK::ComputeLastStackIndexFixedK(WeylGroup& theWeyl, GlobalVariables& theGlobalVariables)

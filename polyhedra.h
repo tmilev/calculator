@@ -1396,8 +1396,8 @@ public:
   void MultiplyByLargeRational(Rational& x);
   void MakeLinearOperatorFromDomainAndRange(roots& domain, roots& range, GlobalVariables& theGlobalVariables);
   void ActOnAroot(root& theRoot)const{ this->ActOnAroot(theRoot, theRoot); }
-  void ActOnAroot(root& input, root& output)const;
-  void ActOnRoots(roots& input, roots& output)const;
+  void ActOnAroot(const root& input, root& output)const;
+  void ActOnRoots(const roots& input, roots& output)const;
   void ActOnRoots(roots& theRoots)const;
   void ActOnMonomialAsDifferentialOperator(Monomial<Rational>& input, PolynomialRationalCoeff& output);
   void GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen);
@@ -4467,6 +4467,7 @@ public:
   void MonomialExponentToRoot(root& output);
   void MonomialExponentToRoot(intRoot& output);
   void MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, intRoot& input);
+  void MakeFromRoot(const ElementOfCommutativeRingWithIdentity& coeff, root& input);
   void MonomialExponentToColumnMatrix(MatrixLargeRational& output);
   bool IsLinear()const
   { return this->IsAConstant() || this->IsLinearNoConstantTerm();
@@ -5857,6 +5858,15 @@ void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot(const ElementO
   this->Coefficient.Assign(coeff);
   for (int i=0; i<this->NumVariables; i++)
     this->degrees[i]=(int) input.TheObjects[i];
+}
+
+template <class ElementOfCommutativeRingWithIdentity>
+void Monomial<ElementOfCommutativeRingWithIdentity>::MakeFromRoot
+(const ElementOfCommutativeRingWithIdentity& coeff, root& input)
+{ this->init((int)input.size);
+  this->Coefficient.Assign(coeff);
+  for (int i=0; i<this->NumVariables; i++)
+    this->degrees[i]=(int) input[i].NumShort;
 }
 
 template <class ElementOfCommutativeRingWithIdentity>
@@ -7553,6 +7563,251 @@ public:
   int SizeWithoutDebugString();
 };
 
+class Cone
+{
+  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
+  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables);
+public:
+  inline static const std::string GetXMLClassName(){ return "Cone";}
+  bool flagIsTheZeroCone;
+  roots Vertices;
+  roots Normals;
+//  bool flagHasSufficientlyManyVertices;
+  int LowestIndexNotCheckedForChopping;
+  int LowestIndexNotCheckedForSlicingInDirection;
+  //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
+  //containing large data for the chamber, such as quasipolynomials, etc.
+  //int Data;
+  std::string ElementToString(PolynomialOutputFormat& theFormat){return this->ElementToString(false, false, theFormat);}
+  std::string ElementToString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){return this->ElementToString(useLatex, useHtml, false, false, theFormat);}
+  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat);
+  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeProjective
+(root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+  ;
+  void ChangeBasis(MatrixLargeRational& theLinearMap);
+  std::string DebugString;
+  int GetDim()
+  { if (this->Normals.size==0)
+      return 0;
+    return this->Normals.TheObjects[0].size;
+  }
+  void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
+  void SliceInDirection
+  (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
+;
+  bool CreateFromNormalS
+  (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  ;
+  //returns false if the cone is non-proper, i.e. when either
+  //1) the cone is empty or is of smaller dimension than it should be
+  //2) the resulting cone is the entire space
+  bool CreateFromNormals
+  (roots& inputNormals, GlobalVariables& theGlobalVariables)
+  { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
+  }
+  bool CreateFromVertices
+  (roots& inputVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void GetInternalPoint(root& output)
+  { if (this->Vertices.size<=0)
+      return;
+    this->Vertices.sum(output, this->Vertices[0].size);
+  }
+  root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
+  int HashFunction()const
+  { return this->Vertices.HashFunction();
+  }
+  bool ProduceNormalFromTwoNormalsAndSlicingDirection
+  (root& SlicingDirection, root& normal1, root& normal2, root& output)
+  ;
+  bool IsInCone(const root& point)const
+  { if (this->flagIsTheZeroCone)
+      return point.IsEqualToZero();
+    Rational tempRat;
+    for (int i=0; i<this->Normals.size; i++)
+    { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
+      if (tempRat.IsNegative())
+        return false;
+    }
+    return true;
+  }
+  bool ReadFromFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+;
+  void WriteToFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+;
+  bool ReadFromFile
+  (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
+;
+  void operator=(const Cone& other)
+  { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
+    this->flagIsTheZeroCone=other.flagIsTheZeroCone;
+    this->Vertices=other.Vertices;
+    this->Normals=other.Normals;
+    this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
+    this->LowestIndexNotCheckedForChopping=other.LowestIndexNotCheckedForChopping;
+  }
+  Cone()
+  { this->LowestIndexNotCheckedForSlicingInDirection=0;
+    this->LowestIndexNotCheckedForChopping=0;
+    this->flagIsTheZeroCone=true;
+    //this->flagHasSufficientlyManyVertices=true;
+  }
+  void IntersectAHyperplane
+  (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
+  ;
+  bool GetRootFromLPolyConstantTermGoesToLastVariable
+  (PolynomialRationalCoeff& inputLPoly, root& output)
+  ;
+  bool SolveLPolyEqualsZeroIAmProjective
+  ( PolynomialRationalCoeff& inputLPoly,
+   Cone& outputCone, GlobalVariables& theGlobalVariables
+   )
+  ;
+  bool SolveLQuasiPolyEqualsZeroIAmProjective
+  (QuasiPolynomial& inputLQP,
+   List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables
+   )
+  ;
+  bool operator>(const Cone& other)const
+  { return this->Normals>other.Normals;
+  }
+  bool operator==(const Cone& other)const
+  { return this->flagIsTheZeroCone==other.flagIsTheZeroCone && this->Normals==other.Normals;
+  }
+};
+
+class ConeLatticeAndShift
+{
+  public:
+  inline static std::string GetXMLClassName(){ return "ConeLatticeShift";}
+  Cone theProjectivizedCone;
+  Lattice theLattice;
+  root theShift;
+  void FindExtremaInDirectionOverLatticeOneNonParam
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend,
+ GlobalVariables& theGlobalVariables)
+       ;
+  void operator=(const ConeLatticeAndShift& other)
+  { this->theProjectivizedCone=other.theProjectivizedCone;
+    this->theLattice=other.theLattice;
+    this->theShift=other.theShift;
+  }
+  void WriteToFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables)
+  ;
+  void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
+(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, MatrixLargeRational& theProjectionLatticeLevel,
+ GlobalVariables& theGlobalVariables)
+ ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
+  ;
+  std::string ElementToString(PolynomialOutputFormat& theFormat);
+  int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
+  int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
+};
+
+class ConeComplex : public HashedList<Cone>
+{
+public:
+  bool flagChambersHaveTooFewVertices;
+  bool flagIsRefined;
+//  List<int> NonRefinedChambers;
+  int indexLowestNonRefinedChamber;
+  hashedRoots splittingNormals;
+  roots slicingDirections;
+  std::string DebugString;
+  void RefineOneStep(GlobalVariables& theGlobalVariables);
+  void Refine(GlobalVariables& theGlobalVariables);
+  void Sort(GlobalVariables& theGlobalVariables);
+  void RefineAndSort(GlobalVariables& theGlobalVariables);
+  void FindMaxmumOverNonDisjointChambers
+    (roots& theMaximaOverEachChamber, roots& outputMaxima, GlobalVariables& theGlobalVariables)
+    ;
+  void MakeAffineAndTransformToProjectiveDimPlusOne
+  (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
+  ;
+  int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
+  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
+  void PopChamberSwapWithLast(int index);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector);
+  void InitFromDirectionsAndRefine
+  (roots& inputVectors, GlobalVariables& theGlobalVariables)
+  ;
+  void InitFromAffineDirectionsAndRefine
+  (roots& inputDirections, roots& inputAffinePoints, GlobalVariables& theGlobalVariables)
+  ;
+  std::string DrawMeToHtmlLastCoordAffine
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+;
+  bool DrawMeProjective
+(root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+  ;
+  std::string DrawMeToHtmlProjective
+(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+;
+  std::string ElementToString(){return this->ElementToString(false, false);}
+  std::string ElementToString(bool useLatex, bool useHtml);
+  void ComputeDebugString(){this->DebugString=this->ElementToString();}
+  int GetLowestIndexchamberContaining(const root& theRoot)const
+  { for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i].IsInCone(theRoot))
+        return i;
+    return -1;
+  }
+  bool findMaxLFOverConeProjective
+  (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+  ;
+  bool findMaxLFOverConeProjective
+  (Cone& input, roots& inputLFsLastCoordConst,
+   List<int>& outputMaximumOverEeachSubChamber,
+   GlobalVariables& theGlobalVariables)
+  ;
+  void initFromCones
+(List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void initFromCones
+(List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  ;
+  bool SplitChamber
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
+  ;
+  void GetNewVerticesAppend
+  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+  ;
+  void init(){this->splittingNormals.ClearTheObjects(); this->slicingDirections.size=0; this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
+  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
+  void WriteToFile
+  (std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit)
+  ;
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables* theGlobalVariables)
+  { return this->ReadFromFile(input, theGlobalVariables, -1);
+  }
+  bool ReadFromFile
+  (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
+  ;
+  void operator=(const ConeComplex& other)
+  { this->:: HashedList<Cone>::operator=(other);
+    this->splittingNormals=other.splittingNormals;
+    this->slicingDirections=other.slicingDirections;
+    this->indexLowestNonRefinedChamber=other.indexLowestNonRefinedChamber;
+    this->flagIsRefined=other.flagIsRefined;
+    this->flagChambersHaveTooFewVertices=other.flagChambersHaveTooFewVertices;
+  }
+};
+
 class partFractions: public HashedList<partFraction>
 { bool ShouldIgnore(GlobalVariables& theGlobalVariables, root* Indicator);
   bool splitPartial(GlobalVariables& theGlobalVariables, root* Indicator);
@@ -7591,7 +7846,8 @@ public:
   bool flagInitialized;
   int LimitSplittingSteps;
   int SplitStepsCounter;
-  CombinatorialChamberContainer theChambers;
+  ConeComplex theChambers;
+  CombinatorialChamberContainer theChambersOld;
   static  bool flagSplitTestModeNoNumerators;
   static  bool flagAnErrorHasOccurredTimeToPanic;
   static  bool flagMakingProgressReport;
@@ -7668,6 +7924,10 @@ public:
   std::string ElementToString() {return this->ElementToString(false, true, "\\eta", 0);}
   std::string ElementToString
   (bool useLatex, bool useHtml, const std::string& simpleRootLetter, List<int>* DisplayIndicesOfSimpleRoots)
+  { return this->ElementToString(-1, useLatex, useHtml, simpleRootLetter, "a", DisplayIndicesOfSimpleRoots);
+  }
+  std::string ElementToString
+  (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter, const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
   ;
   void ComputeDebugString();
   int HashFunction() const;
@@ -7940,24 +8200,31 @@ public:
   WeylGroup AmbientWeyl;
   WeylGroup Elements;
   roots simpleGenerators;
+  //format: each element of of the group is a list of generators, reflections with respect to the simple generators, and outer
+  //automorphisms.
   //format of the externalAutomorphisms:
   // For a fixed external automorphism (of type roots) the i^th entry gives the image of the simple root with 1 on the i^th coordinate
   rootsCollection ExternalAutomorphisms;
   hashedRoots RootSubsystem;
+  roots RootsOfBorel;
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(DebugString); }
   void ElementToString(std::string& output);
   std::string ElementToStringBruhatGraph();
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
+  root GetRho();
   void MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
+  void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
   void ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, root& theRoot);
-  void ActByElement(int index, root& input, root& output);
-  void ActByElement(int index, roots& input, roots& output);
+  void ActByElement(int index, root& input, root& output){this->ActByElement(this->TheObjects[index], input, output);}
+  void ActByElement(ElementWeylGroup& theElement, root& input, root& output);
+  void ActByElement(int index, roots& input, roots& output) {this->ActByElement(this->TheObjects[index], input, output);}
+  void ActByElement(ElementWeylGroup& theElement, roots& input, roots& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void Assign(const ReflectionSubgroupWeylGroup& other);
@@ -10068,249 +10335,6 @@ public:
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
   };
-};
-
-class Cone
-{
-  void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
-  bool EliminateFakeNormalsUsingVertices(int theDiM, int numAddedFakeWalls, GlobalVariables& theGlobalVariables);
-public:
-  inline static const std::string GetXMLClassName(){ return "Cone";}
-  bool flagIsTheZeroCone;
-  roots Vertices;
-  roots Normals;
-//  bool flagHasSufficientlyManyVertices;
-  int LowestIndexNotCheckedForChopping;
-  int LowestIndexNotCheckedForSlicingInDirection;
-  //ignore: the following is the information carrying variable. Write in it anything you want, say an index to an array
-  //containing large data for the chamber, such as quasipolynomials, etc.
-  //int Data;
-  std::string ElementToString(PolynomialOutputFormat& theFormat){return this->ElementToString(false, false, theFormat);}
-  std::string ElementToString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){return this->ElementToString(useLatex, useHtml, false, false, theFormat);}
-  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat);
-  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  bool DrawMeProjective
-(root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-  ;
-  void ChangeBasis(MatrixLargeRational& theLinearMap);
-  std::string DebugString;
-  int GetDim()
-  { if (this->Normals.size==0)
-      return 0;
-    return this->Normals.TheObjects[0].size;
-  }
-  void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
-  void SliceInDirection
-  (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
-;
-  bool CreateFromNormalS
-  (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-  ;
-  //returns false if the cone is non-proper, i.e. when either
-  //1) the cone is empty or is of smaller dimension than it should be
-  //2) the resulting cone is the entire space
-  bool CreateFromNormals
-  (roots& inputNormals, GlobalVariables& theGlobalVariables)
-  { return this->CreateFromNormalS(inputNormals, false, theGlobalVariables);
-  }
-  bool CreateFromVertices
-  (roots& inputVertices, GlobalVariables& theGlobalVariables)
-  ;
-  void GetInternalPoint(root& output)
-  { if (this->Vertices.size<=0)
-      return;
-    this->Vertices.sum(output, this->Vertices[0].size);
-  }
-  root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
-  int HashFunction()const
-  { return this->Vertices.HashFunction();
-  }
-  bool ProduceNormalFromTwoNormalsAndSlicingDirection
-  (root& SlicingDirection, root& normal1, root& normal2, root& output)
-  ;
-  bool IsInCone(const root& point)const
-  { if (this->flagIsTheZeroCone)
-      return point.IsEqualToZero();
-    Rational tempRat;
-    for (int i=0; i<this->Normals.size; i++)
-    { root::RootScalarEuclideanRoot(this->Normals.TheObjects[i], point, tempRat);
-      if (tempRat.IsNegative())
-        return false;
-    }
-    return true;
-  }
-  bool ReadFromFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
-;
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
-;
-  bool ReadFromFile
-  (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
-;
-  void operator=(const Cone& other)
-  { //this->flagHasSufficientlyManyVertices=other.flagHasSufficientlyManyVertices;
-    this->flagIsTheZeroCone=other.flagIsTheZeroCone;
-    this->Vertices=other.Vertices;
-    this->Normals=other.Normals;
-    this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
-    this->LowestIndexNotCheckedForChopping=other.LowestIndexNotCheckedForChopping;
-  }
-  Cone()
-  { this->LowestIndexNotCheckedForSlicingInDirection=0;
-    this->LowestIndexNotCheckedForChopping=0;
-    this->flagIsTheZeroCone=true;
-    //this->flagHasSufficientlyManyVertices=true;
-  }
-  void IntersectAHyperplane
-  (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
-  ;
-  bool GetRootFromLPolyConstantTermGoesToLastVariable
-  (PolynomialRationalCoeff& inputLPoly, root& output)
-  ;
-  bool SolveLPolyEqualsZeroIAmProjective
-  ( PolynomialRationalCoeff& inputLPoly,
-   Cone& outputCone, GlobalVariables& theGlobalVariables
-   )
-  ;
-  bool SolveLQuasiPolyEqualsZeroIAmProjective
-  (QuasiPolynomial& inputLQP,
-   List<Cone>& outputConesOverEachLatticeShift, GlobalVariables& theGlobalVariables
-   )
-  ;
-  bool operator>(const Cone& other)const
-  { return this->Normals>other.Normals;
-  }
-  bool operator==(const Cone& other)const
-  { return this->flagIsTheZeroCone==other.flagIsTheZeroCone && this->Normals==other.Normals;
-  }
-};
-
-class ConeLatticeAndShift
-{
-  public:
-  inline static std::string GetXMLClassName(){ return "ConeLatticeShift";}
-  Cone theProjectivizedCone;
-  Lattice theLattice;
-  root theShift;
-  void FindExtremaInDirectionOverLatticeOneNonParam
-(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
- List<ConeLatticeAndShift>& outputAppend,
- GlobalVariables& theGlobalVariables)
-       ;
-  void operator=(const ConeLatticeAndShift& other)
-  { this->theProjectivizedCone=other.theProjectivizedCone;
-    this->theLattice=other.theLattice;
-    this->theShift=other.theShift;
-  }
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables)
-  ;
-  void FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
-(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
- List<ConeLatticeAndShift>& outputAppend, MatrixLargeRational& theProjectionLatticeLevel,
- GlobalVariables& theGlobalVariables)
- ;
-  bool ReadFromFile
-  (std::fstream& input, GlobalVariables* theGlobalVariables)
-  ;
-  std::string ElementToString(PolynomialOutputFormat& theFormat);
-  int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
-  int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
-};
-
-class ConeComplex : public HashedList<Cone>
-{
-public:
-  bool flagChambersHaveTooFewVertices;
-  bool flagIsRefined;
-//  List<int> NonRefinedChambers;
-  int indexLowestNonRefinedChamber;
-  hashedRoots splittingNormals;
-  roots slicingDirections;
-  std::string DebugString;
-  void RefineOneStep(GlobalVariables& theGlobalVariables);
-  void Refine(GlobalVariables& theGlobalVariables);
-  void Sort(GlobalVariables& theGlobalVariables);
-  void RefineAndSort(GlobalVariables& theGlobalVariables);
-  void FindMaxmumOverNonDisjointChambers
-    (roots& theMaximaOverEachChamber, roots& outputMaxima, GlobalVariables& theGlobalVariables)
-    ;
-  void MakeAffineAndTransformToProjectiveDimPlusOne
-  (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
-  ;
-  int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
-  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
-  void PopChamberSwapWithLast(int index);
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  void InitFromDirectionsAndRefine
-  (roots& inputVectors, GlobalVariables& theGlobalVariables)
-  ;
-  void InitFromAffineDirectionsAndRefine
-  (roots& inputDirections, roots& inputAffinePoints, GlobalVariables& theGlobalVariables)
-  ;
-  std::string DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-;
-  bool DrawMeProjective
-(root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-  ;
-  std::string DrawMeToHtmlProjective
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-;
-  std::string ElementToString(){return this->ElementToString(false, false);}
-  std::string ElementToString(bool useLatex, bool useHtml);
-  void ComputeDebugString(){this->DebugString=this->ElementToString();}
-  int GetLowestIndexchamberContaining(const root& theRoot)const
-  { for (int i=0; i<this->size; i++)
-      if (this->TheObjects[i].IsInCone(theRoot))
-        return i;
-    return -1;
-  }
-  bool findMaxLFOverConeProjective
-  (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
-  ;
-  bool findMaxLFOverConeProjective
-  (Cone& input, roots& inputLFsLastCoordConst,
-   List<int>& outputMaximumOverEeachSubChamber,
-   GlobalVariables& theGlobalVariables)
-  ;
-  void initFromCones
-(List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-  ;
-  void initFromCones
-(List<Cone>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-  ;
-  bool SplitChamber
-(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
-  ;
-  void GetNewVerticesAppend
-  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
-  ;
-  void init(){this->splittingNormals.ClearTheObjects(); this->slicingDirections.size=0; this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
-  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
-  void WriteToFile
-  (std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimit)
-  ;
-  bool ReadFromFile
-  (std::fstream& input, GlobalVariables* theGlobalVariables)
-  { return this->ReadFromFile(input, theGlobalVariables, -1);
-  }
-  bool ReadFromFile
-  (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
-  ;
-  void operator=(const ConeComplex& other)
-  { this->:: HashedList<Cone>::operator=(other);
-    this->splittingNormals=other.splittingNormals;
-    this->slicingDirections=other.slicingDirections;
-    this->indexLowestNonRefinedChamber=other.indexLowestNonRefinedChamber;
-    this->flagIsRefined=other.flagIsRefined;
-    this->flagChambersHaveTooFewVertices=other.flagChambersHaveTooFewVertices;
-  }
 };
 
 class ConeLatticeAndShiftMaxComputation

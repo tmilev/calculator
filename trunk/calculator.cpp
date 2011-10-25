@@ -102,7 +102,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=1000000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -164,6 +164,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
+ // civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="gTwoInBthreeMultsParabolic((3,0,0), (1,0,0) )";
   //civilizedInput="printSlTwosAndRootSAsFORCERecompute";
 //  civilizedInput="actByWeylRho(x_1, x_2,x_3, x_4, x_5, x_6)";
@@ -420,7 +421,11 @@ int main(int argc, char **argv)
                  // << " <br> <a href=\"http://www.cs.kuleuven.be/cgi-bin/dtai/barvinok.cgi\"> Barvinok program online</a>"
                   //<< "</div>"
                   << "";
-  std::cout << "<hr><b>Notes.</b><br> Computation is limited to " << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds. <br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
+  std::cout << "<hr><b>Notes.</b><br> Computation is limited to "
+  << theGlobalVariables.MaxAllowedComputationTimeInSeconds
+  << " seconds. The time limit can be changed if you install from source by editing (file) calculator.cpp (function) main() (variable) "
+  << "theGlobalVariables.MaxAllowedComputationTimeInSeconds ."
+  << "<br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
   std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
   std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";

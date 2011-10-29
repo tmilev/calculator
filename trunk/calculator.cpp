@@ -102,7 +102,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=1000000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -164,7 +164,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
- // civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
+  //civilizedInput="drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))";
+//  civilizedInput=" gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="gTwoInBthreeMultsParabolic((3,0,0), (1,0,0) )";
   //civilizedInput="printSlTwosAndRootSAsFORCERecompute";
 //  civilizedInput="actByWeylRho(x_1, x_2,x_3, x_4, x_5, x_6)";
@@ -512,12 +513,12 @@ int main(int argc, char **argv)
     lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +".tex");
-    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"RootFormat.tex");
-    theParser.SystemCommands.AddObjectOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"EpsFormat.tex");
-    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + ".dvi -o " + fileNameLieBracketFullPathNoEnding + ".png -T tight");
-    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
-    theParser.SystemCommands.AddObjectOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
+    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +".tex");
+    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"RootFormat.tex");
+    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"EpsFormat.tex");
+    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + ".dvi -o " + fileNameLieBracketFullPathNoEnding + ".png -T tight");
+    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
+    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
   }
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";

@@ -194,22 +194,22 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     wxBoxSizer* BoxSizer2;
     wxBoxSizer* BoxSizer1;
     wxBoxSizer* BoxSizer3;
-    
+
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
     this->TimerReady=false;
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
     BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
     Choice1 = new wxChoice(this, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
     Choice1->Append(_("A"));
-    Choice1->Append(_("B"));
+    Choice1->SetSelection( Choice1->Append(_("B")) );
     Choice1->Append(_("C"));
     Choice1->Append(_("D"));
     Choice1->Append(_("E"));
-    Choice1->SetSelection( Choice1->Append(_("F")) );
+    Choice1->Append(_("F"));
     Choice1->Append(_("G"));
     BoxSizer3->Add(Choice1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("4"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 4, _T("ID_SPINCTRL1"));
-    SpinCtrl1->SetValue(_T("4"));
+    SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("3"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 3, _T("ID_SPINCTRL1"));
+    SpinCtrl1->SetValue(_T("3"));
     BoxSizer3->Add(SpinCtrl1, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
     StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("frame:"), wxDefaultPosition, wxSize(42,17), 0, _T("ID_STATICTEXT1"));
     BoxSizer3->Add(StaticText1, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -217,7 +217,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("RunGtwoInBthree"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("drawWeightSupport(1,0,0)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -230,7 +230,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     Timer1.Start(100, false);
     BoxSizer1->Fit(this);
     BoxSizer1->SetSizeHints(this);
-    
+
     Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
     Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
     Connect(ID_SPINCTRL2,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl2Change);
@@ -261,9 +261,6 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     theGlobalVariables.theDrawingVariables.SetDrawCircleFunction(&drawCircle);
     theGlobalVariables.theDrawingVariables.SetDrawClearFunction(&drawClearScreen);
     theGlobalVariables.theDrawingVariables.SetDrawTextFunction(&drawtext);
-    theParser.DefaultWeylRank=4;
-    theParser.DefaultWeylLetter='F';
-
     this->thePath=std::string(wxStandardPaths::Get().GetExecutablePath().mb_str());
     for (unsigned i=this->thePath.size()-1; i>=0; i--)
     { if (this->thePath[i]=='/' || this->thePath[i]=='\\')
@@ -285,7 +282,10 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     this->bitmapW=600;
     this->theBitmapList.SetSize(1);
     this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
-  wxMemoryDC tmpDC;
+    theParser.DefaultWeylRank=3;
+    theParser.DefaultWeylLetter='B';
+    this->UpdateChoices();
+    wxMemoryDC tmpDC;
     tmpDC.SelectObject(*this->theBitmapList[0]);
     tmpDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
     tmpDC.Clear();

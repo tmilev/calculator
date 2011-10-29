@@ -140,6 +140,7 @@ class rootSubalgebras;
 class slTwo;
 class SltwoSubalgebras;
 class DrawingVariables;
+class DrawOperations;
 class ElementSimpleLieAlgebra;
 class ElementUniversalEnveloping;
 class MonomialUniversalEnveloping;
@@ -152,7 +153,6 @@ template<class Base>
 class CompleX;
 class RationalFunction;
 struct CGIspecificRoutines;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -678,7 +678,7 @@ public:
   static int ListActualSizeIncrement;
   Object* TheObjects;
   int size;
-//  void AddObjectOnTop(Object o);
+//  void AddOnTop(Object o);
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease){ int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
   void SetSize(int theSize);
@@ -692,7 +692,7 @@ public:
   void MakeActualSizeAtLeastExpandOnTop(int theSize);
   void AddObjectOnBottom(const Object& o);
   void AddOnBottomNoRepetition(const Object& o) {if (!this->ContainsObject(o)) this->AddObjectOnBottom(o);}
-  void AddObjectOnTop(const Object& o);
+  void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
@@ -799,7 +799,7 @@ class HashedList : public List<Object>
 {
 private:
   void AddObjectOnBottom(const Object& o);
-  void AddObjectOnTop(const Object& o);
+  void AddOnTop(const Object& o);
   void AddListOnTop(List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
@@ -830,9 +830,9 @@ public:
   void initHash();
   inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i; }
   void ClearTheObjects();
-  void AddObjectOnTopHash(const Object& o);
-  bool AddObjectOnTopNoRepetitionOfObjectHash(Object& o);
-  void AddListOnTopNoRepetitionOfObjectHash(const List<Object>& theList);
+  void AddOnTopHash(const Object& o);
+  bool AddOnTopNoRepetitionHash(Object& o);
+  void AddOnTopNoRepetitionHash(const List<Object>& theList);
   void PopIndexSwapWithLastHash(int index);
   //the below returns -1 if it doesn't contain the object,
   //else returns the object's index
@@ -845,7 +845,7 @@ public:
   { this->ClearTheObjects();
     this->MakeActualSizeAtLeastExpandOnTop(other.size);
     for (int i=0; i<other.size; i++)
-      this->AddObjectOnTopHash(other.TheObjects[i]);
+      this->AddOnTopHash(other.TheObjects[i]);
   }
   void QuickSortAscending(){ List<Object> theList; theList=*this; theList.QuickSortAscending(); this->AssignList(theList);}
   void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->AssignList(theList);}
@@ -1384,7 +1384,8 @@ class MatrixLargeRational: public Matrix<Rational>
 {
 public:
   static bool flagAnErrorHasOccurredTimeToPanic;
-  void ComputeDeterminantOverwriteMatrix( Rational& output);
+  void ComputeDeterminantOverwriteMatrix(Rational& output);
+  Rational GetDeterminant();
   void NonPivotPointsToRoot(Selection& TheNonPivotPoints, root& output);
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void Transpose();
@@ -2082,7 +2083,7 @@ public:
     output.size=0;
     for (unsigned int i=2; i<=n; i++)
       if (theSieve.TheObjects[i]!=0)
-      { output.AddObjectOnTop(i);
+      { output.AddOnTop(i);
 //        std::cout << i << ",";
         for (unsigned int j=i; j<=n; j+=i)
           theSieve.TheObjects[j]=0;
@@ -2669,6 +2670,12 @@ public:
   void MakeEi(int DesiredDimension, int NonZeroIndex, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
+  }
+  void MakeAffineUsingLastCoordinate()
+  { CoefficientType theElt;
+    theElt=*this->LastObject();
+    this->size--;
+    this->operator/=(theElt);
   }
   bool AssignMatDetectRowOrColumn(const Matrix<CoefficientType>& input)
   { if (input.NumCols==1)
@@ -3648,7 +3655,7 @@ template <class Object>
 bool  List<Object>::AddOnTopNoRepetition(const Object& o)
 { if (this->IndexOfObject(o)!=-1)
     return false;
-  this->AddObjectOnTop(o);
+  this->AddOnTop(o);
   return true;
 }
 
@@ -3870,7 +3877,7 @@ void List<Object>::AddObjectOnBottom(const Object& o)
 }
 
 template <class Object>
-void List<Object>::AddObjectOnTop(const Object& o)
+void List<Object>::AddOnTop(const Object& o)
 { if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
     this->ExpandArrayOnTop(List<Object>::ListActualSizeIncrement);
   this->TheObjects[size]=o;
@@ -3888,8 +3895,8 @@ void HashedList<Object>::SwapTwoIndicesHash(int i1, int i2)
   tempO= this->TheObjects[i1];
   this->TheObjects[i1]=this->TheObjects[i2];
   this->TheObjects[i2]=tempO;
-  this->TheHashedArrays[i1Hash].AddObjectOnTop(i2);
-  this->TheHashedArrays[i2Hash].AddObjectOnTop(i1);
+  this->TheHashedArrays[i1Hash].AddOnTop(i2);
+  this->TheHashedArrays[i2Hash].AddOnTop(i1);
 }
 
 template <class Object>
@@ -3962,26 +3969,26 @@ int HashedList<Object>::IndexOfObjectHash(const Object& o)const
 }
 
 template <class Object>
-void HashedList<Object>::AddObjectOnTopHash(const Object& o)
+void HashedList<Object>::AddOnTopHash(const Object& o)
 { int hashIndex = o.HashFunction()% this->HashSize;
   if (hashIndex<0)
     hashIndex+=this->HashSize;
-  this->TheHashedArrays[hashIndex].AddObjectOnTop(this->size);
-  this->::List<Object>::AddObjectOnTop(o);
+  this->TheHashedArrays[hashIndex].AddOnTop(this->size);
+  this->::List<Object>::AddOnTop(o);
 }
 
 template <class Object>
-void HashedList<Object>::AddListOnTopNoRepetitionOfObjectHash(const List<Object>& theList)
+void HashedList<Object>::AddOnTopNoRepetitionHash(const List<Object>& theList)
 { this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
   for (int i=0; i<theList.size; i++)
-    this->AddObjectOnTopNoRepetitionOfObjectHash(theList.TheObjects[i]);
+    this->AddOnTopNoRepetitionHash(theList.TheObjects[i]);
 }
 
 template <class Object>
-bool HashedList<Object>::AddObjectOnTopNoRepetitionOfObjectHash(Object& o)
+bool HashedList<Object>::AddOnTopNoRepetitionHash(Object& o)
 { if (this->IndexOfObjectHash(o)!=-1)
     return false;
-  this->AddObjectOnTopHash(o);
+  this->AddOnTopHash(o);
   return true;
 }
 
@@ -4002,7 +4009,7 @@ void HashedList<Object>::PopIndexSwapWithLastHash(int index)
   if (hashIndexTop<0)
     hashIndexTop+=this->HashSize;
   this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
-  this->TheHashedArrays[hashIndexTop].AddObjectOnTop(index);
+  this->TheHashedArrays[hashIndexTop].AddOnTop(index);
   this->List<Object>::PopIndexSwapWithLast(index);
 }
 
@@ -4128,7 +4135,7 @@ void ListPointers<Object>::KillAllElements()
 template<class Object>
 bool ListPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
 { if (this->ContainsObject(o)==-1)
-  { this->AddObjectOnTop(o);
+  { this->AddOnTop(o);
     return true;
   }
   return false;
@@ -4169,7 +4176,7 @@ public:
   std::string DebugString;
   void AddRootsOnTopHash(roots& input)
   { for (int i=0; i<input.size; i++)
-      this->AddObjectOnTopHash(input.TheObjects[i]);
+      this->AddOnTopHash(input.TheObjects[i]);
   }
   void WriteToFile (std::fstream& output);
   bool ReadFromFile(std::fstream& input);
@@ -5030,7 +5037,7 @@ template <class ElementOfCommutativeRingWithIdentity, class GeneratorsOfAlgebra,
 int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebra& g)
 { int x = this->IndexOfObjectHash(g);
   if (x==-1)
-    this->AddObjectOnTopHash(g);
+    this->AddOnTopHash(g);
   else
   { this->TheObjects[x].GeneratorPower+=g.GeneratorPower;
     if (this->TheObjects[x].GeneratorPower==0)
@@ -5054,7 +5061,7 @@ int MonomialInCommutativeAlgebra<ElementOfCommutativeRingWithIdentity, Generator
 { GeneratorsPartialFractionAlgebra tempG;
   tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.IndexOfObjectHash(g);
   if (tempG.GeneratorIndex==-1)
-  { GeneratorsOfAlgebra::theGenerators.AddObjectOnTopHash(g);
+  { GeneratorsOfAlgebra::theGenerators.AddOnTopHash(g);
     tempG.GeneratorIndex= GeneratorsOfAlgebra::theGenerators.size-1;
   }
   tempG.GeneratorPower=Power;
@@ -6246,7 +6253,7 @@ void Polynomial<ElementOfCommutativeRingWithIdentity>::MakeMonomialOneLetter(int
   this->NumVars= NumVars;
   Monomial<ElementOfCommutativeRingWithIdentity> tempM;
   tempM.MakeMonomialOneLetter(NumVars, LetterIndex, Power, Coeff);
-  this->AddObjectOnTopHash(tempM);
+  this->AddOnTopHash(tempM);
 }
 
 template <class TemplateMonomial, class ElementOfCommutativeRingWithIdentity>
@@ -6260,7 +6267,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
   //std::string tempS1;
   /*if (QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic)
   {  std::string tempS;
-    RandomCodeIDontWantToDelete::EvilList1.AddObjectOnTop(tempS);
+    RandomCodeIDontWantToDelete::EvilList1.AddOnTop(tempS);
     tempS1=& RandomCodeIDontWantToDelete::EvilList1.TheObjects
                 [RandomCodeIDontWantToDelete::EvilList1.size-1];
   }*/
@@ -6271,7 +6278,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
     tempP=(IntegerPoly*)this;
     tempP->Evaluate(oneFracWithMultiplicitiesAndElongations::CheckSumRoot, tempRat);
     tempRat.ElementToString(tempS);
-    //  currentList->AddObjectOnTop(tempS);
+    //  currentList->AddOnTop(tempS);
   }*/
   for (int i=0; i<p.size; i++)
   {  /*if (QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic)
@@ -6281,7 +6288,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
       tempP=(QuasiPolynomialOld*)this;
       tempP->Evaluate(partFraction::theVectorToBePartitioned, tempRat);
       tempRat.ElementToString(tempS);
-    //  currentList->AddObjectOnTop(tempS);
+    //  currentList->AddOnTop(tempS);
       tempS1->append(tempS);
       tempS1->append("\n");
     }*/
@@ -6518,7 +6525,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
   int j= this->IndexOfObjectHash(m);
   if (j==-1)
   { if (!m.IsEqualToZero())
-      this->AddObjectOnTopHash(m);
+      this->AddOnTopHash(m);
   } else
   { this->TheObjects[j].Coefficient-=m.Coefficient;
     if (this->TheObjects[j].IsEqualToZero())
@@ -6533,7 +6540,7 @@ void TemplatePolynomial<TemplateMonomial, ElementOfCommutativeRingWithIdentity>:
   int j= this->IndexOfObjectHash(m);
   if (j==-1)
   { if (!m.IsEqualToZero())
-      this->AddObjectOnTopHash(m);
+      this->AddOnTopHash(m);
   } else
   { this->TheObjects[j].Coefficient+=m.Coefficient;
     if (this->TheObjects[j].IsEqualToZero())
@@ -6836,11 +6843,11 @@ public:
   std::string DebugString;
   BasicQN(int NumVars)
   { BasicQN::NumTotalCreated++; this->NumVars= NumVars; CreationNumber=NumTotalCreated;
-    BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObjectOnTop(this);
+    BasicQN::GlobalCollectorsBasicQuasiNumbers.AddOnTop(this);
   }
   BasicQN()
   { BasicQN::NumTotalCreated++; CreationNumber=NumTotalCreated;
-    BasicQN::GlobalCollectorsBasicQuasiNumbers.AddObjectOnTop(this);
+    BasicQN::GlobalCollectorsBasicQuasiNumbers.AddOnTop(this);
   }
   void MakeQNFromMatrixAndColumn(MatrixLargeRational& theMat, root& column);
   Rational Coefficient;
@@ -6946,11 +6953,11 @@ public:
   std::string DebugString;
   ComplexQN(int NumVars)
   { ComplexQN::NumTotalCreated++; this->NumVars= NumVars; CreationNumber=NumTotalCreated;
-    ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
+    ComplexQN::GlobalCollectorsComplexQNs.AddOnTop(this);
   }
   ComplexQN()
   { this->NumVars=NumVars; ComplexQN::NumTotalCreated++; CreationNumber=NumTotalCreated;
-    ComplexQN::GlobalCollectorsComplexQNs.AddObjectOnTop(this);
+    ComplexQN::GlobalCollectorsComplexQNs.AddOnTop(this);
   }
   CompositeComplex Coefficient;
   List<Rational> Exponent;
@@ -7310,6 +7317,13 @@ public:
   static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
   (root& startingPoint, root& theAffineHyperplane, root& theDirection, root& outputPoint)
   ;
+  void GetDefaultFundamentalDomainInternalPoint(root& output);
+  bool GetInternalPointInConeForSomeFundamentalDomain
+(root& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
+  ;
+  void GetRootOnLatticeSmallestPositiveProportionalTo
+(root& input, root& output, GlobalVariables& theGlobalVariables)
+  ;
   void GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   (const root& theDirection, root& outputDirectionMultipleOnLattice, root& theShift, root& theAffineHyperplane,
    roots& outputRepresentatives,
@@ -7383,6 +7397,8 @@ static bool GetHomogeneousSubMatFromSubIgnoreConstantTerms
   void MakeFromRoots
   (const roots& input)
   ;
+  Lattice(){}
+  Lattice(const Lattice& other){this->operator=(other);}
   void MakeFromMat
   (const MatrixLargeRational& input)
   ;
@@ -7413,7 +7429,7 @@ public:
  // ;
   bool IsEqualToZero()const {return this->valueOnEachLatticeShift.size==0;}
   void Substitution
-  (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslation,
+  (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslationSubtractedFromArgument,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   void Substitution
@@ -7421,7 +7437,7 @@ public:
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   void Substitution
-  (const root& inputTranslation, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  (const root& inputTranslationSubtractedFromArgument, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
   ;
   bool SubstitutionLessVariables
   (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
@@ -7584,10 +7600,20 @@ public:
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector);
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat, int ChamberWallColor=0);
   bool DrawMeProjective
 (root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
   ;
+  bool IsInCone(const roots& vertices)
+  { for (int i=0; i<vertices.size; i++)
+      if (!this->IsInCone(vertices[i]))
+        return false;
+    return true;
+  }
+  bool GetLatticePointsInCone
+  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne, roots& outputPoints)
+  ;
+  bool MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables);
   void ChangeBasis(MatrixLargeRational& theLinearMap);
   std::string DebugString;
   int GetDim()
@@ -7652,6 +7678,7 @@ public:
     this->LowestIndexNotCheckedForSlicingInDirection=other.LowestIndexNotCheckedForSlicingInDirection;
     this->LowestIndexNotCheckedForChopping=other.LowestIndexNotCheckedForChopping;
   }
+  Cone(const Cone& other){ this->operator=(other);}
   Cone()
   { this->LowestIndexNotCheckedForSlicingInDirection=0;
     this->LowestIndexNotCheckedForChopping=0;
@@ -7724,9 +7751,11 @@ public:
   int indexLowestNonRefinedChamber;
   hashedRoots splittingNormals;
   roots slicingDirections;
+  Cone ConvexHull;
   std::string DebugString;
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
+  void RefineMakeCommonRefinement(const ConeComplex& other, GlobalVariables& theGlobalVariables);
   void Sort(GlobalVariables& theGlobalVariables);
   void RefineAndSort(GlobalVariables& theGlobalVariables);
   void FindMaxmumOverNonDisjointChambers
@@ -7736,10 +7765,13 @@ public:
   (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
   ;
   int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
-  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone);
+  bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone, GlobalVariables& theGlobalVariables);
   void PopChamberSwapWithLast(int index);
+  void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals
+    (roots& output)const
+  ;
   bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector);
+  void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector, GlobalVariables& theGlobalVariables);
   void InitFromDirectionsAndRefine
   (roots& inputVectors, GlobalVariables& theGlobalVariables)
   ;
@@ -7784,8 +7816,22 @@ public:
   void GetNewVerticesAppend
   (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
   ;
-  void init(){this->splittingNormals.ClearTheObjects(); this->slicingDirections.size=0; this->ClearTheObjects(); this->indexLowestNonRefinedChamber=0;}
-  ConeComplex(){this->flagChambersHaveTooFewVertices=false; this->flagIsRefined=false;}
+  void init()
+  { this->splittingNormals.ClearTheObjects();
+    this->slicingDirections.size=0;
+    this->ClearTheObjects();
+    this->indexLowestNonRefinedChamber=0;
+    this->ConvexHull.Normals.size=0;
+    this->ConvexHull.Vertices.size=0;
+    this->ConvexHull.flagIsTheZeroCone=true;
+  }
+  ConeComplex(const ConeComplex& other)
+  { this->operator=(other);
+  }
+  ConeComplex()
+  { this->flagChambersHaveTooFewVertices=false;
+    this->flagIsRefined=false;
+  }
   void WriteToFile
   (std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
   void WriteToFile
@@ -8078,6 +8124,9 @@ public:
   void MakeG2();
   Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables);
   void RaiseToHighestWeight(root& theWeight);
+  void DrawRootSystem
+(DrawOperations& output, bool wipeCanvas, GlobalVariables& theGlobalVariables, root* bluePoint=0)
+  ;
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
   //void GetLongRootLength(Rational& output);
@@ -8104,7 +8153,7 @@ public:
   bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); }
   void GenerateRootSubsystem(roots& theRoots);
   void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights);
-  void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho);
+  void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho, int UpperLimitNumElements=0);
   void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
   void GenerateRootSystemFromKillingFormMatrix();
   void WriteToFile(std::fstream& output);
@@ -8113,6 +8162,14 @@ public:
   void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   void GetLowestElementInOrbit
   (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho)
+  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, true, RhoAction, UseMinusRho);
+  }
+  void GetHighestElementInOrbit
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho)
+  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, false, RhoAction, UseMinusRho);
+  }
+  void GetExtremeElementInOrbit
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho)
   ;
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt) ;
   bool IsEigenSpaceGeneratorCoxeterElement(root& input);
@@ -8952,6 +9009,9 @@ public:
     }
     return out.str();
   }
+  bool GetAllDominantWeightsHWFDIM
+  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights)
+  ;
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
@@ -10259,7 +10319,7 @@ public:
   inline void drawLineBetweenTwoVectorsBuffer(const root& r1, const root& r2, int PenStyle, int PenColor){this->theBuffer.drawLineBetweenTwoVectorsBuffer(r1, r2, PenStyle, PenColor);}
   void drawTextAtVectorBuffer(const root& point, const std::string& inputText, int textColor, int theTextStyle, std::fstream* LatexOutFile);
   void drawCircleAtVectorBuffer
-  (root& point, double radius, unsigned long thePenStyle, int theColor)
+  (const root& point, double radius, unsigned long thePenStyle, int theColor)
 ;
   void operator=(const DrawingVariables& other)
   { this->theDrawLineFunction=other.theDrawLineFunction;
@@ -10517,7 +10577,7 @@ bool GetRootRationalFromFunctionArguments
   static int EvaluateLatticeImprecise
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateDrawG2InB3
+  static int EvaluateDrawWeightSupport
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateWeylAction
@@ -10552,7 +10612,7 @@ bool GetRootRationalFromFunctionArguments
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystem
-  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, root* bluePoint)
+  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, root* bluePoint, bool wipeCanvas=true)
   ;
 
   static int EvaluateDrawRootSystem
@@ -10838,7 +10898,7 @@ public:
   bool ReplaceXECdotsCEXEXbyE(int theDimension, int theNewToken, int theOperation);
   void FatherByLastNodeChildrenWithIndexInNodeIndex(int IndexInNodeIndex)
   { int childIndex=this->NodeIndexStack.TheObjects[IndexInNodeIndex];
-    this->LastObject()->children.AddObjectOnTop(childIndex);
+    this->LastObject()->children.AddOnTop(childIndex);
     this->TheObjects[childIndex].indexParentNode=this->size-1;
   }
   bool ReplaceOneChildOperationToken
@@ -10862,9 +10922,9 @@ public:
   { this->ExpandOnTop(1);
     this->LastObject()->Operation=theOperationToken;
     this->LastObject()->intValue=theIntValue;
-    this->NodeIndexStack.AddObjectOnTop(this->size-1);
-    this->ValueStack.AddObjectOnTop(theIntValue);
-    this->TokenStack.AddObjectOnTop(theToken);
+    this->NodeIndexStack.AddOnTop(this->size-1);
+    this->ValueStack.AddOnTop(theIntValue);
+    this->TokenStack.AddOnTop(theToken);
     return true;
   }
   bool ExpandOnTopUseOperationOffset(int OperationOffset, int theToken)
@@ -10967,7 +11027,7 @@ public:
 )
   { ParserFunction newFunction;
     bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
-    if (!this->theFunctionList.AddObjectOnTopNoRepetitionOfObjectHash(newFunction))
+    if (!this->theFunctionList.AddOnTopNoRepetitionHash(newFunction))
       return false;
     this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
     this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
@@ -11697,7 +11757,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::MakeOneGenerator
   tempMon.Nullify(theCoeff.NumVars, owner, theContext);
   tempMon.Coefficient.MakeNVarConst((int)theCoeff.NumVars, (Rational) 1);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, tempMon.Coefficient);
-  this->AddObjectOnTopHash(tempMon);
+  this->AddOnTopHash(tempMon);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11709,7 +11769,7 @@ template <class CoefficientType>
 bool Vectors<CoefficientType>::LinSpanContainsRoot(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
 { Vectors<CoefficientType> tempVectors;
   tempVectors.CopyFromBase(*this);
-  tempVectors.AddObjectOnTop(input);
+  tempVectors.AddOnTop(input);
 //  this->ComputeDebugString();
 //  tempRoots.ComputeDebugString();
 //  input.ComputeDebugString();
@@ -11796,7 +11856,7 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
   Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
-  bufferVectors.AddObjectOnTop(*this);
+  bufferVectors.AddOnTop(*this);
 //  bufferVectors.ComputeDebugString();
   if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
     return false;
@@ -11905,7 +11965,7 @@ void Vectors<CoefficientType>::SelectABasis
     theMat.GaussianEliminationByRows(theMat, matEmpty, theSel);
     theMat.ComputeDebugString(false, false);
     if (currentRow<theDim-theSel.CardinalitySelection)
-    { output.AddObjectOnTop(this->TheObjects[i]);
+    { output.AddOnTop(this->TheObjects[i]);
       outputSelectedIndices.AddSelectionAppendNewIndex(i);
       theMat.Resize(currentRow+2, theDim, true, &theRingZero);
     }
@@ -12042,4 +12102,3 @@ class CompleX
   CompleX(double other){this->operator=(other);}
 };
 #endif
-

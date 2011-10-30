@@ -7710,14 +7710,48 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 
 }
 
-bool SemisimpleLieAlgebra::GetAllDominantWeightsHWFDIM
+std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
+(root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+{ roots theDominantWeights;
+  double upperBoundDouble=100000/theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).DoubleValue();
+  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 1);
+  //int upperBoundInt = 10000;
+  root highestWeightTrue=highestWeightSimpleCoords;
+  this->theWeyl.RaiseToHighestWeight(highestWeightTrue);
+  std::stringstream out;
+  if (highestWeightTrue!=highestWeightSimpleCoords)
+    out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
+    <<  "Your input in simple coordinates was: "
+    << highestWeightSimpleCoords.ElementToString() << ".<br> ";
+  out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt);
+  if (isTrimmed)
+    out << "Trimmed the # of dominant weights (RAM limits). <br>";
+  roots tempRoots;
+  hashedRoots finalWeights;
+  int estimatedNumWeights=(int ) (this->theWeyl.GetSizeWeylByFormula(this->theWeyl.WeylLetter, this->theWeyl.GetDim()).DoubleValue()*theDominantWeights.size);
+  estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
+  finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
+  finalWeights.SetHashSize(estimatedNumWeights);
+  theWeyl.GenerateOrbit(theDominantWeights, false, finalWeights, false, 10000);
+  if (finalWeights.size>=10000)
+  { out << "Did not generate all weights of the module due to RAM limits. ";
+    if (!isTrimmed)
+      out << "However, all dominant weights were computed and are drawn.";
+    out << "<br>";
+  }
+  if (!isTrimmed && finalWeights.size<10000)
+    out << "All weights were computed and are drawn. <br>";
+  outputWeights.CopyFromBase(finalWeights);
+  return out.str();
+}
+
+bool SemisimpleLieAlgebra::GetAlLDominantWeightsHWFDIM
 (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights)
 { hashedRoots outputHashed;
   outputHashed.MakeActualSizeAtLeastExpandOnTop(upperBoundWeights);
-  root highestWeightTrue;
-  ElementWeylGroup tempElt;
-  this->theWeyl.GetHighestElementInOrbit
-  (highestWeightSimpleCoords, highestWeightTrue, tempElt, false, false);
+  root highestWeightTrue=highestWeightSimpleCoords;
+  this->theWeyl.RaiseToHighestWeight(highestWeightTrue);
   outputHashed.AddOnTopHash(highestWeightTrue);
   int lowestUnexploredIndex=0;
   int theDim=this->theWeyl.GetDim();
@@ -7756,33 +7790,21 @@ int ParserNode::EvaluateDrawWeightSupport
       return theNode.SetError(errorImplicitRequirementNotSatisfied);
     highestWeightSimpleCoords+=fundamentalWeights[i]*highestWeightFundCoords[i];
   }
-  roots theDominantWeightsToBeDrawn;
-  double upperBoundDouble=100000/theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).DoubleValue();
-  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 1);
-  bool isTrimmed=!
-  theNode.owner->theHmm.theRange.GetAllDominantWeightsHWFDIM
-  (highestWeightSimpleCoords, theDominantWeightsToBeDrawn, upperBoundInt);
-  if (isTrimmed)
-    theNode.outputString="Not all weights in the weight support were computed.";
-  roots tempRoots;
+  roots theWeightsToBeDrawn;
+  std::stringstream out;
+  out <<
+  theNode.owner->theHmm.theRange.GenerateWeightSupportMethoD1
+  (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables);
   DrawOperations theOps;
+  theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(theWeightsToBeDrawn.size);
   theOps.init();
-  hashedRoots finalWeights;
-  int estimatedNumWeights=
-  (int ) (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).DoubleValue()*
-  theDominantWeightsToBeDrawn.size);
-  finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
-  finalWeights.SetHashSize(estimatedNumWeights);
-  theWeyl.GenerateOrbit(theDominantWeightsToBeDrawn, false, finalWeights, false, 10000);
-  theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(finalWeights.size);
-  for (int i=0; i<finalWeights.size; i++)
+  for (int i=0; i<theWeightsToBeDrawn.size; i++)
     theOps.drawCircleAtVectorBuffer
-    (finalWeights[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
+    (theWeightsToBeDrawn[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
   theWeyl.DrawRootSystem(theOps, false, theGlobalVariables);
   theOps.ComputeProjectionsEiVectors();
   theGlobalVariables.theDrawingVariables.theBuffer=theOps;
-  std::stringstream out;
-  out << "Number of elements in weight support: " << finalWeights.size << "<br>";
+  out << "Number of drawn elements in the weight support: " << theWeightsToBeDrawn.size << "<br>";
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theOps;

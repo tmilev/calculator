@@ -102,7 +102,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -164,6 +164,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
+//  civilizedInput="drawWeightSupport(0,5,2,0)";
+//  theParser.DefaultWeylRank=4;
+//  theParser.DefaultWeylLetter='F';
   //civilizedInput="drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))";
 //  civilizedInput=" gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="gTwoInBthreeMultsParabolic((3,0,0), (1,0,0) )";
@@ -526,7 +529,7 @@ int main(int argc, char **argv)
                   << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
   static_html5(tempStream3);
-  //static_html6(tempStream3);
+  static_html6(tempStream3);
   std::cout << tempStream3.str();
 //  std::cout << "</div>";
 

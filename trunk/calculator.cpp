@@ -526,7 +526,7 @@ int main(int argc, char **argv)
                   << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
   static_html5(tempStream3);
-  static_html6(tempStream3);
+  //static_html6(tempStream3);
   std::cout << tempStream3.str();
 //  std::cout << "</div>";
 

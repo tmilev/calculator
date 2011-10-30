@@ -10687,7 +10687,7 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
         }
       }
       if (UpperLimitNumElements>0)
-        if (outputSubset.size>=UpperLimitNumElements)
+        if (outputSubset.size>=UpperLimitNumElements || output.size>=UpperLimitNumElements)
           return;
     }
   }
@@ -22844,13 +22844,13 @@ bool WeylGroup::IsDominantWeight(root& theWeight)
   root tempRoot;
   for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i);
-    if (this->RootScalarCartanRoot(tempRoot, theWeight)<0)
+    if (this->RootScalarCartanRoot(tempRoot, theWeight).IsNegative())
       return false;
   }
   return true;
 }
 
-void SemisimpleLieAlgebra::GenerateWeightSupport(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables)
+void SemisimpleLieAlgebra::GenerateWeightSupportMethod2(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables)
 { int indexFirstNonExplored=0;
   this->theWeyl.RaiseToHighestWeight(theHighestWeight);
   output.size=0;
@@ -22862,7 +22862,7 @@ void SemisimpleLieAlgebra::GenerateWeightSupport(root& theHighestWeight, roots& 
   while (indexFirstNonExplored<output.size)
   { for (int i=0; i<theDimension; i++)
     { current= output.TheObjects[indexFirstNonExplored]-simpleBasis.TheObjects[i];
-      current.ComputeDebugString();
+      //current.ComputeDebugString();
       if (this->IsInTheWeightSupport(current, theHighestWeight, theGlobalVariables))
         output.AddOnTopNoRepetition(current);
     }
@@ -22871,15 +22871,9 @@ void SemisimpleLieAlgebra::GenerateWeightSupport(root& theHighestWeight, roots& 
 }
 
 void WeylGroup::RaiseToHighestWeight(root& theWeight)
-{ root correspondingDominant;
-  for (int i=0; i<this->size; i++)
-  { correspondingDominant= theWeight;
-    this->ActOnRootByGroupElement(i, correspondingDominant, false, false);
-    if (this->IsDominantWeight(correspondingDominant))
-    { theWeight=correspondingDominant;
-      break;
-    }
-  }
+{ root tempRoot=theWeight;
+  ElementWeylGroup tempElt;
+  this->GetHighestElementInOrbit(tempRoot, theWeight, tempElt, false, false);
 }
 
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)

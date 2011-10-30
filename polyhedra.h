@@ -9016,9 +9016,13 @@ public:
     }
     return out.str();
   }
-  bool GetAllDominantWeightsHWFDIM
+  bool GetAlLDominantWeightsHWFDIM
   (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights)
   ;
+  void GenerateWeightSupportMethod2(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
+  std::string GenerateWeightSupportMethoD1
+  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+;
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
@@ -9075,7 +9079,6 @@ public:
   void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
   void MakeSl2ProgressReportNumCycles(int progress, int outOf, GlobalVariables& theGlobalVariables);
   bool IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables);
-  void GenerateWeightSupport(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
   void GenerateOneMonomialPerWeightInTheWeightSupport(root& theHighestWeight, GlobalVariables& theGlobalVariables);
   void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables);
   int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);

@@ -658,7 +658,9 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     tempS=out.str();
     TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(210, 210, 210));
     TDV.drawTextAtVectorBuffer(tempRoot, tempS, CGIspecificRoutines::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
+    TDV.drawCircleAtVectorBuffer(tempRoot, 2, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(100, 200, 100) );
   }
+  TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension, 1, 0);
 }
 
 void DrawingVariables::drawLineBufferOld(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex, std::fstream* LatexOutFile)

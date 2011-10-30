@@ -6244,7 +6244,7 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
 { std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
   std::stringstream tempStream7, tempStream8, tempStream9, tempStream10, tempStream11,
-  tempStream12, tempStream13, tempStream14;
+  tempStream12, tempStream13, tempStream14, tempStream15;
   this->NumHtmlGraphics++;
   int timesCalled=this->NumHtmlGraphics;
   tempStream1 << "drawConeInit" << timesCalled;
@@ -6270,13 +6270,17 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   std::string projName = tempStream13.str();
   tempStream14 << "projCirc" << timesCalled;
   std::string projBasisCircles= tempStream14.str();
+  tempStream15 << "eiBasis" << timesCalled;
+  std::string eiBasis= tempStream15.str();
+
   tempStream7 << "shiftXCone" << timesCalled;
   std::string shiftX=tempStream7.str();
   tempStream8 << "shiftYCone" << timesCalled;
   std::string shiftY=tempStream8.str();
   tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName=tempStream9.str();
-
+  out << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js\""
+  << " djConfig = \"parseOnLoad: true\"></script>";
   out << "<div style=\"width:" << this->DefaultHtmlWidth << ";height:" << this->DefaultHtmlHeight << ";border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
@@ -6331,6 +6335,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     //std::cout << "made a standard basis!";
   }
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
+  out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
     out << projName << "[" << i << "]= new Array(2);\n";
   out  << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
@@ -6343,6 +6348,15 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
         out << ",";
      }
     out <<  "];\n";
+    ////////////////////
+    out << eiBasis << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << (i==j)? 1 :0;
+      if(j!=theDimension-1)
+        out << ",";
+     }
+    out <<  "];\n";
+    //////////////////
     out << projBasisCircles << "[" << i << "]= new Array(2);\n";
   }
   out << "var " << shiftX << "=" <<
@@ -6465,8 +6479,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << "function ComputeProjections" << timesCalled << "()\n"
   << "{ for (var i=0; i<" << theDimension << "; i++)\n"
-  << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ", BilinearForm" << timesCalled << "[i]);\n"
-  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE2Cone" << timesCalled << ", BilinearForm" << timesCalled << "[i]);\n"
+  << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ","  << eiBasis<< "[i]);\n"
+  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
   << "  }\n"
   << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
   << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
@@ -6498,45 +6512,53 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  var selectedRoot=" << basisCircles << "[selectedIndex];\n"
   << "  var selectedRootLength=getScalarProduct" << timesCalled << "(selectedRoot,selectedRoot);\n"
   << "  var projectionSelected=" << projBasisCircles << "[selectedIndex];\n"
-  << "  var oldX=projectionSelected[0]/GraphicsUnit;\n"
-  << "  var oldY=-projectionSelected[1]/GraphicsUnit;\n"
-  << "  newX/=GraphicsUnit;\n"
-  << "  newY/=GraphicsUnit;\n"
+  << "  var oldX=projectionSelected[0]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  var oldY=-projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
+  << "  newX/=GraphicsUnitCone" << timesCalled << ";\n"
+  << "  newY/=GraphicsUnitCone" << timesCalled << ";\n"
   << "  var oldAngle= getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
   << "  var newAngle= getAngleFromXandY" << timesCalled << "(newX, newY, oldX, oldY);\n"
   << "  var AngleChange= -newAngle+oldAngle;\n"
-  << "  var epsilon=0.000015;\n"
+  << "  var epsilon=0.000000015;\n"
   << "  while (AngleChange>=Math.PI/2+epsilon)\n"
   << "  { AngleChange-=Math.PI;}\n"
-  << "    while (AngleChange<=-Math.PI/2-epsilon)\n"
-  << "    { AngleChange+=Math.PI;}\n"
-  << "    var NewVectorE1=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "    var NewVectorE2= dojo.clone(VectorE2Cone" << timesCalled << ");\n"
-  << "    MultiplyVector(NewVectorE1, Math.cos(AngleChange));\n"
-  << "    AddVectorTimes(NewVectorE1, VectorE2Cone" << timesCalled << ", Math.sin(AngleChange));\n"
-  << "    MultiplyVector(NewVectorE2, Math.cos(AngleChange));\n"
-  << "    AddVectorTimes(NewVectorE2, VectorE1Cone" << timesCalled << ", -Math.sin(AngleChange));\n"
-  << "    VectorE1Cone" << timesCalled << "=NewVectorE1;\n"
-  << "    VectorE2Cone" << timesCalled << "=NewVectorE2;\n"
-  << "    var RootTimesE1=getScalarProduct" << timesCalled << "(selectedRoot, VectorE1Cone" << timesCalled << ");\n"
-  << "    var RootTimesE2=getScalarProduct" << timesCalled << "(selectedRoot, VectorE2Cone" << timesCalled << ");\n"
-  << "    var vOrthogonal=dojo.clone(selectedRoot);\n"
-  << "    var vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "    MultiplyVector(vProjection, RootTimesE1);\n"
-  << "    AddVectorTimes(vProjection, VectorE2Cone" << timesCalled << ", VectorE2Cone" << timesCalled << ");\n"
-  << "    AddVectorTimes(vOrthogonal, vProjection, -1);\n"
-  << "    var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
-  << "    var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n"
-  << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
-  << "    { ScaleToUnitLength" << timesCalled << "(vProjection);\n"
-  << "      ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
-  << "      VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
-  << "      VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
+  << "  while (AngleChange<=-Math.PI/2-epsilon)\n"
+  << "  { AngleChange+=Math.PI;}\n"
+  << "  var NewVectorE1=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "  var NewVectorE2= dojo.clone(VectorE2Cone" << timesCalled << ");\n"
+  << "  MultiplyVector" << timesCalled << "(NewVectorE1, Math.cos(AngleChange));\n"
+  << "  AddVectorTimes" << timesCalled << "(NewVectorE1, VectorE2Cone" << timesCalled << ", Math.sin(AngleChange));\n"
+  << "  MultiplyVector" << timesCalled << "(NewVectorE2, Math.cos(AngleChange));\n"
+  << "  AddVectorTimes" << timesCalled << "(NewVectorE2, VectorE1Cone" << timesCalled << ", -Math.sin(AngleChange));\n"
+  << "  VectorE1Cone" << timesCalled << "=NewVectorE1;\n"
+  << "  VectorE2Cone" << timesCalled << "=NewVectorE2;\n"
+  << "  var RootTimesE1=getScalarProduct" << timesCalled << "(selectedRoot, VectorE1Cone" << timesCalled << ");\n"
+  << "  var RootTimesE2=getScalarProduct" << timesCalled << "(selectedRoot, VectorE2Cone" << timesCalled << ");\n"
+  << "  var vOrthogonal=dojo.clone(selectedRoot);\n"
+  << "  var vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "  MultiplyVector" << timesCalled << "(vProjection, RootTimesE1);\n"
+  << "  AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", RootTimesE2" << ");\n"
+  << "  AddVectorTimes" << timesCalled << "(vOrthogonal, vProjection, -1);\n"
+  << "  var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
+  << "  var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n"
+  << "  if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
+  << "  { if (oldRatioProjectionOverHeightSquared==0)\n"
+  << "    { vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "      MultiplyVector" << timesCalled << "(vProjection, newX);\n"
+  << "      AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", -newY" << ");\n"
   << "    }\n"
-  << "    AddVectorTimes(VectorE2, VectorE1Cone" << timesCalled << ", -getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE1Cone" << timesCalled << ")*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE2Cone" << timesCalled << "));\n"
-  << "    ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
-  << "    ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
-  << "    ComputeProjections" << timesCalled << "();\n"
+  << "    ScaleToUnitLength" << timesCalled << "(vProjection);\n"
+  << "    ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
+  << "    VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
+  << "    VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
+  << "  }\n"
+  << "  AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
+  << ", VectorE1Cone" << timesCalled << ", -getScalarProduct" << timesCalled
+  << "(VectorE1Cone" << timesCalled << ", VectorE1Cone" << timesCalled << ")*getScalarProduct"
+  << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE2Cone" << timesCalled << "));\n"
+  << "  ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
+  << "  ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
+  << "  ComputeProjections" << timesCalled << "();\n"
   << "}\n";
 
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
@@ -6568,7 +6590,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  << "}\n"
   << theDrawFunctionName << "();\n}\n";
 
-  out  << ""//"dojo.require(\"dojo.gfx\");"
+  out << "dojo.require(\"dojox.gfx\");"
   << " dojo.addOnLoad(" << theInitFunctionName << "); "
   << "</script>";
   return out.str();
@@ -6757,6 +6779,7 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
     return out.str();
   }
   this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
+  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() ,0);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
   out << "<br>" << this->ElementToString(false, true, true, false, theFormat);
   return out.str();
@@ -7022,7 +7045,7 @@ void WeylGroup::DrawRootSystem
     if (minLength> this->RootScalarCartanRoot(differenceRoot, differenceRoot))
       minLength=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
   }
-  std::cout << "<hr>the min length is: " << minLength.ElementToString();
+//  std::cout << "<hr>the min length is: " << minLength.ElementToString();
   Rational tempRat;
   if (bluePoint!=0)
   { output.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
@@ -7064,8 +7087,17 @@ int ParserNode::EvaluateDrawRootSystem
   theWeyl.DrawRootSystem(theDrawOperators, true, theGlobalVariables, bluePoint);
   theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
-  theNode.outputString = theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
-  theNode.outputString+="\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  std::stringstream out;
+  out << "<hr>Below is a javascript visualization of a root system drawn as described on John Stembridge's website.<br>"
+  << "The darker red points can be rotated around by dragging them with the mouse pointer.<br> "
+  << "The darker red points are the simple positive roots.<br>"
+  << "The mouse wheel acts as a zoom-in/out on the Google chrome browser. <br>"
+  << "Note that for a root system of rank 4 or more there might be javascript-compilation lag.<hr>"
+  << "The javascript visualization uses your browser/your PC processor, so it should be viewed with a good browser (i.e. not with Internet Explorer). ";
+  out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraTypeAndName(theWeylLetter, theDimension);
+  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension)
+  << "\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  theNode.outputString=out.str();
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theDrawOperators;
   theNode.ExpressionType=theNode.typeAnimation;

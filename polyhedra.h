@@ -8998,6 +8998,13 @@ public:
       return true;
     return false;
   }
+  static std::string GetLieAlgebraTypeAndName(char WeylLetter, int WeylDim)
+  { std::stringstream out;
+    out << WeylLetter << "_" << WeylDim;
+    if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
+      out << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetter, WeylDim) << ")";
+    return out.str();
+  }
   static std::string GetLieAlgebraName(char WeylLetter, int WeylDim)
   { std::stringstream out;
     switch (WeylLetter)

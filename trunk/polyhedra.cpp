@@ -23060,7 +23060,7 @@ std::string Parser::ParseEvaluateAndSimplifyPart2
   std::stringstream out;
   if (useHtml)
     out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&& " << this->StringBeingParsed << "\\end{eqnarray*} = </div>";
-  out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables);
+  out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables, true);
   return out.str();
 }
 
@@ -23861,7 +23861,7 @@ void Parser::ElementToString(bool includeLastNode, std::string& output, bool use
   if (useHtml)
     out << "<br><br>";
   if (includeLastNode)
-    out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables);
+    out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables, false);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -23957,7 +23957,7 @@ void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobal
       out << this->children.TheObjects[i] << ", ";
   }
   PolynomialOutputFormat PolyFormatLocal;
-  out << this->ElementToStringValueAndType(false, theGlobalVariables);
+  out << this->ElementToStringValueAndType(false, theGlobalVariables, false);
   output=out.str();
 }
 
@@ -28797,7 +28797,8 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
   return LatexOutput.str();
 }
 
-std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables)
+std::string ParserNode::ElementToStringValueAndType
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString)
 { std::stringstream out;
   PolynomialOutputFormat PolyFormatLocal;
   std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
@@ -28830,15 +28831,19 @@ std::string ParserNode::ElementToStringValueAndType(bool useHtml, int RecursionD
     else
       out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(stringValueOnly);
   }
-  if (this->outputString!="" && this->ExpressionType!=this->typeString)
-    out << "<br>In addition, the program generated the following printout. ";
-  out << this->outputString;
+  if (displayOutputString)
+  { if (this->outputString!="" && this->ExpressionType!=this->typeString)
+      out << "<br>In addition, the program generated the following printout. ";
+    out << this->outputString;
+  } else
+    if (this->outputString!="")
+      out << "Output string not shown to avoid javascript conflicts.";
   if (this->ExpressionType==this->typeArray)
   { out << "<br>Elements of the array follow.";
     RecursionDepth++;
     if (RecursionDepth<=maxRecursionDepth)
       for (int i=0; i<this->children.size; i++)
-        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
+        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, displayOutputString);
   }
   return out.str();
 }

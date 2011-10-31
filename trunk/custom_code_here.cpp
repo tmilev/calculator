@@ -1086,11 +1086,17 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   root tempRoot, ZeroRoot;
   DrawingVariables& drawOps=theGlobalVariables.theDrawingVariables;
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
-  drawOps.theBuffer.initDimensions(theSmallDim, 1);
-  drawOps.theBuffer.MakeMeAStandardBasis(theSmallDim);
+//  drawOps.theBuffer.initDimensions(theSmallDim, 1);
+  Vectors<double> theDraggableBasis;
+  theDraggableBasis.MakeEiBasis(theSmallDim, 1, 0);
+  WeylGroup tmpWeyl;
+  tmpWeyl.MakeAn(2);
+  drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
   PolynomialOutputFormat theFormat;
-  drawOps.theBuffer.ProjectionsEiVectors[0][0]=0.87;  drawOps.theBuffer.ProjectionsEiVectors[0][1]=-0.5;
-  drawOps.theBuffer.ProjectionsEiVectors[1][0]=-0.87; drawOps.theBuffer.ProjectionsEiVectors[1][1]=-0.5;
+  drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1; drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
+  drawOps.theBuffer.BasisProjectionPlane[0][1][0]=1;  drawOps.theBuffer.BasisProjectionPlane[0][1][1]=1;
+  drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
+  (drawOps.theBuffer.BasisProjectionPlane[0][0], drawOps.theBuffer.BasisProjectionPlane[0][1]);
   drawOps.theBuffer.GraphicsUnit[0]=50;
   PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables), theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
   //std::cout << "<hr>" << this->GmodKNegWeightsBasisChanged.ElementToString() << "<hr>";
@@ -6237,6 +6243,11 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
   if (this->BasisProjectionPlane.size<1)
     this->BasisProjectionPlane.SetSize(1);
   this->BasisProjectionPlane[0].MakeEiBasis(theDim, 1, 0);
+  this->BasisProjectionPlane[0].size=2;
+  for (int i=0; i<this->BasisProjectionPlane[0][1].size; i++)
+    this->BasisProjectionPlane[0][1][i]=2*i+1;
+  for (int i=0; i<this->BasisProjectionPlane[0][0].size; i++)
+    this->BasisProjectionPlane[0][0][i]=3*i+2;
   if (this->theBilinearForm.NumRows!=theDim)
     this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
 }
@@ -6286,8 +6297,74 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
   << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
-  out << "<script type=\"text/javascript\">\n"
-  << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
+  out << "<br>The picture is drawn using javascript."
+  << "<br> The basis vectors can be rotated with the mouse (the basis vectors should be labeled in format depending on the type of picture):  "
+  << " left click + hold the basis vector and move the mouse."
+  << "<br>Doing that rotates \"infinitesimally\" the two vectors basis of the projection plane (the plane being drawn on your screen) <br>1) inside the projection plane "
+  << "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane"
+  << "<br>such as to match the motion of your mouse pointer. This operation is not well defined if 1) the selected vector lies "
+  << "inside the projection plane or 2) the selected vector is orthogonal to the projection plane. "
+  << "When you try to drag such a \"degenerate\" vector, the javascript uses a \"dirty\" \"pertubation\" trick, and consequently "
+  << "the picture might \"jump\" around a bit."
+  << "<br> If you are using the google chrome browser you can zoom in and out of the picture using the mouse wheel. "
+  << " Zooming doesn't work on other browsers (there is no commonly supported mouse wheel capture among the popular browsers)."
+  ;
+  out << "<br>Currently, " << this->theBuffer.IndexNthDrawOperation.size << " elements are drawn. ";
+  if (this->theBuffer.IndexNthDrawOperation.size>500)
+    out  << " The visualization is javascript/pc processor <b>intensive</b> so it will <b>not work well</b> "
+    <<  " for graphics with lots of elements. This message is displayed only when the number of drawn elements is more than 500.";
+  out << "<hr>";
+
+  out << "<script type=\"text/javascript\">\n";
+  if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
+  { this->theBuffer.MakeMeAStandardBasis(theDimension);
+    //std::cout << "made a standard basis!";
+  }
+  out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
+  for (int i=0; i<theDimension; i++)
+  { out << "BilinearForm" << timesCalled << "[" << i << "]=new Array(" << theDimension << ");\n";
+    for (int j=0; j<theDimension; j++)
+      out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
+    out << "\n";
+  }
+  this->theBuffer.ModifyToOrthonormalNoShiftSecond
+  (this->theBuffer.BasisProjectionPlane[0][0],  this->theBuffer.BasisProjectionPlane[0][1]);
+  out
+  << "var VectorE1Cone" << timesCalled << "= new Array(" << theDimension << ");\n"
+  << "var VectorE2Cone" << timesCalled << "= new Array(" << theDimension << ");\n";
+  for (int i=0; i<theDimension; i++)
+  { out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\t";
+    out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\n";
+  }
+
+  out << "var " << projName << "= new Array(" << theDimension << ");\n";
+  out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
+  for (int i=0; i<theDimension; i++)
+    out << projName << "[" << i << "]= new Array(2);\n";
+  out  << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  out  << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
+  for (int i=0; i<this->theBuffer.BasisToDrawCirclesAt.size; i++)
+  { out << basisCircles << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << this->theBuffer.BasisToDrawCirclesAt[i][j];
+      if(j!=theDimension-1)
+        out << ",";
+     }
+    out <<  "];\n";
+  }
+  for (int i=0; i<theDimension; i++)
+  {    ////////////////////
+    out << eiBasis << "[" << i << "]=[";
+    for (int j=0; j<theDimension; j++)
+    { out << (i==j)? 1 :0;
+      if(j!=theDimension-1)
+        out << ",";
+     }
+    out <<  "];\n";
+    //////////////////
+    out << projBasisCircles << "[" << i << "]= new Array(2);\n";
+  }
+  out << "var " << Points1ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << Points2ArrayName << "=new Array(" << this->theBuffer.theDrawLineBetweenTwoRootsOperations.size << ");\n"
   << "var " << circArrayName << "=new Array(" << this->theBuffer.theDrawCircleAtVectorOperations.size << ");\n"
   << "var " << txtArrayName << "=new Array(" << this->theBuffer.theDrawTextAtVectorOperations.size << ");\n"
@@ -6330,35 +6407,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     }
     out << "];\n";
   }
-  if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
-  { this->theBuffer.MakeMeAStandardBasis(theDimension);
-    //std::cout << "made a standard basis!";
-  }
-  out << "var " << projName << "= new Array(" << theDimension << ");\n";
-  out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
-  for (int i=0; i<theDimension; i++)
-    out << projName << "[" << i << "]= new Array(2);\n";
-  out  << "var " << basisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  out  << "var " << projBasisCircles << "=new Array(" << this->theBuffer.BasisToDrawCirclesAt.size << ");\n";
-  for (int i=0; i<this->theBuffer.BasisToDrawCirclesAt.size; i++)
-  { out << basisCircles << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
-    { out << this->theBuffer.BasisToDrawCirclesAt[i][j];
-      if(j!=theDimension-1)
-        out << ",";
-     }
-    out <<  "];\n";
-    ////////////////////
-    out << eiBasis << "[" << i << "]=[";
-    for (int j=0; j<theDimension; j++)
-    { out << (i==j)? 1 :0;
-      if(j!=theDimension-1)
-        out << ",";
-     }
-    out <<  "];\n";
-    //////////////////
-    out << projBasisCircles << "[" << i << "]= new Array(2);\n";
-  }
   out << "var " << shiftX << "=" <<
   this->theBuffer.centerX[0]
   //100
@@ -6375,8 +6423,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "result=[resultX, resultY];\n";
   out << "return result;\n";
   out << "}\n";
-  out << "var " << theSurfaceName << ";\n"
+  out << "var " << theSurfaceName << "=0;\n"
   << "function " << theDrawFunctionName << "(){\n"
+  << "  if (" << theSurfaceName << "==0)\n"
+  << "    " << theInitFunctionName << "();\n"
   << "ComputeProjections" << timesCalled << "();\n"
   << theSurfaceName << ".clear();\n";
   for (int i=0; i<this->theBuffer.IndexNthDrawOperation.size; i++)
@@ -6431,14 +6481,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
   << "{ if (x1-x2>clickTolerance || x2-x1>clickTolerance || y1-y2>clickTolerance || y2-y1>clickTolerance )\n    return false;\n  return true;\n}";
 
-  out << "var BilinearForm" << timesCalled << "= new Array(" << theDimension << ");\n";
-  for (int i=0; i<theDimension; i++)
-  { out << "BilinearForm" << timesCalled << "[" << i << "]=new Array(" << theDimension << ");\n";
-    for (int j=0; j<theDimension; j++)
-      out << "BilinearForm" << timesCalled << "[" << i << "][" << j << "]=" << this->theBuffer.theBilinearForm.elements[i][j] << ";\t";
-    out << "\n";
-  }
-
   out << "function MultiplyVector" << timesCalled << "(output, coeff)"
   << "{ for (var i=0; i<output.length; i++)\n"
   << "  output[i]*=coeff;\n"
@@ -6470,13 +6512,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  AddVectorTimes" << timesCalled << "(result, projection, 1);\n"
   << "  return result;\n"
   << "}\n";
-  out
-  << "var VectorE1Cone" << timesCalled << "= new Array(" << theDimension << ");\n"
-  << "var VectorE2Cone" << timesCalled << "= new Array(" << theDimension << ");\n";
-  for (int i=0; i<theDimension; i++)
-  { out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\t";
-    out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\n";
-  }
   out << "function ComputeProjections" << timesCalled << "()\n"
   << "{ for (var i=0; i<" << theDimension << "; i++)\n"
   << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ","  << eiBasis<< "[i]);\n"
@@ -6540,12 +6575,18 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", RootTimesE2" << ");\n"
   << "  AddVectorTimes" << timesCalled << "(vOrthogonal, vProjection, -1);\n"
   << "  var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
-  << "  var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n"
+  << "  var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n";
+  if (theDimension>2)
+  { out
+    << "  if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
+    << "    vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n";
+  }
+out
   << "  if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
   << "  { if (oldRatioProjectionOverHeightSquared==0)\n"
   << "    { vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "      MultiplyVector" << timesCalled << "(vProjection, newX);\n"
-  << "      AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", -newY" << ");\n"
+  << "      MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
+  << "      AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", newY" << ");\n"
   << "    }\n"
   << "    ScaleToUnitLength" << timesCalled << "(vProjection);\n"
   << "    ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
@@ -6576,7 +6617,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    divPosY += thePointer.offsetTop;\n    thePointer = thePointer.offsetParent;\n  }\n"
   << "  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");\n"
   << "  posy=-(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n"
-  << "if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone"<< timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
+  << "if (selectedBasisIndexCone" << timesCalled << "==-2)\n{ shiftXCone" << timesCalled << "=(cx-divPosX+document.body.scrollLeft);\n"
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
   << "{ changeBasis" << timesCalled << "(selectedBasisIndexCone" << timesCalled << ", posx, posy);\n  }\n  "
   << theDrawFunctionName << " ();\n}\n";
@@ -6590,9 +6631,12 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  << "}\n"
   << theDrawFunctionName << "();\n}\n";
 
-  out << "dojo.require(\"dojox.gfx\");"
-  << " dojo.addOnLoad(" << theInitFunctionName << "); "
-  << "</script>";
+  out
+  << "dojo.require(\"dojox.gfx\");\n"
+  << "dojo.addOnLoad(" << theInitFunctionName << ");\n"
+//  << "dojo.addOnLoad(" << theDrawFunctionName << ");\n"
+  << "</script>\n"
+  ;
   return out.str();
 }
 
@@ -6631,6 +6675,8 @@ std::string ConeComplex::DrawMeToHtmlProjective
 bool ConeComplex::DrawMeLastCoordAffine
 (bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
+  theDrawingVariables.theBuffer.initDimensions(this->GetDim()-1, 1);
+  theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1, 0);
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
     result=this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
@@ -6649,18 +6695,10 @@ bool ConeComplex::DrawMeProjective
 (root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
   if (InitDrawVars)
-  { root tempRoot, coordCenter, ZeroRoot;
-    ZeroRoot.MakeZero(this->GetDim());
-    if (coordCenterTranslation==0)
-      coordCenter=ZeroRoot;
-    else
-      coordCenter=*coordCenterTranslation;
+  { theDrawingVariables.theBuffer.init();
+    theDrawingVariables.theBuffer.initDimensions(this->GetDim(), 1);
     theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
-    for (int i=0; i<this->GetDim(); i++)
-    { tempRoot.MakeEi(this->GetDim(), i);
-      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
-    }
+    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim(), 0);
   }
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
@@ -6719,6 +6757,7 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
   if (this->Vertices.size<1)
     return "The cone is empty";
   std::stringstream out;
+   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
   bool foundBadVertex=this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1, 0);
   if (foundBadVertex)
@@ -6778,6 +6817,7 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   { out << "There has been a programming error. The cone is empty.<br>" << this->ElementToString(false, true, true, false, theFormat);
     return out.str();
   }
+  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
   this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim() ,0);
   out << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim());
@@ -6841,10 +6881,18 @@ int DrawOperations::GetDimFromBilinearForm()
 }
 
 void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
-{ this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
+{ if (theDim<2)
+    theDim=2;
+  this->theBilinearForm.MakeIdMatrix(theDim, 1, 0);
   this->ProjectionsEiVectors.SetSizeMakeMatrix(theDim, 2);
   Vectors<double> tempBasis;
-  tempBasis.SetSizeMakeMatrix(2, theDim);
+  tempBasis.MakeEiBasis(theDim, 1, 0);
+  tempBasis.size=2;
+/*  for (int i=0; i<tempBasis[1].size; i++)
+    tempBasis[1][i]=2*i+1;
+  for (int i=0; i<tempBasis[0].size; i++)
+    tempBasis[0][i]=3*i+2;*/
+  this->ModifyToOrthonormalNoShiftSecond(tempBasis[0], tempBasis[1]);
   this->BasisProjectionPlane.initFillInObject(numAnimationFrames, tempBasis);
   this->BasisToDrawCirclesAt.MakeEiBasis(theDim, 1, 0);
   this->SelectedPlane=0;
@@ -8218,7 +8266,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    This function is a temporary solution to this (minor) technical problem. \
    The function name starts with z because it is meant to be used rarely.",
    "zprintSlTwosAndRootSAsFORCERecompute",
-    DefaultWeylLetter, DefaultWeylRank,
+    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluatePrintRootSAsForceRecompute
    );
   this->AddOneFunctionToDictionaryNoFail

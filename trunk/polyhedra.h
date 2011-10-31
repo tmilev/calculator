@@ -10104,7 +10104,7 @@ public:
     tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i=0; i<bilinearForm.NumRows; i++)
       for (int j=0; j<bilinearForm.NumCols; j++)
-        this->theBilinearForm.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
+        tempMat.elements[i][j]=bilinearForm.elements[i][j].DoubleValue();
     this->initDimensions(tempMat, draggableBasis, startingPlane, NumAnimationFrames);
   }
   void initDimensions(int theDim, int numAnimationFrames);
@@ -10518,8 +10518,10 @@ public:
   errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
-  std::string ElementToStringValueAndType(bool useHtml, GlobalVariables& theGlobalVariables){return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables);}
-  std::string ElementToStringValueAndType(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
+  std::string ElementToStringValueAndType(bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString){return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables, displayOutputString);}
+  std::string ElementToStringValueAndType
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString)
+;
   std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables){return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables);}
   std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
   std::string ElementToStringErrorCode(bool useHtml);

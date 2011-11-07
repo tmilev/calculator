@@ -70,9 +70,9 @@ void Rational::AssignString(const std::string& input)
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
   (int indexOperator, root& startingNormal, root& outputNormal)
 { MatrixLargeRational theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
-  root& theTranslation=this->theTranslationsProjecteD.TheObjects[indexOperator];
+  root& theTranslation=this->theTranslationsProjectedBasisChanged.TheObjects[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
-  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModification+theTranslation, startingNormal);
+  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModificationBasisChanged+theTranslation, startingNormal);
   theOperatorExtended.Transpose();
   outputNormal=startingNormal;
   theOperatorExtended.ActOnAroot(outputNormal);
@@ -202,8 +202,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ElementToString();
   theWeYl.ComputeWeylGroup();
-  this->NonIntegralOriginModification="(0,0)";
-  MatrixLargeRational theProjection;
+  this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
+  MatrixLargeRational theProjectionBasisChanged;
   root startingWeight, projectedWeight;
   PolynomialOutputFormat theFormat;
   SSalgebraModule tempM;
@@ -241,13 +241,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       i--;
     }
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
-  theProjection.init(input.theDomain.GetRank(), input.theRange.GetRank());
+  theProjectionBasisChanged.init(input.theDomain.GetRank(), input.theRange.GetRank());
   for (int i=0; i<input.theRange.GetRank(); i++)
   { startingWeight.MakeEi(input.theRange.GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
     this->preferredBasisChangeInversE.ActOnAroot(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
-      theProjection.elements[j][i]=projectedWeight[j];
+      theProjectionBasisChanged.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=theParabolicSel;
@@ -271,7 +271,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->theLinearOperators.SetSize(theSubgroup.size);
   this->theLinearOperatorsExtended.SetSize(theSubgroup.size);
   this->theTranslationS.SetSize(theSubgroup.size);
-  this->theTranslationsProjecteD.SetSize(theSubgroup.size);
+  this->theTranslationsProjectedBasisChanged.SetSize(theSubgroup.size);
   this->theCoeffs.SetSize(theSubgroup.size);
   this->log << " \n******************\nthe subgroup: \n" << theSubgroup.ElementToString() << "\n\n\n\n\n\n";
   this->log << theSubgroup.ElementToStringBruhatGraph();
@@ -285,19 +285,19 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     currentLinearOperator.ActOnAroot(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i]-=theSubgroup.GetRho();
     this->theTranslationS[i].MinusRoot();
-    theProjection.ActOnAroot(this->theTranslationS[i], this->theTranslationsProjecteD[i]);
+    theProjectionBasisChanged.ActOnAroot(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup[i].size%2==0)
       this->theCoeffs[i]=1;
     else
       this->theCoeffs[i]=-1;
   }
-  this->log << "\n\n\nMatrix of the projection operator:\n" << theProjection.ElementToString(false, false);
+  this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n" << theProjectionBasisChanged.ElementToString(false, false);
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<MatrixLargeRational> tempList;
   for (int k=0; k<this->theLinearOperators.size; k++)
   { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[k];
     MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
-    currentLO.MultiplyOnTheLeft(theProjection);
+    currentLO.MultiplyOnTheLeft(theProjectionBasisChanged);
     currentLO*=-1;
     //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
     currentLOExtended.MakeIdMatrix(currentLO.NumRows);
@@ -306,7 +306,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       for (int j=0; j<currentLO.NumCols; j++)
         currentLOExtended.elements[i][j+currentLO.NumRows]=currentLO.elements[i][j];
     this->log << "\n\n" << currentLOExtended.ElementToString(false, false);
-    this->log << this->theTranslationS[k].ElementToString() << ";   " << this->theTranslationsProjecteD[k].ElementToString();
+    this->log << this->theTranslationS[k].ElementToString() << ";   " << this->theTranslationsProjectedBasisChanged[k].ElementToString();
   }
 
   List<int> displayIndicesReflections;
@@ -326,6 +326,13 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theFormat.alphabet[2]="y_1";
   theFormat.alphabet[3]="y_2";
   theFormat.alphabet[4]="y_3";
+  tempRoot=theSubgroup.GetRho();
+  this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
+  this->preferredBasisChangE.ActOnAroot(tempRoot);
+  tempRoot.MinusRoot();
+  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" << theSubgroup.GetRho().ElementToStringLetterFormat("\\eta")
+  << "$; $\\pr(\\rho)=" << tempRoot.ElementToStringLetterFormat("\\alpha") << "$."
+  ;
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ" << tempVect.ElementToString(theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
   { MatrixLargeRational& currentLoExt=this->theLinearOperatorsExtended[i];
@@ -334,7 +341,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
         tempMatPoly.elements[j][k].MakeNVarConst(tempVect.size, currentLoExt.elements[j][k]);
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j=0; j<tempVect2.size; j++)
-      tempVect2[j]+=this->theTranslationsProjecteD[i][j];
+      tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];
     this->log << "\n$" <<  theSubgroup[i].ElementToString(true, false, "\\eta", & displayIndicesReflections) << "$&$"
     << tempVect2.ElementToString(theFormat) << "$\\\\";
   }
@@ -453,7 +460,7 @@ GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObje
 
 void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const root& input, root& output)
 { MatrixLargeRational& currentExtendedOperator=this->theLinearOperatorsExtended[indexOperator];
-  root& currentTranslation=this->theTranslationsProjecteD[indexOperator];
+  root& currentTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
   assert (!input.LastObject()->IsEqualToZero());
   output=input;
   Rational tempRat=*output.LastObject();
@@ -569,7 +576,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
         tempStream << "Processing chamber " << i+1 << " linear operator " << k+1;
         theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= tempStream.str();
         theGlobalVariables.MakeReport();
-        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjecteD[k], this->theExtendedIntegralLatticeMatForM, currentQPSub, theGlobalVariables);
+        currentQPNoSub.Substitution(this->theLinearOperatorsExtended.TheObjects[k], this->theTranslationsProjectedBasisChanged[k], this->theExtendedIntegralLatticeMatForM, currentQPSub, theGlobalVariables);
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       }
     }
@@ -584,7 +591,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     currentSum.MakeZeroOverLattice(this->theExtendedIntegralLatticeMatForM);
     for (int k=0; k<this->theLinearOperators.size; k++)
     { this->GetProjection(k, this->projectivizedChambeR.TheObjects[i].GetInternalPoint(), tempRoot);
-      tempRoot-=this->NonIntegralOriginModification;
+      tempRoot-=this->NonIntegralOriginModificationBasisChanged;
       int theIndex= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex!=-1)
       { tempQP=this->theQPsSubstituted.TheObjects[theIndex].TheObjects[k];
@@ -1107,7 +1114,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 //  translationsProjectedFinal[0].MinusRoot();
   out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
   out << "<br>Input parabolics selections: " << parabolicSel.ElementToString();
-  out << "<br>the argument translations: " << this->theTranslationsProjecteD.ElementToString();
+  out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.ElementToString();
   out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: " << translationsProjectedFinal[0].ElementToString();
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   //std::cout << theStartingPoly.ElementToString(false, true);
@@ -1115,7 +1122,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   //out << this->log.str();
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, translationsProjectedFinal[i]);
-    translationsProjectedFinal[i]+=this->theTranslationsProjecteD[i];
+    translationsProjectedFinal[i]+=this->theTranslationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBuffer(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(250,0,0));
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ElementToString();
@@ -3475,6 +3482,8 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
 //  out << "<br>We have " << this->LatticeShifts.size << " lattice shifts. The polynomial on each lattice shift follows.";
   if (this->LatticeShifts.size==0)
     return "0";
+  if (useLatex&& !useHtml)
+    out << "\\begin{tabular}{c}";
   for (int i=0; i<this->LatticeShifts.size; i++)
   { //if(useHtml)
       //out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
@@ -3496,7 +3505,7 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       out << this->LatticeShifts.TheObjects[i].ElementToString() << " + ";
     if (useLatex)
     { if (!useHtml)
-        out << "$\\Lambda$, \\\\\n ";
+        out << "$\\Lambda$, \\\\\\hline\n ";
       else
         out << "<span class=\"math\"> \\Lambda</span>";
     } else
@@ -3537,6 +3546,8 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
     else
       out << "Z^" <<  this->GetNumVars();
+  if (useLatex&& !useHtml)
+    out << "\\end{tabular}";
   return out.str();
 }
 
@@ -3883,26 +3894,45 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   this->ExpressionType=this->typeString;
 }
 
-std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat)
+std::string partFractions::DoTheFullComputationReturnLatexFileString
+(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
 { if (toBePartitioned.size<1)
     return "";
   this->AmbientDimension= toBePartitioned.TheObjects[0].size;
   this->theChambersOld.AmbientDimension= this->AmbientDimension;
   this->theChambersOld.theDirections.CopyFromBase(toBePartitioned);
-  return this->DoTheFullComputationReturnLatexFileString(theGlobalVariables, theFormat);
+  return this->DoTheFullComputationReturnLatexFileString(theGlobalVariables, theFormat, outputHtml);
 }
 
-std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+void ConeComplex::AssignCombinatorialChamberComplex
+(CombinatorialChamberContainer& other, GlobalVariables& theGlobalVariables)
+{ this->init();
+  roots tempNormals;
+  Cone tempCone;
+  for (int i=0; i<other.size; i++)
+    if (other[i]!=0)
+    { other[i]->GetWallNormals(tempNormals);
+      tempCone.CreateFromNormals(tempNormals, theGlobalVariables);
+      this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
+    }
+}
+
+std::string partFractions::DoTheFullComputationReturnLatexFileString
+(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, std::string* outputHtml)
 { this->theChambersOld.thePauseController.InitComputation();
   //this->theChambers.ReadFromDefaultFile(theGlobalVariables);
   std::stringstream out;
+  std::stringstream outHtml;
   this->theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
   this->theChambersOld.QuickSortAscending();
   this->theChambersOld.LabelChamberIndicesProperly();
+  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld, theGlobalVariables);
+//  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
+  this->theChambersOld.thePauseController.ExitComputation();
+  this->theChambers.DrawMeProjective(0, true, theGlobalVariables.theDrawingVariables, theFormat);
+  outHtml << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
   root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
   tempRoot.MakeZero(this->AmbientDimension);
-  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
-  this->theChambersOld.thePauseController.ExitComputation();
   this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
@@ -3914,15 +3944,20 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString(GlobalVaria
         << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
   QuasiPolynomial tempQP;
   std::string tempS;
+  root tempIndicator;
   for (int i=0; i<this->theChambersOld.size; i++)
     if (this->theChambersOld.TheObjects[i]!=0)
-    { CombinatorialChamber& currentChamber=*this->theChambersOld.TheObjects[i];
-      this->GetVectorPartitionFunction(tempQP, currentChamber.InternalPoint, theGlobalVariables);
-      currentChamber.ElementToInequalitiesString(tempS, this->theChambersOld, true, false, theFormat);
-      out << "\n\nChamber: " << tempS;
-      out << "Quasipolynomial: " << tempQP.ElementToString(false, true, theFormat);
+    { Cone& currentChamber=this->theChambers[i];
+      tempIndicator=currentChamber.GetInternalPoint();
+      this->GetVectorPartitionFunction(tempQP, tempIndicator, theGlobalVariables);
+      out << "\n\n" << currentChamber.ElementToString(true, false, true, false, theFormat);
+      out << "\n\nQuasipolynomial: " << tempQP.ElementToString(false, true, theFormat);
+      outHtml << "<hr>Chamber: " << currentChamber.ElementToString(false, true, true, false, theFormat);
+      outHtml << "Quasipolynomial: " << tempQP.ElementToString(true, false, theFormat);
     }
   out << "\\end{document}";
+  if (outputHtml!=0)
+    *outputHtml=outHtml.str();
   return out.str();
 }
 
@@ -3935,8 +3970,13 @@ int ParserNode::EvaluateVectorPFIndicator
   PolynomialOutputFormat theFormat;
 //  theFormat.alphabet.TheObjects[0]="t_1";
 //  theFormat.alphabet.TheObjects[1]="t_2";
-  std::string tempS= currentPF.DoTheFullComputationReturnLatexFileString(theGlobalVariables, toBePartitioned, theFormat);
+  std::string htmlString;
+  std::string tempS= currentPF.DoTheFullComputationReturnLatexFileString
+  (theGlobalVariables, toBePartitioned, theFormat, &htmlString)
+  ;
   theNode.CreateDefaultLatexAndPDFfromString(tempS);
+  out << theNode.outputString << "<br>" << htmlString;
+  theNode.outputString=out.str();
   return theNode.errorNoError;
 }
 
@@ -4501,7 +4541,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
   output << "NumProcessedConesParam: " << this->NumProcessedConesParam << "\n";
   output << "NumProcessedExtremaEqualOne: " << this->NumProcessedExtremaEqualOne << "\n";
   output << "NormalConstAdjustment: ";
-  this->NonIntegralOriginModification.WriteToFile(output);
+  this->NonIntegralOriginModificationBasisChanged.WriteToFile(output);
   output << "\n";
   output << "ChamberIndicatorHighestWeightLargerAlgebra: ";
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.WriteToFile(output);
@@ -4549,7 +4589,7 @@ void GeneralizedVermaModuleCharacters::WriteToFile
 //  this->theMultiplicitiesExtremaCandidates.WriteToFile(output, theGlobalVariables);
   this->theCoeffs.WriteToFile(output);
   this->theTranslationS.WriteToFile(output, theGlobalVariables);
-  this->theTranslationsProjecteD.WriteToFile(output, theGlobalVariables);
+  this->theTranslationsProjectedBasisChanged.WriteToFile(output, theGlobalVariables);
   this->thePfs.WriteToFile(output, theGlobalVariables);
 //  this->paramSubChambers.WriteToFile(output, theGlobalVariables);
 //  this->nonParamVertices.WriteToFile(output, theGlobalVariables);
@@ -4612,7 +4652,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { assert(false);
     return false;
   }
-  this->NonIntegralOriginModification.ReadFromFile(input);
+  this->NonIntegralOriginModificationBasisChanged.ReadFromFile(input);
   input >> tempS;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ReadFromFile(input);
   this->ParabolicSelectionSmallerAlgebra.ReadFromFile(input);
@@ -4661,7 +4701,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
   this->theCoeffs.ReadFromFile(input);
   this->theTranslationS.ReadFromFile(input, theGlobalVariables);
-  this->theTranslationsProjecteD.ReadFromFile(input, theGlobalVariables);
+  this->theTranslationsProjectedBasisChanged.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading partial fractions... ";
     theGlobalVariables->MakeReport();
@@ -6302,10 +6342,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << " left click + hold the basis vector and move the mouse."
   << "<br>Doing that rotates \"infinitesimally\" the two vectors basis of the projection plane (the plane being drawn on your screen) <br>1) inside the projection plane "
   << "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane"
-  << "<br>such as to match the motion of your mouse pointer. This operation is not well defined if 1) the selected vector lies "
+  << "<br>such as to match the motion of your mouse pointer. Special care must be taken if 1) the selected vector lies "
   << "inside the projection plane or 2) the selected vector is orthogonal to the projection plane. "
-  << "When you try to drag such a \"degenerate\" vector, the javascript uses a \"dirty\" \"pertubation\" trick, and consequently "
-  << "the picture might \"jump\" around a bit."
+  << "When you try to drag such a \"degenerate\" vector, the picture might jump around a bit."
   << "<br> If you are using the google chrome browser you can zoom in and out of the picture using the mouse wheel. "
   << " Zooming doesn't work on other browsers (there is no commonly supported mouse wheel capture among the popular browsers)."
   ;
@@ -6492,7 +6531,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "function ScaleToUnitLength" << timesCalled << "(vector)\n"
   << "{ MultiplyVector" << timesCalled << "(vector, 1/Math.sqrt(getScalarProduct" << timesCalled << "(vector,vector)));\n"
   << "}\n";
-  out << "function RotateOutOfPlane" << timesCalled << "(input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared)"
+  out
+  << "function RotateOutOfPlane" << timesCalled << "(input, orthoBasis1, orthoBasis2, oldTanSquared, newTanSquared, newX, newY, oldX, oldY)"
   << "{ var projection= dojo.clone(orthoBasis1);\n"
   << "  var vComponent= dojo.clone(input);\n"
   << "  var scal1= getScalarProduct" << timesCalled << "(orthoBasis1, input);\n"
@@ -6505,6 +6545,18 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  if (isNaN(oldAngle) || isNaN(newAngle))\n"
   << "    return input;\n"
   << "  var angleChange=-oldAngle+newAngle;\n"
+  << "  if (newX*oldX<0 && newY*oldY<0)\n"
+//  <<  " {
+//  << "    angleChange=oldAngle+newAngle;\n"
+  << "    angleChange*=-1;\n"
+//  << "  };"
+//  << "  topBound=Math.PI/2;\n"
+//  << "  bottomBound=-Math.PI/2;\n"
+//  << "  while (angleChange>=topBound || angleChange<bottomBound)\n"
+//  << "    if(angleChange>=topBound)\n"
+//  << "      angleChange-=Math.PI;\n"
+//  << "    else"
+//  << "      angleChange+=Math.PI;\n"
   << "  projection=dojo.clone(orthoBasis1);\n"
   << "  MultiplyVector" << timesCalled << "(projection, Math.cos(angleChange)*scal1-Math.sin(angleChange)*scal2);\n"
   << "  AddVectorTimes" << timesCalled << "(projection, orthoBasis2, Math.sin(angleChange)*scal1+Math.sin(angleChange)*scal2);\n"
@@ -6528,7 +6580,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    for (var j=0; j<" << theDimension << "; j++)\n"
   << "      result+= root1[i]*root2[j]*BilinearForm" << timesCalled << "[i][j];\n"
   << "  return result;\n"
-  << "}";
+  << "}\n";
   out
   << "function getAngleFromXandY" << timesCalled << "(x, y, neighborX, neighborY)\n"
   << "{ var result;\n"
@@ -6540,7 +6592,25 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    else\n"
   << "      result= -Math.PI/2;\n"
   << "  return result;\n"
-  << "}";
+  << "}\n";
+  out
+  << "function getAngleChange" << timesCalled << "(newX, newY, oldX, oldY)\n"
+  << "{ var result=getAngleFromXandY(newX, newY, oldX, oldY)-getAngleFromXandY(oldX, oldY, newX, newY);\n"
+  << "  topBound=Math.PI/2;\n"
+  << "  bottomBound=-Math.PI/2;\n"
+//  << "  orientationWasFlipped" << timesCalled << "=false;\n"
+//  << "  if (oldX*newX<0 && oldY*newY<0)\n"
+//  << "    orientationWasFlipped" << timesCalled << "=true;\n"
+  << "  while (result>topBound || result< bottomBound)\n"
+  << "    if (result>topBound)\n"
+  << "      result-=Math.PI;\n"
+  << "    else\n"
+  << "      result+=Math.PI;\n"
+  << "  return result;\n"
+  << "}\n";
+
+//  out << "var orientationCounter" << timesCalled << "=1;\n";
+//  out << "var orientationChangedRecently" << timesCalled << "=false;\n";
   out << "\nfunction changeBasis" << timesCalled <<  "(selectedIndex, newX, newY)\n"
   << "{ if (newX==0 && newY==0)\n"
   << "    return;\n"
@@ -6551,55 +6621,67 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  var oldY=-projectionSelected[1]/GraphicsUnitCone" << timesCalled << ";\n"
   << "  newX/=GraphicsUnitCone" << timesCalled << ";\n"
   << "  newY/=GraphicsUnitCone" << timesCalled << ";\n"
-  << "  var oldAngle= getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
-  << "  var newAngle= getAngleFromXandY" << timesCalled << "(newX, newY, oldX, oldY);\n"
-  << "  var AngleChange= -newAngle+oldAngle;\n"
   << "  var epsilon=0.000000015;\n"
-  << "  while (AngleChange>=Math.PI/2+epsilon)\n"
-  << "  { AngleChange-=Math.PI;}\n"
-  << "  while (AngleChange<=-Math.PI/2-epsilon)\n"
-  << "  { AngleChange+=Math.PI;}\n"
-  << "  var NewVectorE1=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "  var NewVectorE2= dojo.clone(VectorE2Cone" << timesCalled << ");\n"
-  << "  MultiplyVector" << timesCalled << "(NewVectorE1, Math.cos(AngleChange));\n"
-  << "  AddVectorTimes" << timesCalled << "(NewVectorE1, VectorE2Cone" << timesCalled << ", Math.sin(AngleChange));\n"
-  << "  MultiplyVector" << timesCalled << "(NewVectorE2, Math.cos(AngleChange));\n"
-  << "  AddVectorTimes" << timesCalled << "(NewVectorE2, VectorE1Cone" << timesCalled << ", -Math.sin(AngleChange));\n"
-  << "  VectorE1Cone" << timesCalled << "=NewVectorE1;\n"
-  << "  VectorE2Cone" << timesCalled << "=NewVectorE2;\n"
-  << "  var RootTimesE1=getScalarProduct" << timesCalled << "(selectedRoot, VectorE1Cone" << timesCalled << ");\n"
-  << "  var RootTimesE2=getScalarProduct" << timesCalled << "(selectedRoot, VectorE2Cone" << timesCalled << ");\n"
-  << "  var vOrthogonal=dojo.clone(selectedRoot);\n"
-  << "  var vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "  MultiplyVector" << timesCalled << "(vProjection, RootTimesE1);\n"
-  << "  AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", RootTimesE2" << ");\n"
-  << "  AddVectorTimes" << timesCalled << "(vOrthogonal, vProjection, -1);\n"
-  << "  var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
-  << "  var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n";
+  << "  if (newX*newX+newY*newY>0.003)\n"
+  << "  { var AngleChange= -getAngleChange" << timesCalled << "(newX, newY, oldX, oldY);\n"
+  << "    var NewVectorE1=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "    var NewVectorE2= dojo.clone(VectorE2Cone" << timesCalled << ");\n"
+  << "    MultiplyVector" << timesCalled << "(NewVectorE1, Math.cos(AngleChange));\n"
+  << "    AddVectorTimes" << timesCalled << "(NewVectorE1, VectorE2Cone" << timesCalled << ", Math.sin(AngleChange));\n"
+  << "    MultiplyVector" << timesCalled << "(NewVectorE2, Math.cos(AngleChange));\n"
+  << "    AddVectorTimes" << timesCalled << "(NewVectorE2, VectorE1Cone" << timesCalled << ", -Math.sin(AngleChange));\n"
+  << "    VectorE1Cone" << timesCalled << "=NewVectorE1;\n"
+  << "    VectorE2Cone" << timesCalled << "=NewVectorE2;\n"
+  << "  }\n"
+  << "  if (newX*newX+newY*newY>0.0001)\n"
+  << "  { var RootTimesE1=getScalarProduct" << timesCalled << "(selectedRoot, VectorE1Cone" << timesCalled << ");\n"
+  << "    var RootTimesE2=getScalarProduct" << timesCalled << "(selectedRoot, VectorE2Cone" << timesCalled << ");\n"
+  << "    var vOrthogonal=dojo.clone(selectedRoot);\n"
+  << "    var vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "    MultiplyVector" << timesCalled << "(vProjection, RootTimesE1);\n"
+  << "    AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", RootTimesE2" << ");\n"
+  << "    AddVectorTimes" << timesCalled << "(vOrthogonal, vProjection, -1);\n"
+  << "    var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
+  << "    var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n";
+//  out
+//  << "  if (orientationWasFlipped" << timesCalled << ")\n"
+//  << "  { if (!orientationChangedRecently" << timesCalled << ")\n"
+//  << "      orientationCounter" << timesCalled << "*=-1;\n"
+//  << "    orientationChangedRecently" << timesCalled << "=true;\n"
+//  << "  } else\n"
+//  << "    orientationChangedRecently" << timesCalled << "=false;\n"
+//  ;
   if (theDimension>2)
   { out
-    << "  if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
-    << "    vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n";
+    << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
+    << "    { vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n"
+//    << "     if ( orientationCounter" << timesCalled << "==1)\n "
+//    << "       vOrthogonal[2]*=-1;\n"
+//    << "     orientationCounter" << timesCalled << "*=-1;\n"
+    << "    }\n";
   }
 out
-  << "  if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
-  << "  { if (oldRatioProjectionOverHeightSquared==0)\n"
-  << "    { vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
-  << "      MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
-  << "      AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", newY" << ");\n"
+  << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
+  << "    { if (oldRatioProjectionOverHeightSquared==0)\n"
+  << "      { vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
+  << "        MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
+  << "        AddVectorTimes" << timesCalled << "(vProjection, VectorE2Cone" << timesCalled << ", newY" << ");\n"
+  << "      }\n"
+  << "      ScaleToUnitLength" << timesCalled << "(vProjection);\n"
+  << "      ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
+  << "      VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
+  << "      VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
   << "    }\n"
-  << "    ScaleToUnitLength" << timesCalled << "(vProjection);\n"
-  << "    ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
-  << "    VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
-  << "    VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared);\n"
-  << "  }\n"
-  << "  AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
+  << "    AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
   << ", VectorE1Cone" << timesCalled << ", -getScalarProduct" << timesCalled
   << "(VectorE1Cone" << timesCalled << ", VectorE1Cone" << timesCalled << ")*getScalarProduct"
   << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE2Cone" << timesCalled << "));\n"
-  << "  ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
-  << "  ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
-  << "  ComputeProjections" << timesCalled << "();\n"
+  << "    ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
+  << "    ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
+//  << "  if (orientationWasFlipped" << timesCalled << ")\n"
+//  << "    MultiplyVector" << timesCalled << "(VectorE2Cone" << timesCalled << ", -1);\n"
+  << "    ComputeProjections" << timesCalled << "();\n"
+  << "  }\n"
   << "}\n";
 
   out << "\nfunction clickCanvasCone" << timesCalled << "(cx,cy)\n"
@@ -6608,7 +6690,7 @@ out
   << "\n  posx=(cx-divPosX+document.body.scrollLeft-" << shiftX << ");"
   << "\n  posy=(cy-divPosY+document.body.scrollTop-" << shiftY << ");\n  selectedBasisIndexCone" << timesCalled <<"=-1;\n"
   << "if (ptsWithinClickToleranceCone" << timesCalled << "(posx,posy,0,0))" << "\nselectedBasisIndexCone" << timesCalled << "=-2;\n"
-  <<  "for (i=0;i<" << theDimension << ";i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
+  <<  "for (i=0; i<" << theDimension << ";i++)  {\n if (ptsWithinClickToleranceCone" << timesCalled
   << "(posx, posy, " << projBasisCircles << "[i][0]" << ", " << projBasisCircles
   << "[i][1]" << "))\n"
   << "  selectedBasisIndexCone" << timesCalled << "=i;  \n}\n}\nfunction mouseMoveRedrawCone" << timesCalled << "(cx, cy)\n"
@@ -6694,11 +6776,22 @@ bool ConeComplex::DrawMeLastCoordAffine
 bool ConeComplex::DrawMeProjective
 (root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
+  root tempRoot;
+  roots tempRoots;
+  MatrixLargeRational tempMat;
   if (InitDrawVars)
   { theDrawingVariables.theBuffer.init();
     theDrawingVariables.theBuffer.initDimensions(this->GetDim(), 1);
     theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
     theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim(), 0);
+    if (this->GetDim()>2)
+    { this->ConvexHull.GetInternalPoint(tempRoot);
+      tempMat.AssignVectorRow(tempRoot);
+      tempMat.FindZeroEigenSpace(tempRoots);
+      for (int i=0; i<2; i++)
+        for (int j=0; j<this->GetDim(); j++)
+          theDrawingVariables.theBuffer.BasisProjectionPlane[0][i][j]=tempRoots[i][j].DoubleValue();
+    }
   }
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
@@ -7141,7 +7234,7 @@ int ParserNode::EvaluateDrawRootSystem
   << "The darker red points are the simple positive roots.<br>"
   << "The mouse wheel acts as a zoom-in/out on the Google chrome browser. <br>"
   << "Note that for a root system of rank 4 or more there might be javascript-compilation lag.<hr>"
-  << "The javascript visualization uses your browser/your PC processor, so it should be viewed with a good browser (i.e. not with Internet Explorer). ";
+  << "The javascript visualization uses your browser/your PC processor, so it should be viewed with a good browser. ";
   out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraTypeAndName(theWeylLetter, theDimension);
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension)
   << "\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
@@ -8216,8 +8309,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("vpf",
    "((Rational,...),...)",
    "Computes the vector partition function with respect to the input vectors, according to this \
-   <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>.",
-   "vpf((1,0), (0,1), (1,1))",
+   <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>. The example below is the Kostant partition function \
+   of root system of type A3 (sl(4)).",
+   "vpf((1,0,0), (0,1,0), (0,0,1), (1,1,0), (0,1,1), (1,1,1))",
     & ParserNode::EvaluateVectorPFIndicator
    );
    this->AddOneFunctionToDictionaryNoFail
@@ -8363,10 +8457,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateDrawConeAffine
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("RunGtwoInBthree",
+  ("runGtwoInBthree",
    "()",
    "Run the G_2 in B_3 computation. Experimental, don't use.",
-   "RunGtwoInBthree",
+   "runGtwoInBthree",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2InB3Computation
    );
@@ -8423,8 +8517,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "(Rational, ... )",
    "<b>Experimental.</b> Draws the weight support of a highest weight module of highest weight given in \
    fundamendal weight basis. All arguments must be non-negative integers. \
-   The maximum number of drawn weights allowed is (hard-code) limited to 100 000. If \
-   the number of weights in the weight support exceeds this number, only the first 100 000 weights will be drawn. ",
+   The maximum number of drawn weights allowed is (hard-code) limited to 10 000. If \
+   the number of weights in the weight support exceeds this number, only the first 10 000 weights will be drawn. ",
    "drawWeightSupport(2,2,2)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateDrawWeightSupport

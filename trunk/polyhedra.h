@@ -1114,8 +1114,8 @@ public:
     for (int i=0; i<input.size; i++)
       this->ActOnVectorColumn(input.TheObjects[i], output.TheObjects[i], TheRingZero);
   }
-  void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero)const{ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
-  void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
+  void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
+  void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const ;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
@@ -7753,6 +7753,7 @@ public:
   roots slicingDirections;
   Cone ConvexHull;
   std::string DebugString;
+  void AssignCombinatorialChamberComplex(CombinatorialChamberContainer& other, GlobalVariables& theGlobalVariables);
   void RefineOneStep(GlobalVariables& theGlobalVariables);
   void Refine(GlobalVariables& theGlobalVariables);
   void RefineMakeCommonRefinement(const ConeComplex& other, GlobalVariables& theGlobalVariables);
@@ -7900,8 +7901,12 @@ public:
   static  bool flagUsingCheckSum;
   static int flagMaxNumStringOutputLines;
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
-  std::string DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
-  std::string DoTheFullComputationReturnLatexFileString(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat);
+  std::string DoTheFullComputationReturnLatexFileString
+(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+  ;
+  std::string DoTheFullComputationReturnLatexFileString
+  (GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+  ;
   bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
   void CompareCheckSums(GlobalVariables& theGlobalVariables);
   void ComputeDebugString(GlobalVariables& theGlobalVariables);
@@ -11622,7 +11627,7 @@ public:
   //the next l variables correspond to the Cartan of the larger Lie algebra
   //the last variable is the projectivization
   List<MatrixLargeRational> theLinearOperatorsExtended;
-  root NonIntegralOriginModification;
+  root NonIntegralOriginModificationBasisChanged;
   std::fstream theMultiplicitiesMaxOutput;
   std::fstream theMultiplicitiesMaxOutputReport2;
   roots GmodKnegativeWeightS;
@@ -11644,7 +11649,7 @@ public:
   Selection ParabolicSelectionSmallerAlgebra;
   List<Rational> theCoeffs;
   roots theTranslationS;
-  roots theTranslationsProjecteD;
+  roots theTranslationsProjectedBasisChanged;
   partFractions thePfs;
 //  List<Cone> allParamSubChambersRepetitionsAllowedConeForm;
   ConeComplex projectivizedParamComplex;

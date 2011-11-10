@@ -3,22 +3,22 @@
 //Vector partition function - computes an algebraic expression
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev
-//email: t.milev@jacobs-university.de
+//email: todor.milev@gmail.com
 //
 //Contributors: Thomas Bliem, Todor Milev
 //
-//This is free software. You are warmly welcome to use, modify and redistribute this code
+//This is free software. You are welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
-//as those given to you to any future recipients of your modifications (in case you
+//as those given to you, to any future recipients of your modifications (in case you
 //decide to pass on those modifications).
-//The code is licensed under the Library General Public License version 3.0
-//(summarized in the preceding sentence).
+//The code is licensed under the Library General Public License version 3.0 or a later version of the License at your choice
+//(the license terms were briefly summarized in the preceding sentence).
 //You should have received a copy of the GNU Library General Public License
 //along with this program.
 //If not, see <http://www.gnu.org/licenses/>.
 //
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith,
+//advice and help with C++. Many thanks to helios, Disch, Grey Wolf, jsmith,
 //Hammurabi and Duoas!
 //*********************************************************************************************************
 //*********************************************************************************************************
@@ -34,6 +34,7 @@
 //REPAIR OR CORRECTION.
 //*********************************************************************************************************
 //*********************************************************************************************************
+
 
 #ifndef polyhedra_h_already_included
 #define polyhedra_h_already_included
@@ -10708,10 +10709,16 @@ bool GetRootRationalFromFunctionArguments
   static int EvaluateInvariantsSl2DegreeM
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
-  void EvaluateEigen(GlobalVariables& theGlobalVariables);
-  void EvaluateEigenOrdered(GlobalVariables& theGlobalVariables);
+  static int EvaluateEigen
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
+  static int EvaluateEigenOrdered
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
-  void EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables);
+  static int EvaluateSecretSauceOrdered
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);

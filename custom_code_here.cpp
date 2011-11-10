@@ -1,25 +1,25 @@
 #include "polyhedra.h"
-// This file is meant to be for people to modify if they do not want to modify the main files polyhedra.cpp or polyhedra.h
-// The reason I would recommend that is because the file polyhedra.cpp compiles very slowly (around 90 seconds), so small modifications
+//This file is to be considered as a part of the file polyhedra.cpp.
+// This file is meant for modification if one does not want to modify the main files polyhedra.cpp or polyhedra.h
+// The reason I would recommend that is because the file polyhedra.cpp compiles very slowly (>90  seconds at the moment), so small modifications
 // take a long time to check. Using a separate file is the solution I chose (may not be the best, see below for discussion).
 // If the code you write here reaches the mature phase where you have realized all functions you think it should have
-// and you are generally satisfied with it, simply cut & paste it in the main files (the class declarations in polyhedra.h and the implementation in polyhedra.cpp).
+// and you are generally satisfied with it, simply cut & paste it in the main files (the class declarations in polyhedra.h
+//and the implementation in polyhedra.cpp).
 
-//Discussion: other options for speeding up the compilation that I have considered.
-//1. Cut up the main files polyhedra.h and polyhedra.cpp into small quick-to-compile pieces. This might be the best solution in the long run. However, I do not want to
-//   do it just yet, because 1) I am not sure what should those parts be - it is not yet clear in my head how to partition the code in conceptually distinct pieces
-//   2) this would certainly create additional maintainance work 3) this will increase the learning curve for a person wanting to just use the program and wanting to eventually
-//   modify some tiny bit and 4) I got an advice on the c++ forum www.cplusplus.com that partitioning the .h file will eventually lead to slower compile times,
-//   especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
-//   greater maturity (see also the first paragraph).
-//2. Use precompiled headers or some other voodoo. I am tocally against that. Those are compiler specific, will require me to learn extra unnecessary info which might
-//    be out of date in a few years, and will make even higher entry learning curve for another to join the project. This is bad.
-//    I should mention in favor of Microsoft that their IDE does recompile very quickly small modifications of the file polyhedra.cpp. I believe it does so by
-//    keeping a database of your recently changed code, and recompiling only the recently changed pieces. Hats off to Microsoft for doing that completely programmatically,
-//    and not bothering the programmer with stupid things such as how to set up precompiled headers.
-//
-// To whomever might be reading this (if anyone): happy hacking and I hope you find my code useful, that it didn't cause you many headaches, and that you
-// did something useful with it! Cheers!
+//Discussion: I have considered the following option for speeing up the compilation time.
+//  Cut up the main files polyhedra.h and polyhedra.cpp into small quick-to-compile pieces.
+//  This might be the best solution in the long run. However, I do not want to
+//  do it just yet, because
+//  1) I am not sure what should those parts be - it is not yet clear in my head how to partition
+//  the code in conceptually distinct pieces
+//  2) this would certainly create additional maintainance work
+//  3) this will increase the learning curve for a person
+//  wanting to just use the program and wanting to eventually
+// modify some tiny bit and
+//  4) I got an advice on the c++ forum www.cplusplus.com that partitioning the .h file will eventually lead to slower compile times,
+//  especially with the massive use of templates that I do. Therefore, such a partitioning should not be done before the code reaches
+//  greater maturity (see also the first paragraph).
 
 void LargeIntUnsigned::AssignString(const std::string& input)
 { if (input.size()<10)
@@ -7200,7 +7200,7 @@ void WeylGroup::DrawRootSystem
   for (int i=0; i<RootSystemSorted.size; i++)
   { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
     output.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
-    output.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,255));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
@@ -7212,6 +7212,8 @@ void WeylGroup::DrawRootSystem
   for (int i=0; i<theDimension; i++)
   { tempRootRat.MakeEi(theDimension, i);
     output.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
   }
   std::stringstream tempStream;
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
@@ -8165,6 +8167,43 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
   output=out.str();
 }
 
+int ParserNode::EvaluateEigenOrdered
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root theWeight;
+  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if(!theWeight.IsIntegral())
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
+  if (theHmm.theDomain.GetRank()!=theWeight.size)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  List<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > theList;
+  EigenVectorComputation theEigenComputation;
+  theNode.outputString=theEigenComputation.ComputeEigenVectorsOfWeightConventionOrdered
+  (theHmm, theNode.owner->testAlgebra, theList, theWeight, theGlobalVariables)
+  ;
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateEigen
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root theWeight;
+  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if(!theWeight.IsIntegral())
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
+  if (theHmm.theDomain.GetRank()!=theWeight.size)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  List<ElementUniversalEnveloping> theList;
+  EigenVectorComputation theEigenComputation;
+  theNode.outputString=theEigenComputation.ComputeEigenVectorsOfWeight
+  (theHmm, theNode.owner->testAlgebra, theList, theWeight, theGlobalVariables);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
@@ -8463,6 +8502,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "runGtwoInBthree",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2InB3Computation
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("branchGenericVermaGtwoInBthree",
+   "(Rational,...)",
+   "Branch generic Verma so(7)-module over G_2.",
+   "branchGenericVermaGtwoInBthree(0,0)",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateSecretSauceOrdered
    );
   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystem",

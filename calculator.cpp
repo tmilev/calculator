@@ -102,7 +102,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=1000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;

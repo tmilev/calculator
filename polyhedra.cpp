@@ -3,22 +3,22 @@
 //Vector partition function - computes an algebraic expression
 //                            for the vector partition function
 //CopyRight (C) 2009: Todor Milev
-//email: t.milev@jacobs-university.de
+//email: todor.milev@gmail.com
 //
 //Contributors: Thomas Bliem, Todor Milev
 //
-//This is free software. You are warmly welcome to use, modify and redistribute this code
+//This is free software. You are welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
-//as those given to you to any future recipients of your modifications (in case you
+//as those given to you, to any future recipients of your modifications (in case you
 //decide to pass on those modifications).
-//The code is licensed under the Library General Public License version 3.0
-//(summarized in the preceding sentence).
+//The code is licensed under the Library General Public License version 3.0 or a later version of the License at your choice
+//(the license terms were briefly summarized in the preceding sentence).
 //You should have received a copy of the GNU Library General Public License
 //along with this program.
 //If not, see <http://www.gnu.org/licenses/>.
 //
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++. Special thanks to helios, Disch, Grey Wolf, jsmith,
+//advice and help with C++. Many thanks to helios, Disch, Grey Wolf, jsmith,
 //Hammurabi and Duoas!
 //*********************************************************************************************************
 //*********************************************************************************************************
@@ -7286,7 +7286,7 @@ double LargeIntUnsigned::GetDoubleValue()
 
 void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
 { LargeIntUnsigned p, q, r, temp;
-  std::string tempSP, tempSQ, tempSR, tempS;
+//  std::string tempSP, tempSQ, tempSR, tempS;
   p.Assign(a);
   q.Assign(b);
   /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
@@ -23666,15 +23666,17 @@ void ParserNode::EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables)
   this->ExpressionType=this->typeString;
 }
 
-void ParserNode::EvaluateSecretSauceOrdered(GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateSecretSauceOrdered
+    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { EigenVectorComputation theComp;
   //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
   //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
-  int indexInOwneR=this->indexInOwner;
-  Parser* theOwner=this->owner;
-  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *this->owner, indexInOwneR);
+  int indexInOwneR=theNode.indexInOwner;
+  Parser* theOwner=theNode.owner;
+  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *theNode.owner, indexInOwneR);
   theOwner->TheObjects[indexInOwneR].outputString=buffer;
   theOwner->TheObjects[indexInOwneR].ExpressionType=ParserNode::typeArray;
+  return theNode.errorNoError;
 }
 
 void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
@@ -24281,54 +24283,6 @@ int ParserNode::EvaluateWeylDimFormula
   theNode.rationalValue= theHmm.theRange.theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
   theNode.ExpressionType=theNode.typeRational;
   return theNode.errorNoError;
-}
-
-void ParserNode::EvaluateEigenOrdered(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  int theDimension= theArgument.children.size;
-  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
-  if (theArgument.GetStrongestExpressionChildrenConvertChildrenIfNeeded(theGlobalVariables)!=this->typeIntegerOrIndex || theDimension!=theHmm.theDomain.theWeyl.CartanSymmetric.NumRows)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  List<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > theList;
-  root theWeight;
-  theWeight.SetSize(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-    theWeight.TheObjects[i]=current.intValue;
-  }
-  EigenVectorComputation theEigenComputation;
-  this->outputString=theEigenComputation.ComputeEigenVectorsOfWeightConventionOrdered(this->owner->theHmm, this->owner->testAlgebra, theList, theWeight, theGlobalVariables);
-  this->ExpressionType=this->typeString;
-}
-
-void ParserNode::EvaluateEigen(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
-  int theDimension= theArgument.children.size;
-  HomomorphismSemisimpleLieAlgebra& theHmm= this->owner->theHmm;
-  if (theArgument.GetStrongestExpressionChildrenConvertChildrenIfNeeded(theGlobalVariables)!=this->typeIntegerOrIndex || theDimension!=theHmm.theDomain.theWeyl.CartanSymmetric.NumRows)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  List<ElementUniversalEnveloping> theList;
-  root theWeight;
-  theWeight.SetSize(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { ParserNode& current= this->owner->TheObjects[theArgument.children.TheObjects[i]];
-    theWeight.TheObjects[i]=current.intValue;
-  }
-  EigenVectorComputation theEigenComputation;
-  this->outputString=theEigenComputation.ComputeEigenVectorsOfWeight(this->owner->theHmm, this->owner->testAlgebra, theList, theWeight, theGlobalVariables);
-  this->ExpressionType=this->typeString;
 }
 
 bool Parser::LookUpInDictionaryAndAdd(std::string& input)

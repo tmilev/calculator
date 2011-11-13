@@ -102,7 +102,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=1000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -164,6 +164,10 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
+//  civilizedInput="adjointRepresentationAction(x_1g_1,g_2)";
+//  civilizedInput="modOutVermaRelationsOrdered(c)";
+//  civilizedInput="modOutVermaRelations(c)";
+//  civilizedInput="decomposeXtimesVinGenericVerma";
 //  civilizedInput="sliceDirections( (1,0,0),(0,1,0),(0,0,1),(1,1,0), (0,1,1),(1,1,1) )";
 //  civilizedInput="drawWeightSupport(0,5,2,0)";
 //  theParser.DefaultWeylRank=4;
@@ -295,71 +299,8 @@ int main(int argc, char **argv)
     CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
     tempFile << tempStreamX.str();
   }
-  if (theParser.DefaultWeylLetter=='B' && theParser.DefaultWeylRank==3)
-  { theParser.theHmm.MakeG2InB3(theParser, theGlobalVariables);
-    SSalgebraModule theModule;
-    std::stringstream out;
-    theModule.InduceFromEmbedding(out, theParser.theHmm, theGlobalVariables);
-    List<ElementSimpleLieAlgebra> theBasis;
-    theBasis.SetSize(theParser.theHmm.theRange.GetNumGenerators());
-    /*int domainRank=theParser.theHmm.theDomain.GetRank();
-    int rangeRank=theParser.theHmm.theRange.GetRank();
-    int numDomainPosRoots=theParser.theHmm.theDomain.GetNumPosRoots();
-    int numRangePosRoots=theParser.theHmm.theRange.GetNumPosRoots();*/
-    for (int i=0; i<theParser.theHmm.imagesAllChevalleyGenerators.size; i++)
-    { int theIndex=i;
-      if (i>=6 && i<8)
-        theIndex=3+i;
-      if (i>=8)
-        theIndex=i+7;
-      /*
-      if (i==0) theIndex=3;
-      if (i==1) theIndex=4;
-      if (i==2) theIndex=5;
-      if (i==3) theIndex=6;
-      if (i==4) theIndex=7;
-      if (i==5) theIndex=8;
-      if (i==6) theIndex=9;
-      if (i==7) theIndex=10;
-      if (i==8) theIndex=12;
-      if (i==9) theIndex=13;
-      if (i==10) theIndex=14;
-      if (i==11) theIndex=15;
-      if (i==12) theIndex=16;
-      if (i==13) theIndex=17;
-      */
-      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-      currentElt=theParser.theHmm.imagesAllChevalleyGenerators.TheObjects[i];
-    }
-    for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
-    { int theIndex=i+6;
-      if (i>=3)
-        theIndex=8+i;
-      /*
-      if (i==0) theIndex=0;
-      if (i==1) theIndex=1;
-      if (i==2) theIndex=2;
-      if (i==3) theIndex=11;
-      if (i==4) theIndex=18;
-      if (i==5) theIndex=19;
-      if (i==6) theIndex=20;
-      */
-      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-      currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
-    }
-    for (int i=0; i<theBasis.size; i++)
-    { int displayIndex=i-9;
-      if (displayIndex>=0)
-      { if (displayIndex<3)
-          displayIndex+=10;
-        else
-          displayIndex-=2;
-      }
-      //std::cout << "<br>f_{" << displayIndex << "}=" << theBasis.TheObjects[i].ElementToStringNegativeRootSpacesFirst(false, false, theParser.theHmm.theRange);
-    }
-    theParser.testAlgebra.init(theBasis, theParser.theHmm.theRange, theGlobalVariables);
-  } else
-    theParser.testAlgebra.initDefaultOrder(theParser.theHmm.theRange, theGlobalVariables);
+  theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
+
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
   CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);

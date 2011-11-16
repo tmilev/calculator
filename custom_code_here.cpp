@@ -8310,7 +8310,10 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
 
   GeneralizedVermaModuleData<RationalFunction> theData;
   ElementGeneralizedVerma<RationalFunction> startingElement;
-  theData.init(theParser, &theGlobalVariables);
+  RationalFunction RFOne, RFZero;
+  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
+  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
   theData.VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(3);
   startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
@@ -8346,15 +8349,21 @@ void PolynomialsRationalCoeff::MakeConstantShiftCoordinatesAreAdded(root& shiftP
 void RationalFunction::Substitution(PolynomialsRationalCoeff& theSub)
 { if (theSub.size<1)
     return;
+//  PolynomialOutputFormat tempFormat;
+  Rational rationalOne=1;
   switch(this->expressionType)
   { case RationalFunction::typeRational: return;
     case RationalFunction::typePoly:
-      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, (Rational) 1);
+//      std::cout <<"<hr>subbing in<br>" << this->ElementToString(tempFormat) << " using " << theSub.ElementToString()
+//      << " to get ";
+      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
+//      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ElementToString();
       this->Simplify();
+//      std::cout << ", which, simplified, yields<br> " << this->ElementToString(tempFormat);
       return;
     case RationalFunction::typeRationalFunction:
-      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, (Rational) 1);
-      this->Denominator.GetElement().Substitution(theSub, theSub[0].NumVars, (Rational) 1);
+      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
+      this->Denominator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
       this->Simplify();
       return;
     default: assert(false); break;
@@ -8402,22 +8411,24 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   highestElt.AssignDefaultGeneratorIndex(this->theOwner->theFDspace.size-1, *this->theOwner, &theGlobalVariables);
   highestElt.ActOnMe(embeddedCasimir, tempElt2, &theGlobalVariables);
   bool sanityCheck1= highestElt.IsProportionalTo(tempElt2, CentralCharacterActionAbsoluteHighest);
-  out << "\n<br>\nStarting character: " << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
-  for (int k=0; k<this->theOwner->theFDspaceWeights.size; k++)
+  out << "\n<br>\nStarting character:<br>" << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
+  for (int k=this->theOwner->theFDspaceWeights.size-1; k>=0; k--)
   { theSub.MakeIdSubstitution(theParser.theHmm.theRange.GetRank());
-    root tempRoot=this->theOwner->theFDspaceWeights[k]- *this->theOwner->theFDspaceWeights.LastObject();
+    root tempRoot= this->theOwner->theFDspaceWeights[k];//*this->theOwner->theFDspaceWeights.LastObject()
+    out << "<br>\n\n weight: " << tempRoot.ElementToString();
     theParser.theHmm.theDomain.theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
+    out << "the id sub: " << theSub.ElementToString();
     for (int l=0; l<tempRoot.size; l++)
       theSub[l]-=tempRoot[l];
     currentChar=CentralCharacterActionAbsoluteHighest;
     currentChar.Substitution(theSub);
-    out << "<br>\n\nThe sub: " << theSub.ElementToString()
-    << ";\n\n weight: " << this->theOwner->theFDspaceWeights[k].ElementToString() << " corresponding weight: "
+    out << "; \n\nCorresponding sub: " << theSub.ElementToString()
+    << "; corresponding character:<br> "
     << currentChar.ElementToString();
   }
   out << "<hr>";
   assert(sanityCheck1);
-  for (int k= this->theOwner->theFDspace.size-1; k>=6; k--)//; i++)
+  for (int k= this->theOwner->theFDspace.size-1; k>=5; k--)//; i++)
   { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
     std::stringstream progressReport;
     progressReport << "Number of direct summands in the decomposition found: " << counter //;
@@ -8475,7 +8486,10 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   GeneralizedVermaModuleData<RationalFunction> theData;
   ElementGeneralizedVerma<RationalFunction> startingElement;
 //  this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHWSubNthElementImageNthCoordSimpleBasis, theGlobalVariables);
-  theData.init(theParser, &theGlobalVariables);
+  RationalFunction RFOne, RFZero;
+  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
+  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
@@ -8518,18 +8532,16 @@ bool MonomialUniversalEnveloping::AdjointRepresentationAction
    GlobalVariables& theGlobalVariables)
 { output.Nullify(*this->owner);
   ElementSimpleLieAlgebra tempElt;
-  ElementUniversalEnveloping summand;
+  output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int nextCycleSize;
     if (!this->Powers[i].IsSmallInteger(nextCycleSize))
       return false;
-    summand=input;
     for (int j=0; j<nextCycleSize; j++)
     { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
         (this->generatorsIndices[i], *this->owner) ;
-      summand.LieBracketOnTheLeft(tempElt);
+      output.LieBracketOnTheLeft(tempElt);
     }
-    output+=summand;
   }
   output*=this->Coefficient;
   return true;
@@ -8588,6 +8600,98 @@ int ParserNode::EvaluateModVermaRelationsOrdered
   theNode.ExpressionType=theNode.typeUEElementOrdered;
   theNode.outputString=out.str();
   return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ if (theNode.owner->DefaultWeylLetter!='B' || theNode.owner->DefaultWeylRank!=3)
+    return theNode.SetError(errorDunnoHowToDoOperation);
+  ParserNode& argumentNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& argumentUE=argumentNode.UEElementOrdered.GetElement();
+  int numVars=MathRoutines::Maximum(3, argumentUE.GetNumVariables());
+
+//  ElementUniversalEnvelopingOrdered<RationalFunction> argumentUErf;
+//  argumentUErf.AssignChangeCoefficientType<PolynomialRationalCoeff> (argumentUE);
+  GeneralizedVermaModuleData<PolynomialRationalCoeff> tempData;
+  Parser& theParser=*theNode.owner;
+  PolynomialRationalCoeff PolyOne, PolyZero;
+  PolyOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1);
+  PolyZero.Nullify(theParser.theHmm.theRange.GetRank());
+  tempData.init(*theNode.owner, & theGlobalVariables, PolyOne, PolyZero);
+  PolynomialRationalCoeff polyOne;
+  polyOne.MakeNVarConst(numVars, (Rational)1);
+  argumentUE.SetNumVariables(numVars);
+  ElementGeneralizedVerma<PolynomialRationalCoeff> theAnswer;
+  if (! theAnswer.AssignElementUE(argumentUE, tempData, theGlobalVariables, polyOne))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+template <class CoefficientType>
+bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
+  (ElementUniversalEnvelopingOrdered<CoefficientType>& theElt,
+   GeneralizedVermaModuleData<CoefficientType>& owner,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit)
+{ MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
+  ElementUniversalEnvelopingOrdered<CoefficientType> precedingMon, succeedingMon;
+  int ambientRank=owner.theOwner.theOwner.GetRank();
+  this->Nullify(owner);
+  for (int i=0; i<theElt.size; i++)
+  { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=theElt[i];
+    bool found=false;
+//    bool doRecursiveCall=true;
+//    int numPosRootsLargeAlgebra=owner.theOwner.theOwner.GetNumPosRoots();
+//    int rankLarge=owner.theOwner.theOwner.GetRank();
+    int IndexFound=-1;
+    for (int j=0; j<currentMon.generatorsIndices.size; j++)
+    { int currentIndex=currentMon.generatorsIndices[j];
+      if (owner.theFDspace.ContainsObject(owner.theOwner.theOrder[currentIndex]))
+      { IndexFound=owner.theFDspace.IndexOfObject(owner.theOwner.theOrder[currentIndex]);
+        int thePower;
+        if (found || currentMon.Powers[j].IsSmallInteger(thePower))
+          return false;
+        if (thePower!=1)
+          return false;
+        found=true;
+        tempMon=currentMon;
+        tempMon.generatorsIndices.size=j;
+        tempMon.Powers.size=j;
+        precedingMon.Nullify(owner.theOwner);
+        precedingMon.AddMonomial(tempMon);
+        tempMon.Coefficient=theRingUnit;
+        tempMon.generatorsIndices.SetSize(currentMon.generatorsIndices.size-j-1);
+        tempMon.Powers.SetSize(tempMon.generatorsIndices.size);
+        for (int k=j+1; j<currentMon.generatorsIndices.size; j++)
+        { tempMon.generatorsIndices[k-j+1]=currentMon.generatorsIndices[k];
+          tempMon.Powers[k-j+1]=currentMon.Powers[k];
+        }
+        succeedingMon.Nullify(owner.theOwner);
+        succeedingMon.AddMonomial(tempMon);
+      }
+    }
+    if (found)
+    { ElementGeneralizedVerma<CoefficientType> tempElt;
+      tempElt.AssignDefaultGeneratorIndex(IndexFound, owner, &theGlobalVariables);
+      ElementUniversalEnvelopingOrdered<CoefficientType> concatenationMon;
+      concatenationMon=precedingMon;
+      concatenationMon*=succeedingMon;
+      ElementVermaModuleOrdered<CoefficientType> tempV;
+      tempV.Nullify(owner.theOwner, owner.VermaHWSubNthElementImageNthCoordSimpleBasis);
+      tempElt.leftComponents[IndexFound].AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
+      (concatenationMon, tempV, & theGlobalVariables, owner.theRingUnit);
+      if (!tempElt.leftComponents[IndexFound].IsEqualToZero())
+        this->operator+=(tempElt);
+      precedingMon.LieBracketOnTheRight(owner.theFDspace[IndexFound], owner.theRingUnit, owner.theRingZero);
+      precedingMon*=succeedingMon;
+      if (!precedingMon.IsEqualToZero())
+      { tempElt.AssignElementUE(precedingMon, owner, theGlobalVariables, theRingUnit);
+        this->operator+=(tempElt);
+      }
+    } else
+      return false;
+  }
+  return true;
 }
 
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
@@ -8965,11 +9069,24 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("adjointRepresentationAction",
    "(UE, UE)",
-   "<b>Experimental, please don't use.</b>Act  by the first argument using the adjoint representation on the second argument. \
-   For example, if u_1, u_2 and u_3 are monomials, adjointRepresentationAction(u_1u_2,u_3) equals [u_1,[u_2,u_3]]. ",
+   "<b>Experimental, please don't use. The implementation works horribly slowly at the moment. \
+   Might be fixed in the future, low priority.</b>\
+    Act  by the first argument using the adjoint representation on the second argument. \
+   For example, if u_1, u_2 and u_3 are of first degree, adjointRepresentationAction(u_1u_2,u_3) equals [u_1,[u_2,u_3]]. \
+   To avoid confusion, we note that adjointRepresentationAction(x,y) is generally NOT equal to [x,y]. ",
    "adjointRepresentationAction(c, g_1)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateAdjointAction
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("modOutSAVerma",
+   "(UEOrdered)",
+   "<b>Experimental, please don't use. The implementation works horribly slowly at the moment. \
+   Might be fixed in the future, low priority.</b>\
+    Mod out the verma relations of the smaller algebra.",
+   "modOutSAVerma(f_1)",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

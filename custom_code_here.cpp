@@ -6842,8 +6842,9 @@ bool Cone::DrawMeLastCoordAffine
       if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
         for (int j=i+1; j<this->Vertices.size; j++)
           if(DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
-            theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-            (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor);
+            if (this->IsAnHonest1DEdgeAffine(i,j))
+              theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+              (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor);
   return foundBadVertex;
 }
 
@@ -6901,8 +6902,9 @@ bool Cone::DrawMeProjective
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
         for (int j=i+1; j<this->Vertices.size; j++)
           if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
-            theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-            (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
+            if (this->IsAnHonest1DEdgeAffine(i,j))
+              theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
   return true;
 }
 
@@ -8635,7 +8637,7 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit)
 { MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   ElementUniversalEnvelopingOrdered<CoefficientType> precedingMon, succeedingMon;
-  int ambientRank=owner.theOwner.theOwner.GetRank();
+//  int ambientRank=owner.theOwner.theOwner.GetRank();
   this->Nullify(owner);
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=theElt[i];
@@ -8938,7 +8940,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("drawConeAffine",
    "(Cone)",
    "On condition that the cone lies in the non-strict upper half-plane and has a vertex at 0, draws the intersection of the cone with the affine hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate 0. ",
-   "drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,-1,1,0), (-1,-1,-1,5/2), (0,0,0,1)))",
+   "drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,0,1,0),(-1,0,0,1), (0,-1,0,1), (0,0,-1,1)))",
     & ParserNode::EvaluateDrawConeAffine
    );
   this->AddOneFunctionToDictionaryNoFail

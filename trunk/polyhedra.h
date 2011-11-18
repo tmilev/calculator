@@ -750,7 +750,7 @@ public:
         return false;
     return true;
   }
-  inline Object& operator[](int i)const{return this->TheObjects[i];}
+  inline Object& operator[](int i)const{ assert(i<this->size); return this->TheObjects[i];}
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
   inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
   bool operator>(const List<Object>& other)const;
@@ -9225,6 +9225,7 @@ template<class CoefficientType>
 class MonomialUniversalEnvelopingOrdered
 {
   void SimplifyAccumulateInOutputNoOutputInit(ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
+  MonomialUniversalEnvelopingOrdered(const MonomialUniversalEnvelopingOrdered& other);
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
@@ -9268,7 +9269,10 @@ public:
   void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   MonomialUniversalEnvelopingOrdered(){this->owner=0;}
-  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;}
+  bool operator==(const MonomialUniversalEnvelopingOrdered& other)const
+  { assert(this->owner==other.owner);
+    return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  }
   void operator*=(const MonomialUniversalEnvelopingOrdered& other);
   template<class OtherCoefficientType>
   void AssignChangeCoefficientType(const MonomialUniversalEnvelopingOrdered<OtherCoefficientType>& other)
@@ -12465,13 +12469,16 @@ class GeneralizedVermaModuleData
 {
   public:
   List<ElementSimpleLieAlgebra> theFDspace;
-  SemisimpleLieAlgebraOrdered theOwner;
+  SemisimpleLieAlgebraOrdered *theOwner;
   PolynomialsRationalCoeff VermaHWSubNthElementImageNthCoordSimpleBasis;
   roots theFDspaceWeights;
   //The order of the below is chosen so that the opposite generator of posGenerators.TheObjects[i] is negGenerators.TheObjects[i]
   List<ElementSimpleLieAlgebra> posGenerators, negGenerators;
   CoefficientType theRingUnit;
   CoefficientType theRingZero;
+  GeneralizedVermaModuleData()
+  { this->theOwner=0;
+  }
   void init(Parser& input, GlobalVariables* theContext, const CoefficientType& ringUnit, const CoefficientType& ringZero)
   { this->theRingUnit=ringUnit;
     this->theRingZero=ringZero;
@@ -12484,9 +12491,10 @@ class GeneralizedVermaModuleData
       this->negGenerators.AddOnTop(input.theHmm.imagesAllChevalleyGenerators.TheObjects
         [numDomainPosRoots-i-1]);
     }
-    this->theOwner=input.testAlgebra;
+    this->theOwner=&input.testAlgebra;
     this->theFDspace=input.theHmm.GmodK;
     input.theHmm.GetWeightsGmodKInSimpleCoordsK(this->theFDspaceWeights, *theContext);
+    this->VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(input.theHmm.theRange.GetRank(), (Rational) 1);
   }
 };
 
@@ -12520,9 +12528,10 @@ class ElementGeneralizedVerma
   { this->Nullify(owner);
     ElementVermaModuleOrdered<CoefficientType>& currentElt=this->leftComponents.TheObjects[theIndex];
     ElementVermaModuleOrdered<CoefficientType> zeroVermaElt;
-    zeroVermaElt.Nullify(this->theOwner->theOwner, this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis);
+    assert(this->theOwner->theOwner!=0);
+    zeroVermaElt.Nullify(*this->theOwner->theOwner, this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis);
     ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
-    tempElt.MakeConst(this->theOwner->theRingUnit, this->theOwner->theOwner);
+    tempElt.MakeConst(this->theOwner->theRingUnit, *this->theOwner->theOwner);
     currentElt.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(tempElt, zeroVermaElt, theContext, this->theOwner->theRingUnit);
     currentElt.theSubNthElementIsImageNthCoordSimpleBasis=this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis;
   }
@@ -12714,7 +12723,7 @@ void ElementGeneralizedVerma<CoefficientType>::Nullify
   this->leftComponents.SetSize(owner.theFDspace.size);
   for (int i=0; i<this->leftComponents.size; i++)
   { ElementVermaModuleOrdered<CoefficientType>& currentElt=this->leftComponents.TheObjects[i];
-    currentElt.Nullify(this->theOwner->theOwner, this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis);
+    currentElt.Nullify(*this->theOwner->theOwner, this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis);
   }
 }
 
@@ -12846,14 +12855,14 @@ void ElementGeneralizedVerma<CoefficientType>::ActOnMe
   Vector<RationalFunction> coordFormRightElt;
   for (int i=0; i<output.leftComponents.size; i++)
   { ElementVermaModuleOrdered<CoefficientType>& currentLeft= this->leftComponents.TheObjects[i];
-    currentLeft.ActOnMe(theElt, output.leftComponents.TheObjects[i], this->theOwner->theOwner.theOwner, this->theOwner->theRingUnit, this->theOwner->theRingZero, theContext);
+    currentLeft.ActOnMe(theElt, output.leftComponents.TheObjects[i], this->theOwner->theOwner->theOwner, this->theOwner->theRingUnit, this->theOwner->theRingZero, theContext);
     currentLeft.MultiplyOnTheLeft(theElt, output.leftComponents.TheObjects[i], this->theOwner->theRingUnit, this->theOwner->theRingZero, theContext);
   }
 //  std::cout << "<br><br>acting on the Universal enveloping part we get:" << output.ElementToString();
   ElementVermaModuleOrdered<CoefficientType> tempElt;
   for (int i=0; i<output.leftComponents.size; i++)
   { ElementSimpleLieAlgebra& currentAlgebraElt=this->theOwner->theFDspace.TheObjects[i];
-    this->theOwner->theOwner.theOwner.LieBracket(theElt, currentAlgebraElt, tempLieElt);
+    this->theOwner->theOwner->theOwner.LieBracket(theElt, currentAlgebraElt, tempLieElt);
     //std::cout << "<br><br>" << theElt.ElementToString() << " acts on " << currentAlgebraElt.ElementToString() << " to obtain: " << tempLieElt.ElementToString();
 
     bool tempBool=tempLieElt.GetCoordsInBasis(this->theOwner->theFDspace, coordFormRightElt, *theContext);
@@ -12919,7 +12928,7 @@ bool ElementGeneralizedVerma<CoefficientType>::ActOnMe
       if (!currentMon.Powers.TheObjects[j].IsSmallInteger(thePower))
         return false;
       ElementSimpleLieAlgebra& currentLieElt=
-      this->theOwner->theOwner.theOrder.TheObjects[currentMon.generatorsIndices.TheObjects[j]];
+      this->theOwner->theOwner->theOrder.TheObjects[currentMon.generatorsIndices.TheObjects[j]];
       for (int k=0; k<thePower; k++)
         tempElt.ActOnMe(currentLieElt, theContext);
     }
@@ -13578,7 +13587,11 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::operator*=(const Elemen
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
-{ int theIndex= this->IndexOfObjectHash(input);
+{ //MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
+  //tempMon=input;
+  //tempMon.ComputeDebugString();
+  //this->ComputeDebugString();
+  int theIndex= this->IndexOfObjectHash(input);
   if (theIndex==-1)
     this->AddOnTopHash(input);
   else

@@ -8624,9 +8624,19 @@ int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
   polyOne.MakeNVarConst(numVars, (Rational)1);
   argumentUE.SetNumVariables(numVars);
   ElementGeneralizedVerma<PolynomialRationalCoeff> theAnswer;
+  SemisimpleLieAlgebraOrdered& ownerAlg=theNode.owner->testAlgebra;
   if (! theAnswer.AssignElementUE(argumentUE, tempData, theGlobalVariables, polyOne))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  theNode.ExpressionType=theNode.typeString;
+  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& theElt=theNode.UEElementOrdered.GetElement();
+  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempElt;
+  theElt.Nullify(ownerAlg);
+  for (int i=0; i<theAnswer.leftComponents.size; i++)
+  { tempElt.AssignElementLieAlgebra(theAnswer.theOwner->theFDspace[i], PolyOne, PolyZero, ownerAlg);
+    tempElt*=theAnswer.leftComponents[i].theElT;
+    theElt+=tempElt;
+  }
+  theNode.outputString=theAnswer.ElementToString(true, false, true);
+  theNode.ExpressionType=theNode.typeUEElementOrdered;
   return theNode.errorNoError;
 }
 
@@ -8638,9 +8648,12 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
 { MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   ElementUniversalEnvelopingOrdered<CoefficientType> precedingMon, succeedingMon;
 //  int ambientRank=owner.theOwner.theOwner.GetRank();
+  assert(owner.theOwner!=0);
   this->Nullify(owner);
+  theElt.ComputeDebugString();
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=theElt[i];
+    currentMon.ComputeDebugString();
     bool found=false;
 //    bool doRecursiveCall=true;
 //    int numPosRootsLargeAlgebra=owner.theOwner.theOwner.GetNumPosRoots();
@@ -8648,10 +8661,10 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
     int IndexFound=-1;
     for (int j=0; j<currentMon.generatorsIndices.size; j++)
     { int currentIndex=currentMon.generatorsIndices[j];
-      if (owner.theFDspace.ContainsObject(owner.theOwner.theOrder[currentIndex]))
-      { IndexFound=owner.theFDspace.IndexOfObject(owner.theOwner.theOrder[currentIndex]);
+      if (owner.theFDspace.ContainsObject(owner.theOwner->theOrder[currentIndex]))
+      { IndexFound=owner.theFDspace.IndexOfObject(owner.theOwner->theOrder[currentIndex]);
         int thePower;
-        if (found || currentMon.Powers[j].IsSmallInteger(thePower))
+        if (found || !currentMon.Powers[j].IsSmallInteger(thePower))
           return false;
         if (thePower!=1)
           return false;
@@ -8659,32 +8672,37 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
         tempMon=currentMon;
         tempMon.generatorsIndices.size=j;
         tempMon.Powers.size=j;
-        precedingMon.Nullify(owner.theOwner);
+        precedingMon.Nullify(*owner.theOwner);
         precedingMon.AddMonomial(tempMon);
         tempMon.Coefficient=theRingUnit;
         tempMon.generatorsIndices.SetSize(currentMon.generatorsIndices.size-j-1);
         tempMon.Powers.SetSize(tempMon.generatorsIndices.size);
-        for (int k=j+1; j<currentMon.generatorsIndices.size; j++)
-        { tempMon.generatorsIndices[k-j+1]=currentMon.generatorsIndices[k];
-          tempMon.Powers[k-j+1]=currentMon.Powers[k];
+        for (int k=j+1; k<currentMon.generatorsIndices.size; k++)
+        { tempMon.generatorsIndices[k-j-1]=currentMon.generatorsIndices[k];
+          tempMon.Powers[k-j-1]=currentMon.Powers[k];
         }
-        succeedingMon.Nullify(owner.theOwner);
+        succeedingMon.Nullify(*owner.theOwner);
         succeedingMon.AddMonomial(tempMon);
       }
     }
     if (found)
     { ElementGeneralizedVerma<CoefficientType> tempElt;
       tempElt.AssignDefaultGeneratorIndex(IndexFound, owner, &theGlobalVariables);
+      precedingMon.ComputeDebugString();
       ElementUniversalEnvelopingOrdered<CoefficientType> concatenationMon;
       concatenationMon=precedingMon;
       concatenationMon*=succeedingMon;
       ElementVermaModuleOrdered<CoefficientType> tempV;
-      tempV.Nullify(owner.theOwner, owner.VermaHWSubNthElementImageNthCoordSimpleBasis);
+      tempV.Nullify(*owner.theOwner, owner.VermaHWSubNthElementImageNthCoordSimpleBasis);
       tempElt.leftComponents[IndexFound].AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
       (concatenationMon, tempV, & theGlobalVariables, owner.theRingUnit);
       if (!tempElt.leftComponents[IndexFound].IsEqualToZero())
         this->operator+=(tempElt);
+      precedingMon.ComputeDebugString();
       precedingMon.LieBracketOnTheRight(owner.theFDspace[IndexFound], owner.theRingUnit, owner.theRingZero);
+      precedingMon.ComputeDebugString();
+      precedingMon.Simplify(& theGlobalVariables);
+      precedingMon.ComputeDebugString();
       precedingMon*=succeedingMon;
       if (!precedingMon.IsEqualToZero())
       { tempElt.AssignElementUE(precedingMon, owner, theGlobalVariables, theRingUnit);
@@ -9083,8 +9101,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("modOutSAVerma",
    "(UEOrdered)",
-   "<b>Experimental, please don't use. The implementation works horribly slowly at the moment. \
-   Might be fixed in the future, low priority.</b>\
+   "<b>Experimental, please don't use. This is testing code for resolving errors on new \
+   functions, not available in the function list.</b>\
     Mod out the verma relations of the smaller algebra.",
    "modOutSAVerma(f_1)",
    DefaultWeylLetter, DefaultWeylRank, true,

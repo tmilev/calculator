@@ -81,7 +81,6 @@ void* RunTimer(void* ptr)
 }
 #endif
 
-
 std::string IPAdressCaller;
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
@@ -122,6 +121,8 @@ int main(int argc, char **argv)
 //		inputString=::getenv("QUERY_STRING");
 #endif
     IPAdressCaller=getenv("REMOTE_ADDR");
+    for (int i=0; i<MathRoutines::Minimum(IPAdressCaller.size(), SomeRandomPrimesSize); i++)
+      IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	getPath(argv[0], inputPath);
 //	inputString="textInput=+asf&buttonGo=Go";
@@ -164,6 +165,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
+
+//  civilizedInput="modOutSAVerma(f_1f_4)";
 //  civilizedInput="adjointRepresentationAction(x_1g_1,g_2)";
 //  civilizedInput="modOutVermaRelationsOrdered(c)";
 //  civilizedInput="modOutVermaRelations(c)";

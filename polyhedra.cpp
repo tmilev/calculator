@@ -27466,11 +27466,16 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
     case ParserNode::typeRational: LatexOutput << this->rationalValue.ElementToString(); break;
     case ParserNode::typePoly: LatexOutput << this->polyValue.GetElement().ElementToString(PolyFormatLocal); break;
     case ParserNode::typeRationalFunction: LatexOutput << this->ratFunction.GetElement().ElementToString(PolyFormatLocal); break;
-    case ParserNode::typeUEElementOrdered: LatexOutput << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal, theGlobalVariables); break;
+    case ParserNode::typeUEElementOrdered:
+      LatexOutput << "\\begin{array}{rcl}&&\n"
+      << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal, theGlobalVariables)
+      << "\n\\end{array}";
+      break;
     case ParserNode::typeUEelement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
       << this->UEElement.GetElement().ElementToString(theGlobalVariables)
-      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables) << "\n\\end{array}"; break;
+      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables) << "\n\\end{array}";
+      break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;

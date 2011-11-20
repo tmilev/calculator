@@ -8383,7 +8383,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   outputVectors.size=0;
   ElementGeneralizedVerma<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
-  CoefficientType tempCoeff, theCoeff, CentralCharacterActionCurrent, CentralCharacterActionAbsoluteHighest, currentChar;
+  CoefficientType tempCoeff, theCoeff, CentralCharacterActionCurrent, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
   int counter=0;
   ElementUniversalEnveloping abstractCasimir, embeddedCasimirNonOrdered;
@@ -8408,29 +8408,55 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   << this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis.ElementToString();
   //return out.str();
   theGlobalVariables.MakeStatusReport("Initializing Casimir done!\n" +out.str());
-  PolynomialsRationalCoeff theSub;
+  PolynomialsRationalCoeff theSub, SubLargerCartanToToSmaller, SubSmallerCartanToLarger;
   ElementGeneralizedVerma<CoefficientType> highestElt, tempElt2;
   highestElt.AssignDefaultGeneratorIndex(this->theOwner->theFDspace.size-1, *this->theOwner, &theGlobalVariables);
   highestElt.ActOnMe(embeddedCasimir, tempElt2, &theGlobalVariables);
   bool sanityCheck1= highestElt.IsProportionalTo(tempElt2, CentralCharacterActionAbsoluteHighest);
-  out << "\n<br>\nStarting character:<br>" << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
+
+  out << "\n<br>\nStarting character in Larger algebra coords:<br>"
+  << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
+  Vectors<Rational> theBasis;
+  theBasis=this->theOwner->smallerCartanEmbedding;
+  int dimLargeCartan=theParser.theHmm.theRange.GetRank();
+  theBasis.BeefUpWithEiToLinearlyIndependentBasis(dimLargeCartan);
+  MatrixLargeRational matLargeToSmallSub;
+  matLargeToSmallSub.AssignVectorsToRows(theBasis);
+  matLargeToSmallSub.Invert();
+  SubLargerCartanToToSmaller.SetSize(dimLargeCartan);
+  SubSmallerCartanToLarger.SetSize(dimLargeCartan);
+  root tempRoot;
+  for (int i=0; i<dimLargeCartan; i++)
+  { matLargeToSmallSub.RowToRoot(i, tempRoot);
+    SubLargerCartanToToSmaller[i].MakeLinPolyFromRootNoConstantTerm(tempRoot);
+    tempRoot=theBasis[i];
+    SubSmallerCartanToLarger[i].MakeLinPolyFromRootNoConstantTerm(tempRoot);
+  }
+  CentralCharacterActionAbsoluteHighestSmallerAlgebraVars=CentralCharacterActionAbsoluteHighest;
+  CentralCharacterActionAbsoluteHighestSmallerAlgebraVars.Substitution(SubLargerCartanToToSmaller);
+  out << "\n<br>\nStarting character in Smaller algebra coords:<br>"
+  << CentralCharacterActionAbsoluteHighestSmallerAlgebraVars.ElementToString() << "<hr>";
+  List<CoefficientType> precomputedChars;
+  precomputedChars.SetSize(this->theOwner->theFDspaceWeights.size);
   for (int k=this->theOwner->theFDspaceWeights.size-1; k>=0; k--)
-  { theSub.MakeIdSubstitution(theParser.theHmm.theRange.GetRank());
-    root tempRoot= this->theOwner->theFDspaceWeights[k];//*this->theOwner->theFDspaceWeights.LastObject()
+  { theSub=SubSmallerCartanToLarger;
+    root tempRoot=
+    this->theOwner->theFDspaceWeights[k]
+    -
+    *this->theOwner->theFDspaceWeights.LastObject()
+    ;
     out << "<br>\n\n weight: " << tempRoot.ElementToString();
     theParser.theHmm.theDomain.theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
-    out << "the id sub: " << theSub.ElementToString();
     for (int l=0; l<tempRoot.size; l++)
       theSub[l]-=tempRoot[l];
-    currentChar=CentralCharacterActionAbsoluteHighest;
-    currentChar.Substitution(theSub);
-    out << "; \n\nCorresponding sub: " << theSub.ElementToString()
-    << "; corresponding character:<br> "
-    << currentChar.ElementToString();
+    precomputedChars[k]=CentralCharacterActionAbsoluteHighestSmallerAlgebraVars;
+    precomputedChars[k].Substitution(theSub);
+    out << "  Corresponding character in larger algebra coords: <br>\n"
+    << precomputedChars[k].ElementToString();
   }
   out << "<hr>";
   assert(sanityCheck1);
-  for (int k= this->theOwner->theFDspace.size-1; k>=5; k--)//; i++)
+  for (int k= this->theOwner->theFDspace.size-1; k>=3; k--)//; i++)
   { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
     std::stringstream progressReport;
     progressReport << "Number of direct summands in the decomposition found: " << counter //;

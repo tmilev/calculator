@@ -165,7 +165,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   //For debugging:
-
+//  civilizedInput="x_1^-1";
+//  civilizedInput="(x_1+x_2\\mapsto x_1: x_1)";
 //  civilizedInput="modOutSAVerma(f_1f_4)";
 //  civilizedInput="adjointRepresentationAction(x_1g_1,g_2)";
 //  civilizedInput="modOutVermaRelationsOrdered(c)";
@@ -322,7 +323,7 @@ int main(int argc, char **argv)
   theParser.DefaultWeylRank=theParser.theHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   //std::cout << "Computation done in " << GetElapsedTimeInSeconds() << "seconds <br>";
   std::cout.flush();
-  theParser.ComputeDebugString(false, theGlobalVariables);
+  theParser.ComputeDebugString(true, theGlobalVariables);
 
   std::string beginMath="<div class=\"math\" scale=\"50\">";
   std::string endMath ="</div>";

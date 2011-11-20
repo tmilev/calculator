@@ -11386,13 +11386,19 @@ void hashedRoots::ComputeDebugString()
 { this->ElementToString(this->DebugString);
 }
 
-void PolynomialsRationalCoeff::ElementToString(std::string& output)
-{ output.clear();
+void PolynomialsRationalCoeff::ElementToString(std::string& output, int numDisplayedEltsMinus1ForAll)
+{ std::stringstream out;
+  output.clear();
   PolynomialOutputFormat PolyFormatLocal;
+  if (numDisplayedEltsMinus1ForAll==-1)
+    numDisplayedEltsMinus1ForAll=this->size;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].StringPrintOutAppend(output, PolyFormatLocal, true);
-    output.append(",\n");
+  { out << "x_{" << i+1 << "} \\mapsto " << this->TheObjects[i].ElementToString(PolyFormatLocal);
+    if (i!=this->size-1)
+      out << ", ";
   }
+  out << ":   ";
+  output=out.str();
 }
 
 void PolynomialsRationalCoeff::ComputeDebugString()
@@ -23178,27 +23184,19 @@ bool Parser::TokenProhibitsUnaryMinus(int theToken)
 }
 
 bool Parser::lookAheadTokenProhibitsPlus(int theToken)
-{ if (theToken==this->tokenEnd)
-    return false;
-  if (theToken==this->tokenPlus)
-    return false;
-  if (theToken==this->tokenMinus)
-    return false;
-  if (theToken==this->tokenCloseBracket)
-    return false;
-  if (theToken==this->tokenCloseLieBracket)
-    return false;
-  if (theToken==this->tokenCloseCurlyBracket)
-    return false;
-  if (theToken==this->tokenComma)
-    return false;
-  if (theToken==this->tokenColon)
-    return false;
-//  if (theToken==this->tokenExpression)
-//    return true;
-//  if (theToken==this->tokenUnderscore)
-//    return true;
-  return true;
+{ switch(theToken)
+  { case Parser::tokenEnd:
+    case Parser::tokenPlus:
+    case Parser::tokenMinus:
+    case Parser::tokenCloseBracket:
+    case Parser::tokenCloseLieBracket:
+    case Parser::tokenCloseCurlyBracket:
+    case Parser::tokenComma:
+    case Parser::tokenColon:
+    case Parser::tokenMapsTo:
+      return false;
+    default: return true;
+  }
 }
 
 bool Parser::lookAheadTokenProhibitsTimes(int theToken)
@@ -23367,18 +23365,18 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
           this->ExpressionType=this->typeUEelement;
           return;
         }
-     if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
+    if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
       if (leftNode.UEElementOrdered.GetElement().IsAPowerOfASingleGenerator())
-        { rightNode.ConvertToType(this->typePoly, this->impliedNumVars, theGlobalVariables);
-          leftNode.UEElementOrdered.GetElement().SetNumVariables(this->impliedNumVars);
-          MonomialUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempMon;
-          tempMon.operator=(leftNode.UEElementOrdered.GetElement().TheObjects[0]);
-          tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue.GetElement());
-          this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
-          this->UEElementOrdered.GetElement().AddMonomial(tempMon);
-          this->ExpressionType=this->typeUEElementOrdered;
-          return;
-        }
+      { rightNode.ConvertToType(this->typePoly, this->impliedNumVars, theGlobalVariables);
+        leftNode.UEElementOrdered.GetElement().SetNumVariables(this->impliedNumVars);
+        MonomialUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempMon;
+        tempMon.operator=(leftNode.UEElementOrdered.GetElement().TheObjects[0]);
+        tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue.GetElement());
+        this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
+        this->UEElementOrdered.GetElement().AddMonomial(tempMon);
+        this->ExpressionType=this->typeUEElementOrdered;
+        return;
+      }
     this->SetError(this->errorDunnoHowToDoOperation);
     return;
   }
@@ -23399,8 +23397,15 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       break;
     case ParserNode::typePoly:
       this->polyValue.GetElement()=leftNode.polyValue.GetElement();
-      this->polyValue.GetElement().RaiseToPower(thePower, (Rational) 1);
-      this->ExpressionType=this->typePoly;
+      if (thePower>=0)
+      { this->polyValue.GetElement().RaiseToPower(thePower, (Rational) 1);
+        this->ExpressionType=this->typePoly;
+      } else
+      { this->ratFunction.GetElement().context=&theGlobalVariables;
+        this->ratFunction.GetElement()=this->polyValue.GetElement();
+        this->ratFunction.GetElement().RaiseToPower(thePower);
+        this->ExpressionType=this->typeRationalFunction;
+      }
       break;
     case ParserNode::typeRationalFunction:
       this->ratFunction.GetElement()=leftNode.ratFunction.GetElementConst();
@@ -23895,7 +23900,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
     case Parser::tokenC: out << "c"; break;
     case Parser::tokenEmbedding: out << "i"; break;
     case Parser::tokenMinusUnary: out << "-"; break;
-    case Parser::tokenVariable: out << "n"; break;
+    case Parser::tokenVariable: out << "variable"; break;
     case Parser::tokenArraY: out << "array"; break;
     case Parser::tokenDereferenceArray: out << "deref[]"; break;
     case Parser::tokenMapsTo: out << "->"; break;
@@ -27772,37 +27777,85 @@ void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
 int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
 { if (this->children.size<2)
     return this->SetError(this->errorProgramming);
-  PolynomialsRationalCoeff theSub;
   this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-  theSub.MakeIdSubstitution(this->impliedNumVars*2, (Rational) 1);
-  List<bool> Explored(this->impliedNumVars*2, false);
   PolynomialRationalCoeff currentLeft, currentRight;
+  roots leftHandSide;
+  PolynomialsRationalCoeff theSubInitial;
+  leftHandSide.MakeActualSizeAtLeastExpandOnTop(this->impliedNumVars*2);
+  theSubInitial.MakeActualSizeAtLeastExpandOnTop(this->impliedNumVars*2);
+  root currentLeftRoot;
   for (int i=0; i<this->children.size-1; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
     if (!currentNode.ConvertToType(this->typeMapWeylAlgebra, this->impliedNumVars, theGlobalVariables))
       return this->SetError(this->errorBadOrNoArgument);
     currentNode.WeylAlgebraElement.GetElement().GetStandardOrder(currentLeft);
     currentNode.weylEltBeingMappedTo.GetElement().GetStandardOrder(currentRight);
-    if (currentLeft.size!=1)
+    if (currentLeft.IsLinear())
+    { currentLeft.GetRootFromLinPolyConstTermLastVariable(currentLeftRoot);
+      theSubInitial.AddOnTop(currentRight);
+      *theSubInitial.LastObject()-=*currentLeftRoot.LastObject();
+      currentLeftRoot.size--;
+      leftHandSide.AddOnTop(currentLeftRoot);
+    } else
       return this->SetError(this->errorBadOrNoArgument);
-    Monomial<Rational>& theMon=currentLeft.TheObjects[0];
-    int theLetterIndex;
-    if (!theMon.IsOneLetterFirstDegree(theLetterIndex))
-      return this->SetError(this->errorBadOrNoArgument);
-    if (Explored.TheObjects[theLetterIndex])
-      return this->SetError(this->errorBadSubstitution);
-//    std::cout << "<br> currentRight is: " << currentRight.ElementToString();
-    Explored.TheObjects[theLetterIndex]=true;
-    theSub.TheObjects[theLetterIndex]=currentRight;
-//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
-    theSub.TheObjects[theLetterIndex]/=theMon.Coefficient;
-//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
-    theSub.TheObjects[theLetterIndex].SetNumVariablesSubDeletedVarsByOne(this->impliedNumVars*2);
-//    std::cout << "<br> and currently we have: " << theSub.TheObjects[theLetterIndex].ElementToString();
   }
+  int NumVarsDoubled=this->impliedNumVars*2;
+  int currentRank=leftHandSide.GetRankOfSpanOfElements(theGlobalVariables);
+  root ei;
+  PolynomialRationalCoeff tempP;
+  std::stringstream report, out;
+  bool found=false;
+  int numImpliedDsubs=0;
+  int numImpliedXsubs=0;
+  for (int i=0; i<NumVarsDoubled && currentRank<NumVarsDoubled; i++)
+  { ei.MakeEi(this->impliedNumVars*2, i);
+    leftHandSide.AddOnTop(ei);
+    int candidateRank=leftHandSide.GetRankOfSpanOfElements(theGlobalVariables);
+    if (candidateRank>currentRank)
+    { currentRank=candidateRank;
+      tempP.MakeLinPolyFromRootNoConstantTerm(ei);
+      theSubInitial.AddOnTop(tempP);
+      if (found)
+        report << ",";
+      found=true;
+      report << tempP.ElementToString() << " \\mapsto " << tempP.ElementToString();
+      if (i<NumVarsDoubled/2)
+        numImpliedXsubs++;
+      else
+        numImpliedDsubs++;
+    } else
+      leftHandSide.size--;
+  }
+  MatrixLargeRational matLeft;
+  matLeft.AssignRootsToRowsOfMatrix(leftHandSide);
+  matLeft.Invert();
+  PolynomialsRationalCoeff theSub;
+  theSub.SetSize(NumVarsDoubled);
+  for (int i=0; i<NumVarsDoubled; i++)
+  { (theSub[i]).Nullify(NumVarsDoubled);
+    for (int j=0; j<NumVarsDoubled; j++)
+    { tempP=theSubInitial[j];
+      tempP*=matLeft.elements[i][j];
+      theSub[i]+=tempP;
+    }
+  }
+  out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ElementToString();
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
+  if (lastNode.ExpressionType==this->typePoly)
+    out << lastNode.polyValue.GetElement().ElementToString() << ")";
+  else
+    out << " ... )";
+  if (found)
+  { out << "<hr> In modified your input  by generating the following susbstitutions.\n<br>\n" << report.str();
+    out << "<hr>";
+    if (numImpliedDsubs==NumVarsDoubled/2)
+      out << "<br>All substitutions are done in 2n variables, where n is the implied number of variables"
+      << "(for reasons specific to the internal implementation of Weyl algebra elements); this explains the last "
+      << " n automatically generated substitutions. \n<br>\n\n";
+  }
   lastNode.ConvertToType(lastNode.ExpressionType, this->impliedNumVars, theGlobalVariables);
   this->CopyValue(lastNode);
+  this->outputString=out.str();
   return this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
 }
 
@@ -28456,6 +28509,10 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
 void RationalFunction::RaiseToPower(int thePower)
 { PolynomialRationalCoeff theNum, theDen;
   this->checkConsistency();
+  if (thePower<0)
+  { this->Invert();
+    thePower=-thePower;
+  }
   switch (this->expressionType)
   { case RationalFunction::typeRational:
       this->ratValue.RaiseToPower(thePower);

@@ -55,7 +55,7 @@ GlobalVariables::GlobalVariables()
 int ParallelComputing::GlobalPointerCounter=0;
 int ParallelComputing::PointerCounterPeakRamUse=0;
 
-void (*CGIspecificRoutines::functionCGIServerIgnoreUserAbort) (void)=0;
+void (*CGI::functionCGIServerIgnoreUserAbort) (void)=0;
 
 
 Integer Integer::TheRingUnit(1) ;
@@ -140,7 +140,7 @@ PolynomialOutputFormat PolyFormatNumFrac;
 int QuasiPolynomialOld::TotalCreatedPolys=0;
 int ComplexQN::NumTotalCreated=0;
 
-int CGIspecificRoutines::GlobalFormulaIdentifier=0;
+int CGI::GlobalFormulaIdentifier=0;
 
 CyclotomicList CompositeComplex::PrecomputedCyclotomic;
 ListPointers<BasicQN> BasicQN::GlobalCollectorsBasicQuasiNumbers;
@@ -453,7 +453,7 @@ int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOut
   int r=(255* (tempI%NumColorsBase))/NumColorsBase;
   int g=(255* (tempI%(NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase);
   int b=(255* (tempI%(NumColorsBase*NumColorsBase*NumColorsBase)))/(NumColorsBase*NumColorsBase*NumColorsBase);
-  return CGIspecificRoutines::RedGreenBlue(r, g, b);
+  return CGI::RedGreenBlue(r, g, b);
 }
 
 void DrawingVariables::initDrawingVariables(int cX1, int cY1)
@@ -471,29 +471,29 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->flagDrawChamberIndices=true;
   this->flagDrawingInvisibles=false;
   this->flagDrawingLinkToOrigin=true;
-  this->ColorDashes=CGIspecificRoutines::RedGreenBlue(200, 200, 200);
+  this->ColorDashes=CGI::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
-  this->ColorChamberIndicator=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
-  this->ColorWeylChamberWalls=CGIspecificRoutines::RedGreenBlue(220, 220, 0);
-  this->ColorTextPermanentlyZeroChamber = CGIspecificRoutines::RedGreenBlue(250, 220, 220);
-  this->ColorTextZeroChamber = CGIspecificRoutines::RedGreenBlue(200, 100, 100);
-  this->ColorTextDefault= CGIspecificRoutines::RedGreenBlue(0, 0, 0);
+  this->ColorChamberIndicator=CGI::RedGreenBlue(220, 220, 0);
+  this->ColorWeylChamberWalls=CGI::RedGreenBlue(220, 220, 0);
+  this->ColorTextPermanentlyZeroChamber = CGI::RedGreenBlue(250, 220, 220);
+  this->ColorTextZeroChamber = CGI::RedGreenBlue(200, 100, 100);
+  this->ColorTextDefault= CGI::RedGreenBlue(0, 0, 0);
   this->Selected=-2;
   this->textX=0;
   this->textY=15;
   this->theBuffer.init();
 }
 
-std::stringstream  CGIspecificRoutines::outputStream;
-int CGIspecificRoutines::numLinesAll;
-int CGIspecificRoutines::shiftX=0;
-int CGIspecificRoutines::numDashedLines=0;
-int CGIspecificRoutines::numRegularLines=0;
-int CGIspecificRoutines::numDottedLines=0;
-int CGIspecificRoutines::shiftY=-200;
-int CGIspecificRoutines::scale=100;
+std::stringstream  CGI::outputStream;
+int CGI::numLinesAll;
+int CGI::shiftX=0;
+int CGI::numDashedLines=0;
+int CGI::numRegularLines=0;
+int CGI::numDottedLines=0;
+int CGI::shiftY=-200;
+int CGI::scale=100;
 
-void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& output)
+void CGI::clearDollarSigns(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='$')
@@ -501,7 +501,7 @@ void CGIspecificRoutines::clearDollarSigns(std::string& theString, std::string& 
   output=out.str();
 }
 
-void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::string& output)
+void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)
     if(theString[i]!='=')
@@ -511,32 +511,32 @@ void CGIspecificRoutines::subEqualitiesWithSimeq(std::string& theString, std::st
   output=out.str();
 }
 
-void CGIspecificRoutines::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
+void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
 { std::cout << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
   std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array(" << numberLines << "); " << "  \tvar clr"  << lineTypeName << "= new Array("  << numberLines << "); ";
 }
 
-void CGIspecificRoutines::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
+void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
 { std::string tempS;
   std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2[" << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
-  { CGIspecificRoutines::outputStream >> tempS;
+  { CGI::outputStream >> tempS;
     std::cout << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
-    CGIspecificRoutines::outputStream >> tempS;
+    CGI::outputStream >> tempS;
     std::cout << "\t" << lineTypeName << "2[" << lineCounter << "][" << j << "]=" << tempS << "; ";
   }
   std::cout << "\tclr" << lineTypeName << "[" << lineCounter << "]=" << stringColor << "; ";
   lineCounter++;
 }
 
-void CGIspecificRoutines::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
+void CGI::ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml)
 { std::stringstream out;
   if (useHtml)
     out << "<span title=\"" << inputTooltip << "\">" << input << "</span>";
   output=out.str();
 }
 
-void CGIspecificRoutines::CivilizedStringTranslationFromVPold(std::string& input, std::string& output)
+void CGI::CivilizedStringTranslationFromVPold(std::string& input, std::string& output)
 { output.clear();
   int oldindex=0;
   int tempSize=(signed) input.size();
@@ -559,9 +559,9 @@ void CGIspecificRoutines::CivilizedStringTranslationFromVPold(std::string& input
     output.push_back(input.at(j));
 }
 
-void CGIspecificRoutines::FormatCPPSourceCode(const std::string& FileName)
+void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileIn, FileName, false, false, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(fileIn, FileName, false, false, false);
   assert(fileIn.is_open());
   fileIn.clear(std::ios::goodbit);
   fileIn.seekg(0, std::ios_base::end);
@@ -571,7 +571,7 @@ void CGIspecificRoutines::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(buffer, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
+  ::CGI::OpenDataFileOrCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
     switch(buffer[i])
@@ -592,7 +592,7 @@ void CGIspecificRoutines::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool CGI::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -626,7 +626,7 @@ bool CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile
   return false;
 }
 
-bool CGIspecificRoutines::FileExists(const std::string& theFileName)
+bool CGI::FileExists(const std::string& theFileName)
 { std::fstream theFile;
   theFile.open(theFileName.c_str(), std::fstream::in);
   if(theFile.is_open())
@@ -635,10 +635,10 @@ bool CGIspecificRoutines::FileExists(const std::string& theFileName)
     return false;
 }
 
-void CGIspecificRoutines::WeylGroupToHtml(WeylGroup& input, std::string& path)
+void CGI::WeylGroupToHtml(WeylGroup& input, std::string& path)
 { std::fstream output;
   std::string tempS;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
   output << "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
 }
@@ -662,9 +662,9 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
     tempRoot.ElementToString(tempS);
     out << tempS;
     tempS=out.str();
-    TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(210, 210, 210));
-    TDV.drawTextAtVectorBuffer(tempRoot, tempS, CGIspecificRoutines::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
-    TDV.drawCircleAtVectorBuffer(tempRoot, 2, TDV.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(100, 200, 100) );
+    TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210));
+    TDV.drawTextAtVectorBuffer(tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
+    TDV.drawCircleAtVectorBuffer(tempRoot, 2, TDV.PenStyleNormal, CGI::RedGreenBlue(100, 200, 100) );
   }
   TDV.theBuffer.BasisToDrawCirclesAt.MakeEiBasis(theDimension, 1, 0);
 }
@@ -3521,7 +3521,7 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
 
 void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers)
 { std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
   this->WriteReportToFile(tempF, DoPurgeZeroPointers);
 }
 
@@ -3970,7 +3970,7 @@ void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables* theGloba
 
 bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false);
   this->WriteToFile(tempF, theGlobalVariables);
   tempF.close();
   return true;
@@ -3978,7 +3978,7 @@ bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, Glo
 
 bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
-  if (!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, false, false))
+  if (!CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, false, false))
     return false;
   this->ReadFromFile(tempF, theGlobalVariables);
   if (theGlobalVariables!=0)
@@ -13683,7 +13683,7 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
   this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
@@ -13744,7 +13744,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     { if (useHtml)
         out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK.TheObjects[i] << ".html\">";
       rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
-      CGIspecificRoutines::clearDollarSigns(largerSA.theDynkinDiagram.DynkinStrinG, tempS);
+      CGI::clearDollarSigns(largerSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << tempS;
       if (useHtml)
         out << "</a>, ";
@@ -13766,7 +13766,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
   this->theCentralizerDiagram.ElementToStrinG(tempS, false, true);
   if(!useLatex)
-    CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+    CGI::clearDollarSigns(tempS, tempS);
   if (useLatex)
     out << "\n\n\\noindent ";
   if (useHtml)
@@ -15849,7 +15849,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   MyPathServer=htmlPathServer; childrenPathServer= htmlPathServer;
   MyPathPhysical.append("rootHtml.html"); MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
   output << "<html><title> Root subsystems of "
   << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
@@ -15926,14 +15926,14 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     this->TheObjects[i].theCentralizerDiagram.ElementToStrinG(tempS2, useLatex, true);
     if (tempS=="") tempS="-";
     if (useLatex)
-    { CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
-      CGIspecificRoutines::subEqualitiesWithSimeq(tempS2, tempS2);
+    { CGI::subEqualitiesWithSimeq(tempS, tempS);
+      CGI::subEqualitiesWithSimeq(tempS2, tempS2);
       out << "\\begin{tabular}{p{2cm}}\n $\\mathfrak{k}_{ss}$: " << tempS;
       out << "\\\\\n";
     }
     else
-    { CGIspecificRoutines::clearDollarSigns(tempS, tempS);
-      CGIspecificRoutines::clearDollarSigns(tempS2, tempS2);
+    { CGI::clearDollarSigns(tempS, tempS);
+      CGI::clearDollarSigns(tempS2, tempS2);
       out << "k_{ss}: ";
       if (!useHtml)
         out << tempS;
@@ -15968,13 +15968,13 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
     { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
       this->TheObjects[tempI].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
       if (useLatex)
-        CGIspecificRoutines::subEqualitiesWithSimeq(tempS, tempS);
+        CGI::subEqualitiesWithSimeq(tempS, tempS);
       counter+=(signed)tempS.length();
       if (!useHtml)
         out << tempS << ", ";
       else
       { if (!useLatex)
-          CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+          CGI::clearDollarSigns(tempS, tempS);
         this->pathToHtmlReference(tempI, tempS, htmlPathServer, tempS3);
         out << tempS3 << " , ";
       }
@@ -17405,13 +17405,13 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 }
 
 void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables* theGlobalVariables)
-{ CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, true, false);
+{ CGI::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, true, false);
   this->WriteToFile(this->theFile, theGlobalVariables);
   this->theFile.close();
 }
 
 void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables* theGlobalVariables)
-{ if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false, false))
+{ if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false, false))
     return;
   this->ReadFromFile(this->theFile, theGlobalVariables);
   this->theFile.close();
@@ -17423,10 +17423,10 @@ void minimalRelationsProverStates::WriteToFileAppend(GlobalVariables* theGlobalV
     this->PurgeImpossibleStates();
   }
   if (this->sizeByLastSave!=0)
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, true, false, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, true, false, false);
   else
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
   assert(this->theFileHeader.is_open());
   this->WriteToFileAppend(this->theFileHeader, this->theFileBody, theGlobalVariables);
   this->theFileHeader.close();
@@ -17434,9 +17434,9 @@ void minimalRelationsProverStates::WriteToFileAppend(GlobalVariables* theGlobalV
 }
 
 void minimalRelationsProverStates::ReadFromFile(GlobalVariables* theGlobalVariables)
-{ if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, false, false))
+{ if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, false, false))
     return;
-  if(!CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, false, false))
+  if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, false, false))
     return;
   this->ReadFromFile(this->theFileHeader, this->theFileBody, theGlobalVariables);
   this->theFileHeader.close();
@@ -20245,7 +20245,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
-      CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
+      CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<td align=\"center\">Decomp. " << tempS << "</td>";
     }
     out << "</tr>\n";
@@ -20253,7 +20253,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ElementToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
-    CGIspecificRoutines::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
+    CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
     if (useHtml)
       out << "<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
@@ -20320,7 +20320,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     if (useHtml)
     { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
       currentSA.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
-      CGIspecificRoutines::clearDollarSigns(tempS, tempS);
+      CGI::clearDollarSigns(tempS, tempS);
     }
     currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
     out << tempS;
@@ -20412,7 +20412,7 @@ void slTwo::ElementToHtml(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
@@ -20951,7 +20951,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
   if(useHtml)
-    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGIspecificRoutines::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\"" << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
+    out << "<br><br><table><tr><td style=\"padding-right:20px\">" << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)  << "</td><td align=\"center\" title=\"" << tooltipHvalue << "\"> h</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\"" << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
       out << "<tr><td>Bad values of h</td><td>";
@@ -20980,14 +20980,14 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
     }
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesMinimalContainingRootSA.TheObjects[j]];
-      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
+      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[j]];
-      CGIspecificRoutines::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
+      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
@@ -21054,7 +21054,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   if(usePNG)
   { fileName= physicalPath;
     fileName.append("sl2s.html");
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
@@ -21073,12 +21073,12 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
   this->owner.ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
   theFile << tempS;
   theFile.close();
@@ -21086,7 +21086,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
+    { CGI::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
       tempStreamLatex << "latex " << " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
@@ -21701,7 +21701,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  if (CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
+  if (CGI::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
@@ -21711,7 +21711,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* t
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 
@@ -23824,7 +23824,7 @@ ParserNode::ParserNode()
 void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out; std::string tempS;
   std::string htmlSafish;
-  if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
+  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
     out << "&lt; -modified string: ";
   else
     out << "String: ";
@@ -24304,6 +24304,9 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddOnTop(functionIndex);
     return true;
   }
+  if (input == "\\\\&&")
+  { return true;
+  }
   if (input=="NoIndicator")
   { this->flagDisplayIndicator=false;
     return true;
@@ -24358,7 +24361,6 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
     this->ValueBuffer.AddOnTop(0);
     return true;
   }
-
   return false;
 }
 
@@ -24861,8 +24863,9 @@ void ElementUniversalEnveloping::ElementToString(std::string& output, bool useLa
 }
 
 void MonomialUniversalEnveloping::SetNumVariables(int newNumVars)
-{ if (this->Coefficient.NumVars==newNumVars)
-    return;
+{//the below code is wrong messed up with substitutions!
+  // if (this->Coefficient.NumVars==newNumVars)
+  //  return;
   this->Coefficient.SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
   for(int i=0; i<this->generatorsIndices.size; i++)
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
@@ -25262,7 +25265,7 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
   }*/
 }
 
-void CGIspecificRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank)
+void CGI::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank)
 { if (theWeylLetter=='a') theWeylLetter='A';
   if (theWeylLetter=='b') theWeylLetter='B';
   if (theWeylLetter=='c') theWeylLetter='C';
@@ -25286,7 +25289,7 @@ void CGIspecificRoutines::MakeSureWeylGroupIsSane(char& theWeylLetter, int& theR
     theRank=4;
 }
 
-void CGIspecificRoutines::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
+void CGI::ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput)
 { for (int i=0; i<(signed)inputOutput.size(); i++)
     if (inputOutput[i]=='=' || inputOutput[i]=='&')
       inputOutput[i]=' ';
@@ -27535,7 +27538,7 @@ std::string ParserNode::ElementToStringValueAndType
   { if (!useHtml)
       out << stringValueOnly;
     else
-      out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(stringValueOnly);
+      out << CGI::GetHtmlMathDivFromLatexFormulA(stringValueOnly);
   }
   if (displayOutputString)
   { if (this->outputString!="" && this->ExpressionType!=this->typeString)
@@ -27846,7 +27849,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   else
     out << " ... )";
   if (found)
-  { out << "<hr> In modified your input  by generating the following susbstitutions.\n<br>\n" << report.str();
+  { out << "<hr> I modified your input  by generating the following susbstitutions.\n<br>\n" << report.str();
     out << "<hr>";
     if (numImpliedDsubs==NumVarsDoubled/2)
       out << "<br>All substitutions are done in 2n variables, where n is the implied number of variables"
@@ -27893,6 +27896,14 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
     case ParserNode::typeArray:
       for (int i=0; i<this->children.size; i++)
         this->owner->TheObjects[this->children.TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
+      return this->errorNoError;
+    case ParserNode::typeUEElementOrdered:
+      this->TrimSubToMinNumVars(theSub, this->impliedNumVars);
+      this->UEElementOrdered.GetElement().SubstitutionCoefficients(theSub, & theGlobalVariables);
+      return this->errorNoError;
+    case ParserNode::typeUEelement:
+      this->TrimSubToMinNumVars(theSub, this->impliedNumVars);
+      this->UEElement.GetElement().SubstitutionCoefficients(theSub, & theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeLattice:
       if (theDimension!=this->theLattice.GetElement().GetDim())
@@ -28912,7 +28923,7 @@ int ParserNode::EvaluateSlTwoInSlN
   std::string fileName;
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output.tex");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
   outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
   std::stringstream out;
   out << "A latex/pdf file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
@@ -29027,7 +29038,7 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
   return this->errorNoError;
 }
 
-void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
+void CGI::CivilizedStringTranslationFromCGI(std::string& input, std::string& output)
 { std::string readAhead;
   std::stringstream out;
   int inputSize=(signed) input.size();
@@ -29036,7 +29047,7 @@ void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, 
     for (int j=0; j<6; j++)
     { if (i+j<inputSize)
         readAhead.push_back(input[i+j]);
-      if (CGIspecificRoutines::AttemptToCivilize(readAhead, out))
+      if (CGI::AttemptToCivilize(readAhead, out))
       { i+=j;
         break;
       }
@@ -29045,7 +29056,7 @@ void CGIspecificRoutines::CivilizedStringTranslationFromCGI(std::string& input, 
   output=out.str();
 }
 
-void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
+void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
 { int inputLength= (signed) input.size();
   bool reading=false;
   output.SetSize(1);
@@ -29063,7 +29074,7 @@ void CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(const std::string&
   }
 }
 
-bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
+bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
 { if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
   { out << readAhead[0];
     return true;
@@ -29130,6 +29141,10 @@ bool CGIspecificRoutines::AttemptToCivilize(std::string& readAhead, std::strings
   }
   if (readAhead=="%5C")
   { out << "\\";
+    return true;
+  }
+  if (readAhead=="%26")
+  { out << "&";
     return true;
   }
   if (readAhead=="%7D")

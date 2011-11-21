@@ -88,7 +88,7 @@ void makeReport(IndicatorWindowVariables& input)
 //  if (counter%10!=0)
 //    return;
   std::fstream theFile;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
   theFile << "<hr>\n\n" << input.StatusString1 << "<hr>\n\n";
@@ -143,14 +143,14 @@ int main(int argc, char **argv)
   pthread_t TimerThread;
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
-  CGIspecificRoutines::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
+  CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings;
-  CGIspecificRoutines::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
+  CGI::ChopCGIInputStringToMultipleStrings(inputString, inputStrings);
   inputStrings.SetSize(3);
   std::string& civilizedInput= inputStrings.TheObjects[2];
   std::string& inputRankString = inputStrings.TheObjects[1];
   std::string& inputWeylString = inputStrings.TheObjects[0];
-  CGIspecificRoutines::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
+  CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   if (inputWeylString!="")
     theParser.DefaultWeylLetter=inputWeylString[0];
@@ -163,8 +163,11 @@ int main(int argc, char **argv)
     tempStream >> theParser.DefaultWeylRank;
   } else
     theParser.DefaultWeylRank=3;
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+//civilizedInput="(x_1+2x_3\\mapsto x_2, 3x_2\\mapsto x_1 :    f_{-3}(512x_3^{6}+2304x_2x_3^{5}+1536x_1x_3^{5}+2432x_3^{5}+4000x_2^{2}x_3^{4}+5760x_1x_2x_3^{4}+8480x_2x_3^{4}+1920x_1^{2}x_3^{4}\\&& +6080x_1x_3^{4}+4480x_3^{4}+3360x_2^{3}x_3^{3}+8000x_1x_2^{2}x_3^{3}+10720x_2^{2}x_3^{3}+5760x_1^{2}x_2x_3^{3}\\&& +16960x_1x_2x_3^{3}+11360x_2x_3^{3}+1280x_1^{3}x_3^{3}+6080x_1^{2}x_3^{3}+8960x_1x_3^{3}+4000x_3^{3}+1368x_2^{4}x_3^{2}\\&& +5040x_1x_2^{3}x_3^{2}+5832x_2^{3}x_3^{2}+6000x_1^{2}x_2^{2}x_3^{2}+16080x_1x_2^{2}x_3^{2}+9288x_2^{2}x_3^{2}\\&& +2880x_1^{3}x_2x_3^{2}+12720x_1^{2}x_2x_3^{2}+17040x_1x_2x_3^{2}+6552x_2x_3^{2}+480x_1^{4}x_3^{2}+3040x_1^{3}x_3^{2}\\&& +6720x_1^{2}x_3^{2}+6000x_1x_3^{2}+1728x_3^{2}+216x_2^{5}x_3+1368x_1x_2^{4}x_3+1152x_2^{4}x_3+2520x_1^{2}x_2^{3}x_3\\&& +5832x_1x_2^{3}x_3+2448x_2^{3}x_3+2000x_1^{3}x_2^{2}x_3+8040x_1^{2}x_2^{2}x_3+9288x_1x_2^{2}x_3+2592x_2^{2}x_3\\&& +720x_1^{4}x_2x_3+4240x_1^{3}x_2x_3+8520x_1^{2}x_2x_3+6552x_1x_2x_3+1368x_2x_3+96x_1^{5}x_3+760x_1^{4}x_3+2240x_1^{3}x_3\\&& +3000x_1^{2}x_3+1728x_1x_3+288x_3+108x_1x_2^{5}+342x_1^{2}x_2^{4}+576x_1x_2^{4}+420x_1^{3}x_2^{3}+1458x_1^{2}x_2^{3}\\&& +1224x_1x_2^{3}+250x_1^{4}x_2^{2}+1340x_1^{3}x_2^{2}+2322x_1^{2}x_2^{2}+1296x_1x_2^{2}+72x_1^{5}x_2+530x_1^{4}x_2\\&& +1420x_1^{3}x_2+1638x_1^{2}x_2+684x_1x_2+8x_1^{6}+76x_1^{5}+280x_1^{4}+500x_1^{3}+432x_1^{2}+144x_1\\&&) v+f_{-2}((-256x_3^{5}-1152x_2x_3^{4}-640x_1x_3^{4}-1216x_3^{4}-2000x_2^{2}x_3^{3}-2304x_1x_2x_3^{3}-4240x_2x_3^{3}-640x_1^{2}x_3^{3}-2432x_1x_3^{3}-2240x_3^{3}-1680x_2^{3}x_3^{2}-3000x_1x_2^{2}x_3^{2}-5360x_2^{2}x_3^{2}-1728x_1^{2}x_2x_3^{2}-6360x_1x_2x_3^{2}-5680x_2x_3^{2}-320x_1^{3}x_3^{2}-1824x_1^{2}x_3^{2}-3360x_1x_3^{2}-2000x_3^{2}-684x_2^{4}x_3-1680x_1x_2^{3}x_3-2916x_2^{3}x_3-1500x_1^{2}x_2^{2}x_3-5360x_1x_2^{2}x_3-4644x_2^{2}x_3-576x_1^{3}x_2x_3-3180x_1^{2}x_2x_3-5680x_1x_2x_3-3276x_2x_3-80x_1^{4}x_3-608x_1^{3}x_3-1680x_1^{2}x_3-2000x_1x_3-864x_3-108x_2^{5}-342x_1x_2^{4}-576x_2^{4}-420x_1^{2}x_2^{3}-1458x_1x_2^{3}-1224x_2^{3}-250x_1^{3}x_2^{2}-1340x_1^{2}x_2^{2}-2322x_1x_2^{2}-1296x_2^{2}-72x_1^{4}x_2-530x_1^{3}x_2-1420x_1^{2}x_2-1638x_1x_2-684x_2-8x_1^{5}-76x_1^{4}-280x_1^{3}-500x_1^{2}-432x_1-144)f_{-5}\\&&) v+f_{-1}((((-256x_3^{5}-768x_2x_3^{4}-640x_1x_3^{4}-1216x_3^{4}-848x_2^{2}x_3^{3}-1536x_1x_2x_3^{3}-2992x_2x_3^{3}-640x_1^{2}x_3^{3}-2432x_1x_3^{3}-2240x_3^{3}-408x_2^{3}x_3^{2}-1272x_1x_2^{2}x_3^{2}-2600x_2^{2}x_3^{2}-1152x_1^{2}x_2x_3^{2}-4488x_1x_2x_3^{2}-4192x_2x_3^{2}-320x_1^{3}x_3^{2}-1824x_1^{2}x_3^{2}-3360x_1x_3^{2}-2000x_3^{2}-72x_2^{4}x_3-408x_1x_2^{3}x_3-924x_2^{3}x_3-636x_1^{2}x_2^{2}x_3-2600x_1x_2^{2}x_3-2496x_2^{2}x_3-384x_1^{3}x_2x_3-2244x_1^{2}x_2x_3-4192x_1x_2x_3-2508x_2x_3-80x_1^{4}x_3-608x_1^{3}x_3-1680x_1^{2}x_3-2000x_1x_3-864x_3-36x_1x_2^{4}-108x_2^{4}-102x_1^{2}x_2^{3}-462x_1x_2^{3}-468x_2^{3}-106x_1^{3}x_2^{2}-650x_1^{2}x_2^{2}-1248x_1x_2^{2}-756x_2^{2}-48x_1^{4}x_2-374x_1^{3}x_2-1048x_1^{2}x_2-1254x_1x_2-540x_2-8x_1^{5}-76x_1^{4}-280x_1^{3}-500x_1^{2}-432x_1-144)f_{-6}\\&&+(384x_3^{4}+1152x_2x_3^{3}+768x_1x_3^{3}+1248x_3^{3}+1272x_2^{2}x_3^{2}+1728x_1x_2x_3^{2}+2760x_2x_3^{2}+576x_1^{2}x_3^{2}+1872x_1x_3^{2}+1488x_3^{2}+612x_2^{3}x_3+1272x_1x_2^{2}x_3+1992x_2^{2}x_3+864x_1^{2}x_2x_3+2760x_1x_2x_3+2148x_2x_3+192x_1^{3}x_3+936x_1^{2}x_3+1488x_1x_3+768x_3+108x_2^{4}+306x_1x_2^{3}+468x_2^{3}+318x_1^{2}x_2^{2}+996x_1x_2^{2}+756x_2^{2}+144x_1^{3}x_2+690x_1^{2}x_2+1074x_1x_2+540x_2+24x_1^{4}+156x_1^{3}+372x_1^{2}+384x_1+144)f_{-5}f_{-4}\\&&)) v)+f_12((((-128x_3^{5}-480x_2x_3^{4}-320x_1x_3^{4}-608x_3^{4}-640x_2^{2}x_3^{3}-960x_1x_2x_3^{3}-1568x_2x_3^{3}-320x_1^{2}x_3^{3}-1216x_1x_3^{3}-1120x_3^{3}-360x_2^{3}x_3^{2}-960x_1x_2^{2}x_3^{2}-1288x_2^{2}x_3^{2}-720x_1^{2}x_2x_3^{2}-2352x_1x_2x_3^{2}-1928x_2x_3^{2}-160x_1^{3}x_3^{2}-912x_1^{2}x_3^{2}-1680x_1x_3^{2}-1000x_3^{2}-72x_2^{4}x_3-360x_1x_2^{3}x_3-336x_2^{3}x_3-480x_1^{2}x_2^{2}x_3-1288x_1x_2^{2}x_3-888x_2^{2}x_3-240x_1^{3}x_2x_3-1176x_1^{2}x_2x_3-1928x_1x_2x_3-1056x_2x_3-40x_1^{4}x_3-304x_1^{3}x_3-840x_1^{2}x_3-1000x_1x_3-432x_3-36x_1x_2^{4}-90x_1^{2}x_2^{3}-168x_1x_2^{3}-72x_2^{3}-80x_1^{3}x_2^{2}-322x_1^{2}x_2^{2}-444x_1x_2^{2}-216x_2^{2}-30x_1^{4}x_2-196x_1^{3}x_2-482x_1^{2}x_2-528x_1x_2-216x_2-4x_1^{5}-38x_1^{4}-140x_1^{3}-250x_1^{2}-216x_1-72)f_{-7}\\&&+(-96x_2x_3^{3}-216x_2^{2}x_3^{2}-144x_1x_2x_3^{2}-216x_2x_3^{2}-156x_2^{3}x_3-216x_1x_2^{2}x_3-312x_2^{2}x_3-72x_1^{2}x_2x_3-216x_1x_2x_3-156x_2x_3-36x_2^{4}-78x_1x_2^{3}-108x_2^{3}-54x_1^{2}x_2^{2}-156x_1x_2^{2}-108x_2^{2}-12x_1^{3}x_2-54x_1^{2}x_2-78x_1x_2-36x_2)f_{-6}f_{-5}\\&&+(-96x_3^{3}-216x_2x_3^{2}-144x_1x_3^{2}-216x_3^{2}-156x_2^{2}x_3-216x_1x_2x_3-312x_2x_3-72x_1^{2}x_3-216x_1x_3-156x_3-36x_2^{3}-78x_1x_2^{2}-108x_2^{2}-54x_1^{2}x_2-156x_1x_2-108x_2-12x_1^{3}-54x_1^{2}-78x_1-36)f_{-5}^{2}f_{-4}\\&&)) v)+f_{1}((((-128x_3^{5}-512x_2x_3^{4}-320x_1x_3^{4}-608x_3^{4}-744x_2^{2}x_3^{3}-1024x_1x_2x_3^{3}-1800x_2x_3^{3}-320x_1^{2}x_3^{3}-1216x_1x_3^{3}-1120x_3^{3}-468x_2^{3}x_3^{2}-1116x_1x_2^{2}x_3^{2}-1728x_2^{2}x_3^{2}-768x_1^{2}x_2x_3^{2}-2700x_1x_2x_3^{2}-2164x_2x_3^{2}-160x_1^{3}x_3^{2}-912x_1^{2}x_3^{2}-1680x_1x_3^{2}-1000x_3^{2}-108x_2^{4}x_3-468x_1x_2^{3}x_3-540x_2^{3}x_3-558x_1^{2}x_2^{2}x_3-1728x_1x_2^{2}x_3-1020x_2^{2}x_3-256x_1^{3}x_2x_3-1350x_1^{2}x_2x_3-2164x_1x_2x_3-1020x_2x_3-40x_1^{4}x_3-304x_1^{3}x_3-840x_1^{2}x_3-1000x_1x_3-432x_3-54x_1x_2^{4}-117x_1^{2}x_2^{3}-270x_1x_2^{3}-93x_1^{3}x_2^{2}-432x_1^{2}x_2^{2}-510x_1x_2^{2}-72x_2^{2}-32x_1^{4}x_2-225x_1^{3}x_2-541x_1^{2}x_2-510x_1x_2-144x_2-4x_1^{5}-38x_1^{4}-140x_1^{3}-250x_1^{2}-216x_1-72)f_{-8}\\&&+(-16x_2x_3^{3}-52x_2^{2}x_3^{2}-24x_1x_2x_3^{2}-116x_2x_3^{2}-54x_2^{3}x_3-52x_1x_2^{2}x_3-220x_2^{2}x_3-12x_1^{2}x_2x_3-116x_1x_2x_3-166x_2x_3-18x_2^{4}-27x_1x_2^{3}-102x_2^{3}-13x_1^{2}x_2^{2}-110x_1x_2^{2}-150x_2^{2}-2x_1^{3}x_2-29x_1^{2}x_2-83x_1x_2-66x_2)f_{-7}f_{-5}\\&&+(16x_2x_3^{2}+28x_2^{2}x_3+16x_1x_2x_3+28x_2x_3+12x_2^{3}+14x_1x_2^{2}+24x_2^{2}+4x_1^{2}x_2+14x_1x_2+12x_2)f_{-6}f_{-5}^{2}+(16x_3^{2}+28x_2x_3+16x_1x_3+28x_3+12x_2^{2}+14x_1x_2+24x_2+4x_1^{2}+14x_1+12)f_{-5}^{3}f_{-4}\\&&)) v)+f_{2}((((-128x_3^{5}-448x_2x_3^{4}-320x_1x_3^{4}-608x_3^{4}-552x_2^{2}x_3^{3}-896x_1x_2x_3^{3}-1560x_2x_3^{3}-320x_1^{2}x_3^{3}-1216x_1x_3^{3}-1120x_3^{3}-288x_2^{3}x_3^{2}-828x_1x_2^{2}x_3^{2}-1260x_2^{2}x_3^{2}-672x_1^{2}x_2x_3^{2}-2340x_1x_2x_3^{2}-1844x_2x_3^{2}-160x_1^{3}x_3^{2}-912x_1^{2}x_3^{2}-1680x_1x_3^{2}-1000x_3^{2}-54x_2^{4}x_3-288x_1x_2^{3}x_3-324x_2^{3}x_3-414x_1^{2}x_2^{2}x_3-1260x_1x_2^{2}x_3-726x_2^{2}x_3-224x_1^{3}x_2x_3-1170x_1^{2}x_2x_3-1844x_1x_2x_3-792x_2x_3-40x_1^{4}x_3-304x_1^{3}x_3-840x_1^{2}x_3-1000x_1x_3-432x_3-27x_1x_2^{4}-72x_1^{2}x_2^{3}-162x_1x_2^{3}-69x_1^{3}x_2^{2}-315x_1^{2}x_2^{2}-363x_1x_2^{2}-28x_1^{4}x_2-195x_1^{3}x_2-461x_1^{2}x_2-396x_1x_2-72x_2-4x_1^{5}-38x_1^{4}-140x_1^{3}-250x_1^{2}-216x_1-72)f_{-9}\\&&+(64x_3^{4}+192x_2x_3^{3}+128x_1x_3^{3}+240x_3^{3}+180x_2^{2}x_3^{2}+288x_1x_2x_3^{2}+468x_2x_3^{2}+96x_1^{2}x_3^{2}+360x_1x_3^{2}+320x_3^{2}+54x_2^{3}x_3+180x_1x_2^{2}x_3+216x_2^{2}x_3+144x_1^{2}x_2x_3+468x_1x_2x_3+294x_2x_3+32x_1^{3}x_3+180x_1^{2}x_3+320x_1x_3+228x_3+27x_1x_2^{3}+45x_1^{2}x_2^{2}+108x_1x_2^{2}+24x_1^{3}x_2+117x_1^{2}x_2+147x_1x_2+72x_2+4x_1^{4}+30x_1^{3}+80x_1^{2}+114x_1+72)f_{-8}f_{-4}\\&&+(16x_2x_3^{3}+20x_2^{2}x_3^{2}+24x_1x_2x_3^{2}-12x_2x_3^{2}+6x_2^{3}x_3+20x_1x_2^{2}x_3-36x_2^{2}x_3+12x_1^{2}x_2x_3-12x_1x_2x_3-90x_2x_3+3x_1x_2^{3}-18x_2^{3}+5x_1^{2}x_2^{2}-18x_1x_2^{2}-72x_2^{2}+2x_1^{3}x_2-3x_1^{2}x_2-45x_1x_2-54x_2)f_{-7}f_{-6}\\&&+(32x_3^{3}+72x_2x_3^{2}+48x_1x_3^{2}+72x_3^{2}+60x_2^{2}x_3+72x_1x_2x_3+144x_2x_3+24x_1^{2}x_3+72x_1x_3+4x_3+18x_2^{3}+30x_1x_2^{2}+72x_2^{2}+18x_1^{2}x_2+72x_1x_2+30x_2+4x_1^{3}+18x_1^{2}+2x_1-24)f_{-7}f_{-5}f_{-4}\\&&+(16x_2x_3^{2}+20x_2^{2}x_3+16x_1x_2x_3+36x_2x_3+6x_2^{3}+10x_1x_2^{2}+24x_2^{2}+4x_1^{2}x_2+18x_1x_2+18x_2)f_{-6}^{2}f_{-5}+(16x_3^{2}+12x_2x_3+16x_1x_3+44x_3+6x_1x_2+24x_2+4x_1^{2}+22x_1+24)f_{-6}f_{-5}^{2}f_{-4}\\&&+(-8x_3-6x_2-4x_1-6)f_{-5}^{3}f_{-4}^{2})) v)+f_{3}((((64x_3^{4}+224x_2x_3^{3}+128x_1x_3^{3}+256x_3^{3}+276x_2^{2}x_3^{2}+336x_1x_2x_3^{2}+636x_2x_3^{2}+96x_1^{2}x_3^{2}+384x_1x_3^{2}+368x_3^{2}+144x_2^{3}x_3+276x_1x_2^{2}x_3+498x_2^{2}x_3+168x_1^{2}x_2x_3+636x_1x_2x_3+574x_2x_3+32x_1^{3}x_3+192x_1^{2}x_3+368x_1x_3+224x_3+27x_2^{4}+72x_1x_2^{3}+126x_2^{3}+69x_1^{2}x_2^{2}+249x_1x_2^{2}+225x_2^{2}+28x_1^{3}x_2+159x_1^{2}x_2+287x_1x_2+150x_2+4x_1^{4}+32x_1^{3}+92x_1^{2}+112x_1+48)f_{-9}f_{-5}\\&&+(-64x_3^{4}-160x_2x_3^{3}-128x_1x_3^{3}-256x_3^{3}-132x_2^{2}x_3^{2}-240x_1x_2x_3^{2}-468x_2x_3^{2}-96x_1^{2}x_3^{2}-384x_1x_3^{2}-368x_3^{2}-36x_2^{3}x_3-132x_1x_2^{2}x_3-246x_2^{2}x_3-120x_1^{2}x_2x_3-468x_1x_2x_3-434x_2x_3-32x_1^{3}x_3-192x_1^{2}x_3-368x_1x_3-224x_3-18x_1x_2^{3}-27x_2^{3}-33x_1^{2}x_2^{2}-123x_1x_2^{2}-99x_2^{2}-20x_1^{3}x_2-117x_1^{2}x_2-217x_1x_2-138x_2-4x_1^{4}-32x_1^{3}-92x_1^{2}-112x_1-48)f_{-8}f_{-6}\\&&+(16x_3^{4}+48x_2x_3^{3}+32x_1x_3^{3}+64x_3^{3}+44x_2^{2}x_3^{2}+72x_1x_2x_3^{2}+116x_2x_3^{2}+24x_1^{2}x_3^{2}+96x_1x_3^{2}+92x_3^{2}+12x_2^{3}x_3+44x_1x_2^{2}x_3+46x_2^{2}x_3+36x_1^{2}x_2x_3+116x_1x_2x_3+82x_2x_3+8x_1^{3}x_3+48x_1^{2}x_3+92x_1x_3+56x_3+6x_1x_2^{3}+11x_1^{2}x_2^{2}+23x_1x_2^{2}+6x_2^{2}+6x_1^{3}x_2+29x_1^{2}x_2+41x_1x_2+6x_2+x_1^{4}+8x_1^{3}+23x_1^{2}+28x_1+12)f_{-7}^{2}\\&&+(8x_2x_3^{2}+12x_2^{2}x_3+8x_1x_2x_3+16x_2x_3+3x_2^{3}+6x_1x_2^{2}+5x_2^{2}+2x_1^{2}x_2+8x_1x_2+16x_2)f_{-7}f_{-6}f_{-5}+(8x_3^{2}+12x_2x_3+8x_1x_3+16x_3+3x_2^{2}+6x_1x_2+3x_2+2x_1^{2}+8x_1+18)f_{-7}f_{-5}^{2}f_{-4}\\&&+(64x_3^{3}+144x_2x_3^{2}+96x_1x_3^{2}+168x_3^{2}+108x_2^{2}x_3+144x_1x_2x_3+252x_2x_3+48x_1^{2}x_3+168x_1x_3+140x_3+27x_2^{3}+54x_1x_2^{2}+99x_2^{2}+36x_1^{2}x_2+126x_1x_2+126x_2+8x_1^{3}+42x_1^{2}+70x_1+12)f_{-8}f_{-5}f_{-4}\\&&+(x_2^{2}-x_2)f_{-6}^{2}f_{-5}^{2}+(2x_2-2)f_{-6}f_{-5}^{3}f_{-4}+f_{-5}^{4}f_{-4}^{2})) v) )";
+
   //For debugging:
+//  civilizedInput="(x_1+2x_3\\mapsto x_2, 3x_2\\mapsto x_1 :    modOutVermaRelations ( i(c) ) )";
 //  civilizedInput="x_1^-1";
 //  civilizedInput="(x_1+x_2\\mapsto x_1: x_1)";
 //  civilizedInput="modOutSAVerma(f_1f_4)";
@@ -296,18 +299,18 @@ int main(int argc, char **argv)
   theParser.indicatorReportFileName=theParser.outputFolderPath + IPAdressCaller+ "report.txt" ;
   theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller+ "report.txt" ;
   theParser.InitJavaScriptDisplayIndicator();
-  if (!CGIspecificRoutines::FileExists(theParser.indicatorFileName))
+  if (!CGI::FileExists(theParser.indicatorFileName))
   { std::stringstream tempStreamX;
     static_html3(tempStreamX);
     std::fstream tempFile;
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
     tempFile << tempStreamX.str();
   }
   theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
 
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
-  CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
+  CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
   civilizedInput=tempS;
 /*  std::cout << "<div id=\"divProgressReport\"> <script type=\"text/javascript\"> window.setTimeout("Click()", 100);</script> </div>";
 
@@ -336,7 +339,7 @@ int main(int argc, char **argv)
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
-  if (CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
+  if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" onkeypress=\"if (event.keyCode == 13) {storeSettings();  this.form.submit(); return false;}\">";
   std::cout << civilizedInputSafish;
@@ -376,8 +379,8 @@ int main(int argc, char **argv)
   << " seconds. The time limit can be changed if you install from source by editing (file) calculator.cpp (function) main() (variable) "
   << "theGlobalVariables.MaxAllowedComputationTimeInSeconds ."
   << "<br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
-  std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
-  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
+  std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  std::cout << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 3 files (header file))</a>\n";
@@ -425,11 +428,11 @@ int main(int argc, char **argv)
   std::string fileNameLieBracketFullPathNoEnding=inputPath;
   fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
   std::cout << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(theParser.DefaultWeylLetter, theParser.DefaultWeylRank) << ").</b><br>";
-  std::cout << "Notation formats: <button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+  std::cout << "Notation formats: <button " << CGI::GetStyleButtonLikeHtml()
     << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";
-  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+  std::cout << "<button " << CGI::GetStyleButtonLikeHtml()
     << " onclick=\"hideItem('ChevalleyWeylBasis'); showItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Simple basis format</button> ";
-  std::cout << "<button " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+  std::cout << "<button " << CGI::GetStyleButtonLikeHtml()
     << " onclick=\"hideItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); showItem('ChevalleyWeylBasisEpsFormat'); \">Epsilon format</button> ";
   std::cout << "<div id=\"ChevalleyWeylBasis\" ><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
     << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
@@ -441,9 +444,9 @@ int main(int argc, char **argv)
     << "/" << fileNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
     << tempStream2.str() << fileNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
   std::string latexCommandTemp;
-  if (!CGIspecificRoutines::FileExists(fileNameLieBracketFullPathNoEnding+".png") ||
-      !CGIspecificRoutines::FileExists(fileNameLieBracketFullPathNoEnding+"RootFormat.png" ) ||
-      !CGIspecificRoutines::FileExists(fileNameLieBracketFullPathNoEnding+"EpsFormat.png")
+  if (!CGI::FileExists(fileNameLieBracketFullPathNoEnding+".png") ||
+      !CGI::FileExists(fileNameLieBracketFullPathNoEnding+"RootFormat.png" ) ||
+      !CGI::FileExists(fileNameLieBracketFullPathNoEnding+"EpsFormat.png")
       )
   { std::cout << "<br>the file: " << fileNameLieBracketNoEnding << ".png" << " was just created<br>";
     std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
@@ -451,9 +454,9 @@ int main(int argc, char **argv)
     tempCommand << "mkdir " << inputPath;
     tempS=tempCommand.str();
     system(tempS.c_str());
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
-    CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
+    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
     tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);

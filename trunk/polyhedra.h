@@ -153,7 +153,7 @@ class XMLRoutines;
 template<class Base>
 class CompleX;
 class RationalFunction;
-struct CGIspecificRoutines;
+struct CGI;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -9199,7 +9199,7 @@ public:
   std::string DebugString;
   void GetWeightsGmodKInSimpleCoordsK
   (roots& outputWeights, GlobalVariables& theGlobalVariables)
-    { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK, theGlobalVariables);}
+  { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->GmodK, theGlobalVariables);}
   void GetWeightsKInSimpleCoordsK
   (roots& outputWeights, GlobalVariables& theGlobalVariables)
   { this->GetWeightsWrtKInSimpleCoordsK(outputWeights, this->imagesAllChevalleyGenerators, theGlobalVariables); }
@@ -9303,6 +9303,9 @@ public:
   void CommuteConsecutiveIndicesLeftIndexAroundRight(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   void CommuteConsecutiveIndicesRightIndexAroundLeft(int theIndeX, ElementUniversalEnvelopingOrdered<CoefficientType>& output, GlobalVariables* theContext);
   MonomialUniversalEnvelopingOrdered(){this->owner=0;}
+  void SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub)
+;
   bool operator==(const MonomialUniversalEnvelopingOrdered& other)const
   { assert(this->owner==other.owner);
     return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
@@ -9336,6 +9339,7 @@ private:
   friend class MonomialUniversalEnvelopingOrdered<CoefficientType>;
 public:
   std::string DebugString;
+  GlobalVariables* context;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal, theGlobalVariables);}
   void ElementToString
   (std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
@@ -9364,6 +9368,9 @@ public:
   bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping(ElementUniversalEnveloping& output, SemisimpleLieAlgebra& owner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
+  void SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub, GlobalVariables* theContext)
+  ;
   void MakeConst(const CoefficientType& coeff, SemisimpleLieAlgebraOrdered& theOwner)
   { this->Nullify(theOwner);
     MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
@@ -9511,6 +9518,9 @@ public:
   bool SwitchConsecutiveIndicesIfTheyCommute
 (int theLeftIndex, MonomialUniversalEnveloping& output, GlobalVariables& theGlobalVariables)
   ;
+  void SubstitutionCoefficient
+  (PolynomialsRationalCoeff& theSub)
+  ;
   void MakeConst(const PolynomialRationalCoeff& theConst, SemisimpleLieAlgebra& theOwner){this->generatorsIndices.size=0; this->Powers.size=0; this->Coefficient=theConst; this->owner=&theOwner;}
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very convenient for computing with Verma modules
@@ -9588,6 +9598,9 @@ public:
       return false;
     return true;
   }
+  void SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub, GlobalVariables* theContext)
+  ;
   void MakeCasimir(SemisimpleLieAlgebra& theOwner, int numVars, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheRight(const ElementUniversalEnveloping& right, ElementUniversalEnveloping& output);
   void LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left);
@@ -10456,7 +10469,7 @@ public:
   }
 };
 
-struct CGIspecificRoutines
+struct CGI
 {
 public:
   static std::stringstream outputStream;
@@ -10479,20 +10492,19 @@ public:
   static void rootSubalgebrasToHtml(rootSubalgebras& input, std::fstream& output);
   static void WeylGroupToHtml(WeylGroup&input, std::string& path);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
-  static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
-  static std::string GetHtmlMathDivFromLatexFormulA
-  (const std::string& input)
-  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", true, false);}
-
-  static std::string GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
-  (const std::string& input)
-  {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);}
-
-    static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);}
-    static std::string GetHtmlMathSpanFromLatexFormula
-  (const std::string& input) {return  CGIspecificRoutines:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);}
-
+  static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
+  static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
+  { return CGI::GetHtmlMathFromLatexFormulA(input, "", "", true, false);
+  }
+  static std::string GetHtmlMathDivFromLatexAddBeginARCL(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);
+  }
+  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);
+  }
+  static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
+  }
   static std::string GetHtmlMathFromLatexFormulA
   (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
 ;
@@ -10507,8 +10519,8 @@ public:
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGIspecificRoutines::ElementToStringTooltip(input, inputTooltip, true); };
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
   static inline int RedGreenBlue(int r, int g, int b)
   { r=r%256;
     g=g%256;
@@ -10518,8 +10530,8 @@ public:
   static void FormatCPPSourceCode(const std::string& FileName);
   static void(*functionCGIServerIgnoreUserAbort)(void);
   static void SetCGIServerIgnoreUserAbort()
-  { if (CGIspecificRoutines::functionCGIServerIgnoreUserAbort!=0)
-      CGIspecificRoutines::functionCGIServerIgnoreUserAbort();
+  { if (CGI::functionCGIServerIgnoreUserAbort!=0)
+      CGI::functionCGIServerIgnoreUserAbort();
   }
   enum TheChoicesWeMake
   { choiceDefaultNeedComputation, choiceInitAndDisplayMainPage, choiceGenerateDynkinTables, choiceDisplayRootSApage, choiceGosl2, choiceExperiments
@@ -12771,7 +12783,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex(in
   if (theIndex<3)
     out << "f_{" << theIndex-3 << "}";
   if (theIndex==3)
-    out << "f_{0,3}";
+    out << "f_{12}";
   if (theIndex>3)
     out << "f_{" << theIndex-3 << "}";
   return out.str();
@@ -12965,6 +12977,12 @@ bool ElementGeneralizedVerma<CoefficientType>::ActOnMe
     { int thePower;
       if (!currentMon.Powers.TheObjects[j].IsSmallInteger(thePower))
         return false;
+      if (theContext!=0)
+      { std::stringstream reportStream;
+        reportStream << "acting by monomial " << i+1 << " out of " << theElt.size << " by the letter of index " << j
+        << " out of  " << currentMon.generatorsIndices.size << " letters in the monomial";
+        theContext->MakeProgressReport(reportStream.str(), 1);
+      }
       ElementSimpleLieAlgebra& currentLieElt=
       this->theOwner->theOwner->theOrder.TheObjects[currentMon.generatorsIndices.TheObjects[j]];
       for (int k=0; k<thePower; k++)
@@ -14246,8 +14264,9 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int new
 
 template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int newNumVars)
-{ if (this->Coefficient.NumVars==newNumVars)
-    return;
+{ //the below commented out code causes problems in substitution code!
+  //if (this->Coefficient.NumVars==newNumVars)
+  //  return;
   this->Coefficient.SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
   for(int i=0; i<this->generatorsIndices.size; i++)
     this->Powers.TheObjects[i].SetNumVariablesSubDeletedVarsByOne((int)newNumVars);
@@ -14291,6 +14310,30 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpan
       current.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
     }
   }
+}
+
+template <class CoefficientType>
+void MonomialUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub)
+{ if (theSub.size<1)
+    return;
+  this->Coefficient.Substitution(theSub, theSub[0].NumVars);
+  this->SetNumVariables(theSub[0].NumVars);
+}
+
+template <class CoefficientType>
+void ElementUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub, GlobalVariables* theContext)
+{ ElementUniversalEnvelopingOrdered<CoefficientType> endResult;
+  MonomialUniversalEnvelopingOrdered<CoefficientType> currentMon;
+  endResult.Nullify(*this->owner);
+  for (int i=0; i<this->size; i++)
+  { currentMon=this->TheObjects[i];
+    currentMon.SubstitutionCoefficients(theSub);
+    endResult.AddMonomial(currentMon);
+  }
+  endResult.Simplify(theContext);
+  this->operator=(endResult);
 }
 
 #endif

@@ -194,7 +194,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     wxBoxSizer* BoxSizer2;
     wxBoxSizer* BoxSizer1;
     wxBoxSizer* BoxSizer3;
-    
+
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
     this->TimerReady=false;
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
@@ -230,7 +230,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     Timer1.Start(100, false);
     BoxSizer1->Fit(this);
     BoxSizer1->SetSizeHints(this);
-    
+
     Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
     Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
     Connect(ID_SPINCTRL2,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl2Change);
@@ -423,7 +423,7 @@ void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
 
 void wxParserFrame::WriteSettings()
 { std::fstream fileSettings;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
   fileSettings << "mainDialogX_Y_Width_Height: " <<  this->GetRect().x << " " << this->GetRect().y << " "
   << this->GetRect().width << " " << this->GetRect().height << "\n";
   fileSettings << "drawDialogX_Y_Width_Height: " <<  this->theDrawPanel->GetRect().x << " " << this->theDrawPanel->GetRect().y << " "
@@ -440,10 +440,10 @@ void wxParserFrame::WriteSettings()
 }
 
 void wxParserFrame::ReadSettings()
-{ if (!CGIspecificRoutines::FileExists(this->theSettingsFileName))
+{ if (!CGI::FileExists(this->theSettingsFileName))
     return;
   std::fstream fileSettings;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
   std::string tempS;
   wxRect tempRect;
   fileSettings >> tempS >> tempRect.x >> tempRect.y >> tempRect.width >> tempRect.height;
@@ -493,7 +493,7 @@ void wxParserFrame::ReadSettings()
   this->theSlides.SetSize(s);
   for (int i=0; i<s-1; i++)
   { slides[i]=this->thePath+slides[i];
-    if (::CGIspecificRoutines::FileExists(slides[i]))
+    if (::CGI::FileExists(slides[i]))
       this->theSlides[i].LoadFile(wxString(slides[i].c_str(), wxConvUTF8), wxBITMAP_TYPE_PNG);
   }
   /*
@@ -504,7 +504,7 @@ void wxParserFrame::ReadSettings()
     if (oldfileName==newFileName)
       break;
     oldfileName=newFileName;
-    if (CGIspecificRoutines::FileExists(newFileName))
+    if (CGI::FileExists(newFileName))
     { this->theSlides.SetSize(this->theSlides.size+1);
       this->theSlidesFileNames.AddObjectOnTop(newFileName);
       this->theSlideFrameIndices.AddObjectOnTop(framecount);
@@ -628,7 +628,7 @@ void wxParserFrame::OnChoice1Select(wxCommandEvent& event)
   }
   char oldLetter=theParser.DefaultWeylLetter;
   int oldRank = theParser.DefaultWeylRank;
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
     this->UpdateChoices();
 }
@@ -637,7 +637,7 @@ void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
 { theParser.DefaultWeylRank=this->SpinCtrl1->GetValue();
   char oldLetter=theParser.DefaultWeylLetter;
   int oldRank = theParser.DefaultWeylRank;
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
     this->UpdateChoices();
 }

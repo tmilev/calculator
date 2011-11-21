@@ -548,7 +548,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -645,18 +645,18 @@ int ParserNode::EvaluateG2InB3Computation
 
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
-  if (!CGIspecificRoutines::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
+  if (!CGI::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
   { this->computationPhase=0;
     return;
   }
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 
@@ -1027,7 +1027,7 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars)
   { int chamberWallColor=0;
     bool isZeroChamber=this->theQPs[i].IsEqualToZero();
     if (isZeroChamber)
-      chamberWallColor= CGIspecificRoutines::RedGreenBlue(200, 200, 200);
+      chamberWallColor= CGI::RedGreenBlue(200, 200, 200);
     this->theProjectivizedComplex[i].DrawMeLastCoordAffine(false, theDrawingVars, theFormat, chamberWallColor);
     std::stringstream tempStream;
     tempStream << i+1;
@@ -1123,7 +1123,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   for (int i=0; i<this->theLinearOperators.size; i++)
   { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, translationsProjectedFinal[i]);
     translationsProjectedFinal[i]+=this->theTranslationsProjectedBasisChanged[i];
-    drawOps.drawCircleAtVectorBuffer(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(250,0,0));
+    drawOps.drawCircleAtVectorBuffer(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(250,0,0));
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ElementToString();
   Accum.Nullify(theStartingPoly.NumVariables, theGlobalVariables);
@@ -1146,8 +1146,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     tempRoot.MinusRoot();
     tempRoot-=this->theTranslationsProjecteD[i];
     drawOps.
-    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,100));
-    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(240, 240, 240));
+    drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,100));
+    drawOps.drawLineBetweenTwoVectorsBuffer(tempRoot, ZeroRoot, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(240, 240, 240));
     tempComplex.DrawMeProjective(&tempRoot, false, drawOps, tempFormat);
     out << tempRoot.ElementToString();
   }
@@ -1723,7 +1723,7 @@ int ParserNode::EvaluateWeylAction
     tempStream << theWeyl[i].ElementToString() << "\\circ " << theWeight.ElementToString() << " &=& " << theOrbitElement.ElementToString() << " \\\\ <br>";
   }
   tempStream << "\\end{array}";
-  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(tempStream.str());
+  out << CGI::GetHtmlMathDivFromLatexFormulA(tempStream.str());
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -2865,11 +2865,11 @@ int ParserNode::EvaluateGroebner
   PolynomialOutputFormat theFormat;
   for(int i=0; i<inputBasis.size; i++)
     out1 << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
-  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL(out1.str());
+  out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out1.str());
   out << "<br>Reduced Groebner basis:";
   for(int i=0; i<outputGroebner.size; i++)
     out2 << outputGroebner.TheObjects[i].ElementToString(theFormat) << ", ";
-  out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL(out2.str());
+  out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
   return theNode.errorNoError;
@@ -2936,13 +2936,13 @@ int ParserNode::EvaluateRelations
   std::stringstream out3;
   for(int i=0; i<inputBasis.size; i++)
     out3 << " u_{" << i+1+theNode.impliedNumVars << "}:=" << inputBasis[i].ElementToString(theFormat) << ", ";
-  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out3.str());
+  out << CGI::GetHtmlMathSpanFromLatexFormula(out3.str());
   out << "<br>Resulting relations:";
   std::stringstream out2;
   theFormat.MakeAlphabetArbitraryWithIndex("u", "v");
   for(int i=0; i<outputRelations.size; i++)
     out2 << outputRelations.TheObjects[i].ElementToString(theFormat) << ", ";
-  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(out2.str());
+  out << CGI::GetHtmlMathSpanFromLatexFormula(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
   return theNode.errorNoError;
@@ -3882,7 +3882,7 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   std::stringstream out;
   fileName.append(this->owner->outputFolderPath);
   fileName.append("output.tex");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
   outputFile << theLatexFileString;
   out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
   out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
@@ -4788,7 +4788,7 @@ int ParserNode::EvaluatePrintRootSystem
 { std::stringstream out;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
   out << "<br>Symmetric Cartan matrix in Bourbaki order:<br>" <<
-  CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL(theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) );
+  CGI::GetHtmlMathDivFromLatexAddBeginARCL(theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) );
   Rational tempRat;
   MatrixLargeRational tempMat;
   tempMat = theWeyl.CartanSymmetric;
@@ -4809,7 +4809,7 @@ int ParserNode::EvaluatePrintRootSystem
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords, theGlobalVariables);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
   { out << "<tr><td>" << simpleBasis[i].ElementToString() << " </td><td>=</td> <td>"
-    << CGIspecificRoutines::
+    << CGI::
     GetHtmlMathFromLatexFormulA
     (simplebasisEpsCoords[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
     << "</td></tr>";
@@ -4820,7 +4820,7 @@ int ParserNode::EvaluatePrintRootSystem
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
   { out << "<tr><td>" << fundamentalWeights[i].ElementToString() << "</td><td> =</td><td> "
-    << CGIspecificRoutines::
+    << CGI::
     GetHtmlMathFromLatexFormulA
     (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
     << "</td></tr>";
@@ -5243,7 +5243,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos,
    bool forceRecompute)
 { std::stringstream outSltwoPath, outMainPath, out, outSltwoDisplayPath, outMainDisplayPath;
-  CGIspecificRoutines::SetCGIServerIgnoreUserAbort();
+  CGI::SetCGIServerIgnoreUserAbort();
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   char weylLetter=theNode.owner->DefaultWeylLetter;
   int theRank=theNode.owner->DefaultWeylRank;
@@ -5251,7 +5251,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   outMainDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/";
   outSltwoPath << outMainPath.str() << "sl2s/";
   outSltwoDisplayPath << outMainDisplayPath.str() << "sl2s/";
-  bool NeedToCreateFolders=(!CGIspecificRoutines::FileExists(outMainPath.str()) || !CGIspecificRoutines::FileExists(outSltwoPath.str()));
+  bool NeedToCreateFolders=(!CGI::FileExists(outMainPath.str()) || !CGI::FileExists(outSltwoPath.str()));
   if (NeedToCreateFolders)
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << outMainPath.str();
@@ -5264,7 +5264,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     << "<META http-equiv=\"refresh\" content=\"3; url="
     << "/cgi-bin/calculator?"
     << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
-    out << CGIspecificRoutines::UnCivilizeStringCGI(theNode.owner->StringBeingParsed);
+    out << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed);
     out << "\">  Redirecting in 3 seconds";
     theNode.outputString=out.str();
     theNode.ExpressionType=theNode.typeString;
@@ -5276,7 +5276,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
   outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
   bool mustRecompute=forceRecompute;
-  if (!CGIspecificRoutines::FileExists(outSltwoMainFile.str()) || !CGIspecificRoutines::FileExists(outRootHtmlFileName.str()))
+  if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
   bool showIndicator=theNode.owner->flagDisplayIndicator;
   if (mustRecompute)
@@ -5291,7 +5291,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
       afterSystemCommands << "<META http-equiv=\"refresh\" content=\"0; url=";
       noindicatorLink << "/cgi-bin/calculator?"
       << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput="
-      << CGIspecificRoutines::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
+      << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
       afterSystemCommands << noindicatorLink.str() << "\">";
       theNode.owner->afterSystemCommands=afterSystemCommands.str();
       out << "\n<br>\nComputing ...<br>" << theNode.owner->javaScriptDisplayingIndicator;
@@ -5350,7 +5350,7 @@ std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLa
   return out.str();
 }
 
-bool CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output)
+bool CGI::GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output)
 { std::stringstream out;
   bool result=false;
   for (unsigned int i=0; i<input.size(); i++)
@@ -5367,7 +5367,7 @@ bool CGIspecificRoutines::GetHtmlStringSafeishReturnFalseIfIdentical(const std::
   return result;
 }
 
-std::string CGIspecificRoutines::UnCivilizeStringCGI(const std::string& input)
+std::string CGI::UnCivilizeStringCGI(const std::string& input)
 { std::stringstream out;
   for (unsigned int i=0; i<input.size(); i++)
     switch (input[i])
@@ -5397,10 +5397,10 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
   out << "<div style=\"display: inline\" id=\"functionBox" << this->functionName << "\" >";
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out <<  "<button" << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
+  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
         << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
         << " textType=" << this->exampleAmbientWeylLetter << "&textDim=" << this->exampleAmbientWeylRank << "&textInput="
-        << CGIspecificRoutines::UnCivilizeStringCGI(this->example)
+        << CGI::UnCivilizeStringCGI(this->example)
         << "\"> " << this->example << "</a></div></div>";
   return out.str();
 }
@@ -6342,7 +6342,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << "></div><br>" << CGIspecificRoutines::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
+  << "></div><br>" << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<br>The picture is drawn using javascript."
   << "<br> The basis vectors can be rotated with the mouse (the basis vectors should be labeled in format depending on the type of picture):  "
   << " left click + hold the basis vector and move the mouse."
@@ -6773,7 +6773,7 @@ bool ConeComplex::DrawMeLastCoordAffine
     root tempRoot=this->TheObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBuffer
-    (tempRoot, tempStream.str(), CGIspecificRoutines::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal, 0);
+    (tempRoot, tempStream.str(), CGI::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal, 0);
     //std::cout <<"<hr> drawing number " << i+1 << ": " << theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->GetDim()-1);
   }
   return result;
@@ -6834,7 +6834,7 @@ bool Cone::DrawMeLastCoordAffine
     for (int i=0; i<this->GetDim()-1; i++)
     { tempRoot.MakeEi(this->GetDim()-1, i);
       theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-      (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+      (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205));
     }
   }
   for (int k=0; k<this->Normals.size; k++)
@@ -6891,12 +6891,12 @@ bool Cone::DrawMeProjective
     for (int i=0; i<this->GetDim(); i++)
     { tempRoot.MakeEi(this->GetDim(), i);
       theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(205,205,205));
+      (ZeroRoot+coordCenter, tempRoot+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205));
     }
   }
   for (int i=0; i<this->Vertices.size; i++)
     theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(180,180,180));
+    (ZeroRoot+coordCenter, VerticesScaled[i]*10000+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(180,180,180));
   for (int k=0; k<this->Normals.size; k++)
     for (int i=0; i<this->Vertices.size; i++)
       if (this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
@@ -6904,7 +6904,7 @@ bool Cone::DrawMeProjective
           if(this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i,j))
               theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,0));
+              (VerticesScaled[i]+coordCenter, VerticesScaled[j]+coordCenter, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   return true;
 }
 
@@ -6926,24 +6926,24 @@ std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, 
   return out.str();
 }
 
-std::string CGIspecificRoutines::GetHtmlButton
+std::string CGI::GetHtmlButton
 (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
 { std::stringstream out;
-  out << "\n<button id=\"" << buttonID << "\" " << CGIspecificRoutines::GetStyleButtonLikeHtml()
+  out << "\n<button id=\"" << buttonID << "\" " << CGI::GetStyleButtonLikeHtml()
     << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
   return out.str();
 }
 
-std::string CGIspecificRoutines::GetHtmlMathFromLatexFormulA
+std::string CGI::GetHtmlMathFromLatexFormulA
   (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
 { std::stringstream out;
-  CGIspecificRoutines::GlobalFormulaIdentifier++;
+  CGI::GlobalFormulaIdentifier++;
   out << prependString;
   if (useDiv)
     out << "<div";
   else
     out << "<span";
-  out << " id=\"theResult" << CGIspecificRoutines::GlobalFormulaIdentifier << "\" class=\"math\" scale=\"50\">";
+  out << " id=\"theResult" << CGI::GlobalFormulaIdentifier << "\" class=\"math\" scale=\"50\">";
   if (useBeginArrayRCL)
     out << "\\begin{array}{rcl}&&\n";
   out << input;
@@ -6953,7 +6953,7 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormulA
     out << "</div><br>";
   else
     out << "</span>";
-  out << "<textarea id=\"theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "\" style=\"display: none\">";
+  out << "<textarea id=\"theResultLatex" << CGI::GlobalFormulaIdentifier << "\" style=\"display: none\">";
   if (useBeginArrayRCL)
     out << "\\begin{array}{rcl}&&\n";
   out << input ;
@@ -6963,9 +6963,9 @@ std::string CGIspecificRoutines::GetHtmlMathFromLatexFormulA
   if (useDiv)
     out << "\n<br>";
   out <<appendStringBeforeButton;
-  out << "\n<button id=\"ButtonToggleLatex"  << CGIspecificRoutines::GlobalFormulaIdentifier
-        << " \" " << CGIspecificRoutines::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
-        << "'); switchMenu('theResultLatex" << CGIspecificRoutines::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
+  out << "\n<button id=\"ButtonToggleLatex"  << CGI::GlobalFormulaIdentifier
+        << " \" " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('theResult" << GlobalFormulaIdentifier
+        << "'); switchMenu('theResultLatex" << CGI::GlobalFormulaIdentifier << "');\"\">LaTeX show/hide</button>";
   return out.str();
 }
 
@@ -7197,36 +7197,36 @@ void WeylGroup::DrawRootSystem
 //  std::cout << "<hr>the min length is: " << minLength.ElementToString();
   Rational tempRat;
   if (bluePoint!=0)
-  { output.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
-    output.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
-    output.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0,0,255));
+  { output.drawCircleAtVectorBuffer(*bluePoint, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
+    output.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
   }
   theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
   theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
   output.centerX[0]=300;
   output.centerY[0]=300;
   for (int i=0; i<RootSystemSorted.size; i++)
-  { int color=CGIspecificRoutines::RedGreenBlue(0, 255, 0);
+  { int color=CGI::RedGreenBlue(0, 255, 0);
     output.drawLineBetweenTwoVectorsBuffer(ZeroRoot, RootSystemSorted[i], DrawingVariables::PenStyleNormal, color);
-    output.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,255));
+    output.drawCircleAtVectorBuffer(RootSystemSorted[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,255));
     for (int j=i+1; j<RootSystemSorted.size; j++)
     { differenceRoot=RootSystemSorted[i]-RootSystemSorted[j];
       tempRat=this->RootScalarCartanRoot(differenceRoot, differenceRoot);
       if (minLength== tempRat)
-        output.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(0, 0, 255));
+        output.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255));
     }
   }
   root tempRootRat;
   for (int i=0; i<theDimension; i++)
   { tempRootRat.MakeEi(theDimension, i);
-    output.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-    output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
-    output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
   }
   std::stringstream tempStream;
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
   (this->WeylLetter, this->GetDim()) << ")";
-  output.drawTextBuffer(0, 0, tempStream.str(), 10, CGIspecificRoutines::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+  output.drawTextBuffer(0, 0, tempStream.str(), 10, CGI::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
 }
 
 int ParserNode::EvaluateDrawRootSystem
@@ -7263,7 +7263,7 @@ int ParserNode::EvaluateAnimateRootSystem
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
   int NumFrames=theNode.owner->TheObjects[theArgumentList[2]].intValue;
   if(NumFrames<1)
     NumFrames=1;
@@ -7497,7 +7497,7 @@ int ParserNode::EvaluateAnimationDots
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
   WeylGroup theWeyl;
   theWeyl.MakeArbitrary('A', 2);
   DrawOperations theDrawOps;
@@ -7541,7 +7541,7 @@ int ParserNode::EvaluateAnimationClearScreen
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
+  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
   WeylGroup theWeyl;
   theWeyl.MakeArbitrary(theWeylLetter, theDim);
   theWeyl.ComputeRho(true);
@@ -7566,7 +7566,7 @@ int ParserNode::EvaluateDrawRootSystem
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
-  CGIspecificRoutines::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
+  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
   return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
 }
 
@@ -7951,7 +7951,7 @@ int ParserNode::EvaluateDrawWeightSupport
   theOps.init();
   for (int i=0; i<theWeightsToBeDrawn.size; i++)
     theOps.drawCircleAtVectorBuffer
-    (theWeightsToBeDrawn[i], 2, DrawingVariables::PenStyleNormal, CGIspecificRoutines::RedGreenBlue(150,150,150));
+    (theWeightsToBeDrawn[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(150,150,150));
   theWeyl.DrawRootSystem(theOps, false, theGlobalVariables);
   theOps.ComputeProjectionsEiVectors();
   theGlobalVariables.theDrawingVariables.theBuffer=theOps;
@@ -8045,7 +8045,7 @@ int ParserNode::EvaluateParabolicWeylGroups
   std::stringstream out;
   for (int i=0; i<numCycles; i++, parabolicSel.incrementSelection())
   { theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl, parabolicSel, theGlobalVariables, 2000);
-    out << "<hr>" << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(theSubgroup.ElementToString());
+    out << "<hr>" << CGI::GetHtmlMathDivFromLatexFormulA(theSubgroup.ElementToString());
   }
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
@@ -8149,7 +8149,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ElementToString()
     << "\\\\";
   head << "\\end{array}";
-  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(head.str());
+  out << CGI::GetHtmlMathSpanFromLatexFormula(head.str());
   if (this->ExternalAutomorphisms.size>0)
   { out << "<br>Outer automorphisms: \n";
     MatrixLargeRational tempMat;
@@ -8160,7 +8160,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
       head2 << "a_{" << i+1 << "}&:=&" << tempMat.ElementToString(false, true) << "\\\\";
     }
     head2 << "\\end{array}";
-    out << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulA(head2.str());
+    out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->GetRho().ElementToString();
   out << "<br>The elements written with minimal # of generators:<br>";
@@ -8171,7 +8171,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
     << "\\\\";
   }
   body << "\\end{array}";
-  out << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormula(body.str());
+  out << CGI::GetHtmlMathSpanFromLatexFormula(body.str());
   output=out.str();
 }
 
@@ -8228,7 +8228,7 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   std::string fileName;
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output");
-  CGIspecificRoutines::OpenDataFileOrCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 500);
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   if (theSubgroup.size>498)
@@ -8258,7 +8258,8 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
 
 void Parser::initTestAlgebraNeedsToBeRewritten(GlobalVariables& theGlobalVariables)
 { if (this->DefaultWeylLetter=='B' && this->DefaultWeylRank==3)
-  { this->theHmm.MakeG2InB3(*this, theGlobalVariables);
+  { Parser tempParser;
+    this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
     SSalgebraModule theModule;
     std::stringstream out;
     theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
@@ -8300,28 +8301,28 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
   //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
   //ParserNode& argumentNode=theNode.owner->TheObjects[theArgumentList[0]];
-  Parser& theParser=*theNode.owner;
-  if (theParser.DefaultWeylLetter!='B' || theParser.DefaultWeylRank!=3)
+  Parser& theParseR=*theNode.owner;
+  if (theParseR.DefaultWeylLetter!='B' || theParseR.DefaultWeylRank!=3)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   roots theAlgebraWeights;
-  theParser.theHmm.GetWeightsGmodKInSimpleCoordsK(theComp.theModuleWeightsShifted, theGlobalVariables);
-  theParser.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
+  theParseR.theHmm.GetWeightsGmodKInSimpleCoordsK(theComp.theModuleWeightsShifted, theGlobalVariables);
+  theParseR.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
 
-  if (theParser.testAlgebra.theOrder.size==0)
-    theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
+  if (theParseR.testAlgebra.theOrder.size==0)
+    theParseR.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
 
   GeneralizedVermaModuleData<RationalFunction> theData;
   ElementGeneralizedVerma<RationalFunction> startingElement;
   RationalFunction RFOne, RFZero;
-  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
-  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
-  theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
+  RFZero.Nullify(theParseR.theHmm.theRange.GetRank(), &theGlobalVariables);
+  RFOne.MakeNVarConst(theParseR.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  theData.init(theParseR, &theGlobalVariables, RFOne, RFZero);
   theData.VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(3);
   startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
   std::stringstream out;
   out << "<br>the starting element is: " << startingElement.ElementToString();
-  out << startingElement.Decompose(theParser, theEigenVectors, theGlobalVariables);
+  out << startingElement.Decompose(theParseR, theEigenVectors, theGlobalVariables);
 
   theNode.ExpressionType=ParserNode::typeString;
   theNode.outputString=out.str();
@@ -8383,25 +8384,22 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   outputVectors.size=0;
   ElementGeneralizedVerma<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
-  CoefficientType tempCoeff, theCoeff, CentralCharacterActionCurrent, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
+  CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
-  int counter=0;
   ElementUniversalEnveloping abstractCasimir, embeddedCasimirNonOrdered;
   abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
   out << "<br>abstract Casimir: "
-  <<
-  CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (abstractCasimir.ElementToString(theGlobalVariables));
   theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
   embeddedCasimirNonOrdered.Simplify(theGlobalVariables);
   out << "<br> embedded Casimir non-ordered: "
-  <<
-  CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables));
   ElementUniversalEnvelopingOrdered<CoefficientType> embeddedCasimir;
   embeddedCasimir.AssignElementUniversalEnveloping(embeddedCasimirNonOrdered, theParser.testAlgebra, this->theOwner->theRingUnit, this->theOwner->theRingZero, &theGlobalVariables);
   out << "<br>the embedded Casimir is: "
-  << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (embeddedCasimir.ElementToString(theGlobalVariables));
   out << "<br>Weights of L: " << this->theOwner->theFDspaceWeights.ElementToString();
   out <<"\n<br>\nHighest weight sub: "
@@ -8440,66 +8438,34 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   precomputedChars.SetSize(this->theOwner->theFDspaceWeights.size);
   for (int k=this->theOwner->theFDspaceWeights.size-1; k>=0; k--)
   { theSub=SubSmallerCartanToLarger;
-    root tempRoot=
-    this->theOwner->theFDspaceWeights[k]
-    -
-    *this->theOwner->theFDspaceWeights.LastObject()
-    ;
+    root tempRoot=this->theOwner->theFDspaceWeights[k]- *this->theOwner->theFDspaceWeights.LastObject();
     out << "<br>\n\n weight: " << tempRoot.ElementToString();
     theParser.theHmm.theDomain.theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
     for (int l=0; l<tempRoot.size; l++)
       theSub[l]-=tempRoot[l];
     precomputedChars[k]=CentralCharacterActionAbsoluteHighestSmallerAlgebraVars;
     precomputedChars[k].Substitution(theSub);
-    out << "  Corresponding character in larger algebra coords: <br>\n"
-    << precomputedChars[k].ElementToString();
+    out << "  Corresponding character in larger algebra coords: <br>\n" << precomputedChars[k].ElementToString();
   }
   out << "<hr>";
   assert(sanityCheck1);
-  for (int k= this->theOwner->theFDspace.size-1; k>=3; k--)//; i++)
+  for (int k= this->theOwner->theFDspace.size-1; k>=0; k--)//; i++)
   { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
     std::stringstream progressReport;
-    progressReport << "Number of direct summands in the decomposition found: " << counter //;
-    << "\n Climbing up from vector: " << remainderElement.ElementToString();
-    theGlobalVariables.MakeStatusReport(progressReport.str());
-    this->ClimbUpFromVector
-      (remainderElement, currentHighestWeightElement,
-       GeneratorSequence, GeneratorPowers, theGlobalVariables);
-    progressReport << "\n Climbing up done!";
-    theGlobalVariables.MakeStatusReport(progressReport.str());
-    assert(GeneratorSequence.size==GeneratorPowers.size);
-    progressReport << "<br>\n<br>\n The climb-up sequence is: ";
-    out << "<br>\n<br>\n The climb-up sequence is: ";
-    for (int i=0; i<GeneratorSequence.size; i++)
-    { progressReport << "(generator " << GeneratorSequence.TheObjects[i] << ")^" << GeneratorPowers.TheObjects[i] << ", ";
-      out << "(generator " << GeneratorSequence.TheObjects[i] << ")^" << GeneratorPowers.TheObjects[i] << ", ";
-    }
-    theGlobalVariables.MakeStatusReport(progressReport.str());
-    out << "<br>current highest weight element:"
-    << CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-    (currentHighestWeightElement.ElementToString());
-    currentHighestWeightElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
-    out << "<br>Casimir acting on current highest: " <<
-    CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(tempElt.ElementToString());
-    bool tempBool=currentHighestWeightElement.IsProportionalTo(tempElt, CentralCharacterActionCurrent);
-    out << "<br>proportionality coefficient: " << CentralCharacterActionCurrent.ElementToString();
-    progressReport << "\n\nproportionality coefficient computed: " << CentralCharacterActionCurrent.ElementToString()
-      << ".\n\n Acting by Casimir - id (propotionality coefficient): ";
-    theGlobalVariables.MakeStatusReport(progressReport.str());
-    assert(tempBool);
+    progressReport << "Number of direct summands in the decomposition found: " << this->theOwner->theFDspace.size-1-k ;
+    progressReport << "\n\nproportionality coefficient: " << precomputedChars[k].ElementToString()
+    << ".\n\n Acting by Casimir - id (propotionality coefficient): ";
+    theGlobalVariables.MakeProgressReport(progressReport.str(), 0);
     remainderElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
     out << "<br>Casimir acting on" <<
-    CGIspecificRoutines::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(remainderElement.ElementToString())
-    << " yields " << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL(tempElt.ElementToString());
-    remainderElement*=CentralCharacterActionCurrent;
-    remainderElement-=tempElt;
+    CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(remainderElement.ElementToString())
+    << " yields " << CGI::GetHtmlMathDivFromLatexAddBeginARCL(tempElt.ElementToString());
+    remainderElement*=precomputedChars[k];
+    tempElt-=remainderElement;
+    remainderElement=tempElt;
     remainderElement.ClearDenominators(tempCoeff);
-    std::cout << "<br><br>Remaining after clearing the denominators: " << remainderElement.ElementToString();
-    counter++;
   }
-//  if (!remainderElement.IsEqualToZero())
-//  {std::cout << "<b>Something went wrong wrong wrong!!!!!!</b>";
-//  }
+  out << "<br>remainder element after the procedure: " << remainderElement.ElementToString();
   return out.str();
 }
 
@@ -8533,12 +8499,12 @@ int ParserNode::EvaluateModVermaRelations
   theNode.UEElement.GetElement()=theArgument.UEElement.GetElement();
   std::stringstream out;
   out << "The element you wanted to be modded out, before simplification: "
-  << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables))
 ;
   theNode.UEElement.GetElement().Simplify(theGlobalVariables);
   out << "<br>And after simplification: "
-  << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables))
   ;
   //Needs to be rewritten! fix it!
@@ -8611,15 +8577,14 @@ int ParserNode::EvaluateModVermaRelationsOrdered
   theNode.UEElementOrdered.GetElement()=theArgument.UEElementOrdered.GetElement();
   std::stringstream out;
   out << "The element you wanted to be modded out, before simplification: "
-  << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
-  (theNode.UEElementOrdered.GetElement().ElementToString(theGlobalVariables))
-;
+  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (theNode.UEElementOrdered.GetElement().ElementToString(theGlobalVariables));
   PolynomialRationalCoeff PolyOne;
   int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange.GetRank());
   PolyOne.MakeNVarConst(numVars, (Rational) 1);
   theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   out << "<br>And after simplification: "
-  << CGIspecificRoutines::GetHtmlMathDivFromLatexFormulaAddBeginArrayRCL
+  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElementOrdered.GetElement().ElementToString(theGlobalVariables))
   ;
   //Needs to be rewritten! fix it!
@@ -8738,6 +8703,33 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
       return false;
   }
   return true;
+}
+
+void MonomialUniversalEnveloping::SubstitutionCoefficient
+(PolynomialsRationalCoeff& theSub)
+{ if (theSub.size<1)
+    return;
+  this->Coefficient.Substitution(theSub, theSub[0].NumVars);
+  this->SetNumVariables(theSub[0].NumVars);
+}
+
+void ElementUniversalEnveloping::SubstitutionCoefficients
+(PolynomialsRationalCoeff& theSub, GlobalVariables* theContext)
+{ ElementUniversalEnveloping endResult;
+  MonomialUniversalEnveloping currentMon;
+  endResult.Nullify(*this->owner);
+  for (int i=0; i<this->size; i++)
+  { currentMon=this->TheObjects[i];
+    currentMon.SubstitutionCoefficient(theSub);
+    endResult.AddMonomial(currentMon);
+  }
+  if (theContext!=0)
+    endResult.Simplify(*theContext);
+  else
+  { GlobalVariables theGlobalVariables;
+    endResult.Simplify(theGlobalVariables);
+  }
+  this->operator=(endResult);
 }
 
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)

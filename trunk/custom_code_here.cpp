@@ -9107,11 +9107,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("adjointRepresentationAction",
    "(UE, UE)",
-   "<b>Experimental, please don't use. The implementation works horribly slowly at the moment. \
+   "<b>Experimental. The implementation works horribly slowly at the moment. \
    Might be fixed in the future, low priority.</b>\
     Act  by the first argument using the adjoint representation on the second argument. \
    For example, if u_1, u_2 and u_3 are of first degree, adjointRepresentationAction(u_1u_2,u_3) equals [u_1,[u_2,u_3]]. \
-   To avoid confusion, we note that adjointRepresentationAction(x,y) is generally NOT equal to [x,y]. ",
+   To avoid confusion, we note that adjointRepresentationAction(x,y) is generally NOT equal to [x,y]. The following example \
+   computes the action of the Casimir element on the first generator of the Chevalley-Weyl basis of \
+   the ambient Lie algebra.",
    "adjointRepresentationAction(c, g_1)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateAdjointAction

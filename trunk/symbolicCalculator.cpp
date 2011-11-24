@@ -299,14 +299,164 @@ void Computation::ParseFillDictionary
 }
 
 
-int main()
-{ std::string input;
-  input =  "asdfja;lsf lajerouw23ru o ap091u4u  jlajf0o u83249yr oqp opqwur slkjfhkh fdla;'agjf[aeroj";
-  std::cout << "\nYour input:  " << input;
-  Computation theComputation;
-  std::vector<Expression> tempExp;
-  theComputation.Evaluate(input, tempExp);
-  std::cout << "\n" << theComputation.ElementToString();
-  return 0;
+#include <sys/time.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <signal.h>
+
+
+void getPath(char* path, std::string& output)
+{ if (path==0)
+    return;
+  int length=0;
+  output= path;
+  while (output[length]!=0 && length<150)
+    length++;
+  for (int i=length-1; i>=0; i--)
+    if (output[i]=='/')
+    { output.resize(i+1);
+      return;
+    }
 }
 
+timeval ComputationStartTime, lastTimeMeasure;
+
+double GetElapsedTimeInSeconds()
+{ gettimeofday(&lastTimeMeasure, NULL);
+  int miliSeconds =(lastTimeMeasure.tv_sec- ComputationStartTime.tv_sec)*1000+(lastTimeMeasure.tv_usec- ComputationStartTime.tv_usec)/1000;
+  return ((double) miliSeconds)/1000;
+}
+
+bool AttemptToCivilize(std::string& readAhead, std::stringstream& out)
+{ if (readAhead[0]!='%' && readAhead[0]!='&' && readAhead[0]!='+')
+  { out << readAhead[0];
+    return true;
+  }
+  if (readAhead=="&")
+  { out << " ";
+    return true;
+  }
+  if (readAhead=="+")
+  { out << " ";
+    return true;
+  }
+  if (readAhead=="%2B")
+  { out << "+";
+    return true;
+  }
+  if (readAhead=="%28")
+  { out << "(";
+    return true;
+  }
+  if (readAhead=="%29")
+  { out << ")";
+    return true;
+  }
+  if (readAhead=="%5B")
+  { out << "[";
+    return true;
+  }
+  if (readAhead=="%5D")
+  { out << "]";
+    return true;
+  }
+  if (readAhead=="%2C")
+  { out << ",";
+    return true;
+  }
+  if (readAhead=="%7B")
+  { out << "{";
+    return true;
+  }
+  if (readAhead=="%3B")
+  { out << ";";
+    return true;
+  }
+  if (readAhead=="%3C")
+  { out << "<";
+    return true;
+  }
+  if (readAhead=="%3E")
+  { out << ">";
+    return true;
+  }
+  if (readAhead=="%2F")
+  { out << "/";
+    return true;
+  }
+  if (readAhead=="%3A")
+  { out << ":";
+    return true;
+  }
+  if (readAhead=="%5E")
+  { out << "^";
+    return true;
+  }
+  if (readAhead=="%5C")
+  { out << "\\";
+    return true;
+  }
+  if (readAhead=="%26")
+  { out << "&";
+    return true;
+  }
+  if (readAhead=="%7D")
+  { out << "}";
+    return true;
+  }
+  if (readAhead=="%0D%0A")
+  { return true;
+  }
+  return false;
+}
+
+void CivilizeCGIString(std::string& input, std::string& output)
+{ std::string readAhead;
+  std::stringstream out;
+  int inputSize=(signed) input.size();
+  for (int i=0; i<inputSize; i++)
+  { readAhead="";
+    for (int j=0; j<6; j++)
+    { if (i+j<inputSize)
+        readAhead.push_back(input[i+j]);
+      if (AttemptToCivilize(readAhead, out))
+      { i+=j;
+        break;
+      }
+    }
+  }
+  output=out.str();
+}
+
+int main(int argc, char **argv)
+{ std::string inputString, inputPath;
+  std::string tempS;
+	std::cin >> inputString;
+//  gettimeofday(&ComputationStartGlobal, NULL);
+	if (inputString=="")
+    inputString=getenv("QUERY_STRING");
+	getPath(argv[0], inputPath);
+	std::cout << "Content-Type: text/html\n\n";
+  std::cout << "<html><title>Symbolic calculator updated " << __DATE__ << "</title> <script src=\"/easy/load.js\"></script><body> ";
+  CivilizeCGIString(inputString, inputString);
+  int numBogusChars= 4;
+  for (unsigned i=0; i<inputString.size()-numBogusChars; i++)
+    inputString[i]=inputString[i+numBogusChars];
+  inputString.resize(inputString.size()-numBogusChars);
+
+  std::string beginMath="<div class=\"math\" scale=\"50\">";
+  std::string endMath ="</div>";
+  std::cout << "\n<form method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/symbolicCalculator\">\n" ;
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"in1\" id=\"in1\" onkeypress=\"if (event.keyCode == 13)"
+  << " { this.form.submit(); return false;}\">";
+  std::cout << inputString;
+  std::cout << "</textarea>\n<br>\n";
+  std::cout << "<input type=\"submit\" name=\"\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
+//  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
+  std::cout << "\n</form>";
+  std::cout << "<hr>result: " << inputString;
+  std::cout << "</body></html>";
+
+	return 0;   // To avoid Apache errors.
+}

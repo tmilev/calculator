@@ -122,7 +122,7 @@ void static_html5(std::stringstream& output){
 output << " <!>\n";
 output << "   <script language=\"javascript\">\n";
 output << "     //The script is courtesy of Madan Chaudhary. The original code was hosted at http://simpleandeasycodes.blogspot.com/ .\n";
-output << "     //The code is slightly modified from the original, and will continue to be modified.\n";
+output << "     //The code is very slightly modified from the original, but will continue to be modified.\n";
 output << "     //Many thanks to Madan Chaudhary for allowing the use of his code!\n";
 output << "     //****************************************************************************\n";
 output << "     function actb(obj,ca){\n";
@@ -132,7 +132,7 @@ output << "     this.saec_lim = 4;    // Number of elements autocomplete can sho
 output << "     this.saec_firstText = false; // should the auto complete be limited to the beginning of keyword?\n";
 output << "     this.saec_mouse = true; // Enable Mouse Support\n";
 output << "     this.saec_delimiter = new Array(';',' ');  // Delimiter for multiple autocomplete. Set it to empty array for single autocomplete\n";
-output << "     this.saec_startcheck = 1; // Show widget only after this number of characters is typed in.\n";
+output << "     this.saec_startcheck = 2; // Show widget only after this number of characters is typed in.\n";
 output << "     /* ---- Public Variables ---- */\n";
 output << "     \n";
 output << "     //Customize style according to your requirement\n";

@@ -5006,7 +5006,8 @@ void PolynomialRationalCoeff::MakeLinPolyFromInt(int theDimension, int x1, int x
 void PolynomialRationalCoeff::operator=(const std::string& tempS)
 { Parser theParser;
   GlobalVariables tempGV;
-  theParser.ParseEvaluateAndSimplify(tempS, false, tempGV);
+  PolynomialOutputFormat tempFormat;
+  theParser.ParseEvaluateAndSimplify(tempS, false, tempGV, tempFormat);
   if (theParser.theValue.ExpressionType==ParserNode::typePoly)
     this->Assign(theParser.theValue.polyValue.GetElement());
   else
@@ -5196,6 +5197,7 @@ PolynomialOutputFormat::PolynomialOutputFormat(const std::string& AlphabetBase1,
 PolynomialOutputFormat::PolynomialOutputFormat()
 { this->MakeAlphabetxi();
   this->ExtraLinesCounterLatex=0;
+  this->flagUseCalculatorFormatForUEOrdered=true;
 }
 
 std::string PolynomialOutputFormat::GetLetterIndex(int index)const
@@ -23061,7 +23063,7 @@ void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVaria
 }
 
 std::string Parser::ParseEvaluateAndSimplifyPart2
-(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { this->Evaluate(theGlobalVariables);
   if (!this->theValue.UEElement.IsZeroPointer())
     this->theValue.UEElement.GetElement().Simplify(theGlobalVariables);
@@ -23070,14 +23072,14 @@ std::string Parser::ParseEvaluateAndSimplifyPart2
   std::stringstream out;
   if (useHtml)
     out << "<DIV class=\"math\" scale=\"50\">\\begin{eqnarray*}&& " << this->StringBeingParsed << "\\end{eqnarray*} = </div>";
-  out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables, true);
+  out << this->theValue.ElementToStringValueAndType(true, theGlobalVariables, true, theFormat);
   return out.str();
 }
 
 std::string Parser::ParseEvaluateAndSimplify
-(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { this->ParseEvaluateAndSimplifyPart1(input, theGlobalVariables);
-  return this->ParseEvaluateAndSimplifyPart2(input, useHtml, theGlobalVariables);
+  return this->ParseEvaluateAndSimplifyPart2(input, useHtml, theGlobalVariables, theFormat);
 }
 
 int DebugCounter=-1;
@@ -23317,7 +23319,7 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenVariable: break;
     case Parser::tokenPartialDerivative: break;
     case Parser::tokenX: break;
-    case Parser::tokenC: this->ExpressionType=this->typeUEelement; this->UEElement.GetElement().MakeCasimir(*this->ContextLieAlgebra, 0, theGlobalVariables); break;
+    case Parser::tokenC: ParserNode::EvaluateMakeCasimir(*this, this->children, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
@@ -23482,7 +23484,9 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
   if (leftNode.Operation==Parser::tokenF)
   { if (theIndex>0 && theIndex<=this->ContextLieAlgebra->GetNumPosRoots())
       theIndex+= this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
-    else if (theIndex<=0)
+    else if (theIndex==0)
+      theIndex=this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
+    else if (theIndex<0)
       theIndex+= this->ContextLieAlgebra->GetNumPosRoots();
     else
       theIndex--;
@@ -23821,7 +23825,7 @@ ParserNode::ParserNode()
   this->Clear();
 }
 
-void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
+void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream out; std::string tempS;
   std::string htmlSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
@@ -23851,7 +23855,7 @@ void Parser::ElementToString(bool includeLastNode, std::string& output, bool use
   if(!includeLastNode)
     NumDisplayedNodes--;
   for (int i=0; i<NumDisplayedNodes; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables);
+  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, theFormat);
     out << " Index: " << i << " " << tempS << ";\n";
     if (useHtml)
       out << "<br>";
@@ -23859,7 +23863,7 @@ void Parser::ElementToString(bool includeLastNode, std::string& output, bool use
   if (useHtml)
     out << "<br><br>";
   if (includeLastNode)
-    out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables, false);
+    out << "\n\nValue: " << this->theValue.ElementToStringValueAndType(false, theGlobalVariables, false, theFormat);
 
 //  this->WeylAlgebraValue.ComputeDebugString(false, false);
 //  this->LieAlgebraValue.ComputeDebugString(this->theLieAlgebra, false, false);
@@ -23945,7 +23949,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
   return out.str();
 }
 
-void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables)
+void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream out; std::string tempS;
   owner->TokenToStringStream(out, this->Operation);
   out << "; #implied vars: " << this->impliedNumVars;
@@ -23954,8 +23958,7 @@ void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobal
     for (int i=0; i<this->children.size; i++)
       out << this->children.TheObjects[i] << ", ";
   }
-  PolynomialOutputFormat PolyFormatLocal;
-  out << this->ElementToStringValueAndType(false, theGlobalVariables, false);
+  out << this->ElementToStringValueAndType(false, theGlobalVariables, false, theFormat);
   output=out.str();
 }
 
@@ -24416,7 +24419,7 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit
         if (!this->owner->AreOrderedProperly(output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
         { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon, theGlobalVariables))
           { output.AddMonomialNoCleanUpZeroCoeff(tempMon);
-            tempMon.ComputeDebugString(theGlobalVariables);
+            //tempMon.ComputeDebugString(theGlobalVariables);
             reductionOccurred=true;
             break;
           }
@@ -24424,7 +24427,7 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit
           { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer2);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
-            output.ComputeDebugString(theGlobalVariables);
+//            output.ComputeDebugString(theGlobalVariables);
             reductionOccurred=true;
             break;
           }
@@ -24432,7 +24435,7 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit
           { output.TheObjects[IndexlowestNonSimplified].CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer2);
             for (int j=0; j<buffer2.size; j++)
               output.AddMonomialNoCleanUpZeroCoeff(buffer2.TheObjects[j]);
-            output.ComputeDebugString(theGlobalVariables);
+//            output.ComputeDebugString(theGlobalVariables);
             reductionOccurred=true;
             break;
           }
@@ -24441,7 +24444,7 @@ void MonomialUniversalEnveloping::SimplifyAccumulateInOutputNoOutputInit
       output.PopIndexSwapWithLastHash(IndexlowestNonSimplified);
     else
       IndexlowestNonSimplified++;
-    output.ComputeDebugString(theGlobalVariables);
+//    output.ComputeDebugString(theGlobalVariables);
   }
   output.CleanUpZeroCoeff();
 }
@@ -24472,12 +24475,12 @@ bool MonomialUniversalEnveloping::SwitchConsecutiveIndicesIfTheyCommute
   if (this->owner->OppositeRootSpaces.TheObjects[leftGenerator]==rightGenerator)
     return false;
   if (this->owner->theLiebracketPairingCoefficients.elements[leftGenerator][rightGenerator].IsEqualToZero())
-  { this->ComputeDebugString(theGlobalVariables);
+  { //this->ComputeDebugString(theGlobalVariables);
     output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
     output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
     output.Nullify(this->Coefficient.NumVars, *this->owner);
     output.Coefficient=this->Coefficient;
-    output.ComputeDebugString(theGlobalVariables);
+    //output.ComputeDebugString(theGlobalVariables);
     for (int i=0; i<theLeftIndex; i++)
       output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
     output.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[theLeftIndex+1], this->Powers.TheObjects[theLeftIndex+1]);
@@ -24840,7 +24843,8 @@ void ElementUniversalEnveloping::AssignElementCartan(const root& input, int numV
     }
 }
 
-void ElementUniversalEnveloping::ElementToString(std::string& output, bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables)
+void ElementUniversalEnveloping::ElementToString
+(std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)
@@ -24848,7 +24852,7 @@ void ElementUniversalEnveloping::ElementToString(std::string& output, bool useLa
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping& current=this->TheObjects[i];
-    tempS=current.ElementToString(false, includeEpsilonCoords, theGlobalVariables);
+    tempS=current.ElementToString(useRootIndices, includeEpsilonCoords, theGlobalVariables, theFormat);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')
@@ -24872,16 +24876,15 @@ void MonomialUniversalEnveloping::SetNumVariables(int newNumVars)
 }
 
 std::string MonomialUniversalEnveloping::ElementToString
-(bool useLatex, bool useEpsilonCoords, GlobalVariables& theGlobalVariables)
+(bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream out;
   std::string tempS;
-  PolynomialOutputFormat PolyFormatLocal, formatUE("g", "h");
   if (this->owner==0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->Coefficient.IsEqualToZero())
     tempS="0";
   else
-    tempS = this->Coefficient.ElementToString(PolyFormatLocal);
+    tempS = this->Coefficient.ElementToString(theFormat);
   if (this->generatorsIndices.size>0)
   { if (tempS=="1")
       tempS="";
@@ -24895,16 +24898,16 @@ std::string MonomialUniversalEnveloping::ElementToString
   for (int i=0; i<this->generatorsIndices.size; i++)
   { PolynomialRationalCoeff& thePower=this->Powers.TheObjects[i];
     int theIndex=this->generatorsIndices.TheObjects[i];
-    tempS=this->owner->GetLetterFromGeneratorIndex(theIndex, useLatex, useEpsilonCoords, formatUE, theGlobalVariables);
+    tempS=this->owner->GetLetterFromGeneratorIndex(theIndex, useRootIndices, useEpsilonCoords, theFormat, theGlobalVariables);
     //if (thePower>1)
     //  out << "(";
     out << tempS;
     if (!thePower.IsEqualToOne())
     { out << "^";
-     // if (useLatex)
+     // if (useRootIndices)
       out << "{";
-      out << thePower.ElementToString(PolyFormatLocal);
-      //if (useLatex)
+      out << thePower.ElementToString(theFormat);
+      //if (useRootIndices)
       out << "}";
     }
     //if (thePower>1)
@@ -24917,7 +24920,7 @@ void MonomialUniversalEnveloping::ModOutVermaRelationS(bool SubHighestWeightWith
 { int numPosRoots=this->owner->theWeyl.RootsOfBorel.size;
   int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
   int theNumVars=this->Coefficient.NumVars;
-  this->ComputeDebugString(theGlobalVariables);
+//  this->ComputeDebugString(theGlobalVariables);
   if (theNumVars<theDimension && !SubHighestWeightWithZeroes)
   { this->SetNumVariables(theDimension);
     theNumVars=theDimension;
@@ -24991,7 +24994,7 @@ void ParserNode::Clear()
 }
 
 std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
-(int theIndex, bool useLatex, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+(int theIndex, bool useRootIndices, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { int numPosRoots= this->theWeyl.RootsOfBorel.size;
   int rank= this->GetRank();
   std::stringstream out;
@@ -25000,8 +25003,8 @@ std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
     int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(theIndex);
     out << theFormat.alphabetBases[0];
     if (!useEpsCoords)
-    { if (useLatex)
-        out << "^{\\alpha_{" << displayIndex << "}}";
+    { if (useRootIndices)
+        out << "_{\\alpha_{" << displayIndex << "}}";
       else
         out << "_{" << displayIndex << "}";
     } else
@@ -25012,7 +25015,7 @@ std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
   } else
   { out << theFormat.alphabetBases[1];
     if(!useEpsCoords)
-    { if (useLatex)
+    { if (useRootIndices)
         out << "_{\\alpha_{" << theIndex-numPosRoots+1 << "}}";
       else
         out << "_{" << theIndex-numPosRoots+1 << "}";
@@ -25248,7 +25251,7 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
     tempElt2*=tempRat;
     *this+=tempElt2;
   }
-  this->ComputeDebugString(theGlobalVariables);
+//  this->ComputeDebugString(theGlobalVariables);
   out << "\n" << this->DebugString;
   this->DebugString=out.str();
 /*  for (int i=0; i<theDimension; i++)
@@ -25834,6 +25837,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered
 //  int numDomainPosRoots= theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
   int numRangePosRoots= theParser.theHmm.theRange.theWeyl.RootsOfBorel.size;
   //int dimQuotient=numRangePosRoots-theParser.theHmm.theDomain.theWeyl.RootsOfBorel.size;
+  PolynomialOutputFormat tempFormat;
   this->theSystem.init(0,0);
   this->theOperators.size=0;
   this->theExponentShifts.size=0;
@@ -25842,12 +25846,14 @@ std::string EigenVectorComputation::ComputeAndReturnStringNonOrdered
     tempElt1.LieBracketOnTheRight(theElt, tempElt2);
     tempElt2.Simplify(theGlobalVariables);
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
-    out << "[" << tempElt1.ElementToString(true, theGlobalVariables) << "," << theElt.ElementToString(true, theGlobalVariables) << "]=" << tempElt2.ElementToString(true, theGlobalVariables);
+    out << "[" << tempElt1.ElementToString(true, theGlobalVariables, tempFormat) << ","
+    << theElt.ElementToString(true, theGlobalVariables, tempFormat) << "]="
+    << tempElt2.ElementToString(true, theGlobalVariables, tempFormat);
     out << "\\end{eqnarray*}</div>";
     tempElt2.ModOutVermaRelationS(theGlobalVariables);
     out << "mod Verma rels:";
     out << "<div class=\"math\" scale=\"50\">\\begin{eqnarray*}&& ";
-    out << tempElt2.ElementToString(true, theGlobalVariables);
+    out << tempElt2.ElementToString(true, theGlobalVariables, tempFormat);
     out << "\\end{eqnarray*}</div>";
     this->DetermineEquationsFromResultLieBracketEquationsPerTarget(theParser, theElt, tempElt2, out, theGlobalVariables);
   }
@@ -26270,7 +26276,7 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
               if (k>= theHmm.theDomain.GetNumPosRoots()+theHmm.theDomain.GetRank())
                 displayString << "f_{" << k+(-theHmm.theDomain.GetNumGenerators()+1+theHmm.theRange.GetNumPosRoots()) << "}=";
               if (k< theHmm.theDomain.GetNumPosRoots()+theHmm.theDomain.GetRank() && k>=theHmm.theDomain.GetNumPosRoots())
-                displayString << "f_{0," << k-theHmm.theDomain.GetNumPosRoots() << "}=f_{" << k+theHmm.theRange.GetNumPosRoots()+1-theHmm.theDomain.GetNumPosRoots() << "}=";
+                displayString << "f_{" << k+theHmm.theRange.GetNumPosRoots()+1-theHmm.theDomain.GetNumPosRoots() << "}=";
               if (k< theHmm.theDomain.GetNumPosRoots())
                 displayString << "f_{" << -theHmm.theRange.GetNumPosRoots()+k<< "}=";
               out << "<tr><td>" << displayString.str() << "</td><td>" << theHmm.imagesAllChevalleyGenerators.TheObjects[k].ElementToStringNegativeRootSpacesFirst
@@ -26287,7 +26293,7 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
   for (int k=0; k<theHmm.GmodK.size; k++)
   { std::stringstream displayString;
     if (k==theHmm.GmodK.size/2)
-      displayString << "f_{0," << theHmm.theRange.GetRank() << "}=f_{" << theHmm.theRange.GetNumPosRoots()+theHmm.theRange.GetRank() << "}=";
+      displayString << "f_{0}=";
     if (k>theHmm.GmodK.size/2)
       displayString << "f_{" << k-theHmm.GmodK.size/2 << "}=";
     if (k<theHmm.GmodK.size/2)
@@ -26592,7 +26598,8 @@ void SSalgebraModule::mapInvariantsToEmbedding
     { this->mapMonomialToEmbedding(currentPoly.TheObjects[k], currentElt, owner, out, theGlobalVariables);
     }
 //    currentElt.Simplify();
-    out << "<br>The substitution: <div class=\"math\" scale=\"50\">\\begin{eqnarray*}" << currentPoly.ElementToString(false, PolyFormatLocal) << "&\\to&" << currentElt.ElementToString(true, theGlobalVariables) << "\\end{eqnarray*}</div>";
+    out << "<br>The substitution: <div class=\"math\" scale=\"50\">\\begin{eqnarray*}" << currentPoly.ElementToString(false, PolyFormatLocal)
+    << "&\\to&" << currentElt.ElementToString(true, theGlobalVariables, PolyFormatLocal) << "\\end{eqnarray*}</div>";
   }
 }
 
@@ -26614,7 +26621,7 @@ void SSalgebraModule::mapMonomialToEmbedding
     for (int j=0; j<input.NumVariables; j++)
       if (input.degrees[j]>0)
       { tempElt.AssignElementLieAlgebra(this->moduleElementsEmbedded.TheObjects[permutationMap.TheObjects[j]], 0, owner);
-        out << "<br>current generator: " << tempElt.ElementToString(false, theGlobalVariables);
+        out << "<br>current generator: " << tempElt.ElementToString(false, theGlobalVariables, PolyFormatLocal);
         MathRoutines::RaiseToPower(tempElt, input.degrees[j], theUEUnit);
         currentContribution*=tempElt;
       }
@@ -26677,6 +26684,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   theBracketsOfTheElements.size=0;
   theSel.IncrementSubsetFixedCardinality(theDegree);
   int numVars=this->GetRank();
+  PolynomialOutputFormat tempFormat;
   for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
   { Accum.MakeConst((Rational) 1, 0, *this);
     for (int j=0; j<theSel.elements.size; j++)
@@ -26705,9 +26713,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators.TheObjects[j].ElementToString(theGlobalVariables) << "," << Accum.ElementToString(theGlobalVariables) << "]=";
+      out << "[" << theGenerators.TheObjects[j].ElementToString(theGlobalVariables, tempFormat) << "," << Accum.ElementToString(theGlobalVariables, tempFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ElementToString(theGlobalVariables);
+      out << currentOutput.ElementToString(theGlobalVariables, tempFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -26719,7 +26727,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis.TheObjects[i].ElementToString(false, false, theGlobalVariables) << ", ";
+    out << theMonBasis.TheObjects[i].ElementToString(false, false, theGlobalVariables, tempFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
@@ -26745,7 +26753,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   { List<RationalFunction>& currentEigen=theEigenVectors.TheObjects[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ElementToString(theGlobalVariables);
+    out << "<br>" << tempElt.ElementToString(theGlobalVariables, tempFormat);
   }
 }
 
@@ -26781,6 +26789,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   theVP.PartitioningRoots.SetSize(numGenerators);
   List<ElementUniversalEnveloping> generatorsBeingActedOn;
   generatorsBeingActedOn.SetSize(numGenerators);
+  PolynomialOutputFormat tempFormat;
   theVP.PartitioningRoots.operator=(this->theWeyl.RootsOfBorel);
   out << "<br>" << theWeight.ElementToString() << "<br> the H's: " << theHs.ElementToString();
   out << "<br> Partitioning roots: " << theVP.PartitioningRoots.ElementToString();
@@ -26860,9 +26869,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators.TheObjects[j].ElementToString(theGlobalVariables) << "," << Accum.ElementToString(theGlobalVariables) << "]=";
+      out << "[" << theGenerators.TheObjects[j].ElementToString(theGlobalVariables, tempFormat) << "," << Accum.ElementToString(theGlobalVariables, tempFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ElementToString(theGlobalVariables);
+      out << currentOutput.ElementToString(theGlobalVariables, tempFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -26874,7 +26883,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis.TheObjects[i].ElementToString(false, false, theGlobalVariables) << ", ";
+    out << theMonBasis.TheObjects[i].ElementToString(false, false, theGlobalVariables, tempFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
@@ -26891,16 +26900,14 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   oneRF.MakeNVarConst(numVars, (Rational) 1, &theGlobalVariables);
   minusOneRF.MakeNVarConst(numVars, (Rational) -1, &theGlobalVariables);
   zeroRF.MakeNVarConst(numVars, (Rational) 0, &theGlobalVariables);
-
   theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
   out << "<br> the dim of the eigen space: " << theEigenVectors.size;
   rootPoly tempProot;
-
   for (int i=0; i<theEigenVectors.size; i++)
   { List<RationalFunction>& currentEigen=theEigenVectors.TheObjects[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ElementToString(theGlobalVariables);
+    out << "<br>" << tempElt.ElementToString(theGlobalVariables, tempFormat);
   }
 }
 
@@ -26909,6 +26916,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
 { output.size=0;
   roots PosRootsEmbeddings, PosRootsProjections;
   std::stringstream out;
+  PolynomialOutputFormat tempFormat;
   int theDimension=inputHmm.theRange.theWeyl.CartanSymmetric.NumRows;
   int theDomainDimension= inputHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
   int numPosRootsDomain=inputHmm.theDomain.theWeyl.RootsOfBorel.size;
@@ -26939,7 +26947,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
     currentMon.Coefficient.MakeNVarConst((int)theDimension, tempRat);
     for (int j=theVP.thePartitions.TheObjects[i].size-1; j>=0; j--)
       currentMon.MultiplyByGeneratorPowerOnTheRight(inputHmm.theRange.RootToIndexInUE(-inputHmm.theRange.theWeyl.RootsOfBorel.TheObjects[j]), theVP.thePartitions.TheObjects[i].TheObjects[j]);
-    out << currentMon.ElementToString(false, false, theGlobalVariables) << "<br>" ;
+    out << currentMon.ElementToString(false, false, theGlobalVariables, tempFormat) << "<br>" ;
     tempElt.Nullify(inputHmm.theRange);
     tempElt.AddOnTopHash(currentMon);
     output.TheObjects[i]=tempElt;
@@ -26959,7 +26967,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
   { List<ElementUniversalEnveloping>& currentTargets= targets.TheObjects[i];
     List<ElementUniversalEnveloping>& currentTargetsNoMod= targetsNoMod.TheObjects[i];
     theSimpleGenerator.AssignElementLieAlgebra(inputHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theDimension, inputHmm.theRange);
-    theSimpleGenerator.ComputeDebugString(theGlobalVariables);
+    theSimpleGenerator.ComputeDebugString(theGlobalVariables, tempFormat);
     out << "Generator number " << i+1 << ": " << beginMath;
     for (int j=0; j<output.size; j++)
     { theSimpleGenerator.LieBracketOnTheRight(output.TheObjects[j], tempElt);
@@ -26967,12 +26975,12 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
       currentTargetsNoMod.AddOnTop(tempElt);
       tempElt.ModOutVermaRelationS(theGlobalVariables);
       currentTargets.AddOnTop(tempElt);
-      out << tempElt.ElementToString(theGlobalVariables) << ", \\quad ";
+      out << tempElt.ElementToString(theGlobalVariables, tempFormat) << ", \\quad ";
     }
     out << endMath << "\n<br>";
     out << "Elements before modding out: " << beginMath;
     for (int j=0; j<output.size; j++)
-      out << currentTargetsNoMod.TheObjects[j].ElementToString(theGlobalVariables) << ", \\quad ";
+      out << currentTargetsNoMod.TheObjects[j].ElementToString(theGlobalVariables, tempFormat) << ", \\quad ";
     out << endMath << "\n<br>";
     List<rootPoly> tempList;
     //Let the monomials corresponding to the given partition be m_1, \dots, m_l
@@ -27032,7 +27040,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
           if (tempS!="1")
             out << "(" << tempS << ")";
         }
-        out << output.TheObjects[j].ElementToString(theGlobalVariables);
+        out << output.TheObjects[j].ElementToString(theGlobalVariables, tempFormat);
         tempEltOrdered.AssignElementUniversalEnveloping(output.TheObjects[j], theOwner, unitPoly, zeroPolynomial, &theGlobalVariables);
         tempRatRoot.TheObjects[j].GetNumerator(tempP);
         tempP.Substitution(theSub, theDimension, (Rational) 1);
@@ -27041,7 +27049,8 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
       AccumOrdered.operator+=(tempEltOrdered);
     }
     out << endMath << "<br>";
-    out << "Corresponding ordered expression: " << "<div class=\"math\">\\begin{eqnarray*}&& " << AccumOrdered.ElementToString(true, polyformatLocal, theGlobalVariables) << "\\end{eqnarray*}</div><br>";
+    out << "Corresponding ordered expression: " << "<div class=\"math\">\\begin{eqnarray*}&& " <<
+    AccumOrdered.ElementToString(true, true, polyformatLocal, theGlobalVariables) << "\\end{eqnarray*}</div><br>";
   }
   return out.str();
 }
@@ -27126,12 +27135,12 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
       currentTargetsNoMod.AddOnTop(tempElt);
       tempElt.ModOutVermaRelationS(false, theSub, &theGlobalVariables, polyOne);
       currentTargets.AddOnTop(tempElt);
-      out << tempElt.ElementToString(theGlobalVariables) << ", \\quad ";
+      out << tempElt.ElementToString(polyFormatLocal, theGlobalVariables) << ", \\quad ";
     }
     out << endMath << "\n<br>";
     out << "Elements before modding out: " << beginMath;
     for (int j=0; j<output.size; j++)
-      out << currentTargetsNoMod.TheObjects[j].ElementToString(theGlobalVariables) << ", \\quad ";
+      out << currentTargetsNoMod.TheObjects[j].ElementToString(polyFormatLocal,theGlobalVariables) << ", \\quad ";
     out << endMath << "\n<br>";
     List<rootPoly> tempList;
     //Let the monomials corresponding to the given partition be m_1, \dots, m_l
@@ -27183,7 +27192,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
           if (tempS!="1")
             out << "(" << tempS << ")";
         }
-        out << output.TheObjects[j].ElementToString(theGlobalVariables);
+        out << output.TheObjects[j].ElementToString(polyFormatLocal,theGlobalVariables);
       }
     }
     out << endMath << "<br>";
@@ -27191,7 +27200,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeightConventionOrdered
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempOElt;
   for (int i=0; i<theOwner.theOrder.size; i++)
   { tempOElt.AssignElementLieAlgebra(theOwner.theOrder.TheObjects[i], polyOne, polyZero, theOwner);
-    out << "<br>" << tempOElt.ElementToString(true, polyFormatLocal, theGlobalVariables);
+    out << "<br>" << tempOElt.ElementToString(true, true, polyFormatLocal, theGlobalVariables);
     out << " = " << theOwner.theOrder.TheObjects[i].ElementToStringNegativeRootSpacesFirst
     (true, false, inputHmm.theRange, polyFormatUE, theGlobalVariables);
   }
@@ -27463,37 +27472,38 @@ bool ElementSimpleLieAlgebra::IsACoeffOneChevalleyGenerator(int& outputGenerator
   return true;
 }
 
-std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables)
+std::string ParserNode::ElementToStringValueOnlY
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream LatexOutput;
-  PolynomialOutputFormat PolyFormatLocal;
-//  PolyFormatLocal.alphabet.TheObjects[0]="z";
-//  PolyFormatLocal.alphabet.TheObjects[1]="x";
   int i;
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
     case ParserNode::typeRational: LatexOutput << this->rationalValue.ElementToString(); break;
-    case ParserNode::typePoly: LatexOutput << this->polyValue.GetElement().ElementToString(PolyFormatLocal); break;
-    case ParserNode::typeRationalFunction: LatexOutput << this->ratFunction.GetElement().ElementToString(PolyFormatLocal); break;
+    case ParserNode::typePoly: LatexOutput << this->polyValue.GetElement().ElementToString(theFormat); break;
+    case ParserNode::typeRationalFunction: LatexOutput << this->ratFunction.GetElement().ElementToString(theFormat); break;
     case ParserNode::typeUEElementOrdered:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->UEElementOrdered.GetElement().ElementToString(true, PolyFormatLocal, theGlobalVariables)
+      << this->UEElementOrdered.GetElement().ElementToString
+      (true, theFormat.flagUseCalculatorFormatForUEOrdered, theFormat, theGlobalVariables)
       << "\n\\end{array}";
       break;
     case ParserNode::typeUEelement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->UEElement.GetElement().ElementToString(theGlobalVariables)
-      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables) << "\n\\end{array}";
+      << this->UEElement.GetElement().ElementToString(theGlobalVariables, theFormat)
+      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, false, theGlobalVariables, theFormat) << "\n\\\\\n"
+      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables, theFormat) << "\n\\\\\n"
+      << "\n\\end{array}";
       break;
     case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
-    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, PolyFormatLocal); break;
+    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
-//    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, PolyFormatLocal); break;
+//    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;
       if (RecursionDepth<=maxRecursionDepth)
         for (i=0; i<this->children.size; i++)
-        { LatexOutput << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
+        { LatexOutput << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, theFormat);
           if (i!=this->children.size-1)
             LatexOutput << ",";
         }
@@ -27507,10 +27517,9 @@ std::string ParserNode::ElementToStringValueOnlY(bool useHtml, int RecursionDept
 }
 
 std::string ParserNode::ElementToStringValueAndType
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString)
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
 { std::stringstream out;
-  PolynomialOutputFormat PolyFormatLocal;
-  std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables);
+  std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, theFormat);
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex:  out << " an integer of value: "; break;
     case ParserNode::typeRational: out << " a rational number of value: "; break;
@@ -27552,7 +27561,8 @@ std::string ParserNode::ElementToStringValueAndType
     RecursionDepth++;
     if (RecursionDepth<=maxRecursionDepth)
       for (int i=0; i<this->children.size; i++)
-        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, displayOutputString);
+        out << "<br>Element of index " << i+1 << ":" << this->owner->TheObjects[this->children.TheObjects[i]].ElementToStringValueAndType
+        (useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, displayOutputString, theFormat);
   }
   return out.str();
 }
@@ -28169,7 +28179,9 @@ std::string TranslationFunctorGmodKVermaModule::RunTheComputationSl2StringVersio
   RationalFunction RFOne, RFZero;
   RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
   RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
-  this->theSpace.initTheSpacesSl2StringVersion(theSimplePosGenerators, theSimpleNegGenerators, theParser.theHmm.theRange, zeroVermaElement, zeroAlgebraElement, RFOne, RFZero, theGlobalVariables);
+  PolynomialOutputFormat tempFormat;
+  this->theSpace.initTheSpacesSl2StringVersion
+  (theSimplePosGenerators, theSimpleNegGenerators, theParser.theHmm.theRange, zeroVermaElement, zeroAlgebraElement, RFOne, RFZero, theGlobalVariables, tempFormat);
 
   //this->theSpace.ExtractHighestWeightVectorsFromVector(this->theSpace.theSeedVector, this->theOutput, theGlobalVariables, this->theSpace.theTargetSpace.theRingUniT);
   return out.str();
@@ -28332,7 +28344,7 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftFromVP
     this->theSpace.theTargetSpace.leftSpaceBasis.AddOnTop(leftComponent);
     this->theSpace.theTargetSpace.leftWeights.AddOnTop(theVP.theRoot);
     //out << "<br>Left element before modding: " << leftComponentBeforeModdingVermaRels.ElementToString() << " and after modding: "<< leftComponent.ElementToString();
-    out << "<br>Left element: "<< leftComponent.ElementToString();
+    out << "<br>Left element: "<< leftComponent.ElementToString(polyFormatLocal);
   }
   return out.str();
 //  currentElement.AssignTensor(leftComponent, rightComponent);
@@ -28379,7 +28391,8 @@ std::string TranslationFunctorGmodKVermaModule::GetLeftAndRightFromVP
      ;
     currentLeftCollection.AddOnTop(leftComponent);
     currentRightCollection.AddOnTop(rightComponent);
-    out << "<br>Left element before modding: " << leftComponentBeforeModdingVermaRels.ElementToString(theGlobalVariables) << " and after modding: "<< leftComponent.ElementToString();
+    out << "<br>Left element before modding: " << leftComponentBeforeModdingVermaRels.ElementToString(polyFormatLocal, theGlobalVariables)
+    << " and after modding: "<< leftComponent.ElementToString(polyFormatLocal);
   }
   return out.str();
 //  currentElement.AssignTensor(leftComponent, rightComponent);

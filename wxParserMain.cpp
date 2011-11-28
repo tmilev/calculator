@@ -196,6 +196,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     wxBoxSizer* BoxSizer3;
 
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+    SetClientSize(wxSize(322,151));
     this->TimerReady=false;
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
     BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
@@ -217,7 +218,8 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("decomposeXtimesVinGenericVerma"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("decomposeXtimesVinGenericVerma(-3)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1->SetMinSize(wxSize(100,20));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
@@ -228,7 +230,6 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SetSizer(BoxSizer1);
     Timer1.SetOwner(this, ID_TIMER1);
     Timer1.Start(100, false);
-    BoxSizer1->Fit(this);
     BoxSizer1->SetSizeHints(this);
 
     Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
@@ -524,7 +525,8 @@ void RunComputationalThread()
 void* RunComputationalThread(void*ptr)
 #endif
 { theGlobalVariables.theLocalPauseController.InitComputation();
-  theParser.DebugString= theParser.ParseEvaluateAndSimplify(theParser.StringBeingParsed, false, theGlobalVariables);
+  PolynomialOutputFormat tempFormat;
+  theParser.DebugString= theParser.ParseEvaluateAndSimplify(theParser.StringBeingParsed, false, theGlobalVariables, tempFormat);
   theGlobalVariables.theLocalPauseController.ExitComputation();
   wxPostEvent(theMainWindow->GetEventHandler(),
              theMainWindow->eventComputationOver

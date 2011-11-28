@@ -6050,7 +6050,7 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
 }
 
 std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
+  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, const PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
@@ -6149,7 +6149,6 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
           << theFormat.alphabetBases[0] << "_{-i}]$\\\\$"
           << theFormat.alphabetBases[1] << "_i$ is dual to the root $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
 //        out << "  \\\\\\hline";
-
         //out << "\\hline generator & corresponding root space\\\\\\hline";
         i+=theDimension;
       }
@@ -6222,7 +6221,6 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     out << endMath;
   } else
     out << "\\begin{tabular}{c} table trimmed to avoid LaTeX/browser memory issues.\\end{tabular}";
-
   output=out.str();
 }
 
@@ -6398,7 +6396,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out <<  "];\n";
   }
   for (int i=0; i<theDimension; i++)
-  {    ////////////////////
+  { ////////////////////
     out << eiBasis << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
     { out << (i==j)? 1 :0;
@@ -7089,8 +7087,6 @@ void MatrixLargeRational::ApproximateLargestEigenSpace
     MathRoutines::swap(r1, r2);
   }*/
 }
-
-
 
 template<class Base>
 std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
@@ -8318,10 +8314,15 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   RFOne.MakeNVarConst(theParseR.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
   theData.init(theParseR, &theGlobalVariables, RFOne, RFZero);
   theData.VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(3);
-  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
+  int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  theIndex+=3;
+  if (theIndex<0 || theIndex>6)
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  startingElement.AssignDefaultGeneratorIndex(theIndex, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
   std::stringstream out;
-  out << "<br>the starting element is: " << startingElement.ElementToString();
+  PolynomialOutputFormat tempFormat;
+  out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
   out << startingElement.Decompose(theParseR, theEigenVectors, theGlobalVariables);
 
   theNode.ExpressionType=ParserNode::typeString;
@@ -8382,6 +8383,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   //simpleNegGenerators.TheObjects[i]
   std::stringstream out;
   outputVectors.size=0;
+  PolynomialOutputFormat tempFormat;
   ElementGeneralizedVerma<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
   CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
@@ -8390,17 +8392,20 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
   out << "<br>abstract Casimir: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (abstractCasimir.ElementToString(theGlobalVariables));
+  (abstractCasimir.ElementToString(theGlobalVariables, tempFormat));
+  tempFormat.MakeAlphabetArbitraryWithIndex("x", "y");
+  tempFormat.alphabetBases[0]="g";
+  tempFormat.alphabetBases[1]="h";
   theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
   embeddedCasimirNonOrdered.Simplify(theGlobalVariables);
   out << "<br> embedded Casimir non-ordered: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables));
+  (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables, tempFormat));
   ElementUniversalEnvelopingOrdered<CoefficientType> embeddedCasimir;
   embeddedCasimir.AssignElementUniversalEnveloping(embeddedCasimirNonOrdered, theParser.testAlgebra, this->theOwner->theRingUnit, this->theOwner->theRingZero, &theGlobalVariables);
   out << "<br>the embedded Casimir is: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (embeddedCasimir.ElementToString(theGlobalVariables));
+  (embeddedCasimir.ElementToString(tempFormat, theGlobalVariables));
   out << "<br>Weights of L: " << this->theOwner->theFDspaceWeights.ElementToString();
   out <<"\n<br>\nHighest weight sub: "
   << this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis.ElementToString();
@@ -8449,7 +8454,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   }
   out << "<hr>";
   assert(sanityCheck1);
-  for (int k= this->theOwner->theFDspace.size-1; k>=0; k--)//; i++)
+  for (int k= this->theOwner->theFDspace.size-1; k>=0; k--)
   { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
     std::stringstream progressReport;
     progressReport << "Number of direct summands in the decomposition found: " << this->theOwner->theFDspace.size-1-k ;
@@ -8458,14 +8463,14 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
     theGlobalVariables.MakeProgressReport(progressReport.str(), 0);
     remainderElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
     out << "<br>Casimir acting on" <<
-    CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(remainderElement.ElementToString())
-    << " yields " << CGI::GetHtmlMathDivFromLatexAddBeginARCL(tempElt.ElementToString());
+    CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(remainderElement.ElementToString(tempFormat, theGlobalVariables))
+    << " yields " << CGI::GetHtmlMathDivFromLatexAddBeginARCL(tempElt.ElementToString(tempFormat, theGlobalVariables));
     remainderElement*=precomputedChars[k];
     tempElt-=remainderElement;
     remainderElement=tempElt;
     remainderElement.ClearDenominators(tempCoeff);
   }
-  out << "<br>remainder element after the procedure: " << remainderElement.ElementToString();
+  out << "<br>remainder element after the procedure: " << remainderElement.ElementToString(tempFormat, theGlobalVariables);
   return out.str();
 }
 
@@ -8485,9 +8490,10 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
   theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
-  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
+  startingElement.AssignDefaultGeneratorIndex(6, theData, &theGlobalVariables);
   List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
-  out << "<br>the starting element is: " << startingElement.ElementToString();
+  PolynomialOutputFormat tempFormat;
+  out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
   out << startingElement.Decompose(theParser, theEigenVectors, theGlobalVariables);
   return out.str();
 }
@@ -8498,14 +8504,15 @@ int ParserNode::EvaluateModVermaRelations
   theNode.impliedNumVars=theArgument.impliedNumVars;
   theNode.UEElement.GetElement()=theArgument.UEElement.GetElement();
   std::stringstream out;
+  PolynomialOutputFormat tempFormat;
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables))
+  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
 ;
   theNode.UEElement.GetElement().Simplify(theGlobalVariables);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables))
+  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
   ;
   //Needs to be rewritten! fix it!
   theNode.UEElement.GetElement().ModOutVermaRelationS(theGlobalVariables);
@@ -8570,22 +8577,31 @@ int ParserNode::EvaluateAdjointAction
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluateMakeCasimir
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ theNode.ExpressionType=theNode.typeUEelement;
+  theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
+  theNode.outputString= "The Casimir element of the ambient Lie algebra. Denoted also by c.";
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluateModVermaRelationsOrdered
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { ParserNode& theArgument=theNode.owner->TheObjects[theArgumentList[0]];
   theNode.impliedNumVars=theArgument.impliedNumVars;
   theNode.UEElementOrdered.GetElement()=theArgument.UEElementOrdered.GetElement();
   std::stringstream out;
+  PolynomialOutputFormat tempFormat;
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (theNode.UEElementOrdered.GetElement().ElementToString(theGlobalVariables));
+  (theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables));
   PolynomialRationalCoeff PolyOne;
   int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange.GetRank());
   PolyOne.MakeNVarConst(numVars, (Rational) 1);
   theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElementOrdered.GetElement().ElementToString(theGlobalVariables))
+  ( theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables))
   ;
   //Needs to be rewritten! fix it!
   theNode.UEElementOrdered.GetElement().ModOutVermaRelationS
@@ -8626,9 +8642,62 @@ int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
     tempElt*=theAnswer.leftComponents[i].theElT;
     theElt+=tempElt;
   }
-  theNode.outputString=theAnswer.ElementToString(true, false, true);
+  PolynomialOutputFormat theFormat;
+  theNode.outputString=theAnswer.ElementToString(true, false, true, theFormat, theGlobalVariables);
   theNode.ExpressionType=theNode.typeUEElementOrdered;
   return theNode.errorNoError;
+}
+
+std::string SemisimpleLieAlgebraOrdered::GetGeneratorString
+  (int theIndex, bool formatCalculator, bool& mustUsebracketsWhenRaisingToPower,
+   const PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  mustUsebracketsWhenRaisingToPower=true;
+  if (this->theOwner.theWeyl.WeylLetter=='B' && this->theOwner.theWeyl.GetDim()==3)
+  { if (formatCalculator)
+    { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
+      if (displayIndex==12)
+        displayIndex=0;
+      out << "f_{" << displayIndex << "}";
+      mustUsebracketsWhenRaisingToPower=false;
+      return out.str();
+    }
+    bool isInGmodK=false;
+    if ((theIndex>=6 && theIndex<9) ||
+        (theIndex>=11 && theIndex<15)        )
+      isInGmodK=true;
+    if (isInGmodK)
+    { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
+      if (displayIndex==12)
+        displayIndex=0;
+      out << "f_{" << displayIndex << "}";
+      mustUsebracketsWhenRaisingToPower=false;
+    } else
+    { WeylGroup tempWeyl;
+      tempWeyl.MakeG2();
+      tempWeyl.ComputeRho(true);
+      if (theIndex<6)
+        out << "g'_{" << tempWeyl.RootSystem[theIndex].
+        ElementToStringLetterFormat("\\alpha", true, false) << "}";
+      else if (theIndex<11)
+        out << "h'_{\\alpha_" << theIndex-8 << "}";
+      else
+        out << "g'_{" << tempWeyl.RootSystem[theIndex-9].
+        ElementToStringLetterFormat("\\alpha", true, false) << "}";
+      mustUsebracketsWhenRaisingToPower=true;
+    }
+    return out.str();
+  }
+  if (formatCalculator)
+  { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
+    out << "f_{" << displayIndex << "}";
+    mustUsebracketsWhenRaisingToPower=false;
+  }
+  else
+  { out << this->theOrder[theIndex].ElementToStringNegativeRootSpacesFirst(false, false, this->theOwner, theFormat, theGlobalVariables);
+    mustUsebracketsWhenRaisingToPower=this->theOrder[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
+  }
+  return out.str();
 }
 
 template <class CoefficientType>
@@ -8773,7 +8842,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("getWeylDim",
    "(Rational,...)",
-   "Evaluates the Weyl dimension formula. Input: a vector in dual root coordinates.",
+   "Evaluates the Weyl dimension formula. Input: a vector in fundamental weight coordinates. \
+   The j^th fundamental weight is the weight that has scalar product 1 with the j^th simple root times 2 \
+   divided by the root length squared, and 0 with the remaining simple roots.",
    "getWeylDim(0,0,1)",
     & ParserNode::EvaluateWeylDimFormula
    );
@@ -9076,7 +9147,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
   this->AddOneFunctionToDictionaryNoFail
   ("decomposeXtimesVinGenericVerma",
-   "()",
+   "(Integer)",
    "<b>Experimental, please don't use.</b> Let v be the highest weight element of B3.",
    "decomposeXtimesVinGenericVerma()",
    DefaultWeylLetter, DefaultWeylRank, false,
@@ -9118,6 +9189,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateAdjointAction
    );
+  this->AddOneFunctionToDictionaryNoFail
+  ("casimir",
+   "()",
+   "Gives the Casimir element of the ambient Lie algebra. You can also use the one-letter alias c.",
+   "c",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateMakeCasimir
+   );
+
   this->AddOneFunctionToDictionaryNoFail
   ("modOutSAVerma",
    "(UEOrdered)",

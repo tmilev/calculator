@@ -4465,6 +4465,7 @@ public:
   static int LatexMaxLineLength;
   static bool UsingLatexFormat;
   static bool CarriageReturnRegular;
+  bool flagUseCalculatorFormatForUEOrdered;
   bool cutOffString;
   unsigned cutOffSize;
 };
@@ -8844,7 +8845,8 @@ public:
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);}
   std::string ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
+  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, const PolynomialOutputFormat& thePolyFormat,
+   GlobalVariables& theGlobalVariables)
 ;
   void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  }
   Selection NonZeroElements;
@@ -9124,7 +9126,7 @@ public:
   int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const{ return this->RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(this->ChevalleyGeneratorIndexToRootIndex(theIndex));}
   bool AreOrderedProperly(int leftIndex, int rightIndex);
   std::string GetLetterFromGeneratorIndex
-  (int theIndex, bool useLatex, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+  (int theIndex, bool useRootIndices, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 ;
   void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
   void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
@@ -9239,6 +9241,10 @@ public:
   //The weights are in increasing order
   //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator in the current coordinates
   MatrixLargeRational ChevalleyGeneratorsInCurrentCoords;
+  std::string GetGeneratorString
+  (int theIndex, bool formatCalculator, bool& mustUsebracketsWhenRaisingToPower,
+   const PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+     ;
   void AssignGeneratorCoeffOne(int theIndex, ElementSimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);}
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom
@@ -9263,9 +9269,15 @@ class MonomialUniversalEnvelopingOrdered
 public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
-  std::string ElementToString()const{PolynomialOutputFormat PolyFormatLocal; return this->ElementToString(false, true, PolyFormatLocal);}
-  std::string ElementToString(bool useLatex, bool useGeneratorLetters, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const;
-  void ComputeDebugString(){ GlobalVariables theGlobalVariables; PolynomialOutputFormat PolyFormatLocal; this->DebugString=this->ElementToString(false, true, PolyFormatLocal, theGlobalVariables);}
+  std::string ElementToString
+(bool useLatex, bool useCalculatorFormat,
+ const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+;
+  void ComputeDebugString()
+  { GlobalVariables theGlobalVariables;
+    PolynomialOutputFormat PolyFormatLocal;
+    this->DebugString=this->ElementToString(false, true, PolyFormatLocal, theGlobalVariables);
+  }
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
   List<int> generatorsIndices;
@@ -9340,16 +9352,32 @@ private:
 public:
   std::string DebugString;
   GlobalVariables* context;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables)const{PolynomialOutputFormat PolyFormatLocal; this->ElementToString(output, true, PolyFormatLocal, theGlobalVariables);}
   void ElementToString
-  (std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+(std::string& output, bool useLatex,
+ bool useCalculatorFormat,
+ const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
   ;
-  std::string ElementToString(GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS;}
-  std::string ElementToString(bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, useLatex, PolyFormatLocal, theGlobalVariables); return tempS;}
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const{std::string tempS; this->ElementToString(tempS, true, PolyFormatLocal, theGlobalVariables); return tempS;}
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{GlobalVariables theGlobalVariables; return this->ElementToString(PolyFormatLocal, theGlobalVariables); }
+  std::string ElementToString(bool useLatex, bool useCalculatorFormat, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  { std::string tempS;
+    this->ElementToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
+    return tempS;
+  }
+  std::string ElementToString
+  (const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  { std::string tempS;
+    this->ElementToString(tempS, true, true, PolyFormatLocal, theGlobalVariables);
+    return tempS;
+  }
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const
+  { GlobalVariables theGlobalVariables;
+    return this->ElementToString(PolyFormatLocal, theGlobalVariables);
+  }
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
-  void ComputeDebugString(){GlobalVariables theGlobalVariables; this->ElementToString(this->DebugString, theGlobalVariables);}
+  void ComputeDebugString()
+  { PolynomialOutputFormat tempFormat;
+    GlobalVariables theGlobalVariables;
+    this->DebugString=this->ElementToString(tempFormat, theGlobalVariables);
+  }
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input);
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
@@ -9488,9 +9516,11 @@ private:
 public:
   std::string DebugString;
   std::string ElementToString
-  (bool useLatex, bool useEpsilonCoords, GlobalVariables& theGlobalVariables)
+  (bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
   ;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->DebugString=this->ElementToString(false, false, theGlobalVariables);}
+  void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { this->DebugString=this->ElementToString(false, false, theGlobalVariables, theFormat);
+  }
   SemisimpleLieAlgebra* owner;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
@@ -9550,12 +9580,31 @@ private:
   friend class MonomialUniversalEnveloping;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables){this->ElementToString(output, true, false, theGlobalVariables);}
-  void ElementToString(std::string& output, bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables);
-  std::string ElementToString(GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, theGlobalVariables); return tempS;}
-  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, useLatex, false, theGlobalVariables); return tempS;}
-  std::string ElementToString(bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables){std::string tempS; this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables); return tempS;}
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ElementToString(this->DebugString, theGlobalVariables);}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { this->ElementToString(output, false, false, theGlobalVariables, theFormat);
+  }
+  void ElementToString
+  (std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  ;
+  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { std::string tempS;
+    this->ElementToString(tempS, theGlobalVariables, theFormat);
+    return tempS;
+  }
+  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { std::string tempS;
+    this->ElementToString(tempS, useLatex, false, theGlobalVariables, theFormat);
+    return tempS;
+  }
+  std::string ElementToString
+  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { std::string tempS;
+    this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables, theFormat);
+    return tempS;
+  }
+  void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { this->ElementToString(this->DebugString, theGlobalVariables, theFormat);
+  }
   SemisimpleLieAlgebra* owner;
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping& input, ElementUniversalEnveloping& output, GlobalVariables& theGlobalVariables)
@@ -10598,8 +10647,8 @@ private:
 public:
   std::string DebugString;
   std::string outputString;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, theGlobalVariables); }
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables);
+  void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat){ this->ElementToString(this->DebugString, theGlobalVariables, theFormat); }
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
   Parser* owner;
   int indexParentNode;
   int indexInOwner;
@@ -10649,12 +10698,19 @@ public:
   errorImplicitRequirementNotSatisfied, errorBadFileFormat };
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
-  std::string ElementToStringValueAndType(bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString){return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables, displayOutputString);}
   std::string ElementToStringValueAndType
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString)
+  (bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
+  { return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables, displayOutputString, theFormat);
+  }
+  std::string ElementToStringValueAndType
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
 ;
-  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables){return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables);}
-  std::string ElementToStringValueOnlY(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables);
+  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables, theFormat);
+  }
+  std::string ElementToStringValueOnlY
+  (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+;
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
   bool GetRootRationalDontUseForFunctionArguments
@@ -10721,6 +10777,9 @@ bool GetRootRationalFromFunctionArguments
 ;
 
   static int EvaluateLatticeImprecise
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateMakeCasimir
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawWeightSupport
@@ -10985,8 +11044,10 @@ public:
   std::string afterSystemCommands;
 //  SemisimpleLieAlgebra theLieAlgebra;
   void InitJavaScriptDisplayIndicator();
-  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables){this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables); }
-  void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
+  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables, theFormat);
+  }
+  void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  //=8
     tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13
@@ -11145,11 +11206,11 @@ public:
   void InitAndTokenize(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 ;
   void ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplifyPart2
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables)
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 ;
   ElementUniversalEnveloping ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVariables);
   void Parse(const std::string& input);
@@ -11691,8 +11752,8 @@ public:
   ElementUniversalEnvelopingOrdered<CoefficientType> theElT;
   std::string DebugString;
   PolynomialsRationalCoeff theSubNthElementIsImageNthCoordSimpleBasis;
-  void ComputeDebugString(){this->DebugString=this->ElementToString();}
-  std::string ElementToString()const;
+  void ComputeDebugString(){PolynomialOutputFormat tempFormat; this->DebugString=this->ElementToString(tempFormat);}
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
   void ElementToString(std::string& output)const{output=this->ElementToString();}
   bool IsEqualToZero()const {return this->theElT.IsEqualToZero();}
   bool ElementToStringNeedsBracketsForMultiplication()const;
@@ -12301,7 +12362,9 @@ public:
   roots rightWeights;
   CoefficientType theRingZerO;
   CoefficientType theRingUniT;
-  std::string ElementToString();
+  std::string ElementToString
+  (const PolynomialOutputFormat& theFormat)
+  ;
   bool GetInternalRepresentationFromVectorLeft
   (const ElementLeft& input, Polynomial<CoefficientType>& output, GlobalVariables& theGlobalVariables)const
   ;
@@ -12447,7 +12510,7 @@ class TensorProductSpaceAndElements: public List<TensorProductElement<ElementLef
   void initTheSpacesSl2StringVersion
   ( List<ElementSimpleLieAlgebra>& theSimplePosElts,  List<ElementSimpleLieAlgebra>& theSimpleNegElts, SemisimpleLieAlgebra& theAlgebra,
     const ElementLeft& leftZero, const ElementRight& rightZero, const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
-    GlobalVariables& theGlobalVariables)
+    GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
      ;
   void GetRootForm(roots& output, GlobalVariables& theGlobalVariables);
   bool FindEigenVectorsWithRespectTo
@@ -12553,9 +12616,13 @@ class ElementGeneralizedVerma
 {
   public:
   std::string DebugString;
-  std::string ElementToString(){ return this->ElementToString(true, false, true);}
+  std::string ElementToString(PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+  { return this->ElementToString(true, false, true, theFormat, theGlobalVariables);
+  }
   std::string ElementToString
-  (bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs)
+(bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs,
+ PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables
+)
 ;
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
   GeneralizedVermaModuleData<CoefficientType>* theOwner;
@@ -12582,10 +12649,15 @@ class ElementGeneralizedVerma
     zeroVermaElt.Nullify(*this->theOwner->theOwner, this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis);
     ElementUniversalEnvelopingOrdered<CoefficientType> tempElt;
     tempElt.MakeConst(this->theOwner->theRingUnit, *this->theOwner->theOwner);
-    currentElt.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector(tempElt, zeroVermaElt, theContext, this->theOwner->theRingUnit);
-    currentElt.theSubNthElementIsImageNthCoordSimpleBasis=this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis;
+    currentElt.AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
+    (tempElt, zeroVermaElt, theContext, this->theOwner->theRingUnit)
+    ;
+    currentElt.theSubNthElementIsImageNthCoordSimpleBasis=
+    this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis;
   }
-  std::string GetStringFormGmodKindex(int theIndex);
+  std::string GetStringFormGmodKindex
+(int theIndex, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+  ;
   void ActOnMe
   (const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
 ;
@@ -12778,20 +12850,28 @@ void ElementGeneralizedVerma<CoefficientType>::Nullify
 }
 
 template <class CoefficientType>
-std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex(int theIndex)
+std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex
+(int theIndex, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  if (theIndex<3)
-    out << "f_{" << theIndex-3 << "}";
-  if (theIndex==3)
-    out << "f_{12}";
-  if (theIndex>3)
-    out << "f_{" << theIndex-3 << "}";
-  return out.str();
+  bool tempbool;
+  if (this->theOwner->theOwner->theOwner.theWeyl.WeylLetter=='B' && this->theOwner->theOwner->theOwner.theWeyl.GetDim()==3)
+  { if (theIndex<3)
+      theIndex+=6;
+    else if (theIndex==3)
+      theIndex=11;
+    else
+      theIndex+=8;
+  }
+  return this->theOwner->theOwner->GetGeneratorString
+    (theIndex, false, tempbool, theFormat, theGlobalVariables)
+    ;
 }
 
 template <class CoefficientType>
 std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
-(bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs)
+(bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs,
+ PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables
+)
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out; std::string leftString, rightString;
@@ -12802,11 +12882,11 @@ std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
     { if (foundFirstNonZero)
         out << "+";
       foundFirstNonZero=true;
-      leftString=MathRoutines::ElementToStringBrackets(currentElt);
+      leftString=MathRoutines::ElementToStringBrackets(currentElt, theFormat);
       if (!useFs)
         rightString=MathRoutines::ElementToStringBrackets(this->theOwner->theFDspace.TheObjects[i]);
       else
-        rightString= this->GetStringFormGmodKindex(i);
+        rightString= this->GetStringFormGmodKindex(i, theFormat, theGlobalVariables);
       if (displayLeftComponenetsOnTheRight)
         MathRoutines::swap(leftString, rightString);
       out << leftString;
@@ -13015,11 +13095,11 @@ bool TensorProductSpace<ElementLeft, ElementRight, CoefficientType>::GetInternal
 { output.Nullify(this->leftSpaceBasis.size+this->rightSpaceBasis.size);
   Monomial<CoefficientType> tempMon;
   Vector<CoefficientType> vectorFormInput;
-  std::string tempS=input.ElementToString();
-  std::string tempS2=this->leftSpaceBasis.ElementToStringGeneric();
+//  std::string tempS=input.ElementToString();
+//  std::string tempS2=this->leftSpaceBasis.ElementToStringGeneric();
   if (! input.GetCoordsInBasis(this->leftSpaceBasis, vectorFormInput, this->theRingUniT, this->theRingZerO, theGlobalVariables))
     return false;
-  vectorFormInput.ComputeDebugString();
+//  vectorFormInput.ComputeDebugString();
   for(int i=0; i<vectorFormInput.size; i++)
     if (!vectorFormInput.TheObjects[i].IsEqualToZero())
     { tempMon.MakeMonomialOneLetter(output.NumVars, i, 1, vectorFormInput.TheObjects[i]);
@@ -13047,11 +13127,12 @@ GetComponentsFromInternalRepresentation
 }
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
-std::string TensorProductSpace<ElementLeft, ElementRight, CoefficientType>::ElementToString()
+std::string TensorProductSpace<ElementLeft, ElementRight, CoefficientType>::ElementToString
+(const PolynomialOutputFormat& theFormat)
 { std::stringstream out;
   out << "<br> Basis of the left components (" << this->leftSpaceBasis.size << " elements): <br>";
   for (int i=0; i<this->leftSpaceBasis.size; i++)
-    out << this->leftSpaceBasis.TheObjects[i].ElementToString() << "<br> ";
+    out << this->leftSpaceBasis.TheObjects[i].ElementToString(theFormat) << "<br> ";
   out << "<br> Basis of the right components (" << this->rightSpaceBasis.size << " elements): <br>";
   for (int i=0; i<this->rightSpaceBasis.size; i++)
     out << this->rightSpaceBasis.TheObjects[i].ElementToString() << "<br> ";
@@ -13116,10 +13197,9 @@ void ElementVermaModuleOrdered<CoefficientType>::MultiplyOnTheLeft
 }
 
 template <class CoefficientType>
-std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString()const
+std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString(const PolynomialOutputFormat& theFormat)const
 { std::stringstream out;
-  PolynomialOutputFormat polyFormatLocal;
-  std::string tempS=MathRoutines::ElementToStringBrackets(this->theElT, polyFormatLocal);
+  std::string tempS=MathRoutines::ElementToStringBrackets(this->theElT, theFormat);
   if (tempS.size()>1)
     out << "(";
   if (tempS!="1")
@@ -13150,11 +13230,13 @@ void ElementVermaModuleOrdered<CoefficientType>::ActOnMe
 template <class ElementLeft, class ElementRight, class CoefficientType>
 std::string TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::ElementToString()
 { std::stringstream out;
+  PolynomialOutputFormat tempFormat;
   out << "The elements (" << this->size << ") are: ";
   for (int i=0; i<this->size; i++)
   { out << this->TheObjects[i].ElementToString() << "<br>";
   }
-  out << "starting space: " << this->theStartingSpace.ElementToString() << "<br>target space: " << this->theTargetSpace.ElementToString();
+  out << "starting space: " << this->theStartingSpace.ElementToString(tempFormat) << "<br>target space: "
+  << this->theTargetSpace.ElementToString(tempFormat);
   return out.str();
 }
 
@@ -13167,8 +13249,8 @@ bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
    GlobalVariables& theGlobalVariables)
 { Matrix<RationalFunction> theSystem;
   this->initTheSpacesForAdjointAction(theElementsActing, theAlgebra, theLeftElts, theRightElts, leftZero, rightZero, theRingUnit, theRingZero, theGlobalVariables);
-  std::cout << "<br><br>the starting space: " << this->theStartingSpace.ElementToString();
-  std::cout << "<br><br>the target space: " << this->theTargetSpace.ElementToString();
+//  std::cout << "<br><br>the starting space: " << this->theStartingSpace.ElementToString();
+//  std::cout << "<br><br>the target space: " << this->theTargetSpace.ElementToString();
   this->PrepareTheMatrix(theElementsActing, theAlgebra, theSystem, theGlobalVariables);
   return false;
 }
@@ -13206,10 +13288,10 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
   this->theTargetSpace.theRingZerO=theRingZero;
   tempLeftElts.AddListOnTop(theLeftElts);
   tempRightElts.AddListOnTop(theRightElts);
-  std::cout << "<br><br><br> before extracting a basis the new left elements are:<br>";
-  for (int i=0; i<tempLeftElts.size; i++)
-    std::cout << tempLeftElts.TheObjects[i].ElementToString() << "<br>";
-  std::cout << "<br> before extracting a basis the new right elements are:<br>";
+//  std::cout << "<br><br><br> before extracting a basis the new left elements are:<br>";
+//  for (int i=0; i<tempLeftElts.size; i++)
+//    std::cout << tempLeftElts.TheObjects[i].ElementToString() << "<br>";
+//  std::cout << "<br> before extracting a basis the new right elements are:<br>";
   for (int i=0; i<tempRightElts.size; i++)
     std::cout << tempRightElts.TheObjects[i].ElementToString() << "<br>";
   std::stringstream out;
@@ -13243,9 +13325,9 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
     theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
     theGlobalVariables.MakeReport();
   }
-  std::cout << "<br> starting space LOOK here: " << this->theStartingSpace.ElementToString();
-  std::cout << "<br> target space LOOK here: " << this->theTargetSpace.ElementToString();
-  std::cout << "<br> the elements we are acting upon are (" << theLeftElts.size << "): ";
+//  std::cout << "<br> starting space LOOK here: " << this->theStartingSpace.ElementToString();//
+//  std::cout << "<br> target space LOOK here: " << this->theTargetSpace.ElementToString();
+//  std::cout << "<br> the elements we are acting upon are (" << theLeftElts.size << "): ";
   for (int i=0; i<theLeftElts.size; i++)
   { this->TheObjects[i].SetTensorProduct(theLeftElts.TheObjects[i], theRightElts.TheObjects[i], this->theStartingSpace, theGlobalVariables);
     std::cout << this->TheObjects[i].ElementToString() << ", ";
@@ -13257,7 +13339,7 @@ template <class ElementLeft, class ElementRight, class CoefficientType>
 void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::initTheSpacesSl2StringVersion
   ( List<ElementSimpleLieAlgebra>& theSimplePosElts,  List<ElementSimpleLieAlgebra>& theSimpleNegElts, SemisimpleLieAlgebra& theAlgebra,
     const ElementLeft& leftZero, const ElementRight& rightZero, const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
-    GlobalVariables& theGlobalVariables)
+    GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
 { this->theTargetSpace.theRingUniT=theRingUnit;
   this->theTargetSpace.theRingZerO=theRingZero;
   this->MakeActualSizeAtLeastExpandOnTop(this->theTargetSpace.leftSpaceBasis.size*this->theTargetSpace.rightSpaceBasis.size);
@@ -13274,13 +13356,14 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
         if (this->theRightLowestWeight==this->theTargetSpace.rightWeights.TheObjects[j] && i==this->theTargetSpace.leftSpaceBasis.size-1)
           this->theSeedVector=*this->LastObject();
     }
-  std::cout << this->theTargetSpace.ElementToString();
+  std::cout << this->theTargetSpace.ElementToString(theFormat);
   //return;
 
   ElementLeft resultLeft; ElementRight  resultRight;
   Vector<CoefficientType> theResultVector;
   this->simplePositiveGeneratorsActions.SetSize(theSimplePosElts.size);
   this->simpleNegativeGeneratorsActions.SetSize(theSimpleNegElts.size);
+  PolynomialOutputFormat tempFormat;
   List<ElementSimpleLieAlgebra>* curentGeneratorCollection=&theSimplePosElts;
   for (int j=0; j<2; j++, curentGeneratorCollection=& theSimpleNegElts)
     for (int i=0; i<curentGeneratorCollection->size; i++)
@@ -13291,7 +13374,9 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
       { ElementLeft& currentLeftElt=this->theTargetSpace.leftSpaceBasis.TheObjects[k];
         Polynomial<CoefficientType>& currentPoly=currentAction->TheObjects[k];
         currentLeftElt.ActOnMe(currentGenerator, resultLeft, theAlgebra, this->theTargetSpace.theRingUniT, this->theTargetSpace.theRingZerO, &theGlobalVariables);
-        std::cout << "<br>" << currentGenerator.ElementToString() << " maps " << currentLeftElt.ElementToString() << " to " << resultLeft.ElementToString();
+        std::cout << "<br>" << currentGenerator.ElementToString() << " maps " <<
+        currentLeftElt.ElementToString(tempFormat) << " to "
+        << resultLeft.ElementToString(tempFormat);
         this->theTargetSpace.GetInternalRepresentationFromVectorLeft(resultLeft, currentPoly, theGlobalVariables);
         std::cout << "<br>" << currentGenerator.ElementToString() << "maps x_{" << k << "} to: " << currentPoly.ElementToString() << "<br><br>";
       }
@@ -13347,13 +13432,15 @@ std::string TensorProductElement<ElementLeft, ElementRight, CoefficientType>::El
   (TensorProductSpace<ElementLeft, ElementRight, CoefficientType>& owner)
 { int theLeftIndex=-1, theRightIndex=-1;
   std::stringstream out;
+  PolynomialOutputFormat tempFormat;
   for (int i=0; i<this->internalRepresentation.size; i++)
   { Monomial<CoefficientType>& currentMon=this->internalRepresentation.TheObjects[i];
     owner.GetLeftAndRightIndexFromMonomial(currentMon, theLeftIndex, theRightIndex);
     std::string tempS= currentMon.Coefficient.ElementToString();
     if (tempS=="1")
       out << "(" << tempS << ")";
-    out << "(" << owner.leftSpaceBasis.TheObjects[theLeftIndex].ElementToString() << ")\\otimes(" << owner.rightSpaceBasis.TheObjects[theRightIndex].ElementToString() << ")";
+    out << "(" << owner.leftSpaceBasis.TheObjects[theLeftIndex].ElementToString(tempFormat) << ")\\otimes("
+    << owner.rightSpaceBasis.TheObjects[theRightIndex].ElementToString() << ")";
   }
   return out.str();
 }
@@ -13400,13 +13487,13 @@ void TensorProductElement<ElementLeft, ElementRight, CoefficientType>::ActOnMe
     //leftComponent.ComputeDebugString();
     //rightComponent.ComputeDebugString(false, false);
     leftComponent.ActOnMe(theElt, newLeftComponent, theAlgebra, theStartingSpace.theRingUniT, theStartingSpace.theRingZerO, &theGlobalVariables);
-    std::cout << "<br>" << theElt.ElementToString() << " acting on " << leftComponent.ElementToString() << " gives " << newLeftComponent.ElementToString();
+//    std::cout << "<br>" << theElt.ElementToString() << " acting on " << leftComponent.ElementToString() << " gives " << newLeftComponent.ElementToString();
     rightComponent.ActOnMe(theElt, newRightComponent, theAlgebra);
-    leftComponent.ComputeDebugString();
-    rightComponent.ComputeDebugString(false, false);
-    newRightComponent.ComputeDebugString(false, false);
-    newLeftComponent.ComputeDebugString();
-    std::cout << "<br>" << theElt.ElementToString() << " acting on " << rightComponent.ElementToString() << " gives " << newRightComponent.ElementToString();
+//    leftComponent.ComputeDebugString();
+//    rightComponent.ComputeDebugString(false, false);
+//    newRightComponent.ComputeDebugString(false, false);
+//    newLeftComponent.ComputeDebugString();
+//    std::cout << "<br>" << theElt.ElementToString() << " acting on " << rightComponent.ElementToString() << " gives " << newRightComponent.ElementToString();
 
     theTargetSpace.GetInternalRepresentationFromLeftAndRight(newLeftComponent, rightComponent, tempP, theGlobalVariables);
     tempP.ComputeDebugString();
@@ -13953,39 +14040,31 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByGeneratorPow
 
 
 template <class CoefficientType>
-std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString(bool useLatex, bool useGeneratorLetters, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
+(bool useLatex, bool useCalculatorFormat,
+ const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { if (this->owner==0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->IsEqualToZero())
     return "0";
   std::stringstream out;
   std::string tempS;
-  PolynomialOutputFormat formatUE;
-  formatUE.MakeAlphabetArbitraryWithIndex("g", "h");
   if (this->generatorsIndices.size>0)
-  { tempS= MathRoutines::ElementToStringBrackets(this->Coefficient);
+  { tempS= MathRoutines::ElementToStringBrackets(this->Coefficient, PolyFormatLocal);
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
       tempS="-";
   } else
     tempS= this->Coefficient.ElementToString(PolyFormatLocal);
-  out <<tempS;
+  out << tempS;
   for (int i=0; i<this->generatorsIndices.size; i++)
-  { CoefficientType& thePower=this->Powers.TheObjects[i];
-    int theIndex=this->generatorsIndices.TheObjects[i];
-    if (!useGeneratorLetters)
-      tempS=this->owner->theOrder.TheObjects[theIndex].ElementToStringNegativeRootSpacesFirst(false, false, this->owner->theOwner, formatUE, theGlobalVariables);
-    else
-    { std::stringstream tempStream;
-      tempStream << "f_{" << this->owner->GetDisplayIndexFromGeneratorIndex(theIndex) << "}";
-      tempS=tempStream.str();
-    }
-    //if (thePower>1)
-    //  out << "(";
+  { CoefficientType& thePower=this->Powers[i];
+    int theIndex=this->generatorsIndices[i];
     bool usebrackets=false;
-    if (!useGeneratorLetters)
-      usebrackets=this->owner->theOrder.TheObjects[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
+    tempS=this->owner->GetGeneratorString
+    (theIndex, useCalculatorFormat, usebrackets, PolyFormatLocal, theGlobalVariables)
+    ;
     if (usebrackets)
       out << "(";
     out << tempS;
@@ -14008,7 +14087,9 @@ std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::ElementToString
-(std::string& output, bool useLatex, const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+(std::string& output, bool useLatex,
+ bool useCalculatorFormat,
+ const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)
@@ -14016,7 +14097,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::ElementToString
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnvelopingOrdered<CoefficientType>& current=this->TheObjects[i];
-    tempS=current.ElementToString(false, true, PolyFormatLocal, theGlobalVariables);
+    tempS=current.ElementToString(false, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')
@@ -14332,7 +14413,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficient
     currentMon.SubstitutionCoefficients(theSub);
     endResult.AddMonomial(currentMon);
   }
-  endResult.Simplify(theContext);
+//  endResult.Simplify(theContext);
   this->operator=(endResult);
 }
 

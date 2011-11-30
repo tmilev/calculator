@@ -320,12 +320,12 @@ int main(int argc, char **argv)
 
   PolynomialOutputFormat theOutputFormat;
   theOutputFormat.alphabetBases.SetSize(2);
-  theOutputFormat.MakeAlphabetArbitraryWithIndex("z", "x");
+  theOutputFormat.MakeAlphabetArbitraryWithIndex("x", "y");
   theOutputFormat.alphabetBases[0]="\\bar g";
   theOutputFormat.alphabetBases[1]="\\bar h";
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
-  theOutputFormat.flagUseCalculatorFormatForUEOrdered=false;
+  theOutputFormat.flagUseCalculatorFormatForUEOrdered=true;
   std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, true, theGlobalVariables, theOutputFormat);
   TimeEvaluation=GetElapsedTimeInSeconds()-TimeParsing;
   theParser.DefaultWeylLetter=theParser.theHmm.theRange.theWeyl.WeylLetter;

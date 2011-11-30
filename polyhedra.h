@@ -2,7 +2,7 @@
 //*********************************************************************************************************
 //Vector partition function - computes an algebraic expression
 //                            for the vector partition function
-//CopyRight (C) 2009: Todor Milev
+//CopyRight (C) 2009-2011: Todor Milev
 //email: todor.milev@gmail.com
 //
 //Contributors: Thomas Bliem, Todor Milev
@@ -174,8 +174,7 @@ struct CGI;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //This is not guaranteed to work on Windows. Might cause crash. Must be fixed to a proper set of Windows routines.
 //This is not possible at the moment since none of my legally owned (but outdated) versions of Windows support the multitasking routines
-//that are officially documented at Microsoft's network. (i.e. I must buy Microsoft's most recent version of Windows so that I can develop
-//software that will *increase* the value of Windows. No thank you, I can always tell my colleagues to install Linux instead. It's free, you know.)
+//that are officially documented at Microsoft's network.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MutexWrapper
 {
@@ -185,7 +184,9 @@ private:
 #endif
   bool locked;
 public:
-  bool isLockedUnsafeUseForWINguiOnly(){return this->locked;}
+  bool isLockedUnsafeUseForWINguiOnly()
+  { return this->locked;
+  }
   //locks the mutex if the mutex is free. If not it suspends calling thread until mutex becomes free and then locks it.
   inline void LockMe()
   {
@@ -10563,7 +10564,7 @@ public:
 ;
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
   static bool FileExists(const std::string& theFileName);
-  static bool OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
   static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);

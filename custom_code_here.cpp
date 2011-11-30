@@ -548,7 +548,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   root tempRoot;
-  CGI::OpenDataFileOrCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
   out << this->thePfs.DebugString;
@@ -606,7 +606,8 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     if (!currentSum.IsEqualToZero())
       this->numNonZeroMults++;
     std::stringstream tempStream;
-    tempStream << " So far " << i+1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numNonZeroMults << " non-zero total.";
+    tempStream << " So far " << i+1 << " out of " << this->projectivizedChambeR.size << " processed " << this->numNonZeroMults
+    << " non-zero total.";
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream.str();
     theGlobalVariables.MakeReport();
     out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
@@ -636,7 +637,10 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
 
 int ParserNode::EvaluateG2InB3Computation
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root parSel="(1,0,0)";
+{ root parSel;
+  theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables);
+  if (parSel.size!=3)
+    return theNode.SetError(theNode.errorDimensionProblem);
   tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
     (parSel, theGlobalVariables)
     ;
@@ -649,14 +653,14 @@ void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theG
   { this->computationPhase=0;
     return;
   }
-  CGI::OpenDataFileOrCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
+  CGI::OpenFileCreateIfNotPresent(input, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, false, false);
   this->ReadFromFile(input, theGlobalVariables);
   input.close();
 }
 
 void GeneralizedVermaModuleCharacters::WriteToDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream output;
-  CGI::OpenDataFileOrCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(output, "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt", false, true, false);
   this->WriteToFile(output, theGlobalVariables);
 }
 
@@ -676,8 +680,8 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
   { numInequalities+=this->projectivizedChambeR[i].Normals.size;
   }
   out << "\nNumber of inequalities: " << numInequalities;
-
-  out << this->PrepareReport(theGlobalVariables);
+  if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.CardinalitySelection==0)
+    out << this->PrepareReport(theGlobalVariables);
   return out.str();
 }
 
@@ -3882,7 +3886,7 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   std::stringstream out;
   fileName.append(this->owner->outputFolderPath);
   fileName.append("output.tex");
-  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile, fileName, false, true, false);
   outputFile << theLatexFileString;
   out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
   out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
@@ -5415,8 +5419,11 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
   theFormat.alphabet.TheObjects[tempI]="y_1"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_2"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_3"; tempI++;
-  out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}\n\\begin{document}\\tiny\n";
-  out << "\n The chamber complex + multiplicities follow.\n\n\n \\begin{longtable}{cc}\\caption{Multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$ for $\\gop$ with Dynkin diagram";
+  out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
+  << "\n\\begin{document}\\tiny\n";
+  out << "\n The chamber complex + multiplicities follow.\n\n\n"
+  << "\\begin{longtable}{cc}\\caption{Multiplicities of generalized Verma modules $m(x_1,x_2, y_1, y_2, y_3)$"
+  << " for $\\gop$ with Dynkin diagram";
   std::stringstream tempStream;
   tempStream << "(";
   for (int i=0; i<this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize; i++)
@@ -6018,7 +6025,8 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
       this->theMaxComputation.LPtoMaximizeLargerDim.AddOnTop(theLPtoMax);
       this->numNonZeroMults++;
       std::stringstream out;
-      out << "Initialized " << i+1 << " out of " << this->theMaxComputation.theConesLargerDim.size << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
+      out << "Initialized " << i+1 << " out of " << this->theMaxComputation.theConesLargerDim.size
+      << "; so far " << this->numNonZeroMults << " non-zero multiplicities";
       theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
       theGlobalVariables.MakeReport();
     }
@@ -8224,7 +8232,7 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   std::string fileName;
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output");
-  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 500);
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   if (theSubgroup.size>498)
@@ -9052,9 +9060,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
   this->AddOneFunctionToDictionaryNoFail
   ("runGtwoInBthree",
-   "()",
+   "(Integer, Integer, Integer)",
    "Run the G_2 in B_3 computation. Experimental, don't use.",
-   "runGtwoInBthree",
+   "runGtwoInBthree(1,0,0)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2InB3Computation
    );

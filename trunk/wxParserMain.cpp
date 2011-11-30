@@ -218,7 +218,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
     SpinCtrl2->SetValue(_T("0"));
     BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("decomposeXtimesVinGenericVerma(-3)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("runGtwoInBthree(1,0,0)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     TextCtrl1->SetMinSize(wxSize(100,20));
     BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
@@ -424,7 +424,7 @@ void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
 
 void wxParserFrame::WriteSettings()
 { std::fstream fileSettings;
-  CGI::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, true, false);
   fileSettings << "mainDialogX_Y_Width_Height: " <<  this->GetRect().x << " " << this->GetRect().y << " "
   << this->GetRect().width << " " << this->GetRect().height << "\n";
   fileSettings << "drawDialogX_Y_Width_Height: " <<  this->theDrawPanel->GetRect().x << " " << this->theDrawPanel->GetRect().y << " "
@@ -444,7 +444,7 @@ void wxParserFrame::ReadSettings()
 { if (!CGI::FileExists(this->theSettingsFileName))
     return;
   std::fstream fileSettings;
-  CGI::OpenDataFileOrCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
+  CGI::OpenFileCreateIfNotPresent(fileSettings, this->theSettingsFileName, false, false, false);
   std::string tempS;
   wxRect tempRect;
   fileSettings >> tempS >> tempRect.x >> tempRect.y >> tempRect.width >> tempRect.height;

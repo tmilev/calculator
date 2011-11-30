@@ -2,7 +2,7 @@
 //*********************************************************************************************************
 //Vector partition function - computes an algebraic expression
 //                            for the vector partition function
-//CopyRight (C) 2009: Todor Milev
+//CopyRight (C) 2009-2011: Todor Milev
 //email: todor.milev@gmail.com
 //
 //Contributors: Thomas Bliem, Todor Milev
@@ -561,7 +561,7 @@ void CGI::CivilizedStringTranslationFromVPold(std::string& input, std::string& o
 
 void CGI::FormatCPPSourceCode(const std::string& FileName)
 { std::fstream fileIn, fileOut;
-  CGI::OpenDataFileOrCreateIfNotPresent(fileIn, FileName, false, false, false);
+  CGI::OpenFileCreateIfNotPresent(fileIn, FileName, false, false, false);
   assert(fileIn.is_open());
   fileIn.clear(std::ios::goodbit);
   fileIn.seekg(0, std::ios_base::end);
@@ -571,7 +571,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   fileIn.read(buffer, theSize*2);
   std::string nameFileOut= FileName;
   nameFileOut.append(".new");
-  ::CGI::OpenDataFileOrCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
+  ::CGI::OpenFileCreateIfNotPresent(fileOut, nameFileOut, false, true, false);
   for (int i=0; i<theSize; i++)
   { char lookAhead= (i< theSize-1)? buffer[i+1] : ' ';
     switch(buffer[i])
@@ -592,7 +592,7 @@ void CGI::FormatCPPSourceCode(const std::string& FileName)
   delete [] buffer;
 }
 
-bool CGI::OpenDataFileOrCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
+bool CGI::OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary)
 { if (OpenInAppendMode)
   { if (openAsBinary)
       theFile.open(theFileName.c_str(), std::fstream::in|std::fstream::out|std::fstream::app| std::fstream::binary);
@@ -638,7 +638,7 @@ bool CGI::FileExists(const std::string& theFileName)
 void CGI::WeylGroupToHtml(WeylGroup& input, std::string& path)
 { std::fstream output;
   std::string tempS;
-  CGI::OpenDataFileOrCreateIfNotPresent(output, path, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(output, path, false, true, false);
   output << "<HTML><BODY>In preparation</BODY></HTML>";
   output.close();
 }
@@ -3521,7 +3521,7 @@ void CombinatorialChamberContainer::WriteReportToFile(DrawingVariables& TDV, roo
 
 void CombinatorialChamberContainer::WriteReportToFile(const std::string& FileNameOutput, bool DoPurgeZeroPointers)
 { std::fstream tempF;
-  CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(tempF, FileNameOutput, false, true, false);
   this->WriteReportToFile(tempF, DoPurgeZeroPointers);
 }
 
@@ -3970,7 +3970,7 @@ void CombinatorialChamberContainer::WriteToDefaultFile(GlobalVariables* theGloba
 
 bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
-  CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(tempF, FileName, false, true, false);
   this->WriteToFile(tempF, theGlobalVariables);
   tempF.close();
   return true;
@@ -3978,7 +3978,7 @@ bool CombinatorialChamberContainer::WriteToFile(const std::string& FileName, Glo
 
 bool CombinatorialChamberContainer::ReadFromFile(const std::string& FileName, GlobalVariables* theGlobalVariables)
 { std::fstream tempF;
-  if (!CGI::OpenDataFileOrCreateIfNotPresent(tempF, FileName, false, false, false))
+  if (!CGI::OpenFileCreateIfNotPresent(tempF, FileName, false, false, false))
     return false;
   this->ReadFromFile(tempF, theGlobalVariables);
   if (theGlobalVariables!=0)
@@ -13685,7 +13685,7 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   childrenPath=out.str();
   out << ".html";
   MyPath=out.str();
-  CGI::OpenDataFileOrCreateIfNotPresent(output, MyPath, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
   this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
@@ -15851,7 +15851,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
   MyPathServer=htmlPathServer; childrenPathServer= htmlPathServer;
   MyPathPhysical.append("rootHtml.html"); MyPathServer.append("rootHtml.html");
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
-  CGI::OpenDataFileOrCreateIfNotPresent(output, MyPathPhysical, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   this->ComputeDebugString(false, true, false, &childrenPathPhysical, &childrenPathServer, theGlobalVariables);
   output << "<html><title> Root subsystems of "
   << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
@@ -17407,13 +17407,13 @@ void ::minimalRelationsProverStatesFixedK::ReadFromFile(std::fstream& input, Glo
 }
 
 void minimalRelationsProverStatesFixedK::WriteToFile(std::string& fileName, GlobalVariables* theGlobalVariables)
-{ CGI::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, true, false);
+{ CGI::OpenFileCreateIfNotPresent(this->theFile, fileName, false, true, false);
   this->WriteToFile(this->theFile, theGlobalVariables);
   this->theFile.close();
 }
 
 void minimalRelationsProverStatesFixedK::ReadFromFile(std::string& fileName, GlobalVariables* theGlobalVariables)
-{ if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFile, fileName, false, false, false))
+{ if(!CGI::OpenFileCreateIfNotPresent(this->theFile, fileName, false, false, false))
     return;
   this->ReadFromFile(this->theFile, theGlobalVariables);
   this->theFile.close();
@@ -17425,10 +17425,10 @@ void minimalRelationsProverStates::WriteToFileAppend(GlobalVariables* theGlobalV
     this->PurgeImpossibleStates();
   }
   if (this->sizeByLastSave!=0)
-    CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, true, false, false);
+    CGI::OpenFileCreateIfNotPresent(this->theFileBody, this->FileBodyString, true, false, false);
   else
-    CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);
-  CGI::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
+    CGI::OpenFileCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, true, false);
   assert(this->theFileHeader.is_open());
   this->WriteToFileAppend(this->theFileHeader, this->theFileBody, theGlobalVariables);
   this->theFileHeader.close();
@@ -17436,9 +17436,9 @@ void minimalRelationsProverStates::WriteToFileAppend(GlobalVariables* theGlobalV
 }
 
 void minimalRelationsProverStates::ReadFromFile(GlobalVariables* theGlobalVariables)
-{ if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, false, false))
+{ if(!CGI::OpenFileCreateIfNotPresent(this->theFileBody, this->FileBodyString, false, false, false))
     return;
-  if(!CGI::OpenDataFileOrCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, false, false))
+  if(!CGI::OpenFileCreateIfNotPresent(this->theFileHeader, this->FileHeaderString, false, false, false))
     return;
   this->ReadFromFile(this->theFileHeader, this->theFileBody, theGlobalVariables);
   this->theFileHeader.close();
@@ -20414,7 +20414,7 @@ void slTwo::ElementToHtml(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
-  CGI::OpenDataFileOrCreateIfNotPresent(theFile, filePath, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
@@ -21056,7 +21056,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   if(usePNG)
   { fileName= physicalPath;
     fileName.append("sl2s.html");
-    CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+    CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
@@ -21075,12 +21075,12 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
-  CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
-  CGI::OpenDataFileOrCreateIfNotPresent(theFile, fileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   this->owner.ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
   theFile << tempS;
   theFile.close();
@@ -21088,7 +21088,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { CGI::OpenDataFileOrCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
+    { CGI::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
       tempStreamLatex << "latex " << " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
@@ -21703,7 +21703,7 @@ void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInput
 
 bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  if (CGI::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
+  if (CGI::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, false, false))
   { theFile.seekg(0);
     this->ReadFromFileNilradicalGeneration(theFile, theGlobalVariables);
     return true;
@@ -21713,7 +21713,7 @@ bool rootSubalgebras::ReadFromDefaultFileNilradicalGeneration(GlobalVariables* t
 
 void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* theGlobalVariables)
 { std::fstream theFile;
-  CGI::OpenDataFileOrCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, "./theNilradicalsGenerator.txt", false, true, false);
   this->WriteToFileNilradicalGeneration(theFile, theGlobalVariables);
 }
 
@@ -28936,7 +28936,7 @@ int ParserNode::EvaluateSlTwoInSlN
   std::string fileName;
   fileName.append(theNode.owner->outputFolderPath);
   fileName.append("output.tex");
-  CGI::OpenDataFileOrCreateIfNotPresent(outputFile, fileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile, fileName, false, true, false);
   outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
   std::stringstream out;
   out << "A latex/pdf file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";

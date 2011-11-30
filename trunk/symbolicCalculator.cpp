@@ -3,7 +3,8 @@
 #include <map>
 #include <sstream>
 
-class Computation;
+class CommandList;
+class Command;
 class Expression;
 
 const int SomeRandomPrimesSize= 25;
@@ -89,20 +90,36 @@ class hashedVector
 
 class Expression
 {
-  int theOperation;
-  Computation* theBoss;
   public:
+  CommandList* theBoss;
+  int commandIndex;
+  ///////////////////////////////////////
+  int theOperation;
   int theData;
   std::vector<Expression> children;
   std::string correspondingString;
   std::string errorString;
-  void reset(Computation* newBoss)
+  void reset(CommandList* newBoss, int indexOfTheCommand)
   { this->theBoss=newBoss;
+    this->commandIndex=indexOfTheCommand;
     this->children.resize(0);
     this->theOperation=-1;
   }
-  std::string GetToken()const;
-  Expression(){this->theBoss=0; this->errorString="";}
+  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=-1)
+  { if (maxRecursionDepth>0)
+      if(recursionDepth<maxRecursionDepth)
+        return "...";
+    for (unsigned i=0; i<this->children.size(); i++)
+    {
+    }
+  }
+  std::string GetOperation()const;
+  Expression()
+  { this->theBoss=0;
+    this->errorString="";
+    this->theData=0;
+    this->theOperation=-1;
+  }
   Expression(const Expression& other)
   { this->operator=(other);
   }
@@ -115,13 +132,31 @@ class Expression
   }
 };
 
-class Computation
+class SyntacticElement
+{
+  public:
+  int controlIndex;
+  Expression theData;
+  void operator=(const SyntacticElement& other)
+  { this->controlIndex=other.controlIndex;
+    this->theData=other.theData;
+  }
+  SyntacticElement(){}
+  SyntacticElement(const SyntacticElement& other)
+  { this->operator=(other);
+  }
+};
+
+class Command
 {
 public:
   hashedVector<std::string, hashString> Dictionary;
-  hashedVector<std::string, hashString> controlSequences;
-  std::vector<Expression> expressionStack;
+  CommandList* theBoss;
+  std::vector<SyntacticElement> syntacticSoup;
+  std::vector<SyntacticElement> expressionStacK;
+  Expression finalValue;
   int numEmptyTokensStart;
+  std::string ErrorString;
   std::string ElementToString()
   { std::stringstream out;
     out << "Dictionary: ";
@@ -131,11 +166,6 @@ public:
         out << ", ";
     }
     return out.str();
-  }
-  void Evaluate(const std::string& input, std::vector<Expression>& output)
-  { std::vector<std::vector< Expression> > startingExpressions;
-    this->ParseFillDictionary(input, startingExpressions);
-    this->ExtractExpressions(startingExpressions, output);
   }
   bool LookAheadAllowsPlus(const std::string& lookAhead)
   { return
@@ -154,65 +184,61 @@ public:
       ;
   }
   bool ReplaceEOEByE()
-  { Expression& final=this->expressionStack[this->expressionStack.size()-2];
-    Expression& left = this->expressionStack[this->expressionStack.size()-3];
-    Expression& right = this->expressionStack[this->expressionStack.size()-1];
-    final.children.push_back(left);
-    final.children.push_back(right);
-    std::swap(left, final);
-    this->expressionStack.resize(this->expressionStack.size()-2);
+  { SyntacticElement& middle=this->expressionStacK[this->expressionStacK.size()-2];
+    SyntacticElement& left = this->expressionStacK[this->expressionStacK.size()-3];
+    SyntacticElement& right = this->expressionStacK[this->expressionStacK.size()-1];
+    middle.theData.theOperation=this->GetOperationIndex(middle.controlIndex);
+    middle.controlIndex=this->GetExpressionIndex();
+    middle.theData.children.push_back(left.theData);
+    middle.theData.children.push_back(right.theData);
+    left=middle;
+    this->expressionStacK.resize(this->expressionStacK.size()-2);
     return true;
   }
-  void ExtractExpressions
-  (const std::vector<std::vector< Expression> >& theExpressions, std::vector<Expression>& output)
-  { std::vector<Expression> expressionStack;
-    std::string lookAheadToken;
-    for (unsigned j=0; j<theExpressions.size(); j++)
-    { this->expressionStack.resize(0);
-      for (unsigned int i=0; i<theExpressions[j].size(); i++)
-      { if (i+1<theExpressions[j].size())
-          lookAheadToken=theExpressions[j][i+1].GetToken();
-        else
-          lookAheadToken="end";
-        this->expressionStack.push_back(theExpressions[j][i]);
-        while(this->ApplyOneRule(lookAheadToken))
-        {}
-      }
-    }
-  }
-  bool ApplyOneRule(const std::string& lookAhead)
-  { const Expression& lastE=this->expressionStack[expressionStack.size()-1];
-    const std::string&    lastS=lastE.GetToken();
-    if (lastS==" " && this->expressionStack.size()>this->numEmptyTokensStart)
-    { this->expressionStack.resize(this->expressionStack.size()-1);
-      return false;
-    }
-    const Expression& secondToLastE=this->expressionStack[expressionStack.size()-2];
-    const std::string&    secondToLastS=secondToLastE.GetToken();
-    const Expression& thirdToLastE=this->expressionStack[expressionStack.size()-3];
-    const std::string&    thirdToLastS=thirdToLastE.GetToken();
-    const Expression& fourthToLastE=this->expressionStack[expressionStack.size()-4];
-    const std::string&    fourthToLastS=fourthToLastE.GetToken();
-    const Expression& fifthToLastE=this->expressionStack[expressionStack.size()-5];
-    const std::string&    fifthToLastS=fifthToLastE.GetToken();
-    //"e" stands for expression
-    if (lastS=="e" && secondToLastS=="+" && thirdToLastS=="e" && this->LookAheadAllowsPlus(lookAhead) )
-      return this->ReplaceEOEByE();
-    if (lastS=="e" && secondToLastS=="*" && thirdToLastS=="e" && this->LookAheadAllowsTimes(lookAhead) )
-      return this->ReplaceEOEByE();
-
-    return false;
-  }
-
-  void ParseFillDictionary
-  (const std::string& input, std::vector<std::vector< Expression> >& output)
-  ;
+  int GetOperationIndex(int controlIndex);
+  int GetExpressionIndex();
+  SyntacticElement GetEmptySyntacticElement();
+  bool ApplyOneRule(const std::string& lookAhead);
   bool isSeparator(char c);
-  void reset()
-  { this->Dictionary.reset();
-    this->Dictionary.AddOnTop(" ");
-    this->Dictionary.AddOnTop("\\");
-    this->Dictionary.AddOnTop(";");
+  void reset(CommandList* owner=0)
+  { this->numEmptyTokensStart=6;
+    this->expressionStacK.resize(0);
+    this->syntacticSoup.resize(0);
+    this->finalValue.reset(owner, -1);
+    this->theBoss=owner;
+    this->ErrorString="";
+  }
+  bool SetError(const std::string& theError)
+  { this->ErrorString=theError;
+    return true;
+  }
+  Command()
+  { this->reset();
+  }
+};
+
+class CommandList
+{
+public:
+  hashedVector<std::string, hashString> controlSequences;
+  hashedVector<std::string, hashString> operations;
+  hashedVector<std::string, hashString> variableDictionary;
+  std::vector<Command> theCommands;
+
+  hashedVector<std::string, hashString> cashedExpressions;
+
+  SyntacticElement GetSyntacticElementEnd()
+  { SyntacticElement result;
+    result.controlIndex=this->controlSequences.GetIndex(";");
+    return result;
+  }
+
+  void AddEmptyHeadedCommand();
+  CommandList()
+  { this->controlSequences.reset();
+    this->operations.reset();
+    this->variableDictionary.reset();
+    this->cashedExpressions.reset();
     this->controlSequences.AddOnTop("+");
     this->controlSequences.AddOnTop("-");
     this->controlSequences.AddOnTop("/");
@@ -220,26 +246,44 @@ public:
     this->controlSequences.AddOnTop(":=");
     this->controlSequences.AddOnTop("^");
     this->controlSequences.AddOnTop("+");
+    this->controlSequences.AddOnTop("\\circ");
+    this->controlSequences.AddOnTop("Variable");
+
+    this->operations.AddOnTop(this->controlSequences);
+
+    this->controlSequences.AddOnTop(" ");//empty token
+    this->controlSequences.AddOnTop("Expression");
     this->controlSequences.AddOnTop("(");
     this->controlSequences.AddOnTop(")");
     this->controlSequences.AddOnTop("[");
     this->controlSequences.AddOnTop("]");
-    this->numEmptyTokensStart=6;
+    this->controlSequences.AddOnTop(";");//exression end
   }
-  Computation()
-  { this->reset();
+  void ExtractExpressions()
+  { std::string lookAheadToken;
+    for (unsigned j=0; j<this->theCommands.size(); j++)
+    { this->theCommands[j].expressionStacK.resize(0);
+      for (unsigned i=0; i<this->theCommands[j].syntacticSoup.size(); i++)
+      { if (i+1<this->theCommands[j].syntacticSoup.size())
+          lookAheadToken=this->controlSequences[this->theCommands[j].syntacticSoup[i+1].controlIndex];
+        else
+          lookAheadToken=";";
+        this->theCommands[j].expressionStacK.push_back(this->theCommands[j].syntacticSoup[i]);
+        while(this->theCommands[j].ApplyOneRule(lookAheadToken))
+        {}
+      }
+    }
   }
+  void Evaluate(const std::string& input)
+  { std::vector<Command> startingExpressions;
+    this->ParseFillDictionary(input);
+    this->ExtractExpressions();
+  }
+  bool isSeparator(char c);
+  void ParseFillDictionary(const std::string& input);
 };
 
-std::string Expression::GetToken()const
-{ if (this->children.size()>0)
-    return "e"; //stands for expression
-  if (this->theBoss->controlSequences.Contains(this->theBoss->Dictionary[this->theData]))
-    return this->theBoss->Dictionary[this->theData];
-  return "e"; //stands for expression
-}
-
-bool Computation::isSeparator(char c)
+bool CommandList::isSeparator(char c)
 { switch(c)
   { case ' ':
     case ':':
@@ -269,18 +313,31 @@ bool Computation::isSeparator(char c)
   }
 }
 
-void Computation::ParseFillDictionary
-  (const std::string& input, std::vector<std::vector< Expression> >& output)
+SyntacticElement Command::GetEmptySyntacticElement()
+{ SyntacticElement result;
+  result.controlIndex=this->theBoss->controlSequences.GetIndex(" ");
+  result.theData.reset(0,-1);
+  return result;
+}
+
+void CommandList::AddEmptyHeadedCommand()
+{ this->theCommands.resize(this->theCommands.size()+1);
+  Command& currentCommand=this->theCommands[this->theCommands.size()-1];
+  currentCommand.reset(this);
+  SyntacticElement emptyElement=currentCommand.GetEmptySyntacticElement();
+  for (int i=0; i<currentCommand.numEmptyTokensStart; i++)
+  { currentCommand.expressionStacK.push_back(emptyElement);
+  }
+}
+
+void CommandList::ParseFillDictionary
+  (const std::string& input)
 { std::string current;
-  output.reserve(1000);
-  output.resize(0);
+  this->theCommands.reserve(1000);
+  this->theCommands.resize(0);
   char LookAheadChar;
-  std::vector<Expression> emptyHead;
-  Expression tempExpression;
-  tempExpression.reset(this);
-  tempExpression.theData=0;
-  emptyHead.resize(this->numEmptyTokensStart, tempExpression);
-  output.push_back(emptyHead);
+  this->AddEmptyHeadedCommand();
+  SyntacticElement currentElement;
   for (unsigned i=0; i<input.size(); i++)
   { current.push_back(input[i]);
     if (i+1<input.size())
@@ -288,23 +345,63 @@ void Computation::ParseFillDictionary
     else
       LookAheadChar=' ';
     if ((current=="\\" && LookAheadChar=='\\')|| current==";")
-      output.resize(output.size()+ 1, emptyHead);
+    { this->theCommands[this->theCommands.size()-1].syntacticSoup.push_back(this->GetSyntacticElementEnd());
+      this->AddEmptyHeadedCommand();
+    }
     if ((this->isSeparator(current[0]) || this->isSeparator(LookAheadChar) )&& current!=" ")
-    { this->Dictionary.AddNoRepetition(current);
-      tempExpression.theData=this->Dictionary.GetIndex(current);
-      output[output.size()-1].push_back(tempExpression);
-      current="";
+    { if (this->controlSequences.Contains(current))
+      { currentElement.controlIndex=this->controlSequences.GetIndex(current);
+        currentElement.theData.reset(this, -1);
+        this->theCommands[this->theCommands.size()-1].syntacticSoup.push_back(currentElement);
+      } else
+      { this->variableDictionary.AddNoRepetition(current);
+        currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
+        currentElement.theData.reset(this, this->theCommands.size()-1);
+        currentElement.theData.theOperation=this->operations.GetIndex("Variable");
+        currentElement.theData.theData=this->variableDictionary.GetIndex(current);
+        this->theCommands[this->theCommands.size()-1].syntacticSoup.push_back(currentElement);
+      }
     }
   }
 }
 
+int Command::GetOperationIndex(int controlIndex)
+{ return this->theBoss->operations.GetIndex(this->theBoss->controlSequences[controlIndex]);
+}
+
+int Command::GetExpressionIndex()
+{ return this->theBoss->controlSequences.GetIndex("Expression");
+}
+
+bool Command::ApplyOneRule(const std::string& lookAhead)
+{ const SyntacticElement& lastE=this->expressionStacK[this->expressionStacK.size()-1];
+  const std::string&    lastS=this->theBoss->controlSequences[lastE.controlIndex];
+  if (lastS==" " && signed (this->expressionStacK.size())>this->numEmptyTokensStart)
+  { this->expressionStacK.resize(this->expressionStacK.size()-1);
+    return false;
+  }
+  const SyntacticElement& secondToLastE=this->expressionStacK[this->expressionStacK.size()-2];
+  const std::string&    secondToLastS=this->theBoss->controlSequences[secondToLastE.controlIndex];
+  const SyntacticElement& thirdToLastE=this->expressionStacK[this->expressionStacK.size()-3];
+  const std::string&    thirdToLastS=this->theBoss->controlSequences[thirdToLastE.controlIndex];
+  const SyntacticElement& fourthToLastE=this->expressionStacK[this->expressionStacK.size()-4];
+  const std::string&    fourthToLastS=this->theBoss->controlSequences[fourthToLastE.controlIndex];
+  const SyntacticElement& fifthToLastE=this->expressionStacK[this->expressionStacK.size()-5];
+  const std::string&    fifthToLastS=this->theBoss->controlSequences[fifthToLastE.controlIndex];
+  if (lastS=="Variable")
+    return this->SetError("The keyword \"Variable\" is reserved. Please use another word.");
+  if (lastS=="Expression" && secondToLastS=="+" && thirdToLastS=="e" && this->LookAheadAllowsPlus(lookAhead) )
+    return this->ReplaceEOEByE();
+  if (lastS=="Expression" && secondToLastS=="*" && thirdToLastS=="e" && this->LookAheadAllowsTimes(lookAhead) )
+    return this->ReplaceEOEByE();
+  return false;
+}
 
 #include <sys/time.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <signal.h>
-
 
 void getPath(char* path, std::string& output)
 { if (path==0)
@@ -441,9 +538,13 @@ int main(int argc, char **argv)
   std::cout << "<html><title>Symbolic calculator updated " << __DATE__ << "</title> <script src=\"/easy/load.js\"></script><body> ";
   CivilizeCGIString(inputString, inputString);
   int numBogusChars= 4;
-  for (unsigned i=0; i<inputString.size()-numBogusChars; i++)
+  for (signed i=0; i<signed(inputString.size())-numBogusChars; i++)
     inputString[i]=inputString[i+numBogusChars];
-  inputString.resize(inputString.size()-numBogusChars);
+  int newSize=signed(inputString.size())-numBogusChars;
+  if (newSize<0)
+    newSize=0;
+  inputString.resize(newSize);
+  inputString = "f~(x):=x+1";
 
   std::string beginMath="<div class=\"math\" scale=\"50\">";
   std::string endMath ="</div>";
@@ -455,7 +556,8 @@ int main(int argc, char **argv)
   std::cout << "<input type=\"submit\" name=\"\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
 //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
   std::cout << "\n</form>";
-  std::cout << "<hr>result: " << inputString;
+  std::cout << "<hr>input: " << "<span class=\"math\">" << inputString << "</span>";
+  std::cout << "<hr>result: ";
   std::cout << "</body></html>";
 
 	return 0;   // To avoid Apache errors.

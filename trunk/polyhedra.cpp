@@ -23442,7 +23442,10 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
   ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
   ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
   if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
-  { this->SetError(this->errorBadIndex);
+  { if (rightNode.ExpressionType==this->typeArray)
+      this->EvaluateUnderscoreLeftArgumentIsArray(theGlobalVariables);
+    else
+      this->SetError(this->errorBadIndex);
     return;
   }
   int theIndex= rightNode.intValue;
@@ -25217,6 +25220,7 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
   killingForm.Invert(theGlobalVariables);
   killingForm.ComputeDebugString();
   out << killingForm.DebugString;
+  std::cout <<killingForm.DebugString;
   ElementUniversalEnveloping tempElt1, tempElt2;
   for (int i=0; i<theDimension; i++)
   { tempRoot1.MakeEi(theDimension, i);
@@ -27479,8 +27483,8 @@ std::string ParserNode::ElementToStringValueOnlY
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
     case ParserNode::typeRational: LatexOutput << this->rationalValue.ElementToString(); break;
-    case ParserNode::typePoly: LatexOutput << this->polyValue.GetElement().ElementToString(theFormat); break;
-    case ParserNode::typeRationalFunction: LatexOutput << this->ratFunction.GetElement().ElementToString(theFormat); break;
+    case ParserNode::typePoly: LatexOutput << "\\begin{array}{rcl}&&\n" << this->polyValue.GetElement().ElementToString(theFormat) << "\n\\end{array}"; break;
+    case ParserNode::typeRationalFunction: LatexOutput << "\\begin{array}{rcl}&&\n" << this->ratFunction.GetElement().ElementToString(theFormat) << "\n\\end{array}"; break;
     case ParserNode::typeUEElementOrdered:
       LatexOutput << "\\begin{array}{rcl}&&\n"
       << this->UEElementOrdered.GetElement().ElementToString

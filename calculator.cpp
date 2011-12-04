@@ -88,7 +88,7 @@ void makeReport(IndicatorWindowVariables& input)
 //  if (counter%10!=0)
 //    return;
   std::fstream theFile;
-  CGI::OpenDataFileOrCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
   theFile << "<hr>\n\n" << input.StatusString1 << "<hr>\n\n";
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
   { std::stringstream tempStreamX;
     static_html3(tempStreamX);
     std::fstream tempFile;
-    CGI::OpenDataFileOrCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
+    CGI::OpenFileCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
     tempFile << tempStreamX.str();
   }
   theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
@@ -321,8 +321,8 @@ int main(int argc, char **argv)
   PolynomialOutputFormat theOutputFormat;
   theOutputFormat.alphabetBases.SetSize(2);
   theOutputFormat.MakeAlphabetArbitraryWithIndex("x", "y");
-  theOutputFormat.alphabetBases[0]="\\bar g";
-  theOutputFormat.alphabetBases[1]="\\bar h";
+  theOutputFormat.alphabetBases[0]="g";
+  theOutputFormat.alphabetBases[1]="h";
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
   TimeParsing=GetElapsedTimeInSeconds();
   theOutputFormat.flagUseCalculatorFormatForUEOrdered=true;
@@ -460,11 +460,11 @@ int main(int argc, char **argv)
     tempCommand << "mkdir " << inputPath;
     tempS=tempCommand.str();
     system(tempS.c_str());
-    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
-    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
-    CGI::OpenDataFileOrCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("\\bar g", "\\bar h");
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);

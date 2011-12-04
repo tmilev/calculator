@@ -10915,6 +10915,7 @@ bool GetRootRationalFromFunctionArguments
   ;
   void EvaluateThePower(GlobalVariables& theGlobalVariables);
   void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
+  int EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables);
   void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
   int EvaluateSubstitution(GlobalVariables& theGlobalVariables);
   int EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);

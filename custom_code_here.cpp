@@ -4791,7 +4791,8 @@ int ParserNode::EvaluatePrintRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
-  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br>" <<
+  out << "<br>Symmetric Cartan matrix in Bourbaki order follows."
+  <<" The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>" <<
   CGI::GetHtmlMathDivFromLatexAddBeginARCL(theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) );
   Rational tempRat;
   MatrixLargeRational tempMat;
@@ -8807,6 +8808,34 @@ void ElementUniversalEnveloping::SubstitutionCoefficients
     endResult.Simplify(theGlobalVariables);
   }
   this->operator=(endResult);
+}
+
+int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)
+{ ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
+  ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
+  if (leftNode.Operation!=Parser::tokenG && leftNode.Operation!=Parser::tokenH)
+    return this->SetError(this->errorBadIndex);
+  root theWeight;
+  if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
+    return this->SetError(this->errorBadIndex);
+  ElementUniversalEnveloping& theUEElement=this->UEElement.GetElement();
+  PolynomialRationalCoeff polyOne;
+  polyOne.MakeNVarConst(0, (Rational) 1);
+  if (leftNode.Operation==Parser::tokenG)
+  { if (!this->ContextLieAlgebra->theWeyl.IsARoot(theWeight))
+      return this->SetError(this->errorDunnoHowToDoOperation);
+    theUEElement.MakeOneGeneratorCoeffOne(theWeight, 0, *this->ContextLieAlgebra);
+    this->ExpressionType=this->typeUEelement;
+    return this->errorNoError;
+  }
+  if (leftNode.Operation==Parser::tokenH)
+  { if (theWeight.size!=this->ContextLieAlgebra->GetRank())
+      return this->SetError(this->errorDimensionProblem);
+    theUEElement.AssignElementCartan(theWeight, 0, *this->ContextLieAlgebra);
+    this->ExpressionType=this->typeUEelement;
+    return this->errorNoError;
+  }
+  return this->SetError(this->errorProgramming);
 }
 
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)

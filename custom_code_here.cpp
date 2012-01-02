@@ -843,6 +843,8 @@ class PiecewiseQuasipolynomial
   void MakeCommonRefinement(const ConeComplex& other);
   void TranslateArgument(root& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
   void MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables);
+  Rational Evaluate(const root& thePoint);
+  Rational EvaluateInputProjectivized(const root& thePoint);
   void Nullify(int numVars, GlobalVariables& theGlobalVariables)
   { this->NumVariables=numVars;
     this->theProjectivizedComplex.init();
@@ -1048,7 +1050,83 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars)
     }
   }
   for (int i=0; i<theLatticePointsFinal.size; i++)
-    theDrawingVars.drawCircleAtVectorBuffer(theLatticePointsFinal[i], 2, theDrawingVars.PenStyleNormal, theLatticePointColors[i]);
+  { theDrawingVars.drawCircleAtVectorBuffer(theLatticePointsFinal[i], 2, theDrawingVars.PenStyleNormal, theLatticePointColors[i]);
+    theDrawingVars.drawTextAtVectorBuffer
+    (theLatticePointsFinal[i], this->EvaluateInputProjectivized(theLatticePointsFinal[i]).ElementToString(), 0, DrawingVariables::PenStyleNormal, 0);
+  }
+}
+
+Rational QuasiPolynomial::Evaluate(const root& input)
+{ root testLatticeBelonging;
+  for (int i=0; i<this->LatticeShifts.size; i++)
+  { testLatticeBelonging=this->LatticeShifts[i]-input;
+    if (this->AmbientLatticeReduced.IsInLattice(testLatticeBelonging))
+    { Rational result;
+      this->valueOnEachLatticeShift[i].Evaluate(input, result);
+      return result;
+    }
+  }
+  return 0;
+}
+
+Rational PiecewiseQuasipolynomial::Evaluate(const root& input)
+{ assert(input.size==this->theProjectivizedComplex.GetDim()-1);
+  root ProjectivizedInput=input;
+  ProjectivizedInput.SetSize(input.size+1);
+  *ProjectivizedInput.LastObject()=1;
+  return this->EvaluateInputProjectivized(ProjectivizedInput);
+}
+
+Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const root& input)
+{ Rational result;
+  assert(input.size==this->theProjectivizedComplex.GetDim());
+  root AffineInput=input;
+  AffineInput.SetSize(input.size-1);
+  int theIndex=this->theProjectivizedComplex.GetLowestIndexchamberContaining(input);
+  if (theIndex==-1)
+    return 0;
+  result=this->theQPs[theIndex].Evaluate(AffineInput);
+  //the following for cycle is for self-check purposes only. Comment it out as soon as
+  // the code has been tested sufficiently
+  for (int i=0; i<this->theProjectivizedComplex.size; i++)
+    if (this->theProjectivizedComplex[i].IsInCone(input))
+    { Rational altResult=this->theQPs[i].Evaluate(AffineInput);
+      if (result!=altResult)
+      { static bool firstFail=true;
+        if (!firstFail)
+          break;
+        PolynomialOutputFormat tempFormat;
+        std::cout << "<hr>Error!!! Failed on chamber " << theIndex+1 << " and " << i+1;
+        std::cout << "<br>Evaluating at point " << AffineInput.ElementToString() << "<br>";
+
+        std::cout << "<br>Chamber " << theIndex+1 << ": "
+        << this->theProjectivizedComplex[theIndex].ElementToString(false, true, true, true, tempFormat);
+        std::cout << "<br>QP: " << this->theQPs[theIndex].ElementToString(true, false);
+        std::cout << "<br>value: " << result.ElementToString();
+        std::cout << "<br><br>Chamber " << i+1 << ": "
+        << this->theProjectivizedComplex[i].ElementToString(false, true, true, true, tempFormat);
+        std::cout << "<br>QP: " << this->theQPs[i].ElementToString(true, false);
+        std::cout << "<br>value: " << altResult.ElementToString();
+        if (firstFail)
+        { DrawingVariables tempDV;
+          std::cout << "<br><b>Point of failure: " << AffineInput.ElementToString() << "</b>";
+          //this->DrawMe(tempDV);
+          this->theProjectivizedComplex.DrawMeLastCoordAffine(true, tempDV, tempFormat);
+          tempDV.NumHtmlGraphics=5;
+          tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 10, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+          tempDV.theBuffer.drawCircleAtVectorBuffer(AffineInput, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+          std::cout << "<br>"
+          << " <script src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\" type=\"text/javascript\"></script>\n";
+          std::cout
+          << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->theProjectivizedComplex.GetDim()-1);
+
+        }
+        firstFail=false;
+      }
+//      assert(result==altResult);
+    }
+  return result;
 }
 
 void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
@@ -1133,11 +1211,26 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Accum.Nullify(theStartingPoly.NumVariables, theGlobalVariables);
   for (int i=0; i<this->theLinearOperators.size; i++)
   { theSubbedPoly=theStartingPoly;
-    if (i%2==1)
-      theSubbedPoly*=-1;
+    theSubbedPoly*=this->theCoeffs[i];
     theSubbedPoly.TranslateArgument(translationsProjectedFinal[i], theGlobalVariables);
     //theSubbedPoly.DrawMe(tempVars);
+    if (i==2)
+    { DrawingVariables tempDV, tempDV2;
+      tempDV.NumHtmlGraphics=100;
+      tempDV2.NumHtmlGraphics=109;
+      std::cout << "<hr><hr>first point of failure: <hr>accum: ";
+      Accum.DrawMe(tempDV);
+      tempDV.drawCoordSystemBuffer(tempDV, 2, 0);
+      std::cout << tempDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+      std::cout << "<hr>subbed poly: ";
+      theSubbedPoly.DrawMe(tempDV2);
+      tempDV.drawCoordSystemBuffer(tempDV2, 2, 0);
+      std::cout << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+    }
     Accum+=theSubbedPoly;
+    DrawingVariables tempDrawOps;
+    std::cout << "<hr><hr> Index: " << i+1 << " out of " << this->theLinearOperators.size << " <hr>";
+    Accum.DrawMe(tempDrawOps);
   }
   Accum.DrawMe(drawOps);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -3600,7 +3693,7 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice
   this->valueOnEachLatticeShift.TheObjects[0]=inputPoly;
 }
 
-bool Lattice::ReduceVector(Vector<Rational>& theVector)
+bool Lattice::ReduceVector(Vector<Rational>& theVector)const
 { root output;
   assert(theVector.size==this->GetDim());
   Vectors<Rational> basisRoots;
@@ -3608,6 +3701,7 @@ bool Lattice::ReduceVector(Vector<Rational>& theVector)
   //std::cout <<  "the basis: " << basisRoots.ElementToString();
   if (!theVector.GetCoordsInBasiS(basisRoots, output, (Rational) 1, (Rational) 0))
   { std::cout << "oops bad!";
+    assert(false);
     return false;
   }
   for (int i=0; i<output.size; i++)
@@ -4787,11 +4881,22 @@ void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
   output.Reduce();
 }
 
+Rational WeylGroup::GetKillingDivTraceRatio()
+{ Rational result=0;
+  Rational tempRat;
+  for (int i=0; i<this->RootSystem.size; i++)
+  { tempRat=this->RootScalarCartanRoot(this->RootSystem[i], this->RootSystem[0]);
+    result+=tempRat*tempRat;
+  }
+  result/=this->RootScalarCartanRoot(this->RootSystem[0], this->RootSystem[0]);
+  return result;
+}
+
 int ParserNode::EvaluatePrintRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
-  out << "<br>Symmetric Cartan matrix in Bourbaki order follows."
+  out << "<br>Symmetric Cartan matrix follows."
   <<" The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>" <<
   CGI::GetHtmlMathDivFromLatexAddBeginARCL(theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) );
   Rational tempRat;
@@ -4799,6 +4904,19 @@ int ParserNode::EvaluatePrintRootSystem
   tempMat = theWeyl.CartanSymmetric;
   tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
   out  << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ElementToString();
+/*  Rational theRatio;
+  for (int j=0; j<theWeyl.GetDim(); j++)
+  { theRatio=0;
+    for (int i=0; i<theWeyl.RootSystem.size; i++)
+    { Rational tempRat=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[j]);
+      theRatio+=tempRat*tempRat;
+    }
+    theRatio.Invert();
+    theRatio*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[j], theWeyl.RootSystem[j]);
+    Rational tempRat=theWeyl.GetKillingDivTraceRatio();
+    tempRat.Invert();
+//    std::cout << "<br>" << j+1 << ": " << theRatio.ElementToString() << "=? " << tempRat.ElementToString();
+  }*/
   //Lattice tempLattice;
   //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
   //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ElementToString(true, false);
@@ -8525,6 +8643,7 @@ int ParserNode::EvaluateModVermaRelations
   ;
   //Needs to be rewritten! fix it!
   theNode.UEElement.GetElement().ModOutVermaRelationS(theGlobalVariables);
+  theNode.impliedNumVars=theNode.UEElement.GetElement().GetNumVariables();
   theNode.ExpressionType=theNode.typeUEelement;
   theNode.outputString=out.str();
   return theNode.errorNoError;
@@ -8589,8 +8708,13 @@ int ParserNode::EvaluateAdjointAction
 int ParserNode::EvaluateMakeCasimir
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { theNode.ExpressionType=theNode.typeUEelement;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
   theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
-  theNode.outputString= "The Casimir element of the ambient Lie algebra. Denoted also by c.";
+  std::stringstream out;
+  out << "The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()
+  <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
+  theNode.outputString=out.str();
+
   return theNode.errorNoError;
 }
 

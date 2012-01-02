@@ -5246,7 +5246,7 @@ public:
   //bool GetRootFromLinPolyConstTermLastVariable(root& output) {return this->GetRootFromLinPolyConstTermLastVariable(output, (Rational) 0);}
   void AssignIntegerPoly(const Polynomial<LargeInt>& p);
   void Evaluate(intRoot& values, Rational& output);
-  void Evaluate(root& values, Rational& output){ this->::Polynomial<Rational>::Evaluate(values, output, (Rational) 0);}
+  void Evaluate(const root& values, Rational& output){ this->::Polynomial<Rational>::Evaluate(values, output, (Rational) 0);}
   void MakePolyFromDirectionAndNormal(root& direction, root& normal, Rational& Correction, GlobalVariables& theGlobalVariables);
   void MakePolyExponentFromIntRoot(intRoot& r, GlobalVariables& theGlobalVariables);
   void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
@@ -7408,8 +7408,14 @@ public:
   ;
   void IntersectWithBothOfMaxRank(const Lattice& other);
   void GetDualLattice(Lattice& output)const;
+  bool IsInLattice(const Vector<Rational>& theVector)const
+  { Vector<Rational> tempVect=theVector;
+    if (!this->ReduceVector(tempVect))
+      return false;
+    return tempVect.IsEqualToZero();
+  }
   //returns false if the vector is not in the vector space spanned by the lattice
-  bool ReduceVector(Vector<Rational>& theVector);
+  bool ReduceVector(Vector<Rational>& theVector) const;
   //In the following two functions, the format of the matrix theSub of the substitution is as follows.
   //Let the ambient dimension be n, and the coordinates be x_1,..., x_n.
   //Let the new vector space be of dimension m, with coordinates y_1,..., y_m.
@@ -7489,7 +7495,7 @@ public:
   std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
   std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ElementToString(false, false);}
-  void Evaluate(const root& input);
+  Rational Evaluate(const root& input);
   void AddLatticeShift(const PolynomialRationalCoeff& input, const root& inputShift);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
@@ -8204,6 +8210,7 @@ public:
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS;}
   void MakeArbitrary(char WeylGroupLetter, int n);
   void GenerateAdditivelyClosedSubset(roots& input, roots& output);
+  Rational GetKillingDivTraceRatio();
   void MakeAn(int n);
   void MakeEn(int n);
   void MakeBn(int n);
@@ -9614,7 +9621,7 @@ public:
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebra& theOwner);
   void AssignElementLieAlgebra(const ElementSimpleLieAlgebra& input, int numVars, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& theOwner);
-  void MakeOneGeneratorCoeffOne(root& rootSpace, int numVars, SemisimpleLieAlgebra& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
+  void MakeOneGeneratorCoeffOne(const root& rootSpace, int numVars, SemisimpleLieAlgebra& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
   void Nullify(SemisimpleLieAlgebra& theOwner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& theOwner);

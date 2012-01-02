@@ -25201,12 +25201,12 @@ void ElementUniversalEnveloping::RaiseToPower(int thePower)
 }
 
 void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int numVars, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{ //std::stringstream out;
   this->Nullify(theOwner);
   WeylGroup& theWeyl= this->owner->theWeyl;
   int theDimension=theWeyl.CartanSymmetric.NumRows;
   root tempRoot1, tempRoot2;
-  MatrixLargeRational killingForm;
+/*  MatrixLargeRational killingForm;
   killingForm.init(theDimension, theDimension);
   for (int i=0; i<theDimension; i++)
   { tempRoot1.MakeEi(theDimension, i);
@@ -25217,14 +25217,29 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
         killingForm.elements[i][j]+= theWeyl.RootScalarCartanRoot(tempRoot1, theWeyl.RootSystem.TheObjects[k])* theWeyl.RootScalarCartanRoot(tempRoot2, theWeyl.RootSystem.TheObjects[k]);
     }
   }
+  std::cout << killingForm.ElementToString(true, false);
   killingForm.Invert(theGlobalVariables);
   killingForm.ComputeDebugString();
-  out << killingForm.DebugString;
-  std::cout <<killingForm.DebugString;
+  out << killingForm.ElementToString(true, false);*/
+//  std::cout << killingForm.ElementToString(true, false);
   ElementUniversalEnveloping tempElt1, tempElt2;
+//this code is to check a math formula:
+//  ElementUniversalEnveloping checkElement;
+//  checkElement.Nullify(theOwner);
+  MatrixLargeRational invertedSymCartan;
+  invertedSymCartan=theWeyl.CartanSymmetric;
+  invertedSymCartan.Invert();
+////////////////////////////////////////////////////////////////////////
   for (int i=0; i<theDimension; i++)
   { tempRoot1.MakeEi(theDimension, i);
-    killingForm.ActOnAroot(tempRoot1, tempRoot2);
+  //implementation without the ninja formula:
+/*    killingForm.ActOnAroot(tempRoot1, tempRoot2);
+    tempElt1.AssignElementCartan(tempRoot1, numVars, theOwner);
+    tempElt2.AssignElementCartan(tempRoot2, numVars, theOwner);
+    tempElt1*=tempElt2;
+    *this+=tempElt1;*/
+// Alternative implementation using a ninja formula I cooked up after looking at the printouts:
+    invertedSymCartan.ActOnAroot(tempRoot1, tempRoot2);
     tempElt1.AssignElementCartan(tempRoot1, numVars, theOwner);
     tempElt2.AssignElementCartan(tempRoot2, numVars, theOwner);
     tempElt1*=tempElt2;
@@ -25233,7 +25248,8 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
   Rational tempRat;
   root theSum;
   for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { tempRat=0;
+  { /*Implementation without the ninja formula:
+    tempRat=0;
     root& theRoot=theWeyl.RootSystem.TheObjects[i];
     int indexOfOpposite=theWeyl.RootSystem.IndexOfObjectHash(-theRoot);
     root& theOpposite= theWeyl.RootSystem.TheObjects[indexOfOpposite];
@@ -25252,12 +25268,27 @@ void ElementUniversalEnveloping::MakeCasimir(SemisimpleLieAlgebra& theOwner, int
     tempElt2.MakeOneGeneratorCoeffOne(theOpposite, numVars, theOwner);
     tempElt1.MakeOneGeneratorCoeffOne(theRoot, numVars, theOwner);
     tempElt2*=tempElt1;
+
     tempElt2*=tempRat;
+    *this+=tempElt2;*/
+ //The ninja formula alternative implementation:
+    root& theRoot=theWeyl.RootSystem.TheObjects[i];
+    tempElt2.MakeOneGeneratorCoeffOne(-theRoot, numVars, theOwner);
+    tempElt1.MakeOneGeneratorCoeffOne(theRoot, numVars, theOwner);
+    tempElt2*=tempElt1;
+    tempElt2*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[i])/2;
     *this+=tempElt2;
   }
-//  this->ComputeDebugString(theGlobalVariables);
-  out << "\n" << this->DebugString;
-  this->DebugString=out.str();
+  *this/=theWeyl.GetKillingDivTraceRatio();
+// Check that the ninja formula is correct:
+/*  PolynomialOutputFormat tempPolyFormat;
+  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  std::cout << "Killing divided by trace ratio:" << theWeyl.GetKillingDivTraceRatio().ElementToString();
+  std::cout << "<br>casimir: " << this->ElementToString(false, false, theGlobalVariables, tempPolyFormat);
+  std::cout << "<br>check element: " << checkElement.ElementToString(false, false, theGlobalVariables, tempPolyFormat);
+*/
+//  std::cout << "<br> check element minus casimir=" << checkElement.ElementToString(false, false, theGlobalVariables, tempPolyFormat);
+  //this->DebugString=out.str();
 /*  for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i);
     if (!length1Explored)

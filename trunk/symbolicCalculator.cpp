@@ -7,6 +7,7 @@
 class CommandList;
 class Command;
 class Expression;
+class ExpressionPairs;
 
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
@@ -38,7 +39,7 @@ class hashedVector
   void reset()
   { if (this->theElts.size()<this->hashedIndices.size())
       for (unsigned i=0; i<this->theElts.size(); i++)
-        this->hashedIndices[this->GetIndex(this->theElts[i])].resize(0);
+        this->hashedIndices[this->GetHash(this->theElts[i])].resize(0);
     else
       for (unsigned i=0; i<this->hashedIndices.size(); i++)
         this->hashedIndices[i].resize(0);
@@ -112,8 +113,11 @@ class Expression
     this->children.resize(0);
     this->theOperation=-1;
   }
-  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=-1);
-
+  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false)const;
+  std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
+  static int HashFunction(const Expression& input)
+  { return input.theData*SomeRandomPrimes[1]+input.theOperation*SomeRandomPrimes[0];
+  }
   std::string GetOperation()const;
   Expression()
   { this->theBoss=0;
@@ -126,14 +130,28 @@ class Expression
   { this->theBoss=0;
     this->operator=(other);
   }
+  bool NeedBracketsForMultiplication()const;
+  bool NeedBracketsForAddition()const;
+  bool NeedBracketsForCirc()const;
+  bool NeedBracketsForThePower()const;
+  bool operator==(const Expression& other)const;
   void operator=(const Expression& other)
   { this->theBoss=other.theBoss;
     this->commandIndex=other.commandIndex;
     this->children=other.children;
+    this->theData=other.theData;
     this->theOperation=other.theOperation;
     this->correspondingString=other.correspondingString;
     this->errorString=other.errorString;
   }
+};
+
+class ExpressionPairs
+{
+public:
+  std::string ElementToString();
+  hashedVector<Expression, Expression::HashFunction> left;
+  hashedVector<Expression, Expression::HashFunction> right;
 };
 
 class SyntacticElement
@@ -217,7 +235,7 @@ public:
     }
     out << "<br>\nSyntactic soup: ";
     for (unsigned i=0; i<syntacticSoup.size(); i++)
-    { out << this->syntacticSoup[i].ElementToStringNoExpression(*this->theBoss);
+    { out << this->syntacticSoup[i].ElementToString(*this->theBoss);
       if (i!=syntacticSoup.size()-1)
         out << ", ";
     }
@@ -233,7 +251,7 @@ public:
       if (i!=expressionStacK.size()-1)
         out << ", ";
     }
-    out << "<br>\n Current value: " << this->finalValue.ElementToString(0,5);
+    out << "<br>\n Current value: " << this->finalValue.ElementToString(0,5, false);
     return out.str();
   }
   bool LookAheadAllowsPlus(const std::string& lookAhead)
@@ -277,10 +295,19 @@ public:
   }
   bool ReplaceXEXByE()
   { this->expressionStacK[this->expressionStacK.size()-3]=this->expressionStacK[this->expressionStacK.size()-2];
-    this->expressionStacK.resize(this->expressionStacK.size()-2);
+    this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
+  bool ReplaceObyE();
   bool ReplaceVXbyEX();
+  bool ReplaceIntIntBy10IntPlusInt()
+  { SyntacticElement& left=this->expressionStacK[this->expressionStacK.size()-2];
+    SyntacticElement& right=this->expressionStacK[this->expressionStacK.size()-1];
+    left.theData.theData*=10;
+    left.theData.theData+=right.theData.theData;
+    this->DecreaseStackSetCharacterRanges(1);
+    return true;
+  }
   bool RegisterBoundVariable();
   int GetOperationIndex(int controlIndex);
   int GetExpressionIndex();
@@ -300,6 +327,8 @@ public:
   }
 };
 
+typedef bool (*standardExpressionEvaluation)(CommandList& theCommands, int commandIndex, Expression& theExpression);
+
 class CommandList
 {
 public:
@@ -307,12 +336,16 @@ public:
   hashedVector<std::string, hashString> controlSequences;
 //operations parametrize the expression elements
   hashedVector<std::string, hashString> operations;
+  std::vector <standardExpressionEvaluation> theStandardEvaluationFunctions;
 //used to parametrize the input data for the special operation "VariableNonBound"
   hashedVector<std::string, hashString> variableDictionary;
+  int MaxRecursionDepth;
+  int MaxAlgTransformationsPerExpression;
   std::vector<Command> theCommands;
 
   hashedVector<std::string, hashString> cashedExpressions;
-
+  std::vector <std::string> Errors;
+  std::string output;
   std::string ElementToString();
 
   SyntacticElement GetSyntacticElementEnd()
@@ -326,11 +359,17 @@ public:
   int conBindVariable()
   { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
   }
+  int conInteger()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
+  }
   int conDeclareFunction()
   { return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
   int conDefine()
   { return this->controlSequences.GetIndexIMustContainTheObject(":=");
+  }
+  int opFunction()
+  { return this->operations.GetIndexIMustContainTheObject("{}");
   }
   int opDefine()
   { return this->operations.GetIndexIMustContainTheObject(":=");
@@ -338,31 +377,78 @@ public:
   int opVariableNonBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
   }
+  int opPlus()
+  { return this->operations.GetIndexIMustContainTheObject("+");
+  }
+  int opMinus()
+  { return this->operations.GetIndexIMustContainTheObject("-");
+  }
+  void CarryOutOneSub
+  (Expression& toBeSubbed, Expression& toBeSubbedWith, int targetCommandIndex, ExpressionPairs& matchedPairs)
+  ;
+
+  Expression* DepthFirstSubExpressionPatternMatch
+  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth=0, int MaxRecursionDepth=10000)
+;
+  bool ProcessOneExpressionOnePatternOneSub
+  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,  int maxNumSubs=10000)
+  ;
+  bool isADigit(const std::string& input, int& whichDigit)
+  { if (input.size()!=1)
+      return false;
+    whichDigit=input[0]-'0';
+    return whichDigit<10 && whichDigit>=0;
+  }
+  int opTimes()
+  { return this->operations.GetIndexIMustContainTheObject("*");
+  }
+  int opDivide()
+  { return this->operations.GetIndexIMustContainTheObject("/");
+  }
+  int opInteger()
+  { return this->operations.GetIndexIMustContainTheObject("Integer");
+  }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
   }
+  bool ExpressionMatchesPattern
+  (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
+   int RecursionDepth=0, int MaxRecursionDepth=500)
+  ;
+  bool ExpressionsAreEqual
+  (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
+  ;
+
+  static bool EvaluateStandardPlus(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   void AddEmptyHeadedCommand();
   CommandList()
   { this->controlSequences.reset();
     this->operations.reset();
     this->variableDictionary.reset();
     this->cashedExpressions.reset();
+    this->theStandardEvaluationFunctions.resize(0);
+    this->MaxRecursionDepth=2000;
 
-    this->operations.AddOnTop("+");
-    this->operations.AddOnTop("-");
-    this->operations.AddOnTop("/");
-    this->operations.AddOnTop("*");
-    this->operations.AddOnTop(":=");
-    this->operations.AddOnTop("^");
-    this->operations.AddOnTop("+");
-    this->operations.AddOnTop("_");
+    this->operations.AddOnTop("+"); this->theStandardEvaluationFunctions.push_back(&this->EvaluateStandardPlus);
+    this->operations.AddOnTop("-");  this->theStandardEvaluationFunctions.push_back(&this->EvaluateStandardMinus);
+    this->operations.AddOnTop("/");  this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("*"); this->theStandardEvaluationFunctions.push_back(this->EvaluateStandardTimes);
+    this->operations.AddOnTop(":="); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("^"); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("_"); this->theStandardEvaluationFunctions.push_back(0);
     //the following two operations are chosen on purpose so that they correspond to LaTeX-undetectable
     //expressions
-    this->operations.AddOnTop("{{}}"); //this is the binding variable operation
-    this->operations.AddOnTop("{}"); //this is the operation for using a variable as a function
-    this->operations.AddOnTop("VariableNonBound");
-    this->operations.AddOnTop("VariableBound");
-    this->operations.AddOnTop("Error");
+    //the following is the binding variable operation
+    this->operations.AddOnTop("{{}}"); this->theStandardEvaluationFunctions.push_back(0);
+    //the following is the operation for using a variable as a function
+    this->operations.AddOnTop("{}"); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("Integer"); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("VariableNonBound"); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("VariableBound"); this->theStandardEvaluationFunctions.push_back(0);
+//    this->operations.AddOnTop("AnyInteger"); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("Error"); this->theStandardEvaluationFunctions.push_back(0);
 
     this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
     this->controlSequences.AddOnTop("Variable");
@@ -395,10 +481,15 @@ public:
         this->theCommands[j].finalValue=this->theCommands[j].expressionStacK[this->theCommands[j].numEmptyTokensStart].theData;
     }
   }
+  void EvaluateCommands();
+  void EvaluateExpression
+(int commandIndex, Expression& theExpression, int RecursionDepth, ExpressionPairs& bufferPairs, int maxNumSubs=10000)
+  ;
   void Evaluate(const std::string& input)
   { std::vector<Command> startingExpressions;
     this->ParseFillDictionary(input);
     this->ExtractExpressions();
+    this->EvaluateCommands();
   }
   bool isSeparator(char c);
   void ParseFillDictionary(const std::string& input);
@@ -452,6 +543,14 @@ void CommandList::AddEmptyHeadedCommand()
   currentCommand.reset(this, this->theCommands.size()-1);
 }
 
+std::string ExpressionPairs::ElementToString()
+{ std::stringstream out;
+  out << "the pairs: ";
+  for (int i=0; i<this->left.size(); i++)
+    out << this->left[i].ElementToString() << "->" << this->right[i].ElementToString() << "<br>";
+  return out.str();
+}
+
 void CommandList::ParseFillDictionary
   (const std::string& input)
 { std::string current;
@@ -461,6 +560,7 @@ void CommandList::ParseFillDictionary
   this->AddEmptyHeadedCommand();
   SyntacticElement currentElement;
   bool lastStatementProperlyTerminated;
+  int currentDigit;
   for (unsigned i=0; i<input.size(); i++)
   { lastStatementProperlyTerminated=false;
     current.push_back(input[i]);
@@ -480,6 +580,12 @@ void CommandList::ParseFillDictionary
       { if (this->controlSequences.Contains(current))
         { currentElement.controlIndex=this->controlSequences.GetIndex(current);
           currentElement.theData.reset(this, -1);
+          this->theCommands[this->theCommands.size()-1].syntacticSoup.push_back(currentElement);
+        } else if (this->isADigit(current, currentDigit))
+        { currentElement.controlIndex=this->conInteger();
+          currentElement.theData.reset(this, -1);
+          currentElement.theData.theOperation=this->opInteger();
+          currentElement.theData.theData=currentDigit;
           this->theCommands[this->theCommands.size()-1].syntacticSoup.push_back(currentElement);
         } else
         { this->variableDictionary.AddNoRepetition(current);
@@ -502,6 +608,13 @@ int Command::GetOperationIndex(int controlIndex)
 
 int Command::GetExpressionIndex()
 { return this->theBoss->controlSequences.GetIndex("Expression");
+}
+
+bool Command::ReplaceObyE()
+{ SyntacticElement& theElt=this->expressionStacK[this->expressionStacK.size()-1];
+  theElt.theData.theOperation=this->theBoss->operations.GetIndex(this->theBoss->controlSequences[theElt.controlIndex]);
+  theElt.controlIndex=this->theBoss->conExpression();
+  return true;
 }
 
 bool Command::ReplaceVXbyEX()
@@ -541,13 +654,13 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return false;
   }
   const SyntacticElement& secondToLastE=this->expressionStacK[this->expressionStacK.size()-2];
-  const std::string&    secondToLastS=this->theBoss->controlSequences[secondToLastE.controlIndex];
+  const std::string& secondToLastS=this->theBoss->controlSequences[secondToLastE.controlIndex];
   const SyntacticElement& thirdToLastE=this->expressionStacK[this->expressionStacK.size()-3];
-  const std::string&    thirdToLastS=this->theBoss->controlSequences[thirdToLastE.controlIndex];
+  const std::string& thirdToLastS=this->theBoss->controlSequences[thirdToLastE.controlIndex];
   const SyntacticElement& fourthToLastE=this->expressionStacK[this->expressionStacK.size()-4];
-  const std::string&    fourthToLastS=this->theBoss->controlSequences[fourthToLastE.controlIndex];
+  const std::string& fourthToLastS=this->theBoss->controlSequences[fourthToLastE.controlIndex];
   const SyntacticElement& fifthToLastE=this->expressionStacK[this->expressionStacK.size()-5];
-  const std::string&    fifthToLastS=this->theBoss->controlSequences[fifthToLastE.controlIndex];
+  const std::string& fifthToLastS=this->theBoss->controlSequences[fifthToLastE.controlIndex];
 //  std::cout << "<hr>" << this->ElementToString();
   if (secondToLastS==":" && lastS=="=")
     return this->ReplaceXXByCon(this->theBoss->conDefine());
@@ -561,7 +674,10 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceVXbyEX();
   if (lastS==";")
     return this->DecreaseStackSetCharacterRanges(1);
-
+  if (lastS=="Integer" && secondToLastS=="Integer")
+    return this->ReplaceIntIntBy10IntPlusInt();
+  if (lastS=="Integer" && lookAhead!="Integer")
+    return this->ReplaceObyE();
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression")
     this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="+" && thirdToLastS=="Expression" && this->LookAheadAllowsPlus(lookAhead) )
@@ -578,9 +694,261 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   return false;
 }
 
+bool CommandList::EvaluateStandardTimes
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.children.size()!=2)
+  { theExpression.errorString="Programming error: operation * always takes two arguments.";
+    return true;
+  }
+  Expression& left= theExpression.children[0];
+  Expression& right=theExpression.children[1];
+  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
+  { theExpression.theOperation=theCommands.opInteger();
+    theExpression.theData=left.theData*right.theData;
+    theExpression.children.resize(0);
+    return true;
+  }
+  return false;
+}
+
+bool CommandList::EvaluateStandardPlus
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.children.size()!=2)
+  { theExpression.errorString="Programming error: operation + always takes two arguments.";
+    return true;
+  }
+  Expression& left= theExpression.children[0];
+  Expression& right=theExpression.children[1];
+  bool result=false;
+  if (left.theOperation==theCommands.opInteger()  && right.theOperation!=theCommands.opInteger())
+  { std::swap(theExpression.children[0], theExpression.children[1]);
+    result=true;
+  }
+  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
+  { theExpression.theOperation=theCommands.opInteger();
+    theExpression.theData=left.theData+right.theData;
+    theExpression.children.resize(0);
+    return true;
+  }
+  //associativity with respect to integers
+  if (left.theOperation==theCommands.opPlus() && right.theOperation==theCommands.opInteger())
+  { if (left.children.size()!=2)
+    { assert(false);
+      return false;
+    }
+    if (left.children[1].theOperation==theCommands.opInteger())
+    { left.children[1].theData+=right.theData;
+      Expression tempExp=left;
+      theExpression=tempExp;
+      return true;
+    }
+  }
+  return result;
+}
+
+bool CommandList::EvaluateStandardMinus
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.children.size()!=1&& theExpression.children.size()!=2)
+  { theExpression.errorString="Programming error: operation - takes one or two arguments.";
+    return true;
+  }
+  Expression& left= theExpression.children[0];
+  if (theExpression.children.size()==1)
+  { if (left.theOperation==theCommands.opInteger() )
+    { theExpression.theData=-left.theData;
+      theExpression.theOperation=theCommands.opInteger();
+      theExpression.children.resize(0);
+    }
+    return true;
+  }
+  Expression& right=theExpression.children[1];
+  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
+  { theExpression.theOperation=theCommands.opInteger();
+    theExpression.theData=left.theData-right.theData;
+    theExpression.children.resize(0);
+    return true;
+  }
+  return false;
+}
+
+bool Expression::operator==
+(const Expression& other)const
+{ if (this->theBoss==0)
+    assert(false);
+  return this->theBoss->ExpressionsAreEqual(*this, other);
+}
+
+bool CommandList::ExpressionsAreEqual
+  (const Expression& left, const Expression& right, int RecursionDepth, int MaxRecursionDepth)
+{ if (RecursionDepth>MaxRecursionDepth)
+  { std::stringstream out;
+    out << "Error: maximium recursion depth of " << MaxRecursionDepth << " exceeded while comparing expressions. " ;
+    this->Errors.push_back(out.str());
+    return false;
+  }
+  if (left.theBoss!=this || right.theBoss!=this || left.theData!=right.theData || left.theOperation!=right.theOperation ||
+        left.children.size()!=right.children.size())
+      return false;
+    for (unsigned i=0; i<left.children.size(); i++)
+      if (!this->ExpressionsAreEqual (left.children[i], right.children[i], RecursionDepth+1, MaxRecursionDepth))
+        return false;
+    return true;
+  }
+
+
+bool CommandList::ExpressionMatchesPattern
+  (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
+   int RecursionDepth, int MaxRecursionDepth)
+{ assert(thePattern.theBoss==this && input.theBoss==this);
+  static int ExpressionMatchesPatternDebugCounter=-1;
+  ExpressionMatchesPatternDebugCounter++;
+  if (RecursionDepth==0)
+  { matchedExpressions.left.reset();
+    matchedExpressions.right.reset();
+  }
+  if (RecursionDepth>MaxRecursionDepth)
+  { std::stringstream out;
+    out << "Max recursion depth of " << MaxRecursionDepth << " exceeded whlie mathcing expression patterns";
+    this->Errors.push_back(out.str());
+    return false;
+  }
+  if (this->opDefine()==input.theOperation)
+    return false;
+  int opVarB=this->opVariableBound();
+  if (thePattern.theOperation== opVarB)
+  { int indexLeft= matchedExpressions.left.GetIndex(thePattern);
+    if (indexLeft==-1)
+    { matchedExpressions.left.AddOnTop(thePattern);
+      matchedExpressions.right.AddOnTop(input);
+      indexLeft=matchedExpressions.left.size()-1;
+    }
+    if (!(matchedExpressions.right[indexLeft]==input))
+      return false;
+    return true;
+  }
+  if (thePattern.theOperation!=input.theOperation || thePattern.theData!=input.theData || thePattern.children.size()!=input.children.size() )
+    return false;
+  for (unsigned i=0; i<thePattern.children.size(); i++)
+    if (!(this->ExpressionMatchesPattern(thePattern.children[i], input.children[i], matchedExpressions, RecursionDepth+1, MaxRecursionDepth)))
+      return false;
+  return true;
+}
+
+void CommandList::EvaluateExpression
+(int commandIndex, Expression& theExpression, int RecursionDepth, ExpressionPairs& bufferPairs, int maxNumSubs)
+{ if (RecursionDepth>=this->MaxRecursionDepth)
+  { std::stringstream out;
+    out << "Recursion depth limit of " << this->MaxRecursionDepth << " exceeded while evaluating expressions.";
+    theExpression.errorString=out.str();
+    this->Errors.push_back(out.str());
+    return;
+  }
+  if (theExpression.theOperation<0 || theExpression.theBoss!=this)
+  { return;
+  }
+  for (unsigned i=0; i<theExpression.children.size(); i++)
+    this->EvaluateExpression(commandIndex, theExpression.children[i], RecursionDepth+1, bufferPairs, maxNumSubs);
+  //reduction phase:
+  bool NonReduced=true;
+  int counter=-1;
+  while (NonReduced)
+  { counter++;
+    NonReduced=false;
+    if (counter>this->MaxAlgTransformationsPerExpression)
+    { std::stringstream out;
+      out << "Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded.";
+      theExpression.errorString=out.str();
+      return;
+    }
+    assert((signed) this->theStandardEvaluationFunctions.size()> theExpression.theOperation);
+    if (this->theStandardEvaluationFunctions[theExpression.theOperation]!=0)
+      if (this->theStandardEvaluationFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
+        NonReduced=true;
+    for (int i=0; i<commandIndex; i++)
+      if (this->theCommands[i].ErrorString=="")
+      { Expression& currentPattern=this->theCommands[i].finalValue;
+        if (currentPattern.errorString=="")
+          if (currentPattern.theOperation==this->opDefine())
+            if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, theExpression, bufferPairs))
+            { NonReduced=true;
+              break;
+            }
+      }
+  }
+}
+
+Expression* CommandList::DepthFirstSubExpressionPatternMatch
+  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth, int MaxRecursionDepth)
+{ static int patternMatchDebugCounter=-1;
+  if (RecursionDepth==0)
+  { patternMatchDebugCounter++;
+    std::cout << "<hr>(" << patternMatchDebugCounter << ") attempting to match pattern " << thePattern.ElementToString();
+  }
+  if (patternMatchDebugCounter==5)
+  { std::cout << "<br>problem starts here:";
+    std::cout << "<br>" << bufferPairs.ElementToString();
+
+  }
+  if (this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs))
+    return &theExpression;
+  Expression* result=0;
+  for (unsigned i=0; i<theExpression.children.size(); i++)
+  { result=this->DepthFirstSubExpressionPatternMatch(thePattern, theExpression.children[i], bufferPairs, RecursionDepth+1, MaxRecursionDepth);
+    if (result!=0)
+      std::cout << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
+    if (result!=0)
+      return result;
+  }
+  return result;
+}
+
+void CommandList::CarryOutOneSub
+  (Expression& toBeSubbed, Expression& toBeSubbedWith, int targetCommandIndex, ExpressionPairs& matchedPairs)
+{ toBeSubbed.theBoss=this;
+  toBeSubbed.commandIndex=targetCommandIndex;
+  int indexMatching= matchedPairs.left.GetIndex(toBeSubbedWith);
+  if (indexMatching!=-1)
+  { toBeSubbed=matchedPairs.right[indexMatching];
+    return;
+  }
+  toBeSubbed.theOperation=toBeSubbedWith.theOperation;
+  toBeSubbed.theData=toBeSubbedWith.theData;
+  toBeSubbed.children.resize(toBeSubbedWith.children.size());
+  for (unsigned i=0; i<toBeSubbedWith.children.size(); i++)
+    this->CarryOutOneSub(toBeSubbed.children[i], toBeSubbedWith.children[i], targetCommandIndex, matchedPairs);
+}
+
+bool CommandList::ProcessOneExpressionOnePatternOneSub
+  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,  int maxNumSubs)
+{ assert(thePattern.theOperation==this->opDefine());
+  assert(thePattern.children.size()==2);
+  std::cout << "<hr>attempting to reduce expression " << theExpression.ElementToString();
+  std::cout << " by pattern " << thePattern.ElementToString();
+  Expression& currentPattern=thePattern.children[0];
+  Expression* toBeSubbed=this->DepthFirstSubExpressionPatternMatch(currentPattern, theExpression, bufferPairs);
+  if (toBeSubbed==0)
+    return false;
+  this->CarryOutOneSub(*toBeSubbed, thePattern.children[1], toBeSubbed->commandIndex, bufferPairs);
+  return true;
+}
+
+void CommandList::EvaluateCommands()
+{ std::stringstream out;
+  ExpressionPairs thePairs;
+  for (unsigned i=0; i<this->theCommands.size(); i++)
+  { out << "command " << i+1 << ": ";
+    if (this->theCommands[i].ErrorString=="")
+    { this->EvaluateExpression(i, this->theCommands[i].finalValue, 0, thePairs);
+    }
+    out << this->theCommands[i].finalValue.ElementToString();
+    if (i!=this->theCommands.size()-1)
+      out << "<br>";
+  }
+  this->output=out.str();
+}
+
 #include <sys/time.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <signal.h>
 
@@ -734,8 +1102,12 @@ void CivilizeCGIString(std::string& input, std::string& output)
 std::string SyntacticElement::ElementToString
 (CommandList& theBoss)
 { std::stringstream out;
-  out << this->ElementToStringNoExpression(theBoss);
-  out << this->theData.ElementToString(0, 10);
+  out << "(" << this->ElementToStringNoExpression(theBoss);
+  if (this->theData.theOperation!=-1)
+  { out << " -> ";
+    out << this->theData.ElementToString(0, 10);
+  }
+  out << ")";
   return out.str();
 }
 
@@ -745,7 +1117,57 @@ std::string SyntacticElement::ElementToStringNoExpression(CommandList& theBoss)
   return out.str();
 }
 
-std::string Expression::ElementToString(int recursionDepth, int maxRecursionDepth)
+std::string Expression::ElementToString(int recursionDepth, int maxRecursionDepth, bool AddBrackets)const
+{ if (maxRecursionDepth>0)
+    if(recursionDepth>maxRecursionDepth)
+      return "(...)";
+  if (this->theBoss==0)
+    return "(non-initialized)";
+  std::stringstream out;
+  if (this->theOperation<0)
+  { out << "(operation not initialized)";
+    return out.str();
+  }
+  if (AddBrackets)
+    out << "(";
+  if (this->theOperation==this->theBoss->opDefine())
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth)
+    << ":=" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth);
+  else if (this->theOperation==this->theBoss->opDivide() )
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication())
+    << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
+  else if (this->theOperation==this->theBoss->opTimes() )
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication())
+    << "*" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
+  else if (this->theOperation==this->theBoss->opPlus() )
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition())
+    << "+" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition());
+  else if (this->theOperation==this->theBoss->opMinus())
+  { if ( this->children.size()==1)
+      out << "-" << this->children[0].ElementToString
+      (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
+    else
+      out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition())
+      << "-" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition());
+  }
+  else if (this->theOperation==this->theBoss->opVariableBound())
+    out << this->theBoss->theCommands[this->commandIndex].BoundVariables[this->theData] << "{{}}";
+  else if (this->theOperation==this->theBoss->opVariableNonBound())
+    out << this->theBoss->variableDictionary[this->theData];
+  else if (this->theOperation==this->theBoss->opInteger())
+    out << this->theData;
+  else if (this->theOperation==this->theBoss->opFunction())
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth)
+    << "{}(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << ")";
+  else
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth)
+    << "?" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth);
+  if (AddBrackets)
+    out << ")";
+  return out.str();
+}
+
+std::string Expression::ElementToStringPolishForm(int recursionDepth, int maxRecursionDepth)
 { if (maxRecursionDepth>0)
     if(recursionDepth>maxRecursionDepth)
       return "...";
@@ -756,11 +1178,12 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   { out << " operation not initialized ";
     return out.str();
   }
-  out << this->theBoss->operations[this->theOperation];
+  out << "(" << this->theBoss->operations[this->theOperation];
+  out << ", " << this->theData << ")";
   if (this->children.size()>0)
   { out << "{ ";
     for (unsigned i=0; i<this->children.size(); i++)
-    { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth);
+    { out << this->children[i].ElementToStringPolishForm(recursionDepth+1, maxRecursionDepth);
       if (i!=this->children.size()-1)
         out << ", ";
     }
@@ -805,34 +1228,57 @@ int main(int argc, char **argv)
   std::cout << "<html><title>Symbolic calculator updated " << __DATE__ << "</title> <script src=\"/easy/load.js\"></script><body> ";
   std::string inputString;
   CivilizeCGIString(inputStringNonCivilized, inputString);
-  IncreaseHygiene(inputStringNonCivilized, inputStringNonCivilized);
   int numBogusChars= 4;
   for (signed i=0; i<signed(inputString.size())-numBogusChars; i++)
-    inputString[i]=inputString[i+numBogusChars];
+  { inputString[i]=inputString[i+numBogusChars];
+  }
   int newSize=signed(inputString.size())-numBogusChars;
   if (newSize<0)
     newSize=0;
   inputString.resize(newSize);
-  inputString = "f{}(x):=x+1";
-
+  //inputString = "";
+  inputString="f{}(x{{}}):=x+1;  f{}(f{}(x))";
+//  inputString="f{}(x{{}}):=x+1;  f{}(x)";
+//  inputString="f{}(x) ";
   std::string beginMath="<div class=\"math\" scale=\"50\">";
   std::string endMath ="</div>";
   std::cout << "\n<form method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/symbolicCalculator\">\n" ;
-  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"in1\" id=\"in1\" onkeypress=\"if (event.keyCode == 13)"
-  << " { this.form.submit(); return false;}\">";
+  std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"in1\" id=\"in1\">";
   std::cout << inputString;
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" name=\"\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
 //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
   std::cout << "\n</form>";
-  std::cout << "<hr>input: " << "<span class=\"math\">" << inputString << "</span>" << "<br>(raw string with increased hygiene: "
-  << inputStringNonCivilized << ")";
+  std::cout << "<hr>input: " << "<span class=\"math\">" << inputString << "</span>";
+
   CommandList theComputation;
   theComputation.Evaluate(inputString);
 
-  std::cout << "<hr>result: ";
+  std::cout << "<hr>result:<br>";
+  std::cout <<  theComputation.output;
+  std::cout << "<hr>";
   std::cout << theComputation.ElementToString();
   std::cout << "</body></html>";
 
 	return 0;   // To avoid Apache errors.
+}
+
+bool Expression::NeedBracketsForMultiplication()const
+{ return
+  this->theOperation==this->theBoss->opPlus() ||
+  this->theOperation==this->theBoss->opMinus()
+  ;
+}
+bool Expression::NeedBracketsForAddition()const
+{ return
+  false
+  ;
+}
+bool Expression::NeedBracketsForThePower()const
+{ return
+  this->theOperation==this->theBoss->opPlus() ||
+  this->theOperation==this->theBoss->opMinus() ||
+  this->theOperation==this->theBoss->opTimes() ||
+  this->theOperation==this->theBoss->opDivide()
+  ;
 }

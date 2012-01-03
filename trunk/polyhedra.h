@@ -10065,6 +10065,7 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   void Nullify(int NumVars);
+  void ActOnPolynomial(PolynomialRationalCoeff& thePoly);
   void GetStandardOrder(PolynomialRationalCoeff& output){output.Assign(this->StandardOrder);}
   void SetNumVariablesPreserveExistingOnes(int newNumVars);
   void TimesConstant(Rational& theConstant){ this->StandardOrder.TimesConstant(theConstant);}
@@ -10778,6 +10779,9 @@ bool GetRootRationalFromFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateParabolicWeylGroups
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateActByWeylAlgebraElement
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateParabolicWeylGroupsBruhatGraph

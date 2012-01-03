@@ -866,10 +866,11 @@ void PiecewiseQuasipolynomial::operator*=(const Rational& other)
 
 void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other)
 { this->MakeCommonRefinement(other);
-  for (int i=0; i<other.theProjectivizedComplex.size; i++)
-  { int theIndex=this->theProjectivizedComplex.GetLowestIndexchamberContaining(other.theProjectivizedComplex[i].GetInternalPoint());
-    assert(theIndex!=-1);
-    this->theQPs[theIndex]+=other.theQPs[i];
+  for (int i=0; i<this->theProjectivizedComplex.size; i++)
+  { int theIndex=other.theProjectivizedComplex.GetLowestIndexchamberContaining
+    (this->theProjectivizedComplex[i].GetInternalPoint());
+    if (theIndex!=-1)
+      this->theQPs[i]+=other.theQPs[theIndex];
   }
 }
 
@@ -1142,6 +1143,7 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
     if (theOldIndex!=-1)
       this->theQPs[i]=oldQPList[theOldIndex];
     else
+    //the below needs to be fixed!!!!!
       this->theQPs[i].MakeZeroLatTiceZn(this->GetNumVars());
   }
 }
@@ -1228,9 +1230,13 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
       std::cout << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
     }
     Accum+=theSubbedPoly;
-    DrawingVariables tempDrawOps;
-    std::cout << "<hr><hr> Index: " << i+1 << " out of " << this->theLinearOperators.size << " <hr>";
-    Accum.DrawMe(tempDrawOps);
+    if (i==2)
+    { DrawingVariables tempDrawOps;
+      tempDrawOps.NumHtmlGraphics=500;
+      std::cout << "<hr><hr> <b>Index: " << i+1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
+      Accum.DrawMe(tempDrawOps);
+      std::cout << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+    }
   }
   Accum.DrawMe(drawOps);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -5206,6 +5212,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
     case ParserNode::typeIntegerOrIndex: return "Integer";
     case ParserNode::typePoly: return "Polynomial";
     case ParserNode::typeCone: return "Cone";
+    case ParserNode::typeWeylAlgebraElement: return "WeylAlgebraElement";
     case ParserNode::typeRationalFunction: return "RF";
     case ParserNode::typePartialFractions: return "PF";
     case ParserNode::typeLattice: return "Lattice";
@@ -5229,6 +5236,8 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeCone;
   if (theArgument=="Integer")
     return ParserNode::typeIntegerOrIndex;
+  if (theArgument=="WeylAlgebraElement")
+    return ParserNode::typeWeylAlgebraElement;
   if (theArgument=="PF")
     return ParserNode::typePartialFractions;
   if (theArgument=="Lattice")
@@ -8175,6 +8184,44 @@ int ParserNode::EvaluateParabolicWeylGroups
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluateActByWeylAlgebraElement
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ PolynomialRationalCoeff& result= theNode.polyValue.GetElement();
+  ElementWeylAlgebra& left = theNode.owner->TheObjects[theArgumentList[0]].WeylAlgebraElement.GetElement();
+  PolynomialRationalCoeff& right = theNode.owner->TheObjects[theArgumentList[1]].polyValue.GetElement();
+  theNode.impliedNumVars=MathRoutines::Maximum(left.NumVariables, right.NumVars);
+  result=right;
+  result.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
+  left.SetNumVariablesPreserveExistingOnes(theNode.impliedNumVars);
+  left.ActOnPolynomial(result);
+  theNode.ExpressionType=theNode.typePoly;
+  return theNode.errorNoError;
+}
+
+void ElementWeylAlgebra::ActOnPolynomial(PolynomialRationalCoeff& thePoly)
+{ assert(thePoly.NumVars==this->NumVariables);
+  PolynomialRationalCoeff result;
+  result.Nullify(this->NumVariables);
+  Monomial<Rational> tempMon;
+  for (int i=0; i<this->StandardOrder.size; i++)
+  { Monomial<Rational>& currentActingMon=this->StandardOrder[i];
+    for (int j=0; j<thePoly.size; j++)
+    { Monomial<Rational>& currentMon=thePoly[j];
+      tempMon=currentMon;
+      tempMon.Coefficient*=currentActingMon.Coefficient;
+      for (int k=0; k<this->NumVariables; k++)
+      { for (int numDiff=currentActingMon.degrees[k+this->NumVariables]; numDiff>0; numDiff--)
+        { tempMon.Coefficient*=tempMon.degrees[k];
+          tempMon.degrees[k]--;
+        }
+        tempMon.degrees[k]+=currentActingMon.degrees[k];
+      }
+      result.AddMonomial(tempMon);
+    }
+  }
+  thePoly=result;
+}
+
 std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
 { if (this->size<1)
     return "Error, non-initialized group";
@@ -9303,7 +9350,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
    "gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2InB3MultsParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -9368,6 +9415,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "modOutSAVerma(f_1)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("actByWeylAlgebraElement",
+   "(WeylAlgebraElement, Polynomial)",
+   "<b>Not fully tested.</b> Act by a weyl algebra element (the first argument)\
+    on the a polynomial (the second argument).",
+   "actByWeylAlgebraElement(x_1d_1+x_2d_2, x_1x_2)",
+//   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateActByWeylAlgebraElement
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

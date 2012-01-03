@@ -23425,6 +23425,10 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
       this->ExpressionType=this->typeUEElementOrdered;
     break;
     case ParserNode::typeWeylAlgebraElement:
+      if (thePower<0)
+      { this->SetError(errorDunnoHowToDoOperation);
+        return;
+      }
       this->WeylAlgebraElement.GetElement()=leftNode.WeylAlgebraElement.GetElement();
       this->WeylAlgebraElement.GetElement().RaiseToPower(thePower);
       this->ExpressionType=this->typeWeylAlgebraElement;
@@ -27529,7 +27533,11 @@ std::string ParserNode::ElementToStringValueOnlY
       << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables, theFormat) << "\n\\\\\n"
       << "\n\\end{array}";
       break;
-    case ParserNode::typeWeylAlgebraElement: LatexOutput << this->WeylAlgebraElement.GetElement().ElementToString(true); break;
+    case ParserNode::typeWeylAlgebraElement:
+      LatexOutput << "\\begin{array}{rcl}&&\n"
+      << this->WeylAlgebraElement.GetElement().ElementToString(true)
+      << "\n\\end{array}";
+      break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
 //    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;

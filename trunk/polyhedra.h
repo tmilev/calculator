@@ -10646,6 +10646,49 @@ class ConeLatticeAndShiftMaxComputation
   ;
 };
 
+class PiecewiseQuasipolynomial
+{
+  public:
+  //Note: PiecewiseQuasipolynomial assumes that its variable GlobalVariables* theBuffers
+  // is always initialized with a non-zero object.
+  //This is an engineering decision that yet has to be proven good: please follow the assumption,
+  //but keep in mind that a better solution might exist, and be ready to switch.
+  //Let the piecewise quasipolynomial be in n variables.
+  //Then the theProjectivizedComplex is an n+1-dimensional complex,
+  //which is the projectivization of the n-dim affine complex representing the
+  //domain of the piecewise quasipoly.
+  ConeComplex theProjectivizedComplex;
+  List<QuasiPolynomial> theQPs;
+  GlobalVariables* theBuffers;
+  int NumVariables;
+  void operator=(PiecewiseQuasipolynomial& other)
+  { this->theBuffers=other.theBuffers;
+    this->NumVariables=other.NumVariables;
+    this->theQPs=other.theQPs;
+    this->theProjectivizedComplex=other.theProjectivizedComplex;
+  }
+  std::string ElementToString(bool useLatex, bool useHtml);
+  PiecewiseQuasipolynomial(){this->theBuffers=0;}
+  PiecewiseQuasipolynomial(GlobalVariables& PermanentGlobalVariables){this->theBuffers=& PermanentGlobalVariables;}
+  void DrawMe(DrawingVariables& theDrawingVars);
+  int GetNumVars(){return this->NumVariables;}
+  inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other){ this->MakeCommonRefinement(other.theProjectivizedComplex);  }
+  void MakeCommonRefinement(const ConeComplex& other);
+  void TranslateArgument(root& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
+  std::string MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables);
+  Rational Evaluate(const root& thePoint);
+  Rational EvaluateInputProjectivized(const root& thePoint);
+  void Nullify(int numVars, GlobalVariables& theGlobalVariables)
+  { this->NumVariables=numVars;
+    this->theProjectivizedComplex.init();
+    this->theBuffers=& theGlobalVariables;
+    this->theQPs.size=0;
+  }
+  void operator+=(const PiecewiseQuasipolynomial& other);
+  void operator*=(const Rational& other);
+  void operator=(const PiecewiseQuasipolynomial& other);
+};
+
 class Parser;
 class ParserNode
 {
@@ -10678,6 +10721,7 @@ public:
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
   MemorySaving<partFractions> thePFs;
+  MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
   MemorySaving<AnimationBuffer> theAnimation;
   List<int> children;
   int intValue;
@@ -10696,6 +10740,7 @@ public:
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
   typeArray, typeQuasiPolynomial, typePartialFractions, //=17
+  typePiecewiseQP,
   typeAnimation,
   typeFile, typeDots,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
@@ -10762,6 +10807,9 @@ bool GetRootRationalFromFunctionArguments
   static int EvaluateAnimationClonePreviousFrameDrawExtraLine
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateG2ParabolicSupport
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
 
   static int EvaluateGroebner
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -10785,6 +10833,9 @@ bool GetRootRationalFromFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateParabolicWeylGroupsBruhatGraph
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateVPF
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
 

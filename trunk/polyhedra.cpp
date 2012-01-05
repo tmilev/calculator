@@ -27580,6 +27580,7 @@ std::string ParserNode::ElementToStringValueAndType
 //      theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, this->theCone.GetElement().GetDim(), 0);
       out << "a cone: ";// << this->theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables);
       break;
+    case ParserNode::typePiecewiseQP: out << "Piecewise quasi-polynomial: "; break;
     case ParserNode::typeQuasiPolynomial: out << "Quasipolynomial of value: "; break;
     case ParserNode::typePartialFractions: out << "Partial fraction(s): "; break;
     case ParserNode::typeUndefined: out << "Undefined expression (type 0)."; break;
@@ -28028,6 +28029,8 @@ void ParserNode::CopyValue(const ParserNode& other)
     case ParserNode::typePartialFractions:
       this->thePFs=other.thePFs;
       break;
+    case ParserNode::typePiecewiseQP:
+      this->thePiecewiseQP=other.thePiecewiseQP;
     case ParserNode::typeQuasiPolynomial:
       this->theQP=other.theQP;
       break;

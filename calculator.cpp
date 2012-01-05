@@ -101,7 +101,7 @@ void makeReport(IndicatorWindowVariables& input)
 int main(int argc, char **argv)
 { ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -164,6 +164,7 @@ int main(int argc, char **argv)
   } else
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+//  civilizedInput="weightSupportGtwoGenVermaModule((0,1),(0,2))";
 //  civilizedInput=" actByWeylAlgebraElement(d_1,x_1)";
 //  civilizedInput="modOutVermaRelations  ( g_{-1}h_1) +g_{-1}";
 //  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";

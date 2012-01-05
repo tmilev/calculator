@@ -813,48 +813,6 @@ bool Cone::GetLatticePointsInCone
   return true;
 }
 
-class PiecewiseQuasipolynomial
-{
-  public:
-  //Note: PiecewiseQuasipolynomial assumes that its variable GlobalVariables* theBuffers
-  // is always initialized with a non-zero object.
-  //This is an engineering decision that yet has to be proven good: please follow the assumption,
-  //but keep in mind that a better solution might exist, and be ready to switch.
-  //Let the piecewise quasipolynomial be in n variables.
-  //Then the theProjectivizedComplex is an n+1-dimensional complex,
-  //which is the projectivization of the n-dim affine complex representing the
-  //domain of the piecewise quasipoly.
-  ConeComplex theProjectivizedComplex;
-  List<QuasiPolynomial> theQPs;
-  GlobalVariables* theBuffers;
-  int NumVariables;
-  void operator=(PiecewiseQuasipolynomial& other)
-  { this->theBuffers=other.theBuffers;
-    this->NumVariables=other.NumVariables;
-    this->theQPs=other.theQPs;
-    this->theProjectivizedComplex=other.theProjectivizedComplex;
-  }
-  std::string ElementToString(bool useLatex, bool useHtml);
-  PiecewiseQuasipolynomial(){this->theBuffers=0;}
-  PiecewiseQuasipolynomial(GlobalVariables& PermanentGlobalVariables){this->theBuffers=& PermanentGlobalVariables;}
-  void DrawMe(DrawingVariables& theDrawingVars);
-  int GetNumVars(){return this->NumVariables;}
-  inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other){ this->MakeCommonRefinement(other.theProjectivizedComplex);  }
-  void MakeCommonRefinement(const ConeComplex& other);
-  void TranslateArgument(root& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
-  void MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables);
-  Rational Evaluate(const root& thePoint);
-  Rational EvaluateInputProjectivized(const root& thePoint);
-  void Nullify(int numVars, GlobalVariables& theGlobalVariables)
-  { this->NumVariables=numVars;
-    this->theProjectivizedComplex.init();
-    this->theBuffers=& theGlobalVariables;
-    this->theQPs.size=0;
-  }
-  void operator+=(const PiecewiseQuasipolynomial& other);
-  void operator*=(const Rational& other);
-};
-
 void PiecewiseQuasipolynomial::operator*=(const Rational& other)
 { if (other.IsEqualToZero())
   { this->Nullify(this->NumVariables, *this->theBuffers);
@@ -874,16 +832,18 @@ void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other)
   }
 }
 
-void PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables)
+std::string PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables)
 { if (theRoots.size<=0)
-    return;
+    return "Error.";
   this->theBuffers=& theGlobalVariables;
   this->NumVariables=theRoots.GetDimensionOfElements();
   partFractions theFracs;
   PolynomialOutputFormat theFormat;
-//  std::cout <<  theFracs.ElementToString(theGlobalVariables, theFormat);
-  theFracs.initAndSplit(theRoots, theGlobalVariables);
-//  std::cout <<  theFracs.ElementToString(theGlobalVariables, theFormat);
+  std::stringstream out;
+  theFracs.initFromRoots(theRoots, theGlobalVariables);
+  out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
+  theFracs.split(theGlobalVariables, 0);
+  out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
   theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
   this->theQPs.SetSize(theFracs.theChambers.size);
   root indicator;
@@ -899,9 +859,10 @@ void PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& theGlob
   root shiftRoot;
   baseLattice.GetInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone, theGlobalVariables);
   shiftRoot.MinusRoot();
-  std::cout << "shiftRoot: " << shiftRoot.ElementToString();
+//  std::cout << "shiftRoot: " << shiftRoot.ElementToString();
   theFracs.theChambers.MakeAffineAndTransformToProjectiveDimPlusOne
   (shiftRoot, this->theProjectivizedComplex, theGlobalVariables);
+  return out.str();
 }
 
 bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
@@ -1040,8 +1001,8 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars)
     tempStream << i+1;
     root tempRoot=this->theProjectivizedComplex[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
-    theDrawingVars.drawTextAtVectorBuffer
-     (tempRoot, tempStream.str(), chamberWallColor, theDrawingVars.PenStyleNormal, 0);
+//    theDrawingVars.drawTextAtVectorBuffer
+//     (tempRoot, tempStream.str(), chamberWallColor, theDrawingVars.PenStyleNormal, 0);
     for (int j=0; j<this->theQPs[i].LatticeShifts.size; j++)
     { this->theProjectivizedComplex[i].GetLatticePointsInCone
       (this->theQPs[i].AmbientLatticeReduced, this->theQPs[i].LatticeShifts[j], 8, true, latticePoints);
@@ -1216,7 +1177,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     theSubbedPoly*=this->theCoeffs[i];
     theSubbedPoly.TranslateArgument(translationsProjectedFinal[i], theGlobalVariables);
     //theSubbedPoly.DrawMe(tempVars);
-    if (i==2)
+   /* if (i==2)
     { DrawingVariables tempDV, tempDV2;
       tempDV.NumHtmlGraphics=100;
       tempDV2.NumHtmlGraphics=109;
@@ -1228,15 +1189,16 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
       theSubbedPoly.DrawMe(tempDV2);
       tempDV.drawCoordSystemBuffer(tempDV2, 2, 0);
       std::cout << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
-    }
+    }*/
     Accum+=theSubbedPoly;
-    if (i==2)
+/*    if (i==2)
     { DrawingVariables tempDrawOps;
       tempDrawOps.NumHtmlGraphics=500;
       std::cout << "<hr><hr> <b>Index: " << i+1 << " out of " << this->theLinearOperators.size << "</b> <hr>";
       Accum.DrawMe(tempDrawOps);
       std::cout << tempDrawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
     }
+    */
   }
   Accum.DrawMe(drawOps);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -4063,6 +4025,34 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
   if (outputHtml!=0)
     *outputHtml=outHtml.str();
   return out.str();
+}
+
+void PiecewiseQuasipolynomial::operator=(const PiecewiseQuasipolynomial& other)
+{ this->theBuffers=other.theBuffers;
+  this->theProjectivizedComplex=other.theProjectivizedComplex;
+  this->theQPs=other.theQPs;
+  this->NumVariables=other.NumVariables;
+}
+
+int ParserNode::EvaluateVPF
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ //partFractions& currentPF=theNode.thePFs.GetElement();
+  roots toBePartitioned; int tempDim;
+  theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
+  std::stringstream out;
+  PolynomialOutputFormat theFormat;
+//  theFormat.alphabet.TheObjects[0]="t_1";
+//  theFormat.alphabet.TheObjects[1]="t_2";
+  PiecewiseQuasipolynomial& thePQP=theNode.thePiecewiseQP.GetElement();
+  out << thePQP.MakeVPF(toBePartitioned, theGlobalVariables);
+  theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(tempDim);
+  theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, tempDim, 0);
+  thePQP.DrawMe(theGlobalVariables.theDrawingVariables);
+  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(tempDim);
+  out << thePQP.ElementToString(false, true);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typePiecewiseQP;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateVectorPFIndicator
@@ -6897,7 +6887,9 @@ std::string ConeComplex::DrawMeToHtmlProjective
 bool ConeComplex::DrawMeLastCoordAffine
 (bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
-  theDrawingVariables.theBuffer.initDimensions(this->GetDim()-1, 1);
+  if (InitDrawVars)
+    theDrawingVariables.theBuffer.initDimensions(this->GetDim()-1, 1);
+
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1, 0);
   for (int i=0; i<this->size; i++)
   { //theDrawingVariables.theBuffer.init();
@@ -6991,7 +6983,7 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
   if (this->Vertices.size<1)
     return "The cone is empty";
   std::stringstream out;
-   theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
+  theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
   bool foundBadVertex=this->DrawMeLastCoordAffine(false, theDrawingVariables, theFormat);
   theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1, 0);
   if (foundBadVertex)
@@ -7359,6 +7351,39 @@ void WeylGroup::DrawRootSystem
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
   (this->WeylLetter, this->GetDim()) << ")";
   output.drawTextBuffer(0, 0, tempStream.str(), 10, CGI::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
+}
+
+int ParserNode::EvaluateG2ParabolicSupport
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root highestWeight, parSel;
+  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
+  if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+  if (!nodeSel.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorProgramming);
+  if (highestWeight.size!=2 || parSel.size!=2)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  std::stringstream out;
+  PiecewiseQuasipolynomial theChar;
+  WeylGroup theWeyl;
+  theWeyl.MakeG2();
+  theWeyl.ComputeRho(true);
+  roots theNegativeRoots;
+  theNegativeRoots.CopyFromBase(theWeyl.RootSystem);
+  theNegativeRoots.size=6;
+  out << "the negative roots of G_2: " << theNegativeRoots.ElementToString();
+  theChar.MakeVPF(theNegativeRoots, theGlobalVariables);
+  theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(2);
+  for (int i=0; i<2; i++)
+    for (int j=0; j<2; j++)
+      theGlobalVariables.theDrawingVariables.theBuffer.theBilinearForm.elements[i][j]=
+      theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
+  theChar.DrawMe(theGlobalVariables.theDrawingVariables);
+//  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateDrawRootSystem
@@ -9108,13 +9133,22 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateSplit
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("vpf",
+  ("vpfReport",
    "((Rational,...),...)",
    "Computes the vector partition function with respect to the input vectors, according to this \
    <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>. The example below is the Kostant partition function \
    of root system of type A3 (sl(4)).",
-   "vpf((1,0,0), (0,1,0), (0,0,1), (1,1,0), (0,1,1), (1,1,1))",
+   "vpfReport((1,0,0), (0,1,0), (0,0,1), (1,1,0), (0,1,1), (1,1,1))",
     & ParserNode::EvaluateVectorPFIndicator
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("vpf",
+   "((Rational,...),...)",
+   "Computes the vector partition function with respect to the input vectors, according to this \
+   <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>. The example below is the Kostant partition function \
+   of root system of type B2 (so(5)).",
+   "vpf((-1,0), (0,-1), (-1,-1), (-1,-2))",
+    & ParserNode::EvaluateVPF
    );
    this->AddOneFunctionToDictionaryNoFail
   ("transformToReducedGroebnerBasis",
@@ -9350,7 +9384,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
    "gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )",
-   DefaultWeylLetter, DefaultWeylRank, false,
+   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateG2InB3MultsParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -9424,6 +9458,16 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "actByWeylAlgebraElement(x_1d_1+x_2d_2, x_1x_2)",
 //   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateActByWeylAlgebraElement
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("weightSupportGtwoGenVermaModule",
+   "((Rational,...), (Rational,...))",
+   "<b>Experimental please don't use.</b> Draw the weight support of a generalized G_2-module.\
+   The first argument gives the parabolic of G_2; the second argument gives the highest weight of G_2 in fundamental \
+   basis coordinates.",
+   "weightSupportGtwoGenVermaModule((0,1),(0,2))",
+//   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateG2ParabolicSupport
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

@@ -8500,7 +8500,7 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   { this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, i, normals, SplitPowerSeriesCoefficient, theDimension);
     if (RecordNumMonomials)
     { std::stringstream out4, out3;
-      out4 << "Current fraction: "<<i+1<<" out of "<<this->Coefficient.size <<" processed";
+      out4 << "Current fraction: "<< i+1<< " out of "<< this->Coefficient.size << " processed";
       partFractions::NumProcessedForVPFMonomialsTotal++;
       out3  <<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
@@ -8900,30 +8900,6 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
   return true;
 }
 
-bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
-{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
-  //this->flagAnErrorHasOccurredTimeToPanic=true;
-  if (!this->flagInitialized)
-  { this->IndexLowestNonProcessed=0;
-    this->PrepareIndicatorVariables();
-    this->PrepareCheckSums(theGlobalVariables);
-    this->flagInitialized=true;
-  }
-  if (this->splitPartial(theGlobalVariables, Indicator))
-  { //this->ComputeDebugString();
-//    this->CompareCheckSums(theGlobalVariables);
-    this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
-    //this->ComputeDebugString();
-    this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
-    //partFraction::UncoveringBrackets=true;
-    //this->ComputeDebugString();
-    this->CompareCheckSums(theGlobalVariables);
-    this->IndexLowestNonProcessed= this->size;
-    this->MakeProgressReportSplittingMainPart(theGlobalVariables);
-  }
-  return false;
-}
-
 bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariables& theGlobalVariables, root* Indicator)
 { this->IndexLowestNonProcessed=0;
   this->PrepareIndicatorVariables();
@@ -9051,7 +9027,7 @@ void partFractions::WriteToFileComputedContributions(std::fstream& output, Globa
 { output.seekp(0);
   output << "Partial_fraction_index/file_storage_position\n";
   for (int i=0; i<this->size; i++)
-    output <<  i<< " " << this->TheObjects[i].FileStoragePosition << "\n";
+    output <<  i << " " << this->TheObjects[i].FileStoragePosition << "\n";
 }
 
 partFractions::partFractions()
@@ -9059,7 +9035,7 @@ partFractions::partFractions()
   this->IndexLowestNonProcessed=-2;
   this->flagSplitTestModeNoNumerators=false;
   this->flagDiscardingFractions=false;
-  this->flagUsingCheckSum=false;
+  this->flagUsingCheckSum=true;
   this->flagUsingOrlikSolomonBasis=false;
   this->flagInitialized=false;
   this->SplitStepsCounter=0;

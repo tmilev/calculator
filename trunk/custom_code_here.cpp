@@ -1054,6 +1054,7 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const root& input)
     if (this->theProjectivizedComplex[i].IsInCone(input))
     { Rational altResult=this->theQPs[i].Evaluate(AffineInput);
       if (result!=altResult)
+      if (false)
       { static bool firstFail=true;
         if (!firstFail)
           break;
@@ -1118,6 +1119,33 @@ void Lattice::GetDefaultFundamentalDomainInternalPoint
     output+=tempRoot;
   }
   output/=2;
+}
+
+bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
+{ //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
+  //this->flagAnErrorHasOccurredTimeToPanic=true;
+  if (!this->flagInitialized)
+  { this->IndexLowestNonProcessed=0;
+    this->PrepareIndicatorVariables();
+    this->PrepareCheckSums(theGlobalVariables);
+    this->flagInitialized=true;
+  }
+  std::cout << "<br>checksum start: " << this->StartCheckSum.ElementToString();
+  if (this->splitPartial(theGlobalVariables, Indicator))
+  { //this->ComputeDebugString();
+//    this->CompareCheckSums(theGlobalVariables);
+    this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
+    //this->ComputeDebugString();
+    this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
+    //partFraction::UncoveringBrackets=true;
+    //this->ComputeDebugString();
+    this->CompareCheckSums(theGlobalVariables);
+    this->IndexLowestNonProcessed= this->size;
+    this->MakeProgressReportSplittingMainPart(theGlobalVariables);
+  }
+  std::cout << "<br>checksum finish: " << this->EndCheckSum.ElementToString();
+
+  return false;
 }
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
@@ -3708,7 +3736,8 @@ void partFraction::GetRootsFromDenominator
 }
 
 void partFraction::ComputePolyCorrespondingToOneMonomial
-  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals, Lattice& theLattice, GlobalVariables& theGlobalVariables)
+  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals,
+   Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { int theDimension=owner.AmbientDimension;
   root shiftRational; shiftRational.SetSize(theDimension);
   Monomial<LargeInt>& currentMon=this->Coefficient.TheObjects[monomialIndex];
@@ -3719,7 +3748,8 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
   tempRat=currentMon.Coefficient;
   outputPolyPart.MakeNVarConst((int)theDimension, tempRat);
   for (int i=0; i<theDimension; i++)
-  { this->MakePolynomialFromOneNormal(normals.TheObjects[i], shiftRational, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0], tempP);
+  { this->MakePolynomialFromOneNormal
+  (normals.TheObjects[i], shiftRational, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0], tempP);
     outputPolyPart.MultiplyBy(tempP);
   }
   outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, shiftRational, theLattice, theGlobalVariables);
@@ -3737,6 +3767,8 @@ void partFraction::GetVectorPartitionFunction
   this->GetRootsFromDenominator(owner, theLatticeGenerators);
   Lattice theLattice;
   theLattice.MakeFromRoots(theLatticeGenerators);
+  std::cout << "<hr><hr> the lattice generators: " << theLatticeGenerators.ElementToString();
+  std::cout << "<br>Corresponding lattice: " << theLattice.ElementToString();
   MatrixLargeRational theNormalsMatForm;
   theNormalsMatForm.AssignRootsToRowsOfMatrix(theLatticeGenerators);
   theNormalsMatForm.Invert();
@@ -3745,9 +3777,12 @@ void partFraction::GetVectorPartitionFunction
 
   for (int i=0; i<this->Coefficient.size; i++)
   { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice, theGlobalVariables);
-    output.ComputeDebugString();
-    shiftedPoly.ComputeDebugString();
+//    output.ComputeDebugString();
+//    shiftedPoly.ComputeDebugString();
+    std::cout << "<hr>Current fraction monomial " << i+1 << " out of " << this->Coefficient.size;
+    std::cout << "<br>Contribution: " << shiftedPoly.ElementToString(true, false);
     output+=shiftedPoly;
+    std::cout << "<br>Accumulator: " << output.ElementToString(true, false);
 //    if (RecordNumMonomials)
 //    { std::stringstream out4, out3;
 //      out4 << "Current fraction: " << i+1<< " out of " << this->Coefficient.size << " processed";
@@ -6423,7 +6458,9 @@ void DrawOperations::MakeMeAStandardBasis(int theDim)
 }
 
 std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(int theDimension)
-{ std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
+{ if (theDimension<2)
+    return "<br><b>Pictures of dimension less than two are not drawn.</b><br>";
+  std::stringstream out, tempStream1, tempStream2, tempStream3, tempStream4, tempStream5, tempStream6;
   std::stringstream tempStream7, tempStream8, tempStream9, tempStream10, tempStream11,
   tempStream12, tempStream13, tempStream14, tempStream15;
   this->NumHtmlGraphics++;

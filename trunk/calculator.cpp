@@ -164,6 +164,8 @@ int main(int argc, char **argv)
   } else
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+//  civilizedInput="vpf((1), (2))";
+//  civilizedInput="vpf((1,0),(0,1),(1,1),(1,3))";
 //  civilizedInput="weightSupportGtwoGenVermaModule((0,1),(0,2))";
 //  civilizedInput=" actByWeylAlgebraElement(d_1,x_1)";
 //  civilizedInput="modOutVermaRelations  ( g_{-1}h_1) +g_{-1}";

@@ -8775,8 +8775,8 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
       std::exit(0);
     }
     else
-    { std::cout<< "Checksum successful";
-      std::cout.flush();
+    { //std::cout<< "Checksum successful";
+      //std::cout.flush();
     }
 #endif
   }

@@ -1130,7 +1130,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
     this->PrepareCheckSums(theGlobalVariables);
     this->flagInitialized=true;
   }
-  std::cout << "<br>checksum start: " << this->StartCheckSum.ElementToString();
+//  std::cout << "<br>checksum start: " << this->StartCheckSum.ElementToString();
   if (this->splitPartial(theGlobalVariables, Indicator))
   { //this->ComputeDebugString();
 //    this->CompareCheckSums(theGlobalVariables);
@@ -1143,7 +1143,7 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
     this->IndexLowestNonProcessed= this->size;
     this->MakeProgressReportSplittingMainPart(theGlobalVariables);
   }
-  std::cout << "<br>checksum finish: " << this->EndCheckSum.ElementToString();
+//  std::cout << "<br>checksum finish: " << this->EndCheckSum.ElementToString();
 
   return false;
 }
@@ -3732,7 +3732,11 @@ void partFraction::GetRootsFromDenominator
 (partFractions& owner, roots& output)
 { output.SetSize(this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
-    output.TheObjects[i].AssignIntRoot(owner.RootsToIndices.TheObjects[this->IndicesNonZeroMults.TheObjects[i]]);
+  { output[i].AssignIntRoot(owner.RootsToIndices[this->IndicesNonZeroMults[i]]);
+    oneFracWithMultiplicitiesAndElongations& current=this->TheObjects[this->IndicesNonZeroMults[i]];
+    assert(current.Elongations.size==1);
+    output[i]*=current.Elongations[0];
+  }
 }
 
 void partFraction::ComputePolyCorrespondingToOneMonomial
@@ -3767,8 +3771,8 @@ void partFraction::GetVectorPartitionFunction
   this->GetRootsFromDenominator(owner, theLatticeGenerators);
   Lattice theLattice;
   theLattice.MakeFromRoots(theLatticeGenerators);
-  std::cout << "<hr><hr> the lattice generators: " << theLatticeGenerators.ElementToString();
-  std::cout << "<br>Corresponding lattice: " << theLattice.ElementToString();
+//  std::cout << "<hr><hr> the lattice generators: " << theLatticeGenerators.ElementToString();
+//  std::cout << "<br>Corresponding lattice: " << theLattice.ElementToString();
   MatrixLargeRational theNormalsMatForm;
   theNormalsMatForm.AssignRootsToRowsOfMatrix(theLatticeGenerators);
   theNormalsMatForm.Invert();
@@ -3779,10 +3783,10 @@ void partFraction::GetVectorPartitionFunction
   { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice, theGlobalVariables);
 //    output.ComputeDebugString();
 //    shiftedPoly.ComputeDebugString();
-    std::cout << "<hr>Current fraction monomial " << i+1 << " out of " << this->Coefficient.size;
-    std::cout << "<br>Contribution: " << shiftedPoly.ElementToString(true, false);
+//    std::cout << "<hr>Current fraction monomial " << i+1 << " out of " << this->Coefficient.size;
+//    std::cout << "<br>Contribution: " << shiftedPoly.ElementToString(true, false);
     output+=shiftedPoly;
-    std::cout << "<br>Accumulator: " << output.ElementToString(true, false);
+//    std::cout << "<br>Accumulator: " << output.ElementToString(true, false);
 //    if (RecordNumMonomials)
 //    { std::stringstream out4, out3;
 //      out4 << "Current fraction: " << i+1<< " out of " << this->Coefficient.size << " processed";

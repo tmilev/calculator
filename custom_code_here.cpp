@@ -6975,43 +6975,55 @@ bool ConeComplex::DrawMeProjective
 }
 
 bool Cone::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat, int ChamberWallColor)
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat,
+ int ChamberWallColor)
 { root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
-  roots VerticesScaled=this->Vertices;
+  roots VerticesScaled;
+//  VerticesScaled.MakeActualSizeAtLeastExpandOnTop(this->Vertices.size*2);
+  VerticesScaled=this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
   DrawVertex.initFillInObject(this->Vertices.size, true);
   bool foundBadVertex=false;
-  for (int i=0; i<VerticesScaled.size; i++)
+
+  for (int i=0; i<this->Vertices.size; i++)
   { tempRat=*VerticesScaled[i].LastObject();
     VerticesScaled[i].SetSize(this->GetDim()-1);
     if (tempRat.IsPositive())
       VerticesScaled[i]/=tempRat;
     if (tempRat.IsEqualToZero())
-      VerticesScaled[i]*=10000;
+    { VerticesScaled[i]*=10000;
+    }
     if (tempRat.IsNegative())
     { DrawVertex[i]=false;
       foundBadVertex=true;
     }
   }
-  root tempRoot;
+  root iScaledVertex, jScaledVertex;
   if (InitDrawVars)
-  { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim()-1);
-    for (int i=0; i<this->GetDim()-1; i++)
-    { tempRoot.MakeEi(this->GetDim()-1, i);
-      theDrawingVariables.drawLineBetweenTwoVectorsBuffer
-      (ZeroRoot, tempRoot, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(205,205,205));
-    }
-  }
+    theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1,0);
   for (int k=0; k<this->Normals.size; k++)
-    for (int i=0; i<this->Vertices.size; i++)
+    for (int i=0; i<VerticesScaled.size; i++)
       if (DrawVertex[i] && this->Normals[k].ScalarEuclidean(this->Vertices[i]).IsEqualToZero())
-        for (int j=i+1; j<this->Vertices.size; j++)
+        for (int j=i+1; j<VerticesScaled.size; j++)
           if(DrawVertex[j] && this->Normals[k].ScalarEuclidean(this->Vertices[j]).IsEqualToZero())
             if (this->IsAnHonest1DEdgeAffine(i,j))
+            { /*bool iVertexLiesAtInfinity=this->Vertices[i].LastObject()->IsEqualToZero();
+              bool jVertexLiesAtInfinity=this->Vertices[j].LastObject()->IsEqualToZero();
+              if (iVertexLiesAtInfinity || jVertexLiesAtInfinity)
+              { iScaledVertex=VerticesScaled[i];
+                jScaledVertex=VerticesScaled[j];
+                if (iVertexLiesAtInfinity)
+                  iScaledVertex*=10000;
+                if (jVertexLiesAtInfinity)
+                  jScaledVertex*=10000;
+                theDrawingVariables.drawLineBetweenTwoVectorsBuffer
+                (iScaledVertex, jScaledVertex, theDrawingVariables.PenStyleNormal, CGI::RedGreenBlue(200,200,200));
+              }*/
               theDrawingVariables.drawLineBetweenTwoVectorsBuffer
               (VerticesScaled[i], VerticesScaled[j], theDrawingVariables.PenStyleNormal, ChamberWallColor);
+            }
   return foundBadVertex;
 }
 

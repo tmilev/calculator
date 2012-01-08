@@ -7678,10 +7678,8 @@ public:
   std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
   void TranslateMeMyLastCoordinateAffinization(root& theTranslationVector);
-  bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2)
-  { root& vertex1=this->Vertices[vertexIndex1];
-    root& vertex2=this->Vertices[vertexIndex2];
-    int numCommonWalls=0;
+  bool IsAnHonest1DEdgeAffine(root& vertex1, root& vertex2)
+  { int numCommonWalls=0;
     for (int i=0; i<this->Normals.size; i++)
       if(vertex1.ScalarEuclidean(this->Normals[i]).IsEqualToZero() && vertex2.ScalarEuclidean(this->Normals[i]).IsEqualToZero())
       { numCommonWalls++;
@@ -7690,7 +7688,14 @@ public:
       }
     return false;
   }
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat, int ChamberWallColor=0);
+  bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2)
+  { root& vertex1=this->Vertices[vertexIndex1];
+    root& vertex2=this->Vertices[vertexIndex2];
+    return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
+  }
+  bool DrawMeLastCoordAffine
+  (bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat,
+   int ChamberWallColor=0);
   bool DrawMeProjective
 (root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
   ;

@@ -175,7 +175,7 @@ template < > int HashedList<MonomialUniversalEnvelopingOrdered<RationalFunction>
 template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<roots>::PreferredHashSize=10000;
 template < > int HashedList<Cone>::PreferredHashSize=10000;
-template < > int HashedList<ParserFunction>::PreferredHashSize=100;
+template < > int HashedList<ParserFunction>::PreferredHashSize=1000;
 
 template < > int List<Cone>::ListActualSizeIncrement=100;
 template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
@@ -10697,7 +10697,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoef
   tempRoots.size=0;
   tempRoots.AddRoot(ChamberIndicator);
   this->GenerateOrbit(tempRoots, RhoAction, TheIndicatorsOrbit, true, OrbitGeneratingSubset, false, 0);
-  TheIndicatorsOrbit.ComputeDebugString();
+//  TheIndicatorsOrbit.ComputeDebugString();
   roots TempTest;
   root tempRoot;
   for (int i=0; i<OrbitGeneratingSubset.size; i++)
@@ -10705,7 +10705,7 @@ void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoef
     OrbitGeneratingSubset.ActOnRootByGroupElement(i, tempRoot, RhoAction, false);
     TempTest.AddRoot(tempRoot);
   }
-  TempTest.ComputeDebugString();
+//  TempTest.ComputeDebugString();
   PolynomialsRationalCoeff theRoot;
   PolyFormatLocal.MakeAlphabetxi();
   output.size=0;

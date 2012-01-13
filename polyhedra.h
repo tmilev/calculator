@@ -3119,6 +3119,7 @@ public:
   void operator=(const SelectionWithMultiplicities& other);
   inline void operator=(const Vector<Rational>& right){this->Assign(right); }
   inline void operator=(const Selection& other){this->::Vector<Rational>::operator=(other); }
+  inline Vector<double> GetVectorDouble();
   bool AssignString(const std::string& input)
   { unsigned int startIndex=0;
     for (; startIndex<input.size(); startIndex++)
@@ -8241,6 +8242,7 @@ public:
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
+  void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
   void GetWeylChamber
   (Cone& output, GlobalVariables& theGlobalVariables)
   ;
@@ -8463,7 +8465,9 @@ public:
   static std::string GetNameFrom
   (const std::string& WeylLetterWithLength, int WeylRank, bool IncludeAlgebraNames)
   ;
-  static std::string GetDiagramAndAlgebraName(const std::string& WeylLetterWithLength, int WeylRank){return DynkinDiagramRootSubalgebra::GetNameFrom(WeylLetterWithLength, WeylRank, true);}
+  static std::string GetDiagramAndAlgebraName
+  (const std::string& WeylLetterWithLength, int WeylRank)
+  {return DynkinDiagramRootSubalgebra::GetNameFrom(WeylLetterWithLength, WeylRank, true);}
   rootsCollection SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -8482,7 +8486,8 @@ public:
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
   //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
   //root subsystem. Note: the simleBasisInput is required to be a set of simple roots. The procedure calls a
-  //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't simple as required!
+  //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
+  //simple as required!
   inline void ComputeDiagramTypeModifyInput(roots& simpleBasisInput, WeylGroup& theWeyl)
   { theWeyl.TransformToSimpleBasisGenerators(simpleBasisInput);
     this->ComputeDiagramTypeKeepInput(simpleBasisInput, theWeyl);
@@ -8651,6 +8656,10 @@ public:
   rootSubalgebra();
   //returns -1 if the weight/root is not in g/k
   int GetIndexKmoduleContainingRoot(root& input);
+  void GetCoxeterPlane
+  (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
+  ;
+  void GetCoxeterElement(MatrixLargeRational& output);
   bool IsGeneratingSingularVectors(int indexKmod, roots& NilradicalRoots);
   bool rootIsInCentralizer(root& input);
   bool IsBKhighest(root& input);
@@ -10779,6 +10788,10 @@ bool GetRootRationalFromFunctionArguments
 (//List<int>& argumentList,
  root& output, GlobalVariables& theGlobalVariables)
 ;
+bool GetRootSRationalDontUseForFunctionArguments
+(
+ roots& output, int& outputDim, GlobalVariables& theGlobalVariables)
+;
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
@@ -10795,6 +10808,10 @@ bool GetRootRationalFromFunctionArguments
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   bool GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
+;
+  bool GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
+(List<int>& theArgumentList, List<roots>& output, int& outputRootsSize, int& outputDim,
+ GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -10890,12 +10907,17 @@ bool GetRootRationalFromFunctionArguments
   static int EvaluateDrawRootSystem
   (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, root* bluePoint, bool wipeCanvas=true)
   ;
-
+  static int EvaluateDrawRootSystemOld
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+;
   static int EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 ;
   static int EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables,0);}
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  { return theNode.EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables, 0);}
+  static int EvaluateDrawRootSystemOld
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystemOld(theNode, theArgumentList, theGlobalVariables,0);}
   static int EvaluatePrintRootSAsAndSlTwos
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
 ;

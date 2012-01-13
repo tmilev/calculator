@@ -3204,6 +3204,59 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   this->Reduce();
 }
 
+bool ParserNode::GetRootSRationalDontUseForFunctionArguments
+(roots& output, int& outputDim, GlobalVariables& theGlobalVariables)
+{ if (this->ExpressionType!=this->typeArray)
+  { if (this->ExpressionType!=this->typeRational)
+      return false;
+    output.SetSize(1);
+    output[0].SetSize(1);
+    output[0][0]=this->rationalValue;
+    outputDim=1;
+    return true;
+  }
+  output.SetSize(this->children.size);
+  for (int i=0; i<this->children.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[this->children[i]];
+    currentNode.GetRootRationalDontUseForFunctionArguments(output[i], theGlobalVariables);
+    if (output[i].size!=output[0].size)
+      return false;
+    outputDim=output[0].size;
+  }
+  return true;
+}
+
+bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
+(List<int>& theArgumentList, List<roots>& output, int& outputRootsSize, int& outputDim,
+ GlobalVariables& theGlobalVariables)
+{ ParserNode& firstNode= this->owner->TheObjects[theArgumentList[0]];
+  if (firstNode.ExpressionType!=this->typeArray)
+  { outputRootsSize=1;
+    if (firstNode.ExpressionType!=this->typeRational)
+      return false;
+    outputDim=1;
+    output.SetSize(1);
+    output[0].SetSize(1);
+    output[0][0].SetSize(1);
+    output[0][0][0]=firstNode.rationalValue;
+    return true;
+  }
+  output.SetSize(theArgumentList.size);
+  outputRootsSize=firstNode.children.size;
+  roots tempRoots;
+  int currentDim;
+  for (int i=0; i<theArgumentList.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[theArgumentList[i]];
+    if(!currentNode.GetRootSRationalDontUseForFunctionArguments(tempRoots, currentDim, theGlobalVariables))
+      return false;
+    if (i==0)
+      outputDim=currentDim;
+    if (currentDim!=outputDim)
+      return false;
+  }
+  return true;
+}
+
 bool ParserNode::GetRootsEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, roots& output, int& outputDim)
 { ParserNode& firstNode= this->owner->TheObjects[theArgumentList.TheObjects[0]];
@@ -6546,6 +6599,43 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   { out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\t";
     out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\n";
   }
+  if (this->theBuffer.BasisProjectionPlane.size>1)
+  { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
+    for (int j=0; j<this->theBuffer.BasisProjectionPlane.size; j++)
+    { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]=new Array(2);\n";
+      for (int k=0; k<2; k++)
+      { out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "]=new Array(" << theDimension << ");\n";
+        for (int l=0; l<theDimension; l++)
+          out << "BasisProjectionPlane" << timesCalled << "[" << j << "][" << k << "][" << l << "]="
+          << this->theBuffer.BasisProjectionPlane[j][k][l] << ";\t";
+        out << "\n";
+      }
+      out << "\n";
+    }
+    out << "var frameCount" << timesCalled << "=0;\n";
+    out << "var frameCountGoesUp" << timesCalled << "=true;\n";
+    out << "function changeProjectionPlaneOnTimer" << timesCalled << "(){\n"
+    << "if(frameCountGoesUp" << timesCalled << ")\n"
+    << "  frameCount" << timesCalled << "++;\n"
+    << "else\n"
+    << "  frameCount" << timesCalled << "--;\n"
+    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size << "-1 || "
+    << "frameCount" << timesCalled << "==0)\n"
+    << "{ \n"
+    << "  frameCountGoesUp" << timesCalled << "=! frameCountGoesUp" << timesCalled << ";\n"
+    << "}\n"
+    << "if (frameCount" << timesCalled << ">= " << this->theBuffer.BasisProjectionPlane.size << ")\n"
+    << "  return;"
+    << "for (i=0; i<" << theDimension << "; i++)\n"
+    << "{ VectorE1Cone" << timesCalled << "[i]=BasisProjectionPlane" << timesCalled
+    << "[frameCount" << timesCalled << "][0][i];\n"
+    << "  VectorE2Cone" << timesCalled << "[i]=BasisProjectionPlane" << timesCalled
+    << "[frameCount" << timesCalled << "][1][i];\n"
+    << "\n}\n";
+    out << theDrawFunctionName << "();\n";
+    out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n"
+    << "}\n";
+  }
 
   out << "var " << projName << "= new Array(" << theDimension << ");\n";
   out << "var " << eiBasis << "= new Array(" << theDimension << ");\n";
@@ -6684,8 +6774,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "function " << theInitFunctionName << "(){\n"
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
   << theSurfaceName << "  = dojox.gfx.createSurface(node," << this->DefaultHtmlWidth << "," << this->DefaultHtmlHeight << ");\n"
-  << theDrawFunctionName << "();\n"
-  << " }\n";
+  << theDrawFunctionName << "();\n";
+  if (this->theBuffer.BasisProjectionPlane.size>1)
+    out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
+  out << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
   << "var clickTolerance=5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
@@ -7291,6 +7383,89 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
   return output;
 }
 
+void WeylGroup::GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output)
+{ roots basis;
+  int theDim=this->GetDim();
+  basis.MakeEiBasis(theDim);
+//  output.init(theDim, theDim);
+  for (int i=0; i<theDim; i++)
+    this->ReflectBetaWRTAlpha(reflectionRoot, basis[i], false, basis[i]);
+  output.AssignRootsToRowsOfMatrix(basis);
+  output.Transpose();
+}
+
+void rootSubalgebra::GetCoxeterElement(MatrixLargeRational& output)
+{ int theDim=this->AmbientWeyl.GetDim();
+  output.MakeIdMatrix(theDim);
+  MatrixLargeRational tempMat;
+  for (int i=0; i<this->SimpleBasisK.size; i++)
+  { this->AmbientWeyl.GetMatrixReflection(this->SimpleBasisK[i], tempMat);
+    output.MultiplyOnTheLeft(tempMat);
+  }
+}
+
+void rootSubalgebra::GetCoxeterPlane
+  (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
+{ //this->ComputeRho(true);
+  root ZeroRoot;
+  int theDimension=this->AmbientWeyl.GetDim();
+  ZeroRoot.MakeZero(theDimension);
+  MatrixLargeRational matCoxeterElt;
+  this->GetCoxeterElement(matCoxeterElt);
+//  std::cout << matCoxeterElt.ElementToString(true, false);
+//  tempMat=matCoxeterElt;
+  this->ComputeDynkinDiagramKandCentralizer();
+  ReflectionSubgroupWeylGroup tempGroup;
+  int coxeterNumber=1;
+  for (int i=0; i<this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i++)
+  { tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
+    tempGroup.ComputeRootSubsystem();
+    root& lastRoot= *tempGroup.RootSubsystem.LastObject();
+    root lastRootInSimpleCoords;
+    lastRoot.GetCoordsInBasis(tempGroup.simpleGenerators, lastRootInSimpleCoords, theGlobalVariables);
+    coxeterNumber=MathRoutines::Maximum
+    (lastRootInSimpleCoords.SumCoordinates().NumShort, coxeterNumber)
+    ;
+  }
+//  for (int i=0; i<coxeterNumber-1; i++)
+//    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+  CompleX<double> theEigenValue;
+  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  Matrix<CompleX<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<List<CompleX<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE
+  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
+   theGlobalVariables);
+  Vectors<CompleX<double> > theEigenSpace;
+  theEigenSpace.operator=(theEigenSpaceList);
+  DrawOperations tempDO;
+  tempDO.initDimensions(theDimension, 1);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      tempDO.theBilinearForm.elements[i][j]=
+      this->AmbientWeyl.CartanSymmetric.elements[i][j].DoubleValue();
+  Vector<double> tempRoot;
+  outputBasis1.SetSize(theDimension);
+  outputBasis2.SetSize(theDimension);
+  if (theEigenSpace.size>0)
+  { for (int j=0; j<theDimension; j++)
+    { outputBasis1[j]=theEigenSpace[0][j].Re;
+      outputBasis2[j]=theEigenSpace[0][j].Im;
+    }
+    tempDO.ModifyToOrthonormalNoShiftSecond
+    (outputBasis1, outputBasis2);
+  }
+}
+
 void WeylGroup::DrawRootSystem
 (DrawOperations& output, bool wipeCanvas, GlobalVariables& theGlobalVariables, root* bluePoint)
 { this->ComputeRho(true);
@@ -7319,7 +7494,9 @@ void WeylGroup::DrawRootSystem
         eigenMat.elements[i][i]-=theEigenValue;
     }
   List<List<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE(theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0, theGlobalVariables);
+  eigenMat.FindZeroEigenSpacE
+  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
+   theGlobalVariables);
   Vectors<CompleX<double> > theEigenSpace;
   if (wipeCanvas)
     output.init();
@@ -7468,16 +7645,36 @@ int ParserNode::EvaluateDrawRootSystem
 
 }
 
+Vector<double> root::GetVectorDouble()
+{ Vector<double> result;
+  result.SetSize(this->size);
+  for (int i=0; i<this->size; i++)
+    result[i]=this->TheObjects[i].DoubleValue();
+  return result;
+}
+
 int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
-{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  int theDim= theNode.owner->TheObjects[theArgumentList[1]].intValue;
-  theWeylLetter+='A';
-  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
-  int NumFrames=theNode.owner->TheObjects[theArgumentList[2]].intValue;
-  if(NumFrames<1)
-    NumFrames=1;
-  int result=ParserNode::EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables, bluePoint);
+{ char theWeylLetter= theNode.owner->DefaultWeylLetter;
+  int theDim= theNode.owner->DefaultWeylRank;
+  int NumFrameS=theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  if(NumFrameS<1)
+    NumFrameS=1;
+//  std::cout << theArgumentList.size;
+  if (theArgumentList.size<5 || theArgumentList.size%2 ==0)
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  roots tempRootsX;
+  tempRootsX.SetSize(theArgumentList.size-1);
+  for (int i=1; i<theArgumentList.size; i++)
+  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList[i]];
+    if (!currentNode.GetRootRationalDontUseForFunctionArguments(tempRootsX[i-1], theGlobalVariables))
+      return theNode.SetError(theNode.errorBadOrNoArgument);
+    else if (tempRootsX[i-1].size!=theDim)
+      return theNode.SetError(theNode.errorDimensionProblem);
+
+  }
+  int result=ParserNode::EvaluateDrawRootSystem
+  (theNode, theWeylLetter, theDim, theGlobalVariables, bluePoint, true);
   if (result==theNode.typeError)
     return result;
   theNode.ExpressionType=theNode.typeAnimation;
@@ -7487,23 +7684,36 @@ int ParserNode::EvaluateAnimateRootSystem
   Vectors<double> theFirstBasis=theOps.BasisProjectionPlane[0];
   Matrix<double> theForm=theOps.theBilinearForm;
   Vectors<double> theDraggableBasis=theOps.BasisToDrawCirclesAt;
-  theOps.initDimensions(theForm, theDraggableBasis, theFirstBasis, NumFrames);
-  Vector<double> target1, target2, start1, start2;
-  target1.MakeEi(theDim, 0, 1, 0);
-  target2.MakeEi(theDim, ((theDim>2)? 2 : 1), 1, 0);
-  start1=theOps.BasisProjectionPlane[0][0];
-  start2=theOps.BasisProjectionPlane[0][1];
-  theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
+  Vector<double> start1, start2, target1, target2;
+  int numTransitions=(theArgumentList.size-3)/2;
+  if (numTransitions<1)
+    numTransitions=1;
+  int NumFrameSPerTransition=NumFrameS/numTransitions;
+  if (NumFrameSPerTransition<2)
+    NumFrameSPerTransition=2;
+  NumFrameS=NumFrameSPerTransition*numTransitions;
+  theOps.initDimensions(theForm, theDraggableBasis, theFirstBasis, NumFrameS);
   int& indexBitMap=theOps.SelectedPlane;
-  for (indexBitMap=0; indexBitMap<NumFrames; indexBitMap++)
-  { double fraction=0;
-    if (NumFrames>1)
-      fraction=((double) indexBitMap)/((double)(NumFrames-1));
-    theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
-    theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
-    theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
-    theOps.ModifyToOrthonormalNoShiftSecond(theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
+  indexBitMap=-1;
+  for (int j=0; j<numTransitions; j++)
+  { start1=tempRootsX[j*2+0].GetVectorDouble();
+    start2=tempRootsX[j*2+1].GetVectorDouble();
+    target1=tempRootsX[j*2+2].GetVectorDouble();
+    target2=tempRootsX[j*2+3].GetVectorDouble();
+    theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
+    theOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    for (int i=0; i<NumFrameSPerTransition; i++)
+    { indexBitMap++;
+      double fraction=0;
+      if (NumFrameSPerTransition>1)
+        fraction=((double) i)/((double)(NumFrameSPerTransition-1));
+      theOps.BasisProjectionPlane[indexBitMap][0]=start1*(1-fraction);
+      theOps.BasisProjectionPlane[indexBitMap][1]=start2*(1-fraction);
+      theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
+      theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
+      theOps.ModifyToOrthonormalNoShiftSecond
+      (theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
+    }
   }
   indexBitMap=0;
   theOps.drawTextBuffer(0, 15, "center can be moved", 0, 10, DrawingVariables::TextStyleNormal);
@@ -7512,6 +7722,10 @@ int ParserNode::EvaluateAnimateRootSystem
   theNode.theAnimation.GetElement()+=theOps;
   theNode.theAnimation.GetElement().flagAnimating=true;
   theNode.theAnimation.GetElement().indexVirtualOp=0;
+  theGlobalVariables.theDrawingVariables.theBuffer=theOps;
+  theNode.outputString= theGlobalVariables.theDrawingVariables.
+  GetHtmlFromDrawOperationsCreateDivWithUniqueName
+  (theDim);
   return result;
 }
 
@@ -7771,12 +7985,19 @@ int ParserNode::EvaluateAnimationClearScreen
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateDrawRootSystem
+int ParserNode::EvaluateDrawRootSystemOld
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
   CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
+  return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
+}
+
+int ParserNode::EvaluateDrawRootSystem
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+{ char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
+  int theDimension= theNode.owner->DefaultWeylRank;
   return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
 }
 
@@ -9092,6 +9313,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     return;
   this->flagFunctionListInitialized=true;
   ParserFunction theFunction;
+  this->theFunctionList.MakeActualSizeAtLeastExpandOnTop(1000);
   this->AddOneFunctionToDictionaryNoFail
   ("coneFromNormals",
    "((Rational,...),...)",
@@ -9357,26 +9579,41 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateG2InB3Computation
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystem",
+  ("drawRootSystemOld",
    "(Integer, Integer)",
    "Draw the root system in its Coxeter plane. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank, which must be at most 8. The example draws E6.",
-   "drawRootSystem(4,6)",
-   DefaultWeylLetter, DefaultWeylRank,
+   "drawRootSystemOld(4,6)",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateDrawRootSystemOld
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("drawRootSystem",
+   "()",
+   "Draw the root system of the ambient Lie algebra in its Coxeter plane. ",
+   "drawRootSystem",
+   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateDrawRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("animateRootSystemDefault",
-   "(Integer, Integer, Integer)",
-   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. Third argument= number of frames.",
-   "animateRootSystemDefault(50)",
-   DefaultWeylLetter, DefaultWeylRank, false,
+  ("animateRootSystem",
+   "(Integer, (Rational,...),...)",
+   "Animate the root system. First argument N>=2 = number of frames. The remaining arguments \
+   must describe an even number>=4 of elements of h* with rational coordinates, written in simple basis coordinates. \
+   The consecutive pairs of such vectors bases parametrize the projection plane waypoints. \
+   The animation will start at the first projection plane (given by the first two vectors), fly through to the\
+   second projection plane, then away to the third, and so on. When at the last frame, the animation will \
+   start backwards. The example rotates the root system of B3(so(7)) from a root subsystem of type B2(so(5)) to a \
+   plane the projection to which induces the embedding of exceptional Lie algebra G2 in B3. This \
+   plane also coincides with one of the (finitely many) choices of a Coxeter plane of B3(so(7)). ",
+   "animateRootSystem(100, (0,1,0),(0,0,1), (0,1,0),(1,0,2) )",
+   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateAnimateRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
   ("animatePause",
    "(Integer)",
    "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
-   "animatePause(50)",
+   "animatePause(100)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimationPause
    );
@@ -9525,6 +9762,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2ParabolicSupport
    );
+
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

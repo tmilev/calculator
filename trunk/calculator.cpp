@@ -98,16 +98,19 @@ void makeReport(IndicatorWindowVariables& input)
   theFile.close();
 }
 
+#define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at line " << __LINE__ << ": " << GetElapsedTimeInSeconds()
+
 int main(int argc, char **argv)
-{ ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
+{
+#ifndef WIN32
+  gettimeofday(&ComputationStartGlobal, NULL);
+#endif
+  ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
-#ifndef WIN32
-  gettimeofday(&ComputationStartGlobal, NULL);
-#endif
   ComputationComplete=false;
 	if (inputString=="")
 	{
@@ -133,6 +136,7 @@ int main(int argc, char **argv)
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
+  ANNOYINGSTATISTICS;
   //std::cout << IPAdressCaller;
 //  std::stringstream tempStreamX;
 //  static_html3(tempStreamX);
@@ -164,6 +168,10 @@ int main(int argc, char **argv)
   } else
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
+  ANNOYINGSTATISTICS;
+  //civilizedInput="drawRootSystem";
+//  civilizedInput="animateRootSystem(100, (0,1,0),(0,0,1), (0,1,0),(1,0,2) )";
+//  civilizedInput="animateRootSystemDefault(1,3,50)";
 //  civilizedInput="vpf((1), (2))";
 //  civilizedInput="vpf((1,0),(0,1),(1,1),(1,3))";
 //  civilizedInput="weightSupportGtwoGenVermaModule((0,1),(0,2))";
@@ -312,8 +320,9 @@ int main(int argc, char **argv)
     CGI::OpenFileCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
     tempFile << tempStreamX.str();
   }
+  ANNOYINGSTATISTICS;
   theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
-
+  ANNOYINGSTATISTICS;
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
   CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
@@ -329,7 +338,9 @@ int main(int argc, char **argv)
   theOutputFormat.MakeAlphabetArbitraryWithIndex("x", "y");
   theOutputFormat.alphabetBases[0]="g";
   theOutputFormat.alphabetBases[1]="h";
+  ANNOYINGSTATISTICS;
   theParser.ParseEvaluateAndSimplifyPart1(civilizedInput, theGlobalVariables);
+  ANNOYINGSTATISTICS;
   TimeParsing=GetElapsedTimeInSeconds();
   theOutputFormat.flagUseCalculatorFormatForUEOrdered=true;
   std::string theResult = theParser.ParseEvaluateAndSimplifyPart2(civilizedInput, true, theGlobalVariables, theOutputFormat);
@@ -365,9 +376,14 @@ int main(int argc, char **argv)
 #ifndef WIN32
   double TimeTotalElapsed=GetElapsedTimeInSeconds();
   if (civilizedInput!="")
-  { std::cout << "<hr><b>Result.</b> " << theResult << "<br><hr><br>Parsing+evaluation time: " << TimeTotalElapsed << " seconds<br> (" << TimeParsing << " parsing + " << TimeEvaluation <<  " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing << " processing)<br>";
+  { std::cout << "<hr><b>Result.</b> " << theResult
+    << "<br><hr><br>Parsing+evaluation time: "
+    << TimeTotalElapsed << " seconds<br> (" << TimeParsing << " parsing + "
+    << TimeEvaluation << " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing
+    << " processing)<br>";
     std::cout << "#  pointers at peak RAM: " << ParallelComputing::PointerCounterPeakRamUse << "<br>(excluding std::string, std::stringstream)<br>";
-  }
+  } //else
+    //std::cout << "Empty input base boot time: " << TimeTotalElapsed;
   if (GetElapsedTimeInSeconds()>1)
     std::cout << "If your computation takes too long it is probably due to the weak algorithms used for your computation.<br> Feel free to email the author(s) with requests for speed improvement.";
   ComputationComplete=true;
@@ -509,8 +525,11 @@ int main(int argc, char **argv)
   std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
   std::cout << "\n</td>";
   std::cout << "<td> <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img>";
-  std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.</td>";
-  std::cout << "</tr></table>";
+  std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.";
+  std::cout << "<hr>Execution time before initiating system commands: " << TimeTotalElapsed << " seconds.";
+  std::cout << "</td>";
+  std::cout << "</tr>";
+  std::cout << "</table>";
   std::cout << "</body></html>";
   std::string command1, command2;
   std::cout << "<!--";

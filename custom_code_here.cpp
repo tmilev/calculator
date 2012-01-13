@@ -6599,7 +6599,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   { out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\t";
     out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\n";
   }
-  if (this->theBuffer.BasisProjectionPlane.size>1)
+  if (this->theBuffer.BasisProjectionPlane.size>2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
     for (int j=0; j<this->theBuffer.BasisProjectionPlane.size; j++)
     { out << "BasisProjectionPlane" << timesCalled << "[" << j << "]=new Array(2);\n";
@@ -6619,7 +6619,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     << "  frameCount" << timesCalled << "++;\n"
     << "else\n"
     << "  frameCount" << timesCalled << "--;\n"
-    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size << "-1 || "
+    << "if (frameCount" << timesCalled << "==" << this->theBuffer.BasisProjectionPlane.size-1 << " || "
     << "frameCount" << timesCalled << "==0)\n"
     << "{ \n"
     << "  frameCountGoesUp" << timesCalled << "=! frameCountGoesUp" << timesCalled << ";\n"
@@ -6775,7 +6775,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
   << theSurfaceName << "  = dojox.gfx.createSurface(node," << this->DefaultHtmlWidth << "," << this->DefaultHtmlHeight << ");\n"
   << theDrawFunctionName << "();\n";
-  if (this->theBuffer.BasisProjectionPlane.size>1)
+  if (this->theBuffer.BasisProjectionPlane.size>2)
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
   out << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
@@ -9599,7 +9599,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "(Integer, (Rational,...),...)",
    "Animate the root system. First argument N>=2 = number of frames. The remaining arguments \
    must describe an even number>=4 of elements of h* with rational coordinates, written in simple basis coordinates. \
-   The consecutive pairs of such vectors bases parametrize the projection plane waypoints. \
+   The consecutive pairs of such vectors parametrize the projection plane waypoints. More precisely, \
+   each pair of input vectors must give an arbitrary basis of the ``waypoint'' projection planes.  \
    The animation will start at the first projection plane (given by the first two vectors), fly through to the\
    second projection plane, then away to the third, and so on. When at the last frame, the animation will \
    start backwards. The example rotates the root system of B3(so(7)) from a root subsystem of type B2(so(5)) to a \

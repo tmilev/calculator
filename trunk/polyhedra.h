@@ -2682,7 +2682,9 @@ public:
   CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other) const
   { return this->ScalarEuclidean(other, (CoefficientType) 0);
   }
-  void MakeEi(int DesiredDimension, int NonZeroIndex, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  void MakeEi
+  (int DesiredDimension, int NonZeroIndex,
+   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
   }
@@ -2827,6 +2829,11 @@ public:
   void operator-=(const Vector<CoefficientType>& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]-=other.TheObjects[i];
+  }
+  Vector<CoefficientType> operator+(const Vector<CoefficientType>& right)
+  { Vector<CoefficientType> result=*this;
+    result+=right;
+    return result;
   }
   void operator=(const List<CoefficientType>& other)
   { this->SetSize(other.size);
@@ -7707,10 +7714,13 @@ public:
     return true;
   }
   bool GetLatticePointsInCone
-  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne, roots& outputPoints)
+  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
+   roots& outputPoints, root* shiftAllPointsBy)
   ;
   bool MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables);
-  void ChangeBasis(MatrixLargeRational& theLinearMap);
+  void ChangeBasis
+  (MatrixLargeRational& theLinearMap, GlobalVariables& theGlobalVariables)
+    ;
   std::string DebugString;
   int GetDim()
   { if (this->Normals.size==0)
@@ -8224,10 +8234,15 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
+  root GetSimpleCoordinatesFromFundamental(root& inputInFundamentalCoords);
   Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables);
   void RaiseToHighestWeight(root& theWeight);
+  void GetCoxeterPlane
+  (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
+;
   void DrawRootSystem
-(DrawOperations& output, bool wipeCanvas, GlobalVariables& theGlobalVariables, root* bluePoint=0)
+(DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
+ bool drawWeylChamber, root* bluePoint=0)
   ;
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
@@ -10684,7 +10699,10 @@ class PiecewiseQuasipolynomial
   std::string ElementToString(bool useLatex, bool useHtml);
   PiecewiseQuasipolynomial(){this->theBuffers=0;}
   PiecewiseQuasipolynomial(GlobalVariables& PermanentGlobalVariables){this->theBuffers=& PermanentGlobalVariables;}
-  void DrawMe(DrawingVariables& theDrawingVars);
+  void DrawMe
+ (DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber=0,
+ root* distinguishedPoint=0)
+  ;
   int GetNumVars(){return this->NumVariables;}
   inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other){ this->MakeCommonRefinement(other.theProjectivizedComplex);  }
   void MakeCommonRefinement(const ConeComplex& other);
@@ -10816,14 +10834,22 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateGetCoxeterBasis
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateAnimationPause
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimationClearScreen
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-
+  static int EvaluateDrawRootSystemCoxeterPlaneRootSA
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateAnimationDots
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateAnimateRootSAs
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimationClonePreviousFrameDrawExtraLine
@@ -11983,7 +12009,7 @@ public:
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
   std::string ComputeMultsLargerAlgebraHighestWeight
-  ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
+  ( root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
    )
   ;
   std::string CheckMultiplicitiesVsOrbits

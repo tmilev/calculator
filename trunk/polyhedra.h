@@ -1101,6 +1101,12 @@ public:
         output.TheObjects[i]+=tempElt;
       }
   }
+  void GetNSquaredVectorForm(Vector<Element>& output)
+  { output.SetSize(this->NumRows*this->NumCols);
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        output.TheObjects[i*this->NumRows+j]=this->elements[i][j];
+  }
   void ActOnVectorColumn(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
   { assert(&input!=&output);
     assert(this->NumCols==input.size);
@@ -1681,7 +1687,7 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Ele
   output.init(input.NumRows, this->NumCols);
   for (int i=0; i< input.NumRows; i++)
     for( int j=0; j< this->NumCols; j++)
-    { output.elements[i][j].Assign(Element::TheRingZero);
+    { output.elements[i][j]=0;
       for (int k=0; k<this->NumRows; k++)
       { tempEl.Assign(input.elements[i][k]);
         tempEl.MultiplyBy(this->elements[k][j]);
@@ -2498,7 +2504,7 @@ ParallelComputing::GlobalPointerCounter++;
     else
       return this->Extended->num.IsNonPositive();
   }
-  bool IsPositive()
+  bool IsPositive()const
   { if (this->Extended==0)
       return this->NumShort>0;
     else
@@ -10831,6 +10837,9 @@ bool GetRootSRationalDontUseForFunctionArguments
 (List<int>& theArgumentList, List<roots>& output, int& outputRootsSize, int& outputDim,
  GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+  ;
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -11814,6 +11823,7 @@ public:
   List<MatrixLargeRational> actionsNegativeRootSpacesCartanPositiveRootspaces;
   List<ElementSimpleLieAlgebra> moduleElementsEmbedded;
   List<ElementUniversalEnveloping> invariantsMappedToEmbedding;
+
   //Index ordering of sipleNegGenerators:
   //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
   //simpleNegGenerators.TheObjects[i]

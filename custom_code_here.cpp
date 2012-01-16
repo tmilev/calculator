@@ -1190,6 +1190,7 @@ root WeylGroup::GetSimpleCoordinatesFromFundamental
   return result;
 }
 
+
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
   ( root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
    )
@@ -10078,6 +10079,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "animateFlyThroughRootSAs",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateAnimateRootSAs
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("InvariantsExteriorPowerFundamentalsPlusTrivials",
+   "(Integer, Integer)",
+   "<b> Experimental</b>. This function was implemented to attempt to answer a question of prof. Alexeevski.",
+   "InvariantsExteriorPowerFundamentalsPlusTrivials(0,0)",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
    );
 
 

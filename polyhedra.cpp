@@ -26110,13 +26110,7 @@ void EigenVectorComputation::MakeGenericVermaElementOrdered(ElementUniversalEnve
 
 
 Rational WeylGroup::WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
-{ root theWeightInSimpleBasis=theWeightInFundamentalBasis;
-  MatrixLargeRational invertedCartan;
-  for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-    theWeightInSimpleBasis.TheObjects[i]/=(2/this->CartanSymmetric.elements[i][i]);
-  invertedCartan=this->CartanSymmetric;
-  invertedCartan.Invert(theGlobalVariables);
-  invertedCartan.ActOnAroot(theWeightInSimpleBasis, theWeightInSimpleBasis);
+{ root theWeightInSimpleBasis= this->GetSimpleCoordinatesFromFundamental(theWeightInFundamentalBasis);
   Rational Result=1;
   for (int i=0; i<this->RootsOfBorel.size; i++)
   { Result.MultiplyBy(this->RootScalarCartanRoot(theWeightInSimpleBasis+this->rho, this->RootsOfBorel.TheObjects[i]));

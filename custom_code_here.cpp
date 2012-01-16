@@ -775,7 +775,8 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
 }
 
 bool Cone::GetLatticePointsInCone
-  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne, roots& outputPoints)
+  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
+   roots& outputPoints, root* shiftAllPointsBy)
 { if (upperBoundPointsInEachDim<=0)
     upperBoundPointsInEachDim=5;
   root theActualShift=theShift;
@@ -800,6 +801,8 @@ bool Cone::GetLatticePointsInCone
   LatticeBasis.AssignMatrixRows(theLattice.basisRationalForm);
   for (int i=0; i<numCycles; i++, boundingBox.IncrementSubset())
   { candidatePoint=theActualShift;
+    if (shiftAllPointsBy!=0)
+      candidatePoint+=*shiftAllPointsBy;
     for (int j=0; j<boundingBox.Multiplicities.size; j++)
       candidatePoint+=LatticeBasis[j]*
       (boundingBox.Multiplicities[j]-upperBoundPointsInEachDim);
@@ -808,7 +811,9 @@ bool Cone::GetLatticePointsInCone
       *candidatePoint.LastObject()=1;
     }
     if (this->IsInCone(candidatePoint))
+    {
       outputPoints.AddOnTop(candidatePoint);
+    }
   }
   return true;
 }
@@ -985,18 +990,24 @@ std::string PiecewiseQuasipolynomial::ElementToString(bool useLatex, bool useHtm
   return out.str();
 }
 
-void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars)
+void PiecewiseQuasipolynomial::DrawMe
+(DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber,
+ root* distinguishedPoint)
 { PolynomialOutputFormat theFormat;
   roots latticePoints;
   hashedRoots theLatticePointsFinal;
   List<int> theLatticePointColors;
   List<int> tempList;
+  if (numLatticePointsPerDim<0)
+    numLatticePointsPerDim=0;
+  int ZeroColor=CGI::RedGreenBlue(200, 200, 200);
   for (int i=0; i<this->theProjectivizedComplex.size; i++)
   { int chamberWallColor=0;
     bool isZeroChamber=this->theQPs[i].IsEqualToZero();
     if (isZeroChamber)
-      chamberWallColor= CGI::RedGreenBlue(200, 200, 200);
-    this->theProjectivizedComplex[i].DrawMeLastCoordAffine(false, theDrawingVars, theFormat, chamberWallColor);
+      chamberWallColor= ZeroColor;
+    this->theProjectivizedComplex[i].DrawMeLastCoordAffine
+    (false, theDrawingVars, theFormat, chamberWallColor);
     std::stringstream tempStream;
     tempStream << i+1;
     root tempRoot=this->theProjectivizedComplex[i].GetInternalPoint();
@@ -1005,16 +1016,27 @@ void PiecewiseQuasipolynomial::DrawMe(DrawingVariables& theDrawingVars)
 //     (tempRoot, tempStream.str(), chamberWallColor, theDrawingVars.PenStyleNormal, 0);
     for (int j=0; j<this->theQPs[i].LatticeShifts.size; j++)
     { this->theProjectivizedComplex[i].GetLatticePointsInCone
-      (this->theQPs[i].AmbientLatticeReduced, this->theQPs[i].LatticeShifts[j], 8, true, latticePoints);
-      theLatticePointsFinal.AddOnTopNoRepetitionHash(latticePoints);
+      (this->theQPs[i].AmbientLatticeReduced, this->theQPs[i].LatticeShifts[j], numLatticePointsPerDim, true, latticePoints,
+      distinguishedPoint);
       tempList.initFillInObject(latticePoints.size, chamberWallColor);
+      if (RestrictingChamber!=0)
+        for (int k=0; k<latticePoints.size; k++)
+        { tempRoot=latticePoints[k];
+          tempRoot.MakeAffineUsingLastCoordinate();
+          if (!RestrictingChamber->IsInCone(tempRoot))
+            tempList[k]=ZeroColor;
+        }
+      theLatticePointsFinal.AddRootsOnTopHash(latticePoints);
       theLatticePointColors.AddListOnTop(tempList);
     }
   }
   for (int i=0; i<theLatticePointsFinal.size; i++)
-  { theDrawingVars.drawCircleAtVectorBuffer(theLatticePointsFinal[i], 2, theDrawingVars.PenStyleNormal, theLatticePointColors[i]);
+  { theDrawingVars.drawCircleAtVectorBuffer
+    (theLatticePointsFinal[i], 2, theDrawingVars.PenStyleNormal, theLatticePointColors[i]);
     theDrawingVars.drawTextAtVectorBuffer
-    (theLatticePointsFinal[i], this->EvaluateInputProjectivized(theLatticePointsFinal[i]).ElementToString(), 0, DrawingVariables::PenStyleNormal, 0);
+    (theLatticePointsFinal[i], this->EvaluateInputProjectivized(theLatticePointsFinal[i]).ElementToString(),
+     theLatticePointColors[i],
+    DrawingVariables::PenStyleNormal, 0);
   }
 }
 
@@ -1148,8 +1170,28 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
   return false;
 }
 
+void Cone::ChangeBasis
+  (MatrixLargeRational& theLinearMap, GlobalVariables& theGlobalVariables)
+{ //roots newNormals;
+//  MatrixLargeRational tempMat=theLinearMap;
+  theLinearMap.ActOnRoots(this->Normals);
+  this->CreateFromNormals(this->Normals, theGlobalVariables);
+}
+
+root WeylGroup::GetSimpleCoordinatesFromFundamental
+(root& inputInFundamentalCoords)
+{ roots fundamentalBasis;
+  this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
+  MatrixLargeRational tempMat;
+  tempMat.AssignRootsToRowsOfMatrix(fundamentalBasis);
+  tempMat.Transpose();
+  root result=inputInFundamentalCoords;
+  tempMat.ActOnAroot(result);
+  return result;
+}
+
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
-  ( root& highestWeightLargerAlg, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
+  ( root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
    )
 { std::stringstream out;
   WeylGroup& LargerWeyl=theParser.theHmm.theRange.theWeyl;
@@ -1159,10 +1201,13 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
   this->TransformToWeylProjectiveStep1(theGlobalVariables);
   this->TransformToWeylProjectiveStep2(theGlobalVariables);
+  root highestWeightLargerAlgSimpleCoords;
+  highestWeightLargerAlgSimpleCoords=LargerWeyl.GetSimpleCoordinatesFromFundamental
+  (highestWeightLargerAlgebraFundamentalCoords);
+
   MatrixLargeRational tempMat;
-  tempMat=LargerWeyl.CartanSymmetric;
-  tempMat.Invert();
-  tempMat.ActOnAroot(highestWeightLargerAlg);
+
+
   root tempRoot, ZeroRoot;
   DrawingVariables& drawOps=theGlobalVariables.theDrawingVariables;
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
@@ -1178,23 +1223,53 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
   (drawOps.theBuffer.BasisProjectionPlane[0][0], drawOps.theBuffer.BasisProjectionPlane[0][1]);
   drawOps.theBuffer.GraphicsUnit[0]=50;
-  PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables), theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
+  PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables),
+  theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
   //std::cout << "<hr>" << this->GmodKNegWeightsBasisChanged.ElementToString() << "<hr>";
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   roots translationsProjectedFinal;
   translationsProjectedFinal.SetSize(this->theLinearOperators.size);
-  this->theLinearOperators[0].ActOnAroot(highestWeightLargerAlg, translationsProjectedFinal[0]);
+  this->theLinearOperators[0].ActOnAroot(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
 //  translationsProjectedFinal[0].MinusRoot();
-  out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlg.ElementToString();
+  out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlgSimpleCoords.ElementToString();
   out << "<br>Input parabolics selections: " << parabolicSel.ElementToString();
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.ElementToString();
-  out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: " << translationsProjectedFinal[0].ElementToString();
+  out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: "
+  << translationsProjectedFinal[0].ElementToString();
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   //std::cout << theStartingPoly.ElementToString(false, true);
   drawOps.drawCoordSystemBuffer(drawOps, 2, 0);
   //out << this->log.str();
+  Cone smallWeylChamber;
+  tempMat=SmallerWeyl.CartanSymmetric;
+  tempMat.Invert();
+  roots tempVertices;
+  root tMpRt;
+  tMpRt=this->ParabolicSelectionSmallerAlgebra;
+//  std::cout << "<br>sel smaller: " << tMpRt.ElementToString();
+  for (int i=0; i<this->ParabolicSelectionSmallerAlgebra.MaxSize; i++)
+  { tempMat.RowToRoot(i, tempRoot);
+    tempVertices.AddOnTop(tempRoot);
+    if(this->ParabolicSelectionSmallerAlgebra.selected[i])
+      tempVertices.AddOnTop(-tempRoot);
+  }
+  smallWeylChamber.CreateFromVertices(tempVertices, theGlobalVariables);
+  tempMat.init(2,2);
+  tempMat.elements[0][0]=1; tempMat.elements[0][1]=0;
+  tempMat.elements[1][0]=1; tempMat.elements[1][1]=1;
+
+//  std::cout << smallWeylChamber.ElementToString(false, true, theFormat);
+  tempMat.Transpose();
+  smallWeylChamber.ChangeBasis
+  (tempMat, theGlobalVariables)
+  ;
+//  std::cout << "<br> after the basis change: " << smallWeylChamber.ElementToString(false, true, theFormat);
+  out << "<br> The small Weyl chamber: " << smallWeylChamber.ElementToString(false, true, theFormat);
+  root highestWeightSmallAlgBasisChanged= -translationsProjectedFinal[0];
+//  std::cout << highestWeightSmallAlgBasisChanged.ElementToString();
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100;
   for (int i=0; i<this->theLinearOperators.size; i++)
-  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, translationsProjectedFinal[i]);
+  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i]+=this->theTranslationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBuffer(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(250,0,0));
   }
@@ -1228,7 +1303,10 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     }
     */
   }
-  Accum.DrawMe(drawOps);
+//  std::cout << "<hr>so far so good!";
+  drawOps.theBuffer.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(2500);
+  Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
+//  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   out << drawOps.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   out << Accum.ElementToString(false, true);
@@ -1422,7 +1500,8 @@ void WeylGroup::GetWeylChamber
   tempMat.Invert();
   roots tempRoots;
   tempRoots.AssignMatrixRows(tempMat);
-  output.CreateFromNormals(tempRoots, theGlobalVariables);
+  output.CreateFromVertices(tempRoots, theGlobalVariables);
+//  output.CreateFromNormals(tempRoots, theGlobalVariables);
 }
 
 std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
@@ -4139,7 +4218,7 @@ int ParserNode::EvaluateVPF
   out << thePQP.MakeVPF(toBePartitioned, theGlobalVariables);
   theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(tempDim);
   theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, tempDim, 0);
-  thePQP.DrawMe(theGlobalVariables.theDrawingVariables);
+  thePQP.DrawMe(theGlobalVariables.theDrawingVariables, 10);
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(tempDim);
   out << thePQP.ElementToString(false, true);
   theNode.outputString=out.str();
@@ -7407,18 +7486,32 @@ void rootSubalgebra::GetCoxeterElement(MatrixLargeRational& output)
 void rootSubalgebra::GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 { //this->ComputeRho(true);
-  root ZeroRoot;
   int theDimension=this->AmbientWeyl.GetDim();
+  if (theDimension<2)
+    return;
+  if (this->SimpleBasisK.size<2)
+  { if (this->SimpleBasisK.size==1)
+      outputBasis1=this->SimpleBasisK[0].GetVectorDouble();
+    else
+      outputBasis1.MakeEi(theDimension, 0);
+    if(outputBasis1[0]==0)
+      outputBasis2.MakeEi(theDimension, 0);
+    else
+      outputBasis2.MakeEi(theDimension, 1);
+    return;
+  }
+  root ZeroRoot;
   ZeroRoot.MakeZero(theDimension);
   MatrixLargeRational matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
-//  std::cout << matCoxeterElt.ElementToString(true, false);
+  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ElementToString(true, false);
 //  tempMat=matCoxeterElt;
   this->ComputeDynkinDiagramKandCentralizer();
   ReflectionSubgroupWeylGroup tempGroup;
   int coxeterNumber=1;
   for (int i=0; i<this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i++)
-  { tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
+  { tempGroup.AmbientWeyl=this->AmbientWeyl;
+    tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
     root& lastRoot= *tempGroup.RootSubsystem.LastObject();
     root lastRootInSimpleCoords;
@@ -7427,6 +7520,7 @@ void rootSubalgebra::GetCoxeterPlane
     (lastRootInSimpleCoords.SumCoordinates().NumShort, coxeterNumber)
     ;
   }
+  std::cout << "<hr>the corresponding Coxeter number: " << coxeterNumber;
 //  for (int i=0; i<coxeterNumber-1; i++)
 //    tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
@@ -7457,18 +7551,89 @@ void rootSubalgebra::GetCoxeterPlane
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);
   if (theEigenSpace.size>0)
-  { for (int j=0; j<theDimension; j++)
-    { outputBasis1[j]=theEigenSpace[0][j].Re;
-      outputBasis2[j]=theEigenSpace[0][j].Im;
+  { if (coxeterNumber>2)
+    { for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[0][j].Im;
+      }
+      tempDO.ModifyToOrthonormalNoShiftSecond
+      (outputBasis1, outputBasis2);
+    } else if (coxeterNumber<=2 && theEigenSpace.size>1)
+    { for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[1][j].Re;
+      }
+      tempDO.ModifyToOrthonormalNoShiftSecond
+      (outputBasis1, outputBasis2);
     }
-    tempDO.ModifyToOrthonormalNoShiftSecond
-    (outputBasis1, outputBasis2);
+  }
+}
+
+void WeylGroup::GetCoxeterPlane
+  (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
+{ this->ComputeRho(true);
+  root ZeroRoot;
+  int theDimension=this->GetDim();
+  if (theDimension<2)
+    return;
+  ZeroRoot.MakeZero(theDimension);
+  ElementWeylGroup tempElt;
+  this->GetCoxeterElement(tempElt);
+  MatrixLargeRational matCoxeterElt, tempMat;
+  this->GetMatrixOfElement(tempElt, matCoxeterElt);
+//  std::cout << matCoxeterElt.ElementToString(true, false);
+  tempMat=matCoxeterElt;
+  int coxeterNumber=this->RootSystem.LastObject()->SumCoordinates().NumShort+1;
+  for (int i=0; i<coxeterNumber-1; i++)
+    tempMat.MultiplyOnTheLeft(matCoxeterElt);
+//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
+  CompleX<double> theEigenValue;
+  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
+  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
+  Matrix<CompleX<double> > eigenMat, idMat;
+  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
+  for (int i =0; i<eigenMat.NumRows; i++)
+    for (int j=0; j<eigenMat.NumCols; j++)
+    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
+      if (i==j)
+        eigenMat.elements[i][i]-=theEigenValue;
+    }
+  List<List<CompleX<double> > > theEigenSpaceList;
+  eigenMat.FindZeroEigenSpacE
+  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
+   theGlobalVariables);
+  Vectors<CompleX<double> > theEigenSpace;
+  outputBasis1.SetSize(theDimension);
+  outputBasis2.SetSize(theDimension);
+  theEigenSpace.operator=(theEigenSpaceList);
+  DrawOperations tempDO;
+  tempDO.initDimensions(theDimension, 1);
+  tempDO.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
+  theEigenSpace.operator=(theEigenSpaceList);
+  for (int i=0; i<theDimension; i++)
+    for (int j=0; j<theDimension; j++)
+      tempDO.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
+
+  if (theEigenSpace.size>0)
+  { if (coxeterNumber>2)
+      for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[0][j].Im;
+      }
+    else if (coxeterNumber==1 && theEigenSpace.size>1 )
+      for (int j=0; j<theDimension; j++)
+      { outputBasis1[j]=theEigenSpace[0][j].Re;
+        outputBasis2[j]=theEigenSpace[1][j].Re;
+      }
+    tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis1,outputBasis2);
   }
 }
 
 void WeylGroup::DrawRootSystem
-(DrawOperations& output, bool wipeCanvas, GlobalVariables& theGlobalVariables, root* bluePoint)
-{ this->ComputeRho(true);
+(DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
+ bool drawWeylChamber, root* bluePoint)
+{ DrawOperations& output=outputDV.theBuffer;
+  this->ComputeRho(true);
   root ZeroRoot;
   int theDimension=this->GetDim();
   ZeroRoot.MakeZero(theDimension);
@@ -7555,6 +7720,12 @@ void WeylGroup::DrawRootSystem
     output.drawCircleAtVectorBuffer(*bluePoint, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
     output.drawCircleAtVectorBuffer(*bluePoint, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,255));
   }
+  if (drawWeylChamber)
+  { Cone theWeylChamber;
+    this->GetWeylChamber(theWeylChamber, theGlobalVariables);
+    PolynomialOutputFormat tempFormat;
+    theWeylChamber.DrawMeProjective(0,false, outputDV, tempFormat);
+  }
   theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
   theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
   output.centerX[0]=300;
@@ -7609,7 +7780,7 @@ int ParserNode::EvaluateG2ParabolicSupport
     for (int j=0; j<2; j++)
       theGlobalVariables.theDrawingVariables.theBuffer.theBilinearForm.elements[i][j]=
       theWeyl.CartanSymmetric.elements[i][j].DoubleValue();
-  theChar.DrawMe(theGlobalVariables.theDrawingVariables);
+  theChar.DrawMe(theGlobalVariables.theDrawingVariables,10);
 //  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
@@ -7621,8 +7792,9 @@ int ParserNode::EvaluateDrawRootSystem
 { WeylGroup theWeyl;
   theWeyl.MakeArbitrary(theWeylLetter, theDimension);
   theNode.impliedNumVars=theDimension;
-  DrawOperations theDrawOperators;
-  theWeyl.DrawRootSystem(theDrawOperators, true, theGlobalVariables, bluePoint);
+  DrawingVariables theDV;
+  DrawOperations& theDrawOperators=theDV.theBuffer;
+  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, bluePoint);
   theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
   std::stringstream out;
@@ -7913,6 +8085,105 @@ int ParserNode::EvaluateAnimationPause
   theNode.ExpressionType=theNode.typeAnimation;
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement().AddPause(NumFrames);
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ DrawingVariables theDrawVars;
+  DrawOperations& theDrawOps=theDrawVars.theBuffer;
+  rootSubalgebras theRootSAs;
+  char theWeylLetter=theNode.owner->DefaultWeylLetter;
+  int theDim=theNode.owner->DefaultWeylRank;
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+  (theGlobalVariables, theWeylLetter, theDim, true, false)
+  ;
+  int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
+  if (theIndex<0 || theIndex>=theRootSAs.size)
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+
+  theRootSAs.AmbientWeyl.DrawRootSystem(theDrawVars, true, theGlobalVariables, true);
+  Vector<double> start1, start2;
+  rootSubalgebra& currentSA=theRootSAs[theIndex];
+  std::stringstream out;
+  out << "The Dynkin diagram of the root Subalgebra is " << currentSA.theDynkinDiagram.DynkinStrinG << ". ";
+  if (currentSA.SimpleBasisK.size<2)
+  { out << "<br>The subalgebra is of rank less than two, using default Coxeter plane instead.";
+  } else
+  { currentSA.GetCoxeterPlane(start1, start2, theGlobalVariables);
+    theDrawOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    theDrawOps.BasisProjectionPlane[0][0]=start1;
+    theDrawOps.BasisProjectionPlane[0][1]=start2;
+  }
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=(theDrawOps);
+  theNode.theAnimation.GetElement().flagAnimating=false;
+  theNode.ExpressionType=theNode.typeAnimation;
+  out << theDrawVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDim);
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateAnimateRootSAs
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ DrawingVariables theDrawingVars;
+  DrawOperations& theDrawOps=theDrawingVars.theBuffer;
+  rootSubalgebras theRootSAs;
+  char theWeylLetter=theNode.owner->DefaultWeylLetter;
+  int theDim=theNode.owner->DefaultWeylRank;
+  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+  (theGlobalVariables, theWeylLetter, theDim, true, false)
+  ;
+  int NumTransitions=0;
+  int numFramesPerTransition=20;
+  if (numFramesPerTransition<3)
+    numFramesPerTransition=3;
+  for (int i=0; i<theRootSAs.size-1; i++)
+  { rootSubalgebra& currentSA=theRootSAs[i];
+    if (currentSA.SimpleBasisK.size<2)
+      break;
+    NumTransitions++;
+  }
+  NumTransitions--;
+  theDrawOps.initDimensions(theDim, NumTransitions*numFramesPerTransition);
+  theRootSAs.AmbientWeyl.DrawRootSystem(theDrawingVars, true, theGlobalVariables, true);
+  Vector<double> start1, start2, target1, target2;
+  //theGlobalVariables.MakeStatusReport("The SA: " + currentSA.theDynkinDiagram.DynkinStrinG);
+  theDrawOps.BasisProjectionPlane.size=0;
+
+  int FrameCounter=-1;
+  for (int i=0; i<theRootSAs.size-1; i++)
+  { rootSubalgebra& currentSA=theRootSAs[i];
+    rootSubalgebra& nextSA=theRootSAs[i+1];
+    if (currentSA.SimpleBasisK.size<2 || nextSA.SimpleBasisK.size<2)
+      break;
+    currentSA.GetCoxeterPlane(start1, start2, theGlobalVariables);
+    nextSA.GetCoxeterPlane(target1, target2, theGlobalVariables);
+    theDrawOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    theDrawOps.BasisProjectionPlane.SetSize(theDrawOps.BasisProjectionPlane.size+numFramesPerTransition);
+    theDrawOps.centerX.SetSize(theDrawOps.BasisProjectionPlane.size);
+    theDrawOps.centerY.SetSize(theDrawOps.BasisProjectionPlane.size);
+    theDrawOps.GraphicsUnit.SetSize(theDrawOps.BasisProjectionPlane.size);
+    for (int j=0; j<numFramesPerTransition; j++)
+    { FrameCounter++;
+      double fraction=((double) j)/((double) numFramesPerTransition-1);
+      theDrawOps.BasisProjectionPlane[FrameCounter].SetSize(2);
+      theDrawOps.BasisProjectionPlane[FrameCounter][0]=start1*(1-fraction)+ target1*fraction;
+      theDrawOps.BasisProjectionPlane[FrameCounter][1]=start2*(1-fraction)+ target2*fraction;
+      theDrawOps.ModifyToOrthonormalNoShiftSecond
+      (theDrawOps.BasisProjectionPlane[FrameCounter][0], theDrawOps.BasisProjectionPlane[FrameCounter][1]);
+      theDrawOps.centerX[FrameCounter]=theDrawOps.centerX[0];
+      theDrawOps.centerY[FrameCounter]=theDrawOps.centerY[0];
+      theDrawOps.GraphicsUnit[FrameCounter]=theDrawOps.GraphicsUnit[0];
+    }
+  }
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=(theDrawOps);
+  theNode.theAnimation.GetElement().flagAnimating=true;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.outputString=theDrawingVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDim);
   return theNode.errorNoError;
 }
 
@@ -8377,13 +8648,14 @@ int ParserNode::EvaluateDrawWeightSupport
   out <<
   theNode.owner->theHmm.theRange.GenerateWeightSupportMethoD1
   (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables);
-  DrawOperations theOps;
+  DrawingVariables theDVs;
+  DrawOperations& theOps=theDVs.theBuffer;
   theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(theWeightsToBeDrawn.size);
   theOps.init();
   for (int i=0; i<theWeightsToBeDrawn.size; i++)
     theOps.drawCircleAtVectorBuffer
     (theWeightsToBeDrawn[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(150,150,150));
-  theWeyl.DrawRootSystem(theOps, false, theGlobalVariables);
+  theWeyl.DrawRootSystem(theDVs, false, theGlobalVariables, true);
   theOps.ComputeProjectionsEiVectors();
   theGlobalVariables.theDrawingVariables.theBuffer=theOps;
   out << "Number of drawn elements in the weight support: " << theWeightsToBeDrawn.size << "<br>";
@@ -9308,6 +9580,26 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   return this->SetError(this->errorProgramming);
 }
 
+int ParserNode::EvaluateGetCoxeterBasis
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ WeylGroup theWeyl;
+  int theDimension=theNode.owner->DefaultWeylRank;
+  std::stringstream out;
+  theNode.ExpressionType=theNode.typeString;
+  if (theDimension<2)
+  { out << "Rank of Lie algebra too small -> no coxeter plane. ";
+    theNode.outputString=out.str();
+    return theNode.errorNoError;
+  }
+  theWeyl.MakeArbitrary(theNode.owner->DefaultWeylLetter, theDimension);
+  Vector<double> basis1, basis2;
+  theWeyl.GetCoxeterPlane(basis1, basis2, theGlobalVariables);
+  out << "Lie algebra of type " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theDimension)
+  << "<br> One orthonormal basis of coxeter plane:<br>" << basis1.ElementToString() << ", " << basis2.ElementToString();
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
+}
+
 void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank)
 { if (this->flagFunctionListInitialized)
     return;
@@ -9595,9 +9887,17 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateDrawRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
+  ("drawRootSystemInCoxeterPlaneOfRootSA",
+   "(Integer)",
+   "<b>Experimental</b>. ",
+   "drawRootSystemInCoxeterPlaneOfRootSA(0)",
+   DefaultWeylLetter, DefaultWeylRank, false,
+    & ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
+   );
+  this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystem",
    "(Integer, (Rational,...),...)",
-   "Animate the root system. First argument N>=2 = number of frames. The remaining arguments \
+   "Animate the root system. First argument N>=3 = number of frames. The remaining arguments \
    must describe an even number>=4 of elements of h* with rational coordinates, written in simple basis coordinates. \
    The consecutive pairs of such vectors parametrize the projection plane waypoints. More precisely, \
    each pair of input vectors must give an arbitrary basis of the ``waypoint'' projection planes.  \
@@ -9678,7 +9978,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental, please don't use.</b> Computes the multiplicities of all G2 generalized Verma modules in the generalized Verma module of so(7) with so(7)-highest weight given by the first argument. \
    The second argument describes the parabolic subalgebra of so(7) (its intersection with G2 determines the parabolic subalgebra in G2). ",
    "gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )",
-   DefaultWeylLetter, DefaultWeylRank, false,
+   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateG2InB3MultsParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -9763,6 +10063,23 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateG2ParabolicSupport
    );
+  this->AddOneFunctionToDictionaryNoFail
+  ("getCoxeterPlaneBasis",
+   "()",
+   " Returns a basis of the Coxeter plane of the Weyl group of the ambient Lie algebra (if it exists). The output is in string format, for the time being. ",
+   "getCoxeterPlaneBasis",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateGetCoxeterBasis
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("animateFlyThroughRootSAs",
+   "()",
+   "<b> Experimental. This function shouldn't be visible, if it is, then somebody (*who can it be*) messed up.</b>Experiment: trying to make sense of coxeter planes for reducible root systems.",
+   "animateFlyThroughRootSAs",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateAnimateRootSAs
+   );
+
 
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

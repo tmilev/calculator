@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
-  << __DATE__ << ", " << __TIME__ << "</title>";
+  << __DATE__ << ", " << __TIME__ <<   "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
@@ -172,6 +172,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="gTwoInBthreeMultsParabolic((212323123,12344124123,1423451), (1,0,0) )";
+//  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
+//  civilizedInput="drawRootSystemInCoxeterPlaneOfRootSA(3)";
   //civilizedInput="drawRootSystem";
 //  civilizedInput="animateRootSystem(100, (0,1,0),(0,0,1), (0,1,0),(1,0,2) )";
 //  civilizedInput="animateRootSystemDefault(1,3,50)";
@@ -410,7 +413,7 @@ int main(int argc, char **argv)
   << " seconds. The time limit can be changed if you install from source by editing (file) calculator.cpp (function) main() (variable) "
   << "theGlobalVariables.MaxAllowedComputationTimeInSeconds ."
   << "<br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
-  std::cout << "<br>Bug reports = my wholehearted gratitude.<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  std::cout << "<br>Bug reports = my wholehearted gratitude (bug reports only by email at the moment; todor.milev at google's email).<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
   std::cout << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";

@@ -2801,11 +2801,13 @@ public:
     return false;
   }
   bool GetCoordsInBasiS
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
+  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
+  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   bool GetCoordsInBasiS
-(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { Vectors<CoefficientType> buffer;
     Matrix<CoefficientType> matBuffer;
     return this->GetCoordsInBasiS(inputBasis, output, buffer, matBuffer, theRingUnit, theRingZero);
@@ -3226,7 +3228,20 @@ public:
   int GetRankOfSpanOfElements(GlobalVariables& theGlobalVariables)const;
   void AddRoot(root& r);
   void AddIntRoot(intRoot& r);
-  void GetVectorsRational(Vectors<Rational>& output)const
+  void GetVectorsDouble
+  (Vectors<double>& output)const
+  { output.SetSize(this->size);
+    for (int i=0; i<this->size; i++)
+    { Vector<double>& currentOutput=output[i];
+      root& current=this->TheObjects[i];
+      int Dim=current.size;
+      currentOutput.SetSize(Dim);
+      for (int j=0; j<Dim; j++)
+        currentOutput[j]=current[j].DoubleValue();
+    }
+  }
+  void GetVectorsRational
+  (Vectors<Rational>& output)const
   { output.SetSize(this->size);
     for (int i=0; i<this->size; i++)
       output.TheObjects[i].CopyFromLight(this->TheObjects[i]);
@@ -8248,7 +8263,8 @@ public:
 ;
   void DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
- bool drawWeylChamber, root* bluePoint=0)
+ bool drawWeylChamber, root* bluePoint=0, bool LabelDynkinDiagramVertices=false,
+ roots* predefinedProjectionPlane=0)
   ;
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
   void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
@@ -10940,13 +10956,20 @@ bool GetRootSRationalDontUseForFunctionArguments
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystem
-  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, root* bluePoint, bool wipeCanvas=true)
+  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
+   root* bluePoint, bool wipeCanvas=true, bool LabelDynkin=false, bool DrawWeylChamber=false, roots* projectionPlane=0)
+  ;
+  static int EvaluateDrawRootSystemLabelDynkin
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateDrawRootSystemOld
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 ;
   static int EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+;
+  static int EvaluateDrawRootSystemFixedProjectionPlane
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -12225,7 +12248,8 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
 template <class CoefficientType>
 bool Vector<CoefficientType>::GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
+  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);

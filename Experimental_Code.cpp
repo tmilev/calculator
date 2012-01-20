@@ -82,19 +82,29 @@ public:
   { Qsqrt2 result, conjugate;
     conjugate=otheR;
     conjugate.b.Minus();
-    result=*this;
+    result.operator=(*this);
     result*=conjugate;
-    result/=(otheR.a*otheR.a+otheR.b*otheR.b*2);
+    result/=(otheR.a*otheR.a-otheR.b*otheR.b*2);
+    Qsqrt2 old=*this, oldOther=otheR;
     this->operator=(result);
+    result*=oldOther;
+    result-=old;
+    if (!result.IsEqualToZero())
+    { std::cout << "  start " << old.ElementToString() << "; oldOther: " << otheR.ElementToString();
+      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ElementToString();
+      old/=oldOther;
+    }
+    assert(result.IsEqualToZero());
   }
   void Minus()
   { this->a.Minus();
     this->b.Minus();
   }
   void Invert()
-  { Qsqrt2 result=1;
+  { Qsqrt2 result;
+    result=1;
     result/=*this;
-    *this=result;
+    this->operator=(result);
   }
   void MultiplyBy(const Qsqrt2& other)
   { this->operator*=(other);
@@ -117,7 +127,6 @@ public:
 
 template < > int List<Matrix<Qsqrt2> >::ListActualSizeIncrement=100;
 template < > int List<Vector<Qsqrt2> >::ListActualSizeIncrement=100;
-
 
 int ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -210,19 +219,31 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
   rootForm.SetSize(numGenerators);
   Vector<CoefficientType> tempRoot, tempRoot2;
   for (int i=0; i<numGenerators; i++)
-  { std::cout << "<hr>Generator " << i+1 << correspondingOperators[i].ElementToString(true, false);
-    correspondingOperators[i].GetNSquaredVectorForm(rootForm[i]);
+  { correspondingOperators[i].GetNSquaredVectorForm(rootForm[i]);
+    std::cout << "<hr>Generator " << i+1 << correspondingOperators[i].ElementToString(true, false)
+    << " and in root form " << rootForm[i].ElementToString();
   }
   Matrix<CoefficientType> tempMat;
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  Qsqrt2 temp1, temp2;
+//  temp1.MakeAplusSqrt2B
   for (int i=0; i<numGenerators; i++)
   { for (int j=0; j<numGenerators; j++)
     { tempMat.LieBracket(correspondingOperators[i],correspondingOperators[j], tempMat);
       tempMat.GetNSquaredVectorForm(tempRoot);
-      tempRoot.GetCoordsInBasiS(rootForm, tempRoot2, (Qsqrt2) 1, (Qsqrt2) 0);
-      std::cout << "<hr>Lie bracket of gen. index " << i+1 << " and "
-      << j+1
+      if (j==7)
+        std::cout << "oh no!";
+      bool tempBool=
+      tempRoot.GetCoordsInBasiS(rootForm, tempRoot2);
+      std::cout << "<hr>Lie bracket of gen. index "
+      << this->theAlgebra.GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables) << " and "
+      << this->theAlgebra.GetLetterFromGeneratorIndex(j, false, false, theFormat, theGlobalVariables)
       << " equals in root form "
-      << tempRoot2.ElementToString();
+      << tempRoot.ElementToString() << "and in chev. coords:" << tempRoot2.ElementToString() << " and in non root form: " << tempMat.ElementToString(true, false);
+      if (! tempBool)
+        std::cout << "<hr>The weakest link is here!";
+      assert(tempBool);
     }
   }
   /*

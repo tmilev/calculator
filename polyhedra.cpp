@@ -17320,15 +17320,15 @@ void minimalRelationsProverStateFixedK::GetCertainGmodLhighestAndNilradicalRoots
 }
 
 void ::minimalRelationsProverStatesFixedK::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ output <<"Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.CartanSymmetric.NumRows<<"\n";
-  output<<"Simple_basis_K: ";
+{ output << "Weyl_letter: " << this->theWeylGroup.WeylLetter << " dim: "<< this->theWeylGroup.CartanSymmetric.NumRows<<"\n";
+  output << "Simple_basis_K: ";
   //this->theK.SimpleBasisK.ComputeDebugString();
   this->theK.SimpleBasisK.WriteToFile(output, theGlobalVariables);
   this->theIsos.WriteToFile(output, theGlobalVariables);
-  output << "\nState_stack_size: "<< this->theIndexStack.size<<" ";
+  output << "\nState_stack_size: " << this->theIndexStack.size << " ";
   for (int i=0; i<this->theIndexStack.size; i++)
-    output << this->theIndexStack.TheObjects[i]<<" ";
-  output<<"\nNum_states: "<< this->size<<"\n";
+    output << this->theIndexStack.TheObjects[i] << " ";
+  output << "\nNum_states: " << this->size << "\n";
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].WriteToFile(output, theGlobalVariables);
   this->theK.WriteMultTableAndOppositeKmodsToFile(output, this->theK.theMultTable, this->theK.theOppositeKmods);
@@ -26288,8 +26288,15 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
                 displayString << "f_{" << k+theHmm.theRange.GetNumPosRoots()+1-theHmm.theDomain.GetNumPosRoots() << "}=";
               if (k< theHmm.theDomain.GetNumPosRoots())
                 displayString << "f_{" << -theHmm.theRange.GetNumPosRoots()+k<< "}=";
-              out << "<tr><td>" << displayString.str() << "</td><td>" << theHmm.imagesAllChevalleyGenerators.TheObjects[k].ElementToStringNegativeRootSpacesFirst
-              (false, false, theHmm.theRange, theFormat, theGlobalVariables) << "</td></tr>";
+              out << "<tr><td>" << displayString.str() << "</td><td>" <<
+              CGI::GetHtmlMathFromLatexFormulA
+              (theHmm.imagesAllChevalleyGenerators.TheObjects[k].ElementToStringNegativeRootSpacesFirst
+              (false, false, theHmm.theRange, theFormat, theGlobalVariables), "", "</td><td>", false, false)
+              << "</td><td>="
+              << CGI::GetHtmlMathFromLatexFormulA
+              (theHmm.imagesAllChevalleyGenerators.TheObjects[k].ElementToStringNegativeRootSpacesFirst
+              (true, true, theHmm.theRange, theFormat, theGlobalVariables), "", "</td><td>", false, false)
+              << "</td></tr>";
             }
             out << "</table>";
           }
@@ -26307,9 +26314,13 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
       displayString << "f_{" << k-theHmm.GmodK.size/2 << "}=";
     if (k<theHmm.GmodK.size/2)
       displayString << "f_{" << k-theHmm.GmodK.size/2 << "}=";
-    out << "<tr><td>" << displayString.str() << "</td><td>" <<
-    theHmm.GmodK.TheObjects[k].ElementToStringNegativeRootSpacesFirst
-    (false, false, theHmm.theRange, theFormat, theGlobalVariables) << "</td></tr>" ;
+    out << "<tr><td>" << displayString.str() << "</td><td>" <<CGI::GetHtmlMathFromLatexFormulA
+    (theHmm.GmodK.TheObjects[k].ElementToStringNegativeRootSpacesFirst
+    (false, false, theHmm.theRange, theFormat, theGlobalVariables), "","</td><td>", false, false)
+     << "</td><td>="
+    << CGI::GetHtmlMathFromLatexFormulA
+    ( theHmm.GmodK.TheObjects[k].ElementToStringNegativeRootSpacesFirst
+    (true, true, theHmm.theRange, theFormat, theGlobalVariables),"","</td><td>", false, false) << "</td></tr>";
   }
   out << "</table>";
   roots theAlgebra;

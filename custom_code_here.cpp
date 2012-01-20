@@ -8737,7 +8737,8 @@ DrawOperations& AnimationBuffer::GetLastDrawOps()
 }
 
 std::string ElementWeylGroup::ElementToString
-  (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter, const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
+  (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter,
+   const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
 { if (this->size==0)
     return "id";
   std::stringstream out;
@@ -8810,6 +8811,62 @@ void ElementWeylAlgebra::ActOnPolynomial(PolynomialRationalCoeff& thePoly)
   thePoly=result;
 }
 
+std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
+(List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
+{ std::stringstream out;
+//  std::cout << this->simpleGenerators.ElementToString();
+  List<int> DisplayIndicesSimpleGenerators;
+  if (!useAmbientIndices)
+  { DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+    for (int i=0; i<this->simpleGenerators.size; i++)
+      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
+  }
+  out << "\\xymatrix{";
+  bool GraphWidthIsOdd=((GraphWidth%2)!=0);
+  if (!GraphWidthIsOdd)
+    GraphWidth++;
+  for (int i=0; i<Layers.size; i++)
+  { int currentRowOffset=(GraphWidth-Layers[i].size)/2;
+    int nextRowOffset=-1;
+    if (i<Layers.size-1)
+      nextRowOffset=(GraphWidth-Layers[i+1].size)/2;
+    for (int j=0; j<currentRowOffset; j++)
+      out << "&";
+    for (int j=0; j<Layers[i].size; j++)
+    { if (!useAmbientIndices)
+        out << this->TheObjects[Layers[i][j]].ElementToString(true, false, "\\eta", &DisplayIndicesSimpleGenerators);
+      else
+        out << this->RepresentativesQuotientAmbientOrder[Layers[i][j]].ElementToString(true, false, "\\eta", 0);
+      int currentOffset=j+currentRowOffset;
+      if (Layers[i].size%2==0)
+        if (currentOffset>=GraphWidth/2)
+          currentOffset++;
+      for (int k=0; k<arrows[i][j].size; k++)
+      { out << " \\ar[d";
+        int indexInLayer=Layers[i+1].IndexOfObject(arrows[i][j][k]);
+        assert(indexInLayer!=-1);
+        int nextOffset=indexInLayer+nextRowOffset;
+        if (Layers[i+1].size%2==0)
+          if (nextOffset>=GraphWidth/2)
+            nextOffset++;
+        int actualOffset=-currentOffset+nextOffset;
+        for (int l=0; l<actualOffset; l++)
+          out << "r";
+        for (int l=0; l>actualOffset; l--)
+          out << "l";
+        out << "]";
+      }
+      out << " & ";
+      if (Layers[i].size%2==0 && j==Layers[i].size/2-1)
+        out << " & ";
+    }
+    out << " \\\\\n";
+  }
+  out << "}";
+  return out.str();
+
+}
+
 std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
 { if (this->size<1)
     return "Error, non-initialized group";
@@ -8847,52 +8904,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
           arrows[i][j].AddOnTop(index);
       }
   }
-  std::stringstream out;
-//  std::cout << this->simpleGenerators.ElementToString();
-  List<int> DisplayIndicesSimpleGenerators;
-  DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
-  for (int i=0; i<this->simpleGenerators.size; i++)
-    DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
-  out << "\\xymatrix{";
-  bool GraphWidthIsOdd=((GraphWidth%2)!=0);
-  if (!GraphWidthIsOdd)
-    GraphWidth++;
-  for (int i=0; i<Layers.size; i++)
-  { int currentRowOffset=(GraphWidth-Layers[i].size)/2;
-    int nextRowOffset=-1;
-    if (i<Layers.size-1)
-      nextRowOffset=(GraphWidth-Layers[i+1].size)/2;
-    for (int j=0; j<currentRowOffset; j++)
-      out << "&";
-    for (int j=0; j<Layers[i].size; j++)
-    { out << this->TheObjects[Layers[i][j]].ElementToString(true, false, "\\eta", &DisplayIndicesSimpleGenerators);
-      int currentOffset=j+currentRowOffset;
-      if (Layers[i].size%2==0)
-        if (currentOffset>=GraphWidth/2)
-          currentOffset++;
-      for (int k=0; k<arrows[i][j].size; k++)
-      { out << " \\ar[d";
-        int indexInLayer=Layers[i+1].IndexOfObject(arrows[i][j][k]);
-        assert(indexInLayer!=-1);
-        int nextOffset=indexInLayer+nextRowOffset;
-        if (Layers[i+1].size%2==0)
-          if (nextOffset>=GraphWidth/2)
-            nextOffset++;
-        int actualOffset=-currentOffset+nextOffset;
-        for (int l=0; l<actualOffset; l++)
-          out << "r";
-        for (int l=0; l>actualOffset; l--)
-          out << "l";
-        out << "]";
-      }
-      out << " & ";
-      if (Layers[i].size%2==0 && j==Layers[i].size/2-1)
-        out << " & ";
-    }
-    out << " \\\\\n";
-  }
-  out << "}";
-  return out.str();
+  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, false);
 }
 
 void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
@@ -8921,7 +8933,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output)
     out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());
   }
   out << "<br>Half sum of the positive roots: " << this->GetRho().ElementToString();
-  out << "<br>The elements written with minimal # of generators:<br>";
+  out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
   body << "\\begin{array}{l}";
   for (int i=0; i<this->size; i++)
   { ElementWeylGroup& currentElt=this->TheObjects[i];
@@ -8982,15 +8994,24 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   parabolicSel=tempRoot;
   ReflectionSubgroupWeylGroup theSubgroup;
   std::stringstream out;
-  std::fstream outputFile;
-  std::string fileName;
+  std::fstream outputFile, outputFile2;
+  std::string fileName, filename2;
   fileName.append(theNode.owner->outputFolderPath);
+  filename2=fileName;
   fileName.append("output");
+  filename2.append("output2");
   CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 500);
+  theSubgroup.FindQuotientRepresentatives(2000);
+  out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
+  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
+  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.size;
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   if (theSubgroup.size>498)
-  { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <= theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
+  { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
+        theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
@@ -8998,17 +9019,35 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   else
   { outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
     outputFile << "\n\\end{document}";
-    out << "<hr>The requested Bruhat graph is located in a png file here: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
+    outputFile2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
+    outputFile2 << "\n\\end{document}";
+    out << "<hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
+    please check whether the .tex corresponds to the .png!</b><br>"
+    << " The requested Bruhat graph is located in a png file here: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
     out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.png\"> output.png</a>";
+    out << "<hr><hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
+    please check whether the .tex corresponds to the .png! </b><br>"
+    << " The coset graph is located in a png file here: <a href=\"" << theNode.owner->outputFolderDisplayPath
+    << "output2.tex\"> output2.tex</a>";
+    out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output2.png\"> output2.png</a>";
+
     out << "<hr>Additional printout follows.<br> ";
+    out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
+    for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
+    { ElementWeylGroup& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
+      out << "<br>" << current.ElementToString();
+    }
+    out << "<hr>";
     out << theSubgroup.ElementToString();
- }
+  }
+
   theNode.outputString=out.str();
 //  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
 
   theNode.owner->SystemCommands.AddOnTop("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + fileName + ".tex");
-
   theNode.owner->SystemCommands.AddOnTop("dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight");
+  theNode.owner->SystemCommands.AddOnTop("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + filename2 + ".tex");
+  theNode.owner->SystemCommands.AddOnTop("dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight");
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -9981,11 +10020,20 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("parabolicsInfoBruhatGraph",
    "(Integer,...)",
-   "<b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this function up to E_6 but LaTeX crashes trying to process the output.</b>Makes a table with information about the parabolic subalgebras of the ambient Lie algebra. The input must have as many integers as there are simple roots in the ambient \
-   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding coordinate. Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
-   calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple roots. \
-   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. You will get your output as a .png file link, you must click onto the link to see the end result. ",
-   "parabolicsInfoBruhatGraph(0,0,0)",
+   "<b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
+   function up to E_6 but LaTeX crashes trying to process the output. </b> \
+   Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
+   as well as the cosets \
+   (given by minimal coset representatives) of the Weyl subgroup in question. \
+   The input must have as many integers as there are simple roots in the ambient \
+   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding \
+   coordinate. \
+   Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
+   calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; \
+   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple roots. \
+   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. \
+   You will get your output as a .png file link, you must click onto the link to see the end result. ",
+   "parabolicsInfoBruhatGraph(1,0,0)",
 //   DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
    );

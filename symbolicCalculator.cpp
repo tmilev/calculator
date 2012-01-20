@@ -294,12 +294,28 @@ public:
       lookAhead=="}" || lookAhead==":"
       ;
   }
+  bool ReplaceEXXEXEByEusingO(int theOp)
+  { SyntacticElement& middle = this->expressionStacK[this->expressionStacK.size()-3];
+    SyntacticElement& left = this->expressionStacK[this->expressionStacK.size()-6];
+    SyntacticElement& right = this->expressionStacK[this->expressionStacK.size()-1];
+    Expression newExpr;
+    newExpr.reset(this->theBoss, this->IndexInBoss);
+    newExpr.theOperation=theOp;
+    newExpr.children.push_back(left.theData);
+    newExpr.children.push_back(middle.theData);
+    newExpr.children.push_back(right.theData);
+    left.theData=newExpr;
+    this->DecreaseStackSetCharacterRanges(5);
+//    std::cout << this->expressionStacK[this->expressionStacK.size()-1].theData.ElementToStringPolishForm();
+    return true;
+  }
   bool ReplaceEEByEusingO(int theOp)
   { SyntacticElement& left = this->expressionStacK[this->expressionStacK.size()-2];
     SyntacticElement& right = this->expressionStacK[this->expressionStacK.size()-1];
     Expression newExpr;
     newExpr.reset(this->theBoss, this->IndexInBoss);
     newExpr.theOperation=theOp;
+//    newExpr.commandIndex=
     newExpr.children.push_back(left.theData);
     newExpr.children.push_back(right.theData);
     left.theData=newExpr;
@@ -404,7 +420,7 @@ public:
   std::vector <standardExpressionEvaluation> theStandardEvaluationFunctions;
 //used to parametrize the input data for the special operation "VariableNonBound"
   hashedVector<std::string, hashString> variableDictionary;
-  int MaxRecursionDepth;
+  int MaxRecursionDepthDefault;
   int MaxAlgTransformationsPerExpression;
   std::vector<Command> theCommands;
 //  std::vector<std::stringstream> theLogs;
@@ -442,11 +458,17 @@ public:
   int opDefine()
   { return this->operations.GetIndexIMustContainTheObject(":=");
   }
+  int opDefineConditional()
+  { return this->operations.GetIndexIMustContainTheObject("if:=");
+  }
   int opThePower()
   { return this->operations.GetIndexIMustContainTheObject("^");
   }
   int opVariableNonBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
+  }
+  int opVariableBound()
+  { return this->operations.GetIndexIMustContainTheObject("VariableBound");
   }
   int opPlus()
   { return this->operations.GetIndexIMustContainTheObject("+");
@@ -457,13 +479,28 @@ public:
   void CarryOutOneSub
   (Expression& toBeSubbed, Expression& toBeSubbedWith, int targetCommandIndex, ExpressionPairs& matchedPairs)
   ;
-
+  bool ExpressionHasBoundedVars(Expression& theExpression, int RecursionDepth=0, int MaxRecursionDepth=1000)
+  { if (RecursionDepth>MaxRecursionDepth)
+    { std::stringstream out;
+      out << "Max recursion depth of " << MaxRecursionDepth << " exceeded.";
+      return false;
+    }
+    if (theExpression.theOperation==this->opVariableBound())
+      return true;
+    else
+      for (unsigned i=0; i<theExpression.children.size(); i++)
+        if (this->ExpressionHasBoundedVars(theExpression.children[i], RecursionDepth+1, MaxRecursionDepth+1))
+          return true;
+    return false;
+  }
   Expression* DepthFirstSubExpressionPatternMatch
-  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth=0,
+  (int commandIndex, Expression& thePattern, Expression& theExpression,
+   ExpressionPairs& bufferPairs, Expression* condition=0,
+   int RecursionDepth=0,
    int MaxRecursionDepth=10000, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
-  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+  (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    int maxNumSubs=10000, std::stringstream* theLog=0, bool logAttempts=false)
   ;
   bool isADigit(const std::string& input, int& whichDigit)
@@ -484,10 +521,6 @@ public:
   int opInteger()
   { return this->operations.GetIndexIMustContainTheObject("Integer");
   }
-  int opVariableBound()
-  { return this->operations.GetIndexIMustContainTheObject("VariableBound");
-  }
-
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
    int RecursionDepth=0, int MaxRecursionDepth=500, std::stringstream* theLog=0)
@@ -508,13 +541,14 @@ public:
     this->variableDictionary.reset();
     this->cashedExpressions.reset();
     this->theStandardEvaluationFunctions.resize(0);
-    this->MaxRecursionDepth=2000;
+    this->MaxRecursionDepthDefault=2000;
 
     this->operations.AddOnTop("+"); this->theStandardEvaluationFunctions.push_back(&this->EvaluateStandardPlus);
     this->operations.AddOnTop("-");  this->theStandardEvaluationFunctions.push_back(&this->EvaluateStandardMinus);
     this->operations.AddOnTop("/");  this->theStandardEvaluationFunctions.push_back(0);
     this->operations.AddOnTop("*"); this->theStandardEvaluationFunctions.push_back(this->EvaluateStandardTimes);
     this->operations.AddOnTop(":="); this->theStandardEvaluationFunctions.push_back(0);
+    this->operations.AddOnTop("if:="); this->theStandardEvaluationFunctions.push_back(0);
     this->operations.AddOnTop("^"); this->theStandardEvaluationFunctions.push_back(0);
     //the following two operations are chosen on purpose so that they correspond to LaTeX-undetectable
     //expressions
@@ -527,7 +561,7 @@ public:
     this->operations.AddOnTop("_"); this->theStandardEvaluationFunctions.push_back(0);
 
     this->operations.AddOnTop("IsInteger"); this->theStandardEvaluationFunctions.push_back(&this->EvaluateIsInteger);
-    this->operations.AddOnTop("If"); this->theStandardEvaluationFunctions.push_back(&this->EvaluateIf);
+    this->operations.AddOnTop("if"); this->theStandardEvaluationFunctions.push_back(&this->EvaluateIf);
     this->operations.AddOnTop("Integer"); this->theStandardEvaluationFunctions.push_back(0);
     this->operations.AddOnTop("VariableNonBound"); this->theStandardEvaluationFunctions.push_back(0);
     this->operations.AddOnTop("VariableBound"); this->theStandardEvaluationFunctions.push_back(0);
@@ -900,7 +934,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEOEByE(secondToLastE.theData.formattingOptions);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXYXByY();
-  if (eighthToLastS=="If" && seventhToLastS=="(" && sixthToLastS=="Expression"
+  if (eighthToLastS=="if" && seventhToLastS=="(" && sixthToLastS=="Expression"
       && fifthToLastS=="," && fourthToLastS=="Expression" && thirdToLastS==","
       && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceOXEXEXEXByE();
@@ -924,6 +958,9 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEOEByE();
   if (fourthToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
+  if (seventhToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression"
+      && fourthToLastS=="if" && fifthToLastS==":" && sixthToLastS=="Expression")
+    return this->ReplaceEXXEXEByEusingO(this->theBoss->opDefineConditional());
   return false;
 }
 
@@ -983,6 +1020,8 @@ bool CommandList::EvaluateIsInteger
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
 { bool isInteger=true;
   assert(theExpression.theBoss==&theCommands);
+  if (theCommands.ExpressionHasBoundedVars(theExpression, 0, theCommands.MaxRecursionDepthDefault))
+    return false;
   if (theExpression.children.size()!=1)
     isInteger=false;
   else
@@ -1121,9 +1160,9 @@ bool CommandList::ExpressionMatchesPattern
 void CommandList::EvaluateExpression
 (int commandIndex, Expression& theExpression, int RecursionDepth, ExpressionPairs& bufferPairs,
  int maxNumSubs, std::stringstream* theLog)
-{ if (RecursionDepth>=this->MaxRecursionDepth)
+{ if (RecursionDepth>=this->MaxRecursionDepthDefault)
   { std::stringstream out;
-    out << "Recursion depth limit of " << this->MaxRecursionDepth << " exceeded while evaluating expressions.";
+    out << "Recursion depth limit of " << this->MaxRecursionDepthDefault << " exceeded while evaluating expressions.";
     theExpression.errorString=out.str();
     this->Errors.push_back(out.str());
     return;
@@ -1153,21 +1192,22 @@ void CommandList::EvaluateExpression
       if (this->theCommands[i].ErrorString=="")
       { Expression& currentPattern=this->theCommands[i].finalValue;
         if (currentPattern.errorString=="")
-          if (currentPattern.theOperation==this->opDefine())
+        { if (currentPattern.theOperation==this->opDefine() || currentPattern.theOperation==this->opDefineConditional())
             if(this->ProcessOneExpressionOnePatternOneSub
-            (currentPattern, theExpression, bufferPairs, 1000, theLog))
+            (commandIndex, currentPattern, theExpression, bufferPairs, 1000, theLog))
             { NonReduced=true;
               break;
             }
+        }
       }
   }
 }
 
 Expression* CommandList::DepthFirstSubExpressionPatternMatch
-  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth,
-   int MaxRecursionDepth, std::stringstream* theLog, bool logAttempts)
+  (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+   Expression* condition, int RecursionDepth, int MaxRecursionDepth, std::stringstream* theLog, bool logAttempts)
 { static int patternMatchDebugCounter=-1;
-  if (RecursionDepth==0)
+ // if (RecursionDepth==0)
     patternMatchDebugCounter++;
   if (theLog!=0 && logAttempts)
     if (RecursionDepth==0)
@@ -1180,15 +1220,34 @@ Expression* CommandList::DepthFirstSubExpressionPatternMatch
 //    std::cout << "<br>" << bufferPairs.ElementToString();
 //    std::cout << "<br>the expression: " << theExpression.ElementToString();
 //  }
+  if (patternMatchDebugCounter==10480)
+  { std::cout <<"<hr>" << thePattern.ElementToString();
+    std::cout << "<hr>problem starts here! ";
+  }
   if (this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, 0, MaxRecursionDepth, theLog))
   { if (theLog!=0)
-      (*theLog) << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
-    return &theExpression;
+    { if (patternMatchDebugCounter==10480)
+      { std::cout << "<hr><hr>" << theExpression.ElementToString();
+        std::cout << thePattern.ElementToString();
+      //  assert(false);
+      }
+//      (*theLog) << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
+    }
+    if (condition==0)
+      return &theExpression;
+    else
+    { Expression tempExp=*condition;
+      this->EvaluateExpression(commandIndex, tempExp, RecursionDepth+1, bufferPairs, 1000, theLog);
+      if (tempExp.theOperation==this->opInteger())
+        if (tempExp.theData==1)
+          return & theExpression;
+    }
   }
   Expression* result=0;
   for (unsigned i=0; i<theExpression.children.size(); i++)
   { result=this->DepthFirstSubExpressionPatternMatch
-    (thePattern, theExpression.children[i], bufferPairs, RecursionDepth+1, MaxRecursionDepth, theLog);
+    (commandIndex, thePattern, theExpression.children[i], bufferPairs, condition,
+     RecursionDepth+1, MaxRecursionDepth, theLog);
     if (result!=0)
       return result;
   }
@@ -1214,16 +1273,24 @@ void CommandList::CarryOutOneSub
 }
 
 bool CommandList::ProcessOneExpressionOnePatternOneSub
-  (Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+  (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    int maxNumSubs, std::stringstream* theLog, bool logAttempts)
-{ assert(thePattern.theOperation==this->opDefine());
-  assert(thePattern.children.size()==2);
+{ assert(thePattern.theOperation==this->opDefine() ||
+  thePattern.theOperation==this->opDefineConditional());
+  assert(thePattern.children.size()==2 || thePattern.children.size()==3);
   if (theLog!=0 && logAttempts)
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ElementToString();
     (*theLog) << " by pattern " << thePattern.ElementToString();
   }
   Expression& currentPattern=thePattern.children[0];
-  Expression* toBeSubbed=this->DepthFirstSubExpressionPatternMatch(currentPattern, theExpression, bufferPairs, 0, 10000, theLog);
+  Expression* theCondition=0;
+  bool isConditionalDefine=thePattern.theOperation==this->opDefineConditional();
+  if (isConditionalDefine)
+    theCondition=&thePattern.children[1];
+  Expression* toBeSubbed=0;
+  if (thePattern.theOperation==this->opDefine() || isConditionalDefine)
+    toBeSubbed=this->DepthFirstSubExpressionPatternMatch
+    (commandIndex, currentPattern, theExpression, bufferPairs, theCondition, 0, 10000, theLog);
   if (toBeSubbed==0)
     return false;
   this->CarryOutOneSub(*toBeSubbed, thePattern.children[1], toBeSubbed->commandIndex, bufferPairs);
@@ -1304,6 +1371,10 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   if (this->theOperation==this->theBoss->opDefine())
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth)
     << ":=" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth);
+  else if (this->theOperation==this->theBoss->opDefineConditional())
+    out <<  this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth) << " :if "
+    << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth)
+    << ":=" << this->children[2].ElementToString(recursionDepth+1, maxRecursionDepth);
   else if (this->theOperation==this->theBoss->opDivide() )
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication())
     << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
@@ -1328,7 +1399,11 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
       << "-" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition());
   }
   else if (this->theOperation==this->theBoss->opVariableBound())
+  { assert((unsigned) this->commandIndex< this->theBoss->theCommands.size());
+    assert(this->theBoss->theCommands[this->commandIndex].BoundVariables.size()>0);
+    assert(this->theBoss->theCommands[this->commandIndex].BoundVariables.size()>this->theData);
     out << "{{" << this->theBoss->theCommands[this->commandIndex].BoundVariables[this->theData] << "}}";
+  }
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->variableDictionary[this->theData];
   else if (this->theOperation==this->theBoss->opInteger())
@@ -1609,6 +1684,9 @@ int main(int argc, char **argv)
   if (newSize<0)
     newSize=0;
   inputString.resize(newSize);
+  inputString="{{a}}:if(1):=x; y";
+//  inputString= "{{a}} : if (IsInteger(a)):=x; \n 5";
+//  inputString="{{a}} : if (IsInteger(a)):=x;";
 //  inputString="IsInteger{}0";
 //  inputString="-x";
 //  inputString="{{a}}{{b}}:=1;c*d";

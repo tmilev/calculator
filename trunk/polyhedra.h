@@ -3055,6 +3055,12 @@ public:
   }
   std::string DebugString;
   void ComputeDebugString();
+  bool IsNonNegative()
+  { for (int i=0; i<this->size; i++)
+      if (this->TheObjects[i].IsNegative())
+        return false;
+    return true;
+  }
   void ElementToString(std::string& output)const;
   std::string ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar);
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
@@ -8279,6 +8285,7 @@ public:
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
+  bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
   void GetWeylChamber
   (Cone& output, GlobalVariables& theGlobalVariables)
@@ -8324,7 +8331,7 @@ public:
       this->SimpleReflection(theGroupElement[i], theVector, RhoAction, UseMinusRho, theRingZero);
   }
   template <class Element>
-  void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  void ActOn(int indexOfWeylElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
   { this->ActOn(this->TheObjects[indexOfWeylElement], theVector, RhoAction, UseMinusRho, theRingZero);
   }
   template <class Element>
@@ -8396,6 +8403,7 @@ public:
   bool truncated;
   WeylGroup AmbientWeyl;
   WeylGroup Elements;
+  List<ElementWeylGroup> RepresentativesQuotientAmbientOrder;
   roots simpleGenerators;
   //format: each element of of the group is a list of generators, reflections with respect to the simple generators, and outer
   //automorphisms.
@@ -8408,11 +8416,16 @@ public:
   void ComputeDebugString(){this->ElementToString(DebugString); }
   void ElementToString(std::string& output);
   std::string ElementToStringBruhatGraph();
+  std::string ElementToStringCosetGraph();
+  std::string ElementToStringFromLayersAndArrows
+  (List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
+  ;
   std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
   root GetRho();
   void MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
+  void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
   void ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);

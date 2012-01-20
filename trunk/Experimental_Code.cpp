@@ -265,3 +265,72 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
 
 */
 }
+
+std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
+{ if (this->size<1)
+    return "Error, non-initialized group";
+  if (this->size==1)
+    return "id";
+  List<List<List<int> > > arrows;
+  List<List<int> > Layers;
+  root tempRoot;
+  Layers.MakeActualSizeAtLeastExpandOnTop(this->RepresentativesQuotientAmbientOrder.size);
+  int GraphWidth=1;
+  int oldLayerElementLength=-1;
+  for (int i=0; i< this->RepresentativesQuotientAmbientOrder.size; i++)
+  { if (this->RepresentativesQuotientAmbientOrder[i].size!=oldLayerElementLength)
+    { Layers.SetSize(Layers.size+1);
+      oldLayerElementLength=this->RepresentativesQuotientAmbientOrder[i].size;
+    }
+    Layers.LastObject()->AddOnTop(i);
+    GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
+  }
+//  hashedRoots orbit;
+//  orbit.MakeActualSizeAtLeastExpandOnTop(this->RepresentativesQuotientAmbientOrder.size);
+  for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
+  { tempRoot=this->AmbientWeyl.rho;
+    this->AmbientWeyl.ActOnRootByGroupElement
+  (this->AmbientWeyl.IndexOfObjectHash(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
+//    orbit.AddOnTopHash(tempRoot);
+  }
+  arrows.SetSize(Layers.size);
+  for (int i=0; i< Layers.size; i++)
+  { arrows[i].SetSize(Layers[i].size);
+    for (int j=0; j<Layers[i].size; j++)
+      for (int k=0; k<this->RepresentativesQuotientAmbientOrder.size; k++)
+        if (this->AmbientWeyl.LeftIsHigherInBruhatOrderThanRight
+        ( this->RepresentativesQuotientAmbientOrder[k], this->RepresentativesQuotientAmbientOrder[Layers[i][j]]))
+          if (this->RepresentativesQuotientAmbientOrder[Layers[i][j]].size
+              ==this->RepresentativesQuotientAmbientOrder[k].size-1)
+            arrows[i][j].AddOnTop(k);
+  }
+  return this->ElementToStringFromLayersAndArrows(arrows, Layers, GraphWidth, true);
+}
+
+bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right)
+{ root leftImage=this->rho;
+  root rightImage=this->rho;
+  this->ActOn(left, leftImage, false, false, (Rational) 0);
+  this->ActOn(right, rightImage, false, false, (Rational) 0);
+  return (rightImage-leftImage).IsNonNegative() && !(rightImage-leftImage).IsEqualToZero();
+}
+
+
+void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
+{ this->AmbientWeyl.ComputeWeylGroup(UpperLimit);
+  root image1;
+  this->RepresentativesQuotientAmbientOrder.size=0;
+  this->RepresentativesQuotientAmbientOrder.MakeActualSizeAtLeastExpandOnTop(this->AmbientWeyl.size);
+  for (int i=0; i<this->AmbientWeyl.size; i++)
+  { image1=this->AmbientWeyl.rho;
+    this->AmbientWeyl.ActOnRootByGroupElement(i, image1, false, false);
+    bool isGood=true;
+    for (int j=0; j<this->simpleGenerators.size; j++)
+      if (this->AmbientWeyl.RootScalarCartanRoot(image1, this->simpleGenerators[j]).IsNegative())
+      { isGood=false;
+        break;
+      }
+    if (isGood)
+      this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl[i]);
+  }
+}

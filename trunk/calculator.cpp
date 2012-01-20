@@ -172,6 +172,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="parabolicsInfoBruhatGraph(1,0,0,1)";
+//  theParser.DefaultWeylRank=4;
+//  theParser.DefaultWeylLetter='D';
 //  civilizedInput="drawRootSystemFixProjection ((11,2,8),(5,6,1))";
 //  civilizedInput="drawRootSystemIncludeWeylChamberAndDynkinLabels";
 //  civilizedInput="InvariantsExteriorPowerFundamentalsPlusTrivials(0,0)";

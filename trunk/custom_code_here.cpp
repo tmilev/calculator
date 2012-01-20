@@ -6348,7 +6348,8 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
 }
 
 std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, const PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
+  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner,
+   const PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
@@ -6640,7 +6641,20 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << "></div><br>" << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
+  << "></div><br>\n";
+  for (int i=0; i<this->theBuffer.theBilinearForm.NumRows; i++)
+  { for (int j=0; j<this->theBuffer.theBilinearForm.NumCols; j++)
+    { std::stringstream tmpStream;
+      tmpStream << "textBilinearForm" << timesCalled << "_" << i << "_" << j;
+      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << tmpStream.str()
+      << "\" \n onChange=\"BilinearForm"
+      << timesCalled << "[" << i << "]["
+      << j << "]=document.getElementById('" << tmpStream.str() << "').value;\">"
+      << this->theBuffer.theBilinearForm.elements[i][j] << "</textarea>\n";
+    }
+    out << "<br>";
+  }
+  out << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<br>The picture is drawn using javascript."
   << "<br> The basis vectors can be rotated with the mouse (the basis vectors should be labeled in format depending on the type of picture):  "
   << " left click + hold the basis vector and move the mouse."
@@ -7632,57 +7646,27 @@ void WeylGroup::GetCoxeterPlane
 
 void WeylGroup::DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
- bool drawWeylChamber, root* bluePoint)
+ bool drawWeylChamber, root* bluePoint, bool LabelDynkinDiagramVertices, roots* predefinedProjectionPlane)
 { DrawOperations& output=outputDV.theBuffer;
   this->ComputeRho(true);
   root ZeroRoot;
   int theDimension=this->GetDim();
   ZeroRoot.MakeZero(theDimension);
-  ElementWeylGroup tempElt;
-  this->GetCoxeterElement(tempElt);
-  MatrixLargeRational matCoxeterElt, tempMat;
-  this->GetMatrixOfElement(tempElt, matCoxeterElt);
-//  std::cout << matCoxeterElt.ElementToString(true, false);
-  tempMat=matCoxeterElt;
-  int coxeterNumber=this->RootSystem.LastObject()->SumCoordinates().NumShort+1;
-  for (int i=0; i<coxeterNumber-1; i++)
-    tempMat.MultiplyOnTheLeft(matCoxeterElt);
-//  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
-  CompleX<double> theEigenValue;
-  theEigenValue.Re= cos(2*MathRoutines::Pi()/coxeterNumber);
-  theEigenValue.Im= sin(2*MathRoutines::Pi()/coxeterNumber);
-  Matrix<CompleX<double> > eigenMat, idMat;
-  eigenMat.init(matCoxeterElt.NumRows, matCoxeterElt.NumCols);
-  for (int i =0; i<eigenMat.NumRows; i++)
-    for (int j=0; j<eigenMat.NumCols; j++)
-    { eigenMat.elements[i][j]=matCoxeterElt.elements[i][j].DoubleValue();
-      if (i==j)
-        eigenMat.elements[i][i]-=theEigenValue;
-    }
-  List<List<CompleX<double> > > theEigenSpaceList;
-  eigenMat.FindZeroEigenSpacE
-  (theEigenSpaceList, (CompleX<double>) 1, (CompleX<double>) -1, (CompleX<double>) 0,
-   theGlobalVariables);
-  Vectors<CompleX<double> > theEigenSpace;
   if (wipeCanvas)
     output.init();
   output.initDimensions(theDimension, 1);
   output.GraphicsUnit[0]=DrawOperations::GraphicsUnitDefault;
-  theEigenSpace.operator=(theEigenSpaceList);
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       output.theBilinearForm.elements[i][j]=this->CartanSymmetric.elements[i][j].DoubleValue();
   Vector<double> tempRoot;
   output.SelectedPlane=0;
   Vectors<double>& theTwoPlane= output.BasisProjectionPlane[0];
+  if (predefinedProjectionPlane==0)
+    this->GetCoxeterPlane(theTwoPlane[0], theTwoPlane[1], theGlobalVariables);
+  else
+    predefinedProjectionPlane->GetVectorsDouble(theTwoPlane);
   assert(theTwoPlane.size==2);
-  if (theEigenSpace.size>0)
-  { for (int j=0; j<theDimension; j++)
-    { theTwoPlane[0][j]=theEigenSpace[0][j].Re;
-      theTwoPlane[1][j]=theEigenSpace[0][j].Im;
-    }
-    output.ModifyToOrthonormalNoShiftSecond(output.BasisProjectionPlane[0][0], output.BasisProjectionPlane[0][1]);
-  }
 //  std::cout << "<hr><hr>the eigenspace: " << theEigenSpace.ElementToString(false, true, false);
 //  std::stringstream tempStream;
 //  tempStream << "<hr>the eigen mat:";
@@ -7725,7 +7709,7 @@ void WeylGroup::DrawRootSystem
   { Cone theWeylChamber;
     this->GetWeylChamber(theWeylChamber, theGlobalVariables);
     PolynomialOutputFormat tempFormat;
-    theWeylChamber.DrawMeProjective(0,false, outputDV, tempFormat);
+    theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
   }
   theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
   theGlobalVariables.theDrawingVariables.DefaultHtmlWidth=600;
@@ -7743,11 +7727,20 @@ void WeylGroup::DrawRootSystem
     }
   }
   root tempRootRat;
+  roots epsNotationSimpleBasis;
+  epsNotationSimpleBasis.MakeEiBasis(theDimension);
+  this->GetEpsilonCoords(epsNotationSimpleBasis, epsNotationSimpleBasis, theGlobalVariables);
   for (int i=0; i<theDimension; i++)
   { tempRootRat.MakeEi(theDimension, i);
     output.drawCircleAtVectorBuffer(tempRootRat, 1, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
+    if (LabelDynkinDiagramVertices)
+    { root& current=epsNotationSimpleBasis[i];
+      output.drawTextAtVectorBuffer(tempRootRat, current.ElementToStringLetterFormat("e"),
+                                    0, 10, DrawingVariables::TextStyleNormal
+                                    );
+    }
   }
   std::stringstream tempStream;
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
@@ -7789,13 +7782,14 @@ int ParserNode::EvaluateG2ParabolicSupport
 }
 
 int ParserNode::EvaluateDrawRootSystem
-  (ParserNode& theNode, char theWeylLetter, int theDimension, GlobalVariables& theGlobalVariables, root* bluePoint, bool wipeCanvas)
+  (ParserNode& theNode, char theWeylLetter, int theDimension, GlobalVariables& theGlobalVariables,
+   root* bluePoint, bool wipeCanvas, bool LabelDynkin, bool DrawWeylChamber, roots* projectionPlane)
 { WeylGroup theWeyl;
   theWeyl.MakeArbitrary(theWeylLetter, theDimension);
   theNode.impliedNumVars=theDimension;
   DrawingVariables theDV;
   DrawOperations& theDrawOperators=theDV.theBuffer;
-  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, bluePoint);
+  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, DrawWeylChamber, bluePoint, LabelDynkin, projectionPlane);
   theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
   std::stringstream out;
@@ -8266,6 +8260,28 @@ int ParserNode::EvaluateDrawRootSystemOld
   return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
 }
 
+int ParserNode::EvaluateDrawRootSystemLabelDynkin
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
+  int theDimension= theNode.owner->DefaultWeylRank;
+  return theNode.EvaluateDrawRootSystem
+  (theNode, theWeylLetter, theDimension, theGlobalVariables, 0, true, true,true);
+}
+
+int ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ int theDim;
+  roots thePlane;
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, thePlane, theDim))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (theDim!=theNode.owner->DefaultWeylRank)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  if (thePlane.size!=2)
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  return theNode.EvaluateDrawRootSystem
+    (theNode, theNode.owner->DefaultWeylLetter, theDim, theGlobalVariables, 0, true, false, false, & thePlane);
+}
+
 int ParserNode::EvaluateDrawRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
 { char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
@@ -8655,7 +8671,7 @@ int ParserNode::EvaluateDrawWeightSupport
   theOps.init();
   for (int i=0; i<theWeightsToBeDrawn.size; i++)
     theOps.drawCircleAtVectorBuffer
-    (theWeightsToBeDrawn[i], 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(150,150,150));
+    (theWeightsToBeDrawn[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   theWeyl.DrawRootSystem(theDVs, false, theGlobalVariables, true);
   theOps.ComputeProjectionsEiVectors();
   theGlobalVariables.theDrawingVariables.theBuffer=theOps;
@@ -9908,7 +9924,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    plane the projection to which induces the embedding of exceptional Lie algebra G2 in B3. This \
    plane also coincides with one of the (finitely many) choices of a Coxeter plane of B3(so(7)). ",
    "animateRootSystem(100, (0,1,0),(0,0,1), (0,1,0),(1,0,2) )",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   'B', 3, true,
     & ParserNode::EvaluateAnimateRootSystem
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10077,7 +10093,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "()",
    "<b> Experimental. This function shouldn't be visible, if it is, then somebody (*who can it be*) messed up.</b>Experiment: trying to make sense of coxeter planes for reducible root systems.",
    "animateFlyThroughRootSAs",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSAs
    );
    this->AddOneFunctionToDictionaryNoFail
@@ -10085,10 +10101,29 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "(Integer, Integer)",
    "<b> Experimental</b>. This function was implemented to attempt to answer a question of prof. Alexeevski.",
    "InvariantsExteriorPowerFundamentalsPlusTrivials(0,0)",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
    );
-
+   this->AddOneFunctionToDictionaryNoFail
+  ("drawRootSystemIncludeWeylChamberAndDynkinLabels",
+   "()",
+   "Same as drawRootSystem but draws in addition the weyl chamber and labels the Dynkin diagram vertices.",
+   "drawRootSystemIncludeWeylChamberAndDynkinLabels",
+   DefaultWeylLetter, DefaultWeylRank, true,
+    & ParserNode::EvaluateDrawRootSystemLabelDynkin
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("drawRootSystemFixProjection",
+   "((Rational,...),(Rational,...))",
+   "Same as drawRootSystem but draws the root system in a user-defined projection plane. Two vectors \
+   giving a basis of the plane must be given by the first and the second argument; \
+   the vectors must be given in simple basis coordinates. The example projects the root system of sl(8) onto the\
+   plane spanned root system of the sl(2) given by 4+4 partition \
+   and the weight corresponding to the element of the Cartan of sl(8) that commutes with the sl(2).",
+   "drawRootSystemFixProjection( (3,4,3,0,3,4,3), (1,2,3,4,3,2,1))",
+   'A', 7, true,
+    & ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
+   );
 
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

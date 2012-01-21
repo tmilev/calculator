@@ -166,6 +166,7 @@ public:
   std::string ElementToString();
   hashedVector<Expression, Expression::HashFunction> left;
   hashedVector<Expression, Expression::HashFunction> right;
+  void reset(){this->left.reset(); this->right.reset();}
 };
 
 class SyntacticElement
@@ -479,10 +480,11 @@ public:
   void CarryOutOneSub
   (Expression& toBeSubbed, Expression& toBeSubbedWith, int targetCommandIndex, ExpressionPairs& matchedPairs)
   ;
-  bool ExpressionHasBoundedVars(Expression& theExpression, int RecursionDepth=0, int MaxRecursionDepth=1000)
+  bool ExpressionHasBoundedVars(Expression& theExpression, int RecursionDepth, int MaxRecursionDepth)
   { if (RecursionDepth>MaxRecursionDepth)
     { std::stringstream out;
       out << "Max recursion depth of " << MaxRecursionDepth << " exceeded.";
+      theExpression.errorString=out.str();
       return false;
     }
     if (theExpression.theOperation==this->opVariableBound())
@@ -495,13 +497,13 @@ public:
   }
   Expression* DepthFirstSubExpressionPatternMatch
   (int commandIndex, Expression& thePattern, Expression& theExpression,
-   ExpressionPairs& bufferPairs, Expression* condition=0,
-   int RecursionDepth=0,
-   int MaxRecursionDepth=10000, std::stringstream* theLog=0, bool logAttempts=false)
+   ExpressionPairs& bufferPairs, int RecursionDepth,
+   int MaxRecursionDepth, Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
   (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   int maxNumSubs=10000, std::stringstream* theLog=0, bool logAttempts=false)
+   int RecursionDepth,
+   int maxRecursionDepth, std::stringstream* theLog=0, bool logAttempts=false)
   ;
   bool isADigit(const std::string& input, int& whichDigit)
   { if (input.size()!=1)
@@ -602,9 +604,10 @@ public:
   }
   void EvaluateCommands();
   void EvaluateExpression
-(int commandIndex, Expression& theExpression, int RecursionDepth, ExpressionPairs& bufferPairs,
- int maxNumSubs=10000, std::stringstream* theLog=0)
-  ;
+(int commandIndex, Expression& theExpression, int RecursionDepth, int maxRecursionDepth,
+ ExpressionPairs& bufferPairs,
+ std::stringstream* theLog=0)
+ ;
   void Evaluate(const std::string& theInput)
   { std::vector<Command> startingExpressions;
     this->input=theInput;
@@ -1092,7 +1095,9 @@ bool CommandList::ExpressionsAreEqual
   (const Expression& left, const Expression& right, int RecursionDepth, int MaxRecursionDepth)
 { if (RecursionDepth>MaxRecursionDepth)
   { std::stringstream out;
-    out << "Error: maximium recursion depth of " << MaxRecursionDepth << " exceeded while comparing expressions. " ;
+    out << "Error: maximium recursion depth of " << MaxRecursionDepth << " exceeded while comparing expressions: " ;
+    out << left.ElementToString() << " and " << right.ElementToString();
+    std::cout << out.str();
     this->Errors.push_back(out.str());
     return false;
   }
@@ -1120,13 +1125,10 @@ bool CommandList::ExpressionMatchesPattern
     std::cout << "<br> current matched expressions: " << matchedExpressions.ElementToString();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (RecursionDepth==0)
-  { matchedExpressions.left.reset();
-    matchedExpressions.right.reset();
-  }
   if (RecursionDepth>MaxRecursionDepth)
   { std::stringstream out;
-    out << "Max recursion depth of " << MaxRecursionDepth << " exceeded whlie mathcing expression patterns";
+    out << "Max recursion depth of " << MaxRecursionDepth << " exceeded whlie trying to match expression pattern "
+    << thePattern.ElementToString() << " onto expression " << input.ElementToString();
     this->Errors.push_back(out.str());
     return false;
   }
@@ -1158,9 +1160,10 @@ bool CommandList::ExpressionMatchesPattern
 }
 
 void CommandList::EvaluateExpression
-(int commandIndex, Expression& theExpression, int RecursionDepth, ExpressionPairs& bufferPairs,
- int maxNumSubs, std::stringstream* theLog)
-{ if (RecursionDepth>=this->MaxRecursionDepthDefault)
+(int commandIndex, Expression& theExpression, int RecursionDepth, int maxRecursionDepth,
+ ExpressionPairs& bufferPairs,
+ std::stringstream* theLog)
+{ if (RecursionDepth>=maxRecursionDepth)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDepthDefault << " exceeded while evaluating expressions.";
     theExpression.errorString=out.str();
@@ -1177,7 +1180,7 @@ void CommandList::EvaluateExpression
   { counter++;
     NonReduced=false;
     for (unsigned i=0; i<theExpression.children.size(); i++)
-      this->EvaluateExpression(commandIndex, theExpression.children[i], RecursionDepth+1, bufferPairs, maxNumSubs, theLog);
+      this->EvaluateExpression(commandIndex, theExpression.children[i], RecursionDepth+1, maxRecursionDepth, bufferPairs, theLog);
     if (counter>this->MaxAlgTransformationsPerExpression)
     { std::stringstream out;
       out << "Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded.";
@@ -1194,7 +1197,7 @@ void CommandList::EvaluateExpression
         if (currentPattern.errorString=="")
         { if (currentPattern.theOperation==this->opDefine() || currentPattern.theOperation==this->opDefineConditional())
             if(this->ProcessOneExpressionOnePatternOneSub
-            (commandIndex, currentPattern, theExpression, bufferPairs, 1000, theLog))
+            (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth, theLog))
             { NonReduced=true;
               break;
             }
@@ -1205,10 +1208,18 @@ void CommandList::EvaluateExpression
 
 Expression* CommandList::DepthFirstSubExpressionPatternMatch
   (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   Expression* condition, int RecursionDepth, int MaxRecursionDepth, std::stringstream* theLog, bool logAttempts)
-{ static int patternMatchDebugCounter=-1;
+   int RecursionDepth, int MaxRecursionDepth, Expression* condition, std::stringstream* theLog, bool logAttempts)
+{ if (RecursionDepth>=MaxRecursionDepthDefault)
+  { std::stringstream out;
+    out << "Error: while trying to evaluate expression, the maximum recursion depth of " << MaxRecursionDepth
+    << " was exceeded";
+    theExpression.errorString=out.str();
+    return 0;
+  }
+  static int patternMatchDebugCounter=-1;
  // if (RecursionDepth==0)
     patternMatchDebugCounter++;
+
   if (theLog!=0 && logAttempts)
     if (RecursionDepth==0)
     { patternMatchDebugCounter++;
@@ -1224,7 +1235,7 @@ Expression* CommandList::DepthFirstSubExpressionPatternMatch
   { std::cout <<"<hr>" << thePattern.ElementToString();
     std::cout << "<hr>problem starts here! ";
   }
-  if (this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, 0, MaxRecursionDepth, theLog))
+  if (this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, RecursionDepth+1, MaxRecursionDepth, theLog))
   { if (theLog!=0)
     { if (patternMatchDebugCounter==10480)
       { std::cout << "<hr><hr>" << theExpression.ElementToString();
@@ -1237,7 +1248,7 @@ Expression* CommandList::DepthFirstSubExpressionPatternMatch
       return &theExpression;
     else
     { Expression tempExp=*condition;
-      this->EvaluateExpression(commandIndex, tempExp, RecursionDepth+1, bufferPairs, 1000, theLog);
+      this->EvaluateExpression(commandIndex, tempExp, RecursionDepth+1, MaxRecursionDepth, bufferPairs, theLog);
       if (tempExp.theOperation==this->opInteger())
         if (tempExp.theData==1)
           return & theExpression;
@@ -1245,9 +1256,10 @@ Expression* CommandList::DepthFirstSubExpressionPatternMatch
   }
   Expression* result=0;
   for (unsigned i=0; i<theExpression.children.size(); i++)
-  { result=this->DepthFirstSubExpressionPatternMatch
-    (commandIndex, thePattern, theExpression.children[i], bufferPairs, condition,
-     RecursionDepth+1, MaxRecursionDepth, theLog);
+  { bufferPairs.reset();
+    result=this->DepthFirstSubExpressionPatternMatch
+    (commandIndex, thePattern, theExpression.children[i], bufferPairs,
+     RecursionDepth+1, MaxRecursionDepth,  condition, theLog);
     if (result!=0)
       return result;
   }
@@ -1274,7 +1286,8 @@ void CommandList::CarryOutOneSub
 
 bool CommandList::ProcessOneExpressionOnePatternOneSub
   (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   int maxNumSubs, std::stringstream* theLog, bool logAttempts)
+   int RecursionDepth,
+   int maxRecursionDepth, std::stringstream* theLog, bool logAttempts)
 { assert(thePattern.theOperation==this->opDefine() ||
   thePattern.theOperation==this->opDefineConditional());
   assert(thePattern.children.size()==2 || thePattern.children.size()==3);
@@ -1290,7 +1303,8 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   Expression* toBeSubbed=0;
   if (thePattern.theOperation==this->opDefine() || isConditionalDefine)
     toBeSubbed=this->DepthFirstSubExpressionPatternMatch
-    (commandIndex, currentPattern, theExpression, bufferPairs, theCondition, 0, 10000, theLog);
+    (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth,
+     theCondition, theLog);
   if (toBeSubbed==0)
     return false;
   this->CarryOutOneSub(*toBeSubbed, thePattern.children[1], toBeSubbed->commandIndex, bufferPairs);
@@ -1310,7 +1324,7 @@ void CommandList::EvaluateCommands()
     std::stringstream localLogger;
     assert((int)this->theCommands[0].expressionStacK[6].theData.theBoss!=-1);
     if (this->theCommands[i].ErrorString=="")
-    { this->EvaluateExpression(i, this->theCommands[i].finalValue, 0, thePairs, 1000, &localLogger);
+    { this->EvaluateExpression(i, this->theCommands[i].finalValue, 0, 10, thePairs, &localLogger);
       assert((int)this->theCommands[0].expressionStacK[6].theData.theBoss!=-1);
     }
     std::string commandOutput=this->theCommands[i].finalValue.ElementToString();
@@ -1325,6 +1339,13 @@ void CommandList::EvaluateCommands()
     loggingStream << "<hr><hr>Command " << i+1 << " log: " << this->theCommands[i].theLog;
     //if (i!=this->theCommands.size()-1)
     out << "</tr>";
+    if (this->Errors.size()>0)
+    { out << "<tr><td>Errors encountered; command evaluation terminated. Error messages follow.";
+      for (unsigned i=0; i<this->Errors.size(); i++)
+        out << "<br>" << this->Errors[i];
+      out << "</td></tr>";
+      break;
+    }
   }
   out << "</table>";
   loggingStream << "<hr><hr><b>CommandList status. </b><hr>";
@@ -1332,7 +1353,6 @@ void CommandList::EvaluateCommands()
   this->theLog=loggingStream.str();
   this->output=out.str();
 }
-
 
 std::string SyntacticElement::ElementToString
 (CommandList& theBoss)
@@ -1363,6 +1383,10 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   if (this->theOperation<0)
   { out << "(operation not initialized)";
     return out.str();
+  }
+  if (this->errorString!="")
+  { out << "This expression contains an error! The error message follows<br> " << this->errorString
+    << "<br>In addition, the value of the expression is: ";
   }
   if (AddBrackets)
     out << "(";
@@ -1684,7 +1708,7 @@ int main(int argc, char **argv)
   if (newSize<0)
     newSize=0;
   inputString.resize(newSize);
-  inputString="{{a}}:if(1):=x; y";
+  inputString="{{a}}:if(IsInteger(a)):=x; y";
 //  inputString= "{{a}} : if (IsInteger(a)):=x; \n 5";
 //  inputString="{{a}} : if (IsInteger(a)):=x;";
 //  inputString="IsInteger{}0";

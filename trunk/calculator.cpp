@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
-  << __DATE__ << ", " << __TIME__ <<   "</title>";
+  << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";

@@ -172,6 +172,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="char(0,0,1)+char(1,0,0)+char(0,0,1)";
 //  civilizedInput="parabolicsInfoBruhatGraph(1,0,0,1)";
 //  theParser.DefaultWeylRank=4;
 //  theParser.DefaultWeylLetter='D';

@@ -176,7 +176,9 @@ template < > int HashedList<Monomial<RationalFunction> >::PreferredHashSize=20;
 template < > int HashedList<roots>::PreferredHashSize=10000;
 template < > int HashedList<Cone>::PreferredHashSize=10000;
 template < > int HashedList<ParserFunction>::PreferredHashSize=1000;
+template < > int HashedList<MonomialChar<Rational> >::PreferredHashSize=100;
 
+template < > int List<MonomialChar<Rational> >::ListActualSizeIncrement=100;
 template < > int List<Cone>::ListActualSizeIncrement=100;
 template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
 template < > int List<affineCone>::ListActualSizeIncrement=1;
@@ -1152,14 +1154,6 @@ Rational root::GetHeight()
 { Rational tempRat;
   this->GetHeight(tempRat);
   return tempRat;
-}
-
-int root::HashFunction() const
-{ int result=0;
-  int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
-  for (int i=0; i<theSize; i++)
-    result+=  this->TheObjects[i].HashFunction()*  ::SomeRandomPrimes[i];
-  return result;
 }
 
 inline bool root::IsPositiveOrZero() const
@@ -23531,6 +23525,9 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
     case ParserNode::typeAnimation:
       this->theAnimation.GetElement().MakeZero();
       break;
+    case ParserNode::typeCharSSFDMod:
+      this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
+      break;
     default:
       break;
   }
@@ -23552,6 +23549,8 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
     this->WeylAlgebraElement.GetElement().MakeConst(this->impliedNumVars, (Rational) 1);
   if (this->ExpressionType==this->typeRationalFunction)
     this->ratFunction.GetElement().MakeNVarConst(this->impliedNumVars, (Rational) 1, theContext);
+  if (this->ExpressionType==this->typeCharSSFDMod)
+    this->theChar.GetElement().MakeTrivial(this->ContextLieAlgebra);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables)
@@ -27495,7 +27494,7 @@ bool ElementSimpleLieAlgebra::IsACoeffOneChevalleyGenerator(int& outputGenerator
 std::string ParserNode::ElementToStringValueOnlY
 (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream LatexOutput;
-  int i;
+  int i; //can't declare variables within a switch clause!
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
     case ParserNode::typeRational: LatexOutput << this->rationalValue.ElementToString(); break;
@@ -27519,6 +27518,7 @@ std::string ParserNode::ElementToStringValueOnlY
       << this->WeylAlgebraElement.GetElement().ElementToString(true)
       << "\n\\end{array}";
       break;
+    case ParserNode::typeCharSSFDMod: LatexOutput << this->theChar.GetElement().ElementToString(); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
 //    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
@@ -27554,6 +27554,8 @@ std::string ParserNode::ElementToStringValueAndType
     case ParserNode::typeWeylAlgebraElement: out << " a Weyl algebra element: "; break;
     case ParserNode::typeArray: out << " an array of " << this->children.size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
+     case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
+     << " simple Lie algebra:"; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone:
@@ -28022,6 +28024,9 @@ void ParserNode::CopyValue(const ParserNode& other)
       break;
     case ParserNode::typeAnimation:
       this->theAnimation=other.theAnimation;
+      break;
+    case ParserNode::typeCharSSFDMod:
+      this->theChar=other.theChar;
       break;
     default:
       assert(false);
@@ -29020,6 +29025,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
         } else
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
+      case ParserNode::typeCharSSFDMod: this->theChar.GetElement()*=currentChild.theChar.GetElement(); break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
       case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
       case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;
@@ -29061,6 +29067,9 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
+      case ParserNode::typeCharSSFDMod:
+        this->theChar.GetElement()+=currentChild.theChar.GetElement();
+        break;
       case ParserNode::typeLattice:
         this->theLattice.GetElement()=currentChild.theLattice.GetElement();
         this->theLattice.GetElement().RefineByOtherLattice(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());

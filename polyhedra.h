@@ -154,6 +154,7 @@ template<class Base>
 class CompleX;
 class RationalFunction;
 struct CGI;
+class charSSAlgMod;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -550,7 +551,14 @@ public:
     for (int i=0; i<right.size; i++)
       this->TheObjects[i]=right[i];
   }
-  void operator == (const ListLight<Object>& right);
+  inline bool operator == (const ListLight<Object>& right) const
+  { if (this->size!=right.size)
+      return false;
+    for (int i=0; i<this->size; i++)
+      if (!(this->TheObjects[i]==right[i]))
+        return false;
+    return true;
+  }
   inline Object* LastObject()const{return &this->TheObjects[this->size-1]; }
   ListLight();
   ~ListLight();
@@ -845,7 +853,7 @@ public:
   void SwapTwoIndicesHash(int i1, int i2);
   inline bool ContainsObjectHash(const Object& o) {return this->IndexOfObjectHash(o)!=-1; }
   int IndexOfObjectHash(const Object& o) const;
-  void SetHashSize(int HS);
+  void SetHashSizE(int HS);
   int SizeWithoutObjects();
   void AssignList(const List<Object>& other)
   { this->ClearTheObjects();
@@ -2670,9 +2678,12 @@ public:
     out << ")";
     output=out.str();
   }
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex);
   std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; }
-  std::string ElementToString(PolynomialOutputFormat& theFormat){ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
+  std::string ElementToString
+  (PolynomialOutputFormat& theFormat){ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
+
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
+
   void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
   CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero) const
   { CoefficientType result, tempElt;
@@ -2693,6 +2704,13 @@ public:
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
+  }
+  int HashFunction() const
+  { int result=0;
+    int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
+    for (int i=0; i<theSize; i++)
+      result+=  this->TheObjects[i].HashFunction()*  ::SomeRandomPrimes[i];
+    return result;
   }
   void MakeAffineUsingLastCoordinate()
   { CoefficientType theElt;
@@ -2727,7 +2745,7 @@ public:
     }
     output.append(")");
   }
-  void MakeZero(int theDim, const CoefficientType& theRingZero)
+  void MakeZero(int theDim, const CoefficientType& theRingZero=0)
   { this->SetSize(theDim);
     for (int i=0; i<theDim; i++)
       this->TheObjects[i]=theRingZero;
@@ -2833,6 +2851,25 @@ public:
   void operator+=(const Vector<CoefficientType>& other)
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i]+=other.TheObjects[i];
+  }
+  inline bool operator>(const Vector<CoefficientType>& other)const
+  { assert(this->size==other.size);
+    CoefficientType c1=0, c2=0;
+    for (int i=0; i<this->size; i++)
+    { c1+=this->TheObjects[i];
+      c2+=other.TheObjects[i];
+    }
+    if (c1>c2)
+      return true;
+    if (c2>c1)
+      return false;
+    for (int i=this->size-1; i>=0; i--)
+    { if (this->TheObjects[i]>other.TheObjects[i])
+        return true;
+      if (other.TheObjects[i]>this->TheObjects[i])
+        return false;
+    }
+    return false;
   }
   void operator-=(const Vector<CoefficientType>& other)
   { for (int i=0; i<this->size; i++)
@@ -3131,7 +3168,6 @@ public:
   static void RootScalarRoot(root& r1, root& r2, MatrixLargeRational& KillingForm, Rational& output);
 //  static void RootScalarRoot(root& r1, root& r2, MatrixIntTightMemoryFit& KillingForm, Rational& output);
   static void RootPlusRootTimesScalar(root& r1, root& r2, Rational& rat, root& output);
-  int HashFunction() const;
   root(){}
   root(const std::string& input){this->AssignString(input);};
   root(const char* input){std::string tempS; tempS=input; this->AssignString(tempS);}
@@ -3680,13 +3716,13 @@ void List<Object>::swap(List<Object>& l1, List<Object>& l2)
     smallL=&l2;
     smallSize=l2.size;
   }
+  smallL->SetSize(bigL->size);
   Object tempO;
-  for(int i=0; i<smallL->size; i++)
+  for(int i=0; i<smallSize; i++)
   { tempO=smallL->TheObjects[i];
     smallL->TheObjects[i]=bigL->TheObjects[i];
     bigL->TheObjects[i]=tempO;
   }
-  smallL->SetSize(bigL->size);
   for(int i=smallSize; i<bigL->size; i++)
     smallL->TheObjects[i]=bigL->TheObjects[i];
   bigL->size=smallSize;
@@ -3989,7 +4025,7 @@ template <class Object>
 void HashedList<Object>::CopyFromHash(const HashedList<Object>& From)
 { if (&From==this){return; }
   this->ClearHashes();
-  this->SetHashSize(From.HashSize);
+  this->SetHashSizE(From.HashSize);
   this->::List<Object>::CopyFromBase(From);
   if (this->size<this->HashSize)
     for (int i=0; i<this->size; i++)
@@ -4089,7 +4125,7 @@ void HashedList<Object>::PopIndexSwapWithLastHash(int index)
 }
 
 template <class Object>
-void HashedList<Object>::SetHashSize(int HS)
+void HashedList<Object>::SetHashSizE(int HS)
 { if (HS!=this->HashSize)
   { delete [] this->TheHashedArrays;
 #ifdef CGIversionLimitRAMuse
@@ -4098,7 +4134,11 @@ ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
 #endif
     this->TheHashedArrays= new  List<int>[HS];
     this->HashSize=HS;
-    this->size=0;
+    if (this->size>0)
+      for (int i=0; i<this->size; i++)
+      { int theIndex=this->FitHashSize(this->TheObjects[i].HashFunction());
+        this->TheHashedArrays[theIndex].AddOnTop(i);
+      }
   }
 }
 
@@ -4106,7 +4146,7 @@ template <class Object>
 HashedList<Object>::HashedList()
 { this->HashSize=0;
   this->TheHashedArrays=0;
-  this->SetHashSize(HashedList<Object>::PreferredHashSize);
+  this->SetHashSizE(HashedList<Object>::PreferredHashSize);
   this->initHash();
 }
 
@@ -6267,12 +6307,18 @@ void Polynomial<Element>::DecreaseNumVariables(int increment, Polynomial<Element
 }
 
 template <class TemplateMonomial, class Element>
-inline void TemplatePolynomial<TemplateMonomial, Element>::MultiplyBy(const TemplatePolynomial<TemplateMonomial, Element>& p, TemplatePolynomial<TemplateMonomial, Element>& output, TemplatePolynomial<TemplateMonomial, Element>& bufferPoly, TemplateMonomial& bufferMon)const
+inline void TemplatePolynomial<TemplateMonomial, Element>::MultiplyBy
+(const TemplatePolynomial<TemplateMonomial, Element>& p,
+ TemplatePolynomial<TemplateMonomial, Element>& output,
+ TemplatePolynomial<TemplateMonomial, Element>& bufferPoly, TemplateMonomial& bufferMon)const
 { if (p.size==0)
   { output.ClearTheObjects();
     return;
   }
-  bufferPoly.MakeActualSizeAtLeastExpandOnTop(this->size*p.size);
+  int maxNumMonsFinal=this->size*p.size;
+  bufferPoly.MakeActualSizeAtLeastExpandOnTop(maxNumMonsFinal);
+  if (maxNumMonsFinal/this->HashSize>3)
+    bufferPoly.SetHashSizE(maxNumMonsFinal);
   bufferPoly.Nullify(p.NumVars);
   for (int i=0; i<p.size; i++)
     for (int j=0; j<this->size; j++)
@@ -8999,6 +9045,15 @@ public:
     result.TimesConstant(other);
     return result;
   }
+  int HashFunction()
+  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->NonZeroElements.CardinalitySelection);
+    int result=0;
+    for (int i=0; i< numCycles; i++)
+      result+= SomeRandomPrimes[i]* this->coeffsRootSpaces[this->NonZeroElements.elements[i]].HashFunction()
+      *(1+this->NonZeroElements.elements[i]);
+    result+=this->Hcomponent.HashFunction();
+    return result;
+  }
   void TimesConstant(const Rational& input);
   bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);}
   void operator+=(const ElementSimpleLieAlgebra& other);
@@ -10756,6 +10811,53 @@ class PiecewiseQuasipolynomial
   void operator=(const PiecewiseQuasipolynomial& other);
 };
 
+class charSSAlgMod;
+
+template<class CoefficientType>
+class MonomialChar
+{
+public:
+  CoefficientType Coefficient;
+  Vector<CoefficientType> weightSimpleCoords;
+  void TensorAndDecompose
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra* owner, charSSAlgMod& output)
+  ;
+  std::string ElementToString
+  (const std::string& theVectorSpaceLetter, const std::string& theWeightLetter)
+  ;
+  inline int HashFunction()const
+  { return weightSimpleCoords.HashFunction();
+  }
+  inline bool operator==(const MonomialChar<CoefficientType>& other) const
+  { return this->weightSimpleCoords==other.weightSimpleCoords;
+  }
+  inline bool operator>(const MonomialChar<CoefficientType>& other) const
+  { return this->weightSimpleCoords>other.weightSimpleCoords;
+  }
+};
+
+class charSSAlgMod : public HashedList<MonomialChar<Rational> >
+{
+  public:
+  SemisimpleLieAlgebra* theBoss;
+  void Nullify(SemisimpleLieAlgebra* owner)
+  { this->ClearTheObjects();
+    this->theBoss=owner;
+  }
+  charSSAlgMod()
+  { this->theBoss=0;
+  }
+  std::string ElementToString();
+  void MakeFromWeight
+  (Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
+  ;
+  void MakeTrivial(SemisimpleLieAlgebra* owner);
+  void operator+=(const charSSAlgMod& other);
+  void operator+=(const MonomialChar<Rational>& other);
+  void operator*=(const charSSAlgMod& other);
+  void operator*=(const MonomialChar<Rational>& other);
+};
+
 class Parser;
 class ParserNode
 {
@@ -10787,6 +10889,7 @@ public:
   MemorySaving<Cone> theCone;
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
+  MemorySaving<charSSAlgMod> theChar;
   MemorySaving<partFractions> thePFs;
   MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
   MemorySaving<AnimationBuffer> theAnimation;
@@ -10807,6 +10910,7 @@ public:
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
   typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
   typeArray, typeQuasiPolynomial, typePartialFractions, //=17
+  typeCharSSFDMod,
   typePiecewiseQP,
   typeAnimation,
   typeFile, typeDots,
@@ -10879,6 +10983,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimationClearScreen
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateChar
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawRootSystemCoxeterPlaneRootSA

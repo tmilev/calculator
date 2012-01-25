@@ -315,7 +315,6 @@ bool WeylGroup::LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, Eleme
   return (rightImage-leftImage).IsNonNegative() && !(rightImage-leftImage).IsEqualToZero();
 }
 
-
 void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
 { this->AmbientWeyl.ComputeWeylGroup(UpperLimit);
   root image1;
@@ -333,4 +332,139 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
     if (isGood)
       this->RepresentativesQuotientAmbientOrder.AddOnTop(this->AmbientWeyl[i]);
   }
+}
+
+int ParserNode::EvaluateChar
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ int theDim=theNode.owner->theHmm.theRange.GetRank();
+  root theWeight;
+  if (! theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables) )
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (theWeight.size!=theDim)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  charSSAlgMod& output=theNode.theChar.GetElement();
+  output.MakeFromWeight(theWeight, &theNode.owner->theHmm.theRange);
+  theNode.ExpressionType=theNode.typeCharSSFDMod;
+  return theNode.errorNoError;
+}
+
+void charSSAlgMod::MakeFromWeight(Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
+{ this->Nullify(owner);
+  assert(inputWeightSimpleCoords.size=this->theBoss->GetRank());
+  MonomialChar<Rational> theMon;
+  theMon.weightSimpleCoords=inputWeightSimpleCoords;
+  theMon.Coefficient=1;
+  this->AddOnTopHash(theMon);
+}
+
+template <class CoefficientType>
+void MonomialChar<CoefficientType>::TensorAndDecompose
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra* owner, charSSAlgMod& output)
+{ output.Nullify(owner);
+}
+
+template <class CoefficientType>
+std::string Vector<CoefficientType>::ElementToStringLetterFormat
+(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)
+{ if (this->IsEqualToZero())
+    return "0";
+  std::stringstream out;
+  std::string tempS;
+  bool found=false;
+  int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
+  for(int i=0; i<NumVars; i++)
+    if (!this->TheObjects[i].IsEqualToZero())
+    { this->TheObjects[i].ElementToString(tempS);
+      if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (found)
+      { if (tempS.size()>0)
+        { if (tempS[0]!='-')
+            out << "+";
+        } else
+          out << "+";
+      }
+      found=true;
+      out << tempS;
+      out << inputLetter << "_{" << i+1<< "}";
+    }
+  return out.str();
+}
+
+void charSSAlgMod::operator+=(const MonomialChar<Rational>& other)
+{ int index=this->IndexOfObjectHash(other);
+  if (index==-1)
+  { this->AddOnTopHash(other);
+    return;
+  }
+  this->TheObjects[index].Coefficient+=other.Coefficient;
+  if (this->TheObjects[index].Coefficient.IsEqualToZero())
+    this->PopIndexSwapWithLastHash(index);
+}
+
+void charSSAlgMod::operator+=(const charSSAlgMod& other)
+{ this->MakeActualSizeAtLeastExpandOnTop(other.size+this->size);
+  if ( (other.size+this->size)/this->HashSize>5)
+    this->SetHashSizE(other.size+this->size);
+  for (int i=0; i<other.size; i++)
+    this->operator+=(other[i]);
+}
+
+void charSSAlgMod::operator*=(const charSSAlgMod& other)
+{ assert(this->theBoss==other.theBoss);
+  this->MakeActualSizeAtLeastExpandOnTop(other.size+this->size);
+  charSSAlgMod result, summand;
+  result.Nullify(this->theBoss);
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<other.size; j++)
+    { MonomialChar<Rational>& left = this->TheObjects[i];
+      MonomialChar<Rational>& right=other[j];
+      left.TensorAndDecompose(right, this->theBoss, summand);
+      result+=summand;
+    }
+  this->operator=(result);
+}
+
+void charSSAlgMod::MakeTrivial(SemisimpleLieAlgebra* owner)
+{ this->Nullify(owner);
+  MonomialChar<Rational> tempMon;
+  tempMon.Coefficient=1;
+  tempMon.weightSimpleCoords.MakeZero(owner->GetRank());
+  this->operator+=(tempMon);
+}
+
+template <class CoefficientType>
+std::string MonomialChar<CoefficientType>::ElementToString
+  (const std::string& theVectorSpaceLetter, const std::string& theWeightLetter)
+{ std::stringstream out;
+  std::string coeffString=this->Coefficient.ElementToString();
+  if (coeffString=="1")
+    coeffString="";
+  if (coeffString=="-1")
+    coeffString="-";
+  out << coeffString <<  theVectorSpaceLetter << "_{"
+  << this->weightSimpleCoords.ElementToStringLetterFormat(theWeightLetter,  true, false) << "}";
+  return out.str();
+}
+
+std::string charSSAlgMod::ElementToString()
+{ std::stringstream out;
+  if (this->size==0)
+    return "0";
+  std::string tempS;
+  List<MonomialChar<Rational> > sortedMons;
+  sortedMons=*this;
+  sortedMons.QuickSortDescending();
+  for (int i=0; i<this->size; i++)
+  { MonomialChar<Rational>& current=sortedMons[i];
+    tempS=current.ElementToString("V", "\\omega");
+    if (i!=0)
+      if (tempS!="")
+        if (tempS[0]!='-')
+          out << "+";
+    out << tempS;
+  }
+  return out.str();
 }

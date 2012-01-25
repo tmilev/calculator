@@ -1708,7 +1708,7 @@ int main(int argc, char **argv)
   if (newSize<0)
     newSize=0;
   inputString.resize(newSize);
-  inputString="{{a}}:if(IsInteger(a)):=x; y";
+//  inputString="{{a}}:if(IsInteger(a)):=x; y";
 //  inputString= "{{a}} : if (IsInteger(a)):=x; \n 5";
 //  inputString="{{a}} : if (IsInteger(a)):=x;";
 //  inputString="IsInteger{}0";

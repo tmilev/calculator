@@ -8587,7 +8587,7 @@ std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
 (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { roots theDominantWeights;
   double upperBoundDouble=100000/theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).DoubleValue();
-  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 1);
+  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   root highestWeightTrue=highestWeightSimpleCoords;
   this->theWeyl.RaiseToHighestWeight(highestWeightTrue);
@@ -8599,7 +8599,9 @@ std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt);
   if (isTrimmed)
-    out << "Trimmed the # of dominant weights (RAM limits). <br>";
+    out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
+  else
+    out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   roots tempRoots;
   hashedRoots finalWeights;
   int estimatedNumWeights=(int ) (this->theWeyl.GetSizeWeylByFormula(this->theWeyl.WeylLetter, this->theWeyl.GetDim()).DoubleValue()*theDominantWeights.size);

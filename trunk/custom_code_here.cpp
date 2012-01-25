@@ -5814,7 +5814,8 @@ std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bo
   return this->ElementToStringLetterFormat(tempFormat, useLatex, DontIncludeLastVar);
 }
 
-std::string root::ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)
+std::string root::ElementToStringLetterFormat
+(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out;
@@ -6641,7 +6642,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << "></div><br>\n";
+  << "></div><br>The bilinear form of the vector space follows. The ij^th element "
+  << " gives the scalar product of e_i and e_j. If you enter a degenerate symmetric bilinear form"
+  << " the javascript might crash. You are expected to enter a symmetric matrix. <br> \n";
   for (int i=0; i<this->theBuffer.theBilinearForm.NumRows; i++)
   { for (int j=0; j<this->theBuffer.theBilinearForm.NumCols; j++)
     { std::stringstream tmpStream;
@@ -8602,7 +8605,7 @@ std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
   int estimatedNumWeights=(int ) (this->theWeyl.GetSizeWeylByFormula(this->theWeyl.WeylLetter, this->theWeyl.GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
-  finalWeights.SetHashSize(estimatedNumWeights);
+  finalWeights.SetHashSizE(estimatedNumWeights);
   theWeyl.GenerateOrbit(theDominantWeights, false, finalWeights, false, 10000);
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
@@ -8626,10 +8629,11 @@ bool SemisimpleLieAlgebra::GetAlLDominantWeightsHWFDIM
   int lowestUnexploredIndex=0;
   int theDim=this->theWeyl.GetDim();
   root currentWeight;
+  int numPosRoots=this->theWeyl.RootsOfBorel.size;
   for (; lowestUnexploredIndex<outputHashed.size; lowestUnexploredIndex++)
   { if (outputHashed.size>upperBoundWeights)
       break;
-    for (int j=0; j<theDim; j++)
+    for (int j=0; j<numPosRoots; j++)
     { currentWeight=outputHashed[lowestUnexploredIndex];
       currentWeight-=this->theWeyl.RootsOfBorel[j];
       if (theWeyl.IsDominantWeight(currentWeight))
@@ -9914,7 +9918,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("drawConeAffine",
    "(Cone)",
-   "On condition that the cone lies in the non-strict upper half-plane and has a vertex at 0, draws the intersection of the cone with the affine hyperplane passing through (0,...,0,1) and parallel to the hyperplane spanned by the vectors with last coordinate 0. ",
+   "On condition that the cone lies in the non-strict upper half-plane and has a vertex at 0, \
+   draws the intersection of the cone with the affine hyperplane passing through (0,...,0,1) and parallel \
+    to the hyperplane spanned by the vectors with last coordinate 0. ",
    "drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,0,1,0),(-1,0,0,1), (0,-1,0,1), (0,0,-1,1)))",
     & ParserNode::EvaluateDrawConeAffine
    );
@@ -9956,8 +9962,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "Animate the root system. First argument N>=3 = number of frames. The remaining arguments \
    must describe an even number>=4 of elements of h* with rational coordinates, written in simple basis coordinates. \
    The consecutive pairs of such vectors parametrize the projection plane waypoints. More precisely, \
-   each pair of input vectors must give an arbitrary basis of the ``waypoint'' projection planes.  \
-   The animation will start at the first projection plane (given by the first two vectors), fly through to the\
+   each pair of input vectors must give an arbitrary basis of a ``waypoint'' projection plane.  \
+   The animation will start at the first projection plane, fly through to the\
    second projection plane, then away to the third, and so on. When at the last frame, the animation will \
    start backwards. The example rotates the root system of B3(so(7)) from a root subsystem of type B2(so(5)) to a \
    plane the projection to which induces the embedding of exceptional Lie algebra G2 in B3. This \
@@ -10163,14 +10169,26 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemFixProjection",
    "((Rational,...),(Rational,...))",
-   "Same as drawRootSystem but draws the root system in a user-defined projection plane. Two vectors \
-   giving a basis of the plane must be given by the first and the second argument; \
-   the vectors must be given in simple basis coordinates. The example projects the root system of sl(8) onto the\
-   plane spanned root system of the sl(2) given by 4+4 partition \
+   "Same as drawRootSystem but draws the root system in a user-defined projection plane.The first and the secondargument\
+   must be two vectors \
+   forming a basis of the projection plane. The vectors must be given in simple basis coordinates. \
+   The example projects the root system of sl(8) onto the\
+   plane spanned by the root of the sl(2)-subalgebra given by 4+4 partition \
    and the weight corresponding to the element of the Cartan of sl(8) that commutes with the sl(2).",
    "drawRootSystemFixProjection( (3,4,3,0,3,4,3), (1,2,3,4,3,2,1))",
    'A', 7, true,
     & ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("char",
+   "(Rational,...)",
+   "<b>Experimental. Tensoring characters at the moment is an algorithmic playgound, so \
+    please do not trust any printouts you see. </b> Creates a character corresponding to an \
+    irreducible highest weight module. The argument of the function is the highest weight \
+    given in fundamental coordinates. ",
+    "char(0,0,1)",
+   'B', 3, false,
+    & ParserNode::EvaluateChar
    );
 
 /*   this->AddOneFunctionToDictionaryNoFail

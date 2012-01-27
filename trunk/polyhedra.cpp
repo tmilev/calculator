@@ -10592,6 +10592,9 @@ void WeylGroup::Assign(const WeylGroup& right)
   this->RootSystem.CopyFromHash(right.RootSystem);
   this->RootsOfBorel.CopyFromBase(right.RootsOfBorel);
   this->rho.Assign(right.rho);
+  this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
+  this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
+  this->flagFundamentalToSimpleMatricesAreComputed=right.flagFundamentalToSimpleMatricesAreComputed;
 }
 
 void WeylGroup::ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction, bool UseMinusRho)
@@ -11494,7 +11497,7 @@ void VermaModulesWithMultiplicities::Compute(int x)
 void VermaModulesWithMultiplicities::FindNextToExplore()
 { bool foundNonExplored=false;
   for (int i=this->LowestNonExplored; i<this->size; i++)
-  { if (!this->Explored.TheObjects[i])
+    if (!this->Explored.TheObjects[i])
     { if (!foundNonExplored)
       { this->LowestNonExplored=i;
         foundNonExplored=true;
@@ -11504,46 +11507,44 @@ void VermaModulesWithMultiplicities::FindNextToExplore()
         return;
       }
     }
-  }
   this->NextToExplore=-1;
 }
 
 bool VermaModulesWithMultiplicities::IsMaxNonEplored(int index)
 { for (int i=this->LowestNonExplored; i<this->size; i++)
-  { if (!this->Explored.TheObjects[i]&& i!=index)
+    if (!this->Explored.TheObjects[i]&& i!=index)
     { root tempRoot;
       tempRoot.Assign(this->TheObjects[i]);
       tempRoot.Subtract(this->TheObjects[index]);
       if (tempRoot.IsPositiveOrZero())
         return false;
     }
-  }
   return true;
 }
 
 void VermaModulesWithMultiplicities::ElementToString(std::string& output)
 { std::string tempS;
   std::stringstream out;
-  out<<"Next to explore: "<<this->NextToExplore<<"\n Orbit of rho:\n";
+  out << "Next to explore: " << this->NextToExplore << "\n Orbit of rho:\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
-    out << tempS<<"   :  "<<this->TheMultiplicities.TheObjects[i];
+    out << tempS << "   :  " << this->TheMultiplicities.TheObjects[i];
     if (this->Explored.TheObjects[i])
-      out<<" Explored\n";
+      out << " Explored\n";
     else
-      out<<" not Explored\n";
+      out << " not Explored\n";
   }
-  out<<"Bruhat order:\n";
+  out << "Bruhat order:\n";
   for (int i=0; i<this->size; i++)
-  { out <<i<<".   ";
+  { out << i << ".   ";
     for(int j=0; j<this->BruhatOrder.TheObjects[i].size; j++)
-      out <<this->BruhatOrder.TheObjects[i].TheObjects[j]<<", ";
-    out<<"\n";
+      out << this->BruhatOrder.TheObjects[i].TheObjects[j] << ", ";
+    out << "\n";
   }
   this->RPolysToString(tempS);
-  out<<"R Polynomials:\n"<<tempS;
+  out << "R Polynomials:\n" << tempS;
   this->KLPolysToString(tempS);
-  out<<"Kazhdan-Lusztig Polynomials:\n"<<tempS;
+  out << "Kazhdan-Lusztig Polynomials:\n" << tempS;
   output= out.str();
 }
 
@@ -11926,8 +11927,8 @@ void OneVarIntPolynomial::MultiplyBy(OneVarIntPolynomial &p)
 { OneVarIntPolynomial Accum;
   Accum.RationalPart.size=0;
   Accum.PolynomialPart.size=0;
-  OneVarIntPolynomial::SetSizeAtLeastInitProperly(  Accum.PolynomialPart, this->PolynomialPart.size+p.PolynomialPart.size -1);
-  OneVarIntPolynomial::SetSizeAtLeastInitProperly(  Accum.RationalPart, this->RationalPart.size+p.RationalPart.size);
+  OneVarIntPolynomial::SetSizeAtLeastInitProperly(Accum.PolynomialPart, this->PolynomialPart.size+p.PolynomialPart.size -1);
+  OneVarIntPolynomial::SetSizeAtLeastInitProperly(Accum.RationalPart, this->RationalPart.size+p.RationalPart.size);
   for (int i=0; i<this->PolynomialPart.size; i++)
   { for(int j=0; j<p.PolynomialPart.size; j++)
       Accum.PolynomialPart.TheObjects[i+j]+=this->PolynomialPart.TheObjects[i]*p.PolynomialPart.TheObjects[j];
@@ -22852,10 +22853,10 @@ void SemisimpleLieAlgebra::GenerateWeightSupportMethod2(root& theHighestWeight, 
   }
 }
 
-void WeylGroup::RaiseToHighestWeight(root& theWeight)
+void WeylGroup::RaiseToHighestWeight(root& theWeight, int* sign, bool* stabilizerFound)
 { root tempRoot=theWeight;
   ElementWeylGroup tempElt;
-  this->GetHighestElementInOrbit(tempRoot, theWeight, tempElt, false, false);
+  this->GetHighestElementInOrbit(tempRoot, theWeight, tempElt, false, false, sign, stabilizerFound);
 }
 
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)
@@ -26107,8 +26108,7 @@ void EigenVectorComputation::MakeGenericVermaElementOrdered(ElementUniversalEnve
   theElt.AddMonomial(tempMon);
 }
 
-
-Rational WeylGroup::WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
+Rational WeylGroup::WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis)
 { root theWeightInSimpleBasis= this->GetSimpleCoordinatesFromFundamental(theWeightInFundamentalBasis);
   Rational Result=1;
   for (int i=0; i<this->RootsOfBorel.size; i++)
@@ -27345,6 +27345,15 @@ bool ParserNode::ConvertToNextType
       }
       return false;
     }
+    if (GoalType==this->typeCharSSFDMod)
+    { MonomialChar<Rational> tempMon;
+      tempMon.weightFundamentalCoords.MakeZero(this->ContextLieAlgebra->GetRank());
+      tempMon.Coefficient=this->rationalValue;
+      this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
+      this->theChar.GetElement()+=tempMon;
+      this->ExpressionType=this->typeCharSSFDMod;
+      return true;
+    }
     this->polyValue.GetElement().MakeNVarConst(GoalNumVariables, this->rationalValue);
     this->ExpressionType=this->typePoly;
     return true;
@@ -27509,8 +27518,10 @@ std::string ParserNode::ElementToStringValueOnlY
     case ParserNode::typeUEelement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
       << this->UEElement.GetElement().ElementToString(theGlobalVariables, theFormat)
-      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, false, theGlobalVariables, theFormat) << "\n\\\\\n"
-      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables, theFormat) << "\n\\\\\n"
+      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, false, theGlobalVariables, theFormat)
+      << "\n\\\\\n"
+      << "\n\\\\&&=\\\\\n&&\n" << this->UEElement.GetElement().ElementToString(true, true, theGlobalVariables, theFormat)
+      << "\n\\\\\n"
       << "\n\\end{array}";
       break;
     case ParserNode::typeWeylAlgebraElement:
@@ -27518,7 +27529,8 @@ std::string ParserNode::ElementToStringValueOnlY
       << this->WeylAlgebraElement.GetElement().ElementToString(true)
       << "\n\\end{array}";
       break;
-    case ParserNode::typeCharSSFDMod: LatexOutput << this->theChar.GetElement().ElementToString(); break;
+    case ParserNode::typeCharSSFDMod:
+      LatexOutput << this->theChar.GetElement().ElementToString("char", "", true); break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
 //    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
@@ -28813,7 +28825,8 @@ std::string slTwoInSlN::GetNotationString(bool useHtml)
   return out.str();
 }
 
-std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable)
+std::string slTwoInSlN::initFromModuleDecomposition
+(List<int>& decompositionDimensions, bool useHtml, bool computePairingTable)
 { std::stringstream out;
   this->thePartition.CopyFromBase(decompositionDimensions);
   this->thePartition.QuickSortDescending();
@@ -28848,9 +28861,12 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
     }
     currentOffset+=this->thePartition.TheObjects[i];
   }
-  out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "=" << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "e=" << this->ElementMatrixToTensorString(this->theE, useHtml) << "=" << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
-  out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "=" << this->theF.ElementToStringWithBlocks(this->thePartition)  << endMath;
+  out << newLine << beginMath << "h=" << this->ElementMatrixToTensorString(this->theH, useHtml) << "="
+  << this->theH.ElementToStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "e=" << this->ElementMatrixToTensorString(this->theE, useHtml) << "="
+  << this->theE.ElementToStringWithBlocks(this->thePartition) << endMath;
+  out << newLine << beginMath << "f=" << this->ElementMatrixToTensorString(this->theF, useHtml) << "="
+  << this->theF.ElementToStringWithBlocks(this->thePartition)  << endMath;
   MatrixLargeRational tempMat;
   tempMat.init(this->theDimension, this->theDimension);
   List<MatrixLargeRational> Decomposition, theHwCandidatesBeforeProjection, theHwCandidatesProjected;
@@ -28881,9 +28897,11 @@ std::string slTwoInSlN::initFromModuleDecomposition(List<int>& decompositionDime
         }
     }
   out << this->GetNotationString(useHtml);
-  out << newLine << "...and the highest weights of the module decomposition are (" << this->theHighestWeightVectors.size << " modules):";
+  out << newLine << "...and the highest weights of the module decomposition are (" <<
+  this->theHighestWeightVectors.size << " modules):";
   for (int i=0; i<this->theHighestWeightVectors.size; i++)
-  { out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors.TheObjects[i], useHtml) << endMath << ", highest weight of ";
+  { out << newLine << beginMath << this->ElementMatrixToTensorString(theHighestWeightVectors.TheObjects[i], useHtml)
+    << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
    //for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
    //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
@@ -28936,11 +28954,13 @@ std::string slTwoInSlN::PairTwoIndices
         for (int k=0; k<HighestWeightsContainingModules.size; k++)
         { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k])==-1)
-            std::cout << newLine << beginMath << "[" << leftElt.ElementToString(false, true) << ", " << rightElt.ElementToString(false, true) << "]=" << tempMat.ElementToString(false, true) << endMath;
+            std::cout << newLine << beginMath << "[" << leftElt.ElementToString(false, true) << ", "
+            << rightElt.ElementToString(false, true) << "]=" << tempMat.ElementToString(false, true) << endMath;
         }
       }
     }
-  out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and " << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
+  out << newLine << beginMath << this->ElementModuleIndexToString(leftIndex, useHtml) << endMath << " and "
+  << beginMath << this->ElementModuleIndexToString(rightIndex, useHtml) << endMath << " pair to: ";
   for (int i=0; i<output.size; i++)
   { out << beginMath << this->ElementModuleIndexToString(output.TheObjects[i], useHtml) << endMath;
     if (i!=output.size-1)
@@ -29013,6 +29033,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
   this->InitForMultiplication(&theGlobalVariables);
   LargeInt theInt;
+  std::string tempS;
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
     switch (this->ExpressionType)
@@ -29025,7 +29046,21 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
         } else
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
-      case ParserNode::typeCharSSFDMod: this->theChar.GetElement()*=currentChild.theChar.GetElement(); break;
+      case ParserNode::typeCharSSFDMod:
+        theGlobalVariables.MaxAllowedComputationTimeInSeconds=MathRoutines::Maximum
+        (theGlobalVariables.MaxAllowedComputationTimeInSeconds, 30);
+        tempS=(this->theChar.GetElement()*=currentChild.theChar.GetElement());
+        if (tempS!="")
+        { this->ExpressionType=this->typeError;
+          this->ErrorType=this->errorImplicitRequirementNotSatisfied;
+          this->outputString=tempS;
+        } else
+        { this->ExpressionType=this->typeCharSSFDMod;
+          this->outputString="The tensor product decomposition is computed using the Brauer-Klymik formula (Humphreys, \" \
+          Introduction to Lie algebras and representation theory (Springer,Third printing, revised, 1980)\", page 142, exercise 9. \
+          Another implementation of the formula, together with detailed code explanation, is available from the online interface of LiE.";
+        }
+        break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
       case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
       case ParserNode::typePoly: this->polyValue.GetElement().MultiplyBy(currentChild.polyValue.GetElement()); break;

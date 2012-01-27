@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 #endif
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -172,6 +172,10 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="freudenthal(char(5))";
+//  theParser.DefaultWeylLetter='A';
+//  theParser.DefaultWeylRank=1;
+//  civilizedInput="freudenthal(char(2,2,2))";
 //  civilizedInput="char(0,0,1)+char(1,0,0)+char(0,0,1)";
 //  civilizedInput="parabolicsInfoBruhatGraph(1,0,0,1)";
 //  theParser.DefaultWeylRank=4;

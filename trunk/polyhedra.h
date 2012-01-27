@@ -8378,7 +8378,8 @@ public:
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
   bool GetAlLDominantWeightsHWFDIM
-  (root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords, int upperBoundWeights)
+  (root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
+   int upperBoundDominantWeights)
   ;
   bool FreudenthalEval
   (root& inputHWfundamentalCoords, hashedRoots& outputDominantWeightsSimpleCoords,

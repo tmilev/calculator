@@ -8650,45 +8650,39 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
 }
 
 bool WeylGroup::GetAlLDominantWeightsHWFDIM
-(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords, int upperBoundWeights)
+(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights)
 { root highestWeightTrue=highestWeightSimpleCoords;
   this->RaiseToHighestWeight(highestWeightTrue);
-  if (!highestWeightTrue.SumCoordinates().IsSmallInteger())
+  root highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
     return false;
-  int theTopHeight=highestWeightTrue.SumCoordinates().NumShort;
+  int theTopHeight=highestWeightFundCoords.SumCoordinates().NumShort;
   if (theTopHeight<0)
     theTopHeight=0;
   List<hashedRoots> outputWeightsByHeight;
   int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
-  int approxDepthInt=1;
-  for (int i=0; i<highestWeightSimpleCoords.size; i++)
-  { int approxFreedom=0;
-    root tempRoot=highestWeightSimpleCoords;
-    root Ei;
-    Ei.MakeEi(highestWeightSimpleCoords.size, i);
-    for (; this->IsDominantWeight(tempRoot); tempRoot-=Ei, approxFreedom++)
-    {}
-    approxDepthInt=MathRoutines::Maximum(approxDepthInt, approxFreedom);
-  }
-  Rational approxDepth=approxDepthInt;
-  approxDepth.RaiseToPower(highestWeightSimpleCoords.size);
-  approxDepth*=theTopHeight+1;
+  Rational UBDWeightsRat=1;
+  for (int i=0; i<highestWeightFundCoords.size; i++)
+    UBDWeightsRat*=highestWeightFundCoords[i]+1;
+  upperBoundDominantWeights=
+  MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue());
   int finalHashSize=MathRoutines::Maximum
-  (100, MathRoutines::Minimum(upperBoundWeights, (int)approxDepth.DoubleValue())/(theTopHeight+1));
-  upperBoundWeights= MathRoutines::Minimum(upperBoundWeights, (int)approxDepth.DoubleValue());
+  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeight+1));
+
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
   outputWeightsSimpleCoords.ClearTheObjects();
-  outputWeightsSimpleCoords.SetHashSizE(upperBoundWeights);
-  outputWeightsSimpleCoords.MakeActualSizeAtLeastExpandOnTop(upperBoundWeights);
+  outputWeightsSimpleCoords.SetHashSizE(upperBoundDominantWeights);
+  outputWeightsSimpleCoords.MakeActualSizeAtLeastExpandOnTop(upperBoundDominantWeights);
   outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
   int numTotalWeightsFound=0;
   int numPosRoots=this->RootsOfBorel.size;
   root currentWeight;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeight; lowestUnexploredHeightDiff++)
-  { if (upperBoundWeights>0 && numTotalWeightsFound>upperBoundWeights)
+  { if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
       break;
     int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
     hashedRoots& currentHashes=outputWeightsByHeight[bufferIndexShift];
@@ -8706,7 +8700,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
     outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
     currentHashes.ClearTheObjects();
   }
-  return (numTotalWeightsFound<=upperBoundWeights);
+  return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
 int ParserNode::EvaluateDrawWeightSupport

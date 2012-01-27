@@ -172,9 +172,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-//  civilizedInput="freudenthal(char(5))";
-//  theParser.DefaultWeylLetter='A';
-//  theParser.DefaultWeylRank=1;
+  civilizedInput="freudenthal(char(5))";
+  theParser.DefaultWeylLetter='A';
+  theParser.DefaultWeylRank=1;
 //  civilizedInput="freudenthal(char(2,2,2))";
 //  civilizedInput="char(0,0,1)+char(1,0,0)+char(0,0,1)";
 //  civilizedInput="parabolicsInfoBruhatGraph(1,0,0,1)";

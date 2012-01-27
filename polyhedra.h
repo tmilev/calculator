@@ -845,6 +845,11 @@ public:
   inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i; }
   void ClearTheObjects();
   void AddOnTopHash(const Object& o);
+  void AddOnTopHash(const List<Object>& theList)
+  { this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
+    for (int i=0; i<theList.size; i++)
+      this->AddOnTopHash(theList[i]);
+  }
   bool AddOnTopNoRepetitionHash(Object& o);
   void AddOnTopNoRepetitionHash(const List<Object>& theList);
   void PopIndexSwapWithLastHash(int index);
@@ -2271,6 +2276,10 @@ Rational operator/(int left, const Rational& right);
 class Rational
 { friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
+  friend std::iostream& operator<< (std::iostream& output, const Rational& theRat)
+  { output << theRat.ElementToString();
+    return output;
+  }
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
     assert(this->DenShort>0 && OtherDen>0);
@@ -2658,6 +2667,7 @@ public:
   Vector(const Vector<CoefficientType>& other){*this=other;}
   void ElementToString(std::string& output)
   { std::stringstream out;
+    out.precision(5);
     out << "(";
     for(int i=0; i<this->size; i++)
     { out << this->TheObjects[i];
@@ -2669,6 +2679,7 @@ public:
   }
   void ElementToString(std::string& output, PolynomialOutputFormat& theFormat)
   { std::stringstream out;
+    out.precision(5);
     out << "(";
     for(int i=0; i<this->size; i++)
     { out << this->TheObjects[i].ElementToString(theFormat);
@@ -8279,6 +8290,20 @@ class WeylGroup: public HashedList<ElementWeylGroup>
       for (int j=0; j<this->CartanSymmetric.NumCols; j++)
         this->CartanSymmetricIntBuffer.elements[i][j]=this->CartanSymmetric.elements[i][j].NumShort;
   }
+  MatrixLargeRational FundamentalToSimpleCoords;
+  MatrixLargeRational SimpleToFundamentalCoords;
+  bool flagFundamentalToSimpleMatricesAreComputed;
+  inline void ComputeFundamentalToSimpleMatrices()
+  { if (flagFundamentalToSimpleMatricesAreComputed)
+      return;
+    roots fundamentalBasis;
+    this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
+    this->FundamentalToSimpleCoords.AssignRootsToRowsOfMatrix(fundamentalBasis);
+    this->FundamentalToSimpleCoords.Transpose();
+    this->SimpleToFundamentalCoords=this->FundamentalToSimpleCoords;
+    this->SimpleToFundamentalCoords.Invert();
+    this->flagFundamentalToSimpleMatricesAreComputed=true;
+  }
 public:
   std::string DebugString;
   MatrixLargeRational CartanSymmetric;
@@ -8307,9 +8332,28 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
-  root GetSimpleCoordinatesFromFundamental(root& inputInFundamentalCoords);
-  Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables);
-  void RaiseToHighestWeight(root& theWeight);
+  WeylGroup(){this->flagFundamentalToSimpleMatricesAreComputed=false;}
+  MatrixLargeRational* GetMatrixFundamentalToSimpleCoords()
+  { this->ComputeFundamentalToSimpleMatrices();
+    return &this->FundamentalToSimpleCoords;
+  }
+  MatrixLargeRational* GetMatrixSimpleToFundamentalCoords()
+  { this->ComputeFundamentalToSimpleMatrices();
+    return &this->SimpleToFundamentalCoords;
+  }
+  root GetSimpleCoordinatesFromFundamental
+  (Vector<Rational>& inputInFundamentalCoords)
+  ;
+  root GetFundamentalCoordinatesFromSimple
+  (root& inputInFundamentalCoords)
+  ;
+  inline Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
+  { return this->WeylDimFormula(theWeightInFundamentalBasis);
+  }
+  Rational WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis);
+  void RaiseToHighestWeight
+  (root& theWeight, int* sign=0, bool* stabilizerFound=0)
+  ;
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 ;
@@ -8333,9 +8377,19 @@ public:
   void ComputeWeylGroup();
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
+  bool GetAlLDominantWeightsHWFDIM
+  (root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords, int upperBoundWeights)
+  ;
+  bool FreudenthalEval
+  (root& inputHWfundamentalCoords, hashedRoots& outputDominantWeightsSimpleCoords,
+   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage)
+  ;
   void GetWeylChamber
   (Cone& output, GlobalVariables& theGlobalVariables)
   ;
+  std::string GenerateWeightSupportMethoD1
+  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+;
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(roots& output);
   inline int GetDim()const{return this->CartanSymmetric.NumRows;}
@@ -8354,15 +8408,16 @@ public:
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   void GetLowestElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho)
-  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, true, RhoAction, UseMinusRho);
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho, int* sign=0, bool* stabilizerFound=0)
+  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, true, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetHighestElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho)
-  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, false, RhoAction, UseMinusRho);
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho,
+   int* sign, bool* stabilizerFound)
+  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, false, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetExtremeElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho)
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
   ;
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt) ;
   bool IsEigenSpaceGeneratorCoxeterElement(root& input);
@@ -8390,7 +8445,7 @@ public:
   void SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho);
   template <class Element>
   void SimpleReflection
-  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  (int index, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
   ;
   void GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatrix);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
@@ -9232,13 +9287,7 @@ public:
     }
     return out.str();
   }
-  bool GetAlLDominantWeightsHWFDIM
-  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights)
-  ;
   void GenerateWeightSupportMethod2(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
-  std::string GenerateWeightSupportMethoD1
-  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
-;
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
@@ -10818,21 +10867,26 @@ class MonomialChar
 {
 public:
   CoefficientType Coefficient;
-  Vector<CoefficientType> weightSimpleCoords;
-  void TensorAndDecompose
-(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra* owner, charSSAlgMod& output)
+  Vector<CoefficientType> weightFundamentalCoords;
+  void AccountSingleWeight
+(root& currentWeightSimpleCoords, root& otherHighestWeightSimpleCoords, WeylGroup& theWeyl,
+ Rational& theMult, charSSAlgMod& outputAccum, Rational& finalCoeff
+ )
+  ;
+  std::string TensorAndDecompose
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output)
   ;
   std::string ElementToString
-  (const std::string& theVectorSpaceLetter, const std::string& theWeightLetter)
+  (const std::string& theVectorSpaceLetter, const std::string& theWeightLetter, bool useBrackets=false)
   ;
   inline int HashFunction()const
-  { return weightSimpleCoords.HashFunction();
+  { return weightFundamentalCoords.HashFunction();
   }
   inline bool operator==(const MonomialChar<CoefficientType>& other) const
-  { return this->weightSimpleCoords==other.weightSimpleCoords;
+  { return this->weightFundamentalCoords==other.weightFundamentalCoords;
   }
   inline bool operator>(const MonomialChar<CoefficientType>& other) const
-  { return this->weightSimpleCoords>other.weightSimpleCoords;
+  { return this->weightFundamentalCoords>other.weightFundamentalCoords;
   }
 };
 
@@ -10847,15 +10901,18 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   charSSAlgMod()
   { this->theBoss=0;
   }
-  std::string ElementToString();
+  std::string ElementToString
+  (const std::string& theVectorSpaceLetter="V", const std::string& theWeightLetter="\\omega", bool useBrackets=false)
+  ;
+  std::string ElementToStringCharacter(List<root>& theWeights, List<Rational>& theMults);
   void MakeFromWeight
   (Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
   ;
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
-  void operator*=(const charSSAlgMod& other);
-  void operator*=(const MonomialChar<Rational>& other);
+  std::string operator*=(const charSSAlgMod& other);
+  std::string operator*=(const MonomialChar<Rational>& other);
 };
 
 class Parser;
@@ -10976,6 +11033,10 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateFreudenthal
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+
   static int EvaluateGetCoxeterBasis
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;

@@ -1179,17 +1179,21 @@ void Cone::ChangeBasis
 }
 
 root WeylGroup::GetSimpleCoordinatesFromFundamental
-(root& inputInFundamentalCoords)
-{ roots fundamentalBasis;
-  this->GetFundamentalWeightsInSimpleCoordinates(fundamentalBasis);
-  MatrixLargeRational tempMat;
-  tempMat.AssignRootsToRowsOfMatrix(fundamentalBasis);
-  tempMat.Transpose();
-  root result=inputInFundamentalCoords;
+(Vector<Rational>& inputInFundamentalCoords)
+{ MatrixLargeRational& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
+  root result;
+  result=inputInFundamentalCoords;
   tempMat.ActOnAroot(result);
   return result;
 }
 
+root WeylGroup::GetFundamentalCoordinatesFromSimple
+(root& inputInFundamentalCoords)
+{ MatrixLargeRational& tempMat=*this->GetMatrixSimpleToFundamentalCoords();
+  root result=inputInFundamentalCoords;
+  tempMat.ActOnAroot(result);
+  return result;
+}
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
   ( root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
@@ -5095,7 +5099,13 @@ int ParserNode::EvaluatePrintRootSystem
   //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
   roots simpleBasis, simplebasisEpsCoords;
-  out << "<hr>Simple basis (regular and epsilon coordinates (convention: Humphreys)): <table>";
+  out << "<hr> Half sum of positive roots: " << theWeyl.rho.ElementToString();
+  root tempRoot;
+  theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot, theGlobalVariables);
+  out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ElementToStringEpsilonForm());
+  out << "<hr>Size of Weyl group according to formula: " <<
+  theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ElementToString();
+  out << "<hr>Simple basis (regular and epsilon coordinates): <table>";
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords, theGlobalVariables);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
@@ -5382,6 +5392,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
     case ParserNode::typeUEelement: return "UE";
     case ParserNode::typeDots: return "...";
     case ParserNode::typeArray: return "";
+    case ParserNode::typeCharSSFDMod: return "Char";
     default: return "Error";
   }
 }
@@ -5412,6 +5423,8 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeUEelement;
   if (theArgument=="...")
     return ParserNode::typeDots;
+  if (theArgument=="Char")
+    return ParserNode::typeCharSSFDMod;
   return -1;
 }
 
@@ -7404,24 +7417,35 @@ void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 }
 
 void WeylGroup::GetExtremeElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho)
+  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
 { assert(& input!=&output);
   output=input;
   roots eiBasis;
   eiBasis.MakeEiBasis(this->GetDim());
   outputWeylElt.size=0;
+  if (sign!=0)
+    *sign=1;
+  if (stabilizerFound!=0)
+    *stabilizerFound=false;
+  Rational theScalarProd;
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<this->GetDim(); i++)
     { bool shouldApplyReflection=false;
+      theScalarProd=this->RootScalarCartanRoot(output, eiBasis[i]);
       if (findLowest)
-        shouldApplyReflection=this->RootScalarCartanRoot(output, eiBasis[i]).IsPositive();
+        shouldApplyReflection=theScalarProd.IsPositive();
       else
-        shouldApplyReflection= this->RootScalarCartanRoot(output, eiBasis[i]).IsNegative();
+        shouldApplyReflection= theScalarProd.IsNegative();
+      if (stabilizerFound!=0)
+        if (theScalarProd.IsEqualToZero())
+          *stabilizerFound=true;
       if (shouldApplyReflection)
       { found=true;
         this->SimpleReflection<Rational>(i, output, RhoAction, UseMinusRho, (Rational) 0);
         outputWeylElt.AddOnTop(i);
+        if (sign!=0)
+          *sign*=-1;
       }
     }
   }
@@ -8583,32 +8607,36 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 
 }
 
-std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
+std::string WeylGroup::GenerateWeightSupportMethoD1
 (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
-{ roots theDominantWeights;
-  double upperBoundDouble=100000/theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).DoubleValue();
+{ hashedRoots theDominantWeights;
+  double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   root highestWeightTrue=highestWeightSimpleCoords;
-  this->theWeyl.RaiseToHighestWeight(highestWeightTrue);
+  this->RaiseToHighestWeight(highestWeightTrue);
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
     out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
-    <<  "Your input in simple coordinates was: "
+    << "Your input in simple coordinates was: "
     << highestWeightSimpleCoords.ElementToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
-  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM(highestWeightSimpleCoords, theDominantWeights, upperBoundInt);
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
+  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt);
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
   else
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   roots tempRoots;
   hashedRoots finalWeights;
-  int estimatedNumWeights=(int ) (this->theWeyl.GetSizeWeylByFormula(this->theWeyl.WeylLetter, this->theWeyl.GetDim()).DoubleValue()*theDominantWeights.size);
+  int estimatedNumWeights=(int )
+  (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
-  theWeyl.GenerateOrbit(theDominantWeights, false, finalWeights, false, 10000);
+  roots dominantWeightsNonHashed;
+  dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 10000);
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
     if (!isTrimmed)
@@ -8621,29 +8649,64 @@ std::string SemisimpleLieAlgebra::GenerateWeightSupportMethoD1
   return out.str();
 }
 
-bool SemisimpleLieAlgebra::GetAlLDominantWeightsHWFDIM
-(root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights)
-{ hashedRoots outputHashed;
-  outputHashed.MakeActualSizeAtLeastExpandOnTop(upperBoundWeights);
-  root highestWeightTrue=highestWeightSimpleCoords;
-  this->theWeyl.RaiseToHighestWeight(highestWeightTrue);
-  outputHashed.AddOnTopHash(highestWeightTrue);
-  int lowestUnexploredIndex=0;
-  int theDim=this->theWeyl.GetDim();
-  root currentWeight;
-  int numPosRoots=this->theWeyl.RootsOfBorel.size;
-  for (; lowestUnexploredIndex<outputHashed.size; lowestUnexploredIndex++)
-  { if (outputHashed.size>upperBoundWeights)
-      break;
-    for (int j=0; j<numPosRoots; j++)
-    { currentWeight=outputHashed[lowestUnexploredIndex];
-      currentWeight-=this->theWeyl.RootsOfBorel[j];
-      if (theWeyl.IsDominantWeight(currentWeight))
-        outputHashed.AddOnTopNoRepetitionHash(currentWeight);
-    }
+bool WeylGroup::GetAlLDominantWeightsHWFDIM
+(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords, int upperBoundWeights)
+{ root highestWeightTrue=highestWeightSimpleCoords;
+  this->RaiseToHighestWeight(highestWeightTrue);
+  if (!highestWeightTrue.SumCoordinates().IsSmallInteger())
+    return false;
+  int theTopHeight=highestWeightTrue.SumCoordinates().NumShort;
+  if (theTopHeight<0)
+    theTopHeight=0;
+  List<hashedRoots> outputWeightsByHeight;
+  int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
+  int topHeightRootSystemPlusOne=topHeightRootSystem+1;
+  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+  int approxDepthInt=1;
+  for (int i=0; i<highestWeightSimpleCoords.size; i++)
+  { int approxFreedom=0;
+    root tempRoot=highestWeightSimpleCoords;
+    root Ei;
+    Ei.MakeEi(highestWeightSimpleCoords.size, i);
+    for (; this->IsDominantWeight(tempRoot); tempRoot-=Ei, approxFreedom++)
+    {}
+    approxDepthInt=MathRoutines::Maximum(approxDepthInt, approxFreedom);
   }
-  outputWeights.CopyFromBase(outputHashed);
-  return !(lowestUnexploredIndex<outputWeights.size);
+  Rational approxDepth=approxDepthInt;
+  approxDepth.RaiseToPower(highestWeightSimpleCoords.size);
+  approxDepth*=theTopHeight+1;
+  int finalHashSize=MathRoutines::Maximum
+  (100, MathRoutines::Minimum(upperBoundWeights, (int)approxDepth.DoubleValue())/(theTopHeight+1));
+  upperBoundWeights= MathRoutines::Minimum(upperBoundWeights, (int)approxDepth.DoubleValue());
+  for (int i=0; i<topHeightRootSystemPlusOne; i++)
+    outputWeightsByHeight[i].SetHashSizE(finalHashSize);
+  outputWeightsSimpleCoords.ClearTheObjects();
+  outputWeightsSimpleCoords.SetHashSizE(upperBoundWeights);
+  outputWeightsSimpleCoords.MakeActualSizeAtLeastExpandOnTop(upperBoundWeights);
+  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  int numTotalWeightsFound=0;
+  int numPosRoots=this->RootsOfBorel.size;
+  root currentWeight;
+  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeight; lowestUnexploredHeightDiff++)
+  { if (upperBoundWeights>0 && numTotalWeightsFound>upperBoundWeights)
+      break;
+    int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
+    hashedRoots& currentHashes=outputWeightsByHeight[bufferIndexShift];
+    for (int lowest=0; lowest<currentHashes.size; lowest++)
+      for (int i=0; i<numPosRoots; i++)
+      { currentWeight=currentHashes[lowest];
+        currentWeight-=this->RootsOfBorel[i];
+        if (this->IsDominantWeight(currentWeight))
+        { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
+          currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
+          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+            numTotalWeightsFound++;
+        }
+      }
+    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+    currentHashes.ClearTheObjects();
+  }
+  return (numTotalWeightsFound<=upperBoundWeights);
 }
 
 int ParserNode::EvaluateDrawWeightSupport
@@ -8669,7 +8732,7 @@ int ParserNode::EvaluateDrawWeightSupport
   roots theWeightsToBeDrawn;
   std::stringstream out;
   out <<
-  theNode.owner->theHmm.theRange.GenerateWeightSupportMethoD1
+  theNode.owner->theHmm.theRange.theWeyl.GenerateWeightSupportMethoD1
   (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables);
   DrawingVariables theDVs;
   DrawOperations& theOps=theDVs.theBuffer;
@@ -9656,8 +9719,10 @@ int ParserNode::EvaluateGetCoxeterBasis
   theWeyl.MakeArbitrary(theNode.owner->DefaultWeylLetter, theDimension);
   Vector<double> basis1, basis2;
   theWeyl.GetCoxeterPlane(basis1, basis2, theGlobalVariables);
+  out.precision(5);
   out << "Lie algebra of type " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theDimension)
-  << "<br> One orthonormal basis of coxeter plane:<br>" << basis1.ElementToString() << ", " << basis2.ElementToString();
+  << "<br> One orthonormal basis of coxeter plane:<br>" << basis1.ElementToString() << ", "
+  << basis2.ElementToString();
   theNode.outputString=out.str();
   return theNode.errorNoError;
 }
@@ -10192,7 +10257,14 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'B', 3, false,
     & ParserNode::EvaluateChar
    );
-
+   this->AddOneFunctionToDictionaryNoFail
+  ("freudenthal",
+   "(Char)",
+   "<b>Experimental. </b> Freudenthal formula. ",
+    "freudenthal(char(2,2,2))",
+   'B', 3, true,
+    & ParserNode::EvaluateFreudenthal
+   );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

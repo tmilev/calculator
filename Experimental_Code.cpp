@@ -359,9 +359,10 @@ void charSSAlgMod::MakeFromWeight(Vector<Rational>& inputWeightSimpleCoords, Sem
 
 template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::TensorAndDecompose
-(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output)
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output,
+ GlobalVariables& theGlobalVariables)
 { std::stringstream errorLog;
-  std::string tempS;
+  std::string tempS, tempS2;
   output.Nullify(&owner);
   Rational finalCoefficient;
   finalCoefficient=this->Coefficient*other.Coefficient;
@@ -381,7 +382,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   }
   hashedRoots weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS))
+  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, tempS2, theGlobalVariables))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -390,16 +391,21 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   int theRank=theWeyl.GetDim();
   root tempRoot;
   root rightHWSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
+//  std::cout << "weights of smaller module: " << weightsLeftSimpleCoords.ElementToString();
   for (int i=0; i<weightsLeftSimpleCoords.size; i++)
   { currentOrbit.ClearTheObjects();
     currentOrbit.AddOnTopHash(weightsLeftSimpleCoords[i]);
+    this->AccountSingleWeight
+    (currentOrbit[0], rightHWSimpleCoords, theWeyl, multsLeft[i], output, finalCoefficient);
     int previousLayerStart=-1;
     int currentLayerStart=0;
     for (int lowestNonExplored=0; lowestNonExplored<currentOrbit.size; lowestNonExplored++)
     { for (int j=0; j<theRank; j++)
       { tempRoot=currentOrbit[lowestNonExplored];
         theWeyl.SimpleReflection(j, tempRoot, false, false);
-        currentOrbit.AddOnTopNoRepetitionHash(tempRoot);
+        if(currentOrbit.AddOnTopNoRepetitionHash(tempRoot))
+          this->AccountSingleWeight
+          (tempRoot, rightHWSimpleCoords, theWeyl, multsLeft[i], output, finalCoefficient);
       }
       //memory saving routine starts here!
       if (currentLayerStart==lowestNonExplored)
@@ -424,11 +430,9 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
       { errorLog << "Error: orbit layer size exceeded hard-coded limit of " << OrbitSizeHardLimit << ".";
         return errorLog.str();
       }
-      this->AccountSingleWeight
-      (weightsLeftSimpleCoords[i], rightHWSimpleCoords, theWeyl, multsLeft[i], output, finalCoefficient);
     }
   }
-
+//  std::cout << "<hr><hr><hr><hr>";
   return errorLog.str();
 }
 
@@ -437,18 +441,27 @@ void MonomialChar<CoefficientType>::AccountSingleWeight
 (root& currentWeightSimpleCoords, root& otherHighestWeightSimpleCoords, WeylGroup& theWeyl,
  Rational& theMult, charSSAlgMod& outputAccum, Rational& finalCoeff
  )
-{ root dominant=currentWeightSimpleCoords;
+{ //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ElementToString()
+  //<< " with coefficient " << finalCoeff.ElementToString();
+
+  root dominant=currentWeightSimpleCoords;
   dominant+=otherHighestWeightSimpleCoords;
   dominant+=theWeyl.rho;
   int sign;
   bool certainlyHasStabilizer;
-  theWeyl.RaiseToHighestWeight(dominant, &sign, &certainlyHasStabilizer);
+  roots eiBasis;
+  eiBasis.MakeEiBasis(theWeyl.GetDim());
+//  std::cout << "<br> Before raising to dominant, in simple coords: " << dominant.ElementToString() << "<br>";
+  theWeyl.RaiseToDominantWeight(dominant, eiBasis, &sign, &certainlyHasStabilizer);
+//  std::cout << "After raising to dominant: " << dominant.ElementToString() << "<br>";
   dominant-=theWeyl.rho;
   if (!theWeyl.IsDominantWeight(dominant))
     return;
   MonomialChar<Rational> tempMon;
   tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
   tempMon.Coefficient=theMult*finalCoeff*sign;
+//  std::cout << "; final contribution: " << tempMon.Coefficient.ElementToString()
+//  << "*" << tempMon.weightFundamentalCoords.ElementToString() << "<br>";
   outputAccum+=tempMon;
 }
 
@@ -504,6 +517,11 @@ void charSSAlgMod::operator+=(const charSSAlgMod& other)
 }
 
 std::string charSSAlgMod::operator*=(const charSSAlgMod& other)
+{ GlobalVariables theGlobalVariables;
+  return this->MultiplyBy(other, theGlobalVariables);
+}
+
+std::string charSSAlgMod::MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables)
 { assert(this->theBoss==other.theBoss && this->theBoss!=0);
   this->MakeActualSizeAtLeastExpandOnTop(other.size+this->size);
   charSSAlgMod result, summand;
@@ -513,7 +531,7 @@ std::string charSSAlgMod::operator*=(const charSSAlgMod& other)
     for (int j=0; j<other.size; j++)
     { MonomialChar<Rational>& left = this->TheObjects[i];
       MonomialChar<Rational>& right=other[j];
-      potentialError=left.TensorAndDecompose(right, *this->theBoss, summand);
+      potentialError=left.TensorAndDecompose(right, *this->theBoss, summand, theGlobalVariables);
       if (potentialError!="")
         return potentialError;
       result+=summand;
@@ -557,6 +575,7 @@ std::string charSSAlgMod::ElementToString
   List<MonomialChar<Rational> > sortedMons;
   sortedMons=*this;
   sortedMons.QuickSortDescending();
+  int lastCutOff=0;
   for (int i=0; i<this->size; i++)
   { MonomialChar<Rational>& current=sortedMons[i];
     tempS=current.ElementToString(theVectorSpaceLetter, theWeightLetter, useBrackets);
@@ -565,19 +584,45 @@ std::string charSSAlgMod::ElementToString
         if (tempS[0]!='-')
           out << "+";
     out << tempS;
+    int sizeSoFar=out.str().size();
+    if (sizeSoFar-lastCutOff>100)
+    { lastCutOff = sizeSoFar;
+      out << "\\\\&&";
+    }
   }
   return out.str();
 }
 
+Rational WeylGroup::EstimateNumDominantWeightsBelow
+(root& inputHWsimpleCoords, GlobalVariables& theGlobalVariables)
+{ Cone theWeylChamber;
+  this->GetWeylChamber(theWeylChamber, theGlobalVariables);
+  int theDim=this->GetDim();
+  roots strechedVertices=theWeylChamber.Vertices;
+  std::string tempS;
+  PolynomialOutputFormat tempFormat;
+  tempS=theWeylChamber.ElementToString(tempFormat);
+  assert(strechedVertices.size==theDim);
+  for (int i=0; i<theDim; i++)
+  { Rational strech= (inputHWsimpleCoords.SumCoordinates()/strechedVertices[i].SumCoordinates())+2;
+    strechedVertices[i]*=strech;
+  }
+  MatrixLargeRational tempMat;
+  tempMat.AssignRootsToRowsOfMatrix(strechedVertices);
+  return tempMat.GetDeterminant()/Rational::Factorial(theDim);
+}
+
 bool WeylGroup::FreudenthalEval
   (root& inputHWfundamentalCoords, hashedRoots& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage)
+   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables)
 { this->ComputeRho(true);
-
+  roots EiBasis;
+  EiBasis.MakeEiBasis(this->GetDim());
   List<bool> Explored;
   root hwSimpleCoords=this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
   const int UpperBoundFreudenthal=10000000;
-  if (!this->GetAlLDominantWeightsHWFDIM(hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal))
+  if (!this->GetAlLDominantWeightsHWFDIM
+      (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
     << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
@@ -600,7 +645,7 @@ bool WeylGroup::FreudenthalEval
       for (int i=1; ; i++)
       { currentWeight= outputDominantWeightsSimpleCoords[k]+this->RootsOfBorel[j]*i;
         currentDominantRepresentative=currentWeight;
-        this->RaiseToHighestWeight(currentDominantRepresentative);
+        this->RaiseToDominantWeight(currentDominantRepresentative, EiBasis);
         int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
         if (theIndex==-1)
           break;
@@ -624,6 +669,9 @@ bool WeylGroup::FreudenthalEval
  //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
   //  .ElementToString()
    // ;
+    std::stringstream out;
+    out << " Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
+    theGlobalVariables.MakeStatusReport(out.str());
   }
   return true;
 }
@@ -643,7 +691,8 @@ std::string charSSAlgMod::ElementToStringCharacter
     currentSummand.Coefficient=theMults[i];
     theMod+=currentSummand;
   }
-  return theMod.ElementToString();
+  out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(theMod.ElementToString());
+  return out.str();
 }
 
 int ParserNode::EvaluateFreudenthal
@@ -654,14 +703,16 @@ int ParserNode::EvaluateFreudenthal
   root theWeight;
   theWeight=ch.TheObjects[0].weightFundamentalCoords;
   hashedRoots outputWeightsSimpleCoords;
-  std::string localErrorString;
+  std::string localErrorString, localDetailsString;
   List<Rational> outputMults;
-  if (!ch.theBoss->theWeyl.FreudenthalEval(theWeight, outputWeightsSimpleCoords, outputMults, localErrorString))
+  if (!ch.theBoss->theWeyl.FreudenthalEval(theWeight, outputWeightsSimpleCoords, outputMults,
+      localErrorString, localDetailsString, theGlobalVariables))
     out << "<br>" << localErrorString;
   else
   { out << "resulting character in fundamental coordinates: <br>";
     out << ch.ElementToStringCharacter(outputWeightsSimpleCoords, outputMults);
   }
+  out << "<br>" << localDetailsString;
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;

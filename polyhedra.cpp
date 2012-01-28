@@ -2050,9 +2050,14 @@ void roots::GaussianEliminationForNormalComputation(MatrixLargeRational& inputMa
   MatrixLargeRational::GaussianEliminationByRows(inputMatrix, matOutputEmpty, outputNonPivotPoints);
 }
 
-bool roots::ComputeNormal(root& output)
+bool roots::ComputeNormal(root& output, int inputDim)
 { if (this->size==0)
+  { if (inputDim==1)
+    { output.MakeEi(1,0);
+      return true;
+    }
     return false;
+  }
   int theDimension= this->TheObjects[0].size;
   MatrixLargeRational tempMatrix;
   Selection NonPivotPoints;
@@ -22287,7 +22292,7 @@ void CombinatorialChamberContainer::MakeStartingChambersSpanEntireSpace(roots& d
     Rational tempRat;
     theSelection.incrementSelectionFixedCardinality(this->AmbientDimension-1);
     directions.SubSelection(theSelection, TempRoots);
-    TempRoots.ComputeNormal(TempRoot);
+    TempRoots.ComputeNormal(TempRoot, this->AmbientDimension);
     TempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
     this->theHyperplanes.AddOnTopHash(TempRoot);
   }
@@ -22811,7 +22816,7 @@ void MatrixLargeRational::MakeLinearOperatorFromDomainAndRange(roots& domain, ro
 
 bool SemisimpleLieAlgebra::IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables)
 { root correspondingDominant= theWeight;
-  this->theWeyl.RaiseToHighestWeight(correspondingDominant);
+  this->theWeyl.RaiseToDominantWeightSlow(correspondingDominant);
 
   root theDiff= highestWeight - correspondingDominant;
   correspondingDominant.ComputeDebugString();
@@ -22833,30 +22838,10 @@ bool WeylGroup::IsDominantWeight(root& theWeight)
   return true;
 }
 
-void SemisimpleLieAlgebra::GenerateWeightSupportMethod2(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables)
-{ int indexFirstNonExplored=0;
-  this->theWeyl.RaiseToHighestWeight(theHighestWeight);
-  output.size=0;
-  output.AddOnTop(theHighestWeight);
-  roots simpleBasis;
-  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
-  simpleBasis.MakeEiBasis(theDimension);
-  root current;
-  while (indexFirstNonExplored<output.size)
-  { for (int i=0; i<theDimension; i++)
-    { current= output.TheObjects[indexFirstNonExplored]-simpleBasis.TheObjects[i];
-      //current.ComputeDebugString();
-      if (this->IsInTheWeightSupport(current, theHighestWeight, theGlobalVariables))
-        output.AddOnTopNoRepetition(current);
-    }
-    indexFirstNonExplored++;
-  }
-}
-
-void WeylGroup::RaiseToHighestWeight(root& theWeight, int* sign, bool* stabilizerFound)
-{ root tempRoot=theWeight;
-  ElementWeylGroup tempElt;
-  this->GetHighestElementInOrbit(tempRoot, theWeight, tempElt, false, false, sign, stabilizerFound);
+void WeylGroup::RaiseToDominantWeightSlow(root& theWeight, int* sign, bool* stabilizerFound)
+{ roots eiBasis;
+  eiBasis.MakeEiBasis(this->GetDim());
+  this->RaiseToDominantWeight(theWeight, eiBasis, sign, stabilizerFound);
 }
 
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)
@@ -29049,7 +29034,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typeCharSSFDMod:
         theGlobalVariables.MaxAllowedComputationTimeInSeconds=MathRoutines::Maximum
         (theGlobalVariables.MaxAllowedComputationTimeInSeconds, 30);
-        tempS=(this->theChar.GetElement()*=currentChild.theChar.GetElement());
+        tempS=(this->theChar.GetElement().MultiplyBy(currentChild.theChar.GetElement(), theGlobalVariables));
         if (tempS!="")
         { this->ExpressionType=this->typeError;
           this->ErrorType=this->errorImplicitRequirementNotSatisfied;

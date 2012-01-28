@@ -3403,7 +3403,7 @@ public:
   void SubSelection(Selection& theSelection, roots& output);
   void SelectionToMatrix(Selection& theSelection, int OutputDimension, MatrixLargeRational& output);
   void SelectionToMatrixAppend(Selection& theSelection, int OutputDimension, MatrixLargeRational& output, int StartRowIndex);
-  bool ComputeNormal(root& output);
+  bool ComputeNormal(root& output, int inputDim);
   bool ComputeNormalExcludingIndex(root& output, int index, GlobalVariables& theGlobalVariables);
   bool ComputeNormalFromSelection(root& output, Selection& theSelection, GlobalVariables& theGlobalVariables, int theDimension);
   bool ComputeNormalFromSelectionAndExtraRoot(root& output, root& ExtraRoot, Selection& theSelection, GlobalVariables& theGlobalVariables);
@@ -4308,6 +4308,11 @@ public:
   bool ReadFromFile(std::fstream& input);
   void ComputeDebugString();
   void ElementToString(std::string& output);
+  std::string ElementToString()
+  { std::string result;
+    this->ElementToString(result);
+    return result;
+  }
   void ElementToString(std::string& output, bool useHtml);
 };
 
@@ -8325,6 +8330,7 @@ public:
   void MakeArbitrary(char WeylGroupLetter, int n);
   void GenerateAdditivelyClosedSubset(roots& input, roots& output);
   Rational GetKillingDivTraceRatio();
+  Rational EstimateNumDominantWeightsBelow(root& inputHWsimpleCoords, GlobalVariables& theGlobalVariables);
   void MakeAn(int n);
   void MakeEn(int n);
   void MakeBn(int n);
@@ -8351,9 +8357,13 @@ public:
   { return this->WeylDimFormula(theWeightInFundamentalBasis);
   }
   Rational WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis);
-  void RaiseToHighestWeight
+  void RaiseToDominantWeightSlow
   (root& theWeight, int* sign=0, bool* stabilizerFound=0)
   ;
+  void RaiseToDominantWeight
+  (root& theWeight, roots& bufferEiBasis, int* sign=0, bool* stabilizerFound=0)
+  { this->GetExtremeElementInOrbit(theWeight, 0, bufferEiBasis, false, false, false, sign, stabilizerFound);
+  }
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 ;
@@ -8378,12 +8388,13 @@ public:
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
   bool GetAlLDominantWeightsHWFDIM
-  (root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
-   int upperBoundDominantWeights)
+(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
   ;
   bool FreudenthalEval
   (root& inputHWfundamentalCoords, hashedRoots& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage)
+   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+   GlobalVariables& theGlobalVariables)
   ;
   void GetWeylChamber
   (Cone& output, GlobalVariables& theGlobalVariables)
@@ -8409,17 +8420,27 @@ public:
   void ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho);
   void ProjectOnTwoPlane(root& orthonormalBasisVector1, root& orthonormalBasisVector2, GlobalVariables& theGlobalVariables);
   void GetLowestElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho, int* sign=0, bool* stabilizerFound=0)
-  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, true, RhoAction, UseMinusRho, sign, stabilizerFound);
+  (root & inputOutput, ElementWeylGroup* outputWeylElt,
+   roots& bufferEiBAsis,
+   bool RhoAction,
+   bool UseMinusRho, int* sign=0, bool* stabilizerFound=0)
+  { this->GetExtremeElementInOrbit
+    (inputOutput, outputWeylElt, bufferEiBAsis, true, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetHighestElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool RhoAction, bool UseMinusRho,
+  (root & inputOutput, ElementWeylGroup* outputWeylElt,
+   roots& bufferEiBAsis,
+   bool RhoAction, bool UseMinusRho,
    int* sign, bool* stabilizerFound)
-  { this->GetExtremeElementInOrbit(input, output, outputWeylElt, false, RhoAction, UseMinusRho, sign, stabilizerFound);
+  { this->GetExtremeElementInOrbit
+    (inputOutput, outputWeylElt, bufferEiBAsis, false, RhoAction, UseMinusRho, sign, stabilizerFound);
   }
   void GetExtremeElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
-  ;
+  (root& inputOutput, ElementWeylGroup* outputWeylElt,
+   roots& bufferEiBAsis,
+   bool findLowest, bool RhoAction, bool UseMinusRho, int* sign,
+   bool* stabilizerFound)
+     ;
   void GetLongestWeylElt(ElementWeylGroup& outputWeylElt) ;
   bool IsEigenSpaceGeneratorCoxeterElement(root& input);
   void GetCoxeterElement(ElementWeylGroup& outputWeylElt)
@@ -10875,7 +10896,7 @@ public:
  )
   ;
   std::string TensorAndDecompose
-(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output)
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output, GlobalVariables& theGlobalVariables)
   ;
   std::string ElementToString
   (const std::string& theVectorSpaceLetter, const std::string& theWeightLetter, bool useBrackets=false)
@@ -10912,6 +10933,7 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
+  std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const MonomialChar<Rational>& other);
 };

@@ -2857,7 +2857,7 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
   { theSelection.incrementSelectionFixedCardinality(rankVerticesSpan-1);
     for (int j=0; j<theSelection.CardinalitySelection; j++)
       extraVertices.AddOnTop(inputVertices[theSelection.elements[j]]);
-    if (extraVertices.ComputeNormal(normalCandidate))
+    if (extraVertices.ComputeNormal(normalCandidate, theDim))
     { bool hasPositive; bool hasNegative;
       hasPositive=false; hasNegative=false;
       for (int j=0; j<inputVertices.size; j++)
@@ -7401,10 +7401,12 @@ void DrawOperations::EnsureProperInitialization()
 }
 
 void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
-{ root lowest;
-  this->ComputeRho(false);
+{ this->ComputeRho(false);
+  root lowest=this->rho;
 //  std::cout << "rho: " << this->rho.ElementToString() << "<hr>";
-  this->GetLowestElementInOrbit(this->rho, lowest, outputWeylElt, false, false);
+  roots tempRoots;
+  tempRoots.MakeEiBasis(this->GetDim());
+  this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
   //std::stringstream out;
   //out << outputWeylElt;
 //  out << "\n<br>";
@@ -7417,12 +7419,12 @@ void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 }
 
 void WeylGroup::GetExtremeElementInOrbit
-  (root & input, root& output, ElementWeylGroup& outputWeylElt, bool findLowest, bool RhoAction, bool UseMinusRho, int* sign, bool* stabilizerFound)
-{ assert(& input!=&output);
-  output=input;
-  roots eiBasis;
-  eiBasis.MakeEiBasis(this->GetDim());
-  outputWeylElt.size=0;
+  (root& inputOutput, ElementWeylGroup* outputWeylElt,
+   roots& bufferEiBAsis,
+   bool findLowest, bool RhoAction, bool UseMinusRho, int* sign,
+   bool* stabilizerFound)
+{ if (outputWeylElt!=0)
+    outputWeylElt->size=0;
   if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -7432,7 +7434,7 @@ void WeylGroup::GetExtremeElementInOrbit
   { found=false;
     for (int i=0; i<this->GetDim(); i++)
     { bool shouldApplyReflection=false;
-      theScalarProd=this->RootScalarCartanRoot(output, eiBasis[i]);
+      theScalarProd=this->RootScalarCartanRoot(inputOutput, bufferEiBAsis[i]);
       if (findLowest)
         shouldApplyReflection=theScalarProd.IsPositive();
       else
@@ -7442,8 +7444,9 @@ void WeylGroup::GetExtremeElementInOrbit
           *stabilizerFound=true;
       if (shouldApplyReflection)
       { found=true;
-        this->SimpleReflection<Rational>(i, output, RhoAction, UseMinusRho, (Rational) 0);
-        outputWeylElt.AddOnTop(i);
+        this->SimpleReflection<Rational>(i, inputOutput, RhoAction, UseMinusRho, (Rational) 0);
+        if (outputWeylElt!=0)
+          outputWeylElt->AddOnTop(i);
         if (sign!=0)
           *sign*=-1;
       }
@@ -8614,15 +8617,19 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   root highestWeightTrue=highestWeightSimpleCoords;
-  this->RaiseToHighestWeight(highestWeightTrue);
+  roots eiBasis;
+  eiBasis.MakeEiBasis(this->GetDim());
+  this->RaiseToDominantWeight(highestWeightTrue, eiBasis);
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
     out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
     << "Your input in simple coordinates was: "
     << highestWeightSimpleCoords.ElementToString() << ".<br> ";
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
+  std::string tempS;
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
-  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt);
+  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, tempS, theGlobalVariables);
+  out <<  tempS << "<br>";
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
   else
@@ -8651,26 +8658,33 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
 
 bool WeylGroup::GetAlLDominantWeightsHWFDIM
 (root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
- int upperBoundDominantWeights)
-{ root highestWeightTrue=highestWeightSimpleCoords;
-  this->RaiseToHighestWeight(highestWeightTrue);
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  root highestWeightTrue=highestWeightSimpleCoords;
+  roots basisEi;
+  basisEi.MakeEiBasis(this->GetDim());
+  this->RaiseToDominantWeight(highestWeightTrue, basisEi);
   root highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
     return false;
-  int theTopHeight=highestWeightFundCoords.SumCoordinates().NumShort;
-  if (theTopHeight<0)
-    theTopHeight=0;
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoordinates().DoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoordinates().DoubleValue();
+  if (theTopHeightSimpleCoords<0)
+    theTopHeightSimpleCoords=0;
   List<hashedRoots> outputWeightsByHeight;
   int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
-  Rational UBDWeightsRat=1;
-  for (int i=0; i<highestWeightFundCoords.size; i++)
-    UBDWeightsRat*=highestWeightFundCoords[i]+1;
+
+  Rational UBDWeightsRat=this->EstimateNumDominantWeightsBelow(highestWeightTrue, theGlobalVariables);
+  out << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
+  if (!UBDWeightsRat.IsInteger())
+    out << " (~" << UBDWeightsRat.DoubleValue() << ")";
+  out << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
   upperBoundDominantWeights=
   MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue());
   int finalHashSize=MathRoutines::Maximum
-  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeight+1));
+  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeightSimpleCoords+1));
 
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
@@ -8681,7 +8695,8 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   int numTotalWeightsFound=0;
   int numPosRoots=this->RootsOfBorel.size;
   root currentWeight;
-  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeight; lowestUnexploredHeightDiff++)
+  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
+  lowestUnexploredHeightDiff++)
   { if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
       break;
     int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
@@ -8700,6 +8715,13 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
     outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
     currentHashes.ClearTheObjects();
   }
+  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
+  if (numTotalWeightsFound>=upperBoundDominantWeights)
+    out << "<hr>This message is generated either because the number of weights has "
+    << "exceeded the hard-coded RAM memory limits, or because "
+    << " a priori bound for the number of weights is WRONG. If the latter "
+    << " is the case, make sure to send an angry email to the author(s).";
+  outputDetails=out.str();
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
@@ -10248,7 +10270,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     irreducible highest weight module. The argument of the function is the highest weight \
     given in fundamental coordinates. ",
     "char(0,0,1)",
-   'B', 3, false,
+   'B', 3, true,
     & ParserNode::EvaluateChar
    );
    this->AddOneFunctionToDictionaryNoFail

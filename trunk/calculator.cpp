@@ -172,9 +172,14 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-  civilizedInput="freudenthal(char(5))";
-  theParser.DefaultWeylLetter='A';
-  theParser.DefaultWeylRank=1;
+//  civilizedInput="char (2) *char(3)";
+//  theParser.DefaultWeylLetter='A';
+//  theParser.DefaultWeylRank=1;
+
+//  civilizedInput="freudenthal(char (2,2,2,2,2,2) )";
+//  civilizedInput="freudenthal(char(5))";
+//  theParser.DefaultWeylLetter='E';
+//  theParser.DefaultWeylRank=6;
 //  civilizedInput="freudenthal(char(2,2,2))";
 //  civilizedInput="char(0,0,1)+char(1,0,0)+char(0,0,1)";
 //  civilizedInput="parabolicsInfoBruhatGraph(1,0,0,1)";
@@ -328,14 +333,14 @@ int main(int argc, char **argv)
   theParser.indicatorFileName=theParser.outputFolderPath + IPAdressCaller+ "indicator.html" ;
   theParser.indicatorFileNameDisplay=theParser.outputFolderDisplayPath + IPAdressCaller+ "indicator.html" ;
   theParser.indicatorReportFileName=theParser.outputFolderPath + IPAdressCaller+ "report.txt" ;
-  theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller+ "report.txt" ;
+  theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller + "report.txt" ;
   theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
-  { std::stringstream tempStreamX;
-    static_html3(tempStreamX);
-    std::fstream tempFile;
+  { std::fstream tempFile;
     CGI::OpenFileCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
-    tempFile << tempStreamX.str();
+    tempFile << "<html><body>" << theParser.javaScriptDisplayingIndicator << "</body></html>";
+    tempFile.flush();
+    tempFile.close();
   }
   ANNOYINGSTATISTICS;
   theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);

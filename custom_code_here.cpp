@@ -206,7 +206,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   MatrixLargeRational theProjectionBasisChanged;
   root startingWeight, projectedWeight;
   PolynomialOutputFormat theFormat;
-  SSalgebraModule tempM;
+  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
   tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
@@ -912,7 +912,7 @@ void Cone::TranslateMeMyLastCoordinateAffinization(root& theTranslationVector)
 }
 
 void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(roots& output)const
-{ hashedRoots outputHashed;
+{ HashedList<root> outputHashed;
   root tempRoot;
   for (int i=0; i< this->size; i++)
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
@@ -995,7 +995,7 @@ void PiecewiseQuasipolynomial::DrawMe
  root* distinguishedPoint)
 { PolynomialOutputFormat theFormat;
   roots latticePoints;
-  hashedRoots theLatticePointsFinal;
+  HashedList<root> theLatticePointsFinal;
   List<int> theLatticePointColors;
   List<int> tempList;
   if (numLatticePointsPerDim<0)
@@ -1026,7 +1026,7 @@ void PiecewiseQuasipolynomial::DrawMe
           if (!RestrictingChamber->IsInCone(tempRoot))
             tempList[k]=ZeroColor;
         }
-      theLatticePointsFinal.AddRootsOnTopHash(latticePoints);
+      theLatticePointsFinal.AddOnTopHash(latticePoints);
       theLatticePointColors.AddListOnTop(tempList);
     }
   }
@@ -2504,7 +2504,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 }
 
 void ConeComplex::GetNewVerticesAppend
-  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+  (Cone& myDyingCone, root& killerNormal, HashedList<root>& outputVertices, GlobalVariables& theGlobalVariables)
 { int theDimMinusTwo=killerNormal.size-2;
   int theDim=killerNormal.size;
   int numCycles=MathRoutines::NChooseK(myDyingCone.Normals.size, theDimMinusTwo);
@@ -2566,7 +2566,7 @@ bool ConeComplex::SplitChamber
   }
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
-  hashedRoots& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
+  HashedList<root>& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
   ZeroVertices.ClearTheObjects();
   Rational tempRat;
   for (int i=0; i<myDyingCone.Vertices.size; i++)
@@ -5137,6 +5137,13 @@ int ParserNode::EvaluatePrintRootSystem
     << "</td></tr>";
   }
   out << "</table>";
+  DrawingVariables theDV;
+  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
+  out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
+  << "(computed as explained on John Stembridge's website). "
+  << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
+  << "<br>The grey lines are the edges of the Weyl chamber."
+  << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -7430,6 +7437,8 @@ void WeylGroup::GetExtremeElementInOrbit
   if (stabilizerFound!=0)
     *stabilizerFound=false;
   Rational theScalarProd;
+//  static int numTimesReflectionWasApplied=0;
+
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<this->GetDim(); i++)
@@ -7449,9 +7458,11 @@ void WeylGroup::GetExtremeElementInOrbit
           outputWeylElt->AddOnTop(i);
         if (sign!=0)
           *sign*=-1;
+//        numTimesReflectionWasApplied++;
       }
     }
   }
+//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
 bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(root& input)
@@ -8295,7 +8306,7 @@ int ParserNode::EvaluateDrawRootSystemLabelDynkin
 { char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
   int theDimension= theNode.owner->DefaultWeylRank;
   return theNode.EvaluateDrawRootSystem
-  (theNode, theWeylLetter, theDimension, theGlobalVariables, 0, true, true,true);
+  (theNode, theWeylLetter, theDimension, theGlobalVariables, 0, true, true, true);
 }
 
 int ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
@@ -8612,14 +8623,12 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
 (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
-{ hashedRoots theDominantWeights;
+{ HashedList<root> theDominantWeights;
   double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   root highestWeightTrue=highestWeightSimpleCoords;
-  roots eiBasis;
-  eiBasis.MakeEiBasis(this->GetDim());
-  this->RaiseToDominantWeight(highestWeightTrue, eiBasis);
+  this->RaiseToDominantWeight(highestWeightTrue);
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
     out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
@@ -8635,7 +8644,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   else
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   roots tempRoots;
-  hashedRoots finalWeights;
+  HashedList<root> finalWeights;
   int estimatedNumWeights=(int )
   (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
@@ -8654,75 +8663,6 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
     out << "All weights were computed and are drawn. <br>";
   outputWeights.CopyFromBase(finalWeights);
   return out.str();
-}
-
-bool WeylGroup::GetAlLDominantWeightsHWFDIM
-(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
- int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  root highestWeightTrue=highestWeightSimpleCoords;
-  roots basisEi;
-  basisEi.MakeEiBasis(this->GetDim());
-  this->RaiseToDominantWeight(highestWeightTrue, basisEi);
-  root highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
-  if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
-    return false;
-  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoordinates().DoubleValue()+1;
-//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoordinates().DoubleValue();
-  if (theTopHeightSimpleCoords<0)
-    theTopHeightSimpleCoords=0;
-  List<hashedRoots> outputWeightsByHeight;
-  int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
-  int topHeightRootSystemPlusOne=topHeightRootSystem+1;
-  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
-
-  Rational UBDWeightsRat=this->EstimateNumDominantWeightsBelow(highestWeightTrue, theGlobalVariables);
-  out << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
-  if (!UBDWeightsRat.IsInteger())
-    out << " (~" << UBDWeightsRat.DoubleValue() << ")";
-  out << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
-  upperBoundDominantWeights=
-  MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue());
-  int finalHashSize=MathRoutines::Maximum
-  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeightSimpleCoords+1));
-
-  for (int i=0; i<topHeightRootSystemPlusOne; i++)
-    outputWeightsByHeight[i].SetHashSizE(finalHashSize);
-  outputWeightsSimpleCoords.ClearTheObjects();
-  outputWeightsSimpleCoords.SetHashSizE(upperBoundDominantWeights);
-  outputWeightsSimpleCoords.MakeActualSizeAtLeastExpandOnTop(upperBoundDominantWeights);
-  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
-  int numTotalWeightsFound=0;
-  int numPosRoots=this->RootsOfBorel.size;
-  root currentWeight;
-  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
-  lowestUnexploredHeightDiff++)
-  { if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
-      break;
-    int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
-    hashedRoots& currentHashes=outputWeightsByHeight[bufferIndexShift];
-    for (int lowest=0; lowest<currentHashes.size; lowest++)
-      for (int i=0; i<numPosRoots; i++)
-      { currentWeight=currentHashes[lowest];
-        currentWeight-=this->RootsOfBorel[i];
-        if (this->IsDominantWeight(currentWeight))
-        { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
-          currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
-            numTotalWeightsFound++;
-        }
-      }
-    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
-    currentHashes.ClearTheObjects();
-  }
-  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
-  if (numTotalWeightsFound>=upperBoundDominantWeights)
-    out << "<hr>This message is generated either because the number of weights has "
-    << "exceeded the hard-coded RAM memory limits, or because "
-    << " a priori bound for the number of weights is WRONG. If the latter "
-    << " is the case, make sure to send an angry email to the author(s).";
-  outputDetails=out.str();
-  return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
 int ParserNode::EvaluateDrawWeightSupport
@@ -8971,7 +8911,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     Layers.LastObject()->AddOnTop(i);
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
-  hashedRoots orbit;
+  HashedList<root> orbit;
   orbit.MakeActualSizeAtLeastExpandOnTop(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
@@ -9129,9 +9069,11 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   theNode.outputString=out.str();
 //  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
 
-  theNode.owner->SystemCommands.AddOnTop("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + fileName + ".tex");
+  theNode.owner->SystemCommands.AddOnTop
+  ("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + fileName + ".tex");
   theNode.owner->SystemCommands.AddOnTop("dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight");
-  theNode.owner->SystemCommands.AddOnTop("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + filename2 + ".tex");
+  theNode.owner->SystemCommands.AddOnTop
+  ("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + filename2 + ".tex");
   theNode.owner->SystemCommands.AddOnTop("dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight");
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
@@ -9142,7 +9084,7 @@ void Parser::initTestAlgebraNeedsToBeRewritten(GlobalVariables& theGlobalVariabl
 { if (this->DefaultWeylLetter=='B' && this->DefaultWeylRank==3)
   { Parser tempParser;
     this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
-    SSalgebraModule theModule;
+    SSalgebraModuleOld theModule;
     std::stringstream out;
     theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
     List<ElementSimpleLieAlgebra> theBasis;
@@ -10094,8 +10036,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    fundamendal weight basis. All arguments must be non-negative integers. \
    The maximum number of drawn weights allowed is (hard-code) limited to 10 000. If \
    the number of weights in the weight support exceeds this number, only the first 10 000 weights will be drawn. ",
-   "drawWeightSupport(2,2,2)",
-   DefaultWeylLetter, DefaultWeylRank, true,
+   "drawWeightSupport(1,1,1)",
+   'B', 3, true,
     & ParserNode::EvaluateDrawWeightSupport
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10265,18 +10207,24 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("char",
    "(Rational,...)",
-   "<b>Experimental. Tensoring characters at the moment is an algorithmic playgound, so \
-    please do not trust any printouts you see. </b> Creates a character corresponding to an \
-    irreducible highest weight module. The argument of the function is the highest weight \
-    given in fundamental coordinates. ",
-    "char(0,0,1)",
+   "<b>Not fully tested, however several tests against LiE work just fine. </b> Creates a character corresponding to an \
+    irreducible highest weight module with respect to the ambient simple Lie algebra. \
+    The argument of the function is the highest weight \
+    given in fundamental coordinates. Some arithmetic operations between characters are allowed. \
+    Multiplication of characters (i.e. tensor decomposition) is implemented via the Brauer-Klimyk formula. \
+    The basic algorithms used are the same as in LiE, however \
+    the current implementation is more than 10 times slower (for technical reasons), \
+    so for heavy computations you might want to use LiE instead. ",
+    "(char(0,0,1)*char(1,0,0)-char(0,1,0))*char(0,0,1)",
    'B', 3, true,
     & ParserNode::EvaluateChar
    );
    this->AddOneFunctionToDictionaryNoFail
   ("freudenthal",
    "(Char)",
-   "<b>Experimental. </b> Freudenthal formula. ",
+   "<b>Experimental. </b> Freudenthal formula that gives the multiplicities of the dominant weights of the \
+    representation. The implementation works considerably slower than LiE(>10 times - the reason is technical; \
+     the algorithm used is approximately the same), so consider using LiE if you need to do a larger example. ",
     "freudenthal(char(2,2,2))",
    'B', 3, true,
     & ParserNode::EvaluateFreudenthal

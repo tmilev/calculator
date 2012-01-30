@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 #endif
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -159,6 +159,7 @@ int main(int argc, char **argv)
   std::string& inputWeylString = inputStrings.TheObjects[0];
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
+  theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   if (inputWeylString!="")
     theParser.DefaultWeylLetter=inputWeylString[0];
   else
@@ -172,10 +173,15 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="-char(1,1,1)";
+//  civilizedInput="char(0,0,0,0,0,0,0,1)char(0,0,0,0,0,1,0,1)";
+//civilizedInput="freudenthal( char(0,0,0,0,0,0,1,2) )";
 //  civilizedInput="char (2) *char(3)";
-//  theParser.DefaultWeylLetter='A';
-//  theParser.DefaultWeylRank=1;
-
+//  theParser.DefaultWeylLetter='E';
+//  theParser.DefaultWeylRank=8;
+//civilizedInput="char(0,0,0,0,0,1,0)*char(0,0,0,0,0,0,1)";
+//theParser.DefaultWeylLetter='E';
+//theParser.DefaultWeylRank=7;
 //  civilizedInput="freudenthal(char (2,2,2,2,2,2) )";
 //  civilizedInput="freudenthal(char(5))";
 //  theParser.DefaultWeylLetter='E';
@@ -334,6 +340,7 @@ int main(int argc, char **argv)
   theParser.indicatorFileNameDisplay=theParser.outputFolderDisplayPath + IPAdressCaller+ "indicator.html" ;
   theParser.indicatorReportFileName=theParser.outputFolderPath + IPAdressCaller+ "report.txt" ;
   theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller + "report.txt" ;
+  theParser.userLabel=IPAdressCaller;
   theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
   { std::fstream tempFile;

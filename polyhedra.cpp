@@ -4057,34 +4057,6 @@ void simplicialCones::ReadFromFile(std::fstream& input, GlobalVariables* theGlob
     this->TheObjects[i].ReadFromFile(input, theGlobalVariables);
 }
 
-void hashedRoots::WriteToFile(std::fstream& output)
-{ int theDimension=0;
-  if (this->size>0)
-    theDimension= this->TheObjects[0].size;
-  output << "Num|dim: " << this->size << " " << theDimension << " ";
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<theDimension; j++)
-    { this->TheObjects[i].TheObjects[j].WriteToFile(output);
-      output << " ";
-    }
-}
-
-bool hashedRoots::ReadFromFile(std::fstream& input)
-{ int theDimension; std::string tempS;
-  int theSize;
-  this->ClearTheObjects();
-  input >> tempS >> theSize >> theDimension;
-  this->MakeActualSizeAtLeastExpandOnTop(theSize);
-  root tempRoot;
-  tempRoot.SetSize(theDimension);
-  for (int i=0; i<theSize; i++)
-  { for (int j=0; j<theDimension; j++)
-      tempRoot.TheObjects[j].ReadFromFile(input);
-    this->AddOnTopHash(tempRoot);
-   }
-   return true;
-}
-
 void ConeGlobal::ComputeFromDirections(roots& directions, GlobalVariables& theGlobalVariables, int theDimension)
 { this->size=0;
   int NumCandidates = MathRoutines::NChooseK(directions.size, theDimension-1);
@@ -10610,7 +10582,7 @@ void WeylGroup::ActOnRootByGroupElement(int index, root& theRoot, bool RhoAction
 void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
 { root tempRoot;
   roots startRoots;
-  hashedRoots tempHashedRootS;
+  HashedList<root> tempHashedRootS;
   int theDimension=this->CartanSymmetric.NumCols;
   for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i);
@@ -10631,13 +10603,14 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
     this->RootSystem.AddOnTopHash(this->RootsOfBorel.TheObjects[i]);
 }
 
-void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho, int UpperLimitNumElements)
+void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements)
 { WeylGroup tempW;
   this->GenerateOrbit(theRoots, RhoAction, output, false, tempW, UseMinusRho, UpperLimitNumElements);
 }
 
-void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
-{ for (int i=0; i<theRoots.size; i++)
+void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
+{ output.ClearTheObjects();
+  for (int i=0; i<theRoots.size; i++)
     output.AddOnTopHash(theRoots.TheObjects[i]);
   root currentRoot;
   ElementWeylGroup tempEW;
@@ -10654,9 +10627,9 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
   }
   for (int i=0; i<output.size; i++)
   { if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
-      tempEW=outputSubset.TheObjects[i];
+      tempEW=outputSubset[i];
     for (int j=0; j<this->CartanSymmetric.NumRows; j++)
-    { currentRoot=output.TheObjects[i];
+    { currentRoot=output[i];
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}
@@ -10664,14 +10637,12 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& outp
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}
-      if (output.IndexOfObjectHash(currentRoot)==-1)
-      { output.AddOnTopHash(currentRoot);
+      if (output.AddOnTopNoRepetitionHash(currentRoot))
         if (ComputingAnOrbitGeneratingSubsetOfTheGroup)
         { tempEW.AddOnTop(j);
           outputSubset.AddOnTopHash(tempEW);
           tempEW.PopIndexSwapWithLast(tempEW.size-1);
         }
-      }
       if (UpperLimitNumElements>0)
         if (outputSubset.size>=UpperLimitNumElements || output.size>=UpperLimitNumElements)
           return;
@@ -10692,7 +10663,7 @@ void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& o
 }
 
 void WeylGroup::GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights)
-{ hashedRoots TheIndicatorsOrbit;
+{ HashedList<root> TheIndicatorsOrbit;
   WeylGroup OrbitGeneratingSubset;
   PolynomialOutputFormat PolyFormatLocal;
   roots tempRoots;
@@ -10762,7 +10733,7 @@ void WeylGroup::ElementToString(std::string& output)
 //  out <<"Number of roots: "<<this->RootSystem.size<<"\n";
   this->rho.ElementToString(tempS);
   out << "rho:" << tempS << "\n";
-  this->RootSystem.ElementToString(tempS);
+  this->RootSystem.ElementToStringGeneric(tempS);
   out << "Root system:\n" << tempS << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
@@ -11179,7 +11150,7 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
   roots tempRoots;
   tempRoots.AddRoot(this->rho);
   this->ClearTheObjects();
-  hashedRoots tempRoots2;
+  HashedList<root> tempRoots2;
   tempRoots2.ClearTheObjects();
   this->GenerateOrbit(tempRoots, false, tempRoots2, true, *this, false, UpperLimitNumElements);
 }
@@ -11213,7 +11184,7 @@ void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& othe
 
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 { this->RootSubsystem.ClearTheObjects();
-  this->RootSubsystem.AddRootsOnTopHash(this->simpleGenerators);
+  this->RootSubsystem.AddOnTopHash(this->simpleGenerators);
   root currentRoot;
   for (int i=0; i<this->RootSubsystem.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
@@ -11341,29 +11312,6 @@ void intRoots::BubbleSort(intRoot* weights)
         this->TheObjects[j]=tempRoot;
       }
     }
-}
-
-void hashedRoots::ElementToString(std::string& output)
-{ this->ElementToString(output, false);
-}
-
-void hashedRoots::ElementToString(std::string& output, bool useHtml)
-{ std::stringstream  out;
-  std::string tempS;
-  out << "Number of vectors: " << this->size << "\n";
-  if (useHtml)
-    out << "\n<br>\n";
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
-    out << tempS << "\n";
-    if (useHtml)
-      out << "\n<br>\n";
-  }
-  output= out.str();
-}
-
-void hashedRoots::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
 }
 
 void PolynomialsRationalCoeff::ElementToString(std::string& output, int numDisplayedEltsMinus1ForAll)
@@ -11554,7 +11502,7 @@ void VermaModulesWithMultiplicities::ElementToString(std::string& output)
 }
 
 void VermaModulesWithMultiplicities::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
+{ this->ElementToStringGeneric(this->DebugString);
 }
 
 void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
@@ -12273,9 +12221,8 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 void thePFcomputation::Run()
 { this->theWeylGroup.MakeEn(6);
   this->theWeylGroup.GenerateRootSystemFromKillingFormMatrix();
-  this->theWeylGroup.RootSystem.ComputeDebugString();
   this->ComputeTableAllowed();
-  this->ComputeDebugString();
+//  this->ComputeDebugString();
   this->EnumerateRecursively(0, 0, 6);
 }
 
@@ -12842,7 +12789,7 @@ void rootSubalgebra::ComputeKModules()
   //this->ComputeDebugString();
   this->ComputeRootsOfK();
   root tempLW, tempHW;
-  hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
+  HashedList<root>& AllRoots= this->AmbientWeyl.RootSystem;
   this->kModules.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
   this->HighestRootsK.MakeActualSizeAtLeastExpandOnTop(this->AmbientWeyl.CartanSymmetric.NumRows);
   this->LowestWeightsGmodK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
@@ -13499,7 +13446,7 @@ bool rootSubalgebras::IsANewSubalgebra(rootSubalgebra& input, GlobalVariables& t
 void rootSubalgebra::ComputeRootsOfK()
 { this->AllRootsK.size=0;
   this->PositiveRootsK.size=0;
-  hashedRoots& AllRoots=this->AmbientWeyl.RootSystem;
+  HashedList<root>& AllRoots=this->AmbientWeyl.RootSystem;
   this->AllRootsK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
   this->PositiveRootsK.MakeActualSizeAtLeastExpandOnTop(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
@@ -14223,7 +14170,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   this->SimpleBasisK.GetMatRootsToRows(tempMat);
   tempMat.Invert(theGlobalVariables);
   int counter=0;
-  hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
+  HashedList<root>& AllRoots= this->AmbientWeyl.RootSystem;
   for(int i=0; i<AllRoots.size; i++)
   { root linComb;
     if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
@@ -14265,7 +14212,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
   root tempRoot;
   tempRoot.Assign(this->SimpleBasisK.TheObjects[0]);
   this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
-  hashedRoots& AllRoots= this->AmbientWeyl.RootSystem;
+  HashedList<root>& AllRoots= this->AmbientWeyl.RootSystem;
   for (int l=0; l<this->SimpleBasisK.size; l++)
   { Rational tempRat;
     this->AmbientWeyl.RootScalarCartanRoot(tempRoot, this->SimpleBasisK.TheObjects[l], tempRat);
@@ -16277,7 +16224,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 }
 
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
-{ hashedRoots& theRoots=this->theWeyl.RootSystem;
+{ HashedList<root>& theRoots=this->theWeyl.RootSystem;
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   int TotalDim=theRoots.size+theDimension;
   int numRoots=theRoots.size;
@@ -19258,7 +19205,7 @@ void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariab
 }
 
 void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,  bool recomputeAmbientRho)
-{ hashedRoots& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
+{ HashedList<root>& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
   this->truncated=false;
   this->ClearTheObjects();
   orbitRho.ClearTheObjects();
@@ -19317,7 +19264,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots
 }
 
 bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements)
-{ hashedRoots theOrbit;
+{ HashedList<root> theOrbit;
   bool result = true;
   theOrbit.ClearTheObjects();
   root tempRoot=input;
@@ -19622,7 +19569,7 @@ void DyckPaths::initPathGraphTypesABC()
   int theDimension= this->AmbientWeyl.CartanSymmetric.NumRows;
   this->NumCompletePaths=theDimension;
   this->AmbientWeyl.ComputeRho(true);
-  this->PositiveRoots.AddRootsOnTopHash(this->AmbientWeyl.RootsOfBorel);
+  this->PositiveRoots.AddOnTopHash(this->AmbientWeyl.RootsOfBorel);
   this->pathGraphPairsOfNodes.SetSize(this->PositiveRoots.size);
   this->pathGraphEdgeLabels.SetSize(this->PositiveRoots.size);
   List<int> tempList;
@@ -19717,17 +19664,17 @@ void DyckPaths::GenerateAllDyckPathsTypesABCRecursive()
 
 void DyckPaths::ElementToString(std::string& output,  bool useHtml)
 { std::stringstream out; std::string tempS;
-  this->PositiveRoots.ElementToString(tempS, useHtml);
-  out <<"Positive roots:\n ";
+  this->PositiveRoots.ElementToStringGeneric(tempS, useHtml);
+  out << "Positive roots:\n ";
   if (useHtml)
     out << "<br>\n";
   out << tempS;
   if (useHtml)
     out << "\n<br>\n";
-  out <<"\nHalf sum of positive roots: " << this->AmbientWeyl.rho.ElementToString()<<"\n";
+  out << "\nHalf sum of positive roots: " << this->AmbientWeyl.rho.ElementToString()<<"\n";
   if (useHtml)
     out << "\n<br><br><br>\n";
-  out <<"\n\n\n*********************************************************************";
+  out << "\n\n\n*********************************************************************";
   if (useHtml)
     out << "\n<br>\n ";
   out << "The allowed starting roots are the simple ones";
@@ -19735,13 +19682,13 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
     out << "\n<br>\n ";
   out << "The allowed ending roots are: ";
   for (int i=0; i<this->AllowedEndNodes.CardinalitySelection; i++)
-    out <<this->PositiveRoots.TheObjects[this->AllowedEndNodes.elements[i]].ElementToString()<<", ";
+    out << this->PositiveRoots.TheObjects[this->AllowedEndNodes.elements[i]].ElementToString()<<", ";
   if (useHtml)
     out << "\n<br><br><br>\n";
-  out <<"\n\n\n*********************************************************************";
+  out << "\n\n\n*********************************************************************";
   if (useHtml)
     out << "\n<br>\n";
-  out<<"\nNumber complete paths (not including the zero path): "<< this->NumCompletePaths;
+  out << "\nNumber complete paths (not including the zero path): "<< this->NumCompletePaths;
   if (useHtml)
     out << "\n<br>\n";
   out << "List of complete paths: ";
@@ -19754,14 +19701,14 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
       this->TheObjects[i].ElementToString(tempS, *this, useHtml, false);
       if (useHtml)
         out << "\n<br>\n";
-      out << "\nPath counter " << counter <<": "<< tempS<<"\n";
+      out << "\nPath counter " << counter << ": " << tempS << "\n";
     }
   if (useHtml)
     out << "\n<br><br><br>\n";
-  out <<"\n\n\n*********************************************************************";
+  out << "\n\n\n*********************************************************************";
   if (useHtml)
     out << "\n<br>\n";
-  out<<"\nFull number of paths (including the zero path): "<< this->size;
+  out << "\nFull number of paths (including the zero path): " << this->size;
   if (useHtml)
     out << "\n<br>\n";
   out << "Full list of paths: ";
@@ -19771,7 +19718,7 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
   { this->TheObjects[i].ElementToString(tempS, *this, useHtml, false);
     if (useHtml)
       out << "\n<br>\n";
-    out << "\nPath index " << i <<": "<< tempS<<"\n";
+    out << "\nPath index " << i << ": " << tempS << "\n";
   }
   if (useHtml)
     out << "\n<br>\n<br>\n<br>\n*********************************************************************<br>\n";
@@ -19782,11 +19729,11 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
   { this->TheObjects[i].ElementToString(tempS, *this, useHtml, true);
     if (useHtml)
       out << "\n<br>\n";
-    out << "\nPath index " << i <<": "<< tempS<<"\n";
+    out << "\nPath index " << i << ": " << tempS << "\n";
   }
   if (useHtml)
     out << "\n<br><br><br>\n";
-  out <<"\n\n\n*********************************************************************";
+  out << "\n\n\n*********************************************************************";
   if (useHtml)
     out << "\n<br>\n";
   if (useHtml)
@@ -19794,19 +19741,20 @@ void DyckPaths::ElementToString(std::string& output,  bool useHtml)
   for (int i=0; i<this->pathGraphPairsOfNodes.size; i++)
   { if (useHtml)
       out << "\n<br>\n";
-    out << "\nNode " << i<< " linked to: ";
+    out << "\nNode " << i << " linked to: ";
     for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
       out << this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]<< ", ";
     if (useHtml)
       out << "\n<br>\n";
-    out <<"\nCoordiante form: ";
+    out << "\nCoordiante form: ";
     for (int j=0; j<this->pathGraphPairsOfNodes.TheObjects[i].size; j++)
-      out << this->PositiveRoots.TheObjects[i].ElementToString()<<"->"<< this->PositiveRoots.TheObjects[this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]].ElementToString()<<"; ";
+      out << this->PositiveRoots.TheObjects[i].ElementToString() << "->"
+      << this->PositiveRoots.TheObjects[this->pathGraphPairsOfNodes.TheObjects[i].TheObjects[j]].ElementToString()<<"; ";
     if (useHtml)
       out << "\n<br>\n";
     out << "\nCorresponding edges: ";
     for (int j=0; j<this->pathGraphEdgeLabels.TheObjects[i].size; j++)
-      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j]<< ", ";
+      out << this->pathGraphEdgeLabels.TheObjects[i].TheObjects[j] << ", ";
   }
   output=out.str();
 }
@@ -19816,14 +19764,14 @@ void DyckPath::ElementToString(std::string& output, DyckPaths& owner,  bool useH
   if (WithDetail)
   { if (useHtml)
     out << "\n<br>\n";
-    out <<"\nNodes: ";
+    out << "\nNodes: ";
     for (int i=0; i<this->thePathNodes.size; i++)
-      out << this->thePathNodes.TheObjects[i]<<", ";
+      out << this->thePathNodes.TheObjects[i] << ", ";
     if (useHtml)
       out << "\n<br>\n";
-    out <<"\nPaths: ";
+    out << "\nPaths: ";
     for (int i=0; i<this->thePathEdgesTaken.size; i++)
-      out << this->thePathEdgesTaken.TheObjects[i]<<", ";
+      out << this->thePathEdgesTaken.TheObjects[i] << ", ";
     if (useHtml)
       out << "\n<br>\n";
     out << "\nCoordinate form: ";
@@ -19831,7 +19779,7 @@ void DyckPath::ElementToString(std::string& output, DyckPaths& owner,  bool useH
   for (int i=0; i<this->thePathNodes.size; i++)
   { out << owner.PositiveRoots.TheObjects[this->thePathNodes.TheObjects[i]].ElementToString();
     if (i!=this->thePathNodes.size-1)
-      out <<"->";
+      out << "->";
   }
   output=out.str();
 }
@@ -19996,7 +19944,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>&
       }
     if (numLettersSinceLastNewLine>12 && i!= this->StandardOrder.size-1 && useLatex)
     { numLettersSinceLastNewLine=0;
-      out <<"\\\\&&\n";
+      out << "\\\\&&\n";
     }
   }
   if (useLatex && useBeginEqnArray)
@@ -20591,7 +20539,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs(int theRelativeDimension, Se
   ProblemCounter++;
   Monomial<Rational> tempM;
   Rational tempRat;
-  hashedRoots RootSpacesThatNeedToBeKilled;
+  HashedList<root> RootSpacesThatNeedToBeKilled;
   RootSpacesThatNeedToBeKilled.ClearTheObjects();
   //List<int> IndicesEquationsByRootSpace;
   RootSpacesThatNeedToBeKilled.MakeActualSizeAtLeastExpandOnTop(this->theWeyl.RootSystem.size);
@@ -22065,7 +22013,7 @@ bool CombinatorialChamber::HasHPositiveAndHNegativeVertex(root& h)
   return false;
 }
 
-bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables)
+bool CombinatorialChamber::SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, HashedList<root>& FacetOutput, GlobalVariables& theGlobalVariables)
 { if (!(this->Externalwalls.size>=output.AmbientDimension))
   { this->ComputeDebugString(output);
 //    CombinatorialChamberContainer::TheBigDump<<this->DebugString;
@@ -22812,12 +22760,9 @@ void MatrixLargeRational::MakeLinearOperatorFromDomainAndRange(roots& domain, ro
   this->Transpose(theGlobalVariables);
 }
 
-//void SemisimpleLieAlgebra::ComputeD
-
 bool SemisimpleLieAlgebra::IsInTheWeightSupport(root& theWeight, root& highestWeight, GlobalVariables& theGlobalVariables)
 { root correspondingDominant= theWeight;
-  this->theWeyl.RaiseToDominantWeightSlow(correspondingDominant);
-
+  this->theWeyl.RaiseToDominantWeight(correspondingDominant);
   root theDiff= highestWeight - correspondingDominant;
   correspondingDominant.ComputeDebugString();
   highestWeight.ComputeDebugString();
@@ -22829,19 +22774,10 @@ bool SemisimpleLieAlgebra::IsInTheWeightSupport(root& theWeight, root& highestWe
 
 bool WeylGroup::IsDominantWeight(root& theWeight)
 { int theDimension= this->CartanSymmetric.NumRows;
-  root tempRoot;
   for (int i=0; i<theDimension; i++)
-  { tempRoot.MakeEi(theDimension, i);
-    if (this->RootScalarCartanRoot(tempRoot, theWeight).IsNegative())
+    if (this->GetScalarProdSimpleRoot(theWeight, i).IsNegative())
       return false;
-  }
   return true;
-}
-
-void WeylGroup::RaiseToDominantWeightSlow(root& theWeight, int* sign, bool* stabilizerFound)
-{ roots eiBasis;
-  eiBasis.MakeEiBasis(this->GetDim());
-  this->RaiseToDominantWeight(theWeight, eiBasis, sign, stabilizerFound);
 }
 
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(root& theHighestWeight, GlobalVariables& theGlobalVariables)
@@ -23570,12 +23506,23 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
     switch (this->ExpressionType)
     { case ParserNode::typeIntegerOrIndex: if (i==0) this->intValue+=currentChild.intValue; else this->intValue-=currentChild.intValue; break;
-      case ParserNode::typeRational: if (i==0) this->rationalValue+=currentChild.rationalValue; else this->rationalValue-=currentChild.rationalValue; break;
+      case ParserNode::typeRational:
+        if (i==0)
+          this->rationalValue+=currentChild.rationalValue;
+        else
+          this->rationalValue-=currentChild.rationalValue;
+        break;
       case ParserNode::typePoly: if(i==0) this->polyValue.GetElement().AddPolynomial(currentChild.polyValue.GetElement()); else this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeRationalFunction: if(i==0) this->ratFunction.GetElement()+=(currentChild.ratFunction.GetElement()); else this->ratFunction.GetElement()-=(currentChild.ratFunction.GetElement()); break;
       case ParserNode::typeUEelement: if (i==0) this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); else this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
       case ParserNode::typeUEElementOrdered: if (i==0) this->UEElementOrdered.GetElement()+=currentChild.UEElementOrdered.GetElement(); else this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
       case ParserNode::typeWeylAlgebraElement: if (i==0) this->WeylAlgebraElement.GetElement()+=currentChild.WeylAlgebraElement.GetElement(); else this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
+      case ParserNode::typeCharSSFDMod:
+        if (i==0)
+          this->theChar.GetElement()+=currentChild.theChar.GetElement();
+        else
+          this->theChar.GetElement()-=currentChild.theChar.GetElement();
+        break;
       default: this->ExpressionType=this->typeError; return;
     }
   }
@@ -23594,6 +23541,7 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     case ParserNode::typeRational: this->rationalValue-=currentChild.rationalValue; break;
     case ParserNode::typePoly: this->polyValue.GetElement().Subtract(currentChild.polyValue.GetElement()); break;
     case ParserNode::typeUEelement: this->UEElement.GetElement()-=currentChild.UEElement.GetElement(); break;
+    case ParserNode::typeCharSSFDMod: this->theChar.GetElement()-=currentChild.theChar.GetElement(); break;
     case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
     case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
     default: this->ExpressionType=this->typeError; return;
@@ -23637,7 +23585,7 @@ void ParserNode::EvaluateSecretSauce(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables)
-{ SSalgebraModule theModule;
+{ SSalgebraModuleOld theModule;
   std::stringstream out;
   theModule.InduceFromEmbedding(out, this->owner->theHmm, theGlobalVariables);
   for (int i=0; i<theModule.actionsNegativeRootSpacesCartanPositiveRootspaces.size; i++)
@@ -24172,7 +24120,7 @@ int ParserNode::EvaluatePrintDecomposition
 { Parser tempParser;
   HomomorphismSemisimpleLieAlgebra tempHmm;
   tempHmm.MakeG2InB3(tempParser, theGlobalVariables);
-  SSalgebraModule theModule;
+  SSalgebraModuleOld theModule;
   std::stringstream out, out2;
   theModule.InduceFromEmbedding(out2, tempHmm, theGlobalVariables);
   out << out2.str();
@@ -26206,7 +26154,7 @@ void EigenVectorComputation::GetDiffOperatorFromShiftAndCoefficient
   //}
 }
 
-void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables)
+void SSalgebraModuleOld::InduceFromEmbedding(std::stringstream& out, HomomorphismSemisimpleLieAlgebra& theHmm, GlobalVariables& theGlobalVariables)
 { this->theAlgebra.Assign(theHmm.theDomain);
   this->ambientAlgebrA.Assign(theHmm.theRange);
   int theDomainRank=this->theAlgebra.theWeyl.CartanSymmetric.NumRows;
@@ -26321,7 +26269,7 @@ void SSalgebraModule::InduceFromEmbedding(std::stringstream& out, HomomorphismSe
   }
 }
 
-void SSalgebraModule::ComputeAdMatrixFromModule
+void SSalgebraModuleOld::ComputeAdMatrixFromModule
   (ElementSimpleLieAlgebra& theElt, roots& theModule, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output,
    GlobalVariables& theGlobalVariables)
 { ElementSimpleLieAlgebra tempElt1, tempElt2;
@@ -26340,7 +26288,7 @@ void SSalgebraModule::ComputeAdMatrixFromModule
   }
 }
 
-void SSalgebraModule::GenerateSubmoduleFromRootNegativeRootSpacesFirst
+void SSalgebraModuleOld::GenerateSubmoduleFromRootNegativeRootSpacesFirst
   (root& input, roots& output, List<MatrixLargeRational>& allSimpleGenerators, GlobalVariables& theGlobalVariables)
 { output.size=0;
   output.AddOnTop(input);
@@ -26354,7 +26302,7 @@ void SSalgebraModule::GenerateSubmoduleFromRootNegativeRootSpacesFirst
     }
 }
 
-void SSalgebraModule::ExtractHighestWeightVectorsFromVector
+void SSalgebraModuleOld::ExtractHighestWeightVectorsFromVector
   (root& input, roots& outputVectors, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& simpleNegGenerators)
 { //Index ordering of sipleNegGenerators:
   //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
@@ -26375,7 +26323,7 @@ void SSalgebraModule::ExtractHighestWeightVectorsFromVector
   }
 }
 
-void SSalgebraModule::ClimbDownFromVectorAccordingToSequence
+void SSalgebraModuleOld::ClimbDownFromVectorAccordingToSequence
   (root& input, root& output, Rational& outputCoeff, List<MatrixLargeRational>& simplePosGenerators, List<MatrixLargeRational>& SimpleNegGenerators,
    List<int>& inputGeneratorSequence, List<int>& inputGeneratorPowers)
 { assert(&input!=&output);
@@ -26392,7 +26340,7 @@ void SSalgebraModule::ClimbDownFromVectorAccordingToSequence
   }
 }
 
-void SSalgebraModule::ClimbDownFromHighestWeightAlongSl2String
+void SSalgebraModuleOld::ClimbDownFromHighestWeightAlongSl2String
   (root& input, root& output, Rational& outputCoeff, MatrixLargeRational& posGenerator, MatrixLargeRational& negGenerator, int generatorPower)
 { assert(&input!=&output);
   Rational currentWeight;
@@ -26411,7 +26359,7 @@ void SSalgebraModule::ClimbDownFromHighestWeightAlongSl2String
   }
 }
 
-void SSalgebraModule::ClimbUpFromVector
+void SSalgebraModuleOld::ClimbUpFromVector
   (root& input, root& outputLastNonZero, List<MatrixLargeRational>& SimplePositiveGenerators, List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers)
 { root tempRoot;
   assert(&input!=&outputLastNonZero);
@@ -26439,14 +26387,14 @@ void SSalgebraModule::ClimbUpFromVector
   }
 }
 
-void SSalgebraModule::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+void SSalgebraModuleOld::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
   (const List<ElementSimpleLieAlgebra>& input, const SemisimpleLieAlgebra& ambientLieAlgebra, List<MatrixLargeRational>& output)
 { output.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     this->ConvertElementsToAdMatrixFormNegativeRootSpacesFirst(input.TheObjects[i], ambientLieAlgebra, output.TheObjects[i]);
 }
 
-void SSalgebraModule::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
+void SSalgebraModuleOld::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
   (const ElementSimpleLieAlgebra& input, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output)
 { ElementSimpleLieAlgebra tempElt1, tempElt2;
   int numGenerators=ambientLieAlgebra.GetNumGenerators();
@@ -26462,7 +26410,7 @@ void SSalgebraModule::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
 //  std::cout << "<br><div class=\"math\">" << output.ElementToString(false, true) << "</div>";
 }
 
-void SSalgebraModule::ActOnPolynomialOverModule
+void SSalgebraModuleOld::ActOnPolynomialOverModule
   (const ElementSimpleLieAlgebra& theActingElement, const PolynomialOverModule& theArgument, PolynomialOverModule& output)
 { root vectorFormElement;
   theActingElement.ElementToVectorNegativeRootSpacesFirst(vectorFormElement);
@@ -26480,7 +26428,7 @@ void SSalgebraModule::ActOnPolynomialOverModule
   output.Assign(Accum);
 }
 
-void SSalgebraModule::ActOnMonomialOverModule
+void SSalgebraModuleOld::ActOnMonomialOverModule
   (int indexChevalleyGeneratorNegativeSpacesFirst, const Monomial<Rational>& theArgument, PolynomialRationalCoeff& output)
 { int theDim=this->GetDim();
   output.Nullify(theDim);
@@ -26503,7 +26451,7 @@ void SSalgebraModule::ActOnMonomialOverModule
     }
 }
 
-void SSalgebraModule::ComputeInvariantsOfDegree
+void SSalgebraModuleOld::ComputeInvariantsOfDegree
   (int degree, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { SelectionWithMaxMultiplicity theSel;
   int theDim=this->GetDim();
@@ -26589,7 +26537,7 @@ void SSalgebraModule::ComputeInvariantsOfDegree
   }
 }
 
-void SSalgebraModule::mapInvariantsToEmbedding
+void SSalgebraModuleOld::mapInvariantsToEmbedding
   (std::stringstream& out, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
 { //PolynomialRationalCoeff tempP="x_1^2";
   PolynomialOutputFormat PolyFormatLocal;
@@ -26607,7 +26555,7 @@ void SSalgebraModule::mapInvariantsToEmbedding
   }
 }
 
-void SSalgebraModule::mapMonomialToEmbedding
+void SSalgebraModuleOld::mapMonomialToEmbedding
   (Monomial<Rational>& input, ElementUniversalEnveloping& Accum, SemisimpleLieAlgebra& owner, std::stringstream& out, GlobalVariables& theGlobalVariables)
 { permutation thePermutation;
   PolynomialOutputFormat PolyFormatLocal;
@@ -27515,7 +27463,10 @@ std::string ParserNode::ElementToStringValueOnlY
       << "\n\\end{array}";
       break;
     case ParserNode::typeCharSSFDMod:
-      LatexOutput << this->theChar.GetElement().ElementToString("char", "", true); break;
+      LatexOutput << "\\begin{array}{rcl}&&\n"
+      << this->theChar.GetElement().ElementToString("char", "", true)
+      << "\\end{array}";
+      break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
 //    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
@@ -28970,17 +28921,20 @@ int ParserNode::EvaluateSlTwoInSlN
   slTwoInSlN theSl2;
   theNode.ExpressionType=theNode.typeString;
   std::fstream outputFile;
-  std::string fileName;
+  std::string fileName, fileDisplayNameNoEnding;
   fileName.append(theNode.owner->outputFolderPath);
-  fileName.append("output.tex");
-  CGI::OpenFileCreateIfNotPresent(outputFile, fileName, false, true, false);
-  outputFile << "\\documentclass{article} \\begin{document}\n" << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
+  fileDisplayNameNoEnding+=theNode.owner->userLabel;
+  fileDisplayNameNoEnding+=("outputSl2");
+  fileName+=fileDisplayNameNoEnding;
+  CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  outputFile << "\\documentclass{article} \\begin{document}\n"
+  << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
   std::stringstream out;
-  out << "A latex/pdf file: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
-  out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
+  out << "A latex/pdf file: <a href=\"/tmp/" << fileDisplayNameNoEnding << ".tex\"> " << fileDisplayNameNoEnding << ".tex</a>";
+  out << ", <a href=\"/tmp/" << fileDisplayNameNoEnding << ".pdf\"> " << fileDisplayNameNoEnding << ".pdf</a>";
   theNode.outputString=out.str();
   std::stringstream theCommand;
-  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
+  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName << ".tex" ;
   //std::cout << theCommand.str();
   theNode.owner->SystemCommands.AddOnTop(theCommand.str());
   return theNode.errorNoError;
@@ -29041,9 +28995,10 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
           this->outputString=tempS;
         } else
         { this->ExpressionType=this->typeCharSSFDMod;
-          this->outputString="The tensor product decomposition is computed using the Brauer-Klymik formula (Humphreys, \" \
+          this->outputString="The tensor product decomposition is computed using the Brauer-Klimyk formula (Humphreys, \" \
           Introduction to Lie algebras and representation theory (Springer,Third printing, revised, 1980)\", page 142, exercise 9. \
-          Another implementation of the formula, together with detailed code explanation, is available from the online interface of LiE.";
+          A faster implementation of the formula, together with detailed code explanation, \
+          is available from the online interface of LiE.";
         }
         break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;

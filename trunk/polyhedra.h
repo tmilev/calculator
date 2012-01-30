@@ -81,7 +81,6 @@ class BasicQN;
 class CombinatorialChamber;
 class PolynomialsRationalCoeff;
 class PrecomputedQuasiPolynomialIntegrals;
-class hashedRoots;
 class PrecomputedTauknPointersKillOnExit;
 class QuasiPolynomialOld;
 class VertexSelectionPointers;
@@ -123,7 +122,6 @@ class Rational;
 class QPSub;
 class partFractions;
 class SubsetWithMultiplicities;
-class hashedRoots;
 class WeylGroup;
 class intRoots;
 class SemisimpleLieAlgebra;
@@ -850,7 +848,15 @@ public:
     for (int i=0; i<theList.size; i++)
       this->AddOnTopHash(theList[i]);
   }
-  bool AddOnTopNoRepetitionHash(Object& o);
+  bool AddOnTopNoRepetitionHash(const Object& o);
+  inline void AdjustHashes()
+  { if (this->size/this->HashSize<5)
+      return;
+    this->SetHashSizE(this->size);
+    this->MakeActualSizeAtLeastExpandOnTop(this->size*5);
+//    static int counter=0;
+//    std::cout << "<br> Num times adjust hashes is called: " << ++counter;
+  }
   void AddOnTopNoRepetitionHash(const List<Object>& theList);
   void PopIndexSwapWithLastHash(int index);
   //the below returns -1 if it doesn't contain the object,
@@ -3143,7 +3149,19 @@ public:
   void Subtract(const root& r);
   void AssignWithoutLastCoordinate(root& right);
   void ReadFromFile(std::fstream& input);
+  inline void ReadFromFile(std::fstream& input, GlobalVariables& theGlobalVariables)
+  { this->ReadFromFile(input);
+  }
+  inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+  { this->ReadFromFile(input);
+  }
   void WriteToFile(std::fstream& output);
+  inline void WriteToFile(std::fstream& output, GlobalVariables& theGlobalVariables)
+  { this->WriteToFile(output);
+  }
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+  { this->WriteToFile(output);
+  }
   inline void Assign(const Vector<Rational>& right)
   { if (this->size!=right.size)
       this->SetSize(right.size);
@@ -3614,7 +3632,7 @@ public:
   bool LinearAlgebraForVertexComputation(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, int theDimension);
   bool LinearAlgebraForVertexComputationOneAffinePlane(Selection& theSelection, root& output, GlobalVariables& theGlobalVariables, CombinatorialChamberContainer* owner);
   //returns false if the vectors were linearly dependent
-  bool SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, hashedRoots& FacetOutput, GlobalVariables& theGlobalVariables);
+  bool SliceInDirection(root& direction, roots& directions, int CurrentIndex, CombinatorialChamberContainer& output, HashedList<root>& FacetOutput, GlobalVariables& theGlobalVariables);
   void PropagateSlicingWallThroughNonExploredNeighbors(root& theKillerNormal, rootsCollection& CuttingPlaneVertices, CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables);
   //the below function will automatically add the candidate to the
   //list of used hyperplanes if the candidate is an allowed one
@@ -4107,7 +4125,7 @@ void HashedList<Object>::AddOnTopNoRepetitionHash(const List<Object>& theList)
 }
 
 template <class Object>
-bool HashedList<Object>::AddOnTopNoRepetitionHash(Object& o)
+bool HashedList<Object>::AddOnTopNoRepetitionHash(const Object& o)
 { if (this->IndexOfObjectHash(o)!=-1)
     return false;
   this->AddOnTopHash(o);
@@ -4296,26 +4314,6 @@ public:
   ~rootsCollection(){}
 };
 
-class hashedRoots: public HashedList<root>
-{
-public:
-  std::string DebugString;
-  void AddRootsOnTopHash(roots& input)
-  { for (int i=0; i<input.size; i++)
-      this->AddOnTopHash(input.TheObjects[i]);
-  }
-  void WriteToFile (std::fstream& output);
-  bool ReadFromFile(std::fstream& input);
-  void ComputeDebugString();
-  void ElementToString(std::string& output);
-  std::string ElementToString()
-  { std::string result;
-    this->ElementToString(result);
-    return result;
-  }
-  void ElementToString(std::string& output, bool useHtml);
-};
-
 //class pertains to the Q^+span of a set of roots.
 class ConeGlobal : public roots
 { //The roots are the normals to the walls of the cone
@@ -4348,7 +4346,7 @@ public:
 class simplicialCones : public List<ConeGlobal>
 {
 public:
-  hashedRoots theFacets;
+  HashedList<root> theFacets;
   List<List<int> > ConesHavingFixedNormal;
   std::string DebugString;
   void ComputeDebugString();
@@ -4371,7 +4369,7 @@ public:
   int AmbientDimension;
   std::stringstream log;
   std::string DebugString;
-  hashedRoots theHyperplanes;
+  HashedList<root> theHyperplanes;
   roots HyperplanesComingFromCurrentDirectionAndSmallerIndices;
   ConeGlobal TheGlobalConeNormals;
   ConeGlobal WeylChamber;
@@ -7944,7 +7942,7 @@ public:
   bool flagIsRefined;
 //  List<int> NonRefinedChambers;
   int indexLowestNonRefinedChamber;
-  hashedRoots splittingNormals;
+  HashedList<root> splittingNormals;
   roots slicingDirections;
   Cone ConvexHull;
   std::string DebugString;
@@ -8010,7 +8008,7 @@ public:
 (int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
   ;
   void GetNewVerticesAppend
-  (Cone& myDyingCone, root& killerNormal, hashedRoots& outputVertices, GlobalVariables& theGlobalVariables)
+  (Cone& myDyingCone, root& killerNormal, HashedList<root>& outputVertices, GlobalVariables& theGlobalVariables)
   ;
   void init()
   { this->splittingNormals.ClearTheObjects();
@@ -8233,7 +8231,7 @@ public:
   void ElementToString(std::string& output, int KLindex);
 };
 
-class VermaModulesWithMultiplicities: public hashedRoots
+class VermaModulesWithMultiplicities: public HashedList<root>
 {
 public:
   WeylGroup* TheWeylGroup;
@@ -8244,6 +8242,7 @@ public:
   List<List<int> > BruhatOrder;
   List<List<int> > SimpleReflectionsActionList;
   List<List<int> > InverseBruhatOrder;
+  std::string DebugString;
   //important: in both the R- and KL-polynomials, if a polynomial Rxy is non-zero,
   //then x is bigger than y. This is the opposite to the usually accepted convention!
   //The reason for that is the following: if you want to compute
@@ -8319,7 +8318,7 @@ public:
   //Rational ShortShortScalarProdPositive;
   //Rational ShortLongScalarProdPositive;
   //Rational ShortRootLength;
-  hashedRoots RootSystem;
+  HashedList<root> RootSystem;
   roots RootsOfBorel;
   static bool flagAnErrorHasOcurredTimeToPanic;
   void Assign(const WeylGroup& right);
@@ -8356,14 +8355,22 @@ public:
   inline Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
   { return this->WeylDimFormula(theWeightInFundamentalBasis);
   }
+  Rational GetScalarProdSimpleRoot(root& input, int indexSimpleRoot)
+  { Rational result, tempRat;
+    result.MakeZero();
+    Rational* currentRow;
+    currentRow=this->CartanSymmetric.elements[indexSimpleRoot];
+    for (int i=0; i<input.size; i++)
+    { tempRat=input.TheObjects[i];
+      tempRat*=currentRow[i];
+      result+=tempRat;
+    }
+    return result;
+  }
   Rational WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis);
-  void RaiseToDominantWeightSlow
+  void RaiseToDominantWeight
   (root& theWeight, int* sign=0, bool* stabilizerFound=0)
   ;
-  void RaiseToDominantWeight
-  (root& theWeight, roots& bufferEiBasis, int* sign=0, bool* stabilizerFound=0)
-  { this->GetExtremeElementInOrbit(theWeight, 0, bufferEiBasis, false, false, false, sign, stabilizerFound);
-  }
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 ;
@@ -8388,11 +8395,11 @@ public:
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output);
   bool GetAlLDominantWeightsHWFDIM
-(root& highestWeightSimpleCoords, hashedRoots& outputWeightsSimpleCoords,
+(root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
   ;
   bool FreudenthalEval
-  (root& inputHWfundamentalCoords, hashedRoots& outputDominantWeightsSimpleCoords,
+  (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
    List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
    GlobalVariables& theGlobalVariables)
   ;
@@ -8412,8 +8419,8 @@ public:
   bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); }
   void GenerateRootSubsystem(roots& theRoots);
   void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights);
-  void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool UseMinusRho, int UpperLimitNumElements=0);
-  void GenerateOrbit(roots& theRoots, bool RhoAction, hashedRoots& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
+  void GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements=0);
+  void GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
   void GenerateRootSystemFromKillingFormMatrix();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -8533,7 +8540,7 @@ public:
   //format of the externalAutomorphisms:
   // For a fixed external automorphism (of type roots) the i^th entry gives the image of the simple root with 1 on the i^th coordinate
   rootsCollection ExternalAutomorphisms;
-  hashedRoots RootSubsystem;
+  HashedList<root> RootSubsystem;
   roots RootsOfBorel;
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(DebugString); }
@@ -10222,7 +10229,7 @@ public:
   List<List<int> > pathGraphPairsOfNodes;
   List<List<int> > pathGraphEdgeLabels;
   roots startingRoots;
-  hashedRoots PositiveRoots;
+  HashedList<root> PositiveRoots;
   int LastNonExploredIndex;
   List<int> GoodPaths;
   void ComputeGoodPathsExcludeTrivialPath();
@@ -10930,9 +10937,15 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   void MakeFromWeight
   (Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
   ;
+  bool FreudenthalEvalMe
+ (charSSAlgMod& outputCharOwnerSetToZero, std::string& errorMessage, std::string& outputDetails,
+  GlobalVariables& theGlobalVariables)
+;
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
+  void operator-=(const charSSAlgMod& other);
+  void operator-=(const MonomialChar<Rational>& other);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const MonomialChar<Rational>& other);
@@ -11385,6 +11398,7 @@ public:
   std::string indicatorFileNameDisplay;
   std::string indicatorReportFileName;
   std::string indicatorReportFileNameDisplay;
+  std::string userLabel;
   char DefaultWeylLetter;
   int DefaultWeylRank;
   int MaxFoundVars;
@@ -11629,6 +11643,7 @@ class GlobalVariables
 {
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
+  double (*getElapsedTimePrivate)();
 public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
@@ -11679,8 +11694,8 @@ public:
   rootSubalgebras rootSAAttemptExtensionIso2;
   rootSubalgebras rootSAsGenerateAll;
 
-  hashedRoots hashedRootsComputeSubGroupFromGeneratingReflections;
-  hashedRoots hashedRootsNewChamberSplit;
+  HashedList<root> hashedRootsComputeSubGroupFromGeneratingReflections;
+  HashedList<root> hashedRootsNewChamberSplit;
 
   List<CombinatorialChamber*> listCombinatorialChamberPtSplitChamber;
   List<int> listWallDataPtSplitChamber;
@@ -11786,6 +11801,14 @@ public:
   Controller theLocalPauseController;
 
   GlobalVariables();
+  void SetTimerFunction(double (*timerFunction)())
+  { this->getElapsedTimePrivate=timerFunction;
+  }
+  double GetElapsedSeconds()
+  { if (this->getElapsedTimePrivate!=0)
+      return this->getElapsedTimePrivate();
+    return -1;
+  }
   inline void IncrementReadWriteDepth()
   { this->ProgressReportDepth++;
     this->theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(5,  this->ProgressReportDepth+1));
@@ -12041,7 +12064,7 @@ public:
 
 class PolynomialOverModule;
 
-class SSalgebraModule
+class SSalgebraModuleOld
 {
 public:
   SemisimpleLieAlgebra theAlgebra;
@@ -12146,14 +12169,14 @@ public:
 
 class PolynomialOverModule : PolynomialRationalCoeff
 {
-  friend class SSalgebraModule;
+  friend class SSalgebraModuleOld;
 public:
-  SSalgebraModule* owner;
+  SSalgebraModuleOld* owner;
   std::string ElementToString(){ PolynomialOutputFormat PolyFormatLocal; return this->::PolynomialRationalCoeff::ElementToString(PolyFormatLocal); }
   void Assign(const PolynomialOverModule& other){ this->::PolynomialRationalCoeff::Assign(other); this->owner=other.owner;}
   void operator=(const PolynomialOverModule& other){ this->Assign(other); }
   int GetNumVars(){return this->NumVars;};
-  void Nullify(SSalgebraModule& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
+  void Nullify(SSalgebraModuleOld& theOwner){this->owner=&theOwner; this->::PolynomialRationalCoeff::Nullify(theOwner.GetDim());}
 };
 
 class slTwoInSlN

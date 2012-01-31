@@ -1697,7 +1697,7 @@ int main(int argc, char **argv)
     inputStringNonCivilized=getenv("QUERY_STRING");
 	getPath(argv[0], inputPath);
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><title>Symbolic calculator updated " << __DATE__ << "</title> <script src=\"/easy/load.js\"></script><body> ";
+  std::cout << "<html><head></head><title>Symbolic calculator updated " << __DATE__ << "</title>  <body> <script src=\"/easy/load.js\"></script>";
   std::string inputString;
   CivilizeCGIString(inputStringNonCivilized, inputString);
   int numBogusChars= 4;

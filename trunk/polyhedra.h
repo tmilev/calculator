@@ -11072,6 +11072,12 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateFreudenthal
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateHWV
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateLittelmannPaths
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
 
   static int EvaluateGetCoxeterBasis
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)

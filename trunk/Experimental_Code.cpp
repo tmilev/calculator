@@ -115,14 +115,31 @@ public:
 };
 
 template <class CoefficientType>
+class ElementModuleSSalgebra;
+
+template <class CoefficientType>
 class ModuleSSalgebraNew
 {
 public:
-  SemisimpleLieAlgebra theAlgebra;
+  SemisimpleLieAlgebraOrdered theAlgebra;
   List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
   void MakeFundamentalRep
 (char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
   ;
+  void Reduce
+  (ElementModuleSSalgebra<CoefficientType>& inputOutput, GlobalVariables& theGlobalVariables)
+  ;
+  List<int> relationsGeneratorIndices;
+  List<CoefficientType> relationsGeneratorPowers;
+
+};
+
+template <class CoefficientType>
+class ElementModuleSSalgebra
+{
+public:
+  ModuleSSalgebraNew<CoefficientType>* owner;
+  ElementUniversalEnvelopingOrdered<CoefficientType> theWord;
 };
 
 template < > int List<Matrix<Qsqrt2> >::ListActualSizeIncrement=100;
@@ -153,9 +170,9 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
     assert(false);
     break;
   }
-  this->theAlgebra.ComputeChevalleyConstants('B', theRank, theGlobalVariables);
-  int numGenerators=this->theAlgebra.GetNumGenerators();
-  int numPosRoots=this->theAlgebra.GetNumPosRoots();
+  this->theAlgebra.theOwner.ComputeChevalleyConstants('B', theRank, theGlobalVariables);
+  int numGenerators=this->theAlgebra.theOwner.GetNumGenerators();
+  int numPosRoots=this->theAlgebra.theOwner.GetNumPosRoots();
   this->ActionsChevalleyGenerators.SetSize(numGenerators);
   root weightCurrentRootSpace;
   root weightInEpsCoords;
@@ -163,15 +180,16 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
   correspondingOperators.SetSize(numGenerators);
 //  for (int sign=0; sign<2; sign++)
   for (int k=0; k<numPosRoots*2; k++)
-  { weightCurrentRootSpace=this->theAlgebra.theWeyl.RootSystem[k];
+  { weightCurrentRootSpace=this->theAlgebra.theOwner.theWeyl.RootSystem[k];
 //   if (sign==1)
 //      weightCurrentRootSpace.MinusRoot();
-    this->theAlgebra.theWeyl.GetEpsilonCoords(weightCurrentRootSpace, weightInEpsCoords, theGlobalVariables);
-    int GeneratorIndex= this->theAlgebra.RootToIndexInUE(weightCurrentRootSpace);
+    this->theAlgebra.theOwner.theWeyl.GetEpsilonCoords(weightCurrentRootSpace, weightInEpsCoords, theGlobalVariables);
+    int GeneratorIndex= this->theAlgebra.theOwner.RootToIndexInUE(weightCurrentRootSpace);
     Matrix<CoefficientType>& currentMat=this->ActionsChevalleyGenerators[GeneratorIndex];
     currentMat.init(theRank*2+1, theRank*2+1);
     currentMat.NullifyAll((Qsqrt2) 0);
-    Rational rootLength=this->theAlgebra.theWeyl.RootScalarCartanRoot(weightCurrentRootSpace, weightCurrentRootSpace);
+    Rational rootLength=
+    this->theAlgebra.theOwner.theWeyl.RootScalarCartanRoot(weightCurrentRootSpace, weightCurrentRootSpace);
     if (rootLength==2)
     { bool found=false;
       int first, firstDual, second, secondDual;
@@ -207,7 +225,7 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
       currentMat.elements[firstIndex][theRank].MakeAplusSqrt2B(0,1);
       currentMat.elements[theRank][firstIndexDual].MakeAplusSqrt2B(0,-1);
     }
-    std::cout << "generator " << this->theAlgebra.ChevalleyGeneratorIndexToDisplayIndex(GeneratorIndex)
+    std::cout << "generator " << this->theAlgebra.theOwner.ChevalleyGeneratorIndexToDisplayIndex(GeneratorIndex)
     << currentMat.ElementToString(true, false);
     correspondingOperators[GeneratorIndex]=currentMat;
   }
@@ -237,8 +255,8 @@ void ModuleSSalgebraNew<CoefficientType>::MakeFundamentalRep
       bool tempBool=
       tempRoot.GetCoordsInBasiS(rootForm, tempRoot2);
       std::cout << "<hr>Lie bracket of gen. index "
-      << this->theAlgebra.GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables) << " and "
-      << this->theAlgebra.GetLetterFromGeneratorIndex(j, false, false, theFormat, theGlobalVariables)
+      << this->theAlgebra.theOwner.GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables) << " and "
+      << this->theAlgebra.theOwner.GetLetterFromGeneratorIndex(j, false, false, theFormat, theGlobalVariables)
       << " equals in root form "
       << tempRoot.ElementToString() << "and in chev. coords:" << tempRoot2.ElementToString() << " and in non root form: " << tempMat.ElementToString(true, false);
       if (! tempBool)
@@ -870,6 +888,64 @@ int ParserNode::EvaluateFreudenthal
     out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(finalChar.ElementToString("V", "\\omega", false));
   }
   out << "<br>" << localDetailsString;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateHWV
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  out << "Function not programmed yet. ";
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+class LittelmannPath
+{
+public:
+  WeylGroup* owner;
+  roots Waypoints;
+  void MakeFromWeight(root& weight, WeylGroup& theOwner)
+  { this->owner=& theOwner;
+    this->Waypoints.SetSize(2);
+    this->Waypoints[0].MakeZero(theOwner.GetDim());
+    this->Waypoints[1]=weight;
+  }
+  void ActByFalpha(int indexAlpha);
+  void ActByEalpha(int indexAlpha);
+//   List<Rational> Speeds;
+  void operator+=(const LittelmannPath& other)
+  { this->Waypoints.MakeActualSizeAtLeastExpandOnTop(this->Waypoints.size+other.Waypoints.size);
+    root endPoint=*this->Waypoints.LastObject();
+    for (int i=0; i<other.Waypoints.size; i++)
+      this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
+  }
+};
+
+void LittelmannPath::ActByFalpha(int indexAlpha)
+{ Rational theMin=0;
+  int minIndex=-1;
+  for (int i=0; i<this->Waypoints.size; i++)
+  { Rational tempRat=this->owner->GetScalarProdSimpleRoot(this->Waypoints[i], indexAlpha);
+     if (tempRat<=theMin)
+      { theMin=tempRat;
+        minIndex=i;
+      }
+  }
+}
+
+int ParserNode::EvaluateLittelmannPaths
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  root theWeight;
+  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  if (theWeight.size!=theWeyl.GetDim())
+    return theNode.SetError(theNode.errorDimensionProblem);
+
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;

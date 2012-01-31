@@ -849,7 +849,11 @@ std::string PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& 
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
   theFracs.split(theGlobalVariables, 0);
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
-  theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
+  //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
+  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
+  theFracs.theChambersOld.theDirections=theRoots;
+  theFracs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
+  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld, theGlobalVariables);
   this->theQPs.SetSize(theFracs.theChambers.size);
   root indicator;
   for (int i=0; i< theFracs.theChambers.size; i++)
@@ -4184,6 +4188,9 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
   out << this->ElementToString(theGlobalVariables, theFormat);
   out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
         << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
+  outHtml << "There are " << this->theChambersOld.size << " systems of linear inequalities "
+  << " such that on each such system of inequalities the vector partition function is quasi-polynomial. "
+  << " A full list of the systems of inequalities (\"chambers\") and the corresponding quasi-polynomials follows.<hr> ";
   QuasiPolynomial tempQP;
   std::string tempS;
   root tempIndicator;
@@ -4195,7 +4202,7 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
       out << "\n\n" << currentChamber.ElementToString(true, false, true, false, theFormat);
       out << "\n\nQuasipolynomial: " << tempQP.ElementToString(false, true, theFormat);
       outHtml << "<hr>Chamber: " << currentChamber.ElementToString(false, true, true, false, theFormat);
-      outHtml << "Quasipolynomial: " << tempQP.ElementToString(true, false, theFormat);
+      outHtml << "<br>Quasi-polynomial: " << tempQP.ElementToString(true, false, theFormat);
     }
   out << "\\end{document}";
   if (outputHtml!=0)
@@ -4213,6 +4220,7 @@ void PiecewiseQuasipolynomial::operator=(const PiecewiseQuasipolynomial& other)
 int ParserNode::EvaluateVPF
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { //partFractions& currentPF=theNode.thePFs.GetElement();
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=50;
   roots toBePartitioned; int tempDim;
   theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
   std::stringstream out;
@@ -4223,8 +4231,10 @@ int ParserNode::EvaluateVPF
   out << thePQP.MakeVPF(toBePartitioned, theGlobalVariables);
   theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(tempDim);
   theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, tempDim, 0);
-  thePQP.DrawMe(theGlobalVariables.theDrawingVariables, 10);
-  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(tempDim);
+  if (tempDim==2)
+  { thePQP.DrawMe(theGlobalVariables.theDrawingVariables, 10);
+    out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(tempDim);
+  }
   out << thePQP.ElementToString(false, true);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typePiecewiseQP;
@@ -4240,6 +4250,7 @@ int ParserNode::EvaluateVectorPFIndicator
   PolynomialOutputFormat theFormat;
 //  theFormat.alphabet.TheObjects[0]="t_1";
 //  theFormat.alphabet.TheObjects[1]="t_2";
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=50;
   std::string htmlString;
   std::string tempS= currentPF.DoTheFullComputationReturnLatexFileString
   (theGlobalVariables, toBePartitioned, theFormat, &htmlString)
@@ -5109,7 +5120,10 @@ int ParserNode::EvaluatePrintRootSystem
   simpleBasis.MakeEiBasis(theWeyl.GetDim());
   theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords, theGlobalVariables);
   for (int i=0; i< simplebasisEpsCoords.size; i++)
-  { out << "<tr><td>" << simpleBasis[i].ElementToString() << " </td><td>=</td> <td>"
+  { std::stringstream tempStream;
+    tempStream << "\\omega_{" << i+1 << "}:=";
+    out << "<tr><td>" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream.str())
+    << simpleBasis[i].ElementToString() << " </td><td>=</td> <td>"
     << CGI::
     GetHtmlMathFromLatexFormulA
     (simplebasisEpsCoords[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
@@ -6663,8 +6677,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
   << "></div><br>The bilinear form of the vector space follows. The ij^th element "
-  << " gives the scalar product of e_i and e_j. If you enter a degenerate symmetric bilinear form"
-  << " the javascript might crash. You are expected to enter a symmetric matrix. <br> \n";
+  << " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite "
+  << " symmetric bilinear form"
+  << " the javascript might crash. You are expected to enter a symmetric strictly positive definite matrix. <br> \n";
   for (int i=0; i<this->theBuffer.theBilinearForm.NumRows; i++)
   { for (int j=0; j<this->theBuffer.theBilinearForm.NumCols; j++)
     { std::stringstream tmpStream;
@@ -10229,6 +10244,26 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'B', 3, true,
     & ParserNode::EvaluateFreudenthal
    );
+   this->AddOneFunctionToDictionaryNoFail
+  ("v",
+   "(Rational,...)",
+   "<b>Experimental. </b> Highest weight vector, of weight given by the argument in fundamental \
+   coordinates, of the corresponding finite-dimensional irreducible representation.",
+    "v(1,0,0)",
+   'B', 3, false,
+    & ParserNode::EvaluateHWV
+   );
+   this->AddOneFunctionToDictionaryNoFail
+  ("littelmann",
+   "(Rational,...)",
+   "<b>Experimental. </b> Gives all paths obtained by the Littelmann path operators from \
+   the path t\\mapsto t\\mu, t\\in [0,1], where \\mu is the weight given in fundamental coordinates \
+   by the argument of the function.",
+    "littelmann(1,0,0)",
+   'B', 3, false,
+    & ParserNode::EvaluateLittelmannPaths
+   );
+
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

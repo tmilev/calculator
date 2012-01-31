@@ -173,6 +173,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="vpf( (1, 0, 0),(0, 1, 0),(0, 0, 1),(1, 1, 0),(0, 1, 1),(1, 1, 1),(0, 1, 2),(1, 1, 2),(1, 2, 2) )";
 //  civilizedInput="-char(1,1,1)";
 //  civilizedInput="char(0,0,0,0,0,0,0,1)char(0,0,0,0,0,1,0,1)";
 //civilizedInput="freudenthal( char(0,0,0,0,0,0,1,2) )";

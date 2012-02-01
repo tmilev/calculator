@@ -922,9 +922,20 @@ public:
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
   }
+  std::string ElementToString()
+  { if (this->Waypoints.size==0)
+      return "0";
+    std::stringstream out;
+    for (int i=0; i<this->Waypoints.size; i++)
+    { out << this->Waypoints[i].ElementToString();
+      if (i!=this->Waypoints.size-1)
+        out << "->";
+    }
+    return out.str();
+  }
 };
 
-void LittelmannPath::ActByFalpha(int indexAlpha)
+void LittelmannPath::ActByEalpha(int indexAlpha)
 { Rational theMin=0;
   int minIndex=-1;
   for (int i=0; i<this->Waypoints.size; i++)
@@ -934,6 +945,61 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
         minIndex=i;
       }
   }
+  if (minIndex<=0 || theMin>-1)
+  { this->Waypoints.size=0;
+    return;
+  }
+//  root pivot=Waypoints[minIndex];
+  root& alpha=this->owner->RootsOfBorel[indexAlpha];
+  Rational LengthAlpha=this->owner->RootScalarCartanRoot(alpha, alpha);
+  root& previous=this->Waypoints[minIndex-1];
+  Rational scalarPrevious= this->owner->RootScalarCartanRoot(previous, alpha);
+  if (scalarPrevious-theMin>1)
+  { this->Waypoints.SetSize(this->Waypoints.size+1);
+    for (int i=this->Waypoints.size-1; i>=minIndex; i--)
+      this->Waypoints[i]=this->Waypoints[i-1];
+    this->Waypoints[minIndex+1]=this->Waypoints[minIndex]+ alpha/LengthAlpha;
+  }
+
+  root difference=this->Waypoints[minIndex]-previous;
+
+  this->owner->SimpleReflection(indexAlpha, difference, false, false);
+  this->Waypoints[minIndex]=previous+difference;
+  for (int i=minIndex+1; i<this->Waypoints.size; i++)
+  { difference =this->Waypoints[i]-previous;
+    this->Waypoints[i]=this->Waypoints[i-1]+difference;
+  }
+}
+
+void LittelmannPath::ActByFalpha(int indexAlpha)
+{ if (this->Waypoints.size==0)
+    return;
+  Rational theMin=0;
+  int minIndex=-1;
+  for (int i=0; i<this->Waypoints.size; i++)
+  { Rational tempRat=this->owner->GetScalarProdSimpleRoot(this->Waypoints[i], indexAlpha);
+     if (tempRat<=theMin)
+      { theMin=tempRat;
+        minIndex=i;
+      }
+  }
+  Rational lastScalar=this->owner->GetScalarProdSimpleRoot(*this->Waypoints.LastObject(), indexAlpha);
+  if (minIndex<0 || lastScalar - theMin<1)
+  { this->Waypoints.size=0;
+    return;
+  }
+  root previous=this->Waypoints[minIndex];
+  root difference=this->Waypoints[minIndex+1]-previous;
+  root& alpha=this->owner->RootsOfBorel[indexAlpha];
+  Rational LengthAlpha=this->owner->RootScalarCartanRoot(alpha, alpha);
+  if (this->owner->GetScalarProdSimpleRoot(difference, indexAlpha)>1)
+  { this->Waypoints.SetSize(this->Waypoints.size+1);
+    for (int i=this->Waypoints.size-1; i>=minIndex+2; i--)
+      this->Waypoints[i]=this->Waypoints[i-1];
+    this->Waypoints[minIndex+1]=this->Waypoints[minIndex]+ alpha/LengthAlpha;
+  }
+  for (int i=minIndex+1; i<this->Waypoints.size; i++)
+    this->Waypoints[i]=this->Waypoints[i]- alpha*2/LengthAlpha;
 }
 
 int ParserNode::EvaluateLittelmannPaths
@@ -945,6 +1011,36 @@ int ParserNode::EvaluateLittelmannPaths
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
   if (theWeight.size!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
+  theWeight= theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+  LittelmannPath tempPath;
+  tempPath.MakeFromWeight(theWeight, theWeyl);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByEalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+
+
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByEalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByEalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByFalpha(0);
+  out << "<br>" << tempPath.ElementToString();
+  tempPath.ActByEalpha(0);
+  out << "<br>" << tempPath.ElementToString();
 
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;

@@ -173,6 +173,10 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="littelmann(1)";
+  theParser.DefaultWeylLetter='A';
+  theParser.DefaultWeylRank=1;
+
 //  civilizedInput="vpf( (1, 0, 0),(0, 1, 0),(0, 0, 1),(1, 1, 0),(0, 1, 1),(1, 1, 1),(0, 1, 2),(1, 1, 2),(1, 2, 2) )";
 //  civilizedInput="-char(1,1,1)";
 //  civilizedInput="char(0,0,0,0,0,0,0,1)char(0,0,0,0,0,1,0,1)";
@@ -381,8 +385,8 @@ int main(int argc, char **argv)
   std::cout.flush();
   theParser.ComputeDebugString(true, theGlobalVariables, theOutputFormat);
 
-  std::string beginMath="<div class=\"math\" scale=\"50\">";
-  std::string endMath ="</div>";
+  std::string beginMath = "<div class=\"math\" scale=\"50\">";
+  std::string endMath = "</div>";
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
   std::stringstream tempStream4;
@@ -481,7 +485,7 @@ int main(int argc, char **argv)
   std::cout << "system commands: <br>";
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   for (int i=0; i< theParser.SystemCommands.size; i++)
-    std::cout <<  theParser.SystemCommands.TheObjects[i] << "<br>";
+    std::cout << theParser.SystemCommands.TheObjects[i] << "<br>";
   std::cout << "<br>Parser debug string:<br> " << theParser.DebugString;
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();

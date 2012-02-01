@@ -4278,7 +4278,6 @@ void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, cons
   }
 }
 
-
 void QuasiPolynomial::Substitution
   (const MatrixLargeRational& mapFromNewSpaceToOldSpace,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
@@ -5674,7 +5673,7 @@ std::string ParserFunctionArgumentTree::ElementToString(bool useHtml, bool useLa
     if (i!=this->functionArguments.size-1)
       out << ", ";
   }
-  out  << ")";
+  out << ")";
   return out.str();
 }
 
@@ -5725,11 +5724,12 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
   out << "<div style=\"display: inline\" id=\"functionBox" << this->functionName << "\" >";
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
-  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName << "');\">More/less info</button><div id=\"fun" << this->functionName
-        << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
-        << " textType=" << this->exampleAmbientWeylLetter << "&textDim=" << this->exampleAmbientWeylRank << "&textInput="
-        << CGI::UnCivilizeStringCGI(this->example)
-        << "\"> " << this->example << "</a></div></div>";
+  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName
+  << "');\">More/less info</button><div id=\"fun" << this->functionName
+  << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
+  << " textType=" << this->exampleAmbientWeylLetter << "&textDim=" << this->exampleAmbientWeylRank << "&textInput="
+  << CGI::UnCivilizeStringCGI(this->example)
+  << "\"> " << this->example << "</a></div></div>";
   return out.str();
 }
 
@@ -5836,7 +5836,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
     theConst=-(*currentNormal.LastObject());
     if(!normalNoConstant.IsEqualToZero())
       out1 << "$" << normalNoConstant.ElementToStringLetterFormat(theFormat, true, false) << "$ & $\\geq$ & $"
-               << theConst.ElementToString() << "$ \\\\";
+      << theConst.ElementToString() << "$ \\\\";
   }
   out1 << "\\end{tabular}";
   return out1.str();
@@ -6289,9 +6289,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   for (int l=0; l<2; l++)
     for (int k=0; k<basisMonsZeroWeight.size; k++)
     { if (l==0)
-      { this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
-
-      }
+        this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
       else
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
       for (int j=0; j<basisMonsAll.size; j++)
@@ -7793,9 +7791,8 @@ void WeylGroup::DrawRootSystem
     output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     if (LabelDynkinDiagramVertices)
     { root& current=epsNotationSimpleBasis[i];
-      output.drawTextAtVectorBuffer(tempRootRat, current.ElementToStringLetterFormat("e"),
-                                    0, 10, DrawingVariables::TextStyleNormal
-                                    );
+      output.drawTextAtVectorBuffer
+      (tempRootRat, current.ElementToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
     }
   }
   std::stringstream tempStream;
@@ -10260,7 +10257,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    the path t\\mapsto t\\mu, t\\in [0,1], where \\mu is the weight given in fundamental coordinates \
    by the argument of the function.",
     "littelmann(1,0,0)",
-   'B', 3, false,
+   'B', 3, true,
     & ParserNode::EvaluateLittelmannPaths
    );
 

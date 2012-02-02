@@ -837,14 +837,23 @@ void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other)
   }
 }
 
-std::string PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables)
+bool PiecewiseQuasipolynomial::MakeVPF
+  (roots& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
 { if (theRoots.size<=0)
-    return "Error.";
+  { outputstring = "Error.";
+    return false;
+  }
   this->theBuffers=& theGlobalVariables;
   this->NumVariables=theRoots.GetDimensionOfElements();
   partFractions theFracs;
   PolynomialOutputFormat theFormat;
   std::stringstream out;
+  std::string whatWentWrong;
+  if (!theFracs.ArgumentsAllowed(theRoots, whatWentWrong, theGlobalVariables))
+  { out << whatWentWrong;
+    outputstring= out.str();
+    return false;
+  }
   theFracs.initFromRoots(theRoots, theGlobalVariables);
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
   theFracs.split(theGlobalVariables, 0);
@@ -871,7 +880,8 @@ std::string PiecewiseQuasipolynomial::MakeVPF(roots& theRoots, GlobalVariables& 
 //  std::cout << "shiftRoot: " << shiftRoot.ElementToString();
   theFracs.theChambers.MakeAffineAndTransformToProjectiveDimPlusOne
   (shiftRoot, this->theProjectivizedComplex, theGlobalVariables);
-  return out.str();
+  outputstring=out.str();
+  return true;
 }
 
 bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
@@ -987,7 +997,12 @@ std::string PiecewiseQuasipolynomial::ElementToString(bool useLatex, bool useHtm
     out << currentCone.ElementToString(false, true, true, true, theFormat);
     if (useHtml)
       out << "<br>";
-    out << "quasipolynomial: " << currentQP.ElementToString(true, false);
+    out << "quasipolynomial: ";
+    if (useLatex& useHtml)
+      out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(currentQP.ElementToString(useHtml, useLatex));
+    else
+    { out << currentQP.ElementToString(useHtml, useLatex);
+    }
     if (useHtml)
       out << "<hr>";
   }
@@ -1235,7 +1250,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables),
   theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
   //std::cout << "<hr>" << this->GmodKNegWeightsBasisChanged.ElementToString() << "<hr>";
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
+  std::string tempS;
+  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
   roots translationsProjectedFinal;
   translationsProjectedFinal.SetSize(this->theLinearOperators.size);
   this->theLinearOperators[0].ActOnAroot(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
@@ -1245,7 +1261,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.ElementToString();
   out << "<br>Element u_w: projection, multiplication by -1, and basis change of so(7)-highest weight to G_2: "
   << translationsProjectedFinal[0].ElementToString();
-  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
+  theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
   //std::cout << theStartingPoly.ElementToString(false, true);
   drawOps.drawCoordSystemBuffer(drawOps, 2, 0);
   //out << this->log.str();
@@ -3718,6 +3734,8 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
     return "0";
   if (useLatex&& !useHtml)
     out << "\\begin{tabular}{c}";
+  if (useLatex&& useHtml)
+    out << "\\begin{array}{rcl}&&";
   for (int i=0; i<this->LatticeShifts.size; i++)
   { //if(useHtml)
       //out << "<br>Shift: " << this->LatticeShifts.TheObjects[i].ElementToString() << "; polynomial: ";
@@ -3734,21 +3752,29 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       else
         out << "</span>";
     }
-    out << " over ";
+    if (!useLatex)
+      out << " over ";
+    else
+      if (useHtml)
+        out << " \\mathrm{~over~}";
+      else
+        out << " over ";
     if (!this->LatticeShifts.TheObjects[i].IsEqualToZero())
       out << this->LatticeShifts.TheObjects[i].ElementToString() << " + ";
     if (useLatex)
     { if (!useHtml)
         out << "$\\Lambda$, \\\\\\hline\n ";
       else
-        out << "<span class=\"math\"> \\Lambda</span>";
+        out << " \\Lambda";
     } else
       out << "L ";
     if (this->LatticeShifts.size>1)
-    { if (useHtml)
+    { if (useHtml & ! useLatex)
         out << "<br>";
-      if (useLatex)
+      if (useLatex && !useHtml)
         out << "\\\\";
+      if (useLatex && useHtml)
+        out << "\\\\&&";
       out << "\n\n";
     }
   }
@@ -3756,7 +3782,7 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
   { if(!useLatex)
       out << ", where L=< ";
     if (useLatex && useHtml)
-      out << ", where <span class=\"math\">\\Lambda</span>=<";
+      out << ", \\mathrm{~where~} \\Lambda=<";
     if (useLatex && !useHtml)
       out << " where $\\Lambda=\\left\\langle\\begin{array}{c}";
     roots tempRoots;
@@ -3777,11 +3803,17 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       out << "\\end{array}\\right\\rangle$";
   } else
     if (useLatex)
-      out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
+    { if (!useHtml)
+        out << ", where $\\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}$";
+      else
+        out << ", \\mathrm{~where~} \\Lambda=\\mathbb{Z}^{" <<  this->GetNumVars() << "}";
+    }
     else
       out << "Z^" <<  this->GetNumVars();
   if (useLatex&& !useHtml)
     out << "\\end{tabular}";
+  if (useLatex&& useHtml)
+    out << "\\end{array}";
   return out.str();
 }
 
@@ -4140,16 +4172,6 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   this->ExpressionType=this->typeString;
 }
 
-std::string partFractions::DoTheFullComputationReturnLatexFileString
-(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
-{ if (toBePartitioned.size<1)
-    return "";
-  this->AmbientDimension= toBePartitioned.TheObjects[0].size;
-  this->theChambersOld.AmbientDimension= this->AmbientDimension;
-  this->theChambersOld.theDirections.CopyFromBase(toBePartitioned);
-  return this->DoTheFullComputationReturnLatexFileString(theGlobalVariables, theFormat, outputHtml);
-}
-
 void ConeComplex::AssignCombinatorialChamberComplex
 (CombinatorialChamberContainer& other, GlobalVariables& theGlobalVariables)
 { this->init();
@@ -4164,8 +4186,14 @@ void ConeComplex::AssignCombinatorialChamberComplex
 }
 
 std::string partFractions::DoTheFullComputationReturnLatexFileString
-(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, std::string* outputHtml)
-{ this->theChambersOld.thePauseController.InitComputation();
+(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+{ std::string whatWentWrong;
+  if (!this->ArgumentsAllowed(toBePartitioned, whatWentWrong, theGlobalVariables))
+    return whatWentWrong;
+  this->theChambersOld.theDirections=toBePartitioned;
+  this->AmbientDimension=toBePartitioned.GetDimensionOfElements();
+  this->theChambersOld.AmbientDimension=toBePartitioned.GetDimensionOfElements();
+  this->theChambersOld.thePauseController.InitComputation();
   //this->theChambers.ReadFromDefaultFile(theGlobalVariables);
   std::stringstream out;
   std::stringstream outHtml;
@@ -4202,7 +4230,12 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
       out << "\n\n" << currentChamber.ElementToString(true, false, true, false, theFormat);
       out << "\n\nQuasipolynomial: " << tempQP.ElementToString(false, true, theFormat);
       outHtml << "<hr>Chamber: " << currentChamber.ElementToString(false, true, true, false, theFormat);
-      outHtml << "<br>Quasi-polynomial: " << tempQP.ElementToString(true, false, theFormat);
+      bool useHtml=false;
+      if (tempQP.valueOnEachLatticeShift.size>0)
+        if (tempQP.valueOnEachLatticeShift[0].size<30)
+          useHtml=true;
+      outHtml << "<br>Quasi-polynomial: " <<
+      CGI::GetHtmlMathDivFromLatexFormulA(tempQP.ElementToString(useHtml, true, theFormat));
     }
   out << "\\end{document}";
   if (outputHtml!=0)
@@ -4228,14 +4261,20 @@ int ParserNode::EvaluateVPF
 //  theFormat.alphabet.TheObjects[0]="t_1";
 //  theFormat.alphabet.TheObjects[1]="t_2";
   PiecewiseQuasipolynomial& thePQP=theNode.thePiecewiseQP.GetElement();
-  out << thePQP.MakeVPF(toBePartitioned, theGlobalVariables);
+  std::string tempS;
+  if(!thePQP.MakeVPF(toBePartitioned, tempS, theGlobalVariables))
+  { out << tempS;
+    theNode.outputString=out.str();
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  }
+  out << tempS;
   theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(tempDim);
   theGlobalVariables.theDrawingVariables.drawCoordSystemBuffer(theGlobalVariables.theDrawingVariables, tempDim, 0);
   if (tempDim==2)
   { thePQP.DrawMe(theGlobalVariables.theDrawingVariables, 10);
     out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(tempDim);
   }
-  out << thePQP.ElementToString(false, true);
+  out << thePQP.ElementToString(true, true);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typePiecewiseQP;
   return theNode.errorNoError;
@@ -4245,7 +4284,9 @@ int ParserNode::EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { partFractions& currentPF=theNode.thePFs.GetElement();
   roots toBePartitioned; int tempDim;
-  theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument
+      (theArgumentList, toBePartitioned, tempDim))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
   std::stringstream out;
   PolynomialOutputFormat theFormat;
 //  theFormat.alphabet.TheObjects[0]="t_1";
@@ -7174,6 +7215,8 @@ bool ConeComplex::DrawMeProjective
   root tempRoot;
   roots tempRoots;
   MatrixLargeRational tempMat;
+  if (this->GetDim()<=1)
+    return false;
   if (InitDrawVars)
   { theDrawingVariables.theBuffer.init();
     theDrawingVariables.theBuffer.initDimensions(this->GetDim(), 1);
@@ -7821,7 +7864,8 @@ int ParserNode::EvaluateG2ParabolicSupport
   theNegativeRoots.CopyFromBase(theWeyl.RootSystem);
   theNegativeRoots.size=6;
   out << "the negative roots of G_2: " << theNegativeRoots.ElementToString();
-  theChar.MakeVPF(theNegativeRoots, theGlobalVariables);
+  std::string tempS;
+  theChar.MakeVPF(theNegativeRoots, tempS, theGlobalVariables);
   theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(2);
   for (int i=0; i<2; i++)
     for (int j=0; j<2; j++)

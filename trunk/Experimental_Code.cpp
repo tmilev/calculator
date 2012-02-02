@@ -902,6 +902,30 @@ int ParserNode::EvaluateHWV
   return theNode.errorNoError;
 }
 
+bool partFractions::ArgumentsAllowed
+  (roots& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
+{ if (theArguments.size<1)
+    return false;
+  Cone tempCone;
+  bool result=tempCone.CreateFromVertices(theArguments, theGlobalVariables);
+  if (tempCone.IsTheEntireSpace())
+  { outputWhatWentWrong="Error: the vectors you gave as input span the entire space.";
+    return false;
+  }
+  for (int i=0; i<tempCone.Vertices.size; i++)
+    if (tempCone.IsInCone(tempCone.Vertices[i]) && tempCone.IsInCone(-tempCone.Vertices[i]))
+    { std::stringstream out;
+      out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
+      << tempCone.Vertices[i].ElementToString() << " as well as its opposite vector "
+      << (-tempCone.Vertices[i]).ElementToString()
+      << "), hence the vector partition function is "
+      << "can only take values infinity or zero. ";
+      outputWhatWentWrong=out.str();
+      return false;
+    }
+  return result;
+}
+
 class LittelmannPath
 {
 public:
@@ -956,19 +980,13 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
   Rational scalarPrevious= this->owner->RootScalarCartanRoot(previous, alpha);
   if (scalarPrevious-theMin>1)
   { this->Waypoints.SetSize(this->Waypoints.size+1);
-    for (int i=this->Waypoints.size-1; i>=minIndex; i--)
+    for (int i=this->Waypoints.size-1; i>=minIndex+1; i--)
       this->Waypoints[i]=this->Waypoints[i-1];
-    this->Waypoints[minIndex+1]=this->Waypoints[minIndex]+ alpha/LengthAlpha;
+    this->Waypoints[minIndex]+=alpha/LengthAlpha;
+    minIndex++;
   }
-
-  root difference=this->Waypoints[minIndex]-previous;
-
-  this->owner->SimpleReflection(indexAlpha, difference, false, false);
-  this->Waypoints[minIndex]=previous+difference;
-  for (int i=minIndex+1; i<this->Waypoints.size; i++)
-  { difference =this->Waypoints[i]-previous;
-    this->Waypoints[i]=this->Waypoints[i-1]+difference;
-  }
+  for (int i=minIndex; i<this->Waypoints.size; i++)
+    this->Waypoints[i]+=alpha/LengthAlpha;
 }
 
 void LittelmannPath::ActByFalpha(int indexAlpha)

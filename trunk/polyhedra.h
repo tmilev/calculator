@@ -7783,6 +7783,9 @@ public:
       }
     return false;
   }
+  bool IsTheEntireSpace()
+  { return this->Normals.size==0 && this->flagIsTheZeroCone;
+  }
   bool IsAnHonest1DEdgeAffine(int vertexIndex1, int vertexIndex2)
   { root& vertex1=this->Vertices[vertexIndex1];
     root& vertex2=this->Vertices[vertexIndex2];
@@ -8095,10 +8098,10 @@ public:
   static int flagMaxNumStringOutputLines;
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
   std::string DoTheFullComputationReturnLatexFileString
-(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, std::string* outputHtml)
-  ;
-  std::string DoTheFullComputationReturnLatexFileString
   (GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+  ;
+  bool ArgumentsAllowed
+  (roots& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
   ;
   bool AssureIndicatorRegularity(GlobalVariables& theGlobalVariables, root& theIndicator);
   void CompareCheckSums(GlobalVariables& theGlobalVariables);
@@ -10875,7 +10878,9 @@ class PiecewiseQuasipolynomial
   inline void MakeCommonRefinement(const PiecewiseQuasipolynomial& other){ this->MakeCommonRefinement(other.theProjectivizedComplex);  }
   void MakeCommonRefinement(const ConeComplex& other);
   void TranslateArgument(root& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables);
-  std::string MakeVPF(roots& theRoots, GlobalVariables& theGlobalVariables);
+  bool MakeVPF
+  (roots& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
+  ;
   Rational Evaluate(const root& thePoint);
   Rational EvaluateInputProjectivized(const root& thePoint);
   void Nullify(int numVars, GlobalVariables& theGlobalVariables)

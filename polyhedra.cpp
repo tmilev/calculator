@@ -408,8 +408,6 @@ void CombinatorialChamberContainer::SliceOneDirection(root* theIndicatorRoot, Gl
 void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoot, GlobalVariables& theGlobalVariables, bool SpanTheEntireSpace)
 { if (this->theDirections.size==0)
     return;
-  if (this->theDirections.TheObjects[0].size==1)
-    return;
   if (this->theCurrentIndex==-1)
     this->flagSpanTheEntireSpace=SpanTheEntireSpace;
   this->flagSpanTheEntireSpace=SpanTheEntireSpace;
@@ -418,6 +416,9 @@ void CombinatorialChamberContainer::SliceTheEuclideanSpace(root* theIndicatorRoo
       return;
     this->SliceOneDirection(theIndicatorRoot, theGlobalVariables);
   }
+//  if (this->theDirections.TheObjects[0].size==1)
+//    return;
+
   this->ComputeNonConvexActualChambers(theGlobalVariables);
   this->LabelChambersForDisplayAndGetNumVisibleChambers();
   this->ComputeDebugString(false);
@@ -3794,8 +3795,8 @@ void CombinatorialChamberContainer::MakeStartingChambers(roots& directions, root
   if (directions.size==0)
     return;
   this->AmbientDimension= directions.TheObjects[0].size;
-  if (this->AmbientDimension==1)
-    return;
+//  if (this->AmbientDimension==1)
+//    return;
   int tempI= directions.ArrangeFirstVectorsBeOfMaxPossibleRank(theGlobalVariables);
   assert(tempI== this->AmbientDimension);
   this->IndicatorRoot.Assign(IndicatorRoot);

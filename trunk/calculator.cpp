@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 //		inputString=::getenv("QUERY_STRING");
 #endif
     IPAdressCaller=getenv("REMOTE_ADDR");
-    for (int i=0; i<MathRoutines::Minimum(IPAdressCaller.size(), SomeRandomPrimesSize); i++)
+    for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	getPath(argv[0], inputPath);
@@ -173,12 +173,16 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="eAlpha(1, eAlpha(-1, littelmann (1) ) )";
+//  theParser.DefaultWeylLetter='A';
+//  theParser.DefaultWeylRank=1;
+
 //  civilizedInput="";
 //  civilizedInput="vpfReport((1,0,0), (0,1,0), (0,0,1))";
 //  civilizedInput="vpf (1,-2)";
-  civilizedInput="littelmann(2)";
-  theParser.DefaultWeylLetter='A';
-  theParser.DefaultWeylRank=1;
+//  civilizedInput="littelmann(2)";
+//  theParser.DefaultWeylLetter='A';
+//  theParser.DefaultWeylRank=1;
 
 //  civilizedInput="vpf( (1, 0, 0),(0, 1, 0),(0, 0, 1),(1, 1, 0),(0, 1, 1),(1, 1, 1),(0, 1, 2),(1, 1, 2),(1, 2, 2) )";
 //  civilizedInput="-char(1,1,1)";

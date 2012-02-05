@@ -10824,8 +10824,14 @@ public:
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
   }
+  std::string ElementToStringIndicesToCalculatorOutput
+(LittelmannPath& inputStartingPath, List<int> & input)
+  ;
+  std::string ElementToStringOperatorSequenceStartingOnMe
+(List<int> & input)
+  ;
   bool GenerateOrbit
-(List<LittelmannPath>& output, GlobalVariables& theGlobalVariables, int UpperBoundNumElts=-1)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts)
 ;
   bool MinimaAreIntegral();
   std::string ElementToString(bool useSimpleCoords=true)

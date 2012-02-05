@@ -5453,6 +5453,7 @@ std::string ParserFunctionArgumentTree::GetArgumentStringFromToken(int theArgume
     case ParserNode::typeUEelement: return "UE";
     case ParserNode::typeDots: return "...";
     case ParserNode::typeArray: return "";
+    case ParserNode::typeLittelman: return "LittelmannPath";
     case ParserNode::typeCharSSFDMod: return "Char";
     default: return "Error";
   }
@@ -5480,6 +5481,8 @@ int ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces
     return ParserNode::typeRationalFunction;
   if (theArgument=="UEOrdered")
     return ParserNode::typeUEElementOrdered;
+  if (theArgument=="LittelmannPath")
+    return ParserNode::typeLittelman;
   if (theArgument=="UE")
     return ParserNode::typeUEelement;
   if (theArgument=="...")
@@ -10297,12 +10300,43 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("littelmann",
    "(Rational,...)",
-   "<b>Experimental. </b> Gives all paths obtained by the Littelmann path operators from \
-   the path t\\mapsto t\\mu, t\\in [0,1], where \\mu is the weight given in fundamental coordinates \
-   by the argument of the function.",
+   "<b>For testing purposes. Will remain in future versions only as a hidden function.</b> Returns the Littelmann path obtained by connecting the \
+   zero weight to the argument weight given in fundamental coordinates.",
     "littelmann(1,0,0)",
-   'B', 3, true,
+   'B', 3, false,
     & ParserNode::EvaluateLittelmannPaths
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("eAlpha",
+   "(Integer, LittelmannPath)",
+   "<b>For testing purposes. Will remain in future versions only as a hidden function. </b> \
+   The Littelmann e_\\alpha and f_\\alpha operators. \
+   The integer index gives the index of the simple root. Positive indices correspond to the Littelmann e_\\alpha operators, \
+   Negative indices correspond to the f_\\alpha operators.",
+    "eAlpha(-1, eAlpha(-2, littelmann(1,0,0))",
+   'B', 3, true,
+    & ParserNode::EvaluateLittelmannEAlpha
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("allLittelmannPaths",
+   "(Rational,...)",
+   "<b>Experimental. Has passed a few tests. </b> Gives all Littelmann paths starting from the path that \
+   connects with a straight line the zero weight with the weight given by the argument in fundamental \
+   coordinates. The number of paths is capped at 1000; if you request a computation whose answer \
+   has more than 1000 paths, you will be informed with an appropriate error message.",
+    "allLittelmannPaths(1,0,0)",
+   'B', 3, true,
+    & ParserNode::EvaluateAllLittelmannPaths
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("littelmannPathsFromWaypoints",
+   "((Rational,...),...)",
+   "<b>For testing purposes. Will remain in future versions only as a hidden function. \
+   </b> Gives a Littelmann path from waypoints given in simple \
+   coordinates.",
+    "littelmannPathsFromWaypoints((0,0,0),(1,2,2))",
+   'B', 3, true,
+    & ParserNode::EvaluateLittelmannPathFromWayPoints
    );
 
 /*   this->AddOneFunctionToDictionaryNoFail

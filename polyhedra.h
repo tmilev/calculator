@@ -366,7 +366,8 @@ public:
   inline static int Maximum(int a, int b){  if (a>b) return a; else return b; }
   template <typename T>
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; }
-  inline static int Minimum(int a, int b){ if (a>b) return b; else return a; }
+  template <class Element>
+  inline static Element Minimum(const Element& a, const Element& b){ if (a>b) return b; else return a; }
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input)
   { if (!input.ElementToStringNeedsBracketsForMultiplication())
@@ -2495,7 +2496,7 @@ ParallelComputing::GlobalPointerCounter++;
   void ElementToString(std::string& output)const;
   std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS;}
   bool IsEqualTo(const Rational& r) const;
-  bool IsGreaterThanOrEqualTo(Rational& right);
+  bool IsGreaterThanOrEqualTo(const Rational& right)const;
   inline bool IsEqualToOne()const
   { if (this->Extended==0)
       return (this->NumShort==1 && this->DenShort==1);
@@ -2644,6 +2645,7 @@ ParallelComputing::GlobalPointerCounter++;
   inline bool operator>(const Rational& right)const{return this->IsGreaterThan(right); }
   inline bool operator<(const Rational& right)const{return right.IsGreaterThan(*this); }
   inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat); }
+  inline bool operator>=(const Rational& right)const{return this->IsGreaterThanOrEqualTo(right); }
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
 };
 
@@ -3235,6 +3237,7 @@ public:
   inline void operator*=(const Rational& other){this->MultiplyByLargeRational(other);}
   inline bool operator==(const root& right){return IsEqualTo(right); }
   inline root operator+(const root& right)const{ root result; result.Assign(*this); result.Add(right); return result;}
+  inline root operator+(const Vector<Rational>& right)const{ root result; result.Assign(right); result.Add(*this); return result;}
   inline root operator-(const root& right)const{ root result; result.Assign(*this); result.Subtract(right); return result;}
   inline void operator+=(const root& right){ this->Add(right); }
   inline void operator-=(const root& right){ this->Subtract(right); }
@@ -7481,6 +7484,7 @@ public:
   void IntersectWithPreimageOfLattice
   (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
 ;
+  void IntersectWithLineGivenBy(root& inputLine, root& outputGenerator);
   static bool GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
   (root& startingPoint, root& theAffineHyperplane, root& theDirection, root& outputPoint)
   ;
@@ -8355,8 +8359,8 @@ public:
   root GetFundamentalCoordinatesFromSimple
   (root& inputInFundamentalCoords)
   ;
-  inline Rational WeylDimFormula(root& theWeightInFundamentalBasis, GlobalVariables& theGlobalVariables)
-  { return this->WeylDimFormula(theWeightInFundamentalBasis);
+  inline Rational WeylDimFormula(root& theWeightInFundamentalCoords, GlobalVariables& theGlobalVariables)
+  { return this->WeylDimFormula(theWeightInFundamentalCoords);
   }
   Rational GetScalarProdSimpleRoot(root& input, int indexSimpleRoot)
   { Rational result, tempRat;
@@ -8370,7 +8374,8 @@ public:
     }
     return result;
   }
-  Rational WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis);
+  Rational WeylDimFormula(Vector<Rational>& theWeightInFundamentalCoords);
+  Rational WeylDimFormulaFromSimpleCoords(Vector<Rational>& theWeightInSimpleCoords);
   void RaiseToDominantWeight
   (root& theWeight, int* sign=0, bool* stabilizerFound=0)
   ;
@@ -8748,7 +8753,7 @@ public:
   }
   bool operator==(const coneRelation& right){ return this->DebugString==right.DebugString; }
   int HashFunction() const
-  { int tempI= ::MathRoutines::Minimum(this->DebugString.length(), ::SomeRandomPrimesSize);
+  { int tempI= ::MathRoutines::Minimum((int)this->DebugString.length(), ::SomeRandomPrimesSize);
     int result=0;
     for (int i=0; i<tempI; i++)
       result+= this->DebugString[i]*::SomeRandomPrimes[i];
@@ -10796,6 +10801,63 @@ public:
   };
 };
 
+class LittelmannPath
+{
+public:
+  WeylGroup* owner;
+  roots Waypoints;
+  void MakeFromWeightInSimpleCoords
+  (root& weightInSimpleCoords, WeylGroup& theOwner)
+  ;
+  void MakeFromWaypoints
+  (roots& weightsInSimpleCoords, WeylGroup& theOwner)
+  { this->owner=& theOwner;
+    this->Waypoints=weightsInSimpleCoords;
+    this->Simplify();
+  }
+  void ActByFalpha(int indexAlpha);
+  void ActByEalpha(int indexAlpha);
+//   List<Rational> Speeds;
+  void operator+=(const LittelmannPath& other)
+  { this->Waypoints.MakeActualSizeAtLeastExpandOnTop(this->Waypoints.size+other.Waypoints.size);
+    root endPoint=*this->Waypoints.LastObject();
+    for (int i=0; i<other.Waypoints.size; i++)
+      this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
+  }
+  bool GenerateOrbit
+(List<LittelmannPath>& output, GlobalVariables& theGlobalVariables, int UpperBoundNumElts=-1)
+;
+  bool MinimaAreIntegral();
+  std::string ElementToString(bool useSimpleCoords=true)
+  { if (this->Waypoints.size==0)
+      return "0";
+    std::stringstream out;
+    for (int i=0; i<this->Waypoints.size; i++)
+    { if (useSimpleCoords)
+        out << this->Waypoints[i].ElementToString();
+      else
+        out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ElementToString();
+      if (i!=this->Waypoints.size-1)
+        out << "->";
+    }
+    return out.str();
+  }
+  void Simplify();
+  int HashFunction()const
+  { return this->Waypoints.HashFunction();
+  }
+  bool IsEqualToZero()const
+  { return this->Waypoints.size==0;
+  }
+  void operator=(const LittelmannPath& other)
+  { this->Waypoints=other.Waypoints;
+    this->owner=other.owner;
+  }
+  bool operator==(const LittelmannPath& other)const
+  { return this->Waypoints==other.Waypoints;
+  }
+};
+
 class ConeLatticeAndShiftMaxComputation
 { public:
   inline static const std::string GetXMLClassName(){ return "ConeLatticeAndShiftMaxComputation";}
@@ -10991,6 +11053,7 @@ public:
   MemorySaving<partFractions> thePFs;
   MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
   MemorySaving<AnimationBuffer> theAnimation;
+  MemorySaving<LittelmannPath> theLittelmann;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -11011,6 +11074,7 @@ public:
   typeCharSSFDMod,
   typePiecewiseQP,
   typeAnimation,
+  typeLittelman,
   typeFile, typeDots,
   typeError //typeError must ALWAYS have the highest numerical value!!!!!
   };
@@ -11081,6 +11145,15 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateLittelmannPaths
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateLittelmannPathFromWayPoints
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateAllLittelmannPaths
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateLittelmannEAlpha
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
 
@@ -11380,7 +11453,7 @@ public:
   { return this->GetHashFromString(this->functionName);
   }
   int GetHashFromString(const std::string& input)const
-  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, input.size());
+  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, (int) input.size());
     int result=0;
     for(int i=0; i<numCycles; i++)
       result+=SomeRandomPrimes[i]*input[i];

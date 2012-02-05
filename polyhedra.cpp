@@ -2402,7 +2402,7 @@ inline bool Rational::IsEqualTo(const Rational& b) const
   return tempRat.IsEqualToZero();
 }
 
-inline bool Rational::IsGreaterThanOrEqualTo(Rational& right)
+inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
 { if (this->Extended==0 && right.Extended==0)
     return (this->NumShort*right.DenShort>=right.NumShort*this->DenShort);
   Rational tempRat;
@@ -26042,14 +26042,18 @@ void EigenVectorComputation::MakeGenericVermaElementOrdered(ElementUniversalEnve
   theElt.AddMonomial(tempMon);
 }
 
-Rational WeylGroup::WeylDimFormula(Vector<Rational>& theWeightInFundamentalBasis)
-{ root theWeightInSimpleBasis= this->GetSimpleCoordinatesFromFundamental(theWeightInFundamentalBasis);
-  Rational Result=1;
+Rational WeylGroup::WeylDimFormulaFromSimpleCoords(Vector<Rational>& theWeightInSimpleCoords)
+{ Rational Result=1;
   for (int i=0; i<this->RootsOfBorel.size; i++)
-  { Result.MultiplyBy(this->RootScalarCartanRoot(theWeightInSimpleBasis+this->rho, this->RootsOfBorel.TheObjects[i]));
+  { Result.MultiplyBy(this->RootScalarCartanRoot(this->rho+theWeightInSimpleCoords, this->RootsOfBorel.TheObjects[i]));
     Result/=this->RootScalarCartanRoot(this->rho, this->RootsOfBorel.TheObjects[i]);
   }
   return Result;
+}
+
+Rational WeylGroup::WeylDimFormula(Vector<Rational>& theWeightInFundamentalCoords)
+{ root theWeightInSimpleCoords= this->GetSimpleCoordinatesFromFundamental(theWeightInFundamentalCoords);
+  return this->WeylDimFormulaFromSimpleCoords(theWeightInSimpleCoords);
 }
 
 std::string SemisimpleSubalgebras::ElementToString()
@@ -27449,6 +27453,8 @@ std::string ParserNode::ElementToStringValueOnlY
       (true, theFormat.flagUseCalculatorFormatForUEOrdered, theFormat, theGlobalVariables)
       << "\n\\end{array}";
       break;
+    case ParserNode::typeLittelman:
+      break;
     case ParserNode::typeUEelement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
       << this->UEElement.GetElement().ElementToString(theGlobalVariables, theFormat)
@@ -27501,10 +27507,11 @@ std::string ParserNode::ElementToStringValueAndType
     case ParserNode::typeUEElementOrdered: out << "an element of U(g) ordered:"; break;
     case ParserNode::typeUEelement: out << " an element of U(g) of value: "; break;
     case ParserNode::typeWeylAlgebraElement: out << " a Weyl algebra element: "; break;
+    case ParserNode::typeLittelman: out << "a Littelmann path: " << this->theLittelmann.GetElement().ElementToString(); break;
     case ParserNode::typeArray: out << " an array of " << this->children.size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
-     case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
-     << " simple Lie algebra:"; break;
+    case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
+    << " simple Lie algebra:"; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone:
@@ -27977,8 +27984,13 @@ void ParserNode::CopyValue(const ParserNode& other)
     case ParserNode::typeCharSSFDMod:
       this->theChar=other.theChar;
       break;
+    case ParserNode::typeLittelman:
+      this->theLittelmann=other.theLittelmann;
+      break;
     default:
-      assert(false);
+      this->SetError(errorProgramming);
+      this->outputString="The lazy programmer(s) forgot to implement the correct \
+      copying procedure for the parser node. Feel free to send them anry emails!";
       break;
   }
 }

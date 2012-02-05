@@ -10323,9 +10323,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental. Has passed a few tests. </b> Gives all Littelmann paths starting from the path that \
    connects with a straight line the zero weight with the weight given by the argument in fundamental \
    coordinates. The number of paths is capped at 1000; if you request a computation whose answer \
-   has more than 1000 paths, you will be informed with an appropriate error message.",
-    "allLittelmannPaths(1,0,0)",
-   'B', 3, true,
+   has more than 1000 paths, you will be informed with an appropriate error message. \
+   Reference: P. Littelmann, Paths and root operators in representation theory. Let e_{\\alpha_i}, f_{\\alpha_i} \
+   be the root operators as defined in the cited article, where \\alpha_i denotes the i^th simple \
+   root. In the printouts, for i>=1, the expression g_{-i} denotes the root operator f_{\\alpha_i}, \
+   and the expression g_{i} denotes the root operator e_{\\alpha_i}. The notation g_{i} is a valid calculator input \
+   and is also used to denote the i^th Chevalley-Weyl generator (i<0 allowed). \
+    ",
+    "allLittelmannPaths(0,1)",
+   'G', 2, true,
     & ParserNode::EvaluateAllLittelmannPaths
    );
   this->AddOneFunctionToDictionaryNoFail

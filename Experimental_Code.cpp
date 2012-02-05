@@ -1183,16 +1183,20 @@ int ParserNode::EvaluateAllLittelmannPaths
   LittelmannPath& thePath=theNode.theLittelmann.GetElement();
   List<LittelmannPath> allPaths;
   std::stringstream out;
-  if (thePath.GenerateOrbit(allPaths, theGlobalVariables, 1000))
+  List<List<int> > outputIndices;
+  if (thePath.GenerateOrbit(allPaths, outputIndices, theGlobalVariables, 1000))
     out << "Number of paths: " << allPaths.size;
   else
     out << "<b>Number of paths has been trimmed to " << allPaths.size
     << " (the hard-coded limit for a path's orbit size is " << 1000 << ")</b>";
   out << "; Weyl dimension formula: "
   << theWeyl.WeylDimFormulaFromSimpleCoords(*thePath.Waypoints.LastObject()).ElementToString();
-  out << "A printout of the paths follows. The waypoints of the Littelmann paths are given in simple coordinates.";
+  out << ".<br> A printout of the paths follows. The waypoints of the Littelmann paths are given in simple coordinates.";
   for (int i=0; i<allPaths.size; i++)
-    out << "\n<br>\n" << allPaths[i].ElementToString();
+  { out << "\n<br>\n" << allPaths[i].ElementToString();
+    out << " corresponds to sequence "
+    << allPaths[0].ElementToStringOperatorSequenceStartingOnMe(outputIndices[i]);
+  }
   theNode.outputString=out.str();
   return theNode.errorNoError;
 }
@@ -1223,39 +1227,35 @@ void LittelmannPath::MakeFromWeightInSimpleCoords
   this->Simplify();
 }
 
-class RootOperatorSequence : public List<int>
-{
-public:
-  std::string ElementToString(LittelmannPath& startingPath)
-  { std::stringstream out;
-    for (int i=this->size-1; i>=0; i--)
-    { int displayIndex= this->TheObjects[i];
-      if (displayIndex>=0)
-        displayIndex++;
-      out << "eAlpha(" << displayIndex << ", ";
-    }
-    out << "littelmann"
-    << startingPath.owner->GetFundamentalCoordinatesFromSimple(
-    *startingPath.Waypoints.LastObject() ).ElementToString();
-    for (int i=0; i<this->size; i++)
-      out << " ) ";
-    return out.str();
+std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput
+(LittelmannPath& inputStartingPath, List<int> & input)
+{ std::stringstream out;
+  for (int i=input.size-1; i>=0; i--)
+  { int displayIndex= input[i];
+    if (displayIndex>=0)
+      displayIndex++;
+    out << "eAlpha(" << displayIndex << ", ";
   }
-
-};
-
-template < > int List<RootOperatorSequence>::ListActualSizeIncrement=1000;
+  out << "littelmann"
+  << inputStartingPath.owner->GetFundamentalCoordinatesFromSimple
+  (*inputStartingPath.Waypoints.LastObject() ).ElementToString();
+  for (int i=0; i<input.size; i++)
+    out << " ) ";
+  return out.str();
+}
 
 bool LittelmannPath::GenerateOrbit
-(List<LittelmannPath>& output, GlobalVariables& theGlobalVariables, int UpperBoundNumElts)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators,
+ GlobalVariables& theGlobalVariables, int UpperBoundNumElts)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTopHash(*this);
   int theDim=this->owner->GetDim();
+  outputOperators.SetSize(1);
+  outputOperators[0].SetSize(0);
+  List<int> currentSequence;
+  if (UpperBoundNumElts>0)
+    currentSequence.MakeActualSizeAtLeastExpandOnTop(UpperBoundNumElts);
   LittelmannPath currentPath;
-  List<RootOperatorSequence> opList;
-  opList.SetSize(1);
-  opList[0].SetSize(0);
-  RootOperatorSequence currentSequence;
   bool result=true;
   for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
     if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
@@ -1269,12 +1269,11 @@ bool LittelmannPath::GenerateOrbit
         if (!currentPath.IsEqualToZero())
 //          hashedOutput.AddOnTopNoRepetitionHash(currentPath);
           if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
-          { currentSequence=opList[lowestNonExplored];
+          { currentSequence=outputOperators[lowestNonExplored];
             currentSequence.AddOnTop(i);
-            opList.AddOnTop(currentSequence);
+            outputOperators.AddOnTop(currentSequence);
             if (!currentPath.MinimaAreIntegral())
-            { std::cout << "<hr>Found a bad path:<br> "
-              << opList.LastObject()->ElementToString(*this);
+            { std::cout << "<hr>Found a bad path:<br> ";
               std::cout << " = " << currentPath.ElementToString();
             }
           }
@@ -1283,12 +1282,11 @@ bool LittelmannPath::GenerateOrbit
         if (!currentPath.IsEqualToZero())
           //hashedOutput.AddOnTopNoRepetitionHash(currentPath);
           if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
-          { currentSequence=opList[lowestNonExplored];
+          { currentSequence=outputOperators[lowestNonExplored];
             currentSequence.AddOnTop(-i-1);
-            opList.AddOnTop(currentSequence);
+            outputOperators.AddOnTop(currentSequence);
             if (!currentPath.MinimaAreIntegral())
-            { std::cout << "<hr>Found a bad path:<br> "
-              << opList.LastObject()->ElementToString(*this);
+            { std::cout << "<hr>Found a bad path:<br> ";
               std::cout << " = " << currentPath.ElementToString();
             }
           }
@@ -1296,3 +1294,24 @@ bool LittelmannPath::GenerateOrbit
   output.CopyFromBase(hashedOutput);
   return result;
 }
+
+std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
+(List<int> & input)
+{ std::stringstream out;
+  int currentCount=0;
+  for (int i=input.size-1; i>=0; i--)
+  { int displayIndexNext=0;
+    if (i>0)
+      displayIndexNext=(input[i-1]<0) ? input[i-1]: input[i]+1;
+    int displayIndexCurrent= (input[i]<0) ? input[i] : input[i]+1;
+    currentCount++;
+    if (displayIndexNext!=displayIndexCurrent)
+    { out << "g_{" << displayIndexCurrent << "}";
+      if (currentCount>1)
+        out << "^{" << currentCount << "}";
+      currentCount=0;
+    }
+  }
+  return out.str();
+}
+

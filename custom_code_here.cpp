@@ -1198,7 +1198,7 @@ void Cone::ChangeBasis
 }
 
 root WeylGroup::GetSimpleCoordinatesFromFundamental
-(Vector<Rational>& inputInFundamentalCoords)
+(const Vector<Rational>& inputInFundamentalCoords)
 { MatrixLargeRational& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
   root result;
   result=inputInFundamentalCoords;
@@ -1207,7 +1207,7 @@ root WeylGroup::GetSimpleCoordinatesFromFundamental
 }
 
 root WeylGroup::GetFundamentalCoordinatesFromSimple
-(root& inputInFundamentalCoords)
+(const root& inputInFundamentalCoords)
 { MatrixLargeRational& tempMat=*this->GetMatrixSimpleToFundamentalCoords();
   root result=inputInFundamentalCoords;
   tempMat.ActOnAroot(result);
@@ -9058,7 +9058,7 @@ int ParserNode::EvaluateEigen
   HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
   if (theHmm.theDomain.GetRank()!=theWeight.size)
     return theNode.SetError(theNode.errorDimensionProblem);
-  List<ElementUniversalEnveloping> theList;
+  List<ElementUniversalEnveloping<PolynomialRationalCoeff> > theList;
   EigenVectorComputation theEigenComputation;
   theNode.outputString=theEigenComputation.ComputeEigenVectorsOfWeight
   (theHmm, theNode.owner->testAlgebra, theList, theWeight, theGlobalVariables);
@@ -9275,7 +9275,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   remainderElement=*this;
   CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
-  ElementUniversalEnveloping abstractCasimir, embeddedCasimirNonOrdered;
+  ElementUniversalEnveloping<PolynomialRationalCoeff> abstractCasimir, embeddedCasimirNonOrdered;
   abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
   out << "<br>abstract Casimir: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
@@ -9288,8 +9288,13 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   out << "<br> embedded Casimir non-ordered: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables, tempFormat));
-  ElementUniversalEnvelopingOrdered<CoefficientType> embeddedCasimir;
-  embeddedCasimir.AssignElementUniversalEnveloping(embeddedCasimirNonOrdered, theParser.testAlgebra, this->theOwner->theRingUnit, this->theOwner->theRingZero, &theGlobalVariables);
+  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> embeddedCasimir;
+  PolynomialRationalCoeff polyOne, polyZero;
+  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
+  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
+  embeddedCasimir.AssignElementUniversalEnveloping
+  (embeddedCasimirNonOrdered, theParser.testAlgebra, polyOne, polyZero,
+   &theGlobalVariables);
   out << "<br>the embedded Casimir is: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (embeddedCasimir.ElementToString(tempFormat, theGlobalVariables));
@@ -9409,15 +9414,18 @@ int ParserNode::EvaluateModVermaRelations
   return theNode.errorNoError;
 }
 
-void ElementUniversalEnveloping::LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left)
-{ ElementUniversalEnveloping tempElt1, tempElt2;
+template<class CoefficientType>
+void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left)
+{ ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
   tempElt1.AssignElementLieAlgebra(left, this->GetNumVariables(), *this->owner);
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
 
-bool MonomialUniversalEnveloping::AdjointRepresentationAction
-  (const ElementUniversalEnveloping& input, ElementUniversalEnveloping& output,
+template<class CoefficientType>
+bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
+  (const ElementUniversalEnveloping<CoefficientType>& input,
+   ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
 { output.Nullify(*this->owner);
   ElementSimpleLieAlgebra tempElt;
@@ -9436,12 +9444,13 @@ bool MonomialUniversalEnveloping::AdjointRepresentationAction
   return true;
 }
 
-bool ElementUniversalEnveloping::AdjointRepresentationAction
-  (const ElementUniversalEnveloping& input, ElementUniversalEnveloping& output,
+template<class CoefficientType>
+bool ElementUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
+  (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
   output.Nullify(*this->owner);
-  ElementUniversalEnveloping summand;
+  ElementUniversalEnveloping<CoefficientType> summand;
   for (int i=0; i<this->size; i++)
   { if(!this->TheObjects[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
       return false;
@@ -9457,7 +9466,7 @@ int ParserNode::EvaluateAdjointAction
   theNode.impliedNumVars= MathRoutines::Maximum(actingNode.impliedNumVars, NodeBeingActedUpon.impliedNumVars);
   actingNode.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
   NodeBeingActedUpon.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
-  ElementUniversalEnveloping& output=theNode.UEElement.GetElement();
+  ElementUniversalEnveloping<PolynomialRationalCoeff>& output=theNode.UEElement.GetElement();
   if ( !actingNode.UEElement.GetElement().AdjointRepresentationAction
   (NodeBeingActedUpon.UEElement.GetElement(), output, theGlobalVariables))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
@@ -9488,16 +9497,17 @@ int ParserNode::EvaluateModVermaRelationsOrdered
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables));
-  PolynomialRationalCoeff PolyOne;
+  PolynomialRationalCoeff PolyOne, PolyZero;
   int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange.GetRank());
   PolyOne.MakeNVarConst(numVars, (Rational) 1);
-  theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables);
+  PolyZero.Nullify(numVars);
+  theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables, PolyOne, PolyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables))
   ;
   //Needs to be rewritten! fix it!
-  theNode.UEElementOrdered.GetElement().ModOutVermaRelationS
+  theNode.UEElementOrdered.GetElement().ModOutVermaRelationSOld
   (&theGlobalVariables, PolyOne, numVars);
   theNode.ExpressionType=theNode.typeUEElementOrdered;
   theNode.outputString=out.str();
@@ -9651,11 +9661,11 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
       (concatenationMon, tempV, & theGlobalVariables, owner.theRingUnit);
       if (!tempElt.leftComponents[IndexFound].IsEqualToZero())
         this->operator+=(tempElt);
-      precedingMon.ComputeDebugString();
+//      precedingMon.ComputeDebugString();
       precedingMon.LieBracketOnTheRight(owner.theFDspace[IndexFound], owner.theRingUnit, owner.theRingZero);
-      precedingMon.ComputeDebugString();
-      precedingMon.Simplify(& theGlobalVariables);
-      precedingMon.ComputeDebugString();
+      //precedingMon.ComputeDebugString();
+      precedingMon.Simplify(&theGlobalVariables, owner.theRingUnit, owner.theRingZero);
+      //precedingMon.ComputeDebugString();
       precedingMon*=succeedingMon;
       if (!precedingMon.IsEqualToZero())
       { tempElt.AssignElementUE(precedingMon, owner, theGlobalVariables, theRingUnit);
@@ -9667,33 +9677,6 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
   return true;
 }
 
-void MonomialUniversalEnveloping::SubstitutionCoefficient
-(PolynomialsRationalCoeff& theSub)
-{ if (theSub.size<1)
-    return;
-  this->Coefficient.Substitution(theSub, theSub[0].NumVars);
-  this->SetNumVariables(theSub[0].NumVars);
-}
-
-void ElementUniversalEnveloping::SubstitutionCoefficients
-(PolynomialsRationalCoeff& theSub, GlobalVariables* theContext)
-{ ElementUniversalEnveloping endResult;
-  MonomialUniversalEnveloping currentMon;
-  endResult.Nullify(*this->owner);
-  for (int i=0; i<this->size; i++)
-  { currentMon=this->TheObjects[i];
-    currentMon.SubstitutionCoefficient(theSub);
-    endResult.AddMonomial(currentMon);
-  }
-  if (theContext!=0)
-    endResult.Simplify(*theContext);
-  else
-  { GlobalVariables theGlobalVariables;
-    endResult.Simplify(theGlobalVariables);
-  }
-  this->operator=(endResult);
-}
-
 int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)
 { ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
   ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
@@ -9702,7 +9685,7 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   root theWeight;
   if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
     return this->SetError(this->errorBadIndex);
-  ElementUniversalEnveloping& theUEElement=this->UEElement.GetElement();
+  ElementUniversalEnveloping<PolynomialRationalCoeff>& theUEElement=this->UEElement.GetElement();
   PolynomialRationalCoeff polyOne;
   polyOne.MakeNVarConst(0, (Rational) 1);
   if (leftNode.Operation==Parser::tokenG)
@@ -10344,7 +10327,16 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'B', 3, true,
     & ParserNode::EvaluateLittelmannPathFromWayPoints
    );
-
+  this->AddOneFunctionToDictionaryNoFail
+  ("irreducibleRep",
+   "((Rational,...),...)",
+   "<b>Experimental, not tested. \
+   </b> Creates an irreducible finite dimensional representation from highest weight given in fundamental \
+   coordinates.",
+    "irreducibleRep(1,1)",
+   'A', 2, true,
+    & ParserNode::EvaluateRepresentationFromHWFundCoords
+   );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

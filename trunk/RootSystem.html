@@ -107,8 +107,8 @@ function checkCookie()
   //alert("height: " + theOldHeight +" width: " + theOldWidth);
   //theCalculatorForm.setStyle("width:"+ theOldWidth);
 //  theCalculatorForm.style.height=theOldHeight;
-  theCalculatorForm.style.width=theOldWidth;
-  theCalculatorForm.style.height=theOldHeight;
+  theCalculatorForm.style.setProperty('width', theOldWidth);
+  theCalculatorForm.style.setProperty('height', theOldHeight);
 }
 </script>
 <!>

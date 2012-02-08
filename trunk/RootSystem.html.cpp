@@ -113,8 +113,8 @@ output << "   theOldHeight=getCookie(\"heightCalculatorText\");\n";
 output << "   //alert(\"height: \" + theOldHeight +\" width: \" + theOldWidth);\n";
 output << "   //theCalculatorForm.setStyle(\"width:\"+ theOldWidth);\n";
 output << " //  theCalculatorForm.style.height=theOldHeight;\n";
-output << "   theCalculatorForm.style.width=theOldWidth;\n";
-output << "   theCalculatorForm.style.height=theOldHeight;\n";
+output << "   theCalculatorForm.style.setProperty('width', theOldWidth);\n";
+output << "   theCalculatorForm.style.setProperty('height', theOldHeight);\n";
 output << " }\n";
 output << " </script>\n";
 }

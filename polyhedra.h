@@ -874,6 +874,12 @@ public:
   void SwapTwoIndicesHash(int i1, int i2);
   inline bool ContainsObjectHash(const Object& o) {return this->IndexOfObjectHash(o)!=-1; }
   int IndexOfObjectHash(const Object& o) const;
+  void SetExpectedSize(int expectedSize)
+  { if (expectedSize<1)
+      return;
+    this->MakeActualSizeAtLeastExpandOnTop(expectedSize);
+    this->SetHashSizE(expectedSize*2);
+  }
   void SetHashSizE(int HS);
   int SizeWithoutObjects();
   void AssignList(const List<Object>& other)
@@ -9841,6 +9847,11 @@ public:
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
+  void GetMinimialDegreeFormWithFDRelsComingFrom
+  (const ElementUniversalEnveloping<CoefficientType>& output, const root& theHWinSimpleCoords,
+   GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
+   ;
   void Nullify(const CoefficientType& theRingZero, SemisimpleLieAlgebra& theOwner)
   { this->init(theOwner);
     this->Coefficient=theRingZero;
@@ -9940,6 +9951,11 @@ public:
     this->ElementToString(tempS, useLatex, false, theGlobalVariables, theFormat);
     return tempS;
   }
+  std::string ElementToStringCalculatorFormat(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  { std::string tempS;
+    this->ElementToString(tempS, false, false, theGlobalVariables, theFormat);
+    return tempS;
+  }
   std::string ElementToString
   (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
   { std::string tempS;
@@ -9986,6 +10002,19 @@ public:
       return this->TheObjects[0].Coefficient.NumVars;
   }
   inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& other){this->operator*=(other);}
+  void ModToMinDegreeFormFDRels
+  (const root& theHWinSimpleCoords,
+   GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
+  { ElementUniversalEnveloping<CoefficientType> result, temp;
+    result.Nullify(*this->owner);
+    for (int i=0; i<this->size; i++)
+    { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
+      currentMon.GetMinimialDegreeFormWithFDRelsComingFrom
+      (temp, theHWinSimpleCoords, theGlobalVariables, theRingUnit, theRingZero);
+      result.AddMonomial(currentMon);
+    }
+  }
   void ModOutVermaRelationS(GlobalVariables& theGlobalVariables){ this->ModOutVermaRelationS(false, theGlobalVariables);}
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   static void GetCoordinateFormOfSpanOfElements
@@ -10040,6 +10069,7 @@ static void GetBasisFromSpanOfElements
     this->owner=other.owner;
   }
   void operator+=(const ElementUniversalEnveloping<CoefficientType>& other);
+  void operator+=(const MonomialUniversalEnveloping<CoefficientType>& other){this->AddMonomial(other);}
   void operator+=(int other);
   void operator+=(const Rational& other);
   void operator-=(const ElementUniversalEnveloping<CoefficientType>& other);
@@ -15395,7 +15425,9 @@ void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheRight
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::AddMonomial
 (const MonomialUniversalEnveloping<CoefficientType>& input)
-{ int theIndex= this->IndexOfObjectHash(input);
+{ if (input.Coefficient.IsEqualToZero())
+    return;
+  int theIndex= this->IndexOfObjectHash(input);
   if (theIndex==-1)
     this->AddOnTopHash(input);
   else
@@ -15567,7 +15599,8 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::ElementToString
-(std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+(std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables,
+ PolynomialOutputFormat& theFormat)
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)
@@ -15575,7 +15608,8 @@ void ElementUniversalEnveloping<CoefficientType>::ElementToString
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<CoefficientType>& current=this->TheObjects[i];
-    tempS=current.ElementToString(useRootIndices, includeEpsilonCoords, theGlobalVariables, theFormat);
+    tempS=current.ElementToString
+    (useRootIndices, includeEpsilonCoords, theGlobalVariables, theFormat);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')
@@ -15916,7 +15950,8 @@ std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString
   for (int i=0; i<this->generatorsIndices.size; i++)
   { CoefficientType& thePower=this->Powers.TheObjects[i];
     int theIndex=this->generatorsIndices.TheObjects[i];
-    tempS=this->owner->GetLetterFromGeneratorIndex(theIndex, useRootIndices, useEpsilonCoords, theFormat, theGlobalVariables);
+    tempS=this->owner->GetLetterFromGeneratorIndex
+    (theIndex, useRootIndices, useEpsilonCoords, theFormat, theGlobalVariables);
     //if (thePower>1)
     //  out << "(";
     out << tempS;

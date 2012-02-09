@@ -9284,14 +9284,14 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   tempFormat.alphabetBases[0]="g";
   tempFormat.alphabetBases[1]="h";
   theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
-  embeddedCasimirNonOrdered.Simplify(theGlobalVariables);
+  PolynomialRationalCoeff polyOne, polyZero;
+  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
+  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
+  embeddedCasimirNonOrdered.Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br> embedded Casimir non-ordered: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables, tempFormat));
   ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> embeddedCasimir;
-  PolynomialRationalCoeff polyOne, polyZero;
-  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
-  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
   embeddedCasimir.AssignElementUniversalEnveloping
   (embeddedCasimirNonOrdered, theParser.testAlgebra, polyOne, polyZero,
    &theGlobalVariables);
@@ -9401,7 +9401,10 @@ int ParserNode::EvaluateModVermaRelations
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
 ;
-  theNode.UEElement.GetElement().Simplify(theGlobalVariables);
+  PolynomialRationalCoeff polyOne, polyZero;
+  polyOne.MakeNVarConst(theNode.impliedNumVars, 1);
+  polyZero.Nullify(theNode.impliedNumVars);
+  theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))

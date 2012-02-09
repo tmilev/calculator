@@ -129,7 +129,8 @@ class ModuleSSalgebraNew
 public:
   SemisimpleLieAlgebra theAlgebra;
   List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
-  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWords;
+  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
+  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
   void MakeFundamentalRep
@@ -155,6 +156,7 @@ public:
 
 template < > int List<Matrix<Qsqrt2> >::ListActualSizeIncrement=100;
 template < > int List<Vector<Qsqrt2> >::ListActualSizeIncrement=100;
+template < > int HashedList<MonomialUniversalEnveloping<Qsqrt2> >::PreferredHashSize=100;
 
 int ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -1238,12 +1240,14 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 //  ElementUniversalEnvelopingOrdered<CoefficientType> theElt;
   ElementUniversalEnveloping<CoefficientType> tempElt;
   PolynomialOutputFormat tempFormat;
+  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   List<Rational> theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(theHWFundCoords);
-  this->theGeneratingWords.SetSize(theGeneratingWordsNonReduced.size);
+  this->theGeneratingWordsLittelmannForm.SetSize(theGeneratingWordsNonReduced.size);
+  this->theGeneratingMonsPBWform.SetExpectedSize(theGeneratingWordsNonReduced.size);
   for (int i=0; i<theGeneratingWordsNonReduced.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
     ElementUniversalEnveloping<CoefficientType>& currentElt = this->theGeneratingWordsNonReduced[i];
-    ElementUniversalEnveloping<CoefficientType>& currentReducedElt = this->theGeneratingWords[i];
+    ElementUniversalEnveloping<CoefficientType>& currentReducedElt = this->theGeneratingWordsLittelmannForm[i];
     currentElt.MakeConst(1, this->theAlgebra);
     for (int j=currentPath.size-1; j>=0; j--)
     { int theIndex=currentPath[j];
@@ -1254,37 +1258,59 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       theRingUnit, this->theAlgebra);
       currentElt.MultiplyBy(tempElt);
     }
-    out << "<br>Element " << i+1 << ": "
-    << currentElt.ElementToString(true, theGlobalVariables, tempFormat) << " \\cdot v = ";
+    out << "<br>m_{ " << i+1 << "} := "
+    << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " \\cdot v = ";
     currentReducedElt=currentElt;
     currentReducedElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 //    out << currentElt.ElementToString(tempFormat) << " \\cdot v = ";
 //    std::cout  << "<hr><hr>Element " << i+1 << " here: ";
-    currentReducedElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-    out << currentReducedElt.ElementToString(true, theGlobalVariables, tempFormat);
+    currentReducedElt.ModToMinDegreeFormFDRels(theHWsimpleCoords, theGlobalVariables, 1, 0);
+    out << currentReducedElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
+    int numNewFoundMons=0;
+    for (int l=0; l<currentReducedElt.size; l++)
+      if (this->theGeneratingMonsPBWform.AddOnTopNoRepetitionHash(currentReducedElt[l]))
+        numNewFoundMons++;
+//    if (numNewFoundMons>1)
+//      std::cout << "<hr>Houston, we don't have problem @ element " << i+1 << ": "
+//      << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
   }
   int theDim=theWeyl.GetDim();
   int numPosRoots=theWeyl.RootsOfBorel.size;
 //  ElementUniversalEnvelopingOrdered<Rational> te
   root tempRoot;
   bool foundBad=false;
-  for (int j=0; j<this->theGeneratingWords.size; j++)
-  { ElementUniversalEnveloping<CoefficientType>& currentWord=this->theGeneratingWords[j];
+  ElementUniversalEnveloping<Rational> theSimpleGenerator;
+  for (int j=0; j<this->theGeneratingWordsLittelmannForm.size; j++)
+  { ElementUniversalEnveloping<CoefficientType>& currentWord=this->theGeneratingWordsLittelmannForm[j];
     for (int k=0; k<2; k++)
       for (int i=0; i<theDim; i++)
       { int genChevIndex=(k==0) ? numPosRoots-i-1 : numPosRoots+theDim+i;
-        tempElt.MakeOneGenerator(genChevIndex, 0, this->theAlgebra);
-        tempElt.LieBracketOnTheRight(currentWord, tempElt);
+        theSimpleGenerator.MakeOneGenerator(genChevIndex, 1, this->theAlgebra);
+        theSimpleGenerator.LieBracketOnTheRight(currentWord, tempElt);
         tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-        if (!tempElt.GetCoordsInBasis(this->theGeneratingWords, tempRoot, 1, 0, theGlobalVariables))
-        { out << "<hr><hr>Houston, we have a problem @ element "
-          << currentWord.ElementToString(true, theGlobalVariables, tempFormat)
-          << " and generator ";
-          tempElt.MakeOneGenerator(genChevIndex, 0, this->theAlgebra);
-          out << tempElt.ElementToString(true, theGlobalVariables, tempFormat);
+        tempElt.Simplify(theGlobalVariables, 1, 0);
+        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
+        if (!tempElt.GetCoordsInBasis(this->theGeneratingWordsLittelmannForm, tempRoot, 1, 0, theGlobalVariables))
+        { out << "<hr><hr>Houston, we have a problem @ ["
+          << theSimpleGenerator.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat)
+          << ", "
+          << currentWord.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat)
+          << "] = " ;
+          out << tempElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
           foundBad=true;
+        } else
+        { out << "<br> [" << theSimpleGenerator.ElementToStringCalculatorFormat
+          (theGlobalVariables, tempFormat) << "," << currentWord.ElementToStringCalculatorFormat
+          (theGlobalVariables, tempFormat) << "]="
+          << tempRoot.ElementToStringLetterFormat("m");
         }
       }
+  }
+  out << "<hr>The " << this->theGeneratingMonsPBWform.size << " found monomials follow. ";
+  for (int i=0; i<this->theGeneratingMonsPBWform.size; i++)
+  { MonomialUniversalEnveloping<Rational>& currentMon=this->theGeneratingMonsPBWform[i];
+    out << "<br>Monomial " << i+1 << ": "
+    << currentMon.ElementToString(false, false, theGlobalVariables, tempFormat);
   }
   if (!foundBad)
   { out << "<br>No problem here!";
@@ -1580,5 +1606,14 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
       this->Powers.size--;
     }
   }
+}
+
+template<class CoefficientType>
+void MonomialUniversalEnveloping<CoefficientType>::
+GetMinimialDegreeFormWithFDRelsComingFrom
+  (const ElementUniversalEnveloping<CoefficientType>& output, const root& theHWinSimpleCoords,
+   GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
+{
 }
 

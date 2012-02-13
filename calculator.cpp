@@ -173,8 +173,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-//  civilizedInput="irreducibleRep(1,1)";
-//  civilizedInput="eAlpha(1, eAlpha(-1, littelmann (1) ) )";
+//  civilizedInput="(h_1)/3";
+//  civilizedInput="irreducibleRep(2,2)";
+//  civilizedInput="irreducibleRep(1,1,1)";
 //  theParser.DefaultWeylLetter='A';
 //  theParser.DefaultWeylRank=2;
 

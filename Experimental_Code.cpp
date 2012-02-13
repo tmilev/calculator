@@ -1261,10 +1261,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     out << "<br>m_{ " << i+1 << "} := "
     << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " \\cdot v = ";
     currentReducedElt=currentElt;
-    currentReducedElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+//    currentReducedElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 //    out << currentElt.ElementToString(tempFormat) << " \\cdot v = ";
 //    std::cout  << "<hr><hr>Element " << i+1 << " here: ";
-    currentReducedElt.ModToMinDegreeFormFDRels(theHWsimpleCoords, theGlobalVariables, 1, 0);
+//    currentReducedElt.ModToMinDegreeFormFDRels
+//    (theHWsimpleCoords, theGlobalVariables, 1, 0)
+//    ;
     out << currentReducedElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
     int numNewFoundMons=0;
     for (int l=0; l<currentReducedElt.size; l++)
@@ -1282,27 +1284,28 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   ElementUniversalEnveloping<Rational> theSimpleGenerator;
   for (int j=0; j<this->theGeneratingWordsLittelmannForm.size; j++)
   { ElementUniversalEnveloping<CoefficientType>& currentWord=this->theGeneratingWordsLittelmannForm[j];
-    for (int k=0; k<2; k++)
+    for (int k=0; k<1; k++)
       for (int i=0; i<theDim; i++)
       { int genChevIndex=(k==0) ? numPosRoots-i-1 : numPosRoots+theDim+i;
         theSimpleGenerator.MakeOneGenerator(genChevIndex, 1, this->theAlgebra);
-        theSimpleGenerator.LieBracketOnTheRight(currentWord, tempElt);
+        tempElt=theSimpleGenerator;
+        tempElt.MultiplyBy(currentWord);
         tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-        tempElt.Simplify(theGlobalVariables, 1, 0);
-        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
+//        tempElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+//        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
+//        tempElt.Simplify(theGlobalVariables, 1, 0);
+//        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
+//        tempElt.ModToMinDegreeFormFDRels(theHWsimpleCoords, theGlobalVariables, theRingUnit, theRingZero);
         if (!tempElt.GetCoordsInBasis(this->theGeneratingWordsLittelmannForm, tempRoot, 1, 0, theGlobalVariables))
-        { out << "<hr><hr>Houston, we have a problem @ ["
-          << theSimpleGenerator.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat)
-          << ", "
-          << currentWord.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat)
-          << "] = " ;
+        { out << "<hr><hr>Houston, we have a problem @ "
+          << theSimpleGenerator.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << "*("
+          << currentWord.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " )= " ;
           out << tempElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
           foundBad=true;
         } else
-        { out << "<br> [" << theSimpleGenerator.ElementToStringCalculatorFormat
-          (theGlobalVariables, tempFormat) << "," << currentWord.ElementToStringCalculatorFormat
-          (theGlobalVariables, tempFormat) << "]="
-          << tempRoot.ElementToStringLetterFormat("m");
+        { out << "<br> " << theSimpleGenerator.ElementToStringCalculatorFormat
+          (theGlobalVariables, tempFormat) << "*(" << currentWord.ElementToStringCalculatorFormat
+          (theGlobalVariables, tempFormat) << ")=" << tempRoot.ElementToStringLetterFormat("m");
         }
       }
   }
@@ -1444,17 +1447,17 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperi
 
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const root& theHWsimpleCoords,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   ElementUniversalEnveloping<CoefficientType> output;
   output.Nullify(*this->owner);
-  bool result=true;
+  bool result=false;
   for (int i=0; i<this->size; i++)
   { tempMon= this->TheObjects[i];
 //    tempMon.ComputeDebugString();
-    if (!tempMon.ModOutFDRelationsExperimental(theContext, theHWsimpleCoords, theRingUnit, theRingZero))
-      result=false;
+    if (tempMon.ModOutFDRelationsExperimental(theContext, theHWsimpleCoords, theRingUnit, theRingZero))
+      result=true;
 //    tempMon.ComputeDebugString();
     output.AddMonomial(tempMon);
   }
@@ -1471,7 +1474,8 @@ bool ElementUniversalEnveloping<CoefficientType>::GetCoordsInBasis
   tempBasis=theBasis;
   tempBasis.AddOnTop(*this);
   Vectors<CoefficientType> tempCoords;
-  this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, theGlobalVariables);
+  if (!this->GetBasisFromSpanOfElements(tempBasis, tempCoords, tempElts, theRingUnit, theRingZero, theGlobalVariables))
+    return false;
   Vector<CoefficientType> tempRoot;
   tempRoot=*tempCoords.LastObject();
   tempCoords.SetSize(theBasis.size);
@@ -1480,14 +1484,14 @@ bool ElementUniversalEnveloping<CoefficientType>::GetCoordsInBasis
 
 template<class CoefficientType>
 template<class CoefficientTypeQuotientField>
-void ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
+bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
   (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
    Vectors<CoefficientTypeQuotientField>& outputCoords,
    List<ElementUniversalEnveloping<CoefficientType> >& outputTheBasis,
    const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero,
    GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
-    return;
+    return false;
   ElementUniversalEnveloping<CoefficientType> outputCorrespondingMonomials;
   outputCorrespondingMonomials.Nullify(*theElements.TheObjects[0].owner);
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
@@ -1516,6 +1520,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
   Matrix<CoefficientType> bufferMat;
   Vectors<CoefficientType> bufferVectors;
   outputCoordsBeforeReduction.GetCoordsInBasis(basisCoordForm, outputCoords, bufferVectors, bufferMat, theFieldUnit, theFieldZero);
+  return true;
 }
 
 template <class CoefficientType>
@@ -1565,7 +1570,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
       }
     }
   }
-  return true;
+  return false;
 }
 
 template <class CoefficientType>
@@ -1609,11 +1614,111 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
 }
 
 template<class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::
-GetMinimialDegreeFormWithFDRelsComingFrom
-  (const ElementUniversalEnveloping<CoefficientType>& output, const root& theHWinSimpleCoords,
-   GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
+void ElementUniversalEnveloping<CoefficientType>::ModToMinDegreeFormFDRels
+(const root& theHWinSimpleCoords, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
+{ ElementUniversalEnveloping<CoefficientType> result, temp;
+  result.Nullify(*this->owner);
+  bool Found=true;
+  int numPosRoots=this->owner->GetNumPosRoots();
+  while (Found)
+  { Found=false;
+    for (int j=numPosRoots-1; j>=0; j--)
+    { this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j,numPosRoots-1);
+      this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
+      this->owner->UEGeneratorOrderIncludingCartanElts.SwapTwoIndices(j,numPosRoots-1);
+      if (this->ModOutFDRelationsExperimental(&theGlobalVariables, theHWinSimpleCoords, theRingUnit, theRingZero))
+        Found=true;
+    }
+  }
+  this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
+}
+
+template<class CoefficientType>
+bool ElementUniversalEnveloping<CoefficientType>::ApplyMinusTransposeAutoOnMe()
+{ MonomialUniversalEnveloping<CoefficientType> tempMon;
+  ElementUniversalEnveloping<CoefficientType> result;
+  result.Nullify(*this->owner);
+  int numPosRoots=this->owner->GetNumPosRoots();
+  int theRank=this->owner->GetRank();
+  for (int i=0; i<this->size; i++)
+  { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
+    tempMon.Coefficient=currentMon.Coefficient;
+    tempMon.owner=currentMon.owner;
+    tempMon.Powers.size=0;
+    tempMon.generatorsIndices.size=0;
+    for (int j=0; j<currentMon.Powers.size; j++)
+//    for (int j=currentMon.Powers.size-1; j>=0; j--)
+    { int thePower;
+      if (!currentMon.Powers[j].IsSmallInteger(thePower))
+        return false;
+      int theGenerator=currentMon.generatorsIndices[j];
+      if (theGenerator<numPosRoots)
+        theGenerator=2*numPosRoots+theRank-1-theGenerator;
+      else if (theGenerator>=numPosRoots +theRank)
+        theGenerator=-theGenerator+2*numPosRoots+theRank-1;
+      tempMon.MultiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
+      if (thePower%2==1)
+        tempMon.Coefficient*=-1;
+    }
+    result+=tempMon;
+  }
+  *this=result;
+  return true;
+}
+
+int ParserNode::EvaluateMinusTransposeAuto
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ ElementUniversalEnveloping<PolynomialRationalCoeff>& theElt= theNode.UEElement.GetElement();
+  theElt=theNode.owner->TheObjects[theArgumentList[0]].UEElement.GetElement();
+  if (!theElt.ApplyMinusTransposeAutoOnMe())
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  theNode.ExpressionType=theNode.typeUEelement;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateHWBilinearForm
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root weight;
+  ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
+  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
+  if (weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
+  if (weight.size!=theSSalgebra.GetRank())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  ElementUniversalEnveloping<PolynomialRationalCoeff> leftElt=leftNode.UEElement.GetElement();
+  ElementUniversalEnveloping<PolynomialRationalCoeff> rightElt=rightNode.UEElement.GetElement();
+  PolynomialRationalCoeff theRingZero;
+  theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
+  theRingZero.Nullify(theNode.impliedNumVars);
+  if(!leftElt.HWbilinearForm(rightElt, theNode.polyValue.GetElement(), theRingZero))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  theNode.ExpressionType=theNode.typePoly;
+  return theNode.errorNoError;
+}
+
+template <class CoefficientType>
+bool ElementUniversalEnveloping<CoefficientType>::HWbilinearForm
+  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
+{ output=theRingZero;
+  CoefficientType tempCF;
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<right.size; j++)
+    { MonomialUniversalEnveloping<CoefficientType>& leftMon=this->TheObjects[i];
+      MonomialUniversalEnveloping<CoefficientType>& rightMon=right[j];
+      if (!leftMon.HWbilinearForm(rightMon, tempCF, theRingZero))
+        return false;
+      output+=tempCF;
+    }
+  return true;
+}
+
+template <class CoefficientType>
+bool MonomialUniversalEnveloping<CoefficientType>::HWbilinearForm
+  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
 {
+  return true;
 }
 

@@ -9331,6 +9331,8 @@ public:
   Matrix<int> theLiebracketPairingIndices;
   MatrixLargeRational theLiebracketPairingCoefficients;
   List<int> OppositeRootSpaces;
+  List<int> UEGeneratorOrderIncludingCartanElts;
+
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { if (this->OppositeRootSpaces.TheObjects[leftIndex]==rightIndex)
       return true;
@@ -9356,6 +9358,7 @@ public:
     }
     return out.str();
   }
+  void GetMinusTransposeAuto(const ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output);
   void GenerateWeightSupportMethod2(root& theHighestWeight, roots& output, GlobalVariables& theGlobalVariables);
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
@@ -9431,6 +9434,7 @@ public:
     this->theLiebracketPairingCoefficients.Assign(other.theLiebracketPairingCoefficients);
     this->theLiebracketPairingIndices.Assign(other.theLiebracketPairingIndices);
     this->Computed.Assign(other.Computed);
+    this->UEGeneratorOrderIncludingCartanElts=other.UEGeneratorOrderIncludingCartanElts;
   }
 };
 
@@ -9847,15 +9851,13 @@ public:
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
-  void GetMinimialDegreeFormWithFDRelsComingFrom
-  (const ElementUniversalEnveloping<CoefficientType>& output, const root& theHWinSimpleCoords,
-   GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
-   ;
   void Nullify(const CoefficientType& theRingZero, SemisimpleLieAlgebra& theOwner)
   { this->init(theOwner);
     this->Coefficient=theRingZero;
   }
+  bool HWbilinearForm
+  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
+;
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   void ModOutVermaRelations
   (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement=0,
@@ -9969,6 +9971,11 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
+  bool HWbilinearForm
+  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
+  ;
+
+  bool ApplyMinusTransposeAutoOnMe();
   void AddMonomial(const MonomialUniversalEnveloping<CoefficientType>& input);
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebra& theOwner);
   void AssignElementLieAlgebra(const ElementSimpleLieAlgebra& input, int numVars, SemisimpleLieAlgebra& theOwner);
@@ -10001,20 +10008,11 @@ public:
     else
       return this->TheObjects[0].Coefficient.NumVars;
   }
-  inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& other){this->operator*=(other);}
+  inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight){this->operator*=(standsOnTheRight);}
   void ModToMinDegreeFormFDRels
   (const root& theHWinSimpleCoords,
    GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
-  { ElementUniversalEnveloping<CoefficientType> result, temp;
-    result.Nullify(*this->owner);
-    for (int i=0; i<this->size; i++)
-    { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
-      currentMon.GetMinimialDegreeFormWithFDRelsComingFrom
-      (temp, theHWinSimpleCoords, theGlobalVariables, theRingUnit, theRingZero);
-      result.AddMonomial(currentMon);
-    }
-  }
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero ) ;
   void ModOutVermaRelationS(GlobalVariables& theGlobalVariables){ this->ModOutVermaRelationS(false, theGlobalVariables);}
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   static void GetCoordinateFormOfSpanOfElements
@@ -10029,7 +10027,7 @@ public:
 ;
 
 template<class CoefficientTypeQuotientField>
-static void GetBasisFromSpanOfElements
+static bool GetBasisFromSpanOfElements
   (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
    Vectors<CoefficientTypeQuotientField>& outputCoords,
    List<ElementUniversalEnveloping<CoefficientType> >& outputTheBasis,
@@ -10073,7 +10071,7 @@ static void GetBasisFromSpanOfElements
   void operator+=(int other);
   void operator+=(const Rational& other);
   void operator-=(const ElementUniversalEnveloping<CoefficientType>& other);
-  void operator*=(const ElementUniversalEnveloping<CoefficientType>& other);
+  void operator*=(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight);
   void operator/=(const Rational& other);
   void operator*=(const Rational& other);
   void operator*=(const PolynomialRationalCoeff& other);
@@ -11345,6 +11343,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateHWBilinearForm
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateFreudenthal
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -11383,6 +11384,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimateRootSAs
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateMinusTransposeAuto
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimationClonePreviousFrameDrawExtraLine
@@ -15189,8 +15193,8 @@ void ElementUniversalEnveloping<CoefficientType>::operator*=(const Rational& oth
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::operator*=(const ElementUniversalEnveloping& other)
-{ this->MakeActualSizeAtLeastExpandOnTop(other.size*this->size);
+void ElementUniversalEnveloping<CoefficientType>::operator*=(const ElementUniversalEnveloping& standsOnTheRight)
+{ this->MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.size*this->size);
   ElementUniversalEnveloping output;
   output.Nullify(*this->owner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
@@ -15202,13 +15206,13 @@ void ElementUniversalEnveloping<CoefficientType>::operator*=(const ElementUniver
     if (sizeOriginal>0)
       powerOriginal=*tempMon.Powers.LastObject();
     CoeffOriginal.Assign(tempMon.Coefficient);
-    for(int j=0; j<other.size; j++)
+    for(int j=0; j<standsOnTheRight.size; j++)
     { tempMon.generatorsIndices.size=sizeOriginal;
       tempMon.Powers.size=sizeOriginal;
       if (sizeOriginal>0)
         *tempMon.Powers.LastObject()=powerOriginal;
       tempMon.Coefficient.Assign(CoeffOriginal);
-      tempMon.MultiplyByNoSimplify(other.TheObjects[j]);
+      tempMon.MultiplyByNoSimplify(standsOnTheRight.TheObjects[j]);
       //tempMon.ComputeDebugString();
       output.AddMonomialNoCleanUpZeroCoeff(tempMon);
     }
@@ -15633,12 +15637,14 @@ void MonomialUniversalEnveloping<CoefficientType>::SimplifyAccumulateInOutputNoO
   //simplified order is descending order
   while (IndexlowestNonSimplified<output.size)
   { bool reductionOccurred=false;
-    if (output.TheObjects[IndexlowestNonSimplified].Coefficient.IsEqualToZero())
+    if (output[IndexlowestNonSimplified].Coefficient.IsEqualToZero())
       reductionOccurred=true;
     else
-      for (int i=0; i<output.TheObjects[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
-        if (!this->owner->AreOrderedProperly(output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i], output.TheObjects[IndexlowestNonSimplified].generatorsIndices.TheObjects[i+1]))
-        { if (output.TheObjects[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon, theGlobalVariables))
+      for (int i=0; i<output[IndexlowestNonSimplified].generatorsIndices.size-1; i++)
+        if (!this->owner->AreOrderedProperly
+            (output[IndexlowestNonSimplified].generatorsIndices[i],
+             output[IndexlowestNonSimplified].generatorsIndices[i+1]))
+        { if (output[IndexlowestNonSimplified].SwitchConsecutiveIndicesIfTheyCommute(i, tempMon, theGlobalVariables))
           { output.AddMonomialNoCleanUpZeroCoeff(tempMon);
             //tempMon.ComputeDebugString(theGlobalVariables);
             reductionOccurred=true;
@@ -15744,22 +15750,22 @@ void MonomialUniversalEnveloping<CoefficientType>::Simplify
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MultiplyByNoSimplify
-(const MonomialUniversalEnveloping<CoefficientType>& other)
-{ this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
-  this->Powers.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
-  this->Coefficient.MultiplyBy(other.Coefficient);
-  if (other.generatorsIndices.size==0)
+(const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight)
+{ this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+  this->Powers.MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+  this->Coefficient.MultiplyBy(standsOnTheRight.Coefficient);
+  if (standsOnTheRight.generatorsIndices.size==0)
     return;
-  int firstIndex=other.generatorsIndices.TheObjects[0];
+  int firstIndex=standsOnTheRight.generatorsIndices.TheObjects[0];
   int i=0;
   if (this->generatorsIndices.size>0)
     if (firstIndex==(*this->generatorsIndices.LastObject()))
-    { *this->Powers.LastObject()+=other.Powers.TheObjects[0];
+    { *this->Powers.LastObject()+=standsOnTheRight.Powers.TheObjects[0];
       i=1;
     }
-  for (; i<other.generatorsIndices.size; i++)
-  { this->Powers.AddOnTop(other.Powers.TheObjects[i]);
-    this->generatorsIndices.AddOnTop(other.generatorsIndices.TheObjects[i]);
+  for (; i<standsOnTheRight.generatorsIndices.size; i++)
+  { this->Powers.AddOnTop(standsOnTheRight.Powers.TheObjects[i]);
+    this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices.TheObjects[i]);
   }
 }
 

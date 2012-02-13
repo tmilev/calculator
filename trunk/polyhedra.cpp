@@ -16101,9 +16101,11 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
 { int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   int numRoots = numPosRoots*2;
+  int numGenerators=numRoots+theDimension;
   root tempRoot;
-  this->theLiebracketPairingCoefficients.init(numRoots+theDimension, numRoots+theDimension);
-  this->theLiebracketPairingIndices.init(numRoots+theDimension, numRoots+theDimension);
+  this->theLiebracketPairingCoefficients.init(numGenerators, numGenerators);
+  this->theLiebracketPairingIndices.init(numGenerators, numGenerators);
+  this->UEGeneratorOrderIncludingCartanElts.initFillInObject(numGenerators, -1);
   this->theLiebracketPairingIndices.NullifyAll(-1);
   this->OppositeRootSpaces.initFillInObject(numRoots+theDimension, -1);
   for (int i=0; i<numRoots; i++)
@@ -16132,6 +16134,8 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
     { this->theLiebracketPairingCoefficients.elements[numPosRoots+i][numPosRoots+j]=0;
       this->theLiebracketPairingIndices.elements[numPosRoots+i][numPosRoots+j]=-1;
     }
+  for (int i=0; i<numGenerators; i++)
+    this->UEGeneratorOrderIncludingCartanElts[i]=i;
 }
 
 void SemisimpleLieAlgebra::ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ)
@@ -16402,7 +16406,8 @@ void ElementSimpleLieAlgebra::Nullify(int numRoots, int theAlgebraRank)
   this->NonZeroElements.init(this->coeffsRootSpaces.size);
 }
 
-void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)const
+void SemisimpleLieAlgebra::LieBracket
+(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)const
 { assert(&output!=&g1 && &output!=&g2);
   output.Nullify(*this);
   root tempRoot, root1plusRoot2;
@@ -16426,13 +16431,12 @@ void SemisimpleLieAlgebra::LieBracket(const ElementSimpleLieAlgebra& g1, const E
         output.Hcomponent.Add(tempRoot);
       }
       else
-      { if (!this->ChevalleyConstants.elements[i1][i2].IsEqualToZero())
+        if (!this->ChevalleyConstants.elements[i1][i2].IsEqualToZero())
         { int theIndex=this->theWeyl.RootSystem.IndexOfObjectHash(root1plusRoot2);
           tempRat.Assign(g1.coeffsRootSpaces.TheObjects[i1]);
           tempRat.MultiplyBy(g2.coeffsRootSpaces.TheObjects[i2]);
           output.coeffsRootSpaces.TheObjects[theIndex]+=(tempRat*this->ChevalleyConstants.elements[i1][i2]);
         }
-      }
     }
   ElementSimpleLieAlgebra const* element1;
   ElementSimpleLieAlgebra const* element2;
@@ -24404,7 +24408,8 @@ std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
 }
 
 bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)
-{ return leftIndex<=rightIndex;
+{ return this->UEGeneratorOrderIncludingCartanElts[leftIndex]<=
+  this->UEGeneratorOrderIncludingCartanElts[rightIndex];
 }
 
 int SemisimpleLieAlgebra::DisplayIndexToRootIndex(int theIndex)
@@ -27796,6 +27801,7 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
       this->UEElement.GetElement()=leftNode.UEElement.GetElement();
       this->UEElement.GetElement()/=rightNode.rationalValue;
       this->ExpressionType=this->typeUEelement;
+      break;
     case ParserNode::typeUEElementOrdered:
       if (!rightNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
       { this->SetError(this->errorDunnoHowToDoOperation);
@@ -27804,6 +27810,7 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
       this->UEElementOrdered.GetElement()=leftNode.UEElementOrdered.GetElement();
       this->UEElementOrdered.GetElement()/=rightNode.rationalValue;
       this->ExpressionType=this->typeUEElementOrdered;
+      break;
     break;
     default: this->SetError(this->errorDivisionByNonAllowedType); return;
   }

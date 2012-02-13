@@ -1102,7 +1102,6 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const root& input)
         PolynomialOutputFormat tempFormat;
         std::cout << "<hr>Error!!! Failed on chamber " << theIndex+1 << " and " << i+1;
         std::cout << "<br>Evaluating at point " << AffineInput.ElementToString() << "<br>";
-
         std::cout << "<br>Chamber " << theIndex+1 << ": "
         << this->theProjectivizedComplex[theIndex].ElementToString(false, true, true, true, tempFormat);
         std::cout << "<br>QP: " << this->theQPs[theIndex].ElementToString(true, false);
@@ -1138,7 +1137,6 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
   GlobalVariables& theGlobalVariables=*this->theBuffers;
   List<QuasiPolynomial> oldQPList=this->theQPs;
   ConeComplex oldComplex=this->theProjectivizedComplex;
-
   this->theProjectivizedComplex.RefineMakeCommonRefinement(other, theGlobalVariables);
   this->theQPs.SetSize(this->theProjectivizedComplex.size);
   for (int i=0; i<this->theProjectivizedComplex.size; i++)
@@ -1215,8 +1213,8 @@ root WeylGroup::GetFundamentalCoordinatesFromSimple
 }
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
-  ( root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
-   )
+  (root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser,
+   GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   WeylGroup& LargerWeyl=theParser.theHmm.theRange.theWeyl;
   WeylGroup& SmallerWeyl=theParser.theHmm.theDomain.theWeyl;
@@ -5916,7 +5914,7 @@ std::string root::ElementToStringLetterFormat
       }
       found=true;
       out << tempS;
-      out << theFormat.alphabet.TheObjects[i];
+      out << theFormat.GetLetterIndex(i);
     }
   return out.str();
 }
@@ -10339,6 +10337,30 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     "irreducibleRep(1,1)",
    'A', 2, true,
     & ParserNode::EvaluateRepresentationFromHWFundCoords
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("mta",
+   "(UE)",
+   "<b>Experimental, supposed to be hidden. \
+   </b> Internal testing only. MTA= minus transpose automorphism. Stands for the automorphism of g \
+   defined by g_{\\alpha} -> -g_{-\\alpha}. In the case of gl(n), the matrix minus transpose automorphism of gl(n)\
+   coincides with the so defined mta() map; for the other classical types, the mta() map coincides with the minus transpose\
+   automorphism for the matrix realizations by the Vinberg-Onishchik book (Seminar...).",
+    "mta(g_1)",
+   'A', 2, true,
+    & ParserNode::EvaluateMinusTransposeAuto
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("hwbf",
+   "(UE, UE, (Rational,...))",
+   "<b>Experimental, supposed to be hidden. \
+   </b> Highest weight bilinear form. M be a Verma module with highest weight vector v, and let P:M->M\
+   be a projection map onto Cv that maps every weight vector of M of weight different from the \
+   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwbf(u_1,u_2):=\
+   Tr_M (P ( u_1 mta(u_2) +u_2mta(u_1) ) ), where mta is the minus transpose automorphism of g.",
+    "hwbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
+   'G', 2, true,
+    & ParserNode::EvaluateHWBilinearForm
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

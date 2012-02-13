@@ -10341,8 +10341,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("mta",
    "(UE)",
-   "<b>Experimental, supposed to be hidden. \
-   </b> Internal testing only. MTA= minus transpose automorphism. Stands for the automorphism of g \
+   "<b>Experimental, might be hidden in future versions. \
+   </b> MTA= minus transpose automorphism. Stands for the automorphism of g \
    defined by g_{\\alpha} -> -g_{-\\alpha}. In the case of gl(n), the matrix minus transpose automorphism of gl(n)\
    coincides with the so defined mta() map; for the other classical types, the mta() map coincides with the minus transpose\
    automorphism for the matrix realizations by the Vinberg-Onishchik book (Seminar...).",
@@ -10353,11 +10353,11 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("hwbf",
    "(UE, UE, (Rational,...))",
-   "<b>Experimental, supposed to be hidden. \
-   </b> Highest weight bilinear form. M be a Verma module with highest weight vector v, and let P:M->M\
+   "<b>Experimental, might be hidden or changed in future versions. \
+   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v, and let P:M->M\
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwbf(u_1,u_2):=\
-   Tr_M (P ( u_1 mta(u_2) +u_2mta(u_1) ) ), where mta is the minus transpose automorphism of g.",
+   Tr_M (P ( u_1 mta(u_2) +u_2mta(u_1) ) ), where mta() is the minus transpose automorphism of g.",
     "hwbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
    'G', 2, true,
     & ParserNode::EvaluateHWBilinearForm

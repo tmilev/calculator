@@ -1519,7 +1519,8 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
     outputTheBasis.AddOnTop(theElements.TheObjects[selectedBasis.elements[i]]);
   Matrix<CoefficientType> bufferMat;
   Vectors<CoefficientType> bufferVectors;
-  outputCoordsBeforeReduction.GetCoordsInBasis(basisCoordForm, outputCoords, bufferVectors, bufferMat, theFieldUnit, theFieldZero);
+  outputCoordsBeforeReduction.GetCoordsInBasis
+  (basisCoordForm, outputCoords, bufferVectors, bufferMat, theFieldUnit, theFieldZero);
   return true;
 }
 
@@ -1580,6 +1581,7 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
 { int numPosRoots=this->owner->GetNumPosRoots();
   int theDimension=this->owner->GetRank();
   ElementSimpleLieAlgebra currentElt;
+  CoefficientType tempCF;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int IndexCurrentGenerator=this->generatorsIndices.TheObjects[i];
     if (IndexCurrentGenerator>=numPosRoots+theDimension)
@@ -1601,7 +1603,10 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
       (IndexCurrentGenerator, *this->owner);
       root& currentH=currentElt.Hcomponent;
       for (int i=0; i<currentH.size; i++)
-        theSubbedH+=(*subHiGoesToIthElement)[i]*currentH[i];
+      { tempCF=(*subHiGoesToIthElement)[i];
+        tempCF*=currentH[i];
+        theSubbedH+=tempCF;
+      }
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);
 //      this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.ComputeDebugString();
       //assert(this->Coefficient.checkConsistency());
@@ -1660,6 +1665,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyMinusTransposeAutoOnMe()
       tempMon.MultiplyByGeneratorPowerOnTheRight(theGenerator, currentMon.Powers[j]);
       if (thePower%2==1)
         tempMon.Coefficient*=-1;
+//      ;
     }
     result+=tempMon;
   }
@@ -1683,42 +1689,96 @@ int ParserNode::EvaluateHWBilinearForm
   ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
-  if (weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
+  if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<PolynomialRationalCoeff> leftElt=leftNode.UEElement.GetElement();
   ElementUniversalEnveloping<PolynomialRationalCoeff> rightElt=rightNode.UEElement.GetElement();
-  PolynomialRationalCoeff theRingZero;
+  PolynomialRationalCoeff theRingZero, theRingUnit;
   theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
-  theRingZero.Nullify(theNode.impliedNumVars);
-  if(!leftElt.HWbilinearForm(rightElt, theNode.polyValue.GetElement(), theRingZero))
+  int& numVars= theNode.impliedNumVars;
+  theRingZero.Nullify(numVars);
+  theRingUnit.MakeOne(numVars);
+  List<PolynomialRationalCoeff> theHW;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  weight=theWeyl.GetSimpleCoordinatesFromFundamental(weight);
+  std::stringstream out;
+  out << "Highest weight in simple coords: " << weight.ElementToString() << "<br>";
+  theHW.SetSize(weight.size);
+  for (int i=0; i<weight.size; i++)
+    theHW[i].MakeNVarConst(numVars, weight[i]);
+  if(!leftElt.HWbilinearForm
+     (rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  PolynomialRationalCoeff symmTerm;
+  if(!leftElt.HWbilinearForm
+     (rightElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  theNode.polyValue.GetElement()+=symmTerm;
   theNode.ExpressionType=theNode.typePoly;
+  theNode.outputString=out.str();
   return theNode.errorNoError;
 }
 
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWbilinearForm
-  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
+  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)
 { output=theRingZero;
   CoefficientType tempCF;
-  for (int i=0; i<this->size; i++)
-    for (int j=0; j<right.size; j++)
-    { MonomialUniversalEnveloping<CoefficientType>& leftMon=this->TheObjects[i];
-      MonomialUniversalEnveloping<CoefficientType>& rightMon=right[j];
-      if (!leftMon.HWbilinearForm(rightMon, tempCF, theRingZero))
+  ElementUniversalEnveloping<CoefficientType> MTright;
+  MTright=right;
+  if (!MTright.ApplyMinusTransposeAutoOnMe())
+    return false;
+  ElementUniversalEnveloping<CoefficientType> Accum, intermediateAccum, tempElt;
+  List<int> oldOrder=this->owner->UEGeneratorOrderIncludingCartanElts;
+  int numPosRoots=this->owner->GetNumPosRoots();
+  for (int i=0; i<numPosRoots; i++)
+    this->owner->UEGeneratorOrderIncludingCartanElts[i]=-1;
+  Accum.Nullify(*this->owner);
+  MonomialUniversalEnveloping<CoefficientType> constMon;
+  constMon.MakeConst(theRingUnit, *this->owner);
+  PolynomialOutputFormat tempFormat;
+  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  if (logStream!=0)
+  { *logStream << "backtraced elt: " << MTright.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+    *logStream << "this element: " << this->ElementToString(theGlobalVariables, tempFormat) << "<br>";
+  }
+  for (int j=0; j<right.size; j++)
+  { intermediateAccum=*this;
+    MonomialUniversalEnveloping<CoefficientType>& rightMon=MTright[j];
+    int thePower;
+    for (int i=rightMon.Powers.size-1; i>=0; i--)
+      if (rightMon.Powers[i].IsSmallInteger(thePower))
+        for (int k=0; k<thePower; k++)
+        { tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], theRingUnit, *this->owner);
+          MathRoutines::swap(tempElt, intermediateAccum);
+          if (logStream!=0)
+          { *logStream << "tempElt before mult: " << tempElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream<< "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+          }
+          intermediateAccum.MultiplyBy(tempElt);
+          if (logStream!=0)
+            *logStream << "intermediate before simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+          intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+          if (logStream!=0)
+            *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+          intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
+          if (logStream!=0)
+            *logStream << "intermediate after Verma rels: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+        }
+      else
         return false;
-      output+=tempCF;
-    }
+    intermediateAccum*=rightMon.Coefficient;
+    Accum+=intermediateAccum;
+    int theIndex= intermediateAccum.IndexOfObjectHash(constMon);
+    if (theIndex!=-1)
+      output+=intermediateAccum[theIndex].Coefficient;
+  }
+  if (logStream!=0)
+    *logStream << "final UE element: " << Accum.ElementToString(false, theGlobalVariables, tempFormat);
   return true;
 }
-
-template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::HWbilinearForm
-  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
-{
-  return true;
-}
-

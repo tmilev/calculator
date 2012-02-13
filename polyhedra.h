@@ -9972,7 +9972,9 @@ public:
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
   bool HWbilinearForm
-  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
+  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
 
   bool ApplyMinusTransposeAutoOnMe();
@@ -10012,7 +10014,11 @@ public:
   void ModToMinDegreeFormFDRels
   (const root& theHWinSimpleCoords,
    GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero ) ;
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero);
+  void ModOutVermaRelations
+  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   ;
   void ModOutVermaRelationS(GlobalVariables& theGlobalVariables){ this->ModOutVermaRelationS(false, theGlobalVariables);}
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   static void GetCoordinateFormOfSpanOfElements
@@ -15541,6 +15547,21 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
     tempMon.generatorsIndices.TheObjects[0]=theGeneratorIndex;
     this->AddOnTopHash(tempMon);
   }
+}
+
+template <class CoefficientType>
+void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
+  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ MonomialUniversalEnveloping<CoefficientType> tempMon;
+  ElementUniversalEnveloping<CoefficientType> output;
+  output.Nullify(*this->owner);
+  for (int i=0; i<this->size; i++)
+  { tempMon= this->TheObjects[i];
+    tempMon.ModOutVermaRelations(theContext, subHiGoesToIthElement, theRingUnit, theRingZero);
+    output.AddMonomial(tempMon);
+  }
+  this->operator=(output);
 }
 
 template <class CoefficientType>

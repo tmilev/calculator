@@ -28487,3 +28487,7 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   return false;
 }
 
+template < >
+Rational& ParserNode::GetElement<Rational>()
+{ return this->rationalValue;
+}

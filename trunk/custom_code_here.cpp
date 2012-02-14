@@ -3832,24 +3832,6 @@ bool ParserNode::GetRootRationalFromFunctionArguments
   return true;
 }
 
-bool ParserNode::GetRootRationalDontUseForFunctionArguments(root& output, GlobalVariables& theGlobalVariables)
-{ if (this->ExpressionType!=this->typeArray)
-  { output.SetSize(1);
-    if (!this->ConvertToType(this->typeRational, 0, theGlobalVariables))
-      return false;
-    output.TheObjects[0]=this->rationalValue;
-    return true;
-  }
-  output.SetSize(this->children.size);
-  for (int i=0; i<output.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
-      return false;
-    output.TheObjects[i]=currentNode.rationalValue;
-  }
-  return true;
-}
-
 void QuasiPolynomial::MakeFromPolyShiftAndLattice
 (const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { this->AmbientLatticeReduced=theLattice;
@@ -10351,16 +10333,38 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateMinusTransposeAuto
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("hwbf",
+  ("hwMTAbf",
    "(UE, UE, (Rational,...))",
    "<b>Experimental, might be hidden or changed in future versions. \
    </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v, and let P:M->M\
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
-   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwbf(u_1,u_2):=\
-   Tr_M (P ( u_1 mta(u_2) +u_2mta(u_1) ) ), where mta() is the minus transpose automorphism of g.",
-    "hwbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
+   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwMTAbf(u_1,u_2):=\
+   Tr_M (P ( mta(u_2) u_1 +mta(u_1)u_2 ) ), where mta() is the minus transpose automorphism of g.",
+    "hwMTAbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
    'G', 2, true,
-    & ParserNode::EvaluateHWBilinearForm
+    & ParserNode::EvaluateHWMTABilinearForm
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("hwTAAbf",
+   "(UE, UE, (Rational,...))",
+   "<b>Experimental, might be hidden or changed in future versions. \
+   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v, and let P:M->M\
+   be a projection map onto Cv that maps every weight vector of M of weight different from the \
+   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
+   Tr_M (P ( taa(u_2) u_1 +taa(u_1)u_2 ) ), where taa() is the transpose anti-automorphism of g.",
+    "hwTAAbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
+   'G', 2, true,
+    & ParserNode::EvaluateHWTAABilinearForm
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("taa",
+   "(UE)",
+   "<b>Experimental, might be hidden or changed in future versions. \
+   </b>Transpose anti-automorphism of the universal enveloping. This map sends g_{\\alpha} to g_{-\\alpha} \
+   and reverses the order of multiplication. ",
+    "taa(g_{-1} g_{-2})",
+   'G', 2, true,
+    & ParserNode::EvaluateTransposeAntiAuto
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

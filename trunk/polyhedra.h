@@ -9971,13 +9971,19 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
-  bool HWbilinearForm
+  bool HWMTAbilinearForm
+  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
+  ;
+  bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
 
   bool ApplyMinusTransposeAutoOnMe();
+  bool ApplyTransposeAntiAutoOnMe();
   void AddMonomial(const MonomialUniversalEnveloping<CoefficientType>& input);
   void AssignElementCartan(const root& input, int numVars, SemisimpleLieAlgebra& theOwner);
   void AssignElementLieAlgebra(const ElementSimpleLieAlgebra& input, int numVars, SemisimpleLieAlgebra& theOwner);
@@ -11308,9 +11314,16 @@ public:
 ;
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
-  bool GetRootRationalDontUseForFunctionArguments
-  (root& output, GlobalVariables& theGlobalVariables)
-  ;
+  template <class CoefficientType>
+bool GetRootRationalDontUseForFunctionArguments
+(Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
+;
+  template <class CoefficientType>
+CoefficientType& GetElement();
+  template <class CoefficientType>
+bool GetListDontUseForFunctionArguments
+(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int ExpressionType, int impliedNumVars)
+;
 bool GetRootRationalFromFunctionArguments
 (//List<int>& argumentList,
  root& output, GlobalVariables& theGlobalVariables)
@@ -11349,7 +11362,10 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateHWBilinearForm
+  static int EvaluateHWMTABilinearForm
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateHWTAABilinearForm
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateFreudenthal
@@ -11393,6 +11409,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateMinusTransposeAuto
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateTransposeAntiAuto
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateAnimationClonePreviousFrameDrawExtraLine
@@ -16055,4 +16074,47 @@ int MonomialUniversalEnveloping<CoefficientType>::HashFunction() const
   return result;
 }
 
+template <class CoefficientType>
+bool ParserNode::GetRootRationalDontUseForFunctionArguments
+(Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
+{ if (this->ExpressionType!=this->typeArray)
+  { output.SetSize(1);
+    if (!this->ConvertToType(this->typeRational, 0, theGlobalVariables))
+      return false;
+    output.TheObjects[0]=this->rationalValue;
+    return true;
+  }
+  output.SetSize(this->children.size);
+  for (int i=0; i<output.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
+    if (!currentNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
+      return false;
+    output.TheObjects[i]=currentNode.rationalValue;
+  }
+  return true;
+}
+
+template <class CoefficientType>
+bool ParserNode::GetListDontUseForFunctionArguments
+(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int goalExpressionType, int impliedNumVars)
+{ if (this->ExpressionType!=this->typeArray)
+  { output.SetSize(1);
+    if (!this->ConvertToType(goalExpressionType, impliedNumVars, theGlobalVariables))
+      return false;
+    output.TheObjects[0]=this->rationalValue;
+    return true;
+  }
+  output.SetSize(this->children.size);
+  for (int i=0; i<output.size; i++)
+  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
+    if (!currentNode.ConvertToType(goalExpressionType, this->impliedNumVars, theGlobalVariables))
+      return false;
+    output.TheObjects[i]=currentNode.GetElement<CoefficientType>();
+  }
+  return true;
+}
+
+
+
 #endif
+

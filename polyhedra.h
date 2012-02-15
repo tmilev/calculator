@@ -1100,8 +1100,12 @@ public:
     result.append(Element::GetXMLClassName());
     return result;
   }
-  Matrix(const Matrix<Element>& other){this->Assign(other);}
-  void operator=(const Matrix<Element>& other){this->Assign(other);}
+  Matrix(const Matrix<Element>& other)
+  { this->Assign(other);
+  }
+  inline void operator=(const Matrix<Element>& other)
+  { this->Assign(other);
+  }
   Matrix(){}
   std::string DebugString;
   static bool flagComputingDebugInfo;
@@ -9976,6 +9980,17 @@ public:
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
+  void PrepareOrderSSalgebraForHWbfComputation()
+  { int numPosRoots=this->owner->GetNumPosRoots();
+    for (int i=0; i<numPosRoots; i++)
+      this->owner->UEGeneratorOrderIncludingCartanElts[i]=-1;
+  }
+  void RestoreOrderSSLieAlgebra()
+  { int numGens=this->owner->GetNumGenerators();
+    for (int i=0; i<numGens; i++)
+      this->owner->UEGeneratorOrderIncludingCartanElts[i]=i;
+  }
+
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
@@ -15214,7 +15229,7 @@ void ElementUniversalEnveloping<CoefficientType>::operator*=(const Rational& oth
     return;
   }
   for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Coefficient.TimesConstant(other);
+    this->TheObjects[i].Coefficient*=(other);
 }
 
 template <class CoefficientType>
@@ -16113,8 +16128,5 @@ bool ParserNode::GetListDontUseForFunctionArguments
   }
   return true;
 }
-
-
-
 #endif
 

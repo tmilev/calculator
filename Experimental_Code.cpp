@@ -129,18 +129,43 @@ class ModuleSSalgebraNew
 public:
   SemisimpleLieAlgebra theAlgebra;
   List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
-  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
-  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
+  List<List<ElementUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
+  List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
+  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
+  List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
+  List<Matrix<CoefficientType> > theBilinearFormsInverted;
+  roots weightsSimpleGens;
+//  List<List<Matrix<CoefficientType> > >
+  HashedList<root> generatingWordsWeights;
+//  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
+//  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
   void MakeFundamentalRep
 (char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
+  ;
+  void IntermediateStepForMakeFromHW
+    ( List<Rational>& theHWDualCoords, GlobalVariables& theGlobalVariables,
+    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
 (char WeylLetter, int theRank, root& theHWFundCoords, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport)
   ;
+  void GetAdActionHomogenousElt
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& inputWeight,
+   List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   ;
+  void ExpressEltIrrepAs
+  (ElementUniversalEnveloping<CoefficientType>& inputWord,
+   List<ElementUniversalEnveloping<CoefficientType> >& mustBeBasis, List<Rational>& theHWDualCoords,
+    ElementUniversalEnveloping<CoefficientType>& outputWord, GlobalVariables& theGlobalVariables,
+    const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+   ;
+
   void Reduce
   (ElementModuleSSalgebra<CoefficientType>& inputOutput, GlobalVariables& theGlobalVariables)
   ;
@@ -1214,6 +1239,100 @@ int ParserNode::EvaluateRepresentationFromHWFundCoords
   return theNode.errorNoError;
 }
 
+
+template<class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
+  ( List<Rational>& theHWDualCoords, GlobalVariables& theGlobalVariables,
+    const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+{ WeylGroup& theWeyl=this->theAlgebra.theWeyl;
+  int theDim=theWeyl.GetDim();
+  int numPosRoots=theWeyl.RootsOfBorel.size;
+  root targetWeight;
+  this->theSimpleGens.SetSize(theDim*2);
+  this->weightsSimpleGens.SetSize(theDim*2);
+  this->actionsSimpleGens.SetSize(theDim*2);
+  for (int k=0; k<2; k++)
+    for (int i=0; i<theDim; i++)
+    { int genChevIndex=(k==0) ? numPosRoots-i-1 : numPosRoots+theDim+i;
+      ElementUniversalEnveloping<Rational>& theSimpleGenerator= this->theSimpleGens[k*theDim+i];
+      root& simpleGeneratorWeight=this->weightsSimpleGens[k*theDim+i];
+      simpleGeneratorWeight=theWeyl.RootsOfBorel[i];
+      if (k==1)
+        simpleGeneratorWeight.MinusRoot();
+      theSimpleGenerator.MakeOneGenerator(genChevIndex, 1, this->theAlgebra);
+    }
+  this->theBilinearFormsAtEachWeightLevel.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->theBilinearFormsInverted.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  for (int l=0; l<this->theGeneratingWordsGrouppedByWeight.size; l++)
+  { Matrix<CoefficientType>& currentBF=this->theBilinearFormsAtEachWeightLevel[l];
+    List<ElementUniversalEnveloping<CoefficientType> >& currentWordList=this->theGeneratingWordsGrouppedByWeight[l];
+    currentBF.init(currentWordList.size, currentWordList.size);
+    for (int i=0; i<currentWordList.size; i++)
+      for (int j=i; j<currentWordList.size; j++)
+      { currentWordList[i].HWTAAbilinearForm
+        (currentWordList[j], currentBF.elements[i][j], &theHWDualCoords, theGlobalVariables, theRingUnit, theRingZero, 0);
+        if (i!=j)
+          currentBF.elements[j][i]=currentBF.elements[i][j];
+      }
+    MatrixLargeRational tempMat;
+    tempMat.Assign(currentBF);
+    Rational tempRat;
+    tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
+    if (tempRat!=0)
+    { this->theBilinearFormsInverted[l]=currentBF;
+      this->theBilinearFormsInverted[l].Invert();
+    } else
+      this->theBilinearFormsInverted[l].init(0,0);
+  }
+}
+
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::ExpressEltIrrepAs
+  (ElementUniversalEnveloping<CoefficientType>& inputWord,
+   List<ElementUniversalEnveloping<CoefficientType> >& mustBeBasis, List<Rational>& theHWDualCoords,
+    ElementUniversalEnveloping<CoefficientType>& outputWord, GlobalVariables& theGlobalVariables,
+    const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+{ CoefficientType theScalarProd;
+  for (int i=0; i<mustBeBasis.size; i++)
+  { inputWord.HWMTAbilinearForm
+    (mustBeBasis[i], theScalarProd, & theHWDualCoords, theGlobalVariables, theRingUnit, theRingZero, 0);
+
+  }
+}
+
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::GetAdActionHomogenousElt
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& inputWeight,
+   List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ root targetWeight;
+  outputSortedByArgumentWeight.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  ElementUniversalEnveloping<CoefficientType> theElt;
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+  { List<ElementUniversalEnveloping<CoefficientType> >& currentWordList=
+    this->theGeneratingWordsGrouppedByWeight[i];
+    List<ElementUniversalEnveloping<CoefficientType> >& outputCurrentList=
+    outputSortedByArgumentWeight[i];
+    outputCurrentList.SetSize(currentWordList.size);
+    root& currentWeight=this->generatingWordsWeights[i];
+    targetWeight=currentWeight+inputWeight;
+    int theIndex=this->generatingWordsWeights.IndexOfObjectHash(targetWeight);
+    for (int j=0; j<currentWordList.size; j++)
+    { ElementUniversalEnveloping<CoefficientType>& currentWord=outputCurrentList[j];
+      currentWord.Nullify(this->theAlgebra);
+      if (theIndex!=-1)
+      { List<ElementUniversalEnveloping<CoefficientType> >& targetWordList =
+        this->theGeneratingWordsGrouppedByWeight[theIndex];
+        theElt=inputHomogeneous;
+        theElt.MultiplyBy(currentWord);
+
+      }
+    }
+  }
+}
+
 template<class CoefficientType>
 bool ModuleSSalgebraNew<CoefficientType>::MakeFromHW
 (char WeylLetter, int theRank, root& theHWFundCoords, GlobalVariables& theGlobalVariables,
@@ -1234,7 +1353,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   std::stringstream out;
   if (outputReport!=0)
     out << "Number of Littelmann paths: " << thePaths.size;
-  out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates " << theHWsimpleCoords.ElementToString();
+  out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
+  << theHWsimpleCoords.ElementToString();
   out << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
   this->theGeneratingWordsNonReduced.SetSize(thePaths.size);
 //  ElementUniversalEnvelopingOrdered<CoefficientType> theElt;
@@ -1242,12 +1362,19 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   List<Rational> theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(theHWFundCoords);
-  this->theGeneratingWordsLittelmannForm.SetSize(theGeneratingWordsNonReduced.size);
-  this->theGeneratingMonsPBWform.SetExpectedSize(theGeneratingWordsNonReduced.size);
+//  this->theGeneratingWordsLittelmannForm.SetSize(theGeneratingWordsNonReduced.size);
+  this->theGeneratingWordsNonReduced.SetSize(theGeneratingWordsNonReduced.size);
+  roots tempRoots;
+  theWeyl.GenerateWeightSupportMethoD1
+  (theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
+  this->generatingWordsWeights.AssignList(tempRoots);
+  this->theGeneratingWordsGrouppedByWeight.SetSize(this->generatingWordsWeights.size);
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+    this->theGeneratingWordsGrouppedByWeight[i].size=0;
   for (int i=0; i<theGeneratingWordsNonReduced.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
     ElementUniversalEnveloping<CoefficientType>& currentElt = this->theGeneratingWordsNonReduced[i];
-    ElementUniversalEnveloping<CoefficientType>& currentReducedElt = this->theGeneratingWordsLittelmannForm[i];
+//    ElementUniversalEnveloping<CoefficientType>& currentReducedElt = this->theGeneratingWordsLittelmannForm[i];
     currentElt.MakeConst(1, this->theAlgebra);
     for (int j=currentPath.size-1; j>=0; j--)
     { int theIndex=currentPath[j];
@@ -1259,65 +1386,48 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       currentElt.MultiplyBy(tempElt);
     }
     out << "<br>m_{ " << i+1 << "} := "
-    << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " \\cdot v = ";
-    currentReducedElt=currentElt;
+    << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " \\cdot v ";
+    root& hwCurrent=*thePaths[i].Waypoints.LastObject();
+    int theIndex=this->generatingWordsWeights.IndexOfObjectHash(hwCurrent);
+    if (theIndex==-1)
+    { out << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
+        << " weight # limit is 10000";
+      if (outputReport!=0)
+        *outputReport=out.str();
+      return false;
+    }
+    this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentElt);
+//    currentReducedElt=currentElt;
 //    currentReducedElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 //    out << currentElt.ElementToString(tempFormat) << " \\cdot v = ";
 //    std::cout  << "<hr><hr>Element " << i+1 << " here: ";
 //    currentReducedElt.ModToMinDegreeFormFDRels
 //    (theHWsimpleCoords, theGlobalVariables, 1, 0)
 //    ;
-    out << currentReducedElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
-    int numNewFoundMons=0;
-    for (int l=0; l<currentReducedElt.size; l++)
-      if (this->theGeneratingMonsPBWform.AddOnTopNoRepetitionHash(currentReducedElt[l]))
-        numNewFoundMons++;
+//    out << currentReducedElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
+//    int numNewFoundMons=0;
+//    for (int l=0; l<currentReducedElt.size; l++)
+//      if (this->theGeneratingMonsPBWform.AddOnTopNoRepetitionHash(currentReducedElt[l]))
+//        numNewFoundMons++;
 //    if (numNewFoundMons>1)
 //      std::cout << "<hr>Houston, we don't have problem @ element " << i+1 << ": "
 //      << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
   }
-  int theDim=theWeyl.GetDim();
-  int numPosRoots=theWeyl.RootsOfBorel.size;
-//  ElementUniversalEnvelopingOrdered<Rational> te
-  root tempRoot;
-  bool foundBad=false;
-  ElementUniversalEnveloping<Rational> theSimpleGenerator;
-  for (int j=0; j<this->theGeneratingWordsLittelmannForm.size; j++)
-  { ElementUniversalEnveloping<CoefficientType>& currentWord=this->theGeneratingWordsLittelmannForm[j];
-    for (int k=0; k<1; k++)
-      for (int i=0; i<theDim; i++)
-      { int genChevIndex=(k==0) ? numPosRoots-i-1 : numPosRoots+theDim+i;
-        theSimpleGenerator.MakeOneGenerator(genChevIndex, 1, this->theAlgebra);
-        tempElt=theSimpleGenerator;
-        tempElt.MultiplyBy(currentWord);
-        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-//        tempElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-//        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-//        tempElt.Simplify(theGlobalVariables, 1, 0);
-//        tempElt.ModOutFDRelationsExperimental(& theGlobalVariables, theHWsimpleCoords);
-//        tempElt.ModToMinDegreeFormFDRels(theHWsimpleCoords, theGlobalVariables, theRingUnit, theRingZero);
-        if (!tempElt.GetCoordsInBasis(this->theGeneratingWordsLittelmannForm, tempRoot, 1, 0, theGlobalVariables))
-        { out << "<hr><hr>Houston, we have a problem @ "
-          << theSimpleGenerator.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << "*("
-          << currentWord.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << " )= " ;
-          out << tempElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
-          foundBad=true;
-        } else
-        { out << "<br> " << theSimpleGenerator.ElementToStringCalculatorFormat
-          (theGlobalVariables, tempFormat) << "*(" << currentWord.ElementToStringCalculatorFormat
-          (theGlobalVariables, tempFormat) << ")=" << tempRoot.ElementToStringLetterFormat("m");
-        }
-      }
-  }
-  out << "<hr>The " << this->theGeneratingMonsPBWform.size << " found monomials follow. ";
-  for (int i=0; i<this->theGeneratingMonsPBWform.size; i++)
-  { MonomialUniversalEnveloping<Rational>& currentMon=this->theGeneratingMonsPBWform[i];
-    out << "<br>Monomial " << i+1 << ": "
-    << currentMon.ElementToString(false, false, theGlobalVariables, tempFormat);
-  }
-  if (!foundBad)
-  { out << "<br>No problem here!";
-  }
+  this->IntermediateStepForMakeFromHW(theHWDualCoords, theGlobalVariables, theRingUnit, theRingZero);
+  if (outputReport!=0)
+    for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
+    { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
+      Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
+      out << "<br>weight " << this->generatingWordsWeights[i].ElementToString()
+      << "; corresponding form:<br> "<< theBF.ElementToString(true, false)
+      << " corresonding inverted matrix (if invertible):<br>" << theBFinverted.ElementToString(true, false);
+    }
+/*  for (int i=0; i<this->theSimpleGens.size; i++)
+  { ElementUniversalEnveloping<Rational>& theSimpleGenerator=this->theSimpleGens[i];
+    root& simpleWeight=this->weightsSimpleGens[i];
+    this->GetAdActionHomogenousElt
+    (theSimpleGenerator, simpleWeight, this->actionsSimpleGens[i], theGlobalVariables, theRingUnit, theRingZero);
+  }*/
   if (outputReport!=0)
     *outputReport=out.str();
   return true;
@@ -1753,6 +1863,7 @@ int ParserNode::EvaluateHWMTABilinearForm
   theHW.SetSize(weight.size);
   for (int i=0; i<weight.size; i++)
     theHW[i].MakeNVarConst(numVars, weight[i]);
+  leftElt.PrepareOrderSSalgebraForHWbfComputation();
   if(!leftElt.HWMTAbilinearForm
      (rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
@@ -1760,6 +1871,7 @@ int ParserNode::EvaluateHWMTABilinearForm
   if(!rightElt.HWMTAbilinearForm
      (leftElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  leftElt.RestoreOrderSSLieAlgebra();
   theNode.polyValue.GetElement()+=symmTerm;
   theNode.ExpressionType=theNode.typePoly;
   theNode.outputString=out.str();
@@ -1790,6 +1902,7 @@ int ParserNode::EvaluateHWTAABilinearForm
   std::stringstream out;
   out << "Highest weight in simple coords: " << weight.ElementToString() << "<br>";
   theHW.SetSize(weight.size);
+  leftElt.PrepareOrderSSalgebraForHWbfComputation();
   for (int i=0; i<weight.size; i++)
     theHW[i].MakeNVarConst(numVars, weight[i]);
   if(!leftElt.HWTAAbilinearForm
@@ -1798,7 +1911,8 @@ int ParserNode::EvaluateHWTAABilinearForm
   PolynomialRationalCoeff symmTerm;
   if(!rightElt.HWTAAbilinearForm
      (leftElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  leftElt.RestoreOrderSSLieAlgebra();
   theNode.polyValue.GetElement()+=symmTerm;
   theNode.ExpressionType=theNode.typePoly;
   theNode.outputString=out.str();
@@ -1817,10 +1931,6 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   if (!MTright.ApplyMinusTransposeAutoOnMe())
     return false;
   ElementUniversalEnveloping<CoefficientType> Accum, intermediateAccum, tempElt;
-  List<int> oldOrder=this->owner->UEGeneratorOrderIncludingCartanElts;
-  int numPosRoots=this->owner->GetNumPosRoots();
-  for (int i=0; i<numPosRoots; i++)
-    this->owner->UEGeneratorOrderIncludingCartanElts[i]=-1;
   Accum.Nullify(*this->owner);
   MonomialUniversalEnveloping<CoefficientType> constMon;
   constMon.MakeConst(theRingUnit, *this->owner);

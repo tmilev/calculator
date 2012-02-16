@@ -9975,6 +9975,9 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
+  bool IsEqualToZero()
+  { return this->size==0;
+  }
   bool HWMTAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
@@ -9990,7 +9993,10 @@ public:
     for (int i=0; i<numGens; i++)
       this->owner->UEGeneratorOrderIncludingCartanElts[i]=i;
   }
-
+  std::string IsInProperSubmodule
+  (const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   ;
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
@@ -11387,6 +11393,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateHWV
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateIsInProperSubmoduleVermaModule
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateLittelmannPaths

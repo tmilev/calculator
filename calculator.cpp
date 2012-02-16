@@ -173,13 +173,12 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-//  civilizedInput="irreducibleRep(1)";
+//  civilizedInput="isInproperSubmodule(g_1,1)";
 //  civilizedInput="(h_1)/3";
 //  civilizedInput="irreducibleRep(2,2)";
 //  civilizedInput="irreducibleRep(1,1,1)";
 //  theParser.DefaultWeylLetter='A';
 //  theParser.DefaultWeylRank=1;
-
 //  civilizedInput="";
 //  civilizedInput="vpfReport((1,0,0), (0,1,0), (0,0,1))";
 //  civilizedInput="vpf (1,-2)";

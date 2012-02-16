@@ -1164,32 +1164,42 @@ bool LittelmannPath::GenerateOrbit
     }
     else
       for (int i=0; i<theDim; i++)
-      { currentPath=hashedOutput[lowestNonExplored];
-        currentPath.ActByEalpha(i);
-        if (!currentPath.IsEqualToZero())
-//          hashedOutput.AddOnTopNoRepetitionHash(currentPath);
-          if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
-          { currentSequence=outputOperators[lowestNonExplored];
-            currentSequence.AddOnTop(i);
-            outputOperators.AddOnTop(currentSequence);
-            if (!currentPath.MinimaAreIntegral())
-            { std::cout << "<hr>Found a bad path:<br> ";
-              std::cout << " = " << currentPath.ElementToString();
-            }
-          }
+      { bool found=true;
         currentPath=hashedOutput[lowestNonExplored];
-        currentPath.ActByFalpha(i);
-        if (!currentPath.IsEqualToZero())
-          //hashedOutput.AddOnTopNoRepetitionHash(currentPath);
-          if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
-          { currentSequence=outputOperators[lowestNonExplored];
-            currentSequence.AddOnTop(-i-1);
-            outputOperators.AddOnTop(currentSequence);
-            if (!currentPath.MinimaAreIntegral())
-            { std::cout << "<hr>Found a bad path:<br> ";
-              std::cout << " = " << currentPath.ElementToString();
+        currentSequence=outputOperators[lowestNonExplored];
+        while (found)
+        { found=false;
+          currentPath.ActByEalpha(i);
+          if (!currentPath.IsEqualToZero())
+  //          hashedOutput.AddOnTopNoRepetitionHash(currentPath);
+            if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
+            { found=true;
+              currentSequence.AddOnTop(i);
+              outputOperators.AddOnTop(currentSequence);
+              if (!currentPath.MinimaAreIntegral())
+              { std::cout << "<hr>Found a bad path:<br> ";
+                std::cout << " = " << currentPath.ElementToString();
+              }
             }
-          }
+        }
+        found=true;
+        currentPath=hashedOutput[lowestNonExplored];
+        currentSequence=outputOperators[lowestNonExplored];
+        while (found)
+        { found=false;
+          currentPath.ActByFalpha(i);
+          if (!currentPath.IsEqualToZero())
+            //hashedOutput.AddOnTopNoRepetitionHash(currentPath);
+            if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
+            {  found=true;
+              currentSequence.AddOnTop(-i-1);
+              outputOperators.AddOnTop(currentSequence);
+              if (!currentPath.MinimaAreIntegral())
+              { std::cout << "<hr>Found a bad path:<br> ";
+                std::cout << " = " << currentPath.ElementToString();
+              }
+            }
+        }
       }
   output.CopyFromBase(hashedOutput);
   return result;
@@ -1418,9 +1428,18 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
     { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
       Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
-      out << "<br>weight " << this->generatingWordsWeights[i].ElementToString()
-      << "; corresponding form:<br> "<< theBF.ElementToString(true, false)
-      << " corresonding inverted matrix (if invertible):<br>" << theBFinverted.ElementToString(true, false);
+      out << "<hr>weight " << this->generatingWordsWeights[i].ElementToString();
+      List<ElementUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
+      for (int i=0; i<currentList.size; i++)
+      { ElementUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
+        out << "<br>mon " << i+1 << ": " << currentElt.ElementToString(theGlobalVariables, tempFormat);
+      }
+      out << "; corresponding form:<br> "<< theBF.ElementToString(true, false)
+      << " corresonding inverted matrix:<br>";
+      if (theBFinverted.NumRows>0)
+        out << theBFinverted.ElementToString(true, false);
+      else
+        out << "<b>The matrix of the bilinear form is not invertible!</b>";
     }
 /*  for (int i=0; i<this->theSimpleGens.size; i++)
   { ElementUniversalEnveloping<Rational>& theSimpleGenerator=this->theSimpleGens[i];
@@ -1954,7 +1973,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
           { *logStream << "tempElt before mult: " << tempElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-            *logStream<< "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
           }
           intermediateAccum.MultiplyBy(tempElt);
           if (logStream!=0)
@@ -2015,7 +2034,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
           { *logStream << "tempElt before mult: " << tempElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-            *logStream<< "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
           }
           intermediateAccum.MultiplyBy(tempElt);
           if (logStream!=0)
@@ -2038,4 +2057,66 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   if (logStream!=0)
     *logStream << "final UE element: " << Accum.ElementToString(false, theGlobalVariables, tempFormat);
   return true;
+}
+
+int ParserNode::EvaluateIsInProperSubmoduleVermaModule
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root weight;
+  ParserNode& ueNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[1]];
+  if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
+  if (weight.size!=theSSalgebra.GetRank())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  ElementUniversalEnveloping<PolynomialRationalCoeff>& theUE=ueNode.UEElement.GetElement();
+  PolynomialRationalCoeff theRingZero, theRingUnit;
+  theNode.impliedNumVars=ueNode.impliedNumVars;
+  int& numVars= theNode.impliedNumVars;
+  theRingZero.Nullify(numVars);
+  theRingUnit.MakeOne(numVars);
+  List<PolynomialRationalCoeff> theHW;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
+  std::stringstream out;
+  out << "Highest weight in dual coords: " << weight.ElementToString() << "<br>";
+  theHW.SetSize(weight.size);
+  for (int i=0; i<weight.size; i++)
+    theHW[i].MakeNVarConst(numVars, weight[i]);
+  theUE.PrepareOrderSSalgebraForHWbfComputation();
+  out << theUE.IsInProperSubmodule(&theHW, theGlobalVariables, theRingUnit, theRingZero);
+  theUE.RestoreOrderSSLieAlgebra();
+  theNode.ExpressionType=theNode.typeString;
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
+}
+
+template <class CoefficientType>
+std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
+(const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ std::stringstream out;
+  List<ElementUniversalEnveloping<CoefficientType> > theOrbit;
+  theOrbit.MakeActualSizeAtLeastExpandOnTop(1000);
+  ElementUniversalEnveloping<CoefficientType> theElt;
+  int theDim=this->owner->GetRank();
+  int numPosRoots=this->owner->GetNumPosRoots();
+  theOrbit.AddOnTop(*this);
+  for (int i=0; i<theOrbit.size; i++)
+    for (int j=0; j<theDim; j++)
+    { theElt.MakeOneGenerator(j+numPosRoots+theDim, theRingUnit, *this->owner);
+      theElt.MultiplyBy(theOrbit[i]);
+      theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+      theElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
+//      theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+      if (!theElt.IsEqualToZero())
+        theOrbit.AddOnTop(theElt);
+    }
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  for (int i=0; i< theOrbit.size; i++)
+  { ElementUniversalEnveloping<CoefficientType>& current=theOrbit[i];
+    out << "<br>" << current.ElementToString(theGlobalVariables, theFormat);
+  }
+  return out.str();
 }

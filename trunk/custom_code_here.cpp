@@ -10366,6 +10366,17 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'G', 2, true,
     & ParserNode::EvaluateTransposeAntiAuto
    );
+  this->AddOneFunctionToDictionaryNoFail
+  ("isInproperSubmodule",
+   "(UE, (Rational, ...))",
+   "<b>Experimental, might be hidden or changed in future versions. \
+   </b>Tells whether word sends hw vector in proper submodule of the verma module.",
+    "isInproperSubmodule\
+    (11/5 g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1}^{2}g_{-2}^{2}g_{-1}^{2} \
+      - g_{-1}^{3}g_{-2}^{2}g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1} , (2,2))",
+   'C', 2, true,
+    & ParserNode::EvaluateIsInProperSubmoduleVermaModule
+   );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

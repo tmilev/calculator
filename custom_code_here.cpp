@@ -8661,7 +8661,8 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
-(root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+(root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights,
+ GlobalVariables& theGlobalVariables)
 { HashedList<root> theDominantWeights;
   double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
@@ -8677,6 +8678,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   std::string tempS;
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
   (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, tempS, theGlobalVariables);
+
   out <<  tempS << "<br>";
   if (isTrimmed)
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
@@ -8714,32 +8716,32 @@ int ParserNode::EvaluateDrawWeightSupport
     return theNode.SetError(theNode.errorDimensionProblem);
   if (!highestWeightFundCoords.IsIntegral())
     return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  roots fundamentalWeights;
+  //roots fundamentalWeights;
   root highestWeightSimpleCoords;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
-  theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
-  highestWeightSimpleCoords.MakeZero(theWeyl.GetDim());
-  for (int i=0; i<highestWeightSimpleCoords.size; i++)
-  { if (!highestWeightFundCoords[i].IsSmallInteger())
-      return theNode.SetError(errorImplicitRequirementNotSatisfied);
-    highestWeightSimpleCoords+=fundamentalWeights[i]*highestWeightFundCoords[i];
-  }
-  roots theWeightsToBeDrawn;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //roots theWeightsToBeDrawn;
   std::stringstream out;
-  out <<
-  theNode.owner->theHmm.theRange.theWeyl.GenerateWeightSupportMethoD1
-  (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables);
+  charSSAlgMod theChar;
+  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange);
+  DrawingVariables theDV;
+  std::string errorMessage, report;
+  theChar.DrawMe(errorMessage, report, theGlobalVariables, theDV);
+//  if (errorMessage
+//  out << theWeyl.GenerateWeightSupportMethoD1
+//  (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables)
+//  ;
   DrawingVariables theDVs;
   DrawOperations& theOps=theDVs.theBuffer;
-  theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(theWeightsToBeDrawn.size);
+//  theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(theWeightsToBeDrawn.size);
   theOps.init();
-  for (int i=0; i<theWeightsToBeDrawn.size; i++)
-    theOps.drawCircleAtVectorBuffer
-    (theWeightsToBeDrawn[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+//  for (int i=0; i<theWeightsToBeDrawn.size; i++)
+//    theOps.drawCircleAtVectorBuffer
+//    (theWeightsToBeDrawn[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
   theWeyl.DrawRootSystem(theDVs, false, theGlobalVariables, true);
   theOps.ComputeProjectionsEiVectors();
   theGlobalVariables.theDrawingVariables.theBuffer=theOps;
-  out << "Number of drawn elements in the weight support: " << theWeightsToBeDrawn.size << "<br>";
+//  out << "Number of drawn elements in the weight support: " << theWeightsToBeDrawn.size << "<br>";
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theOps;

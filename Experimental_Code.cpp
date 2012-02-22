@@ -128,10 +128,11 @@ class ModuleSSalgebraNew
 {
 public:
   SemisimpleLieAlgebra theAlgebra;
-  List<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
+  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
   List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
+  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForm;
   List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
   roots weightsSimpleGens;
@@ -282,6 +283,58 @@ int ParserNode::EvaluateChar
   return theNode.errorNoError;
 }
 
+bool charSSAlgMod::DrawMe
+(std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars)
+{ charSSAlgMod CharCartan;
+  bool result=  this->FreudenthalEvalMe
+  (CharCartan, errorMessage, outputDetails, theGlobalVariables, 1000000);
+  std::stringstream out;
+
+/*
+
+  HashedList<root> theDominantWeights;
+  double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
+  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
+  //int upperBoundInt = 10000;
+  root highestWeightTrue=highestWeightSimpleCoords;
+  this->RaiseToDominantWeight(highestWeightTrue);
+  if (highestWeightTrue!=highestWeightSimpleCoords)
+    out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
+    << "Your input in simple coordinates was: "
+    << highestWeightSimpleCoords.ElementToString() << ".<br> ";
+  out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
+  std::string tempS;
+  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
+  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, tempS, theGlobalVariables);
+  this->
+  out <<  tempS << "<br>";
+  if (isTrimmed)
+    out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
+  else
+    out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
+  roots tempRoots;
+  HashedList<root> finalWeights;
+  int estimatedNumWeights=(int )
+  (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
+  estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
+  finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
+  finalWeights.SetHashSizE(estimatedNumWeights);
+  roots dominantWeightsNonHashed;
+  dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 10000);
+  if (finalWeights.size>=10000)
+  { out << "Did not generate all weights of the module due to RAM limits. ";
+    if (!isTrimmed)
+      out << "However, all dominant weights were computed and are drawn.";
+    out << "<br>";
+  }
+  if (!isTrimmed && finalWeights.size<10000)
+    out << "All weights were computed and are drawn. <br>";
+  outputWeights.CopyFromBase(finalWeights);*/
+  return result;
+}
+
 void charSSAlgMod::MakeFromWeight(Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
 { this->Nullify(owner);
   assert(inputWeightSimpleCoords.size=this->theBoss->GetRank());
@@ -316,7 +369,8 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   }
   HashedList<root> weightsLeftSimpleCoords;
   List<Rational> multsLeft;
-  if (!theWeyl.FreudenthalEval(leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, tempS2, theGlobalVariables))
+  if (!theWeyl.FreudenthalEval
+      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, tempS2, theGlobalVariables, 1000000))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -663,14 +717,14 @@ void WeylGroup::RaiseToDominantWeight
 
 bool WeylGroup::FreudenthalEval
   (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+   GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRho(true);
   roots EiBasis;
   EiBasis.MakeEiBasis(this->GetDim());
   List<bool> Explored;
   root hwSimpleCoords=this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
-  const int UpperBoundFreudenthal=10000000;
   if (!this->GetAlLDominantWeightsHWFDIM
       (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
@@ -763,7 +817,7 @@ std::string charSSAlgMod::ElementToStringCharacter
 
 bool charSSAlgMod::FreudenthalEvalMe
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& errorMessage, std::string& outputDetails,
-  GlobalVariables& theGlobalVariables)
+  GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
 { assert(&outputCharOwnerSetToZero!=this);
   outputCharOwnerSetToZero.Nullify(0);
   root currentWeightFundCoords;
@@ -776,7 +830,7 @@ bool charSSAlgMod::FreudenthalEvalMe
   for (int i=0; i<this->size; i++)
   { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoords;
     if (!this->theBoss->theWeyl.FreudenthalEval
-    (currentWeightFundCoords, currentWeights, currentMults, localError, localDetail, theGlobalVariables))
+    (currentWeightFundCoords, currentWeights, currentMults, localError, localDetail, theGlobalVariables, upperBoundNumDominantWeights))
     { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localError;
       return false;
     }
@@ -799,7 +853,7 @@ int ParserNode::EvaluateFreudenthal
   charSSAlgMod& ch=theNode.owner->TheObjects[theArgumentList[0]].theChar.GetElement();
   charSSAlgMod finalChar;
   std::string localErrorString, localDetailsString;
-  if (!ch.FreudenthalEvalMe(finalChar, localErrorString, localDetailsString, theGlobalVariables))
+  if (!ch.FreudenthalEvalMe(finalChar, localErrorString, localDetailsString, theGlobalVariables, 1000000))
     out << "<br>" << localErrorString;
   else
   { out << "resulting character in fundamental coordinates: <br>";
@@ -1386,50 +1440,44 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   }
   std::stringstream out;
   if (outputReport!=0)
-    out << "Number of Littelmann paths: " << thePaths.size;
-  out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
-  << theHWsimpleCoords.ElementToString();
-  out << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
-  this->theGeneratingWordsNonReduced.SetSize(thePaths.size);
-//  ElementUniversalEnvelopingOrdered<CoefficientType> theElt;
+  { out << "Number of Littelmann paths: " << thePaths.size;
+    out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
+    << theHWsimpleCoords.ElementToString();
+    out << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
+  }
   ElementUniversalEnveloping<CoefficientType> tempElt;
   PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   List<Rational> theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(theHWFundCoords);
-//  this->theGeneratingWordsLittelmannForm.SetSize(theGeneratingWordsNonReduced.size);
-  this->theGeneratingWordsNonReduced.SetSize(theGeneratingWordsNonReduced.size);
   roots tempRoots;
   theWeyl.GenerateWeightSupportMethoD1
   (theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
-  tempRoots.QuickSortAscending();
+  tempRoots.QuickSortDescending();
   this->generatingWordsWeights.AssignList(tempRoots);
   this->theGeneratingWordsGrouppedByWeight.SetSize(this->generatingWordsWeights.size);
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     this->theGeneratingWordsGrouppedByWeight[i].size=0;
-  for (int i=0; i<theGeneratingWordsNonReduced.size; i++)
+  MonomialUniversalEnveloping<CoefficientType> currentNonReducedElement;
+  for (int i=0; i<thePaths.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
-    MonomialUniversalEnveloping<CoefficientType>& currentElt = this->theGeneratingWordsNonReduced[i];
-//    ElementUniversalEnveloping<CoefficientType>& currentReducedElt = this->theGeneratingWordsLittelmannForm[i];
-    currentElt.MakeConst(1, this->theAlgebra);
+    currentNonReducedElement.MakeConst(1, this->theAlgebra);
     for (int j=currentPath.size-1; j>=0; j--)
     { int theIndex=currentPath[j];
       if (theIndex>0)
         theIndex++;
-      currentElt.MultiplyByGeneratorPowerOnTheRight
+      currentNonReducedElement.MultiplyByGeneratorPowerOnTheRight
       (this->theAlgebra.DisplayIndexToChevalleyGeneratorIndex(theIndex),1);
     }
-    out << "<br>m_{ " << i+1 << "} := "
-    << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat) << " \\cdot v ";
     root& hwCurrent=*thePaths[i].Waypoints.LastObject();
     int theIndex=this->generatingWordsWeights.IndexOfObjectHash(hwCurrent);
     if (theIndex==-1)
     { out << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
-      << " weight # limit is 10000";
+      << " # of weights is 10000";
       if (outputReport!=0)
         *outputReport=out.str();
       return false;
     }
-    this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentElt);
+    this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentNonReducedElement);
 //    currentReducedElt=currentElt;
 //    currentReducedElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 //    out << currentElt.ElementToString(tempFormat) << " \\cdot v = ";
@@ -1446,44 +1494,90 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 //      std::cout << "<hr>Houston, we don't have problem @ element " << i+1 << ": "
 //      << currentElt.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat);
   }
+  this->theGeneratingWordsNonReduced.ClearTheObjects();
+  this->theGeneratingWordsNonReduced.SetExpectedSize(thePaths.size);
+  this->theGeneratingWordsNonReduced.size=0;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList= this->theGeneratingWordsGrouppedByWeight[i];
-    currentList.QuickSortAscending();
+  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
+    this->theGeneratingWordsGrouppedByWeight[i];
+    currentList.QuickSortDescending();
+    for (int j=0; j<currentList.size; j++)
+    { this->theGeneratingWordsNonReduced.AddOnTopHash(currentList[j]);
+      if (outputReport!=0)
+        out << "<br>m_{ " << i+1 << "} := "
+        << currentList[j].ElementToString(false, false, theGlobalVariables, tempFormat) << " \\cdot v ";
+    }
   }
   this->IntermediateStepForMakeFromHW(theHWDualCoords, theGlobalVariables, theRingUnit, theRingZero);
+  bool isBad=false;
   if (outputReport!=0)
     for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
     { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
       Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
-      out << "<hr>weight " << this->generatingWordsWeights[i].ElementToString();
-      List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
-      for (int i=0; i<currentList.size; i++)
-      { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
-        out << "<br>mon " << i+1 << ": " << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat);
+      if (outputReport!=0)
+      { out << "<hr>weight " << this->generatingWordsWeights[i].ElementToString();
+        List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
+        for (int i=0; i<currentList.size; i++)
+        { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
+          out << "<br>mon " << i+1 << ": " << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat);
+        }
+        out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ElementToString(true, false)
+        << " corresonding inverted matrix:<br>";
       }
-      out << "; corresponding form:<br> " << theBF.ElementToString(true, false)
-      << " corresonding inverted matrix:<br>";
       if (theBFinverted.NumRows>0)
-        out << theBFinverted.ElementToString(true, false);
+      { if (outputReport!=0)
+          out << theBFinverted.ElementToString(true, false);
+      }
       else
-        out << "<b>The matrix of the bilinear form is not invertible!</b>";
+      { if (outputReport!=0)
+          out << "<b>The matrix of the bilinear form is not invertible!</b>";
+        isBad=true;
+      }
     }
+  if (isBad)
+  { if(outputReport!=0)
+      out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
+    *outputReport=out.str();
+    return false;
+  }
   this->actionsSimpleGens.SetSize(this->theAlgebra.GetRank()*2);
+  this->actionsSimpleGensMatrixForm.SetSize(this->theAlgebra.GetRank()*2);
   for (int i=0; i<this->theSimpleGens.size; i++)
   { ElementUniversalEnveloping<Rational>& theSimpleGenerator=this->theSimpleGens[i];
     root& simpleWeight=this->weightsSimpleGens[i];
+    List<List<ElementUniversalEnveloping<CoefficientType> > >& currentAction= this->actionsSimpleGens[i];
     this->GetAdActionHomogenousElt
-    (theSimpleGenerator, simpleWeight, this->actionsSimpleGens[i], theHWDualCoords, theGlobalVariables,
+    (theSimpleGenerator, simpleWeight, currentAction, theHWDualCoords, theGlobalVariables,
      theRingUnit, theRingZero);
-    out << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
-    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
+    if (outputReport!=0)
+      out << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
+    Matrix<CoefficientType> theMatrix;
+    theMatrix.init(this->theGeneratingWordsNonReduced.size, this->theGeneratingWordsNonReduced.size);
+    theMatrix.NullifyAll(theRingZero);
+    for (int j=0; j<currentAction.size; j++)
+      for (int k=0; k<currentAction[j].size; k++)
+      { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->theGeneratingWordsGrouppedByWeight[j][k];
+        ElementUniversalEnveloping<CoefficientType>& imageCurrentMon=currentAction[j][k];
+        int indexColumn=this->theGeneratingWordsNonReduced.IndexOfObjectHash(currentMon);
+        assert(indexColumn!=-1);
+        for (int l=0; l< imageCurrentMon.size; l++)
+        { int indexRow=this->theGeneratingWordsNonReduced.IndexOfObjectHash(imageCurrentMon[l]);
+          assert(indexRow!=-1);
+          theMatrix.elements[indexRow][indexColumn]=imageCurrentMon[l].Coefficient;
+//          std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
+        }
+      }
+    if (outputReport!=0)
+      out << "<br>Matrix of elemenent in the m_i basis:<br>"
+      << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ElementToString(false, true));
+/*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
       for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
       { out << "<br>" << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat) << "\\cdot "
         << this->theGeneratingWordsGrouppedByWeight[j][k].ElementToString(false, false, theGlobalVariables, tempFormat)
         << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ElementToString(theGlobalVariables, tempFormat)
         << "\\cdot v"
         ;
-      }
+      }*/
   }
   if (outputReport!=0)
     *outputReport=out.str();

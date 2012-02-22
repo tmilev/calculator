@@ -878,7 +878,7 @@ public:
   { if (expectedSize<1)
       return;
     this->MakeActualSizeAtLeastExpandOnTop(expectedSize);
-    this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*2));
+    this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*5));
   }
   void SetHashSizE(int HS);
   int SizeWithoutObjects();
@@ -8444,7 +8444,7 @@ public:
   bool FreudenthalEval
   (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
    List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
-   GlobalVariables& theGlobalVariables)
+   GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
   void GetWeylChamber
   (Cone& output, GlobalVariables& theGlobalVariables)
@@ -11277,8 +11277,12 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   ;
   bool FreudenthalEvalMe
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& errorMessage, std::string& outputDetails,
-  GlobalVariables& theGlobalVariables)
+  GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
 ;
+  bool DrawMe
+  (std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars)
+ ;
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);

@@ -9120,7 +9120,8 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
 }
 
 void Parser::initTestAlgebraNeedsToBeRewritten(GlobalVariables& theGlobalVariables)
-{ if (this->DefaultWeylLetter=='B' && this->DefaultWeylRank==3)
+{ if (false)
+//(this->DefaultWeylLetter=='B' && this->DefaultWeylRank==3)
   { Parser tempParser;
     this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
     SSalgebraModuleOld theModule;
@@ -10348,10 +10349,11 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("hwTAAbf",
    "(UE, UE, (Rational,...))",
    "<b>Experimental, might be hidden or changed in future versions. \
-   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v, and let P:M->M\
+   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v given in \
+   fundamental coordinates. Let P:M->M\
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
-   Tr_M (P ( taa(u_2) u_1 +taa(u_1)u_2 ) ), where taa() is the transpose anti-automorphism of g.",
+   Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g.",
     "hwTAAbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
    'G', 2, true,
     & ParserNode::EvaluateHWTAABilinearForm
@@ -10370,12 +10372,23 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("isInproperSubmodule",
    "(UE, (Rational, ...))",
    "<b>Experimental, might be hidden or changed in future versions. \
-   </b>Tells whether word sends hw vector in proper submodule of the verma module.",
+   </b>Generates and prints out the ad(g_{\\alpha_i})-\"orbit\" of the first argument in \
+   the Verma module of highest weight given in fundamental coordinates by the second argument, where \\alpha_i\
+   run over all simple positive roots of the ambient Lie algebra.",
     "isInproperSubmodule\
     (11/5 g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1}^{2}g_{-2}^{2}g_{-1}^{2} \
       - g_{-1}^{3}g_{-2}^{2}g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1} , (2,2))",
    'C', 2, true,
     & ParserNode::EvaluateIsInProperSubmoduleVermaModule
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("splitIrrepOverLeviParabolic",
+   "( (Rational, ...), (Rational, ...))",
+   "<b>Not implemented yet. Might be hidden or changed in future versions. \
+   </b>First argument gives the highest weight of the irrep. Second argument gives the parabolic selection.",
+    "splitIrrepOverLeviParabolic((1,1),(0,1))",
+   'B', 2, true,
+    & ParserNode::EvaluateSplitIrrepOverLeviParabolic
    );
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",

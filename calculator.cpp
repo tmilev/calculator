@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 #endif
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -173,12 +173,13 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="irreducibleRep(1,0)";
 //  civilizedInput="isInproperSubmodule(g_1,1)";
 //  civilizedInput="(h_1)/3";
 //  civilizedInput="irreducibleRep(2,2)";
 //  civilizedInput="irreducibleRep(1,1,1)";
 //  theParser.DefaultWeylLetter='A';
-//  theParser.DefaultWeylRank=1;
+//  theParser.DefaultWeylRank=2;
 //  civilizedInput="";
 //  civilizedInput="vpfReport((1,0,0), (0,1,0), (0,0,1))";
 //  civilizedInput="vpf (1,-2)";
@@ -579,7 +580,7 @@ int main(int argc, char **argv)
   std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
   std::cout << "\n</td>";
   std::cout << "<td> <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img>";
-  std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.";
+ // std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.";
   std::cout << "<hr>Execution time before initiating system commands: " << TimeTotalElapsed << " seconds.";
   std::cout << "</td>";
   std::cout << "</tr>";

@@ -878,7 +878,7 @@ public:
   { if (expectedSize<1)
       return;
     this->MakeActualSizeAtLeastExpandOnTop(expectedSize);
-    this->SetHashSizE(expectedSize*2);
+    this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*2));
   }
   void SetHashSizE(int HS);
   int SizeWithoutObjects();
@@ -3705,9 +3705,8 @@ template <class Object>
 void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
 { if (TopIndex<=BottomIndex)
     return;
-  int LowIndex = BottomIndex+1;
   int HighIndex = TopIndex;
-  for (; LowIndex<=HighIndex; LowIndex++)
+  for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
     if (this->TheObjects[LowIndex]>(this->TheObjects[BottomIndex]))
     { this->SwapTwoIndices(LowIndex, HighIndex);
       LowIndex--;
@@ -9852,16 +9851,17 @@ public:
   ;
   void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnveloping<CoefficientType>& output);
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
-  void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
   void Nullify(const CoefficientType& theRingZero, SemisimpleLieAlgebra& theOwner)
   { this->init(theOwner);
     this->Coefficient=theRingZero;
   }
-  bool HWbilinearForm
-  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output, const CoefficientType& theRingZero)
-;
+  bool HWTAAbilinearForm
+  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
+  ;
   void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   void ModOutVermaRelations
   (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement=0,
@@ -9923,6 +9923,23 @@ public:
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
   MonomialUniversalEnveloping(){this->owner=0;}
+  bool operator>(const MonomialUniversalEnveloping& other)
+  { if (other.generatorsIndices.size>this->generatorsIndices.size)
+      return false;
+    if (other.generatorsIndices.size< this->generatorsIndices.size)
+      return true;
+    for (int i=0; i<this->generatorsIndices.size; i++)
+    { if (other.generatorsIndices[i]>this->generatorsIndices[i])
+        return false;
+      if (other.generatorsIndices[i]<this->generatorsIndices[i])
+        return true;
+      if (other.Powers[i]>this->Powers[i])
+        return false;
+      if (other.Powers[i]<this->Powers[i])
+        return true;
+    }
+    return false;
+  }
   bool operator==(const MonomialUniversalEnveloping& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;}
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
@@ -9941,29 +9958,31 @@ private:
   friend class MonomialUniversalEnveloping<CoefficientType>;
 public:
   std::string DebugString;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)const
   { this->ElementToString(output, false, false, theGlobalVariables, theFormat);
   }
   void ElementToString
-  (std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (std::string& output, bool useRootIndices, bool includeEpsilonCoords,
+   GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)const
   ;
-  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)const
   { std::string tempS;
     this->ElementToString(tempS, theGlobalVariables, theFormat);
     return tempS;
   }
-  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)const
   { std::string tempS;
     this->ElementToString(tempS, useLatex, false, theGlobalVariables, theFormat);
     return tempS;
   }
-  std::string ElementToStringCalculatorFormat(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  std::string ElementToStringCalculatorFormat(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)const
   { std::string tempS;
     this->ElementToString(tempS, false, false, theGlobalVariables, theFormat);
     return tempS;
   }
   std::string ElementToString
-  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables,
+   PolynomialOutputFormat& theFormat)const
   { std::string tempS;
     this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables, theFormat);
     return tempS;
@@ -10002,7 +10021,16 @@ public:
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
-
+  bool HWTAAbilinearForm
+  (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
+  { ElementUniversalEnveloping<CoefficientType> tempElt;
+    tempElt.Nullify(*this->owner);
+    tempElt+=right;
+    return this->HWTAAbilinearForm
+    (tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, 0);
+  }
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
   void AddMonomial(const MonomialUniversalEnveloping<CoefficientType>& input);
@@ -10017,7 +10045,8 @@ public:
    ;
   void MakeOneGeneratorCoeffOne(int theIndex, int numVars, SemisimpleLieAlgebra& theOwner);
   void MakeOneGeneratorCoeffOne(const root& rootSpace, int numVars, SemisimpleLieAlgebra& theOwner)
-  {this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
+  { this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);
+  }
   void Nullify(SemisimpleLieAlgebra& theOwner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSimpleLieAlgebra& output)const;
   void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& theOwner);
@@ -10037,7 +10066,9 @@ public:
     else
       return this->TheObjects[0].Coefficient.NumVars;
   }
-  inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight){this->operator*=(standsOnTheRight);}
+  inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight)
+  { this->operator*=(standsOnTheRight);
+  }
   void ModToMinDegreeFormFDRels
   (const root& theHWinSimpleCoords,
    GlobalVariables& theGlobalVariables,
@@ -10099,12 +10130,17 @@ static bool GetBasisFromSpanOfElements
   { this->CopyFromHash(other);
     this->owner=other.owner;
   }
+  void operator=(const MonomialUniversalEnveloping<CoefficientType>& other)
+  { this->Nullify(*other.owner);
+    this->AddMonomial(other);
+  }
   void operator+=(const ElementUniversalEnveloping<CoefficientType>& other);
   void operator+=(const MonomialUniversalEnveloping<CoefficientType>& other){this->AddMonomial(other);}
   void operator+=(int other);
   void operator+=(const Rational& other);
   void operator-=(const ElementUniversalEnveloping<CoefficientType>& other);
   void operator*=(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight);
+  void operator*=(const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight);
   void operator/=(const Rational& other);
   void operator*=(const Rational& other);
   void operator*=(const PolynomialRationalCoeff& other);
@@ -11401,6 +11437,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLittelmannPaths
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
+  static int EvaluateSplitIrrepOverLeviParabolic
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
   static int EvaluateLittelmannPathFromWayPoints
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -11993,6 +12032,7 @@ private:
 public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
+  PolynomialOutputFormat theDefaultFormat;
   roots rootsGeneralPurposeBuffer1;
   roots rootsGeneralPurposeBuffer2;
   roots rootsWallBasis;
@@ -15242,10 +15282,37 @@ void ElementUniversalEnveloping<CoefficientType>::operator*=(const Rational& oth
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::operator*=(const ElementUniversalEnveloping& standsOnTheRight)
-{ this->MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.size*this->size);
-  ElementUniversalEnveloping output;
+void ElementUniversalEnveloping<CoefficientType>::operator*=
+(const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight)
+{ ElementUniversalEnveloping<CoefficientType> output;
+  output.MakeActualSizeAtLeastExpandOnTop(this->size);
   output.Nullify(*this->owner);
+  MonomialUniversalEnveloping<CoefficientType> tempMon;
+  int sizeOriginal=0;
+  CoefficientType powerOriginal, CoeffOriginal;
+  for (int i=0; i<this->size; i++)
+  { tempMon=this->TheObjects[i];
+    sizeOriginal=tempMon.generatorsIndices.size;
+    if (sizeOriginal>0)
+      powerOriginal=*tempMon.Powers.LastObject();
+    CoeffOriginal.Assign(tempMon.Coefficient);
+    tempMon.generatorsIndices.size=sizeOriginal;
+    tempMon.Powers.size=sizeOriginal;
+    if (sizeOriginal>0)
+      *tempMon.Powers.LastObject()=powerOriginal;
+    tempMon.Coefficient.Assign(CoeffOriginal);
+    tempMon.MultiplyByNoSimplify(standsOnTheRight);
+      //tempMon.ComputeDebugString();
+    output.AddMonomialNoCleanUpZeroCoeff(tempMon);
+  }
+  (*this)=output;
+}
+
+template <class CoefficientType>
+void ElementUniversalEnveloping<CoefficientType>::operator*=(const ElementUniversalEnveloping& standsOnTheRight)
+{ ElementUniversalEnveloping output;
+  output.Nullify(*this->owner);
+  output.SetExpectedSize(standsOnTheRight.size*this->size);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   int sizeOriginal=0;
   CoefficientType powerOriginal, CoeffOriginal;
@@ -15500,15 +15567,6 @@ void ElementUniversalEnveloping<CoefficientType>::CleanUpZeroCoeff()
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower)
-{ if (thePower==0)
-    return;
-  PolynomialRationalCoeff tempP;
-  tempP.MakeNVarConst(this->Coefficient.NumVars, thePower);
-  this->MultiplyByGeneratorPowerOnTheRight(theGeneratorIndex, tempP);
-}
-
-template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MultiplyByGeneratorPowerOnTheRight
 (int theGeneratorIndex, const CoefficientType& thePower)
 { if (thePower.IsEqualToZero())
@@ -15668,7 +15726,7 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::ElementToString
 (std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables,
- PolynomialOutputFormat& theFormat)
+ PolynomialOutputFormat& theFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)

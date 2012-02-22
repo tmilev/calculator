@@ -7326,7 +7326,11 @@ LargeInt LargeInt::operator/(int x)const
 { LargeInt result;
   LargeIntUnsigned remainder;
   LargeIntUnsigned tempX;
-  int absX=x; signed char signX=1; if (x<0){ signX=-1; absX=-absX; }
+  int absX=x; signed char signX=1;
+  if (x<0)
+  { signX=-1;
+    absX=-absX;
+  }
   tempX.AssignShiftedUInt(absX, 0);
   this->value.DivPositive(tempX, result.value, remainder);
 //  assert(result.CheckForConsistensy());
@@ -7532,7 +7536,7 @@ void partFractionPolynomials::AddPolynomialLargeRational(root& rootLatticeIndica
   else
   { this->TheObjects[x].AddPolynomial(input);
     if (partFraction::MakingConsistencyCheck)
-    {  if (tempRoot2.IsEqualTo(tempRoot))
+    { if (tempRoot2.IsEqualTo(tempRoot))
       { Rational tempLRat;
         this->TheObjects[x].Evaluate(partFraction::theVectorToBePartitioned, tempLRat);
         assert(tempLRat.IsEqualTo(partFraction::CheckSum));
@@ -7605,7 +7609,7 @@ bool partFraction::RemoveRedundantShortRootsClassicalRootSystem(partFractions& o
 
 bool partFraction::reduceOnceTotalOrderMethod(partFractions& Accum, GlobalVariables& theGlobalVariables, root* Indicator)
 { for (int i=0; i<this->IndicesNonZeroMults.size; i++)
-  { for (int j=0; j<this->IndicesNonZeroMults.size; j++)
+    for (int j=0; j<this->IndicesNonZeroMults.size; j++)
     { //assert (this->IndicesNonZeroMults[i]<this->IndicesNonZeroMults[j]);
       int AminusBindex = Accum.RootsToIndices.TableAllowedAminusB.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
       int Aminus2Bindex = Accum.RootsToIndices.TableAllowedAminus2B.elements[this->IndicesNonZeroMults.TheObjects[i]][this->IndicesNonZeroMults.TheObjects[j]];
@@ -7618,7 +7622,6 @@ bool partFraction::reduceOnceTotalOrderMethod(partFractions& Accum, GlobalVariab
         return true;
       }
     }
-  }
 //  Accum.Add(*this);
   return false;
 }
@@ -7775,13 +7778,13 @@ int partFraction::GetNumMonomialsInNumerator()
 void partFraction::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { output << "Fraction_start: " << this->size << "\n";
   for (int j=0; j<this->size; j++)
-  { output <<this->TheObjects[j].Multiplicities.size <<" ";
+  { output << this->TheObjects[j].Multiplicities.size << " ";
     for (int i=0; i<this->TheObjects[j].Multiplicities.size; i++)
-      output << this->TheObjects[j].Multiplicities.TheObjects[i] <<" "<< this->TheObjects[j].Elongations.TheObjects[i] <<" ";
+      output << this->TheObjects[j].Multiplicities.TheObjects[i] << " " << this->TheObjects[j].Elongations.TheObjects[i] << " ";
   }
-  output<<"\nCoefficient:\n";
+  output << "\nCoefficient:\n";
   this->Coefficient.WriteToFile(output);
-  output<<"Fraction_end\n";
+  output << "Fraction_end\n";
 }
 
 void partFraction::ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension)
@@ -8013,7 +8016,7 @@ int partFraction::ComputeGainingMultiplicityIndexInLinearRelation(partFractions&
       if (candidateDesire<0)
         candidateDesire=-candidateDesire;
       if (result==-1 || DesireToSelectAsGainingMultiplicity<candidateDesire)
-      {  result=i;
+      { result=i;
         DesireToSelectAsGainingMultiplicity = candidateDesire;
       }
     }
@@ -8475,9 +8478,10 @@ void partFraction::partFractionToPartitionFunctionSplit(partFractions& owner, Qu
   { this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, i, normals, SplitPowerSeriesCoefficient, theDimension);
     if (RecordNumMonomials)
     { std::stringstream out4, out3;
-      out4 << "Current fraction: "<< i+1<< " out of "<< this->Coefficient.size << " processed";
+      out4 << "Current fraction: " << i+1 << " out of " << this->Coefficient.size << " processed";
       partFractions::NumProcessedForVPFMonomialsTotal++;
-      out3  <<" Processed " << partFractions::NumProcessedForVPFMonomialsTotal <<" out of " <<partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
+      out3 << " Processed " << partFractions::NumProcessedForVPFMonomialsTotal
+      << " out of " << partFractions::NumMonomialsInNumeratorsRelevantFractions << " relevant monomials";
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out4.str();
       theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -8846,7 +8850,7 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, root* Indi
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
     { ProblemCounter++;
       this->ComputeDebugString(theGlobalVariables);
-      out << this->DebugString<< "\\\\ = \\\\";
+      out << this->DebugString << "\\\\ = \\\\";
       tempS= out.str();
       this->CompareCheckSums(theGlobalVariables);
     }
@@ -8955,7 +8959,6 @@ bool partFraction::initFromRoots(partFractions& owner, roots& input)
   PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded;
   if (input.size==0)
     return false;
-
   for(int i=0; i<input.size; i++)
     if (input.TheObjects[i].IsEqualToZero())
       return false;
@@ -9420,16 +9423,22 @@ void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out1, out2, out3;
-  out1 << this->NumberRelevantReducedFractions << " relevant reduced + " << this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
+  out1 << this->NumberRelevantReducedFractions << " relevant reduced + "
+  << this->NumberIrrelevantFractions << " disjoint = " << this->NumTotalReduced;
   if (this->NumRelevantNonReducedFractions!=0)
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
   out1 << " out of "<< this->size << " total fractions";
   theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out1.str();
-  out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + " << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
-          << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions << " out of " << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
+  out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
+  << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
+  << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions
+  << " out of " << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
   theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
   if (this->NumGeneratorsInTheNumerators!=0)
-  { out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + " << this->NumGeneratorsIrrelevantFractions << " disjoint = " << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions << " out of " << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
+  { out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + "
+    << this->NumGeneratorsIrrelevantFractions << " disjoint = "
+    << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions << " out of "
+    << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
   } else
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2].clear();
@@ -9441,7 +9450,8 @@ void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariabl
   if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out2, out3;
-  out2  << "Processed " << this->NumProcessedForVPFfractions << " out of " << this->NumberRelevantReducedFractions << " relevant fractions";
+  out2  << "Processed " << this->NumProcessedForVPFfractions << " out of "
+  << this->NumberRelevantReducedFractions << " relevant fractions";
 //  out3  << "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";
   theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
@@ -9863,7 +9873,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
   theBorel.AssignRoots(tempRoots);
   theVPbasis.CopyFromBase(theBorel);
   if (WeylGroupLetter=='B')
-  { for (int i=0; i<theVPbasis.size; i++)
+    for (int i=0; i<theVPbasis.size; i++)
     { Rational tempRat;
       root tempRoot; tempRoot.AssignIntRoot(theVPbasis.TheObjects[i]);
       tempW.RootScalarCartanRoot(tempRoot, tempRoot, tempRat);
@@ -9874,7 +9884,6 @@ void partFractions::ComputeKostantFunctionFromWeylGroup(char WeylGroupLetter, in
         theVPbasis.AddOnTop(tempIntRoot);
       }
     }
-  }
   if (WeylGroupLetter=='D')
   { intRoot tempRoot;
     tempRoot.MakeZero(this->AmbientDimension);
@@ -11399,10 +11408,10 @@ void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, L
 int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
 { std::string tempS;
   int TopIndex;
-  input >> tempS >>TopIndex;
+  input >> tempS >> TopIndex;
   output.SetSize(this->size);
   for (int i=0; i<this->size; i++)
-    input>>tempS >> output.TheObjects[i];
+    input >> tempS >> output.TheObjects[i];
   return TopIndex;
 }
 
@@ -11539,7 +11548,7 @@ void VermaModulesWithMultiplicities::ExtendOrder()
 { this->initTheMults();
   int x=this->FindLowestBruhatNonExplored();
   while (x!=-1)
-  {  for (int j=0; j<this->BruhatOrder.TheObjects[x].size; j++)
+  { for (int j=0; j<this->BruhatOrder.TheObjects[x].size; j++)
     { int a= this->BruhatOrder.TheObjects[x].TheObjects[j];
       this->MergeBruhatLists(a, x);
     }
@@ -11655,7 +11664,7 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
 }
 
 void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
-{  this->GeneratePartialBruhatOrder();
+{ this->GeneratePartialBruhatOrder();
   PolynomialOutputFormat PolyFormatLocal;
   PolyFormatLocal.SetLetterIndex("q", 0);
   this->ComputeRPolys();
@@ -26157,7 +26166,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
   int numPosRootsDomain=inputHmm.theDomain.theWeyl.RootsOfBorel.size;
   int numPosRootsRange=inputHmm.theRange.theWeyl.RootsOfBorel.size;
   int numVars=theDimension;
-  PolynomialRationalCoeff polyOne, polyZero;
+  PolynomialRationalCoeff polyOne, polyZero, polyN;
   polyOne.MakeOne(numVars);
   polyZero.Nullify(numVars);
   PosRootsEmbeddings.SetSize(numPosRootsDomain);
@@ -26185,7 +26194,11 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
     currentMon.Coefficient.ComputeDebugString();
     currentMon.Coefficient.MakeNVarConst((int)theDimension, tempRat);
     for (int j=theVP.thePartitions.TheObjects[i].size-1; j>=0; j--)
-      currentMon.MultiplyByGeneratorPowerOnTheRight(inputHmm.theRange.RootToIndexInUE(-inputHmm.theRange.theWeyl.RootsOfBorel.TheObjects[j]), theVP.thePartitions.TheObjects[i].TheObjects[j]);
+    { polyN.MakeNVarConst(numVars, theVP.thePartitions[i][j]);
+      currentMon.MultiplyByGeneratorPowerOnTheRight
+      (inputHmm.theRange.RootToIndexInUE
+       (-inputHmm.theRange.theWeyl.RootsOfBorel[j]), polyN);
+    }
     out << currentMon.ElementToString(false, false, theGlobalVariables, tempFormat) << "<br>" ;
     tempElt.Nullify(inputHmm.theRange);
     tempElt.AddOnTopHash(currentMon);

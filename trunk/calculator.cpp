@@ -173,6 +173,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+
 //  civilizedInput="irreducibleRep(1,0)";
 //  civilizedInput="isInproperSubmodule(g_1,1)";
 //  civilizedInput="(h_1)/3";
@@ -398,7 +399,7 @@ int main(int argc, char **argv)
   std::string beginMath = "<div class=\"math\" scale=\"50\">";
   std::string endMath = "</div>";
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
-  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"/cgi-bin/calculator\">\n" ;
+  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"./calculator\">\n" ;
   std::stringstream tempStream4;
   static_html4(tempStream4);
   std:: cout << tempStream4.str();
@@ -451,7 +452,7 @@ int main(int argc, char **argv)
   << " seconds. The time limit can be changed if you install from source by editing (file) calculator.cpp (function) main() (variable) "
   << "theGlobalVariables.MaxAllowedComputationTimeInSeconds ."
   << "<br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
-  std::cout << "<br>Bug reports = my wholehearted gratitude (bug reports only by email at the moment; todor.milev at google's email).<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  std::cout << "<br>Bug reports = our wholehearted gratitude.<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
   std::cout << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";

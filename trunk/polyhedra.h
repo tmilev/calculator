@@ -3121,6 +3121,7 @@ public:
   inline static std::string GetXMLClassName(){ return "root";}
 //the below is to facilitate operator overloading
   root(const root& right){this->Assign(right); };
+  root(const Vector<Rational>& other){this->CopyFromLight(other);}
   void MultiplyByLargeRational(const Rational& a);
   void MakeZero(int DesiredDimension);
   void MakeEi(int DesiredDimension, int NonZeroIndex);
@@ -8383,8 +8384,8 @@ public:
   root GetSimpleCoordinatesFromFundamental
   (const Vector<Rational>& inputInFundamentalCoords)
   ;
-  root GetFundamentalCoordinatesFromSimple
-  (const root& inputInSimpleCoords)
+  Vector<Rational> GetFundamentalCoordinatesFromSimple
+  (const Vector<Rational>& inputInSimpleCoords)
   ;
   root GetDualCoordinatesFromFundamental
   (const root& inputInFundamentalCoords)
@@ -8462,8 +8463,8 @@ public:
   bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); }
   void GenerateRootSubsystem(roots& theRoots);
   void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights);
-  void GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements=0);
-  void GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
+  bool GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements=0);
+  bool GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements);
   void GenerateRootSystemFromKillingFormMatrix();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -11273,16 +11274,20 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   ;
   std::string ElementToStringCharacter(List<root>& theWeights, List<Rational>& theMults);
   void MakeFromWeight
-  (Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
+  (const Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
   ;
   bool FreudenthalEvalMe
- (charSSAlgMod& outputCharOwnerSetToZero, std::string& errorMessage, std::string& outputDetails,
+ (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
   GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
 ;
-  bool DrawMe
-  (std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars)
- ;
+  bool DrawMeNoMults
+(std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars, int upperBoundWeights)
+  ;
+  bool DrawMeWithMults
+(std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars, int upperBoundWeights)
+  ;
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
@@ -11421,6 +11426,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateDrawWeightSupportWithMults
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateHWMTABilinearForm

@@ -278,68 +278,80 @@ int ParserNode::EvaluateChar
   if (theWeight.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
   charSSAlgMod& output=theNode.theChar.GetElement();
-  output.MakeFromWeight(theWeight, &theNode.owner->theHmm.theRange);
+
+  output.MakeFromWeight
+  (theNode.owner->theHmm.theRange.theWeyl.GetSimpleCoordinatesFromFundamental(theWeight),
+   &theNode.owner->theHmm.theRange);
   theNode.ExpressionType=theNode.typeCharSSFDMod;
   return theNode.errorNoError;
 }
 
-bool charSSAlgMod::DrawMe
-(std::string& errorMessage, std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars)
+bool charSSAlgMod::DrawMeNoMults
+(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
 { charSSAlgMod CharCartan;
-  bool result=  this->FreudenthalEvalMe
-  (CharCartan, errorMessage, outputDetails, theGlobalVariables, 1000000);
-  std::stringstream out;
-
-/*
-
-  HashedList<root> theDominantWeights;
-  double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
-  int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
-  //int upperBoundInt = 10000;
-  root highestWeightTrue=highestWeightSimpleCoords;
-  this->RaiseToDominantWeight(highestWeightTrue);
-  if (highestWeightTrue!=highestWeightSimpleCoords)
-    out << "<br>Cheater! The input weight is not highest... using the highest weight in the same orbit instead. "
-    << "Your input in simple coordinates was: "
-    << highestWeightSimpleCoords.ElementToString() << ".<br> ";
-  out << "The highest weight in simple coordinates is: " << highestWeightTrue.ElementToString() << ".<br>";
-  std::string tempS;
-  bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
-  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, tempS, theGlobalVariables);
-  this->
-  out <<  tempS << "<br>";
-  if (isTrimmed)
-    out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
-  else
-    out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
-  roots tempRoots;
-  HashedList<root> finalWeights;
-  int estimatedNumWeights=(int )
-  (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
-  estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
-  finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
-  finalWeights.SetHashSizE(estimatedNumWeights);
-  roots dominantWeightsNonHashed;
-  dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
-  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 10000);
-  if (finalWeights.size>=10000)
-  { out << "Did not generate all weights of the module due to RAM limits. ";
-    if (!isTrimmed)
-      out << "However, all dominant weights were computed and are drawn.";
-    out << "<br>";
+  WeylGroup& theWeyl=this->theBoss->theWeyl;
+  if (this->size!=1)
+  { outputDetails="I am programmed to compute weight supports of irreducible modules only.";
+    return false;
   }
-  if (!isTrimmed && finalWeights.size<10000)
-    out << "All weights were computed and are drawn. <br>";
-  outputWeights.CopyFromBase(finalWeights);*/
+  root theWeightSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental
+  (this->TheObjects[0].weightFundamentalCoords);
+  roots finalWeights;
+  outputDetails= theWeyl.GenerateWeightSupportMethoD1
+  (theWeightSimpleCoords, finalWeights, upperBoundWeights, theGlobalVariables);
+  theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
+  for (int i=0; i< finalWeights.size; i++)
+    theDrawingVars.drawCircleAtVectorBuffer(finalWeights[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+  return true;
+}
+
+bool charSSAlgMod::DrawMeWithMults
+(std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars, int upperBoundWeights)
+{ charSSAlgMod CharCartan;
+  bool result= this->FreudenthalEvalMe
+  (CharCartan, outputDetails, theGlobalVariables, upperBoundWeights);
+  std::stringstream out;
+  roots currentOrbit;
+  WeylGroup& theWeyl=this->theBoss->theWeyl;
+  theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
+  int totalNumWeights=0;
+  roots dominantWeightsNonHashed;
+  HashedList<root> finalWeights;
+  for (int i=0; i< CharCartan.size; i++)
+  { MonomialChar<Rational>& currentMon=CharCartan[i];
+    dominantWeightsNonHashed.size=0;
+    dominantWeightsNonHashed.AddOnTop
+    (theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords));
+    bool isTrimmed=!theWeyl.GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, upperBoundWeights);
+    totalNumWeights+=finalWeights.size;
+    if (isTrimmed || totalNumWeights>upperBoundWeights)
+    { out << "Did not generate all weights of the module due to RAM limits. ";
+      result=false;
+      break;
+    }
+    for (int j=0; j<finalWeights.size; j++)
+    { theDrawingVars.drawCircleAtVectorBuffer(finalWeights[j], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      theDrawingVars.drawTextAtVectorBuffer
+        (finalWeights[j], currentMon.Coefficient.ElementToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+    }
+  }
+  out << "<br>Number of computed weights: " << totalNumWeights << ". ";
+  if (result && totalNumWeights<upperBoundWeights)
+    out << "<br>All weights were computed and are drawn. <br>";
+  else
+    out << "<br><b> Not all weights were computed. </b>";
+  outputDetails=out.str();
+//  outputWeights.CopyFromBase(finalWeights);
   return result;
 }
 
-void charSSAlgMod::MakeFromWeight(Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
+void charSSAlgMod::MakeFromWeight(const Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
 { this->Nullify(owner);
-  assert(inputWeightSimpleCoords.size=this->theBoss->GetRank());
+  assert(inputWeightSimpleCoords.size==this->theBoss->GetRank());
   MonomialChar<Rational> theMon;
-  theMon.weightFundamentalCoords=inputWeightSimpleCoords;
+  theMon.weightFundamentalCoords=
+  owner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
   theMon.Coefficient=1;
   this->AddOnTopHash(theMon);
 }
@@ -816,7 +828,7 @@ std::string charSSAlgMod::ElementToStringCharacter
 }
 
 bool charSSAlgMod::FreudenthalEvalMe
- (charSSAlgMod& outputCharOwnerSetToZero, std::string& errorMessage, std::string& outputDetails,
+ (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
   GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
 { assert(&outputCharOwnerSetToZero!=this);
   outputCharOwnerSetToZero.Nullify(0);
@@ -825,13 +837,14 @@ bool charSSAlgMod::FreudenthalEvalMe
   HashedList<root> currentWeights;
   std::stringstream localErrors, localDetails;
   std::string localError, localDetail;
-  errorMessage="";
   MonomialChar<Rational> tempMon;
   for (int i=0; i<this->size; i++)
   { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoords;
     if (!this->theBoss->theWeyl.FreudenthalEval
     (currentWeightFundCoords, currentWeights, currentMults, localError, localDetail, theGlobalVariables, upperBoundNumDominantWeights))
-    { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localError;
+    { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localError
+      << "<br> Further computation detail: " << localDetails.str() << "<hr>Failing computation details: " << localDetail;
+      outputDetails=localErrors.str();
       return false;
     }
     if (localDetail!="")
@@ -852,10 +865,8 @@ int ParserNode::EvaluateFreudenthal
   out << "Freudenthal formula: ";
   charSSAlgMod& ch=theNode.owner->TheObjects[theArgumentList[0]].theChar.GetElement();
   charSSAlgMod finalChar;
-  std::string localErrorString, localDetailsString;
-  if (!ch.FreudenthalEvalMe(finalChar, localErrorString, localDetailsString, theGlobalVariables, 1000000))
-    out << "<br>" << localErrorString;
-  else
+  std::string localDetailsString;
+  if (ch.FreudenthalEvalMe(finalChar, localDetailsString, theGlobalVariables, 1000000))
   { out << "resulting character in fundamental coordinates: <br>";
     out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(finalChar.ElementToString("V", "\\omega", false));
   }

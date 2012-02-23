@@ -10616,12 +10616,14 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
     this->RootSystem.AddOnTopHash(this->RootsOfBorel.TheObjects[i]);
 }
 
-void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements)
+bool WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements)
 { WeylGroup tempW;
-  this->GenerateOrbit(theRoots, RhoAction, output, false, tempW, UseMinusRho, UpperLimitNumElements);
+  return this->GenerateOrbit(theRoots, RhoAction, output, false, tempW, UseMinusRho, UpperLimitNumElements);
 }
 
-void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup, WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
+bool WeylGroup::GenerateOrbit
+(roots& theRoots, bool RhoAction, HashedList<root>& output, bool ComputingAnOrbitGeneratingSubsetOfTheGroup,
+ WeylGroup& outputSubset, bool UseMinusRho, int UpperLimitNumElements)
 { output.ClearTheObjects();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTopHash(theRoots.TheObjects[i]);
@@ -10658,9 +10660,10 @@ void WeylGroup::GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>&
         }
       if (UpperLimitNumElements>0)
         if (outputSubset.size>=UpperLimitNumElements || output.size>=UpperLimitNumElements)
-          return;
+          return false;
     }
   }
+  return true;
 }
 
 void WeylGroup::RootScalarCartanRoot(const root& r1, const root& r2, Rational& output)const
@@ -28314,10 +28317,10 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
           this->outputString=tempS;
         } else
         { this->ExpressionType=this->typeCharSSFDMod;
-          this->outputString="The tensor product decomposition is computed using the Brauer-Klimyk formula (Humphreys, \" \
-          Introduction to Lie algebras and representation theory (Springer,Third printing, revised, 1980)\", page 142, exercise 9. \
-          A faster implementation of the formula, together with detailed code explanation, \
-          is available from the online interface of LiE.";
+          this->outputString="The tensor product decomposition is computed using the Brauer-Klimyk formula, Humphreys,  \
+          Introduction to Lie algebras and representation theory (Springer, Third printing, revised, 1980), page 142, exercise 9. \
+          A faster implementation of the formula, together with detailed algorithm explanation, \
+          is available from the online interface of LiE. ";
         }
         break;
       case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;

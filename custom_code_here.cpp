@@ -1204,11 +1204,11 @@ root WeylGroup::GetSimpleCoordinatesFromFundamental
   return result;
 }
 
-root WeylGroup::GetFundamentalCoordinatesFromSimple
-(const root& inputInFundamentalCoords)
+Vector<Rational> WeylGroup::GetFundamentalCoordinatesFromSimple
+(const Vector<Rational>& inputInFundamentalCoords)
 { MatrixLargeRational& tempMat=*this->GetMatrixSimpleToFundamentalCoords();
-  root result=inputInFundamentalCoords;
-  tempMat.ActOnAroot(result);
+  Vector<Rational> result=inputInFundamentalCoords;
+  tempMat.ActOnVectorColumn(result);
   return result;
 }
 
@@ -8725,30 +8725,45 @@ int ParserNode::EvaluateDrawWeightSupport
   charSSAlgMod theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange);
   DrawingVariables theDV;
-  std::string errorMessage, report;
-  theChar.DrawMe(errorMessage, report, theGlobalVariables, theDV);
-//  if (errorMessage
-//  out << theWeyl.GenerateWeightSupportMethoD1
-//  (highestWeightSimpleCoords, theWeightsToBeDrawn, 0, theGlobalVariables)
-//  ;
-  DrawingVariables theDVs;
-  DrawOperations& theOps=theDVs.theBuffer;
-//  theOps.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(theWeightsToBeDrawn.size);
-  theOps.init();
-//  for (int i=0; i<theWeightsToBeDrawn.size; i++)
-//    theOps.drawCircleAtVectorBuffer
-//    (theWeightsToBeDrawn[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-  theWeyl.DrawRootSystem(theDVs, false, theGlobalVariables, true);
-  theOps.ComputeProjectionsEiVectors();
-  theGlobalVariables.theDrawingVariables.theBuffer=theOps;
-//  out << "Number of drawn elements in the weight support: " << theWeightsToBeDrawn.size << "<br>";
-  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  std::string report;
+  theChar.DrawMeNoMults(report, theGlobalVariables, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+
   theNode.theAnimation.GetElement().MakeZero();
-  theNode.theAnimation.GetElement()+=theOps;
+  theNode.theAnimation.GetElement()+=theDV.theBuffer;
   theNode.ExpressionType=theNode.typeAnimation;
   theNode.outputString=out.str();
 //  theGlobalVariables.theDrawingVariables.theBuffer=theOps;
 //std::cout << "I am alive!";
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateDrawWeightSupportWithMults
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  root highestWeightFundCoords;
+  if (!theNode.GetRootRationalFromFunctionArguments(highestWeightFundCoords, theGlobalVariables))
+    return theNode.SetError(theNode.errorDimensionProblem);
+  if (highestWeightFundCoords.size!=theNode.owner->DefaultWeylRank)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  if (!highestWeightFundCoords.IsIntegral())
+    return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  //roots fundamentalWeights;
+  root highestWeightSimpleCoords;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //roots theWeightsToBeDrawn;
+  std::stringstream out;
+  charSSAlgMod theChar;
+  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  theNode.theAnimation.GetElement().MakeZero();
+  theNode.theAnimation.GetElement()+=theDV.theBuffer;
+  theNode.ExpressionType=theNode.typeAnimation;
+  theNode.outputString=out.str();
   return theNode.errorNoError;
 }
 
@@ -10067,6 +10082,15 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "drawWeightSupport(1,1,1)",
    'B', 3, true,
     & ParserNode::EvaluateDrawWeightSupport
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("drawWeightSupportWithMults",
+   "(Rational, ... )",
+   "Same as drawWeightSupport but also displays weight multiplicities. <b> Warning. Drawing text (i.e. multiplicities) \
+   is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b> ",
+   "drawWeightSupportWithMults(1,1)",
+   'G', 2, true,
+    & ParserNode::EvaluateDrawWeightSupportWithMults
    );
   this->AddOneFunctionToDictionaryNoFail
   ("parabolicsInfo",

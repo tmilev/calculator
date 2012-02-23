@@ -1454,6 +1454,13 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   { out << "Number of Littelmann paths: " << thePaths.size;
     out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
     << theHWsimpleCoords.ElementToString();
+    charSSAlgMod theChar;
+    theChar.MakeFromWeight(theHWsimpleCoords, &this->theAlgebra);
+    std::string tempS;
+    DrawingVariables theDV;
+    theChar.DrawMeWithMults(tempS, theGlobalVariables, theDV, 1000);
+    out << " A picture of the weight support follows. "
+    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
     out << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
   }
   ElementUniversalEnveloping<CoefficientType> tempElt;

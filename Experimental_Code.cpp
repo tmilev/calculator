@@ -163,11 +163,16 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   void ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
    ElementUniversalEnveloping<CoefficientType>& outputHomogeneous,
-   int indexInputBasis,
-   const List<CoefficientType>& subHiGoesToIthElement,
+   int indexInputBasis, const List<CoefficientType>& subHiGoesToIthElement,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
    )
   ;
+  void SplitOverLevi
+  (std::string* Report,
+   int indexInputBasis, const List<CoefficientType>& subHiGoesToIthElement,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+   ;
   void Reduce
   (ElementModuleSSalgebra<CoefficientType>& inputOutput, GlobalVariables& theGlobalVariables)
   ;
@@ -1747,8 +1752,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::GetCoordsInBasis
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<CoefficientType>& output,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
-   GlobalVariables& theGlobalVariables)const
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
 { List<ElementUniversalEnveloping<CoefficientType> > tempBasis, tempElts;
   tempBasis=theBasis;
   tempBasis.AddOnTop(*this);
@@ -1764,11 +1768,9 @@ bool ElementUniversalEnveloping<CoefficientType>::GetCoordsInBasis
 template<class CoefficientType>
 template<class CoefficientTypeQuotientField>
 bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
-  (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
-   Vectors<CoefficientTypeQuotientField>& outputCoords,
-   List<ElementUniversalEnveloping<CoefficientType> >& outputTheBasis,
-   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero,
-   GlobalVariables& theGlobalVariables)
+  (List<ElementUniversalEnveloping<CoefficientType> >& theElements, Vectors<CoefficientTypeQuotientField>& outputCoords,
+   List<ElementUniversalEnveloping<CoefficientType> >& outputTheBasis, const CoefficientTypeQuotientField& theFieldUnit,
+   const CoefficientTypeQuotientField& theFieldZero, GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
     return false;
   ElementUniversalEnveloping<CoefficientType> outputCorrespondingMonomials;
@@ -1805,8 +1807,8 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
 
 template <class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const root& theHWsimpleCoords,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero)
 { WeylGroup& theWeyl=this->owner->theWeyl;
   root theHWsimpleCoordsTrue=theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
@@ -1855,8 +1857,8 @@ bool MonomialUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero)
 { int numPosRoots=this->owner->GetNumPosRoots();
   int theDimension=this->owner->GetRank();
   ElementSimpleLieAlgebra currentElt;
@@ -2274,8 +2276,8 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
 
 template <class CoefficientType>
 std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
-(const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { std::stringstream out;
   List<ElementUniversalEnveloping<CoefficientType> > theOrbit;
   theOrbit.MakeActualSizeAtLeastExpandOnTop(1000);
@@ -2317,6 +2319,8 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   std::stringstream out;
   out << "Not implemented yet. Your input weight: " << theWeight.ElementToString();
   out << "; your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  ModuleSSalgebraNew<Rational> theMod;
+//  out << theMod.SplitOverLevi(
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
 }

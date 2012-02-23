@@ -10385,10 +10385,10 @@ void SelectionWithMaxMultiplicity::IncrementSubsetFixedCardinality(int Cardinali
 }
 
 int ::SelectionWithMaxMultiplicity::NumCombinationsOfCardinality(int cardinality)
-{ int fixThisShit;
+{ int fixThis;
   return ::MathRoutines::NChooseK(this->Multiplicities.size+cardinality-1, cardinality);
-  int fixThisShit2;
-  return fixThisShit2;
+  int fixThis;
+  return fixThis;
 }
 
 void SelectionWithMaxMultiplicity::IncrementSubset()

@@ -7,6 +7,9 @@
 //
 //Contributors: Thomas Bliem, Todor Milev
 //
+//The files of the form vpf*.cpp are considered to be inseparable parts of the same body of code.
+//These files implement the specifications of the vpf.h header file.
+//The files are split in order to speed up compilation times on small non-hearder modifications.
 //This is free software. You are welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
 //as those given to you, to any future recipients of your modifications (in case you
@@ -35,7 +38,7 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 
-#include "polyhedra.h"
+#include "vpf.h"
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
@@ -10510,7 +10513,9 @@ void WeylGroup::SimpleReflectionDualSpace(int index, root& DualSpaceElement)
 }
 
 void WeylGroup::SimpleReflectionRoot(int index, root& theRoot, bool RhoAction, bool UseMinusRho)
-{ Rational alphaShift, tempRat;
+{// if (this->CartanSymmetric.elements[index][index].IsEqualToZero())
+  //  return;
+  Rational alphaShift, tempRat;
   alphaShift.MakeZero();
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
   { tempRat.Assign(theRoot.TheObjects[i]);
@@ -10748,7 +10753,7 @@ void WeylGroup::ElementToString(std::string& output)
   this->rho.ElementToString(tempS);
   out << "rho:" << tempS << "\n";
   this->RootSystem.ElementToStringGeneric(tempS);
-  out << "Root system:\n" << tempS << "\n";
+  out << "Root system(" << this->RootSystem.size << " elements):\n" << tempS << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS);
@@ -19222,7 +19227,9 @@ void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariab
   this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,  bool recomputeAmbientRho)
+void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
+(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables,
+ int UpperLimitNumElements, bool recomputeAmbientRho)
 { HashedList<root>& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections;
   this->truncated=false;
   this->ClearTheObjects();

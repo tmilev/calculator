@@ -1,4 +1,8 @@
-#include "polyhedra.h"
+#include "vpf.h"
+//The files vpf*.cpp are under the same license. The license is included in the last (in alphabetical order)
+//vpf*.cpp file. At the moment, this is the file vpf9.cpp. The vpf*.cpp files are considered to be inseparable
+//pieces of the same body code; they are separated only to facilitate faster compilation time.
+
 
 template < > int HashedList<LittelmannPath >::PreferredHashSize=1000;
 template < > int List<LittelmannPath>::ListActualSizeIncrement=1000;
@@ -138,6 +142,7 @@ public:
   roots weightsSimpleGens;
 //  List<List<Matrix<CoefficientType> > >
   HashedList<root> generatingWordsWeights;
+  charSSAlgMod theChar;
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
 //  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
 //  List
@@ -168,10 +173,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    )
   ;
   void SplitOverLevi
-  (std::string* Report,
-   int indexInputBasis, const List<CoefficientType>& subHiGoesToIthElement,
-   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
-   )
+  (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero)
    ;
   void Reduce
   (ElementModuleSSalgebra<CoefficientType>& inputOutput, GlobalVariables& theGlobalVariables)
@@ -704,8 +707,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
-void WeylGroup::RaiseToDominantWeight
-  (root& theWeight, int* sign, bool* stabilizerFound)
+void WeylGroup::RaiseToDominantWeight(root& theWeight, int* sign, bool* stabilizerFound)
 { if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -732,10 +734,91 @@ void WeylGroup::RaiseToDominantWeight
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
+bool ReflectionSubgroupWeylGroup::FreudenthalEval
+(root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+ List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+ GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
+{ //double startTimer=theGlobalVariables.GetElapsedSeconds();
+  this->ComputeRootSubsystem();
+  roots EiBasis;
+  EiBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
+  List<bool> Explored;
+  root hwSimpleCoords=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
+  if (!this->GetAlLDominantWeightsHWFDIM
+      (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
+  { std::stringstream errorLog;
+    errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
+    << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
+    << " formula can do your computation.";
+    errorMessage=errorLog.str();
+    return false;
+  }
+  Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
+  outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
+  root currentWeight, currentDominantRepresentative;
+  root Rho=this->GetRho();
+  Rational hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoords+Rho, hwSimpleCoords+Rho);
+  outputMultsSimpleCoords[0]=1;
+  Explored[0]=true;
+//  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+  //static double totalTimeSpentOnHashIndexing=0;
+//  static double timeSpentRaisingWeights=0;
+  for (int k=1; k< outputDominantWeightsSimpleCoords.size; k++)
+  { Explored[k]=true;
+    Rational& currentAccum=outputMultsSimpleCoords[k];
+    currentAccum=0;
+    for (int j=0; j<this->RootsOfBorel.size; j++)
+      for (int i=1; ; i++)
+      { currentWeight= outputDominantWeightsSimpleCoords[k]+this->RootsOfBorel[j]*i;
+        currentDominantRepresentative=currentWeight;
+//        double startLocal=theGlobalVariables.GetElapsedSeconds();
+        this->RaiseToDominantWeight(currentDominantRepresentative);
+//        timeSpentRaisingWeights+=theGlobalVariables.GetElapsedSeconds()-startLocal;
+        //double beforeHash=theGlobalVariables.GetElapsedSeconds();
+        int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
+        //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
+        if (theIndex==-1)
+          break;
+//        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
+        if (!Explored[theIndex])
+        { std::stringstream errorLog;
+          errorLog << "This is an internal error check. If you see it, that means "
+          << " that the Freudenthal algorithm implementation is "
+          << " wrong (because the author of the implementation was dumb enough to try to write less code than what is "
+          << " suggested by LiE).";
+          errorMessage=errorLog.str();
+          return false;
+        }
+        currentAccum+=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, this->RootsOfBorel[j])
+        *outputMultsSimpleCoords[theIndex];
+      }
+    currentAccum*=2;
+    currentAccum/= hwPlusRhoSquared-
+    this->AmbientWeyl.RootScalarCartanRoot
+    (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho);
+//    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
+ //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
+  //  .ElementToString()
+   // ;
+    std::stringstream out;
+    out << " Computed the multiplicities of " << k+1 << " out of "
+    << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
+    theGlobalVariables.MakeStatusReport(out.str());
+//    std::cout
+//    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
+    theGlobalVariables.MakeStatusReport(out.str());
+//    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+//    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
+//    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
+  }
+//  std::cout << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
+  return true;
+}
+
 bool WeylGroup::FreudenthalEval
-  (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
-   GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
+(root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+ List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+ GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRho(true);
   roots EiBasis;
@@ -1446,6 +1529,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   LittelmannPath startingPath;
   WeylGroup& theWeyl=this->theAlgebra.theWeyl;
   root theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWFundCoords);
+  this->theChar.MakeFromWeight(theHWsimpleCoords, &this->theAlgebra);
   startingPath.MakeFromWeightInSimpleCoords(theHWsimpleCoords, theWeyl);
   List<LittelmannPath> thePaths;
   List<List<int> > generatorsIndices;
@@ -1454,19 +1538,19 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       *outputReport = "Error: number of Littelmann paths exceeded allowed limit of 1000.";
     return false;
   }
-  std::stringstream out;
+  std::stringstream out2, monomialDetailStream;
   if (outputReport!=0)
-  { out << "Number of Littelmann paths: " << thePaths.size;
-    out << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
+  { monomialDetailStream << "Number of Littelmann paths: " << thePaths.size;
+    monomialDetailStream << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
     << theHWsimpleCoords.ElementToString();
     charSSAlgMod theChar;
     theChar.MakeFromWeight(theHWsimpleCoords, &this->theAlgebra);
     std::string tempS;
     DrawingVariables theDV;
     theChar.DrawMeWithMults(tempS, theGlobalVariables, theDV, 1000);
-    out << " A picture of the weight support follows. "
+    out2 << " A picture of the weight support follows. "
     << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
-    out << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
+    monomialDetailStream << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
   }
   ElementUniversalEnveloping<CoefficientType> tempElt;
   PolynomialOutputFormat tempFormat;
@@ -1494,10 +1578,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     root& hwCurrent=*thePaths[i].Waypoints.LastObject();
     int theIndex=this->generatingWordsWeights.IndexOfObjectHash(hwCurrent);
     if (theIndex==-1)
-    { out << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
+    { out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << " # of weights is 10000";
       if (outputReport!=0)
-        *outputReport=out.str();
+        *outputReport=out2.str() + monomialDetailStream.str();
       return false;
     }
     this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentNonReducedElement);
@@ -1521,13 +1605,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->theGeneratingWordsNonReduced.SetExpectedSize(thePaths.size);
   this->theGeneratingWordsNonReduced.size=0;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
-    this->theGeneratingWordsGrouppedByWeight[i];
+  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
     currentList.QuickSortDescending();
     for (int j=0; j<currentList.size; j++)
     { this->theGeneratingWordsNonReduced.AddOnTopHash(currentList[j]);
       if (outputReport!=0)
-        out << "<br>m_{ " << i+1 << "} := "
+        monomialDetailStream << "<br>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
         << currentList[j].ElementToString(false, false, theGlobalVariables, tempFormat) << " \\cdot v ";
     }
   }
@@ -1538,29 +1621,30 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
       Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
       if (outputReport!=0)
-      { out << "<hr>weight " << this->generatingWordsWeights[i].ElementToString();
+      { monomialDetailStream << "<hr>weight " << this->generatingWordsWeights[i].ElementToString();
         List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
         for (int i=0; i<currentList.size; i++)
         { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
-          out << "<br>mon " << i+1 << ": " << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat);
+          monomialDetailStream << "<br>monomial " << i+1 << ": "
+          << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat);
         }
-        out << "; Matrix of Shapovalov form associated to current weight level: <br> " << theBF.ElementToString(true, false)
-        << " corresonding inverted matrix:<br>";
+        monomialDetailStream << "; Matrix of Shapovalov form associated to current weight level: <br> "
+        << theBF.ElementToString(true, false) << " corresonding inverted matrix:<br>";
       }
       if (theBFinverted.NumRows>0)
       { if (outputReport!=0)
-          out << theBFinverted.ElementToString(true, false);
+          monomialDetailStream << theBFinverted.ElementToString(true, false);
       }
       else
       { if (outputReport!=0)
-          out << "<b>The matrix of the bilinear form is not invertible!</b>";
+          monomialDetailStream << "<b>The matrix of the bilinear form is not invertible!</b>";
         isBad=true;
       }
     }
   if (isBad)
   { if(outputReport!=0)
-      out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
-    *outputReport=out.str();
+      monomialDetailStream << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
+    *outputReport=out2.str()+monomialDetailStream.str();
     return false;
   }
   this->actionsSimpleGens.SetSize(this->theAlgebra.GetRank()*2);
@@ -1573,7 +1657,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     (theSimpleGenerator, simpleWeight, currentAction, theHWDualCoords, theGlobalVariables,
      theRingUnit, theRingZero);
     if (outputReport!=0)
-      out << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
+      out2 << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
     Matrix<CoefficientType> theMatrix;
     theMatrix.init(this->theGeneratingWordsNonReduced.size, this->theGeneratingWordsNonReduced.size);
     theMatrix.NullifyAll(theRingZero);
@@ -1591,7 +1675,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         }
       }
     if (outputReport!=0)
-      out << "<br>Matrix of elemenent in the m_i basis:<br>"
+      out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
       << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ElementToString(false, true));
 /*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
       for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
@@ -1603,7 +1687,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }*/
   }
   if (outputReport!=0)
-    *outputReport=out.str();
+    *outputReport= out2.str()+monomialDetailStream.str();
   return true;
 }
 
@@ -1663,8 +1747,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const root& theHWsimpleCoords,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { WeylGroup& theWeyl=this->owner->theOwner.theWeyl;
   root theHWsimpleCoordsTrue=theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
@@ -1711,8 +1795,8 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExper
 
 template <class CoefficientType>
 bool ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const root& theHWsimpleCoords,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   ElementUniversalEnvelopingOrdered<CoefficientType> output;
   output.Nullify(*this->owner);
@@ -2305,22 +2389,91 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
 }
 
 int ParserNode::EvaluateSplitIrrepOverLeviParabolic
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root theWeight, parSel;
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root theWeightFundCoords, parSel;
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
+  WeylGroup& theWeyl=theNode.ContextLieAlgebra->theWeyl;
   int theDim=theNode.owner->theHmm.theRange.GetRank();
-  if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
+  if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeightFundCoords, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (theWeight.size!=theDim || parSel.size!=theDim)
+  if (theWeightFundCoords.size!=theDim || parSel.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
-  out << "Not implemented yet. Your input weight: " << theWeight.ElementToString();
+  out << "Not implemented yet. Your input weight: " << theWeightFundCoords.ElementToString();
   out << "; your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
   ModuleSSalgebraNew<Rational> theMod;
-//  out << theMod.SplitOverLevi(
+  theMod.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theWeightFundCoords, theGlobalVariables, 1, 0, 0);
+  std::string report;
+  theMod.SplitOverLevi(& report, parSel, theGlobalVariables, 1, 0);
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
+}
+
+template<class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
+  (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero)
+{ ReflectionSubgroupWeylGroup subWeyl;
+  charSSAlgMod tempChar;
+  this->theChar.SplitCharOverLevi(Report, tempChar, parSelection, subWeyl, theGlobalVariables);
+}
+
+int ParserNode::EvaluateSplitCharOverLeviParabolic
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root parSel;
+  ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
+//  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
+  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (parSel.size!=theDim)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  std::stringstream out;
+  out << "Not implemented yet; your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  charSSAlgMod& theChar=charNode.theChar.GetElement();
+  std::string report;
+  charSSAlgMod tempChar;
+  ReflectionSubgroupWeylGroup subWeyl;
+  theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
+  out << report;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+int ParserNode::EvaluateMakeWeylFromParSel
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root parSel;
+  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  if (! theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (parSel.size!=theDim)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  std::stringstream out;
+  ReflectionSubgroupWeylGroup tempWeyl;
+  Selection tempSel;
+  tempSel=parSel;
+  tempWeyl.MakeParabolicFromSelectionSimpleRoots
+  (theNode.owner->theHmm.theRange.theWeyl, tempSel, theGlobalVariables, 1)
+  ;
+  tempWeyl.ComputeRootSubsystem();
+  out << tempWeyl.ElementToString(false);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
+void charSSAlgMod::SplitCharOverLevi
+(std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
+ GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, parabolicSel, theGlobalVariables,1);
+  outputWeylSub.ComputeRootSubsystem();
+  out << outputWeylSub.ElementToString(false);
+  if (Report!=0)
+    *Report=out.str();
 }

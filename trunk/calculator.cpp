@@ -1,5 +1,5 @@
 #include <iostream>
-#include "polyhedra.h"
+#include "vpf.h"
 #ifndef WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 #endif
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=100;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=50;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;
@@ -456,13 +456,13 @@ int main(int argc, char **argv)
   std::cout << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
   std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
 	std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.h?view=markup\"> Vector partition c++(1 out of 4 files (header file))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf.h?view=markup\"> Vector partition c++(1 out of 4 files (header file))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/polyhedra.cpp?view=markup\"> Vector partition c++(2 out of 4 files (.cpp file that has passed minimal testing))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf9.cpp?view=markup\"> Vector partition c++(2 out of 4 files (.cpp))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/custom_code_here.cpp?view=markup\"> Vector partition c++(3 out of 4 files (.cpp file for current development))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf8.cpp?view=markup\"> Vector partition c++(3 out of 4 files (.cpp))</a>\n";
   std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/Experimental_Code.cpp?view=markup\"> Vector partition c++(4 out of 4 files (.cpp file for current development))</a>\n";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf7.cpp?view=markup\"> Vector partition c++(4 out of 4 files (.cpp))</a>\n";
   std::cout << " <br>\n";
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Calculator interface c++ (1 out of 2 files)</a>\n";
   std::cout << " <br>\n";

@@ -155,6 +155,7 @@ class CompleX;
 class RationalFunction;
 struct CGI;
 class charSSAlgMod;
+class ReflectionSubgroupWeylGroup;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -8356,6 +8357,7 @@ public:
   HashedList<root> RootSystem;
   roots RootsOfBorel;
   static bool flagAnErrorHasOcurredTimeToPanic;
+//  void MakeFromParSel(root& parSel, WeylGroup& input);
   void Assign(const WeylGroup& right);
   void ComputeRho(bool Recompute);
   void ComputeDebugString();
@@ -8587,18 +8589,36 @@ public:
   HashedList<root> RootSubsystem;
   roots RootsOfBorel;
   std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(DebugString); }
-  void ElementToString(std::string& output);
+  void ComputeDebugString(){this->ElementToString(this->DebugString, true); }
+  void ElementToString(std::string& output, bool displayElements);
   std::string ElementToStringBruhatGraph();
   std::string ElementToStringCosetGraph();
   std::string ElementToStringFromLayersAndArrows
   (List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
   ;
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
+  std::string ElementToString(bool displayElements=true){std::string tempS; this->ElementToString(tempS, displayElements); return tempS;}
   root GetRho();
+    void RaiseToDominantWeight
+  (root& theWeight, int* sign=0, bool* stabilizerFound=0)
+  ;
+  bool FreudenthalEval
+  (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+   GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
+  ;
   void MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
+  void MakeParabolicFromSelectionSimpleRoots
+(WeylGroup& inputWeyl, root& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+  { Selection tempSel;
+    tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
+    this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
+  }
+  bool GetAlLDominantWeightsHWFDIM
+  (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+ ;
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
@@ -11276,6 +11296,10 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   void MakeFromWeight
   (const Vector<Rational>& inputWeightSimpleCoords, SemisimpleLieAlgebra* owner)
   ;
+  bool GetDominantCharacterWRTsubalgebra
+ (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
+  GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
+;
   bool FreudenthalEvalMe
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
   GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
@@ -11288,6 +11312,10 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights)
   ;
+  void SplitCharOverLevi
+(std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
+ GlobalVariables& theGlobalVariables)
+     ;
   void MakeTrivial(SemisimpleLieAlgebra* owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
@@ -11450,6 +11478,12 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateSplitIrrepOverLeviParabolic
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateSplitCharOverLeviParabolic
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateMakeWeylFromParSel
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateLittelmannPathFromWayPoints

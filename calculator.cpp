@@ -349,14 +349,7 @@ int main(int argc, char **argv)
   //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
-  theParser.outputFolderPath.append(inputPath);
-  theParser.outputFolderPath.append("../htdocs/tmp/");
-  theParser.outputFolderDisplayPath="/tmp/";
-  theParser.indicatorFileName=theParser.outputFolderPath + IPAdressCaller+ "indicator.html" ;
-  theParser.indicatorFileNameDisplay=theParser.outputFolderDisplayPath + IPAdressCaller+ "indicator.html" ;
-  theParser.indicatorReportFileName=theParser.outputFolderPath + IPAdressCaller+ "report.txt" ;
-  theParser.indicatorReportFileNameDisplay=theParser.outputFolderDisplayPath+IPAdressCaller + "report.txt" ;
-  theParser.userLabel=IPAdressCaller;
+  theParser.initDefaultFolderAndFileNames(inputPath, IPAdressCaller);
   theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
   { std::fstream tempFile;

@@ -8619,6 +8619,7 @@ public:
   (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;
+  bool IsDominantWeight(root& theWeight);
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
   bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
@@ -11823,6 +11824,7 @@ public:
   List<std::string> SystemCommands;
   std::string outputFolderPath;
   std::string outputFolderDisplayPath;
+  std::string outputDefaultFile;
   std::string indicatorFileName;
   std::string indicatorFileNameDisplay;
   std::string indicatorReportFileName;
@@ -11839,6 +11841,9 @@ public:
   std::string javaScriptDisplayingIndicator;
   std::string afterSystemCommands;
 //  SemisimpleLieAlgebra theLieAlgebra;
+  void initDefaultFolderAndFileNames
+  (const std::string& inputPath, const std::string& scrambledIP)
+  ;
   void InitJavaScriptDisplayIndicator();
   void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
   { this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables, theFormat);

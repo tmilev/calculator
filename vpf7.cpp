@@ -2477,3 +2477,139 @@ void charSSAlgMod::SplitCharOverLevi
   if (Report!=0)
     *Report=out.str();
 }
+
+bool ReflectionSubgroupWeylGroup::IsDominantWeight(root& theWeight)
+{ for (int i=0; i<this->simpleGenerators.size; i++)
+    if (this->AmbientWeyl.RootScalarCartanRoot(theWeight, this->simpleGenerators[i]).IsNegative())
+      return false;
+  return true;
+}
+
+bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
+(root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+//  double startTime=theGlobalVariables.GetElapsedSeconds();
+//  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+  root highestWeightTrue=highestWeightSimpleCoords;
+  roots basisEi;
+  basisEi.MakeEiBasis(this->AmbientWeyl.GetDim());
+  this->RaiseToDominantWeight(highestWeightTrue);
+  root highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
+    return false;
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoordinates().DoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoordinates().DoubleValue();
+  if (theTopHeightSimpleCoords<0)
+    theTopHeightSimpleCoords=0;
+  List<HashedList<root> > outputWeightsByHeight;
+  int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
+  int topHeightRootSystemPlusOne=topHeightRootSystem+1;
+  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+
+//  Rational UBDWeightsRat=this->EstimateNumDominantWeightsBelow(highestWeightTrue, theGlobalVariables);
+//  out << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
+//  std::cout << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
+//  if (!UBDWeightsRat.IsInteger())
+//  { out << " (~" << UBDWeightsRat.DoubleValue() << ")";
+//    std::cout << " (~" << UBDWeightsRat.DoubleValue() << ")";
+//  }
+//  out << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
+//  std::cout << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
+//  assert((int)UBDWeightsRat.DoubleValue()>=1);
+//  upperBoundDominantWeights=
+//  MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue()+1);
+  int finalHashSize=100;//MathRoutines::Maximum  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeightSimpleCoords+1));
+
+  for (int i=0; i<topHeightRootSystemPlusOne; i++)
+    outputWeightsByHeight[i].SetHashSizE(finalHashSize);
+  outputWeightsSimpleCoords.ClearTheObjects();
+  outputWeightsSimpleCoords.SetHashSizE(10000);
+  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  int numTotalWeightsFound=0;
+  int numPosRoots=this->RootsOfBorel.size;
+  root currentWeight;
+//  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
+  lowestUnexploredHeightDiff++)
+  { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
+    if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
+      break;
+    int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
+    HashedList<root>& currentHashes=outputWeightsByHeight[bufferIndexShift];
+    for (int lowest=0; lowest<currentHashes.size; lowest++)
+      for (int i=0; i<numPosRoots; i++)
+      { currentWeight=currentHashes[lowest];
+        currentWeight-=this->RootsOfBorel[i];
+        if (this->IsDominantWeight(currentWeight))
+        { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
+          currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
+          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+          { numTotalWeightsFound++;
+            outputWeightsByHeight[currentIndexShift].AdjustHashes();
+          }
+        }
+      }
+//    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+//    std::cout << " Size of current level: " << currentHashes.size;
+    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+//    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+//    startCycleTime=theGlobalVariables.GetElapsedSeconds();
+    outputWeightsSimpleCoords.AdjustHashes();
+    currentHashes.ClearTheObjects();
+//    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+  }
+  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
+  if (numTotalWeightsFound>=upperBoundDominantWeights)
+    out << "<hr>This message is generated either because the number of weights has "
+    << "exceeded the hard-coded RAM memory limits, or because "
+    << " a priori bound for the number of weights is WRONG. If the latter "
+    << " is the case, make sure to send an angry email to the author(s).";
+  outputDetails=out.str();
+  //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
+  return (numTotalWeightsFound<=upperBoundDominantWeights);
+}
+
+void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(root& theWeight, int* sign, bool* stabilizerFound)
+{ if (sign!=0)
+    *sign=1;
+  if (stabilizerFound!=0)
+    *stabilizerFound=false;
+  Rational theScalarProd;
+//  int theDim=this->AmbientWeyl.GetDim();
+  for (bool found = true; found; )
+  { found=false;
+    for (int i=0; i<this->simpleGenerators.size; i++)
+    { theScalarProd=this->AmbientWeyl.RootScalarCartanRoot( theWeight, this->simpleGenerators[i]);
+      if (theScalarProd.IsNegative())
+      { found=true;
+        theScalarProd*=2;
+        theScalarProd/=this->AmbientWeyl.RootScalarCartanRoot(this->simpleGenerators[i], this->simpleGenerators[i]);
+        theWeight[i]-=theScalarProd;
+        if (sign!=0)
+          *sign*=-1;
+      }
+      if (stabilizerFound!=0)
+        if (theScalarProd.IsEqualToZero())
+          *stabilizerFound=true;
+    }
+  }
+//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+
+}
+
+void Parser::initDefaultFolderAndFileNames
+  (const std::string& inputPath, const std::string& scrambledIP)
+{ this->outputFolderPath.append(inputPath);
+  this->outputFolderPath.append("../htdocs/tmp/");
+  this->outputFolderDisplayPath="/tmp/";
+  this->userLabel=scrambledIP;
+  this->indicatorFileName=this->outputFolderPath + this->userLabel+ "indicator.html" ;
+  this->indicatorFileNameDisplay=this->outputFolderDisplayPath + this->userLabel+ "indicator.html" ;
+  this->indicatorReportFileName=this->outputFolderPath + this->userLabel+ "report.txt" ;
+  this->indicatorReportFileNameDisplay=this->outputFolderDisplayPath+this->userLabel + "report.txt" ;
+}
+

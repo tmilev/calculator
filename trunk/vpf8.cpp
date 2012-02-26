@@ -4118,17 +4118,15 @@ int ParserNode::EvaluatePartialFractions
 void ParserNode::CreateDefaultLatexAndPDFfromString
 (std::string& theLatexFileString)
 { std::fstream outputFile;
-  std::string fileName;
   std::stringstream out;
-  fileName.append(this->owner->outputFolderPath);
-  fileName.append("output.tex");
-  CGI::OpenFileCreateIfNotPresent(outputFile, fileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile, this->owner->outputDefaultFile, false, true, false);
   outputFile << theLatexFileString;
   out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
   out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
   this->outputString=out.str();
   std::stringstream theCommand;
-  theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   " << fileName ;
+  theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   "
+  << this->owner->outputFolderDisplayPath;
   //std::cout << theCommand.str();
   this->owner->SystemCommands.AddOnTop(theCommand.str());
   this->ExpressionType=this->typeString;
@@ -4246,8 +4244,7 @@ int ParserNode::EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { partFractions& currentPF=theNode.thePFs.GetElement();
   roots toBePartitioned; int tempDim;
-  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument
-      (theArgumentList, toBePartitioned, tempDim))
+  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   std::stringstream out;
   PolynomialOutputFormat theFormat;
@@ -10406,7 +10403,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Not implemented yet. Might be hidden or changed in future versions. \
    </b>First argument gives the highest weight of the irrep. Second argument gives the parabolic selection.",
     "splitIrrepOverLeviParabolic((1,1),(0,1))",
-   'B', 2, true,
+   'B', 2, false,
     & ParserNode::EvaluateSplitIrrepOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10415,7 +10412,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
    </b>First argument is a representation character. Second argument gives the parabolic selection.",
     "splitCharOverLeviParabolic(char(1,1),(0,1))",
-   'B', 2, true,
+   'B', 2, false,
     & ParserNode::EvaluateSplitCharOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10425,7 +10422,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
    the argument.",
     "makeWeylFromParabolicSelection(0,0,1,0)",
-   'F', 4, true,
+   'F', 4, false,
     & ParserNode::EvaluateMakeWeylFromParSel
    );
 /*   this->AddOneFunctionToDictionaryNoFail

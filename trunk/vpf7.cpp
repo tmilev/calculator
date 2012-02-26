@@ -626,8 +626,6 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
 //  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   root highestWeightTrue=highestWeightSimpleCoords;
-  roots basisEi;
-  basisEi.MakeEiBasis(this->GetDim());
   this->RaiseToDominantWeight(highestWeightTrue);
   root highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
@@ -640,21 +638,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
-
-//  Rational UBDWeightsRat=this->EstimateNumDominantWeightsBelow(highestWeightTrue, theGlobalVariables);
-//  out << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
-//  std::cout << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
-//  if (!UBDWeightsRat.IsInteger())
-//  { out << " (~" << UBDWeightsRat.DoubleValue() << ")";
-//    std::cout << " (~" << UBDWeightsRat.DoubleValue() << ")";
-//  }
-//  out << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
-//  std::cout << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
-//  assert((int)UBDWeightsRat.DoubleValue()>=1);
-//  upperBoundDominantWeights=
-//  MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue()+1);
-  int finalHashSize=100;//MathRoutines::Maximum  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeightSimpleCoords+1));
-
+  int finalHashSize=100;
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
   outputWeightsSimpleCoords.ClearTheObjects();
@@ -734,9 +718,9 @@ void WeylGroup::RaiseToDominantWeight(root& theWeight, int* sign, bool* stabiliz
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
-bool ReflectionSubgroupWeylGroup::FreudenthalEval
-(root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
- List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
+(Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+ List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRootSubsystem();
@@ -744,13 +728,13 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEval
   EiBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   List<bool> Explored;
   root hwSimpleCoords=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
-  if (!this->GetAlLDominantWeightsHWFDIM
+  if (!this->GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
       (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
     << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
     << " formula can do your computation.";
-    errorMessage=errorLog.str();
+    outputDetails=errorLog.str();
     return false;
   }
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
@@ -786,7 +770,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEval
           << " that the Freudenthal algorithm implementation is "
           << " wrong (because the author of the implementation was dumb enough to try to write less code than what is "
           << " suggested by LiE).";
-          errorMessage=errorLog.str();
+          outputDetails=errorLog.str();
           return false;
         }
         currentAccum+=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, this->RootsOfBorel[j])
@@ -2471,9 +2455,25 @@ void charSSAlgMod::SplitCharOverLevi
 (std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
  GlobalVariables& theGlobalVariables)
 { std::stringstream out;
+  std::string tempS;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, parabolicSel, theGlobalVariables,1);
   outputWeylSub.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
+  root theHW;
+  HashedList<root> dominantWeightsPerMon;
+  List<Rational> theMults;
+  output.Nullify(0);
+  for (int i=0; i<this->size; i++)
+  { MonomialChar<Rational>& currentMon=this->TheObjects[i];
+    outputWeylSub.FreudenthalEvalIrrepIsWRTAmbientAlgebra
+      (currentMon.weightFundamentalCoords, dominantWeightsPerMon, theMults, tempS, theGlobalVariables, 1000)
+      ;
+//    outputWeylSub.GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
+  //  (this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords),
+    // dominantWeightsPerMon, 1000, tempS, theGlobalVariables);
+
+  }
+
   if (Report!=0)
     *Report=out.str();
 }
@@ -2485,7 +2485,7 @@ bool ReflectionSubgroupWeylGroup::IsDominantWeight(root& theWeight)
   return true;
 }
 
-bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
+bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
 (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
@@ -2493,7 +2493,8 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
 //  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   root highestWeightTrue=highestWeightSimpleCoords;
   roots basisEi;
-  basisEi.MakeEiBasis(this->AmbientWeyl.GetDim());
+  int theDim=this->AmbientWeyl.GetDim();
+  basisEi.MakeEiBasis(theDim);
   this->RaiseToDominantWeight(highestWeightTrue);
   root highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
@@ -2503,31 +2504,16 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
   if (theTopHeightSimpleCoords<0)
     theTopHeightSimpleCoords=0;
   List<HashedList<root> > outputWeightsByHeight;
-  int topHeightRootSystem=this->RootsOfBorel.LastObject()->SumCoordinates().NumShort;
+  int topHeightRootSystem=this->AmbientWeyl.RootsOfBorel.LastObject()->SumCoordinates().NumShort;
   int topHeightRootSystemPlusOne=topHeightRootSystem+1;
   outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
-
-//  Rational UBDWeightsRat=this->EstimateNumDominantWeightsBelow(highestWeightTrue, theGlobalVariables);
-//  out << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
-//  std::cout << "Computed a priori bound for the number of dominant weights " << UBDWeightsRat.ElementToString();
-//  if (!UBDWeightsRat.IsInteger())
-//  { out << " (~" << UBDWeightsRat.DoubleValue() << ")";
-//    std::cout << " (~" << UBDWeightsRat.DoubleValue() << ")";
-//  }
-//  out << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
-//  std::cout << " (the bound is used to preallocate RAM to minimize the memory allocation routines called).";
-//  assert((int)UBDWeightsRat.DoubleValue()>=1);
-//  upperBoundDominantWeights=
-//  MathRoutines::Minimum(upperBoundDominantWeights, (int)UBDWeightsRat.DoubleValue()+1);
-  int finalHashSize=100;//MathRoutines::Maximum  (100, (int)UBDWeightsRat.DoubleValue() /(theTopHeightSimpleCoords+1));
-
+  int finalHashSize=100;
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
   outputWeightsSimpleCoords.ClearTheObjects();
-  outputWeightsSimpleCoords.SetHashSizE(10000);
   outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
   int numTotalWeightsFound=0;
-  int numPosRoots=this->RootsOfBorel.size;
+  int numPosRoots=this->AmbientWeyl.RootsOfBorel.size;
   root currentWeight;
 //  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
@@ -2540,9 +2526,9 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
     for (int lowest=0; lowest<currentHashes.size; lowest++)
       for (int i=0; i<numPosRoots; i++)
       { currentWeight=currentHashes[lowest];
-        currentWeight-=this->RootsOfBorel[i];
+        currentWeight-=this->AmbientWeyl.RootsOfBorel[i];
         if (this->IsDominantWeight(currentWeight))
-        { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
+        { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoordinates().NumShort;
           currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
           if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
           { numTotalWeightsFound++;

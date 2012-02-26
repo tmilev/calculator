@@ -366,11 +366,21 @@ public:
   static int BinomialCoefficientMultivariate(int N, List<int>& theChoices);
   template <class Element>
   static void RaiseToPower(Element& theElement, int thePower, const Element& theRingUnit);
-  inline static int Maximum(int a, int b){  if (a>b) return a; else return b; }
+  inline static int Maximum(int a, int b)
+  { if (a>b)
+      return a;
+    else
+      return b;
+  }
   template <typename T>
   inline static void swap(T& a, T& b) { T temp; temp=a; a=b; b=temp; }
   template <class Element>
-  inline static Element Minimum(const Element& a, const Element& b){ if (a>b) return b; else return a; }
+  inline static Element Minimum(const Element& a, const Element& b)
+  { if (a>b)
+      return b;
+    else
+      return a;
+  }
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input)
   { if (!input.ElementToStringNeedsBracketsForMultiplication())
@@ -1091,7 +1101,6 @@ std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat)
 }
 
 template <typename Element>
-
 class Matrix: public MatrixElementaryLooseMemoryFit<Element>
 { friend std::iostream& operator<< <Element>(std::iostream& output, const Matrix<Element>& theMat);
 //  friend std::iostream& operator>> <Element>(std::iostream& input, Matrix<Element>& theMat);
@@ -8598,13 +8607,13 @@ public:
   ;
   std::string ElementToString(bool displayElements=true){std::string tempS; this->ElementToString(tempS, displayElements); return tempS;}
   root GetRho();
-    void RaiseToDominantWeight
+  void RaiseToDominantWeight
   (root& theWeight, int* sign=0, bool* stabilizerFound=0)
   ;
-  bool FreudenthalEval
-  (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
-   GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
+  bool FreudenthalEvalIrrepIsWRTAmbientAlgebra
+(Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+ List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
+ GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
   void MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
@@ -8615,7 +8624,7 @@ public:
     tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
     this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
   }
-  bool GetAlLDominantWeightsHWFDIM
+  bool GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
   (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;

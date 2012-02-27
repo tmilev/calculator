@@ -737,6 +737,10 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
     outputDetails=errorLog.str();
     return false;
   }
+  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "Dominant weights wrt. levi part: ";
+  for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
+    std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
+
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   root currentWeight, currentDominantRepresentative;
@@ -777,9 +781,10 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
         *outputMultsSimpleCoords[theIndex];
       }
     currentAccum*=2;
-    currentAccum/= hwPlusRhoSquared-
-    this->AmbientWeyl.RootScalarCartanRoot
+    Rational tempDen= hwPlusRhoSquared- this->AmbientWeyl.RootScalarCartanRoot
     (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho);
+    assert(tempDen!=0);
+    currentAccum/=tempDen;
 //    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
  //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
   //  .ElementToString()
@@ -790,7 +795,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
     theGlobalVariables.MakeStatusReport(out.str());
 //    std::cout
 //    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
-    theGlobalVariables.MakeStatusReport(out.str());
+ //   theGlobalVariables.MakeStatusReport(out.str());
 //    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
 //    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
 //    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
@@ -2463,17 +2468,20 @@ void charSSAlgMod::SplitCharOverLevi
   HashedList<root> dominantWeightsPerMon;
   List<Rational> theMults;
   output.Nullify(0);
+  MonomialChar<Rational> tempMon;
   for (int i=0; i<this->size; i++)
   { MonomialChar<Rational>& currentMon=this->TheObjects[i];
     outputWeylSub.FreudenthalEvalIrrepIsWRTAmbientAlgebra
       (currentMon.weightFundamentalCoords, dominantWeightsPerMon, theMults, tempS, theGlobalVariables, 1000)
       ;
-//    outputWeylSub.GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
-  //  (this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords),
-    // dominantWeightsPerMon, 1000, tempS, theGlobalVariables);
-
+    for (int j=0; j<dominantWeightsPerMon.size; j++)
+    { tempMon.weightFundamentalCoords=
+      this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple(dominantWeightsPerMon[j]);
+      tempMon.Coefficient=theMults[j]*currentMon.Coefficient;
+    }
+    output+=tempMon;
   }
-
+  out << "<hr>"  << "The split character is: " << output.ElementToString("V", "\\omega", false);
   if (Report!=0)
     *Report=out.str();
 }
@@ -2514,7 +2522,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
   outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
   int numTotalWeightsFound=0;
   int numPosRoots=this->AmbientWeyl.RootsOfBorel.size;
-  root currentWeight;
+  root currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
 //  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
   for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
   lowestUnexploredHeightDiff++)
@@ -2528,11 +2536,16 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
       { currentWeight=currentHashes[lowest];
         currentWeight-=this->AmbientWeyl.RootsOfBorel[i];
         if (this->IsDominantWeight(currentWeight))
-        { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoordinates().NumShort;
-          currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
-          { numTotalWeightsFound++;
-            outputWeightsByHeight[currentIndexShift].AdjustHashes();
+        { currentWeightRaisedToDominantWRTAmbientAlgebra=currentWeight;
+          this->AmbientWeyl.RaiseToDominantWeight(currentWeightRaisedToDominantWRTAmbientAlgebra);
+          currentWeightRaisedToDominantWRTAmbientAlgebra-=highestWeightTrue;
+          if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero())
+          { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoordinates().NumShort;
+            currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
+            if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+            { numTotalWeightsFound++;
+              outputWeightsByHeight[currentIndexShift].AdjustHashes();
+            }
           }
         }
       }

@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 #endif
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=500000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
   std::string inputString, inputPath;
   std::string tempS;
 	std::cin >> inputString;

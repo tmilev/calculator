@@ -10403,7 +10403,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Not implemented yet. Might be hidden or changed in future versions. \
    </b>First argument gives the highest weight of the irrep. Second argument gives the parabolic selection.",
     "splitIrrepOverLeviParabolic((1,1),(0,1))",
-   'B', 2, true,
+   'B', 2, false,
     & ParserNode::EvaluateSplitIrrepOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10412,7 +10412,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
    </b>First argument is a representation character. Second argument gives the parabolic selection.",
     "splitCharOverLeviParabolic(char(1,1),(0,1))",
-   'B', 2, true,
+   'B', 2, false,
     & ParserNode::EvaluateSplitCharOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10422,7 +10422,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
    the argument.",
     "makeWeylFromParabolicSelection(0,0,1,0)",
-   'F', 4, true,
+   'F', 4, false,
     & ParserNode::EvaluateMakeWeylFromParSel
    );
 /*   this->AddOneFunctionToDictionaryNoFail

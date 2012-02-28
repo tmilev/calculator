@@ -19288,7 +19288,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   }
 }
 
-bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements)
+bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(const root& input, roots& outputOrbit, int UpperLimitNumElements)
 { HashedList<root> theOrbit;
   bool result = true;
   theOrbit.ClearTheObjects();

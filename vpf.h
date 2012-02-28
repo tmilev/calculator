@@ -8454,8 +8454,8 @@ public:
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
   ;
   bool FreudenthalEval
-  (root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
-   List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+  (Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+   List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
    GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
   void GetWeylChamber
@@ -8610,7 +8610,7 @@ public:
   void RaiseToDominantWeight
   (root& theWeight, int* sign=0, bool* stabilizerFound=0)
   ;
-  bool FreudenthalEvalIrrepIsWRTAmbientAlgebra
+  bool FreudenthalEvalIrrepIsWRTLeviPart
 (Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
  List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
@@ -8628,10 +8628,14 @@ public:
   (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;
+  bool GetAlLDominantWeightsHWFDIM
+  (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+ ;
   bool IsDominantWeight(root& theWeight);
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
-  bool GenerateOrbitReturnFalseIfTruncated(root& input, roots& outputOrbit, int UpperLimitNumElements);
+  bool GenerateOrbitReturnFalseIfTruncated(const root& input, roots& outputOrbit, int UpperLimitNumElements);
   void ComputeSubGroupFromGeneratingReflections(roots& inputGenerators, rootsCollection& inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, root& theRoot);
@@ -11296,6 +11300,9 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   { this->ClearTheObjects();
     this->theBoss=owner;
   }
+  bool IsEqualToZero()
+  { return this->size==0;
+  }
   charSSAlgMod()
   { this->theBoss=0;
   }
@@ -11322,7 +11329,7 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights)
   ;
-  void SplitCharOverLevi
+  bool SplitCharOverLevi
 (std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
  GlobalVariables& theGlobalVariables)
      ;

@@ -369,7 +369,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
 (MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner, charSSAlgMod& output,
  GlobalVariables& theGlobalVariables)
 { std::stringstream errorLog;
-  std::string tempS, tempS2;
+  std::string tempS;
   output.Nullify(&owner);
   Rational finalCoefficient;
   finalCoefficient=this->Coefficient*other.Coefficient;
@@ -390,7 +390,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   HashedList<root> weightsLeftSimpleCoords;
   List<Rational> multsLeft;
   if (!theWeyl.FreudenthalEval
-      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, tempS2, theGlobalVariables, 1000000))
+      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, theGlobalVariables, 1000000))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -718,7 +718,7 @@ void WeylGroup::RaiseToDominantWeight(root& theWeight, int* sign, bool* stabiliz
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
-bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
+bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 (Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
  List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
@@ -728,7 +728,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
   EiBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   List<bool> Explored;
   root hwSimpleCoords=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
-  if (!this->GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
+  if (!this->GetAlLDominantWeightsHWFDIM
       (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
@@ -740,19 +740,19 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
   std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "Dominant weights wrt. levi part: ";
   for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
     std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
-
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   root currentWeight, currentDominantRepresentative;
   root Rho=this->GetRho();
   Rational hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoords+Rho, hwSimpleCoords+Rho);
-  outputMultsSimpleCoords[0]=1;
   Explored[0]=true;
 //  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
-  for (int k=1; k< outputDominantWeightsSimpleCoords.size; k++)
-  { Explored[k]=true;
+  for (int k=0; k< outputDominantWeightsSimpleCoords.size; k++)
+  { if (this->IsDominantWeight(outputDominantWeightsSimpleCoords[k]))
+      outputMultsSimpleCoords[k]=1;
+    Explored[k]=true;
     Rational& currentAccum=outputMultsSimpleCoords[k];
     currentAccum=0;
     for (int j=0; j<this->RootsOfBorel.size; j++)
@@ -770,8 +770,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
 //        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
         if (!Explored[theIndex])
         { std::stringstream errorLog;
-          errorLog << "This is an internal error check. If you see it, that means "
-          << " that the Freudenthal algorithm implementation is "
+          errorLog << "This is an internal error check. If you see it, that means " << " that the Freudenthal algorithm implementation is "
           << " wrong (because the author of the implementation was dumb enough to try to write less code than what is "
           << " suggested by LiE).";
           outputDetails=errorLog.str();
@@ -779,6 +778,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
         }
         currentAccum+=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, this->RootsOfBorel[j])
         *outputMultsSimpleCoords[theIndex];
+        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
+        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
     Rational tempDen= hwPlusRhoSquared- this->AmbientWeyl.RootScalarCartanRoot
@@ -805,8 +806,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTAmbientAlgebra
 }
 
 bool WeylGroup::FreudenthalEval
-(root& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
- List<Rational>& outputMultsSimpleCoords, std::string& errorMessage, std::string& outputDetails,
+(Vector<Rational>& inputHWfundamentalCoords, HashedList<root>& outputDominantWeightsSimpleCoords,
+ List<Rational>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRho(true);
@@ -820,7 +821,7 @@ bool WeylGroup::FreudenthalEval
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
     << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
     << " formula can do your computation.";
-    errorMessage=errorLog.str();
+    outputDetails=errorLog.str();
     return false;
   }
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
@@ -856,7 +857,7 @@ bool WeylGroup::FreudenthalEval
           << " that the Freudenthal algorithm implementation is "
           << " wrong (because the author of the implementation was dumb enough to try to write less code than what is "
           << " suggested by LiE).";
-          errorMessage=errorLog.str();
+          outputDetails=errorLog.str();
           return false;
         }
         currentAccum+=this->RootScalarCartanRoot(currentWeight, this->RootsOfBorel[j])
@@ -913,14 +914,14 @@ bool charSSAlgMod::FreudenthalEvalMe
   List<Rational> currentMults;
   HashedList<root> currentWeights;
   std::stringstream localErrors, localDetails;
-  std::string localError, localDetail;
+  std::string localDetail;
   MonomialChar<Rational> tempMon;
   for (int i=0; i<this->size; i++)
   { currentWeightFundCoords=this->TheObjects[i].weightFundamentalCoords;
     if (!this->theBoss->theWeyl.FreudenthalEval
-    (currentWeightFundCoords, currentWeights, currentMults, localError, localDetail, theGlobalVariables, upperBoundNumDominantWeights))
-    { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localError
-      << "<br> Further computation detail: " << localDetails.str() << "<hr>Failing computation details: " << localDetail;
+    (currentWeightFundCoords, currentWeights, currentMults, localDetail, theGlobalVariables, upperBoundNumDominantWeights))
+    { localErrors << "Encountered error while evaluating freudenthal formula. Error details: " << localDetail
+      << "<br> Further computation detail: " << localDetails.str();
       outputDetails=localErrors.str();
       return false;
     }
@@ -936,8 +937,7 @@ bool charSSAlgMod::FreudenthalEvalMe
   return true;
 }
 
-int ParserNode::EvaluateFreudenthal
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateFreudenthal(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   out << "Freudenthal formula: ";
   charSSAlgMod& ch=theNode.owner->TheObjects[theArgumentList[0]].theChar.GetElement();
@@ -953,8 +953,7 @@ int ParserNode::EvaluateFreudenthal
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateHWV
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   out << "Function not programmed yet. ";
   theNode.outputString=out.str();
@@ -978,8 +977,7 @@ bool partFractions::ArgumentsAllowed
       out << "Error: the Q_{>0} span of vectors you gave as input contains zero (as it contains the vector "
       << tempCone.Vertices[i].ElementToString() << " as well as its opposite vector "
       << (-tempCone.Vertices[i]).ElementToString()
-      << "), hence the vector partition function is "
-      << "can only take values infinity or zero. ";
+      << "), hence the vector partition function is " << "can only take values infinity or zero. ";
       outputWhatWentWrong=out.str();
       return false;
     }
@@ -2456,34 +2454,81 @@ int ParserNode::EvaluateMakeWeylFromParSel
   return theNode.errorNoError;
 }
 
-void charSSAlgMod::SplitCharOverLevi
+bool charSSAlgMod::SplitCharOverLevi
 (std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
  GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
+  root invertedSel;
+  invertedSel.MakeZero(parabolicSel.size);
+  for (int i=0; i<parabolicSel.size; i++)
+    if (parabolicSel[i].IsEqualToZero())
+      invertedSel[i]=1;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, parabolicSel, theGlobalVariables,1);
   outputWeylSub.ComputeRootSubsystem();
+  ReflectionSubgroupWeylGroup complementGroup;
+  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, invertedSel, theGlobalVariables,1);
+  complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
-  root theHW;
-  HashedList<root> dominantWeightsPerMon;
-  List<Rational> theMults;
+  out << "<br>Complement subgroup: " << complementGroup.ElementToString(false);
+  charSSAlgMod dominantCharAmbient, remainingCharDominantLevi;
+  this->FreudenthalEvalMe(dominantCharAmbient, tempS, theGlobalVariables, 10000);
+  remainingCharDominantLevi.Nullify(0);
+  roots orbitComplementGroup;
+  MonomialChar<Rational> tempMon, localHighest;
+  for (int i=0; i<dominantCharAmbient.size; i++)
+    if(!complementGroup.GenerateOrbitReturnFalseIfTruncated
+       (this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
+       (dominantCharAmbient[i].weightFundamentalCoords), orbitComplementGroup, 10000))
+    { out << "failed to generate the complement-sub-Weyl-orbit of weight "
+      << this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
+      (dominantCharAmbient[i].weightFundamentalCoords).ElementToString();
+      if (Report!=0)
+        *Report=out.str();
+      return false;
+    } else
+      for (int j=0; j<orbitComplementGroup.size; j++)
+      { tempMon.Coefficient=dominantCharAmbient[i].Coefficient;
+        tempMon.weightFundamentalCoords=orbitComplementGroup[j];
+        remainingCharDominantLevi+=tempMon;
+      }
   output.Nullify(0);
-  MonomialChar<Rational> tempMon;
-  for (int i=0; i<this->size; i++)
-  { MonomialChar<Rational>& currentMon=this->TheObjects[i];
-    outputWeylSub.FreudenthalEvalIrrepIsWRTAmbientAlgebra
-      (currentMon.weightFundamentalCoords, dominantWeightsPerMon, theMults, tempS, theGlobalVariables, 1000)
-      ;
-    for (int j=0; j<dominantWeightsPerMon.size; j++)
-    { tempMon.weightFundamentalCoords=
-      this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple(dominantWeightsPerMon[j]);
-      tempMon.Coefficient=theMults[j]*currentMon.Coefficient;
+  HashedList<root> tempRoots;
+  List<Rational> tempMults;
+  out << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+  while(!remainingCharDominantLevi.IsEqualToZero())
+  { localHighest=*remainingCharDominantLevi.LastObject();
+    for (bool Found=true; Found; )
+    { Found=false;
+      for (int i=0; i<outputWeylSub.simpleGenerators.size; i++)
+      { tempMon=localHighest;
+        tempMon.weightFundamentalCoords+=this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple
+        (outputWeylSub.simpleGenerators[i]);
+        if (remainingCharDominantLevi.ContainsObjectHash(tempMon))
+        { localHighest=tempMon;
+          Found=true;
+        }
+      }
     }
-    output+=tempMon;
+    localHighest=remainingCharDominantLevi[remainingCharDominantLevi.IndexOfObjectHash(localHighest)];
+    output+=localHighest;
+    if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
+        (localHighest.weightFundamentalCoords, tempRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+    for (int i=0; i<tempRoots.size; i++)
+    { tempMon.weightFundamentalCoords=this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple(tempRoots[i]);
+      tempMon.Coefficient=tempMults[i]* localHighest.Coefficient;
+      remainingCharDominantLevi-=tempMon;
+    }
   }
   out << "<hr>"  << "The split character is: " << output.ElementToString("V", "\\omega", false);
   if (Report!=0)
     *Report=out.str();
+  return true;
 }
 
 bool ReflectionSubgroupWeylGroup::IsDominantWeight(root& theWeight)
@@ -2572,6 +2617,80 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
   return (numTotalWeightsFound<=upperBoundDominantWeights);
 }
 
+bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
+(root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
+ int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
+{ std::stringstream out;
+  this->ComputeRootSubsystem();
+//  double startTime=theGlobalVariables.GetElapsedSeconds();
+//  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+  root highestWeightTrue=highestWeightSimpleCoords;
+  roots basisEi;
+  int theDim=this->AmbientWeyl.GetDim();
+  basisEi.MakeEiBasis(theDim);
+  this->RaiseToDominantWeight(highestWeightTrue);
+  root highestWeightFundCoords=this->AmbientWeyl.GetFundamentalCoordinatesFromSimple(highestWeightTrue);
+  if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
+    return false;
+  int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoordinates().DoubleValue()+1;
+//  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoordinates().DoubleValue();
+  if (theTopHeightSimpleCoords<0)
+    theTopHeightSimpleCoords=0;
+  List<HashedList<root> > outputWeightsByHeight;
+  int topHeightRootSystem=this->AmbientWeyl.RootsOfBorel.LastObject()->SumCoordinates().NumShort;
+  int topHeightRootSystemPlusOne=topHeightRootSystem+1;
+  outputWeightsByHeight.SetSize(topHeightRootSystemPlusOne);
+  int finalHashSize=100;
+  for (int i=0; i<topHeightRootSystemPlusOne; i++)
+    outputWeightsByHeight[i].SetHashSizE(finalHashSize);
+  outputWeightsSimpleCoords.ClearTheObjects();
+  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  int numTotalWeightsFound=0;
+  root currentWeight, currentWeightRaisedToDominant;
+//  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
+  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
+  lowestUnexploredHeightDiff++)
+  { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
+    if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
+      break;
+    int bufferIndexShift=lowestUnexploredHeightDiff%topHeightRootSystemPlusOne;
+    HashedList<root>& currentHashes=outputWeightsByHeight[bufferIndexShift];
+    for (int lowest=0; lowest<currentHashes.size; lowest++)
+      for (int i=0; i<this->RootsOfBorel.size; i++)
+      { currentWeight=currentHashes[lowest];
+        currentWeight-=this->RootsOfBorel[i];
+        if (this->IsDominantWeight(currentWeight))
+        { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
+          currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
+          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+          { numTotalWeightsFound++;
+            outputWeightsByHeight[currentIndexShift].AdjustHashes();
+          }
+        }
+      }
+//    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+//    std::cout << " Size of current level: " << currentHashes.size;
+    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+//    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+//    startCycleTime=theGlobalVariables.GetElapsedSeconds();
+    outputWeightsSimpleCoords.AdjustHashes();
+    currentHashes.ClearTheObjects();
+//    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
+//    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+  }
+  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
+  if (numTotalWeightsFound>=upperBoundDominantWeights)
+    out << "<hr>This message is generated either because the number of weights has "
+    << "exceeded the hard-coded RAM memory limits, or because "
+    << " a priori bound for the number of weights is WRONG. If the latter "
+    << " is the case, make sure to send an angry email to the author(s).";
+  outputDetails=out.str();
+  //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
+  return (numTotalWeightsFound<=upperBoundDominantWeights);
+}
+
 void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(root& theWeight, int* sign, bool* stabilizerFound)
 { if (sign!=0)
     *sign=1;
@@ -2582,12 +2701,10 @@ void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(root& theWeight, int* si
   for (bool found = true; found; )
   { found=false;
     for (int i=0; i<this->simpleGenerators.size; i++)
-    { theScalarProd=this->AmbientWeyl.RootScalarCartanRoot( theWeight, this->simpleGenerators[i]);
+    { theScalarProd=this->AmbientWeyl.RootScalarCartanRoot(theWeight, this->simpleGenerators[i]);
       if (theScalarProd.IsNegative())
       { found=true;
-        theScalarProd*=2;
-        theScalarProd/=this->AmbientWeyl.RootScalarCartanRoot(this->simpleGenerators[i], this->simpleGenerators[i]);
-        theWeight[i]-=theScalarProd;
+        this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[i], theWeight, false, theWeight);
         if (sign!=0)
           *sign*=-1;
       }

@@ -53,6 +53,7 @@ GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->ProgressReportDepth=-1;
   this->MaxAllowedComputationTimeInSeconds=1000000;
+  this->callSystem=0;
 }
 
 int ParallelComputing::GlobalPointerCounter=0;

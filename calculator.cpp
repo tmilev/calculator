@@ -98,6 +98,10 @@ void makeReport(IndicatorWindowVariables& input)
   theFile.close();
 }
 
+void CallSystemWrapper(const std::string& theCommand)
+{ system(theCommand.c_str());
+}
+
 #define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at line " << __LINE__ << ": " << GetElapsedTimeInSeconds()
 
 int main(int argc, char **argv)
@@ -109,7 +113,7 @@ int main(int argc, char **argv)
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
-  std::string inputString, inputPath;
+  std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
   ComputationComplete=false;
@@ -128,7 +132,7 @@ int main(int argc, char **argv)
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-	getPath(argv[0], inputPath);
+	getPath(argv[0], inputPatH);
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
@@ -353,7 +357,7 @@ int main(int argc, char **argv)
   //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
-  theParser.initDefaultFolderAndFileNames(inputPath, "vpf/", IPAdressCaller);
+  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
   theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
   { std::fstream tempFile;
@@ -498,61 +502,9 @@ int main(int argc, char **argv)
 //  theParser.theLieAlgebra.ComputeDebugString();
 //  std::cout << "<br>details:<br> " << theParser.theLieAlgebra.ElementToStringLieBracketPairing();
   std::cout << "</div>";
+  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
 
-  std::stringstream tempStream;
-  inputPath.append("../htdocs/tmp/");
-  std::stringstream tempStream2;
-  tempStream2 << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "/";
-  inputPath.append(tempStream2.str());
-  tempStream << theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "table";
-  std::string fileNameLieBracketNoEnding=tempStream.str();
-  std::string fileNameLieBracketFullPathNoEnding=inputPath;
-  fileNameLieBracketFullPathNoEnding.append(fileNameLieBracketNoEnding);
-  std::cout << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " <<  theParser.DefaultWeylLetter << theParser.DefaultWeylRank << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(theParser.DefaultWeylLetter, theParser.DefaultWeylRank) << ").</b><br>";
-  std::cout << "Notation formats: <button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";
-  std::cout << "<button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"hideItem('ChevalleyWeylBasis'); showItem('ChevalleyWeylBasisRootFormat'); hideItem('ChevalleyWeylBasisEpsFormat'); \">Simple basis format</button> ";
-  std::cout << "<button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"hideItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); showItem('ChevalleyWeylBasisEpsFormat'); \">Epsilon format</button> ";
-  std::cout << "<div id=\"ChevalleyWeylBasis\" ><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
-  << "/" << fileNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
-  << tempStream2.str() << fileNameLieBracketNoEnding << ".png\"></img></div>";
-  std::cout << "<div id=\"ChevalleyWeylBasisRootFormat\" style=\"display: none\"><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
-  << "/" << fileNameLieBracketNoEnding << "RootFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
-  << tempStream2.str() << fileNameLieBracketNoEnding << "RootFormat.png\"></img></div>";
-  std::cout << "<div id=\"ChevalleyWeylBasisEpsFormat\" style=\"display: none\"><a href=\"/tmp/"<< theParser.DefaultWeylLetter << theParser.DefaultWeylRank
-  << "/" << fileNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\"/tmp/"
-  << tempStream2.str() << fileNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
-  std::string latexCommandTemp;
-  if (!CGI::FileExists(fileNameLieBracketFullPathNoEnding+".png") ||
-      !CGI::FileExists(fileNameLieBracketFullPathNoEnding+"RootFormat.png" ) ||
-      !CGI::FileExists(fileNameLieBracketFullPathNoEnding+"EpsFormat.png")
-      )
-  { std::cout << "<br>the file: " << fileNameLieBracketNoEnding << ".png" << " was just created<br>";
-    std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
-    std::stringstream tempCommand;
-    tempCommand << "mkdir " << inputPath;
-    tempS=tempCommand.str();
-    system(tempS.c_str());
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile1, fileNameLieBracketFullPathNoEnding+".tex", false, true, false);
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile2, fileNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile3, fileNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
-    PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    theParser.theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +".tex");
-    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"RootFormat.tex");
-    theParser.SystemCommands.AddOnTop("latex  -output-directory=" + inputPath + " " + inputPath + fileNameLieBracketNoEnding +"EpsFormat.tex");
-    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + ".dvi -o " + fileNameLieBracketFullPathNoEnding + ".png -T tight");
-    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
-    theParser.SystemCommands.AddOnTop("dvipng " + fileNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + fileNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
-  }
+  std::cout << theParser.CreateBasicStructureConstantInfoIfItDoesntExist(theGlobalVariables);
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
   std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"

@@ -2753,6 +2753,77 @@ void Parser::initDefaultFolderAndFileNames
   this->indicatorReportFileNameDisplay=this->DisplayPathOutputFolder+"report"+this->userLabel + ".txt" ;
 }
 
+std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
+(GlobalVariables& theGlobalVariables)
+{ std::stringstream stream1, stream2, stream3;
+  std::stringstream out;
+
+  stream1 << this->PhysicalPathOutputFolder << this->DefaultWeylLetter << this->DefaultWeylRank << "/";
+  std::string PhysicalPathCurrentType=stream1.str();
+
+  stream2 << this->DisplayPathOutputFolder << this->DefaultWeylLetter << this->DefaultWeylRank << "/" << this->DefaultWeylLetter << this->DefaultWeylRank << "table";
+  std::string DisplayNameLieBracketNoEnding= stream2.str();
+
+  stream3 << PhysicalPathCurrentType << this->DefaultWeylLetter << this->DefaultWeylRank << "table";
+  std::string PhysicalNameLieBracketFullPathNoEnding=stream3.str();
+
+  out << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " << this->DefaultWeylLetter << this->DefaultWeylRank
+  << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(this->DefaultWeylLetter, this->DefaultWeylRank) << ").</b><br>";
+  out << "Notation formats: <button " << CGI::GetStyleButtonLikeHtml()
+  << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); "
+  << "hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";
+  out << "<button " << CGI::GetStyleButtonLikeHtml()
+  << " onclick=\"hideItem('ChevalleyWeylBasis'); showItem('ChevalleyWeylBasisRootFormat'); "
+  << "hideItem('ChevalleyWeylBasisEpsFormat'); \">Simple basis format</button> ";
+  out << "<button " << CGI::GetStyleButtonLikeHtml()
+  << " onclick=\"hideItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); "
+  << "showItem('ChevalleyWeylBasisEpsFormat'); \">Epsilon format</button> ";
+
+  out << "<div id=\"ChevalleyWeylBasis\" ><a href=\""
+  << DisplayNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\""
+  << DisplayNameLieBracketNoEnding << ".png\"></img></div>";
+
+  out << "<div id=\"ChevalleyWeylBasisRootFormat\" style=\"display: none\"><a href=\""
+  << DisplayNameLieBracketNoEnding << "RootFormat.tex\">Latex source</a>. <br>\n<img src=\""
+  << DisplayNameLieBracketNoEnding << "RootFormat.png\"></img></div>";
+
+  out << "<div id=\"ChevalleyWeylBasisEpsFormat\" style=\"display: none\"><a href=\""
+  << DisplayNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\""
+  << DisplayNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
+
+  std::string latexCommandTemp;
+  if (!CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+".png") ||
+      !CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+"RootFormat.png" ) ||
+      !CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.png")
+      )
+  { out << "<br>the file: " << PhysicalNameLieBracketFullPathNoEnding << ".png" << " was just created<br>";
+    std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
+    std::stringstream tempCommand;
+    tempCommand << "mkdir " << PhysicalPathCurrentType;
+    std::string tempS;
+    tempS=tempCommand.str();
+    system(tempS.c_str());
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile1, PhysicalNameLieBracketFullPathNoEnding+".tex", false, true, false);
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile2, PhysicalNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
+    CGI::OpenFileCreateIfNotPresent(lieBracketFile3, PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
+    PolynomialOutputFormat tempFormat;
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
+    lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +".tex");
+    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +"RootFormat.tex");
+    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +"EpsFormat.tex");
+    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + ".dvi -o " + PhysicalNameLieBracketFullPathNoEnding + ".png -T tight");
+    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + PhysicalNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
+    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + PhysicalNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
+  }
+  return out.str();
+}
+
 bool ReflectionSubgroupWeylGroup::DrawContour
 (const root& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
  int UpperBoundVertices)

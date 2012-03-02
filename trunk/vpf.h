@@ -12008,6 +12008,9 @@ public:
     this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
     return true;
   }
+  std::string CreateBasicStructureConstantInfoIfItDoesntExist
+  (GlobalVariables& theGlobalVariables)
+  ;
   bool ReplaceOneChildOperationOffset
   (int child1Offset, int OperationOffset, int StackDecreaseNotCountingNewExpression, int theToken)
   { int lastIndexInNodeIndex=this->TokenStack.size-1;
@@ -12124,6 +12127,7 @@ class GlobalVariables
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
   double (*getElapsedTimePrivate)();
+  void (*callSystem)(const std::string& theSystemCommand);
 public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
@@ -12310,6 +12314,13 @@ public:
   inline void FeedIndicatorWindow(IndicatorWindowVariables& input)
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(input);
+  }
+  void SetCallSystem(void (*theSystemCall)(const std::string&))
+  { this->callSystem=theSystemCall;
+  }
+  void System(const std::string& systemCommand)
+  { if (this->callSystem!=0)
+      this->callSystem(systemCommand);
   }
   void ClearIndicatorVars()
   { this->ProgressReportDepth=0;

@@ -15810,10 +15810,14 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
     this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
 }
 
-void rootSubalgebras::ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+void rootSubalgebras::ElementToString
+(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords,
+ std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out; std::string tempS;
   if (useHtml)
-    out << " <a href=\"/cgi-bin/calculator\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    out << " <a href=\""
+    << DisplayNameCalculator <<
+    "\">Calculator main page</a><br><a href=\"./tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);
@@ -15969,7 +15973,9 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
   outputFooter.append("\\end{tabular}");
 }
 
-void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+void coneRelations::ElementToString
+(std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+ std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out;
   std::string tempS, header, footer;
   roots tempAlphas, tempBetas;
@@ -16019,7 +16025,8 @@ void coneRelations::ElementToString(std::string& output, rootSubalgebras& owners
   if (useLatex)
     out << footer;
   if (this->flagIncludeSubalgebraDataInDebugString)
-  { owners.ElementToString(tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer, theGlobalVariables);
+  { owners.ElementToString
+    (tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer, theGlobalVariables, DisplayNameCalculator);
     out << "\n\n\\newpage" << tempS;
   }
   output=out.str();
@@ -20971,7 +20978,9 @@ void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& the
   return;
 }
 
-void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer)
+void SltwoSubalgebras::ElementToHtml
+(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer,
+ std::string& DisplayNameCalculator)
 { std::string physicalPathSAs;
   std::string htmlPathServerSAs;
   physicalPathSAs= physicalPath;
@@ -20998,7 +21007,7 @@ void SltwoSubalgebras::ElementToHtml(GlobalVariables& theGlobalVariables, WeylGr
   std::string fileName;
   std::fstream theFile, fileFlas;
   outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a>"
-  << "<br> <a href=\"/cgi-bin/calculator\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
+  << "<br> <a href=\""<< DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out << tempS;
@@ -28246,24 +28255,10 @@ int ParserNode::EvaluateSlTwoInSlN
 //    std::cout<< thePartition.TheObjects[i] << ",";
   }
   slTwoInSlN theSl2;
-  theNode.ExpressionType=theNode.typeString;
-  std::fstream outputFile;
-  std::string fileName, fileDisplayNameNoEnding;
-  fileName.append(theNode.owner->outputFolderPath);
-  fileDisplayNameNoEnding+=theNode.owner->userLabel;
-  fileDisplayNameNoEnding+=("outputSl2");
-  fileName+=fileDisplayNameNoEnding;
-  CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
-  outputFile << "\\documentclass{article} \\begin{document}\n"
+  std::stringstream tempStream;
+  tempStream << "\\documentclass{article} \\begin{document}\n"
   << theSl2.initFromModuleDecomposition(thePartition, false, true) << "\n\\end{document}";
-  std::stringstream out;
-  out << "A latex/pdf file: <a href=\"/tmp/" << fileDisplayNameNoEnding << ".tex\"> " << fileDisplayNameNoEnding << ".tex</a>";
-  out << ", <a href=\"/tmp/" << fileDisplayNameNoEnding << ".pdf\"> " << fileDisplayNameNoEnding << ".pdf</a>";
-  theNode.outputString=out.str();
-  std::stringstream theCommand;
-  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName << ".tex" ;
-  //std::cout << theCommand.str();
-  theNode.owner->SystemCommands.AddOnTop(theCommand.str());
+  theNode.CreateDefaultLatexAndPDFfromString(tempStream.str());
   return theNode.errorNoError;
 }
 

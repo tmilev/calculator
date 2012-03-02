@@ -105,6 +105,7 @@ int main(int argc, char **argv)
 #ifndef WIN32
   gettimeofday(&ComputationStartGlobal, NULL);
 #endif
+  theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
@@ -174,7 +175,7 @@ int main(int argc, char **argv)
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
 
-//  civilizedInput="splitCharOverLeviParabolic(char(1,0),(0,1))";
+//  civilizedInput="splitCharOverLeviParabolic(char(1,1),(0,1))";
 //  theParser.DefaultWeylLetter='B';
 //  theParser.DefaultWeylRank=2;
 //  civilizedInput="irreducibleRep(1,0)";
@@ -352,7 +353,7 @@ int main(int argc, char **argv)
   //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
-  theParser.initDefaultFolderAndFileNames(inputPath, IPAdressCaller);
+  theParser.initDefaultFolderAndFileNames(inputPath, "vpf/", IPAdressCaller);
   theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
   { std::fstream tempFile;
@@ -395,7 +396,7 @@ int main(int argc, char **argv)
   std::string beginMath = "<div class=\"math\" scale=\"50\">";
   std::string endMath = "</div>";
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
-  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"./calculator\">\n" ;
+  std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
   std::stringstream tempStream4;
   static_html4(tempStream4);
   std:: cout << tempStream4.str();

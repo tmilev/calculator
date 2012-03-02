@@ -4116,17 +4116,19 @@ int ParserNode::EvaluatePartialFractions
 }
 
 void ParserNode::CreateDefaultLatexAndPDFfromString
-(std::string& theLatexFileString)
+  (const std::string& theLatexFileString)
 { std::fstream outputFile;
   std::stringstream out;
-  CGI::OpenFileCreateIfNotPresent(outputFile, this->owner->outputDefaultFile, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile, this->owner->PhysicalNameDefaultOutput+".tex", false, true, false);
   outputFile << theLatexFileString;
-  out << "A latex/pdf file: <a href=\"" << this->owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
-  out << ", <a href=\"" << this->owner->outputFolderDisplayPath << "output.pdf\"> output.pdf</a>";
+  out << "A latex/pdf file: <a href=\"" << this->owner->DisplayNameDefaultOutput << ".tex\">"
+  << this->owner->DisplayNameDefaultOutput << ".tex</a>";
+  out << ", <a href=\"" << this->owner->DisplayNameDefaultOutput << ".pdf\">" << this->owner->DisplayNameDefaultOutput
+  << ".pdf</a>";
   this->outputString=out.str();
   std::stringstream theCommand;
-  theCommand << "pdflatex -output-directory=" << this->owner->outputFolderPath << "   "
-  << this->owner->outputFolderDisplayPath;
+  theCommand << "pdflatex -output-directory=" << this->owner->PhysicalPathOutputFolder << "   "
+  << this->owner->PhysicalNameDefaultOutput;
   //std::cout << theCommand.str();
   this->owner->SystemCommands.AddOnTop(theCommand.str());
   this->ExpressionType=this->typeString;
@@ -5577,8 +5579,8 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
   char weylLetter=theNode.owner->DefaultWeylLetter;
   int theRank=theNode.owner->DefaultWeylRank;
-  outMainPath << theNode.owner->outputFolderPath <<  weylLetter << theRank << "/";
-  outMainDisplayPath << theNode.owner->outputFolderDisplayPath << weylLetter << theRank << "/";
+  outMainPath << theNode.owner->PhysicalPathOutputFolder <<  weylLetter << theRank << "/";
+  outMainDisplayPath << theNode.owner->DisplayPathOutputFolder << weylLetter << theRank << "/";
   outSltwoPath << outMainPath.str() << "sl2s/";
   outSltwoDisplayPath << outMainDisplayPath.str() << "sl2s/";
   bool NeedToCreateFolders=(!CGI::FileExists(outMainPath.str()) || !CGI::FileExists(outSltwoPath.str()));
@@ -5592,7 +5594,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     <<  " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
     << "(Apache server configuration) problem.</b><br><br>"
     << "<META http-equiv=\"refresh\" content=\"3; url="
-    << "/cgi-bin/calculator?"
+    << theNode.owner->DisplayNameCalculator << "?"
     << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
     out << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed);
     out << "\">  Redirecting in 3 seconds";
@@ -5619,7 +5621,7 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
       std::stringstream afterSystemCommands;
       std::stringstream noindicatorLink;
       afterSystemCommands << "<META http-equiv=\"refresh\" content=\"0; url=";
-      noindicatorLink << "/cgi-bin/calculator?"
+      noindicatorLink << theNode.owner->DisplayNameCalculator << "?"
       << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput="
       << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
       afterSystemCommands << noindicatorLink.str() << "\">";
@@ -5634,7 +5636,8 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
     { SltwoSubalgebras theSl2s;
       theSl2s.owner.FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
       std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
-      theSl2s.ElementToHtml(theGlobalVariables, theSl2s.owner.theWeyl, true, PathSl2, DisplayPathSl2);
+      theSl2s.ElementToHtml
+      (theGlobalVariables, theSl2s.owner.theWeyl, true, PathSl2, DisplayPathSl2, theNode.owner->DisplayNameCalculator);
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
     }
@@ -5657,7 +5660,7 @@ std::string Parser::GetFunctionDescription()
 { std::stringstream out;
   for (int i=0; i<this->theFunctionList.size; i++)
     if (this->theFunctionList.TheObjects[i].flagVisible)
-      out << this->theFunctionList.TheObjects[i].ElementToString(true, false) << " <br>";
+      out << this->theFunctionList.TheObjects[i].ElementToString(true, false, *this) << " <br>";
   return out.str();
 }
 
@@ -5722,14 +5725,14 @@ std::string CGI::UnCivilizeStringCGI(const std::string& input)
   return out.str();
 }
 
-std::string ParserFunction::ElementToString(bool useHtml, bool useLatex)const
+std::string ParserFunction::ElementToString(bool useHtml, bool useLatex, Parser& owner)const
 { std::stringstream out;
   out << "<div style=\"display: inline\" id=\"functionBox" << this->functionName << "\" >";
   out << this->functionName;
   out << this->theArguments.ElementToString(useHtml, useLatex);
   out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->functionName
   << "');\">More/less info</button><div id=\"fun" << this->functionName
-  << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"/cgi-bin/calculator?"
+  << "\" style=\"display: none\"><br>" << this->functionDescription << "<br>Example. <a href=\"" << owner.DisplayNameCalculator  << "?"
   << " textType=" << this->exampleAmbientWeylLetter << "&textDim=" << this->exampleAmbientWeylRank << "&textInput="
   << CGI::UnCivilizeStringCGI(this->example)
   << "\"> " << this->example << "</a></div></div>";
@@ -6963,12 +6966,16 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "}\n";
   out << "function ComputeProjections" << timesCalled << "()\n"
   << "{ for (var i=0; i<" << theDimension << "; i++)\n"
-  << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ","  << eiBasis<< "[i]);\n"
-  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
+  << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "(VectorE1Cone" << timesCalled << ","  << eiBasis<< "[i]);\n"
+  << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
   << "  }\n"
   << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
-  << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE1Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
-  << "    " << projBasisCircles << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled << "(VectorE2Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
+  << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "(VectorE1Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
+  << "    " << projBasisCircles << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
+  << "(VectorE2Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
   << "  }\n"
   << "}\n";
   out << "\nfunction getScalarProduct" << timesCalled << "(root1, root2)\n"
@@ -7050,7 +7057,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  ;
   if (theDimension>2)
   { out
-    << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
+    << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled
+    << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
     << "    { vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n"
 //    << "     if ( orientationCounter" << timesCalled << "==1)\n "
 //    << "       vOrthogonal[2]*=-1;\n"
@@ -7058,7 +7066,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     << "    }\n";
   }
 out
-  << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
+  << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled
+  << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
   << "    { if (oldRatioProjectionOverHeightSquared==0)\n"
   << "      { vProjection=dojo.clone(VectorE1Cone" << timesCalled << ");\n"
   << "        MultiplyVector" << timesCalled << "(vProjection, -newX);\n"
@@ -7066,8 +7075,10 @@ out
   << "      }\n"
   << "      ScaleToUnitLength" << timesCalled << "(vProjection);\n"
   << "      ScaleToUnitLength" << timesCalled << "(vOrthogonal);\n"
-  << "      VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
-  << "      VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
+  << "      VectorE1Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE1Cone" << timesCalled
+  << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
+  << "      VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled
+  << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
   << "    }\n"
   << "    AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
   << ", VectorE1Cone" << timesCalled << ", -getScalarProduct" << timesCalled
@@ -7100,9 +7111,9 @@ out
   << shiftY << "=(cy-divPosY+document.body.scrollTop);\n  }  else\n"
   << "{ changeBasis" << timesCalled << "(selectedBasisIndexCone" << timesCalled << ", posx, posy);\n  }\n  "
   << theDrawFunctionName << " ();\n}\n";
-//  out << "\n dojo.addOnLoad ('{tempDiv=document.getElementById(\"" << theCanvasId << "\");";
-//  out << "tempDiv.addEventListener (\"DOMMouseScroll\", mouseHandleWheelCone"
-//  << timesCalled << ", true);}');";
+  out << "\n tempDiv=document.getElementById(\"" << theCanvasId << "\");";
+  out << "\ntempDiv.addEventListener (\"DOMMouseScroll\", mouseHandleWheelCone"
+  << timesCalled << ", true);\n";
   out << "function mouseHandleWheelCone" << timesCalled << "(theEvent){\n"
   << "theEvent = theEvent ? theEvent : window.event;\n theEvent.preventDefault();\ntheEvent.stopPropagation();\ntheWheelDelta = theEvent.detail ? theEvent.detail * -1 : theEvent.wheelDelta / 40;\n"
   << "GraphicsUnitCone" << timesCalled << "+=theWheelDelta;\n"
@@ -9067,10 +9078,8 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   std::stringstream out;
   std::fstream outputFile, outputFile2;
   std::string fileName, filename2;
-  fileName.append(theNode.owner->outputFolderPath);
-  filename2=fileName;
-  fileName.append("output");
-  filename2.append("output2");
+  fileName=theNode.owner->PhysicalNameDefaultOutput+"1";
+  filename2=theNode.owner->PhysicalNameDefaultOutput+"2";
   CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   theSubgroup.MakeParabolicFromSelectionSimpleRoots(theAmbientWeyl,  parabolicSel, theGlobalVariables, 500);
@@ -9094,13 +9103,15 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
     outputFile2 << "\n\\end{document}";
     out << "<hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
     please check whether the .tex corresponds to the .png!</b><br>"
-    << " The requested Bruhat graph is located in a png file here: <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.tex\"> output.tex</a>";
-    out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output.png\"> output.png</a>";
+    << " The requested Bruhat graph is located in a png file here: <a href=\""
+    << theNode.owner->DisplayNameDefaultOutput << "1.tex\"> " <<  theNode.owner->DisplayNameDefaultOutput << "1.tex</a>";
+    out << ", <a href=\"" << theNode.owner->DisplayNameDefaultOutput << "1.png\">" << theNode.owner->DisplayNameDefaultOutput << "1.png</a>";
     out << "<hr><hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
     please check whether the .tex corresponds to the .png! </b><br>"
-    << " The coset graph is located in a png file here: <a href=\"" << theNode.owner->outputFolderDisplayPath
-    << "output2.tex\"> output2.tex</a>";
-    out << ", <a href=\"" << theNode.owner->outputFolderDisplayPath << "output2.png\"> output2.png</a>";
+    << " The coset graph is located in a png file here: <a href=\"" << theNode.owner->DisplayNameDefaultOutput
+    << "2.tex\"> " <<  theNode.owner->DisplayNameDefaultOutput << "2.tex</a>";
+    out << ", <a href=\"" << theNode.owner->DisplayNameDefaultOutput << "2.png\"> "
+    << theNode.owner->DisplayNameDefaultOutput << "2.png</a>";
 
     out << "<hr>Additional printout follows.<br> ";
     out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
@@ -9116,10 +9127,10 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
 //  theCommand << "pdflatex -output-directory=" << theNode.owner->outputFolderPath << "   " << fileName ;
 
   theNode.owner->SystemCommands.AddOnTop
-  ("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + fileName + ".tex");
+  ("latex  -output-directory=" + theNode.owner->PhysicalPathOutputFolder + " " + fileName + ".tex");
   theNode.owner->SystemCommands.AddOnTop("dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight");
   theNode.owner->SystemCommands.AddOnTop
-  ("latex  -output-directory=" + theNode.owner->outputFolderPath + " " + filename2 + ".tex");
+  ("latex  -output-directory=" + theNode.owner->PhysicalPathOutputFolder + " " + filename2 + ".tex");
   theNode.owner->SystemCommands.AddOnTop("dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight");
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
@@ -10412,7 +10423,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
    </b>First argument is a representation character. Second argument gives the parabolic selection.",
     "splitCharOverLeviParabolic(char(1,1),(0,1))",
-   'B', 2, false,
+   'B', 2, true,
     & ParserNode::EvaluateSplitCharOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
@@ -10422,7 +10433,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
    the argument.",
     "makeWeylFromParabolicSelection(0,0,1,0)",
-   'F', 4, false,
+   'F', 4, true,
     & ParserNode::EvaluateMakeWeylFromParSel
    );
 /*   this->AddOneFunctionToDictionaryNoFail

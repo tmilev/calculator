@@ -737,22 +737,24 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
     outputDetails=errorLog.str();
     return false;
   }
-  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "Dominant weights wrt. levi part: ";
+  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "<br>Dominant weights wrt. levi part("
+  << outputDominantWeightsSimpleCoords.size << "):<br> ";
   for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
     std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   root currentWeight, currentDominantRepresentative;
   root Rho=this->GetRho();
+  std::cout << "<br> Rho equals: " << Rho.ElementToString();
+  //out << "<br> Rho equals: " << Rho.ElementToString();
   Rational hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoords+Rho, hwSimpleCoords+Rho);
   Explored[0]=true;
+  outputMultsSimpleCoords[0]=1;
 //  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
-  for (int k=0; k< outputDominantWeightsSimpleCoords.size; k++)
-  { if (this->IsDominantWeight(outputDominantWeightsSimpleCoords[k]))
-      outputMultsSimpleCoords[k]=1;
-    Explored[k]=true;
+  for (int k=1; k< outputDominantWeightsSimpleCoords.size; k++)
+  { Explored[k]=true;
     Rational& currentAccum=outputMultsSimpleCoords[k];
     currentAccum=0;
     for (int j=0; j<this->RootsOfBorel.size; j++)
@@ -761,9 +763,9 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
         currentDominantRepresentative=currentWeight;
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
-//        timeSpentRaisingWeights+=theGlobalVariables.GetElapsedSeconds()-startLocal;
-        //double beforeHash=theGlobalVariables.GetElapsedSeconds();
+        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
         int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
+        std::cout << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
@@ -782,14 +784,15 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
         std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
+    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
+    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->AmbientWeyl.RootScalarCartanRoot
+   (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho))
+    .ElementToString()
+    ;
     Rational tempDen= hwPlusRhoSquared- this->AmbientWeyl.RootScalarCartanRoot
     (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho);
     assert(tempDen!=0);
     currentAccum/=tempDen;
-//    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
- //   (outputDominantWeightsSimpleCoords[k]+this->rho, outputDominantWeightsSimpleCoords[k]+this->rho))
-  //  .ElementToString()
-   // ;
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of "
     << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
@@ -2420,13 +2423,21 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   if (parSel.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
-  out << "Not implemented yet; your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  out << "Parabolic subalgebra selection: " << parSel.ElementToString() << ".";
   charSSAlgMod& theChar=charNode.theChar.GetElement();
   std::string report;
   charSSAlgMod tempChar;
   ReflectionSubgroupWeylGroup subWeyl;
   theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
+  DrawingVariables theDV;
+  WeylGroup& theWeyl=theChar.theBoss->theWeyl;
   out << report;
+  theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
+  for (int i=0; i<tempChar.size; i++)
+    subWeyl.DrawContour
+    (theWeyl.GetSimpleCoordinatesFromFundamental(tempChar[i].weightFundamentalCoords),
+     theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+  out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -2466,36 +2477,42 @@ bool charSSAlgMod::SplitCharOverLevi
       invertedSel[i]=1;
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, parabolicSel, theGlobalVariables,1);
   outputWeylSub.ComputeRootSubsystem();
-  ReflectionSubgroupWeylGroup complementGroup;
-  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, invertedSel, theGlobalVariables,1);
-  complementGroup.ComputeRootSubsystem();
+//  ReflectionSubgroupWeylGroup complementGroup;
+//  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, invertedSel, theGlobalVariables,1);
+//  complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
-  out << "<br>Complement subgroup: " << complementGroup.ElementToString(false);
+  std::cout << out.str();
   charSSAlgMod dominantCharAmbient, remainingCharDominantLevi;
   this->FreudenthalEvalMe(dominantCharAmbient, tempS, theGlobalVariables, 10000);
+  std::cout << "<hr>" << tempS;
   remainingCharDominantLevi.Nullify(0);
-  roots orbitComplementGroup;
+  roots tempRootS;
+  HashedList<root> orbitDom, tempHashedRoots;
   MonomialChar<Rational> tempMon, localHighest;
+  WeylGroup& theWeyl=this->theBoss->theWeyl;
   for (int i=0; i<dominantCharAmbient.size; i++)
-    if(!complementGroup.GenerateOrbitReturnFalseIfTruncated
-       (this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
-       (dominantCharAmbient[i].weightFundamentalCoords), orbitComplementGroup, 10000))
+  { tempRootS.size=0;
+    tempRootS.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(dominantCharAmbient[i].weightFundamentalCoords));
+    if (!theWeyl.GenerateOrbit(tempRootS, false, orbitDom, false, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
       (dominantCharAmbient[i].weightFundamentalCoords).ElementToString();
       if (Report!=0)
         *Report=out.str();
       return false;
-    } else
-      for (int j=0; j<orbitComplementGroup.size; j++)
+    }
+    for (int k=0; k<orbitDom.size; k++)
+      if (outputWeylSub.IsDominantWeight(orbitDom[k]))
       { tempMon.Coefficient=dominantCharAmbient[i].Coefficient;
-        tempMon.weightFundamentalCoords=orbitComplementGroup[j];
+        tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi+=tempMon;
       }
+  }
   output.Nullify(0);
-  HashedList<root> tempRoots;
   List<Rational> tempMults;
   out << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+  std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
   while(!remainingCharDominantLevi.IsEqualToZero())
   { localHighest=*remainingCharDominantLevi.LastObject();
@@ -2514,13 +2531,13 @@ bool charSSAlgMod::SplitCharOverLevi
     localHighest=remainingCharDominantLevi[remainingCharDominantLevi.IndexOfObjectHash(localHighest)];
     output+=localHighest;
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
-        (localHighest.weightFundamentalCoords, tempRoots, tempMults, tempS, theGlobalVariables, 10000))
+        (localHighest.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
     { if (Report!=0)
         *Report=tempS;
       return false;
     }
-    for (int i=0; i<tempRoots.size; i++)
-    { tempMon.weightFundamentalCoords=this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple(tempRoots[i]);
+    for (int i=0; i<tempHashedRoots.size; i++)
+    { tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       tempMon.Coefficient=tempMults[i]* localHighest.Coefficient;
       remainingCharDominantLevi-=tempMon;
     }
@@ -2718,14 +2735,40 @@ void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(root& theWeight, int* si
 }
 
 void Parser::initDefaultFolderAndFileNames
-  (const std::string& inputPath, const std::string& scrambledIP)
-{ this->outputFolderPath.append(inputPath);
-  this->outputFolderPath.append("../htdocs/tmp/");
-  this->outputFolderDisplayPath="/tmp/";
+  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
+{ this->PhysicalPathServerBase=inputPathBinaryBaseIsFolderBelow+"../";
+  this->DisplayPathServerBase=inputDisplayPathBase;
+
+  this->PhysicalPathOutputFolder=this->PhysicalPathServerBase+"output/";
+  this->DisplayPathOutputFolder= this->DisplayPathServerBase + "output/";
+
   this->userLabel=scrambledIP;
-  this->indicatorFileName=this->outputFolderPath + this->userLabel+ "indicator.html" ;
-  this->indicatorFileNameDisplay=this->outputFolderDisplayPath + this->userLabel+ "indicator.html" ;
-  this->indicatorReportFileName=this->outputFolderPath + this->userLabel+ "report.txt" ;
-  this->indicatorReportFileNameDisplay=this->outputFolderDisplayPath+this->userLabel + "report.txt" ;
+
+  this->PhysicalNameDefaultOutput=this->PhysicalPathOutputFolder+"default"+this->userLabel+"output";
+  this->DisplayNameDefaultOutput=this->DisplayNameDefaultOutput+"default"+this->userLabel+"output";
+
+  this->indicatorFileName=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
+  this->indicatorFileNameDisplay=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
+  this->indicatorReportFileName=this->PhysicalPathOutputFolder +"report"+ this->userLabel+ ".txt" ;
+  this->indicatorReportFileNameDisplay=this->DisplayPathOutputFolder+"report"+this->userLabel + ".txt" ;
+}
+
+bool ReflectionSubgroupWeylGroup::DrawContour
+(const root& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
+ int UpperBoundVertices)
+{ HashedList<root> theOrbit;
+  theOrbit.AddOnTopHash(highestWeightSimpleCoord);
+  WeylGroup& theWeyl=this->AmbientWeyl;
+  root tempRoot;
+  for (int i=0; i<theOrbit.size; i++)
+    for (int j=0; j<this->simpleGenerators.size; j++)
+    { tempRoot=theOrbit[i];
+      theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
+      if (theOrbit.AddOnTopNoRepetitionHash(tempRoot))
+        theDV.drawLineBetweenTwoVectorsBuffer(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
+      if (theOrbit.size>UpperBoundVertices)
+        return false;
+    }
+  return true;
 }
 

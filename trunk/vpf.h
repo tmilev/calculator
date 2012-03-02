@@ -8632,6 +8632,10 @@ public:
   (root& highestWeightSimpleCoords, HashedList<root>& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;
+  bool DrawContour
+(const root& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
+ int UpperBoundVertices)
+    ;
   bool IsDominantWeight(root& theWeight);
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix);
@@ -8842,8 +8846,13 @@ public:
   std::string DebugString;
   List<std::string> CoordinateReps;
   void GetLatexHeaderAndFooter(std::string& outputHeader, std::string& outputFooter);
-  void ElementToString (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
-  void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables){ this->ElementToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables);}
+  void ElementToString
+(std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
+ std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
+  ;
+  void ComputeDebugString(rootSubalgebras& owners, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+  { this->ElementToString (this->DebugString, owners, true, false, htmlPathPhysical, htmlPathServer, theGlobalVariables, "");
+  }
   void ComputeDebugString(rootSubalgebras& owners, GlobalVariables& theGlobalVariables){ this->ComputeDebugString(owners, 0, 0, theGlobalVariables); };
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner);
@@ -9053,10 +9062,17 @@ public:
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables);
   void ElementToHtml(std::string& header, std::string& pathPhysical, std::string& htmlPathServer, SltwoSubalgebras* Sl2s, GlobalVariables& theGlobalVariables);
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
-  void ElementToString(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables);
+  void ElementToString
+(std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords,
+ std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
+  ;
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-  void ComputeDebugString(bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables);};
+  void ComputeDebugString
+  (bool useLatex, bool useHtml, bool includeKEpsCoords, std::string* htmlPathPhysical,
+   std::string* htmlPathServer, GlobalVariables& theGlobalVariables)
+  { this->ElementToString(this->DebugString, 0, useLatex, useHtml, includeKEpsCoords, htmlPathPhysical, htmlPathServer, theGlobalVariables, "");
+  }
   void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void initForNilradicalGeneration()
@@ -10213,7 +10229,10 @@ public:
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(root& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(root& theHCharacteristic, int* outputIndex);
-  void ElementToHtml(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer);
+  void ElementToHtml
+(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer,
+ std::string& DisplayNameCalculator)
+   ;
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
   void ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
@@ -11454,7 +11473,7 @@ bool GetRootSRationalDontUseForFunctionArguments
   void EvaluateDivide(GlobalVariables& theGlobalVariables);
   void EvaluateOrder(GlobalVariables& theGlobalVariables);
   void CreateDefaultLatexAndPDFfromString
-  (std::string& theLatexFileString)
+  (const std::string& theLatexFileString)
   ;
   void EvaluateInteger(GlobalVariables& theGlobalVariables);
   bool GetRootsEqualDimNoConversionNoEmptyArgument
@@ -11803,7 +11822,7 @@ public:
     this->exampleAmbientWeylLetter=other.exampleAmbientWeylLetter;
   }
   std::string ElementToString
-  (bool useHtml, bool useLatex)const
+(bool useHtml, bool useLatex, Parser& owner)const
   ;
   int CallMe
   (ParserNode& theNode, GlobalVariables& theGlobalVariables)
@@ -11838,9 +11857,18 @@ public:
   std::string DebugString;
   std::string StringBeingParsed;
   List<std::string> SystemCommands;
-  std::string outputFolderPath;
-  std::string outputFolderDisplayPath;
-  std::string outputDefaultFile;
+
+  std::string DisplayNameCalculator;
+
+  std::string DisplayPathServerBase;
+  std::string PhysicalPathServerBase;
+
+  std::string DisplayPathOutputFolder;
+  std::string PhysicalPathOutputFolder;
+
+  std::string DisplayNameDefaultOutput;
+  std::string PhysicalNameDefaultOutput;
+
   std::string indicatorFileName;
   std::string indicatorFileNameDisplay;
   std::string indicatorReportFileName;
@@ -11858,7 +11886,7 @@ public:
   std::string afterSystemCommands;
 //  SemisimpleLieAlgebra theLieAlgebra;
   void initDefaultFolderAndFileNames
-  (const std::string& inputPath, const std::string& scrambledIP)
+  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
   ;
   void InitJavaScriptDisplayIndicator();
   void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)

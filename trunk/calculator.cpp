@@ -471,7 +471,9 @@ int main(int argc, char **argv)
   std::cout << " <br>\n";
   std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
   std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error)."
-  << "  \n<br> All precomputed data is stored in a \"database\" <a href=\"/tmp/\">here</a>. \
+  << "  \n<br> All precomputed data is stored in a \"database\" <a href=\""
+  << theParser.DisplayPathOutputFolder
+  <<"\">here</a>. \
   <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() \
   calls. The LaTeX logs can be found by viewing the calculator page's source. <br> \
   The html output is hardcoded: either by hand or transformed from a separate .html file using a \

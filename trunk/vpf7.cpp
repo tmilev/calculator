@@ -2745,7 +2745,8 @@ void Parser::initDefaultFolderAndFileNames
   this->userLabel=scrambledIP;
 
   this->PhysicalNameDefaultOutput=this->PhysicalPathOutputFolder+"default"+this->userLabel+"output";
-  this->DisplayNameDefaultOutput=this->DisplayNameDefaultOutput+"default"+this->userLabel+"output";
+  this->DisplayNameDefaultOutputNoPath="default"+this->userLabel+"output";
+  this->DisplayNameDefaultOutput=this->DisplayPathOutputFolder+this->DisplayNameDefaultOutputNoPath;
 
   this->indicatorFileName=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
   this->indicatorFileNameDisplay=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;

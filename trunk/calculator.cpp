@@ -112,7 +112,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -133,6 +133,10 @@ int main(int argc, char **argv)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
 	getPath(argv[0], inputPatH);
+
+  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
+  theParser.InitJavaScriptDisplayIndicator();
+
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 
@@ -142,7 +146,7 @@ int main(int argc, char **argv)
   << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
-  std::cout << "<script src=\"/easy/load.js\"></script> ";
+  std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
   ANNOYINGSTATISTICS;
   //std::cout << IPAdressCaller;
@@ -357,8 +361,6 @@ int main(int argc, char **argv)
   //theParser.theHmm.MakeGinGWithId('B', 3, theGlobalVariables);
   //  EigenVectorComputation theEigen;
   //  std::cout << theEigen.ComputeAndReturnString(theGlobalVariables, theParser);
-  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
-  theParser.InitJavaScriptDisplayIndicator();
   if (!CGI::FileExists(theParser.indicatorFileName))
   { std::fstream tempFile;
     CGI::OpenFileCreateIfNotPresent(tempFile, theParser.indicatorFileName, false, true, false);
@@ -470,10 +472,10 @@ int main(int argc, char **argv)
   std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
   std::cout << " <br>\n";
   std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
-  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() left by me (blank screen), or 2) by Apache/the system (internal server error)."
-  << "  \n<br> All precomputed data is stored in a \"database\" <a href=\""
+  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() (blank screen), or 2) by Apache/the system (internal server error)."
+  << "  \n<br> All precomputed data is stored <a href=\""
   << theParser.DisplayPathOutputFolder
-  <<"\">here</a>. \
+  <<"\">here</a> (the precomputed data is stored as usual files). \
   <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() \
   calls. The LaTeX logs can be found by viewing the calculator page's source. <br> \
   The html output is hardcoded: either by hand or transformed from a separate .html file using a \
@@ -482,14 +484,23 @@ int main(int argc, char **argv)
   std::cout << " \n";
   std::cout << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> \
   In order to get the calculator running on your machine you need to do the following. \
-  I will work on simplifying the installation some time soon. \
-  <br>0) You need a Linux machine. I have tested it only on Ubuntu. \
+  Simplifying the installation procedure is on our to-do list. \
+  <br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. \
   <br>1) Download the c++ files in the links above. \
   <br>2) Put them in a c++ project and make sure the following includes work:"
-  << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. They should work by default on almost any Linux distro. <br>3) Build the project to a console application with default console application settings.  <br> 4) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts (you might have to google how to, it's not easy).  Apache comes preinstalled on Ubuntu.\n"
-  << "<br>5) Assume the location of your server's cgi-bin folder is some_folder_path/cgi-bin/ (you can google where this folder is located). Put the calculator executable file in some_folder_path/cgi-bin/  .  <br> 6) Create folders some_folder_path/cgi-bin/../htdocs, some_folder_path/cgi-bin/../htdocs/tmp/. "
-  << "Enable read/write access to those two folders for every user. <br>7) The basic installation is now complete; test the calculator by running it through your web browser. The remaining steps are needed in order to get a nicely formatted output and to avoid broken links in the calculator. "
-  << "<br>8) The calculator calls latex, so you need to install latex. <br>9) You need install the jsmath script in the base (root) folder of your apache server.";
+  << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. "
+  << "They should work by default on almost any Linux distro. "
+  << "<br>3) Build the project to a console application named \" calculator \" with default console application settings.  "
+  << "<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called"
+  << "ServerBase/    "
+  << "<br>5) Create folders ServerBase/cgi-bin and ServerBase/output . "
+  << "<br>6) Enable full read/write access to every user in the folder ServerBase/output  . "
+  << "<br>7) Copy the file  calculator to ServerBase/cgi-bin/calculator and allow read/execute access to every user."
+  << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts "
+  << "from folder ServerBase/cgi-bin/calculator"
+  << "<br>9) Configure the Apache server so the adress of physical folder ServerBase is displayed as / ."
+  << "<br>10) The basic installation is now complete; test the calculator by running it through your web browser."
+  << "<br>11) To finish the installation install the jsmath in folder ServerBase/jsmath.";
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
@@ -509,7 +520,8 @@ int main(int argc, char **argv)
   std::cout << theParser.CreateBasicStructureConstantInfoIfItDoesntExist(theGlobalVariables);
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
-  std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer. <br> The <a href=\"/tmp/RootSystem_no_autocomplete.html\">visualization code</a>"
+  std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer." <<
+  " <br> The <a href=\"/RootSystem_no_autocomplete.html\">visualization code</a>"
   << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
   static_html5(tempStream3);
@@ -531,7 +543,13 @@ int main(int argc, char **argv)
   std::cout << ");</script>";
   std::cout << "<script language=\"javascript\"> var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>";
   std::cout << "\n</td>";
-  std::cout << "<td> <img src=\"../karlin.png\" width=\"275\" height=\"48\"></img>&nbsp<img src=\"../jacobs_logo.png\" width=\"128\" height=\"44\"></img>";
+  std::cout
+  << "<td>"
+  << "<img src=\"" << theParser.DisplayPathServerBase << "/UMassBoston.png\" width=\"70\" height=\"81\"></img>"
+  << "&nbsp"
+  << "<img src=\"" << theParser.DisplayPathServerBase << "/karlin.png\" width=\"275\" height=\"48\"></img>"
+  << "&nbsp"
+  << "<img src=\"" << theParser.DisplayPathServerBase << "/jacobs_logo.png\" width=\"128\" height=\"44\"></img>";
  // std::cout << "<br>\n\nThe page <a href=\"http://www.google.com/search?btnG=1&pws=0&q=why+is+internet+explorer+bad\">does not support Internet Explorer </a>. To view this page properly you might need to install another browser.";
   std::cout << "<hr>Execution time before initiating system commands: " << TimeTotalElapsed << " seconds.";
   std::cout << "</td>";

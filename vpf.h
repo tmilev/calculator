@@ -11867,6 +11867,7 @@ public:
   std::string PhysicalPathOutputFolder;
 
   std::string DisplayNameDefaultOutput;
+  std::string DisplayNameDefaultOutputNoPath;
   std::string PhysicalNameDefaultOutput;
 
   std::string indicatorFileName;

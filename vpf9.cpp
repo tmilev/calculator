@@ -15818,7 +15818,7 @@ void rootSubalgebras::ElementToString
   if (useHtml)
     out << " <a href=\""
     << DisplayNameCalculator <<
-    "\">Calculator main page</a><br><a href=\"./tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);

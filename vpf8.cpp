@@ -4122,9 +4122,9 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   CGI::OpenFileCreateIfNotPresent(outputFile, this->owner->PhysicalNameDefaultOutput+".tex", false, true, false);
   outputFile << theLatexFileString;
   out << "A latex/pdf file: <a href=\"" << this->owner->DisplayNameDefaultOutput << ".tex\">"
-  << this->owner->DisplayNameDefaultOutput << ".tex</a>";
-  out << ", <a href=\"" << this->owner->DisplayNameDefaultOutput << ".pdf\">" << this->owner->DisplayNameDefaultOutput
-  << ".pdf</a>";
+  << this->owner->DisplayNameDefaultOutputNoPath << ".tex</a>";
+  out << ", <a href=\"" << this->owner->DisplayNameDefaultOutput << ".pdf\">"
+  << this->owner->DisplayNameDefaultOutputNoPath << ".pdf</a>";
   this->outputString=out.str();
   std::stringstream theCommand;
   theCommand << "pdflatex -output-directory=" << this->owner->PhysicalPathOutputFolder << "   "
@@ -4166,7 +4166,9 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
 //  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
   this->theChambersOld.thePauseController.ExitComputation();
   this->theChambers.DrawMeProjective(0, true, theGlobalVariables.theDrawingVariables, theFormat);
-  outHtml << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->AmbientDimension);
+  outHtml <<
+    theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName
+    (this->AmbientDimension);
   root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
   tempRoot.MakeZero(this->AmbientDimension);
   this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
@@ -10420,7 +10422,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("splitCharOverLeviParabolic",
    "( Char, (Rational, ...))",
-   "<b>At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
+   "<b>Please don't use. At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
    </b>First argument is a representation character. Second argument gives the parabolic selection.",
     "splitCharOverLeviParabolic(char(1,1),(0,1))",
    'B', 2, true,
@@ -10429,7 +10431,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("makeWeylFromParabolicSelection",
    "(Rational, ...)",
-   "<b>For testing purposes. \
+   "<b>Please don't use. For testing purposes. \
    </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
    the argument.",
     "makeWeylFromParabolicSelection(0,0,1,0)",

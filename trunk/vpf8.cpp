@@ -7001,7 +7001,8 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "}\n";
   out
   << "function getAngleChange" << timesCalled << "(newX, newY, oldX, oldY)\n"
-  << "{ var result=getAngleFromXandY(newX, newY, oldX, oldY)-getAngleFromXandY(oldX, oldY, newX, newY);\n"
+  << "{ var result=getAngleFromXandY" << timesCalled
+  << "(newX, newY, oldX, oldY)-getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
   << "  topBound=Math.PI/2;\n"
   << "  bottomBound=-Math.PI/2;\n"
 //  << "  orientationWasFlipped" << timesCalled << "=false;\n"
@@ -7869,15 +7870,14 @@ int ParserNode::EvaluateDrawRootSystem
   theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
   std::stringstream out;
-  out << "<hr>Below is a javascript visualization of a root system drawn as described on John Stembridge's website.<br>"
-  << "The darker red points can be rotated around by dragging them with the mouse pointer.<br> "
-  << "The darker red points are the simple positive roots.<br>"
-  << "The mouse wheel acts as a zoom-in/out on the Google chrome browser. <br>"
-  << "Note that for a root system of rank 4 or more there might be javascript-compilation lag.<hr>"
-  << "The javascript visualization uses your browser/your PC processor, so it should be viewed with a good browser. ";
+  out << "<hr>Below is a javascript visualization of a root system drawn as described on John Stembridge's website"
+  <<" (<a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">"
+  << "http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>).<br>"
+  << "The darker red points can be rotated around by dragging them with the mouse pointer; they denote the simple positive roots.<br> "
+  << "Mouse wheel zooms-in/out. <br>";
   out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraTypeAndName(theWeylLetter, theDimension);
-  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension)
-  << "\n<br>\nReference: John Stembridge, <a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>.";
+  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
+//  out << "<br>Note that for a root system of rank 4 or more there might be javascript-compilation lag.";
   theNode.outputString=out.str();
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theDrawOperators;

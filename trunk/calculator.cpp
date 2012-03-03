@@ -486,21 +486,22 @@ int main(int argc, char **argv)
   In order to get the calculator running on your machine you need to do the following. \
   Simplifying the installation procedure is on our to-do list. \
   <br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. \
-  <br>1) Download the c++ files in the links above. \
-  <br>2) Put them in a c++ project and make sure the following includes work:"
+  <br>1) Download the c++ files in the links above. Alternatively you can check out the program's "
+  << " svn repository. The svn check out command is  &nbsp&nbsp  svn co https://vectorpartition.svn.sourceforge.net/svnroot/vectorpartition vectorpartition &nbsp&nbsp."
+  << "<br>2) Put them in a c++ project and make sure the following includes work:"
   << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. "
   << "They should work by default on almost any Linux distro. "
-  << "<br>3) Build the project to a console application named \" calculator \" with default console application settings.  "
-  << "<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called"
-  << "ServerBase/    "
-  << "<br>5) Create folders ServerBase/cgi-bin and ServerBase/output . "
-  << "<br>6) Enable full read/write access to every user in the folder ServerBase/output  . "
-  << "<br>7) Copy the file  calculator to ServerBase/cgi-bin/calculator and allow read/execute access to every user."
+  << "<br>3) Build the project to a console application named  &nbsp&nbsp calculator &nbsp&nbsp with default console application settings.  "
+  << "<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called "
+  << "&nbsp&nbsp ServerBase/    &nbsp&nbsp."
+  << "<br>5) Create folders &nbsp&nbsp ServerBase/cgi-bin  &nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
+  << "<br>6) Enable full read/write access for every user in the folder &nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
+  << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
   << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts "
-  << "from folder ServerBase/cgi-bin/calculator"
-  << "<br>9) Configure the Apache server so the adress of physical folder ServerBase is displayed as / ."
+  << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
+  << "<br>9) Configure the Apache server so the adress of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
   << "<br>10) The basic installation is now complete; test the calculator by running it through your web browser."
-  << "<br>11) To finish the installation install the jsmath in folder ServerBase/jsmath.";
+  << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp.";
 	std::cout <<	"</div>";
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
@@ -520,12 +521,24 @@ int main(int argc, char **argv)
   std::cout << theParser.CreateBasicStructureConstantInfoIfItDoesntExist(theGlobalVariables);
   //  std::cout << "<button onclick=\"switchMenu('rootSystem');\" >Root system</button>";
 //  std::cout << "<div id=\"rootSystem\" style=\"display: none\">";
-  std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer." <<
-  " <br> The <a href=\"/RootSystem_no_autocomplete.html\">visualization code</a>"
-  << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
+//  std::cout << "<hr><b> Root system visualization</b><br> The basis vectors (small red cirles) can be dragged with the mouse pointer." <<
+  std::cout <<  " <br> <a href=\""
+  << theParser.DisplayNameCalculator << "?%20textType=" << theParser.DefaultWeylLetter
+  << "&textDim=" << theParser.DefaultWeylRank << "&textInput=drawRootSystem"
+  << "\">Root system visualization (calculator generated).</a>";
+  std::cout <<  " <br> <a href=\"/vpf/RootSystem_no_autocomplete.html\">"
+  << "Root system visualization (self-contained javascript).</a>";
+  std::cout <<  " <br> <a href=\""
+  << theParser.DisplayNameCalculator << "?%20textType=" << theParser.DefaultWeylLetter
+  << "&textDim=" << theParser.DefaultWeylRank << "&textInput=printRootSystem"
+  << "\">Root system conventions used by the calculator</a>";
+//  << "<br> At the moment the G_2 and F_4 long-short root convention is different from LiE/Humphreys/wikipedia."
+//  << " Changing according to the preceding convention.";
+
+//  << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";
   std::stringstream tempStream3;
   static_html5(tempStream3);
-  static_html6(tempStream3);
+//  static_html6(tempStream3);
   std::cout << tempStream3.str();
 //  std::cout << "</div>";
 

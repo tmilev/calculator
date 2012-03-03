@@ -98,8 +98,6 @@ function addCookie(theName, theValue, exdays)
   document.cookie=theName + "=" + c_value;
 }
 
-window.setTimeout("checkCookie()",1000);
-
 function checkCookie()
 { theCalculatorForm=document.getElementById("textInputID");  
   theOldWidth=getCookie("widthCalculatorText");
@@ -107,8 +105,8 @@ function checkCookie()
   //alert("height: " + theOldHeight +" width: " + theOldWidth);
   //theCalculatorForm.setStyle("width:"+ theOldWidth);
 //  theCalculatorForm.style.height=theOldHeight;
-  theCalculatorForm.style.setProperty('width', theOldWidth);
-  theCalculatorForm.style.setProperty('height', theOldHeight);
+  theCalculatorForm.style.width  = theOldWidth;
+  theCalculatorForm.style.height = theOldHeight;
 }
 </script>
 <!>

@@ -104,8 +104,6 @@ output << "   c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"
 output << "   document.cookie=theName + \"=\" + c_value;\n";
 output << " }\n";
 output << " \n";
-output << " window.setTimeout(\"checkCookie()\",1000);\n";
-output << " \n";
 output << " function checkCookie()\n";
 output << " { theCalculatorForm=document.getElementById(\"textInputID\");  \n";
 output << "   theOldWidth=getCookie(\"widthCalculatorText\");\n";
@@ -113,8 +111,8 @@ output << "   theOldHeight=getCookie(\"heightCalculatorText\");\n";
 output << "   //alert(\"height: \" + theOldHeight +\" width: \" + theOldWidth);\n";
 output << "   //theCalculatorForm.setStyle(\"width:\"+ theOldWidth);\n";
 output << " //  theCalculatorForm.style.height=theOldHeight;\n";
-output << "   theCalculatorForm.style.setProperty('width', theOldWidth);\n";
-output << "   theCalculatorForm.style.setProperty('height', theOldHeight);\n";
+output << "   theCalculatorForm.style.width  = theOldWidth;\n";
+output << "   theCalculatorForm.style.height = theOldHeight;\n";
 output << " }\n";
 output << " </script>\n";
 }

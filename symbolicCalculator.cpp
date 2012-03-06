@@ -31,6 +31,23 @@ template <class element, int hashFunction(const element&)>
 class hashedVector
 { std::vector<element> theElts;
   std::vector<std::vector<int> > hashedIndices;
+  void RemoveKeyOfObjectWithIndex(int theIndex)
+  { element& current=this->theElts[theIndex];
+    int indexHash=this->GetHash(current);
+    std::vector<int>& currentHashes=this->hashedIndices[indexHash];
+    int indexKey=-1;
+    for (unsigned i=0; i<currentHashes.size(); i++)
+      if (currentHashes[i]==theIndex)
+      { indexKey=i;
+        break;
+      }
+    if (indexKey==-1)
+    { std::cout << "faulty hashed list. This is a programming error (aka bug). ";
+      assert(false);
+    }
+    std::swap(currentHashes[indexKey], currentHashes[currentHashes.size()-1]);
+    currentHashes.resize(currentHashes.size()-1);
+  }
   public:
   const element& operator[](int i)const {return this->theElts[i];}
   int GetHash(const element& x)
@@ -62,6 +79,17 @@ class hashedVector
       if (x==this->theElts[currentHash[i]])
         return currentHash[i];
     return -1;
+  }
+  void PopIndexSwapWithLast(int theIndex)
+  { this->RemoveKeyOfObjectWithIndex(theIndex);
+    if (theIndex!=(signed)this->theElts.size()-1)
+    { this->RemoveKeyOfObjectWithIndex(this->theElts.size()-1);
+      this->theElts[theIndex]=this->theElts[this->theElts.size()-1];
+      element& current=this->theElts[theIndex];
+      std::vector<int>& currentHashes=this->hashedIndices[this->GetHash(current)];
+      currentHashes.push_back(theIndex);
+    }
+    this->theElts.resize(this->theElts.size()-1);
   }
   int GetIndexIMustContainTheObject(const element& x)
   { int result=this->GetIndex(x);
@@ -118,11 +146,14 @@ class Expression
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot,
   };
+  void MakeInt(int theValue, CommandList* newBoss, int indexOfTheCommand)
+  ;
   void reset(CommandList* newBoss, int indexOfTheCommand)
   { this->theBoss=newBoss;
     this->commandIndex=indexOfTheCommand;
     this->children.resize(0);
     this->theOperation=-1;
+    this->theData=0;
   }
   void AssignMeMyChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
@@ -498,9 +529,17 @@ public:
   int opMinus()
   { return this->operations.GetIndexIMustContainTheObject("-");
   }
+  bool AppendOpands
+    (Expression& theExpression, std::vector<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
+;
   bool AppendMultiplicands
   (Expression& theExpression, std::vector<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
-  ;
+  { return this->AppendOpands(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
+  }
+  bool AppendSummands
+  (Expression& theExpression, std::vector<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+  { return this->AppendOpands(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
+  }
   void SpecializeBoundVars
 (Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
   ;
@@ -544,6 +583,8 @@ public:
   int opInteger()
   { return this->operations.GetIndexIMustContainTheObject("Integer");
   }
+  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
+  bool CollectSummands(int commandIndex, Expression& theExpression);
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
    int RecursionDepth=0, int MaxRecursionDepth=500, std::stringstream* theLog=0)
@@ -1047,16 +1088,162 @@ bool CommandList::EvaluateFunctionIsInteger
   return true;
 }
 
-bool CommandList::AppendMultiplicands
-  (Expression& theExpression, std::vector<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+bool CommandList::AppendOpands
+  (Expression& theExpression, std::vector<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 { if (RecursionDepth>MaxRecursionDepthDefault)
     return false;
-  if (theExpression.theOperation!=this->opTimes())
+  if (theExpression.theOperation!=theOp)
     output.push_back(theExpression);
   else
     for (unsigned i=0; i<theExpression.children.size(); i++)
-      if (!this->AppendMultiplicands(theExpression.children[i], output, RecursionDepth+1, MaxRecursionDepth))
+      if (!this->AppendOpands(theExpression.children[i], output, theOp, RecursionDepth+1, MaxRecursionDepth))
         return false;
+  return true;
+}
+
+bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
+{ std::vector<Expression> summands;
+  if (!this->AppendSummands(theExpression, summands, 0, this->MaxRecursionDepthDefault))
+    return false;
+  hashedVector<Expression, Expression::HashFunction> summandsNoCoeff;
+  output.reserve(summands.size());
+  std::vector<int> theCoeffs;
+  int constTerm=0;
+  bool needSimplification=false;
+  bool foundConstTerm=false;
+//  std::cout << "<b>" << theExpression.ElementToString() << "</b>";
+//  if (theExpression.ElementToString()=="(4)*(a) b+(a) b")
+//    std::cout << "problem!";
+  for (unsigned i=0; i<summands.size(); i++)
+  { Expression* currentSummandNoCoeff;
+    currentSummandNoCoeff=&summands[i];
+//    this->OrderMultiplicationTreeProperly(commandIndex, *currentSummandNoCoeff);
+    int theCoeff=1;
+    if (currentSummandNoCoeff->theOperation==this->opTimes())
+    { if(currentSummandNoCoeff->children[0].theOperation==this->opInteger())
+      { theCoeff=currentSummandNoCoeff->children[0].theData;
+        currentSummandNoCoeff=& currentSummandNoCoeff->children[1];
+        if (theCoeff==0)
+          needSimplification=true;
+      }
+    } else if (currentSummandNoCoeff->theOperation==this->opInteger())
+    { constTerm+=currentSummandNoCoeff->theData;
+      if (foundConstTerm || currentSummandNoCoeff->theData==0)
+          needSimplification=true;
+        foundConstTerm=true;
+        continue;
+    }
+    int currentIndex= summandsNoCoeff.GetIndex(*currentSummandNoCoeff);
+//    std::cout << "<hr>" << currentSummandNoCoeff->ElementToStringPolishForm(0,1000);
+//    std::cout << "<hr>" << currentSummandNoCoeff->ElementToString();
+    if (currentIndex==-1)
+    { summandsNoCoeff.AddOnTop(*currentSummandNoCoeff);
+      theCoeffs.push_back(0);
+      currentIndex=summandsNoCoeff.size()-1;
+    } else
+      needSimplification=true;
+    theCoeffs[currentIndex]+=theCoeff;
+  }
+/*
+  std::cout << "<hr>summands: ";
+  for (unsigned i=0; i< summands.size(); i++)
+    std::cout << summands[i].ElementToString() << ", ";
+  std::cout << " const term: " << constTerm;
+    std::cout << "<br>coeff->summand_no_coeff: ";
+  for (int i=0; i< summandsNoCoeff.size(); i++)
+    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ElementToString() << ", ";
+  std::cout << " const term: " << constTerm;
+  */
+  if (!needSimplification)
+    return false;
+  for (int i=0; i<summandsNoCoeff.size(); i++)
+    if (theCoeffs[i]==0)
+    { theCoeffs[i]=theCoeffs[theCoeffs.size()-1];
+      summandsNoCoeff.PopIndexSwapWithLast(i);
+      i--;
+    }
+  std::vector<Expression> summandsWithCoeff;
+  summandsWithCoeff.reserve(summandsNoCoeff.size());
+  for (int i=0; i<summandsNoCoeff.size(); i++)
+  { summandsWithCoeff.resize(summandsWithCoeff.size()+1);
+    Expression& current=summandsWithCoeff[summandsWithCoeff.size()-1];
+    current.reset(this, commandIndex);
+    current.theOperation=this->opTimes();
+    current.children.resize(2);
+    current.children[0].reset(this, commandIndex);
+    current.children[0].theOperation=this->opInteger();
+    current.children[0].theData=theCoeffs[i];
+    current.children[1]=summandsNoCoeff[i];
+  }
+  if (constTerm!=0 || summandsNoCoeff.size()==0)
+  { summandsWithCoeff.resize(summandsWithCoeff.size()+1);
+    Expression& current=summandsWithCoeff[summandsWithCoeff.size()-1];
+    current.reset(this, commandIndex);
+    current.theOperation=this->opInteger();
+    current.theData=constTerm;
+  }
+  if (summandsWithCoeff.size()==1)
+  { theExpression=summandsWithCoeff[0];
+    return true;
+  }
+  Expression* currentExp;
+  currentExp=&theExpression;
+  for (int i=0; i<(signed) summandsWithCoeff.size()-1; i++)
+  { currentExp->reset(this, commandIndex);
+    currentExp->theOperation=this->opPlus();
+    currentExp->children.resize(2);
+    currentExp->children[0]=summandsWithCoeff[i];
+    currentExp=& currentExp->children[1];
+  }
+  *currentExp=summandsWithCoeff[summandsWithCoeff.size()-1];
+  return true;
+}
+
+bool CommandList::OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression)
+{ std::vector<Expression> multiplicands, actualMultiplicands;
+  if (!this->AppendMultiplicands(theExpression, multiplicands, 0, this->MaxRecursionDepthDefault))
+    return false;
+  bool needsModification=false;
+  actualMultiplicands.reserve(multiplicands.size());
+  int theCoeff=1;
+  for (unsigned i=0; i<multiplicands.size(); i++)
+    if (multiplicands[i].theOperation==this->opInteger())
+    { theCoeff*=multiplicands[i].theData;
+      if (i>0)
+        needsModification=true;
+    } else
+      actualMultiplicands.push_back(multiplicands[i]);
+  if (theCoeff==0 && multiplicands.size()>1)
+    needsModification=true;
+  if (!needsModification)
+    return false;
+  if (theCoeff==0)
+  { actualMultiplicands.resize(1);
+    actualMultiplicands[0].reset(this, commandIndex);
+    actualMultiplicands[0].theOperation=this->opInteger();
+    actualMultiplicands[0].theData=0;
+    return true;
+  }
+  if (actualMultiplicands.size()==1 && theCoeff==1)
+  { theExpression=actualMultiplicands[0];
+    return true;
+  }
+  Expression* currentExpression;
+  currentExpression=&theExpression;
+  if (theCoeff!=1)
+  { currentExpression->theOperation=this->opTimes();
+    currentExpression->children.resize(2);
+    currentExpression->children[0].MakeInt(theCoeff, this, commandIndex);
+    currentExpression=&currentExpression->children[1];
+  }
+  for (unsigned i=0; i<actualMultiplicands.size()-1; i++)
+  { currentExpression->reset(theExpression.theBoss, theExpression.commandIndex);
+    currentExpression->theOperation=this->opTimes();
+    currentExpression->children.resize(2);
+    currentExpression->children[0]=actualMultiplicands[i];
+    currentExpression=&currentExpression->children[1];
+  }
+  *currentExpression=actualMultiplicands[actualMultiplicands.size()-1];
   return true;
 }
 
@@ -1066,57 +1253,7 @@ bool CommandList::EvaluateStandardTimes
   { theExpression.errorString="Programming error: operation * always takes two arguments.";
     return true;
   }
-  Expression& left= theExpression.children[0];
-  Expression& right=theExpression.children[1];
-  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
-  { theExpression.theOperation=theCommands.opInteger();
-    theExpression.theData=left.theData*right.theData;
-    theExpression.children.resize(0);
-    return true;
-  }
-  if (right.theOperation==theCommands.opTimes() || right.theOperation==theCommands.opInteger())
-  { std::vector<Expression> multiplicands;
-    if (!theCommands.AppendMultiplicands(theExpression, multiplicands, 0, theCommands.MaxRecursionDepthDefault))
-      return false;
-    int lowestIndex=-1;
-    int theCoeff=1;
-    for (unsigned i=0; i<multiplicands.size(); i++)
-      if (multiplicands[i].theOperation==theCommands.opInteger())
-         theCoeff*=multiplicands[i].theData;
-      else
-      { lowestIndex++;
-        multiplicands[lowestIndex]=multiplicands[i];
-      }
-    if (theCoeff==0)
-      lowestIndex=-1;
-
-    if (lowestIndex==-1)
-    { theExpression.theOperation=theCommands.opInteger();
-      theExpression.theData=theCoeff;
-      return true;
-    }
-    multiplicands.resize(lowestIndex+1);
-    Expression* currentExpression;
-    currentExpression=&theExpression;
-    for (int i=multiplicands.size()-1; i>=1; i--)
-    { currentExpression->theOperation=theCommands.opTimes();
-      currentExpression->children.resize(2);
-      currentExpression->children[1]=multiplicands[i];
-      currentExpression=&currentExpression->children[0];
-      currentExpression->reset(theExpression.theBoss, theExpression.commandIndex);
-    }
-    if (theCoeff!=1)
-    { currentExpression->theOperation=theCommands.opTimes();
-      currentExpression->children.resize(2);
-      currentExpression->children[1]=multiplicands[0];
-      currentExpression->children[0].reset(theExpression.theBoss, theExpression.commandIndex);
-      currentExpression->children[0].theOperation=theCommands.opInteger();
-      currentExpression->children[0].theData=theCoeff;
-    } else
-      *currentExpression=multiplicands[0];
-    return true;
-  }
-  return false;
+  return theCommands.OrderMultiplicationTreeProperly(commandIndex, theExpression);
 }
 
 bool CommandList::EvaluateStandardPlus
@@ -1125,34 +1262,8 @@ bool CommandList::EvaluateStandardPlus
   { theExpression.errorString="Programming error: operation + always takes two arguments.";
     return true;
   }
-  Expression& left= theExpression.children[0];
-  Expression& right=theExpression.children[1];
-  bool result=false;
-  if (left.theOperation==theCommands.opInteger() && right.theOperation!=theCommands.opInteger())
-  { std::swap(theExpression.children[0], theExpression.children[1]);
-    result=true;
-  }
-  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
-  { theExpression.theOperation=theCommands.opInteger();
-    theExpression.theData=left.theData+right.theData;
-    theExpression.children.resize(0);
-    return true;
-  }
-  //associativity with respect to integers
-  if (left.theOperation==theCommands.opPlus() && right.theOperation==theCommands.opInteger())
-  { if (left.children.size()!=2)
-    { assert(false);
-      return false;
-    }
-    if (left.children[1].theOperation==theCommands.opInteger())
-    { left.children[1].theData+=right.theData;
-      Expression tempExp=left;
-      theExpression=tempExp;
-      return true;
-    }
-  }
-  return result;
-}
+  return theCommands.CollectSummands(commandIndex, theExpression);
+ }
 
 bool CommandList::EvaluateIf
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
@@ -1201,26 +1312,27 @@ bool CommandList::EvaluateStandardMinus
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
 { if (theExpression.children.size()!=1&& theExpression.children.size()!=2)
   { theExpression.errorString="Programming error: operation - takes one or two arguments.";
-    return true;
-  }
-  Expression& left= theExpression.children[0];
-  if (theExpression.children.size()==1)
-  { if (left.theOperation==theCommands.opInteger() )
-    { theExpression.theData=-left.theData;
-      theExpression.theOperation=theCommands.opInteger();
-      theExpression.children.resize(0);
-      return true;
-    }
     return false;
   }
-  Expression& right=theExpression.children[1];
-  if (left.theOperation==theCommands.opInteger() && right.theOperation==theCommands.opInteger())
-  { theExpression.theOperation=theCommands.opInteger();
-    theExpression.theData=left.theData-right.theData;
-    theExpression.children.resize(0);
-    return true;
+  Expression* toBeTransformed=0;
+  if (theExpression.children.size()==1)
+  { theExpression.AssignMeMyChild(0);
+    toBeTransformed=&theExpression;
   }
-  return false;
+  else
+  { toBeTransformed=& theExpression.children[1];
+    theExpression.theOperation=theCommands.opPlus();
+  }
+  Expression tempExp;
+  tempExp.reset(& theCommands, commandIndex);
+  tempExp.theOperation=theCommands.opTimes();
+  tempExp.children.resize(2);
+  tempExp.children[0].reset(& theCommands, commandIndex);
+  tempExp.children[0].theOperation=theCommands.opInteger();
+  tempExp.children[0].theData=-1;
+  tempExp.children[1]=*toBeTransformed;
+  *toBeTransformed=tempExp;
+  return true;
 }
 
 bool Expression::operator==
@@ -1328,11 +1440,11 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       return true;
     }
     assert((signed) this->theStandardOpEvalFunctions.size()> theExpression.theOperation);
-    std::cout << "<hr>before standard eval: " << theExpression.ElementToString();
+//    std::cout << "<hr>before standard eval: " << theExpression.ElementToString();
     if (this->theStandardOpEvalFunctions[theExpression.theOperation]!=0)
       if (this->theStandardOpEvalFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
         NonReduced=true;
-    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
+//    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
     for (int i=0; i<commandIndex; i++)
       if (this->theCommands[i].ErrorString=="")
       { Expression& currentPattern=this->theCommands[i].finalValue;
@@ -1430,9 +1542,6 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   assert(thePattern.children.size()==2 || thePattern.children.size()==3);
   if (theLog!=0 && logAttempts)
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ElementToString();
-    if (theExpression.ElementToString()=="2*d+3*d")
-    { *theLog << "<br>problem<br>";
-    }
     (*theLog) << " by pattern " << thePattern.ElementToString();
   }
   Expression& currentPattern=thePattern.children[0];
@@ -1557,8 +1666,17 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication())
     << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   else if (this->theOperation==this->theBoss->opTimes() )
-  { out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
-    if (this->formattingOptions==this->formatTimesDenotedByStar)
+  { std::string tempS=this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
+    if (false)
+    {
+    if (tempS=="-1")
+      tempS="-";
+    if (tempS=="1")
+      tempS="";
+    } else
+      tempS="("+tempS+")";
+    out << tempS;
+    if (this->formattingOptions==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
     out << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   }
@@ -1566,8 +1684,13 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForThePower())
     << "^{" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false) << "}";
   else if (this->theOperation==this->theBoss->opPlus() )
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition())
-    << "+" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForAddition());
+  { out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition());
+    std::string tempS=this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForAddition());
+    if (tempS.size()>0)
+      if (tempS[0]!='-')
+        out << "+";
+    out << tempS;
+  }
   else if (this->theOperation==this->theBoss->opMinus())
   { if ( this->children.size()==1)
       out << "-" << this->children[0].ElementToString
@@ -1672,7 +1795,7 @@ bool Expression::NeedBracketsForFunctionName() const
 }
 
 bool Expression::NeedBracketsForMultiplication()const
-{ return this->children.size()>1;
+{ //return this->children.size()>1;
   return
   this->theOperation==this->theBoss->opPlus() ||
   this->theOperation==this->theBoss->opMinus()
@@ -1690,6 +1813,12 @@ bool Expression::NeedBracketsForThePower()const
   this->theOperation==this->theBoss->opTimes() ||
   this->theOperation==this->theBoss->opDivide()
   ;
+}
+
+void Expression::MakeInt(int theValue, CommandList* newBoss, int indexOfTheCommand)
+{ this->reset(newBoss, indexOfTheCommand);
+  this->theData=theValue;
+  this->theOperation=newBoss->opInteger();
 }
 
 #include <sys/time.h>
@@ -1884,7 +2013,11 @@ int main(int argc, char **argv)
 //  inputString="2*c*3*a*5*d*2";
  // inputString="2*c*3";
 //  inputString="c*1";
-inputString="2*c*d*1";
+//inputString="2*c*d*1";
+//  inputString="a+a";
+//  inputString="1*1a";
+//inputString="a*b";
+//inputString="2a b*2+a b";
   std::string beginMath="<div class=\"math\" scale=\"50\">";
   std::string endMath ="</div>";
   std::cout << "<table><tr><td valign=\"top\">";
@@ -1905,6 +2038,6 @@ inputString="2*c*d*1";
   std::cout << theComputation.theLog;
   std::cout << "</td></tr></table>";
   std::cout << "</body></html>";
-
+//  std::system("cls");
 	return 0;   // To avoid Apache errors.
 }

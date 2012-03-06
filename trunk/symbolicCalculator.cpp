@@ -1035,7 +1035,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
 //    return this->ReplaceXXXByCon(this->theBoss->conBindVariable());
   if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
     return this->RegisterBoundVariable();
-  if (lastS=="Variable" && lookAhead!="}")
+  if (lastS=="Variable" && (lookAhead!="}" || secondToLastS!="{"|| thirdToLastS!="{"))
     return this->ReplaceVbyE();
   if (lastS==";")
     return this->DecreaseStackSetCharacterRanges(1);
@@ -1062,6 +1062,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (lastS=="Expression" && secondToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEEByEusingO(this->theBoss->opTimes());
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
+    return this->ReplaceXEXByE();
+  if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}" && lookAhead!="}")
     return this->ReplaceXEXByE();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();

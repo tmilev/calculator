@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <map>
+//#include <algorithm>
 #include <sstream>
 #include<assert.h>
 
@@ -128,20 +128,42 @@ class hashedVector
   }
 };
 
-class Expression
+class ExpressionProperty
 {
   public:
-  CommandList* theBoss;
-  int commandIndex;
-  ///////////////////////////////////////
+  int nameIndex;
+  int value;
+  bool operator==(const ExpressionProperty& other)
+  { return nameIndex==other.nameIndex && this->value==other.value;
+  }
+  bool operator<(const ExpressionProperty& other)const
+  { if (this->nameIndex<other.nameIndex)
+      return true;
+    return this->value<other.value;
+  }
+  ExpressionProperty():nameIndex(-1), value(0){}
+};
+
+class Expression
+{ //Each expression maintains an explicit list of properties.
+  //Each property not listed explicitly is assumed to be a property of the expression with
+  // value 0.
+  //A request to get a value of a property not contained in the list of
+  //properties will return 0 without adding the property to the list.
+  //A request to set the value of a property not contained in the list of
+  //properties will add the property to the explicit list of properties.
+  //The properties are not used when comparing two expressions (operator==())
+  //Two expressions that are with different properties but are otherwise equal are considered equal.
+  std::vector<ExpressionProperty> theProperties;
+  public:
   int theOperation;
   int theData;
   std::vector<Expression> children;
-  ///////////////////////////////////////
-  int formattingOptions;
-  std::string correspondingString;
   std::string errorString;
-
+  ///////////////////////////////////////
+  //two objects are considered equal even when the the following data is different:
+  CommandList* theBoss;
+  int commandIndex;
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot,
@@ -151,13 +173,36 @@ class Expression
   void reset(CommandList* newBoss, int indexOfTheCommand)
   { this->theBoss=newBoss;
     this->commandIndex=indexOfTheCommand;
-    this->children.resize(0);
+    this->children.clear();
     this->theOperation=-1;
     this->theData=0;
+    this->theProperties.clear();
+    this->errorString="";
   }
-  void AssignMeMyChild(int childIndex)
+  void AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
+  }
+  void SetPropertyValue(const ExpressionProperty& theProp)
+  { for (unsigned i=0; i<this->theProperties.size(); i++)
+      if (theProp.nameIndex==this->theProperties[i].nameIndex)
+      { this->theProperties[i].value=theProp.value;
+        return;
+      }
+    this->theProperties.push_back(theProp);
+  }
+  void SetPropertyValue(const std::string& propertyName, int PropertyValue)
+  ;
+  int GetPropertyValue(const std::string& propName)const
+;
+  void SetProduct
+  (CommandList* owner, int commandIndex, const Expression& left, const Expression& right)
+  ;
+  int GetPropertyValue(const ExpressionProperty& theProp)const
+  { for (unsigned i=0; i<theProperties.size(); i++)
+      if (theProperties[i].nameIndex==theProp.nameIndex)
+        return theProperties[i].value;
+    return 0;
   }
   std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false, bool AddCurlyBraces=false)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
@@ -166,34 +211,55 @@ class Expression
   }
   std::string GetOperation()const;
   Expression()
-  { this->theBoss=0;
-    this->errorString="";
-    this->theData=0;
-    this->theOperation=-1;
-    this->commandIndex=-1;
-    this->formattingOptions=this->formatDefault;
+  { this->reset(0,-1);
   }
   Expression(const Expression& other)
   { this->theBoss=0;
     this->operator=(other);
+  }
+  bool AreEqualExcludingChildren(const Expression& other) const
+  { return
+    this->theBoss==other.theBoss &&
+    this->theData==other.theData &&
+    this->theOperation==other.theOperation &&
+    this->children.size()==other.children.size() &&
+    this->errorString==other.errorString
+    ;
   }
   bool NeedBracketsForMultiplication()const;
   bool NeedBracketsForAddition()const;
   bool NeedBracketsForFunctionName()const;
   bool NeedBracketsForThePower()const;
   bool operator==(const Expression& other)const;
-  void operator=(const Expression& other)
-  { if (this==&other)
-      return;
-    this->theBoss=other.theBoss;
+  void CopyValueFromNoChildrenCopy(const Expression& other)
+  { this->theBoss=other.theBoss;
     this->commandIndex=other.commandIndex;
-    this->children=other.children;
     this->theData=other.theData;
     this->theOperation=other.theOperation;
-    //////////////////////////////////////////////////////////////
-    this->formattingOptions=other.formattingOptions;
-    this->correspondingString=other.correspondingString;
     this->errorString=other.errorString;
+    this->theProperties=other.theProperties;
+    this->children.resize(other.children.size());
+  }
+  inline void operator=(const Expression& other)
+  { //warning: we are assuming that invoking function OperatorAssignRecursively
+    // recursively RecursionDepthThatWouldNonPopTheStack times
+    //will not pop the stack. If this is not the case, the program might crash unexpectedly.
+    const int RecursionDepthThatWouldNonPopTheStack=100000;
+    this->OperatorAssignRecursively(other, 0, RecursionDepthThatWouldNonPopTheStack);
+  }
+  void OperatorAssignRecursively(const Expression& other, int RecursionDepth, int MaxRecursionDepth)
+  { if (this==&other)
+      return;
+    this->CopyValueFromNoChildrenCopy(other);
+    if (RecursionDepth>MaxRecursionDepth)
+    { std::stringstream out;
+      out << "Error while copying expression: expression depth exceeded maximum allowed depth of " << MaxRecursionDepth;
+      this->errorString=out.str();
+      return;
+    }
+    this->children.resize(other.children.size());
+    for (unsigned i=0; i<other.children.size(); i++)
+      this->children[i].OperatorAssignRecursively(other.children[i], RecursionDepth+1, MaxRecursionDepth);
   }
 };
 
@@ -365,14 +431,15 @@ public:
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
+  bool ReplaceEOEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceEOEByE(const ExpressionProperty& theProp)
   { SyntacticElement& middle=this->expressionStacK[this->expressionStacK.size()-2];
     SyntacticElement& left = this->expressionStacK[this->expressionStacK.size()-3];
     SyntacticElement& right = this->expressionStacK[this->expressionStacK.size()-1];
     Expression newExpr;
     newExpr.reset(this->theBoss, this->IndexInBoss);
     newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
-    newExpr.formattingOptions=formatOptions;
+    newExpr.SetPropertyValue(theProp);
     newExpr.children.push_back(left.theData);
     newExpr.children.push_back(right.theData);
     left.theData=newExpr;
@@ -382,13 +449,13 @@ public:
   }
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->expressionStacK[this->expressionStacK.size()-2].controlIndex=theCon;
-    this->expressionStacK[this->expressionStacK.size()-2].theData.formattingOptions=theFormat;
+    this->expressionStacK[this->expressionStacK.size()-2].theData.SetPropertyValue("format", theFormat);
     this->DecreaseStackSetCharacterRanges(1);
     return true;
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->expressionStacK[this->expressionStacK.size()-1].controlIndex=theCon;
-    this->expressionStacK[this->expressionStacK.size()-1].theData.formattingOptions=theFormat;
+    this->expressionStacK[this->expressionStacK.size()-1].theData.SetPropertyValue("format", theFormat);
 //    this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
@@ -470,13 +537,16 @@ public:
 //used to parametrize the input data for the special operation "VariableNonBound"
   hashedVector<VariableNonBound, VariableNonBound::hashVariableNonBound> theNonBoundVars;
   hashedVector<std::string, hashString> theDictionary;
+  hashedVector<std::string, hashString> thePropertyNames;
+  std::vector<ExpressionProperty> targetProperties;
+  std::vector <bool ((*)(CommandList& theCommands, int commandIndex, Expression& theExpression))> targetPropertiesHandlers;
+
 //  std::vector<>
 
   int MaxRecursionDepthDefault;
   int MaxAlgTransformationsPerExpression;
   std::vector<Command> theCommands;
 //  std::vector<std::stringstream> theLogs;
-
   hashedVector<std::string, hashString> cashedExpressions;
   std::vector <std::string> syntaxErrors;
   std::vector <std::string> evaluationErrors;
@@ -519,6 +589,10 @@ public:
   }
   int opVariableNonBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
+  }
+  void AddTargetProperty(const std::string& propertyName, int theData, bool theHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+  { this->targetProperties.push_back(this->GetProperty(propertyName, theData));
+    this->targetPropertiesHandlers.push_back(theHandler);
   }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
@@ -568,6 +642,16 @@ public:
    int RecursionDepth,
    int maxRecursionDepth, std::stringstream* theLog=0, bool logAttempts=true)
   ;
+  ExpressionProperty GetProperty(const std::string& propertyName, int theData=0)
+  { ExpressionProperty result;
+    result.value=theData;
+    result.nameIndex=this->thePropertyNames.GetIndex(propertyName);
+    if (result.nameIndex==-1)
+    { this->thePropertyNames.AddOnTop(propertyName);
+      result.nameIndex=this->thePropertyNames.size()-1;
+    }
+    return result;
+  }
   bool isADigit(const std::string& input, int& whichDigit)
   { if (input.size()!=1)
       return false;
@@ -597,6 +681,10 @@ public:
   static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
+
+  static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression);
 
   static bool EvaluateFunctionIsInteger(CommandList& theCommands, int commandIndex, Expression& theExpression);
 
@@ -637,7 +725,6 @@ public:
     this->theNonBoundVars.AddOnTop(tempVar);
     return this->theNonBoundVars.size()-1 ;
   }
-
   void init()
   { this->controlSequences.reset();
     this->operations.reset();
@@ -647,6 +734,9 @@ public:
     this->theStandardOpEvalFunctions.resize(0);
     this->syntaxErrors.resize(0);
     this->evaluationErrors.resize(0);
+    this->thePropertyNames.reset();
+    this->targetProperties.resize(0);
+    this->targetPropertiesHandlers.resize(0);
     this->MaxRecursionDepthDefault=1000;
     this->AddOperationNoFail("+",this->EvaluateStandardPlus);
     this->AddOperationNoFail("-", this->EvaluateStandardMinus);
@@ -684,11 +774,15 @@ public:
     this->controlSequences.AddOnTop(":");
     this->controlSequences.AddOnTop("=");
     this->controlSequences.AddOnTop(";");
-    initPredefinedDictionary();
+//    this->thePropertyNames.AddOnTop("IsCommutative");
+    this->initPredefinedDictionary();
+    this->initTargetProperties();
   }
-
   void initPredefinedDictionary()
   { this->AddNonBoundVarMustBeNew("IsInteger", &this->EvaluateFunctionIsInteger);
+  }
+  void initTargetProperties()
+  { this->AddTargetProperty("IsDistributed", 1, & this->EvaluateDoDistribute);
   }
   void ExtractExpressions()
   { std::string lookAheadToken;
@@ -733,6 +827,38 @@ public:
   void ParseFillDictionary(const std::string& input);
 };
 
+void Expression::SetProduct
+  (CommandList* owner, int commandIndex, const Expression& left, const Expression& right)
+{ this->reset(owner, commandIndex);
+  this->theOperation=owner->opTimes();
+  this->children.resize(2);
+  this->children[0]=left;
+  this->children[1]=right;
+}
+
+bool Command::ReplaceEOEByE(int formatOptions)
+{ return this->ReplaceEOEByE(this->theBoss->GetProperty("format", formatOptions));
+}
+
+void Expression::SetPropertyValue(const std::string& propertyName, int PropertyValue)
+{ if (this->theBoss==0)
+  { assert(false);
+    return;
+  }
+  this->SetPropertyValue(this->theBoss->GetProperty(propertyName, PropertyValue));
+}
+
+int Expression::GetPropertyValue( const std::string& propertyName)const
+{ if (this->theBoss==0)
+  { assert(false);
+    return 0;
+  }
+  for (unsigned i=0; i<theProperties.size(); i++)
+    if (this->theBoss->thePropertyNames[theProperties[i].nameIndex]==propertyName)
+      return theProperties[i].value;
+  return 0;
+}
+
 bool Command::ReplaceOXEXEXEXByE(int formatOptions)
 { SyntacticElement& opElt=this->expressionStacK[this->expressionStacK.size()-8];
   SyntacticElement& leftE = this->expressionStacK[this->expressionStacK.size()-6];
@@ -741,7 +867,7 @@ bool Command::ReplaceOXEXEXEXByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
-  newExpr.formattingOptions=formatOptions;
+  newExpr.SetPropertyValue("format", formatOptions);
   newExpr.children.push_back(leftE.theData);
   newExpr.children.push_back(middleE.theData);
   newExpr.children.push_back(rightE.theData);
@@ -760,7 +886,7 @@ bool Command::ReplaceOXXEXEXEXByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
-  newExpr.formattingOptions=formatOptions;
+  newExpr.SetPropertyValue("format", formatOptions);
   newExpr.children.push_back(leftE.theData);
   newExpr.children.push_back(middleE.theData);
   newExpr.children.push_back(rightE.theData);
@@ -777,7 +903,7 @@ bool Command::ReplaceOXEByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(left.controlIndex);
-  newExpr.formattingOptions=formatOptions;
+  newExpr.SetPropertyValue("format", formatOptions);
   newExpr.children.push_back(right.theData);
   left.theData=newExpr;
   left.controlIndex=this->theBoss->conExpression();
@@ -792,7 +918,7 @@ bool Command::ReplaceOEByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
-  newExpr.formattingOptions=formatOptions;
+  newExpr.SetPropertyValue("format", formatOptions);
   newExpr.children.push_back(right.theData);
   middle.theData=newExpr;
   middle.controlIndex=this->theBoss->conExpression();
@@ -1026,7 +1152,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (secondToLastS==":" && lastS=="=")
     return this->ReplaceXXByCon(this->theBoss->conDefine());
   if (secondToLastS=="{" && lastS=="}")
-    return this->ReplaceXXByCon(this->theBoss->conDeclareFunction());
+    return this->ReplaceXXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
   if (lastS=="_")
     return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatFunctionUseUnderscore);
   if (lastS=="\\cdot")
@@ -1044,7 +1170,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (lastS=="Integer" && lookAhead!="Integer")
     return this->ReplaceObyE();
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceEOEByE(secondToLastE.theData.formattingOptions);
+    return this->ReplaceEOEByE(secondToLastE.theData.GetPropertyValue("format"));
   if (eighthToLastS=="if" && seventhToLastS=="(" && sixthToLastS=="Expression"
       && fifthToLastS=="," && fourthToLastS=="Expression" && thirdToLastS==","
       && secondToLastS=="Expression" && lastS==")")
@@ -1249,6 +1375,71 @@ bool CommandList::OrderMultiplicationTreeProperly(int commandIndex, Expression& 
   return true;
 }
 
+bool CommandList::EvaluateDoDistribute
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.theOperation!=theCommands.opTimes())
+  { theExpression.SetPropertyValue("IsDistributed", 1);
+    return false;
+  }
+  Expression& left=theExpression.children[0];
+  Expression& right=theExpression.children[1];
+  if (left.GetPropertyValue("IsDistributed")!=1 || right.GetPropertyValue("IsDistributed"))
+    return false;
+  if ((left.theOperation==theCommands.opPlus() || left.theOperation==theCommands.opMinus()) && left.children.size()==2)
+  { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression);
+    return true;
+  }
+  if ((right.theOperation==theCommands.opPlus() || right.theOperation==theCommands.opMinus()) && right.children.size()==2)
+  { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression);
+    return true;
+  }
+  theExpression.SetPropertyValue("IsDistributed", 1);
+  return false;
+}
+
+bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.theOperation!=theCommands.opTimes())
+    return false;
+  Expression left=theExpression.children[0];
+  Expression right=theExpression.children[1];
+  int leftOp=left.theOperation;
+  if (leftOp!=theCommands.opPlus() && leftOp!=theCommands.opMinus())
+    return false;
+  if (left.children.size()!=2)
+    return false;
+  int theFormat=theExpression.GetPropertyValue("format");
+  theExpression.reset(& theCommands, commandIndex);
+  theExpression.theOperation=leftOp;
+  theExpression.children[0].SetProduct(&theCommands, commandIndex, left.children[0], right);
+  theExpression.children[1].SetProduct(&theCommands, commandIndex, left.children[1], right);
+  theExpression.children[0].SetPropertyValue("format", theFormat);
+  theExpression.children[1].SetPropertyValue("format", theFormat);
+  return true;
+}
+
+bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theExpression.theOperation!=theCommands.opTimes())
+    return false;
+  Expression left=theExpression.children[0];
+  Expression right=theExpression.children[1];
+  int rightOp=right.theOperation;
+  if (rightOp!=theCommands.opPlus() && rightOp!=theCommands.opMinus())
+    return false;
+  if (right.children.size()!=2)
+    return false;
+  int theFormat=theExpression.GetPropertyValue("format");
+  theExpression.reset(& theCommands, commandIndex);
+  theExpression.theOperation=rightOp;
+  theExpression.children[0].SetProduct(&theCommands, commandIndex, left, right.children[0]);
+  theExpression.children[1].SetProduct(&theCommands, commandIndex, left, right.children[1]);
+  theExpression.children[0].SetPropertyValue("format", theFormat);
+  theExpression.children[1].SetPropertyValue("format", theFormat);
+  return true;
+}
+
+
 bool CommandList::EvaluateStandardTimes
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
 { if (theExpression.children.size()!=2)
@@ -1277,11 +1468,11 @@ bool CommandList::EvaluateIf
   if (left.theOperation!=theCommands.opInteger())
     return false;
   if (left.theData==1)
-  { theExpression.AssignMeMyChild(1);
+  { theExpression.AssignChild(1);
     return true;
   }
   if (left.theData==0)
-  { theExpression.AssignMeMyChild(2);
+  { theExpression.AssignChild(2);
     return true;
   }
   return false;
@@ -1318,7 +1509,7 @@ bool CommandList::EvaluateStandardMinus
   }
   Expression* toBeTransformed=0;
   if (theExpression.children.size()==1)
-  { theExpression.AssignMeMyChild(0);
+  { theExpression.AssignChild(0);
     toBeTransformed=&theExpression;
   }
   else
@@ -1354,8 +1545,7 @@ bool CommandList::ExpressionsAreEqual
     this->evaluationErrors.push_back(out.str());
     return false;
   }
-  if (left.theBoss!=this || right.theBoss!=this || left.theData!=right.theData || left.theOperation!=right.theOperation ||
-        left.children.size()!=right.children.size())
+  if (!left.AreEqualExcludingChildren(right))
     return false;
   for (unsigned i=0; i<left.children.size(); i++)
     if (!this->ExpressionsAreEqual (left.children[i], right.children[i], RecursionDepth+1, MaxRecursionDepth))
@@ -1442,10 +1632,15 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       return true;
     }
     assert((signed) this->theStandardOpEvalFunctions.size()> theExpression.theOperation);
+    for (unsigned i=0; i<this->targetProperties.size(); i++)
+      if (theExpression.GetPropertyValue(this->targetProperties[i])!=this->targetProperties[i].value)
+        if (this->targetPropertiesHandlers[i]!=0)
+          if (this->targetPropertiesHandlers[i](*this, commandIndex, theExpression))
+            NonReduced=true;
 //    std::cout << "<hr>before standard eval: " << theExpression.ElementToString();
-    if (this->theStandardOpEvalFunctions[theExpression.theOperation]!=0)
-      if (this->theStandardOpEvalFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
-        NonReduced=true;
+//    if (this->theStandardOpEvalFunctions[theExpression.theOperation]!=0)
+//      if (this->theStandardOpEvalFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
+//        NonReduced=true;
 //    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
     for (int i=0; i<commandIndex; i++)
       if (this->theCommands[i].ErrorString=="")
@@ -1678,7 +1873,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     } else
       tempS="("+tempS+")";
     out << tempS;
-    if (this->formattingOptions==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
+    if (this->GetPropertyValue("format")==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
     out << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   }
@@ -1714,7 +1909,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   else if (this->theOperation==this->theBoss->opFunction())
   { out << this->children[0].ElementToString
     (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName());
-    switch(this->formattingOptions)
+    switch(this->GetPropertyValue("format"))
     { case Expression::formatFunctionUseUnderscore:
         out << "_{" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << "}";
         break;
@@ -1757,6 +1952,18 @@ std::string Expression::ElementToStringPolishForm(int recursionDepth, int maxRec
     }
     out << "}";
   }
+  if (this->theProperties.size()>0)
+  { out << "; properties: ";
+    for (unsigned i=0; i<this->theProperties.size(); i++)
+    { if (this->theBoss==0)
+        out << this->theProperties[i].nameIndex;
+      else
+        out << this->theBoss->thePropertyNames[this->theProperties[i].nameIndex];
+      out << "=" << this->theProperties[i].value;
+      if (i< this->theProperties.size()-1)
+        out << ",";
+    }
+  }
   return out.str();
 }
 
@@ -1792,7 +1999,7 @@ bool Expression::NeedBracketsForFunctionName() const
 { return !(
   this->theOperation==this->theBoss->opVariableBound() ||
   this->theOperation==this->theBoss->opVariableNonBound() ||
-  (this->theOperation==this->theBoss->opFunction() && this->formattingOptions==this->formatFunctionUseUnderscore)
+  (this->theOperation==this->theBoss->opFunction() && this->GetPropertyValue("format")==this->formatFunctionUseUnderscore)
   );
 }
 

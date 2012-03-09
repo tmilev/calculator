@@ -12,6 +12,9 @@
 #define __DATE__ " unknown date "
 #endif
 
+//#undef ANNOYINGSTATISTICS
+//#define ANNOYINGSTATISTICS std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
+
 
 extern int GlobalPointerCounter;
 
@@ -102,7 +105,6 @@ void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
 
-#define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at line " << __LINE__ << ": " << GetElapsedTimeInSeconds()
 
 int main(int argc, char **argv)
 {

@@ -16051,6 +16051,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(WeylGroup& input, GlobalVar
   for (int i=0; i<posRoots.size; i++)
     nonExploredRoots.AddSelectionAppendNewIndex(i);
   root tempRoot;
+  ANNOYINGSTATISTICS;
+//  std::cout << "<hr>time before running initilization cycle: " << theGlobalVariables.GetElapsedSeconds();
   for (int i=0; i<this->theWeyl.RootSystem.size; i++)
     for(int j=i; j<this->theWeyl.RootSystem.size; j++)
     { tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
@@ -16063,6 +16065,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(WeylGroup& input, GlobalVar
         }
     }
   Rational tempRat;
+  ANNOYINGSTATISTICS;
+//  std::cout << "<hr>time before running main cycle: " << theGlobalVariables.GetElapsedSeconds();
   while (nonExploredRoots.CardinalitySelection>0)
   { //this->ComputeDebugString();
     //nonExploredRoots.ComputeDebugString();
@@ -16117,6 +16121,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstants(WeylGroup& input, GlobalVar
   }
 //  this->ComputeDebugString();
 //  this->TestForConsistency(theGlobalVariables);
+//  std::cout << "<hr>time before computing multiplication table for chevalley constants:" << theGlobalVariables.GetElapsedSeconds();
+  ANNOYINGSTATISTICS;
   this->ComputeMultTable(theGlobalVariables);
 }
 
@@ -22990,6 +22996,8 @@ Parser::ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVari
 
 void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theHmm.theRange.ComputeChevalleyConstants(this->DefaultWeylLetter, this->DefaultWeylRank, theGlobalVariables);
+  ANNOYINGSTATISTICS;
+  //std::cout << "<hr>Chevalley constants computed on the " << theGlobalVariables.GetElapsedSeconds() << " second.";
   this->Parse(input);
   //this->ComputeDebugString(false, theGlobalVariables);
 }

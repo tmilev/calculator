@@ -307,6 +307,7 @@ public:
   Expression finalValue;
   int numEmptyTokensStart;
   int IndexInBoss;
+  bool flagOpDefineEncountered;
   std::string theLog;
   std::string ErrorString;
   hashedVector<std::string, hashString> BoundVariables;
@@ -320,6 +321,7 @@ public:
     this->ErrorString=other.ErrorString;
     this->theBoss=other.theBoss;
     this->IndexInBoss=other.IndexInBoss;
+    this->flagOpDefineEncountered=other.flagOpDefineEncountered;
     this->log=other.log;
   }
   bool DecreaseStackSetCharacterRanges(int decrease)
@@ -338,6 +340,7 @@ public:
     this->BoundVariables.reset();
     this->finalValue.reset(owner, -1);
     this->theBoss=owner;
+    this->flagOpDefineEncountered=false;
     this->IndexInBoss=commandIndexInBoss;
     this->ErrorString="";
   }
@@ -575,6 +578,9 @@ public:
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
     return result;
+  }
+  int conError()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Error");
   }
   int conExpression()
   { return this->controlSequences.GetIndexIMustContainTheObject("Expression");
@@ -1147,15 +1153,21 @@ bool Command::ReplaceVbyE()
   const std::string& theVarString=this->theBoss->theDictionary[theElt.theData.theData];
   int indexBoundVar=this->BoundVariables.GetIndex(theVarString);
   if (indexBoundVar!=- 1)
-  { theElt.theData.theOperation=this->theBoss->opVariableBound();
-    theElt.theData.theData=indexBoundVar;
+  { if (!this->flagOpDefineEncountered)
+    { theElt.theData.theOperation=this->theBoss->opVariableBound();
+      theElt.theData.theData=indexBoundVar;
+      theElt.controlIndex=this->theBoss->conExpression();
+    }else
+    { theElt.ErrorString="Error: bound variables cannot be declared after the definition operation := .";
+      theElt.controlIndex=this->theBoss->conError();
+    }
   } else
   { theElt.theData.theOperation=this->theBoss->opVariableNonBound();
     theElt.theData.theData=this->theBoss->AddNonBoundVarReturnVarIndex(theVarString, 0);
+    theElt.controlIndex=this->theBoss->conExpression();
     //note:     theElt.theData.theOperation.theData     should be initialized with the index of the non-bound variable!
   }
 //  std::cout << "now i'm here!";
-  theElt.controlIndex=this->theBoss->conExpression();
   return true;
 }
 
@@ -1212,7 +1224,9 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
 //  std::cout << "<hr>" << this->ElementToString();
 //this->theBoss->ElementToString();
   if (secondToLastS==":" && lastS=="=")
+  { this->flagOpDefineEncountered=true;
     return this->ReplaceXXByCon(this->theBoss->conDefine());
+  }
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
   if (lastS=="_")
@@ -1897,15 +1911,18 @@ void CommandList::EvaluateCommands()
 
 std::string SyntacticElement::ElementToString(CommandList& theBoss)
 { std::stringstream out;
-  if (this->controlIndex==theBoss.conExpression())
+  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError();
+  if (makeTable)
     out <<"<table border=\"1\"><tr><td>";
   if (this->controlIndex<0)
     out << "Error: control index is not initialized! This is likely a programming error.";
   else
     out << theBoss.controlSequences[this->controlIndex];
-  if (this->controlIndex==theBoss.conExpression())
+  if (makeTable)
   { out << "</td></tr><tr><td>";
     out << this->theData.ElementToString(0, 10);
+    if (this->ErrorString!="")
+      out << "</td></tr><tr><td>" << this->ErrorString;
     out << "</td></tr></table>";
   }
   return out.str();

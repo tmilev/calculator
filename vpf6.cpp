@@ -1553,17 +1553,13 @@ bool CommandList::EvaluateStandardFunction
   }
   Expression& functionNameNode =theExpression.children[0];
   if (functionNameNode.theOperation!=theExpression.theBoss->opVariableNonBound())
-  { theExpression.errorString="Error: the first argument of the function operation is not a valid name of a function \
-    (only Expressions of type VariableNonBound can be used as function names).";
-    return true;
-  }
+    return false;
   bool (*theFun)(CommandList& , int , Expression& );
   theFun=theExpression.theBoss->theNonBoundVars [functionNameNode.theData].theHandler;
   if (theFun==0)
     return false;
   theFun(theCommands, commandIndex, theExpression);
   return true;
-
 }
 
 bool CommandList::EvaluateStandardEqualEqual

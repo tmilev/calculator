@@ -149,6 +149,7 @@ class Expression
   std::string errorString;
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
+  int format;
   CommandList* theBoss;
   int commandIndex;
   enum format
@@ -162,6 +163,7 @@ class Expression
     this->theOperation=-1;
     this->theData=0;
     this->errorString="";
+    this->format=this->formatDefault;
   }
   void AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
@@ -174,8 +176,6 @@ class Expression
   int GetPropertyValue(int propertyIndex)const
 ;
   void MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
-  ;
-  void MakeIntNoProperties(int theValue, CommandList* newBoss, int indexOfTheCommand)
   ;
 void MakeVariableNonBoundNoProperties
   (CommandList* owner, int indexOfTheCommand, int varIndex)
@@ -234,6 +234,7 @@ void MakeVariableNonBounD
     this->theOperation=other.theOperation;
     this->errorString=other.errorString;
     this->children.resize(other.children.size());
+    this->format=other.format;
   }
   inline void operator=(const Expression& other)
   { //warning: we are assuming that invoking function OperatorAssignRecursively
@@ -273,6 +274,7 @@ class SyntacticElement
   int controlIndex;
   int IndexFirstChar;
   int IndexLastCharPlusOne;
+  int format;
   std::string ErrorString;
   Expression theData;
   void operator=(const SyntacticElement& other)
@@ -288,6 +290,7 @@ class SyntacticElement
     this->ErrorString="";
     this->IndexFirstChar=-1;
     this->IndexLastCharPlusOne=-1;
+    this->format=Expression::formatDefault;
   }
   SyntacticElement(const SyntacticElement& other)
   { this->operator=(other);
@@ -370,11 +373,26 @@ public:
       out << "<br>=(in polish form):" << this->finalValue.ElementToStringPolishForm(0, 20);
     return out.str();
   }
+  bool isStrongLeftSeparator(const std::string& input)
+  { return
+    input=="{" || input=="(" || input=="[" ||
+    input=="," || input==":" || input==";" ||
+    input==" "
+    ;
+  }
+  bool isStrongRightSeparator(const std::string& input)
+  { return
+    input=="}" || input==")" || input=="]" ||
+    input=="," || input==":" || input==";" ||
+    input==" "
+    ;
+  }
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return
       lookAhead!="{}"
       ;
-  }  bool LookAheadAllowsPlus(const std::string& lookAhead)
+  }
+  bool LookAheadAllowsPlus(const std::string& lookAhead)
   { return
       lookAhead=="+" || lookAhead=="-" ||
       lookAhead==")" || lookAhead==";" ||
@@ -434,20 +452,20 @@ public:
     newExpr.children.push_back(left.theData);
     newExpr.children.push_back(right.theData);
     left.theData=newExpr;
-    newExpr.SetPropertyValue("format", formatOptions);
+    newExpr.format=formatOptions;
     this->DecreaseStackSetCharacterRanges(2);
 //    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
     return true;
   }
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size()-2].controlIndex=theCon;
-    this->syntacticStack[this->syntacticStack.size()-2].theData.SetPropertyValue("format", theFormat);
+    this->syntacticStack[this->syntacticStack.size()-2].format=theFormat;
     this->DecreaseStackSetCharacterRanges(1);
     return true;
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size()-1].controlIndex=theCon;
-    this->syntacticStack[this->syntacticStack.size()-1].theData.SetPropertyValue("format", theFormat);
+    this->syntacticStack[this->syntacticStack.size()-1].format=theFormat;
 //    this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
@@ -567,6 +585,9 @@ public:
   int conInteger()
   { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
   }
+  int conEqualEqual()
+  { return this->controlSequences.GetIndexIMustContainTheObject("==");
+  }
   int conDeclareFunction()
   { return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
@@ -587,6 +608,9 @@ public:
   }
   int opVariableNonBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
+  }
+  int opEqualEqual()
+  { return this->operations.GetIndexIMustContainTheObject("==");
   }
   void AddTargetProperty(const std::string& propertyName, bool theHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
   { this->theDictionary.AddNoRepetition(propertyName);
@@ -684,13 +708,11 @@ public:
 
   static bool EvaluateStandardPlus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression)
-  { return false;
-  }
+  ;
   static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardEqualEqual(CommandList& theCommands, int commandIndex, Expression& theExpression);
 
-  static bool EvaluateDoNoMinuses(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateDoAssociate(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression);
@@ -800,12 +822,9 @@ public:
   }
   void initPredefinedVars()
   { this->AddNonBoundVarMustBeNew("IsInteger", &this->EvaluateFunctionIsInteger);
-    this->AddNonBoundVarMustBeNew("format", 0);
   }
   void initTargetProperties()
-  { this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
-    this->AddTargetProperty("IsAssociated", & this->EvaluateDoAssociate);
-    this->AddTargetProperty("IsCollected", & this->EvaluateDoCollect);
+  {// this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
   }
   void ExtractExpressions()
   { std::string lookAheadToken;
@@ -877,7 +896,7 @@ void Expression::SetPropertyValue(const std::string& propertyName, int PropertyV
 //    if (theIndex==4)
 //      std::cout <<"!";
   }
-  this->theBoss->imagesCashedExpressions[theIndex].MakeIntNoProperties(PropertyValue, this->theBoss, this->commandIndex);
+  this->theBoss->imagesCashedExpressions[theIndex].MakeInT(PropertyValue, this->theBoss, this->commandIndex);
 }
 
 int Expression::GetPropertyValue(const std::string& propertyName)const
@@ -909,7 +928,7 @@ bool Command::ReplaceOXEXEXEXByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
-  newExpr.SetPropertyValue("format", formatOptions);
+  newExpr.format=formatOptions;
   newExpr.children.push_back(leftE.theData);
   newExpr.children.push_back(middleE.theData);
   newExpr.children.push_back(rightE.theData);
@@ -928,7 +947,7 @@ bool Command::ReplaceOXXEXEXEXByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
-  newExpr.SetPropertyValue("format", formatOptions);
+  newExpr.format= formatOptions;
   newExpr.children.push_back(leftE.theData);
   newExpr.children.push_back(middleE.theData);
   newExpr.children.push_back(rightE.theData);
@@ -945,7 +964,7 @@ bool Command::ReplaceOXEByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(left.controlIndex);
-  newExpr.SetPropertyValue("format", formatOptions);
+  newExpr.format= formatOptions;
   newExpr.children.push_back(right.theData);
   left.theData=newExpr;
   left.controlIndex=this->theBoss->conExpression();
@@ -960,7 +979,7 @@ bool Command::ReplaceOEByE(int formatOptions)
   Expression newExpr;
   newExpr.reset(this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
-  newExpr.SetPropertyValue("format", formatOptions);
+  newExpr.format= formatOptions;
   newExpr.children.push_back(right.theData);
   middle.theData=newExpr;
   middle.controlIndex=this->theBoss->conExpression();
@@ -1206,6 +1225,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->RegisterBoundVariable();
   if (lastS=="Variable" && (lookAhead!="}" || secondToLastS!="{"|| thirdToLastS!="{"))
     return this->ReplaceVbyE();
+  if (lastS=="=" && secondToLastS=="=")
+    return this->ReplaceXXByCon(this->theBoss->conEqualEqual());
   if (lastS==";")
     return this->DecreaseStackSetCharacterRanges(1);
   if (lastS=="Integer" && secondToLastS=="Integer")
@@ -1216,7 +1237,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceObyE();
   }
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceEOEByE(secondToLastE.theData.GetPropertyValue("format"));
+    return this->ReplaceEOEByE(secondToLastE.theData.format);
   if (eighthToLastS=="if" && seventhToLastS=="(" && sixthToLastS=="Expression"
       && fifthToLastS=="," && fourthToLastS=="Expression" && thirdToLastS==","
       && secondToLastS=="Expression" && lastS==")")
@@ -1231,6 +1252,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceOEByE();
   if (lastS=="Expression" && secondToLastS=="*" && thirdToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEOEByE(Expression::formatTimesDenotedByStar);
+  if (lastS=="Expression" && secondToLastS=="/" && thirdToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
+    return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEEByEusingO(this->theBoss->opTimes());
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
@@ -1238,6 +1261,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}" && lookAhead!="}")
     return this->ReplaceXEXByE();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
+    return this->ReplaceEOEByE();
+  if (this->isStrongRightSeparator(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
   if (fourthToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
@@ -1374,32 +1399,22 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   return true;
 }
 
-bool CommandList::EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.GetPropertyValue("IsCollected")==1 || theExpression.GetPropertyValue("IsAssociated")!=1 ||
-      theExpression.GetPropertyValue ("IsDistributed")!=1)
-    return false;
-  if (theExpression.theOperation!=theCommands.opPlus())
-  { theExpression.SetPropertyValue("IsCollected", 1);
-    return false;
-  }
-  theExpression.SetPropertyValue("IsCollected", 1);
-  return theCommands.CollectSummands(commandIndex, theExpression);
+bool CommandList::EvaluateStandardTimes
+(CommandList& theCommands, int commandIndex, Expression& theExpression)
+{ if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression))
+    return true;
+  if (theCommands.EvaluateDoAssociate(theCommands, commandIndex, theExpression))
+    return true;
+  return false;
 }
 
 bool CommandList::EvaluateDoAssociate
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.GetPropertyValue("IsAssociated")==1 || theExpression.GetPropertyValue("IsDistributed")!=1)
-    return false;
-  if (theExpression.theOperation!=theCommands.opTimes())
-  { theExpression.SetPropertyValue("IsAssociated", 1);
-    return false;
-  }
-  std::vector<Expression>& multiplicands=theCommands.buffer1;
+{ std::vector<Expression>& multiplicands=theCommands.buffer1;
   std::vector<Expression>& actualMultiplicands=theCommands.buffer2;
   multiplicands.resize(0);
   if (!theCommands.AppendMultiplicands(theExpression, multiplicands, 0, theCommands.MaxRecursionDepthDefault))
     return false;
-  theExpression.SetPropertyValue("IsAssociated",1);
   bool needsModification=false;
   actualMultiplicands.reserve(multiplicands.size());
   actualMultiplicands.resize(0);
@@ -1439,23 +1454,13 @@ bool CommandList::EvaluateDoAssociate
     currentExpression=&currentExpression->children[1];
   }
   *currentExpression=actualMultiplicands[actualMultiplicands.size()-1];
-  theExpression.SetPropertyValue("IsDistributed",1);
-  theExpression.SetPropertyValue("IsAssociated",1);
   return true;
 }
 
 bool CommandList::EvaluateDoDistribute
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.GetPropertyValue("IsDistributed")==1 )
-    return false;
-  if (theExpression.theOperation!=theCommands.opTimes())
-  { theExpression.SetPropertyValue("IsDistributed", 1);
-    return false;
-  }
-  Expression& left=theExpression.children[0];
+{ Expression& left=theExpression.children[0];
   Expression& right=theExpression.children[1];
-  if (left.GetPropertyValue("IsDistributed")!=1 || right.GetPropertyValue("IsDistributed")!=1)
-    return false;
   if ((left.theOperation==theCommands.opPlus() || left.theOperation==theCommands.opMinus()) && left.children.size()==2)
   { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression);
     return true;
@@ -1464,7 +1469,6 @@ bool CommandList::EvaluateDoDistribute
   { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression);
     return true;
   }
-  theExpression.SetPropertyValue("IsDistributed", 1);
   return false;
 }
 
@@ -1479,14 +1483,14 @@ bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
     return false;
   Expression left=theExpression.children[0];
   Expression right=theExpression.children[1];
-  int theFormat=theExpression.GetPropertyValue("format");
+  int theFormat=theExpression.format;
   theExpression.reset(& theCommands, commandIndex);
   theExpression.theOperation=leftOp;
   theExpression.children.resize(2);
   theExpression.children[0].MakeProduct(&theCommands, commandIndex, left.children[0], right);
   theExpression.children[1].MakeProduct(&theCommands, commandIndex, left.children[1], right);
-  theExpression.children[0].SetPropertyValue("format", theFormat);
-  theExpression.children[1].SetPropertyValue("format", theFormat);
+  theExpression.children[0].format=theFormat;
+  theExpression.children[1].format=theFormat;
   return true;
 }
 
@@ -1501,31 +1505,21 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
     return false;
   Expression left=theExpression.children[0];
   Expression right=theExpression.children[1];
-  int theFormat=theExpression.GetPropertyValue("format");
+  int theFormat=theExpression.format;
   theExpression.reset(& theCommands, commandIndex);
   theExpression.theOperation=rightOp;
   theExpression.children.resize(2);
   theExpression.children[0].MakeProduct(&theCommands, commandIndex, left, right.children[0]);
   theExpression.children[1].MakeProduct(&theCommands, commandIndex, left, right.children[1]);
-  theExpression.children[0].SetPropertyValue("format", theFormat);
-  theExpression.children[1].SetPropertyValue("format", theFormat);
+  theExpression.children[0].format=theFormat;
+  theExpression.children[1].format=theFormat;
   return true;
 }
 
-
-/*bool CommandList::EvaluateStandardTimes
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.children.size()!=2)
-  { theExpression.errorString="Programming error: operation * always takes two arguments.";
-    return true;
-  }
-//  return theCommands.OrderMultiplicationTreeProperly(commandIndex, theExpression);
-}
-*/
 bool CommandList::EvaluateStandardPlus
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ return false;
- }
+{ return theCommands.CollectSummands(commandIndex, theExpression);
+}
 
 bool CommandList::EvaluateIf
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
@@ -1574,7 +1568,14 @@ bool CommandList::EvaluateStandardFunction
 
 bool CommandList::EvaluateStandardEqualEqual
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ return false;
+{ assert(theExpression.children.size()==2);
+  Expression& left=theExpression.children[0];
+  Expression& right=theExpression.children[1];
+  if (left==right)
+    theExpression.MakeInT(1, & theCommands, commandIndex);
+  else
+    theExpression.MakeInT(0, & theCommands, commandIndex);
+  return true;
 }
 
 bool CommandList::EvaluateStandardMinus
@@ -1709,19 +1710,16 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       return true;
     }
     assert((signed) this->theStandardOpEvalFunctions.size()> theExpression.theOperation);
+//    std::cout << "<hr>before standard eval: " << theExpression.ElementToString();
     if (this->theStandardOpEvalFunctions[theExpression.theOperation]!=0)
       if (this->theStandardOpEvalFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
         NonReduced=true;
-    for (unsigned i=0; i<this->targetProperties.size(); i++)
-      if (theExpression.GetPropertyValue(this->targetProperties[i])!=1)
-        if (this->theNonBoundVars[this->targetProperties[i]].theHandler!=0)
-          if (this->theNonBoundVars[this->targetProperties[i]].theHandler(*this, commandIndex, theExpression))
-            NonReduced=true;
-//    std::cout << "<hr>before standard eval: " << theExpression.ElementToString();
-//    if (this->theStandardOpEvalFunctions[theExpression.theOperation]!=0)
-//      if (this->theStandardOpEvalFunctions[theExpression.theOperation](*this, commandIndex, theExpression))
-//        NonReduced=true;
 //    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
+//    for (unsigned i=0; i<this->targetProperties.size(); i++)
+//      if (theExpression.GetPropertyValue(this->targetProperties[i])!=1)
+//        if (this->theNonBoundVars[this->targetProperties[i]].theHandler!=0)
+//          if (this->theNonBoundVars[this->targetProperties[i]].theHandler(*this, commandIndex, theExpression))
+//            NonReduced=true;
     for (int i=0; i<commandIndex; i++)
       if (this->theCommands[i].ErrorString=="")
       { Expression& currentPattern=this->theCommands[i].finalValue;
@@ -1861,7 +1859,8 @@ void CommandList::EvaluateCommands()
   }
   out << "<table border=\"1\">";
   for (unsigned i=0; i<this->theCommands.size(); i++)
-  { out  << "<tr><td>" << i+1 << ": </td><td>" << this->theCommands[i].finalValue.ElementToString() << "</td>";
+  { out  << "<tr><td>" << i+1 << ": </td><td><span class=\"math\">" << this->theCommands[i].finalValue.ElementToString()
+    << "</span></td><td>=</td>";
     std::stringstream localLogger;
     assert((int)this->theCommands[0].syntacticStack[6].theData.theBoss!=-1);
     if (this->theCommands[i].ErrorString=="")
@@ -1874,8 +1873,8 @@ void CommandList::EvaluateCommands()
     if (commandOutput.size() <300)
       out << "<td><span class=\"math\">" << commandOutput << "</span></td>";
     else
-      out << "<td><b>output is more than 300 characters, displaying without LaTeX rendering. </b>" << "<br>" << commandOutput << "</td>";
-    out << "<td>" << commandOutput;
+      out << "<td><b>output is more than 300 characters, use the non- LaTeX version to the right. </b></td>";
+    out << "<td>=</td><td>" << commandOutput;
     out << "</td>";
 //    out << " ( for debugging: " << this->theCommands[i].finalValue.ElementToStringPolishForm() << ")";
     this->theCommands[i].theLog= localLogger.str();
@@ -1954,7 +1953,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
 //    } else
 //      tempS="("+tempS+")";
     out << tempS;
-    if (this->GetPropertyValue("format")==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
+    if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
     out << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   }
@@ -1975,8 +1974,10 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
       out << "-" << this->children[0].ElementToString
       (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
     else
+    { assert(children.size()==2);
       out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition())
-      << "-" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForAddition());
+      << "-" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForAddition());
+    }
   }
   else if (this->theOperation==this->theBoss->opVariableBound())
   { assert((unsigned) this->commandIndex< this->theBoss->theCommands.size());
@@ -1992,7 +1993,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   { assert(this->children.size()>=2);
     out << this->children[0].ElementToString
     (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName());
-    int theFormat=this->GetPropertyValue("format");
+    int theFormat=this->format;
     switch(theFormat)
     { case Expression::formatFunctionUseUnderscore:
         out << "_{" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << "}";
@@ -2005,6 +2006,9 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
         break;
     }
   }
+  else if (this->theOperation==this->theBoss->opEqualEqual())
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth)
+    << "==" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth);
   else
     out << "?operation not documented? This is probably a programming error!" ;
   if (AddBrackets)
@@ -2100,7 +2104,7 @@ bool Expression::NeedBracketsForFunctionName() const
 { return !(
   this->theOperation==this->theBoss->opVariableBound() ||
   this->theOperation==this->theBoss->opVariableNonBound() ||
-  (this->theOperation==this->theBoss->opFunction() && this->GetPropertyValue("format")==this->formatFunctionUseUnderscore)
+  (this->theOperation==this->theBoss->opFunction() && this->format==this->formatFunctionUseUnderscore)
   );
 }
 
@@ -2125,17 +2129,10 @@ bool Expression::NeedBracketsForThePower()const
   ;
 }
 
-void Expression::MakeIntNoProperties(int theValue, CommandList* newBoss, int indexOfTheCommand)
+void Expression::MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
 { this->reset(newBoss, indexOfTheCommand);
   this->theData=theValue;
   this->theOperation=newBoss->opInteger();
-}
-
-void Expression::MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
-{ this->MakeIntNoProperties(theValue, newBoss, indexOfTheCommand);
-  this->SetPropertyValue("IsAssociated", 1);
-  this->SetPropertyValue("IsDistributed", 1);
-  this->SetPropertyValue("IsCollected", 1);
 }
 
 void Expression::MakeVariableNonBoundNoProperties
@@ -2185,6 +2182,32 @@ double GetElapsedTimeInSeconds()
 { gettimeofday(&lastTimeMeasure, NULL);
   int miliSeconds =(lastTimeMeasure.tv_sec- ComputationStartTime.tv_sec)*1000+(lastTimeMeasure.tv_usec- ComputationStartTime.tv_usec)/1000;
   return ((double) miliSeconds)/1000;
+}
+
+std::string UnCivilizeStringCGI(const std::string& input)
+{ std::stringstream out;
+  for (unsigned int i=0; i<input.size(); i++)
+    switch (input[i])
+    { case ' ': out << "+"; break;
+      case '+': out << "%2B"; break;
+      case '(': out << "%28"; break;
+      case ')': out << "%29"; break;
+      case '[': out << "%5B"; break;
+      case ']': out << "%5D"; break;
+      case ',': out << "%2C"; break;
+      case '{': out << "%7B"; break;
+      case ';': out << "%3B"; break;
+      case '/': out << "%2F"; break;
+      case ':': out << "%3A"; break;
+      case '^': out << "%5E"; break;
+      case '\\': out << "%5C"; break;
+      case '}': out << "%7D"; break;
+      case '=': out << "%3D"; break;
+      case '\n': out << "%0D%0A"; break;
+//      case '': out << ""; break;
+      default: out << input[i]; break;
+    }
+  return out.str();
 }
 
 bool AttemptToCivilize(std::string& readAhead, std::stringstream& out)
@@ -2324,6 +2347,7 @@ int main(int argc, char **argv)
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><head></head><title>Symbolic calculator updated " << __DATE__ << "</title>  <body> <script src=\"/vpf/jsmath/easy/load.js\"></script>";
   std::string inputString;
+//  std::cout << "<br>Uncivilized string: " << inputStringNonCivilized;
   CivilizeCGIString(inputStringNonCivilized, inputString);
   int numBogusChars= 4;
   for (signed i=0; i<signed(inputString.size())-numBogusChars; i++)
@@ -2359,7 +2383,7 @@ int main(int argc, char **argv)
 //inputString="2a b*2+a b";
 //inputString="x*1";
 //  inputString="-3";
-//  inputString="1+1";
+//  inputString="-a";
   std::cout << "<table><tr><td valign=\"top\">";
   std::cout << "\n<form method=\"POST\" name=\"formCalculator\" action=\"/vpf/cgi-bin/symbolicCalculator\">\n" ;
   std::cout << "<textarea rows=\"10\" cols=\"100\" name=\"in1\" id=\"in1\">";
@@ -2374,8 +2398,11 @@ int main(int argc, char **argv)
   theComputation.Evaluate(inputString);
 
   std::cout << "<hr><b>Result.</b><br>";
-  std::cout <<  theComputation.output;
+  if (inputString!="")
+    std::cout <<  theComputation.output;
   std::cout << "</td><td valign=\"top\">";
+  std::cout << "<a href=\"/vpf/cgi-bin/symbolicCalculator?" << inputStringNonCivilized << "\">Link to your input.</a><br>";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf6.cpp?view=markup\"> C++ source of the calculator</a>\n<hr>";
   std::cout << theComputation.theLog;
   std::cout << "</td></tr></table>";
   std::cout << "</body></html>";

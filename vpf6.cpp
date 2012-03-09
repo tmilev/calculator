@@ -1153,20 +1153,14 @@ bool Command::ReplaceVbyE()
   const std::string& theVarString=this->theBoss->theDictionary[theElt.theData.theData];
   int indexBoundVar=this->BoundVariables.GetIndex(theVarString);
   if (indexBoundVar!=- 1)
-  { if (!this->flagOpDefineEncountered)
-    { theElt.theData.theOperation=this->theBoss->opVariableBound();
-      theElt.theData.theData=indexBoundVar;
-      theElt.controlIndex=this->theBoss->conExpression();
-    }else
-    { theElt.ErrorString="Error: bound variables cannot be declared after the definition operation := .";
-      theElt.controlIndex=this->theBoss->conError();
-    }
+  { theElt.theData.theOperation=this->theBoss->opVariableBound();
+    theElt.theData.theData=indexBoundVar;
   } else
   { theElt.theData.theOperation=this->theBoss->opVariableNonBound();
     theElt.theData.theData=this->theBoss->AddNonBoundVarReturnVarIndex(theVarString, 0);
-    theElt.controlIndex=this->theBoss->conExpression();
     //note:     theElt.theData.theOperation.theData     should be initialized with the index of the non-bound variable!
   }
+  theElt.controlIndex=this->theBoss->conExpression();
 //  std::cout << "now i'm here!";
   return true;
 }
@@ -1190,9 +1184,16 @@ bool Command::RegisterBoundVariable()
 { SyntacticElement& theElt=this->syntacticStack[this->syntacticStack.size()-3];
   const std::string& theVarString=this->theBoss->theDictionary[theElt.theData.theData];
   if (!this->BoundVariables.Contains(theVarString))
-    this->BoundVariables.AddOnTop(theVarString);
-  this->DecreaseStackSetCharacterRanges(2);
-  this->ReplaceXXYByY();
+  { if (!this->flagOpDefineEncountered)
+      this->BoundVariables.AddOnTop(theVarString);
+    else
+    { theElt.controlIndex=this->theBoss->conError();
+      theElt.ErrorString=  "Error: bound variables cannot be declared after the definition operation := .";
+    }
+  } else
+  { this->DecreaseStackSetCharacterRanges(2);
+    this->ReplaceXXYByY();
+  }
   return true;
 }
 

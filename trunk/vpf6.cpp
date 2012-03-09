@@ -633,16 +633,16 @@ public:
   int opMinus()
   { return this->operations.GetIndexIMustContainTheObject("-");
   }
-  bool AppendOpands
+  bool AppendOpandsReturnTrueIfOrderNonCanonical
     (Expression& theExpression, std::vector<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
-  bool AppendMultiplicands
+  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, std::vector<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
-  { return this->AppendOpands(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
   }
-  bool AppendSummands
+  bool AppendSummandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, std::vector<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
-  { return this->AppendOpands(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
   }
   void SpecializeBoundVars
 (Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
@@ -1287,29 +1287,34 @@ bool CommandList::EvaluateFunctionIsInteger
   return true;
 }
 
-bool CommandList::AppendOpands
+bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, std::vector<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 { if (RecursionDepth>MaxRecursionDepthDefault)
     return false;
+  bool result=false;
   if (theExpression.theOperation!=theOp)
     output.push_back(theExpression);
   else
     for (unsigned i=0; i<theExpression.children.size(); i++)
-      if (!this->AppendOpands(theExpression.children[i], output, theOp, RecursionDepth+1, MaxRecursionDepth))
-        return false;
-  return true;
+    { if (this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression.children[i], output, theOp, RecursionDepth+1, MaxRecursionDepth))
+        result=true;
+      if (i<theExpression.children.size()-1 &&
+          theExpression.children[i].theOperation==theOp &&
+          theExpression.children[i].children.size()>1)
+        result=true;
+    }
+  return result;
 }
 
 bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
 { std::vector<Expression>& summands= this->buffer1;
   summands.resize(0);
-  if (!this->AppendSummands(theExpression, summands, 0, this->MaxRecursionDepthDefault))
-    return false;
+  bool needSimplification=this->AppendSummandsReturnTrueIfOrderNonCanonical
+  (theExpression, summands, 0, this->MaxRecursionDepthDefault);
   hashedVector<Expression, Expression::HashFunction> summandsNoCoeff;
   output.reserve(summands.size());
   std::vector<int> theCoeffs;
   int constTerm=0;
-  bool needSimplification=false;
   bool foundConstTerm=false;
 //  std::cout << "<b>" << theExpression.ElementToString() << "</b>";
 //  if (theExpression.ElementToString()=="(4)*(a) b+(a) b")
@@ -1353,7 +1358,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   for (int i=0; i< summandsNoCoeff.size(); i++)
     std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ElementToString() << ", ";
   std::cout << " const term: " << constTerm;
-  */
+*/
   if (!needSimplification)
     return false;
   for (int i=0; i<summandsNoCoeff.size(); i++)
@@ -1370,17 +1375,13 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
     current.reset(this, commandIndex);
     current.theOperation=this->opTimes();
     current.children.resize(2);
-    current.children[0].reset(this, commandIndex);
-    current.children[0].theOperation=this->opInteger();
-    current.children[0].theData=theCoeffs[i];
+    current.children[0].MakeInT(theCoeffs[i],this, commandIndex);
     current.children[1]=summandsNoCoeff[i];
   }
   if (constTerm!=0 || summandsNoCoeff.size()==0)
   { summandsWithCoeff.resize(summandsWithCoeff.size()+1);
     Expression& current=summandsWithCoeff[summandsWithCoeff.size()-1];
-    current.reset(this, commandIndex);
-    current.theOperation=this->opInteger();
-    current.theData=constTerm;
+    current.MakeInT(constTerm, this, commandIndex);
   }
   if (summandsWithCoeff.size()==1)
   { theExpression=summandsWithCoeff[0];
@@ -1413,9 +1414,8 @@ bool CommandList::EvaluateDoAssociate
 { std::vector<Expression>& multiplicands=theCommands.buffer1;
   std::vector<Expression>& actualMultiplicands=theCommands.buffer2;
   multiplicands.resize(0);
-  if (!theCommands.AppendMultiplicands(theExpression, multiplicands, 0, theCommands.MaxRecursionDepthDefault))
-    return false;
-  bool needsModification=false;
+  bool needsModification=theCommands.AppendMultiplicandsReturnTrueIfOrderNonCanonical
+  (theExpression, multiplicands, 0, theCommands.MaxRecursionDepthDefault);
   actualMultiplicands.reserve(multiplicands.size());
   actualMultiplicands.resize(0);
   int theCoeff=1;
@@ -1729,6 +1729,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
             if(this->ProcessOneExpressionOnePatternOneSub
             (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth, theLog))
             { NonReduced=true;
+
               break;
             }
           }
@@ -1806,10 +1807,12 @@ void CommandList::SpecializeBoundVars
   if (toBeSubbed.theOperation==this->opVariableBound())
   { int indexMatching= matchedPairs.BoundVariableIndices.GetIndex(toBeSubbed.theData);
     toBeSubbed=matchedPairs.variableImages[indexMatching];
+    this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
     return;
   }
   for (unsigned i=0; i<toBeSubbed.children.size(); i++)
     this->SpecializeBoundVars(toBeSubbed.children[i], targetCommandIndex, matchedPairs, RecursionDepth+1, MaxRecursionDepth);
+  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
 }
 
 bool CommandList::ProcessOneExpressionOnePatternOneSub
@@ -1874,6 +1877,8 @@ void CommandList::EvaluateCommands()
       out << "<td><span class=\"math\">" << commandOutput << "</span></td>";
     else
       out << "<td><b>output is more than 300 characters, use the non- LaTeX version to the right. </b></td>";
+//    std::cout <<"<hr>" << this->theCommands[i].finalValue.ElementToStringPolishForm(0,100);
+
     out << "<td>=</td><td>" << commandOutput;
     out << "</td>";
 //    out << " ( for debugging: " << this->theCommands[i].finalValue.ElementToStringPolishForm() << ")";

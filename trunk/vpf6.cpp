@@ -2448,7 +2448,7 @@ int main(int argc, char **argv)
     std::cout <<  theComputation.output;
   std::cout << "</td><td valign=\"top\">";
   std::cout << "<a href=\"/vpf/cgi-bin/symbolicCalculator?" << inputStringNonCivilized << "\">Link to your input.</a><br>";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf6.cpp?view=markup\"> C++ source of the calculator</a>\n<hr>";
+  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf6.cpp?view=markup&pathrev=946\"> C++ source of the calculator</a>\n<hr>";
   std::cout << theComputation.theLog;
   std::cout << "</td></tr></table>";
   std::cout << "</body></html>";

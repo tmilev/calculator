@@ -824,6 +824,7 @@ public:
     this->controlSequences.AddOnTop(":");
     this->controlSequences.AddOnTop("=");
     this->controlSequences.AddOnTop(";");
+    this->controlSequences.AddOnTop("$");
 //    this->thePropertyNames.AddOnTop("IsCommutative");
     this->TotalNumPatternMatchedPerformed=0;
     this->initPredefinedVars();
@@ -1021,6 +1022,7 @@ bool CommandList::isRightSeparator(char c)
     case '}':
     case '{':
     case '~':
+    case '$':
     case ']':
     case '(':
     case ')':
@@ -1050,6 +1052,7 @@ bool CommandList::isLeftSeparator(char c)
     case '}':
     case '{':
     case '~':
+    case '$':
     case ']':
     case '(':
     case ')':
@@ -1238,6 +1241,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   }
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
+  if (lastS=="$")
+    return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
   if (lastS=="_")
     return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatFunctionUseUnderscore);
   if (lastS=="\\cdot")
@@ -2262,6 +2267,10 @@ bool AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   }
   if (readAhead=="%2B")
   { out << "+";
+    return true;
+  }
+  if (readAhead=="%24")
+  { out << "$";
     return true;
   }
   if (readAhead=="%28")

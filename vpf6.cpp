@@ -189,8 +189,11 @@ void MakeVariableNonBounD
   void MakeFunction
   (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 ;
-  void MakeProduct
+  void MakeProducT
   (CommandList* owner, int indexOfTheCommand, const Expression& left, const Expression& right)
+  ;
+  void MakeXOX
+  (CommandList* owner, int indexOfTheCommand, int theOp, const Expression& left, const Expression& right)
   ;
   std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false, bool AddCurlyBraces=false)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
@@ -721,9 +724,9 @@ public:
 
   static bool EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateDoAssociate(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
+  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
+  static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP);
 
   static bool EvaluateFunctionIsInteger(CommandList& theCommands, int commandIndex, Expression& theExpression);
 
@@ -878,10 +881,15 @@ public:
   void ParseFillDictionary(const std::string& input);
 };
 
-void Expression::MakeProduct
+void Expression::MakeProducT
   (CommandList* owner, int commandIndex, const Expression& left, const Expression& right)
+{ this->MakeXOX(owner, commandIndex, owner->opTimes(), left, right);
+}
+
+void Expression::MakeXOX
+  (CommandList* owner, int commandIndex, int theOp, const Expression& left, const Expression& right)
 { this->reset(owner, commandIndex);
-  this->theOperation=owner->opTimes();
+  this->theOperation=theOp;
   this->children.resize(2);
   this->children[0]=left;
   this->children[1]=right;
@@ -1417,7 +1425,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
 
 bool CommandList::EvaluateStandardTimes
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression))
+{ if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression, theCommands.opTimes(), theCommands.opPlus()))
     return true;
   if (theCommands.EvaluateDoAssociate(theCommands, commandIndex, theExpression))
     return true;
@@ -1465,7 +1473,7 @@ bool CommandList::EvaluateDoAssociate
   }
 //  Expression tmpExp;
   for (unsigned i=0; i<actualMultiplicands.size()-1; i++)
-  { currentExpression->MakeProduct(& theCommands, commandIndex, actualMultiplicands[i], actualMultiplicands[i]);
+  { currentExpression->MakeProducT(& theCommands, commandIndex, actualMultiplicands[i], actualMultiplicands[i]);
     currentExpression=&currentExpression->children[1];
   }
   *currentExpression=actualMultiplicands[actualMultiplicands.size()-1];
@@ -1473,26 +1481,25 @@ bool CommandList::EvaluateDoAssociate
 }
 
 bool CommandList::EvaluateDoDistribute
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp)
 { Expression& left=theExpression.children[0];
   Expression& right=theExpression.children[1];
   if ((left.theOperation==theCommands.opPlus() || left.theOperation==theCommands.opMinus()) && left.children.size()==2)
-  { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression);
+  { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression, theMultiplicativeOP, theAdditiveOp);
     return true;
   }
   if ((right.theOperation==theCommands.opPlus() || right.theOperation==theCommands.opMinus()) && right.children.size()==2)
-  { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression);
+  { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression, theMultiplicativeOP);
     return true;
   }
   return false;
 }
 
 bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.theOperation!=theCommands.opTimes())
+(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp)
+{ if (theExpression.theOperation!=theMultiplicativeOP)
     return false;
-  int leftOp=theExpression.children[0].theOperation;
-  if (leftOp!=theCommands.opPlus() && leftOp!=theCommands.opMinus())
+  if (theExpression.children[0].theOperation!=theAdditiveOp)
     return false;
   if (theExpression.children[0].children.size()!=2)
     return false;
@@ -1500,18 +1507,18 @@ bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
   Expression right=theExpression.children[1];
   int theFormat=theExpression.format;
   theExpression.reset(& theCommands, commandIndex);
-  theExpression.theOperation=leftOp;
+  theExpression.theOperation=theAdditiveOp;
   theExpression.children.resize(2);
-  theExpression.children[0].MakeProduct(&theCommands, commandIndex, left.children[0], right);
-  theExpression.children[1].MakeProduct(&theCommands, commandIndex, left.children[1], right);
+  theExpression.children[0].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left.children[0], right);
+  theExpression.children[1].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left.children[1], right);
   theExpression.children[0].format=theFormat;
   theExpression.children[1].format=theFormat;
   return true;
 }
 
 bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.theOperation!=theCommands.opTimes())
+(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP)
+{ if (theExpression.theOperation!=theMultiplicativeOP)
     return false;
   int rightOp=theExpression.children[1].theOperation;
   if (rightOp!=theCommands.opPlus() && rightOp!=theCommands.opMinus())
@@ -1524,8 +1531,8 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
   theExpression.reset(& theCommands, commandIndex);
   theExpression.theOperation=rightOp;
   theExpression.children.resize(2);
-  theExpression.children[0].MakeProduct(&theCommands, commandIndex, left, right.children[0]);
-  theExpression.children[1].MakeProduct(&theCommands, commandIndex, left, right.children[1]);
+  theExpression.children[0].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left, right.children[0]);
+  theExpression.children[1].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left, right.children[1]);
   theExpression.children[0].format=theFormat;
   theExpression.children[1].format=theFormat;
   return true;
@@ -1566,7 +1573,18 @@ bool CommandList::EvaluateStandardFunction
     Please dubug function CommandList::EvaluateStandardFunction";
     return true;
   }
+  if (theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft
+      (theCommands, commandIndex, theExpression, theCommands.opFunction(), theCommands.opPlus()))
+    return true;
+  if (theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft
+      (theCommands, commandIndex, theExpression, theCommands.opFunction(), theCommands.opTimes()))
+    return true;
   Expression& functionNameNode =theExpression.children[0];
+  assert(theExpression.children.size()==2);
+  if (functionNameNode.theOperation==theCommands.opInteger())
+  { theExpression.AssignChild(0);
+    return true;
+  }
   if (functionNameNode.theOperation!=theExpression.theBoss->opVariableNonBound())
     return false;
   bool (*theFun)(CommandList& , int , Expression& );
@@ -1606,7 +1624,7 @@ bool CommandList::EvaluateStandardMinus
   }
   Expression result, minusOne;
   minusOne.MakeInT(-1, & theCommands, commandIndex);
-  result.MakeProduct(& theCommands, commandIndex, minusOne, *toBeTransformed);
+  result.MakeProducT(& theCommands, commandIndex, minusOne, *toBeTransformed);
   *toBeTransformed=result;
   return true;
 }
@@ -1818,12 +1836,12 @@ void CommandList::SpecializeBoundVars
   if (toBeSubbed.theOperation==this->opVariableBound())
   { int indexMatching= matchedPairs.BoundVariableIndices.GetIndex(toBeSubbed.theData);
     toBeSubbed=matchedPairs.variableImages[indexMatching];
-    this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
+//    this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
     return;
   }
   for (unsigned i=0; i<toBeSubbed.children.size(); i++)
     this->SpecializeBoundVars(toBeSubbed.children[i], targetCommandIndex, matchedPairs, RecursionDepth+1, MaxRecursionDepth);
-  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
+//  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
 }
 
 bool CommandList::ProcessOneExpressionOnePatternOneSub
@@ -1963,14 +1981,14 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   else if (this->theOperation==this->theBoss->opTimes() )
   { std::string tempS=this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
-//    if (false)
-//    {
+    if (false)
+    {
     if (tempS=="-1")
       tempS="-";
     if (tempS=="1")
       tempS="";
-//    } else
-//      tempS="("+tempS+")";
+    } else
+      tempS="("+tempS+")";
     out << tempS;
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
@@ -2364,7 +2382,7 @@ int main(int argc, char **argv)
     inputStringNonCivilized=getenv("QUERY_STRING");
 	getPath(argv[0], inputPath);
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><head></head><title>Symbolic calculator updated " << __DATE__ << "</title>  <body> <script src=\"/vpf/jsmath/easy/load.js\"></script>";
+  std::cout << "<html><head></head><title>Symbolic calculator updated " << __DATE__  << ", " << __TIME__ << "</title>  <body> <script src=\"/vpf/jsmath/easy/load.js\"></script>";
   std::string inputString;
 //  std::cout << "<br>Uncivilized string: " << inputStringNonCivilized;
   CivilizeCGIString(inputStringNonCivilized, inputString);

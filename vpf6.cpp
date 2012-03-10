@@ -243,7 +243,7 @@ void MakeVariableNonBounD
   { //warning: we are assuming that invoking function OperatorAssignRecursively
     // recursively RecursionDepthThatWouldNonPopTheStack times
     //will not pop the stack. If this is not the case, the program might crash unexpectedly.
-    const int RecursionDepthThatWouldNonPopTheStack=100000;
+    const int RecursionDepthThatWouldNonPopTheStack=10000;
     this->OperatorAssignRecursively(other, 0, RecursionDepthThatWouldNonPopTheStack);
   }
   void OperatorAssignRecursively(const Expression& other, int RecursionDepth, int MaxRecursionDepth)
@@ -410,7 +410,7 @@ public:
   { return
       lookAhead=="+" || lookAhead=="-" ||
       lookAhead=="*" || lookAhead=="/" ||
-      lookAhead=="e" || lookAhead==")" ||
+      lookAhead=="Expression" || lookAhead==")" ||
       lookAhead==";" || lookAhead=="]" ||
       lookAhead=="}" || lookAhead==":"
       ;
@@ -1546,7 +1546,7 @@ bool CommandList::EvaluateStandardPlus
 bool CommandList::EvaluateIf
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
 { if (theExpression.children.size()!=3)
-  { theExpression.errorString="Programming error: operation - takes three arguments.";
+  { theExpression.errorString="Programming error: operation :if := takes three arguments.";
     return true;
   }
   Expression& left= theExpression.children[0];
@@ -1981,14 +1981,14 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForMultiplication());
   else if (this->theOperation==this->theBoss->opTimes() )
   { std::string tempS=this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForMultiplication());
-    if (false)
-    {
+    //if (false)
+   // {
     if (tempS=="-1")
       tempS="-";
     if (tempS=="1")
       tempS="";
-    } else
-      tempS="("+tempS+")";
+    //} else
+      //tempS="("+tempS+")";
     out << tempS;
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";

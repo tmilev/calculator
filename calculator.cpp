@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -184,10 +184,16 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
+  theParser.DefaultWeylLetter='B';
+  theParser.DefaultWeylRank=2;
 
-//  civilizedInput="splitCharOverLeviParabolic(char(1,1),(0,1))";
+//  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
+//  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
 //  theParser.DefaultWeylLetter='B';
 //  theParser.DefaultWeylRank=2;
+
+//  civilizedInput="splitCharOverLeviParabolic(char(1,1),(0,1))";
 //  civilizedInput="irreducibleRep(1,0)";
 //  civilizedInput="isInproperSubmodule(g_1,1)";
 //  civilizedInput="(h_1)/3";
@@ -371,7 +377,10 @@ int main(int argc, char **argv)
     tempFile.close();
   }
   ANNOYINGSTATISTICS;
-  theParser.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
+  if (theParser.DefaultWeylLetter!='B' || theParser.DefaultWeylRank!=3)
+    theParser.initTestAlgebraNeedsToBeRewritteN(theGlobalVariables);
+  else
+    theParser.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   ANNOYINGSTATISTICS;
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;

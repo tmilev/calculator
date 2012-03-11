@@ -2127,15 +2127,16 @@ public:
   //    on the system.
   ////////////////////////////////////////////////////////
   //On a 32 bit machine any number smaller than or equal to 2^31 will work.
-  //If you got no clue what to put just leave CarryOverBound= 2^31.
-  //static const unsigned int CarryOverBound=37;
-  void SubtractSmallerPositive(const LargeIntUnsigned& x);
-//  static const unsigned int CarryOverBound=2147483648UL; //=2^31
+  //If you got no clue what to put just leave CarryOverBound as it is below.
   static const unsigned int CarryOverBound=1000000000UL;
+  //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
+  //relatively small loss of speed and RAM memory.
+//  static const unsigned int CarryOverBound=2147483648UL; //=2^31
   //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
+  static const int SquareRootOfCarryOverBound=31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound=32768; //=2^15
-  static const int SquareRootOfCarryOverBound=31000; //=2^15
+  void SubtractSmallerPositive(const LargeIntUnsigned& x);
   void ElementToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
   inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
@@ -11346,10 +11347,16 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   bool DrawMeNoMults
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights)
-  ;
+  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, false);
+  }
   bool DrawMeWithMults
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights)
+  { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
+  }
+  bool DrawMe
+(std::string& outputDetails, GlobalVariables& theGlobalVariables,
+ DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
   ;
   bool SplitCharOverLevi
 (std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
@@ -12075,7 +12082,8 @@ public:
   bool lookAheadTokenProhibitsTimes(int theToken);
   bool lookAheadTokenAllowsMapsTo(int theToken);
   bool TokenProhibitsUnaryMinus(int theToken);
-  void initTestAlgebraNeedsToBeRewritten(GlobalVariables& theGlobalVariables);
+  void initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariables);
+  void initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables);
   void initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank);
   void AddOneFunctionToDictionaryNoFail
   (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,

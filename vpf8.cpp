@@ -678,6 +678,7 @@ int ParserNode::EvaluateG2InB3MultsParabolic
     return theNode.SetError(theNode.errorProgramming);
   if (highestWeight.size!=3 || parSel.size!=3)
     return theNode.SetError(theNode.errorDimensionProblem);
+  theNode.owner->initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   theNode.outputString=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis
   .ComputeMultsLargerAlgebraHighestWeight(highestWeight, parSel, *theNode.owner, theGlobalVariables);
   theNode.ExpressionType=theNode.typeString;
@@ -1225,7 +1226,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1; drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
   drawOps.theBuffer.BasisProjectionPlane[0][1][0]=1;  drawOps.theBuffer.BasisProjectionPlane[0][1][1]=1;
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
-  (drawOps.theBuffer.BasisProjectionPlane[0][0], drawOps.theBuffer.BasisProjectionPlane[0][1]);
+  (drawOps.theBuffer.BasisProjectionPlane[0][1], drawOps.theBuffer.BasisProjectionPlane[0][0]);
   drawOps.theBuffer.GraphicsUnit[0]=50;
   PiecewiseQuasipolynomial theStartingPoly(theGlobalVariables),
   theSubbedPoly(theGlobalVariables), Accum(theGlobalVariables);
@@ -6730,13 +6731,14 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     out << "\n";
   }
   this->theBuffer.ModifyToOrthonormalNoShiftSecond
-  (this->theBuffer.BasisProjectionPlane[0][0],  this->theBuffer.BasisProjectionPlane[0][1]);
+  (this->theBuffer.BasisProjectionPlane[0][1], this->theBuffer.BasisProjectionPlane[0][0]);
+//  (this->theBuffer.BasisProjectionPlane[0][0], this->theBuffer.BasisProjectionPlane[0][1]);
   out
   << "var VectorE1Cone" << timesCalled << "= new Array(" << theDimension << ");\n"
   << "var VectorE2Cone" << timesCalled << "= new Array(" << theDimension << ");\n";
   for (int i=0; i<theDimension; i++)
-  { out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\t";
-    out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\n";
+  { out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\t";
+    out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\n";
   }
   if (this->theBuffer.BasisProjectionPlane.size>2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
@@ -7417,7 +7419,8 @@ void DrawOperations::initDimensions(int theDim, int numAnimationFrames)
     tempBasis[1][i]=2*i+1;
   for (int i=0; i<tempBasis[0].size; i++)
     tempBasis[0][i]=3*i+2;*/
-  this->ModifyToOrthonormalNoShiftSecond(tempBasis[0], tempBasis[1]);
+  this->ModifyToOrthonormalNoShiftSecond(tempBasis[1], tempBasis[0]);
+//  this->ModifyToOrthonormalNoShiftSecond(tempBasis[0], tempBasis[1]);
   this->BasisProjectionPlane.initFillInObject(numAnimationFrames, tempBasis);
   this->BasisToDrawCirclesAt.MakeEiBasis(theDim, 1, 0);
   this->SelectedPlane=0;
@@ -7649,14 +7652,14 @@ void rootSubalgebra::GetCoxeterPlane
         outputBasis2[j]=theEigenSpace[0][j].Im;
       }
       tempDO.ModifyToOrthonormalNoShiftSecond
-      (outputBasis1, outputBasis2);
+      (outputBasis2, outputBasis1);
     } else if (coxeterNumber<=2 && theEigenSpace.size>1)
     { for (int j=0; j<theDimension; j++)
       { outputBasis1[j]=theEigenSpace[0][j].Re;
         outputBasis2[j]=theEigenSpace[1][j].Re;
       }
       tempDO.ModifyToOrthonormalNoShiftSecond
-      (outputBasis1, outputBasis2);
+      (outputBasis2, outputBasis1);
     }
   }
 }
@@ -7717,7 +7720,7 @@ void WeylGroup::GetCoxeterPlane
       { outputBasis1[j]=theEigenSpace[0][j].Re;
         outputBasis2[j]=theEigenSpace[1][j].Re;
       }
-    tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis1,outputBasis2);
+    tempDO.ModifyToOrthonormalNoShiftSecond(outputBasis2, outputBasis1);
   }
 }
 
@@ -7821,6 +7824,13 @@ void WeylGroup::DrawRootSystem
   std::stringstream tempStream;
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
   (this->WeylLetter, this->GetDim()) << ")";
+  if (this->GetDim()==2 && predefinedProjectionPlane!=0)
+  { theTwoPlane[1][0]=1;
+    theTwoPlane[1][1]=0;
+    theTwoPlane[0][0]=0;
+    theTwoPlane[0][1]=1;
+    outputDV.theBuffer.ModifyToOrthonormalNoShiftSecond(theTwoPlane[0], theTwoPlane[1]);
+  }
   output.drawTextBuffer(0, 0, tempStream.str(), 10, CGI::RedGreenBlue(0,0,0), DrawingVariables::TextStyleNormal);
 }
 
@@ -7943,8 +7953,8 @@ int ParserNode::EvaluateAnimateRootSystem
     start2=tempRootsX[j*2+1].GetVectorDouble();
     target1=tempRootsX[j*2+2].GetVectorDouble();
     target2=tempRootsX[j*2+3].GetVectorDouble();
-    theOps.ModifyToOrthonormalNoShiftSecond(target1, target2);
-    theOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    theOps.ModifyToOrthonormalNoShiftSecond(target2, target1);
+    theOps.ModifyToOrthonormalNoShiftSecond(start2, start1);
     for (int i=0; i<NumFrameSPerTransition; i++)
     { indexBitMap++;
       double fraction=0;
@@ -7955,7 +7965,7 @@ int ParserNode::EvaluateAnimateRootSystem
       theOps.BasisProjectionPlane[indexBitMap][0]+=target1*fraction;
       theOps.BasisProjectionPlane[indexBitMap][1]+=target2*fraction;
       theOps.ModifyToOrthonormalNoShiftSecond
-      (theOps.BasisProjectionPlane[indexBitMap][0], theOps.BasisProjectionPlane[indexBitMap][1]);
+      (theOps.BasisProjectionPlane[indexBitMap][1], theOps.BasisProjectionPlane[indexBitMap][0]);
     }
   }
   indexBitMap=0;
@@ -8182,7 +8192,7 @@ int ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
   { out << "<br>The subalgebra is of rank less than two, using default Coxeter plane instead.";
   } else
   { currentSA.GetCoxeterPlane(start1, start2, theGlobalVariables);
-    theDrawOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    theDrawOps.ModifyToOrthonormalNoShiftSecond(start2, start1);
     theDrawOps.BasisProjectionPlane[0][0]=start1;
     theDrawOps.BasisProjectionPlane[0][1]=start2;
   }
@@ -8231,7 +8241,7 @@ int ParserNode::EvaluateAnimateRootSAs
       break;
     currentSA.GetCoxeterPlane(start1, start2, theGlobalVariables);
     nextSA.GetCoxeterPlane(target1, target2, theGlobalVariables);
-    theDrawOps.ModifyToOrthonormalNoShiftSecond(start1, start2);
+    theDrawOps.ModifyToOrthonormalNoShiftSecond(start2, start1);
     theDrawOps.BasisProjectionPlane.SetSize(theDrawOps.BasisProjectionPlane.size+numFramesPerTransition);
     theDrawOps.centerX.SetSize(theDrawOps.BasisProjectionPlane.size);
     theDrawOps.centerY.SetSize(theDrawOps.BasisProjectionPlane.size);
@@ -8243,7 +8253,7 @@ int ParserNode::EvaluateAnimateRootSAs
       theDrawOps.BasisProjectionPlane[FrameCounter][0]=start1*(1-fraction)+ target1*fraction;
       theDrawOps.BasisProjectionPlane[FrameCounter][1]=start2*(1-fraction)+ target2*fraction;
       theDrawOps.ModifyToOrthonormalNoShiftSecond
-      (theDrawOps.BasisProjectionPlane[FrameCounter][0], theDrawOps.BasisProjectionPlane[FrameCounter][1]);
+      (theDrawOps.BasisProjectionPlane[FrameCounter][1], theDrawOps.BasisProjectionPlane[FrameCounter][0]);
       theDrawOps.centerX[FrameCounter]=theDrawOps.centerX[0];
       theDrawOps.centerY[FrameCounter]=theDrawOps.centerY[0];
       theDrawOps.GraphicsUnit[FrameCounter]=theDrawOps.GraphicsUnit[0];
@@ -9139,44 +9149,46 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   return theNode.errorNoError;
 }
 
-void Parser::initTestAlgebraNeedsToBeRewritten(GlobalVariables& theGlobalVariables)
-{ if (false)
-//(this->DefaultWeylLetter=='B' && this->DefaultWeylRank==3)
-  { Parser tempParser;
-    this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
-    SSalgebraModuleOld theModule;
-    std::stringstream out;
-    theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
-    List<ElementSimpleLieAlgebra> theBasis;
-    theBasis.SetSize(this->theHmm.theRange.GetNumGenerators());
-    for (int i=0; i<this->theHmm.imagesAllChevalleyGenerators.size; i++)
-    { int theIndex=i;
-      if (i>=6 && i<8)
-        theIndex=3+i;
-      if (i>=8)
-        theIndex=i+7;
-      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-      currentElt=this->theHmm.imagesAllChevalleyGenerators.TheObjects[i];
+void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables)
+{ if(this->DefaultWeylLetter!='B' || this->DefaultWeylRank!=3)
+    return;
+  Parser tempParser;
+  this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
+  SSalgebraModuleOld theModule;
+  std::stringstream out;
+  theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
+  List<ElementSimpleLieAlgebra> theBasis;
+  theBasis.SetSize(this->theHmm.theRange.GetNumGenerators());
+  for (int i=0; i<this->theHmm.imagesAllChevalleyGenerators.size; i++)
+  { int theIndex=i;
+    if (i>=6 && i<8)
+      theIndex=3+i;
+    if (i>=8)
+      theIndex=i+7;
+    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+    currentElt=this->theHmm.imagesAllChevalleyGenerators.TheObjects[i];
+  }
+  for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
+  { int theIndex=i+6;
+    if (i>=3)
+      theIndex=8+i;
+    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+    currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
+  }
+  for (int i=0; i<theBasis.size; i++)
+  { int displayIndex=i-9;
+    if (displayIndex>=0)
+    { if (displayIndex<3)
+        displayIndex+=10;
+      else
+        displayIndex-=2;
     }
-    for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
-    { int theIndex=i+6;
-      if (i>=3)
-        theIndex=8+i;
-      ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-      currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
-    }
-    for (int i=0; i<theBasis.size; i++)
-    { int displayIndex=i-9;
-      if (displayIndex>=0)
-      { if (displayIndex<3)
-          displayIndex+=10;
-        else
-          displayIndex-=2;
-      }
-    }
-    this->testAlgebra.init(theBasis, this->theHmm.theRange, theGlobalVariables);
-  } else
-    this->testAlgebra.initDefaultOrder(this->theHmm.theRange, theGlobalVariables);
+  }
+  this->testAlgebra.init(theBasis, this->theHmm.theRange, theGlobalVariables);
+}
+
+void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariables)
+{ this->testAlgebra.initDefaultOrder(this->theHmm.theRange, theGlobalVariables);
 }
 
 int ParserNode::EvaluateDecomposeOverSubalgebra
@@ -9193,8 +9205,7 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   theParseR.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
 
   if (theParseR.testAlgebra.theOrder.size==0)
-    theParseR.initTestAlgebraNeedsToBeRewritten(theGlobalVariables);
-
+    theParseR.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   GeneralizedVermaModuleData<RationalFunction> theData;
   ElementGeneralizedVerma<RationalFunction> startingElement;
   RationalFunction RFOne, RFZero;
@@ -10416,7 +10427,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Not implemented yet. Might be hidden or changed in future versions. \
    </b>First argument gives the highest weight of the irrep. Second argument gives the parabolic selection.",
     "splitIrrepOverLeviParabolic((1,1),(0,1))",
-   'B', 2, false,
+   'B', 2, true,
     & ParserNode::EvaluateSplitIrrepOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail

@@ -294,28 +294,9 @@ int ParserNode::EvaluateChar
   return theNode.errorNoError;
 }
 
-bool charSSAlgMod::DrawMeNoMults
-(std::string& outputDetails, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars, int upperBoundWeights)
-{ charSSAlgMod CharCartan;
-  WeylGroup& theWeyl=this->theBoss->theWeyl;
-  if (this->size!=1)
-  { outputDetails="I am programmed to compute weight supports of irreducible modules only.";
-    return false;
-  }
-  root theWeightSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental
-  (this->TheObjects[0].weightFundamentalCoords);
-  roots finalWeights;
-  outputDetails= theWeyl.GenerateWeightSupportMethoD1
-  (theWeightSimpleCoords, finalWeights, upperBoundWeights, theGlobalVariables);
-  theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
-  for (int i=0; i< finalWeights.size; i++)
-    theDrawingVars.drawCircleAtVectorBuffer(finalWeights[i], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-  return true;
-}
-
-bool charSSAlgMod::DrawMeWithMults
+bool charSSAlgMod::DrawMe
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
- DrawingVariables& theDrawingVars, int upperBoundWeights)
+ DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
 { charSSAlgMod CharCartan;
   bool result= this->FreudenthalEvalMe
   (CharCartan, outputDetails, theGlobalVariables, upperBoundWeights);
@@ -340,8 +321,9 @@ bool charSSAlgMod::DrawMeWithMults
     }
     for (int j=0; j<finalWeights.size; j++)
     { theDrawingVars.drawCircleAtVectorBuffer(finalWeights[j], 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
-      theDrawingVars.drawTextAtVectorBuffer
-        (finalWeights[j], currentMon.Coefficient.ElementToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
+      if (useMults)
+        theDrawingVars.drawTextAtVectorBuffer
+          (finalWeights[j], currentMon.Coefficient.ElementToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);
     }
   }
   out << "<br>Number of computed weights: " << totalNumWeights << ". ";
@@ -737,15 +719,15 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
     outputDetails=errorLog.str();
     return false;
   }
-  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "<br>Dominant weights wrt. levi part("
-  << outputDominantWeightsSimpleCoords.size << "):<br> ";
-  for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
-    std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
+//  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "<br>Dominant weights wrt. levi part("
+//  << outputDominantWeightsSimpleCoords.size << "):<br> ";
+//  for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
+//    std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   root currentWeight, currentDominantRepresentative;
   root Rho=this->GetRho();
-  std::cout << "<br> Rho equals: " << Rho.ElementToString();
+//  std::cout << "<br> Rho equals: " << Rho.ElementToString();
   //out << "<br> Rho equals: " << Rho.ElementToString();
   Rational hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoords+Rho, hwSimpleCoords+Rho);
   Explored[0]=true;
@@ -763,9 +745,9 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
         currentDominantRepresentative=currentWeight;
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
-        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
+//        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
         int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
-        std::cout << "<br>index of currentDomain rep: " << theIndex;
+//        std::cout << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
@@ -780,14 +762,14 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
         }
         currentAccum+=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, this->RootsOfBorel[j])
         *outputMultsSimpleCoords[theIndex];
-        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
-        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
+//        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
+//        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
-    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
-    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->AmbientWeyl.RootScalarCartanRoot
-   (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho))
-    .ElementToString()
+//    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
+//    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->AmbientWeyl.RootScalarCartanRoot
+//   (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho))
+//    .ElementToString()
     ;
     Rational tempDen= hwPlusRhoSquared- this->AmbientWeyl.RootScalarCartanRoot
     (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho);
@@ -2398,7 +2380,10 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   theMod.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theWeightFundCoords, theGlobalVariables, 1, 0, 0);
   std::string report;
   theMod.SplitOverLevi(& report, parSel, theGlobalVariables, 1, 0);
+  out << "<br>" << report;
+
   theNode.ExpressionType=theNode.typeString;
+  theNode.outputString=out.str();
   return theNode.errorNoError;
 }
 
@@ -2406,9 +2391,33 @@ template<class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
-{ ReflectionSubgroupWeylGroup subWeyl;
-  charSSAlgMod tempChar;
-  this->theChar.SplitCharOverLevi(Report, tempChar, parSelection, subWeyl, theGlobalVariables);
+{ if (this->theChar.size!=1)
+  { if (Report!=0)
+      *Report="I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
+    return;
+  }
+  ReflectionSubgroupWeylGroup subWeyl;
+  charSSAlgMod charWRTsubalgebra;
+  this->theChar.SplitCharOverLevi(Report, charWRTsubalgebra, parSelection, subWeyl, theGlobalVariables);
+/*  root currentWeight, theHW;
+
+  if (
+  ModuleSSalgebraNew<Rational>  theIrrep;
+  theHW=theWeyl.GetSimpleCoordinatesFromFundamental(this->TheObjects[0].weightFundamentalCoords);
+  std::string irrepReport;
+  if (! theIrrep.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theHW, theGlobalVariables, 1, 0, &irrepReport))
+  { out << "<hr><b>Failed to create the irreducible representation (most probably the computation requested was too large).</b> "
+    << "Below is the report obtained when trying to create the irrep you requested.<br> " << irrepReport;
+    if (Report!=0)
+      *Report=out.str();
+    return false;
+  }
+  for (int i=0; i<output.size; i++)
+  { MonomialChar<Rational> currentMon;
+    currentWeight=theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords);
+
+  }
+*/
 }
 
 int ParserNode::EvaluateSplitCharOverLeviParabolic
@@ -2429,15 +2438,7 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   charSSAlgMod tempChar;
   ReflectionSubgroupWeylGroup subWeyl;
   theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
-  DrawingVariables theDV;
-  WeylGroup& theWeyl=theChar.theBoss->theWeyl;
   out << report;
-  theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
-  for (int i=0; i<tempChar.size; i++)
-    subWeyl.DrawContour
-    (theWeyl.GetSimpleCoordinatesFromFundamental(tempChar[i].weightFundamentalCoords),
-     theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
-  out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -2481,10 +2482,10 @@ bool charSSAlgMod::SplitCharOverLevi
 //  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, invertedSel, theGlobalVariables,1);
 //  complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
-  std::cout << out.str();
+  //std::cout << out.str();
   charSSAlgMod dominantCharAmbient, remainingCharDominantLevi;
   this->FreudenthalEvalMe(dominantCharAmbient, tempS, theGlobalVariables, 10000);
-  std::cout << "<hr>" << tempS;
+  //std::cout << "<hr>" << tempS;
   remainingCharDominantLevi.Nullify(0);
   roots tempRootS;
   HashedList<root> orbitDom, tempHashedRoots;
@@ -2512,8 +2513,8 @@ bool charSSAlgMod::SplitCharOverLevi
   List<Rational> tempMults;
   out << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
-  std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+  //std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+//  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
   while(!remainingCharDominantLevi.IsEqualToZero())
   { localHighest=*remainingCharDominantLevi.LastObject();
     for (bool Found=true; Found; )
@@ -2542,9 +2543,25 @@ bool charSSAlgMod::SplitCharOverLevi
       remainingCharDominantLevi-=tempMon;
     }
   }
-  out << "<hr>"  << "The split character is: " << output.ElementToString("V", "\\omega", false);
   if (Report!=0)
+  { //out << "<hr>"  << "The split character is: " << output.ElementToString("V", "\\omega", false);
+    DrawingVariables theDV;
+    std::string tempS;
+    this->DrawMeNoMults(tempS, theGlobalVariables, theDV, 10000);
+    root tempRoot;
+    out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
+    << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
+    for (int i=0; i<output.size; i++)
+    { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output.TheObjects[i].weightFundamentalCoords);
+      outputWeylSub.DrawContour
+      (tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
+      std::stringstream tempStream;
+      tempStream << output[i].Coefficient.ElementToString();
+      theDV.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+    }
+    out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
     *Report=out.str();
+  }
   return true;
 }
 

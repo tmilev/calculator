@@ -611,7 +611,12 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   this->RaiseToDominantWeight(highestWeightTrue);
   root highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoordinates().IsSmallInteger())
+  { out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.ElementToString()
+    << " which equals " << highestWeightFundCoords.ElementToString() << "  in fundamental coordinates "
+    << " is not integral dominant.<br>";
+    outputDetails=out.str();
     return false;
+  }
   int theTopHeightSimpleCoords=(int) highestWeightSimpleCoords.SumCoordinates().DoubleValue()+1;
 //  int theTopHeightFundCoords=(int) highestWeightFundCoords.SumCoordinates().DoubleValue();
   if (theTopHeightSimpleCoords<0)
@@ -1273,8 +1278,8 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput
 }
 
 bool LittelmannPath::GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators,
- GlobalVariables& theGlobalVariables, int UpperBoundNumElts)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
+ Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTopHash(*this);
   int theDim=this->owner->GetDim();
@@ -1285,24 +1290,33 @@ bool LittelmannPath::GenerateOrbit
     currentSequence.MakeActualSizeAtLeastExpandOnTop(UpperBoundNumElts);
   LittelmannPath currentPath;
   bool result=true;
+  Selection parabolicSelectionSelectedAreInLeviPart;
+  parabolicSelectionSelectedAreInLeviPart.init(theDim);
+  if (parabolicNonSelectedAreInLeviPart!=0)
+  { parabolicSelectionSelectedAreInLeviPart=*parabolicNonSelectedAreInLeviPart;
+    parabolicSelectionSelectedAreInLeviPart.InvertSelection();
+  }
+  else
+    parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
   for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
     if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
     { result=false;
       break;
     }
     else
-      for (int i=0; i<theDim; i++)
+      for (int j=0; j<parabolicSelectionSelectedAreInLeviPart.CardinalitySelection; j++)
       { bool found=true;
         currentPath=hashedOutput[lowestNonExplored];
         currentSequence=outputOperators[lowestNonExplored];
+        int theIndex=parabolicSelectionSelectedAreInLeviPart.elements[j];
         while (found)
         { found=false;
-          currentPath.ActByEalpha(i);
+          currentPath.ActByEalpha(theIndex);
           if (!currentPath.IsEqualToZero())
   //          hashedOutput.AddOnTopNoRepetitionHash(currentPath);
             if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
             { found=true;
-              currentSequence.AddOnTop(i);
+              currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
               { std::cout << "<hr>Found a bad path:<br> ";
@@ -1315,12 +1329,12 @@ bool LittelmannPath::GenerateOrbit
         currentSequence=outputOperators[lowestNonExplored];
         while (found)
         { found=false;
-          currentPath.ActByFalpha(i);
+          currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
             //hashedOutput.AddOnTopNoRepetitionHash(currentPath);
             if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
-            {  found=true;
-              currentSequence.AddOnTop(-i-1);
+            { found=true;
+              currentSequence.AddOnTop(-theIndex-1);
               outputOperators.AddOnTop(currentSequence);
               if (!currentPath.MinimaAreIntegral())
               { std::cout << "<hr>Found a bad path:<br> ";
@@ -1529,8 +1543,13 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   List<Rational> theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(theHWFundCoords);
   roots tempRoots;
-  theWeyl.GenerateWeightSupportMethoD1
-  (theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
+  if( theHWsimpleCoords.ElementToString()=="(5/2, 7/2)")
+  { std::cout << "<hr>Problem";
+  }
+  std::cout << theWeyl.GenerateWeightSupportMethoD1(theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
+  if (tempRoots.size==0)
+  { std::cout << "<hr>Problem at " << theHWsimpleCoords.ElementToString();
+  }
   tempRoots.QuickSortDescending();
   this->generatingWordsWeights.AssignList(tempRoots);
   this->theGeneratingWordsGrouppedByWeight.SetSize(this->generatingWordsWeights.size);
@@ -1550,7 +1569,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     root& hwCurrent=*thePaths[i].Waypoints.LastObject();
     int theIndex=this->generatingWordsWeights.IndexOfObjectHash(hwCurrent);
     if (theIndex==-1)
-    { out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
+    { std::cout << "couldn't find weight : " << hwCurrent.ElementToString() << " in " << this->generatingWordsWeights.ElementToString();
+      out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << " # of weights is 10000";
       if (outputReport!=0)
         *outputReport=out2.str() + monomialDetailStream.str();
@@ -1682,8 +1702,8 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
 
 template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
-  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { int numPosRoots=this->owner->theOwner.GetNumPosRoots();
   int theDimension=this->owner->theOwner.GetRank();
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
@@ -1719,8 +1739,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperimental
-(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
- const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { WeylGroup& theWeyl=this->owner->theOwner.theWeyl;
   root theHWsimpleCoordsTrue=theHWsimpleCoords;
   theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
@@ -1767,8 +1786,7 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExper
 
 template <class CoefficientType>
 bool ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperimental
-(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit,
- const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const root& theHWsimpleCoords, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   ElementUniversalEnvelopingOrdered<CoefficientType> output;
   output.Nullify(*this->owner);
@@ -2374,8 +2392,11 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   if (theWeightFundCoords.size!=theDim || parSel.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
-  out << "Not implemented yet. Your input weight: " << theWeightFundCoords.ElementToString();
-  out << "; your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  out << "Your input weight in fundamental coordinates: "
+  << theWeyl.GetFundamentalCoordinatesFromSimple(theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords)  )
+  .ElementToString();
+  out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ElementToString();
+  out << ".<br>Your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
   ModuleSSalgebraNew<Rational> theMod;
   theMod.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theWeightFundCoords, theGlobalVariables, 1, 0, 0);
   std::string report;
@@ -2399,25 +2420,29 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   ReflectionSubgroupWeylGroup subWeyl;
   charSSAlgMod charWRTsubalgebra;
   this->theChar.SplitCharOverLevi(Report, charWRTsubalgebra, parSelection, subWeyl, theGlobalVariables);
-/*  root currentWeight, theHW;
-
-  if (
+  root currentWeight, theHWsimpleCoords, theHWfundCoords;
+  std::stringstream out;
+  if(Report!=0)
+    out << *Report;
   ModuleSSalgebraNew<Rational>  theIrrep;
-  theHW=theWeyl.GetSimpleCoordinatesFromFundamental(this->TheObjects[0].weightFundamentalCoords);
+  WeylGroup& theWeyl=this->theAlgebra.theWeyl;
+  theHWfundCoords=this->theChar[0].weightFundamentalCoords;
+  theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundCoords);
   std::string irrepReport;
-  if (! theIrrep.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theHW, theGlobalVariables, 1, 0, &irrepReport))
+  if (! theIrrep.MakeFromHW(theWeyl.WeylLetter, theWeyl.GetDim(), theHWfundCoords, theGlobalVariables, 1, 0, &irrepReport))
   { out << "<hr><b>Failed to create the irreducible representation (most probably the computation requested was too large).</b> "
     << "Below is the report obtained when trying to create the irrep you requested.<br> " << irrepReport;
     if (Report!=0)
       *Report=out.str();
-    return false;
+    return;
   }
-  for (int i=0; i<output.size; i++)
-  { MonomialChar<Rational> currentMon;
+  for (int i=0; i<this->theChar.size; i++)
+  { MonomialChar<Rational>& currentMon =this->theChar[i];
     currentWeight=theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords);
 
   }
-*/
+  if (Report!=0)
+    *Report=out.str();
 }
 
 int ParserNode::EvaluateSplitCharOverLeviParabolic

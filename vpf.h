@@ -906,6 +906,16 @@ public:
   void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->AssignList(theList);}
   HashedList();
   ~HashedList();
+  std::string ElementToString()
+  { std::stringstream out;
+    out << this->size << " hashed objects:";
+    for (int i=0; i<this->size; i++)
+    { out << this->TheObjects[i].ElementToString();
+      if (i!=this->size-1)
+        out << ", ";
+    }
+    return out.str();
+  }
   void CopyFromHash(const HashedList<Object>& From);
   inline void operator=(const HashedList<Object>& From){this->CopyFromHash(From);}
 };
@@ -1537,6 +1547,7 @@ public:
     { this->elements[i]=i;
       this->selected[i]=true;
     }
+    this->CardinalitySelection=this->MaxSize;
   }
   void init(int maxNumElements);
   void ComputeIndicesFromSelection();
@@ -1558,6 +1569,11 @@ public:
   void WriteToFile(std::fstream& output);
   inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
   void ReadFromFile(std::fstream& input);
+  void InvertSelection()
+  { for (int i=0; i<this->MaxSize; i++)
+      this->selected[i]=!this->selected[i];
+    this->ComputeIndicesFromSelection();
+  }
   inline void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){ this->ReadFromFile(input);}
   inline void operator=(const Selection& right){this->Assign(right); }
   void operator=(const root& other);
@@ -11154,7 +11170,8 @@ public:
 (List<int> & input)
   ;
   bool GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts)
+(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
+ Selection* parabolicSelectedRootsAreInLeviPart=0)
 ;
   bool MinimaAreIntegral();
   std::string ElementToString(bool useSimpleCoords=true)

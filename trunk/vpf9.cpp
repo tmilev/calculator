@@ -1728,8 +1728,9 @@ void Selection::ReadFromFile(std::fstream& input)
 void Selection::ElementToString(std::string& output)
 { std::stringstream out;
   out << "Cardinality: " << this->CardinalitySelection << "\n";
-  for (int i=0; i<this->CardinalitySelection; i++)
-    out << this->elements[i] << ", ";
+  root tempRoot;
+  tempRoot=*this;
+  out << tempRoot.ElementToString();
   output=out.str();
 }
 

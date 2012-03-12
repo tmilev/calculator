@@ -185,9 +185,9 @@ int main(int argc, char **argv)
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
 //  civilizedInput="allLittelmannPaths(0,1)";
-  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
-  theParser.DefaultWeylLetter='B';
-  theParser.DefaultWeylRank=2;
+//  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
+//  theParser.DefaultWeylLetter='B';
+//  theParser.DefaultWeylRank=2;
 
 //  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";

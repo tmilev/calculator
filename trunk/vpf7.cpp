@@ -1543,13 +1543,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   List<Rational> theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(theHWFundCoords);
   roots tempRoots;
-  if( theHWsimpleCoords.ElementToString()=="(5/2, 7/2)")
-  { std::cout << "<hr>Problem";
-  }
-  std::cout << theWeyl.GenerateWeightSupportMethoD1(theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
-  if (tempRoots.size==0)
-  { std::cout << "<hr>Problem at " << theHWsimpleCoords.ElementToString();
-  }
+  theWeyl.GenerateWeightSupportMethoD1(theHWsimpleCoords, tempRoots, 10000, theGlobalVariables);
   tempRoots.QuickSortDescending();
   this->generatingWordsWeights.AssignList(tempRoots);
   this->theGeneratingWordsGrouppedByWeight.SetSize(this->generatingWordsWeights.size);
@@ -1650,7 +1644,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
      theRingUnit, theRingZero);
     if (outputReport!=0)
       out2 << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
-    Matrix<CoefficientType> theMatrix;
+    Matrix<CoefficientType>& theMatrix=this->actionsSimpleGensMatrixForm[i];
     theMatrix.init(this->theGeneratingWordsNonReduced.size, this->theGeneratingWordsNonReduced.size);
     theMatrix.NullifyAll(theRingZero);
     for (int j=0; j<currentAction.size; j++)
@@ -2417,10 +2411,12 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
       *Report="I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
     return;
   }
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   ReflectionSubgroupWeylGroup subWeyl;
   charSSAlgMod charWRTsubalgebra;
   this->theChar.SplitCharOverLevi(Report, charWRTsubalgebra, parSelection, subWeyl, theGlobalVariables);
-  root currentWeight, theHWsimpleCoords, theHWfundCoords;
+  root theHWsimpleCoords, theHWfundCoords;
   std::stringstream out;
   if(Report!=0)
     out << *Report;
@@ -2436,10 +2432,45 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
       *Report=out.str();
     return;
   }
-  for (int i=0; i<this->theChar.size; i++)
-  { MonomialChar<Rational>& currentMon =this->theChar[i];
-    currentWeight=theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords);
-
+  Selection parSelSelectedRootsAreInLeviPart;
+  parSelSelectedRootsAreInLeviPart=parSelection;
+  parSelSelectedRootsAreInLeviPart.InvertSelection();
+  out << "<br>Parabolic selection 1 stands for levi part: " << parSelSelectedRootsAreInLeviPart.ElementToString();
+  List<List<List<Rational> > > eigenSpacesPerSimpleGenerator;
+ // if (false)
+  eigenSpacesPerSimpleGenerator.SetSize(parSelSelectedRootsAreInLeviPart.CardinalitySelection);
+  roots theFinalEigenSpace, tempSpace1, tempSpace2;
+  for (int i=0; i<parSelSelectedRootsAreInLeviPart.CardinalitySelection; i++)
+  { int theGenIndex=parSelSelectedRootsAreInLeviPart.elements[i]+theWeyl.GetDim();
+    Matrix<Rational>& currentOp=theIrrep.actionsSimpleGensMatrixForm[theGenIndex];
+    currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    if (i==0)
+      theFinalEigenSpace.AssignListListRational(eigenSpacesPerSimpleGenerator[i]);
+    else
+    { tempSpace1=theFinalEigenSpace;
+      tempSpace2.AssignListListRational(eigenSpacesPerSimpleGenerator[i]);
+      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
+    }
+  }
+  out << "<br> Eigenvectors: ";
+  for (int j=0; j<theFinalEigenSpace.size; j++)
+  { out << "<hr>Weight: " << theIrrep.generatingWordsWeights[j].ElementToString() << "<br>Eigenvector:<br>";
+    ElementUniversalEnveloping<Rational> currentElt, tempElt;
+    currentElt.Nullify(this->theAlgebra);
+    root& currentVect= theFinalEigenSpace[j];
+    for (int i=0; i<currentVect.size; i++)
+    { tempElt=theIrrep.theGeneratingWordsNonReduced[i];
+      tempElt*=currentVect[i];
+      currentElt+=tempElt;
+    }
+    if (currentElt.size>1)
+      out << "(";
+    out << currentElt.ElementToString(false, theGlobalVariables, theFormat);
+    if (currentElt.size>1)
+      out << ")";
+    out << "\\cdot v";
+    if (j!=theFinalEigenSpace.size-1)
+      out << ", ";
   }
   if (Report!=0)
     *Report=out.str();

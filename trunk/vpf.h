@@ -3447,10 +3447,13 @@ public:
     for (int i=0; i<this->size; i++)
       this->TheObjects[i].CopyFromLight(input.TheObjects[i]);
   }
+  void AssignListListRational(const List<List<Rational> >& input)
+  { this->SetSize(input.size);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i].CopyFromHeavy(input[i]);
+  }
   static void IntersectTwoLinSpaces
-  (const roots& firstSpace, const roots& secondSpace,
-   roots& output,
-   GlobalVariables& theGlobalVariables)
+  (const roots& firstSpace, const roots& secondSpace, roots& output, GlobalVariables& theGlobalVariables)
   { Vectors<Rational> firstSpaceVectors, secondSpaceVectors, outputVectors;
     firstSpace.GetVectorsRational(firstSpaceVectors);
     secondSpace.GetVectorsRational(secondSpaceVectors);

@@ -159,6 +159,12 @@ class RationalFunction;
 struct CGI;
 class charSSAlgMod;
 class ReflectionSubgroupWeylGroup;
+template <class CoefficientType>
+class ElementModuleSSalgebra;
+template<class CoefficientType>
+class ElementGeneralizedVerma;
+template <class CoefficientType>
+class ModuleSSalgebraNew;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -725,7 +731,7 @@ public:
   }
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
-  void MakeActualSizeAtLeastExpandOnTop(int theSize);
+  void Reserve(int theSize);
   void AddObjectOnBottom(const Object& o);
   void AddOnBottomNoRepetition(const Object& o) {if (!this->ContainsObject(o)) this->AddObjectOnBottom(o);}
   void AddOnTop(const Object& o);
@@ -868,7 +874,7 @@ public:
   void ClearTheObjects();
   void AddOnTopHash(const Object& o);
   void AddOnTopHash(const List<Object>& theList)
-  { this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
+  { this->Reserve(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTopHash(theList[i]);
   }
@@ -877,7 +883,7 @@ public:
   { if (this->size/this->HashSize<5)
       return;
     this->SetHashSizE(this->size);
-    this->MakeActualSizeAtLeastExpandOnTop(this->size*5);
+    this->Reserve(this->size*5);
 //    static int counter=0;
 //    std::cout << "<br> Num times adjust hashes is called: " << ++counter;
   }
@@ -891,14 +897,14 @@ public:
   void SetExpectedSize(int expectedSize)
   { if (expectedSize<1)
       return;
-    this->MakeActualSizeAtLeastExpandOnTop(expectedSize);
+    this->Reserve(expectedSize);
     this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*5));
   }
   void SetHashSizE(int HS);
   int SizeWithoutObjects();
   void AssignList(const List<Object>& other)
   { this->ClearTheObjects();
-    this->MakeActualSizeAtLeastExpandOnTop(other.size);
+    this->Reserve(other.size);
     for (int i=0; i<other.size; i++)
       this->AddOnTopHash(other.TheObjects[i]);
   }
@@ -2169,7 +2175,7 @@ public:
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
   { List<int> theSieve;
     theSieve.initFillInObject(n+1,1);
-    output.MakeActualSizeAtLeastExpandOnTop(n/2);
+    output.Reserve(n/2);
     output.size=0;
     for (unsigned int i=2; i<=n; i++)
       if (theSieve.TheObjects[i]!=0)
@@ -3903,7 +3909,7 @@ void List<Object>::CopyFromBase(const List<Object>& From)
 }
 
 template <class Object>
-void List<Object>::MakeActualSizeAtLeastExpandOnTop(int theSize)
+void List<Object>::Reserve(int theSize)
 { if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
   { ParallelComputing::SafePointDontCallMeFromDestructors();
     this->ExpandArrayOnTop(this->IndexOfVirtualZero+theSize- this->ActualSize);
@@ -3923,7 +3929,7 @@ template <class Object>
 void List<Object>::SetSize(int theSize)
 { if (theSize<0)
     theSize=0;
-  this->MakeActualSizeAtLeastExpandOnTop(theSize);
+  this->Reserve(theSize);
   this->size=theSize;
 }
 
@@ -4180,7 +4186,7 @@ void HashedList<Object>::AddOnTopHash(const Object& o)
 
 template <class Object>
 void HashedList<Object>::AddOnTopNoRepetitionHash(const List<Object>& theList)
-{ this->MakeActualSizeAtLeastExpandOnTop(this->size+theList.size);
+{ this->Reserve(this->size+theList.size);
   for (int i=0; i<theList.size; i++)
     this->AddOnTopNoRepetitionHash(theList.TheObjects[i]);
 }
@@ -4792,6 +4798,9 @@ public:
   void operator= (const TemplatePolynomial<TemplateMonomial, Element>& right);
   bool operator== (const TemplatePolynomial<TemplateMonomial, Element>& right);
   inline void operator+=(const Polynomial<Element>& other){this->AddPolynomial(other);}
+  inline void operator+=(const TemplateMonomial& m)
+  { this->AddMonomial(m);
+  }
   inline void operator+=(const Element& other)
   { TemplateMonomial tempM;
     tempM.MakeConstantMonomial(this->NumVars, other);
@@ -5329,7 +5338,7 @@ inline bool MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, Generator
 
 template <class Element, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyBy(MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m)
-{ this->MakeActualSizeAtLeastExpandOnTop(this->size+m.size);
+{ this->Reserve(this->size+m.size);
   for (int i=0; i<m.size; i++)
     this->MultiplyByGenerator(m.TheObjects[i]);
   this->Coefficient.MultiplyBy(m.Coefficient);
@@ -6289,7 +6298,7 @@ inline bool TemplatePolynomial<TemplateMonomial, Element>::ReadFromFile
   this->Nullify(candidateVars);
   TemplateMonomial tempM;
   tempM.init(candidateVars);
-  this->MakeActualSizeAtLeastExpandOnTop(targetSize);
+  this->Reserve(targetSize);
   input.ignore();
   for (int i=0; i<targetSize; i++)
   { if (input.peek()=='+')
@@ -6326,7 +6335,7 @@ void Polynomial<Element>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
     return;
   Polynomial<Element> Accum;
   Accum.Nullify(newNumVars);
-  Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
+  Accum.Reserve(this->size);
   Monomial<Element> tempM;
   tempM.init(Accum.NumVars);
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
@@ -6343,7 +6352,7 @@ template <class Element>
 void Polynomial<Element>::IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease)
 { Polynomial<Element> Accum;
   Accum.Nullify(this->NumVars+theIncrease);
-  Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
+  Accum.Reserve(this->size);
   Monomial<Element> tempM;
   tempM.init(Accum.NumVars);
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
@@ -6394,7 +6403,7 @@ inline void TemplatePolynomial<TemplateMonomial, Element>::MultiplyBy
     return;
   }
   int maxNumMonsFinal=this->size*p.size;
-  bufferPoly.MakeActualSizeAtLeastExpandOnTop(maxNumMonsFinal);
+  bufferPoly.Reserve(maxNumMonsFinal);
   if (maxNumMonsFinal/this->HashSize>3)
     bufferPoly.SetHashSizE(maxNumMonsFinal);
   bufferPoly.Nullify(p.NumVars);
@@ -6486,7 +6495,7 @@ inline int TemplatePolynomial<TemplateMonomial, Element>::HasSameExponentMonomia
 
 template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::AddPolynomial(const TemplatePolynomial<TemplateMonomial, Element>& p)
-{ this->MakeActualSizeAtLeastExpandOnTop(p.size+this->size);
+{ this->Reserve(p.size+this->size);
   //std::string tempS1;
   /*if (QuasiPolynomialOld::flagAnErrorHasOccurredTimeToPanic)
   {  std::string tempS;
@@ -6685,11 +6694,11 @@ void Polynomial<Element>::DivideBy(const Polynomial<Element>& inputDivisor, Poly
   outputQuotient.Nullify(this->NumVars);
   if (remainderMaxMonomial==-1)
     return;
-  outputQuotient.MakeActualSizeAtLeastExpandOnTop(this->size);
+  outputQuotient.Reserve(this->size);
   Monomial<Element> tempMon;
   tempMon.init(this->NumVars);
   Polynomial<Element> tempP;
-  tempP.MakeActualSizeAtLeastExpandOnTop(this->size);
+  tempP.Reserve(this->size);
   //if (this->flagAnErrorHasOccuredTimeToPanic)
   //{ this->ComputeDebugString();
    // tempInput.ComputeDebugString();
@@ -6787,7 +6796,7 @@ void TemplatePolynomial<TemplateMonomial, Element>::MultiplyByMonomial(TemplateM
   }
   TemplateMonomial tempM;
   TemplatePolynomial<TemplateMonomial, Element> Accum;
-  Accum.MakeActualSizeAtLeastExpandOnTop(this->size);
+  Accum.Reserve(this->size);
   Accum.ClearTheObjects();
   Accum.NumVars= this->NumVars;
   for (int i=0; i<this->size; i++)
@@ -6856,7 +6865,7 @@ bool Polynomial<Element>::IsGreaterThanZeroLexicographicOrder()
 template <class Element>
 void Polynomial<Element>::AssignPolynomialLight(const PolynomialLight<Element>& from)
 { this->Nullify(from.NumVars);
-  this->MakeActualSizeAtLeastExpandOnTop(from.size);
+  this->Reserve(from.size);
   for (int i=0; i<from.size; i++)
     this->AddMonomial(from.TheObjects[i]);
 }
@@ -8421,6 +8430,10 @@ public:
   Vector<Rational> GetFundamentalCoordinatesFromSimple
   (const Vector<Rational>& inputInSimpleCoords)
   ;
+  root GetDualCoordinatesFromSimple
+  (const root& inputInSimpleCoords)
+  { return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
+  }
   root GetDualCoordinatesFromFundamental
   (const root& inputInFundamentalCoords)
   { root result=inputInFundamentalCoords;
@@ -8485,7 +8498,7 @@ public:
   (Cone& output, GlobalVariables& theGlobalVariables)
   ;
   std::string GenerateWeightSupportMethoD1
-  (root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights, GlobalVariables& theGlobalVariables)
+  (root& highestWeightSimpleCoords, roots& outputWeightsSimpleCoords, int upperBoundWeights, GlobalVariables& theGlobalVariables)
 ;
   void GetIntegralLatticeInSimpleCoordinates(Lattice& output);
   void GetFundamentalWeightsInSimpleCoordinates(roots& output);
@@ -9450,6 +9463,25 @@ public:
   }
   int RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(int theIndex)const;
   int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const;
+  void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart)
+  { for (int i=0; i<this->GetNumPosRoots(); i++)
+    { int translationCoeff;
+      for (int j=0; j<this->GetRank(); j++)
+        if (parSelZeroMeansLeviPart.selected[j])
+          translationCoeff+=this->theWeyl.RootSystem[i][j].NumShort;
+      this->UEGeneratorOrderIncludingCartanElts[i]+=translationCoeff;
+    }
+  }
+  void OrderSSalgebraForHWbfComputation()
+  { int numPosRoots=this->GetNumPosRoots();
+    for (int i=0; i<numPosRoots; i++)
+      this->UEGeneratorOrderIncludingCartanElts[i]=-1;
+  }
+  void OrderSSLieAlgebra()
+  { int numGens=this->GetNumGenerators();
+    for (int i=0; i<numGens; i++)
+      this->UEGeneratorOrderIncludingCartanElts[i]=i;
+  }
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int ChevalleyGeneratorIndexToRootIndex(int theIndex)const;
   int ChevalleyGeneratorIndexToElementCartanIndex(int theIndex){ return theIndex-this->theWeyl.RootsOfBorel.size;}
@@ -9860,7 +9892,7 @@ public:
   void AssignChangeCoefficientType (const ElementUniversalEnvelopingOrdered<OtherCoefficientType>& other)
   { this->Nullify(*other.owner);
     MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
-    this->MakeActualSizeAtLeastExpandOnTop(other.size);
+    this->Reserve(other.size);
     for (int i=0; i<other.size; i++)
     { tempMon.AssignChangeCoefficientType<OtherCoefficientType>(other[i]);
       this->AddMonomial(tempMon);
@@ -10068,7 +10100,8 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
-  bool IsEqualToZero()
+  bool ConvertToRationalCoeff(ElementUniversalEnveloping<Rational>& output);
+  bool IsEqualToZero()const
   { return this->size==0;
   }
   bool HWMTAbilinearForm
@@ -10076,16 +10109,6 @@ public:
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
-  void PrepareOrderSSalgebraForHWbfComputation()
-  { int numPosRoots=this->owner->GetNumPosRoots();
-    for (int i=0; i<numPosRoots; i++)
-      this->owner->UEGeneratorOrderIncludingCartanElts[i]=-1;
-  }
-  void RestoreOrderSSLieAlgebra()
-  { int numGens=this->owner->GetNumGenerators();
-    for (int i=0; i<numGens; i++)
-      this->owner->UEGeneratorOrderIncludingCartanElts[i]=i;
-  }
   std::string IsInProperSubmodule
   (const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -10932,11 +10955,11 @@ public:
     this->indexStartingModifiableTextCommands=0;
   }
   void init()
-  { this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(10000);
-    this->TypeNthDrawOperation.MakeActualSizeAtLeastExpandOnTop(10000);
-    this->theDrawLineBetweenTwoRootsOperations.MakeActualSizeAtLeastExpandOnTop(10000);
-    this->theDrawTextAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(15);
-    this->theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(280);
+  { this->IndexNthDrawOperation.Reserve(10000);
+    this->TypeNthDrawOperation.Reserve(10000);
+    this->theDrawLineBetweenTwoRootsOperations.Reserve(10000);
+    this->theDrawTextAtVectorOperations.Reserve(15);
+    this->theDrawCircleAtVectorOperations.Reserve(280);
     this->IndexNthDrawOperation.size=0;
     this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0;
@@ -11161,7 +11184,7 @@ public:
   void ActByEalpha(int indexAlpha);
 //   List<Rational> Speeds;
   void operator+=(const LittelmannPath& other)
-  { this->Waypoints.MakeActualSizeAtLeastExpandOnTop(this->Waypoints.size+other.Waypoints.size);
+  { this->Waypoints.Reserve(this->Waypoints.size+other.Waypoints.size);
     root endPoint=*this->Waypoints.LastObject();
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
@@ -11392,6 +11415,122 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   std::string operator*=(const MonomialChar<Rational>& other);
 };
 
+template <class CoefficientType>
+class GeneralizedVermaModule
+{
+public :
+  ModuleSSalgebraNew<CoefficientType>* theFDRep;
+  Selection parSelZeroesStandForLeviPart;
+};
+
+template <class CoefficientType>
+class ModuleSSalgebraNew
+{ List<Matrix<CoefficientType> > actionsGeneratorsMat;
+  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGenerators;
+  Selection ComputedGeneratorActions;
+public:
+  SemisimpleLieAlgebra theAlgebra;
+  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
+  List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
+  List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
+  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
+  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForm;
+  List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
+  List<Matrix<CoefficientType> > theBilinearFormsInverted;
+  roots weightsSimpleGens;
+  List<Rational> HighestWeightInDualCoords;
+//  List<List<Matrix<CoefficientType> > >
+  HashedList<root> theGeneratingWordsWeightsSimpleCoords;
+  charSSAlgMod theChar;
+  bool flagIsInitialized;
+
+//  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
+//  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
+//  List
+//  List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
+  Matrix<CoefficientType>& GetActionGeneratorIndex
+  (int generatorIndex, GlobalVariables& theGlobalVariables,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ ;
+
+  void MakeFundamentalRep
+(char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
+  ;
+  void IntermediateStepForMakeFromHW
+( List<Rational>& theHWDualCoords, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  const CoefficientType& theRingZero)
+  ;
+  bool MakeFromHW
+(char WeylLetter, int theRank, root& theHWFundCoords, GlobalVariables& theGlobalVariables,
+const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::string* outputReport)
+  ;
+  void GetAdActionHomogenousElt
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& inputWeightSimpleCoords,
+   List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
+   const List<CoefficientType>& subHiGoesToIthElement,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   ;
+  void GetMatrixHomogenousElt
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
+   List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
+    root& inputWeightSimpleCoords, const List<CoefficientType>& subHiGoesToIthElement, Matrix<CoefficientType>& output,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   ;
+  void ExpressAsLinearCombinationHomogenousElement
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
+   ElementUniversalEnveloping<CoefficientType>& outputHomogeneous,
+   int indexInputBasis, const List<CoefficientType>& subHiGoesToIthElement,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+  ;
+  void SplitOverLevi
+  (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero)
+   ;
+   ModuleSSalgebraNew() :flagIsInitialized(false)
+   {}
+};
+
+template<class CoefficientType>
+class MonomialGeneralizedVerma
+{
+  public:
+  GeneralizedVermaModule<CoefficientType>* owner;
+  ElementUniversalEnveloping<CoefficientType> Coefficient;
+  int indexFDVector;
+  MonomialGeneralizedVerma(): owner(0) { }
+  void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
+  { this->owner=other.owner;
+    this->indexFDVector=other.indexFDVector;
+    this->Coefficient=other.Coefficient;
+  }
+  bool IsEqualToZero()const
+  { return this->Coefficient.IsEqualToZero();
+  }
+  bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)
+  { return this->indexFDVector==other.indexFDVector;
+  }
+  int HashFunction()const
+  { return this->indexFDVector;
+  }
+
+};
+
+template<class CoefficientType>
+class ElementGeneralizedVerma : public TemplatePolynomial<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >
+{
+  public:
+  GeneralizedVermaModule<CoefficientType>* owner;
+  void MultiplyMeByUEEltOnTheLeft
+  (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  ;
+  void ReduceMonAndAddToMe
+  (MonomialUniversalEnveloping<CoefficientType>& theMon, int theIndexOfFDVector, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  ;
+};
+
 class Parser;
 class ParserNode
 {
@@ -11428,6 +11567,7 @@ public:
   MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
   MemorySaving<AnimationBuffer> theAnimation;
   MemorySaving<LittelmannPath> theLittelmann;
+  MemorySaving<ElementGeneralizedVerma<Rational> > theGenVermaElt;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -11443,7 +11583,7 @@ public:
   bool ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
-  typeUEelement, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
+  typeUEelement, typeGenVermaElt, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
   typeArray, typeQuasiPolynomial, typePartialFractions, //=17
   typeCharSSFDMod,
   typePiecewiseQP,
@@ -11520,6 +11660,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateLattice
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateActByUEonEltGenVerma
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawWeightSupportWithMults
@@ -13107,7 +13250,7 @@ void Vectors<CoefficientType>::SelectABasis
   if (this->size==0)
     return;
   int theDim=this->TheObjects[0].size;
-  output.MakeActualSizeAtLeastExpandOnTop(this->size);
+  output.Reserve(this->size);
   output.size=0;
   Matrix<CoefficientType> theMat, matEmpty;
   theMat.init(1, theDim);
@@ -13530,7 +13673,7 @@ class GeneralizedVermaModuleData
 };
 
 template<class CoefficientType>
-class ElementGeneralizedVerma
+class ElementGeneralizedVermaOld
 {
   public:
   std::string DebugString;
@@ -13545,9 +13688,9 @@ class ElementGeneralizedVerma
   void ComputeDebugString(){this->DebugString=this->ElementToString();}
   GeneralizedVermaModuleData<CoefficientType>* theOwner;
   List<ElementVermaModuleOrdered<CoefficientType> > leftComponents;
-  ElementGeneralizedVerma(){this->theOwner=0;}
+  ElementGeneralizedVermaOld(){this->theOwner=0;}
   std::string Decompose
-  (Parser& theParser, List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
+  (Parser& theParser, List<ElementGeneralizedVermaOld<CoefficientType> >& outputVectors,
     GlobalVariables& theGlobalVariables)
 ;
   void Nullify
@@ -13577,32 +13720,32 @@ class ElementGeneralizedVerma
 (int theIndex, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
   ;
   void ActOnMe
-  (const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
+  (const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVermaOld<CoefficientType>& output, GlobalVariables* theContext)
 ;
 template<class CoefficientActingElement>
   bool ActOnMe
   (const ElementUniversalEnvelopingOrdered<CoefficientActingElement>& theElt,
-   ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
+   ElementGeneralizedVermaOld<CoefficientType>& output, GlobalVariables* theContext)
 ;
-  void ActOnMe(const ElementSimpleLieAlgebra& theElt, GlobalVariables* theContext) {ElementGeneralizedVerma<CoefficientType> output; this->ActOnMe(theElt, output, theContext); this->operator=(output);};
+  void ActOnMe(const ElementSimpleLieAlgebra& theElt, GlobalVariables* theContext) {ElementGeneralizedVermaOld<CoefficientType> output; this->ActOnMe(theElt, output, theContext); this->operator=(output);};
   void ClimbDownFromHighestWeightAlongSl2String
-(ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& output,
+(ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& output,
     CoefficientType& outputCoeff,
    const ElementSimpleLieAlgebra& posGenerator, const ElementSimpleLieAlgebra& negGenerator,
      int generatorPower, GlobalVariables& theGlobalVariables)
   ;
   void ClimbDownFromVectorAccordingToSequence
-  (ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& outputLastNonZero, CoefficientType& outputCoeff,
+  (ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& outputLastNonZero, CoefficientType& outputCoeff,
    List<int>& inputGeneratorSequence, List<int>& inputGeneratorPowers, GlobalVariables& theGlobalVariables)
   ;
   void ClimbUpFromVector
-  (ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& outputLastNonZero,
+  (ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& outputLastNonZero,
    List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers, GlobalVariables& theGlobalVariables)
   ;
-  void operator=(const ElementGeneralizedVerma<CoefficientType>& other)
+  void operator=(const ElementGeneralizedVermaOld<CoefficientType>& other)
   { this->leftComponents=other.leftComponents;
     this->theOwner=other.theOwner;
   }
@@ -13625,15 +13768,15 @@ template<class CoefficientActingElement>
     for (int i=0; i<this->leftComponents.size; i++)
       this->leftComponents.TheObjects[i]*=theConst;
   }
-  void operator-=(const ElementGeneralizedVerma<CoefficientType>& other)
+  void operator-=(const ElementGeneralizedVermaOld<CoefficientType>& other)
   { for (int i=0; i<this->leftComponents.size; i++)
       this->leftComponents.TheObjects[i]-=other.leftComponents.TheObjects[i];
   }
-  void operator+=(const ElementGeneralizedVerma<CoefficientType>& other)
+  void operator+=(const ElementGeneralizedVermaOld<CoefficientType>& other)
   { for (int i=0; i<this->leftComponents.size; i++)
       this->leftComponents.TheObjects[i]+=other.leftComponents.TheObjects[i];
   }
-  bool IsProportionalTo(const ElementGeneralizedVerma<CoefficientType>& other, CoefficientType& outputTimesMeEqualsInput)const
+  bool IsProportionalTo(const ElementGeneralizedVermaOld<CoefficientType>& other, CoefficientType& outputTimesMeEqualsInput)const
   { assert(this->leftComponents.size==other.leftComponents.size);
     if (this->IsEqualToZero())
     { if (other.IsEqualToZero())
@@ -13649,7 +13792,7 @@ template<class CoefficientActingElement>
         else
           break;
       }
-    ElementGeneralizedVerma<CoefficientType> tempElt;
+    ElementGeneralizedVermaOld<CoefficientType> tempElt;
     tempElt=*this;
     tempElt*=outputTimesMeEqualsInput;
     tempElt-=other;
@@ -13764,7 +13907,7 @@ std::string TensorProductSpaceAndElements<ElementLeft, ElementRight, Coefficient
 }
 
 template<class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::Nullify
+void ElementGeneralizedVermaOld<CoefficientType>::Nullify
   (GeneralizedVermaModuleData<CoefficientType>& owner)
 { this->theOwner=&owner;
   this->leftComponents.SetSize(owner.theFDspace.size);
@@ -13775,7 +13918,7 @@ void ElementGeneralizedVerma<CoefficientType>::Nullify
 }
 
 template <class CoefficientType>
-std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex
+std::string ElementGeneralizedVermaOld<CoefficientType>::GetStringFormGmodKindex
 (int theIndex, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   bool tempbool;
@@ -13793,7 +13936,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::GetStringFormGmodKindex
 }
 
 template <class CoefficientType>
-std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
+std::string ElementGeneralizedVermaOld<CoefficientType>::ElementToString
 (bool displayLeftComponenetsOnTheRight, bool useOtimes, bool useFs,
  PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables
 )
@@ -13824,15 +13967,15 @@ std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
 }
 
 template <class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromHighestWeightAlongSl2String
-(ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& output,
+void ElementGeneralizedVermaOld<CoefficientType>::ClimbDownFromHighestWeightAlongSl2String
+(ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& output,
     CoefficientType& outputCoeff,
    const ElementSimpleLieAlgebra& posGenerator, const ElementSimpleLieAlgebra& negGenerator,
      int generatorPower, GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
   CoefficientType currentWeight;
-  ElementGeneralizedVerma<CoefficientType> debugElt;
+  ElementGeneralizedVermaOld<CoefficientType> debugElt;
   input.ActOnMe(posGenerator, debugElt, &theGlobalVariables);
   std::cout << "<br>climbing down with (" << negGenerator.ElementToString() << " )^" << generatorPower << ": ";
   std::cout << input.ElementToString() << "->";
@@ -13862,11 +14005,11 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromHighestWeightAlongSl
 }
 
 template <class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::ClimbUpFromVector
-  (ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& outputLastNonZero,
+void ElementGeneralizedVermaOld<CoefficientType>::ClimbUpFromVector
+  (ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& outputLastNonZero,
    List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers, GlobalVariables& theGlobalVariables)
-{ ElementGeneralizedVerma<CoefficientType> tempElt;
+{ ElementGeneralizedVermaOld<CoefficientType> tempElt;
   assert(&input!=&outputLastNonZero);
   outputLastNonZero=input;
   outputGeneratorPowers.size=0;
@@ -13900,11 +14043,11 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbUpFromVector
 }
 
 template <class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::ActOnMe
-(const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVerma<CoefficientType>& output,
+void ElementGeneralizedVermaOld<CoefficientType>::ActOnMe
+(const ElementSimpleLieAlgebra& theElt, ElementGeneralizedVermaOld<CoefficientType>& output,
  GlobalVariables* theContext)
 { assert(this!=&output);
-  ElementGeneralizedVerma<CoefficientType> actingOnRight;
+  ElementGeneralizedVermaOld<CoefficientType> actingOnRight;
   output.Nullify(*this->theOwner);
   actingOnRight.Nullify(*this->theOwner);
   ElementSimpleLieAlgebra tempLieElt;
@@ -13935,13 +14078,13 @@ void ElementGeneralizedVerma<CoefficientType>::ActOnMe
 }
 
 template <class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromVectorAccordingToSequence
-  (ElementGeneralizedVerma<CoefficientType>& input,
-   ElementGeneralizedVerma<CoefficientType>& output, CoefficientType& outputCoeff,
+void ElementGeneralizedVermaOld<CoefficientType>::ClimbDownFromVectorAccordingToSequence
+  (ElementGeneralizedVermaOld<CoefficientType>& input,
+   ElementGeneralizedVermaOld<CoefficientType>& output, CoefficientType& outputCoeff,
    List<int>& inputGeneratorSequence, List<int>& inputGeneratorPowers, GlobalVariables& theGlobalVariables)
  { assert(&input!=&output);
   output=input;
-  ElementGeneralizedVerma<CoefficientType> tempElt;
+  ElementGeneralizedVermaOld<CoefficientType> tempElt;
   outputCoeff=this->theOwner->theRingUnit;
   CoefficientType tempCoeff;
   for (int i=inputGeneratorSequence.size-1; i>=0; i--)
@@ -13956,7 +14099,7 @@ void ElementGeneralizedVerma<CoefficientType>::ClimbDownFromVectorAccordingToSeq
 }
 
 template <class CoefficientType>
-void ElementGeneralizedVerma<CoefficientType>::ClearDenominators
+void ElementGeneralizedVermaOld<CoefficientType>::ClearDenominators
   (CoefficientType& outputWasMultipliedByThis)
 { outputWasMultipliedByThis=this->theOwner->theRingUnit;
   CoefficientType CurrentCoeff;
@@ -13972,10 +14115,10 @@ void ElementGeneralizedVerma<CoefficientType>::ClearDenominators
 
 template <class CoefficientType>
 template<class CoefficientActingElement>
-bool ElementGeneralizedVerma<CoefficientType>::ActOnMe
+bool ElementGeneralizedVermaOld<CoefficientType>::ActOnMe
   (const ElementUniversalEnvelopingOrdered<CoefficientActingElement>& theElt,
-   ElementGeneralizedVerma<CoefficientType>& output, GlobalVariables* theContext)
-{ ElementGeneralizedVerma<CoefficientType> Accum, tempElt;
+   ElementGeneralizedVermaOld<CoefficientType>& output, GlobalVariables* theContext)
+{ ElementGeneralizedVermaOld<CoefficientType> Accum, tempElt;
   Accum.Nullify(*this->theOwner);
   for (int i=0; i<theElt.size; i++)
   { MonomialUniversalEnvelopingOrdered<CoefficientActingElement>& currentMon=theElt.TheObjects[i];
@@ -14269,7 +14412,7 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
     GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
 { this->theTargetSpace.theRingUniT=theRingUnit;
   this->theTargetSpace.theRingZerO=theRingZero;
-  this->MakeActualSizeAtLeastExpandOnTop(this->theTargetSpace.leftSpaceBasis.size*this->theTargetSpace.rightSpaceBasis.size);
+  this->Reserve(this->theTargetSpace.leftSpaceBasis.size*this->theTargetSpace.rightSpaceBasis.size);
   this->size=0;
   std::stringstream de_Bugger;
   bool foundSeed=false;
@@ -14480,9 +14623,9 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfEleme
     }
   }
   outputTheBasis.size=0;
-  outputTheBasis.MakeActualSizeAtLeastExpandOnTop(theElements.size);
+  outputTheBasis.Reserve(theElements.size);
   Vectors<CoefficientTypeQuotientField> basisCoordForm;
-  basisCoordForm.MakeActualSizeAtLeastExpandOnTop(theElements.size);
+  basisCoordForm.Reserve(theElements.size);
   Selection selectedBasis;
   outputCoordsBeforeReduction.ComputeDebugString();
   outputCoordsBeforeReduction.SelectABasis(basisCoordForm, theFieldZero, selectedBasis, theGlobalVariables);
@@ -14536,7 +14679,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::CleanUpZeroCoeff()
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::operator+=(const ElementUniversalEnvelopingOrdered<CoefficientType>& other)
-{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+{ this->Reserve(other.size);
   for (int i=0; i<other.size; i++)
     this->AddMonomialNoCleanUpZeroCoeff(other.TheObjects[i]);
   this->CleanUpZeroCoeff();
@@ -14544,7 +14687,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::operator+=(const Elemen
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::operator-=(const ElementUniversalEnvelopingOrdered<CoefficientType>& other)
-{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+{ this->Reserve(other.size);
   MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   for (int i=0; i<other.size; i++)
   { tempMon=other.TheObjects[i];
@@ -14576,8 +14719,8 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::operator/=
 template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByNoSimplify(const MonomialUniversalEnvelopingOrdered& other)
 { assert(this!=&other);
-  this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
-  this->Powers.MakeActualSizeAtLeastExpandOnTop(other.generatorsIndices.size+this->generatorsIndices.size);
+  this->generatorsIndices.Reserve(other.generatorsIndices.size+this->generatorsIndices.size);
+  this->Powers.Reserve(other.generatorsIndices.size+this->generatorsIndices.size);
   this->Coefficient.MultiplyBy(other.Coefficient);
   if (other.generatorsIndices.size==0)
     return;
@@ -14642,7 +14785,7 @@ template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::operator*=(const ElementUniversalEnvelopingOrdered<CoefficientType>& other)
 { ElementUniversalEnvelopingOrdered output;
   output.Nullify(*this->owner);
-  output.MakeActualSizeAtLeastExpandOnTop(this->size*other.size);
+  output.Reserve(this->size*other.size);
   MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
   for (int i=0; i<this->size; i++)
     for(int j=0; j<other.size; j++)
@@ -14728,8 +14871,8 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::SwitchConsecutiveIndic
   ElementSimpleLieAlgebra tempElt;
   this->owner->theOwner.LieBracket(this->owner->theOrder.TheObjects[theLeftGeneratorIndex], this->owner->theOrder.TheObjects[theRightGeneratorIndex], tempElt);
   if (tempElt.IsEqualToZero())
-  { output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
-    output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
+  { output.generatorsIndices.Reserve(this->generatorsIndices.size);
+    output.Powers.Reserve(this->generatorsIndices.size);
     output.Nullify(theRingZero, *this->owner);
     output.Coefficient=this->Coefficient;
     //output.ComputeDebugString();
@@ -14759,8 +14902,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   output.Nullify(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
   tempMon.Nullify(theRingZero, *this->owner);
-  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
   tempMon.generatorsIndices.size=0;
   int rightGeneratorIndeX= this->generatorsIndices.TheObjects[theIndeX+1];
@@ -14847,8 +14990,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   output.Nullify(*this->owner);
   MonomialUniversalEnvelopingOrdered tempMon;
   tempMon.Nullify(theRingZero, *this->owner);
-  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
   tempMon.generatorsIndices.size=0;
   int rightGeneratorIndex= this->generatorsIndices.TheObjects[theIndeX+1];
@@ -15374,7 +15517,7 @@ void ElementUniversalEnveloping<CoefficientType>::Nullify(SemisimpleLieAlgebra& 
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::operator+=(const ElementUniversalEnveloping<CoefficientType>& other)
-{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+{ this->Reserve(other.size);
   for (int i=0; i<other.size; i++)
     this->AddMonomialNoCleanUpZeroCoeff(other.TheObjects[i]);
   this->CleanUpZeroCoeff();
@@ -15383,7 +15526,7 @@ void ElementUniversalEnveloping<CoefficientType>::operator+=(const ElementUniver
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::operator-=
 (const ElementUniversalEnveloping<CoefficientType>& other)
-{ this->MakeActualSizeAtLeastExpandOnTop(other.size);
+{ this->Reserve(other.size);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<other.size; i++)
   { tempMon=other.TheObjects[i];
@@ -15396,7 +15539,7 @@ void ElementUniversalEnveloping<CoefficientType>::operator-=
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::operator/=(const Rational& other)
 { for (int i=0; i<this->size; i++)
-    this->TheObjects[i].Coefficient.DivByRational(other);
+    this->TheObjects[i].Coefficient/=(other);
 }
 
 template <class CoefficientType>
@@ -15423,7 +15566,7 @@ template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::operator*=
 (const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight)
 { ElementUniversalEnveloping<CoefficientType> output;
-  output.MakeActualSizeAtLeastExpandOnTop(this->size);
+  output.Reserve(this->size);
   output.Nullify(*this->owner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   int sizeOriginal=0;
@@ -15975,8 +16118,8 @@ bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfThe
     return false;
   if (this->owner->theLiebracketPairingCoefficients.elements[leftGenerator][rightGenerator].IsEqualToZero())
   { //this->ComputeDebugString(theGlobalVariables);
-    output.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
-    output.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size);
+    output.generatorsIndices.Reserve(this->generatorsIndices.size);
+    output.Powers.Reserve(this->generatorsIndices.size);
     output.init(*this->owner);
     output.Coefficient=this->Coefficient;
     //output.ComputeDebugString(theGlobalVariables);
@@ -16011,8 +16154,8 @@ void MonomialUniversalEnveloping<CoefficientType>::Simplify
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MultiplyByNoSimplify
 (const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight)
-{ this->generatorsIndices.MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
-  this->Powers.MakeActualSizeAtLeastExpandOnTop(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+{ this->generatorsIndices.Reserve(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+  this->Powers.Reserve(standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
   this->Coefficient.MultiplyBy(standsOnTheRight.Coefficient);
   if (standsOnTheRight.generatorsIndices.size==0)
     return;
@@ -16039,8 +16182,8 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRigh
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   tempMon.init(*this->owner);
   tempMon.Coefficient=theRingZero;
-  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
   tempMon.generatorsIndices.size=0;
   int rightGeneratorIndeX= this->generatorsIndices.TheObjects[theIndeX+1];
@@ -16114,8 +16257,8 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeft
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   tempMon.init(*this->owner);
   tempMon.Coefficient=theRingZero;
-  tempMon.Powers.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.MakeActualSizeAtLeastExpandOnTop(this->generatorsIndices.size+2);
+  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
+  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
   tempMon.generatorsIndices.size=0;
   int rightGeneratorIndex= this->generatorsIndices[theIndeX+1];

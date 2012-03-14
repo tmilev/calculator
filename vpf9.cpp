@@ -23533,7 +23533,7 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
   if (this->ExpressionType==this->typeRationalFunction)
     this->ratFunction.GetElement().MakeNVarConst(this->impliedNumVars, (Rational) 1, theContext);
   if (this->ExpressionType==this->typeCharSSFDMod)
-    this->theChar.GetElement().MakeTrivial(this->ContextLieAlgebra);
+    this->theChar.GetElement().MakeTrivial(*this->ContextLieAlgebra);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables)

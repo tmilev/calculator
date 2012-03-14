@@ -10297,7 +10297,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
    this->AddOneFunctionToDictionaryNoFail
   ("v",
-   "(Rational,...)",
+   "((Rational,...),(Rational,...))",
    "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
    The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
    In the second argument, a zero stands for a root space that is a root of the Levi part of the Weyl algebra. \

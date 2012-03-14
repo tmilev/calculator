@@ -1555,6 +1555,14 @@ public:
     }
     this->CardinalitySelection=this->MaxSize;
   }
+  bool IsSubset(const Selection& other)const
+  { if (this->MaxSize!=other.MaxSize)
+      return false;
+    for (int i=0; i<this->CardinalitySelection; i++)
+      if (!other.selected[this->elements[i]])
+        return false;
+    return true;
+  }
   void init(int maxNumElements);
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
@@ -1596,6 +1604,7 @@ public:
   }
   Selection();
   Selection(int m);
+  Selection(const root& other){this->operator=(other);}
   Selection(const Selection& other){this->Assign(other);}
   ~Selection();
 };
@@ -11397,6 +11406,10 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
  DrawingVariables& theDrawingVars, int upperBoundWeights)
   { return this->DrawMe(outputDetails, theGlobalVariables, theDrawingVars, upperBoundWeights, true);
   }
+  void DrawMeAssumeCharIsOverCartan
+(WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)
+  ;
+
   bool DrawMe
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
@@ -11405,7 +11418,7 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
 (std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
  GlobalVariables& theGlobalVariables)
      ;
-  void MakeTrivial(SemisimpleLieAlgebra* owner);
+  void MakeTrivial(SemisimpleLieAlgebra& owner);
   void operator+=(const charSSAlgMod& other);
   void operator+=(const MonomialChar<Rational>& other);
   void operator-=(const charSSAlgMod& other);
@@ -11420,13 +11433,13 @@ class GeneralizedVermaModule
 {
 public :
   ModuleSSalgebraNew<CoefficientType>* theFDRep;
-  Selection parSelZeroesStandForLeviPart;
+//  Selection parSelZeroesStandForLeviPart;
 };
 
 template <class CoefficientType>
 class ModuleSSalgebraNew
-{ List<Matrix<CoefficientType> > actionsGeneratorsMat;
-  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGenerators;
+{ List<Matrix<CoefficientType> > actionsGeneratorsMaT;
+  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
 public:
   SemisimpleLieAlgebra theAlgebra;
@@ -11434,14 +11447,17 @@ public:
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
   List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
-  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForm;
+  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForM;
   List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
   roots weightsSimpleGens;
   List<Rational> HighestWeightInDualCoords;
 //  List<List<Matrix<CoefficientType> > >
   HashedList<root> theGeneratingWordsWeightsSimpleCoords;
-  charSSAlgMod theChar;
+  charSSAlgMod theCharOverH;
+  charSSAlgMod theChaR;
+  Selection parabolicSelectionNonSelectedAreElementsLevi;
+  Selection parabolicSelectionSelectedAreElementsLevi;
   bool flagIsInitialized;
 
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
@@ -11461,8 +11477,10 @@ public:
   const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
-(char WeylLetter, int theRank, root& theHWFundCoords, GlobalVariables& theGlobalVariables,
-const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::string* outputReport)
+(char WeylLetter, int theRank, root& theHWFundCoords, const Selection& selNonSelectedAreElementsLevi,
+ GlobalVariables& theGlobalVariables,
+const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+ std::string* outputReport)
   ;
   void GetAdActionHomogenousElt
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& inputWeightSimpleCoords,
@@ -12056,6 +12074,7 @@ public:
   HomomorphismSemisimpleLieAlgebra theHmm;
   SemisimpleLieAlgebraOrdered testAlgebra;
   SemisimpleLieAlgebraOrdered testSubAlgebra;
+  ModuleSSalgebraNew<Rational> theModule;
   std::string javaScriptDisplayingIndicator;
   std::string afterSystemCommands;
 //  SemisimpleLieAlgebra theLieAlgebra;

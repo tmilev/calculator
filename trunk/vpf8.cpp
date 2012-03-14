@@ -415,7 +415,7 @@ void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatr
 void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { roots selectedRoots;
-  selectedRoots.MakeActualSizeAtLeastExpandOnTop(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+  selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
@@ -777,7 +777,7 @@ bool Cone::GetLatticePointsInCone
   //This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
   //we get a total of (2*2+1)^8=390625 points to test, which is a pretty darn small box
     return false;
-  outputPoints.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  outputPoints.Reserve(numCycles);
   outputPoints.size=0;
   root candidatePoint;
   roots LatticeBasis;
@@ -1310,7 +1310,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     */
   }
 //  std::cout << "<hr>so far so good!";
-  drawOps.theBuffer.theDrawCircleAtVectorOperations.MakeActualSizeAtLeastExpandOnTop(2500);
+  drawOps.theBuffer.theDrawCircleAtVectorOperations.Reserve(2500);
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
 //  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -1650,7 +1650,7 @@ void CombinatorialChamber::TransformToWeylProjective
 { for (int i=0; i<this->Externalwalls.size; i++)
     this->Externalwalls.TheObjects[i].TransformToWeylProjective(theGlobalVariables);
   WallData newWall;
-  this->Externalwalls.MakeActualSizeAtLeastExpandOnTop(owner.WeylChamber.size+this->Externalwalls.size);
+  this->Externalwalls.Reserve(owner.WeylChamber.size+this->Externalwalls.size);
   roots newExternalWalls;
   owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
   for (int i=0; i<newExternalWalls.size; i++)
@@ -2776,7 +2776,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
       }
       //all normals should now lie in the subspace spanned by the vertices
       //add the walls needed to go down to the subspace
-      this->Normals.MakeActualSizeAtLeastExpandOnTop(this->Normals.size+2*NormalsToSubspace.size);
+      this->Normals.Reserve(this->Normals.size+2*NormalsToSubspace.size);
       for (int i=0; i<NormalsToSubspace.size; i++)
       { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
         this->Normals.AddOnTop(NormalsToSubspace[i]);
@@ -3082,7 +3082,7 @@ void RationalFunction::GetRelations
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { std::cout << theGroebnerBasis.TheObjects[i].ElementToString(false, tempFormat) << "<br>";
 //  }
-  theGenerators.MakeActualSizeAtLeastExpandOnTop(theGroebnerBasis.size);
+  theGenerators.Reserve(theGroebnerBasis.size);
   theGenerators.size=0;
   for (int i=0; i<theGroebnerBasis.size; i++)
   { PolynomialRationalCoeff& currentPoly= theGroebnerBasis.TheObjects[i];
@@ -3539,7 +3539,7 @@ bool Lattice::GetAllRepresentativesProjectingDownTo
 { roots tempRepresentatives;
   if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
     return false;
-  output.MakeActualSizeAtLeastExpandOnTop(startingShifts.size*tempRepresentatives.size);
+  output.Reserve(startingShifts.size*tempRepresentatives.size);
   output.size=0;
   for (int i=0; i<startingShifts.size; i++)
     for (int j=0; j<tempRepresentatives.size; j++)
@@ -4038,7 +4038,7 @@ bool PolynomialRationalCoeff::GetIntegerPoly(Polynomial<LargeInt>& output)const
 { output.Nullify(this->NumVars);
   Monomial<LargeInt> tempM;
   tempM.init(this->NumVars);
-  output.MakeActualSizeAtLeastExpandOnTop(this->size);
+  output.Reserve(this->size);
   for (int i=0; i<this->size; i++)
   { Monomial<Rational>& currentMon=this->TheObjects[i];
     if (!currentMon.Coefficient.IsInteger())
@@ -4363,8 +4363,8 @@ bool QuasiPolynomial::SubstitutionLessVariables
   MatrixLargeRational theShiftImage, shiftMatForm;
   output.LatticeShifts.size=0;
   output.valueOnEachLatticeShift.size=0;
-  output.valueOnEachLatticeShift.MakeActualSizeAtLeastExpandOnTop(this->LatticeShifts.size);
-  output.LatticeShifts.MakeActualSizeAtLeastExpandOnTop(this->LatticeShifts.size);
+  output.valueOnEachLatticeShift.Reserve(this->LatticeShifts.size);
+  output.LatticeShifts.Reserve(this->LatticeShifts.size);
   root tempRoot;
   PolynomialRationalCoeff tempP;
   for (int i=0; i<this->LatticeShifts.size; i++)
@@ -4439,7 +4439,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
   //std::cout << "<br>The Zn-Lattice: " << theZnLattice.ElementToString(true, false);
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
   //std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ElementToString(true, false);
-  resultBasis.MakeActualSizeAtLeastExpandOnTop(theScalarProducts.size-1);
+  resultBasis.Reserve(theScalarProducts.size-1);
   root tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
   { theZnLattice.basisRationalForm.RowToRoot(i, tempRoot);
@@ -5200,7 +5200,7 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
   //std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ElementToString(true, false);
   theMat.GaussianEliminationByRows(matEmpty, tempSel);
   //std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ElementToString(true, false);
-  output.MakeActualSizeAtLeastExpandOnTop(tempSel.CardinalitySelection);
+  output.Reserve(tempSel.CardinalitySelection);
   output.size=0;
   Vector<CoefficientType> nextIntersection;
   for(int i=0; i<tempSel.CardinalitySelection; i++)
@@ -6268,9 +6268,9 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   }
   PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
   basisMonsZeroWeight.Nullify(this->theDimension);
-  basisMonsZeroWeight.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  basisMonsZeroWeight.Reserve(numCycles);
   basisMonsAll.Nullify(this->theDimension);
-  basisMonsAll.MakeActualSizeAtLeastExpandOnTop(numCycles);
+  basisMonsAll.Reserve(numCycles);
   Monomial<Rational> theMon;
   theMon.init(this->theDimension);
   root theWeight;
@@ -6334,8 +6334,8 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation
 (GlobalVariables& theGlobalVariables)
 { this->theMaxComputation.numNonParaM=2;
-  this->theMaxComputation.theConesLargerDim.MakeActualSizeAtLeastExpandOnTop(this->projectivizedChambeR.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.MakeActualSizeAtLeastExpandOnTop(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.Reserve(this->projectivizedChambeR.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.Reserve(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.SetSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
   Lattice ZnLattice;
@@ -7227,7 +7227,7 @@ bool Cone::DrawMeLastCoordAffine
 { root ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
   roots VerticesScaled;
-//  VerticesScaled.MakeActualSizeAtLeastExpandOnTop(this->Vertices.size*2);
+//  VerticesScaled.Reserve(this->Vertices.size*2);
   VerticesScaled=this->Vertices;
   Rational tempRat;
   List<bool> DrawVertex;
@@ -8007,7 +8007,7 @@ void AnimationBuffer::operator+=(const DrawOperations& other)
   if (this->theVirtualOpS.size>0)
     theOp.indexPhysicalFrame=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
   theOp.selectedPlaneInPhysicalDrawOp=0;
-  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
   for (int i=0; i<other.BasisProjectionPlane.size; i++)
   { this->theVirtualOpS.AddOnTop(theOp);
     theOp.indexPhysicalFrame++;
@@ -8021,7 +8021,7 @@ void AnimationBuffer::AddPause(int numFrames)
   theVOp.selectedPlaneInPhysicalDrawOp=-1;
   theVOp.theVirtualOp=this->typePause;
   theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
-  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+numFrames);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+numFrames);
   for (int i=0; i<numFrames; i++)
     this->theVirtualOpS.AddOnTop(theVOp);
 }
@@ -8070,10 +8070,10 @@ void AnimationBuffer::operator+=(const AnimationBuffer& other)
   int physicalFrameShift=0;
   if (this->theVirtualOpS.size>0)
     physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  this->thePhysicalDrawOps.MakeActualSizeAtLeastExpandOnTop(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
+  this->thePhysicalDrawOps.Reserve(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
   for (int i=0; i<other.thePhysicalDrawOps.size; i++)
     this->thePhysicalDrawOps.AddOnTop(other.thePhysicalDrawOps[i]);
-  this->theVirtualOpS.MakeActualSizeAtLeastExpandOnTop(this->theVirtualOpS.size+other.theVirtualOpS.size);
+  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.theVirtualOpS.size);
   VirtualDrawOp currentOp;
   for (int i=0; i<other.theVirtualOpS.size; i++)
   { currentOp=other.theVirtualOpS[i];
@@ -8667,7 +8667,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
-(root& highestWeightSimpleCoords, roots& outputWeights, int upperBoundWeights,
+(root& highestWeightSimpleCoords, roots& outputWeightsSimpleCoords, int upperBoundWeights,
  GlobalVariables& theGlobalVariables)
 { HashedList<root> theDominantWeights;
   double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
@@ -8695,7 +8695,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   int estimatedNumWeights=(int )
   (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
-  finalWeights.MakeActualSizeAtLeastExpandOnTop(estimatedNumWeights);
+  finalWeights.Reserve(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
   roots dominantWeightsNonHashed;
   dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
@@ -8708,7 +8708,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   }
   if (!isTrimmed && finalWeights.size<10000)
     out << "All weights were computed and are drawn. <br>";
-  outputWeights.CopyFromBase(finalWeights);
+  outputWeightsSimpleCoords.CopyFromBase(finalWeights);
   return out.str();
 }
 
@@ -8782,7 +8782,7 @@ void DrawOperations::operator+=(const DrawOperations& other)
   int shiftDrawLine=this->theDrawLineOperations.size;
   int shiftDrawLineBnVectors=this->theDrawLineBetweenTwoRootsOperations.size;
   int shiftDrawCircleAtVector=this->theDrawCircleAtVectorOperations.size;
-  this->IndexNthDrawOperation.MakeActualSizeAtLeastExpandOnTop
+  this->IndexNthDrawOperation.Reserve
   (this->IndexNthDrawOperation.size+other.IndexNthDrawOperation.size);
   for (int i=0; i<other.TypeNthDrawOperation.size; i++)
     switch(other.TypeNthDrawOperation[i])
@@ -8962,7 +8962,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   root tempRoot;
-  Layers.MakeActualSizeAtLeastExpandOnTop(this->size);
+  Layers.Reserve(this->size);
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->size; i++)
@@ -8974,7 +8974,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   HashedList<root> orbit;
-  orbit.MakeActualSizeAtLeastExpandOnTop(this->size);
+  orbit.Reserve(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
     orbit.AddOnTopHash(tempRoot);
@@ -9207,7 +9207,7 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   if (theParseR.testAlgebra.theOrder.size==0)
     theParseR.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   GeneralizedVermaModuleData<RationalFunction> theData;
-  ElementGeneralizedVerma<RationalFunction> startingElement;
+  ElementGeneralizedVermaOld<RationalFunction> startingElement;
   RationalFunction RFOne, RFZero;
   RFZero.Nullify(theParseR.theHmm.theRange.GetRank(), &theGlobalVariables);
   RFOne.MakeNVarConst(theParseR.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
@@ -9218,7 +9218,7 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   if (theIndex<0 || theIndex>6)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   startingElement.AssignDefaultGeneratorIndex(theIndex, theData, &theGlobalVariables);
-  List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
+  List<ElementGeneralizedVermaOld<RationalFunction> > theEigenVectors;
   std::stringstream out;
   PolynomialOutputFormat tempFormat;
   out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
@@ -9274,8 +9274,8 @@ void RationalFunction::Substitution(PolynomialsRationalCoeff& theSub)
 }
 
 template <class CoefficientType>
-std::string ElementGeneralizedVerma<CoefficientType>::Decompose
-  (Parser& theParser, List<ElementGeneralizedVerma<CoefficientType> >& outputVectors,
+std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
+  (Parser& theParser, List<ElementGeneralizedVermaOld<CoefficientType> >& outputVectors,
     GlobalVariables& theGlobalVariables)
 { //Index ordering of simpleNegGenerators:
   //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
@@ -9283,7 +9283,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   std::stringstream out;
   outputVectors.size=0;
   PolynomialOutputFormat tempFormat;
-  ElementGeneralizedVerma<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
+  ElementGeneralizedVermaOld<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
   CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
@@ -9316,7 +9316,7 @@ std::string ElementGeneralizedVerma<CoefficientType>::Decompose
   //return out.str();
   theGlobalVariables.MakeStatusReport("Initializing Casimir done!\n" +out.str());
   PolynomialsRationalCoeff theSub, SubLargerCartanToToSmaller, SubSmallerCartanToLarger;
-  ElementGeneralizedVerma<CoefficientType> highestElt, tempElt2;
+  ElementGeneralizedVermaOld<CoefficientType> highestElt, tempElt2;
   highestElt.AssignDefaultGeneratorIndex(this->theOwner->theFDspace.size-1, *this->theOwner, &theGlobalVariables);
   highestElt.ActOnMe(embeddedCasimir, tempElt2, &theGlobalVariables);
   bool sanityCheck1= highestElt.IsProportionalTo(tempElt2, CentralCharacterActionAbsoluteHighest);
@@ -9387,7 +9387,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   theParser.theHmm.GetWeightsGmodKInSimpleCoordsK(this->theModuleWeightsShifted, theGlobalVariables);
   theParser.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
   GeneralizedVermaModuleData<RationalFunction> theData;
-  ElementGeneralizedVerma<RationalFunction> startingElement;
+  ElementGeneralizedVermaOld<RationalFunction> startingElement;
 //  this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHWSubNthElementImageNthCoordSimpleBasis, theGlobalVariables);
   RationalFunction RFOne, RFZero;
   RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
@@ -9395,7 +9395,7 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   startingElement.AssignDefaultGeneratorIndex(6, theData, &theGlobalVariables);
-  List<ElementGeneralizedVerma<RationalFunction> > theEigenVectors;
+  List<ElementGeneralizedVermaOld<RationalFunction> > theEigenVectors;
   PolynomialOutputFormat tempFormat;
   out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
   out << startingElement.Decompose(theParser, theEigenVectors, theGlobalVariables);
@@ -9548,7 +9548,7 @@ int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
   PolynomialRationalCoeff polyOne;
   polyOne.MakeNVarConst(numVars, (Rational)1);
   argumentUE.SetNumVariables(numVars);
-  ElementGeneralizedVerma<PolynomialRationalCoeff> theAnswer;
+  ElementGeneralizedVermaOld<PolynomialRationalCoeff> theAnswer;
   SemisimpleLieAlgebraOrdered& ownerAlg=theNode.owner->testAlgebra;
   if (! theAnswer.AssignElementUE(argumentUE, tempData, theGlobalVariables, polyOne))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
@@ -9619,7 +9619,7 @@ std::string SemisimpleLieAlgebraOrdered::GetGeneratorString
 }
 
 template <class CoefficientType>
-bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
+bool  ElementGeneralizedVermaOld<CoefficientType>::AssignElementUE
   (ElementUniversalEnvelopingOrdered<CoefficientType>& theElt,
    GeneralizedVermaModuleData<CoefficientType>& owner,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit)
@@ -9664,7 +9664,7 @@ bool  ElementGeneralizedVerma<CoefficientType>::AssignElementUE
       }
     }
     if (found)
-    { ElementGeneralizedVerma<CoefficientType> tempElt;
+    { ElementGeneralizedVermaOld<CoefficientType> tempElt;
       tempElt.AssignDefaultGeneratorIndex(IndexFound, owner, &theGlobalVariables);
       precedingMon.ComputeDebugString();
       ElementUniversalEnvelopingOrdered<CoefficientType> concatenationMon;
@@ -9747,7 +9747,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     return;
   this->flagFunctionListInitialized=true;
   ParserFunction theFunction;
-  this->theFunctionList.MakeActualSizeAtLeastExpandOnTop(1000);
+  this->theFunctionList.Reserve(1000);
   this->AddOneFunctionToDictionaryNoFail
   ("coneFromNormals",
    "((Rational,...),...)",
@@ -10298,10 +10298,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("v",
    "(Rational,...)",
-   "<b>Experimental. </b> Highest weight vector, of weight given by the argument in fundamental \
-   coordinates, of the corresponding finite-dimensional irreducible representation.",
-    "v(1,0,0)",
-   'B', 3, false,
+   "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
+   The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
+   In the second argument, a zero stands for a root space that is a root of the Levi part of the Weyl algebra. \
+   A non-zero element stands indicates that the corresponding root space that is not in the Levi part of \
+   the parabolic subalgebra.",
+    "v((1,0,1), (1,0,0))",
+   'B', 3, true,
     & ParserNode::EvaluateHWV
    );
    this->AddOneFunctionToDictionaryNoFail

@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -184,6 +184,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="g_1 v((0,0,1), (1,0,0))";
+//  civilizedInput="v((1,0,1),(1,0,0))";
 //  civilizedInput="allLittelmannPaths(0,1)";
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
 //  theParser.DefaultWeylLetter='B';

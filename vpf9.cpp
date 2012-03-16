@@ -23508,6 +23508,9 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
     case ParserNode::typeAnimation:
       this->theAnimation.GetElement().MakeZero();
       break;
+    case ParserNode::typeGenVermaElt:
+      this->theGenVermaElt.GetElement().Nullify(this->owner->theModule);
+    break;
     case ParserNode::typeCharSSFDMod:
       this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
       break;
@@ -26807,6 +26810,9 @@ std::string ParserNode::ElementToStringValueOnlY
       << this->theChar.GetElement().ElementToString("char", "", true)
       << "\\end{array}";
       break;
+    case ParserNode::typeGenVermaElt:
+      LatexOutput <<this->theGenVermaElt.GetElement().ElementToString(theGlobalVariables);
+      break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
 //    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
@@ -26846,6 +26852,7 @@ std::string ParserNode::ElementToStringValueAndType
     case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
     << " simple Lie algebra:"; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
+    case ParserNode::typeGenVermaElt: out << "Generalized Verma module element: "; break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone:
 //      theGlobalVariables.theDrawingVariables.theBuffer.init();
@@ -28405,6 +28412,9 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
         break;
       case ParserNode::typeAnimation:
         this->theAnimation.GetElement()+=currentChild.theAnimation.GetElement();
+        break;
+      case ParserNode::typeGenVermaElt:
+        this->theGenVermaElt.GetElement()+=currentChild.theGenVermaElt.GetElement();
         break;
       default: return this->SetError(this->errorDunnoHowToDoOperation);
     }

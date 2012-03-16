@@ -4806,7 +4806,7 @@ public:
   int HasSameExponentMonomial(TemplateMonomial& m);
   void operator= (const TemplatePolynomial<TemplateMonomial, Element>& right);
   bool operator== (const TemplatePolynomial<TemplateMonomial, Element>& right);
-  inline void operator+=(const Polynomial<Element>& other){this->AddPolynomial(other);}
+  inline void operator+=(const TemplatePolynomial<TemplateMonomial, Element>& other){this->AddPolynomial(other);}
   inline void operator+=(const TemplateMonomial& m)
   { this->AddMonomial(m);
   }
@@ -10137,6 +10137,9 @@ public:
     return this->HWTAAbilinearForm
     (tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, 0);
   }
+  bool NeedsBracketForMultiplication()
+  { return this->size>1;
+  }
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
   void AddMonomial(const MonomialUniversalEnveloping<CoefficientType>& input);
@@ -11516,6 +11519,9 @@ class MonomialGeneralizedVerma
     this->indexFDVector=other.indexFDVector;
     this->Coefficient=other.Coefficient;
   }
+  void ElementToString
+  (std::string& output, const PolynomialOutputFormat& theFormat)
+  ;
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
   }
@@ -11525,7 +11531,8 @@ class MonomialGeneralizedVerma
   int HashFunction()const
   { return this->indexFDVector;
   }
-
+  bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
+  ;
 };
 
 template<class CoefficientType>
@@ -11545,7 +11552,12 @@ class ElementGeneralizedVerma : public TemplatePolynomial<MonomialGeneralizedVer
   void MakeHWV
   (ModuleSSalgebraNew<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
   ;
-
+  void Nullify
+  (ModuleSSalgebraNew<CoefficientType>& theOwner)
+  { this->ClearTheObjects();
+    this->owner=&theOwner;
+  }
+  std::string ElementToString(GlobalVariables& theGlobalVariables);
   void operator=(const ElementGeneralizedVerma<CoefficientType>& other)
   { this->owner=other.owner;
     this->Assign(other);
@@ -16497,6 +16509,39 @@ bool ParserNode::GetListDontUseForFunctionArguments
     output.TheObjects[i]=currentNode.GetElement<CoefficientType>();
   }
   return true;
+}
+
+template <class CoefficientType>
+std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
+  (GlobalVariables& theGlobalVariables)
+{ if (this->size==0)
+    return "0";
+  root parSel;
+  parSel=  this->owner->parabolicSelectionNonSelectedAreElementsLevi;
+  std::stringstream out;
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  std::string tempS;
+  for (int i=0; i<this->size; i++)
+  { MonomialGeneralizedVerma<CoefficientType>& currentMon=this->TheObjects[i];
+    tempS=currentMon.Coefficient.ElementToStringCalculatorFormat(theGlobalVariables, theFormat);
+    if (currentMon.Coefficient.NeedsBracketForMultiplication())
+      out << "(" << tempS << ")";
+    else
+    { if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (i>0)
+        if (tempS.size()>0)
+          if (tempS[0]!='-')
+            out << "+";
+      out << tempS;
+    }
+    out << "v(" << this->owner->theHWFundamentalCoords.ElementToString() << ","
+    << parSel.ElementToString() << ")";
+  }
+  return out.str();
 }
 #endif
 

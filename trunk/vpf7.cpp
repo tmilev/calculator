@@ -2928,8 +2928,7 @@ void ElementGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementUniversalEnveloping<CoefficientType> nilPart;
-  this->owner->theAlgebra.OrderSetNilradicalNegativeMost
-  (this->owner->parabolicSelectionNonSelectedAreElementsLevi);
+  this->owner->theAlgebra.OrderSetNilradicalNegativeMost(this->owner->parabolicSelectionNonSelectedAreElementsLevi);
   ElementGeneralizedVerma<CoefficientType> output;
   MonomialGeneralizedVerma<CoefficientType> currentMon;
   output.owner=this->owner;
@@ -2960,9 +2959,14 @@ void ElementGeneralizedVerma<CoefficientType>::ReduceMonAndAddToMe
     int theIndex=theMon.generatorsIndices[i];
     tempMat2=this->owner->GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
     if (tempMat2.NumRows==0)
+    { if (theIndex>=this->owner->theAlgebra.GetRank()+this->owner->theAlgebra.GetNumPosRoots())
+        return;
       break;
+    }
     for (int j=0; j<thePower; j++)
       tempMat1.MultiplyOnTheLeft(tempMat2);
+    theMon.Powers.size--;
+    theMon.generatorsIndices.size--;
   }
   MonomialGeneralizedVerma<CoefficientType> tempMon;
   tempMon.Coefficient.Nullify(*theMon.owner);

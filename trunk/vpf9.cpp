@@ -23931,7 +23931,11 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 
 void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 { std::stringstream out; std::string tempS;
-  owner->TokenToStringStream(out, this->Operation);
+  this->owner->TokenToStringStream(out, this->Operation);
+  if (this->Operation==Parser::tokenFunction)
+  { out << " " << this->owner->theFunctionList[this->intValue].functionName;
+
+  }
   out << "; #implied vars: " << this->impliedNumVars;
   if (this->children.size>0)
   { out << ". Children: ";

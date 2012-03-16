@@ -516,7 +516,6 @@ std::string QPSub::ElementToString()
   return out.str();
 }
 
-
 void Selection::operator=(const root& other)
 { this->init(other.size);
   for (int i=0; i<other.size; i++)

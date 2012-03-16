@@ -1537,10 +1537,10 @@ class Selection
 {
 public:
   inline static std::string GetXMLClassName(){ return "Selection";}
-  int MaxSize;
   int* elements;
 //  int* elementsInverseSelection;
   bool* selected;
+  int MaxSize;
   int CardinalitySelection;
   void AddSelectionAppendNewIndex(int index);
   void RemoveLastSelection();
@@ -1604,7 +1604,7 @@ public:
   }
   Selection();
   Selection(int m);
-  Selection(const root& other){this->operator=(other);}
+  Selection(const root& other) :elements(0), selected(0), MaxSize(0), CardinalitySelection(0){ this->operator=(other);}
   Selection(const Selection& other){this->Assign(other);}
   ~Selection();
 };
@@ -9486,7 +9486,7 @@ public:
     for (int i=0; i<numPosRoots; i++)
       this->UEGeneratorOrderIncludingCartanElts[i]=-1;
   }
-  void OrderSSLieAlgebra()
+  void OrderSSLieAlgebraStandard()
   { int numGens=this->GetNumGenerators();
     for (int i=0; i<numGens; i++)
       this->UEGeneratorOrderIncludingCartanElts[i]=i;
@@ -11206,7 +11206,7 @@ public:
   ;
   bool GenerateOrbit
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
- Selection* parabolicSelectedRootsAreInLeviPart=0)
+ Selection* parabolicNonSelectedAreInLeviPart=0)
 ;
   bool MinimaAreIntegral();
   std::string ElementToString(bool useSimpleCoords=true)
@@ -11429,14 +11429,6 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
 };
 
 template <class CoefficientType>
-class GeneralizedVermaModule
-{
-public :
-  ModuleSSalgebraNew<CoefficientType>* theFDRep;
-//  Selection parSelZeroesStandForLeviPart;
-};
-
-template <class CoefficientType>
 class ModuleSSalgebraNew
 { List<Matrix<CoefficientType> > actionsGeneratorsMaT;
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGeneratorS;
@@ -11451,7 +11443,10 @@ public:
   List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
   roots weightsSimpleGens;
-  List<Rational> HighestWeightInDualCoords;
+  List<Rational> theHWDualCoords;
+  root theHWSimpleCoordS;
+  root theHWFundamentalCoords;
+
 //  List<List<Matrix<CoefficientType> > >
   HashedList<root> theGeneratingWordsWeightsSimpleCoords;
   charSSAlgMod theCharOverH;
@@ -11477,21 +11472,20 @@ public:
   const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
-(char WeylLetter, int theRank, root& theHWFundCoords, const Selection& selNonSelectedAreElementsLevi,
+(char WeylLetter, int theRank, root& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
  GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport)
   ;
-  void GetAdActionHomogenousElt
-  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& inputWeightSimpleCoords,
+  void GetAdActionHomogenousElT
+  (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, root& weightUEEltSimpleCoords,
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
-   const List<CoefficientType>& subHiGoesToIthElement,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   void GetMatrixHomogenousElt
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
-    root& inputWeightSimpleCoords, const List<CoefficientType>& subHiGoesToIthElement, Matrix<CoefficientType>& output,
+    root& weightUEEltSimpleCoords, Matrix<CoefficientType>& output,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   void ExpressAsLinearCombinationHomogenousElement
@@ -11513,7 +11507,7 @@ template<class CoefficientType>
 class MonomialGeneralizedVerma
 {
   public:
-  GeneralizedVermaModule<CoefficientType>* owner;
+  ModuleSSalgebraNew<CoefficientType>* owner;
   ElementUniversalEnveloping<CoefficientType> Coefficient;
   int indexFDVector;
   MonomialGeneralizedVerma(): owner(0) { }
@@ -11538,7 +11532,7 @@ template<class CoefficientType>
 class ElementGeneralizedVerma : public TemplatePolynomial<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >
 {
   public:
-  GeneralizedVermaModule<CoefficientType>* owner;
+  ModuleSSalgebraNew<CoefficientType>* owner;
   void MultiplyMeByUEEltOnTheLeft
   (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -11547,6 +11541,15 @@ class ElementGeneralizedVerma : public TemplatePolynomial<MonomialGeneralizedVer
   (MonomialUniversalEnveloping<CoefficientType>& theMon, int theIndexOfFDVector, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
+  ElementGeneralizedVerma():owner(0){}
+  void MakeHWV
+  (ModuleSSalgebraNew<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
+  ;
+
+  void operator=(const ElementGeneralizedVerma<CoefficientType>& other)
+  { this->owner=other.owner;
+    this->Assign(other);
+  }
 };
 
 class Parser;

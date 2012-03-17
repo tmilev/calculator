@@ -16526,18 +16526,23 @@ std::string ElementGeneralizedVerma<CoefficientType>::ElementToString
   { MonomialGeneralizedVerma<CoefficientType>& currentMon=this->TheObjects[i];
     tempS=currentMon.Coefficient.ElementToStringCalculatorFormat(theGlobalVariables, theFormat);
     if (currentMon.Coefficient.NeedsBracketForMultiplication())
-      out << "(" << tempS << ")";
-    else
-    { if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (i>0)
-        if (tempS.size()>0)
-          if (tempS[0]!='-')
-            out << "+";
-      out << tempS;
+      tempS= "(" + tempS + ")";
+    if (tempS=="1")
+      tempS="";
+    if (tempS=="-1")
+      tempS="-";
+    if (i>0)
+    { if (tempS.size()>0)
+      { if (tempS[0]!='-')
+          out << "+";
+      } else
+        out << "+";
     }
+    out << tempS;
+    tempS= this->owner->theGeneratingWordsNonReduced[currentMon.indexFDVector].
+    ElementToString(false, false, theGlobalVariables, theFormat);
+    if (tempS!="1")
+      out << tempS;
     out << "v(" << this->owner->theHWFundamentalCoords.ElementToString() << ","
     << parSel.ElementToString() << ")";
   }

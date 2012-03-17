@@ -2918,6 +2918,10 @@ int ParserNode::EvaluateActByUEonEltGenVerma
   ElementUniversalEnveloping<Rational> tempElt;
   if (!left.UEElement.GetElement().ConvertToRationalCoeff(tempElt))
     return theNode.SetError(theNode.errorBadOrNoArgument);
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  std::cout << "<br>Acting on " << theNode.theGenVermaElt.GetElement().ElementToString(theGlobalVariables)
+  << " by " << tempElt.ElementToString(theGlobalVariables, theFormat);
   theNode.theGenVermaElt.GetElement().MultiplyMeByUEEltOnTheLeft(tempElt, theGlobalVariables, 1, 0);
   theNode.ExpressionType=theNode.typeGenVermaElt;
   return theNode.errorNoError;
@@ -2931,12 +2935,19 @@ void ElementGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   this->owner->theAlgebra.OrderSetNilradicalNegativeMost(this->owner->parabolicSelectionNonSelectedAreElementsLevi);
   ElementGeneralizedVerma<CoefficientType> output;
   MonomialGeneralizedVerma<CoefficientType> currentMon;
-  output.owner=this->owner;
+  output.Nullify(*this->owner);
   for (int i=0; i<this->size; i++)
   { currentMon.Coefficient=theUE;
     currentMon.indexFDVector=this->TheObjects[i].indexFDVector;
     currentMon.Coefficient*=this->TheObjects[i].Coefficient;
     currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+    PolynomialOutputFormat theFormat;
+    theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    ElementGeneralizedVerma<CoefficientType> tempElt;
+    tempElt.Nullify(*this->owner);
+    tempElt.AddOnTopHash(currentMon);
+    std::cout << "<br>Monomial before simplification: " << tempElt.ElementToString(theGlobalVariables)
+    << "; index of vector is: " << currentMon.indexFDVector;
     for (int j=0; j<currentMon.Coefficient.size; j++)
       output.ReduceMonAndAddToMe(currentMon.Coefficient[j], currentMon.indexFDVector, theGlobalVariables, theRingUnit, theRingZero);
   }
@@ -2951,6 +2962,10 @@ void ElementGeneralizedVerma<CoefficientType>::ReduceMonAndAddToMe
 { Matrix<CoefficientType> tempMat1, tempMat2;
   if (theMon.Coefficient.IsEqualToZero())
     return;
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  std::cout << "<br>Reducing  " << theMon.ElementToString(false, false, theGlobalVariables, theFormat);
+
   tempMat1.MakeIdMatrix(this->owner->theGeneratingWordsWeightsSimpleCoords.size, theRingUnit, theRingZero);
   for (int i=theMon.Powers.size-1; i>=0; i--)
   { int thePower;
@@ -2960,7 +2975,9 @@ void ElementGeneralizedVerma<CoefficientType>::ReduceMonAndAddToMe
     tempMat2=this->owner->GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
     if (tempMat2.NumRows==0)
     { if (theIndex>=this->owner->theAlgebra.GetRank()+this->owner->theAlgebra.GetNumPosRoots())
+      { std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
         return;
+      }
       break;
     }
     for (int j=0; j<thePower; j++)
@@ -2971,15 +2988,15 @@ void ElementGeneralizedVerma<CoefficientType>::ReduceMonAndAddToMe
   MonomialGeneralizedVerma<CoefficientType> tempMon;
   tempMon.Coefficient.Nullify(*theMon.owner);
   tempMon.owner=this->owner;
-  tempMon.Coefficient+=theMon;
   for (int i=0; i<tempMat1.NumRows; i++)
-    if (tempMat1.elements[theIndexOfFDVector][i]!=0)
-    { tempMon.indexFDVector=i;
-      tempMon.Coefficient*=tempMat1.elements[theIndexOfFDVector][i];
+    if (tempMat1.elements[i][theIndexOfFDVector]!=0)
+    { tempMon.Coefficient=theMon;
+      tempMon.indexFDVector=i;
+      tempMon.Coefficient*=tempMat1.elements[i][theIndexOfFDVector];
       this->operator+=(tempMon);
-      tempMon.Coefficient/=tempMat1.elements[theIndexOfFDVector][i];
-
     }
+  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
+  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
 }
 
 template  <class CoefficientType>

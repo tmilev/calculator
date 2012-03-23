@@ -185,8 +185,9 @@ int main(int argc, char **argv)
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
 //  civilizedInput="g_1 v((0,0,1), (1,0,0))";
-//  civilizedInput="v((1,0,1),(1,0,0))";
+//  civilizedInput="v((0,x_1,1),(1,0,0))";
 //  civilizedInput="allLittelmannPaths(0,1)";
+
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
 //  theParser.DefaultWeylLetter='B';
 //  theParser.DefaultWeylRank=2;
@@ -438,7 +439,8 @@ int main(int argc, char **argv)
 #ifndef WIN32
   double TimeTotalElapsed=GetElapsedTimeInSeconds();
   if (civilizedInput!="")
-  { std::cout << "<hr><b>Result.</b> " << theResult
+  { std::cout << "<a href=\"./calculator?" << inputString << "\">Link to your computation. </a>" ;
+    std::cout << "<hr><b>Result.</b> "<< theResult
     << "<br><hr><br>Parsing+evaluation time: "
     << TimeTotalElapsed << " seconds<br> (" << TimeParsing << " parsing + "
     << TimeEvaluation << " evaluation + " << TimeTotalElapsed-TimeEvaluation-TimeParsing

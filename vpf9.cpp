@@ -183,6 +183,8 @@ template < > int HashedList<ParserFunction>::PreferredHashSize=1000;
 template < > int HashedList<MonomialChar<Rational> >::PreferredHashSize=100;
 template < > int HashedList<MonomialUniversalEnveloping<Rational> >::PreferredHashSize=50;
 template < > int HashedList<MonomialGeneralizedVerma<Rational> >::PreferredHashSize=50;
+template < > int HashedList<MonomialUniversalEnveloping<RationalFunction> >::PreferredHashSize=50;
+template < > int HashedList<MonomialGeneralizedVerma<RationalFunction> >::PreferredHashSize=50;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -273,6 +275,8 @@ template < > int List<DyckPath>::ListActualSizeIncrement=2000;
 template < > int List<ElementGeneralizedVermaOld<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<TensorProductElement<ElementVermaModuleOrdered<RationalFunction>, ElementSimpleLieAlgebra, RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialGeneralizedVerma<Rational> >::ListActualSizeIncrement=10;
+template < > int List<MonomialUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<MonomialGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -1338,34 +1342,6 @@ Rational MatrixLargeRational::GetDeterminant()
   return result;
 }
 
-void MatrixLargeRational::ComputeDeterminantOverwriteMatrix(Rational &output)
-{ int tempI;
-  output.Assign(ROne);
-  Rational tempRat;
-  assert(this->NumCols==this->NumRows);
-  int dim =this->NumCols;
-  for (int i=0; i<dim; i++)
-  {  //this->ComputeDebugString();
-    tempI = this->FindPivot(i, i, dim-1);
-    if (tempI==-1)
-    { output.MakeZero();
-      return;
-    }
-    this->SwitchTwoRows(i, tempI);
-    if(tempI!=i){output.Minus(); }
-    tempRat.Assign(this->elements[i][i]);
-    output.MultiplyBy(tempRat);
-    tempRat.Invert();
-    this->RowTimesScalar(i, tempRat);
-    for (int j=i+1; j<dim; j++)
-      if (!this->elements[j][i].IsEqualToZero())
-      { tempRat.Assign(this->elements[j][i]);
-        tempRat.Minus();
-        this->AddTwoRows (i, j, i, tempRat);
-      }
-  }
-}
-
 void MatrixLargeRational::Transpose()
 { if (this->NumCols==this->NumRows)
   { for (int i=0; i<this->NumRows; i++)
@@ -1396,6 +1372,15 @@ void MatrixLargeRational::MultiplyByLargeRational(Rational& x)
 
 void MatrixLargeRational::DivideByRational(Rational& x)
 { this->operator/=(x);
+}
+
+MatrixLargeRational MatrixLargeRational::operator*(const MatrixLargeRational& right)const
+{ MatrixLargeRational tempMat;
+  tempMat.Assign(right);
+  //    tempMat.ComputeDebugString();
+  tempMat.MultiplyOnTheLeft(*this);
+  //    tempMat.ComputeDebugString();
+  return tempMat;
 }
 
 void MatrixLargeRational::ActOnAroot(const root& input, root& output)const
@@ -13640,6 +13625,7 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
     output << ", exceptional Lie algebra";
   output << " \">";
+  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
   output << "<body>" << tempS << "</body></html>";
   output.close();
 }
@@ -13648,7 +13634,7 @@ void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std:
 { outputHeader.clear();
   outputFooter.clear();
   if (useHtml)
-  { outputHeader.append("g/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>");
+  { outputHeader.append("\ng/k k-submodules<table border=\"1\">\n<tr><th>id</th><th>size</th>");
     outputHeader.append("<th>b\\cap k-lowest weight</th><th>b\\cap k-highest weight</th><th>roots</th>");
     outputHeader.append("<th>epsilon coordinates</th>");
     if (includeKEpsCoords)
@@ -13741,9 +13727,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   out << tempS;
   if (sl2s!=0)
   { if (useHtml)
-      out << "\n<br>\n";
-    if (useHtml)
-      out << "\n<br>";
+      out << "\n<hr>\n";
     List<int> hCharacteristics_S_subalgebras;
     //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
     hCharacteristics_S_subalgebras.size=0;
@@ -13775,10 +13759,38 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ElementToString() << ", ";
   }
   if (useHtml)
-    out << "<br>\n Number g/k k-submodules: ";
+  { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
+    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2) simple coordinates w.r.t. g <br> ";
+    std::stringstream //tempStream1,
+    tempStream2, tempStream3;
+    for(int i=0; i<this->HighestWeightsGmodK.size; i++)
+    { //tempStream1 << "\\underbrace{V_{";
+      tempStream2 << "\\underbrace{V_{";
+      tempStream3 << "\\underbrace{V_{";
+      //tempStream1
+      //<< this->AmbientWeyl.GetFundamentalCoordinatesFromSimple
+      //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
+      tempStream2
+      << this->kModulesgEpsCoords[i][0].ElementToStringLetterFormat("\\epsilon", true, false);
+      tempStream3
+      << this->HighestWeightsGmodK[i].ElementToStringLetterFormat("\\alpha", true, false);
+      //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";
+      if (i!=this->HighestWeightsGmodK.size-1)
+      { //tempStream1 << "\\oplus";
+        tempStream2 << "\\oplus";
+        tempStream3 << "\\oplus";
+      }
+    }
+//    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream3.str()) << "\n<hr>\n";
+  }
   if (useLatex)
     out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
-  out << this->LowestWeightsGmodK.size ;
+  if (!useHtml)
+    out << this->LowestWeightsGmodK.size ;
   if (useHtml)
     out << "<br>\n";
   if (useLatex)
@@ -23509,7 +23521,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->theAnimation.GetElement().MakeZero();
       break;
     case ParserNode::typeGenVermaElt:
-      this->theGenVermaElt.GetElement().Nullify(this->owner->theModule);
+      this->theGenVermaElt.GetElement().Nullify(this->owner->theModulePolys);
     break;
     case ParserNode::typeCharSSFDMod:
       this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
@@ -23926,7 +23938,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
     case ParserNode::errorUnknownOperation: out << "error: unknown operation. The lazy programmer has added the operation to the dictionary, but hasn't implemented it yet. Lazy programmers deserve no salary. "; break;
     case ParserNode::errorImplicitRequirementNotSatisfied: out << "Error: an implicit requirement for the funciton input has not been satisfied."; break;
     case ParserNode::errorBadFileFormat: out << "Bad input file format. "; break;
-    case ParserNode::errorConversionError: out << "Error with the conversion routines. This is likely to be a programming error."; break;
+    case ParserNode::errorConversionError: out << "Error with the conversion routines. In some cases this may be a programming error."; break;
     default: out << "Non-documented error number " << this->ErrorType << ". Lazy programmers deserve no salaries."; break;
   }
   return out.str();
@@ -26740,6 +26752,13 @@ bool ParserNode::ConvertToType
         return false;
       }
       break;
+    case ParserNode::typeGenVermaElt:
+      if (GoalNumVars!=this->theGenVermaElt.GetElement().GetNumVars())
+      { this->SetError(this->errorDimensionProblem);
+        return false;
+      }
+      break;
+
     default: break;
   }
   bool ConversionError;
@@ -28544,4 +28563,9 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
 template < >
 Rational& ParserNode::GetElement<Rational>()
 { return this->rationalValue;
+}
+
+template < >
+RationalFunction& ParserNode::GetElement<RationalFunction>()
+{ return this->ratFunction.GetElement();
 }

@@ -10241,14 +10241,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateAnimateRootSAs
    );
    this->AddOneFunctionToDictionaryNoFail
-  ("InvariantsExteriorPowerFundamentalsPlusTrivials",
-   "(Integer, Integer)",
-   "<b> Experimental</b>. This function was implemented to attempt to answer a question of prof. Alexeevski.",
-   "InvariantsExteriorPowerFundamentalsPlusTrivials(0,0)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
-   );
-   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemIncludeWeylChamberAndDynkinLabels",
    "()",
    "Same as drawRootSystem but draws in addition the weyl chamber and labels the Dynkin diagram vertices.",
@@ -10296,7 +10288,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    );
    this->AddOneFunctionToDictionaryNoFail
   ("v",
-   "((Rational,...),(Rational,...))",
+   "((Polynomial,...),(Rational,...))",
    "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
    The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
    In the second argument, a zero stands for a root space that is a root of the Levi part of the Weyl algebra. \
@@ -10451,6 +10443,17 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'F', 4, true,
     & ParserNode::EvaluateMakeWeylFromParSel
    );
+/*  this->AddOneFunctionToDictionaryNoFail
+  ("splitGenVermaBthreeOverGtwo",
+   "((Rational, Rational), (Rational, Rational, Rational), (Rational, Rational, Rational))",
+   "<b>Please don't use. For testing purposes. \
+   </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
+   the argument.",
+    "splitGenVermaBthreeOverGtwo((-1,-1), (1,1,0), (1,0,0) )",
+   'B', 3, true,
+    & ParserNode::EvaluateSplitGenVermaBthreeOverGtwo
+   );*/
+
 /*   this->AddOneFunctionToDictionaryNoFail
   ("solveLPolyEqualsZeroOverCone",
    "(Polynomial, Cone)",

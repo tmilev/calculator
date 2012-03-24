@@ -901,7 +901,7 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   RFOne.MakeNVarConst(theNode.impliedNumVars, 1, & theGlobalVariables);
   RFZero.Nullify(theNode.impliedNumVars, & theGlobalVariables);
   std::string report;
-  ElementSumGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
+  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
   List<ModuleSSalgebraNew<RationalFunction> >& theMods=theNode.owner->theModulePolys;
   int indexOfModule=-1;
   Selection selectionParSel;
@@ -2978,7 +2978,9 @@ int ParserNode::EvaluateActByUEonEltGenVerma
 //  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "<br>Acting on " << theNode.theGenVermaElt.GetElement().ElementToString(theGlobalVariables)
 //  << " by " << tempElt.ElementToString(theGlobalVariables, theFormat);
-  theNode.theGenVermaElt.GetElement().MultiplyMeByUEEltOnTheLeft(tempElt, theGlobalVariables, RFone, RFZero);
+  theNode.theGenVermaElt.GetElement().MultiplyMeByUEEltOnTheLeft
+  (theNode.owner->theModulePolys, tempElt, theGlobalVariables, RFone, RFZero)
+  ;
   theNode.ExpressionType=theNode.typeGenVermaElt;
   return theNode.errorNoError;
 }
@@ -3138,12 +3140,63 @@ void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
 { this->owneR=&theOwner;
   MonomialGeneralizedVerma<CoefficientType> theMon;
+  theMon.indexInOwner=TheIndexInOwner;
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[TheIndexInOwner];
   theMon.indexFDVector=theMod.theGeneratingWordsWeightsSimpleCoords.size-1;
   theMon.Coefficient.MakeConst(theRingUnit, theMod.theAlgebra);
   theMon.owneR=&theOwner;
-  theMon.indexInOwner=TheIndexInOwner;
   assert(TheIndexInOwner<theOwner.size);
   this->ClearTheObjects();
   this->AddOnTopHash(theMon);
 }
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+{ assert(TheIndexInOwner<theOwner.size);
+  MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
+  tensorMon.Coefficient=theRingUnit;
+  tensorMon.theMons.SetSize(1);
+  MonomialGeneralizedVerma<CoefficientType>& theMon=tensorMon.theMons[0];
+  theMon.owneR=&theOwner;
+  theMon.indexInOwner=TheIndexInOwner;
+  ModuleSSalgebraNew<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
+  theMon.indexFDVector=theMod.theGeneratingWordsWeightsSimpleCoords.size-1;
+  theMon.Coefficient.MakeConst(theRingUnit, theMod.theAlgebra);
+
+  this->ClearTheObjects();
+  this->AddOnTopHash(tensorMon);
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, ElementUniversalEnveloping<CoefficientType>& theUE,
+   GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ ElementTensorsGeneralizedVermas<CoefficientType> output;
+  output.Nullify();
+  MonomialTensorGeneralizedVermas<CoefficientType> accumMon, monActedOn;
+  ElementSumGeneralizedVermas<CoefficientType> tempElt;
+
+  for (int i=0; i<this->size; i++)
+  { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
+    accumMon.theMons.SetSize(0);
+    accumMon.Coefficient=theRingUnit;
+    for (int j=0; j<currentMon.theMons.size; j++)
+    { monActedOn=accumMon;
+      tempElt.Nullify(theOwner);
+      tempElt+=currentMon.theMons[j];
+      tempElt.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables, theRingUnit, theRingZero);
+      for (int k=0; k<tempElt.size; k++)
+      { monActedOn*=tempElt[k];
+        for (int l=j+1; l<currentMon.theMons.size; l++)
+          monActedOn*=currentMon.theMons[l];
+        output+=monActedOn;
+      }
+      accumMon*=currentMon.theMons[j];
+    }
+  }
+  *this=output;
+}
+
+

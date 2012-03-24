@@ -8867,7 +8867,7 @@ int ParserNode::EvaluateActByWeylAlgebraElement
   theNode.impliedNumVars=MathRoutines::Maximum(left.NumVariables, right.NumVars);
   result=right;
   result.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
-  left.SetNumVariablesPreserveExistingOnes(theNode.impliedNumVars);
+  left.SetNumVariables(theNode.impliedNumVars);
   left.ActOnPolynomial(result);
   theNode.ExpressionType=theNode.typePoly;
   return theNode.errorNoError;

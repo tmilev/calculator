@@ -185,6 +185,7 @@ template < > int HashedList<MonomialUniversalEnveloping<Rational> >::PreferredHa
 template < > int HashedList<MonomialGeneralizedVerma<Rational> >::PreferredHashSize=50;
 template < > int HashedList<MonomialUniversalEnveloping<RationalFunction> >::PreferredHashSize=50;
 template < > int HashedList<MonomialGeneralizedVerma<RationalFunction> >::PreferredHashSize=50;
+template < > int HashedList<MonomialTensorGeneralizedVermas<RationalFunction> >::PreferredHashSize=50;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -277,6 +278,7 @@ template < > int List<TensorProductElement<ElementVermaModuleOrdered<RationalFun
 template < > int List<MonomialGeneralizedVerma<Rational> >::ListActualSizeIncrement=10;
 template < > int List<MonomialUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<MonomialTensorGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -20026,7 +20028,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool 
   this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
 }
 
-void ElementWeylAlgebra::SetNumVariablesPreserveExistingOnes(int newNumVars)
+void ElementWeylAlgebra::SetNumVariables(int newNumVars)
 { if (newNumVars<this->NumVariables)
     this->NumVariables=newNumVars;
   PolynomialRationalCoeff Accum;
@@ -23521,7 +23523,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->theAnimation.GetElement().MakeZero();
       break;
     case ParserNode::typeGenVermaElt:
-      this->theGenVermaElt.GetElement().Nullify(this->owner->theModulePolys);
+      this->theGenVermaElt.GetElement().Nullify();//this->owner->theModulePolys);
     break;
     case ParserNode::typeCharSSFDMod:
       this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
@@ -24430,7 +24432,7 @@ void ParserNode::Clear()
 }
 
 std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
-(int theIndex, bool useRootIndices, bool useEpsCoords, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+(int theIndex, bool useRootIndices, bool useEpsCoords, const PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { int numPosRoots= this->theWeyl.RootsOfBorel.size;
   int rank= this->GetRank();
   std::stringstream out;
@@ -26612,7 +26614,7 @@ bool ParserNode::ConvertToNextType
       break;
     case ParserNode::typeWeylAlgebraElement:
       assert(this->WeylAlgebraElement.GetElement().NumVariables<=GoalNumVariables);
-      this->WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(GoalNumVariables);
+      this->WeylAlgebraElement.GetElement().SetNumVariables(GoalNumVariables);
       break;
   }
   if (GoalType==this->ExpressionType)
@@ -26741,9 +26743,9 @@ bool ParserNode::ConvertToType
       this->UEElementOrdered.GetElement().SetNumVariables(GoalNumVars);
       break;
     case ParserNode::typeMapWeylAlgebra:
-      this->weylEltBeingMappedTo.GetElement().SetNumVariablesPreserveExistingOnes(GoalNumVars);
+      this->weylEltBeingMappedTo.GetElement().SetNumVariables(GoalNumVars);
     case ParserNode::typeWeylAlgebraElement:
-      this->WeylAlgebraElement.GetElement().SetNumVariablesPreserveExistingOnes(GoalNumVars); break;
+      this->WeylAlgebraElement.GetElement().SetNumVariables(GoalNumVars); break;
     case ParserNode::typeAnimation:
       break;
     case ParserNode::typeQuasiPolynomial:
@@ -26753,12 +26755,7 @@ bool ParserNode::ConvertToType
       }
       break;
     case ParserNode::typeGenVermaElt:
-      if (GoalNumVars!=this->theGenVermaElt.GetElement().GetNumVars())
-      { this->SetError(this->errorDimensionProblem);
-        return false;
-      }
-      break;
-
+      this->theGenVermaElt.GetElement().SetNumVariables(GoalNumVars); break;
     default: break;
   }
   bool ConversionError;
@@ -26830,7 +26827,7 @@ std::string ParserNode::ElementToStringValueOnlY
       << "\\end{array}";
       break;
     case ParserNode::typeGenVermaElt:
-      LatexOutput <<this->theGenVermaElt.GetElement().ElementToString(theGlobalVariables);
+      LatexOutput << this->theGenVermaElt.GetElement().ElementToString(theGlobalVariables);
       break;
     case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
     case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;

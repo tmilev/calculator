@@ -1714,7 +1714,7 @@ void Selection::ReadFromFile(std::fstream& input)
   }
 }
 
-void Selection::ElementToString(std::string& output)
+void Selection::ElementToString(std::string& output)const
 { std::stringstream out;
   out << "Cardinality: " << this->CardinalitySelection << "\n";
   root tempRoot;
@@ -23622,6 +23622,7 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     case ParserNode::typeCharSSFDMod: this->theChar.GetElement()-=currentChild.theChar.GetElement(); break;
     case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()-=currentChild.UEElementOrdered.GetElement(); break;
     case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement()-=currentChild.WeylAlgebraElement.GetElement(); break;
+    case ParserNode::typeGenVermaElt: this->theGenVermaElt.GetElement()-=currentChild.theGenVermaElt.GetElement(); break;
     default: this->ExpressionType=this->typeError; return;
   }
 }
@@ -28339,7 +28340,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
   { List<int> argumentList;
     argumentList.AddOnTop(this->children[0]);
     argumentList.AddOnTop(this->children[1]);
-    return this->EvaluateActByUEonEltGenVerma(*this, argumentList, theGlobalVariables);
+    return this->EvaluateMultiplyEltGenVermaOnTheRight(*this, argumentList, theGlobalVariables);
   }
   else
     this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);

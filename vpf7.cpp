@@ -3034,13 +3034,19 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
     currentMon.Coefficient*=this->TheObjects[i].Coefficient;
     currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 
-    PolynomialOutputFormat theFormat;
+/*    PolynomialOutputFormat theFormat;
     theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     ElementSumGeneralizedVermas<CoefficientType> tempElt;
     tempElt.Nullify(*this->owneR);
     tempElt.AddOnTopHash(currentMon);
-    std::cout << "<hr>Monomial before simplification: " << tempElt.ElementToString(theGlobalVariables)
-    << "; index of vector is: " << currentMon.indexFDVector;
+    std::cout << "<hr>Monomial before PBW basis: " << tempElt.ElementToString(theGlobalVariables)
+    << "; index of vector is: " << currentMon.indexFDVector;*/
+
+    currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+
+//    std::cout << "<hr>Monomial before generalized verma simplification: " << tempElt.ElementToString(theGlobalVariables)
+//    << "; index of vector is: " << currentMon.indexFDVector;
+
 
     output.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
     theMod.theAlgebra->OrderSSLieAlgebraStandard();
@@ -3091,9 +3097,9 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
 { Matrix<CoefficientType> tempMat1, tempMat2;
   if (theMon.Coefficient.IsEqualToZero())
     return;
-  PolynomialOutputFormat theFormat;
-  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
+//  PolynomialOutputFormat theFormat;
+//  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+//  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
   ModuleSSalgebraNew<CoefficientType>& theMod=theMon.owneR->TheObjects[theMon.indexInOwner];
   tempMat1.MakeIdMatrix(theMod.theGeneratingWordsWeightsSimpleCoords.size, theRingUnit, theRingZero);
   ElementUniversalEnveloping<CoefficientType>& theUEelt=theMon.Coefficient;
@@ -3132,8 +3138,8 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
         this->operator+=(newMon);
       }
   }
-  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
-  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+//  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
+//  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
 }
 
 template  <class CoefficientType>
@@ -3173,8 +3179,7 @@ void ModuleSSalgebraNew<CoefficientType>::
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
     root& weightUEEltSimpleCoords, Matrix<CoefficientType>& output,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{
-  std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ElementToString();
+{//  std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ElementToString();
   this->GetAdActionHomogenousElT
   (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theGlobalVariables, theRingUnit, theRingZero)
   ;

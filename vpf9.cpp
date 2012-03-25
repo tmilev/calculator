@@ -26869,7 +26869,7 @@ std::string ParserNode::ElementToStringValueAndType
     case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
     << " simple Lie algebra:"; break;
     case ParserNode::typeError: out << this->ElementToStringErrorCode(useHtml); break;
-    case ParserNode::typeGenVermaElt: out << "Generalized Verma module element: "; break;
+    case ParserNode::typeGenVermaElt: out << "Tensor product of elemetns of generalized Verma modules: "; break;
     case ParserNode::typeLattice: out << "A lattice."; useHtml=true; break;
     case ParserNode::typeCone:
 //      theGlobalVariables.theDrawingVariables.theBuffer.init();

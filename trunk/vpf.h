@@ -11581,8 +11581,8 @@ public:
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
     this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
     this->flagIsInitialized=other.flagIsInitialized;
-    std::cout << "<hr><hr><b>Copying from:</b> " << other.ElementToString()
-    << "<b>Copy result:</b>" << this->ElementToString() << "<br><b>End of copy</b><hr><hr>";
+//    std::cout << "<hr><hr><b>Copying from:</b> " << other.ElementToString()
+//    << "<b>Copy result:</b>" << this->ElementToString() << "<br><b>End of copy</b><hr><hr>";
 
   }
   void SetNumVariables(int GoalNumVars);
@@ -11669,7 +11669,8 @@ class MonomialGeneralizedVerma
   { return this->indexFDVector==other.indexFDVector && this->indexInOwner==other.indexInOwner;
   }
   void SetNumVariables(int GoalNumVars)
-  { this->Coefficient.SetNumVariables(GoalNumVars);
+  { assert(this->owneR->size>this->indexInOwner);
+    this->Coefficient.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
   int HashFunction()const
@@ -16967,9 +16968,9 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
       this->theGeneratingWordsGrouppedByWeight[i][j].SetNumVariables(GoalNumVars);
   for (int i=0; i<this->theSimpleGens.size; i++)
     this->theSimpleGens[i].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->actionsGeneratorS.size; i++)
-    for (int j=0; j<this->actionsGeneratorS[i].size; j++)
-      for (int k=0; k<this->actionsGeneratorS[i][j].size; k++)
+  for (int i=0; i<this->actionsSimpleGens.size; i++)
+    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
+      for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
         this->actionsSimpleGens[i][j][k].SetNumVariables(GoalNumVars);
   for (int i=0; i<this->actionsSimpleGensMatrixForM.size; i++)
   { this->actionsSimpleGensMatrixForM[i].SetNumVariables(GoalNumVars);

@@ -754,6 +754,12 @@ public:
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
   std::string ElementToStringGeneric()const{ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;}
+  std::string ElementToString()const
+  { return this->ElementToStringGeneric();
+  }
+  void ElementToString(std::string& output)const
+  { output=this->ElementToStringGeneric();
+  }
   void ElementToStringGeneric(std::string& output)const;
   void ElementToStringGeneric(std::string& output, int NumElementsToPrint)const;
   int IndexOfObject(const Object& o) const;
@@ -912,7 +918,7 @@ public:
   void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->AssignList(theList);}
   HashedList();
   ~HashedList();
-  std::string ElementToString()
+  std::string ElementToString()const
   { std::stringstream out;
     out << this->size << " hashed objects:";
     for (int i=0; i<this->size; i++)
@@ -1567,8 +1573,8 @@ public:
   int HashFunction() const;
   std::string DebugString;
   void ComputeDebugString();
-  std::string ElementToString() {std::string tempS; this->ElementToString(tempS); return tempS;}
-  void ElementToString(std::string& output);
+  std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
+  void ElementToString(std::string& output)const;
   void incrementSelection();
   int SelectionToIndex();
   void ExpandMaxSize();
@@ -2752,7 +2758,7 @@ public:
   void ComputeDebugString(){this->ElementToString(this->DebugString);}
   Vector(){}
   Vector(const Vector<CoefficientType>& other){*this=other;}
-  void ElementToString(std::string& output)
+  void ElementToString(std::string& output)const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -2764,7 +2770,7 @@ public:
     out << ")";
     output=out.str();
   }
-  void ElementToString(std::string& output, PolynomialOutputFormat& theFormat)
+  void ElementToString(std::string& output, PolynomialOutputFormat& theFormat)const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -2776,9 +2782,9 @@ public:
     out << ")";
     output=out.str();
   }
-  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS; }
+  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; }
   std::string ElementToString
-  (PolynomialOutputFormat& theFormat){ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
+  (PolynomialOutputFormat& theFormat)const{ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
 
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
 
@@ -2831,7 +2837,7 @@ public:
     }
     return false;
   }
-  void ElementToString(std::string& output, bool useLaTeX)
+  void ElementToString(std::string& output, bool useLaTeX)const
   { output.clear();
     std::string tempStr;
     output.append("(");
@@ -2984,7 +2990,11 @@ public:
       this->TheObjects[i]=other.TheObjects[i];
   }
   void operator=(const Selection& other)
-  { this->SetSize(other.MaxSize);
+  { if (other.MaxSize<0)
+    { this->SetSize(0);
+      return;
+    }
+    this->SetSize(other.MaxSize);
     for(int i=0; i<other.MaxSize; i++)
       if (other.selected[i])
         this->TheObjects[i]=1;
@@ -4773,6 +4783,8 @@ public:
   std::string DebugString;
   // returns the number of lines used
   int StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const;
+
+  void  ElementToString(std::string& output)const{ output=this->ElementToString();}
   std::string ElementToString()const{ PolynomialOutputFormat LocalFormat; return this->ElementToString(false, LocalFormat);}
   std::string ElementToString(bool breakLinesLatex, const PolynomialOutputFormat& PolyFormatLocal)const
   { std::string output; output.clear();
@@ -4793,6 +4805,14 @@ public:
   bool HasGEQMonomial(TemplateMonomial& m, int& WhichIndex);
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, Element>& p);
   inline void operator*=(const TemplatePolynomial<TemplateMonomial, Element>& p){ this->MultiplyBy(p);}
+  void operator*=(const Element& other)
+  { if (other.IsEqualToZero())
+    { this->Nullify(this->NumVars);
+      return;
+    }
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i].Coefficient*=other;
+  }
   void MultiplyBy(const TemplatePolynomial<TemplateMonomial, Element>& p, TemplatePolynomial<TemplateMonomial, Element>& output, TemplatePolynomial<TemplateMonomial, Element>& bufferPoly, TemplateMonomial& bufferMon)const;
   void RaiseToPower(int d, TemplatePolynomial<TemplateMonomial, Element>& output, const Element& theRingUniT);
   void RaiseToPower(int d,  const Element& theRingUniT);
@@ -4816,6 +4836,11 @@ public:
   { TemplateMonomial tempM;
     tempM.MakeConstantMonomial(this->NumVars, other);
     this->SubtractMonomial(tempM);
+  }
+  inline void operator-=(const TemplatePolynomial<TemplateMonomial, Element>& p)
+  { this->SetExpectedSize(this->size+p.size);
+    for (int i=0; i<p.size; i++)
+      this->SubtractMonomial(p[i]);
   }
 };
 
@@ -6803,6 +6828,7 @@ void TemplatePolynomial<TemplateMonomial, Element>::SubtractMonomial(const Templ
   if (j==-1)
   { if (!m.IsEqualToZero())
       this->AddOnTopHash(m);
+    this->LastObject()->Coefficient*=-1;
   } else
   { this->TheObjects[j].Coefficient-=m.Coefficient;
     if (this->TheObjects[j].IsEqualToZero())
@@ -9419,6 +9445,39 @@ class SemisimpleLieAlgebra: public HashedList<ElementSimpleLieAlgebra>
 {
 public:
   std::string DebugString;
+  bool flagAnErrorHasOccurredTimeToPanic;
+  WeylGroup theWeyl;
+  //format:
+  //the Chevalley constants are listed in the same order as the root system of the Weyl group
+  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
+  //the root at the j^th position, then
+  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
+  //will be located at the ij^{th} entry in the below matrix.
+  //Let $\alpha$ be a root. Then our choice of the elements of the Cartan subalgebra is such that
+  //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
+  //2.   [h_{\alpha},g^\beta] :=\langle\alpha,\beta\rangle g^\beta
+  //Reference: Samelson, Notes on Lie algebras, pages 46-51
+  MatrixLargeRational ChevalleyConstants;
+  Matrix<bool> Computed;
+  //The below gives a total ordering to all generators, including the elements of the Cartan
+  //the order is:  We put first the generators corresponding to positive roots,
+  //we put second the elements of the Cartan
+  //we put last the negative roots
+  Matrix<int> theLiebracketPairingIndices;
+  MatrixLargeRational theLiebracketPairingCoefficients;
+  List<int> OppositeRootSpaces;
+  List<int> UEGeneratorOrderIncludingCartanElts;
+  void Assign(const SemisimpleLieAlgebra& other)
+  { this->theWeyl.Assign(other.theWeyl);
+    this->ChevalleyConstants.Assign(other.ChevalleyConstants);
+    this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
+    this->theLiebracketPairingCoefficients.Assign(other.theLiebracketPairingCoefficients);
+    this->theLiebracketPairingIndices.Assign(other.theLiebracketPairingIndices);
+    this->Computed.Assign(other.Computed);
+    this->UEGeneratorOrderIncludingCartanElts=other.UEGeneratorOrderIncludingCartanElts;
+  }
+
+  void ComputeMultTable(GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); }
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
   void ElementToStringNegativeRootSpacesFirst
@@ -9437,34 +9496,6 @@ public:
   (int theIndex, GlobalVariables& theGlobalVariables)
   { return this->theWeyl.RootSystem[theIndex].ElementToStringLetterFormat("\\alpha", true);
   }
-  bool flagAnErrorHasOccurredTimeToPanic;
-  WeylGroup theWeyl;
-  //List<VermaModuleWord> VermaWords;
-/*  List<VermaModuleMonomial> VermaMonomials;
-  List<MatrixLargeRational> EmbeddingsRootSpaces;
-  List<MatrixLargeRational> EmbeddingsCartan;*/
-  //format:
-  //the Chevalley constants are listed in the same order as the root system of the Weyl group
-  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
-  //the root at the j^th position, then
-  //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
-  //will be located at the ij^{th} entry in the below matrix.
-  //Let $\alpha$ be a root. Then our choice of the elements of the Cartan subalgebra is such that
-  //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
-  //2.   [h_{\alpha},g^\beta] :=\langle\alpha,\beta\rangle g^\beta
-  //Reference: Samelson, Notes on Lie algebras, pages 46-51
-  void ComputeMultTable(GlobalVariables& theGlobalVariables);
-  MatrixLargeRational ChevalleyConstants;
-  Matrix<bool> Computed;
-  //The below gives a total ordering to all generators, including the elements of the Cartan
-  //the order is:  We put first the generators corresponding to positive roots,
-  //we put second the elements of the Cartan
-  //we put last the negative roots
-  Matrix<int> theLiebracketPairingIndices;
-  MatrixLargeRational theLiebracketPairingCoefficients;
-  List<int> OppositeRootSpaces;
-  List<int> UEGeneratorOrderIncludingCartanElts;
-
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { if (this->OppositeRootSpaces.TheObjects[leftIndex]==rightIndex)
       return true;
@@ -9579,15 +9610,6 @@ public:
   int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);
   void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);}
-  void Assign(const SemisimpleLieAlgebra& other)
-  { this->theWeyl.Assign(other.theWeyl);
-    this->ChevalleyConstants.Assign(other.ChevalleyConstants);
-    this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
-    this->theLiebracketPairingCoefficients.Assign(other.theLiebracketPairingCoefficients);
-    this->theLiebracketPairingIndices.Assign(other.theLiebracketPairingIndices);
-    this->Computed.Assign(other.Computed);
-    this->UEGeneratorOrderIncludingCartanElts=other.UEGeneratorOrderIncludingCartanElts;
-  }
 };
 
 class Parser;
@@ -9984,7 +10006,7 @@ private:
 public:
   std::string DebugString;
   std::string ElementToString
-  (bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
+  (bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
   ;
   void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
   { this->DebugString=this->ElementToString(false, false, theGlobalVariables, theFormat);
@@ -10100,10 +10122,7 @@ public:
   }
   bool operator==(const MonomialUniversalEnveloping& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;}
   inline void operator=(const MonomialUniversalEnveloping& other)
-  { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
-    this->Powers.CopyFromBase(other.Powers);
-    this->Coefficient.Assign(other.Coefficient);
-    this->owner=other.owner;
+  { this->Assign(other);
   }
 };
 
@@ -10118,6 +10137,11 @@ public:
   std::string DebugString;
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
   { this->ElementToString(output, false, false, theGlobalVariables, theFormat);
+  }
+  std::string ElementToString()
+;
+  void ElementToString(std::string& output)
+  { output=this->ElementToString();
   }
   void ElementToString
   (std::string& output, bool useRootIndices, bool includeEpsilonCoords,
@@ -10178,7 +10202,7 @@ public:
     tempElt.Nullify(*this->owner);
     tempElt+=right;
     return this->HWTAAbilinearForm
-    (tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, 0);
+    (tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
   }
   bool NeedsBracketForMultiplication()
   { return this->size>1;
@@ -11505,7 +11529,7 @@ class ModuleSSalgebraNew
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
 public:
-  SemisimpleLieAlgebra theAlgebra;
+  SemisimpleLieAlgebra* theAlgebra;
   HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
   List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
@@ -11532,7 +11556,9 @@ public:
   bool flagIsInitialized;
 
   void operator=(const ModuleSSalgebraNew<CoefficientType>& other)
-  { this->actionsGeneratorsMaT=other.actionsGeneratorsMaT;
+  { if (this==&other)
+      return;
+    this->actionsGeneratorsMaT=other.actionsGeneratorsMaT;
     this->actionsGeneratorS=other.actionsGeneratorS;
     this->ComputedGeneratorActions=other.ComputedGeneratorActions;
     this->theAlgebra=other.theAlgebra;
@@ -11555,6 +11581,9 @@ public:
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
     this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
     this->flagIsInitialized=other.flagIsInitialized;
+    std::cout << "<hr><hr><b>Copying from:</b> " << other.ElementToString()
+    << "<b>Copy result:</b>" << this->ElementToString() << "<br><b>End of copy</b><hr><hr>";
+
   }
   void SetNumVariables(int GoalNumVars);
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
@@ -11579,7 +11608,7 @@ public:
   const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
-(char WeylLetter, int theRank, Vector<CoefficientType>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
+(SemisimpleLieAlgebra& inputAlgebra, Vector<CoefficientType>& HWFundCoords, const Selection& selNonSelectedAreElementsLevi,
  GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport)
@@ -11602,12 +11631,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
    )
   ;
-  std::string ElementToString();
+  std::string ElementToString()const;
   void SplitOverLevi
   (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
    ;
-   ModuleSSalgebraNew() :flagIsInitialized(false)
+   ModuleSSalgebraNew() : theAlgebra(0), flagIsInitialized(false)
    {}
 };
 
@@ -11619,7 +11648,7 @@ class MonomialGeneralizedVerma
   int indexInOwner;
   ElementUniversalEnveloping<CoefficientType> Coefficient;
   int indexFDVector;
-  MonomialGeneralizedVerma(): owneR(0), indexFDVector(-1) { }
+  MonomialGeneralizedVerma(): owneR(0), indexInOwner(-1), indexFDVector(-1) { }
   void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
   { this->owneR=other.owneR;
     this->indexFDVector=other.indexFDVector;
@@ -11749,8 +11778,18 @@ public:
   }
   std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
   ;
+  MonomialTensorGeneralizedVermas(){}
+  void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
+  { this->Coefficient=other.Coefficient;
+    this->theMons=other.theMons;
+  }
   bool operator==(const MonomialTensorGeneralizedVermas<CoefficientType>& other)const
-  { return this->theMons==other.theMons;
+  { if (this->theMons.size!=other.theMons.size)
+      return false;
+    for (int i=0; i<this->theMons.size; i++)
+      if( !(this->theMons[i]==other.theMons[i]) || !(this->theMons[i].Coefficient==other.theMons[i].Coefficient))
+        return false;
+    return true;
   }
 };
 
@@ -11789,8 +11828,14 @@ public:
    GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
-  void ReduceMonAndAddToMe
-  (MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
+  void MultiplyMeByUEEltOnTheLeft
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, MonomialUniversalEnveloping<CoefficientType>& theUE,
+   GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  ;
+  void MultiplyMeByElementLieAlg
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int indexGenerator,
+   GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
   void MakeHWV
@@ -11817,7 +11862,7 @@ public:
   std::string ElementToString
   (GlobalVariables& theGlobalVariables)
     ;
-  void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
+  void operator=(const ElementTensorsGeneralizedVermas<CoefficientType>& other)
   { this->Assign(other);
   }
 };
@@ -11953,7 +11998,7 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateActByUEonEltGenVerma
+  static int EvaluateMultiplyEltGenVermaOnTheRight
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawWeightSupportWithMults
@@ -16626,7 +16671,7 @@ void MonomialUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVar
 template <class CoefficientType>
 std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString
 (bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables,
- const PolynomialOutputFormat& theFormat)
+ const PolynomialOutputFormat& theFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->owner==0)
@@ -16780,7 +16825,10 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
     tempS="";
   if (tempS=="-1")
     tempS="-";
-  out << tempS;
+  if (this->Coefficient.ElementToStringNeedsBracketsForMultiplication())
+    out << "(" << tempS << ")";
+  else
+    out << tempS;
   for (int i=0; i<this->theMons.size; i++)
     out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat) << ")";
   return out.str();
@@ -16935,5 +16983,14 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
     this->theHWFundamentalCoordsBaseField[i].SetNumVariables(GoalNumVars);
   }
 }
+
+template <class CoefficientType>
+std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()
+{ GlobalVariables theGlobalVariables;
+  PolynomialOutputFormat tempFormat;
+  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  return this->ElementToString(theGlobalVariables, tempFormat);
+}
+
 #endif
 

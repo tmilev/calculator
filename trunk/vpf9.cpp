@@ -26695,7 +26695,7 @@ bool ParserNode::ConvertToNextType
     }
     return false;
   }
-  if (this->ExpressionType==this->typeUEelement)
+  if (this->ExpressionType==this->typeUEelement && GoalType==this->typeUEElementOrdered)
   { PolynomialRationalCoeff unitPoly, zeroPoly;
     unitPoly.MakeNVarConst(this->UEElement.GetElement().GetNumVariables(), (Rational) 1);
     zeroPoly.Nullify(unitPoly.NumVars);

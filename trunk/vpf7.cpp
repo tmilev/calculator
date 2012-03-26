@@ -3040,8 +3040,8 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
     tempElt.Nullify(*this->owneR);
     tempElt.AddOnTopHash(currentMon);
     std::cout << "<hr>Monomial before PBW basis: " << tempElt.ElementToString(theGlobalVariables)
-    << "; index of vector is: " << currentMon.indexFDVector;*/
-
+    << "; index of vector is: " << currentMon.indexFDVector;
+*/
     currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 
 //    std::cout << "<hr>Monomial before generalized verma simplification: " << tempElt.ElementToString(theGlobalVariables)
@@ -3052,13 +3052,13 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
     theMod.theAlgebra->OrderSSLieAlgebraStandard();
   }
   *this=output;
+//  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
 }
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, ElementUniversalEnveloping<CoefficientType>& theUE,
-   GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementTensorsGeneralizedVermas<CoefficientType> output, tempET;
   output.Nullify();
   for (int i=0; i<theUE.size; i++)
@@ -3086,7 +3086,10 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
       break;
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
+    { //std::cout <<"<hr>Before generator: " << this->ElementToString(theGlobalVariables);
       this->MultiplyMeByElementLieAlg(theOwner, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      //std::cout <<"<hr>After generator: " << this->ElementToString(theGlobalVariables);
+    }
   }
 }
 
@@ -3267,12 +3270,12 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
   theGenerator.MakeOneGenerator
   (indexGenerator, theRingUnit, *theOwner[0].theAlgebra)
   ;
-  PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+//  PolynomialOutputFormat tempFormat;
+//  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i<this->size; i++)
   { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
     accumMon.theMons.SetSize(0);
-    accumMon.Coefficient=theRingUnit;
+    accumMon.Coefficient=currentMon.Coefficient;
     for (int j=0; j<currentMon.theMons.size; j++)
     { tempElt.Nullify(theOwner);
       tempElt+=currentMon.theMons[j];

@@ -69,7 +69,7 @@ double GetElapsedTimeInSeconds()
 
 void* RunTimer(void* ptr)
 { for (; GetElapsedTimeInSeconds()<theGlobalVariables.MaxAllowedComputationTimeInSeconds || theGlobalVariables.MaxAllowedComputationTimeInSeconds<=0;)
-  { usleep(10000);
+  { usleep(10);
     if (ComputationComplete)
       break;
   }
@@ -184,7 +184,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-//  civilizedInput="h_2^2 (v((0,1),(0,0)) v( (x_2,x_3),(1,1)))";
+//  civilizedInput="i(c)";
+//  civilizedInput="(h_1-x_2) v((0,1),(0,0))";
 
 //  civilizedInput=" g_{-1} (  v((1),(0))* v((1),(1)) )";
 //  civilizedInput="h_1 (1,1)";
@@ -386,10 +387,13 @@ int main(int argc, char **argv)
     tempFile.close();
   }
   ANNOYINGSTATISTICS;
-//  if (theParser.DefaultWeylLetter!='B' || theParser.DefaultWeylRank!=3)
-  theParser.initTestAlgebraNeedsToBeRewritteN(theGlobalVariables);
-//  else
-//    theParser.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
+  if (theParser.DefaultWeylLetter!='B' || theParser.DefaultWeylRank!=3)
+  { HomomorphismSemisimpleLieAlgebra& theHmm=theParser.theHmm;
+    theHmm.MakeGinGWithId(theParser.DefaultWeylLetter,  theParser.DefaultWeylRank, theGlobalVariables);
+    theParser.initTestAlgebraNeedsToBeRewritteN(theGlobalVariables);
+  }
+  else
+    theParser.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   ANNOYINGSTATISTICS;
   double TimeParsing=0, TimeEvaluation=0;
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;

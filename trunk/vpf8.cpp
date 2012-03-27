@@ -9491,7 +9491,8 @@ int ParserNode::EvaluateAdjointAction
 int ParserNode::EvaluateMakeCasimir
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { theNode.ExpressionType=theNode.typeUEelement;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
+  if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
+    theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
   theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
   std::stringstream out;
   out << "The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()

@@ -23601,6 +23601,12 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
         else
           this->theChar.GetElement()-=currentChild.theChar.GetElement();
         break;
+      case ParserNode::typeGenVermaElt:
+        if (i==0)
+          this->theGenVermaElt.GetElement()+=currentChild.theGenVermaElt.GetElement();
+        else
+          this->theGenVermaElt.GetElement()-=currentChild.theGenVermaElt.GetElement();
+        break;
       default: this->ExpressionType=this->typeError; return;
     }
   }

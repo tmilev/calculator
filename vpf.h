@@ -5609,12 +5609,12 @@ public:
     }
     return false;
   }
-  RationalFunction GetUnit()
+  RationalFunction GetUnit()const
   { RationalFunction tempRat;
     tempRat.MakeNVarConst(this->NumVars, 1, this->context);
     return tempRat;
   }
-  RationalFunction GetZero()
+  RationalFunction GetZero()const
   { RationalFunction tempRat;
     tempRat.Nullify(this->NumVars, this->context);
     return tempRat;
@@ -10020,6 +10020,9 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
+  bool IsEqualToZero()const
+  { return this->Coefficient.IsEqualToZero();
+  }
   template<class otherType>
   void Assign(const MonomialUniversalEnveloping<otherType>& other)
   { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
@@ -10029,7 +10032,25 @@ public:
     this->Coefficient=(other.Coefficient);
     this->owner=other.owner;
   }
-  void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnveloping<CoefficientType>& output);
+//  void MultiplyBy(const MonomialUniversalEnveloping& other, ElementUniversalEnveloping<CoefficientType>& output);
+  void MultiplyBy(const MonomialUniversalEnveloping<CoefficientType>& other)
+  { if (this->IsEqualToZero())
+      return;
+    if (other.Coefficient.IsEqualToZero())
+    { this->Nullify(this->Coefficient.GetZero(), *this->owner);
+      return;
+    }
+    if (this==&other)
+    { MonomialUniversalEnveloping<CoefficientType> tempMon;
+      tempMon=other;
+      this->MultiplyBy(tempMon);
+      return;
+    }
+    this->Coefficient*=other.Coefficient;
+    for (int i=0; i<other.Powers.size; i++)
+      this->MultiplyByGeneratorPowerOnTheRight(other.generatorsIndices[i], other.Powers[i]);
+  }
+
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& other);
   void Nullify(int numVars, SemisimpleLieAlgebra& theOwner);
@@ -10123,6 +10144,9 @@ public:
   bool operator==(const MonomialUniversalEnveloping& other)const{ return this->owner==other.owner && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;}
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->Assign(other);
+  }
+  inline void operator*=(const MonomialUniversalEnveloping& other)
+  { this->MultiplyBy(other);
   }
 };
 
@@ -11646,31 +11670,45 @@ class MonomialGeneralizedVerma
   public:
   List<ModuleSSalgebraNew<CoefficientType> >* owneR;
   int indexInOwner;
-  ElementUniversalEnveloping<CoefficientType> Coefficient;
+  CoefficientType Coefficient;
+  MonomialUniversalEnveloping<CoefficientType> theMonCoeffOne;
   int indexFDVector;
   MonomialGeneralizedVerma(): owneR(0), indexInOwner(-1), indexFDVector(-1) { }
+  void SimplifyNormalizeCoeffs()
+  { if (this->Coefficient.IsEqualToZero() || this->theMonCoeffOne.Coefficient.IsEqualToZero())
+    { this->Coefficient=this->Coefficient.GetZero();
+      this->theMonCoeffOne.Nullify(this->Coefficient.GetZero(), *this->theMonCoeffOne.owner);
+      return;
+    }
+    this->Coefficient*= this->theMonCoeffOne.Coefficient;
+    this->theMonCoeffOne.Coefficient=this->Coefficient.GetUnit();
+  }
   void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
   { this->owneR=other.owneR;
     this->indexFDVector=other.indexFDVector;
     this->indexInOwner=other.indexInOwner;
     this->Coefficient=other.Coefficient;
+    this->theMonCoeffOne=other.theMonCoeffOne;
   }
 
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
+  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
   ;
   void ElementToString
-  (std::string& output, PolynomialOutputFormat& theFormat)
+  (std::string& output, PolynomialOutputFormat& theFormat)const
   ;
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
   }
   bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)
-  { return this->indexFDVector==other.indexFDVector && this->indexInOwner==other.indexInOwner;
+  { if (this->indexFDVector==other.indexFDVector && this->indexInOwner==other.indexInOwner)
+      return this->theMonCoeffOne==other.theMonCoeffOne;
+    return false;
   }
   void SetNumVariables(int GoalNumVars)
   { assert(this->owneR->size>this->indexInOwner);
     this->Coefficient.SetNumVariables(GoalNumVars);
+    this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
   int HashFunction()const
@@ -11678,6 +11716,11 @@ class MonomialGeneralizedVerma
   }
   bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
   ;
+  void MakeConst(const CoefficientType& theConst, SemisimpleLieAlgebra& owner)
+  { this->Coefficient=theConst;
+    this->theMonCoeffOne.MakeConst(theConst.GetUnit(), owner);
+    this->SimplifyNormalizeCoeffs();
+  }
   ModuleSSalgebraNew<CoefficientType>& GetOwner()
   { return this->owneR->TheObjects[this->indexInOwner];
   }
@@ -11693,7 +11736,7 @@ class ElementSumGeneralizedVermas : public TemplatePolynomial<MonomialGeneralize
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
   void ReduceMonAndAddToMe
-  (MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
+  (const MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
   ElementSumGeneralizedVermas():owneR(0){}
@@ -11732,7 +11775,7 @@ public:
   CoefficientType Coefficient;
   List<MonomialGeneralizedVerma<CoefficientType> > theMons;
   void SimplifyNormalizeCoeffs
-  ( const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  ( )
   ;
   void Nullify( const CoefficientType& theRingZero)
   { this->Coefficient=theRingZero;
@@ -11754,14 +11797,14 @@ public:
     output=*this;
     output.Coefficient*=other.Coefficient;
     output.theMons.AddListOnTop(other.theMons);
-    output.SimplifyNormalizeCoeffs(this->Coefficient.GetUnit(), this->Coefficient.GetZero());
+    output.SimplifyNormalizeCoeffs();
   }
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
   }
   void operator*=(MonomialGeneralizedVerma<CoefficientType>& other)
   { this->theMons.AddOnTop(other);
-    this->SimplifyNormalizeCoeffs(this->Coefficient.GetUnit(), this->Coefficient.GetZero() );
+    this->SimplifyNormalizeCoeffs();
   }
   int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->theMons.size);
@@ -11796,26 +11839,19 @@ public:
 
 template <class CoefficientType>
 void MonomialTensorGeneralizedVermas <CoefficientType>::SimplifyNormalizeCoeffs
-( const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+()
 { if (this->Coefficient.IsEqualToZero())
-  { this->Nullify(theRingZero);
+  { this->Nullify(this->Coefficient.GetZero());
     return;
   }
   for (int i=0; i<this->theMons.size; i++)
-  { MonomialGeneralizedVerma<CoefficientType>& currentMon=this->theMons[i];
-    ElementUniversalEnveloping<CoefficientType>& currentUE=currentMon.Coefficient;
-    if (currentUE.IsEqualToZero())
-    { this->Nullify(theRingZero);
+  { CoefficientType& currentCF=this->theMons[i].Coefficient;
+    if (currentCF.IsEqualToZero())
+    { this->Nullify(this->Coefficient.GetZero());
       return;
     }
-    MonomialUniversalEnveloping<CoefficientType>* currentMaxUEMon=&currentUE[0];
-    for (int j=1; j<currentUE.size; j++)
-      if (currentUE[j]>*currentMaxUEMon)
-        currentMaxUEMon=& currentUE[j];
-    CoefficientType tempCF;
-    tempCF=currentMaxUEMon->Coefficient;
-    currentUE/=tempCF;
-    this->Coefficient*=tempCF;
+    this->Coefficient*=currentCF;
+    currentCF=currentCF.GetUnit();
   }
 }
 
@@ -16832,24 +16868,30 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
     out << tempS;
   for (int i=0; i<this->theMons.size; i++)
     out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat) << ")";
+  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
+  for (int i=0; i<this->theMons.size; i++)
+    std::cout << this->theMons[i].HashFunction() << ", ";
   return out.str();
 }
 
 template <class CoefficientType>
 std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)
+  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
 { ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   root parSel;
   parSel= theMod.parabolicSelectionNonSelectedAreElementsLevi;
   std::string tempS;
-  tempS=this->Coefficient.ElementToStringCalculatorFormat(theGlobalVariables, theFormat);
-  std::stringstream out;
-  if (this->Coefficient.NeedsBracketForMultiplication())
-    tempS= "(" + tempS + ")";
+  tempS=this->Coefficient.ElementToString();
   if (tempS=="1")
     tempS="";
   if (tempS=="-1")
     tempS="-";
+  tempS+=this->theMonCoeffOne.ElementToString(false, false, theGlobalVariables, theFormat);
+  if (tempS=="1")
+    tempS="";
+  if (tempS=="-1")
+    tempS="-";
+  std::stringstream out;
   out << tempS;
   tempS= theMod.theGeneratingWordsNonReduced[this->indexFDVector].
   ElementToString(false, false, theGlobalVariables, theFormat);
@@ -16874,9 +16916,7 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
   { MonomialGeneralizedVerma<CoefficientType>& currentMon=this->TheObjects[i];
     ModuleSSalgebraNew<CoefficientType>& theMod=currentMon.owneR->TheObjects[currentMon.indexInOwner];
     parSel= theMod.parabolicSelectionNonSelectedAreElementsLevi;
-    tempS=currentMon.Coefficient.ElementToStringCalculatorFormat(theGlobalVariables, theFormat);
-    if (currentMon.Coefficient.NeedsBracketForMultiplication())
-      tempS= "(" + tempS + ")";
+    tempS=currentMon.ElementToString(theGlobalVariables, theFormat);
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -16914,6 +16954,11 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
     if (i!=0 && tempS[0]!='-')
       out << "+";
     out << tempS;
+  }
+
+  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
+  for (int i=0; i<this->size; i++)
+  { std::cout << this->TheObjects[i].HashFunction() << ", ";
   }
   return out.str();
 }

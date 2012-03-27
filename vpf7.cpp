@@ -3019,38 +3019,27 @@ template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ ElementUniversalEnveloping<CoefficientType> nilPart;
-  ElementSumGeneralizedVermas<CoefficientType> output;
+{ ElementSumGeneralizedVermas<CoefficientType> output;
   MonomialGeneralizedVerma<CoefficientType> currentMon;
   output.Nullify(*this->owneR);
   for (int i=0; i<this->size; i++)
-  { currentMon.Coefficient=theUE;
-    currentMon.indexFDVector=this->TheObjects[i].indexFDVector;
-    currentMon.owneR=this->owneR;
-    currentMon.indexInOwner=this->TheObjects[i].indexInOwner;
-    ModuleSSalgebraNew<CoefficientType>& theMod= this->owneR->TheObjects[currentMon.indexInOwner];
-    theMod.theAlgebra->OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+    for (int j=0; j<theUE.size; j++)
+    { currentMon.theMonCoeffOne=theUE[j];
+      currentMon.theMonCoeffOne*=this->TheObjects[j].theMonCoeffOne;
+      currentMon.Coefficient=this->TheObjects[j].Coefficient;
+      currentMon.SimplifyNormalizeCoeffs();
 
-    currentMon.Coefficient*=this->TheObjects[i].Coefficient;
-    currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+      currentMon.owneR=this->owneR;
+      currentMon.indexFDVector=this->TheObjects[i].indexFDVector;
+      currentMon.indexInOwner=this->TheObjects[i].indexInOwner;
 
-/*    PolynomialOutputFormat theFormat;
-    theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    ElementSumGeneralizedVermas<CoefficientType> tempElt;
-    tempElt.Nullify(*this->owneR);
-    tempElt.AddOnTopHash(currentMon);
-    std::cout << "<hr>Monomial before PBW basis: " << tempElt.ElementToString(theGlobalVariables)
-    << "; index of vector is: " << currentMon.indexFDVector;
-*/
-    currentMon.Coefficient.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-
-//    std::cout << "<hr>Monomial before generalized verma simplification: " << tempElt.ElementToString(theGlobalVariables)
-//    << "; index of vector is: " << currentMon.indexFDVector;
+      ModuleSSalgebraNew<CoefficientType>& theMod= this->owneR->TheObjects[currentMon.indexInOwner];
+      theMod.theAlgebra->OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
 
 
-    output.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
-    theMod.theAlgebra->OrderSSLieAlgebraStandard();
-  }
+      output.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
+      theMod.theAlgebra->OrderSSLieAlgebraStandard();
+    }
   *this=output;
 //  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
 }
@@ -3078,7 +3067,9 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
    GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { if (theUE.Coefficient.IsEqualToZero())
-    this->Nullify();
+  { this->Nullify();
+    return;
+  }
   this->operator*=(theUE.Coefficient);
   for (int i=theUE.Powers.size-1; i>=0; i--)
   { int thePower;
@@ -3095,7 +3086,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
 
 template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
-  (MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
+  (const MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { Matrix<CoefficientType> tempMat1, tempMat2;
   if (theMon.Coefficient.IsEqualToZero())
@@ -3105,9 +3096,13 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
 //  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
   ModuleSSalgebraNew<CoefficientType>& theMod=theMon.owneR->TheObjects[theMon.indexInOwner];
   tempMat1.MakeIdMatrix(theMod.theGeneratingWordsWeightsSimpleCoords.size, theRingUnit, theRingZero);
-  ElementUniversalEnveloping<CoefficientType>& theUEelt=theMon.Coefficient;
+  ElementUniversalEnveloping<CoefficientType> theUEelt;
+  theUEelt=theMon.theMonCoeffOne;
+  theUEelt*=theMon.Coefficient;
+  theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
+  CoefficientType theCoeff;
   for (int j=0; j<theUEelt.size; j++)
   { currentMon=theUEelt[j];
     for (int i=currentMon.Powers.size-1; i>=0; i--)
@@ -3120,9 +3115,9 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
 //      << tempMat2.ElementToString(true, false);
       if (tempMat2.NumRows==0)
       { if (theIndex>=theMod.theAlgebra->GetRank()+theMod.theAlgebra->GetNumPosRoots())
-  //      { //std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+//        { std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
           return;
-  //      }
+//        }
         break;
       }
       for (int j=0; j<thePower; j++)
@@ -3130,12 +3125,13 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
     }
-    newMon.Coefficient.Nullify(*theMod.theAlgebra);
     newMon.owneR=this->owneR;
     newMon.indexInOwner=theMon.indexInOwner;
     for (int i=0; i<tempMat1.NumRows; i++)
       if (!tempMat1.elements[i][theMon.indexFDVector].IsEqualToZero())
-      { newMon.Coefficient=currentMon;
+      { newMon.theMonCoeffOne=currentMon;
+        newMon.Coefficient=theRingUnit;
+        newMon.SimplifyNormalizeCoeffs();
         newMon.indexFDVector=i;
         newMon.Coefficient*=tempMat1.elements[i][theMon.indexFDVector];
         this->operator+=(newMon);
@@ -3249,7 +3245,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
   theMon.indexInOwner=TheIndexInOwner;
   ModuleSSalgebraNew<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
   theMon.indexFDVector=theMod.theGeneratingWordsWeightsSimpleCoords.size-1;
-  theMon.Coefficient.MakeConst(theRingUnit, *theMod.theAlgebra);
+  theMon.MakeConst(theRingUnit, *theMod.theAlgebra);
 
   this->ClearTheObjects();
   this->AddOnTopHash(tensorMon);

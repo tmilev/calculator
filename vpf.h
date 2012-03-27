@@ -9538,11 +9538,11 @@ public:
   int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const;
   void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart)
   { for (int i=0; i<this->GetNumPosRoots(); i++)
-    { int translationCoeff;
+    { int translationCoeff=0;
       for (int j=0; j<this->GetRank(); j++)
-        if (parSelZeroMeansLeviPart.selected[j])
-          translationCoeff+=this->theWeyl.RootSystem[i][j].NumShort;
-      this->UEGeneratorOrderIncludingCartanElts[i]+=translationCoeff;
+        if (!parSelZeroMeansLeviPart.selected[j])
+          translationCoeff+=this->theWeyl.RootSystem[i][j].NumShort*this->GetNumPosRoots();
+      this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff;
     }
   }
   void OrderSSalgebraForHWbfComputation()
@@ -11947,6 +11947,7 @@ public:
   void operator=(const ParserNode& other);
   void Clear();
   int GetMaxImpliedNumVarsChildren();
+  int GetMaxNumImpliedVarsFromUnderscore();
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
   void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
   void CopyValue(const ParserNode& other);
@@ -11995,7 +11996,7 @@ bool GetRootRationalDontUseForFunctionArguments
 CoefficientType& GetElement();
   template <class CoefficientType>
 bool GetListDontUseForFunctionArguments
-(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int ExpressionType, int impliedNumVars)
+(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int ExpressionType, int theImpliedNumVars)
 ;
 bool GetRootRationalFromFunctionArguments
 (//List<int>& argumentList,
@@ -12437,6 +12438,8 @@ public:
 
   std::string javaScriptDisplayingIndicator;
   std::string afterSystemCommands;
+  int GetNumVarsModulePolys();
+  void SetNumVarsModulePolys(int NumVars);
 //  SemisimpleLieAlgebra theLieAlgebra;
   void initDefaultFolderAndFileNames
   (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
@@ -16830,10 +16833,10 @@ bool ParserNode::GetRootRationalDontUseForFunctionArguments
 
 template <class CoefficientType>
 bool ParserNode::GetListDontUseForFunctionArguments
-(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int goalExpressionType, int impliedNumVars)
+(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int goalExpressionType, int theImpliedNumVars)
 { if (this->ExpressionType!=this->typeArray)
   { output.SetSize(1);
-    if (!this->ConvertToType(goalExpressionType, impliedNumVars, theGlobalVariables))
+    if (!this->ConvertToType(goalExpressionType, theImpliedNumVars, theGlobalVariables))
       return false;
     output.TheObjects[0]=this->GetElement<CoefficientType>();
     return true;
@@ -16841,7 +16844,7 @@ bool ParserNode::GetListDontUseForFunctionArguments
   output.SetSize(this->children.size);
   for (int i=0; i<output.size; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(goalExpressionType, this->impliedNumVars, theGlobalVariables))
+    if (!currentNode.ConvertToType(goalExpressionType, theImpliedNumVars, theGlobalVariables))
       return false;
     output.TheObjects[i]=currentNode.GetElement<CoefficientType>();
   }
@@ -16868,9 +16871,9 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
     out << tempS;
   for (int i=0; i<this->theMons.size; i++)
     out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat) << ")";
-  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
-  for (int i=0; i<this->theMons.size; i++)
-    std::cout << this->theMons[i].HashFunction() << ", ";
+//  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
+//  for (int i=0; i<this->theMons.size; i++)
+//    std::cout << this->theMons[i].HashFunction() << ", ";
   return out.str();
 }
 
@@ -16899,6 +16902,7 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
     out << tempS;
   out << "v(" << theMod.theHWFundamentalCoordsBaseField.ElementToString() << ","
     << parSel.ElementToString() << ")";
+//  std::cout << "<br>Monomial " << out.str() << " has indexInOwner " << this->indexInOwner;
   return out.str();
 }
 
@@ -16956,10 +16960,10 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
     out << tempS;
   }
 
-  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
-  for (int i=0; i<this->size; i++)
-  { std::cout << this->TheObjects[i].HashFunction() << ", ";
-  }
+//  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
+//  for (int i=0; i<this->size; i++)
+//  { std::cout << this->TheObjects[i].HashFunction() << ", ";
+//  }
   return out.str();
 }
 

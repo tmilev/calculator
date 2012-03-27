@@ -184,7 +184,8 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-//  civilizedInput="i(c)";
+//  civilizedInput="g_{8}(g_{-8} v((x_1,1,0),(1,0,0)) )";
+//  civilizedInput="v((x_1,1,0),(1,0,0))(x_2  v((x_1,1,0),(1,0,0)) )+v((x_1,1,0),(1,0,0))(  v((x_1,1,0),(1,0,0)) )";
 //  civilizedInput="(h_1-x_2) v((0,1),(0,0))";
 
 //  civilizedInput=" g_{-1} (  v((1),(0))* v((1),(1)) )";

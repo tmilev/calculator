@@ -880,6 +880,23 @@ int ParserNode::EvaluateFreudenthal(ParserNode& theNode, List<int>& theArgumentL
   return theNode.errorNoError;
 }
 
+int Parser::GetNumVarsModulePolys()
+{ int result=0;
+  for (int i=0; i<this->theModulePolys.size; i++)
+    result=MathRoutines::Maximum(this->theModulePolys[i].GetNumVars(), result);
+  return result;
+}
+
+void Parser::SetNumVarsModulePolys(int NumVars)
+{ for (int i=0; i<this->theModulePolys.size; i++)
+    this->theModulePolys[i].SetNumVariables(NumVars);
+  for (int i=0; i<this->size; i++)
+  { ParserNode& current=this->TheObjects[i];
+    if (current.ExpressionType==current.typeGenVermaElt)
+      current.theGenVermaElt.GetElement().SetNumVariables(NumVars);
+  }
+}
+
 int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
@@ -887,6 +904,9 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   root parSel;
   List<RationalFunction> weight;
   theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
+  theNode.impliedNumVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->MaxFoundVars);
+  theNode.owner->SetNumVarsModulePolys(theNode.impliedNumVars);
+
   if (!leftNode.GetListDontUseForFunctionArguments<RationalFunction>
       (weight, theGlobalVariables, theNode.typeRationalFunction, theNode.impliedNumVars))
     return theNode.SetError(theNode.errorBadOrNoArgument);
@@ -908,12 +928,11 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   selectionParSel=parSel;
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
-    if (currentMod.GetNumVars()!=theNode.impliedNumVars)
-      if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
+    if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
           selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
-      { indexOfModule=i;
-        break;
-      }
+    { indexOfModule=i;
+      break;
+    }
   }
   if (indexOfModule==-1)
   { indexOfModule=theMods.size;
@@ -921,8 +940,10 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   }
   ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { bool isGood=theMod.MakeFromHW
+  { assert(theWeight[0].NumVars==RFOne.NumVars);
+    bool isGood=theMod.MakeFromHW
     (theNode.owner->theHmm.theRange, theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
+
     out << report;
     if (!isGood)
       return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
@@ -2139,31 +2160,35 @@ int ParserNode::EvaluateHWMTABilinearForm
 
 int ParserNode::EvaluateHWTAABilinearForm
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root weight;
+{ List<PolynomialRationalCoeff> weight;
   ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
-  if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
+  theNode.impliedNumVars=theNode.owner->MaxFoundVars;
+  if (!weightNode.GetListDontUseForFunctionArguments<PolynomialRationalCoeff>
+      (weight, theGlobalVariables, theNode.typePoly, theNode.impliedNumVars))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<PolynomialRationalCoeff>& leftElt=leftNode.UEElement.GetElement();
   ElementUniversalEnveloping<PolynomialRationalCoeff>& rightElt=rightNode.UEElement.GetElement();
+  leftElt.SetNumVariables(theNode.impliedNumVars);
+  rightElt.SetNumVariables(theNode.impliedNumVars);
   PolynomialRationalCoeff theRingZero, theRingUnit;
-  theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
   int& numVars= theNode.impliedNumVars;
   theRingZero.Nullify(numVars);
   theRingUnit.MakeOne(numVars);
   List<PolynomialRationalCoeff> theHW;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
   std::stringstream out;
   out << "Highest weight in fundamental coords: " << weight.ElementToString() << "<br>";
   theHW.SetSize(weight.size);
   leftElt.owner->OrderSSalgebraForHWbfComputation();
   for (int i=0; i<weight.size; i++)
-    theHW[i].MakeNVarConst(numVars, weight[i]);
+  { theHW[i]=weight[i];
+    theHW[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
+  }
   if(!leftElt.HWTAAbilinearForm(rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
 //  PolynomialRationalCoeff symmTerm;
@@ -2988,6 +3013,8 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
   ParserNode& left=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& right=theNode.owner->TheObjects[theArgumentList[1]];
   theNode.impliedNumVars=MathRoutines::Maximum(left.impliedNumVars, right.impliedNumVars);
+  theNode.impliedNumVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->MaxFoundVars);
+  theNode.owner->SetNumVarsModulePolys(theNode.impliedNumVars);
   if (!right.ConvertToType(theNode.typeGenVermaElt, theNode.impliedNumVars, theGlobalVariables))
     return theNode.SetError(theNode.errorConversionError);
   if (!left.ConvertToType(theNode.typeUEelement, theNode.impliedNumVars, theGlobalVariables))
@@ -3033,12 +3060,9 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
       currentMon.indexFDVector=this->TheObjects[i].indexFDVector;
       currentMon.indexInOwner=this->TheObjects[i].indexInOwner;
 
-      ModuleSSalgebraNew<CoefficientType>& theMod= this->owneR->TheObjects[currentMon.indexInOwner];
-      theMod.theAlgebra->OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-
 
       output.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
-      theMod.theAlgebra->OrderSSLieAlgebraStandard();
+
     }
   *this=output;
 //  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
@@ -3077,9 +3101,9 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
       break;
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
-    { //std::cout <<"<hr>Before generator: " << this->ElementToString(theGlobalVariables);
+    { std::cout <<"<hr>Acting by generator index " << theIndex << " on " << this->ElementToString(theGlobalVariables);
       this->MultiplyMeByElementLieAlg(theOwner, theIndex, theGlobalVariables, theRingUnit, theRingZero);
-      //std::cout <<"<hr>After generator: " << this->ElementToString(theGlobalVariables);
+      std::cout <<"<br>to get: " << this->ElementToString(theGlobalVariables);
     }
   }
 }
@@ -3088,43 +3112,54 @@ template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
   (const MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ Matrix<CoefficientType> tempMat1, tempMat2;
-  if (theMon.Coefficient.IsEqualToZero())
+{ if (theMon.Coefficient.IsEqualToZero())
     return;
-//  PolynomialOutputFormat theFormat;
-//  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  PolynomialOutputFormat theFormat;
+  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
   ModuleSSalgebraNew<CoefficientType>& theMod=theMon.owneR->TheObjects[theMon.indexInOwner];
-  tempMat1.MakeIdMatrix(theMod.theGeneratingWordsWeightsSimpleCoords.size, theRingUnit, theRingZero);
+  theMod.theAlgebra->OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+  std::cout << "<br>";
+  for (int i=0; i<theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts.size; i++)
+  { std::cout << "<br>generator idex " << i << " has order " << theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts[i];
+  }
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt=theMon.theMonCoeffOne;
   theUEelt*=theMon.Coefficient;
+  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+  std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
   CoefficientType theCoeff;
-  for (int j=0; j<theUEelt.size; j++)
-  { currentMon=theUEelt[j];
-    for (int i=currentMon.Powers.size-1; i>=0; i--)
+  Matrix<CoefficientType> tempMat1, tempMat2;
+  for (int l=0; l<theUEelt.size; l++)
+  { currentMon=theUEelt[l];
+    std::cout << "<br> Processing monomial " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat);
+    tempMat1.MakeIdMatrix(theMod.theGeneratingWordsWeightsSimpleCoords.size, theRingUnit, theRingZero);
+    for (int k=currentMon.Powers.size-1; k>=0; k--)
     { int thePower;
-      if (!currentMon.Powers[i].IsSmallInteger(thePower))
+      if (!currentMon.Powers[k].IsSmallInteger(thePower))
         break;
-      int theIndex=currentMon.generatorsIndices[i];
+      int theIndex=currentMon.generatorsIndices[k];
       tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
-//      std::cout << "<hr><hr><hr><hr><hr>Action generator " << theIndex << ":<br>"
-//      << tempMat2.ElementToString(true, false);
+      std::cout << "<hr>Action generator " << theIndex << ":<br>"
+      << tempMat2.ElementToString(true, false);
       if (tempMat2.NumRows==0)
       { if (theIndex>=theMod.theAlgebra->GetRank()+theMod.theAlgebra->GetNumPosRoots())
-//        { std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+        { std::cout << "<br>Error! Accum: " << this->ElementToString(theGlobalVariables);
           return;
-//        }
+        }
         break;
       }
-      for (int j=0; j<thePower; j++)
+      for (int s=0; s<thePower; s++)
         tempMat1.MultiplyOnTheLeft(tempMat2, theRingZero);
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
     }
+      std::cout << "<br> Action is the " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat)
+      << " free action plus <br>"
+      << tempMat1.ElementToString(true, false);
     newMon.owneR=this->owneR;
     newMon.indexInOwner=theMon.indexInOwner;
     for (int i=0; i<tempMat1.NumRows; i++)
@@ -3139,6 +3174,7 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
   }
 //  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
 //  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+  theMod.theAlgebra->OrderSSLieAlgebraStandard();
 }
 
 template  <class CoefficientType>
@@ -3150,7 +3186,10 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
   int numPosRoots=this->theAlgebra->GetNumPosRoots();
   assert(generatorIndex>=0 && generatorIndex<numGenerators);
   if (this->ComputedGeneratorActions.selected[generatorIndex])
+  { std::cout << "<br>generator index " << generatorIndex << " is precomputed: "
+    << this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
     return this->actionsGeneratorsMaT[generatorIndex];
+  }
   this->ComputedGeneratorActions.AddSelectionAppendNewIndex(generatorIndex);
   ElementUniversalEnveloping<CoefficientType> tempElt;
   root theWeight;
@@ -3162,12 +3201,24 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
     theWeight=this->theAlgebra->theWeyl.RootSystem[generatorIndex-theDim];
   for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
     if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
-    { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
-      return this->actionsGeneratorsMaT[generatorIndex];
+    { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
+      { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
+        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+        return this->actionsGeneratorsMaT[generatorIndex];
+      } else
+      { this->actionsGeneratorsMaT[generatorIndex].init
+        (this->theGeneratingWordsNonReduced.size,this->theGeneratingWordsNonReduced.size);
+        this->actionsGeneratorsMaT[generatorIndex].NullifyAll(theRingZero);
+        std::cout << "<br>generator index " << generatorIndex << " has ZERO action. ";
+        return this->actionsGeneratorsMaT[generatorIndex];
+      }
     }
+
   this->GetMatrixHomogenousElt
   (tempElt, this->actionsGeneratorS[generatorIndex], theWeight,
    this->actionsGeneratorsMaT[generatorIndex], theGlobalVariables, theRingUnit, theRingZero);
+  std::cout << "<br>generator index " << generatorIndex << " has been computed to be: "
+  << this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
   return this->actionsGeneratorsMaT[generatorIndex];
 }
 
@@ -3266,8 +3317,8 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
   theGenerator.MakeOneGenerator
   (indexGenerator, theRingUnit, *theOwner[0].theAlgebra)
   ;
-//  PolynomialOutputFormat tempFormat;
-//  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  PolynomialOutputFormat tempFormat;
+  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i<this->size; i++)
   { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
     accumMon.theMons.SetSize(0);
@@ -3275,17 +3326,17 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
     for (int j=0; j<currentMon.theMons.size; j++)
     { tempElt.Nullify(theOwner);
       tempElt+=currentMon.theMons[j];
-//      std::cout << "<hr> Acting by " << theGenerator.ElementToString(true, theGlobalVariables, tempFormat)
-//      << " on " << tempElt.ElementToString(theGlobalVariables);
+      std::cout << "<hr> Acting by " << theGenerator.ElementToString(true, theGlobalVariables, tempFormat)
+      << " on " << tempElt.ElementToString(theGlobalVariables);
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
-//      std::cout << "<br> result: " << tempElt.ElementToString(theGlobalVariables);
+      std::cout << "<br> result: " << tempElt.ElementToString(theGlobalVariables);
       for (int k=0; k<tempElt.size; k++)
       { monActedOn=accumMon;
         monActedOn*=tempElt[k];
         for (int l=j+1; l<currentMon.theMons.size; l++)
           monActedOn*=currentMon.theMons[l];
         output+=monActedOn;
-//        std::cout << "<br>accounted: " << monActedOn.ElementToString(theGlobalVariables, tempFormat);
+        std::cout << "<br>accounted: " << monActedOn.ElementToString(theGlobalVariables, tempFormat);
       }
       accumMon*=currentMon.theMons[j];
     }

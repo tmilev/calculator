@@ -23524,6 +23524,8 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       break;
     case ParserNode::typeGenVermaElt:
       this->theGenVermaElt.GetElement().Nullify();//this->owner->theModulePolys);
+      this->impliedNumVars=this->owner->MaxFoundVars;
+      this->owner->SetNumVarsModulePolys(this->impliedNumVars);
     break;
     case ParserNode::typeCharSSFDMod:
       this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
@@ -26762,6 +26764,9 @@ bool ParserNode::ConvertToType
       }
       break;
     case ParserNode::typeGenVermaElt:
+      this->impliedNumVars=this->owner->MaxFoundVars;
+      GoalNumVars=this->impliedNumVars;
+      this->owner->SetNumVarsModulePolys(GoalNumVars);
       this->theGenVermaElt.GetElement().SetNumVariables(GoalNumVars); break;
     default: break;
   }
@@ -28572,4 +28577,9 @@ Rational& ParserNode::GetElement<Rational>()
 template < >
 RationalFunction& ParserNode::GetElement<RationalFunction>()
 { return this->ratFunction.GetElement();
+}
+
+template < >
+PolynomialRationalCoeff& ParserNode::GetElement<PolynomialRationalCoeff>()
+{ return this->polyValue.GetElement();
 }

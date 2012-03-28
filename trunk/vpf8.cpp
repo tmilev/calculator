@@ -9493,11 +9493,11 @@ int ParserNode::EvaluateMakeCasimir
 { theNode.ExpressionType=theNode.typeUEelement;
   if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
     theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
-  std::cout << "context Lie algebra: " << theNode.ContextLieAlgebra->GetLieAlgebraTypeAndName
-  (theNode.ContextLieAlgebra->theWeyl.WeylLetter, theNode.ContextLieAlgebra->GetRank());
   theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
   std::stringstream out;
-  out << "The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()
+  out << "Context Lie algebra: " << theNode.ContextLieAlgebra->GetLieAlgebraTypeAndName
+  (theNode.ContextLieAlgebra->theWeyl.WeylLetter, theNode.ContextLieAlgebra->GetRank());
+  out << ". The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()
   <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
   theNode.outputString=out.str();
 

@@ -310,13 +310,12 @@ public:
       { tempMutex.UnlockMe();
         return;
       }
-      flagUngracefulExitInitiated=true;
+      ParallelComputing::flagUngracefulExitInitiated=true;
       tempMutex.UnlockMe();
       std::cout << "<b>Error:</b> Number of pointers allocated exceeded allowed <b>limit of " <<
       ParallelComputing::cgiLimitRAMuseNumPointersInList << ".</b>\n<br><b>Signalling ungraceful exit...</b>";
       std::cout.flush();
-      ParallelComputing::SafePointDontCallMeFromDestructors();
-      ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
+
       std::exit(0);
     }
     if (ParallelComputing::PointerCounterPeakRamUse<ParallelComputing::GlobalPointerCounter)
@@ -3172,7 +3171,8 @@ class root: public Vector<Rational>
 public:
   inline static std::string GetXMLClassName(){ return "root";}
 //the below is to facilitate operator overloading
-  root(const root& right){this->Assign(right); };
+  root(const root& right){this->Assign(right); }
+  root(const Selection& right){this->operator=(right); }
   root(const Vector<Rational>& other){this->CopyFromLight(other);}
   void MultiplyByLargeRational(const Rational& a);
   void MakeZero(int DesiredDimension);
@@ -9540,7 +9540,7 @@ public:
   { for (int i=0; i<this->GetNumPosRoots(); i++)
     { int translationCoeff=0;
       for (int j=0; j<this->GetRank(); j++)
-        if (!parSelZeroMeansLeviPart.selected[j])
+        if (parSelZeroMeansLeviPart.selected[j])
           translationCoeff+=this->theWeyl.RootSystem[i][j].NumShort*this->GetNumPosRoots();
       this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff;
     }

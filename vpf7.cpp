@@ -3209,7 +3209,7 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
     if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
     { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
       { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
-        //std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+//        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
         return this->actionsGeneratorsMaT[generatorIndex];
       } else
       { this->actionsGeneratorsMaT[generatorIndex].init
@@ -3224,7 +3224,7 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
   (tempElt, this->actionsGeneratorS[generatorIndex], theWeight,
    this->actionsGeneratorsMaT[generatorIndex], theGlobalVariables, theRingUnit, theRingZero);
 //  std::cout << "<br>generator index " << generatorIndex << " has been computed to be: "
- // << this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
+//  << this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
   return this->actionsGeneratorsMaT[generatorIndex];
 }
 
@@ -3282,7 +3282,7 @@ void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
   MonomialGeneralizedVerma<CoefficientType> theMon;
   theMon.indexInOwner=TheIndexInOwner;
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[TheIndexInOwner];
-  theMon.indexFDVector=theMod.theGeneratingWordsWeightsSimpleCoords.size-1;
+  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
   theMon.Coefficient.MakeConst(theRingUnit, theMod.theAlgebra);
   theMon.owneR=&theOwner;
   assert(TheIndexInOwner<theOwner.size);
@@ -3301,7 +3301,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
   theMon.owneR=&theOwner;
   theMon.indexInOwner=TheIndexInOwner;
   ModuleSSalgebraNew<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
-  theMon.indexFDVector=theMod.theGeneratingWordsWeightsSimpleCoords.size-1;
+  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
   theMon.MakeConst(theRingUnit, *theMod.theAlgebra);
 
   this->ClearTheObjects();
@@ -3323,8 +3323,8 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
   theGenerator.MakeOneGenerator
   (indexGenerator, theRingUnit, *theOwner[0].theAlgebra)
   ;
-//  PolynomialOutputFormat tempFormat;
-//  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  PolynomialOutputFormat tempFormat;
+  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i<this->size; i++)
   { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
     accumMon.theMons.SetSize(0);
@@ -3333,7 +3333,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
     { tempElt.Nullify(theOwner);
       tempElt+=currentMon.theMons[j];
 //      std::cout << "<hr> Acting by " << theGenerator.ElementToString(true, theGlobalVariables, tempFormat)
-//      << " on " << tempElt.ElementToString(theGlobalVariables);
+//      << " on " << tempElt.ElementToString(theGlobalVariables) << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
 //      std::cout << "<br> result: " << tempElt.ElementToString(theGlobalVariables);
       for (int k=0; k<tempElt.size; k++)

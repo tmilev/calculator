@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -189,9 +189,9 @@ int main(int argc, char **argv)
 //  civilizedInput="(h_1-x_2) v((0,1),(0,0))";
 
 //  civilizedInput=" g_{-1} (  v((1),(0))* v((1),(1)) )";
-//  civilizedInput="h_1 (1,1)";
-//  theParser.DefaultWeylLetter='G';
-//  theParser.DefaultWeylRank=2;
+  civilizedInput="g_1 v((1,0),(0,0))";
+  theParser.DefaultWeylLetter='G';
+  theParser.DefaultWeylRank=2;
 //  civilizedInput="g_1 v((0,0,1), (1,0,0))";
 //  civilizedInput="v((0,x_1,1),(1,0,0))";
 //  civilizedInput="allLittelmannPaths(0,1)";

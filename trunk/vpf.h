@@ -117,6 +117,8 @@ template <class Object>
 class Matrix;
 template <class Object>
 class ListPointers;
+template <class Object, int hashFunction(const Object&)>
+class HashedListB;
 template <class Object>
 class HashedList;
 class PrecomputedTauknPointers;
@@ -165,6 +167,9 @@ template<class CoefficientType>
 class ElementSumGeneralizedVermas;
 template <class CoefficientType>
 class ModuleSSalgebraNew;
+class CommandList;
+class Command;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //The documentation of pthreads.h can be found at:
@@ -407,6 +412,18 @@ public:
     result.append("(");
     result.append(input.ElementToString(theFormat));
     result.append(")");
+    return result;
+  }
+  inline static int IntIdentity(const int& input)
+  { return input;
+  }
+  static int hashString(const std::string& x)
+  { int numCycles=x.size();
+    if (numCycles>SomeRandomPrimesSize)
+      numCycles=SomeRandomPrimesSize;
+    int result=0;
+    for (int i=0; i<numCycles; i++)
+      result+=x[i]*SomeRandomPrimes[i];
     return result;
   }
 };
@@ -780,6 +797,9 @@ public:
       result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
     return result;
   }
+  static inline int HashFunction(const List<Object>& input)
+  { return input.HashFunction();
+  }
   void operator=(const List<Object>& right){ this->CopyFromBase(right); }
   static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
@@ -841,17 +861,38 @@ public:
   void QuickSortAscending();
 };
 
-template <class Object>
-class HashedList : public List<Object>
+class intRoot :public List<int>
+{
+private:
+public:
+  void AssignRoot(root& r);
+  int HashFunction() const;
+  static int HashFunction(const intRoot& input){return input.HashFunction();}
+  void ElementToString(std::string& output);
+  bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
+  bool IsGEQNoWeight(intRoot& r);
+  void MakeZero(int  theDimension);
+  void MultiplyByInteger(int x)
+  { for (int i=0; i<this->size; i++)
+      this->TheObjects[i]*=x;
+  }
+  void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
+  void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
+  //remark: zero is considered to be a positive vector!
+  bool IsPositive();
+  void AddRoot(intRoot& theRoot);
+  intRoot(){}
+};
+
+template <class Object, int hashFunction(const Object&)>
+class HashedListB: public List<Object>
 {
 private:
   void AddObjectOnBottom(const Object& o);
-  void AddOnTop(const Object& o);
   void AddListOnTop(List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
-  void PopIndexSwapWithLast(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
   void CopyFromBase(const List<Object>& From);
   void SwapTwoIndices(int index1, int index2);
@@ -864,7 +905,16 @@ private:
   void ShiftUpExpandOnTop(int StartingIndex);
   void PopLastObject();
 protected:
-  void ClearHashes();
+  void ClearHashes()
+  { if (this->size<this->HashSize)
+      for (int i=0; i<this->size; i++)
+      { int hashIndex=this->GetHash(this->TheObjects[i]);
+        this->TheHashedArrays[hashIndex].size=0;
+      }
+    else
+      for (int i=0; i<this->HashSize; i++)
+        this->TheHashedArrays[i].size=0;
+  }
   List<int>* TheHashedArrays;
 public:
   inline static std::string GetXMLClassName()
@@ -874,16 +924,38 @@ public:
   }
   static int PreferredHashSize;
   int HashSize;
-  void initHash();
-  inline int FitHashSize( int i){i%=this->HashSize; if (i<0) i+=this->HashSize; return i; }
-  void ClearTheObjects();
-  void AddOnTopHash(const Object& o);
-  void AddOnTopHash(const List<Object>& theList)
+  void initHash()
+  { this->size=0;
+    for (int i=0; i<this->HashSize; i++)
+      this->TheHashedArrays[i].size=0;
+  }
+  inline int GetHash(const Object& input)const
+  { int result=hashFunction(input);
+    result%=this->HashSize;
+    if (result<0)
+      result+=this->HashSize;
+    return result;
+  }
+  void Clear()
+  { this->ClearHashes();
+    this->size=0;
+  }
+  void AddOnTop(const Object& o)
+  { int hashIndex =this->GetHash(o);
+    this->TheHashedArrays[hashIndex].AddOnTop(this->size);
+    this->::List<Object>::AddOnTop(o);
+  }
+  void AddOnTop(const List<Object>& theList)
   { this->Reserve(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
-      this->AddOnTopHash(theList[i]);
+      this->AddOnTop(theList[i]);
   }
-  bool AddOnTopNoRepetitionHash(const Object& o);
+  bool AddNoRepetition(const Object& o)
+  { if (this->GetIndex(o)!=-1)
+      return false;
+    this->AddOnTop(o);
+    return true;
+  }
   inline void AdjustHashes()
   { if (this->size/this->HashSize<5)
       return;
@@ -892,31 +964,108 @@ public:
 //    static int counter=0;
 //    std::cout << "<br> Num times adjust hashes is called: " << ++counter;
   }
-  void AddOnTopNoRepetitionHash(const List<Object>& theList);
-  void PopIndexSwapWithLastHash(int index);
-  //the below returns -1 if it doesn't contain the object,
-  //else returns the object's index
-  void SwapTwoIndicesHash(int i1, int i2);
-  inline bool ContainsObjectHash(const Object& o) {return this->IndexOfObjectHash(o)!=-1; }
-  int IndexOfObjectHash(const Object& o) const;
+  void AddNoRepetition(const List<Object>& theList)
+  { this->SetExpectedSize(this->size+theList.size);
+    for (int i=0; i<theList.size; i++)
+      this->AddNoRepetition(theList.TheObjects[i]);
+  }
+  void PopIndexSwapWithLast(int index)
+  { Object* oPop= &this->TheObjects[index];
+    int hashIndexPop = this->GetHash(*oPop);
+    this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
+    if (index==this->size-1)
+    { this->size--;
+      return;
+    }
+    int tempI=this->size-1;
+    Object* oTop= &this->TheObjects[tempI];
+    int hashIndexTop=this->GetHash(*oTop);
+    this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
+    this->TheHashedArrays[hashIndexTop].AddOnTop(index);
+    this->List<Object>::PopIndexSwapWithLast(index);
+  }
+  void SwapTwoIndicesHash(int i1, int i2)
+  { Object tempO;
+    int i1Hash = this->GetHash(this->TheObjects[i1]);
+    int i2Hash = this->GetHash(this->TheObjects[i2]);
+    this->TheHashedArrays[i1Hash].RemoveFirstOccurenceSwapWithLast(i1);
+    this->TheHashedArrays[i2Hash].RemoveFirstOccurenceSwapWithLast(i2);
+    tempO= this->TheObjects[i1];
+    this->TheObjects[i1]=this->TheObjects[i2];
+    this->TheObjects[i2]=tempO;
+    this->TheHashedArrays[i1Hash].AddOnTop(i2);
+    this->TheHashedArrays[i2Hash].AddOnTop(i1);
+  }
+
+  inline bool Contains(const Object& o) {return this->GetIndex(o)!=-1; }
+  int GetIndex(const Object& o) const
+  { int hashIndex = this->GetHash(o);
+    for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
+    { int j=this->TheHashedArrays[hashIndex].TheObjects[i];
+      if(this->TheObjects[j]==o)
+        return j;
+    }
+    return -1;
+  }
+  inline int GetIndexIMustContainTheObject(const Object& o) const
+  { int result=this->GetIndex(o);
+    assert(result!=-1);
+    return result;
+  }
   void SetExpectedSize(int expectedSize)
   { if (expectedSize<1)
       return;
     this->Reserve(expectedSize);
     this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*5));
   }
-  void SetHashSizE(int HS);
-  int SizeWithoutObjects();
+  void SetHashSizE(int HS)
+  { if (HS==this->HashSize)
+      return;
+    delete [] this->TheHashedArrays;
+#ifdef CGIversionLimitRAMuse
+  ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
+    ParallelComputing::CheckPointerCounters();
+#endif
+  this->TheHashedArrays= new List<int>[HS];
+  this->HashSize=HS;
+  if (this->size>0)
+    for (int i=0; i<this->size; i++)
+    { int theIndex=this->GetHash(this->TheObjects[i]);
+      this->TheHashedArrays[theIndex].AddOnTop(i);
+    }
+  }
+  int SizeWithoutObjects()
+  { int Accum=0;
+    Accum+=this->List<Object>::SizeWithoutObjects();
+    Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
+    Accum+=sizeof(this->HashSize);
+    for (int i=0; i<this->HashSize; i++)
+      Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
+    return Accum;
+  }
   void AssignList(const List<Object>& other)
-  { this->ClearTheObjects();
+  { this->Clear();
     this->Reserve(other.size);
     for (int i=0; i<other.size; i++)
-      this->AddOnTopHash(other.TheObjects[i]);
+      this->AddOnTop(other.TheObjects[i]);
   }
   void QuickSortAscending(){ List<Object> theList; theList=*this; theList.QuickSortAscending(); this->AssignList(theList);}
   void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->AssignList(theList);}
-  HashedList();
-  ~HashedList();
+  HashedListB()
+  { this->HashSize=0;
+    this->TheHashedArrays=0;
+    this->SetHashSizE(HashedListB<Object, hashFunction>::PreferredHashSize);
+    this->initHash();
+  }
+  ~HashedListB()
+  { delete [] this->TheHashedArrays;
+  #ifdef CGIversionLimitRAMuse
+  ParallelComputing::GlobalPointerCounter-=this->HashSize;
+    ParallelComputing::CheckPointerCounters();
+  #endif
+    this->HashSize=0;
+    this->TheHashedArrays=0;
+  }
   std::string ElementToString()const
   { std::stringstream out;
     out << this->size << " hashed objects:";
@@ -927,9 +1076,29 @@ public:
     }
     return out.str();
   }
-  void CopyFromHash(const HashedList<Object>& From);
-  inline void operator=(const HashedList<Object>& From){this->CopyFromHash(From);}
+  void CopyFromHash(const HashedListB<Object, hashFunction>& From)
+  { if (&From==this)
+      return;
+    this->ClearHashes();
+    this->SetHashSizE(From.HashSize);
+    this->::List<Object>::CopyFromBase(From);
+    if (this->size<this->HashSize)
+      for (int i=0; i<this->size; i++)
+      { int hashIndex=this->GetHash(this->TheObjects[i]);
+        this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
+      }
+    else
+      for (int i=0; i<this->HashSize; i++)
+        this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
+  }
+  inline void operator=(const HashedListB<Object, hashFunction>& From)
+  { this->CopyFromHash(From);
+  }
 };
+
+template <class Object>
+class HashedList : public HashedListB<Object, Object::HashFunction>
+{};
 
 class Integer
 {
@@ -1570,6 +1739,9 @@ public:
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
   int HashFunction() const;
+  static inline int HashFunction(const Selection& input)
+  { return input.HashFunction();
+  }
   std::string DebugString;
   void ComputeDebugString();
   std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
@@ -2533,6 +2705,9 @@ ParallelComputing::GlobalPointerCounter++;
       return this->NumShort*SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1];
     return this->Extended->num.HashFunction()*SomeRandomPrimes[0]+this->Extended->den.HashFunction()*SomeRandomPrimes[1];
   }
+  static inline int HashFunction(const Rational& input)
+  { return input.HashFunction();
+  }
   inline void ComputeDebugString(){}
   //void MultiplyByLargeRational(int num, int den);
   void MultiplyByInt(int x);
@@ -2733,6 +2908,120 @@ ParallelComputing::GlobalPointerCounter++;
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
 };
 
+class Qsqrt2
+{
+public:
+  Rational a;
+  Rational b;
+  friend std::iostream& operator<< (std::iostream& output, const Qsqrt2& theElt)
+  { output << theElt.ElementToString();
+    return output;
+  }
+  void operator =(const Qsqrt2& other)
+  { this->a=other.a;
+    this->b=other.b;
+  }
+  void operator =(int x)
+  { this->a=x;
+    this->b.MakeZero();
+  }
+  Qsqrt2(const Qsqrt2& other)
+  { this->operator=(other);
+  }
+  Qsqrt2()
+  { this->a.MakeZero();
+    this->b.MakeZero();
+  }
+  void MakeAplusSqrt2B(int theA, int theB){ this->a=theA; this->b=theB;}
+  Qsqrt2(int x)
+  { this->operator=(x);
+  }
+  bool IsEqualToZero()const
+  { return this->a.IsEqualToZero() && this->b.IsEqualToZero();
+  }
+  void Assign(const Qsqrt2& other)
+  { this->operator=(other);
+  }
+  void ElementToString(std::string& output)
+  { output=this->ElementToString();
+  }
+  std::string ElementToString()const
+  { if (this->IsEqualToZero())
+      return "0";
+    std::stringstream out;
+    if (!this->a.IsEqualToZero())
+    { out << this->a.ElementToString();
+      if (this->b.IsPositive())
+        out << "+";
+    }
+    if (this->b.IsEqualToZero())
+      return out.str();
+    else
+    { Rational tempRat=this->b;
+      if (tempRat<0)
+      { out << "-";
+        tempRat.Minus();
+      }
+      if (tempRat!=1)
+        out << tempRat.ElementToString();
+      out << "\\sqrt{2}";
+    }
+    return out.str();
+  }
+  void operator+=(const Qsqrt2& other)
+  { this->a+=other.a;
+    this->b+=other.b;
+  }
+  void operator-=(const Qsqrt2& other)
+  { this->a-=other.a;
+    this->b-=other.b;
+  }
+  void operator*=(const Qsqrt2& other)
+  { Qsqrt2 result;
+    result.a=this->a*other.a+this->b*other.b*2;
+    result.b=other.b*this->a+this->b*other.a;
+    this->operator=(result);
+  }
+  void operator/=(const Rational& other)
+  { this->a/=other;
+    this->b/=other;
+  }
+  void operator/=(const Qsqrt2& otheR)
+  { Qsqrt2 result, conjugate;
+    conjugate=otheR;
+    conjugate.b.Minus();
+    result.operator=(*this);
+    result*=conjugate;
+    result/=(otheR.a*otheR.a-otheR.b*otheR.b*2);
+    Qsqrt2 old=*this, oldOther=otheR;
+    this->operator=(result);
+    result*=oldOther;
+    result-=old;
+    if (!result.IsEqualToZero())
+    { std::cout << "  start " << old.ElementToString() << "; oldOther: " << otheR.ElementToString();
+      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ElementToString();
+      old/=oldOther;
+    }
+    assert(result.IsEqualToZero());
+  }
+  void Minus()
+  { this->a.Minus();
+    this->b.Minus();
+  }
+  void Invert()
+  { Qsqrt2 result;
+    result=1;
+    result/=*this;
+    this->operator=(result);
+  }
+  void MultiplyBy(const Qsqrt2& other)
+  { this->operator*=(other);
+  }
+  void Subtract(const Qsqrt2& other)
+  { this->operator-=(other);
+  }
+};
+
 template<class CoefficientType>
 Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right)
 { Vector<CoefficientType> result;
@@ -2746,12 +3035,7 @@ Vector<CoefficientType> operator-(const Vector<CoefficientType>& left, const Vec
 
 template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
-{
-//To M$: that YOU can't inline template functions is YOUR compiler's problem, not a problem of
-//my code!!!!!
-//#pragma warning(disable:4396)
-  friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
-//#pragma warning(default:4396)
+{ friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& left, const Vector<CoefficientType>& right);
 public:
   std::string DebugString;
   void ComputeDebugString(){this->ElementToString(this->DebugString);}
@@ -2808,6 +3092,8 @@ public:
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
   }
+  inline static int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
+
   int HashFunction() const
   { int result=0;
     int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
@@ -3356,6 +3642,10 @@ public:
     }
     return false;
   }
+  inline static int HashFunction(const root& input){return input.::Vector<Rational>::HashFunction();}
+  int HashFunction()const
+  { return this->::Vector<Rational>::HashFunction();
+  }
 };
 
 inline root operator-(const root& right)
@@ -3412,6 +3702,12 @@ public:
   }
   void AddRootSnoRepetition(roots& r);
   bool AddRootNoRepetition(root& r);
+  inline int HashFunction()const
+  { return this->List<root>::HashFunction();
+  }
+  static inline int HashFunction(const roots& input)
+  { return input.List<root>::HashFunction(input);
+  }
   bool ElementsHaveNonNegativeScalarProduct(const root& theRoot)const;
   bool ElementsHavePositiveScalarProduct(const root& theRoot)const;
   bool ElementsHaveNonPositiveScalarProduct(const root& theRoot)const;
@@ -3599,6 +3895,9 @@ public:
   //void InduceFromFacet(Facet& input);
   //the below returns false if the projection is not of full dimension
   int HashFunction()const;
+  static inline int HashFunction(const affineHyperplane& input)
+  { return input.HashFunction();
+  }
 //  bool ProjectFromFacet(Facet& input);
   bool ProjectFromFacetNormal(root& input);
   bool ContainsPoint(root& thePoint);
@@ -3622,6 +3921,7 @@ class affineCone
 public:
   affineHyperplanes theWalls;
   int HashFunction() const;
+  inline static int HashFunction(const affineCone& input){return input.HashFunction();}
   inline int GetDimension();
   void SuperimposeAffineCones(affineCones& theOtherComplex);
   void ProjectFromCombinatorialChamber(CombinatorialChamber& input);
@@ -4108,172 +4408,6 @@ void List<Object>::AddOnTop(const Object& o)
 }
 
 template <class Object>
-void HashedList<Object>::SwapTwoIndicesHash(int i1, int i2)
-{ Object tempO;
-  int i1Hash = this->TheObjects[i1].HashFunction();
-  int i2Hash = this->TheObjects[i2].HashFunction();
-  this->FitHashSize(i1Hash); this->FitHashSize(i2Hash);
-  this->TheHashedArrays[i1Hash].RemoveFirstOccurenceSwapWithLast(i1);
-  this->TheHashedArrays[i2Hash].RemoveFirstOccurenceSwapWithLast(i2);
-  tempO= this->TheObjects[i1];
-  this->TheObjects[i1]=this->TheObjects[i2];
-  this->TheObjects[i2]=tempO;
-  this->TheHashedArrays[i1Hash].AddOnTop(i2);
-  this->TheHashedArrays[i2Hash].AddOnTop(i1);
-}
-
-template <class Object>
-int HashedList<Object>::SizeWithoutObjects()
-{ int Accum=0;
-  Accum+=this->List<Object>::SizeWithoutObjects();
-  Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
-  Accum+=sizeof(this->HashSize);
-  for (int i=0; i<this->HashSize; i++)
-    Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
-  return Accum;
-}
-
-template <class Object>
-void HashedList<Object>::CopyFromHash(const HashedList<Object>& From)
-{ if (&From==this){return; }
-  this->ClearHashes();
-  this->SetHashSizE(From.HashSize);
-  this->::List<Object>::CopyFromBase(From);
-  if (this->size<this->HashSize)
-    for (int i=0; i<this->size; i++)
-    { int hashIndex= this->TheObjects[i].HashFunction()% this->HashSize;
-      if (hashIndex<0)
-        hashIndex+=this->HashSize;
-      this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
-    }
-  else
-    for (int i=0; i<this->HashSize; i++)
-      this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
-}
-
-template <class Object>
-void HashedList<Object>::ClearHashes()
-{ if (this->size<this->HashSize)
-    for (int i=0; i<this->size; i++)
-    { int hashIndex=this->TheObjects[i].HashFunction()%this->HashSize;
-      if (hashIndex<0)
-        hashIndex+=this->HashSize;
-      this->TheHashedArrays[hashIndex].size=0;
-    }
-  else
-    for (int i=0; i<this->HashSize; i++)
-      this->TheHashedArrays[i].size=0;
-}
-
-template <class Object>
-void HashedList<Object>::ClearTheObjects()
-{ this->ClearHashes();
-  this->size=0;
-}
-
-template <class Object>
-void HashedList<Object>::initHash()
-{ this->size=0;
-  for (int i=0; i<this->HashSize; i++)
-    this->TheHashedArrays[i].size=0;
-}
-
-template <class Object>
-int HashedList<Object>::IndexOfObjectHash(const Object& o)const
-{ int hashIndex = o.HashFunction()%this->HashSize;
-  if (hashIndex<0)
-    hashIndex+=this->HashSize;
-  for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
-  { int j=this->TheHashedArrays[hashIndex].TheObjects[i];
-    if(this->TheObjects[j]==o)
-      return j;
-  }
-  return -1;
-}
-
-template <class Object>
-void HashedList<Object>::AddOnTopHash(const Object& o)
-{ int hashIndex = o.HashFunction()% this->HashSize;
-  if (hashIndex<0)
-    hashIndex+=this->HashSize;
-  this->TheHashedArrays[hashIndex].AddOnTop(this->size);
-  this->::List<Object>::AddOnTop(o);
-}
-
-template <class Object>
-void HashedList<Object>::AddOnTopNoRepetitionHash(const List<Object>& theList)
-{ this->Reserve(this->size+theList.size);
-  for (int i=0; i<theList.size; i++)
-    this->AddOnTopNoRepetitionHash(theList.TheObjects[i]);
-}
-
-template <class Object>
-bool HashedList<Object>::AddOnTopNoRepetitionHash(const Object& o)
-{ if (this->IndexOfObjectHash(o)!=-1)
-    return false;
-  this->AddOnTopHash(o);
-  return true;
-}
-
-template <class Object>
-void HashedList<Object>::PopIndexSwapWithLastHash(int index)
-{ Object* oPop= &this->TheObjects[index];
-  int hashIndexPop = oPop->HashFunction()% this->HashSize;
-  if (hashIndexPop<0)
-    hashIndexPop+=this->HashSize;
-  this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
-  if (index==this->size-1)
-  { this->size--;
-    return;
-  }
-  int tempI=this->size-1;
-  Object* oTop= &this->TheObjects[tempI];
-  int hashIndexTop= oTop->HashFunction()% this->HashSize;
-  if (hashIndexTop<0)
-    hashIndexTop+=this->HashSize;
-  this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
-  this->TheHashedArrays[hashIndexTop].AddOnTop(index);
-  this->List<Object>::PopIndexSwapWithLast(index);
-}
-
-template <class Object>
-void HashedList<Object>::SetHashSizE(int HS)
-{ if (HS!=this->HashSize)
-  { delete [] this->TheHashedArrays;
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
-  ParallelComputing::CheckPointerCounters();
-#endif
-    this->TheHashedArrays= new  List<int>[HS];
-    this->HashSize=HS;
-    if (this->size>0)
-      for (int i=0; i<this->size; i++)
-      { int theIndex=this->FitHashSize(this->TheObjects[i].HashFunction());
-        this->TheHashedArrays[theIndex].AddOnTop(i);
-      }
-  }
-}
-
-template <class Object>
-HashedList<Object>::HashedList()
-{ this->HashSize=0;
-  this->TheHashedArrays=0;
-  this->SetHashSizE(HashedList<Object>::PreferredHashSize);
-  this->initHash();
-}
-
-template <class Object>
-HashedList<Object>::~HashedList()
-{ delete [] this->TheHashedArrays;
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter-=this->HashSize;
-  ParallelComputing::CheckPointerCounters();
-#endif
-  this->HashSize=0;
-  this->TheHashedArrays=0;
-}
-
-template <class Object>
 class ListPointersKillOnExit: public ListPointers<Object>
 {
 public:
@@ -4656,6 +4790,9 @@ public:
   static bool InitWithZero;
   Element Coefficient;
   int HashFunction() const;
+  static inline int HashFunction(const Monomial<Element>& input)
+  { return input.HashFunction();
+  }
 //  int DegreesToIndex(int MaxDeg);
   std::string DebugString;
   bool ComputeDebugString(PolynomialOutputFormat& PolyFormat);
@@ -5110,28 +5247,6 @@ inline bool PolynomialLight<Element>::IsEqualToZero()
 { return this->size==0;
 }
 
-class intRoot :public List<int>
-{
-private:
-public:
-  void AssignRoot(root& r);
-  int HashFunction() const;
-  void ElementToString(std::string& output);
-  bool IsHigherThanWRTWeight(intRoot& r, intRoot& theWeights);
-  bool IsGEQNoWeight(intRoot& r);
-  void MakeZero(int  theDimension);
-  void MultiplyByInteger(int x)
-  { for (int i=0; i<this->size; i++)
-      this->TheObjects[i]*=x;
-  }
-  void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
-  void initFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12);
-  //remark: zero is considered to be a positive vector!
-  bool IsPositive();
-  void AddRoot(intRoot& theRoot);
-  intRoot(){}
-};
-
 class GeneratorPFAlgebraRecord
 {
 private:
@@ -5152,7 +5267,12 @@ public:
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   void GetValue(Polynomial<LargeInt>& output, int theDimension);
   void operator=(const GeneratorPFAlgebraRecord& right);
-  int HashFunction()const{ return this->Elongation+ this->GeneratorRoot.HashFunction();}
+  int HashFunction()const
+  { return this->Elongation+ this->GeneratorRoot.HashFunction();
+  }
+  static inline int HashFunction(const GeneratorPFAlgebraRecord&input)
+  { return input.HashFunction();
+  }
   bool operator==(const GeneratorPFAlgebraRecord& right){ return (this->GeneratorRoot == right.GeneratorRoot) && (this->Elongation == right.Elongation);}
 };
 
@@ -5168,6 +5288,9 @@ public:
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat, int theDimension)const;
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat)const;
   int HashFunction() const;
+  static inline int HashFunction(const GeneratorsPartialFractionAlgebra& input)
+  { return input.HashFunction();
+  }
   void operator=(const GeneratorsPartialFractionAlgebra& right);
   void ConvertToIntegerPoly(Polynomial<LargeInt>& output, int theDimension);
   //IMPORTANT two generators are declared to be equal if the generator indices coincide. The power doesn't count.
@@ -5194,6 +5317,9 @@ public:
   void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat);
   void StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat);
   int HashFunction()const;
+  static inline int HashFunction(const MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>&input)
+  { return input.HashFunction();
+  }
   void MakeConstantMonomial(int Nvar, const Element& coeff);
   void MultiplyBy(MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m, MonomialInCommutativeAlgebra<  Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& output);
   void MultiplyBy(MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>& m);
@@ -5273,7 +5399,7 @@ public:
 
 template<class Element, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 void MonomialInCommutativeAlgebra<  Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MakeConstantMonomial(int Nvar, const Element& coeff)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->Coefficient.Assign(coeff);
 }
 
@@ -5287,13 +5413,13 @@ void MonomialInCommutativeAlgebra<  Element, GeneratorsOfAlgebra, GeneratorsOfAl
 
 template <class Element, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebra& g)
-{ int x = this->IndexOfObjectHash(g);
+{ int x = this->GetIndex(g);
   if (x==-1)
-    this->AddOnTopHash(g);
+    this->AddOnTop(g);
   else
   { this->TheObjects[x].GeneratorPower+=g.GeneratorPower;
     if (this->TheObjects[x].GeneratorPower==0)
-    { this->PopIndexSwapWithLastHash(x);
+    { this->PopIndexSwapWithLast(x);
       return 0;
     }
   }
@@ -5311,9 +5437,9 @@ int MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgeb
 template <class Element, class GeneratorsOfAlgebra, class GeneratorsOfAlgebraRecord>
 int MonomialInCommutativeAlgebra<Element, GeneratorsOfAlgebra, GeneratorsOfAlgebraRecord>::MultiplyByGenerator(GeneratorsOfAlgebraRecord& g, int Power)
 { GeneratorsPartialFractionAlgebra tempG;
-  tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.IndexOfObjectHash(g);
+  tempG.GeneratorIndex=GeneratorsOfAlgebra::theGenerators.GetIndex(g);
   if (tempG.GeneratorIndex==-1)
-  { GeneratorsOfAlgebra::theGenerators.AddOnTopHash(g);
+  { GeneratorsOfAlgebra::theGenerators.AddOnTop(g);
     tempG.GeneratorIndex= GeneratorsOfAlgebra::theGenerators.size-1;
   }
   tempG.GeneratorPower=Power;
@@ -5597,8 +5723,6 @@ public:
   int NumVars;
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
-  std::string DebugString;
-  void ComputeDebugString(){ this->DebugString=this->ElementToString();}
   std::string ElementToString()const {return this->ElementToString(true, false);}
   std::string ElementToString(bool useLatex, bool breakLinesLatex)const;
   bool ElementToStringNeedsBracketsForMultiplication()const
@@ -5636,6 +5760,22 @@ public:
     this->NumVars=other.NumVars;
     this->Numerator.GetElement()=other;
     this->ReduceMemory();
+  }
+  inline int HashFunction()const
+  { switch(this->expressionType)
+    { case RationalFunction::typeRational:
+        return this->ratValue.HashFunction();
+      case RationalFunction::typePoly:
+        return this->Numerator.GetElementConst().HashFunction();
+      case RationalFunction::typeRationalFunction:
+        return this->Numerator.GetElementConst().HashFunction()*SomeRandomPrimes[0]+
+        this->Denominator.GetElementConst().HashFunction()*SomeRandomPrimes[1];
+      default:
+        return -1;
+    }
+  }
+  static inline int HashFunction(const RationalFunction& input)
+  { return input.HashFunction();
   }
   inline void operator=(const RationalFunction& other){this->Assign(other);}
   void Assign(const RationalFunction& other)
@@ -6302,7 +6442,7 @@ template <class Element>
 void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRingZero)
 { Monomial<Element> tempM;
   tempM.MakeConstantMonomial(this->NumVars, theRingZero);
-  int i=this->IndexOfObjectHash(tempM);
+  int i=this->GetIndex(tempM);
   if (i==-1)
     output=theRingZero;
   else
@@ -6313,7 +6453,7 @@ template <class Element>
 void Polynomial<Element>::GetCoeffInFrontOfLinearTermVariableIndex(int index, Element& output, const Element& theRingZero)
 { Monomial<Element> tempM;
   tempM.MakeNVarFirstDegree(index, this->NumVars, theRingZero);
-  int i=this->IndexOfObjectHash(tempM);
+  int i=this->GetIndex(tempM);
   if (i==-1)
     output=theRingZero;
   else
@@ -6451,7 +6591,7 @@ void Polynomial<Element>::Evaluate
 
 template <class Element>
 void Polynomial<Element>::DecreaseNumVariables(int increment, Polynomial<Element>& output)
-{ output.ClearTheObjects();
+{ output.Clear();
   Monomial<Element> tempM;
   for (int i=0; i<this->size; i++)
   { tempM.CopyFrom(this->TheObjects[i]);
@@ -6466,7 +6606,7 @@ inline void TemplatePolynomial<TemplateMonomial, Element>::MultiplyBy
  TemplatePolynomial<TemplateMonomial, Element>& output,
  TemplatePolynomial<TemplateMonomial, Element>& bufferPoly, TemplateMonomial& bufferMon)const
 { if (p.size==0)
-  { output.ClearTheObjects();
+  { output.Clear();
     return;
   }
   int maxNumMonsFinal=this->size*p.size;
@@ -6496,7 +6636,7 @@ void TemplatePolynomial<TemplateMonomial, Element>::MultiplyBy(const TemplatePol
 template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::MakeNVarConst(int nVar, const Element& coeff)
 { TemplateMonomial tempM;
-  this->ClearTheObjects();
+  this->Clear();
   this->NumVars=nVar;
   tempM.MakeConstantMonomial(nVar, coeff);
   this->AddMonomial(tempM);
@@ -6548,16 +6688,16 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const root& r)
 
 template <class Element>
 void Polynomial<Element>::MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const Element& Coeff)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->NumVars= NumVars;
   Monomial<Element> tempM;
   tempM.MakeMonomialOneLetter(NumVars, LetterIndex, Power, Coeff);
-  this->AddOnTopHash(tempM);
+  this->AddOnTop(tempM);
 }
 
 template <class TemplateMonomial, class Element>
 inline int TemplatePolynomial<TemplateMonomial, Element>::HasSameExponentMonomial(TemplateMonomial& m)
-{ return this->IndexOfObjectHash(m);
+{ return this->GetIndex(m);
 }
 
 template <class TemplateMonomial, class Element>
@@ -6681,7 +6821,7 @@ int TemplatePolynomial<TemplateMonomial, Element>::StringPrintOutAppend(std::str
 template <class Element>
 void Polynomial<Element>::TimesConstant(const Element& r)
 { if(r.IsEqualToZero())
-    this->ClearTheObjects();
+    this->Clear();
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].Coefficient.MultiplyBy(r);
 }
@@ -6734,7 +6874,7 @@ bool Polynomial<Element>::IsProportionalTo(const Polynomial<Element>& other, Ele
     return true;
   }
   Monomial<Element>& firstMon= this->TheObjects[0];
-  int indexInOther=other.IndexOfObjectHash(firstMon);
+  int indexInOther=other.GetIndex(firstMon);
   if (indexInOther==-1)
     return false;
   TimesMeEqualsOther=other.TheObjects[indexInOther].Coefficient;
@@ -6824,15 +6964,15 @@ template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::SubtractMonomial(const TemplateMonomial& m)
 { if (m.Coefficient.IsEqualToZero())
     return;
-  int j= this->IndexOfObjectHash(m);
+  int j= this->GetIndex(m);
   if (j==-1)
   { if (!m.IsEqualToZero())
-      this->AddOnTopHash(m);
+      this->AddOnTop(m);
     this->LastObject()->Coefficient*=-1;
   } else
   { this->TheObjects[j].Coefficient-=m.Coefficient;
     if (this->TheObjects[j].IsEqualToZero())
-      this->PopIndexSwapWithLastHash(j);
+      this->PopIndexSwapWithLast(j);
   }
 }
 
@@ -6840,14 +6980,14 @@ template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::AddMonomial(const TemplateMonomial& m)
 { if (m.Coefficient.IsEqualToZero())
     return;
-  int j= this->IndexOfObjectHash(m);
+  int j= this->GetIndex(m);
   if (j==-1)
   { if (!m.IsEqualToZero())
-      this->AddOnTopHash(m);
+      this->AddOnTop(m);
   } else
   { this->TheObjects[j].Coefficient+=m.Coefficient;
     if (this->TheObjects[j].IsEqualToZero())
-      this->PopIndexSwapWithLastHash(j);
+      this->PopIndexSwapWithLast(j);
   }
 }
 
@@ -6859,13 +6999,13 @@ void TemplatePolynomial<TemplateMonomial, Element>::MultiplyByMonomial(TemplateM
 template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::MultiplyByMonomial(TemplateMonomial& m, TemplatePolynomial<TemplateMonomial, Element>& output)
 { if (m.IsEqualToZero())
-  { output.ClearTheObjects();
+  { output.Clear();
     return;
   }
   TemplateMonomial tempM;
   TemplatePolynomial<TemplateMonomial, Element> Accum;
   Accum.Reserve(this->size);
-  Accum.ClearTheObjects();
+  Accum.Clear();
   Accum.NumVars= this->NumVars;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].MultiplyBy(m, tempM);
@@ -6899,7 +7039,7 @@ int Polynomial<Element>::TotalDegree()const
 
 template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::Nullify(int NVar)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->NumVars= NVar;
 }
 
@@ -6966,7 +7106,7 @@ void Polynomial<Element>::Substitution(const List<Polynomial<Element> >& TheSubs
   //PolynomialOutputFormat theFormat;
   //std::cout << "into this piece of crap:<br> " << this->ElementToString(theFormat);
   Polynomial<Element> Accum, TempPoly;
-  Accum.ClearTheObjects();
+  Accum.Clear();
   Accum.NumVars=NumVarTarget;
   for(int i=0; i<this->size; i++)
   { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, NumVarTarget, theRingUnit);
@@ -6984,7 +7124,7 @@ void Polynomial<Element>::Substitution(const List<Polynomial<Element> >& TheSubs
 
 template <class Element>
 void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const Element& coeff)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->NumVars=NVar;
   Monomial<Element> tempM;
   tempM.MakeNVarFirstDegree(NonZeroIndex, NVar, coeff);
@@ -6993,7 +7133,7 @@ void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const E
 
 template <class Element>
 void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const Element& coeff1, const Element& coeff2)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->NumVars=NVar;
   Monomial<Element> tempM;
   tempM.MakeNVarFirstDegree(NonZeroIndex1, NVar, coeff1);
@@ -7004,7 +7144,7 @@ void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int No
 
 template <class Element>
 void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const Element& coeff1, const Element& ConstantTerm)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->NumVars =NVar;
   Monomial<Element> tempM;
   tempM.MakeConstantMonomial(NVar, ConstantTerm);
@@ -7164,6 +7304,9 @@ public:
   int NumVars;
   int Den;
   int HashFunction() const;
+  static inline int HashFunction(const BasicQN& input)
+  { return input.HashFunction();
+  }
   void ScaleBy(int DenIncrease);
 //  Selection PivotPoints;
   void ExpToDebugString();
@@ -7502,6 +7645,9 @@ public:
   void init();
   static root GetCheckSumRoot(int NumVars);
   int HashFunction() const;
+  static inline int HashFunction(const oneFracWithMultiplicitiesAndElongations& input)
+  { return input.HashFunction();
+  }
   void ComputeOneCheckSum(Rational& output, intRoot& theExp, int theDimension);
   bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
   void operator=(oneFracWithMultiplicitiesAndElongations& right);
@@ -7852,6 +7998,10 @@ public:
   //owner is passed only in order to read the flags, not used in any other way
   bool AddReturnShouldAttemptReduction(const partFraction& other, const partFractions& owner, GlobalVariables& theGlobalVariables);
   int HashFunction() const;
+  static inline int HashFunction(const partFraction& input)
+  { return input.HashFunction();
+  }
+
   int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
   void init(int numRoots);
   //int Elongate(int indexElongatedFraction, int theElongation);
@@ -7984,6 +8134,9 @@ public:
   root GetInternalPoint(){root result; this->GetInternalPoint(result); return result;}
   int HashFunction()const
   { return this->Vertices.HashFunction();
+  }
+  static inline int HashFunction(const Cone& input)
+  { return input.HashFunction();
   }
   bool ProduceNormalFromTwoNormalsAndSlicingDirection
   (root& SlicingDirection, root& normal1, root& normal2, root& output)
@@ -8156,9 +8309,9 @@ public:
   (Cone& myDyingCone, root& killerNormal, HashedList<root>& outputVertices, GlobalVariables& theGlobalVariables)
   ;
   void init()
-  { this->splittingNormals.ClearTheObjects();
+  { this->splittingNormals.Clear();
     this->slicingDirections.size=0;
-    this->ClearTheObjects();
+    this->Clear();
     this->indexLowestNonRefinedChamber=0;
     this->ConvexHull.Normals.size=0;
     this->ConvexHull.Vertices.size=0;
@@ -8320,6 +8473,9 @@ public:
   ;
   void ComputeDebugString();
   int HashFunction() const;
+  static inline int HashFunction(const ElementWeylGroup& input)
+  { return input.HashFunction();
+  }
   void operator=(const ElementWeylGroup& right);
   bool operator==(const ElementWeylGroup& right);
 };
@@ -8575,7 +8731,7 @@ public:
   void ComputeWeylGroupAndRootsOfBorel(roots& output);
   void ComputeRootsOfBorel(roots& output);
   static Rational GetSizeWeylByFormula(char weylLetter, int theDim);
-  bool IsARoot(const root& input){ return this->RootSystem.ContainsObjectHash(input); }
+  bool IsARoot(const root& input){ return this->RootSystem.Contains(input); }
   void GenerateRootSubsystem(roots& theRoots);
   void GenerateOrbitAlg(root& ChamberIndicator, PolynomialsRationalCoeff& input, PolynomialsRationalCoeffCollection& output, bool RhoAction, bool PositiveWeightsOnly, ConeGlobal* LimitingCone, bool onlyLowerWeights);
   bool GenerateOrbit(roots& theRoots, bool RhoAction, HashedList<root>& output, bool UseMinusRho, int UpperLimitNumElements=0);
@@ -8936,6 +9092,9 @@ public:
     for (int i=0; i<tempI; i++)
       result+= this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
+  }
+  static inline int HashFunction(const coneRelation& input)
+  { return input.HashFunction();
   }
   coneRelation(){this->IndexOwnerRootSubalgebra=-1; }
 };
@@ -9327,7 +9486,7 @@ public:
     result.TimesConstant(other);
     return result;
   }
-  int HashFunction()
+  int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->NonZeroElements.CardinalitySelection);
     int result=0;
     for (int i=0; i< numCycles; i++)
@@ -9335,6 +9494,9 @@ public:
       *(1+this->NonZeroElements.elements[i]);
     result+=this->Hcomponent.HashFunction();
     return result;
+  }
+  static inline int HashFunction(const ElementSimpleLieAlgebra& input)
+  { return input.HashFunction();
   }
   void TimesConstant(const Rational& input);
   bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);}
@@ -9421,6 +9583,10 @@ public:
       result+= this->hCharacteristic.TheObjects[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
+  static inline int HashFunction(const slTwo& input)
+  { return input.HashFunction();
+  }
+
 };
 
 class VectorPartition
@@ -9527,7 +9693,7 @@ public:
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
   int CartanIndexToChevalleyGeneratorIndex(int theIndex){ return this->theWeyl.RootsOfBorel.size+theIndex;}
-  int RootToIndexInUE(const root& input){ return this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.IndexOfObjectHash(input));}
+  int RootToIndexInUE(const root& input){ return this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.GetIndex(input));}
   int DisplayIndexToRootIndex(int theIndex);
   int DisplayIndexToChevalleyGeneratorIndex(int theIndex)
   { if (theIndex<0)
@@ -9747,6 +9913,9 @@ public:
   ;
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
+  static inline int HashFunction(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   void GetDegree(PolynomialRationalCoeff& output)
   { output.Nullify(this->Coefficient.NumVars);
     for (int i=0; i<this->generatorsIndices.size; i++)
@@ -10070,6 +10239,9 @@ public:
 ;
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
+  static inline int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   void GetDegree(PolynomialRationalCoeff& output)
   { output.Nullify(this->Coefficient.NumVars);
     for (int i=0; i<this->generatorsIndices.size; i++)
@@ -11346,6 +11518,9 @@ public:
   int HashFunction()const
   { return this->Waypoints.HashFunction();
   }
+  static inline int HashFunction(const LittelmannPath& input)
+  { return input.HashFunction();
+  }
   bool IsEqualToZero()const
   { return this->Waypoints.size==0;
   }
@@ -11478,6 +11653,9 @@ public:
   inline int HashFunction()const
   { return weightFundamentalCoords.HashFunction();
   }
+  static inline int HashFunction(const MonomialChar<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   inline bool operator==(const MonomialChar<CoefficientType>& other) const
   { return this->weightFundamentalCoords==other.weightFundamentalCoords;
   }
@@ -11491,7 +11669,7 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
   public:
   SemisimpleLieAlgebra* theBoss;
   void Nullify(SemisimpleLieAlgebra* owner)
-  { this->ClearTheObjects();
+  { this->Clear();
     this->theBoss=owner;
   }
   bool IsEqualToZero()
@@ -11555,6 +11733,8 @@ class ModuleSSalgebraNew
 public:
   SemisimpleLieAlgebra* theAlgebra;
   HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
+  roots theGeneratingWordsNonReducedWeights;
+
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
   List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
@@ -11571,7 +11751,7 @@ public:
   Vector<CoefficientType> theHWFundamentalCoordsBaseField;
 
 //  List<List<Matrix<CoefficientType> > >
-  HashedList<root> theGeneratingWordsWeightsSimpleCoords;
+  HashedList<root> theModuleWeightsSimpleCoords;
   charSSAlgMod theCharOverH;
   charSSAlgMod theChaR;
   Selection parabolicSelectionNonSelectedAreElementsLevi;
@@ -11587,6 +11767,7 @@ public:
     this->ComputedGeneratorActions=other.ComputedGeneratorActions;
     this->theAlgebra=other.theAlgebra;
     this->theGeneratingWordsNonReduced= other.theGeneratingWordsNonReduced;
+    this->theGeneratingWordsNonReducedWeights=other.theGeneratingWordsNonReducedWeights;
     this->theGeneratingWordsGrouppedByWeight= other.theGeneratingWordsGrouppedByWeight;
     this->theSimpleGens=other.theSimpleGens;
     this->actionsSimpleGens=other.actionsSimpleGens;
@@ -11599,7 +11780,7 @@ public:
     this->theHWSimpleCoordS=other.theHWSimpleCoordS;
     this->theHWFundamentalCoordS=other.theHWFundamentalCoordS;
     this->theHWFundamentalCoordsBaseField= other.theHWFundamentalCoordsBaseField;
-    this->theGeneratingWordsWeightsSimpleCoords=other.theGeneratingWordsWeightsSimpleCoords;
+    this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
     this->theCharOverH=other.theCharOverH;
     this->theChaR=other.theChaR;
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
@@ -11656,6 +11837,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    )
   ;
   std::string ElementToString()const;
+  std::string ElementToStringHWV()const
+  { return "v(" + this->theHWFundamentalCoordsBaseField.ElementToString() + ","
+    + root(this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() + ")";
+  }
   void SplitOverLevi
   (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
@@ -11692,7 +11877,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
+  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat, bool includeV)const
   ;
   void ElementToString
   (std::string& output, PolynomialOutputFormat& theFormat)const
@@ -11713,6 +11898,9 @@ class MonomialGeneralizedVerma
   }
   int HashFunction()const
   { return this->indexFDVector*SomeRandomPrimes[0]+this->indexInOwner*SomeRandomPrimes[1];
+  }
+  static inline int HashFunction(const MonomialGeneralizedVerma<CoefficientType>& input)
+  { return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
   ;
@@ -11756,7 +11944,7 @@ class ElementSumGeneralizedVermas : public TemplatePolynomial<MonomialGeneralize
   }
   void Nullify
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner)
-  { this->ClearTheObjects();
+  { this->Clear();
     this->owneR=&theOwner;
   }
   std::string ElementToString
@@ -11814,13 +12002,16 @@ public:
     }
     return result;
   }
+  static inline int HashFunction(const MonomialTensorGeneralizedVermas<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   void SetNumVariables
   (int GoalNumVars)
   { this->Coefficient.SetNumVariables(GoalNumVars);
     for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
-  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, bool includeV)
   ;
   MonomialTensorGeneralizedVermas(){}
   void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
@@ -11894,7 +12085,7 @@ public:
   }
   void Nullify
   ()
-  { this->ClearTheObjects();
+  { this->Clear();
   }
   std::string ElementToString
   (GlobalVariables& theGlobalVariables)
@@ -12383,6 +12574,9 @@ public:
   int HashFunction()const
   { return this->GetHashFromString(this->functionName);
   }
+  static inline int HashFunction(const ParserFunction& input)
+  { return input.HashFunction();
+  }
   int GetHashFromString(const std::string& input)const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, (int) input.size());
     int result=0;
@@ -12659,7 +12853,7 @@ public:
 )
   { ParserFunction newFunction;
     bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
-    if (!this->theFunctionList.AddOnTopNoRepetitionHash(newFunction))
+    if (!this->theFunctionList.AddNoRepetition(newFunction))
       return false;
     this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
     this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
@@ -12986,62 +13180,6 @@ public:
   GlobalVariables* Default(){return &this->TheObjects[0]; };
 };
 
-/*class NonExpandedOnTheRightRationalPoly
-{
-public:
-  std::string ElementToString();
-  List<PolynomialRationalCoeff> theRightCoeffs;
-  ListPointers<NonExpandedOnTheRightRationalPoly> theLeftBrackets;
-};*/
-
-class GeneralizedMonomialRational
-{
-  public:
-  PolynomialRationalCoeff Coefficient;
-  List<PolynomialRationalCoeff> degrees;
-  void MakeOne(int NumVars);
-  void Nullify
-  (int numVars)
-  ;
-  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal);
-  void MakeGenericMon
-(int numVars,  int startingIndexFormalExponent)
-  ;
-  bool IsConstant()const
-  { for(int i=0; i<degrees.size; i++)
-      if (!this->degrees.TheObjects[i].IsEqualToZero())
-        return false;
-    return true;
-  }
-  int HashFunction()const
-  { int result=0;
-    int upperBound=MathRoutines::Minimum(degrees.size, SomeRandomPrimesSize);
-    for (int i=0; i<upperBound; i++)
-      for (int j=0; j<degrees.TheObjects[i].size; j++)
-        result+=SomeRandomPrimes[i]*degrees.TheObjects[i].TheObjects[j].HashFunction();
-    return result;
-  }
-  bool IsEqualToZero()const{ return this->Coefficient.IsEqualToZero();}
-  bool operator==(const GeneralizedMonomialRational& other)const{ return this->degrees.operator==(other.degrees); }
-  void operator=(const GeneralizedMonomialRational& other) {this->Coefficient.operator=(other.Coefficient); this->degrees.operator=(other.degrees);}
-};
-
-class GeneralizedPolynomialRational: public HashedList<GeneralizedMonomialRational>
-{
-  public:
-  int NumCoeffVars;
-  int NumMainVars;
-
-  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal);
-  void Nullify
-(int numVarsCoeff, int numberMainVars)
-  ;
-  void MakeGenericMonomial(int numberMainVars, int numVarsCoeff);
-  void MakeConst(int NumVars, const Rational& theCoeff);
-  void MakeConst(int NumVars, const PolynomialRationalCoeff& theCoeff);
-  void operator+=(const GeneralizedMonomialRational& theMon);
-};
-
 class EigenVectorComputation
 {
 public:
@@ -13086,12 +13224,6 @@ public:
   //Note that in the accepted order of monomials, the 1st negative root comes last (i.e. on the right hand side)
   void MakeGenericVermaElement
   (ElementUniversalEnveloping<PolynomialRationalCoeff>& theElt, SemisimpleLieAlgebra& theOwner)
-  ;
-  void WeylElementActsOnGeneralizedMonomial
-  (ElementWeylAlgebra& inputWeylElement, GeneralizedMonomialRational& inputMonomial, GeneralizedPolynomialRational& output)
-  ;
-  void WeylMonomialActsOnGeneralizedMonomial
-  (Monomial<Rational>& inputWeylMon, GeneralizedMonomialRational& inputMonomial, GeneralizedMonomialRational& output)
   ;
   bool AreUnimodular
 (roots& input, Selection& outputBasisUnimodularity, GlobalVariables& theGlobalVariables)
@@ -13444,7 +13576,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::MakeOneGenerator
 //  tempMon.Nullify(theCoeff.NumVars, owner, theContext);
   tempMon.Coefficient=theCoeff;
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, tempMon.Coefficient);
-  this->AddOnTopHash(tempMon);
+  this->AddOnTop(tempMon);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14903,10 +15035,6 @@ void TensorProductElement<ElementLeft, ElementRight, CoefficientType>::ElementTo
 { output.MakeZero(owner.leftSpaceBasis.size*owner.rightSpaceBasis.size, owner.theRingZerO);
   for (int i=0; i<this->internalRepresentation.size; i++)
   { int relevantIndex=owner.GetIndexFromMonomial(this->internalRepresentation.TheObjects[i]);
-    if (TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic)
-    { output.ComputeDebugString();
-      this->internalRepresentation.TheObjects[i].Coefficient.ComputeDebugString();
-    }
     output.TheObjects[relevantIndex]=this->internalRepresentation.TheObjects[i].Coefficient;
   }
 }
@@ -14993,7 +15121,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfEleme
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetitionHash(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
   { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction.TheObjects[i];
@@ -15001,7 +15129,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfEleme
     ElementUniversalEnvelopingOrdered<CoefficientType>& currentElt=theElements.TheObjects[i];
     for (int j=0; j<currentElt.size; j++)
     { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=currentElt.TheObjects[j];
-      currentList.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
+      currentList.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
     }
   }
   outputTheBasis.size=0;
@@ -15036,7 +15164,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::Simplify
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::Nullify(SemisimpleLieAlgebraOrdered& theOwner)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->owner=&theOwner;
 }
 
@@ -15046,7 +15174,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::Simplify
  const CoefficientType& theRingUnit,  const CoefficientType& theRingZero
  )
 { output.Nullify(*this->owner);
-  output.AddOnTopHash(*this);
+  output.AddOnTop(*this);
   this->SimplifyAccumulateInOutputNoOutputInit(output, theContext, theRingUnit, theRingZero);
 }
 
@@ -15054,7 +15182,7 @@ template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::CleanUpZeroCoeff()
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
-    { this->PopIndexSwapWithLastHash(i);
+    { this->PopIndexSwapWithLast(i);
       i--;
     }
 }
@@ -15138,7 +15266,7 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::IsProportionalTo
   if (other.size!=this->size)
     return false;
   MonomialUniversalEnvelopingOrdered<CoefficientType>& theMon= this->TheObjects[0];
-  int theIndex=other.IndexOfObjectHash(theMon);
+  int theIndex=other.GetIndex(theMon);
   if (theIndex==-1)
     return false;
   MonomialUniversalEnvelopingOrdered<CoefficientType>& otherMon= other.TheObjects[theIndex];
@@ -15185,9 +15313,9 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::AddMonomialNoCleanUpZer
   //tempMon=input;
   //tempMon.ComputeDebugString();
   //this->ComputeDebugString();
-  int theIndex= this->IndexOfObjectHash(input);
+  int theIndex= this->GetIndex(input);
   if (theIndex==-1)
-    this->AddOnTopHash(input);
+    this->AddOnTop(input);
   else
     this->TheObjects[theIndex].Coefficient+=input.Coefficient;
 }
@@ -15234,7 +15362,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
           }
         }
     if (reductionOccurred)
-      output.PopIndexSwapWithLastHash(IndexlowestNonSimplified);
+      output.PopIndexSwapWithLast(IndexlowestNonSimplified);
     else
       IndexlowestNonSimplified++;
 //    output.ComputeDebugString();
@@ -15314,14 +15442,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
   //tempLefttElt.ComputeDebugString(*this->owner, false, false);
   root theCoeffs;
   do
-  { if(this->flagAnErrorHasOccurredTimeToPanic)
-    { acquiredCoefficienT.ComputeDebugString();
-      theRightPoweR.ComputeDebugString();
-      theLeftPoweR.ComputeDebugString();
-      adResulT.ComputeDebugString( false, false);
-      tempMon.ComputeDebugString();
-    }
-    this->owner->GetLinearCombinationFrom(adResulT, theCoeffs);
+  { this->owner->GetLinearCombinationFrom(adResulT, theCoeffs);
     for (int i=0; i<theCoeffs.size; i++)
       if (theCoeffs.TheObjects[i]!=0)
       { int theNewGeneratorIndex=i;
@@ -15349,7 +15470,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
         { tempMon.ComputeDebugString();
           this->ComputeDebugString();
         }
-        output.AddOnTopHash(tempMon);
+        output.AddOnTop(tempMon);
       }
     acquiredCoefficienT.MultiplyBy(theLeftPoweR);
     theLeftPoweR-=1;
@@ -15418,7 +15539,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
         tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
         for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
           tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
-        output.AddOnTopHash(tempMon);
+        output.AddOnTop(tempMon);
       }
     acquiredCoefficient.MultiplyBy(theRightPower);
     theRightPower-=1;
@@ -15633,7 +15754,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::AssignElementLieAlgebra
     { tempMon.Coefficient=theRingUnit;
       tempMon.Coefficient*=ElementRootForm.TheObjects[theIndex];
       tempMon.generatorsIndices.TheObjects[0]=theIndex;
-      this->AddOnTopHash(tempMon);
+      this->AddOnTop(tempMon);
     }
 }
 
@@ -15673,13 +15794,13 @@ template<class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
 { if (input.IsEqualToZero())
     return;
-  int theIndex= this->IndexOfObjectHash(input);
+  int theIndex= this->GetIndex(input);
   if (theIndex==-1)
-    this->AddOnTopHash(input);
+    this->AddOnTop(input);
   else
   { this->TheObjects[theIndex].Coefficient+=input.Coefficient;
     if (this->TheObjects[theIndex].Coefficient.IsEqualToZero())
-      this->PopIndexSwapWithLastHash(theIndex);
+      this->PopIndexSwapWithLast(theIndex);
   }
 }
 
@@ -15840,7 +15961,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpan
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetitionHash(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSize(theElements.size);
   PolynomialRationalCoeff ZeroPoly;
   ZeroPoly.Nullify((int)numVars);
@@ -15850,7 +15971,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpan
     ElementUniversalEnvelopingOrdered& currentElt=theElements.TheObjects[i];
     for (int j=0; j<currentElt.size; j++)
     { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=currentElt.TheObjects[j];
-      current.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
+      current.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
     }
   }
 }
@@ -15893,7 +16014,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeConst
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::Nullify(SemisimpleLieAlgebra& theOwner)
-{ this->ClearTheObjects();
+{ this->Clear();
   this->owner=&theOwner;
 }
 
@@ -16076,14 +16197,14 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
   { /*Implementation without the ninja formula:
     tempRat=0;
     root& theRoot=theWeyl.RootSystem.TheObjects[i];
-    int indexOfOpposite=theWeyl.RootSystem.IndexOfObjectHash(-theRoot);
+    int indexOfOpposite=theWeyl.RootSystem.GetIndex(-theRoot);
     root& theOpposite= theWeyl.RootSystem.TheObjects[indexOfOpposite];
     for (int j=0; j<theWeyl.RootSystem.size; j++)
     { root& current=theWeyl.RootSystem.TheObjects[j];
       if (current==theOpposite)
         tempRat+=2;
       else
-      { int indexOfSum=theWeyl.RootSystem.IndexOfObjectHash(current+theRoot);
+      { int indexOfSum=theWeyl.RootSystem.GetIndex(current+theRoot);
         if (indexOfSum!=-1)
           tempRat+=(theOwner.ChevalleyConstants.elements[i][j]*theOwner.ChevalleyConstants.elements[indexOfOpposite][indexOfSum]);
       }
@@ -16178,9 +16299,9 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::AddMonomialNoCleanUpZeroCoeff(const MonomialUniversalEnveloping<CoefficientType>& input)
-{ int theIndex= this->IndexOfObjectHash(input);
+{ int theIndex= this->GetIndex(input);
   if (theIndex==-1)
-    this->AddOnTopHash(input);
+    this->AddOnTop(input);
   else
     this->TheObjects[theIndex].Coefficient+=input.Coefficient;
 }
@@ -16202,13 +16323,13 @@ void ElementUniversalEnveloping<CoefficientType>::AddMonomial
 (const MonomialUniversalEnveloping<CoefficientType>& input)
 { if (input.Coefficient.IsEqualToZero())
     return;
-  int theIndex= this->IndexOfObjectHash(input);
+  int theIndex= this->GetIndex(input);
   if (theIndex==-1)
-    this->AddOnTopHash(input);
+    this->AddOnTop(input);
   else
   { this->TheObjects[theIndex].Coefficient+=input.Coefficient;
     if (this->TheObjects[theIndex].Coefficient.IsEqualToZero())
-      this->PopIndexSwapWithLastHash(theIndex);
+      this->PopIndexSwapWithLast(theIndex);
   }
 }
 
@@ -16216,7 +16337,7 @@ template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::CleanUpZeroCoeff()
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
-    { this->PopIndexSwapWithLastHash(i);
+    { this->PopIndexSwapWithLast(i);
       i--;
     }
 }
@@ -16243,7 +16364,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeOneGenerator
   tempMon.init(theOwner);
   tempMon.Coefficient=theCoeff;
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, tempMon.Coefficient);
-  this->AddOnTopHash(tempMon);
+  this->AddOnTop(tempMon);
 }
 
 template <class CoefficientType>
@@ -16254,7 +16375,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeOneGeneratorCoeffOne
   tempMon.Nullify(numVars, theOwner);
   tempMon.Coefficient.MakeNVarConst((int)numVars, (Rational) 1);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, tempMon.Coefficient);
-  this->AddOnTopHash(tempMon);
+  this->AddOnTop(tempMon);
 }
 
 template <class CoefficientType>
@@ -16301,7 +16422,7 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
     int theGeneratorIndex=theOwner.RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(theIndex);
     tempMon.Coefficient.MakeNVarConst((int)numVars, input.coeffsRootSpaces.TheObjects[theIndex]);
     tempMon.generatorsIndices.TheObjects[0]=theGeneratorIndex;
-    this->AddOnTopHash(tempMon);
+    this->AddOnTop(tempMon);
   }
 }
 
@@ -16344,7 +16465,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetitionHash(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSize(theElements.size);
   PolynomialRationalCoeff ZeroPoly;
   ZeroPoly.Nullify((int)numVars);
@@ -16354,7 +16475,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
     ElementUniversalEnveloping& currentElt=theElements.TheObjects[i];
     for (int j=0; j<currentElt.size; j++)
     { MonomialUniversalEnveloping<CoefficientType>& currentMon=currentElt.TheObjects[j];
-      current.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
+      current.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
     }
   }
 }
@@ -16374,7 +16495,7 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
     { (*tempMon.generatorsIndices.LastObject())=i+numPosRoots;
       tempMon.Powers.LastObject()->MakeNVarConst((int)numVars, 1);
       tempMon.Coefficient.MakeNVarConst((int)numVars, input.TheObjects[i]);
-      this->AddOnTopHash(tempMon);
+      this->AddOnTop(tempMon);
     }
 }
 
@@ -16454,7 +16575,7 @@ void MonomialUniversalEnveloping<CoefficientType>::SimplifyAccumulateInOutputNoO
           }
         }
     if (reductionOccurred)
-      output.PopIndexSwapWithLastHash(IndexlowestNonSimplified);
+      output.PopIndexSwapWithLast(IndexlowestNonSimplified);
     else
       IndexlowestNonSimplified++;
 //    output.ComputeDebugString(theGlobalVariables);
@@ -16521,7 +16642,7 @@ void MonomialUniversalEnveloping<CoefficientType>::Simplify
 (ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
 { output.Nullify(*this->owner);
-  output.AddOnTopHash(*this);
+  output.AddOnTop(*this);
   this->SimplifyAccumulateInOutputNoOutputInit(output, theGlobalVariables, theRingUnit, theRingZero);
 }
 
@@ -16592,7 +16713,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRigh
       for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
       //tempMon.ComputeDebugString();
-      output.AddOnTopHash(tempMon);
+      output.AddOnTop(tempMon);
     } else
     { int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
       int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
@@ -16607,7 +16728,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRigh
           for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
             tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
           //tempMon.ComputeDebugString();
-          output.AddOnTopHash(tempMon);
+          output.AddOnTop(tempMon);
         }
     }
     acquiredCoefficienT.MultiplyBy(theLeftPoweR);
@@ -16670,7 +16791,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeft
       for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
       //tempMon.ComputeDebugString();
-      output.AddOnTopHash(tempMon);
+      output.AddOnTop(tempMon);
     } else
     { int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
       int numPosRoots= this->owner->theWeyl.RootsOfBorel.size;
@@ -16684,7 +16805,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeft
           for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
             tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
           //tempMon.ComputeDebugString();
-          output.AddOnTopHash(tempMon);
+          output.AddOnTop(tempMon);
         }
     }
     acquiredCoefficient.MultiplyBy(theRightPower);
@@ -16853,7 +16974,7 @@ bool ParserNode::GetListDontUseForFunctionArguments
 
 template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, bool includeV)
 { if (this->IsEqualToZero())
     return "0";
   if (this->theMons.size==0)
@@ -16869,8 +16990,11 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
     out << "(" << tempS << ")";
   else
     out << tempS;
-  for (int i=0; i<this->theMons.size; i++)
-    out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat) << ")";
+  if (this->theMons.size>1)
+    for (int i=0; i<this->theMons.size; i++)
+      out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat, includeV) << ")";
+  else
+    out << this->theMons[0].ElementToString(theGlobalVariables, theFormat, includeV);
 //  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
 //  for (int i=0; i<this->theMons.size; i++)
 //    std::cout << this->theMons[i].HashFunction() << ", ";
@@ -16879,10 +17003,8 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
+  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat, bool includeV)const
 { ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
-  root parSel;
-  parSel= theMod.parabolicSelectionNonSelectedAreElementsLevi;
   std::string tempS;
   tempS=this->Coefficient.ElementToString();
   if (tempS=="1")
@@ -16900,8 +17022,8 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
   ElementToString(false, false, theGlobalVariables, theFormat);
   if (tempS!="1")
     out << tempS;
-  out << "v(" << theMod.theHWFundamentalCoordsBaseField.ElementToString() << ","
-    << parSel.ElementToString() << ")";
+  if (includeV)
+    out << theMod.ElementToStringHWV();
 //  std::cout << "<br>Monomial " << out.str() << " has indexInOwner " << this->indexInOwner;
   return out.str();
 }
@@ -16953,13 +17075,34 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
   std::string tempS;
   PolynomialOutputFormat theFormat;
   theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  MonomialTensorGeneralizedVermas<CoefficientType>& firstMon=this->TheObjects[0];
+  bool includeV=false;
+  int indexInOwnerFirst=-1;
+  if (firstMon.theMons.size!=1)
+    includeV=true;
+  else
+    indexInOwnerFirst=firstMon.theMons[0].indexInOwner;
+  for (int i=1; i< this->size; i++)
+  { MonomialTensorGeneralizedVermas<CoefficientType>& curMon=this->TheObjects[i];
+    if (curMon.theMons.size!=1)
+    { includeV=true;
+      break;
+    }
+    if (curMon.theMons[0].indexInOwner!=indexInOwnerFirst)
+    { includeV=true;
+      break;
+    }
+  }
+  if (!includeV)
+    out << "(";
   for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ElementToString(theGlobalVariables, theFormat);
+  { tempS=this->TheObjects[i].ElementToString(theGlobalVariables, theFormat, includeV);
     if (i!=0 && tempS[0]!='-')
       out << "+";
     out << tempS;
   }
-
+  if (!includeV)
+    out << ")" << firstMon.theMons[0].owneR->TheObjects[indexInOwnerFirst].ElementToStringHWV();
 //  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
 //  for (int i=0; i<this->size; i++)
 //  { std::cout << this->TheObjects[i].HashFunction() << ", ";
@@ -17007,10 +17150,10 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
         this->actionsGeneratorS[i][j][k].SetNumVariables(GoalNumVars);
   List<MonomialUniversalEnveloping<CoefficientType> > oldGeneratingWordsNonReduced;
   oldGeneratingWordsNonReduced.CopyFromBase(this->theGeneratingWordsNonReduced);
-  this->theGeneratingWordsNonReduced.ClearTheObjects();
+  this->theGeneratingWordsNonReduced.Clear();
   for (int i=0; i<oldGeneratingWordsNonReduced.size; i++)
   { oldGeneratingWordsNonReduced[i].SetNumVariables(GoalNumVars);
-    this->theGeneratingWordsNonReduced.AddOnTopHash(oldGeneratingWordsNonReduced[i]);
+    this->theGeneratingWordsNonReduced.AddOnTop(oldGeneratingWordsNonReduced[i]);
   }
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
@@ -17042,5 +17185,750 @@ std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()
   return this->ElementToString(theGlobalVariables, tempFormat);
 }
 
+
+
+class Expression
+{
+  public:
+  int theOperation;
+  int theData;
+  List<Expression> children;
+  std::string errorString;
+  ///////////////////////////////////////
+  //two objects are considered equal even when the the following data is different:
+  int format;
+  CommandList* theBoss;
+  int commandIndex;
+  enum format
+  { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
+    formatFunctionUseCdot,
+  };
+  void reset(CommandList* newBoss, int indexOfTheCommand)
+  { this->theBoss=newBoss;
+    this->commandIndex=indexOfTheCommand;
+    this->children.size=0;
+    this->theOperation=-1;
+    this->theData=0;
+    this->errorString="";
+    this->format=this->formatDefault;
+  }
+  void AssignChild(int childIndex)
+  { Expression tempExp=this->children[childIndex];
+    this->operator=(tempExp);
+  }
+  void SetPropertyValue(const std::string& propertyName, int PropertyValue)
+  ;
+  int GetPropertyValue(const std::string& propName)const
+;
+  int GetPropertyValue(int propertyIndex)const
+;
+  void MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
+  ;
+void MakeVariableNonBoundNoProperties
+  (CommandList* owner, int indexOfTheCommand, int varIndex)
+;
+void MakeVariableNonBounD
+  (CommandList* owner, int indexOfTheCommand, int varIndex)
+;
+  void MakeFunction
+  (CommandList* owner, int indexOfTheCommand, const Expression& argument, const std::string& functionName)
+;
+  void MakeFunction
+  (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
+;
+  void MakeProducT
+  (CommandList* owner, int indexOfTheCommand, const Expression& left, const Expression& right)
+  ;
+  void MakeXOX
+  (CommandList* owner, int indexOfTheCommand, int theOp, const Expression& left, const Expression& right)
+  ;
+  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false, bool AddCurlyBraces=false)const;
+  std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
+  static int HashFunction(const Expression& input)
+  { return input.HashFunctionRecursive(0, 1000);
+  }
+  int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth)const
+  { if (RecursionDepth>MaxRecursionDepth)
+      return 0;
+    int result=this->theOperation*SomeRandomPrimes[0]+this->theData*SomeRandomPrimes[1];
+    int numCycles=MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
+    for (int i=0; i<numCycles; i++)
+      result+=this->children[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
+    return result;
+  }
+  std::string GetOperation()const;
+  Expression()
+  { this->reset(0,-1);
+  }
+  Expression(const Expression& other)
+  { this->operator=(other);
+  }
+  bool AreEqualExcludingChildren(const Expression& other) const
+  { return
+    this->theBoss==other.theBoss &&
+    this->theData==other.theData &&
+    this->theOperation==other.theOperation &&
+    this->children.size==other.children.size &&
+    this->errorString==other.errorString
+    ;
+  }
+  bool NeedBracketsForMultiplication()const;
+  bool NeedBracketsForAddition()const;
+  bool NeedBracketsForFunctionName()const;
+  bool NeedBracketsForThePower()const;
+  bool operator==(const Expression& other)const;
+  void CopyValueFromNoChildrenCopy(const Expression& other)
+  { this->theBoss=other.theBoss;
+    this->commandIndex=other.commandIndex;
+    this->theData=other.theData;
+    this->theOperation=other.theOperation;
+    this->errorString=other.errorString;
+    this->children.SetSize(other.children.size);
+    this->format=other.format;
+  }
+  inline void operator=(const Expression& other)
+  { //warning: we are assuming that invoking function OperatorAssignRecursively
+    // recursively RecursionDepthThatWouldNonPopTheStack times
+    //will not pop the stack. If this is not the case, the program might crash unexpectedly.
+    const int RecursionDepthThatWouldNonPopTheStack=10000;
+    this->OperatorAssignRecursively(other, 0, RecursionDepthThatWouldNonPopTheStack);
+  }
+  void OperatorAssignRecursively(const Expression& other, int RecursionDepth, int MaxRecursionDepth)
+  { if (this==&other)
+      return;
+    this->CopyValueFromNoChildrenCopy(other);
+    if (RecursionDepth>MaxRecursionDepth)
+    { std::stringstream out;
+      out << "Error while copying expression: expression depth exceeded maximum allowed depth of " << MaxRecursionDepth;
+      this->errorString=out.str();
+      return;
+    }
+    this->children.SetSize(other.children.size);
+    for (int i=0; i<other.children.size; i++)
+      this->children[i].OperatorAssignRecursively(other.children[i], RecursionDepth+1, MaxRecursionDepth);
+  }
+};
+
+class ExpressionPairs
+{
+public:
+  std::string ElementToString();
+  HashedListB<int, MathRoutines::IntIdentity> BoundVariableIndices;
+  HashedList<Expression> variableImages;
+  void reset()
+  { this->BoundVariableIndices.Clear();
+    this->variableImages.Clear();
+  }
+};
+
+class SyntacticElement
+{
+  public:
+  int controlIndex;
+  int IndexFirstChar;
+  int IndexLastCharPlusOne;
+  int format;
+  std::string ErrorString;
+  Expression theData;
+  void operator=(const SyntacticElement& other)
+  { this->controlIndex=other.controlIndex;
+    this->theData=other.theData;
+    this->ErrorString=other.ErrorString;
+    this->IndexFirstChar=other.IndexFirstChar;
+    this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
+  }
+  std::string ElementToString(CommandList& theBoss);
+  SyntacticElement()
+  { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
+    this->ErrorString="";
+    this->IndexFirstChar=-1;
+    this->IndexLastCharPlusOne=-1;
+    this->format=Expression::formatDefault;
+  }
+  SyntacticElement(const SyntacticElement& other)
+  { this->operator=(other);
+  }
+};
+
+class Command
+{
+public:
+  CommandList* theBoss;
+  List<SyntacticElement> syntacticSoup;
+  List<SyntacticElement> syntacticStack;
+  std::string log;
+  Expression finalValue;
+  int numEmptyTokensStart;
+  int IndexInBoss;
+  bool flagOpDefineEncountered;
+  std::string theLog;
+  std::string ErrorString;
+  HashedListB<std::string, MathRoutines::hashString> BoundVariables;
+  void operator=(const Command& other)
+  { if (this==& other)
+      return;
+    this->BoundVariables=other.BoundVariables;
+    this->syntacticStack=other.syntacticStack;
+    this->finalValue=other.finalValue;
+    this->numEmptyTokensStart=other.numEmptyTokensStart;
+    this->ErrorString=other.ErrorString;
+    this->theBoss=other.theBoss;
+    this->IndexInBoss=other.IndexInBoss;
+    this->flagOpDefineEncountered=other.flagOpDefineEncountered;
+    this->log=other.log;
+  }
+  bool DecreaseStackSetCharacterRanges(int decrease)
+  { if (decrease<=0)
+      return true;
+    assert( this->syntacticStack.size-decrease>0);
+    this->syntacticStack[this->syntacticStack.size-decrease-1].IndexLastCharPlusOne=
+    this->syntacticStack[this->syntacticStack.size-1].IndexLastCharPlusOne;
+    this->syntacticStack.SetSize(this->syntacticStack.size-decrease);
+    return true;
+  }
+  void reset(CommandList* owner=0, int commandIndexInBoss=-1)
+  { this->numEmptyTokensStart=9;
+    this->syntacticStack.SetSize(0);
+    this->syntacticSoup.SetSize(0);
+    this->BoundVariables.Clear();
+    this->finalValue.reset(owner, -1);
+    this->theBoss=owner;
+    this->flagOpDefineEncountered=false;
+    this->IndexInBoss=commandIndexInBoss;
+    this->ErrorString="";
+  }
+  std::string ElementToStringSyntacticStack();
+  std::string ElementToString(bool usePolishForm=false)
+  { std::stringstream out;
+    out << "Bound variables:<br>\n ";
+    for (int i=0; i<this->BoundVariables.size; i++)
+    { out << this->BoundVariables[i];
+      if (i!=this->BoundVariables.size-1)
+        out << ", ";
+    }
+    if (this->theBoss==0)
+    { out << "Element not initialized.";
+      return out.str();
+    }
+    out << "<br>\nExpression stack no values (excluding empty tokens in the start): ";
+    for (int i=this->numEmptyTokensStart; i<this->syntacticStack.size; i++)
+    { out << this->syntacticStack[i].ElementToString(*this->theBoss);
+      if (i!=this->syntacticStack.size-1)
+        out << ", ";
+    }
+    out << "<hr>\nSyntactic soup:";
+    for (int i=0; i<this->syntacticSoup.size; i++)
+    { out << this->syntacticSoup[i].ElementToString(*this->theBoss);
+      if (i!=this->syntacticSoup.size-1)
+        out << ", ";
+    }
+    out << "<br>\nExpression stack(excluding empty tokens in the start): ";
+    out << this->ElementToStringSyntacticStack();
+    out << "<br>\n Current value: " << this->finalValue.ElementToString(0, 5, false);
+    if (usePolishForm)
+      out << "<br>=(in polish form):" << this->finalValue.ElementToStringPolishForm(0, 20);
+    return out.str();
+  }
+  bool isStrongLeftSeparator(const std::string& input)
+  { return
+    input=="{" || input=="(" || input=="[" ||
+    input=="," || input==":" || input==";" ||
+    input==" "
+    ;
+  }
+  bool isStrongRightSeparator(const std::string& input)
+  { return
+    input=="}" || input==")" || input=="]" ||
+    input=="," || input==":" || input==";" ||
+    input==" "
+    ;
+  }
+  bool LookAheadAllowsThePower(const std::string& lookAhead)
+  { return
+      lookAhead!="{}"
+      ;
+  }
+  bool LookAheadAllowsPlus(const std::string& lookAhead)
+  { return
+      lookAhead=="+" || lookAhead=="-" ||
+      lookAhead==")" || lookAhead==";" ||
+      lookAhead=="]" || lookAhead=="}" ||
+      lookAhead==":"
+      ;
+  }
+  bool LookAheadAllowsTimes(const std::string& lookAhead)
+  { return
+      lookAhead=="+" || lookAhead=="-" ||
+      lookAhead=="*" || lookAhead=="/" ||
+      lookAhead=="Expression" || lookAhead==")" ||
+      lookAhead==";" || lookAhead=="]" ||
+      lookAhead=="}" || lookAhead==":"
+      ;
+  }
+  bool ReplaceEXXEXEByEusingO(int theOp)
+  { SyntacticElement& middle = this->syntacticStack[this->syntacticStack.size-3];
+    SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-6];
+    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
+    Expression newExpr;
+    newExpr.reset(this->theBoss, this->IndexInBoss);
+    newExpr.theOperation=theOp;
+    newExpr.children.AddOnTop(left.theData);
+    newExpr.children.AddOnTop(middle.theData);
+    newExpr.children.AddOnTop(right.theData);
+    left.theData=newExpr;
+    this->DecreaseStackSetCharacterRanges(5);
+//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
+    return true;
+  }
+  bool ReplaceEEByEusingO(int theOp)
+  { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-2];
+    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
+    Expression newExpr;
+    newExpr.reset(this->theBoss, this->IndexInBoss);
+    newExpr.theOperation=theOp;
+//    newExpr.commandIndex=
+    newExpr.children.AddOnTop(left.theData);
+    newExpr.children.AddOnTop(right.theData);
+    left.theData=newExpr;
+    this->DecreaseStackSetCharacterRanges(1);
+//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
+    return true;
+  }
+  bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
+  { SyntacticElement& middle=this->syntacticStack[this->syntacticStack.size-2];
+    SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
+    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
+    Expression newExpr;
+    newExpr.reset(this->theBoss, this->IndexInBoss);
+    newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
+    newExpr.children.AddOnTop(left.theData);
+    newExpr.children.AddOnTop(right.theData);
+    left.theData=newExpr;
+    newExpr.format=formatOptions;
+    this->DecreaseStackSetCharacterRanges(2);
+//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
+    return true;
+  }
+  bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
+  { this->syntacticStack[this->syntacticStack.size-2].controlIndex=theCon;
+    this->syntacticStack[this->syntacticStack.size-2].format=theFormat;
+    this->DecreaseStackSetCharacterRanges(1);
+    return true;
+  }
+  bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault)
+  { this->syntacticStack[this->syntacticStack.size-1].controlIndex=theCon;
+    this->syntacticStack[this->syntacticStack.size-1].format=theFormat;
+//    this->DecreaseStackSetCharacterRanges(2);
+    return true;
+  }
+  bool ReplaceXXXByCon(int theCon)
+  { this->syntacticStack[this->syntacticStack.size-3].controlIndex=theCon;
+    this->DecreaseStackSetCharacterRanges(2);
+    return true;
+  }
+  bool ReplaceXXYByY()
+  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-1];
+    this->syntacticStack.SetSize(this->syntacticStack.size-2);
+    return true;
+  }
+  bool ReplaceXYXByY()
+  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
+    this->DecreaseStackSetCharacterRanges(2);
+    return true;
+  }
+  bool ReplaceXYByY()
+  { this->syntacticStack[this->syntacticStack.size-2]=this->syntacticStack[this->syntacticStack.size-1];
+    this->syntacticStack.SetSize(this->syntacticStack.size-1);
+    return true;
+  }
+  bool ReplaceXEXByE()
+  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
+    this->DecreaseStackSetCharacterRanges(2);
+    return true;
+  }
+  bool ReplaceObyE();
+  bool ReplaceVXbyEX();
+  bool ReplaceVbyE();
+  bool ReplaceIntIntBy10IntPlusInt()
+  { SyntacticElement& left=this->syntacticStack[this->syntacticStack.size-2];
+    SyntacticElement& right=this->syntacticStack[this->syntacticStack.size-1];
+    left.theData.theData*=10;
+    left.theData.theData+=right.theData.theData;
+    this->DecreaseStackSetCharacterRanges(1);
+    return true;
+  }
+  bool RegisterBoundVariable();
+  int GetOperationIndexFromControlIndex(int controlIndex);
+  int GetExpressionIndex();
+  SyntacticElement GetEmptySyntacticElement();
+  bool ApplyOneRule(const std::string& lookAhead);
+  void resetStack()
+  { SyntacticElement emptyElement=this->GetEmptySyntacticElement();
+    this->syntacticStack.initFillInObject(this->numEmptyTokensStart, emptyElement);
+  }
+  bool SetError(const std::string& theError)
+  { this->ErrorString=theError;
+    return true;
+  }
+  Command()
+  { this->reset();
+  }
+};
+
+class VariableNonBound
+{
+  public:
+  std::string theName;
+  bool (*theHandler)(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  inline static int HashFunction(const VariableNonBound& input)
+  { return MathRoutines::hashString(input.theName);
+  }
+  bool operator==(const VariableNonBound& other)const
+  { return this->theName==other.theName;
+  }
+};
+
+class CommandList
+{
+public:
+//control sequences parametrize the syntactical elements
+  HashedListB<std::string, MathRoutines::hashString> controlSequences;
+//operations parametrize the expression elements
+  HashedListB<std::string, MathRoutines::hashString> operations;
+  List<bool ((*)(CommandList& theCommands, int commandIndex, Expression& theExpression))> theStandardOpEvalFunctions;
+//used to parametrize the input data for the special operation "VariableNonBound"
+  HashedListB<VariableNonBound, VariableNonBound::HashFunction> theNonBoundVars;
+  List<int> targetProperties;
+  HashedListB<std::string, MathRoutines::hashString> theDictionary;
+  HashedListB<std::string, MathRoutines::hashString> thePropertyNameS;
+  List<Expression> buffer1, buffer2;
+  int MaxRecursionDepthDefault;
+  int MaxAlgTransformationsPerExpression;
+  int TotalNumPatternMatchedPerformed;
+  List<Command> theCommands;
+//  std::vector<std::stringstream> theLogs;
+  HashedList<Expression> cachedExpressions;
+  List<Expression> imagesCashedExpressions;
+
+  List<std::string> syntaxErrors;
+  List<std::string> evaluationErrors;
+  std::string input;
+  std::string output;
+  std::string theLog;
+  std::string ElementToString();
+  double StartTimeInSeconds;
+  double (*GetElapsedTimeNonSafe)();
+  double GetElapsedTime()
+  { if (this->GetElapsedTimeNonSafe==0)
+      return -1;
+    return this->GetElapsedTimeNonSafe();
+  }
+  SyntacticElement GetSyntacticElementEnd()
+  { SyntacticElement result;
+    result.controlIndex=this->controlSequences.GetIndex(";");
+    return result;
+  }
+  int conError()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Error");
+  }
+  int conExpression()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Expression");
+  }
+  int conBindVariable()
+  { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
+  }
+  int conInteger()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
+  }
+  int conEqualEqual()
+  { return this->controlSequences.GetIndexIMustContainTheObject("==");
+  }
+  int conDeclareFunction()
+  { return this->controlSequences.GetIndexIMustContainTheObject("{}");
+  }
+  int conDefine()
+  { return this->controlSequences.GetIndexIMustContainTheObject(":=");
+  }
+  int opFunction()
+  { return this->operations.GetIndexIMustContainTheObject("{}");
+  }
+  int opDefine()
+  { return this->operations.GetIndexIMustContainTheObject(":=");
+  }
+  int opDefineConditional()
+  { return this->operations.GetIndexIMustContainTheObject("if:=");
+  }
+  int opThePower()
+  { return this->operations.GetIndexIMustContainTheObject("^");
+  }
+  int opVariableNonBound()
+  { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
+  }
+  int opEqualEqual()
+  { return this->operations.GetIndexIMustContainTheObject("==");
+  }
+  void AddTargetProperty(const std::string& propertyName, bool theHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+  { this->theDictionary.AddNoRepetition(propertyName);
+    VariableNonBound tempV;
+    tempV.theName=propertyName;
+    tempV.theHandler=theHandler;
+    int theIndex=this->theNonBoundVars.GetIndex(tempV);
+    if (theIndex==-1)
+    { this->theNonBoundVars.AddOnTop(tempV);
+      theIndex=this->theNonBoundVars.size-1;
+    }
+    this->targetProperties.AddOnTop(theIndex);
+  }
+  int opVariableBound()
+  { return this->operations.GetIndexIMustContainTheObject("VariableBound");
+  }
+  int opPlus()
+  { return this->operations.GetIndexIMustContainTheObject("+");
+  }
+  int opMinus()
+  { return this->operations.GetIndexIMustContainTheObject("-");
+  }
+  bool AppendOpandsReturnTrueIfOrderNonCanonical
+  (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
+;
+  bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
+  (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
+  }
+  bool AppendSummandsReturnTrueIfOrderNonCanonical
+  (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
+  }
+  void SpecializeBoundVars
+(Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
+  ;
+  bool ExpressionHasBoundVars(Expression& theExpression, int RecursionDepth, int MaxRecursionDepth)
+  { if (RecursionDepth>MaxRecursionDepth)
+    { std::stringstream out;
+      out << "Max recursion depth of " << MaxRecursionDepth << " exceeded.";
+      theExpression.errorString=out.str();
+      return false;
+    }
+    if (theExpression.theOperation==this->opVariableBound())
+      return true;
+    else
+      for (int i=0; i<theExpression.children.size; i++)
+        if (this->ExpressionHasBoundVars(theExpression.children[i], RecursionDepth+1, MaxRecursionDepth+1))
+          return true;
+    return false;
+  }
+  Expression* DepthFirstSubExpressionPatternMatch
+  (int commandIndex, Expression& thePattern, Expression& theExpression,
+   ExpressionPairs& bufferPairs, int RecursionDepth,
+   int MaxRecursionDepth, Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
+;
+  bool ProcessOneExpressionOnePatternOneSub
+  (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+   int RecursionDepth, int maxRecursionDepth, std::stringstream* theLog=0, bool logAttempts=false)
+  ;
+/*  Expression GetProperty(const std::string& propertyName, int theData=0)
+  { ExpressionProperty result;
+    result.value=theData;
+    result.nameIndex=this->thePropertyNames.GetIndex(propertyName);
+    if (result.nameIndex==-1)
+    { this->thePropertyNames.AddOnTop(propertyName);
+      result.nameIndex=this->thePropertyNames.size()-1;
+    }
+    return result;
+  }*/
+  bool isADigit(const std::string& input, int& whichDigit)
+  { if (input.size()!=1)
+      return false;
+    whichDigit=input[0]-'0';
+    return whichDigit<10 && whichDigit>=0;
+  }
+  int opTimes()
+  { return this->operations.GetIndexIMustContainTheObject("*");
+  }
+  int opDivide()
+  { return this->operations.GetIndexIMustContainTheObject("/");
+  }
+  int opInteger()
+  { return this->operations.GetIndexIMustContainTheObject("Integer");
+  }
+//  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
+  bool CollectSummands(int commandIndex, Expression& theExpression);
+  bool ExpressionMatchesPattern
+  (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
+   int RecursionDepth=0, int MaxRecursionDepth=500, std::stringstream* theLog=0)
+  ;
+  bool ExpressionsAreEqual
+  (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
+  ;
+
+  static bool EvaluateStandardPlus(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression)
+  ;
+  static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateStandardEqualEqual(CommandList& theCommands, int commandIndex, Expression& theExpression);
+
+  static bool EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoAssociate(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
+  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
+  static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP);
+
+  static bool EvaluateFunctionIsInteger(CommandList& theCommands, int commandIndex, Expression& theExpression);
+
+  static bool EvaluateIf(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  void AddEmptyHeadedCommand();
+  CommandList()
+  { this->GetElapsedTimeNonSafe=0;
+    init();
+  }
+  void AddOperationNoFail
+  (const std::string& theOp,
+   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+   )
+  { if (this->operations.Contains(theOp))
+    { assert(false);
+      return;
+    }
+    this->operations.AddOnTop(theOp);
+    this->theStandardOpEvalFunctions.AddOnTop(theOpHandler);
+  }
+  void AddNonBoundVarMustBeNew
+  (const std::string& theName,
+   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+   )
+  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, theOpHandler);
+    if (theIndex!=this->theNonBoundVars.size-1)
+      assert(false);
+  }
+  int GetIndexNonBoundVar(const std::string& theName)
+  { VariableNonBound tempVar;
+    tempVar.theName=theName;
+    tempVar.theHandler=0;
+    return this->theNonBoundVars.GetIndex(tempVar);
+  }
+  int AddNonBoundVarReturnVarIndex
+  (const std::string& theName,
+   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+   )
+  { VariableNonBound tempVar;
+    tempVar.theName=theName;
+    int theIndex=this->theNonBoundVars.GetIndex(tempVar);
+    if (theIndex!=-1)
+      return theIndex;
+    tempVar.theHandler=theOpHandler;
+    this->theNonBoundVars.AddOnTop(tempVar);
+    this->theDictionary.AddNoRepetition(theName);
+    return this->theNonBoundVars.size-1 ;
+  }
+  void init()
+  { this->controlSequences.Clear();
+    this->operations.Clear();
+    this->theNonBoundVars.Clear();
+    this->theDictionary.Clear();
+    this->cachedExpressions.Clear();
+    this->imagesCashedExpressions.SetSize(0);
+    this->theStandardOpEvalFunctions.SetSize(0);
+    this->syntaxErrors.SetSize(0);
+    this->evaluationErrors.SetSize(0);
+    this->thePropertyNameS.Clear();
+    this->targetProperties.SetSize(0);
+    this->MaxRecursionDepthDefault=1000;
+    this->AddOperationNoFail("+",this->EvaluateStandardPlus);
+    this->AddOperationNoFail("-", this->EvaluateStandardMinus);
+    this->AddOperationNoFail("/", 0);
+    this->AddOperationNoFail("*", this->EvaluateStandardTimes);
+    this->AddOperationNoFail(":=", 0);
+    this->AddOperationNoFail("if:=", 0);
+    this->AddOperationNoFail("^", 0);
+    this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual);
+    //the following two operations are chosen on purpose so that they correspond to LaTeX-undetectable
+    //expressions
+    //the following is the binding variable operation
+    this->AddOperationNoFail("{{}}", 0);
+    //the following is the operation for using a variable as a function
+    this->AddOperationNoFail("{}", this->EvaluateStandardFunction);
+    this->AddOperationNoFail("if", this->EvaluateIf);
+    this->AddOperationNoFail("Integer", 0);
+    this->AddOperationNoFail("VariableNonBound", 0);
+    this->AddOperationNoFail("VariableBound", 0);
+    this->AddOperationNoFail("Error", 0);
+
+    this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
+    this->controlSequences.AddOnTop("Variable");
+    this->controlSequences.AddOnTop(this->operations);//all operations are also control sequences
+    this->controlSequences.AddOnTop("Expression");
+    this->controlSequences.AddOnTop(",");
+    this->controlSequences.AddOnTop("\\cdot");
+    this->controlSequences.AddOnTop("_");
+    this->controlSequences.AddOnTop("(");
+    this->controlSequences.AddOnTop(")");
+    this->controlSequences.AddOnTop("[");
+    this->controlSequences.AddOnTop("]");
+    this->controlSequences.AddOnTop("{");
+    this->controlSequences.AddOnTop("}");
+    this->controlSequences.AddOnTop(":");
+    this->controlSequences.AddOnTop("=");
+    this->controlSequences.AddOnTop(";");
+    this->controlSequences.AddOnTop("$");
+//    this->thePropertyNames.AddOnTop("IsCommutative");
+    this->TotalNumPatternMatchedPerformed=0;
+    this->initPredefinedVars();
+    this->initTargetProperties();
+  }
+  void initPredefinedVars()
+  { this->AddNonBoundVarMustBeNew("IsInteger", &this->EvaluateFunctionIsInteger);
+  }
+  void initTargetProperties()
+  {// this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
+  }
+  void ExtractExpressions()
+  { std::string lookAheadToken;
+    std::stringstream errorLog;
+    for (int j=0; j<this->theCommands.size; j++)
+    { this->theCommands[j].resetStack();
+      for (int i=0; i<this->theCommands[j].syntacticSoup.size; i++)
+      { if (i+1<this->theCommands[j].syntacticSoup.size)
+          lookAheadToken=this->controlSequences[this->theCommands[j].syntacticSoup[i+1].controlIndex];
+        else
+          lookAheadToken=";";
+        this->theCommands[j].syntacticStack.AddOnTop(this->theCommands[j].syntacticSoup[i]);
+        while(this->theCommands[j].ApplyOneRule(lookAheadToken))
+        {}
+      }
+      if (this->theCommands[j].ErrorString=="" && this->theCommands[j].syntacticStack.size==this->theCommands[j].numEmptyTokensStart+1)
+        this->theCommands[j].finalValue=this->theCommands[j].syntacticStack[this->theCommands[j].numEmptyTokensStart].theData;
+      else if (this->theCommands[j].ErrorString!="")
+        errorLog << "Syntax error at command " << j+1 << ":" << theCommands[j].ErrorString << "<br>";
+      else if (this->theCommands[j].syntacticStack.size!=this->theCommands[j].numEmptyTokensStart)
+      { errorLog << "Syntax error at command " << j+1 << ": your command does not simplify to a single expression. <br>";
+        errorLog << "Instead it simplifies to:<br> " << this->theCommands[j].ElementToStringSyntacticStack();
+      }
+    }
+    std::string error = errorLog.str();
+    if (error!="")
+      this->syntaxErrors.AddOnTop(error);
+  }
+  void EvaluateCommands();
+  bool EvaluateExpressionReturnFalseIfExpressionIsBound
+(int commandIndex, Expression& theExpression, int RecursionDepth, int maxRecursionDepth,
+ ExpressionPairs& bufferPairs,
+ std::stringstream* theLog=0)
+ ;
+  void Evaluate(const std::string& theInput)
+  { this->StartTimeInSeconds=this->GetElapsedTime();
+    this->input=theInput;
+    this->ParseFillDictionary(this->input);
+    this->ExtractExpressions();
+    this->EvaluateCommands();
+  }
+  bool isLeftSeparator(char c);
+  bool isRightSeparator(char c);
+  void ParseFillDictionary(const std::string& input);
+};
 #endif
 

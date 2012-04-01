@@ -95,7 +95,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
     projectivizedChamberFinal.AddNonRefinedChamberOnTopNoRepetition(currentProjectiveCone, theGlobalVariables);
   }
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
-    projectivizedChamberFinal.splittingNormals.AddOnTopHash(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
+    projectivizedChamberFinal.splittingNormals.AddOnTop(this->PreimageWeylChamberSmallerAlgebra.Normals[i]);
   out << "projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ElementToString(false, false);
   projectivizedChamberFinal.Refine(theGlobalVariables);
   out << "Refined projectivized chamber before chopping non-dominant part:\n" << projectivizedChamberFinal.ElementToString(false, false);
@@ -122,7 +122,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
       for (int j=0; j<this->smallerAlgebraChamber[i].Normals.size; j++)
       { this->TransformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
         wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-        this->projectivizedChambeR.splittingNormals.AddOnTopNoRepetitionHash(wallToSliceWith);
+        this->projectivizedChambeR.splittingNormals.AddNoRepetition(wallToSliceWith);
       }
   out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.ElementToString(false, false);
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
@@ -914,7 +914,7 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(ro
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
     { tempRoot=this->TheObjects[i].Normals[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-      outputHashed.AddOnTopNoRepetitionHash(tempRoot);
+      outputHashed.AddNoRepetition(tempRoot);
     }
   output.CopyFromBase(outputHashed);
 }
@@ -927,10 +927,10 @@ void ConeComplex::RefineMakeCommonRefinement(const ConeComplex& other, GlobalVar
     this->init();
     this->ConvexHull=tempCone;
     this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
-    this->splittingNormals.AddOnTopNoRepetitionHash(newWalls);
+    this->splittingNormals.AddNoRepetition(newWalls);
   }
   other.GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
-  this->splittingNormals.AddOnTopNoRepetitionHash(newWalls);
+  this->splittingNormals.AddNoRepetition(newWalls);
   this->indexLowestNonRefinedChamber=0;
   this->Refine(theGlobalVariables);
 }
@@ -951,7 +951,7 @@ void ConeComplex::TranslateMeMyLastCoordinateAffinization(root& theTranslationVe
     newNormal=normalNoAffinePart;
     normalNoAffinePart.size--;
     (*newNormal.LastObject())-=normalNoAffinePart.ScalarEuclidean(theTranslationVector);
-    this->splittingNormals.AddOnTopHash(newNormal);
+    this->splittingNormals.AddOnTop(newNormal);
   }
 }
 
@@ -1027,7 +1027,7 @@ void PiecewiseQuasipolynomial::DrawMe
           if (!RestrictingChamber->IsInCone(tempRoot))
             tempList[k]=ZeroColor;
         }
-      theLatticePointsFinal.AddOnTopHash(latticePoints);
+      theLatticePointsFinal.AddOnTop(latticePoints);
       theLatticePointColors.AddListOnTop(tempList);
     }
   }
@@ -1340,11 +1340,11 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
   List<QuasiPolynomial> tempQPlist;
   tempQPlist.SetSize(this->theMultiplicities.size);
   for (int i=0; i<this->theMultiplicities.size; i++)
-    tempQPlist[i]=this->theMultiplicities[this->projectivizedChambeR.IndexOfObjectHash(tempList[i])];
+    tempQPlist[i]=this->theMultiplicities[this->projectivizedChambeR.GetIndex(tempList[i])];
   this->theMultiplicities=tempQPlist;
-  this->projectivizedChambeR.ClearTheObjects();
+  this->projectivizedChambeR.Clear();
   for (int i=0; i<tempList.size; i++)
-    this->projectivizedChambeR.AddOnTopHash(tempList[i]);
+    this->projectivizedChambeR.AddOnTop(tempList[i]);
 }
 
 void DynkinDiagramRootSubalgebra::ComputeDynkinString
@@ -1523,7 +1523,7 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
   { for (int j=0; j<smallDim; j++)
       normal[j]=this->WeylChamberSmallerAlgebra.Normals[i][j];
     newWalls.AddOnTop(normal);
-    tempComplex.splittingNormals.AddOnTopHash(normal);
+    tempComplex.splittingNormals.AddOnTop(normal);
   }
   tempComplex.indexLowestNonRefinedChamber=0;
   tempComplex.Refine(theGlobalVariables);
@@ -1682,7 +1682,7 @@ void CombinatorialChamberContainer::TransformToWeylProjective
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           if (k>0)
             this->NewHyperplanesToSliceWith.AddOnTopNoRepetition(wallToSliceWith);
-          this->theHyperplanes.AddOnTopNoRepetitionHash(wallToSliceWith);
+          this->theHyperplanes.AddNoRepetition(wallToSliceWith);
         }
   this->log << "\n Affine walls to slice with:";
   for (int i=0; i<this->NewHyperplanesToSliceWith.size; i++)
@@ -2200,7 +2200,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
     { tempRoot=this->theFinalRepresentatives[i];
       this->theConesLargerDim[j].theLattice.ReduceVector(tempRoot);
       if (tempRoot==this->theConesLargerDim[j].theShift)
-      { this->complexStartingPerRepresentative[i].AddOnTopHash(this->theConesLargerDim[j].theProjectivizedCone);
+      { this->complexStartingPerRepresentative[i].AddOnTop(this->theConesLargerDim[j].theProjectivizedCone);
         this->startingLPtoMaximize[i].AddOnTop(this->LPtoMaximizeLargerDim[j]);
       }
     }
@@ -2532,11 +2532,11 @@ void ConeComplex::GetNewVerticesAppend
     { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
       tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
       if (myDyingCone.IsInCone(tempRoot))
-        outputVertices.AddOnTopNoRepetitionHash(tempRoot);
+        outputVertices.AddNoRepetition(tempRoot);
       else
       { tempRoot.MinusRoot();
         if (myDyingCone.IsInCone(tempRoot))
-          outputVertices.AddOnTopNoRepetitionHash(tempRoot);
+          outputVertices.AddNoRepetition(tempRoot);
       }
     }
   }
@@ -2567,14 +2567,14 @@ bool ConeComplex::SplitChamber
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
   HashedList<root>& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
-  ZeroVertices.ClearTheObjects();
+  ZeroVertices.Clear();
   Rational tempRat;
   for (int i=0; i<myDyingCone.Vertices.size; i++)
   { root::RootScalarEuclideanRoot(killerNormal, myDyingCone.Vertices.TheObjects[i], tempRat);
     if (tempRat.IsPositive())
       newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsEqualToZero())
-      ZeroVertices.AddOnTopNoRepetitionHash(myDyingCone.Vertices.TheObjects[i]);
+      ZeroVertices.AddNoRepetition(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsNegative())
       newMinusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
   }
@@ -2608,7 +2608,7 @@ bool ConeComplex::SplitChamber
 }
 
 void ConeComplex::PopChamberSwapWithLast(int index)
-{ this->PopIndexSwapWithLastHash(index);
+{ this->PopIndexSwapWithLast(index);
 }
 
 bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables)
@@ -2631,7 +2631,7 @@ bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition
 (Cone& newCone, GlobalVariables& theGlobalVariables)
 { newCone.Normals.QuickSortAscending();
   this->ConvexHull.MakeConvexHullOfMeAnd(newCone, theGlobalVariables);
-  return this->AddOnTopNoRepetitionHash(newCone);
+  return this->AddNoRepetition(newCone);
 }
 
 void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
@@ -2666,9 +2666,9 @@ void ConeComplex::Sort(GlobalVariables& theGlobalVariables)
 { List<Cone> tempList;
   tempList=*this;
   tempList.QuickSortAscending();
-  this->ClearTheObjects();
+  this->Clear();
   for (int i=0; i<tempList.size; i++)
-    this->AddOnTopHash(tempList[i]);
+    this->AddOnTop(tempList[i]);
 }
 
 void ConeComplex::RefineAndSort(GlobalVariables& theGlobalVariables)
@@ -2934,7 +2934,7 @@ void ConeComplex::initFromCones
 void ConeComplex::initFromCones
 (List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { Cone tempCone;
-  this->ClearTheObjects();
+  this->Clear();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=NormalsOfCones.ElementToStringGeneric();
   theGlobalVariables.MakeReport();
@@ -2949,12 +2949,12 @@ void ConeComplex::initFromCones
     theGlobalVariables.MakeReport();
   }
   root tempRoot;
-  this->splittingNormals.ClearTheObjects();
+  this->splittingNormals.Clear();
   for (int i=0; i<this->size; i++)
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
     { tempRoot=this->TheObjects[i].Normals.TheObjects[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-      this->splittingNormals.AddOnTopNoRepetitionHash(tempRoot);
+      this->splittingNormals.AddNoRepetition(tempRoot);
       std::stringstream out;
       out << "Extracting walls from cone " << i+1 << " out of " << this->size << " total distinct chambers.";
       out << "\nProcessed " << j+1 << " out of " << this->TheObjects[i].Normals.size << " walls of the current chamber.";
@@ -3192,7 +3192,7 @@ bool ConeComplex::findMaxLFOverConeProjective
     { tempRoot=inputLFsLastCoordConst[i]-inputLFsLastCoordConst[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       if (!tempRoot.IsEqualToZero())
-        this->splittingNormals.AddOnTopNoRepetitionHash(tempRoot);
+        this->splittingNormals.AddNoRepetition(tempRoot);
     }
   std::cout << this->ElementToString(false, true);
   this->Refine(theGlobalVariables);
@@ -5979,7 +5979,7 @@ bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVar
   }
   thePF.CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
   thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  int tempI = this->IndexOfObjectHash(thePF);
+  int tempI = this->GetIndex(thePF);
   if (tempI==-1)
     this->AddAlreadyReduced(thePF, theGlobalVariables, Indicator);
   else
@@ -6301,7 +6301,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
       else
         this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
       for (int j=0; j<basisMonsAll.size; j++)
-      { int indexInResult=tempP.IndexOfObjectHash(basisMonsAll.TheObjects[j]);
+      { int indexInResult=tempP.GetIndex(basisMonsAll.TheObjects[j]);
         int currentRow=l*basisMonsAll.size+j;
         if (indexInResult==-1)
           tempMat.elements[currentRow][k]=0;
@@ -6701,15 +6701,17 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << CGI::GetHtmlButton("button"+theCanvasId, theDrawFunctionName+"();", "redraw");
   out << "<br>The picture is drawn using javascript."
-  << "<br> The basis vectors can be rotated with the mouse (the basis vectors should be labeled in format depending on the type of picture):  "
-  << " left click + hold the basis vector and move the mouse."
-  << "<br>Doing that rotates \"infinitesimally\" the two vectors basis of the projection plane (the plane being drawn on your screen) <br>1) inside the projection plane "
-  << "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane"
-  << "<br>such as to match the motion of your mouse pointer. Special care must be taken if 1) the selected vector lies "
-  << "inside the projection plane or 2) the selected vector is orthogonal to the projection plane. "
-  << "When you try to drag such a \"degenerate\" vector, the picture might jump around a bit."
-  << "<br> If you are using the google chrome browser you can zoom in and out of the picture using the mouse wheel. "
-  << " Zooming doesn't work on other browsers (there is no commonly supported mouse wheel capture among the popular browsers)."
+  << "<br> Left click + hold+ move the mouse on a special vector = rotates the special vector. "
+  << "Special vectors, if any, should be labeled according to the author's ``artistic'' inspiration (usually dark red dots).  "
+  << "<br>Moving a vector rotates ``infinitesimally'' the projection plane of your screen "
+  << "<br>1) inside the projection plane "
+  << "<br>2) in the plane spanned by the selected vector and its orthogonal complement relative to the projection plane. "
+  << "<br>The angle change matches the motion of your mouse pointer.  "
+  << " Special care must be taken if the selected vector lies "
+  << "inside the projection plane or the selected vector is orthogonal to the projection plane. "
+  << "If one of these cases happens, the picture might jump around a bit."
+  << "<br>The mouse wheel zooms in/out. "
+  << " Zooming is tested to work on Firefox and google Chrome browsers on Ubuntu."
   ;
   out << "<br>Currently, " << this->theBuffer.IndexNthDrawOperation.size << " elements are drawn. ";
   if (this->theBuffer.IndexNthDrawOperation.size>500)
@@ -8976,7 +8978,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
   orbit.Reserve(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
-    orbit.AddOnTopHash(tempRoot);
+    orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
   for (int i=0; i< Layers.size; i++)
@@ -8984,7 +8986,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     for (int j=0; j<Layers[i].size; j++)
       for (int k=0; k<this->simpleGenerators.size; k++)
       { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[k], orbit[Layers[i][j]], false, tempRoot);
-        int index=orbit.IndexOfObjectHash(tempRoot);
+        int index=orbit.GetIndex(tempRoot);
         assert(index!=-1);
         if (this->TheObjects[index].size>this->TheObjects[Layers[i][j]].size)
           arrows[i][j].AddOnTop(index);
@@ -10294,8 +10296,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "((Polynomial,...),(Rational,...))",
    "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
    The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
-   In the second argument, a zero stands for a root space that is a root of the Levi part of the Weyl algebra. \
-   A non-zero element stands indicates that the corresponding root space that is not in the Levi part of \
+   In the second argument, a zero stands for a root space that is a root of the Levi part of the parabolic subalgebra. \
+   A non-zero element indicates that the corresponding root space that is not in the Levi part of \
    the parabolic subalgebra.",
     "v((1,0,1), (1,0,0))",
    'B', 3, true,

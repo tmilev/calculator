@@ -8,127 +8,12 @@ class Qsqrt2;
 template < > int List<LittelmannPath>::ListActualSizeIncrement=1000;
 template < > int List<MonomialUniversalEnvelopingOrdered<Rational> >::ListActualSizeIncrement=100;
 template < > int List<ElementUniversalEnvelopingOrdered<Rational> >::ListActualSizeIncrement=100;
-template < > int List<Matrix<Qsqrt2> >::ListActualSizeIncrement=100;
-template < > int List<Vector<Qsqrt2> >::ListActualSizeIncrement=100;
-template < > int HashedList<MonomialUniversalEnveloping<Qsqrt2> >::PreferredHashSize=100;
-template < > int HashedList<MonomialUniversalEnvelopingOrdered<Rational> >::PreferredHashSize=100;
-template < > int HashedList<LittelmannPath >::PreferredHashSize=1000;
-
-
-class Qsqrt2
-{
-public:
-  Rational a;
-  Rational b;
-  friend std::iostream& operator<< (std::iostream& output, const Qsqrt2& theElt)
-  { output << theElt.ElementToString();
-    return output;
-  }
-  void operator =(const Qsqrt2& other)
-  { this->a=other.a;
-    this->b=other.b;
-  }
-  void operator =(int x)
-  { this->a=x;
-    this->b.MakeZero();
-  }
-  Qsqrt2(const Qsqrt2& other)
-  { this->operator=(other);
-  }
-  Qsqrt2()
-  { this->a.MakeZero();
-    this->b.MakeZero();
-  }
-  void MakeAplusSqrt2B(int theA, int theB){ this->a=theA; this->b=theB;}
-  Qsqrt2(int x)
-  { this->operator=(x);
-  }
-  bool IsEqualToZero()const
-  { return this->a.IsEqualToZero() && this->b.IsEqualToZero();
-  }
-  void Assign(const Qsqrt2& other)
-  { this->operator=(other);
-  }
-  void ElementToString(std::string& output)
-  { output=this->ElementToString();
-  }
-  std::string ElementToString()const
-  { if (this->IsEqualToZero())
-      return "0";
-    std::stringstream out;
-    if (!this->a.IsEqualToZero())
-    { out << this->a.ElementToString();
-      if (this->b.IsPositive())
-        out << "+";
-    }
-    if (this->b.IsEqualToZero())
-      return out.str();
-    else
-    { Rational tempRat=this->b;
-      if (tempRat<0)
-      { out << "-";
-        tempRat.Minus();
-      }
-      if (tempRat!=1)
-        out << tempRat.ElementToString();
-      out << "\\sqrt{2}";
-    }
-    return out.str();
-  }
-  void operator+=(const Qsqrt2& other)
-  { this->a+=other.a;
-    this->b+=other.b;
-  }
-  void operator-=(const Qsqrt2& other)
-  { this->a-=other.a;
-    this->b-=other.b;
-  }
-  void operator*=(const Qsqrt2& other)
-  { Qsqrt2 result;
-    result.a=this->a*other.a+this->b*other.b*2;
-    result.b=other.b*this->a+this->b*other.a;
-    this->operator=(result);
-  }
-  void operator/=(const Rational& other)
-  { this->a/=other;
-    this->b/=other;
-  }
-  void operator/=(const Qsqrt2& otheR)
-  { Qsqrt2 result, conjugate;
-    conjugate=otheR;
-    conjugate.b.Minus();
-    result.operator=(*this);
-    result*=conjugate;
-    result/=(otheR.a*otheR.a-otheR.b*otheR.b*2);
-    Qsqrt2 old=*this, oldOther=otheR;
-    this->operator=(result);
-    result*=oldOther;
-    result-=old;
-    if (!result.IsEqualToZero())
-    { std::cout << "  start " << old.ElementToString() << "; oldOther: " << otheR.ElementToString();
-      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ElementToString();
-      old/=oldOther;
-    }
-    assert(result.IsEqualToZero());
-  }
-  void Minus()
-  { this->a.Minus();
-    this->b.Minus();
-  }
-  void Invert()
-  { Qsqrt2 result;
-    result=1;
-    result/=*this;
-    this->operator=(result);
-  }
-  void MultiplyBy(const Qsqrt2& other)
-  { this->operator*=(other);
-  }
-  void Subtract(const Qsqrt2& other)
-  { this->operator-=(other);
-  }
-};
-
+//template < > int List<Matrix<Qsqrt2> >::ListActualSizeIncrement=100;
+//template < > int List<Vector<Qsqrt2> >::ListActualSizeIncrement=100;
+//template < > int HashedList<MonomialUniversalEnveloping<Qsqrt2> >::PreferredHashSize=100;
+template < > int HashedListB<MonomialUniversalEnvelopingOrdered<Rational>, MonomialUniversalEnvelopingOrdered<Rational>::HashFunction>::PreferredHashSize=100;
+template < > int HashedListB<LittelmannPath, LittelmannPath::HashFunction>::PreferredHashSize=1000;
+template < > int HashedListB<MonomialUniversalEnveloping<Qsqrt2>, MonomialUniversalEnveloping<Qsqrt2>::HashFunction>::PreferredHashSize=30;
 
 int ParserNode::EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -170,8 +55,8 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
   for (int i=0; i<this->RepresentativesQuotientAmbientOrder.size; i++)
   { tempRoot=this->AmbientWeyl.rho;
     this->AmbientWeyl.ActOnRootByGroupElement
-  (this->AmbientWeyl.IndexOfObjectHash(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
-//    orbit.AddOnTopHash(tempRoot);
+  (this->AmbientWeyl.GetIndex(this->RepresentativesQuotientAmbientOrder[i]), tempRoot, false, false);
+//    orbit.AddOnTop(tempRoot);
   }
   arrows.SetSize(Layers.size);
   for (int i=0; i< Layers.size; i++)
@@ -280,7 +165,7 @@ void charSSAlgMod::MakeFromWeight(const Vector<Rational>& inputWeightSimpleCoord
   theMon.weightFundamentalCoords=
   owner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
   theMon.Coefficient=1;
-  this->AddOnTopHash(theMon);
+  this->AddOnTop(theMon);
 }
 
 template <class CoefficientType>
@@ -395,28 +280,28 @@ std::string Vector<CoefficientType>::ElementToStringLetterFormat
 void charSSAlgMod::operator+=(const MonomialChar<Rational>& other)
 { if (other.Coefficient.IsEqualToZero())
     return;
-  int index=this->IndexOfObjectHash(other);
+  int index=this->GetIndex(other);
   if (index==-1)
-  { this->AddOnTopHash(other);
+  { this->AddOnTop(other);
     return;
   }
   this->TheObjects[index].Coefficient+=other.Coefficient;
   if (this->TheObjects[index].Coefficient.IsEqualToZero())
-    this->PopIndexSwapWithLastHash(index);
+    this->PopIndexSwapWithLast(index);
 }
 
 void charSSAlgMod::operator-=(const MonomialChar<Rational>& other)
 { if (other.Coefficient.IsEqualToZero())
     return;
-  int index=this->IndexOfObjectHash(other);
+  int index=this->GetIndex(other);
   if (index==-1)
-  { this->AddOnTopHash(other);
+  { this->AddOnTop(other);
     this->LastObject()->Coefficient*=-1;
     return;
   }
   this->TheObjects[index].Coefficient-=other.Coefficient;
   if (this->TheObjects[index].Coefficient.IsEqualToZero())
-    this->PopIndexSwapWithLastHash(index);
+    this->PopIndexSwapWithLast(index);
 }
 
 void charSSAlgMod::operator+=(const charSSAlgMod& other)
@@ -565,9 +450,9 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   int finalHashSize=100;
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
-  outputWeightsSimpleCoords.ClearTheObjects();
+  outputWeightsSimpleCoords.Clear();
   outputWeightsSimpleCoords.SetHashSizE(10000);
-  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
   int numTotalWeightsFound=0;
   int numPosRoots=this->RootsOfBorel.size;
   root currentWeight;
@@ -586,7 +471,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
         if (this->IsDominantWeight(currentWeight))
         { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
           currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+          if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
           { numTotalWeightsFound++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -595,12 +480,12 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
 //    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    std::cout << " Size of current level: " << currentHashes.size;
-    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+    outputWeightsSimpleCoords.AddOnTop(currentHashes);
 //    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
-    currentHashes.ClearTheObjects();
+    currentHashes.Clear();
 //    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
   }
@@ -688,7 +573,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
 //        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
-        int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
+        int theIndex=outputDominantWeightsSimpleCoords.GetIndex(currentDominantRepresentative);
 //        std::cout << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
@@ -773,7 +658,7 @@ bool WeylGroup::FreudenthalEval
         this->RaiseToDominantWeight(currentDominantRepresentative);
 //        timeSpentRaisingWeights+=theGlobalVariables.GetElapsedSeconds()-startLocal;
         //double beforeHash=theGlobalVariables.GetElapsedSeconds();
-        int theIndex=outputDominantWeightsSimpleCoords.IndexOfObjectHash(currentDominantRepresentative);
+        int theIndex=outputDominantWeightsSimpleCoords.GetIndex(currentDominantRepresentative);
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
@@ -1284,7 +1169,7 @@ bool LittelmannPath::GenerateOrbit
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
  Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
-  hashedOutput.AddOnTopHash(*this);
+  hashedOutput.AddOnTop(*this);
   int theDim=this->owner->GetDim();
   outputOperators.SetSize(1);
   outputOperators[0].SetSize(0);
@@ -1316,8 +1201,8 @@ bool LittelmannPath::GenerateOrbit
         { found=false;
           currentPath.ActByEalpha(theIndex);
           if (!currentPath.IsEqualToZero())
-  //          hashedOutput.AddOnTopNoRepetitionHash(currentPath);
-            if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
+  //          hashedOutput.AddNoRepetition(currentPath);
+            if (hashedOutput.AddNoRepetition(currentPath))
             { found=true;
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
@@ -1334,8 +1219,8 @@ bool LittelmannPath::GenerateOrbit
         { found=false;
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
-            //hashedOutput.AddOnTopNoRepetitionHash(currentPath);
-            if (hashedOutput.AddOnTopNoRepetitionHash(currentPath))
+            //hashedOutput.AddNoRepetition(currentPath);
+            if (hashedOutput.AddNoRepetition(currentPath))
             { found=true;
               currentSequence.AddOnTop(-theIndex-1);
               outputOperators.AddOnTop(currentSequence);
@@ -1503,11 +1388,11 @@ void ModuleSSalgebraNew<CoefficientType>::GetAdActionHomogenousElT
     List<ElementUniversalEnveloping<CoefficientType> >& outputCurrentList=
     outputSortedByArgumentWeight[i];
     outputCurrentList.SetSize(currentWordList.size);
-    root& currentWeight=this->theGeneratingWordsWeightsSimpleCoords[i];
+    root& currentWeight=this->theModuleWeightsSimpleCoords[i];
     targetWeight=currentWeight+weightUEEltSimpleCoords;
 //    std::cout << "<br>target weight: " << targetWeight.ElementToString() << "="
 //    << currentWeight.ElementToString() << "+" << inputWeight.ElementToString();
-    int theIndex=this->theGeneratingWordsWeightsSimpleCoords.IndexOfObjectHash(targetWeight);
+    int theIndex=this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
     for (int j=0; j<currentWordList.size; j++)
     { ElementUniversalEnveloping<CoefficientType>& currentOutputWord=outputCurrentList[j];
       if (theIndex==-1)
@@ -1578,16 +1463,16 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       *outputReport = "Error: number of Littelmann paths exceeded allowed limit of 1000.";
     return false;
   }
-  this->theGeneratingWordsWeightsSimpleCoords.ClearTheObjects();
+  this->theModuleWeightsSimpleCoords.Clear();
   MonomialChar<Rational> tempCharMon;
   tempCharMon.Coefficient=1;
   this->theCharOverH.Nullify(0);
   for (int i=0; i<thePaths.size; i++)
-  { this->theGeneratingWordsWeightsSimpleCoords.AddOnTopNoRepetitionHash(*thePaths[i].Waypoints.LastObject());
+  { this->theModuleWeightsSimpleCoords.AddNoRepetition(*thePaths[i].Waypoints.LastObject());
     tempCharMon.weightFundamentalCoords= theWeyl.GetFundamentalCoordinatesFromSimple(*thePaths[i].Waypoints.LastObject());
     this->theCharOverH+=tempCharMon;
   }
-  this->theGeneratingWordsWeightsSimpleCoords.QuickSortAscending();
+  this->theModuleWeightsSimpleCoords.QuickSortAscending();
   std::stringstream out2, monomialDetailStream;
   if (outputReport!=0)
   { monomialDetailStream << "Number of Littelmann paths: " << thePaths.size;
@@ -1604,7 +1489,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 
-  this->theGeneratingWordsGrouppedByWeight.SetSize(this->theGeneratingWordsWeightsSimpleCoords.size);
+  this->theGeneratingWordsGrouppedByWeight.SetSize(this->theModuleWeightsSimpleCoords.size);
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     this->theGeneratingWordsGrouppedByWeight[i].size=0;
   MonomialUniversalEnveloping<CoefficientType> currentNonReducedElement;
@@ -1619,9 +1504,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       (this->theAlgebra->DisplayIndexToChevalleyGeneratorIndex(theIndex), theRingUnit);
     }
     root& hwCurrent=*thePaths[i].Waypoints.LastObject();
-    int theIndex=this->theGeneratingWordsWeightsSimpleCoords.IndexOfObjectHash(hwCurrent);
+    int theIndex=this->theModuleWeightsSimpleCoords.GetIndex(hwCurrent);
     if (theIndex==-1)
-    { std::cout << "couldn't find weight : " << hwCurrent.ElementToString() << " in " << this->theGeneratingWordsWeightsSimpleCoords.ElementToString();
+    { std::cout << "couldn't find weight : " << hwCurrent.ElementToString() << " in " << this->theModuleWeightsSimpleCoords.ElementToString();
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << " # of weights is 10000";
       if (outputReport!=0)
@@ -1630,19 +1515,25 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     }
     this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentNonReducedElement);
   }
-  this->theGeneratingWordsNonReduced.ClearTheObjects();
+  this->theGeneratingWordsNonReduced.Clear();
   this->theGeneratingWordsNonReduced.SetExpectedSize(thePaths.size);
   this->theGeneratingWordsNonReduced.size=0;
+  this->theGeneratingWordsNonReducedWeights.SetSize(0);
+  this->theGeneratingWordsNonReducedWeights.Reserve(thePaths.size);
+  int wordCounter=-1;
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
     currentList.QuickSortDescending();
     for (int j=0; j<currentList.size; j++)
-    { this->theGeneratingWordsNonReduced.AddOnTopHash(currentList[j]);
+    { wordCounter++;
+      this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
+      this->theGeneratingWordsNonReducedWeights.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
       if (outputReport!=0)
       { monomialDetailStream << "<br>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
         << currentList[j].ElementToString(false, false, theGlobalVariables, tempFormat) << "  v( "
         << this->theHWFundamentalCoordsBaseField.ElementToString() << ", "
         << root(this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() << ")";
+;
       }
     }
   }
@@ -1653,7 +1544,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
       Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
       if (outputReport!=0)
-      { monomialDetailStream << "<hr>weight in simple coords: " << this->theGeneratingWordsWeightsSimpleCoords[i].ElementToString();
+      { monomialDetailStream << "<hr>weight in simple coords: " << this->theModuleWeightsSimpleCoords[i].ElementToString();
         List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
         for (int i=0; i<currentList.size; i++)
         { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
@@ -1889,7 +1780,7 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetitionHash(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
   { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction.TheObjects[i];
@@ -1897,7 +1788,7 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
     ElementUniversalEnveloping<CoefficientType>& currentElt=theElements.TheObjects[i];
     for (int j=0; j<currentElt.size; j++)
     { MonomialUniversalEnveloping<CoefficientType>& currentMon=currentElt.TheObjects[j];
-      currentList.TheObjects[outputCorrespondingMonomials.IndexOfObjectHash(currentMon)]=currentMon.Coefficient;
+      currentList.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=currentMon.Coefficient;
     }
   }
   outputTheBasis.size=0;
@@ -2260,7 +2151,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
         return false;
     intermediateAccum*=rightMon.Coefficient;
     Accum+=intermediateAccum;
-    int theIndex= intermediateAccum.IndexOfObjectHash(constMon);
+    int theIndex= intermediateAccum.GetIndex(constMon);
     if (theIndex!=-1)
       output+=intermediateAccum[theIndex].Coefficient;
   }
@@ -2356,7 +2247,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
       }
     intermediateAccum*=leftMon.Coefficient;
     Accum+=intermediateAccum;
-    int theIndex= intermediateAccum.IndexOfObjectHash(constMon);
+    int theIndex= intermediateAccum.GetIndex(constMon);
     if (theIndex!=-1)
       output+=intermediateAccum[theIndex].Coefficient;
   }
@@ -2429,6 +2320,30 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
   return out.str();
 }
 
+int ParserNode::EvaluateSplitCharOverLeviParabolic
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root parSel;
+  ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
+//  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
+  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (parSel.size!=theDim)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  std::stringstream out;
+  out << "Parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  charSSAlgMod& theChar=charNode.theChar.GetElement();
+  std::string report;
+  charSSAlgMod tempChar;
+  ReflectionSubgroupWeylGroup subWeyl;
+  theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
+  out << report;
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeString;
+  return theNode.errorNoError;
+}
+
 int ParserNode::EvaluateSplitIrrepOverLeviParabolic
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { root theWeightFundCoords, parSel;
@@ -2450,8 +2365,10 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   out << ".<br>Your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
   ModuleSSalgebraNew<Rational> theMod;
 
+  Selection emptySel;
+  emptySel.init(theDim);
   theMod.MakeFromHW
-  (theNode.owner->theHmm.theRange, theWeightFundCoords, parSel, theGlobalVariables, 1, 0, 0);
+  (theNode.owner->theHmm.theRange, theWeightFundCoords, emptySel, theGlobalVariables, 1, 0, 0);
   std::string report;
   theMod.SplitOverLevi(& report, parSel, theGlobalVariables, 1, 0);
   out << "<br>" << report;
@@ -2522,53 +2439,34 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
       theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
     }
   }
-  out << "<br> Eigenvectors: ";
+  out << "<br>Eigenvectors:<table> ";
+  root zeroRoot;
+  zeroRoot.MakeZero(this->theAlgebra->GetRank());
   for (int j=0; j<theFinalEigenSpace.size; j++)
-  { out << "<hr>Weight in simple coords: "
-    << theIrrep.theGeneratingWordsWeightsSimpleCoords[j].ElementToString() << "<br>Eigenvector:<br>";
+  { out << "<tr><td>";
     ElementUniversalEnveloping<Rational> currentElt, tempElt;
     currentElt.Nullify(*this->theAlgebra);
     root& currentVect= theFinalEigenSpace[j];
+    int lastNonZeroIndex=-1;
     for (int i=0; i<currentVect.size; i++)
-    { tempElt=theIrrep.theGeneratingWordsNonReduced[i];
-      tempElt*=currentVect[i];
-      currentElt+=tempElt;
-    }
+      if (currentVect[i]!=0)
+      { tempElt=theIrrep.theGeneratingWordsNonReduced[i];
+        tempElt*=currentVect[i];
+        currentElt+=tempElt;
+        lastNonZeroIndex=i;
+      }
     if (currentElt.size>1)
       out << "(";
     out << currentElt.ElementToString(false, theGlobalVariables, theFormat);
     if (currentElt.size>1)
       out << ")";
-    out << "\\cdot v";
-    if (j!=theFinalEigenSpace.size-1)
-      out << ", ";
+    out << " v(" << this->theHWFundamentalCoordS.ElementToString() << "," << zeroRoot.ElementToString() << ")" ;
+    out << "</td><td>(weight: "
+    << this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex].ElementToString() << ")</td></tr>";
   }
+  out << "</table>";
   if (Report!=0)
     *Report=out.str();
-}
-
-int ParserNode::EvaluateSplitCharOverLeviParabolic
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root parSel;
-  ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
-//  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
-  if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (parSel.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  std::stringstream out;
-  out << "Parabolic subalgebra selection: " << parSel.ElementToString() << ".";
-  charSSAlgMod& theChar=charNode.theChar.GetElement();
-  std::string report;
-  charSSAlgMod tempChar;
-  ReflectionSubgroupWeylGroup subWeyl;
-  theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
-  out << report;
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateMakeWeylFromParSel
@@ -2619,8 +2517,9 @@ bool charSSAlgMod::SplitCharOverLevi
   MonomialChar<Rational> tempMon, localHighest;
   WeylGroup& theWeyl=this->theBoss->theWeyl;
   for (int i=0; i<dominantCharAmbient.size; i++)
-  { tempRootS.size=0;
+  { tempRootS.SetSize(0);
     tempRootS.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(dominantCharAmbient[i].weightFundamentalCoords));
+    orbitDom.Clear();
     if (!theWeyl.GenerateOrbit(tempRootS, false, orbitDom, false, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
@@ -2638,8 +2537,8 @@ bool charSSAlgMod::SplitCharOverLevi
   }
   output.Nullify(0);
   List<Rational> tempMults;
-  out << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+//  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+//  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
   //std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
 //  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
   while(!remainingCharDominantLevi.IsEqualToZero())
@@ -2650,13 +2549,13 @@ bool charSSAlgMod::SplitCharOverLevi
       { tempMon=localHighest;
         tempMon.weightFundamentalCoords+=this->theBoss->theWeyl.GetFundamentalCoordinatesFromSimple
         (outputWeylSub.simpleGenerators[i]);
-        if (remainingCharDominantLevi.ContainsObjectHash(tempMon))
+        if (remainingCharDominantLevi.Contains(tempMon))
         { localHighest=tempMon;
           Found=true;
         }
       }
     }
-    localHighest=remainingCharDominantLevi[remainingCharDominantLevi.IndexOfObjectHash(localHighest)];
+    localHighest=remainingCharDominantLevi[remainingCharDominantLevi.GetIndex(localHighest)];
     output+=localHighest;
     if (!outputWeylSub.FreudenthalEvalIrrepIsWRTLeviPart
         (localHighest.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
@@ -2670,6 +2569,10 @@ bool charSSAlgMod::SplitCharOverLevi
       remainingCharDominantLevi-=tempMon;
     }
   }
+  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (output.ElementToString("V", "\\omega", false))
+  ;
+
   if (Report!=0)
   { //out << "<hr>"  << "The split character is: " << output.ElementToString("V", "\\omega", false);
     DrawingVariables theDV;
@@ -2724,8 +2627,8 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
   int finalHashSize=100;
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
-  outputWeightsSimpleCoords.ClearTheObjects();
-  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  outputWeightsSimpleCoords.Clear();
+  outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
   int numTotalWeightsFound=0;
   int numPosRoots=this->AmbientWeyl.RootsOfBorel.size;
   root currentWeight, currentWeightRaisedToDominantWRTAmbientAlgebra;
@@ -2748,7 +2651,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero())
           { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoordinates().NumShort;
             currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-            if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+            if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
             { numTotalWeightsFound++;
               outputWeightsByHeight[currentIndexShift].AdjustHashes();
             }
@@ -2758,12 +2661,12 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
 //    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    std::cout << " Size of current level: " << currentHashes.size;
-    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+    outputWeightsSimpleCoords.AddOnTop(currentHashes);
 //    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
-    currentHashes.ClearTheObjects();
+    currentHashes.Clear();
 //    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
   }
@@ -2804,8 +2707,8 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
   int finalHashSize=100;
   for (int i=0; i<topHeightRootSystemPlusOne; i++)
     outputWeightsByHeight[i].SetHashSizE(finalHashSize);
-  outputWeightsSimpleCoords.ClearTheObjects();
-  outputWeightsByHeight[0].AddOnTopHash(highestWeightTrue);
+  outputWeightsSimpleCoords.Clear();
+  outputWeightsByHeight[0].AddOnTop(highestWeightTrue);
   int numTotalWeightsFound=0;
   root currentWeight, currentWeightRaisedToDominant;
 //  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
@@ -2823,7 +2726,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
         if (this->IsDominantWeight(currentWeight))
         { int currentIndexShift=this->RootsOfBorel[i].SumCoordinates().NumShort;
           currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetitionHash(currentWeight))
+          if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
           { numTotalWeightsFound++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -2832,12 +2735,12 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
 //    std::cout << "<br>time spent before accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    std::cout << " Size of current level: " << currentHashes.size;
-    outputWeightsSimpleCoords.AddOnTopHash(currentHashes);
+    outputWeightsSimpleCoords.AddOnTop(currentHashes);
 //    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
-    currentHashes.ClearTheObjects();
+    currentHashes.Clear();
 //    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
   }
@@ -2973,14 +2876,14 @@ bool ReflectionSubgroupWeylGroup::DrawContour
 (const root& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
  int UpperBoundVertices)
 { HashedList<root> theOrbit;
-  theOrbit.AddOnTopHash(highestWeightSimpleCoord);
+  theOrbit.AddOnTop(highestWeightSimpleCoord);
   WeylGroup& theWeyl=this->AmbientWeyl;
   root tempRoot;
   for (int i=0; i<theOrbit.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)
     { tempRoot=theOrbit[i];
       theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
-      if (theOrbit.AddOnTopNoRepetitionHash(tempRoot))
+      if (theOrbit.AddNoRepetition(tempRoot))
         theDV.drawLineBetweenTwoVectorsBuffer(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
       if (theOrbit.size>UpperBoundVertices)
         return false;
@@ -3137,8 +3040,8 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
   CoefficientType theCoeff;
   Matrix<CoefficientType> tempMat1, tempMat2;
 //  std::cout << theMod.ElementToString();
-//  std::cout << "<br>theMod.theGeneratingWordsWeightsSimpleCoords.size: "
-//  << theMod.theGeneratingWordsWeightsSimpleCoords.size;
+//  std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
+//  << theMod.theModuleWeightsSimpleCoords.size;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
 //    std::cout << "<br> Processing monomial " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat);
@@ -3245,10 +3148,10 @@ void ModuleSSalgebraNew<CoefficientType>::
     for (int k=0; k<outputSortedByArgumentWeight[j].size; k++)
     { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->theGeneratingWordsGrouppedByWeight[j][k];
       ElementUniversalEnveloping<CoefficientType>& imageCurrentMon=outputSortedByArgumentWeight[j][k];
-      int indexColumn=this->theGeneratingWordsNonReduced.IndexOfObjectHash(currentMon);
+      int indexColumn=this->theGeneratingWordsNonReduced.GetIndex(currentMon);
       assert(indexColumn!=-1);
       for (int l=0; l< imageCurrentMon.size; l++)
-      { int indexRow=this->theGeneratingWordsNonReduced.IndexOfObjectHash(imageCurrentMon[l]);
+      { int indexRow=this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
         assert(indexRow!=-1);
         output.elements[indexRow][indexColumn]=imageCurrentMon[l].Coefficient;
 //        std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
@@ -3286,8 +3189,8 @@ void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
   theMon.Coefficient.MakeConst(theRingUnit, theMod.theAlgebra);
   theMon.owneR=&theOwner;
   assert(TheIndexInOwner<theOwner.size);
-  this->ClearTheObjects();
-  this->AddOnTopHash(theMon);
+  this->Clear();
+  this->AddOnTop(theMon);
 }
 
 template <class CoefficientType>
@@ -3304,8 +3207,8 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
   theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
   theMon.MakeConst(theRingUnit, *theMod.theAlgebra);
 
-  this->ClearTheObjects();
-  this->AddOnTopHash(tensorMon);
+  this->Clear();
+  this->AddOnTop(tensorMon);
 }
 
 template <class CoefficientType>
@@ -3323,8 +3226,8 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
   theGenerator.MakeOneGenerator
   (indexGenerator, theRingUnit, *theOwner[0].theAlgebra)
   ;
-  PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+//  PolynomialOutputFormat tempFormat;
+//  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i<this->size; i++)
   { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
     accumMon.theMons.SetSize(0);
@@ -3382,7 +3285,7 @@ out <<     this->actionsSimpleGensMatrixForM= other.actionsSimpleGensMatrixForM;
     this->theHWSimpleCoordS=other.theHWSimpleCoordS;
     this->theHWFundamentalCoordS=other.theHWFundamentalCoordS;
     this->theHWFundamentalCoordsBaseField= other.theHWFundamentalCoordsBaseField;
-    this->theGeneratingWordsWeightsSimpleCoords=other.theGeneratingWordsWeightsSimpleCoords;
+    this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
     this->theCharOverH=other.theCharOverH;
     this->theChaR=other.theChaR;
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;

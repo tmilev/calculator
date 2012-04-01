@@ -105,7 +105,6 @@ void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
 
-
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -114,7 +113,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -147,6 +146,9 @@ int main(int argc, char **argv)
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
+
+
+
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
@@ -184,6 +186,9 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+
+CommandList theComputation;
+
 //  civilizedInput="h_2 v((1,0),(0,0))";
 //  civilizedInput="g_{8}(g_{-8} v((x_1,1,0),(1,0,0)) )";
 //  civilizedInput="v((x_1,1,0),(1,0,0))(x_2  v((x_1,1,0),(1,0,0)) )+v((x_1,1,0),(1,0,0))(  v((x_1,1,0),(1,0,0)) )";
@@ -191,8 +196,8 @@ int main(int argc, char **argv)
 
 //  civilizedInput=" g_{-1} (  v((1),(0))* v((1),(1)) )";
 //  civilizedInput="g_1 v((1,0),(0,0))";
-  theParser.DefaultWeylLetter='G';
-  theParser.DefaultWeylRank=2;
+//  theParser.DefaultWeylLetter='G';
+//  theParser.DefaultWeylRank=2;
 //  civilizedInput="g_1 v((0,0,1), (1,0,0))";
 //  civilizedInput="v((0,x_1,1),(1,0,0))";
 //  civilizedInput="allLittelmannPaths(0,1)";
@@ -290,17 +295,17 @@ int main(int argc, char **argv)
 //  civilizedInput="drawConeAffine( cone((1,0,0,0)))";
 //  civilizedInput="RunGtwoInBthree";
 //  civilizedInput="latticeImprecise((1, 0.000000001), (1.00000000001, 1.00000000001))";
-/*  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)
-    +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(19)
-+animateRootSystemBlueDot(0,2,1, (-1,0))+animatePause(19)
-+animateRootSystemBlueDot(0,2,1, (-1,-1))
-    +animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,-1))
-    +animatePause(19)+animateRootSystemDefault(0,2,1)+animatePause(79)+animateRootSystemDefault(1,3,100)+animatePause(20)
-    +animateRootSystemDefault(2,4,100)+animatePause(20)+animateRootSystemDefault(3,5,1)+animatePause(79)+animateRootSystemDefault(6,2,1)
-    +animatePause(29)+animateRootSystemDefault(5,4,1)+animatePause(59)+animateRootSystemDefault(4,6,1)+animatePause(59)
-    +animateRootSystemDefault(4,7,1)+animatePause(59)+animateRootSystemDefault(4,8,1)+animatePause(59)+animateRootSystemDefault(6,2,1)
-    +animatePause(99)+animateRootSystemDefault(4,8,1)+animatePause(119)+animateRootSystemDefault(4,7,1)+animatePause(119)
-    +animateRootSystemDefault(5,4,100)+animatePause(50)+animateRootSystemDefault(4,6,100)+animatePause(230)";*/
+//  civilizedInput= "animateRootSystemDefault(4,6,1)+animatePause(380)+animateRootSystemBlueDot(0,2,1, (1,0))+animatePause(49)
+//    +animateRootSystemBlueDot(0,2,1, (1,1))+animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,1))+animatePause(19)
+//+animateRootSystemBlueDot(0,2,1, (-1,0))+animatePause(19)
+//+animateRootSystemBlueDot(0,2,1, (-1,-1))
+//    +animatePause(19)+animateRootSystemBlueDot(0,2,1, (0,-1))
+//    +animatePause(19)+animateRootSystemDefault(0,2,1)+animatePause(79)+animateRootSystemDefault(1,3,100)+animatePause(20)
+//    +animateRootSystemDefault(2,4,100)+animatePause(20)+animateRootSystemDefault(3,5,1)+animatePause(79)+animateRootSystemDefault(6,2,1)
+//    +animatePause(29)+animateRootSystemDefault(5,4,1)+animatePause(59)+animateRootSystemDefault(4,6,1)+animatePause(59)
+//    +animateRootSystemDefault(4,7,1)+animatePause(59)+animateRootSystemDefault(4,8,1)+animatePause(59)+animateRootSystemDefault(6,2,1)
+//    +animatePause(99)+animateRootSystemDefault(4,8,1)+animatePause(119)+animateRootSystemDefault(4,7,1)+animatePause(119)
+//    +animateRootSystemDefault(5,4,100)+animatePause(50)+animateRootSystemDefault(4,6,100)+animatePause(230)";
   //civilizedInput="(x_1\\mapsto factorial(10):x_1)";
   //civilizedInput="getWeylDim(0,0,(x_1\\mapsto 10: x_1))";
   //civilizedInput="factorial(100)/2";
@@ -401,11 +406,6 @@ int main(int argc, char **argv)
   //std::cout << "before parsing numvars is: " << theParser.NumVariables;
   CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, tempS);
   civilizedInput=tempS;
-/*  std::cout << "<div id=\"divProgressReport\"> <script type=\"text/javascript\"> window.setTimeout("Click()", 100);</script> </div>";
-
-  <script  document.getElementById(\"textDim\").value=" << theParser.DefaultWeylRank << "; \n";
-  std::cout << "document.getElementById(\"textType\").value=\"" << theParser.DefaultWeylLetter << "\"; </script>";
-  */
 
   PolynomialOutputFormat theOutputFormat;
   theOutputFormat.alphabetBases.SetSize(2);

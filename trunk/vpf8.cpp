@@ -5850,14 +5850,14 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
   return out1.str();
 }
 
-std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)
+std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)const
 { PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex(inputLetter, tempFormat.alphabetBases[1]);
   return this->ElementToStringLetterFormat(tempFormat, useLatex, DontIncludeLastVar);
 }
 
 std::string root::ElementToStringLetterFormat
-(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)
+(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out;

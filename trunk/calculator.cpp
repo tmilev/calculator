@@ -105,6 +105,28 @@ void CallSystemWrapper(const std::string& theCommand)
 { system(theCommand.c_str());
 }
 
+std::string GetSelectHTMLStringTEmp
+(List<std::string>& optionsType, List<std::string>& optionsRank,
+  std::string& selectedType, std::string& selectedRank)
+{ std::stringstream output;
+  output << "  <select name=\"textType\" id=\"textType\">\n";
+  for (int i=0; i<optionsType.size; i++)
+  { output << "   <option";
+    if (selectedType==optionsType[i])
+      output << " selected=\"selected\"";
+    output << ">" << optionsType[i] << "</option>\n";
+  }
+  output << "</select>";
+  output << "  <select name=\"textDim\" id=\"textDim\">\n";
+  for (int i=0; i<optionsRank.size; i++)
+  { output << "   <option";
+    if (selectedRank==optionsRank[i])
+      output << " selected=\"selected\"";
+    output << ">" << optionsRank[i] << "</option>\n";
+  }
+  output << " </select> Root system.\n";
+  return output.str();
+}
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -146,9 +168,6 @@ int main(int argc, char **argv)
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
-
-
-
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n</head>\n<body onload=\"checkCookie();\">\n";
@@ -173,6 +192,58 @@ int main(int argc, char **argv)
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
+  List<std::string> optionsType, optionsRank;
+  optionsType.AddOnTop("A");
+  optionsType.AddOnTop("B");
+  optionsType.AddOnTop("C");
+  optionsType.AddOnTop("D");
+  optionsType.AddOnTop("E");
+  optionsType.AddOnTop("F");
+  optionsType.AddOnTop("G");
+  optionsType.AddOnTop("Calculator");
+  optionsRank.AddOnTop("1");
+  optionsRank.AddOnTop("2");
+  optionsRank.AddOnTop("3");
+  optionsRank.AddOnTop("4");
+  optionsRank.AddOnTop("5");
+  optionsRank.AddOnTop("6");
+  optionsRank.AddOnTop("7");
+  optionsRank.AddOnTop("8");
+//  inputWeylString="Calculator";
+//  civilizedInput="h_a";
+//  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
+
+  if (inputWeylString=="Calculator")
+  { std::stringstream tempStreamXX;
+    static_html4(tempStreamXX);
+    std::cout << "<table>\n <tr valign=\"top\">\n <td>";
+    std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" <<
+    theParser.DisplayNameCalculator << "\">\n" ;
+    std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString)
+    <<  tempStreamXX.str();
+     std::cout << "\n<br>\n";
+    std::string civilizedInputSafish;
+    if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
+      std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
+    std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" >";
+    std::cout << civilizedInputSafish;
+    std::cout << "</textarea>\n<br>\n";
+    std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
+  //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
+    std::cout << "\n</FORM>";
+    CommandList theComputation;
+    theComputation.GetElapsedTimeNonSafe=&GetElapsedTimeInSeconds;
+    theComputation.Evaluate(civilizedInput);
+    std::cout << "<hr><b>Result.</b><br>";
+    if (civilizedInput!="")
+      std::cout <<  theComputation.output;
+    std::cout << "</td><td valign=\"top\">";
+    std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
+    std::cout << theComputation.theLog;
+    std::cout << "</td></tr></table>";
+    std::cout << "</body></html>";
+    return 0;
+  }
   if (inputWeylString!="")
     theParser.DefaultWeylLetter=inputWeylString[0];
   else
@@ -431,6 +502,7 @@ CommandList theComputation;
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" << theParser.DisplayNameCalculator << "\">\n" ;
   std::stringstream tempStream4;
   static_html4(tempStream4);
+  std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString) ;
   std:: cout << tempStream4.str();
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylLetterInput\" value=\"" << theParser.DefaultWeylLetter << "\"></input>";
 //  std::cout << "<input type=\"text\" size =\"1\" name=\"weylRankInput\" value=\"" << theParser.DefaultWeylRank << "\"></input>";

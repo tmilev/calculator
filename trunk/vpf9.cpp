@@ -884,7 +884,7 @@ void root::ElementToString(std::string& output, bool useLaTeX)const
   output.append(")");
 }
 
-void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)
+void root::ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)const
 { if (useLatex)
     output= this->ElementToStringLetterFormat("\\varepsilon", useLatex);
   else
@@ -28325,6 +28325,10 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   }
   if (readAhead=="%26")
   { out << "&";
+    return true;
+  }
+  if (readAhead=="%3D")
+  { out << "=";
     return true;
   }
   if (readAhead=="%7D")

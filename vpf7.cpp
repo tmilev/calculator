@@ -1537,6 +1537,35 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
     }
   }
+  if (outputReport!=0)
+  { std::stringstream latexTableStream;
+    Vector<CoefficientType> tempV;
+    tempV=this->theHWFundamentalCoordsBaseField;
+    for (int i=0; i<tempV.size; i++)
+      tempV[i]-=this->theHWFundamentalCoordS[i];
+    latexTableStream << "<hr>Ready copy +paste for your .tex file:<br> <br>\\begin{tabular}{ll}\n\\hline\\hline \\multicolumn{2}{|c|}{ Highest weight $\\lambda="
+    << tempV.ElementToStringLetterFormat("\\omega", false, false)
+    << "+" << theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables).ElementToStringEpsilonForm()
+    << "$}\\\\\\hline weight & basis vector\\\\\n";
+    for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+      for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
+      { std::string stringWeightTemp=theWeyl.GetEpsilonCoords
+        (this->theModuleWeightsSimpleCoords[i], theGlobalVariables).ElementToStringEpsilonForm();
+        latexTableStream << "\n$" << tempV.ElementToStringLetterFormat("\\omega", false, false);
+        if (stringWeightTemp!="0")
+        { if (stringWeightTemp[0]!='-')
+            latexTableStream << "+";
+          latexTableStream << stringWeightTemp;
+        }
+        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ElementToString
+        (false, false, theGlobalVariables, tempFormat);
+        if (theMonString=="1")
+          theMonString="";
+        latexTableStream << "$&$" << theMonString << "  v_\\lambda$\\\\\n";
+      }
+    latexTableStream << "\\end{tabular}<hr>";
+    monomialDetailStream << (latexTableStream.str());
+  }
   this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseField, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
   if (outputReport!=0)

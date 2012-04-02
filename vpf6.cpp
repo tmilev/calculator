@@ -408,7 +408,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEEByEusingO(this->theBoss->opTimes());
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE();
-  if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}" && lookAhead!="}")
+  if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXEXByE();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
@@ -454,6 +454,62 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
         result=true;
     }
   return result;
+}
+
+void CommandList::init()
+{ this->controlSequences.Clear();
+  this->operations.Clear();
+  this->theNonBoundVars.Clear();
+  this->theDictionary.Clear();
+  this->cachedExpressions.Clear();
+  this->imagesCashedExpressions.SetSize(0);
+  this->theStandardOpEvalFunctions.SetSize(0);
+  this->syntaxErrors.SetSize(0);
+  this->evaluationErrors.SetSize(0);
+  this->thePropertyNameS.Clear();
+  this->targetProperties.SetSize(0);
+  this->MaxRecursionDepthDefault=1000;
+  this->AddOperationNoFail("+",this->EvaluateStandardPlus);
+  this->AddOperationNoFail("-", this->EvaluateStandardMinus);
+  this->AddOperationNoFail("/", 0);
+  this->AddOperationNoFail("*", this->EvaluateStandardTimes);
+  this->AddOperationNoFail(":=", 0);
+  this->AddOperationNoFail("if:=", 0);
+  this->AddOperationNoFail("^", 0);
+  this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual);
+  //the following two operations are chosen on purpose so that they correspond to LaTeX-undetectable
+  //expressions
+  //the following is the binding variable operation
+  this->AddOperationNoFail("{{}}", 0);
+  //the following is the operation for using a variable as a function
+  this->AddOperationNoFail("{}", 0);// this->EvaluateStandardFunction);
+  this->AddOperationNoFail("if", this->EvaluateIf);
+  this->AddOperationNoFail("Integer", 0);
+  this->AddOperationNoFail("VariableNonBound", 0);
+  this->AddOperationNoFail("VariableBound", 0);
+  this->AddOperationNoFail("Error", 0);
+
+  this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
+  this->controlSequences.AddOnTop("Variable");
+  this->controlSequences.AddOnTop(this->operations);//all operations are also control sequences
+  this->controlSequences.AddOnTop("Expression");
+  this->controlSequences.AddOnTop(",");
+  this->controlSequences.AddOnTop("\\cdot");
+  this->controlSequences.AddOnTop("_");
+  this->controlSequences.AddOnTop("(");
+  this->controlSequences.AddOnTop(")");
+  this->controlSequences.AddOnTop("[");
+  this->controlSequences.AddOnTop("]");
+  this->controlSequences.AddOnTop("{");
+  this->controlSequences.AddOnTop("}");
+  this->controlSequences.AddOnTop(":");
+  this->controlSequences.AddOnTop("=");
+  this->controlSequences.AddOnTop(";");
+  this->controlSequences.AddOnTop("$");
+//    this->thePropertyNames.AddOnTop("IsCommutative");
+  this->TotalNumPatternMatchedPerformed=0;
+  this->initPredefinedVars();
+  this->initTargetProperties();
 }
 
 bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
@@ -844,7 +900,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   bool NonReduced=true;
   int counter=-1;
   while (NonReduced)
-  { const double MaxAllowedTimeInSeconds=30;
+  { const double MaxAllowedTimeInSeconds=300000;
     if (this->GetElapsedTimeNonSafe!=0)
       if (this->GetElapsedTime()-this->StartTimeInSeconds >MaxAllowedTimeInSeconds)
       { std::cout << "<br><b>Max allowed computational time is " << MaxAllowedTimeInSeconds << ";  so far, "
@@ -853,6 +909,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       }
     counter++;
     NonReduced=false;
+    std::string debugString=theExpression.ElementToString();
     for (int i=0; i<theExpression.children.size; i++)
       if(! this->EvaluateExpressionReturnFalseIfExpressionIsBound
          (commandIndex, theExpression.children[i], RecursionDepth+1, maxRecursionDepth, bufferPairs, theLog))
@@ -880,10 +937,10 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
         if (currentPattern.errorString=="")
           if (currentPattern.theOperation==this->opDefine() || currentPattern.theOperation==this->opDefineConditional())
           { this->TotalNumPatternMatchedPerformed++;
+            bufferPairs.reset();
             if(this->ProcessOneExpressionOnePatternOneSub
             (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth, theLog))
             { NonReduced=true;
-
               break;
             }
           }
@@ -896,7 +953,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   return true;
 }
 
-Expression* CommandList::DepthFirstSubExpressionPatternMatch
+Expression* CommandList::PatternMatch
   (int commandIndex, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    int RecursionDepth, int MaxRecursionDepth, Expression* condition, std::stringstream* theLog, bool logAttempts)
 { if (RecursionDepth>=MaxRecursionDepthDefault)
@@ -906,53 +963,27 @@ Expression* CommandList::DepthFirstSubExpressionPatternMatch
     theExpression.errorString=out.str();
     return 0;
   }
-  static int patternMatchDebugCounter=-1;
- // if (RecursionDepth==0)
-    patternMatchDebugCounter++;
-
+  if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, RecursionDepth+1, MaxRecursionDepth, theLog))
+    return 0;
   if (theLog!=0 && logAttempts)
-    if (RecursionDepth==0)
-    { patternMatchDebugCounter++;
-      (*theLog) << "<hr>(" << patternMatchDebugCounter << ") attempting to match pattern "
-      << thePattern.ElementToString();
-    }
-//  if (patternMatchDebugCounter==0)
-//  { std::cout << "<br>problem starts here:";
-//    std::cout << "<br>" << bufferPairs.ElementToString();
-//    std::cout << "<br>the expression: " << theExpression.ElementToString();
-//  }
-  if (this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, RecursionDepth+1, MaxRecursionDepth, theLog))
-  { if (theLog!=0 && logAttempts)
-      (*theLog) << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
-    if (condition==0)
-      return &theExpression;
-    else
-    { Expression tempExp=*condition;
-      if (theLog!=0 && logAttempts)
-        (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ElementToString();
-      this->SpecializeBoundVars(tempExp, commandIndex, bufferPairs, RecursionDepth+1, MaxRecursionDepth);
-      if (theLog!=0 && logAttempts)
-        (*theLog) << "<hr>Specialized condition: " << tempExp.ElementToString() << "; evaluating...";
-      ExpressionPairs tempPairs;
-      this->EvaluateExpressionReturnFalseIfExpressionIsBound
-      (commandIndex, tempExp, RecursionDepth+1, MaxRecursionDepth, tempPairs, theLog);
-      if (theLog!=0 && logAttempts)
-        (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ElementToString() << "; evaluating...";
-      if (tempExp.theOperation==this->opInteger())
-        if (tempExp.theData==1)
-          return & theExpression;
-    }
-  }
-  Expression* result=0;
-  for (int i=0; i<theExpression.children.size; i++)
-  { bufferPairs.reset();
-    result=this->DepthFirstSubExpressionPatternMatch
-    (commandIndex, thePattern, theExpression.children[i], bufferPairs,
-     RecursionDepth+1, MaxRecursionDepth,  condition, theLog);
-    if (result!=0)
-      return result;
-  }
-  return result;
+    (*theLog) << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
+  if (condition==0)
+    return &theExpression;
+  Expression tempExp=*condition;
+  if (theLog!=0 && logAttempts)
+    (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ElementToString();
+  this->SpecializeBoundVars(tempExp, commandIndex, bufferPairs, RecursionDepth+1, MaxRecursionDepth);
+  if (theLog!=0 && logAttempts)
+    (*theLog) << "<hr>Specialized condition: " << tempExp.ElementToString() << "; evaluating...";
+  ExpressionPairs tempPairs;
+  this->EvaluateExpressionReturnFalseIfExpressionIsBound
+  (commandIndex, tempExp, RecursionDepth+1, MaxRecursionDepth, tempPairs, theLog);
+  if (theLog!=0 && logAttempts)
+    (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ElementToString() << "; evaluating...";
+  if (tempExp.theOperation==this->opInteger())
+    if (tempExp.theData==1)
+      return & theExpression;
+  return 0;
 }
 
 void CommandList::SpecializeBoundVars
@@ -986,9 +1017,8 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
     theCondition=&thePattern.children[1];
   Expression* toBeSubbed=0;
   if ((thePattern.theOperation==this->opDefine()) || isConditionalDefine)
-    toBeSubbed=this->DepthFirstSubExpressionPatternMatch
-    (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth,
-     theCondition, theLog);
+    toBeSubbed=this->PatternMatch
+    (commandIndex, currentPattern, theExpression, bufferPairs, RecursionDepth+1, maxRecursionDepth, theCondition, theLog);
   if (toBeSubbed==0)
     return false;
   if (theLog!=0 && logAttempts)
@@ -1027,10 +1057,12 @@ void CommandList::EvaluateCommands()
     }
     std::string commandOutput=this->theCommands[i].finalValue.ElementToString();
     assert((int)this->theCommands[0].syntacticStack[6].theData.theBoss!=-1);
-    if (commandOutput.size()<300)
+    const int MaxLatexChars=1000;
+    if ((signed)commandOutput.size()<MaxLatexChars)
       out << "<td><span class=\"math\">" << commandOutput << "</span></td>";
     else
-      out << "<td><b>output is more than 300 characters, use the non- LaTeX version to the right. </b></td>";
+      out << "<td><b>output is more than " << MaxLatexChars
+      << " characters, use the non- LaTeX version to the right. </b></td>";
 //    std::cout <<"<hr>" << this->theCommands[i].finalValue.ElementToStringPolishForm(0,100);
 
     out << "<td>=</td><td>" << commandOutput;
@@ -1153,18 +1185,22 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     out << this->theData;
   else if (this->theOperation==this->theBoss->opFunction())
   { assert(this->children.size>=2);
-    out << this->children[0].ElementToString
-    (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName());
-    int theFormat=this->format;
-    switch(theFormat)
+    switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
-        out << "_{" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << "}";
+        out <<  this->children[0].ElementToString
+        (recursionDepth+1, maxRecursionDepth, false, this->children[0].NeedBracketsForFunctionName())
+        << "_" << this->children[1].ElementToString
+        (recursionDepth+1, maxRecursionDepth, false, this->children[1].NeedBracketsForFunctionName()) << "";
         break;
       case Expression::formatFunctionUseCdot:
-        out << "\\cdot(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << ")";
+        out <<  this->children[0].ElementToString
+        (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName())
+        << "\\cdot(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << ")";
         break;
       default:
-        out << "{}(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << ")";
+        out << this->children[0].ElementToString
+        (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName())
+        << "{}(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth) << ")";
         break;
     }
   }
@@ -1265,9 +1301,7 @@ std::string Command::ElementToStringSyntacticStack()
 bool Expression::NeedBracketsForFunctionName() const
 { return !(
   this->theOperation==this->theBoss->opVariableBound() ||
-  this->theOperation==this->theBoss->opVariableNonBound() ||
-  (this->theOperation==this->theBoss->opFunction() && this->format==this->formatFunctionUseUnderscore)
-  );
+  this->theOperation==this->theBoss->opVariableNonBound() );
 }
 
 bool Expression::NeedBracketsForMultiplication()const

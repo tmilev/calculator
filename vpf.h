@@ -3454,9 +3454,19 @@ class Vectors: public List<Vector<CoefficientType> >
 
 class root: public Vector<Rational>
 {
+  friend inline root operator-(const root& right)
+  { root tempRoot;
+    tempRoot.Assign(right);
+    tempRoot.MinusRoot();
+    return tempRoot;
+  }
+  friend inline root operator-(const root& left, const root& right)
+  { root result=left;
+    result.Subtract(right);
+    return result;
+  }
 public:
   inline static std::string GetXMLClassName(){ return "root";}
-//the below is to facilitate operator overloading
   root(const root& right){this->Assign(right); }
   root(const Selection& right){this->operator=(right); }
   root(const Vector<Rational>& other){this->CopyFromLight(other);}
@@ -3494,13 +3504,14 @@ public:
     return true;
   }
   void ElementToString(std::string& output)const;
-  std::string ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar);
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar);
-  std::string ElementToStringLetterFormat(const std::string& inputLetter){return this->ElementToStringLetterFormat(inputLetter, false, false);}
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex){ return this->ElementToStringLetterFormat(inputLetter, useLatex, false);}
-  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; };
-  void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml);
-  std::string ElementToStringEpsilonForm(){std::string result; this->ElementToStringEpsilonForm(result, true, false); return result;}
+  std::string ElementToStringLetterFormat(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const;
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)const;
+  std::string ElementToStringLetterFormat(const std::string& inputLetter)const{return this->ElementToStringLetterFormat(inputLetter, false, false);}
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex)const{ return this->ElementToStringLetterFormat(inputLetter, useLatex, false);}
+  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; }
+  void ElementToStringEpsilonForm(std::string& output, bool useLatex, bool useHtml)const;
+  std::string ElementToStringEpsilonForm()const
+  {std::string result; this->ElementToStringEpsilonForm(result, true, false); return result;}
   void ElementToString(std::string& output, bool useLaTeX)const;
   bool CheckForElementSanity();
   //void RootToLinPolyToString(std::string& output, PolynomialOutputFormat& PolyOutput);
@@ -3614,7 +3625,6 @@ public:
   inline bool operator==(const root& right){return IsEqualTo(right); }
   inline root operator+(const root& right)const{ root result; result.Assign(*this); result.Add(right); return result;}
   inline root operator+(const Vector<Rational>& right)const{ root result; result.Assign(right); result.Add(*this); return result;}
-  inline root operator-(const root& right)const{ root result; result.Assign(*this); result.Subtract(right); return result;}
   inline void operator+=(const root& right){ this->Add(right); }
   inline void operator-=(const root& right){ this->Subtract(right); }
   inline bool operator!=(const root& right) const{ return !this->IsEqualTo(right); }
@@ -3647,13 +3657,6 @@ public:
   { return this->::Vector<Rational>::HashFunction();
   }
 };
-
-inline root operator-(const root& right)
-{ root tempRoot;
-  tempRoot.Assign(right);
-  tempRoot.MinusRoot();
-  return tempRoot;
-}
 
 template<typename Element>
 void Matrix<Element>::RowToRoot(int rowIndex, Vector<Element>& output)const
@@ -5895,7 +5898,11 @@ public:
   void operator*=(const RationalFunction& other);
   void operator*=(const PolynomialRationalCoeff& other);
   void operator*=(const Rational& other);
-  void operator-=(int theConstant){RationalFunction tempRF; tempRF.MakeNVarConst(this->NumVars, (Rational) -theConstant, this->context); (*this)+=tempRF;}
+  void operator-=(const Rational& theConstant)
+  { RationalFunction tempRF;
+    tempRF.MakeNVarConst(this->NumVars, -theConstant, this->context);
+    (*this)+=tempRF;
+  }
   bool operator>(const RationalFunction& other)const
   { if (this->expressionType<other.expressionType)
       return false;
@@ -8703,7 +8710,11 @@ public:
   void GetEpsilonCoords(char WeylLetter, int WeylRank, roots& simpleBasis, root& input, root& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(const root& input, root& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
-  root GetEpsilonCoords(const root& input, GlobalVariables& theGlobalVariables){root tempRoot; this->GetEpsilonCoords(input, tempRoot, theGlobalVariables); return tempRoot;}
+  root GetEpsilonCoords(const root& input, GlobalVariables& theGlobalVariables)
+  { root tempRoot;
+    this->GetEpsilonCoords(input, tempRoot, theGlobalVariables);
+    return tempRoot;
+  }
   void GetEpsilonCoordsWRTsubalgebra(roots& generators, List<root>& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, MatrixLargeRational& output);
   void ComputeWeylGroup();
@@ -17327,7 +17338,6 @@ class SyntacticElement
   int controlIndex;
   int IndexFirstChar;
   int IndexLastCharPlusOne;
-  int format;
   std::string ErrorString;
   Expression theData;
   void operator=(const SyntacticElement& other)
@@ -17343,7 +17353,6 @@ class SyntacticElement
     this->ErrorString="";
     this->IndexFirstChar=-1;
     this->IndexLastCharPlusOne=-1;
-    this->format=Expression::formatDefault;
   }
   SyntacticElement(const SyntacticElement& other)
   { this->operator=(other);
@@ -17507,21 +17516,21 @@ public:
     newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
     newExpr.children.AddOnTop(left.theData);
     newExpr.children.AddOnTop(right.theData);
-    left.theData=newExpr;
     newExpr.format=formatOptions;
+    left.theData=newExpr;
     this->DecreaseStackSetCharacterRanges(2);
 //    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
     return true;
   }
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size-2].controlIndex=theCon;
-    this->syntacticStack[this->syntacticStack.size-2].format=theFormat;
+    this->syntacticStack[this->syntacticStack.size-2].theData.format=theFormat;
     this->DecreaseStackSetCharacterRanges(1);
     return true;
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size-1].controlIndex=theCon;
-    this->syntacticStack[this->syntacticStack.size-1].format=theFormat;
+    this->syntacticStack[this->syntacticStack.size-1].theData.format=theFormat;
 //    this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
@@ -17721,7 +17730,7 @@ public:
           return true;
     return false;
   }
-  Expression* DepthFirstSubExpressionPatternMatch
+  Expression* PatternMatch
   (int commandIndex, Expression& thePattern, Expression& theExpression,
    ExpressionPairs& bufferPairs, int RecursionDepth,
    int MaxRecursionDepth, Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
@@ -17825,61 +17834,7 @@ public:
     this->theDictionary.AddNoRepetition(theName);
     return this->theNonBoundVars.size-1 ;
   }
-  void init()
-  { this->controlSequences.Clear();
-    this->operations.Clear();
-    this->theNonBoundVars.Clear();
-    this->theDictionary.Clear();
-    this->cachedExpressions.Clear();
-    this->imagesCashedExpressions.SetSize(0);
-    this->theStandardOpEvalFunctions.SetSize(0);
-    this->syntaxErrors.SetSize(0);
-    this->evaluationErrors.SetSize(0);
-    this->thePropertyNameS.Clear();
-    this->targetProperties.SetSize(0);
-    this->MaxRecursionDepthDefault=1000;
-    this->AddOperationNoFail("+",this->EvaluateStandardPlus);
-    this->AddOperationNoFail("-", this->EvaluateStandardMinus);
-    this->AddOperationNoFail("/", 0);
-    this->AddOperationNoFail("*", this->EvaluateStandardTimes);
-    this->AddOperationNoFail(":=", 0);
-    this->AddOperationNoFail("if:=", 0);
-    this->AddOperationNoFail("^", 0);
-    this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual);
-    //the following two operations are chosen on purpose so that they correspond to LaTeX-undetectable
-    //expressions
-    //the following is the binding variable operation
-    this->AddOperationNoFail("{{}}", 0);
-    //the following is the operation for using a variable as a function
-    this->AddOperationNoFail("{}", this->EvaluateStandardFunction);
-    this->AddOperationNoFail("if", this->EvaluateIf);
-    this->AddOperationNoFail("Integer", 0);
-    this->AddOperationNoFail("VariableNonBound", 0);
-    this->AddOperationNoFail("VariableBound", 0);
-    this->AddOperationNoFail("Error", 0);
-
-    this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
-    this->controlSequences.AddOnTop("Variable");
-    this->controlSequences.AddOnTop(this->operations);//all operations are also control sequences
-    this->controlSequences.AddOnTop("Expression");
-    this->controlSequences.AddOnTop(",");
-    this->controlSequences.AddOnTop("\\cdot");
-    this->controlSequences.AddOnTop("_");
-    this->controlSequences.AddOnTop("(");
-    this->controlSequences.AddOnTop(")");
-    this->controlSequences.AddOnTop("[");
-    this->controlSequences.AddOnTop("]");
-    this->controlSequences.AddOnTop("{");
-    this->controlSequences.AddOnTop("}");
-    this->controlSequences.AddOnTop(":");
-    this->controlSequences.AddOnTop("=");
-    this->controlSequences.AddOnTop(";");
-    this->controlSequences.AddOnTop("$");
-//    this->thePropertyNames.AddOnTop("IsCommutative");
-    this->TotalNumPatternMatchedPerformed=0;
-    this->initPredefinedVars();
-    this->initTargetProperties();
-  }
+  void init();
   void initPredefinedVars()
   { this->AddNonBoundVarMustBeNew("IsInteger", &this->EvaluateFunctionIsInteger);
   }

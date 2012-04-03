@@ -413,7 +413,7 @@ void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatr
 }
 
 void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
-(WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { roots selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
@@ -6682,8 +6682,25 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
   << "onmousewheel=\"mouseHandleWheelCone" << timesCalled << "(event);\""
-  << "></div>"
-  << "<br>The bilinear form of the vector space follows. The ij^th element "
+  << "></div>";
+  out
+  << "<br>The projection plane (drawn on the screen) is spanned by the following two vectors<br> \n";
+  List<List<std::string> > textEbasisNames;
+  textEbasisNames.SetSize(2);
+  for (int i=0; i<2; i++)
+  { textEbasisNames[i].SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+    { std::stringstream tmpStream;
+      tmpStream << "textEbasis" << timesCalled << "_" << i << "_" << j;
+      textEbasisNames[i][j]=tmpStream.str();
+      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNames[i][j]
+      << "\">" << "</textarea>\n";
+    }
+    out << "<br>";
+  }
+  out << "<button onclick=\"startProjectionPlaneUser" << timesCalled << "();\">Change to basis</button><br>";
+  out
+  << "The bilinear form of the vector space follows. The ij^th element "
   << " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite "
   << " symmetric bilinear form"
   << " the javascript might crash. You are expected to enter a symmetric strictly positive definite matrix. <br> \n";
@@ -6736,11 +6753,52 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
 //  (this->theBuffer.BasisProjectionPlane[0][0], this->theBuffer.BasisProjectionPlane[0][1]);
   out
   << "var VectorE1Cone" << timesCalled << "= new Array(" << theDimension << ");\n"
-  << "var VectorE2Cone" << timesCalled << "= new Array(" << theDimension << ");\n";
+  << "var VectorE2Cone" << timesCalled << "= new Array(" << theDimension << ");\n"
+  << "var VectorE1ConeGoal" << timesCalled << "= new Array(" << theDimension << ");\n"
+  << "var VectorE2ConeGoal" << timesCalled << "= new Array(" << theDimension << ");\n"
+  << "var VectorE1ConeStart" << timesCalled << "= new Array(" << theDimension << ");\n"
+  << "var VectorE2ConeStart" << timesCalled << "= new Array(" << theDimension << ");\n";
+
   for (int i=0; i<theDimension; i++)
   { out << "VectorE2Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][1][i] << ";\t";
     out << "VectorE1Cone" << timesCalled << "[" << i << "]=" << this->theBuffer.BasisProjectionPlane[0][0][i] << ";\n";
   }
+  out << "var frameCount" << timesCalled << "=0;\n";
+  out << "var frameCountGoesUp" << timesCalled << "=true;\n";
+  int numFramesUserPlane=50;
+  out << "function startProjectionPlaneUser" << timesCalled << "(){\n"
+  << " frameCount" << timesCalled << "=0;\n";
+  for (int i=0; i<theDimension; i++)
+    out
+    << "  VectorE1ConeStart" << timesCalled << "[" << i << "]=VectorE1Cone" << timesCalled << "[" << i << "];\n"
+    << "  VectorE2ConeStart" << timesCalled << "[" << i << "]=VectorE2Cone" << timesCalled << "[" << i << "];\n"
+    << "  VectorE1ConeGoal" << timesCalled << "[" << i << "]=document.getElementById(\""
+    << textEbasisNames[0][i] << "\").value;\n"
+    << "  VectorE2ConeGoal" << timesCalled << "[" << i << "]=document.getElementById(\""
+    << textEbasisNames[1][i] << "\").value;\n";
+  out
+  << "  changeProjectionPlaneUser" << timesCalled << "();\n"
+  << "\n}\n";
+  out << "function changeProjectionPlaneUser" << timesCalled << "(){\n"
+  << "  frameCount" << timesCalled << "++;\n"
+  << "  if (frameCount" << timesCalled << "> " << numFramesUserPlane << ")\n"
+  << "    return;\n"
+  << "  for (i=0; i<" << theDimension << "; i++)\n"
+  << "  { "
+  << "VectorE1Cone" << timesCalled << "[i]=VectorE1ConeGoal" << timesCalled << "[i]*"
+  << "(frameCount" << timesCalled << "/" << numFramesUserPlane << ")"
+  << "+ VectorE1ConeStart" << timesCalled << "[i]*"
+  << "(1-frameCount" << timesCalled << "/" << numFramesUserPlane << ");\n"
+  << "    VectorE2Cone" << timesCalled << "[i]=VectorE2ConeGoal" << timesCalled << "[i]*"
+  << "(frameCount" << timesCalled << "/" << numFramesUserPlane << ")"
+  << "+ VectorE2ConeStart" << timesCalled << "[i]*"
+  << "(1-frameCount" << timesCalled << "/" << numFramesUserPlane << ");\n"
+  << "  }\n"
+  << "  MakeVectorE1AndE2orthonormal" << timesCalled << "();\n"
+  << "  ComputeProjections" << timesCalled << "();\n"
+  << "  " << theDrawFunctionName << "();\n"
+  << "  window.setTimeout(\"changeProjectionPlaneUser" << timesCalled << "()\",100);\n"
+  << "}";
   if (this->theBuffer.BasisProjectionPlane.size>2)
   { out << "BasisProjectionPlane" << timesCalled << "=new Array(" << this->theBuffer.BasisProjectionPlane.size << ");\n";
     for (int j=0; j<this->theBuffer.BasisProjectionPlane.size; j++)
@@ -6754,8 +6812,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
       }
       out << "\n";
     }
-    out << "var frameCount" << timesCalled << "=0;\n";
-    out << "var frameCountGoesUp" << timesCalled << "=true;\n";
     out << "function changeProjectionPlaneOnTimer" << timesCalled << "(){\n"
     << "if(frameCountGoesUp" << timesCalled << ")\n"
     << "  frameCount" << timesCalled << "++;\n"
@@ -6969,13 +7025,28 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "  AddVectorTimes" << timesCalled << "(result, projection, 1);\n"
   << "  return result;\n"
   << "}\n";
+  out << "function MakeVectorE1AndE2orthonormal" << timesCalled << "(){\n"
+  << "  AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
+  << ", VectorE1Cone" << timesCalled << ", -getScalarProduct"
+  << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE2Cone" << timesCalled
+  << ")/getScalarProduct" << timesCalled
+  << "(VectorE1Cone" << timesCalled << ", VectorE1Cone" << timesCalled << "));\n"
+  << "  ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
+  << "  ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
+  << "}\n";
   out << "function ComputeProjections" << timesCalled << "()\n"
   << "{ for (var i=0; i<" << theDimension << "; i++)\n"
   << "  { " << projName << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
-  << "(VectorE1Cone" << timesCalled << ","  << eiBasis<< "[i]);\n"
+  << "(VectorE1Cone" << timesCalled << ","  << eiBasis << "[i]);\n"
   << "    " << projName << "[i][1]=-GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
   << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
-  << "  }\n"
+  << "  }\n";
+  for (int j=0; j<theDimension; j++)
+    out << "  document.getElementById(\"" << textEbasisNames[0][j] << "\").value="
+    << "VectorE1Cone" << timesCalled << "[" << j << "];\n"
+    << "  document.getElementById(\"" << textEbasisNames[1][j] << "\").value="
+    << "VectorE2Cone" << timesCalled << "[" << j << "];\n";
+  out
   << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
   << "  { " << projBasisCircles << "[i][0]=GraphicsUnitCone" << timesCalled << "*getScalarProduct" << timesCalled
   << "(VectorE1Cone" << timesCalled << ", " << basisCircles << "[i]);\n"
@@ -7008,9 +7079,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "(newX, newY, oldX, oldY)-getAngleFromXandY" << timesCalled << "(oldX, oldY, newX, newY);\n"
   << "  topBound=Math.PI/2;\n"
   << "  bottomBound=-Math.PI/2;\n"
-//  << "  orientationWasFlipped" << timesCalled << "=false;\n"
-//  << "  if (oldX*newX<0 && oldY*newY<0)\n"
-//  << "    orientationWasFlipped" << timesCalled << "=true;\n"
   << "  while (result>topBound || result< bottomBound)\n"
   << "    if (result>topBound)\n"
   << "      result-=Math.PI;\n"
@@ -7018,9 +7086,6 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "      result+=Math.PI;\n"
   << "  return result;\n"
   << "}\n";
-
-//  out << "var orientationCounter" << timesCalled << "=1;\n";
-//  out << "var orientationChangedRecently" << timesCalled << "=false;\n";
   out << "\nfunction changeBasis" << timesCalled <<  "(selectedIndex, newX, newY)\n"
   << "{ if (newX==0 && newY==0)\n"
   << "    return;\n"
@@ -7053,22 +7118,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "    AddVectorTimes" << timesCalled << "(vOrthogonal, vProjection, -1);\n"
   << "    var oldRatioProjectionOverHeightSquared = (oldX*oldX+oldY*oldY)/ (selectedRootLength-oldX*oldX-oldY*oldY);\n"
   << "    var newRatioProjectionOverHeightSquared = (newX*newX+newY*newY)/ (selectedRootLength-newX*newX-newY*newY);\n";
-//  out
-//  << "  if (orientationWasFlipped" << timesCalled << ")\n"
-//  << "  { if (!orientationChangedRecently" << timesCalled << ")\n"
-//  << "      orientationCounter" << timesCalled << "*=-1;\n"
-//  << "    orientationChangedRecently" << timesCalled << "=true;\n"
-//  << "  } else\n"
-//  << "    orientationChangedRecently" << timesCalled << "=false;\n"
-//  ;
   if (theDimension>2)
   { out
     << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)<epsilon && getScalarProduct" << timesCalled
     << "(vOrthogonal, vOrthogonal)>-epsilon)\n"
     << "    { vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n"
-//    << "     if ( orientationCounter" << timesCalled << "==1)\n "
-//    << "       vOrthogonal[2]*=-1;\n"
-//    << "     orientationCounter" << timesCalled << "*=-1;\n"
     << "    }\n";
   }
 out
@@ -7086,14 +7140,7 @@ out
   << "      VectorE2Cone" << timesCalled << "=RotateOutOfPlane" << timesCalled << "(VectorE2Cone" << timesCalled
   << ", vProjection, vOrthogonal, oldRatioProjectionOverHeightSquared, newRatioProjectionOverHeightSquared, newX, newY, oldX, oldY);\n"
   << "    }\n"
-  << "    AddVectorTimes" << timesCalled << "(VectorE2Cone" << timesCalled
-  << ", VectorE1Cone" << timesCalled << ", -getScalarProduct" << timesCalled
-  << "(VectorE1Cone" << timesCalled << ", VectorE1Cone" << timesCalled << ")*getScalarProduct"
-  << timesCalled << "(VectorE1Cone" << timesCalled << ", VectorE2Cone" << timesCalled << "));\n"
-  << "    ScaleToUnitLength" << timesCalled << "(VectorE1Cone" << timesCalled << ");\n"
-  << "    ScaleToUnitLength" << timesCalled << "(VectorE2Cone" << timesCalled << ");\n"
-//  << "  if (orientationWasFlipped" << timesCalled << ")\n"
-//  << "    MultiplyVector" << timesCalled << "(VectorE2Cone" << timesCalled << ", -1);\n"
+  << "    MakeVectorE1AndE2orthonormal" << timesCalled << "();\n"
   << "    ComputeProjections" << timesCalled << "();\n"
   << "  }\n"
   << "}\n";
@@ -10423,11 +10470,26 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("splitIrrepOverLeviParabolic",
    "( (Rational, ...), (Rational, ...))",
-   "<b>Not implemented yet. Might be hidden or changed in future versions. \
-   </b>First argument gives the highest weight of the irrep. Second argument gives the parabolic selection.",
+   "<b>Might be hidden or changed in future versions. \
+   </b>Splits an irreducible finite dimensional representation with highest weight \
+   given by the first argument over the Levi part of the parabolic subalgebra given by the \
+   second argument. The splitting both splits the characters and finds the singular vectors \
+   that realize this splitting",
     "splitIrrepOverLeviParabolic((1,1),(0,1))",
    'B', 2, true,
     & ParserNode::EvaluateSplitIrrepOverLeviParabolic
+   );
+  this->AddOneFunctionToDictionaryNoFail
+  ("splitFDPartGenVermaOverLeviParabolic",
+   "( (Rational, ...), (Rational, ...), (Rational, ...))",
+   "<b>Might be hidden or changed in future versions. \
+   </b>Splits the inducing module of a generalized verma module with highest weight vector given \
+   by the first two arguments over \
+   the Levi part of the parabolic subalgebra given by the \
+   third argument.",
+    "splitFDPartGenVermaOverLeviParabolic((0, 1,1),(1,0,0), (1,0,1))",
+   'B', 3, true,
+    & ParserNode::EvaluateSplitFDPartGenVermaOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
   ("splitCharOverLeviParabolic",

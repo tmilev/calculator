@@ -2366,7 +2366,9 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   std::string report;
   charSSAlgMod tempChar;
   ReflectionSubgroupWeylGroup subWeyl;
-  theChar.SplitCharOverLevi(&report,  tempChar, parSel, subWeyl, theGlobalVariables);
+  root emptySel;
+  emptySel.MakeZero(theDim);
+  theChar.SplitCharOverLevi(&report,  tempChar, parSel, emptySel, subWeyl, theGlobalVariables);
   out << report;
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
@@ -2407,9 +2409,45 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   return theNode.errorNoError;
 }
 
+int ParserNode::EvaluateSplitFDPartGenVermaOverLeviParabolic
+(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+{ root theWeightFundCoords, inducingParSel, splittingParSel;
+  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[0]];
+  ParserNode& inducingParNode=theNode.owner->TheObjects[theArgumentList[1]];
+  ParserNode& splittingParNode=theNode.owner->TheObjects[theArgumentList[2]];
+  WeylGroup& theWeyl=theNode.ContextLieAlgebra->theWeyl;
+  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeightFundCoords, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (! inducingParNode.GetRootRationalDontUseForFunctionArguments(inducingParSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (! splittingParNode.GetRootRationalDontUseForFunctionArguments(splittingParSel, theGlobalVariables))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  if (theWeightFundCoords.size!=theDim || inducingParSel.size!=theDim || splittingParSel.size!=theDim)
+    return theNode.SetError(theNode.errorDimensionProblem);
+  std::stringstream out;
+  out << "Your input weight in fundamental coordinates: "
+  << theWeyl.GetFundamentalCoordinatesFromSimple(theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords)  )
+  .ElementToString();
+  out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ElementToString();
+  out << ".<br>Your inducing parabolic subalgebra: " << inducingParSel.ElementToString() << ".";
+  out << ".<br>The parabolic subalgebra I should split over: " << splittingParSel.ElementToString() << ".";
+  ModuleSSalgebraNew<Rational> theMod;
+  Selection selInducing= inducingParSel;
+  theMod.MakeFromHW
+  (theNode.owner->theHmm.theRange, theWeightFundCoords, selInducing, theGlobalVariables, 1, 0, 0);
+  std::string report;
+  theMod.SplitOverLevi(& report, splittingParSel, theGlobalVariables, 1, 0);
+  out << "<br>" << report;
+
+  theNode.ExpressionType=theNode.typeString;
+  theNode.outputString=out.str();
+  return theNode.errorNoError;
+}
+
 template<class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
-  (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  (std::string* Report, root& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
 { if (this->theChaR.size!=1)
   { if (Report!=0)
@@ -2420,45 +2458,34 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   ReflectionSubgroupWeylGroup subWeyl;
   charSSAlgMod charWRTsubalgebra;
-  this->theChaR.SplitCharOverLevi(Report, charWRTsubalgebra, parSelection, subWeyl, theGlobalVariables);
+  this->theChaR.SplitCharOverLevi
+  (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
+   subWeyl, theGlobalVariables);
   root theHWsimpleCoords, theHWfundCoords;
   std::stringstream out;
   if(Report!=0)
     out << *Report;
-  ModuleSSalgebraNew<Rational>  theIrrep;
-  WeylGroup& theWeyl=this->theAlgebra->theWeyl;
-  theHWfundCoords=this->theChaR[0].weightFundamentalCoords;
-  theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundCoords);
-  std::string irrepReport;
-  root fullPar;
-  fullPar.MakeZero(theWeyl.GetDim());
-  if (! theIrrep.MakeFromHW(*this->theAlgebra, theHWfundCoords, fullPar, theGlobalVariables, 1, 0, &irrepReport))
-  { out << "<hr><b>Failed to create the irreducible representation (most probably the computation requested was too large).</b> "
-    << "Below is the report obtained when trying to create the irrep you requested.<br> " << irrepReport;
-    if (Report!=0)
-      *Report=out.str();
-    return;
-  }
-  Selection parSelSelectedRootsAreInLeviPart;
-  parSelSelectedRootsAreInLeviPart=parSelection;
-  parSelSelectedRootsAreInLeviPart.InvertSelection();
-  if (!parSelSelectedRootsAreInLeviPart.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
+  Selection splittingParSelectedInLevi;
+  splittingParSelectedInLevi=splittingParSel;
+  splittingParSelectedInLevi.InvertSelection();
+  if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
   { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
-    << " The parabolic has roots of Levi given by " << parSelSelectedRootsAreInLeviPart.ElementToString()
+    << " The parabolic has roots of Levi given by " << splittingParSel.ElementToString()
     <<" while the ambient parabolic subalgebra has roots of Levi given by "
-    << this->parabolicSelectionSelectedAreElementsLevi.ElementToString();
+    << this->parabolicSelectionNonSelectedAreElementsLevi.ElementToString();
     if (Report!=0)
       *Report=out.str();
     return;
   }
-  out << "<br>Parabolic selection 1 stands for levi part: " << parSelSelectedRootsAreInLeviPart.ElementToString();
+  out << "<br>Parabolic selection: " << splittingParSel.ElementToString();
   List<List<List<Rational> > > eigenSpacesPerSimpleGenerator;
  // if (false)
-  eigenSpacesPerSimpleGenerator.SetSize(parSelSelectedRootsAreInLeviPart.CardinalitySelection);
+  eigenSpacesPerSimpleGenerator.SetSize(splittingParSelectedInLevi.CardinalitySelection);
   roots theFinalEigenSpace, tempSpace1, tempSpace2;
-  for (int i=0; i<parSelSelectedRootsAreInLeviPart.CardinalitySelection; i++)
-  { int theGenIndex=parSelSelectedRootsAreInLeviPart.elements[i]+theWeyl.GetDim();
-    Matrix<Rational>& currentOp=theIrrep.actionsSimpleGensMatrixForM[theGenIndex];
+//  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
+  for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
+  { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->theAlgebra->GetRank();
+    Matrix<Rational>& currentOp=this->actionsSimpleGensMatrixForM[theGenIndex];
     currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
     if (i==0)
       theFinalEigenSpace.AssignListListRational(eigenSpacesPerSimpleGenerator[i]);
@@ -2479,7 +2506,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
     int lastNonZeroIndex=-1;
     for (int i=0; i<currentVect.size; i++)
       if (currentVect[i]!=0)
-      { tempElt=theIrrep.theGeneratingWordsNonReduced[i];
+      { tempElt=this->theGeneratingWordsNonReduced[i];
         tempElt*=currentVect[i];
         currentElt+=tempElt;
         lastNonZeroIndex=i;
@@ -2521,55 +2548,74 @@ int ParserNode::EvaluateMakeWeylFromParSel
 }
 
 bool charSSAlgMod::SplitCharOverLevi
-(std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
- GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, root& splittingParSel, const root& ParSelFDInducingPart,
+ ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
-  root invertedSel;
-  invertedSel.MakeZero(parabolicSel.size);
-  for (int i=0; i<parabolicSel.size; i++)
-    if (parabolicSel[i].IsEqualToZero())
-      invertedSel[i]=1;
-  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, parabolicSel, theGlobalVariables,1);
+//  std::cout << "Splitting parabolic selection: " << splittingParSel.ElementToString();
+  outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, splittingParSel, theGlobalVariables,1);
   outputWeylSub.ComputeRootSubsystem();
 //  ReflectionSubgroupWeylGroup complementGroup;
 //  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->theBoss->theWeyl, invertedSel, theGlobalVariables,1);
 //  complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
-  //std::cout << out.str();
-  charSSAlgMod dominantCharAmbient, remainingCharDominantLevi;
-  this->FreudenthalEvalMe(dominantCharAmbient, tempS, theGlobalVariables, 10000);
-  //std::cout << "<hr>" << tempS;
+//  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ElementToString(false);
+//  std::cout << this->ElementToString();
+//  std::cout << out.str();
+  charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
+  ReflectionSubgroupWeylGroup theFDWeyl;
+  theFDWeyl.MakeParabolicFromSelectionSimpleRoots
+  (this->theBoss->theWeyl, ParSelFDInducingPart, theGlobalVariables, 1);
+  MonomialChar<Rational> tempMon, localHighest;
+  List<Rational> tempMults;
+  HashedList<root> tempHashedRoots;
+  WeylGroup& theWeyL=this->theBoss->theWeyl;
+  charAmbientFDWeyl.Nullify(0);
+  for (int i=0; i<this->size; i++)
+  { MonomialChar<Rational>& currentMon=this->TheObjects[i];
+    if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart
+        (currentMon.weightFundamentalCoords, tempHashedRoots, tempMults, tempS, theGlobalVariables, 10000))
+    { if (Report!=0)
+        *Report=tempS;
+      return false;
+    }
+    for (int j=0; j<tempHashedRoots.size; j++)
+    { tempMon.Coefficient=currentMon.Coefficient;
+      tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
+      tempMon.Coefficient*=tempMults[j];
+      charAmbientFDWeyl+=tempMon;
+    }
+  }
+//  std::cout << "<hr>" << tempS;
   remainingCharDominantLevi.Nullify(0);
   roots tempRootS;
-  HashedList<root> orbitDom, tempHashedRoots;
-  MonomialChar<Rational> tempMon, localHighest;
-  WeylGroup& theWeyl=this->theBoss->theWeyl;
-  for (int i=0; i<dominantCharAmbient.size; i++)
-  { tempRootS.SetSize(0);
-    tempRootS.AddOnTop(theWeyl.GetSimpleCoordinatesFromFundamental(dominantCharAmbient[i].weightFundamentalCoords));
-    orbitDom.Clear();
-    if (!theWeyl.GenerateOrbit(tempRootS, false, orbitDom, false, 10000))
+  roots orbitDom;
+  for (int i=0; i<charAmbientFDWeyl.size; i++)
+  { orbitDom.SetSize(0);
+    if (!theFDWeyl.GenerateOrbitReturnFalseIfTruncated
+        (theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords),
+         orbitDom, 10000))
     { out << "failed to generate the complement-sub-Weyl-orbit of weight "
       << this->theBoss->theWeyl.GetSimpleCoordinatesFromFundamental
-      (dominantCharAmbient[i].weightFundamentalCoords).ElementToString();
+      (charAmbientFDWeyl[i].weightFundamentalCoords).ElementToString();
       if (Report!=0)
         *Report=out.str();
       return false;
     }
     for (int k=0; k<orbitDom.size; k++)
       if (outputWeylSub.IsDominantWeight(orbitDom[k]))
-      { tempMon.Coefficient=dominantCharAmbient[i].Coefficient;
-        tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
+      { tempMon.Coefficient=charAmbientFDWeyl[i].Coefficient;
+        tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi+=tempMon;
       }
   }
   output.Nullify(0);
-  List<Rational> tempMults;
-//  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+//  std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
 //  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
-  //std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-//  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+
+
   while(!remainingCharDominantLevi.IsEqualToZero())
   { localHighest=*remainingCharDominantLevi.LastObject();
     for (bool Found=true; Found; )
@@ -2593,7 +2639,7 @@ bool charSSAlgMod::SplitCharOverLevi
       return false;
     }
     for (int i=0; i<tempHashedRoots.size; i++)
-    { tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
+    { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       tempMon.Coefficient=tempMults[i]* localHighest.Coefficient;
       remainingCharDominantLevi-=tempMon;
     }
@@ -2611,14 +2657,14 @@ bool charSSAlgMod::SplitCharOverLevi
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
-    { tempRoot=theWeyl.GetSimpleCoordinatesFromFundamental(output.TheObjects[i].weightFundamentalCoords);
+    { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output.TheObjects[i].weightFundamentalCoords);
       outputWeylSub.DrawContour
       (tempRoot, theDV, theGlobalVariables, CGI::RedGreenBlue(200, 200, 0), 1000);
       std::stringstream tempStream;
       tempStream << output[i].Coefficient.ElementToString();
       theDV.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
     }
-    out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+    out << "<hr>" << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyL.GetDim());
     *Report=out.str();
   }
   return true;

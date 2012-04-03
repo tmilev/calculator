@@ -257,9 +257,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
-
-CommandList theComputation;
-
+//  civilizedInput="splitFDPartGenVermaOverLeviParabolic((0, 1,1),(1,0,0), (1,0,1))";
 //  civilizedInput="h_2 v((1,0),(0,0))";
 //  civilizedInput="g_{8}(g_{-8} v((x_1,1,0),(1,0,0)) )";
 //  civilizedInput="v((x_1,1,0),(1,0,0))(x_2  v((x_1,1,0),(1,0,0)) )+v((x_1,1,0),(1,0,0))(  v((x_1,1,0),(1,0,0)) )";

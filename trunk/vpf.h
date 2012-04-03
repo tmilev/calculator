@@ -8887,10 +8887,10 @@ public:
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
   void MakeParabolicFromSelectionSimpleRoots
-(WeylGroup& inputWeyl, Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
   void MakeParabolicFromSelectionSimpleRoots
-(WeylGroup& inputWeyl, root& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroup& inputWeyl, const root& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   { Selection tempSel;
     tempSel=ZeroesMeanSimpleRootSpaceIsInParabolic;
     this->MakeParabolicFromSelectionSimpleRoots(inputWeyl, tempSel, theGlobalVariables, UpperLimitNumElements);
@@ -11723,8 +11723,8 @@ class charSSAlgMod : public HashedList<MonomialChar<Rational> >
  DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
   ;
   bool SplitCharOverLevi
-(std::string* Report, charSSAlgMod& output, root& parabolicSel, ReflectionSubgroupWeylGroup& outputWeylSub,
- GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, root& splittingParSel, const root& ParSelFDInducingPart,
+ ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
      ;
   void MakeTrivial(SemisimpleLieAlgebra& owner);
   void operator+=(const charSSAlgMod& other);
@@ -11853,7 +11853,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     + root(this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() + ")";
   }
   void SplitOverLevi
-  (std::string* Report, root& parSelection, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  (std::string* Report, root& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
    ;
    ModuleSSalgebraNew() : theAlgebra(0), flagIsInitialized(false)
@@ -12266,6 +12266,9 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateSplitIrrepOverLeviParabolic
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
+;
+  static int EvaluateSplitFDPartGenVermaOverLeviParabolic
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateSplitCharOverLeviParabolic

@@ -1537,35 +1537,6 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
     }
   }
-  if (outputReport!=0)
-  { std::stringstream latexTableStream;
-    Vector<CoefficientType> tempV;
-    tempV=this->theHWFundamentalCoordsBaseField;
-    for (int i=0; i<tempV.size; i++)
-      tempV[i]-=this->theHWFundamentalCoordS[i];
-    latexTableStream << "<hr>Ready copy +paste for your .tex file:<br> <br>\\begin{tabular}{ll}\n\\hline\\hline \\multicolumn{2}{|c|}{ Highest weight $\\lambda="
-    << tempV.ElementToStringLetterFormat("\\omega", false, false)
-    << "+" << theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables).ElementToStringEpsilonForm()
-    << "$}\\\\\\hline weight & basis vector\\\\\n";
-    for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-      for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
-      { std::string stringWeightTemp=theWeyl.GetEpsilonCoords
-        (this->theModuleWeightsSimpleCoords[i], theGlobalVariables).ElementToStringEpsilonForm();
-        latexTableStream << "\n$" << tempV.ElementToStringLetterFormat("\\omega", false, false);
-        if (stringWeightTemp!="0")
-        { if (stringWeightTemp[0]!='-')
-            latexTableStream << "+";
-          latexTableStream << stringWeightTemp;
-        }
-        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ElementToString
-        (false, false, theGlobalVariables, tempFormat);
-        if (theMonString=="1")
-          theMonString="";
-        latexTableStream << "$&$" << theMonString << "  v_\\lambda$\\\\\n";
-      }
-    latexTableStream << "\\end{tabular}<hr>";
-    monomialDetailStream << (latexTableStream.str());
-  }
   this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseField, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
   if (outputReport!=0)
@@ -1631,7 +1602,77 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->ComputedGeneratorActions.init(this->theAlgebra->GetNumGenerators());
   this->actionsGeneratorS.SetSize(this->theAlgebra->GetNumGenerators());
   this->actionsGeneratorsMaT.SetSize(this->theAlgebra->GetNumGenerators());
-
+  if (outputReport!=0)
+  { std::stringstream latexTableStream;
+    Vector<CoefficientType> tempV;
+    tempV=this->theHWFundamentalCoordsBaseField;
+    for (int i=0; i<tempV.size; i++)
+      tempV[i]-=this->theHWFundamentalCoordS[i];
+    latexTableStream << "<hr>Ready copy +paste for your .tex file:<br> <br>"
+    << "\\begin{tabular}{lll";
+    for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
+      latexTableStream <<"l";
+    latexTableStream << "} \n\\hline\\hline \\multicolumn{"
+    << this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection+3
+    << "}{|c|}{ Highest weight $\\lambda="
+    << tempV.ElementToStringLetterFormat("\\omega", false, false)
+    << "+" << theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables).ElementToStringEpsilonForm()
+    << "$}\\\\\\hline Element& weight & monomial expression";
+    for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
+    { latexTableStream << "&action of $"
+      << this->theSimpleGens
+      [this->parabolicSelectionSelectedAreElementsLevi.elements[i]+ this->theAlgebra->GetRank()].ElementToString()
+      << "$";
+    }
+    latexTableStream << "\\\\\n";
+    int monCounter=0;
+    for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+      for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
+      { monCounter++;
+        latexTableStream << "$m_{" << monCounter << "}$&";
+        std::string stringWeightTemp=theWeyl.GetEpsilonCoords
+        (this->theModuleWeightsSimpleCoords[i], theGlobalVariables).ElementToStringEpsilonForm();
+        latexTableStream << "\n$" << tempV.ElementToStringLetterFormat("\\omega", false, false);
+        if (stringWeightTemp!="0")
+        { if (stringWeightTemp[0]!='-')
+            latexTableStream << "+";
+          latexTableStream << stringWeightTemp;
+        }
+        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ElementToString
+        (false, false, theGlobalVariables, tempFormat);
+        if (theMonString=="1")
+          theMonString="";
+        latexTableStream << "$&$" << theMonString << "  v_\\lambda$";
+        for (int s=0; s< this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; s++)
+        { Matrix<CoefficientType>& theMat=this->actionsSimpleGensMatrixForM
+          [this->parabolicSelectionSelectedAreElementsLevi.elements[s] +this->theAlgebra->GetRank()];
+          bool foundMon=false;
+          latexTableStream << "&$";
+          for (int l=0; l< this->GetDim(); l++)
+            if (!theMat.elements[l] [monCounter-1].IsEqualToZero())
+            { std::string tempS1;
+              tempS1= theMat.elements[l][monCounter-1].ElementToString();
+              if (tempS1=="1")
+                tempS1="";
+              if (tempS1=="-1")
+                tempS1="-";
+              std::stringstream tempStream;
+              tempStream << "m_{" << l+1 << "}";
+              tempS1+=tempStream.str();
+              if (foundMon && tempS1[0]!='-')
+                latexTableStream << "+";
+              latexTableStream << tempS1;
+              foundMon=true;
+            }
+          if (!foundMon)
+            latexTableStream << "0";
+          latexTableStream << "$";
+        }
+        latexTableStream << "\\\\\n";
+      }
+    latexTableStream << "\\end{tabular}<hr>";
+    monomialDetailStream << (latexTableStream.str());
+  }
   if (outputReport!=0)
     *outputReport= out2.str()+monomialDetailStream.str();
   this->flagIsInitialized=true;
@@ -2496,8 +2537,20 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
     }
   }
   out << "<br>Eigenvectors:<table> ";
-  root zeroRoot;
-  zeroRoot.MakeZero(this->theAlgebra->GetRank());
+//  root zeroRoot;
+//  zeroRoot.MakeZero(this->theAlgebra->GetRank());
+  std::stringstream readyForLatexComsumption;
+  readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
+  std::stringstream extraHWAddition;
+  for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+    extraHWAddition << "x_{" << this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]+1
+    << "}\\omega_{" << this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]+1 << "}+";
+  readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $" << extraHWAddition.str();
+  readyForLatexComsumption
+  << this->theAlgebra->theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables)
+  .ElementToStringEpsilonForm()
+  << "$}\\\\\n<br>";
+  readyForLatexComsumption << "weight fund. coord.& weight& singular vector \\\\\\hline\n<br>";
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
     ElementUniversalEnveloping<Rational> currentElt, tempElt;
@@ -2511,16 +2564,29 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
         currentElt+=tempElt;
         lastNonZeroIndex=i;
       }
+    root& currentWeight=this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex];
+    readyForLatexComsumption << "$" << extraHWAddition.str()
+    << this->theAlgebra->theWeyl.GetFundamentalCoordinatesFromSimple(currentWeight)
+    .ElementToStringLetterFormat("\\omega", false, false)
+    << "$&$" << extraHWAddition.str()
+    << this->theAlgebra->theWeyl.GetEpsilonCoords(currentWeight, theGlobalVariables)
+    .root::ElementToStringEpsilonForm()
+    << "$&$" << currentVect.ElementToStringLetterFormat("m") << "$";
+
     if (currentElt.size>1)
       out << "(";
     out << currentElt.ElementToString(false, theGlobalVariables, theFormat);
     if (currentElt.size>1)
       out << ")";
-    out << " v(" << this->theHWFundamentalCoordS.ElementToString() << "," << zeroRoot.ElementToString() << ")" ;
+    out << " v(" << this->theHWFundamentalCoordS.ElementToString() << "," << ((root)this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() << ")" ;
     out << "</td><td>(weight: "
-    << this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex].ElementToString() << ")</td></tr>";
+    << currentWeight.ElementToString() << ")</td></tr>";
+    readyForLatexComsumption << "\\\\\n<br>";
   }
   out << "</table>";
+  readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
+  out << "<br>Your ready for LaTeX consumption text follows.<br>";
+  out << readyForLatexComsumption.str();
   if (Report!=0)
     *Report=out.str();
 }
@@ -2610,8 +2676,8 @@ bool charSSAlgMod::SplitCharOverLevi
       }
   }
   output.Nullify(0);
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
+//  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+//  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
 //  std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
 //  (remainingCharDominantLevi.ElementToString("V", "\\omega", false));
 

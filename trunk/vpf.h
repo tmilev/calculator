@@ -11815,7 +11815,9 @@ public:
       return -1;
     return this->theHWFundamentalCoordsBaseField[0].GetNumVars();
   }
-
+  int GetDim()
+  { return this->theGeneratingWordsNonReduced.size;
+  }
   void MakeFundamentalRep
 (char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
   ;

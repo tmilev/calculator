@@ -18,45 +18,6 @@ void Expression::MakeXOX
   this->children[1]=right;
 }
 
-void Expression::SetPropertyValue(const std::string& propertyName, int PropertyValue)
-{ if (this->theBoss==0)
-  { assert(false);
-    return;
-  }
-  Expression tempExp;
-  tempExp.MakeFunction(this->theBoss, this->commandIndex,*this, propertyName);
-  int theIndex= this->theBoss->cachedExpressions.GetIndex(tempExp);
-  if (theIndex==-1)
-  { this->theBoss->cachedExpressions.AddOnTop(tempExp);
-    this->theBoss->imagesCashedExpressions.SetSize(this->theBoss->cachedExpressions.size);
-    theIndex=(signed)this->theBoss->cachedExpressions.size-1;
-//    if (theIndex==4)
-//      std::cout <<"!";
-  }
-  this->theBoss->imagesCashedExpressions[theIndex].MakeInT(PropertyValue, this->theBoss, this->commandIndex);
-}
-
-int Expression::GetPropertyValue(const std::string& propertyName)const
-{ if (this->theBoss==0)
-  { assert(false);
-    return 0;
-  }
-  return this->GetPropertyValue (this->theBoss->GetIndexNonBoundVar(propertyName));
-}
-
-int Expression::GetPropertyValue(int propertyIndex)const
-{ if (this->theBoss==0)
-  { assert(false);
-    return 0;
-  }
-  Expression tempExp;
-  tempExp.MakeFunction(this->theBoss, this->commandIndex,*this, propertyIndex);
-  int theIndex= this->theBoss->cachedExpressions.GetIndex(tempExp);
-  if (theIndex==-1)
-    return -1;
-  return this->theBoss->imagesCashedExpressions[theIndex].theData;
-}
-
 bool Command::ReplaceOXEXEXEXByE(int formatOptions)
 { SyntacticElement& opElt=this->syntacticStack[this->syntacticStack.size-8];
   SyntacticElement& leftE = this->syntacticStack[this->syntacticStack.size-6];
@@ -246,10 +207,12 @@ void CommandList::ParseFillDictionary
           currentElement.theData.reset(this, -1);
           this->theCommands[this->theCommands.size-1].syntacticSoup.AddOnTop(currentElement);
         } else if (this->isADigit(current, currentDigit))
-        { currentElement.controlIndex=this->conInteger();
-          currentElement.theData.reset(this, -1);
-          currentElement.theData.theOperation=this->opInteger();
-          currentElement.theData.theData=currentDigit;
+        { Data tempData;
+          tempData.SetInt(currentDigit);
+          currentElement.controlIndex=this->conData();
+          currentElement.theData.reset(this, this->theCommands.size-1);
+          currentElement.theData.theOperation=this->opData();
+          currentElement.theData.theData=this->theData.AddNoRepetitionOrReturnIndexFirst(tempData);
           this->theCommands[this->theCommands.size-1].syntacticSoup.AddOnTop(currentElement);
         } else
         { this->theDictionary.AddNoRepetition(current);
@@ -379,11 +342,11 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceXXByCon(this->theBoss->conEqualEqual());
   if (lastS==";")
     return this->DecreaseStackSetCharacterRanges(1);
-  if (lastS=="Integer" && secondToLastS=="Integer")
+  if (lastS=="Data" && secondToLastS=="Data")
     return this->ReplaceIntIntBy10IntPlusInt();
-  if (lastS=="Integer" && lookAhead!="Integer")
-  { this->syntacticStack[this->syntacticStack.size-1].theData.MakeInT
-    (lastE.theData.theData, lastE.theData.theBoss, lastE.theData.commandIndex);
+  if (lastS=="Data" && lookAhead!="Data")
+  { this->syntacticStack[this->syntacticStack.size-1].theData.MakeData
+    (lastE.theData.theData, *lastE.theData.theBoss, lastE.theData.commandIndex);
     return this->ReplaceObyE();
   }
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression")
@@ -426,14 +389,17 @@ bool CommandList::EvaluateFunctionIsInteger
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
 { bool IsInteger=false;
   if (theExpression.children.size==2)
-    if (theExpression.children[1].theOperation==theExpression.theBoss->opInteger())
-      IsInteger=true;
-  theExpression.children.SetSize(0);
-  theExpression.theOperation=theExpression.theBoss->opInteger();
+    if (theExpression.children[1].theOperation==theExpression.theBoss->opData())
+    { IsInteger=theCommands.theData[theExpression.children[1].theData].IsInteger();
+    }
+  Data endData;
   if (IsInteger)
-    theExpression.theData=1;
+    endData=1;
   else
-    theExpression.theData=0;
+    endData=0;
+  theExpression.children.SetSize(0);
+  theExpression.theOperation=theExpression.theBoss->opData();
+  theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(endData);
   return true;
 }
 
@@ -460,13 +426,13 @@ void CommandList::init()
 { this->controlSequences.Clear();
   this->operations.Clear();
   this->theNonBoundVars.Clear();
+  this->theData.Clear();
   this->theDictionary.Clear();
   this->cachedExpressions.Clear();
   this->imagesCashedExpressions.SetSize(0);
   this->theStandardOpEvalFunctions.SetSize(0);
   this->syntaxErrors.SetSize(0);
   this->evaluationErrors.SetSize(0);
-  this->thePropertyNameS.Clear();
   this->targetProperties.SetSize(0);
   this->MaxRecursionDepthDefault=1000;
   this->AddOperationNoFail("+",this->EvaluateStandardPlus);
@@ -484,10 +450,10 @@ void CommandList::init()
   //the following is the operation for using a variable as a function
   this->AddOperationNoFail("{}", 0);// this->EvaluateStandardFunction);
   this->AddOperationNoFail("if", this->EvaluateIf);
-  this->AddOperationNoFail("Integer", 0);
   this->AddOperationNoFail("VariableNonBound", 0);
   this->AddOperationNoFail("VariableBound", 0);
   this->AddOperationNoFail("Error", 0);
+  this->AddOperationNoFail("Data", 0);
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("Variable");
@@ -518,8 +484,8 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   bool needSimplification=this->AppendSummandsReturnTrueIfOrderNonCanonical
   (theExpression, summands, 0, this->MaxRecursionDepthDefault);
   HashedList<Expression> summandsNoCoeff;
-  List<int> theCoeffs;
-  int constTerm=0;
+  List<Data> theCoeffs;
+  Data constTerm=0;
   bool foundConstTerm=false;
 //  std::cout << "<b>" << theExpression.ElementToString() << "</b>";
 //  if (theExpression.ElementToString()=="(4)*(a) b+(a) b")
@@ -528,20 +494,20 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   { Expression* currentSummandNoCoeff;
     currentSummandNoCoeff=&summands[i];
 //    this->OrderMultiplicationTreeProperly(commandIndex, *currentSummandNoCoeff);
-    int theCoeff=1;
+    Data theCoefF=1;
     if (currentSummandNoCoeff->theOperation==this->opTimes())
-    { if(currentSummandNoCoeff->children[0].theOperation==this->opInteger())
-      { theCoeff=currentSummandNoCoeff->children[0].theData;
+    { if(currentSummandNoCoeff->children[0].theOperation==this->opData())
+      { theCoefF=this->theData[currentSummandNoCoeff->children[0].theData];
         currentSummandNoCoeff=& currentSummandNoCoeff->children[1];
-        if (theCoeff==0)
+        if (theCoefF.IsEqualToZero())
           needSimplification=true;
       }
-    } else if (currentSummandNoCoeff->theOperation==this->opInteger())
-    { constTerm+=currentSummandNoCoeff->theData;
-      if (foundConstTerm || currentSummandNoCoeff->theData==0)
-          needSimplification=true;
-        foundConstTerm=true;
-        continue;
+    } else if (currentSummandNoCoeff->theOperation==this->opData())
+    { constTerm+=this->theData[currentSummandNoCoeff->theData];
+      if (foundConstTerm || this->theData[currentSummandNoCoeff->theData].IsEqualToZero())
+        needSimplification=true;
+      foundConstTerm=true;
+      continue;
     }
     int currentIndex= summandsNoCoeff.GetIndex(*currentSummandNoCoeff);
 //    std::cout << "<hr>" << currentSummandNoCoeff->ElementToStringPolishForm(0,1000);
@@ -552,7 +518,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
       currentIndex=summandsNoCoeff.size-1;
     } else
       needSimplification=true;
-    theCoeffs[currentIndex]+=theCoeff;
+    theCoeffs[currentIndex]+=theCoefF;
   }
 /*
   std::cout << "<hr>summands: ";
@@ -567,7 +533,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   if (!needSimplification)
     return false;
   for (int i=0; i<summandsNoCoeff.size; i++)
-    if (theCoeffs[i]==0)
+    if (theCoeffs[i].IsEqualToZero())
     { theCoeffs[i]=theCoeffs[theCoeffs.size-1];
       summandsNoCoeff.PopIndexSwapWithLast(i);
       i--;
@@ -580,13 +546,13 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
     current.reset(this, commandIndex);
     current.theOperation=this->opTimes();
     current.children.SetSize(2);
-    current.children[0].MakeInT(theCoeffs[i],this, commandIndex);
+    current.children[0].MakeData(this->theData.AddNoRepetitionOrReturnIndexFirst(theCoeffs[i]), *this, commandIndex);
     current.children[1]=summandsNoCoeff[i];
   }
-  if (constTerm!=0 || summandsNoCoeff.size==0)
+  if (!constTerm.IsEqualToZero() || summandsNoCoeff.size==0)
   { summandsWithCoeff.SetSize(summandsWithCoeff.size+1);
     Expression& current=summandsWithCoeff[summandsWithCoeff.size-1];
-    current.MakeInT(constTerm, this, commandIndex);
+    current.MakeData(this->theData.AddNoRepetitionOrReturnIndexFirst(constTerm), *this, commandIndex);
   }
   if (summandsWithCoeff.size==1)
   { theExpression=summandsWithCoeff[0];
@@ -607,10 +573,13 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
 
 bool CommandList::EvaluateStandardTimes
 (CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression, theCommands.opTimes(), theCommands.opPlus()))
+{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
+  if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression, theCommands.opTimes(), theCommands.opPlus()))
     return true;
+  //std::cout << "<br>After distribute: " << theExpression.ElementToString();
   if (theCommands.EvaluateDoAssociate(theCommands, commandIndex, theExpression))
     return true;
+  //std::cout << "<br>After do associate: " << theExpression.ElementToString();
   return false;
 }
 
@@ -619,14 +588,15 @@ bool CommandList::EvaluateDoAssociate
 { List<Expression>& multiplicands=theCommands.buffer1;
   List<Expression>& actualMultiplicands=theCommands.buffer2;
   multiplicands.SetSize(0);
+  //std::cout << "<br>At start of do associate: " << theExpression.ElementToString();
   bool needsModification=theCommands.AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (theExpression, multiplicands, 0, theCommands.MaxRecursionDepthDefault);
   actualMultiplicands.Reserve(multiplicands.size);
   actualMultiplicands.SetSize(0);
-  int theCoeff=1;
+  Data theCoeff=1;
   for (int i=0; i<multiplicands.size; i++)
-    if (multiplicands[i].theOperation==theCommands.opInteger())
-    { theCoeff*=multiplicands[i].theData;
+    if (multiplicands[i].theOperation==theCommands.opData())
+    { theCoeff*=theCommands.theData[multiplicands[i].theData];
       if (i>0)
         needsModification=true;
     } else
@@ -634,15 +604,19 @@ bool CommandList::EvaluateDoAssociate
   if (theCoeff==0 && multiplicands.size>1)
     needsModification=true;
   if (!needsModification)
+  { //std::cout << " no modification do associate: " << theExpression.ElementToString();
     return false;
+  }
   if (theCoeff==0)
     actualMultiplicands.SetSize(0);
   if (actualMultiplicands.size==0)
-  { theExpression.MakeInT(theCoeff, &theCommands, commandIndex);
+  { theExpression.MakeData(theCommands.theData.AddNoRepetitionOrReturnIndexFirst(theCoeff), theCommands, commandIndex);
+    //std::cout << "<br>  do associate return: " << theExpression.ElementToString();
     return true;
   }
   if (actualMultiplicands.size==1 && theCoeff==1)
   { theExpression=actualMultiplicands[0];
+    //std::cout << "<br>  do associate return: " << theExpression.ElementToString();
     return true;
   }
   Expression* currentExpression;
@@ -650,7 +624,7 @@ bool CommandList::EvaluateDoAssociate
   if (theCoeff!=1)
   { currentExpression->theOperation=theCommands.opTimes();
     currentExpression->children.SetSize(2);
-    currentExpression->children[0].MakeInT(theCoeff, & theCommands, commandIndex);
+    currentExpression->children[0].MakeData(theCommands.theData.AddNoRepetitionOrReturnIndexFirst(theCoeff), theCommands, commandIndex);
     currentExpression=&currentExpression->children[1];
   }
   for (int i=0; i<actualMultiplicands.size-1; i++)
@@ -658,6 +632,7 @@ bool CommandList::EvaluateDoAssociate
     currentExpression=&currentExpression->children[1];
   }
   *currentExpression=actualMultiplicands[actualMultiplicands.size-1];
+  //std::cout << "<br>At end do associate: " << theExpression.ElementToString();
   return true;
 }
 
@@ -731,13 +706,13 @@ bool CommandList::EvaluateIf
     return true;
   }
   Expression& left= theExpression.children[0];
-  if (left.theOperation!=theCommands.opInteger())
+  if (left.theOperation!=theCommands.opData())
     return false;
-  if (left.theData==1)
+  if (theCommands.theData[left.theData]==1)
   { theExpression.AssignChild(1);
     return true;
   }
-  if (left.theData==0)
+  if (theCommands.theData[left.theData]==0)
   { theExpression.AssignChild(2);
     return true;
   }
@@ -762,7 +737,7 @@ bool CommandList::EvaluateStandardFunction
     return true;
   Expression& functionNameNode =theExpression.children[0];
   assert(theExpression.children.size==2);
-  if (functionNameNode.theOperation==theCommands.opInteger())
+  if (functionNameNode.theOperation==theCommands.opData())
   { theExpression.AssignChild(0);
     return true;
   }
@@ -782,9 +757,9 @@ bool CommandList::EvaluateStandardEqualEqual
   Expression& left=theExpression.children[0];
   Expression& right=theExpression.children[1];
   if (left==right)
-    theExpression.MakeInT(1, & theCommands, commandIndex);
+    theExpression.MakeInt(1, theCommands, commandIndex);
   else
-    theExpression.MakeInT(0, & theCommands, commandIndex);
+    theExpression.MakeInt(0, theCommands, commandIndex);
   return true;
 }
 
@@ -804,9 +779,10 @@ bool CommandList::EvaluateStandardMinus
     theExpression.theOperation=theCommands.opPlus();
   }
   Expression result, minusOne;
-  minusOne.MakeInT(-1, & theCommands, commandIndex);
+  minusOne.MakeInt(-1, theCommands, commandIndex);
   result.MakeProducT(& theCommands, commandIndex, minusOne, *toBeTransformed);
   *toBeTransformed=result;
+  //std::cout << toBeTransformed->ElementToString();
   return true;
 }
 
@@ -980,8 +956,8 @@ Expression* CommandList::PatternMatch
   (commandIndex, tempExp, RecursionDepth+1, MaxRecursionDepth, tempPairs, theLog);
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ElementToString() << "; evaluating...";
-  if (tempExp.theOperation==this->opInteger())
-    if (tempExp.theData==1)
+  if (tempExp.theOperation==this->opData())
+    if (this->theData[tempExp.theData]==1)
       return & theExpression;
   return 0;
 }
@@ -1181,8 +1157,8 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   }
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->theNonBoundVars[this->theData].theName;
-  else if (this->theOperation==this->theBoss->opInteger())
-    out << this->theData;
+  else if (this->theOperation==this->theBoss->opData())
+    out << this->theBoss->theData[this->theData].ElementToString();
   else if (this->theOperation==this->theBoss->opFunction())
   { assert(this->children.size>=2);
     switch(this->format)
@@ -1263,6 +1239,11 @@ std::string CommandList::ElementToString()
   for (int i=0; i<this->theNonBoundVars.size; i++)
   { out << this->theNonBoundVars[i].theName << ", ";
   }
+  out << "<br>\n Data entries (" << this->theData.size << " total):\n<br>\n";
+  for (int i=0; i<this->theData.size; i++)
+  { out << this->theData[i].ElementToString() << ", ";
+  }
+  out << "<hr>";
   assert(this->cachedExpressions.size==this->imagesCashedExpressions.size);
   if (this->cachedExpressions.size>0)
   { out << "<br>\n Cached expressions: (" << this->cachedExpressions.size << " total):\n<br>\n";
@@ -1325,10 +1306,17 @@ bool Expression::NeedBracketsForThePower()const
   ;
 }
 
-void Expression::MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
-{ this->reset(newBoss, indexOfTheCommand);
-  this->theData=theValue;
-  this->theOperation=newBoss->opInteger();
+void Expression::MakeInt(int theValue, CommandList& newBoss, int indexOfTheCommand)
+{ this->reset(&newBoss, indexOfTheCommand);
+  this->theData=newBoss.theData.AddNoRepetitionOrReturnIndexFirst((Data)theValue);
+  this->theOperation=newBoss.opData();
+}
+
+void Expression::MakeData(int DataIndex, CommandList& newBoss, int indexOfTheCommand)
+{ this->reset(&newBoss, indexOfTheCommand);
+  this->theData=DataIndex;
+  assert(this->theData<newBoss.theData.size);
+  this->theOperation=newBoss.opData();
 }
 
 void Expression::MakeVariableNonBoundNoProperties
@@ -1352,4 +1340,26 @@ void Expression::MakeFunction
 { int index=owner->GetIndexNonBoundVar(functionName);
   assert(index!=-1);
   this->MakeFunction(owner, indexOfTheCommand, argument, index);
+}
+
+int Data::HashFunction()const
+{ switch (this->type)
+  { case Data::typeRational:
+      return this->theRational.GetElementConst().HashFunction()*this->typeRational;
+    default:
+      assert(false);
+      return 0;
+  }
+}
+
+bool Command::ReplaceIntIntBy10IntPlusInt()
+{ SyntacticElement& left=this->syntacticStack[this->syntacticStack.size-2];
+  SyntacticElement& right=this->syntacticStack[this->syntacticStack.size-1];
+  Data tempData;
+  tempData=this->theBoss->theData[left.theData.theData];
+  tempData*=10;
+  tempData+=this->theBoss->theData[right.theData.theData];
+  left.theData.theData= this->theBoss->theData.AddNoRepetitionOrReturnIndexFirst(tempData);
+  this->DecreaseStackSetCharacterRanges(1);
+  return true;
 }

@@ -190,6 +190,7 @@ template < > int HashedListB<std::string, MathRoutines::hashString>::PreferredHa
 template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<int, MathRoutines::IntIdentity>::PreferredHashSize=50;
+template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -286,6 +287,7 @@ template < > int List<bool ((*)(CommandList& theCommands, int commandIndex, Expr
 template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
 template < > int List<Expression>::ListActualSizeIncrement=50;
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
+template < > int List<Data>::ListActualSizeIncrement=500;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -26991,7 +26993,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   return this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
 }
 
-void ParserNode::TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension)
+void ParserNode::TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialsRationalCoeff& theSub, int theDimension)
 { theSub.SetSize(theDimension);
   for (int i=0; i<theSub.size; i++)
     theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
@@ -26999,6 +27001,7 @@ void ParserNode::TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDi
 //      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ElementToString() << "<br>";
   for (int i=0; i<theDimension; i++)
     theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
+  this->impliedNumVars=minNumberVarsAfterSub;
 }
 
 int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
@@ -27028,20 +27031,22 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
         this->owner->TheObjects[this->children.TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeUEElementOrdered:
-      this->TrimSubToMinNumVars(theSub, this->impliedNumVars);
+      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
+      this->UEElementOrdered.GetElement().SetNumVariables(this->impliedNumVars);
       this->UEElementOrdered.GetElement().SubstitutionCoefficients(theSub, & theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeUEelement:
-      this->TrimSubToMinNumVars(theSub, this->impliedNumVars);
+      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
       polyOneAfterSub.MakeOne(this->impliedNumVars);
       polyZeroAfterSub.Nullify(this->impliedNumVars);
+      this->UEElement.GetElement().SetNumVariables(this->impliedNumVars);
       this->UEElement.GetElement().SubstitutionCoefficients
       (theSub, & theGlobalVariables, polyOneAfterSub, polyZeroAfterSub);
       return this->errorNoError;
     case ParserNode::typeLattice:
       if (theDimension!=this->theLattice.GetElement().GetDim())
         return this->SetError(this->errorDimensionProblem);
-      this->TrimSubToMinNumVars(theSub, theDimension);
+      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, theDimension);
       if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
       this->outputString=this->theLattice.GetElement().ElementToString(true, false);
@@ -27049,7 +27054,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialsRationalCoeff& theSub, Globa
     case ParserNode::typeQuasiPolynomial:
       if(theDimension!=this->theQP.GetElement().GetNumVars())
         return this->SetError(this->errorDimensionProblem);
-      this->TrimSubToMinNumVars(theSub, theDimension);
+      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, theDimension);
       tempQP=this->theQP.GetElement();
       if (!tempQP.SubstitutionLessVariables(theSub, this->theQP.GetElement(), theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);

@@ -169,6 +169,7 @@ template <class CoefficientType>
 class ModuleSSalgebraNew;
 class CommandList;
 class Command;
+class VariableNonBound;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -949,6 +950,13 @@ public:
   { this->Reserve(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTop(theList[i]);
+  }
+  int AddNoRepetitionOrReturnIndexFirst(const Object& o)
+  { int result= this->GetIndex(o);
+    if (result!=-1)
+      return result;
+    this->AddOnTop(o);
+    return this->size-1;
   }
   bool AddNoRepetition(const Object& o)
   { if (this->GetIndex(o)!=-1)
@@ -12191,7 +12199,7 @@ public:
   (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
 ;
   std::string ElementToStringErrorCode(bool useHtml);
-  void TrimSubToMinNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
+  void TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialsRationalCoeff& theSub, int theDimension);
   template <class CoefficientType>
 bool GetRootRationalDontUseForFunctionArguments
 (Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
@@ -17201,7 +17209,132 @@ std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()
   return this->ElementToString(theGlobalVariables, tempFormat);
 }
 
-
+class Data
+{
+public:
+  MemorySaving<Rational> theRational;
+  MemorySaving<PolynomialRationalCoeff> thePoly;
+  MemorySaving<RationalFunction> theRationalFunction;
+  MemorySaving<std::string> theError;
+  int type;
+  enum DataType
+  { typeError=0, typeRational, typePoly, typeRationalFunction
+  };
+  Data (int x)
+  { this->type=this->typeError;
+    this->operator=(x);
+  }
+  Data()
+  { this->type=this->typeError;
+  }
+  Data(const Data& otherData)
+  { this->type=this->typeError;
+    this->operator=(otherData);
+  }
+  void FreeMemory()
+  { switch (this->type)
+    { case Data::typeRational: this->theRational.FreeMemory(); break;
+      case Data::typePoly: this->thePoly.FreeMemory(); break;
+      case Data::typeRationalFunction: this->theRationalFunction.FreeMemory(); break;
+      default:
+        break;
+    }
+  }
+  bool IsEqualToZero()
+  { switch (this->type)
+    { case Data::typeRational:
+        return this->theRational.GetElement().IsEqualToZero();
+      default:
+        assert(false);
+        return false;
+    }
+  }
+  bool IsInteger()
+  { if (this->type!=this->typeRational)
+      return false;
+    return this->theRational.GetElement().IsInteger();
+  }
+  void SetInt(int inputInt)
+  { this->FreeMemory();
+    this->type=this->typeRational;
+    this->theRational.GetElement()=inputInt;
+  }
+  bool SetError(const std::string& inputError)
+  { this->FreeMemory();
+    this->type=this->typeError;
+    this->theError.GetElement()=inputError;
+    return false;
+  }
+  void operator=(int i)
+  { this->SetInt(i);
+  }
+  bool operator+=(const Data& other)
+  { std::stringstream out;
+    if (this->type!=other.type)
+    { out << "Adding different types, " << this->type << " and " << other.type << ", is not allowed.";
+      return this->SetError(out.str());
+    }
+    switch(this->type)
+    { case Data::typeRational:
+        this->theRational.GetElement()+=other.theRational.GetElementConst();
+        return true;
+      default:
+        out << "Don't know how to add elements of type " << this->type << ". ";
+        return this->SetError(out.str());
+    }
+  }
+  bool operator*=(const Data& other)
+  { std::stringstream out;
+    if (this->type!=other.type)
+    { out << "Multiplying different types, " << this->type << " and " << other.type << ", is not allowed.";
+      return this->SetError(out.str());
+    }
+    switch(this->type)
+    { case Data::typeRational:
+        this->theRational.GetElement()*=other.theRational.GetElementConst();
+        return true;
+      default:
+        out << "Don't know how to multiply elements of type " << this->type << ". ";
+        return this->SetError(out.str());
+    }
+  }
+  void operator=(const Data& other)
+  { if (this==&other)
+      return;
+    this->type=other.type;
+    switch(this->type)
+    { case Data::typeRational: this->theRational=other.theRational; break;
+      default: assert(false);
+    }
+  }
+  bool operator==(const Data& other)
+  { if (this->type!=other.type)
+      return false;
+    switch(this->type)
+    { case Data::typeRational:
+        return this->theRational.GetElement()==other.theRational.GetElementConst();
+      default:
+        return false;
+    }
+  }
+  std::string ElementToString()
+  { std::stringstream out;
+    switch(this->type)
+    { case Data::typeRational:
+        return this->theRational.GetElement().ElementToString();
+      default:
+        out << "Don't know how to convert element of type " << this->type << " to string.";
+        return out.str();
+    }
+  }
+  bool operator!=(const Data& other)
+  { return ! this->operator==(other);
+  }
+  int HashFunction()const;
+  static inline int HashFunction(const Data& input)
+  { return input.HashFunction();
+  }
+};
 
 class Expression
 {
@@ -17232,13 +17365,9 @@ class Expression
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
   }
-  void SetPropertyValue(const std::string& propertyName, int PropertyValue)
+  void MakeData(int DataIndex, CommandList& newBoss, int indexOfTheCommand)
   ;
-  int GetPropertyValue(const std::string& propName)const
-;
-  int GetPropertyValue(int propertyIndex)const
-;
-  void MakeInT(int theValue, CommandList* newBoss, int indexOfTheCommand)
+  void MakeInt(int theInt, CommandList& newBoss, int indexOfTheCommand)
   ;
 void MakeVariableNonBoundNoProperties
   (CommandList* owner, int indexOfTheCommand, int varIndex)
@@ -17568,13 +17697,8 @@ public:
   bool ReplaceVXbyEX();
   bool ReplaceVbyE();
   bool ReplaceIntIntBy10IntPlusInt()
-  { SyntacticElement& left=this->syntacticStack[this->syntacticStack.size-2];
-    SyntacticElement& right=this->syntacticStack[this->syntacticStack.size-1];
-    left.theData.theData*=10;
-    left.theData.theData+=right.theData.theData;
-    this->DecreaseStackSetCharacterRanges(1);
-    return true;
-  }
+  ;
+
   bool RegisterBoundVariable();
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
@@ -17601,6 +17725,12 @@ class VariableNonBound
   inline static int HashFunction(const VariableNonBound& input)
   { return MathRoutines::hashString(input.theName);
   }
+  int HashFunction()const
+  { return VariableNonBound::HashFunction(*this);
+  }
+  VariableNonBound()
+  { this->theHandler=0;
+  }
   bool operator==(const VariableNonBound& other)const
   { return this->theName==other.theName;
   }
@@ -17615,10 +17745,10 @@ public:
   HashedListB<std::string, MathRoutines::hashString> operations;
   List<bool ((*)(CommandList& theCommands, int commandIndex, Expression& theExpression))> theStandardOpEvalFunctions;
 //used to parametrize the input data for the special operation "VariableNonBound"
-  HashedListB<VariableNonBound, VariableNonBound::HashFunction> theNonBoundVars;
+  HashedList<VariableNonBound> theNonBoundVars;
+  HashedListB<Data, Data::HashFunction> theData;
   List<int> targetProperties;
   HashedListB<std::string, MathRoutines::hashString> theDictionary;
-  HashedListB<std::string, MathRoutines::hashString> thePropertyNameS;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDepthDefault;
   int MaxAlgTransformationsPerExpression;
@@ -17655,8 +17785,8 @@ public:
   int conBindVariable()
   { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
   }
-  int conInteger()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
+  int conData()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Data");
   }
   int conEqualEqual()
   { return this->controlSequences.GetIndexIMustContainTheObject("==");
@@ -17685,17 +17815,8 @@ public:
   int opEqualEqual()
   { return this->operations.GetIndexIMustContainTheObject("==");
   }
-  void AddTargetProperty(const std::string& propertyName, bool theHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
-  { this->theDictionary.AddNoRepetition(propertyName);
-    VariableNonBound tempV;
-    tempV.theName=propertyName;
-    tempV.theHandler=theHandler;
-    int theIndex=this->theNonBoundVars.GetIndex(tempV);
-    if (theIndex==-1)
-    { this->theNonBoundVars.AddOnTop(tempV);
-      theIndex=this->theNonBoundVars.size-1;
-    }
-    this->targetProperties.AddOnTop(theIndex);
+  int opData()
+  { return this->operations.GetIndexIMustContainTheObject("Data");
   }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
@@ -17705,6 +17826,12 @@ public:
   }
   int opMinus()
   { return this->operations.GetIndexIMustContainTheObject("-");
+  }
+  int opTimes()
+  { return this->operations.GetIndexIMustContainTheObject("*");
+  }
+  int opDivide()
+  { return this->operations.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
@@ -17759,15 +17886,6 @@ public:
       return false;
     whichDigit=input[0]-'0';
     return whichDigit<10 && whichDigit>=0;
-  }
-  int opTimes()
-  { return this->operations.GetIndexIMustContainTheObject("*");
-  }
-  int opDivide()
-  { return this->operations.GetIndexIMustContainTheObject("/");
-  }
-  int opInteger()
-  { return this->operations.GetIndexIMustContainTheObject("Integer");
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   bool CollectSummands(int commandIndex, Expression& theExpression);

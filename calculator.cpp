@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=2000000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -209,8 +209,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
-//  civilizedInput="h_a";
+  inputWeylString="Calculator";
+//  civilizedInput="-1";
 //  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
 
   if (inputWeylString=="Calculator")
@@ -257,6 +257,7 @@ int main(int argc, char **argv)
     theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+//  civilizedInput="(x_1\\mapsto 0: g_{-1}g_{-2}g_{-3})";
 //  civilizedInput="splitFDPartGenVermaOverLeviParabolic((0, 1,1),(1,0,0), (1,0,1))";
 //  civilizedInput="h_2 v((1,0),(0,0))";
 //  civilizedInput="g_{8}(g_{-8} v((x_1,1,0),(1,0,0)) )";

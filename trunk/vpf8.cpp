@@ -1476,7 +1476,7 @@ std::string DynkinDiagramRootSubalgebra::GetNameFrom
 { std::stringstream out;
   out << WeylLetterWithLength << "_" << WeylRank;
   if (IncludeAlgebraNames && (WeylLetterWithLength[0]=='A' || WeylLetterWithLength[0]=='B' || WeylLetterWithLength[0]=='C' || WeylLetterWithLength[0]=='D'))
-    out << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetterWithLength[0], WeylRank) << ")";
+    out << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetterWithLength[0], WeylRank, true) << ")";
   return out.str();
 }
 
@@ -7871,7 +7871,7 @@ void WeylGroup::DrawRootSystem
   }
   std::stringstream tempStream;
   tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
-  (this->WeylLetter, this->GetDim()) << ")";
+  (this->WeylLetter, this->GetDim(), true) << ")";
   if (this->GetDim()==2 && predefinedProjectionPlane!=0)
   { theTwoPlane[1][0]=1;
     theTwoPlane[1][1]=0;
@@ -7933,7 +7933,7 @@ int ParserNode::EvaluateDrawRootSystem
   << "http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>).<br>"
   << "The darker red points can be rotated around by dragging them with the mouse pointer; they denote the simple positive roots.<br> "
   << "Mouse wheel zooms-in/out. <br>";
-  out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraTypeAndName(theWeylLetter, theDimension);
+  out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeylLetter, theDimension);
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
 //  out << "<br>Note that for a root system of rank 4 or more there might be javascript-compilation lag.";
   theNode.outputString=out.str();
@@ -9544,7 +9544,7 @@ int ParserNode::EvaluateMakeCasimir
     theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
   theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
   std::stringstream out;
-  out << "Context Lie algebra: " << theNode.ContextLieAlgebra->GetLieAlgebraTypeAndName
+  out << "Context Lie algebra: " << theNode.ContextLieAlgebra->GetLieAlgebraName
   (theNode.ContextLieAlgebra->theWeyl.WeylLetter, theNode.ContextLieAlgebra->GetRank());
   out << ". The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()
   <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
@@ -9786,7 +9786,7 @@ int ParserNode::EvaluateGetCoxeterBasis
   Vector<double> basis1, basis2;
   theWeyl.GetCoxeterPlane(basis1, basis2, theGlobalVariables);
   out.precision(5);
-  out << "Lie algebra of type " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theDimension)
+  out << "Lie algebra of type " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theDimension, true)
   << "<br> One orthonormal basis of coxeter plane:<br>" << basis1.ElementToString() << ", "
   << basis2.ElementToString();
   theNode.outputString=out.str();

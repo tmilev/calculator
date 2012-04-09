@@ -754,6 +754,14 @@ public:
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
+  int AddNoRepetitionOrReturnIndexFirst(const Object& o)
+  { int indexOfObject=this->IndexOfObject(o);
+    if (indexOfObject==-1)
+    { this->AddOnTop(o);
+      return this->size-1;
+    }
+    return indexOfObject;
+  }
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index)
   { for (int i=index; i<this->size-1; i++)
@@ -9700,6 +9708,12 @@ public:
     this->ElementToStringNegativeRootSpacesFirst(tempS, useRootNotation, useEpsilonNotation, useHtml, useLatex, usePNG, theFormat, theGlobalVariables);
     return tempS;
   }
+  std::string ElementToString
+  (GlobalVariables& theGlobalVariables)
+  { PolynomialOutputFormat tempFormat;
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    return this->ElementToStringNegativeRootSpacesFirst(false, false, true, false, false, tempFormat, theGlobalVariables);
+  }
   std::string ElementToStringLieBracketPairing();
   void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); }
   std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables) {return this->theWeyl.GetEpsilonCoords(this->theWeyl.RootSystem[theIndex], theGlobalVariables).ElementToStringEpsilonForm();}
@@ -9714,22 +9728,21 @@ public:
       return true;
     return false;
   }
-  static std::string GetLieAlgebraTypeAndName(char WeylLetter, int WeylDim)
+  std::string GetLieAlgebraName(bool includeNonTechnicalNames=true)const
+  { return this->GetLieAlgebraName(this->theWeyl.WeylLetter, this->GetRank(), includeNonTechnicalNames);
+  }
+  static std::string GetLieAlgebraName(char WeylLetter, int WeylDim, bool includeNonTechnicalNames=true)
   { std::stringstream out;
     out << WeylLetter << "_" << WeylDim;
-    if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
-      out << " (" << SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetter, WeylDim) << ")";
-    return out.str();
-  }
-  static std::string GetLieAlgebraName(char WeylLetter, int WeylDim)
-  { std::stringstream out;
-    switch (WeylLetter)
-    { case 'A':  out << "sl(" << WeylDim+1 << ")"; break;
-      case 'B':  out << "so(" << 2*WeylDim+1 << ")"; break;
-      case 'C':  out << "sp(" << 2*WeylDim << ")"; break;
-      case 'D':  out << "so(" << 2*WeylDim << ")"; break;
-      default: out << WeylLetter << "_" << WeylDim; break;
-    }
+    if (includeNonTechnicalNames)
+      if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
+        switch (WeylLetter)
+        { case 'A':  out << "(sl(" << WeylDim+1 << "))"; break;
+          case 'B':  out << "(so(" << 2*WeylDim+1 << "))"; break;
+          case 'C':  out << "(sp(" << 2*WeylDim << "))"; break;
+          case 'D':  out << "(so(" << 2*WeylDim << "))"; break;
+          default: out << "(" << WeylLetter << "_" << WeylDim << ")"; break;
+        }
     return out.str();
   }
   void GetMinusTransposeAuto(const ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output);
@@ -17244,7 +17257,7 @@ public:
   MemorySaving<std::string> theError;
   int type;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction
+  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra
   };
   Data (int x)
   { this->type=this->typeError;
@@ -17259,7 +17272,8 @@ public:
   }
   void FreeMemory()
   { switch (this->type)
-    { case Data::typeRational: this->theRational.FreeMemory(); break;
+    { case Data::typeSSalgebra:
+      case Data::typeRational: this->theRational.FreeMemory(); break;
       case Data::typePoly: this->thePoly.FreeMemory(); break;
       case Data::typeRationalFunction: this->theRationalFunction.FreeMemory(); break;
       default:
@@ -17268,7 +17282,9 @@ public:
   }
   bool IsEqualToZero()
   { switch (this->type)
-    { case Data::typeRational:
+    { case Data::typeSSalgebra:
+        return false;
+      case Data::typeRational:
         return this->theRational.GetElement().IsEqualToZero();
       default:
         assert(false);
@@ -17337,7 +17353,8 @@ public:
       return;
     this->type=other.type;
     switch(this->type)
-    { case Data::typeRational: this->theRational=other.theRational; break;
+    { case Data::typeSSalgebra:
+      case Data::typeRational: this->theRational=other.theRational; break;
       case Data::typePoly: this->thePoly=other.thePoly; break;
       default:
         std::cout << "This is a programming error: operator= does not cover all possible cases. "
@@ -17353,7 +17370,8 @@ public:
   { if (this->type!=other.type)
       return false;
     switch(this->type)
-    { case Data::typeRational:
+    { case Data::typeSSalgebra:
+      case Data::typeRational:
         return this->theRational.GetElement()==other.theRational.GetElementConst();
       case Data::typePoly:
         return this->thePoly.GetElement()==other.thePoly.GetElementConst();
@@ -17364,20 +17382,7 @@ public:
         return false;
     }
   }
-  std::string ElementToString()
-  { std::stringstream out;
-    switch(this->type)
-    { case Data::typeRational:
-        return this->theRational.GetElement().ElementToString();
-      case Data::typePoly:
-        return this->thePoly.GetElement().ElementToString();
-      default:
-        std::cout << "This is a programming error: don't know how to convert element of type " << this->type << " to string. "
-        << "Please debug line " << __LINE__;
-        assert(false);
-        return out.str();
-    }
-  }
+  std::string ElementToString(CommandList* owner=0, std::stringstream* comments=0)const;
   bool operator!=(const Data& other)
   { return ! this->operator==(other);
   }
@@ -17386,6 +17391,7 @@ public:
   { return input.HashFunction();
   }
   Data operator/(const Data& right);
+  Data operator*(const Data& right);
 };
 
 class Expression
@@ -17655,6 +17661,8 @@ public:
       lookAhead!="{}"
       ;
   }
+  bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
+;
   bool LookAheadAllowsPlus(const std::string& lookAhead)
   { return
       lookAhead=="+" || lookAhead=="-" ||
@@ -17705,6 +17713,8 @@ public:
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault)
+  ;
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
   { SyntacticElement& middle=this->syntacticStack[this->syntacticStack.size-2];
     SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
@@ -17876,6 +17886,7 @@ public:
   List<Expression> buffer1, buffer2;
   int MaxRecursionDepthDefault;
   int MaxAlgTransformationsPerExpression;
+  int MaxLatexChars;
   double MaxAllowedTimeInSeconds;
   int TotalNumPatternMatchedPerformed;
   List<Command> theCommands;
@@ -17889,17 +17900,12 @@ public:
   std::string output;
   std::string theLog;
 //following are the variout hardcoded data structures.
+  GlobalVariables* theGlobalVariableS;
   List<SemisimpleLieAlgebra> theLieAlgebras;
   HashedListB<Data, Data::HashFunction> theData;
 //end of hardcoded data structures
   std::string ElementToString();
   double StartTimeInSeconds;
-  double (*GetElapsedTimeNonSafe)();
-  double GetElapsedTime()
-  { if (this->GetElapsedTimeNonSafe==0)
-      return -1;
-    return this->GetElapsedTimeNonSafe();
-  }
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
@@ -18039,8 +18045,11 @@ public:
   static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardEqualEqual(CommandList& theCommands, int commandIndex, Expression& theExpression);
 
+  static bool EvaluateDoAssociatE
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, int theOperation)
+  ;
   static bool EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoAssociate(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool EvaluateDoExtractBaseMultiplication(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
   static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP);
@@ -18062,8 +18071,7 @@ public:
   static bool EvaluateIf(CommandList& theCommands, int commandIndex, Expression& theExpression);
   void AddEmptyHeadedCommand();
   CommandList()
-  { this->GetElapsedTimeNonSafe=0;
-    init();
+  { this->theGlobalVariableS=0;
   }
   void AddOperationNoFail
   (const std::string& theOpName,
@@ -18093,7 +18101,7 @@ public:
    const std::string& argList, const std::string& description, const std::string& exampleArgs
    )
 ;
-  void init();
+  void init(GlobalVariables& theGlobalVariables);
   void initPredefinedVars()
   ;
   void initTargetProperties()
@@ -18133,7 +18141,11 @@ public:
  std::stringstream* theLog=0)
  ;
   void Evaluate(const std::string& theInput)
-  { this->StartTimeInSeconds=this->GetElapsedTime();
+  { if (this->theGlobalVariableS==0)
+    { this->output= "This is a programming error: commandList not initialized properly. Please report this bug. ";
+      return;
+    }
+    this->StartTimeInSeconds=this->theGlobalVariableS->GetElapsedSeconds();
     this->input=theInput;
     this->ParseFillDictionary(this->input);
     this->ExtractExpressions();

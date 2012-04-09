@@ -209,7 +209,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
+  inputWeylString="Calculator";
+//  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="-1";
 //  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
@@ -233,7 +234,8 @@ int main(int argc, char **argv)
   //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
     std::cout << "\n</FORM>";
     CommandList theComputation;
-    theComputation.GetElapsedTimeNonSafe=&GetElapsedTimeInSeconds;
+    theComputation.init(theGlobalVariables);
+
     theComputation.Evaluate(civilizedInput);
     std::cout << "<hr><b>Result.</b><br>";
     if (civilizedInput!="")

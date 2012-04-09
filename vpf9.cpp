@@ -191,6 +191,7 @@ template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::
 template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<int, MathRoutines::IntIdentity>::PreferredHashSize=50;
 template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
+template < > int HashedListB<Function, Function::HashFunction>::PreferredHashSize=100;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -287,6 +288,7 @@ template < > int List<bool ((*)(CommandList& theCommands, int commandIndex, Expr
 template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
 template < > int List<Expression>::ListActualSizeIncrement=50;
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
+template < > int List<Function>::ListActualSizeIncrement=50;
 template < > int List<Data>::ListActualSizeIncrement=500;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>

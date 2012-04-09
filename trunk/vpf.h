@@ -1106,7 +1106,33 @@ public:
 
 template <class Object>
 class HashedList : public HashedListB<Object, Object::HashFunction>
-{};
+{
+public:
+//code::blocks fails to parse for autocomplete the methods of the parent class.
+//As a (benign) workaround we redefine the methods of HashedListB here.
+  inline static std::string GetXMLClassName(){ return HashedListB<Object, Object::HashFunction>::GetXMLClassName();}
+  inline void initHash(){ this->HashedListB<Object, Object::HashFunction>::initHash();}
+  inline int GetHash(const Object& input)const{ return this->HashedListB<Object, Object::HashFunction>::GetHash(input);}
+  inline void Clear(){ this->HashedListB<Object, Object::HashFunction>::Clear();}
+  inline void AddOnTop(const Object& o){ this->HashedListB<Object, Object::HashFunction>::AddOnTop(o);}
+  inline void AddOnTop(const List<Object>& theList){ return this->HashedListB<Object, Object::HashFunction>::AddOnTop(theList);}
+  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o){ return this->HashedListB<Object, Object::HashFunction>::AddNoRepetitionOrReturnIndexFirst(o);}
+  inline bool AddNoRepetition(const Object& o){ return this->HashedListB<Object, Object::HashFunction>::AddNoRepetition(o);}
+  inline void AdjustHashes(){ this->HashedListB<Object, Object::HashFunction>::AdjustHashes();}
+  inline void AddNoRepetition(const List<Object>& theList){ this->HashedListB<Object, Object::HashFunction>::AddNoRepetition(theList);}
+  inline void PopIndexSwapWithLast(int index){ this->HashedListB<Object, Object::HashFunction>::PopIndexSwapWithLast(index);}
+  inline void SwapTwoIndicesHash(int i1, int i2){this->HashedListB<Object, Object::HashFunction>::SwapTwoIndicesHash(i1, i2);}
+  inline bool Contains(const Object& o){return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
+  inline int GetIndex(const Object& o) const{return this->HashedListB<Object, Object::HashFunction>::GetIndex(o); }
+  inline int GetIndexIMustContainTheObject(const Object& o) const {return this->HashedListB<Object, Object::HashFunction>::GetIndexIMustContainTheObject(o);}
+  inline void SetExpectedSize(int expectedSize) {this->HashedListB<Object, Object::HashFunction>::SetExpectedSize(expectedSize); }
+  inline void SetHashSizE(int HS) {this->HashedListB<Object, Object::HashFunction>::SetHashSizE(HS); }
+  inline int SizeWithoutObjects() {return this->HashedListB<Object, Object::HashFunction>::SizeWithoutObjects(); }
+  inline void AssignList(const List<Object>& other){this->HashedListB<Object, Object::HashFunction>::AssignList(other); }
+  inline void QuickSortAscending(){ this->HashedListB<Object, Object::HashFunction>::QuickSortAscending();}
+  inline void QuickSortDescending(){this->HashedListB<Object, Object::HashFunction>::QuickSortDescending();}
+  inline std::string ElementToString()const {return this->HashedListB<Object, Object::HashFunction>::ElementToString();}
+};
 
 class Integer
 {
@@ -17218,7 +17244,7 @@ public:
   MemorySaving<std::string> theError;
   int type;
   enum DataType
-  { typeError=0, typeRational, typePoly, typeRationalFunction
+  { typeError=1, typeRational, typePoly, typeRationalFunction
   };
   Data (int x)
   { this->type=this->typeError;
@@ -17249,10 +17275,18 @@ public:
         return false;
     }
   }
+  bool IsSmallInteger(int & whichInteger)
+  { if (this->type!=this->typeRational)
+      return false;
+    return this->theRational.GetElement().IsSmallInteger(whichInteger);
+  }
   bool IsInteger()
   { if (this->type!=this->typeRational)
       return false;
     return this->theRational.GetElement().IsInteger();
+  }
+  int GetSmallInt()
+  { return this->theRational.GetElement().NumShort;
   }
   void SetInt(int inputInt)
   { this->FreeMemory();
@@ -17304,8 +17338,16 @@ public:
     this->type=other.type;
     switch(this->type)
     { case Data::typeRational: this->theRational=other.theRational; break;
-      default: assert(false);
+      case Data::typePoly: this->thePoly=other.thePoly; break;
+      default:
+        std::cout << "This is a programming error: operator= does not cover all possible cases. "
+        << " Please debug line " << __LINE__ << ".";
+        assert(false);
     }
+  }
+  void operator=(const Rational& other)
+  { this->theRational.GetElement()=other;
+    this->type=this->typeRational;
   }
   bool operator==(const Data& other)
   { if (this->type!=other.type)
@@ -17313,7 +17355,12 @@ public:
     switch(this->type)
     { case Data::typeRational:
         return this->theRational.GetElement()==other.theRational.GetElementConst();
+      case Data::typePoly:
+        return this->thePoly.GetElement()==other.thePoly.GetElementConst();
       default:
+        std::cout << "This is a programming error: operator== does not cover all possible cases. "
+        << " Please debug line " << __LINE__ << ".";
+        assert(false);
         return false;
     }
   }
@@ -17322,8 +17369,12 @@ public:
     switch(this->type)
     { case Data::typeRational:
         return this->theRational.GetElement().ElementToString();
+      case Data::typePoly:
+        return this->thePoly.GetElement().ElementToString();
       default:
-        out << "Don't know how to convert element of type " << this->type << " to string.";
+        std::cout << "This is a programming error: don't know how to convert element of type " << this->type << " to string. "
+        << "Please debug line " << __LINE__;
+        assert(false);
         return out.str();
     }
   }
@@ -17334,6 +17385,7 @@ public:
   static inline int HashFunction(const Data& input)
   { return input.HashFunction();
   }
+  Data operator/(const Data& right);
 };
 
 class Expression
@@ -17348,6 +17400,7 @@ class Expression
   int format;
   CommandList* theBoss;
   int commandIndex;
+  std::string theComments;
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot,
@@ -17360,6 +17413,7 @@ class Expression
     this->theData=0;
     this->errorString="";
     this->format=this->formatDefault;
+    this->theComments="";
   }
   void AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
@@ -17381,13 +17435,18 @@ void MakeVariableNonBounD
   void MakeFunction
   (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 ;
+//C++ does have horrible syntax:
+//the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
+// as input
+  bool (*GetFunctionFromVarName()) (CommandList& theCommands, int commandIndex, Expression& theExpression)
+;
   void MakeProducT
   (CommandList* owner, int indexOfTheCommand, const Expression& left, const Expression& right)
   ;
   void MakeXOX
   (CommandList* owner, int indexOfTheCommand, int theOp, const Expression& left, const Expression& right)
   ;
-  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false, bool AddCurlyBraces=false)const;
+  std::string ElementToString(int recursionDepth=0, int maxRecursionDepth=1000, bool AddBrackets=false, bool AddCurlyBraces=false, std::stringstream* outComments=0)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static int HashFunction(const Expression& input)
   { return input.HashFunctionRecursive(0, 1000);
@@ -17404,6 +17463,10 @@ void MakeVariableNonBounD
   std::string GetOperation()const;
   Expression()
   { this->reset(0,-1);
+  }
+  inline bool SetError (const std::string& theError)
+  { this->errorString=theError;
+    return true;
   }
   Expression(const Expression& other)
   { this->operator=(other);
@@ -17423,7 +17486,8 @@ void MakeVariableNonBounD
   bool NeedBracketsForThePower()const;
   bool operator==(const Expression& other)const;
   void CopyValueFromNoChildrenCopy(const Expression& other)
-  { this->theBoss=other.theBoss;
+  { this->theComments=other.theComments;
+    this->theBoss=other.theBoss;
     this->commandIndex=other.commandIndex;
     this->theData=other.theData;
     this->theOperation=other.theOperation;
@@ -17717,19 +17781,75 @@ public:
   }
 };
 
+class Function
+{
+  public:
+  //the functions may not possess a name.
+  //If you want your function to possess a name, use a VariableNonBound which has a member function handler.
+  std::string theName;
+  std::string theArgumentList;
+  std::string theDescription;
+  std::string theExampleArguments;
+
+  bool (*theFunction)(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  std::string ElementToString()const
+  { return this->theName;
+  }
+  void operator =(const Function& other)
+  { this->theName=other.theName;
+    this->theArgumentList=other.theArgumentList;
+    this->theDescription=other.theDescription;
+    this->theExampleArguments=other.theExampleArguments;
+    this->theFunction=other.theFunction;
+  }
+  bool operator==(const Function& other)const
+  { return this->theArgumentList==other.theArgumentList &&
+    this->theFunction==other.theFunction && this->theName==other.theName;
+  }
+  Function(){this->theFunction=0;}
+  Function
+  ( bool (*functionPointer)(CommandList& theCommands, int commandIndex, Expression& theExpression),
+    const std::string& functionName,
+    const std::string& argumentList,
+    const std::string& description, const std::string& exampleArguments
+  )
+  { this->theFunction=functionPointer;
+    this->theName=functionName;
+    this->theDescription=description;
+    this->theExampleArguments=exampleArguments;
+    this->theArgumentList=argumentList;
+  }
+  inline static int HashFunction(const Function& input)
+  { return input.HashFunction();
+  }
+  int HashFunction()const
+  { return ((int) this->theFunction)+SomeRandomPrimes[1]*MathRoutines::hashString(theArgumentList);
+  }
+};
+
 class VariableNonBound
 {
   public:
   std::string theName;
-  bool (*theHandler)(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  int HandlerFunctionIndex;
   inline static int HashFunction(const VariableNonBound& input)
   { return MathRoutines::hashString(input.theName);
   }
+  VariableNonBound(const char x[]):theName(x), HandlerFunctionIndex(-1){}
+  VariableNonBound(const std::string& input):theName(input), HandlerFunctionIndex(-1) {}
+  VariableNonBound():HandlerFunctionIndex(-1) {}
+  std::string GetHandlerFunctionName(CommandList& owner);
+  //C++ does have horrible syntax:
+//the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
+// as input
+  bool (*GetFunction(CommandList& owner)) (CommandList& theCommands, int commandIndex, Expression& theExpression)
+;
   int HashFunction()const
   { return VariableNonBound::HashFunction(*this);
   }
-  VariableNonBound()
-  { this->theHandler=0;
+  void operator=(const VariableNonBound& other)
+  { this->theName=other.theName;
+    this->HandlerFunctionIndex=other.HandlerFunctionIndex;
   }
   bool operator==(const VariableNonBound& other)const
   { return this->theName==other.theName;
@@ -17742,16 +17862,21 @@ public:
 //control sequences parametrize the syntactical elements
   HashedListB<std::string, MathRoutines::hashString> controlSequences;
 //operations parametrize the expression elements
-  HashedListB<std::string, MathRoutines::hashString> operations;
-  List<bool ((*)(CommandList& theCommands, int commandIndex, Expression& theExpression))> theStandardOpEvalFunctions;
-//used to parametrize the input data for the special operation "VariableNonBound"
+//operations are the labels of the nodes of the expression tree
+//As operations can be thought of as functions, and functions are named by the class VariableNonBound,
+//operations are in fact realized as elements of type VariableNonBound.
+  HashedList<VariableNonBound> operations;
+//Non bound variables can only be data entries of an expression x for which x.theOperation
+//equals x.theBoss->opVariableNonBound()
   HashedList<VariableNonBound> theNonBoundVars;
-  HashedListB<Data, Data::HashFunction> theData;
+
+  HashedList<Function> theFunctions;
   List<int> targetProperties;
   HashedListB<std::string, MathRoutines::hashString> theDictionary;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDepthDefault;
   int MaxAlgTransformationsPerExpression;
+  double MaxAllowedTimeInSeconds;
   int TotalNumPatternMatchedPerformed;
   List<Command> theCommands;
 //  std::vector<std::stringstream> theLogs;
@@ -17763,6 +17888,10 @@ public:
   std::string input;
   std::string output;
   std::string theLog;
+//following are the variout hardcoded data structures.
+  List<SemisimpleLieAlgebra> theLieAlgebras;
+  HashedListB<Data, Data::HashFunction> theData;
+//end of hardcoded data structures
   std::string ElementToString();
   double StartTimeInSeconds;
   double (*GetElapsedTimeNonSafe)();
@@ -17836,6 +17965,10 @@ public:
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
+  bool ExtractPolyRational
+  (PolynomialRationalCoeff& output, const Expression& theInput, HashedList<Expression>& VariableImages,
+   int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
+  ;
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
@@ -17900,6 +18033,8 @@ public:
   static bool EvaluateStandardPlus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression)
   ;
+  static bool EvaluateStandardDivide(CommandList& theCommands, int commandIndex, Expression& theExpression)
+  ;
   static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
   static bool EvaluateStandardEqualEqual(CommandList& theCommands, int commandIndex, Expression& theExpression);
@@ -17910,7 +18045,19 @@ public:
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
   static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP);
 
-  static bool EvaluateFunctionIsInteger(CommandList& theCommands, int commandIndex, Expression& theExpression);
+  static bool fIsInteger
+  (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  ;
+  static bool fPolynomial
+  (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  ;
+  static bool fSSAlgebra
+    (CommandList& theCommands, int commandIndex, Expression& theExpression)
+;
+
+  static bool fElementSSAlgebra
+    (CommandList& theCommands, int commandIndex, Expression& theExpression)
+;
 
   static bool EvaluateIf(CommandList& theCommands, int commandIndex, Expression& theExpression);
   void AddEmptyHeadedCommand();
@@ -17919,48 +18066,36 @@ public:
     init();
   }
   void AddOperationNoFail
-  (const std::string& theOp,
-   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+  (const std::string& theOpName,
+   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+   const std::string& opFunctionTechnicalName,
+   const std::string& opArgumentList="", const std::string& opDescription="",
+   const std::string& opExample=""
    )
-  { if (this->operations.Contains(theOp))
-    { assert(false);
-      return;
-    }
-    this->operations.AddOnTop(theOp);
-    this->theStandardOpEvalFunctions.AddOnTop(theOpHandler);
-  }
+   ;
   void AddNonBoundVarMustBeNew
   (const std::string& theName,
-   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+   bool (funHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+   const std::string& argList, const std::string& description, const std::string& exampleArgs
    )
-  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, theOpHandler);
+  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
     if (theIndex!=this->theNonBoundVars.size-1)
       assert(false);
   }
   int GetIndexNonBoundVar(const std::string& theName)
   { VariableNonBound tempVar;
     tempVar.theName=theName;
-    tempVar.theHandler=0;
     return this->theNonBoundVars.GetIndex(tempVar);
   }
   int AddNonBoundVarReturnVarIndex
   (const std::string& theName,
-   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression))
+   bool (funHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+   const std::string& argList, const std::string& description, const std::string& exampleArgs
    )
-  { VariableNonBound tempVar;
-    tempVar.theName=theName;
-    int theIndex=this->theNonBoundVars.GetIndex(tempVar);
-    if (theIndex!=-1)
-      return theIndex;
-    tempVar.theHandler=theOpHandler;
-    this->theNonBoundVars.AddOnTop(tempVar);
-    this->theDictionary.AddNoRepetition(theName);
-    return this->theNonBoundVars.size-1 ;
-  }
+;
   void init();
   void initPredefinedVars()
-  { this->AddNonBoundVarMustBeNew("IsInteger", &this->EvaluateFunctionIsInteger);
-  }
+  ;
   void initTargetProperties()
   {// this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
   }

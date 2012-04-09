@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=2000000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -209,7 +209,8 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  inputWeylString="Calculator";
+//  inputWeylString="Calculator";
+//  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="-1";
 //  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
 

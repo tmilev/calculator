@@ -290,6 +290,7 @@ template < > int List<Expression>::ListActualSizeIncrement=50;
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
 template < > int List<Function>::ListActualSizeIncrement=50;
 template < > int List<Data>::ListActualSizeIncrement=500;
+template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -16709,7 +16710,7 @@ void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bo
       outNotation << "\\\\";
   }
   for (int i=0; i<theDimension; i++)
-  { outNotation << "$h_{\\alpha_" << i+1 << "} (g^{\\gamma}) := \\langle\\gamma, \\alpha_{" << i+1 << " } \\rangle g^{\\gamma}$, for any $\\gamma$.\n\n";
+  { outNotation << " $h_{\\alpha_" << i+1 << "} (g^{\\gamma}) := \\langle\\gamma, \\alpha_{" << i+1 << " } \\rangle g^{\\gamma}$, for any $\\gamma$.\n\n";
     if (usePNG)
       outNotation << "\\\\\n";
   }
@@ -28302,6 +28303,10 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   { out << "{";
     return true;
   }
+  if (readAhead=="%27")
+  { out << "'";
+    return true;
+  }
   if (readAhead=="%3B")
   { out << ";";
     return true;
@@ -28343,7 +28348,8 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
     return true;
   }
   if (readAhead=="%0D%0A")
-  { return true;
+  { out << "\n";
+    return true;
   }
   return false;
 }

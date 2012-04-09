@@ -2957,7 +2957,7 @@ std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
   std::string PhysicalNameLieBracketFullPathNoEnding=stream3.str();
 
   out << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " << this->DefaultWeylLetter << this->DefaultWeylRank
-  << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(this->DefaultWeylLetter, this->DefaultWeylRank) << ").</b><br>";
+  << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(this->DefaultWeylLetter, this->DefaultWeylRank, true) << ").</b><br>";
   out << "Notation formats: <button " << CGI::GetStyleButtonLikeHtml()
   << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); "
   << "hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";

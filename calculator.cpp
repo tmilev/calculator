@@ -209,7 +209,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  inputWeylString="Calculator";
+//  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="-1";

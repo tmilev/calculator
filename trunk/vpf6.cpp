@@ -207,8 +207,7 @@ void CommandList::ParseFillDictionary
           currentElement.theData.reset(this, -1);
           this->theCommands[this->theCommands.size-1].syntacticSoup.AddOnTop(currentElement);
         } else if (this->isADigit(current, currentDigit))
-        { Data tempData;
-          tempData.SetInt(currentDigit);
+        { Data tempData= Data(currentDigit, *this);
           currentElement.controlIndex=this->conData();
           currentElement.theData.reset(this, this->theCommands.size-1);
           currentElement.theData.theOperation=this->opData();
@@ -235,6 +234,14 @@ int Command::GetOperationIndexFromControlIndex(int controlIndex)
 
 int Command::GetExpressionIndex()
 { return this->theBoss->controlSequences.GetIndex("Expression");
+}
+
+
+bool Command::ReplaceOXbyEX()
+{ SyntacticElement& theElt=this->syntacticStack[this->syntacticStack.size-2];
+  theElt.theData.theOperation=this->theBoss->operations.GetIndex(this->theBoss->controlSequences[theElt.controlIndex]);
+  theElt.controlIndex=this->theBoss->conExpression();
+  return true;
 }
 
 bool Command::ReplaceObyE()
@@ -297,6 +304,29 @@ bool Command::LookAheadAllowsApplyFunction(const std::string& lookAhead)
 { return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
 }
 
+bool Command::ReplaceCEByC()
+{ SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-2];
+  SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
+  List<Expression>::ListActualSizeIncrement=
+  MathRoutines::Maximum(List<Expression>::ListActualSizeIncrement,(int) ((double)left.theData.children.size*1.2));
+  left.theData.children.AddOnTop(right.theData);
+  this->DecreaseStackSetCharacterRanges(1);
+  return true;
+}
+
+bool Command::ReplaceECByC()
+{ SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-2];
+  Expression oldE=left.theData;
+  left.theData.reset(this->theBoss, this->IndexInBoss);
+  left.theData.theOperation=this->theBoss->opComma();
+  left.theData.theBoss=this->theBoss;
+  left.theData.commandIndex=this->IndexInBoss;
+  left.theData.children.AddOnTop(oldE);
+  left.controlIndex=this->theBoss->conComma();
+  this->DecreaseStackSetCharacterRanges(1);
+  return true;
+}
+
 bool Command::ReplaceEOEXByEX(int formatOptions)
 { SyntacticElement& middle=this->syntacticStack[this->syntacticStack.size-3];
   SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-4];
@@ -336,8 +366,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   const std::string& sixthToLastS=this->theBoss->controlSequences[sixthToLastE.controlIndex];
   const SyntacticElement& seventhToLastE=this->syntacticStack[this->syntacticStack.size-7];
   const std::string& seventhToLastS=this->theBoss->controlSequences[seventhToLastE.controlIndex];
-  const SyntacticElement& eighthToLastE=this->syntacticStack[this->syntacticStack.size-8];
-  const std::string& eighthToLastS=this->theBoss->controlSequences[eighthToLastE.controlIndex];
+//  const SyntacticElement& eighthToLastE=this->syntacticStack[this->syntacticStack.size-8];
+//  const std::string& eighthToLastS=this->theBoss->controlSequences[eighthToLastE.controlIndex];
 //  const SyntacticElement& ninthToLastE=this->syntacticStack[this->syntacticStack.size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
 
@@ -348,13 +378,9 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceXXByCon(this->theBoss->conDefine());
   }
   if (secondToLastS=="{" && lastS=="}")
-    return this->ReplaceXXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
-  if (lastS=="$")
-    return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatDefault);
-  if (lastS=="_")
-    return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatFunctionUseUnderscore);
+    return this->ReplaceXXByCon(this->theBoss->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
-    return this->ReplaceXByCon(this->theBoss->conDeclareFunction(), Expression::formatFunctionUseCdot);
+    return this->ReplaceXByCon(this->theBoss->conApplyFunction(), Expression::formatFunctionUseCdot);
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")
 //    return this->ReplaceXXXByCon(this->theBoss->conBindVariable());
   if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
@@ -376,17 +402,16 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   //Which is better: x{}y{}z:= x{} (y{}z), or x{}y{}z:=(x{}y){}z ?
   //In our implementation, we choose x{}y{}z:= x{} (y{}z). Although this is slightly harder to implement,
   //it appears to be the more natural choice.
-  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
-      && this->LookAheadAllowsApplyFunction(lastS) )
-    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
+//  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
+//      && this->LookAheadAllowsApplyFunction(lastS) )
+//    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression"
       && this->LookAheadAllowsApplyFunction(lookAhead))
     return this->ReplaceEOEByE(secondToLastE.theData.format);
+  if (thirdToLastS=="Expression" && secondToLastS=="_" && lastS=="Expression"
+      && lookAhead!="_")
+    return this->ReplaceEOEByEusingO(this->theBoss->conApplyFunction(), Expression::formatFunctionUseUnderscore);
   //end of ambiguity.
-  if (eighthToLastS=="if" && seventhToLastS=="(" && sixthToLastS=="Expression"
-      && fifthToLastS=="," && fourthToLastS=="Expression" && thirdToLastS==","
-      && secondToLastS=="Expression" && lastS==")")
-    return this->ReplaceOXEXEXEXByE();
   if (lastS=="Expression" && secondToLastS=="^" && thirdToLastS=="Expression" && this->LookAheadAllowsThePower(lookAhead) )
     return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="+" && thirdToLastS=="Expression" && this->LookAheadAllowsPlus(lookAhead) )
@@ -407,10 +432,16 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceXEXByE();
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
-  if (this->isStrongRightSeparator(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
+  if (this->isStrongSeparatorFromTheRight(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
   if (fourthToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
+  if (secondToLastS=="Expression" && lastS==",")
+    return this->ReplaceECByC();
+  if (secondToLastS=="," && lastS=="Expression" && this->isStrongSeparatorFromTheRight(lookAhead) )
+    return this->ReplaceCEByC();
+  if (thirdToLastS=="(" && secondToLastS=="," && lastS==")")
+    return this->ReplaceOXbyEX();
   if (seventhToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression"
       && fourthToLastS=="if" && fifthToLastS==":" && sixthToLastS=="Expression")
     return this->ReplaceEXXEXEByEusingO(this->theBoss->opDefineConditional());
@@ -418,7 +449,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
 }
 
 bool CommandList::fPolynomial
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { Data outputData;
   std::stringstream errorLog;
   outputData.type=outputData.typePoly;
@@ -439,14 +470,8 @@ bool CommandList::fPolynomial
   return true;
 }
 
-bool CommandList::fElementSSAlgebra
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{
-  return false;
-}
-
 bool CommandList::fSSAlgebra
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
     <<" (in mathematical language Type_Rank). Instead I recieved " << theExpression.ElementToString() << " at file "
@@ -491,7 +516,7 @@ bool CommandList::fSSAlgebra
   }
   SemisimpleLieAlgebra theSSalgebra;
   theSSalgebra.ComputeChevalleyConstants(theWeylLetter, theRank, *theCommands.theGlobalVariableS);
-  Data tempData;
+  Data tempData(theCommands);
   tempData.theRational.GetElement()=theCommands.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSalgebra);
   tempData.type=tempData.typeSSalgebra;
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(tempData);
@@ -501,15 +526,15 @@ bool CommandList::fSSAlgebra
 }
 
 bool CommandList::fIsInteger
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { bool isInteger=false;
   if (theExpression.theOperation==theCommands.opData())
     if (theCommands.theData[theExpression.theData].IsInteger())
       isInteger=true;
   if (isInteger)
-    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(1);
+    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(Data(1, theCommands));
   else
-    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(0);
+    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(Data(0, theCommands));
   theExpression.children.SetSize(0);
   theExpression.theOperation=theExpression.theBoss->opData();
   return true;
@@ -537,8 +562,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 void CommandList::initPredefinedVars()
 { this->AddNonBoundVarMustBeNew("IsInteger", &this->fIsInteger, "", " returns 1 if the argument is an integer, 0 otherwise. ", "");
   this->AddNonBoundVarMustBeNew("SemisimpleLieAlgebra", & this->fSSAlgebra, "", "creates a semisimple Lie algebra (at the moment implemented for simple Lie algebras only).", "");
-  this->AddNonBoundVarMustBeNew("ElementSemisimpleAlgebra", & this->fElementSSAlgebra, "", "Creates an element of a semisimple Lie algebra.", "");
   this->AddNonBoundVarMustBeNew("Polynomial", & this->fPolynomial, "", "Creates an internal data structure representation of a polynomial expression, implemented without use of expression trees.", "");
+  this->NumPredefinedVars=this->theNonBoundVars.size;
 }
 
 void CommandList::init(GlobalVariables& inputGlobalVariables)
@@ -572,7 +597,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "VariableNonBound", "", "", "");
   this->AddOperationNoFail("VariableBound", 0, "BoundVariable", "", "", "");
-  this->AddOperationNoFail("if", this->EvaluateIf, "If", "", "", "");
+  this->AddOperationNoFail(",", 0, "Comma", "", "", "");
   this->AddOperationNoFail("Error", 0, "Error", "", "", "");
   this->AddOperationNoFail("Data", 0, "Data", "", "", "");
 
@@ -583,6 +608,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
     this->controlSequences.AddOnTop(this->operations[i].theName);//all operations are also control sequences
   this->controlSequences.AddOnTop("Expression");
   this->controlSequences.AddOnTop(",");
+  this->controlSequences.AddOnTop("if");
   this->controlSequences.AddOnTop("\\cdot");
   this->controlSequences.AddOnTop("_");
   this->controlSequences.AddOnTop("(");
@@ -608,7 +634,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   (theExpression, summands, 0, this->MaxRecursionDepthDefault);
   HashedList<Expression> summandsNoCoeff;
   List<Data> theCoeffs;
-  Data constTerm=0;
+  Data constTerm(0, *this);
   bool foundConstTerm=false;
 //  std::cout << "<b>" << theExpression.ElementToString() << "</b>";
 //  if (theExpression.ElementToString()=="(4)*(a) b+(a) b")
@@ -617,7 +643,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   { Expression* currentSummandNoCoeff;
     currentSummandNoCoeff=&summands[i];
 //    this->OrderMultiplicationTreeProperly(commandIndex, *currentSummandNoCoeff);
-    Data theCoefF=1;
+    Data theCoefF(1, *this);
     if (currentSummandNoCoeff->theOperation==this->opTimes())
     { if(currentSummandNoCoeff->children[0].theOperation==this->opData())
       { theCoefF=this->theData[currentSummandNoCoeff->children[0].theData];
@@ -637,7 +663,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
 //    std::cout << "<hr>" << currentSummandNoCoeff->ElementToString();
     if (currentIndex==-1)
     { summandsNoCoeff.AddOnTop(*currentSummandNoCoeff);
-      theCoeffs.AddOnTop(0);
+      theCoeffs.AddOnTop(Data(0,*this));
       currentIndex=summandsNoCoeff.size-1;
     } else
       needSimplification=true;
@@ -669,13 +695,13 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
     current.reset(this, commandIndex);
     current.theOperation=this->opTimes();
     current.children.SetSize(2);
-    current.children[0].MakeData(this->theData.AddNoRepetitionOrReturnIndexFirst(theCoeffs[i]), *this, commandIndex);
+    current.children[0].MakeData(theCoeffs[i], *this, commandIndex);
     current.children[1]=summandsNoCoeff[i];
   }
   if (!constTerm.IsEqualToZero() || summandsNoCoeff.size==0)
   { summandsWithCoeff.SetSize(summandsWithCoeff.size+1);
     Expression& current=summandsWithCoeff[summandsWithCoeff.size-1];
-    current.MakeData(this->theData.AddNoRepetitionOrReturnIndexFirst(constTerm), *this, commandIndex);
+    current.MakeData(constTerm, *this, commandIndex);
   }
   if (summandsWithCoeff.size==1)
   { theExpression=summandsWithCoeff[0];
@@ -695,16 +721,17 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
 }
 
 bool CommandList::EvaluateStandardTimes
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
-  if (theCommands.EvaluateDoDistribute(theCommands, commandIndex, theExpression, theCommands.opTimes(), theCommands.opPlus()))
+  if (theCommands.EvaluateDoDistribute
+      (theCommands, commandIndex, theExpression, comments, theCommands.opTimes(), theCommands.opPlus()))
     return true;
   //std::cout << "<br>After distribute: " << theExpression.ElementToString();
-  if (theCommands.EvaluateDoAssociatE(theCommands, commandIndex, theExpression, theCommands.opTimes()))
+  if (theCommands.EvaluateDoAssociatE
+      (theCommands, commandIndex, theExpression, comments, theCommands.opTimes()))
     return true;
-  if (theCommands.EvaluateDoExtractBaseMultiplication(theCommands, commandIndex, theExpression))
+  if (theCommands.EvaluateDoExtractBaseMultiplication(theCommands, commandIndex, theExpression, comments))
     return true;
-
   if (theExpression.children.size!=2)
     return false;
   //std::cout << "<br>After do associate: " << theExpression.ElementToString();
@@ -712,7 +739,7 @@ bool CommandList::EvaluateStandardTimes
 }
 
 bool CommandList::EvaluateDoExtractBaseMultiplication
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=2 || theExpression.theOperation!=theCommands.opTimes())
     return false;
   bool result=false;
@@ -723,8 +750,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   { Data& leftD=theCommands.theData[leftE.theData];
     Data& rightD=theCommands.theData[rightE.theData];
     if (leftD.type==leftD.typeRational && rightD.type==rightD.typeRational)
-    { theExpression.MakeData
-      (theCommands.theData.AddNoRepetitionOrReturnIndexFirst(leftD*rightD), theCommands, commandIndex);
+    { theExpression.MakeData(leftD*rightD, theCommands, commandIndex);
       return true;
     }
   }
@@ -748,8 +774,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     { Data& leftD=theCommands.theData[leftE.theData];
       Data& righLefttD=theCommands.theData[rightLeftE.theData];
       if (leftD.type==leftD.typeRational && righLefttD.type==righLefttD.typeRational)
-      { leftE.MakeData
-        (theCommands.theData.AddNoRepetitionOrReturnIndexFirst(leftD*righLefttD), theCommands, commandIndex);
+      { leftE.MakeData(leftD*righLefttD, theCommands, commandIndex);
         rightE.AssignChild(1);
         result=true;
       }
@@ -758,7 +783,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   //handle 0*Anything:=0
   if (leftE.theOperation==theCommands.opData() )
   { Data& leftD=theCommands.theData[leftE.theData];
-    if (leftD.type==leftD.typeRational && leftD==0)
+    if (leftD.type==leftD.typeRational && leftD.IsEqualToZero())
     { theExpression.MakeInt(0, theCommands, commandIndex);
       result=true;
     }
@@ -767,7 +792,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
 }
 
 bool CommandList::EvaluateDoAssociatE
-(CommandList& theCommands, int commandIndex, Expression& theExpression, int theOperation)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theOperation)
 { List<Expression>& opands=theCommands.buffer1;
   opands.SetSize(0);
   //std::cout << "<br>At start of do associate: " << theExpression.ElementToString();
@@ -788,22 +813,22 @@ bool CommandList::EvaluateDoAssociatE
 }
 
 bool CommandList::EvaluateDoDistribute
-(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
 { Expression& left=theExpression.children[0];
   Expression& right=theExpression.children[1];
   if ((left.theOperation==theCommands.opPlus() || left.theOperation==theCommands.opMinus()) && left.children.size==2)
-  { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression, theMultiplicativeOP, theAdditiveOp);
+  { theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft(theCommands, commandIndex, theExpression, comments, theMultiplicativeOP, theAdditiveOp);
     return true;
   }
   if ((right.theOperation==theCommands.opPlus() || right.theOperation==theCommands.opMinus()) && right.children.size==2)
-  { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression, theMultiplicativeOP);
+  { theCommands.EvaluateDoRightDistributeBracketIsOnTheRight(theCommands, commandIndex, theExpression, comments, theMultiplicativeOP);
     return true;
   }
   return false;
 }
 
 bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
 { if (theExpression.theOperation!=theMultiplicativeOP)
     return false;
   if (theExpression.children[0].theOperation!=theAdditiveOp)
@@ -824,7 +849,7 @@ bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
 }
 
 bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
-(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP)
 { if (theExpression.theOperation!=theMultiplicativeOP)
     return false;
   int rightOp=theExpression.children[1].theOperation;
@@ -846,12 +871,12 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
 }
 
 bool CommandList::EvaluateStandardPlus
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { return theCommands.CollectSummands(commandIndex, theExpression);
 }
 
 bool CommandList::EvaluateIf
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=3)
   { theExpression.errorString="Programming error: operation :if := takes three arguments.";
     return true;
@@ -859,11 +884,11 @@ bool CommandList::EvaluateIf
   Expression& left= theExpression.children[0];
   if (left.theOperation!=theCommands.opData())
     return false;
-  if (theCommands.theData[left.theData]==1)
+  if (theCommands.theData[left.theData].IsEqualToOne())
   { theExpression.AssignChild(1);
     return true;
   }
-  if (theCommands.theData[left.theData]==0)
+  if (theCommands.theData[left.theData].IsEqualToZero())
   { theExpression.AssignChild(2);
     return true;
   }
@@ -871,8 +896,8 @@ bool CommandList::EvaluateIf
 }
 
 bool CommandList::EvaluateStandardFunction
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
-{ if (theExpression.theOperation!=theCommands.opFunction())
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opApplyFunction())
     return false;
   if (theExpression.children.size==0)
   { theExpression.errorString=
@@ -887,20 +912,47 @@ bool CommandList::EvaluateStandardFunction
 //      (theCommands, commandIndex, theExpression, theCommands.opFunction(), theCommands.opTimes()))
 //    return true;
   Expression& functionNameNode =theExpression.children[0];
+  Expression& functionArgumentNode=theExpression.children[1];
+
   assert(theExpression.children.size==2);
   if (functionNameNode.theOperation==theCommands.opData())
-  { theExpression.AssignChild(0);
+  { Data tempData;
+    Data& theFunData=theCommands.theData[functionNameNode.theData];
+    if (theFunData.type==Data::typeRational)
+    { theExpression.AssignChild(0);
+      return true;
+    }
+    if (functionArgumentNode.theOperation!=theCommands.opComma())
+    { if (functionArgumentNode.theOperation!=theCommands.opData() )
+        return false;
+      if (!theFunData.OperatorDereference
+          (theCommands.theData[functionArgumentNode.theData], tempData, comments))
+        return false;
+      theExpression.MakeData(tempData, theCommands, commandIndex);
+      return true;
+    }
+    if (functionArgumentNode.children.size!=2)
+      return false;
+    Expression& leftE=functionArgumentNode.children[0];
+    Expression& rightE=functionArgumentNode.children[1];
+    if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
+      return false;
+    Data& leftD=theCommands.theData[leftE.theData];
+    Data& rightD=theCommands.theData[rightE.theData];
+    if (!theFunData.OperatorDereference(leftD, rightD, tempData, comments))
+      return false;
+    theExpression.MakeData(tempData, theCommands, commandIndex);
     return true;
   }
   if (functionNameNode.theOperation!=theExpression.theBoss->opVariableNonBound())
     return false;
-  bool (*theFun)(CommandList& , int , Expression& );
+  Function::FunctionAddress theFun;
   theFun= functionNameNode.GetFunctionFromVarName();
   if (theFun==0)
     return false;
   Expression result;
   result=theExpression.children[1];
-  if(theFun(theCommands, commandIndex, result))
+  if(theFun(theCommands, commandIndex, result, comments))
   { theExpression=result;
     return true;
   }
@@ -908,7 +960,7 @@ bool CommandList::EvaluateStandardFunction
 }
 
 bool CommandList::EvaluateStandardEqualEqual
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { assert(theExpression.children.size==2);
   Expression& left=theExpression.children[0];
   Expression& right=theExpression.children[1];
@@ -920,7 +972,7 @@ bool CommandList::EvaluateStandardEqualEqual
 }
 
 bool CommandList::EvaluateStandardDivide
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=2)
     return false;
   Expression& leftE= theExpression.children[0];
@@ -932,15 +984,12 @@ bool CommandList::EvaluateStandardDivide
   if (leftData.type!=leftData.typeRational || rightData.type!=rightData.typeRational)
     return false;
   Data resultData=leftData/rightData;
-  theExpression.MakeData
-  (theCommands.theData.AddNoRepetitionOrReturnIndexFirst(resultData), theCommands, commandIndex)
-  ;
+  theExpression.MakeData(resultData, theCommands, commandIndex);
   return true;
 }
 
-
 bool CommandList::EvaluateStandardMinus
-(CommandList& theCommands, int commandIndex, Expression& theExpression)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=1&& theExpression.children.size!=2)
   { theExpression.errorString="Programming error: operation - takes one or two arguments.";
     return false;
@@ -1106,6 +1155,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     this->evaluationErrors.AddOnTop(out.str());
     return true;
   }
+  std::stringstream comments;
   if (theExpression.theOperation<0 || theExpression.theBoss!=this)
     return true;
   //reduction phase:
@@ -1127,14 +1177,14 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
         return false;
     if (counter>this->MaxAlgTransformationsPerExpression)
     { std::stringstream out;
-      out << "Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded.";
+      out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
+      << " while simplifying " << theExpression.ElementToString();
       theExpression.errorString=out.str();
       return true;
     }
-    bool (*theFun)(CommandList& theCommands, int commandIndex, Expression& theExpression)
-    =this->operations[theExpression.theOperation].GetFunction(*this);
+    Function::FunctionAddress theFun=this->operations[theExpression.theOperation].GetFunction(*this);
     if (theFun!=0)
-      if (theFun(*this, commandIndex, theExpression))
+      if (theFun(*this, commandIndex, theExpression, &comments))
         NonReduced=true;
 //    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
 //    for (unsigned i=0; i<this->targetProperties.size(); i++)
@@ -1159,6 +1209,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 //    if (NonReduced)
 //      theExpression.ElementToString();
   }
+  theExpression.theComments=comments.str();
   if (theExpression.theOperation==this->opVariableBound())
     return false;
   return true;
@@ -1192,7 +1243,7 @@ Expression* CommandList::PatternMatch
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ElementToString() << "; evaluating...";
   if (tempExp.theOperation==this->opData())
-    if (this->theData[tempExp.theData]==1)
+    if (this->theData[tempExp.theData].IsEqualToOne())
       return & theExpression;
   return 0;
 }
@@ -1241,6 +1292,42 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   this->SpecializeBoundVars(*toBeSubbed, toBeSubbed->commandIndex, bufferPairs, RecursionDepth+1, maxRecursionDepth);
   return true;
 }
+
+void CommandList::ExtractExpressions()
+{ std::string lookAheadToken;
+  std::stringstream errorLog;
+  for (int j=0; j<this->theCommands.size; j++)
+  { this->theCommands[j].resetStack();
+    for (int i=0; i<this->theCommands[j].syntacticSoup.size; i++)
+    { if (i+1<this->theCommands[j].syntacticSoup.size)
+        lookAheadToken=this->controlSequences[this->theCommands[j].syntacticSoup[i+1].controlIndex];
+      else
+        lookAheadToken=";";
+      this->theCommands[j].syntacticStack.AddOnTop(this->theCommands[j].syntacticSoup[i]);
+      while(this->theCommands[j].ApplyOneRule(lookAheadToken))
+      {}
+    }
+    if (this->theCommands[j].ErrorString=="" && this->theCommands[j].syntacticStack.size==this->theCommands[j].numEmptyTokensStart+1)
+    { SyntacticElement& result=this->theCommands[j].syntacticStack[this->theCommands[j].numEmptyTokensStart];
+      this->theCommands[j].finalValue=result.theData;
+      if (result.controlIndex!=this->conExpression())
+      { errorLog << "Syntax error at command " << j+1
+        << ": your command simplifies to a single syntactic element but it is not an expression. <br>";
+        errorLog << "It simplifies to:<br> " << this->theCommands[j].ElementToStringSyntacticStack();
+      }
+    }
+    else if (this->theCommands[j].ErrorString!="")
+      errorLog << "Syntax error at command " << j+1 << ":" << theCommands[j].ErrorString << "<br>";
+    else if (this->theCommands[j].syntacticStack.size!=this->theCommands[j].numEmptyTokensStart)
+    { errorLog << "Syntax error at command " << j+1 << ": your command does not simplify to a syntactic element. <br>";
+      errorLog << "Instead it simplifies to:<br> " << this->theCommands[j].ElementToStringSyntacticStack();
+    }
+  }
+  std::string error = errorLog.str();
+  if (error!="")
+    this->syntaxErrors.AddOnTop(error);
+}
+
 
 void CommandList::EvaluateCommands()
 { std::stringstream out;
@@ -1303,7 +1390,8 @@ void CommandList::EvaluateCommands()
 
 std::string SyntacticElement::ElementToString(CommandList& theBoss)
 { std::stringstream out;
-  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError();
+  bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError()
+  || this->controlIndex==theBoss.conComma() ;
   if (makeTable)
     out <<"<table border=\"1\"><tr><td>";
   if (this->controlIndex<0)
@@ -1320,15 +1408,14 @@ std::string SyntacticElement::ElementToString(CommandList& theBoss)
   return out.str();
 }
 
-bool (*VariableNonBound::GetFunction(CommandList& owner)) (CommandList& theCommands, int commandIndex, Expression& theExpression)
+Function::FunctionAddress VariableNonBound::GetFunction(CommandList& owner)
 { if (this->HandlerFunctionIndex==-1)
     return 0;
   assert(this->HandlerFunctionIndex>=0 && this->HandlerFunctionIndex <owner.theFunctions.size);
   return owner.theFunctions[this->HandlerFunctionIndex].theFunction;
-
 }
 
-bool (*Expression::GetFunctionFromVarName()) (CommandList& theCommands, int commandIndex, Expression& theExpression)
+Function::FunctionAddress Expression::GetFunctionFromVarName()
 { assert(this->theBoss!=0);
   assert(this->theOperation==this->theBoss->opVariableNonBound());
   return this->theBoss->theNonBoundVars[this->theData].GetFunction(*this->theBoss);
@@ -1411,8 +1498,8 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->theNonBoundVars[this->theData].theName;
   else if (this->theOperation==this->theBoss->opData())
-    out << this->theBoss->theData[this->theData].ElementToString(this->theBoss, outComments);
-  else if (this->theOperation==this->theBoss->opFunction())
+    out << this->theBoss->theData[this->theData].ElementToString(outComments);
+  else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
@@ -1436,6 +1523,15 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   else if (this->theOperation==this->theBoss->opEqualEqual())
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
     << "==" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments);
+  else if (this->theOperation==this->theBoss->opComma())
+  { out << "(";
+    for (int i=0; i<this->children.size; i++)
+    { out <<  this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments);
+      if (i!=this->children.size-1)
+        out << ",";
+    }
+    out << ")";
+  }
   else
     out << "?operation not documented? This is probably a programming error!" ;
   if (AddBrackets)
@@ -1484,15 +1580,15 @@ std::string VariableNonBound::GetHandlerFunctionName(CommandList& owner)
 }
 
 void CommandList::AddOperationNoFail
-(const std::string& theOpName,
- bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
- const std::string& opFunctionTechnicalName,
- const std::string& opArgumentList, const std::string& opDescription,
- const std::string& opExample
-)
+  (const std::string& theOpName,
+   const Function::FunctionAddress& theFunAddress,
+   const std::string& opFunctionTechnicalName,
+   const std::string& opArgumentList, const std::string& opDescription,
+   const std::string& opExample
+   )
 { VariableNonBound theVar;
-  if (theOpHandler!=0)
-  { Function currentFunction(theOpHandler, opFunctionTechnicalName, opArgumentList, opDescription, opExample);
+  if (theFunAddress!=0)
+  { Function currentFunction(theFunAddress, opFunctionTechnicalName, opArgumentList, opDescription, opExample);
     theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(currentFunction);
   } else
     theVar.HandlerFunctionIndex=-1;
@@ -1505,8 +1601,7 @@ void CommandList::AddOperationNoFail
 }
 
 int CommandList:: AddNonBoundVarReturnVarIndex
-(const std::string& theName,
-  bool (funHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+(const std::string& theName, const Function::FunctionAddress& funHandler,
   const std::string& argList, const std::string& description, const std::string& exampleArgs
 )
 { VariableNonBound theVar;
@@ -1526,51 +1621,75 @@ int CommandList:: AddNonBoundVarReturnVarIndex
 
 std::string CommandList::ElementToString()
 { std::stringstream out;
-  out << "Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed;
+  std::string openTag1="<span style=\"color:#0000FF\">";
+  std::string closeTag1="</span>";
+  std::string openTag2="<span style=\"color:#FF0000\">";
+  std::string closeTag2="</span>";
+  std::string openTag3="<span style=\"color:#00FF00\">";
+  std::string closeTag3="</span>";
+  out << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
   out << "<br>Elapsed time since evaluation was started: "
-  << this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds;
+  << this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds << "";
   out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
-  { out << this->controlSequences[i] << ", ";
+  { out << openTag1 << this->controlSequences[i] << closeTag1;
+    if (i!=this->controlSequences.size)
+      out << ", ";
   }
-  out << "<br>\nOperators (" << this->operations.size << " total):\n";
+  out << "<br>\nOperators (" << this->operations.size << " total):<br>\n";
   for (int i=0; i<this->operations.size; i++)
-  { out << "\n" << this->operations[i].theName;
+  { out << "\n" << openTag1 << this->operations[i].theName << closeTag1;
     std::string handlerName=this->operations[i].GetHandlerFunctionName(*this);
     if (this->operations[i].GetFunction(*this)!= 0)
-      out << " [handled by: " << handlerName <<"]";
+      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
     if(i!=this->operations.size-1)
       out << ", ";
   }
-  out << "<br>\n Handler functions (" << this->theFunctions.size << " total):\n";
+  out << "<br>\n Handler functions (" << this->theFunctions.size << " total):<br>\n";
   for (int i=0; i<this->theFunctions.size; i++)
-  { out << "\n" << this->theFunctions[i].ElementToString();
+  { out << "\n" << openTag2 << this->theFunctions[i].ElementToString() << closeTag2;
     if (this->theFunctions[i].theFunction==0)
       out << " [empty function]";
-    else
-      out << "@" << std::hex << this->theFunctions[i].theFunction;
+//    else
+//      out << "@" << std::hex << this->theFunctions[i].theFunction;
     if (i!=this->theFunctions.size-1)
       out << ", ";
   }
   out << "<br>\n Dictionary (" << this->theDictionary.size << " total):\n<br>\n";
   for (int i=0; i<this->theDictionary.size; i++)
-  { out << this->theDictionary[i] << ", ";
+  { out << openTag1 << this->theDictionary[i] << closeTag1;
+    if (i!=this->theDictionary.size-1)
+      out << ", ";
   }
-  out << "<br>\n Global variables (" << this->theNonBoundVars.size << " total):\n<br>\n";
+  out << "<br>\n" << this->theNonBoundVars.size << " global variables " << " (= "
+  << this->NumPredefinedVars  << " predefined + " << this->theNonBoundVars.size-this->NumPredefinedVars
+  << " user-defined). <br>Predefined: \n<br>\n";
   for (int i=0; i<this->theNonBoundVars.size; i++)
-  { out << this->theNonBoundVars[i].theName << ", ";
+  { out << openTag1 << this->theNonBoundVars[i].theName << closeTag1;
+    std::string handlerName=this->theNonBoundVars[i].GetHandlerFunctionName(*this);
+    if (handlerName!="")
+      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
+    if (i!=this->theNonBoundVars.size-1)
+    { out << ", ";
+      if (i==this->NumPredefinedVars-1 )
+        out << "<br>user-defined:\n<br>\n";
+    }
   }
-  out << "<br>\n Data entries (" << this->theData.size << " total):\n<br>\n";
+  out << "<br>\nData entries (" << this->theData.size << " total):\n<br>\n";
   for (int i=0; i<this->theData.size; i++)
-  { out << this->theData[i].ElementToString() << ", ";
+  { out << openTag3 << this->theData[i].ElementToString() << closeTag3;
+    if (i!=this->theData.size-1)
+      out  << ", ";
   }
   out << "<hr>";
   assert(this->cachedExpressions.size==this->imagesCashedExpressions.size);
   if (this->cachedExpressions.size>0)
-  { out << "<br>\n Cached expressions: (" << this->cachedExpressions.size << " total):\n<br>\n";
+  { out << "<br>\n Cached expressions: (" << this->cachedExpressions.size << " total):\n<br>\n"
+    << openTag1;
     for (int i=0; i<this->cachedExpressions.size; i++)
     { out << this->cachedExpressions[i].ElementToString() << " -> " << this->imagesCashedExpressions[i].ElementToString() << "<br>";
     }
+    out << closeTag1;
   }
   for (int i=0; i<this->theCommands.size; i++)
   { out << this->theCommands[i].ElementToString();
@@ -1584,18 +1703,22 @@ std::string Command::ElementToStringSyntacticStack()
     return "Error: this is a programming error: not enough empty tokens in the start of the syntactic stack.";
   if (this->theBoss==0)
     return "Error: command is not initialized properly. This is likely a programming error";
-  bool HasMoreThanOneSignificantEntries=(this->syntacticStack.size>this->numEmptyTokensStart+1);
-  if (HasMoreThanOneSignificantEntries)
+  bool HasMoreThanOneSignificantEntriesOrIsNotExpression=(this->syntacticStack.size>this->numEmptyTokensStart+1);
+  SyntacticElement& lastSyntacticElt=* this->syntacticStack.LastObject();
+  if (this->syntacticStack.size==this->numEmptyTokensStart+1)
+    if (lastSyntacticElt.controlIndex!=this->theBoss->conExpression())
+      HasMoreThanOneSignificantEntriesOrIsNotExpression=true;
+  if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
     out << "<table border=\"1\"><tr><td>";
   for (int i=this->numEmptyTokensStart; i<this->syntacticStack.size; i++)
   { out << this->syntacticStack[i].ElementToString(*this->theBoss);
-    if (HasMoreThanOneSignificantEntries)
+    if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
     { out << "</td>";
       if (i!=this->syntacticStack.size-1)
         out << "<td>";
     }
   }
-  if (HasMoreThanOneSignificantEntries)
+  if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
     out << "</td></tr></table>";
   return out.str();
 }
@@ -1603,7 +1726,9 @@ std::string Command::ElementToStringSyntacticStack()
 bool Expression::NeedBracketsForFunctionName() const
 { return !(
   this->theOperation==this->theBoss->opVariableBound() ||
-  this->theOperation==this->theBoss->opVariableNonBound() );
+  this->theOperation==this->theBoss->opVariableNonBound()
+  || ( this->theOperation==this->theBoss->opApplyFunction() && this->format==this->formatFunctionUseUnderscore)
+  );
 }
 
 bool Expression::NeedBracketsForMultiplication()const
@@ -1629,7 +1754,7 @@ bool Expression::NeedBracketsForThePower()const
 
 void Expression::MakeInt(int theValue, CommandList& newBoss, int indexOfTheCommand)
 { this->reset(&newBoss, indexOfTheCommand);
-  this->theData=newBoss.theData.AddNoRepetitionOrReturnIndexFirst((Data)theValue);
+  this->theData=newBoss.theData.AddNoRepetitionOrReturnIndexFirst(Data(theValue, newBoss));
   this->theOperation=newBoss.opData();
 }
 
@@ -1638,6 +1763,10 @@ void Expression::MakeData(int DataIndex, CommandList& newBoss, int indexOfTheCom
   this->theData=DataIndex;
   assert(this->theData<newBoss.theData.size);
   this->theOperation=newBoss.opData();
+}
+
+void Expression::MakeData(const Data& inputData, CommandList& newBoss, int indexOfTheCommand)
+{ this->MakeData(newBoss.theData.AddNoRepetitionOrReturnIndexFirst(inputData), newBoss, indexOfTheCommand);
 }
 
 void Expression::MakeVariableNonBoundNoProperties
@@ -1650,7 +1779,7 @@ void Expression::MakeVariableNonBoundNoProperties
 void Expression::MakeFunction
   (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 { this->reset(owner, indexOfTheCommand);
-  this->theOperation=owner->opFunction();
+  this->theOperation=owner->opApplyFunction();
   this->children.SetSize(2);
   this->children[0].MakeVariableNonBoundNoProperties(owner, commandIndex, functionIndex);
   this->children[1]=argument;
@@ -1664,7 +1793,7 @@ void Expression::MakeFunction
 }
 
 Data Data::operator/(const Data& right)
-{ Data result;
+{ Data result(*this);
   if (this->type!=this->typeRational || right.type!=this->typeRational)
   { std::cout << "I cannot divide expression of type " << this->type << " by expression of type " << right.type;
     assert(false);
@@ -1673,18 +1802,18 @@ Data Data::operator/(const Data& right)
   if (right.theRational.GetElementConst().IsEqualToZero())
     result.SetError("Error: division by zero");
   else
-    result=this->theRational.GetElementConst()/right.theRational.GetElementConst();
+    result=Data(this->theRational.GetElementConst()/right.theRational.GetElementConst(), *this->owner);
   return result;
 }
 
 Data Data::operator*(const Data& right)
-{ Data result;
+{ Data result(*this);
   if (this->type!=this->typeRational || right.type!=this->typeRational)
   { std::cout << "I cannot divide expression of type " << this->type << " by expression of type " << right.type;
     assert(false);
     return result;
   }
-  result=this->theRational.GetElementConst()*right.theRational.GetElementConst();
+  result=Data(this->theRational.GetElementConst()*right.theRational.GetElementConst(), *this->owner);
   return result;
 }
 
@@ -1716,19 +1845,18 @@ bool Command::ReplaceIntIntBy10IntPlusInt()
   return true;
 }
 
-std::string Data::ElementToString(CommandList* owner, std::stringstream* comments)const
+std::string Data::ElementToString(std::stringstream* comments)const
 { std::stringstream out;
+  if (this->owner==0)
+    return "(ProgrammingError:NoOwner)";
   switch(this->type)
   { case Data::typeSSalgebra:
-      if (owner==0)
-        return "(semisimple~Lie~algebra)";
-      else
-      { if (comments!=0)
-          *comments << owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].ElementToString(*owner->theGlobalVariableS);
-        out << "SemisimpleLieAlgebra{}(" <<
-        owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].GetLieAlgebraName(false) << ")";
-        return out.str();
-      }
+      if (comments!=0)
+        *comments << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
+        ElementToString(*this->owner->theGlobalVariableS);
+      out << "SemisimpleLieAlgebra{}("
+      << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].GetLieAlgebraName(false) << ")";
+      return out.str();
     case Data::typeRational:
       return this->theRational.GetElementConst().ElementToString();
     case Data::typePoly:
@@ -1740,4 +1868,130 @@ std::string Data::ElementToString(CommandList* owner, std::stringstream* comment
       return out.str();
   }
 }
+
+bool Command::ReplaceEOEByEusingO(int theControlIndex, int formatOptions)
+{ SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
+  SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
+  Expression newExpr;
+  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
+  newExpr.children.AddOnTop(left.theData);
+  newExpr.children.AddOnTop(right.theData);
+  newExpr.format=formatOptions;
+  left.theData=newExpr;
+  this->DecreaseStackSetCharacterRanges(2);
+//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
+bool Data::MakeElementSemisimpleLieAlgebra
+(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
+{ bool isGood=(index1==0 && index2 <=ownerAlgebra.GetRank() && index2>0);
+  if (!isGood)
+  { if (comments!=0)
+      *comments
+       << "You requested element of the Cartan subalgebra labeled by (" << index1 << ", " << index2
+      << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
+      << "). For your request to succeed, the first index must be zero and the second must be an integer"
+      << " between 1 and the rank of the Algebra which is " << ownerAlgebra.GetRank()
+      << ". If you want to request an element that is in a root space outside of the Cartan, you should only one index."
+      ;
+    return false;
+  }
+  ElementSimpleLieAlgebra tempElt;
+  int actualIndeX=index2-1+ownerAlgebra.GetNumPosRoots();
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (actualIndeX, ownerAlgebra);
+  this->owner=&owner;
+  this->type=this->typeElementSSalgebra;
+  this->theRational.GetElement()=owner.theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(tempElt);
+  return true;
+}
+
+bool Data::MakeElementSemisimpleLieAlgebra
+(CommandList& inputOwner, SemisimpleLieAlgebra& ownerAlgebra, int theDisplayIndex, std::stringstream* comments)
+{ bool isGood=(theDisplayIndex>0 && theDisplayIndex<= ownerAlgebra.GetNumPosRoots()) ||
+  (theDisplayIndex<0 && theDisplayIndex>=- ownerAlgebra.GetNumPosRoots());
+  if (!isGood)
+  { if (comments!=0)
+      *comments
+       << "Error: you requested element of index " << theDisplayIndex
+      << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
+      << ". The index of the root space must be a non-zero integer "
+      << " of absolute value between 1 and the number of positive roots which is " << ownerAlgebra.GetNumPosRoots()
+      << ". If you want to request an element of the Cartan, you should use two indices, the first of which is zero. For example,"
+      << " ElementSemisimpleAlgebra{}(0,1) gives you the an element of the Cartan corresponding to the first simple root. "
+      ;
+    return false;
+  }
+  ElementSimpleLieAlgebra tempElt;
+  int actualIndex=theDisplayIndex;
+  if (actualIndex<0)
+    actualIndex+=ownerAlgebra.GetNumPosRoots();
+  else
+    actualIndex+=ownerAlgebra.GetNumPosRoots()+ownerAlgebra.GetRank()-1;
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (actualIndex, ownerAlgebra);
+  this->owner=&inputOwner;
+  this->type=this->typeElementSSalgebra;
+  this->theRational.GetElement()=inputOwner.theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(tempElt);
+  return true;
+}
+
+bool Data::OperatorDereference
+  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)
+{ int whichInteger1, whichInteger2;
+  switch(this->type)
+  { case Data::typeSSalgebra:
+      if (!argument1.IsSmallInteger(whichInteger1) ||!argument2.IsSmallInteger(whichInteger2) )
+      { if (comments!=0)
+        *comments << "You requested element of a semisimple Lie algebra labeled by ("
+        << argument1.ElementToString() << ", " << argument2.ElementToString()
+        << ")  which is not a pair of small integers. ";
+        return false;
+      }
+      return output.MakeElementSemisimpleLieAlgebra
+      (*this->owner, this->owner->theLieAlgebras[this->GetSmallInt()], whichInteger1, whichInteger2, comments);
+    default:
+      return false;
+  }
+}
+
+bool Data::OperatorDereference
+  (const Data& argument, Data& output, std::stringstream* comments)
+{ int whichInteger;
+  switch(this->type)
+  { case Data::typeSSalgebra:
+      if (!argument.IsSmallInteger(whichInteger))
+      { if (comments!=0)
+        *comments << "You requested element of a semisimple Lie algebra labeled by "
+        << argument.ElementToString() << " which is not a small integer. ";
+        return false;
+      }
+      output.MakeElementSemisimpleLieAlgebra
+      (*this->owner, this->owner->theLieAlgebras[this->GetSmallInt()], whichInteger, comments);
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool Data::IsEqualToOne()
+{ switch (this->type)
+  { case Data::typeRational:
+      return this->theRational.GetElement().IsEqualToOne();
+    default:
+      return false;
+  }
+}
+
+bool Data::IsEqualToZero()
+{ switch (this->type)
+  { case Data::typeRational:
+      return this->theRational.GetElement().IsEqualToZero();
+    default:
+      return false;
+   }
+}
+
 

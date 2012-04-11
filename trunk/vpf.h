@@ -170,6 +170,8 @@ class ModuleSSalgebraNew;
 class CommandList;
 class Command;
 class VariableNonBound;
+class Function;
+class Expression;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9465,7 +9467,8 @@ public:
   // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
   List<Rational> coeffsRootSpaces;
   root Hcomponent;
-  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(int theIndex, const SemisimpleLieAlgebra& owner);
+  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (int theIndex, const SemisimpleLieAlgebra& owner);
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const;
   void AssignVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
@@ -17251,24 +17254,27 @@ std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()
 class Data
 {
 public:
+  CommandList* owner;
   MemorySaving<Rational> theRational;
   MemorySaving<PolynomialRationalCoeff> thePoly;
   MemorySaving<RationalFunction> theRationalFunction;
   MemorySaving<std::string> theError;
   int type;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra
+  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra
   };
-  Data (int x)
-  { this->type=this->typeError;
-    this->operator=(x);
+  Data (const Rational& x, CommandList& inputOwner)
+  { this->owner=&inputOwner;
+    this->type=this->typeRational;
+    this->theRational.GetElement()=x;
   }
+  Data(CommandList& theOwner) : owner(&theOwner), type(Data::typeError) {}
   Data()
-  { this->type=this->typeError;
+  { this->owner=0;
+    this->type=this->typeError;
   }
   Data(const Data& otherData)
-  { this->type=this->typeError;
-    this->operator=(otherData);
+  { this->operator=(otherData);
   }
   void FreeMemory()
   { switch (this->type)
@@ -17280,21 +17286,18 @@ public:
         break;
     }
   }
-  bool IsEqualToZero()
-  { switch (this->type)
-    { case Data::typeSSalgebra:
-        return false;
-      case Data::typeRational:
-        return this->theRational.GetElement().IsEqualToZero();
-      default:
-        assert(false);
-        return false;
-    }
-  }
-  bool IsSmallInteger(int & whichInteger)
+  bool MakeElementSemisimpleLieAlgebra
+(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int theDisplayIndex, std::stringstream* comments)
+  ;
+  bool MakeElementSemisimpleLieAlgebra
+(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
+;
+  bool IsEqualToOne();
+  bool IsEqualToZero();
+  bool IsSmallInteger(int & whichInteger)const
   { if (this->type!=this->typeRational)
       return false;
-    return this->theRational.GetElement().IsSmallInteger(whichInteger);
+    return this->theRational.GetElementConst().IsSmallInteger(whichInteger);
   }
   bool IsInteger()
   { if (this->type!=this->typeRational)
@@ -17304,19 +17307,11 @@ public:
   int GetSmallInt()
   { return this->theRational.GetElement().NumShort;
   }
-  void SetInt(int inputInt)
-  { this->FreeMemory();
-    this->type=this->typeRational;
-    this->theRational.GetElement()=inputInt;
-  }
   bool SetError(const std::string& inputError)
   { this->FreeMemory();
     this->type=this->typeError;
     this->theError.GetElement()=inputError;
     return false;
-  }
-  void operator=(int i)
-  { this->SetInt(i);
   }
   bool operator+=(const Data& other)
   { std::stringstream out;
@@ -17332,6 +17327,10 @@ public:
         out << "Don't know how to add elements of type " << this->type << ". ";
         return this->SetError(out.str());
     }
+  }
+  bool operator*=(const Rational& other)
+  { Data Other(other, *this->owner);
+    return this->operator*=(Other);
   }
   bool operator*=(const Data& other)
   { std::stringstream out;
@@ -17352,8 +17351,10 @@ public:
   { if (this==&other)
       return;
     this->type=other.type;
+    this->owner=other.owner;
     switch(this->type)
-    { case Data::typeSSalgebra:
+    { case Data::typeElementSSalgebra:
+      case Data::typeSSalgebra:
       case Data::typeRational: this->theRational=other.theRational; break;
       case Data::typePoly: this->thePoly=other.thePoly; break;
       default:
@@ -17362,12 +17363,10 @@ public:
         assert(false);
     }
   }
-  void operator=(const Rational& other)
-  { this->theRational.GetElement()=other;
-    this->type=this->typeRational;
-  }
   bool operator==(const Data& other)
-  { if (this->type!=other.type)
+  { if(this->owner!=other.owner)
+      return false;
+    if (this->type!=other.type)
       return false;
     switch(this->type)
     { case Data::typeSSalgebra:
@@ -17382,7 +17381,7 @@ public:
         return false;
     }
   }
-  std::string ElementToString(CommandList* owner=0, std::stringstream* comments=0)const;
+  std::string ElementToString(std::stringstream* comments=0)const;
   bool operator!=(const Data& other)
   { return ! this->operator==(other);
   }
@@ -17390,8 +17389,60 @@ public:
   static inline int HashFunction(const Data& input)
   { return input.HashFunction();
   }
+  bool OperatorDereference
+  (const Data& argument, Data& output, std::stringstream* comments)
+  ;
+  bool OperatorDereference
+  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)
+  ;
   Data operator/(const Data& right);
   Data operator*(const Data& right);
+};
+
+class Function
+{
+  public:
+  //the functions may not possess a name.
+  //If you want your function to possess a name, use a VariableNonBound which has a member function handler.
+  std::string theName;
+  std::string theArgumentList;
+  std::string theDescription;
+  std::string theExampleArguments;
+  typedef  bool (*FunctionAddress)(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments);
+  FunctionAddress theFunction;
+  std::string ElementToString()const
+  { return this->theName;
+  }
+  void operator =(const Function& other)
+  { this->theName=other.theName;
+    this->theArgumentList=other.theArgumentList;
+    this->theDescription=other.theDescription;
+    this->theExampleArguments=other.theExampleArguments;
+    this->theFunction=other.theFunction;
+  }
+  bool operator==(const Function& other)const
+  { return this->theArgumentList==other.theArgumentList &&
+    this->theFunction==other.theFunction && this->theName==other.theName;
+  }
+  Function(){this->theFunction=0;}
+  Function
+  ( const Function::FunctionAddress& functionPointer,
+    const std::string& functionName,
+    const std::string& argumentList,
+    const std::string& description, const std::string& exampleArguments
+  )
+  { this->theFunction=functionPointer;
+    this->theName=functionName;
+    this->theDescription=description;
+    this->theExampleArguments=exampleArguments;
+    this->theArgumentList=argumentList;
+  }
+  inline static int HashFunction(const Function& input)
+  { return input.HashFunction();
+  }
+  int HashFunction()const
+  { return ((int) this->theFunction)+SomeRandomPrimes[1]*MathRoutines::hashString(theArgumentList);
+  }
 };
 
 class Expression
@@ -17427,6 +17478,8 @@ class Expression
   }
   void MakeData(int DataIndex, CommandList& newBoss, int indexOfTheCommand)
   ;
+  void MakeData(const Data& inputData, CommandList& newBoss, int indexOfTheCommand)
+  ;
   void MakeInt(int theInt, CommandList& newBoss, int indexOfTheCommand)
   ;
 void MakeVariableNonBoundNoProperties
@@ -17441,11 +17494,7 @@ void MakeVariableNonBounD
   void MakeFunction
   (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 ;
-//C++ does have horrible syntax:
-//the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
-// as input
-  bool (*GetFunctionFromVarName()) (CommandList& theCommands, int commandIndex, Expression& theExpression)
-;
+  Function::FunctionAddress GetFunctionFromVarName();
   void MakeProducT
   (CommandList* owner, int indexOfTheCommand, const Expression& left, const Expression& right)
   ;
@@ -17642,18 +17691,17 @@ public:
       out << "<br>=(in polish form):" << this->finalValue.ElementToStringPolishForm(0, 20);
     return out.str();
   }
-  bool isStrongLeftSeparator(const std::string& input)
+  bool isStrongSeparatorFromTheLeft(const std::string& input)
   { return
     input=="{" || input=="(" || input=="[" ||
     input=="," || input==":" || input==";" ||
     input==" "
     ;
   }
-  bool isStrongRightSeparator(const std::string& input)
+  bool isStrongSeparatorFromTheRight(const std::string& input)
   { return
     input=="}" || input==")" || input=="]" ||
-    input=="," || input==":" || input==";" ||
-    input==" "
+    input=="," || input==":" || input==";"
     ;
   }
   bool LookAheadAllowsThePower(const std::string& lookAhead)
@@ -17715,21 +17763,16 @@ public:
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault)
   ;
+  bool ReplaceECByC()
+  ;
+  bool ReplaceCEByC()
+;
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
-  { SyntacticElement& middle=this->syntacticStack[this->syntacticStack.size-2];
-    SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
-    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
-    Expression newExpr;
-    newExpr.reset(this->theBoss, this->IndexInBoss);
-    newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
-    newExpr.children.AddOnTop(left.theData);
-    newExpr.children.AddOnTop(right.theData);
-    newExpr.format=formatOptions;
-    left.theData=newExpr;
-    this->DecreaseStackSetCharacterRanges(2);
-//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
-    return true;
+  { return this->ReplaceEOEByEusingO(this->syntacticStack[this->syntacticStack.size-2].controlIndex, formatOptions);
   }
+
+  bool ReplaceEOEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
+  ;
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size-2].controlIndex=theCon;
     this->syntacticStack[this->syntacticStack.size-2].theData.format=theFormat;
@@ -17768,6 +17811,7 @@ public:
     return true;
   }
   bool ReplaceObyE();
+  bool ReplaceOXbyEX();
   bool ReplaceVXbyEX();
   bool ReplaceVbyE();
   bool ReplaceIntIntBy10IntPlusInt()
@@ -17791,52 +17835,6 @@ public:
   }
 };
 
-class Function
-{
-  public:
-  //the functions may not possess a name.
-  //If you want your function to possess a name, use a VariableNonBound which has a member function handler.
-  std::string theName;
-  std::string theArgumentList;
-  std::string theDescription;
-  std::string theExampleArguments;
-
-  bool (*theFunction)(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  std::string ElementToString()const
-  { return this->theName;
-  }
-  void operator =(const Function& other)
-  { this->theName=other.theName;
-    this->theArgumentList=other.theArgumentList;
-    this->theDescription=other.theDescription;
-    this->theExampleArguments=other.theExampleArguments;
-    this->theFunction=other.theFunction;
-  }
-  bool operator==(const Function& other)const
-  { return this->theArgumentList==other.theArgumentList &&
-    this->theFunction==other.theFunction && this->theName==other.theName;
-  }
-  Function(){this->theFunction=0;}
-  Function
-  ( bool (*functionPointer)(CommandList& theCommands, int commandIndex, Expression& theExpression),
-    const std::string& functionName,
-    const std::string& argumentList,
-    const std::string& description, const std::string& exampleArguments
-  )
-  { this->theFunction=functionPointer;
-    this->theName=functionName;
-    this->theDescription=description;
-    this->theExampleArguments=exampleArguments;
-    this->theArgumentList=argumentList;
-  }
-  inline static int HashFunction(const Function& input)
-  { return input.HashFunction();
-  }
-  int HashFunction()const
-  { return ((int) this->theFunction)+SomeRandomPrimes[1]*MathRoutines::hashString(theArgumentList);
-  }
-};
-
 class VariableNonBound
 {
   public:
@@ -17852,8 +17850,10 @@ class VariableNonBound
   //C++ does have horrible syntax:
 //the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
 // as input
-  bool (*GetFunction(CommandList& owner)) (CommandList& theCommands, int commandIndex, Expression& theExpression)
-;
+//[Edit:] masked the horror in a typedef. Now the horror lies in a single isolated line. Nevertheless, a horror.
+  Function::FunctionAddress GetFunction
+  (CommandList& owner)
+  ;
   int HashFunction()const
   { return VariableNonBound::HashFunction(*this);
   }
@@ -17889,6 +17889,7 @@ public:
   int MaxLatexChars;
   double MaxAllowedTimeInSeconds;
   int TotalNumPatternMatchedPerformed;
+  int NumPredefinedVars;
   List<Command> theCommands;
 //  std::vector<std::stringstream> theLogs;
   HashedList<Expression> cachedExpressions;
@@ -17902,6 +17903,7 @@ public:
 //following are the variout hardcoded data structures.
   GlobalVariables* theGlobalVariableS;
   List<SemisimpleLieAlgebra> theLieAlgebras;
+  HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
   HashedListB<Data, Data::HashFunction> theData;
 //end of hardcoded data structures
   std::string ElementToString();
@@ -17926,13 +17928,16 @@ public:
   int conEqualEqual()
   { return this->controlSequences.GetIndexIMustContainTheObject("==");
   }
-  int conDeclareFunction()
+  int conApplyFunction()
   { return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
   int conDefine()
   { return this->controlSequences.GetIndexIMustContainTheObject(":=");
   }
-  int opFunction()
+  int conComma()
+  { return this->controlSequences.GetIndexIMustContainTheObject(",");
+  }
+  int opApplyFunction()
   { return this->operations.GetIndexIMustContainTheObject("{}");
   }
   int opDefine()
@@ -17952,6 +17957,9 @@ public:
   }
   int opData()
   { return this->operations.GetIndexIMustContainTheObject("Data");
+  }
+  int opComma()
+  { return this->operations.GetIndexIMustContainTheObject(",");
   }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
@@ -18036,54 +18044,71 @@ public:
   (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
   ;
 
-  static bool EvaluateStandardPlus(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateStandardTimes(CommandList& theCommands, int commandIndex, Expression& theExpression)
+  static bool EvaluateStandardPlus
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardDivide(CommandList& theCommands, int commandIndex, Expression& theExpression)
+  static bool EvaluateStandardTimes
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardMinus(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateStandardFunction(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateStandardEqualEqual(CommandList& theCommands, int commandIndex, Expression& theExpression);
-
+  static bool EvaluateStandardDivide
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateStandardMinus
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateStandardFunction
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateStandardEqualEqual
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool EvaluateDoAssociatE
-  (CommandList& theCommands, int commandIndex, Expression& theExpression, int theOperation)
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* coments, int theOperation)
   ;
-  static bool EvaluateDoCollect(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoExtractBaseMultiplication(CommandList& theCommands, int commandIndex, Expression& theExpression);
-  static bool EvaluateDoDistribute(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
-  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP, int theAdditiveOp);
-  static bool EvaluateDoRightDistributeBracketIsOnTheRight(CommandList& theCommands, int commandIndex, Expression& theExpression, int theMultiplicativeOP);
-
+  static bool EvaluateDoCollect
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateDoExtractBaseMultiplication
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateDoDistribute
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+  ;
+  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+  ;
+  static bool EvaluateDoRightDistributeBracketIsOnTheRight
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP)
+  ;
+  static bool EvaluateIf
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fIsInteger
-  (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPolynomial
-  (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fSSAlgebra
-    (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 ;
-
   static bool fElementSSAlgebra
-    (CommandList& theCommands, int commandIndex, Expression& theExpression)
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 ;
-
-  static bool EvaluateIf(CommandList& theCommands, int commandIndex, Expression& theExpression);
   void AddEmptyHeadedCommand();
   CommandList()
   { this->theGlobalVariableS=0;
   }
   void AddOperationNoFail
   (const std::string& theOpName,
-   bool (theOpHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+   const Function::FunctionAddress& theFunAddress,
    const std::string& opFunctionTechnicalName,
    const std::string& opArgumentList="", const std::string& opDescription="",
    const std::string& opExample=""
    )
    ;
   void AddNonBoundVarMustBeNew
-  (const std::string& theName,
-   bool (funHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
+  (const std::string& theName, const Function::FunctionAddress& funHandler,
    const std::string& argList, const std::string& description, const std::string& exampleArgs
    )
   { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
@@ -18096,10 +18121,9 @@ public:
     return this->theNonBoundVars.GetIndex(tempVar);
   }
   int AddNonBoundVarReturnVarIndex
-  (const std::string& theName,
-   bool (funHandler(CommandList& theCommands, int commandIndex, Expression& theExpression)),
-   const std::string& argList, const std::string& description, const std::string& exampleArgs
-   )
+(const std::string& theName, const Function::FunctionAddress& funHandler,
+  const std::string& argList, const std::string& description, const std::string& exampleArgs
+)
 ;
   void init(GlobalVariables& theGlobalVariables);
   void initPredefinedVars()
@@ -18107,33 +18131,7 @@ public:
   void initTargetProperties()
   {// this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
   }
-  void ExtractExpressions()
-  { std::string lookAheadToken;
-    std::stringstream errorLog;
-    for (int j=0; j<this->theCommands.size; j++)
-    { this->theCommands[j].resetStack();
-      for (int i=0; i<this->theCommands[j].syntacticSoup.size; i++)
-      { if (i+1<this->theCommands[j].syntacticSoup.size)
-          lookAheadToken=this->controlSequences[this->theCommands[j].syntacticSoup[i+1].controlIndex];
-        else
-          lookAheadToken=";";
-        this->theCommands[j].syntacticStack.AddOnTop(this->theCommands[j].syntacticSoup[i]);
-        while(this->theCommands[j].ApplyOneRule(lookAheadToken))
-        {}
-      }
-      if (this->theCommands[j].ErrorString=="" && this->theCommands[j].syntacticStack.size==this->theCommands[j].numEmptyTokensStart+1)
-        this->theCommands[j].finalValue=this->theCommands[j].syntacticStack[this->theCommands[j].numEmptyTokensStart].theData;
-      else if (this->theCommands[j].ErrorString!="")
-        errorLog << "Syntax error at command " << j+1 << ":" << theCommands[j].ErrorString << "<br>";
-      else if (this->theCommands[j].syntacticStack.size!=this->theCommands[j].numEmptyTokensStart)
-      { errorLog << "Syntax error at command " << j+1 << ": your command does not simplify to a single expression. <br>";
-        errorLog << "Instead it simplifies to:<br> " << this->theCommands[j].ElementToStringSyntacticStack();
-      }
-    }
-    std::string error = errorLog.str();
-    if (error!="")
-      this->syntaxErrors.AddOnTop(error);
-  }
+  void ExtractExpressions();
   void EvaluateCommands();
   bool EvaluateExpressionReturnFalseIfExpressionIsBound
 (int commandIndex, Expression& theExpression, int RecursionDepth, int maxRecursionDepth,

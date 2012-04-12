@@ -9203,8 +9203,7 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
 void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables)
 { if(this->DefaultWeylLetter!='B' || this->DefaultWeylRank!=3)
     return;
-  Parser tempParser;
-  this->theHmm.MakeG2InB3(tempParser, theGlobalVariables);
+  this->theHmm.MakeG2InB3(*this, theGlobalVariables);
   SSalgebraModuleOld theModule;
   std::stringstream out;
   theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);

@@ -24159,7 +24159,9 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 
 void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 (char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
-{ this->theDomain().ComputeChevalleyConstantS(theWeylLetter, theWeylDim, ownerOfAlgebras, theGlobalVariables);
+{ this->owners=&ownerOfAlgebras;
+  this->owners->SetSize(2);
+  this->theDomain().ComputeChevalleyConstantS(theWeylLetter, theWeylDim, ownerOfAlgebras, theGlobalVariables);
   this->theRange().ComputeChevalleyConstantS(theWeylLetter, theWeylDim, ownerOfAlgebras, theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
@@ -24185,7 +24187,11 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 }
 
 void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables)
-{ owner.DefaultWeylLetter='B';
+{ this->owners=&owner.theAlgebras;
+  this->indexRange=1;
+  this->indexDomain=0;
+  owner.theAlgebras.SetSize(2);
+  owner.DefaultWeylLetter='B';
   owner.DefaultWeylRank=3;
   owner.theHmm.theRange().ComputeChevalleyConstantS
   (owner.DefaultWeylLetter, owner.DefaultWeylRank, owner.theAlgebras, theGlobalVariables);

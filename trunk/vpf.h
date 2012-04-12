@@ -9940,7 +9940,7 @@ public:
   SemisimpleLieAlgebra& theRange()
   { return owners->TheObjects[this->indexRange];
   }
-  HomomorphismSemisimpleLieAlgebra(): owners(0), indexDomain(-1), indexRange(-1){}
+  HomomorphismSemisimpleLieAlgebra(): owners(0), indexDomain(0), indexRange(1){}
   std::string DebugString;
   void GetWeightsGmodKInSimpleCoordsK
   (roots& outputWeights, GlobalVariables& theGlobalVariables)

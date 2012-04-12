@@ -73,6 +73,47 @@
 #define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
 
 
+
+// Copyright (c) 2009, Fredrik Orderud
+//   License: BSD licence (http://www.opensource.org/licenses/bsd-license.php)
+//   Based on: http://stupefydeveloper.blogspot.com/2008/10/cc-call-stack.html
+// note from Todor Milev: a big portion of Fredrik Orderud's code was line-noise;
+// I cleaned it up to contain only the pieces of code that actually do something.
+/*#include <execinfo.h>
+#include <cxxabi.h>
+#include <dlfcn.h>
+
+class StackRoutines
+{
+public:
+  static void PrintStack(std::ostream& out, const size_t num_discard = 0)
+  { // retrieve call-stack
+    const int Max_Depth=30;
+    void * trace[Max_Depth];
+    int stack_depth = backtrace(trace, Max_Depth);
+    for (int i = num_discard+1; i < stack_depth; i++)
+    { Dl_info dlinfo;
+      if(!dladdr(trace[i], &dlinfo))
+        break;
+      const char * symname = dlinfo.dli_sname;
+      int status;
+      char * demangled = abi::__cxa_demangle(symname, NULL, 0, &status);
+      if(status == 0 && demangled)
+        symname = demangled;
+      // store entry to stack
+      if (dlinfo.dli_fname && symname)
+      { out << "<br>file " << dlinfo.dli_fname;
+        out << symname;
+      } else
+        break; // skip last entries below main
+      if (demangled)
+        free(demangled);
+    }
+  }
+};*/
+//end of cleaned-up Fredrik Orderud code.
+////////////////////////////////////////////////////////////////////////
+
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
 const int SomeRandomPrimes[SomeRandomPrimesSize]={ 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911};
@@ -704,7 +745,7 @@ std::iostream& operator<<(std::iostream& output, const List<Object>& theList);
 template <class Object>
 std::iostream& operator>>(std::iostream& input, List<Object>& theList);
 
-//List kills the objects it contains when it expires
+//List serves the same purpose as std::vector
 template <class Object>
 class List
 { friend std::iostream& operator<< <Object>(std::iostream& output, const List<Object>& theList);
@@ -829,7 +870,15 @@ public:
         return false;
     return true;
   }
-  inline Object& operator[](int i)const{ assert(i<this->size); return this->TheObjects[i];}
+  inline Object& operator[](int i)const
+  { if (i>=this->size || i<0)
+    { std::cout << "Programming error: attempting to access the entry of index " << i << " in an array of "
+      << this->size << " elements. <br>\n";
+//      StackRoutines::PrintStack(std::cout);
+      assert(false);
+    }
+    return this->TheObjects[i];
+  }
   inline bool operator!=(const List<Object>& other)const{ return !this->IsEqualTo(other);}
   inline bool operator==(const List<Object>& other)const{ return this->IsEqualTo(other);}
   bool operator>(const List<Object>& other)const;
@@ -8877,6 +8926,9 @@ public:
   void TransformToSimpleBasisGeneratorsWRTh(roots& theGens, root& theH);
   int length(int index);
   void operator=(const WeylGroup& other){this->Assign(other);}
+  bool operator==(const WeylGroup& other)
+  { return this->CartanSymmetric==other.CartanSymmetric;
+  }
 };
 
 template <class Element>
@@ -9458,7 +9510,12 @@ public:
 class ElementSimpleLieAlgebra
 {
 public:
-  std::string DebugString;
+  List<SemisimpleLieAlgebra>* ownerArray;
+  int indexOfOwnerAlgebra;
+  Selection NonZeroElements;
+  // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
+  List<Rational> coeffsRootSpaces;
+  root Hcomponent;
   void ElementToString(std::string& output){this->ElementToString(output, false, false);}
   std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
   bool ElementToStringNeedsBracketsForMultiplication()const;
@@ -9468,19 +9525,14 @@ public:
   (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, const PolynomialOutputFormat& thePolyFormat,
    GlobalVariables& theGlobalVariables)
 ;
-  void ComputeDebugString(bool useHtml, bool useLatex){ this->ElementToString(this->DebugString, useHtml, useLatex, false, 0, 0);  }
-  Selection NonZeroElements;
-  // the index in i^th position in the below array gives the coefficient in front of the i^th root in the ambient root system, i.e. the root owner.theWeyl.RootSystem.TheObjects[i].
-  List<Rational> coeffsRootSpaces;
-  root Hcomponent;
   void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (int theIndex, const SemisimpleLieAlgebra& owner);
+  (int generatorIndex, SemisimpleLieAlgebra& owner)
+  ;
   void ElementToVectorRootSpacesFirstThenCartan(root& output);
   void ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const;
   void AssignVectorRootSpacesFirstThenCartan(const root& input, SemisimpleLieAlgebra& owner);
-  void AssignVectorNegRootSpacesCartanPosRootSpaces(const root& input, const SemisimpleLieAlgebra& owner);
   void AssignVectorNegRootSpacesCartanPosRootSpaces
-  (const root& input, int numRoots, int theAlgebraRank)
+(const root& input, SemisimpleLieAlgebra& owner)
   ;
   bool GetCoordsInBasis
   (const List<ElementSimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
@@ -9526,9 +9578,11 @@ public:
   //range is the image of the vectors e_i
   bool IsEqualToZero()const;
   ElementSimpleLieAlgebra(const ElementSimpleLieAlgebra& other){ this->operator=(other);}
-  ElementSimpleLieAlgebra(){}
+  ElementSimpleLieAlgebra():ownerArray(0),indexOfOwnerAlgebra(-1) {}
   void operator=(const ElementSimpleLieAlgebra& other)
-  { this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
+  { this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
+    this->ownerArray=other.ownerArray;
+    this->coeffsRootSpaces.CopyFromBase(other.coeffsRootSpaces);
     this->Hcomponent.Assign(other.Hcomponent);
     this->NonZeroElements.Assign(other.NonZeroElements);
   }
@@ -9538,10 +9592,12 @@ public:
   void init
   (int numRoots, int theAlgebraRank)
   ;
-  void Nullify(const SemisimpleLieAlgebra& owner);
   void Nullify
-  (int numRoots, int theAlgebraRank)
-;
+  (SemisimpleLieAlgebra& owner)
+  ;
+  void Nullify
+  (List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
+  ;
   ElementSimpleLieAlgebra operator*(const Rational& other)
   { ElementSimpleLieAlgebra result;
     result=*this;
@@ -9561,7 +9617,11 @@ public:
   { return input.HashFunction();
   }
   void TimesConstant(const Rational& input);
-  bool operator==(const ElementSimpleLieAlgebra& other)const{ return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) && this->Hcomponent.IsEqualTo(other.Hcomponent);}
+  bool operator==(const ElementSimpleLieAlgebra& other)const
+  { return this->coeffsRootSpaces.IsEqualTo(other.coeffsRootSpaces) &&
+    this->Hcomponent.IsEqualTo(other.Hcomponent) && this->ownerArray==other.ownerArray
+    && this->indexOfOwnerAlgebra==other.indexOfOwnerAlgebra;
+  }
   void operator+=(const ElementSimpleLieAlgebra& other);
 };
 
@@ -9672,7 +9732,8 @@ public:
 class SemisimpleLieAlgebra: public HashedList<ElementSimpleLieAlgebra>
 {
 public:
-  std::string DebugString;
+  List<SemisimpleLieAlgebra>* owner;
+  int indexInOwner;
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
@@ -9696,7 +9757,9 @@ public:
   List<int> OppositeRootSpaces;
   List<int> UEGeneratorOrderIncludingCartanElts;
   void Assign(const SemisimpleLieAlgebra& other)
-  { this->theWeyl.Assign(other.theWeyl);
+  { this->owner=other.owner;
+    this->indexInOwner=other.indexInOwner;
+    this->theWeyl.Assign(other.theWeyl);
     this->ChevalleyConstants.Assign(other.ChevalleyConstants);
     this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
     this->theLiebracketPairingCoefficients.Assign(other.theLiebracketPairingCoefficients);
@@ -9704,7 +9767,7 @@ public:
     this->Computed.Assign(other.Computed);
     this->UEGeneratorOrderIncludingCartanElts=other.UEGeneratorOrderIncludingCartanElts;
   }
-
+  SemisimpleLieAlgebra(): owner(0), indexInOwner(-1){ }
   void ComputeMultTable(GlobalVariables& theGlobalVariables);
   void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); }
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
@@ -9724,8 +9787,10 @@ public:
     return this->ElementToStringNegativeRootSpacesFirst(false, false, true, false, false, tempFormat, theGlobalVariables);
   }
   std::string ElementToStringLieBracketPairing();
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(this->DebugString, useHtml, useLatex, theGlobalVariables); }
-  std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables) {return this->theWeyl.GetEpsilonCoords(this->theWeyl.RootSystem[theIndex], theGlobalVariables).ElementToStringEpsilonForm();}
+  std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables)
+  { return this->theWeyl.GetEpsilonCoords
+    (this->theWeyl.RootSystem[theIndex], theGlobalVariables).ElementToStringEpsilonForm();
+  }
   std::string ElementToStringRootIndexToSimpleBasis
   (int theIndex, GlobalVariables& theGlobalVariables)
   { return this->theWeyl.RootSystem[theIndex].ElementToStringLetterFormat("\\alpha", true);
@@ -9797,12 +9862,17 @@ public:
   (int theIndex, bool useRootIndices, bool useEpsCoords, const PolynomialOutputFormat& theFormat,
    GlobalVariables& theGlobalVariables)
 ;
-  void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables);
-  void ComputeChevalleyConstants(WeylGroup& input, GlobalVariables& theGlobalVariables);
-  void ComputeChevalleyConstants(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
+  void GenerateVermaMonomials(root& highestWeight, GlobalVariables& theGlobalVariables)
+  ;
+  void ComputeChevalleyConstantS
+  (char WeylLetter, int Rank, List<SemisimpleLieAlgebra>& owner, GlobalVariables& theGlobalVariables)
+  ;
+  void ComputeChevalleyConstantS
+  (WeylGroup& input, GlobalVariables& theGlobalVariables)
+  ;
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a root.
   //then the below function computes n_{-\epsilon, -\zeta}
-  void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output)const;
+  void LieBracket(const ElementSimpleLieAlgebra& g1, const ElementSimpleLieAlgebra& g2, ElementSimpleLieAlgebra& output);
   void ComputeOneChevalleyConstant(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta);
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
@@ -9843,14 +9913,18 @@ public:
   int GetLengthStringAlongAlphaThroughBeta(root& alpha, root& beta, int& distanceToHighestWeight, roots& weightSupport);
   void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, MatrixLargeRational& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);}
+  bool operator==(const SemisimpleLieAlgebra& other)
+  { return this->theWeyl==other.theWeyl;
+  }
 };
 
 class Parser;
 class HomomorphismSemisimpleLieAlgebra
 {
 public:
-  SemisimpleLieAlgebra theDomain;
-  SemisimpleLieAlgebra theRange;
+  List<SemisimpleLieAlgebra>* owners;
+  int indexDomain;
+  int indexRange;
   //Let rk:=Rank(Domain)
   //format of ImagesSimpleChevalleyGenerators: the first rk elements give the images of the Chevalley generators corresponding to simple positive roots
   //the second rk elements give the images of the Chevalley generators corresponding to simple negative roots
@@ -9860,6 +9934,13 @@ public:
   List<ElementSimpleLieAlgebra> domainAllChevalleyGenerators;
   List<ElementSimpleLieAlgebra> GmodK;
   roots RestrictedRootSystem;
+  SemisimpleLieAlgebra& theDomain()
+  { return owners->TheObjects[this->indexDomain];
+  }
+  SemisimpleLieAlgebra& theRange()
+  { return owners->TheObjects[this->indexRange];
+  }
+  HomomorphismSemisimpleLieAlgebra(): owners(0), indexDomain(-1), indexRange(-1){}
   std::string DebugString;
   void GetWeightsGmodKInSimpleCoordsK
   (roots& outputWeights, GlobalVariables& theGlobalVariables)
@@ -9873,7 +9954,10 @@ public:
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ElementToString(output, false, theGlobalVariables);};
   void ElementToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
-  void MakeGinGWithId(char theWeylLetter, int theWeylDim, GlobalVariables& theGlobalVariables);
+  void MakeGinGWithId
+  (char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras,
+   GlobalVariables& theGlobalVariables)
+  ;
   void ProjectOntoSmallCartan(root& input, root& output, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(roots& input, roots& output, GlobalVariables& theGlobalVariables);
   void GetMapSmallCartanDualToLargeCartanDual(MatrixLargeRational& output);
@@ -12704,6 +12788,7 @@ public:
   SemisimpleLieAlgebraOrdered testSubAlgebra;
   ModuleSSalgebraNew<Rational> theModulE;
   List<ModuleSSalgebraNew<RationalFunction> > theModulePolys;
+  List<SemisimpleLieAlgebra> theAlgebras;
 
   std::string javaScriptDisplayingIndicator;
   std::string afterSystemCommands;
@@ -13358,14 +13443,14 @@ public:
   (root& input, root& outputLastNonZero, List<MatrixLargeRational>& SimplePositiveGenerators, List<int>& outputGeneratorSequence, List<int>& outputGeneratorPowers)
   ;
   void ComputeAdMatrixFromModule
-  (ElementSimpleLieAlgebra& theElt, roots& theModule, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output,
+  (ElementSimpleLieAlgebra& theElt, roots& theModule, SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output,
    GlobalVariables& theGlobalVariables)
      ;
   void ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
-  (const List<ElementSimpleLieAlgebra>& input, const SemisimpleLieAlgebra& ambientLieAlgebra, List<MatrixLargeRational>& output)
+  (const List<ElementSimpleLieAlgebra>& input, SemisimpleLieAlgebra& ambientLieAlgebra, List<MatrixLargeRational>& output)
   ;
   void ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
-  (const ElementSimpleLieAlgebra& input, const SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output)
+  (const ElementSimpleLieAlgebra& input, SemisimpleLieAlgebra& ambientLieAlgebra, MatrixLargeRational& output)
   ;
   void ComputeInvariantsOfDegree
   (int degree, std::stringstream& out, GlobalVariables& theGlobalVariables)
@@ -14244,8 +14329,8 @@ class GeneralizedVermaModuleData
   { this->theRingUnit=ringUnit;
     this->theRingZero=ringZero;
     this->posGenerators.size=0; this->negGenerators.size=0;
-    int domainRank=input.theHmm.theDomain.GetRank();
-    int numDomainPosRoots=input.theHmm.theDomain.GetNumPosRoots();
+    int domainRank=input.theHmm.theDomain().GetRank();
+    int numDomainPosRoots=input.theHmm.theDomain().GetNumPosRoots();
     this->smallerCartanEmbedding.SetSize(domainRank);
     for (int i=0; i<domainRank; i++)
     { this->posGenerators.AddOnTop(input.theHmm.imagesAllChevalleyGenerators.TheObjects
@@ -14257,7 +14342,7 @@ class GeneralizedVermaModuleData
     this->theOwner=&input.testAlgebra;
     this->theFDspace=input.theHmm.GmodK;
     input.theHmm.GetWeightsGmodKInSimpleCoordsK(this->theFDspaceWeights, *theContext);
-    this->VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(input.theHmm.theRange.GetRank(), (Rational) 1);
+    this->VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(input.theHmm.theRange().GetRank(), (Rational) 1);
   }
 };
 
@@ -14938,8 +15023,8 @@ void TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::
       tempLeftElts.AddOnTop(tempLeft);
       theRightElts.TheObjects[i].ActOnMe(theElementsActing.TheObjects[j], tempRight, theAlgebra);
       tempRightElts.AddOnTop(tempRight);
-      tempRight.ComputeDebugString( false, false);
-      tempLeft.ComputeDebugString();
+//      tempRight.ComputeDebugString( false, false);
+//      tempLeft.ComputeDebugString();
     }
   this->theStartingSpace.theRingUniT=theRingUnit;
   this->theTargetSpace.theRingUniT=theRingUnit;
@@ -15553,8 +15638,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
     adResulT=tempElT;
     powerDroP++;
     acquiredCoefficienT/=powerDroP;
-    if (this->flagAnErrorHasOccurredTimeToPanic)
-      adResulT.ComputeDebugString(false, false);
+//    if (this->flagAnErrorHasOccurredTimeToPanic)
+//      adResulT.ComputeDebugString(false, false);
   }while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
 }
 
@@ -17353,6 +17438,9 @@ public:
   static inline int HashFunction(const Data& input)
   { return input.HashFunction();
   }
+  static bool LieBracket
+  (const Data& left, const Data& right, Data& output, std::stringstream* comments)
+  ;
   bool OperatorDereference
   (const Data& argument, Data& output, std::stringstream* comments)
   ;
@@ -17440,9 +17528,9 @@ class Expression
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
   }
-  void MakeData(int DataIndex, CommandList& newBoss, int indexOfTheCommand)
+  void MakeDatA(const Data& inputData, CommandList& newBoss, int indexOfTheCommand)
   ;
-  void MakeData(const Data& inputData, CommandList& newBoss, int indexOfTheCommand)
+  void MakeDatA(const Rational& inputRat, CommandList& newBoss, int indexOfTheCommand)
   ;
   void MakeInt(int theInt, CommandList& newBoss, int indexOfTheCommand)
   ;
@@ -17499,6 +17587,7 @@ void MakeVariableNonBounD
     this->errorString==other.errorString
     ;
   }
+  Rational GetConstantTerm() const;
   bool NeedBracketsForMultiplication()const;
   bool NeedBracketsForAddition()const;
   bool NeedBracketsForFunctionName()const;
@@ -17692,50 +17781,24 @@ public:
       lookAhead=="}" || lookAhead==":"
       ;
   }
-  bool ReplaceEXXEXEByEusingO(int theOp)
-  { SyntacticElement& middle = this->syntacticStack[this->syntacticStack.size-3];
-    SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-6];
-    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
-    Expression newExpr;
-    newExpr.reset(this->theBoss, this->IndexInBoss);
-    newExpr.theOperation=theOp;
-    newExpr.children.AddOnTop(left.theData);
-    newExpr.children.AddOnTop(middle.theData);
-    newExpr.children.AddOnTop(right.theData);
-    left.theData=newExpr;
-    this->DecreaseStackSetCharacterRanges(5);
-//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
-    return true;
-  }
-  bool ReplaceEEByEusingO(int theOp)
-  { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-2];
-    SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
-    Expression newExpr;
-    newExpr.reset(this->theBoss, this->IndexInBoss);
-    newExpr.theOperation=theOp;
-//    newExpr.commandIndex=
-    newExpr.children.AddOnTop(left.theData);
-    newExpr.children.AddOnTop(right.theData);
-    left.theData=newExpr;
-    this->DecreaseStackSetCharacterRanges(1);
-//    std::cout << this->syntacticStack[this->syntacticStack.size()-1].theData.ElementToStringPolishForm();
-    return true;
-  }
+  bool ReplaceEXXEXEByEusingO(int theOp);
+  bool ReplaceEEByEusingO(int theControlIndex);
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
-  bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault)
-  ;
-  bool ReplaceECByC()
-  ;
-  bool ReplaceCEByC()
-;
+  bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
+  bool ReplaceECByC();
+  bool ReplaceEXEByList();
+  bool ReplaceListXEByList();
+  bool ReplaceCEByC();
+  bool ReplaceCCByC();
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
-  { return this->ReplaceEOEByEusingO(this->syntacticStack[this->syntacticStack.size-2].controlIndex, formatOptions);
+  { return this->ReplaceEXEByEusingO(this->syntacticStack[this->syntacticStack.size-2].controlIndex, formatOptions);
   }
-
-  bool ReplaceEOEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
+  bool ReplaceXEXEXByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
+  ;
+  bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
   ;
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size-2].controlIndex=theCon;
@@ -17895,11 +17958,20 @@ public:
   int conApplyFunction()
   { return this->controlSequences.GetIndexIMustContainTheObject("{}");
   }
+  int conTimes()
+  { return this->controlSequences.GetIndexIMustContainTheObject("*");
+  }
+  int conDefineConditional()
+  { return this->controlSequences.GetIndexIMustContainTheObject("if:=");
+  }
   int conDefine()
   { return this->controlSequences.GetIndexIMustContainTheObject(":=");
   }
-  int conComma()
-  { return this->controlSequences.GetIndexIMustContainTheObject(",");
+  int conList()
+  { return this->controlSequences.GetIndexIMustContainTheObject("List");
+  }
+  int conLieBracket()
+  { return this->controlSequences.GetIndexIMustContainTheObject("[]");
   }
   int opApplyFunction()
   { return this->operations.GetIndexIMustContainTheObject("{}");
@@ -17922,8 +17994,8 @@ public:
   int opData()
   { return this->operations.GetIndexIMustContainTheObject("Data");
   }
-  int opComma()
-  { return this->operations.GetIndexIMustContainTheObject(",");
+  int opList()
+  { return this->operations.GetIndexIMustContainTheObject("List");
   }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
@@ -17936,6 +18008,9 @@ public:
   }
   int opTimes()
   { return this->operations.GetIndexIMustContainTheObject("*");
+  }
+  int opLieBracket()
+  { return this->operations.GetIndexIMustContainTheObject("[]");
   }
   int opDivide()
   { return this->operations.GetIndexIMustContainTheObject("/");
@@ -18015,6 +18090,9 @@ public:
   (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateStandardDivide
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateStandardLieBracket
   (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateStandardMinus

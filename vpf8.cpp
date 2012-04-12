@@ -131,27 +131,25 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   (ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output)
 { assert(&output!=&input);
-  output.Nullify(this->theRange);
+  output.Nullify(*this->owners, this->indexRange);
   for (int i=0; i<input.NonZeroElements.CardinalitySelection; i++)
   { int currentIndex=input.NonZeroElements.elements[i];
     output+=this->imagesAllChevalleyGenerators[currentIndex]*input.coeffsRootSpaces[currentIndex];
   }
-  output.Hcomponent.MakeZero(this->theRange.GetRank());
+  output.Hcomponent.MakeZero(this->theRange().GetRank());
   for (int i=0; i<input.Hcomponent.size; i++)
     output.Hcomponent+=
     this->imagesAllChevalleyGenerators
-    [this->theDomain.CartanIndexToChevalleyGeneratorIndex(i)].Hcomponent  *input.Hcomponent[i];
+    [this->theDomain().CartanIndexToChevalleyGeneratorIndex(i)].Hcomponent  *input.Hcomponent[i];
   output.ComputeNonZeroElements();
 }
 
-void HomomorphismSemisimpleLieAlgebra::
-GetMapSmallCartanDualToLargeCartanDual
-(MatrixLargeRational& output)
-{ output.init(this->theRange.GetRank(), this->theDomain.GetRank());
+void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(MatrixLargeRational& output)
+{ output.init(this->theRange().GetRank(), this->theDomain().GetRank());
   ElementSimpleLieAlgebra domainElt, imageElt;
-  domainElt.Nullify(this->theDomain);
-  for (int i=0; i<this->theDomain.GetRank(); i++)
-  { domainElt.Hcomponent.MakeEi(this->theDomain.GetRank(), i);
+  domainElt.Nullify(*this->owners, this->indexDomain);
+  for (int i=0; i<this->theDomain().GetRank(); i++)
+  { domainElt.Hcomponent.MakeEi(this->theDomain().GetRank(), i);
 //    std::string tempS=domainElt.ElementToString();
     this->ApplyHomomorphism(domainElt, imageElt);
 //    std::string tempS2=imageElt.ElementToString();
@@ -178,9 +176,9 @@ void ReflectionSubgroupWeylGroup::GetMatrixOfElement
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
   (root& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
 { roots tempRoots;
-  this->WeylLarger=input.theRange.theWeyl;
-  this->WeylSmaller=input.theDomain.theWeyl;
-  WeylGroup& theWeYl=input.theRange.theWeyl;
+  this->WeylLarger=input.theRange().theWeyl;
+  this->WeylSmaller=input.theDomain().theWeyl;
+  WeylGroup& theWeYl=input.theRange().theWeyl;
 //  input.ProjectOntoSmallCartan(theWeyl.RootsOfBorel, tempRoots, theGlobalVariables);
   this->log << "projections: " << tempRoots.ElementToString();
   theWeYl.ComputeWeylGroup();
@@ -195,7 +193,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS, theGlobalVariables);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ElementToString();
   MatrixLargeRational tempMat;
-  tempMat=input.theDomain.theWeyl.CartanSymmetric;
+  tempMat=input.theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
 //  tempMat.ActOnRoots(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.ElementToString();
@@ -223,9 +221,9 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       i--;
     }
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
-  theProjectionBasisChanged.init(input.theDomain.GetRank(), input.theRange.GetRank());
-  for (int i=0; i<input.theRange.GetRank(); i++)
-  { startingWeight.MakeEi(input.theRange.GetRank(), i);
+  theProjectionBasisChanged.init(input.theDomain().GetRank(), input.theRange().GetRank());
+  for (int i=0; i<input.theRange().GetRank(); i++)
+  { startingWeight.MakeEi(input.theRange().GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
     this->preferredBasisChangeInversE.ActOnAroot(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
@@ -237,8 +235,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
   root ParabolicEvaluationRootImage, tempRoot;
   ParabolicEvaluationRootImage=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
-  this->ParabolicSelectionSmallerAlgebra.init(input.theDomain.GetRank());
-  for (int i=0; i<input.theDomain.GetRank(); i++)
+  this->ParabolicSelectionSmallerAlgebra.init(input.theDomain().GetRank());
+  for (int i=0; i<input.theDomain().GetRank(); i++)
   { DualCartanEmbedding.ColToRoot(i, tempRoot);
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).IsPositive())
       this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
@@ -297,10 +295,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       displayIndicesReflections.AddOnTop(i+1);
   Matrix<PolynomialRationalCoeff> tempMatPoly;
   Vector<PolynomialRationalCoeff> tempVect, tempVect2;
-  tempVect.SetSize(input.theDomain.theWeyl.GetDim()+input.theRange.theWeyl.GetDim());
+  tempVect.SetSize(input.theDomain().theWeyl.GetDim()+input.theRange().theWeyl.GetDim());
   for (int i=0; i<tempVect.size; i++)
     tempVect[i].MakeMonomialOneLetter(tempVect.size, i, 1, (Rational) 1);
-  tempMatPoly.init(input.theDomain.theWeyl.GetDim(), tempVect.size);
+  tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
   PolynomialRationalCoeff polyZero;
   polyZero.Nullify(tempVect.size);
   theFormat.alphabet[0]="x_1";
@@ -331,7 +329,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
   Lattice tempLattice;
   theWeYl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
-  this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdMatrix(input.theDomain.GetRank());
+  this->theExtendedIntegralLatticeMatForM.basisRationalForm.MakeIdMatrix(input.theDomain().GetRank());
   this->theExtendedIntegralLatticeMatForM.basisRationalForm.DirectSumWith(tempLattice.basisRationalForm, (Rational) 0);
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat=theWeYl.CartanSymmetric;
@@ -347,7 +345,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\n\n\n**************\nParabolic selection larger algebra:" << ParabolicEvaluationRootImage.ElementToString() << "\nWalls Weyl chamber larger algebra: " << WallsWeylChamberLargerAlgebra.ElementToString();
   this->log << "\n**************\n\n";
   roots rootsGeneratingExtendedLattice;
-  int totalDim=input.theRange.GetRank()+input.theDomain.GetRank();
+  int totalDim=input.theRange().GetRank()+input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ElementToString(false, false);
@@ -355,18 +353,18 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
-  { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
-    for (int j=0; j<input.theRange.GetRank(); j++)
-      tempRoot.TheObjects[j+input.theDomain.GetRank()]=this->PreimageWeylChamberLargerAlgebra.Normals[i][j];
+  { tempRoot.MakeZero(input.theRange().GetRank()+input.theDomain().GetRank()+1);
+    for (int j=0; j<input.theRange().GetRank(); j++)
+      tempRoot.TheObjects[j+input.theDomain().GetRank()]=this->PreimageWeylChamberLargerAlgebra.Normals[i][j];
     this->PreimageWeylChamberLargerAlgebra.Normals[i]=tempRoot;
   }
-  tempMat=input.theDomain.theWeyl.CartanSymmetric;
+  tempMat=input.theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.size=0;
   root ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
-  { input.theDomain.theWeyl.CartanSymmetric.RowToRoot(i, tempRoot);
+  { input.theDomain().theWeyl.CartanSymmetric.RowToRoot(i, tempRoot);
     if (tempRoot.ScalarEuclidean(ParabolicEvaluationRootSmallerAlgebra).IsEqualToZero())
     { tempRoots.SetSize(tempRoots.size+1);
       tempMat.RowToRoot(i, *tempRoots.LastObject());
@@ -389,15 +387,15 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     *this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].LastObject()=0;
   }*/
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.Normals.size; i++)
-  { tempRoot.MakeZero(input.theRange.GetRank()+input.theDomain.GetRank()+1);
-    for (int j=0; j<input.theDomain.GetRank(); j++)
+  { tempRoot.MakeZero(input.theRange().GetRank()+input.theDomain().GetRank()+1);
+    for (int j=0; j<input.theDomain().GetRank(); j++)
       tempRoot.TheObjects[j]=this->PreimageWeylChamberSmallerAlgebra.Normals[i][j];
   //  for (int j=0; j<input.theRange.GetRank(); j++)
    //   tempRoot.TheObjects[j+input.theDomain.GetRank()]=tempRoot2.TheObjects[j];
     this->PreimageWeylChamberSmallerAlgebra.Normals[i]=tempRoot;
   }
 
-  tempRoot.MakeEi(input.theRange.GetRank()+input.theDomain.GetRank()+1, input.theRange.GetRank()+input.theDomain.GetRank());
+  tempRoot.MakeEi(input.theRange().GetRank()+input.theDomain().GetRank()+1, input.theRange().GetRank()+input.theDomain().GetRank());
   this->PreimageWeylChamberLargerAlgebra.Normals.AddOnTop(tempRoot);
   this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
   this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
@@ -1198,8 +1196,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   (root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser,
    GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  WeylGroup& LargerWeyl=theParser.theHmm.theRange.theWeyl;
-  WeylGroup& SmallerWeyl=theParser.theHmm.theDomain.theWeyl;
+  WeylGroup& LargerWeyl=theParser.theHmm.theRange().theWeyl;
+  WeylGroup& SmallerWeyl=theParser.theHmm.theDomain().theWeyl;
   if (LargerWeyl.GetDim()!=3 || LargerWeyl.WeylLetter!='B')
     return "Error: algebra is not so(7).";
   this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
@@ -1866,7 +1864,7 @@ int ParserNode::EvaluateWeylAction
    List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
    bool DualAction, bool useRho, bool useMinusRho)
 { Vector<RationalFunction> theWeight;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   if (theArgumentList.size!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
   int theDim=theArgumentList.size;
@@ -5081,10 +5079,11 @@ Rational WeylGroup::GetKillingDivTraceRatio()
 int ParserNode::EvaluatePrintRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   out << "<br>Symmetric Cartan matrix follows."
   <<" The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>" <<
-  CGI::GetHtmlMathDivFromLatexAddBeginARCL(theNode.owner->theHmm.theRange.theWeyl.CartanSymmetric.ElementToString(false, true) );
+  CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  (theNode.owner->theHmm.theRange().theWeyl.CartanSymmetric.ElementToString(false, true) );
   Rational tempRat;
   MatrixLargeRational tempMat;
   tempMat = theWeyl.CartanSymmetric;
@@ -5148,7 +5147,7 @@ int ParserNode::EvaluatePrintRootSystem
   roots rootSystemEpsCoords;
   theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords, theGlobalVariables);
   for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { root& current=theNode.owner->theHmm.theRange.theWeyl.RootSystem.TheObjects[i];
+  { root& current=theNode.owner->theHmm.theRange().theWeyl.RootSystem.TheObjects[i];
     out << "<tr><td>" << current.ElementToString() << "</td><td>=</td><td>"
     << rootSystemEpsCoords[i].ElementToStringLetterFormat("e")
     << "</td></tr>";
@@ -8776,12 +8775,12 @@ int ParserNode::EvaluateDrawWeightSupport
     return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   //roots fundamentalWeights;
   root highestWeightSimpleCoords;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //roots theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange());
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeNoMults(report, theGlobalVariables, theDV, 10000);
@@ -8808,12 +8807,12 @@ int ParserNode::EvaluateDrawWeightSupportWithMults
     return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   //roots fundamentalWeights;
   root highestWeightSimpleCoords;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //roots theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange);
+  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange());
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
@@ -8897,7 +8896,7 @@ std::string ElementWeylGroup::ElementToString
 
 int ParserNode::EvaluateParabolicWeylGroups
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
+{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange().theWeyl;
   Selection parabolicSel;
   parabolicSel.init(theAmbientWeyl.GetDim());
   int numCycles=MathRoutines::TwoToTheNth(parabolicSel.MaxSize);
@@ -9099,7 +9098,7 @@ int ParserNode::EvaluateEigenOrdered
   if(!theWeight.IsIntegral())
     return theNode.SetError(theNode.errorBadOrNoArgument);
   HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
-  if (theHmm.theDomain.GetRank()!=theWeight.size)
+  if (theHmm.theDomain().GetRank()!=theWeight.size)
     return theNode.SetError(theNode.errorDimensionProblem);
   List<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > theList;
   EigenVectorComputation theEigenComputation;
@@ -9118,7 +9117,7 @@ int ParserNode::EvaluateEigen
   if(!theWeight.IsIntegral())
     return theNode.SetError(theNode.errorBadOrNoArgument);
   HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
-  if (theHmm.theDomain.GetRank()!=theWeight.size)
+  if (theHmm.theDomain().GetRank()!=theWeight.size)
     return theNode.SetError(theNode.errorDimensionProblem);
   List<ElementUniversalEnveloping<PolynomialRationalCoeff> > theList;
   EigenVectorComputation theEigenComputation;
@@ -9130,7 +9129,7 @@ int ParserNode::EvaluateEigen
 
 int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange.theWeyl;
+{ WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange().theWeyl;
   root tempRoot;
   if (!theNode.GetRootRationalFromFunctionArguments(tempRoot, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
@@ -9210,7 +9209,7 @@ void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalV
   std::stringstream out;
   theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
   List<ElementSimpleLieAlgebra> theBasis;
-  theBasis.SetSize(this->theHmm.theRange.GetNumGenerators());
+  theBasis.SetSize(this->theHmm.theRange().GetNumGenerators());
   for (int i=0; i<this->theHmm.imagesAllChevalleyGenerators.size; i++)
   { int theIndex=i;
     if (i>=6 && i<8)
@@ -9236,11 +9235,11 @@ void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalV
         displayIndex-=2;
     }
   }
-  this->testAlgebra.init(theBasis, this->theHmm.theRange, theGlobalVariables);
+  this->testAlgebra.init(theBasis, this->theHmm.theRange(), theGlobalVariables);
 }
 
 void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariables)
-{ this->testAlgebra.initDefaultOrder(this->theHmm.theRange, theGlobalVariables);
+{ this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
 
 int ParserNode::EvaluateDecomposeOverSubalgebra
@@ -9261,8 +9260,8 @@ int ParserNode::EvaluateDecomposeOverSubalgebra
   GeneralizedVermaModuleData<RationalFunction> theData;
   ElementGeneralizedVermaOld<RationalFunction> startingElement;
   RationalFunction RFOne, RFZero;
-  RFZero.Nullify(theParseR.theHmm.theRange.GetRank(), &theGlobalVariables);
-  RFOne.MakeNVarConst(theParseR.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theParseR.theHmm.theRange().GetRank(), &theGlobalVariables);
+  RFOne.MakeNVarConst(theParseR.theHmm.theRange().GetRank(), (Rational) 1, &theGlobalVariables);
   theData.init(theParseR, &theGlobalVariables, RFOne, RFZero);
   theData.VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(3);
   int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
@@ -9340,7 +9339,7 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
   ElementUniversalEnveloping<PolynomialRationalCoeff> abstractCasimir, embeddedCasimirNonOrdered;
-  abstractCasimir.MakeCasimir(theParser.theHmm.theDomain, theParser.theHmm.theRange.GetRank(), theGlobalVariables);
+  abstractCasimir.MakeCasimir(theParser.theHmm.theDomain(), theParser.theHmm.theRange().GetRank(), theGlobalVariables);
   out << "<br>abstract Casimir: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (abstractCasimir.ElementToString(theGlobalVariables, tempFormat));
@@ -9377,7 +9376,7 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
   Vectors<Rational> theBasis;
   theBasis=this->theOwner->smallerCartanEmbedding;
-  int dimLargeCartan=theParser.theHmm.theRange.GetRank();
+  int dimLargeCartan=theParser.theHmm.theRange().GetRank();
   theBasis.BeefUpWithEiToLinearlyIndependentBasis(dimLargeCartan);
   MatrixLargeRational matLargeToSmallSub;
   matLargeToSmallSub.AssignVectorsToRows(theBasis);
@@ -9401,7 +9400,7 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   { theSub=SubSmallerCartanToLarger;
     root tempRoot=this->theOwner->theFDspaceWeights[k]- *this->theOwner->theFDspaceWeights.LastObject();
     out << "<br>\n\n weight: " << tempRoot.ElementToString();
-    theParser.theHmm.theDomain.theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
+    theParser.theHmm.theDomain().theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
     for (int l=0; l<tempRoot.size; l++)
       theSub[l]-=tempRoot[l];
     precomputedChars[k]=CentralCharacterActionAbsoluteHighestSmallerAlgebraVars;
@@ -9442,8 +9441,8 @@ std::string EigenVectorComputation::ComputeAndReturnStringOrdered
   ElementGeneralizedVermaOld<RationalFunction> startingElement;
 //  this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHWSubNthElementImageNthCoordSimpleBasis, theGlobalVariables);
   RationalFunction RFOne, RFZero;
-  RFZero.Nullify(theParser.theHmm.theRange.GetRank(), &theGlobalVariables);
-  RFOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1, &theGlobalVariables);
+  RFZero.Nullify(theParser.theHmm.theRange().GetRank(), &theGlobalVariables);
+  RFOne.MakeNVarConst(theParser.theHmm.theRange().GetRank(), (Rational) 1, &theGlobalVariables);
   theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
 //  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
   startingElement.AssignDefaultGeneratorIndex(6, theData, &theGlobalVariables);
@@ -9568,7 +9567,7 @@ int ParserNode::EvaluateModVermaRelationsOrdered
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables));
   PolynomialRationalCoeff PolyOne, PolyZero;
-  int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange.GetRank());
+  int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange().GetRank());
   PolyOne.MakeNVarConst(numVars, (Rational) 1);
   PolyZero.Nullify(numVars);
   theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables, PolyOne, PolyZero);
@@ -9597,8 +9596,8 @@ int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
   GeneralizedVermaModuleData<PolynomialRationalCoeff> tempData;
   Parser& theParser=*theNode.owner;
   PolynomialRationalCoeff PolyOne, PolyZero;
-  PolyOne.MakeNVarConst(theParser.theHmm.theRange.GetRank(), (Rational) 1);
-  PolyZero.Nullify(theParser.theHmm.theRange.GetRank());
+  PolyOne.MakeNVarConst(theParser.theHmm.theRange().GetRank(), (Rational) 1);
+  PolyZero.Nullify(theParser.theHmm.theRange().GetRank());
   tempData.init(*theNode.owner, & theGlobalVariables, PolyOne, PolyZero);
   PolynomialRationalCoeff polyOne;
   polyOne.MakeNVarConst(numVars, (Rational)1);

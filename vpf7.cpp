@@ -101,7 +101,7 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
 
 int ParserNode::EvaluateChar
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ int theDim=theNode.owner->theHmm.theRange.GetRank();
+{ int theDim=theNode.owner->theHmm.theRange().GetRank();
   root theWeight;
   if (! theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables) )
     return theNode.SetError(theNode.errorBadOrNoArgument);
@@ -110,8 +110,8 @@ int ParserNode::EvaluateChar
   charSSAlgMod& output=theNode.theChar.GetElement();
 
   output.MakeFromWeight
-  (theNode.owner->theHmm.theRange.theWeyl.GetSimpleCoordinatesFromFundamental(theWeight),
-   &theNode.owner->theHmm.theRange);
+  (theNode.owner->theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theWeight),
+   &theNode.owner->theHmm.theRange());
   theNode.ExpressionType=theNode.typeCharSSFDMod;
   return theNode.errorNoError;
 }
@@ -827,7 +827,7 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   if (!theMod.flagIsInitialized)
   { assert(theWeight[0].NumVars==RFOne.NumVars);
     bool isGood=theMod.MakeFromHW
-    (theNode.owner->theHmm.theRange, theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
+    (theNode.owner->theHmm.theRange(), theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
 
     out << report;
     if (!isGood)
@@ -1061,7 +1061,7 @@ int ParserNode::EvaluateLittelmannPaths
   root theWeight;
   if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   if (theWeight.size!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
   root theWeightInSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
@@ -1079,7 +1079,7 @@ int ParserNode::EvaluateLittelmannPathFromWayPoints
   int theDim;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theWeights, theDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   if (theDim!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
 //  for (int i=0; i<theWeights.size; i++)
@@ -1093,7 +1093,7 @@ int ParserNode::EvaluateLittelmannPathFromWayPoints
 
 int ParserNode::EvaluateLittelmannEAlpha
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
   if (theIndex>theWeyl.GetDim() || theIndex==0 || theIndex< - theWeyl.GetDim())
     return theNode.SetError(theNode.errorBadIndex);
@@ -1109,7 +1109,7 @@ int ParserNode::EvaluateLittelmannEAlpha
 
 int ParserNode::EvaluateAllLittelmannPaths
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   theNode.EvaluateLittelmannPaths(theNode, theArgumentList, theGlobalVariables);
   if (theNode.ErrorType!=theNode.errorNoError)
     return theNode.ErrorType;
@@ -1258,7 +1258,7 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
 int ParserNode::EvaluateRepresentationFromHWFundCoords
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { root theWeight;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange.theWeyl;
+  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (theWeight.size!=theWeyl.GetDim())
@@ -1271,7 +1271,7 @@ int ParserNode::EvaluateRepresentationFromHWFundCoords
   root fullParSel;
   fullParSel.MakeZero(theWeight.size);
   if (!theModule.MakeFromHW
-      (theNode.owner->theHmm.theRange, theWeight, fullParSel, theGlobalVariables, 1, 0, &report))
+      (theNode.owner->theHmm.theRange(), theWeight, fullParSel, theGlobalVariables, 1, 0, &report))
   { theNode.outputString=report;
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   }
@@ -2089,7 +2089,7 @@ int ParserNode::EvaluateHWMTABilinearForm
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
   if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<PolynomialRationalCoeff>& leftElt=leftNode.UEElement.GetElement();
@@ -2132,7 +2132,7 @@ int ParserNode::EvaluateHWTAABilinearForm
   if (!weightNode.GetListDontUseForFunctionArguments<PolynomialRationalCoeff>
       (weight, theGlobalVariables, theNode.typePoly, theNode.impliedNumVars))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<PolynomialRationalCoeff>& leftElt=leftNode.UEElement.GetElement();
@@ -2334,7 +2334,7 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[1]];
   if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange;
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<PolynomialRationalCoeff>& theUE=ueNode.UEElement.GetElement();
@@ -2396,7 +2396,7 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
 //  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  int theDim=theNode.owner->theHmm.theRange().GetRank();
   if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (parSel.size!=theDim)
@@ -2422,7 +2422,7 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
   WeylGroup& theWeyl=theNode.ContextLieAlgebra->theWeyl;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  int theDim=theNode.owner->theHmm.theRange().GetRank();
   if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeightFundCoords, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
@@ -2440,7 +2440,7 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   Selection emptySel;
   emptySel.init(theDim);
   theMod.MakeFromHW
-  (theNode.owner->theHmm.theRange, theWeightFundCoords, emptySel, theGlobalVariables, 1, 0, 0);
+  (theNode.owner->theHmm.theRange(), theWeightFundCoords, emptySel, theGlobalVariables, 1, 0, 0);
   std::string report;
   theMod.SplitOverLevi(& report, parSel, theGlobalVariables, 1, 0);
   out << "<br>" << report;
@@ -2457,7 +2457,7 @@ int ParserNode::EvaluateSplitFDPartGenVermaOverLeviParabolic
   ParserNode& inducingParNode=theNode.owner->TheObjects[theArgumentList[1]];
   ParserNode& splittingParNode=theNode.owner->TheObjects[theArgumentList[2]];
   WeylGroup& theWeyl=theNode.ContextLieAlgebra->theWeyl;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  int theDim=theNode.owner->theHmm.theRange().GetRank();
   if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeightFundCoords, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (! inducingParNode.GetRootRationalDontUseForFunctionArguments(inducingParSel, theGlobalVariables))
@@ -2476,7 +2476,7 @@ int ParserNode::EvaluateSplitFDPartGenVermaOverLeviParabolic
   ModuleSSalgebraNew<Rational> theMod;
   Selection selInducing= inducingParSel;
   theMod.MakeFromHW
-  (theNode.owner->theHmm.theRange, theWeightFundCoords, selInducing, theGlobalVariables, 1, 0, 0);
+  (theNode.owner->theHmm.theRange(), theWeightFundCoords, selInducing, theGlobalVariables, 1, 0, 0);
   std::string report;
   theMod.SplitOverLevi(& report, splittingParSel, theGlobalVariables, 1, 0);
   out << "<br>" << report;
@@ -2594,7 +2594,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
 int ParserNode::EvaluateMakeWeylFromParSel
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { root parSel;
-  int theDim=theNode.owner->theHmm.theRange.GetRank();
+  int theDim=theNode.owner->theHmm.theRange().GetRank();
   if (! theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (parSel.size!=theDim)
@@ -2604,7 +2604,7 @@ int ParserNode::EvaluateMakeWeylFromParSel
   Selection tempSel;
   tempSel=parSel;
   tempWeyl.MakeParabolicFromSelectionSimpleRoots
-  (theNode.owner->theHmm.theRange.theWeyl, tempSel, theGlobalVariables, 1)
+  (theNode.owner->theHmm.theRange().theWeyl, tempSel, theGlobalVariables, 1)
   ;
   tempWeyl.ComputeRootSubsystem();
   out << tempWeyl.ElementToString(false);
@@ -2997,11 +2997,11 @@ std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
     CGI::OpenFileCreateIfNotPresent(lieBracketFile3, PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
     tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
+    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
+    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    this->theHmm.theRange.ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
+    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
     lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
     this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +".tex");
     this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +"RootFormat.tex");

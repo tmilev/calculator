@@ -209,7 +209,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  inputWeylString="Calculator";
+//  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -468,9 +468,11 @@ int main(int argc, char **argv)
     tempFile.close();
   }
   ANNOYINGSTATISTICS;
+  HomomorphismSemisimpleLieAlgebra& theHmm=theParser.theHmm;
+  theHmm.owners=&theParser.theAlgebras;
+  theParser.theAlgebras.SetSize(2);
   if (theParser.DefaultWeylLetter!='B' || theParser.DefaultWeylRank!=3)
-  { HomomorphismSemisimpleLieAlgebra& theHmm=theParser.theHmm;
-    theHmm.MakeGinGWithId(theParser.DefaultWeylLetter, theParser.DefaultWeylRank, theParser.theAlgebras, theGlobalVariables);
+  { theHmm.MakeGinGWithId(theParser.DefaultWeylLetter, theParser.DefaultWeylRank, theParser.theAlgebras, theGlobalVariables);
     theParser.initTestAlgebraNeedsToBeRewritteN(theGlobalVariables);
   }
   else

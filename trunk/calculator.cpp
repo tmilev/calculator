@@ -209,13 +209,14 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
+  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
 //  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1";//\ng_0";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1;\nh_{{a}}:=g_(0,a);\ng_1+h_1";
+  //civilizedInput="SemisimpleLieAlgebra{} A_1";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

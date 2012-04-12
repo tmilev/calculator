@@ -526,7 +526,13 @@ public:
       (this->GetElement()).operator=(other.GetElementConst());
     else this->FreeMemory();
   }
-  const Object& GetElementConst()const{ assert(this->theValue!=0); return *this->theValue;}
+  const Object& GetElementConst()const
+  { if (this->theValue==0)
+    { std::cout << "Programming error: attempting to access zero pointer, file " << __FILE__ << ", line " << __LINE__;
+      assert(false);
+    }
+    return *this->theValue;
+  }
   Object& GetElement()
   { if (this->theValue==0)
     { this->theValue=new Object;
@@ -11501,6 +11507,9 @@ public:
   static std::string GetHtmlButton
   (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
 ;
+  static std::string GetHtmlSpanHidableStartsHidden
+  (const std::string& input)
+;
   static void rootSubalgebrasToHtml(GlobalVariables& theGlobalVariables, rootSubalgebras& input, std::string& path);
   static bool FileExists(const std::string& theFileName);
   static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
@@ -17313,21 +17322,7 @@ public:
     this->theError.GetElement()=inputError;
     return false;
   }
-  bool operator+=(const Data& other)
-  { std::stringstream out;
-    if (this->type!=other.type)
-    { out << "Adding different types, " << this->type << " and " << other.type << ", is not allowed.";
-      return this->SetError(out.str());
-    }
-    switch(this->type)
-    { case Data::typeRational:
-        this->theRational.GetElement()+=other.theRational.GetElementConst();
-        return true;
-      default:
-        out << "Don't know how to add elements of type " << this->type << ". ";
-        return this->SetError(out.str());
-    }
-  }
+  bool operator+=(const Data& other);
   bool operator*=(const Rational& other)
   { Data Other(other, *this->owner);
     return this->operator*=(Other);
@@ -17347,41 +17342,10 @@ public:
         return this->SetError(out.str());
     }
   }
-  void operator=(const Data& other)
-  { if (this==&other)
-      return;
-    this->type=other.type;
-    this->owner=other.owner;
-    switch(this->type)
-    { case Data::typeElementSSalgebra:
-      case Data::typeSSalgebra:
-      case Data::typeRational: this->theRational=other.theRational; break;
-      case Data::typePoly: this->thePoly=other.thePoly; break;
-      default:
-        std::cout << "This is a programming error: operator= does not cover all possible cases. "
-        << " Please debug line " << __LINE__ << ".";
-        assert(false);
-    }
-  }
-  bool operator==(const Data& other)
-  { if(this->owner!=other.owner)
-      return false;
-    if (this->type!=other.type)
-      return false;
-    switch(this->type)
-    { case Data::typeSSalgebra:
-      case Data::typeRational:
-        return this->theRational.GetElement()==other.theRational.GetElementConst();
-      case Data::typePoly:
-        return this->thePoly.GetElement()==other.thePoly.GetElementConst();
-      default:
-        std::cout << "This is a programming error: operator== does not cover all possible cases. "
-        << " Please debug line " << __LINE__ << ".";
-        assert(false);
-        return false;
-    }
-  }
+  void operator=(const Data& other);
+  bool operator==(const Data& other);
   std::string ElementToString(std::stringstream* comments=0)const;
+  std::string ElementToStringDataType()const;
   bool operator!=(const Data& other)
   { return ! this->operator==(other);
   }

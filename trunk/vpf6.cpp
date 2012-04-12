@@ -652,7 +652,10 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
           needSimplification=true;
       }
     } else if (currentSummandNoCoeff->theOperation==this->opData())
-    { constTerm+=this->theData[currentSummandNoCoeff->theData];
+    { if (!foundConstTerm)
+        constTerm=this->theData[currentSummandNoCoeff->theData];
+      else
+        constTerm+=this->theData[currentSummandNoCoeff->theData];
       if (foundConstTerm || this->theData[currentSummandNoCoeff->theData].IsEqualToZero())
         needSimplification=true;
       foundConstTerm=true;
@@ -916,7 +919,7 @@ bool CommandList::EvaluateStandardFunction
 
   assert(theExpression.children.size==2);
   if (functionNameNode.theOperation==theCommands.opData())
-  { Data tempData;
+  { Data tempData(theCommands);
     Data& theFunData=theCommands.theData[functionNameNode.theData];
     if (theFunData.type==Data::typeRational)
     { theExpression.AssignChild(0);
@@ -1365,7 +1368,7 @@ void CommandList::EvaluateCommands()
       << " characters, use the non- LaTeX version to the right. </b>";
     std::string tempS=commentsLog.str();
     if (tempS!="")
-      out << "<hr>In addition, the expression has the following comments.<br>" << tempS;
+      out << "<hr>Additional comments: " << CGI::GetHtmlSpanHidableStartsHidden(tempS);
     out << "</td>";
   //    std::cout <<"<hr>" << this->theCommands[i].finalValue.ElementToStringPolishForm(0,100);
     out << "<td>=</td><td>" << commandOutput;
@@ -1429,6 +1432,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     return "(ErrorNoBoss)";
   assert((int)(this->theBoss)!=-1);
   std::stringstream out;
+  std::string additionalDataComments;
   if (this->errorString!="")
   { out << "(Error:~";
     if (outComments!=0)
@@ -1498,7 +1502,10 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->theNonBoundVars[this->theData].theName;
   else if (this->theOperation==this->theBoss->opData())
-    out << this->theBoss->theData[this->theData].ElementToString(outComments);
+  { std::stringstream dataComments;
+    out << this->theBoss->theData[this->theData].ElementToString(&dataComments);
+    additionalDataComments=dataComments.str();
+  }
   else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
     switch(this->format)
@@ -1538,11 +1545,16 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     out << ")";
   if (AddCurlyBraces)
     out << "}";
-  if (outComments!=0)
-    if (this->theComments!="")
-      *outComments << "<br>Comments to expression " << out.str() << ":" << this->theComments;
   if (this->errorString!="")
     out << ")";
+  if (outComments!=0)
+  { if (this->theComments!="" || additionalDataComments!="")
+      *outComments << "<br>Comments to expression " << out.str() << ":<br>";
+    if (this->theComments!="")
+      *outComments << this->theComments << "<br>";
+    if (additionalDataComments!="")
+      *outComments << additionalDataComments;
+  }
   return out.str();
 }
 
@@ -1628,8 +1640,9 @@ std::string CommandList::ElementToString()
   std::string openTag3="<span style=\"color:#00FF00\">";
   std::string closeTag3="</span>";
   out << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
+  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds;
   out << "<br>Elapsed time since evaluation was started: "
-  << this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds << "";
+  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).";
   out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
@@ -1817,16 +1830,59 @@ Data Data::operator*(const Data& right)
   return result;
 }
 
+bool Data::operator+=(const Data& other)
+{ std::stringstream out;
+  if (this->type!=other.type)
+  { out << "Adding different types, " << this->ElementToStringDataType() << " and "
+    << other.ElementToStringDataType() << ", is not allowed.";
+    return this->SetError(out.str());
+  }
+  switch(this->type)
+  { case Data::typeRational:
+      this->theRational.GetElement()+=other.theRational.GetElementConst();
+      return true;
+    default:
+      out << "Don't know how to add elements of type " << this->ElementToStringDataType() << ". ";
+      return this->SetError(out.str());
+  }
+}
+
+bool Data::operator==(const Data& other)
+{ if(this->owner!=other.owner)
+    return false;
+  if (this->type!=other.type)
+    return false;
+  switch(this->type)
+  { case Data::typeSSalgebra:
+    case Data::typeElementSSalgebra:
+    case Data::typeRational:
+      return this->theRational.GetElement()==other.theRational.GetElementConst();
+    case Data::typePoly:
+      return this->thePoly.GetElement()==other.thePoly.GetElementConst();
+    case Data::typeError:
+      return this->theError.GetElement()==other.theError.GetElementConst();
+    default:
+      std::cout << "This is a programming error: operator== does not cover type "
+      << this->ElementToStringDataType()
+      << " Please debug file " << __FILE__ << " line " << __LINE__ << ".";
+      assert(false);
+      return false;
+  }
+}
 
 int Data::HashFunction()const
 { switch (this->type)
   { case Data::typeSSalgebra:
+    case Data::typeElementSSalgebra:
     case Data::typeRational:
       return this->theRational.GetElementConst().HashFunction()*this->type;
     case Data::typePoly:
       return this->thePoly.GetElementConst().HashFunction()*this->type;
+    case Data::typeError:
+      return MathRoutines::hashString(this->theError.GetElementConst());
     default:
-      std::cout << "This is a programming error. Data::HashFunction() does not cover all possible cases, please debug line"
+      std::cout << "This is a programming error. Data::HashFunction() does not cover type "
+      << this->type << ", please debug line"
       << __LINE__;
       assert(false);
       return 0;
@@ -1845,25 +1901,69 @@ bool Command::ReplaceIntIntBy10IntPlusInt()
   return true;
 }
 
+
+void Data::operator=(const Data& other)
+{ if (this==&other)
+    return;
+  this->type=other.type;
+  this->owner=other.owner;
+  switch(this->type)
+  { case Data::typeElementSSalgebra:
+    case Data::typeSSalgebra:
+    case Data::typeRational: this->theRational=other.theRational; break;
+    case Data::typePoly: this->thePoly=other.thePoly; break;
+    case Data::typeError: this->theError=other.theError; break;
+    default:
+      std::cout << "This is a programming error: operator= does not cover type "
+      << this->ElementToStringDataType()
+      << ". Please debug file " << __FILE__ << " line " << __LINE__ << ".";
+      assert(false);
+  }
+}
+
+std::string Data::ElementToStringDataType() const
+{ switch(this->type)
+  { case Data::typeElementSSalgebra: return "ElementSSalgebra";
+    case Data::typeSSalgebra: return "SemisimpleLieAlgebra";
+    case Data::typeRational:  return "Rational";
+    case Data::typeError:  return "Error";
+    default:
+      std::cout << "This is a programming error: Data::ElementToStringDataType does not cover all cases. Please "
+      << " debug file " << __FILE__ << " line " << __LINE__ << ".";
+      assert(false);
+      return "unknown";
+  }
+}
+
 std::string Data::ElementToString(std::stringstream* comments)const
 { std::stringstream out;
   if (this->owner==0)
     return "(ProgrammingError:NoOwner)";
   switch(this->type)
   { case Data::typeSSalgebra:
-      if (comments!=0)
-        *comments << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
-        ElementToString(*this->owner->theGlobalVariableS);
       out << "SemisimpleLieAlgebra{}("
       << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].GetLieAlgebraName(false) << ")";
+      if (comments!=0)
+        *comments << "Comments to data " << out.str() << ":<br>"
+        << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
+        ElementToString(*this->owner->theGlobalVariableS);
+      return out.str();
+    case Data::typeElementSSalgebra:
+      out << this->owner->theLieAlgebraElements[this->theRational.GetElementConst().NumShort].ElementToString();
       return out.str();
     case Data::typeRational:
       return this->theRational.GetElementConst().ElementToString();
     case Data::typePoly:
       return this->thePoly.GetElementConst().ElementToString();
+    case Data::typeError:
+      out << "(Error)";
+      if (comments!=0)
+        *comments << this->theError.GetElementConst();
+      return out.str();
     default:
-      std::cout << "This is a programming error: don't know how to convert element of type " << this->type << " to string. "
-      << "Please debug line " << __LINE__;
+      std::cout << "This is a programming error: don't know how to convert element of type " << this->type
+      << " (type " << this->ElementToStringDataType() << ") to string. "
+      << "Please debug file " << __FILE__ << " line " << __LINE__;
       assert(false);
       return out.str();
   }
@@ -1915,10 +2015,12 @@ bool Data::MakeElementSemisimpleLieAlgebra
   if (!isGood)
   { if (comments!=0)
       *comments
-       << "Error: you requested element of index " << theDisplayIndex
+       << "<b>Error</b>. You requested element of index " << theDisplayIndex
       << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
       << ". The index of the root space must be a non-zero integer "
-      << " of absolute value between 1 and the number of positive roots which is " << ownerAlgebra.GetNumPosRoots()
+      << " of absolute value between 1 and the number of positive roots. "
+      << "The number of positive roots for the current semisimple Lie algebra is "
+      << ownerAlgebra.GetNumPosRoots()
       << ". If you want to request an element of the Cartan, you should use two indices, the first of which is zero. For example,"
       << " ElementSemisimpleAlgebra{}(0,1) gives you the an element of the Cartan corresponding to the first simple root. "
       ;
@@ -1968,9 +2070,8 @@ bool Data::OperatorDereference
         << argument.ElementToString() << " which is not a small integer. ";
         return false;
       }
-      output.MakeElementSemisimpleLieAlgebra
+      return output.MakeElementSemisimpleLieAlgebra
       (*this->owner, this->owner->theLieAlgebras[this->GetSmallInt()], whichInteger, comments);
-      return true;
     default:
       return false;
   }
@@ -1993,5 +2094,3 @@ bool Data::IsEqualToZero()
       return false;
    }
 }
-
-

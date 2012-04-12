@@ -209,12 +209,13 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
+  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="-1";
 //  civilizedInput="h_{{a}}:={\\bar h}_a; \nh_1h_2";
-
+//  civilizedInput="g:=SemisimpleLieAlgebra{}A_1";//\ng_0";
+//  civilizedInput="g:=SemisimpleLieAlgebra{}A_1;\nh_{{a}}:=g_(0,a);\ng_1+h_1";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -235,13 +236,13 @@ int main(int argc, char **argv)
     std::cout << "\n</FORM>";
     CommandList theComputation;
     theComputation.init(theGlobalVariables);
-
-    theComputation.Evaluate(civilizedInput);
-    std::cout << "<hr><b>Result.</b><br>";
     if (civilizedInput!="")
+    { std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
+      theComputation.Evaluate(civilizedInput);
+      std::cout << "<hr><b>Result.</b><br>";
       std::cout <<  theComputation.output;
+    }
     std::cout << "</td><td valign=\"top\">";
-    std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
     std::cout << theComputation.theLog;
     std::cout << "</td></tr></table>";
     std::cout << "</body></html>";

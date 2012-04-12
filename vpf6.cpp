@@ -476,6 +476,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceListXEByList();
   if (thirdToLastS=="(" && secondToLastS=="List" && lastS==")")
     return this->ReplaceOXbyEX();
+  if (thirdToLastS=="{" && secondToLastS=="List" && lastS=="}")
+    return this->ReplaceOXbyEX();
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
     return this->ReplaceXEXEXByEusingO(this->theBoss->conLieBracket());
   if (seventhToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression"
@@ -1017,8 +1019,20 @@ bool CommandList::EvaluateStandardEqualEqual
 
 bool CommandList::EvaluateStandardLieBracket
 (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
-{
-  return false;
+{ if (theExpression.children.size!=2)
+    return false;
+  assert(theExpression.theOperation=theCommands.opLieBracket());
+  Expression& leftE=theExpression.children[0];
+  Expression& rightE=theExpression.children[1];
+  if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
+    return false;
+  Data& leftD=theCommands.theData[leftE.theData];
+  Data& rightD=theCommands.theData[rightE.theData];
+  Data newData(theCommands);
+  if (!Data::LieBracket(leftD, rightD, newData, comments))
+    return false;
+  theExpression.MakeDatA(newData, theCommands, commandIndex);
+  return true;
 }
 
 bool CommandList::EvaluateStandardDivide
@@ -2119,8 +2133,22 @@ bool Data::MakeElementSemisimpleLieAlgebra
   return true;
 }
 
+SemisimpleLieAlgebra& ElementSimpleLieAlgebra::GetOwner()
+{ if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)
+  { std::cout << "This is a programming error: a semisimple Lie algebra element has not been initialized properly. "
+    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    assert(false);
+  }
+  if ( this->indexOfOwnerAlgebra<0 || this->ownerArray->size<=this->indexOfOwnerAlgebra)
+  { std::cout << "This is a programming error: a semisimple Lie algebra container has not been initialized properly. "
+    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    assert(false);
+  }
+  return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra];
+}
+
 bool Data::LieBracket
-  (const Data& left, const Data& right, Data& output, std::stringstream* comments)
+  (Data& left, Data& right, Data& output, std::stringstream* comments)
 { if (left.type==Data::typeError || right.type==Data::typeError)
     return false;
   if (left.type==Data::typeRational || right.type==Data::typeRational)
@@ -2128,7 +2156,17 @@ bool Data::LieBracket
     return true;
   }
   if (left.type==Data::typeElementSSalgebra || right.type==Data::typeElementSSalgebra)
-  {
+  { ElementSimpleLieAlgebra& leftElt=left.owner->theLieAlgebraElements[left.GetSmallInt()];
+    ElementSimpleLieAlgebra& rightElt=right.owner->theLieAlgebraElements[right.GetSmallInt()];
+    if (leftElt.ownerArray!=rightElt.ownerArray || leftElt.indexOfOwnerAlgebra!=rightElt.indexOfOwnerAlgebra)
+      return false;
+    SemisimpleLieAlgebra& theOwnerAlg=leftElt.GetOwner();
+    ElementSimpleLieAlgebra outputElt;
+    theOwnerAlg.LieBracket(leftElt, rightElt, outputElt);
+    output.owner=left.owner;
+    output.type=output.typeElementSSalgebra;
+    output.theRational.GetElement()=output.owner->theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(outputElt);
+    return true;
   }
   return false;
 }

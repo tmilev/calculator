@@ -9537,6 +9537,7 @@ public:
   bool GetCoordsInBasis
   (const List<ElementSimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
 ;
+  SemisimpleLieAlgebra& GetOwner();
   bool GetCoordsInBasis
   (const List<ElementSimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
   { Vector<Rational> tempVect;
@@ -9780,11 +9781,18 @@ public:
     this->ElementToStringNegativeRootSpacesFirst(tempS, useRootNotation, useEpsilonNotation, useHtml, useLatex, usePNG, theFormat, theGlobalVariables);
     return tempS;
   }
-  std::string ElementToString
-  (GlobalVariables& theGlobalVariables)
-  { PolynomialOutputFormat tempFormat;
+  std::string ElementToString(GlobalVariables& theGlobalVariables)
+  { this->CheckConsistency();
+    PolynomialOutputFormat tempFormat;
     tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     return this->ElementToStringNegativeRootSpacesFirst(false, false, true, false, false, tempFormat, theGlobalVariables);
+  }
+  void CheckConsistency()
+  { if (this->owner==0 || this->indexInOwner==-1)
+    { std::cout << "This is a programming error. Use of non-initialized semisimple Lie algebra. Please debug file "
+      << __FILE__ << " line " << __LINE__;
+      assert(false);
+    }
   }
   std::string ElementToStringLieBracketPairing();
   std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables)
@@ -17439,7 +17447,7 @@ public:
   { return input.HashFunction();
   }
   static bool LieBracket
-  (const Data& left, const Data& right, Data& output, std::stringstream* comments)
+  (Data& left, Data& right, Data& output, std::stringstream* comments)
   ;
   bool OperatorDereference
   (const Data& argument, Data& output, std::stringstream* comments)

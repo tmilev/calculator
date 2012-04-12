@@ -16064,10 +16064,19 @@ void coneRelations::ElementToString
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 (char WeylLetter, int Rank, List<SemisimpleLieAlgebra>& owner, GlobalVariables& theGlobalVariables)
-{ this->owner=&owner;
-  this->theWeyl.MakeArbitrary(WeylLetter, Rank);
+{ this->theWeyl.MakeArbitrary(WeylLetter, Rank);
+  //the following initialization code stinks. This following piece of code caused me half an hour of painful debugging.
+  //I need a better scheme.
+  //until such is found, this uglyness must stay.
+  this->owner=&owner;
+  this->indexInOwner=this->owner->IndexOfObject(*this);
+  if (this->indexInOwner==-1)
+  { this->indexInOwner=this->owner->size;
+    this->owner->AddOnTop(*this);
+  }
   this->ComputeChevalleyConstantS(this->theWeyl, theGlobalVariables);
-  this->indexInOwner=this->owner->AddNoRepetitionOrReturnIndexFirst(*this);
+  this->owner->TheObjects[this->indexInOwner]=*this;
+  //end of stinky part
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS(WeylGroup& input, GlobalVariables& theGlobalVariables)
@@ -16465,8 +16474,7 @@ void ElementSimpleLieAlgebra::Nullify(SemisimpleLieAlgebra& owner)
   this->Nullify(*owner.owner, owner.indexInOwner);
 }
 
-void ElementSimpleLieAlgebra::Nullify
-(List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
+void ElementSimpleLieAlgebra::Nullify(List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
 { this->ownerArray=&owners;
   this->indexOfOwnerAlgebra=indexAlgebra;
   SemisimpleLieAlgebra& theOwner=owners[this->indexOfOwnerAlgebra];
@@ -22683,6 +22691,11 @@ void MatrixLargeRational::FindZeroEigenSpaceOneOneForEachNonPivot(roots& output)
 void ElementSimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (int generatorIndex, SemisimpleLieAlgebra& owner)
 { //Changing RootSystem order invalidates this function!
+  if (owner.owner==0 || owner.indexInOwner==-1)
+  { std::cout << " This is a programming error: usage of non-initialized Semisimple Lie algebra. Please debug file "
+    << __FILE__ << " line " << __LINE__;
+    assert(false);
+  }
   this->ownerArray=owner.owner;
   this->indexOfOwnerAlgebra=owner.indexInOwner;
   int numPosRoots=owner.theWeyl.RootsOfBorel.size;

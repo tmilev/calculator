@@ -6570,8 +6570,10 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml,
     out << "0";
   if (useLatex)
     out << "$";
+  int numPosRoots=this->NonZeroElements.MaxSize/2;
   for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
-  { this->coeffsRootSpaces.TheObjects[this->NonZeroElements.elements[i]].ElementToString(tempS);
+  { int actualIndex=this->NonZeroElements.elements[i];
+    this->coeffsRootSpaces.TheObjects[actualIndex].ElementToString(tempS);
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -6583,24 +6585,11 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml,
       } else
         out << "+";
     }
-    out << tempS << "g_{" << this->NonZeroElements.elements[i]+1 << "}";
+    int DisplayIndex= (actualIndex<numPosRoots ) ? actualIndex-numPosRoots : actualIndex-numPosRoots+1;
+    out << tempS << "g_{" << DisplayIndex << "}";
   }
-  for (int i=0; i<this->Hcomponent.size; i++)
-    if (!this->Hcomponent.TheObjects[i].IsEqualToZero())
-    { this->Hcomponent.TheObjects[i].ElementToString(tempS);
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (tempS!="")
-      { if (tempS[0]!='-')
-          out << "+";
-      } else
-        out << "+";
-      out << tempS << "h_{\\alpha_{" << i+1 << "}}";
-    }
-  if(useLatex)
-    out << "$";
+  if (!this->Hcomponent.IsEqualToZero())
+    out << this->Hcomponent.ElementToStringLetterFormat("h", useLatex);
   output= out.str();
 }
 
@@ -7405,6 +7394,21 @@ std::string CGI::GetHtmlButton
 { std::stringstream out;
   out << "\n<button id=\"" << buttonID << "\" " << CGI::GetStyleButtonLikeHtml()
     << " onclick=\"" << theScript << "\">" << buttonText << "</button>";
+  return out.str();
+}
+
+std::string CGI::GetHtmlSpanHidableStartsHidden
+  (const std::string& input)
+{ std::stringstream out;
+  CGI::GlobalFormulaIdentifier ++;
+  std::stringstream buttonLabel;
+  std::stringstream spanLabel;
+  spanLabel << "hidableSpan" << CGI::GlobalFormulaIdentifier;
+  buttonLabel << "button" << CGI::GlobalFormulaIdentifier;
+  out << CGI::GetHtmlButton(buttonLabel.str(), "switchMenu('"+spanLabel.str() +"');", "show/hide");
+  out << "<span";
+  out << " id=\"" << spanLabel.str() << "\" style=\"display: none\">";
+  out << input << "</span>";
   return out.str();
 }
 

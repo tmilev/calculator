@@ -10700,7 +10700,7 @@ public:
   List<int> IndicesSl2decompositionFlas;
   roots BadHCharacteristics;
   int IndexZeroWeight;
-  SemisimpleLieAlgebra owner;
+  List<SemisimpleLieAlgebra> owner;
   rootSubalgebras theRootSAs;
   void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml){ this->ElementToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);};
   List<std::string> texFileNamesForPNG;
@@ -10710,6 +10710,11 @@ public:
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
   { for(int i=0; i<this->size; i++)
       this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
+  }
+  SltwoSubalgebras()
+  { this->owner.SetSize(1);
+    this->owner[0].indexInOwner=0;
+    this->owner[0].owner=&this->owner;
   }
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
   { for(int i=0; i<this->size; i++)

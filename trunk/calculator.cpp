@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  inputWeylString="Calculator";
+//  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -279,11 +279,11 @@ int main(int argc, char **argv)
 //  civilizedInput="allLittelmannPaths(0,1)";
 
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
-
+//  civilizedInput="printRootSubalgebras NoIndicator";
 
 //  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
-//  theParser.DefaultWeylLetter='B';
+//  theParser.DefaultWeylLetter='G';
 //  theParser.DefaultWeylRank=2;
 
 //  civilizedInput="splitCharOverLeviParabolic(char(1,1),(0,1))";

@@ -5635,10 +5635,10 @@ int ParserNode::EvaluatePrintRootSAsAndSlTwos
       return theNode.errorNoError;
     } else
     { SltwoSubalgebras theSl2s;
-      theSl2s.owner.FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
+      theSl2s.owner[0].FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
       std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
       theSl2s.ElementToHtml
-      (theGlobalVariables, theSl2s.owner.theWeyl, true, PathSl2, DisplayPathSl2, theNode.owner->DisplayNameCalculator);
+      (theGlobalVariables, theSl2s.owner[0].theWeyl, true, PathSl2, DisplayPathSl2, theNode.owner->DisplayNameCalculator);
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
       theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
     }

@@ -21098,7 +21098,7 @@ void SltwoSubalgebras::ElementToHtml
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  this->owner.ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
+  this->owner[0].ElementToString(tempS, true, false, usePNG, theGlobalVariables, &physicalPath, &htmlPathServer, &this->texFileNamesForPNG, &this->texStringsEachFile);
   theFile << tempS;
   theFile.close();
   if (usePNG)
@@ -21181,7 +21181,7 @@ bool IsRegularWRT(roots& input, root& h1, root& h2, WeylGroup& theWeyl)
 
 void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables)
 { //this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
-  this->theSl2s.owner.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
+  this->theSl2s.owner[0].FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylIndex, theGlobalVariables);
   this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
   this->GenerateModuleDecompositionsPrincipalSl2s(WeylIndex, theGlobalVariables);
   this->MatchActualSl2sFixedRootSAToPartitionSl2s(theGlobalVariables);
@@ -21206,7 +21206,7 @@ void reductiveSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& th
   for (int i=0; i<this->theLetters.size; i++)
     if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
     { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras.TheObjects[i];
-      SemisimpleLieAlgebra& theSSLieAlgebra= theCurrentAlgebrasSl2s.owner;
+      SemisimpleLieAlgebra& theSSLieAlgebra= theCurrentAlgebrasSl2s.owner[0];
       theSSLieAlgebra.FindSl2Subalgebras(theCurrentAlgebrasSl2s, theGlobalVariables);
       bool DoesFit=true;
       for (int j=0; j<theCurrentAlgebrasSl2s.size; j++)
@@ -21236,11 +21236,11 @@ void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank
   for (int i=0; i<this->theLetters.size; i++)
   { this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
     this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-    this->theCandidateSubAlgebras.TheObjects[i].owner.theWeyl.Assign(this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl);
+    this->theCandidateSubAlgebras.TheObjects[i].owner[0].theWeyl.Assign(this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl);
     int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.CartanSymmetric.NumRows;
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
-    tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i].owner;
+    tempSl2.owner = &this->theCandidateSubAlgebras.TheObjects[i].owner[0];
     tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
     this->CandidatesPrincipalSl2ofSubalgebra.AddOnTop(tempSl2);
   }

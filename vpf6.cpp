@@ -234,7 +234,6 @@ int Command::GetExpressionIndex()
 { return this->theBoss->controlSequences.GetIndex("Expression");
 }
 
-
 bool Command::ReplaceOXbyEX()
 { SyntacticElement& theElt=this->syntacticStack[this->syntacticStack.size-2];
   theElt.theData.theOperation=this->theBoss->operations.GetIndex(this->theBoss->controlSequences[theElt.controlIndex]);
@@ -445,6 +444,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
       && lookAhead!="_")
     return this->ReplaceEXEByEusingO(this->theBoss->conApplyFunction(), Expression::formatFunctionUseUnderscore);
   //end of ambiguity.
+  if (fourthToLastS=="{"  && thirdToLastS=="{}" && secondToLastS=="Expression" && lastS=="}")
+    return this->ReplaceXYYXByYY();
   if (lastS=="Expression" && secondToLastS=="^" && thirdToLastS=="Expression" && this->LookAheadAllowsThePower(lookAhead) )
     return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="+" && thirdToLastS=="Expression" && this->LookAheadAllowsPlus(lookAhead) )
@@ -462,7 +463,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE();
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
-    return this->ReplaceXEXByE();
+    return this->ReplaceXEXByE(Expression::formatNoBracketsForFunctionArgument);
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isStrongSeparatorFromTheRight(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
@@ -615,8 +616,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->theNonBoundVars.Clear();
   this->theData.Clear();
   this->theDictionary.Clear();
-  this->cachedExpressions.Clear();
-  this->imagesCashedExpressions.SetSize(0);
   this->theFunctions.Clear();
   this->syntaxErrors.SetSize(0);
   this->evaluationErrors.SetSize(0);
@@ -1222,14 +1221,36 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   std::stringstream comments;
   if (theExpression.theOperation<0 || theExpression.theBoss!=this)
     return true;
-  //reduction phase:
+  Command& currentCommand=this->theCommands[commandIndex];
+  if (currentCommand.ExpressionStack.Contains(theExpression))
+  { std::stringstream errorStream;
+    errorStream << "I think I have detected a cycle: " << theExpression.ElementToString()
+    << " is transformed to an expression that contains the starting expression. ";
+    theExpression.SetError(errorStream.str());
+    currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
+    return true;
+  }
+  currentCommand.ExpressionStack.AddOnTop(theExpression);
+  HashedList<Expression> currentExpressionTransformations;
+//  currentExpressionTransformations.AddOnTop(theExpression);
+
   bool NonReduced=true;
   int counter=-1;
+  int indexInCache=currentCommand.cachedExpressions.GetIndex(theExpression);
+  if (indexInCache!=-1)
+  { theExpression=currentCommand.imagesCachedExpressions[indexInCache];
+  } else
+  { currentCommand.cachedExpressions.AddOnTop(theExpression);
+    currentCommand.imagesCachedExpressions.AddOnTop(theExpression);
+    indexInCache=currentCommand.cachedExpressions.size-1;
+  }
+  //reduction phase:
   while (NonReduced)
   { if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds >this->MaxAllowedTimeInSeconds)
       { std::cout << "<br><b>Max allowed computational time is " << this->MaxAllowedTimeInSeconds << ";  so far, "
         << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds  << " have elapsed -> aborting computation ungracefully.</b>";
+        currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
         return true;
       }
     counter++;
@@ -1238,12 +1259,15 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     for (int i=0; i<theExpression.children.size; i++)
       if(! this->EvaluateExpressionReturnFalseIfExpressionIsBound
          (commandIndex, theExpression.children[i], RecursionDepth+1, maxRecursionDepth, bufferPairs, theLog))
+      { currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
         return false;
+      }
     if (counter>this->MaxAlgTransformationsPerExpression)
     { std::stringstream out;
       out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
       << " while simplifying " << theExpression.ElementToString();
       theExpression.errorString=out.str();
+      currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
       return true;
     }
     Function::FunctionAddress theFun=this->operations[theExpression.theOperation].GetFunction(*this);
@@ -1270,9 +1294,22 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
             }
           }
       }
+    currentCommand.imagesCachedExpressions[indexInCache]=theExpression;
+    if (NonReduced)
+    { if (currentExpressionTransformations.Contains(theExpression))
+      { std::stringstream errorStream;
+        errorStream << "I think I detected a substitution cycle, " << theExpression.ElementToString()
+        << " appears twice in the reduction cycle";
+        theExpression.SetError(errorStream.str());
+        break;
+      } else
+        currentExpressionTransformations.AddOnTop(theExpression);
+    }
 //    if (NonReduced)
 //      theExpression.ElementToString();
   }
+  currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
+
   theExpression.theComments=comments.str();
   if (theExpression.theOperation==this->opVariableBound())
     return false;
@@ -1495,7 +1532,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   std::stringstream out;
   std::string additionalDataComments;
   if (this->errorString!="")
-  { out << "(Error:~";
+  { out << "(Error:";
     if (outComments!=0)
       *outComments << this->errorString << " ";
   }
@@ -1584,7 +1621,7 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
       default:
         out << this->children[0].ElementToString
         (recursionDepth+1, maxRecursionDepth, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "{}(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments) << ")";
+        << "{{}" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << "}";
         break;
     }
   }
@@ -1759,17 +1796,46 @@ std::string CommandList::ElementToString()
       out  << ", ";
   }
   out << "<hr>";
-  assert(this->cachedExpressions.size==this->imagesCashedExpressions.size);
-  if (this->cachedExpressions.size>0)
-  { out << "<br>\n Cached expressions: (" << this->cachedExpressions.size << " total):\n<br>\n"
-    << openTag1;
-    for (int i=0; i<this->cachedExpressions.size; i++)
-    { out << this->cachedExpressions[i].ElementToString() << " -> " << this->imagesCashedExpressions[i].ElementToString() << "<br>";
-    }
-    out << closeTag1;
-  }
   for (int i=0; i<this->theCommands.size; i++)
   { out << this->theCommands[i].ElementToString();
+  }
+  return out.str();
+}
+
+std::string Command::ElementToString(bool usePolishForm)
+{ std::stringstream out;
+  out << "Bound variables:<br>\n ";
+  for (int i=0; i<this->BoundVariables.size; i++)
+  { out << this->BoundVariables[i];
+    if (i!=this->BoundVariables.size-1)
+      out << ", ";
+  }
+  if (this->theBoss==0)
+  { out << "Element not initialized.";
+    return out.str();
+  }
+  out << "<br>\nExpression stack no values (excluding empty tokens in the start): ";
+  for (int i=this->numEmptyTokensStart; i<this->syntacticStack.size; i++)
+  { out << this->syntacticStack[i].ElementToString(*this->theBoss);
+    if (i!=this->syntacticStack.size-1)
+      out << ", ";
+  }
+  out << "<hr>\nSyntactic soup:";
+  for (int i=0; i<this->syntacticSoup.size; i++)
+  { out << this->syntacticSoup[i].ElementToString(*this->theBoss);
+    if (i!=this->syntacticSoup.size-1)
+      out << ", ";
+  }
+  out << "<br>\nExpression stack(excluding empty tokens in the start): ";
+  out << this->ElementToStringSyntacticStack();
+  out << "<br>\n Current value: " << this->finalValue.ElementToString(0, 5, false);
+  if (usePolishForm)
+    out << "<br>=(in polish form):" << this->finalValue.ElementToStringPolishForm(0, 20);
+  assert(this->cachedExpressions.size==this->imagesCachedExpressions.size);
+  if (this->cachedExpressions.size>0)
+  { out << "<br>\n Cached expressions: (" << this->cachedExpressions.size << " total):\n<br>\n";
+    for (int i=0; i<this->cachedExpressions.size; i++)
+      out << this->cachedExpressions[i].ElementToString() << " -> " << this->imagesCachedExpressions[i].ElementToString() << "<br>";
   }
   return out.str();
 }
@@ -1830,11 +1896,17 @@ bool Expression::NeedBracketsForMultiplication()const
   this->theOperation==this->theBoss->opMinus()
   ;
 }
+
 bool Expression::NeedBracketsForAddition()const
 { return
   false
   ;
 }
+
+bool Expression::NeedBracketsForFunctionArgument()const
+{ return this->format!=formatNoBracketsForFunctionArgument;
+}
+
 bool Expression::NeedBracketsForThePower()const
 { return
   this->theOperation==this->theBoss->opPlus() ||

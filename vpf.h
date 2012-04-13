@@ -17520,7 +17520,7 @@ class Expression
   std::string theComments;
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
-    formatFunctionUseCdot,
+    formatFunctionUseCdot, formatNoBracketsForFunctionArgument
   };
   void reset(CommandList* newBoss, int indexOfTheCommand)
   { this->theBoss=newBoss;
@@ -17597,6 +17597,7 @@ void MakeVariableNonBounD
   }
   Rational GetConstantTerm() const;
   bool NeedBracketsForMultiplication()const;
+  bool NeedBracketsForFunctionArgument()const;
   bool NeedBracketsForAddition()const;
   bool NeedBracketsForFunctionName()const;
   bool NeedBracketsForThePower()const;
@@ -17687,6 +17688,10 @@ public:
   std::string theLog;
   std::string ErrorString;
   HashedListB<std::string, MathRoutines::hashString> BoundVariables;
+  HashedList<Expression> cachedExpressions;
+  List<Expression> imagesCachedExpressions;
+//  List<int> recursionDepthCache;
+  HashedList<Expression> ExpressionStack;
   void operator=(const Command& other)
   { if (this==& other)
       return;
@@ -17699,6 +17704,9 @@ public:
     this->IndexInBoss=other.IndexInBoss;
     this->flagOpDefineEncountered=other.flagOpDefineEncountered;
     this->log=other.log;
+    this->cachedExpressions=other.cachedExpressions;
+    this->imagesCachedExpressions=other.imagesCachedExpressions;
+    this->ExpressionStack=other.ExpressionStack;
   }
   bool DecreaseStackSetCharacterRanges(int decrease)
   { if (decrease<=0)
@@ -17719,39 +17727,13 @@ public:
     this->flagOpDefineEncountered=false;
     this->IndexInBoss=commandIndexInBoss;
     this->ErrorString="";
+    this->cachedExpressions.Clear();
+    this->imagesCachedExpressions.SetSize(0);
+    this->ExpressionStack.Clear();
   }
   std::string ElementToStringSyntacticStack();
   std::string ElementToString(bool usePolishForm=false)
-  { std::stringstream out;
-    out << "Bound variables:<br>\n ";
-    for (int i=0; i<this->BoundVariables.size; i++)
-    { out << this->BoundVariables[i];
-      if (i!=this->BoundVariables.size-1)
-        out << ", ";
-    }
-    if (this->theBoss==0)
-    { out << "Element not initialized.";
-      return out.str();
-    }
-    out << "<br>\nExpression stack no values (excluding empty tokens in the start): ";
-    for (int i=this->numEmptyTokensStart; i<this->syntacticStack.size; i++)
-    { out << this->syntacticStack[i].ElementToString(*this->theBoss);
-      if (i!=this->syntacticStack.size-1)
-        out << ", ";
-    }
-    out << "<hr>\nSyntactic soup:";
-    for (int i=0; i<this->syntacticSoup.size; i++)
-    { out << this->syntacticSoup[i].ElementToString(*this->theBoss);
-      if (i!=this->syntacticSoup.size-1)
-        out << ", ";
-    }
-    out << "<br>\nExpression stack(excluding empty tokens in the start): ";
-    out << this->ElementToStringSyntacticStack();
-    out << "<br>\n Current value: " << this->finalValue.ElementToString(0, 5, false);
-    if (usePolishForm)
-      out << "<br>=(in polish form):" << this->finalValue.ElementToStringPolishForm(0, 20);
-    return out.str();
-  }
+  ;
   bool isStrongSeparatorFromTheLeft(const std::string& input)
   { return
     input=="{" || input=="(" || input=="[" ||
@@ -17830,6 +17812,12 @@ public:
     this->syntacticStack.SetSize(this->syntacticStack.size-2);
     return true;
   }
+  bool ReplaceXYYXByYY()
+  { this->syntacticStack[this->syntacticStack.size-4]=this->syntacticStack[this->syntacticStack.size-3];
+    this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
+    this->syntacticStack.SetSize(this->syntacticStack.size-2);
+    return true;
+  }
   bool ReplaceXYXByY()
   { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
     this->DecreaseStackSetCharacterRanges(2);
@@ -17840,8 +17828,9 @@ public:
     this->syntacticStack.SetSize(this->syntacticStack.size-1);
     return true;
   }
-  bool ReplaceXEXByE()
+  bool ReplaceXEXByE(int inputFormat=Expression::formatDefault)
   { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
+    this->syntacticStack[this->syntacticStack.size-3].theData.format=inputFormat;
     this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
@@ -17927,8 +17916,6 @@ public:
   int NumPredefinedVars;
   List<Command> theCommands;
 //  std::vector<std::stringstream> theLogs;
-  HashedList<Expression> cachedExpressions;
-  List<Expression> imagesCashedExpressions;
 
   List<std::string> syntaxErrors;
   List<std::string> evaluationErrors;

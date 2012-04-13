@@ -217,6 +217,7 @@ int main(int argc, char **argv)
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1";//\ng_0";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1;\nh_{{a}}:=g_(0,a);\ng_1+h_1";
   //civilizedInput="SemisimpleLieAlgebra{} A_1";
+//  civilizedInput="1";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

@@ -1043,7 +1043,12 @@ public:
       this->AddNoRepetition(theList.TheObjects[i]);
   }
   void PopIndexSwapWithLast(int index)
-  { Object* oPop= &this->TheObjects[index];
+  { if (index<0 || index>=this->size)
+    { std::cout << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
+      << " of size " << this->size << ". The error occurred first int file " << __FILE__ << " line " << __LINE__ << ".";
+      assert(false);
+    }
+    Object* oPop= &this->TheObjects[index];
     int hashIndexPop = this->GetHash(*oPop);
     this->TheHashedArrays[hashIndexPop].RemoveFirstOccurenceSwapWithLast(index);
     if (index==this->size-1)
@@ -17399,8 +17404,8 @@ public:
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
 ;
-  bool IsEqualToOne();
-  bool IsEqualToZero();
+  bool IsEqualToOne()const;
+  bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   { if (this->type!=this->typeRational)
       return false;
@@ -17425,21 +17430,10 @@ public:
   { Data Other(other, *this->owner);
     return this->operator*=(Other);
   }
+  bool operator/=(const Data& other)
+  ;
   bool operator*=(const Data& other)
-  { std::stringstream out;
-    if (this->type!=other.type)
-    { out << "Multiplying different types, " << this->type << " and " << other.type << ", is not allowed.";
-      return this->SetError(out.str());
-    }
-    switch(this->type)
-    { case Data::typeRational:
-        this->theRational.GetElement()*=other.theRational.GetElementConst();
-        return true;
-      default:
-        out << "Don't know how to multiply elements of type " << this->type << ". ";
-        return this->SetError(out.str());
-    }
-  }
+  ;
   void operator=(const Data& other);
   bool operator==(const Data& other);
   std::string ElementToString(std::stringstream* comments=0)const;
@@ -17511,7 +17505,16 @@ class Function
 };
 
 class Expression
-{
+{ void reset(int indexOfTheCommand)
+  { this->theBoss=0;
+    this->commandIndex=indexOfTheCommand;
+    this->children.size=0;
+    this->theOperation=-1;
+    this->theData=0;
+    this->errorString="";
+    this->format=this->formatDefault;
+    this->theComments="";
+  }
   public:
   int theOperation;
   int theData;
@@ -17527,15 +17530,9 @@ class Expression
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument
   };
-  void reset(CommandList* newBoss, int indexOfTheCommand)
-  { this->theBoss=newBoss;
-    this->commandIndex=indexOfTheCommand;
-    this->children.size=0;
-    this->theOperation=-1;
-    this->theData=0;
-    this->errorString="";
-    this->format=this->formatDefault;
-    this->theComments="";
+  void reset(CommandList& newBoss, int indexOfTheCommand)
+  { this->reset(indexOfTheCommand);
+    this->theBoss=&newBoss;
   }
   void AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
@@ -17548,16 +17545,16 @@ class Expression
   void MakeInt(int theInt, CommandList& newBoss, int indexOfTheCommand)
   ;
 void MakeVariableNonBoundNoProperties
-  (CommandList* owner, int indexOfTheCommand, int varIndex)
+  (CommandList& owner, int indexOfTheCommand, int varIndex)
 ;
 void MakeVariableNonBounD
-  (CommandList* owner, int indexOfTheCommand, int varIndex)
+  (CommandList& owner, int indexOfTheCommand, int varIndex)
 ;
   void MakeFunction
-  (CommandList* owner, int indexOfTheCommand, const Expression& argument, const std::string& functionName)
+  (CommandList& owner, int indexOfTheCommand, const Expression& argument, const std::string& functionName)
 ;
   void MakeFunction
-  (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
+  (CommandList& owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 ;
   Function::FunctionAddress GetFunctionFromVarName();
   void MakeProducT
@@ -17582,7 +17579,7 @@ void MakeVariableNonBounD
   }
   std::string GetOperation()const;
   Expression()
-  { this->reset(0,-1);
+  { this->reset(-1);
   }
   inline bool SetError (const std::string& theError)
   { this->errorString=theError;
@@ -17591,6 +17588,7 @@ void MakeVariableNonBounD
   Expression(const Expression& other)
   { this->operator=(other);
   }
+  bool IsRationalNumber();
   bool AreEqualExcludingChildren(const Expression& other) const
   { return
     this->theBoss==other.theBoss &&
@@ -17690,6 +17688,7 @@ public:
   int numEmptyTokensStart;
   int IndexInBoss;
   bool flagOpDefineEncountered;
+  bool flagLogApplyRule;
   std::string theLog;
   std::string ErrorString;
   HashedListB<std::string, MathRoutines::hashString> BoundVariables;
@@ -17708,6 +17707,7 @@ public:
     this->theBoss=other.theBoss;
     this->IndexInBoss=other.IndexInBoss;
     this->flagOpDefineEncountered=other.flagOpDefineEncountered;
+    this->flagLogApplyRule=other.flagLogApplyRule;
     this->log=other.log;
     this->cachedExpressions=other.cachedExpressions;
     this->imagesCachedExpressions=other.imagesCachedExpressions;
@@ -17722,13 +17722,14 @@ public:
     this->syntacticStack.SetSize(this->syntacticStack.size-decrease);
     return true;
   }
-  void reset(CommandList* owner=0, int commandIndexInBoss=-1)
+  void reset(CommandList* owner=0, int commandIndexInBoss=-1, bool logApplyRules=false)
   { this->numEmptyTokensStart=9;
     this->syntacticStack.SetSize(0);
     this->syntacticSoup.SetSize(0);
     this->BoundVariables.Clear();
-    this->finalValue.reset(owner, -1);
+    this->finalValue.reset(*owner, -1);
     this->theBoss=owner;
+    this->flagLogApplyRule=logApplyRules;
     this->flagOpDefineEncountered=false;
     this->IndexInBoss=commandIndexInBoss;
     this->ErrorString="";
@@ -17760,22 +17761,9 @@ public:
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
 ;
   bool LookAheadAllowsPlus(const std::string& lookAhead)
-  { return
-      lookAhead=="+" || lookAhead=="-" ||
-      lookAhead==")" || lookAhead==";" ||
-      lookAhead=="]" || lookAhead=="}" ||
-      lookAhead==":"
-      ;
-  }
-  bool LookAheadAllowsTimes(const std::string& lookAhead)
-  { return
-      lookAhead=="+" || lookAhead=="-" ||
-      lookAhead=="*" || lookAhead=="/" ||
-      lookAhead=="Expression" || lookAhead==")" ||
-      lookAhead==";" || lookAhead=="]" ||
-      lookAhead=="}" || lookAhead==":"
-      ;
-  }
+  ;
+  bool LookAheadAllowsTimes(const std::string& lookAhead);
+  bool LookAheadAllowsDivide(const std::string& lookAhead);
   bool ReplaceEXXEXEByEusingO(int theOp);
   bool ReplaceEEByEusingO(int theControlIndex);
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
@@ -17917,6 +17905,14 @@ public:
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
   double MaxAllowedTimeInSeconds;
+  ///////////////////////////////////////////////////////////////////////////
+  bool flagTimeLimitErrorDetected;
+  bool flagFirstErrorEncountered;
+  bool flagMaxRecursionErrorEncountered;
+  bool flagMaxTransformationsErrorEncountered;
+
+  bool flagLogSyntaxRules;
+  ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;
   List<Command> theCommands;
@@ -17970,6 +17966,9 @@ public:
   int conList()
   { return this->controlSequences.GetIndexIMustContainTheObject("List");
   }
+  int conListNoRepetition()
+  { return this->controlSequences.GetIndexIMustContainTheObject("ListNoRepetition");
+  }
   int conLieBracket()
   { return this->controlSequences.GetIndexIMustContainTheObject("[]");
   }
@@ -17996,6 +17995,12 @@ public:
   }
   int opList()
   { return this->operations.GetIndexIMustContainTheObject("List");
+  }
+  int opUnion()
+  { return this->operations.GetIndexIMustContainTheObject("\\cup");
+  }
+  int opUnionNoRepetition()
+  { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
   }
   int opVariableBound()
   { return this->operations.GetIndexIMustContainTheObject("VariableBound");
@@ -18083,6 +18088,12 @@ public:
   (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
   ;
 
+  static bool EvaluateStandardUnion
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool EvaluateStandardUnionNoRepetition
+  (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool EvaluateStandardPlus
   (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
   ;
@@ -18167,7 +18178,7 @@ public:
   const std::string& argList, const std::string& description, const std::string& exampleArgs
 )
 ;
-  void init(GlobalVariables& theGlobalVariables);
+  void init(GlobalVariables& inputGlobalVariables);
   void initPredefinedVars()
   ;
   void initTargetProperties()

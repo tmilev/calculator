@@ -162,7 +162,6 @@ int main(int argc, char **argv)
 
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
-
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
@@ -209,7 +208,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
+  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -217,7 +216,7 @@ int main(int argc, char **argv)
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1";//\ng_0";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1;\nh_{{a}}:=g_(0,a);\ng_1+h_1";
   //civilizedInput="SemisimpleLieAlgebra{} A_1";
-//  civilizedInput="1";
+//  civilizedInput="f{}0:=1;\nf{}1:=f{}2;\nf{}{{x}}:=f{}(x-1)+f{}(x-2);\nf{}1";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -238,6 +237,7 @@ int main(int argc, char **argv)
     std::cout << "\n</FORM>";
     CommandList theComputation;
     theComputation.init(theGlobalVariables);
+    theComputation.flagLogSyntaxRules=false;
     if (civilizedInput!="")
     { std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
       theComputation.Evaluate(civilizedInput);

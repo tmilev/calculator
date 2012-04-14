@@ -11,7 +11,7 @@ void Expression::MakeProducT
 
 void Expression::MakeXOX
   (CommandList* owner, int commandIndex, int theOp, const Expression& left, const Expression& right)
-{ this->reset(owner, commandIndex);
+{ this->reset(*owner, commandIndex);
   this->theOperation=theOp;
   this->children.SetSize(2);
   this->children[0]=left;
@@ -24,7 +24,7 @@ bool Command::ReplaceOXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= this->syntacticStack[this->syntacticStack.size-4];
   SyntacticElement& rightE = this->syntacticStack[this->syntacticStack.size-2];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   newExpr.format=formatOptions;
   newExpr.children.AddOnTop(leftE.theData);
@@ -43,7 +43,7 @@ bool Command::ReplaceOXXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= this->syntacticStack[this->syntacticStack.size-4];
   SyntacticElement& rightE = this->syntacticStack[this->syntacticStack.size-2];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(leftE.theData);
@@ -60,7 +60,7 @@ bool Command::ReplaceOXEByE(int formatOptions)
 { SyntacticElement& left=this->syntacticStack[this->syntacticStack.size-3];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(left.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(right.theData);
@@ -75,7 +75,7 @@ bool Command::ReplaceOEByE(int formatOptions)
 { SyntacticElement& middle=this->syntacticStack[this->syntacticStack.size-2];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(right.theData);
@@ -158,14 +158,14 @@ bool CommandList::isLeftSeparator(char c)
 SyntacticElement Command::GetEmptySyntacticElement()
 { SyntacticElement result;
   result.controlIndex=this->theBoss->controlSequences.GetIndex(" ");
-  result.theData.reset(0,-1);
+  result.theData.reset(*this->theBoss, -1);
   return result;
 }
 
 void CommandList::AddEmptyHeadedCommand()
 { this->theCommands.SetSize(this->theCommands.size+1);
   Command& currentCommand=this->theCommands[this->theCommands.size-1];
-  currentCommand.reset(this, this->theCommands.size-1);
+  currentCommand.reset(this, this->theCommands.size-1, this->flagLogSyntaxRules);
 }
 
 std::string ExpressionPairs::ElementToString()
@@ -204,7 +204,7 @@ void CommandList::ParseFillDictionary
       if (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) )
       { if (this->controlSequences.Contains(current))
         { currentElement.controlIndex=this->controlSequences.GetIndex(current);
-          currentElement.theData.reset(this, -1);
+          currentElement.theData.reset(*this, -1);
           this->theCommands[this->theCommands.size-1].syntacticSoup.AddOnTop(currentElement);
         } else if (this->isADigit(current, currentDigit))
         { Data tempData= Data(currentDigit, *this);
@@ -214,7 +214,7 @@ void CommandList::ParseFillDictionary
         } else
         { this->theDictionary.AddNoRepetition(current);
           currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
-          currentElement.theData.reset(this, this->theCommands.size-1);
+          currentElement.theData.reset(*this, this->theCommands.size-1);
           currentElement.theData.theOperation=this->operations.GetIndex("Variable");
           currentElement.theData.theData=this->theDictionary.GetIndex(current);
           this->theCommands[this->theCommands.size-1].syntacticSoup.AddOnTop(currentElement);
@@ -305,7 +305,7 @@ bool Command::ReplaceListXEByList()
 { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->theBoss->opList();
   newExpr.children.AddListOnTop(left.theData.children);
   newExpr.children.AddOnTop(right.theData);
@@ -320,7 +320,7 @@ bool Command::ReplaceEXEByList()
 { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->theBoss->opList();
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -335,7 +335,7 @@ bool Command::ReplaceEEByEusingO(int theControlIndex)
 { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-2];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   //    newExpr.commandIndex=
   newExpr.children.AddOnTop(left.theData);
@@ -351,7 +351,7 @@ bool Command::ReplaceEXXEXEByEusingO(int theControlIndex)
   SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-6];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(middle.theData);
@@ -367,7 +367,7 @@ bool Command::ReplaceEOEXByEX(int formatOptions)
   SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-4];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-2];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -380,6 +380,30 @@ bool Command::ReplaceEOEXByEX(int formatOptions)
   return true;
 }
 
+bool Command::LookAheadAllowsTimes(const std::string& lookAhead)
+{ return
+    lookAhead=="+" || lookAhead=="-" ||
+    lookAhead=="*" || lookAhead=="/" ||
+    lookAhead=="Expression" || lookAhead==")" ||
+    lookAhead=="Variable" ||
+    lookAhead==";" || lookAhead=="]" ||
+    lookAhead=="}" || lookAhead==":"
+    ;
+}
+
+bool Command::LookAheadAllowsPlus(const std::string& lookAhead)
+{ return
+    lookAhead=="+" || lookAhead=="-" ||
+    lookAhead=="," ||
+    lookAhead==")" || lookAhead==";" ||
+    lookAhead=="]" || lookAhead=="}" ||
+    lookAhead==":"
+    ;
+}
+
+bool Command::LookAheadAllowsDivide(const std::string& lookAhead)
+{ return this->LookAheadAllowsTimes(lookAhead);
+}
 
 bool Command::ApplyOneRule(const std::string& lookAhead)
 { //return false;
@@ -405,9 +429,8 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
 //  const std::string& eighthToLastS=this->theBoss->controlSequences[eighthToLastE.controlIndex];
 //  const SyntacticElement& ninthToLastE=this->syntacticStack[this->syntacticStack.size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
-
-//to turn on debugging:
-//  std::cout <<"<hr>" << this->ElementToStringSyntacticStack();
+  if (this->flagLogApplyRule)
+    std::cout <<"<hr>" << this->ElementToStringSyntacticStack();
   if (secondToLastS==":" && lastS=="=")
   { this->flagOpDefineEncountered=true;
     return this->ReplaceXXByCon(this->theBoss->conDefine());
@@ -456,7 +479,7 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceOEByE();
   if (lastS=="Expression" && secondToLastS=="*" && thirdToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEOEByE(Expression::formatTimesDenotedByStar);
-  if (lastS=="Expression" && secondToLastS=="/" && thirdToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
+  if (lastS=="Expression" && secondToLastS=="/" && thirdToLastS=="Expression" && this->LookAheadAllowsDivide(lookAhead) )
     return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEEByEusingO(this->theBoss->conTimes());
@@ -469,6 +492,11 @@ bool Command::ApplyOneRule(const std::string& lookAhead)
   if (this->isStrongSeparatorFromTheRight(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
   if (fourthToLastS==" " && lookAhead==";" && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression")
+    return this->ReplaceEOEByE();
+
+  if ( thirdToLastS=="Expression" && secondToLastS=="\\cup" && lastS== "Expression" && this->isStrongSeparatorFromTheRight(lookAhead))
+    return this->ReplaceEOEByE();
+  if ( thirdToLastS=="Expression" && secondToLastS=="\\sqcup" && lastS== "Expression" && this->isStrongSeparatorFromTheRight(lookAhead))
     return this->ReplaceEOEByE();
 
   if (fourthToLastS!="[" && thirdToLastS=="Expression" && secondToLastS=="," && lastS== "Expression")
@@ -609,10 +637,15 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 { this->theGlobalVariableS=& inputGlobalVariables;
   this->MaxAlgTransformationsPerExpression=100000;
   this->MaxRecursionDepthDefault=10000;
-  this->MaxAllowedTimeInSeconds=10000;
+  this->MaxAllowedTimeInSeconds=inputGlobalVariables.MaxAllowedComputationTimeInSeconds/2;
+  this->flagLogSyntaxRules=false;
   this->MaxLatexChars=2000;
   this->controlSequences.Clear();
   this->operations.Clear();
+  this->flagTimeLimitErrorDetected=false;
+  this->flagFirstErrorEncountered=false;
+  this->flagMaxTransformationsErrorEncountered=false;
+  this->flagMaxRecursionErrorEncountered=false;
   this->theNonBoundVars.Clear();
   this->theData.Clear();
   this->theDictionary.Clear();
@@ -636,6 +669,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoFail("VariableNonBound", 0, "VariableNonBound", "", "", "");
   this->AddOperationNoFail("VariableBound", 0, "BoundVariable", "", "", "");
   this->AddOperationNoFail("List", 0, "List", "", "", "");
+  this->AddOperationNoFail("\\cup", this->EvaluateStandardUnion, "Union", "", "", "");
+  this->AddOperationNoFail("\\sqcup", this->EvaluateStandardUnionNoRepetition, "UnionNoRepetition", "", "", "");
+
   this->AddOperationNoFail("Error", 0, "Error", "", "", "");
   this->AddOperationNoFail("Data", 0, "Data", "", "", "");
 
@@ -735,7 +771,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
     summandsWithCoeff.SetSize(summandsWithCoeff.size+1);
     Expression& current=summandsWithCoeff[summandsWithCoeff.size-1];
     if (!theCoeffs[i].IsEqualToOne())
-    { current.reset(this, commandIndex);
+    { current.reset(*this, commandIndex);
       current.theOperation=this->opTimes();
       current.children.SetSize(2);
       current.children[0].MakeDatA(theCoeffs[i], *this, commandIndex);
@@ -755,7 +791,7 @@ bool CommandList::CollectSummands(int commandIndex, Expression& theExpression)
   Expression* currentExp;
   currentExp=&theExpression;
   for (int i=0; i<summandsWithCoeff.size-1; i++)
-  { currentExp->reset(this, commandIndex);
+  { currentExp->reset(*this, commandIndex);
     currentExp->theOperation=this->opPlus();
     currentExp->children.SetSize(2);
     currentExp->children[0]=summandsWithCoeff[i];
@@ -883,7 +919,7 @@ bool CommandList::EvaluateDoLeftDistributeBracketIsOnTheLeft
   Expression left=theExpression.children[0];
   Expression right=theExpression.children[1];
   int theFormat=theExpression.format;
-  theExpression.reset(& theCommands, commandIndex);
+  theExpression.reset(theCommands, commandIndex);
   theExpression.theOperation=theAdditiveOp;
   theExpression.children.SetSize(2);
   theExpression.children[0].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left.children[0], right);
@@ -905,7 +941,7 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
   Expression left=theExpression.children[0];
   Expression right=theExpression.children[1];
   int theFormat=theExpression.format;
-  theExpression.reset(& theCommands, commandIndex);
+  theExpression.reset(theCommands, commandIndex);
   theExpression.theOperation=rightOp;
   theExpression.children.SetSize(2);
   theExpression.children[0].MakeXOX(&theCommands, commandIndex, theMultiplicativeOP, left, right.children[0]);
@@ -1034,12 +1070,54 @@ bool CommandList::EvaluateStandardLieBracket
   return true;
 }
 
+bool Expression::IsRationalNumber()
+{ if (this->theOperation!=this->theBoss->opData())
+    return false;
+  if (this->theBoss->theData[this->theData].type==Data::typeRational)
+    return true;
+  return false;
+}
+
+bool CommandList::EvaluateStandardUnion
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.children.size==1)
+  { theExpression.AssignChild(0);
+    return true;
+  }
+  if (theExpression.children.size==0)
+    return false;
+  Expression resultExpression;
+  resultExpression.reset(theCommands, commandIndex);
+  resultExpression.theOperation=theCommands.opList();
+  for (int i=0; i<theExpression.children.size; i++)
+  { Expression& currentExp=theExpression.children[i];
+    if (currentExp.theOperation==theCommands.opList())
+      resultExpression.children.AddListOnTop(currentExp.children);
+    else
+      resultExpression.children.AddOnTop(currentExp);
+  }
+  theExpression=resultExpression;
+  return true;
+}
+
+bool CommandList::EvaluateStandardUnionNoRepetition
+(CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
+{ return false;
+}
+
 bool CommandList::EvaluateStandardDivide
 (CommandList& theCommands, int commandIndex, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=2)
     return false;
   Expression& leftE= theExpression.children[0];
   Expression& rightE= theExpression.children[1];
+  if (rightE.IsRationalNumber() && !leftE.IsRationalNumber())
+  { Data tempData(1, theCommands);
+    tempData/=theCommands.theData[rightE.theData];
+    rightE=leftE;
+    leftE.MakeDatA(tempData, theCommands, commandIndex);
+    return true;
+  }
   if (leftE.theOperation!= theCommands.opData() || rightE.theOperation!=theCommands.opData())
     return false;
   Data& leftData=theCommands.theData[leftE.theData];
@@ -1215,9 +1293,13 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDepthDefault << " exceeded while evaluating expressions.";
     theExpression.errorString=out.str();
-    this->evaluationErrors.AddOnTop(out.str());
+    if (this->flagMaxRecursionErrorEncountered)
+      this->evaluationErrors.AddOnTop(out.str());
+    this->flagMaxRecursionErrorEncountered=true;
     return true;
   }
+  if (theExpression.errorString!="")
+    return true;
   std::stringstream comments;
   if (theExpression.theOperation<0 || theExpression.theBoss!=this)
     return true;
@@ -1227,9 +1309,12 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     errorStream << "I think I have detected a cycle: " << theExpression.ElementToString()
     << " is transformed to an expression that contains the starting expression. ";
     theExpression.SetError(errorStream.str());
-    currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
     return true;
   }
+  static int errorCounter=0;
+  errorCounter++;
+  std::string debugString;
+  debugString=theExpression.ElementToString();
   currentCommand.ExpressionStack.AddOnTop(theExpression);
   HashedList<Expression> currentExpressionTransformations;
 //  currentExpressionTransformations.AddOnTop(theExpression);
@@ -1248,8 +1333,10 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   while (NonReduced)
   { if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds >this->MaxAllowedTimeInSeconds)
-      { std::cout << "<br><b>Max allowed computational time is " << this->MaxAllowedTimeInSeconds << ";  so far, "
-        << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds  << " have elapsed -> aborting computation ungracefully.</b>";
+      { if (!this->flagTimeLimitErrorDetected)
+          std::cout << "<br><b>Max allowed computational time is " << this->MaxAllowedTimeInSeconds << ";  so far, "
+          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds  << " have elapsed -> aborting computation ungracefully.</b>";
+        this->flagTimeLimitErrorDetected=true;
         currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
         return true;
       }
@@ -1262,11 +1349,21 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       { currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
         return false;
       }
+      else
+        if (theExpression.children[i].errorString!="")
+        { currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
+          std::stringstream errorStream;
+          errorStream << "Error: child " << i+1 << " contains an error.";
+          theExpression.SetError(errorStream.str());
+          return true;
+        }
     if (counter>this->MaxAlgTransformationsPerExpression)
-    { std::stringstream out;
-      out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
-      << " while simplifying " << theExpression.ElementToString();
-      theExpression.errorString=out.str();
+    { if (!this->flagMaxTransformationsErrorEncountered)
+      { std::stringstream out;
+        out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
+        << " while simplifying " << theExpression.ElementToString();
+        theExpression.errorString=out.str();
+      }
       currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
       return true;
     }
@@ -1307,6 +1404,9 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     }
 //    if (NonReduced)
 //      theExpression.ElementToString();
+  }
+  if (currentCommand.ExpressionStack.size==0)
+  { debugString=theExpression.ElementToString();
   }
   currentCommand.ExpressionStack.PopIndexSwapWithLast(currentCommand.ExpressionStack.size-1);
 
@@ -1532,9 +1632,9 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
   std::stringstream out;
   std::string additionalDataComments;
   if (this->errorString!="")
-  { out << "(Error:";
-    if (outComments!=0)
+  { if (outComments!=0)
       *outComments << this->errorString << " ";
+    return "(Error:SeeComments)";
   }
   if (this->theOperation<0)
   { out << "(ErrorNoOp)";
@@ -1640,6 +1740,14 @@ std::string Expression::ElementToString(int recursionDepth, int maxRecursionDept
     out << "[" << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
     << "," << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
     << "]";
+  else if (this->theOperation==this->theBoss->opUnion())
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
+    << "\\cup" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
+    ;
+  else if (this->theOperation==this->theBoss->opUnionNoRepetition())
+    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
+    << "\\sqcup" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, false, false, outComments)
+    ;
   else
     out << "(ProgrammingError:NotDocumented)" ;
   if (AddBrackets)
@@ -1917,7 +2025,7 @@ bool Expression::NeedBracketsForThePower()const
 }
 
 void Expression::MakeInt(int theValue, CommandList& newBoss, int indexOfTheCommand)
-{ this->reset(&newBoss, indexOfTheCommand);
+{ this->reset(newBoss, indexOfTheCommand);
   this->theData=newBoss.theData.AddNoRepetitionOrReturnIndexFirst(Data(theValue, newBoss));
   this->theOperation=newBoss.opData();
 }
@@ -1927,31 +2035,31 @@ void Expression::MakeDatA(const Rational& inputData, CommandList& newBoss, int i
 }
 
 void Expression::MakeDatA(const Data& inputData, CommandList& newBoss, int indexOfTheCommand)
-{ this->reset(&newBoss, indexOfTheCommand);
+{ this->reset(newBoss, indexOfTheCommand);
   this->theData=newBoss.theData.AddNoRepetitionOrReturnIndexFirst(inputData);
   assert(this->theData<newBoss.theData.size);
   this->theOperation=newBoss.opData();
 }
 
 void Expression::MakeVariableNonBoundNoProperties
-  (CommandList* owner, int indexOfTheCommand, int varIndex)
+  (CommandList& owner, int indexOfTheCommand, int varIndex)
 { this->reset(owner, indexOfTheCommand);
   this->theData=varIndex;
-  this->theOperation=owner->opVariableNonBound();
+  this->theOperation=owner.opVariableNonBound();
 }
 
 void Expression::MakeFunction
-  (CommandList* owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
+  (CommandList& owner, int indexOfTheCommand, const Expression& argument, int functionIndex)
 { this->reset(owner, indexOfTheCommand);
-  this->theOperation=owner->opApplyFunction();
+  this->theOperation=owner.opApplyFunction();
   this->children.SetSize(2);
   this->children[0].MakeVariableNonBoundNoProperties(owner, commandIndex, functionIndex);
   this->children[1]=argument;
 }
 
 void Expression::MakeFunction
-  (CommandList* owner, int indexOfTheCommand, const Expression& argument, const std::string& functionName)
-{ int index=owner->GetIndexNonBoundVar(functionName);
+  (CommandList& owner, int indexOfTheCommand, const Expression& argument, const std::string& functionName)
+{ int index=owner.GetIndexNonBoundVar(functionName);
   assert(index!=-1);
   this->MakeFunction(owner, indexOfTheCommand, argument, index);
 }
@@ -2123,7 +2231,7 @@ bool Command::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-2];
   SyntacticElement& result = this->syntacticStack[this->syntacticStack.size-5];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(lefT.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -2138,7 +2246,7 @@ bool Command::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& left = this->syntacticStack[this->syntacticStack.size-3];
   SyntacticElement& right = this->syntacticStack[this->syntacticStack.size-1];
   Expression newExpr;
-  newExpr.reset(this->theBoss, this->IndexInBoss);
+  newExpr.reset(*this->theBoss, this->IndexInBoss);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -2280,20 +2388,54 @@ bool Data::OperatorDereference
   }
 }
 
-bool Data::IsEqualToOne()
+bool Data::IsEqualToOne()const
 { switch (this->type)
   { case Data::typeRational:
-      return this->theRational.GetElement().IsEqualToOne();
+      return this->theRational.GetElementConst().IsEqualToOne();
     default:
       return false;
   }
 }
 
-bool Data::IsEqualToZero()
+bool Data::IsEqualToZero()const
 { switch (this->type)
   { case Data::typeRational:
-      return this->theRational.GetElement().IsEqualToZero();
+      return this->theRational.GetElementConst().IsEqualToZero();
     default:
       return false;
    }
+}
+
+bool Data::operator*=(const Data& other)
+{ std::stringstream out;
+  if (this->type!=other.type)
+  { out << "Multiplying different types, " << this->type << " and " << other.type << ", is not allowed.";
+    return this->SetError(out.str());
+  }
+  switch(this->type)
+  { case Data::typeRational:
+      this->theRational.GetElement()*=other.theRational.GetElementConst();
+      return true;
+    default:
+      out << "Don't know how to multiply elements of type " << this->type << ". ";
+      return this->SetError(out.str());
+  }
+}
+
+bool Data::operator/=(const Data& other)
+{ std::stringstream out;
+  if (this->type!=other.type)
+  { out << "Multiplying different types, " << this->type << " and " << other.type << ", is not allowed.";
+    return this->SetError(out.str());
+  }
+  if (other.IsEqualToZero())
+    return false;
+  switch(this->type)
+  { case Data::typeRational:
+      this->theRational.GetElement()/=other.theRational.GetElementConst();
+      return true;
+    default:
+      out << "Don't know how to multiply elements of type " << this->type << ". ";
+      return this->SetError(out.str());
+  }
 }

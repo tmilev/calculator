@@ -813,6 +813,15 @@ void CommandList::initPredefinedVars()
   ("FunctionToMatrix", & this->fMatrix, "",
    "Creates a matrix from a function. \
    For example, FunctionToMatrix{}(A,5,6) will create a 5 by six matrix with entries A_{1,1} to A_{5,6} ", "");
+  this->AddNonBoundVarMustBeNew
+  ("Union", & this->EvaluateStandardUnion, "",
+   "Makes a union of the elements of its arguments. \
+   Union{}(X, Y) equals X \\cup Y. ", "");
+  this->AddNonBoundVarMustBeNew
+  ("UnionNoRepetition", & this->EvaluateStandardUnionNoRepetition, "",
+   "Makes a union without repetition of the elements of its arguments. \
+   UnionNoRepetition{}(X, Y) equals X \\sqcup Y. ", "");
+
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
 
@@ -1310,6 +1319,7 @@ bool CommandList::EvaluateStandardUnion
   for (int i=0; i<theExpression.children.size; i++)
     resultExpression.children.AddListOnTop(theExpression.children[i].children);
   theExpression=resultExpression;
+  theExpression.format=theExpression.formatDefault;
   return true;
 }
 
@@ -1329,8 +1339,8 @@ bool CommandList::EvaluateStandardUnionNoRepetition
     tempList.AddNoRepetition(theExpression.children[i].children);
   theExpression.theOperation=theCommands.opList();
   theExpression.theData=0;
-
   theExpression.children=tempList;
+  theExpression.format=theExpression.formatDefault;
   return true;
 }
 

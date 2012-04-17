@@ -34,6 +34,8 @@
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />
+		<Unit filename="vpfHeader1.h" />
+		<Unit filename="vpfHeader2.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

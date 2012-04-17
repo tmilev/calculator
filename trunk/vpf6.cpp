@@ -555,12 +555,10 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceVbyE();
   if (lastS=="=" && secondToLastS=="=")
     return this->ReplaceXXByCon(this->conEqualEqual());
-
   if (lastS=="Data" && secondToLastS=="Data")
     return this->ReplaceIntIntBy10IntPlusInt();
   if (lastS=="Data" && lookAhead!="Data")
     return this->ReplaceObyE();
-
   //there is an ambiguity on how should function application be associated
   //Which is better: x{}y{}z:= x{} (y{}z), or x{}y{}z:=(x{}y){}z ?
   //In our implementation, we choose x{}y{}z:= x{} (y{}z). Although this is slightly harder to implement,
@@ -568,11 +566,9 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //  if (fourthToLastS=="Expression" && thirdToLastS=="{}" && secondToLastS=="Expression"
 //      && this->LookAheadAllowsApplyFunction(lastS) )
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
-  if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression"
-      && this->LookAheadAllowsApplyFunction(lookAhead))
-    return this->ReplaceEOEByE(lastE.theData.format);
-  if (thirdToLastS=="Expression" && secondToLastS=="_" && lastS=="Expression"
-      && lookAhead!="_")
+  if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression" && this->LookAheadAllowsApplyFunction(lookAhead))
+    return this->ReplaceEOEByE();
+  if (thirdToLastS=="Expression" && secondToLastS=="_" && lastS=="Expression" && lookAhead!="_")
     return this->ReplaceEXEByEusingO(this->conApplyFunction(), Expression::formatFunctionUseUnderscore);
   //end of ambiguity.
   if (fourthToLastS=="{"  && thirdToLastS=="{}" && secondToLastS=="Expression" && lastS=="}")
@@ -592,9 +588,9 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (lastS=="Expression" && secondToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEEByEusingO(this->conTimes());
   if (thirdToLastS=="List" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceXXYByListY(this->conExpression());
+    return this->ReplaceXXYByListY(this->conExpression(), lastE.theData.format);
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
-    return this->ReplaceXEXByE(Expression::formatDefault);
+    return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXEXByE(Expression::formatNoBracketsForFunctionArgument);
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
@@ -765,16 +761,28 @@ bool CommandList::fSSAlgebra
   return true;
 }
 
+bool Expression::HasBoundVariables(int RecursionDepth, int MaxRecursionDepth)
+{ if (RecursionDepth>MaxRecursionDepth)
+  { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
+    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    assert(false);
+  }
+  if (this->theOperation==this->theBoss->opVariableBound())
+    return true;
+  for (int i=0; i<this->children.size; i++)
+    if (this->children[i].HasBoundVariables(RecursionDepth, MaxRecursionDepth))
+      return true;
+  return false;
+}
+
 bool CommandList::fIsInteger
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.IsInteger())
-    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(Data(1, theCommands));
-  else  if (theExpression.IsRationalNumber())
-    theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(Data(0, theCommands));
-  else
+{ if (theExpression.HasBoundVariables(0, theCommands.MaxRecursionDepthDefault))
     return false;
-  theExpression.children.SetSize(0);
-  theExpression.theOperation=theExpression.theBoss->opData();
+  if (theExpression.IsInteger())
+    theExpression.MakeDatA(1, theCommands, inputIndexBoundVars);
+  else
+    theExpression.MakeDatA(0, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -802,9 +810,9 @@ void CommandList::initPredefinedVars()
   this->AddNonBoundVarMustBeNew("SemisimpleLieAlgebra", & this->fSSAlgebra, "", "creates a semisimple Lie algebra (at the moment implemented for simple Lie algebras only).", "");
   this->AddNonBoundVarMustBeNew("Polynomial", & this->fPolynomial, "", "Creates an internal data structure representation of a polynomial expression, implemented without use of expression trees.", "");
   this->AddNonBoundVarMustBeNew
-  ("Matrix", & this->fMatrix, "",
+  ("FunctionToMatrix", & this->fMatrix, "",
    "Creates a matrix from a function. \
-   For example, Matrix{}(A,5,6) will create a 5 by six matrix with entries A_{1,1} to A_{5,6} ", "");
+   For example, FunctionToMatrix{}(A,5,6) will create a 5 by six matrix with entries A_{1,1} to A_{5,6} ", "");
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
 
@@ -1297,7 +1305,7 @@ bool CommandList::EvaluateStandardUnion
   resultExpression.reset(theCommands, inputIndexBoundVars);
   resultExpression.theOperation=theCommands.opList();
   for (int i=0; i<theExpression.children.size; i++)
-    if (theExpression.children[i].theOperation==theCommands.opList())
+    if (theExpression.children[i].theOperation!=theCommands.opList())
       return false;
   for (int i=0; i<theExpression.children.size; i++)
     resultExpression.children.AddListOnTop(theExpression.children[i].children);
@@ -1307,7 +1315,23 @@ bool CommandList::EvaluateStandardUnion
 
 bool CommandList::EvaluateStandardUnionNoRepetition
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ return false;
+{ if (theExpression.children.size==1)
+  { theExpression.AssignChild(0);
+    return true;
+  }
+  if (theExpression.children.size==0)
+    return false;
+  for (int i=0; i<theExpression.children.size; i++)
+    if (theExpression.children[i].theOperation!=theCommands.opList())
+      return false;
+  HashedList<Expression> tempList;
+  for (int i=0; i<theExpression.children.size; i++)
+    tempList.AddNoRepetition(theExpression.children[i].children);
+  theExpression.theOperation=theCommands.opList();
+  theExpression.theData=0;
+
+  theExpression.children=tempList;
+  return true;
 }
 
 bool CommandList::EvaluateStandardDivide
@@ -1763,8 +1787,11 @@ void CommandList::EvaluateCommands()
   }
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, 0, this->MaxRecursionDepthDefault, thePairs, &loggingStream);
+  std::stringstream comments;
   out << "<table><tr><td>" << this->theCommands.ElementToString(0, 10000)
-  << "</td><td>" << this->theCommands.ElementToString(0, 10000, true) << "</td></tr></table>";
+  << "</td><td>" << this->theCommands.ElementToString(0, 10000, true, false, false, &comments) << "</td></tr></table>";
+  if (comments.str()!="")
+    out << comments.str();
   loggingStream << "<b>CommandList status. </b><br>";
   loggingStream << this->ElementToString();
   this->theLog= loggingStream.str();
@@ -1967,11 +1994,11 @@ std::string Expression::ElementToString
     << "]";
   else if (this->theOperation==this->theBoss->opUnion())
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "\\cup" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+    << "\\cup " << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
     ;
   else if (this->theOperation==this->theBoss->opUnionNoRepetition())
     out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "\\sqcup" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+    << "\\sqcup " << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
     ;
   else if (this->theOperation==this->theBoss->opEndStatement())
   { out << "<table>";

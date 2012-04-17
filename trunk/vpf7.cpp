@@ -1,7 +1,6 @@
-#include "vpf.h"
-//The files vpf*.cpp are under the same license. The license is included in the last (in alphabetical order)
-//vpf*.cpp file. At the moment, this is the file vpf9.cpp. The vpf*.cpp files are considered to be inseparable
-//pieces of the same body code; they are separated only to facilitate faster compilation time.
+//The current file is licensed under the license terms found in the main header file "vpf.h".
+//For additional information refer to the file "vpf.h".
+#include "vpfHeader1.h"
 
 class Qsqrt2;
 

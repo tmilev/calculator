@@ -1,44 +1,8 @@
-//*********************************************************************************************************
-//*********************************************************************************************************
-//Vector partition function - computes an algebraic expression
-//                            for the vector partition function
-//CopyRight (C) 2009-2011: Todor Milev
-//email: todor.milev@gmail.com
-//
-//Contributors: Thomas Bliem, Todor Milev
-//
-//The files of the form vpf*.cpp are considered to be inseparable parts of the same body of code.
-//These files implement the specifications of the vpf.h header file.
-//The files are split in order to speed up compilation times on small non-hearder modifications.
-//This is free software. You are welcome to use, modify and redistribute this code
-//and the resulting program any way you wish, as long as you provide the same rights
-//as those given to you, to any future recipients of your modifications (in case you
-//decide to pass on those modifications).
-//The code is licensed under the Library General Public License version 3.0 or a later version of the License at your choice
-//(the license terms were briefly summarized in the preceding sentence).
-//You should have received a copy of the GNU Library General Public License
-//along with this program.
-//If not, see <http://www.gnu.org/licenses/>.
-//
-//Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
-//advice and help with C++. Many thanks to helios, Disch, Grey Wolf, jsmith,
-//Hammurabi and Duoas!
-//*********************************************************************************************************
-//*********************************************************************************************************
-//DISCLAIMER
-//
-//THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.
-//EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-//PROVIDE THE PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND,
-//EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO,
-//THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-//THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.
-//SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-//REPAIR OR CORRECTION.
-//*********************************************************************************************************
-//*********************************************************************************************************
+//The current file is licensed under the license terms found in the main header file "vpf.h".
+//For additional information refer to the file "vpf.h".
+#include "vpfHeader1.h"
 
-#include "vpf.h"
+
 
 //the below gives upper limit to the amount of pointers that are allowed to be allocated by the program. Can be changed dynamically.
 //used to guard the web server from abuse.
@@ -187,11 +151,6 @@ template < > int HashedListB<MonomialUniversalEnveloping<RationalFunction>, Mono
 template < > int HashedListB<MonomialGeneralizedVerma<RationalFunction>, MonomialGeneralizedVerma<RationalFunction>::HashFunction >::PreferredHashSize=50;
 template < > int HashedListB<MonomialTensorGeneralizedVermas<RationalFunction>, MonomialTensorGeneralizedVermas<RationalFunction>::HashFunction >::PreferredHashSize=50;
 template < > int HashedListB<std::string, MathRoutines::hashString>::PreferredHashSize=50;
-template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<int, MathRoutines::IntIdentity>::PreferredHashSize=50;
-template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<Function, Function::HashFunction>::PreferredHashSize=100;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -284,13 +243,9 @@ template < > int List<MonomialGeneralizedVerma<Rational> >::ListActualSizeIncrem
 template < > int List<MonomialUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialTensorGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<bool ((*)(CommandList& theCommands, int commandIndex, Expression& theExpression))>::ListActualSizeIncrement=50;
+template < > int List<bool ((*)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression))>::ListActualSizeIncrement=50;
 template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
 template < > int List<Expression>::ListActualSizeIncrement=50;
-template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
-template < > int List<Function>::ListActualSizeIncrement=50;
-template < > int List<Data>::ListActualSizeIncrement=500;
-template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 bool TensorProductSpaceAndElements<ElementLeft, ElementRight, CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;

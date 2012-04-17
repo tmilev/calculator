@@ -1,5 +1,9 @@
+//The current file is licensed under the license terms found in the main header file "vpf.h".
+//For additional information refer to the file "vpf.h".
 #include <iostream>
-#include "vpf.h"
+#include "vpfHeader1.h"
+#include "vpfHeader2.h"
+
 #ifndef WIN32
 #include <sys/time.h>
 #include <unistd.h>
@@ -208,7 +212,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  inputWeylString="Calculator";
+//  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -217,6 +221,12 @@ int main(int argc, char **argv)
 //  civilizedInput="g:=SemisimpleLieAlgebra{}A_1;\nh_{{a}}:=g_(0,a);\ng_1+h_1";
   //civilizedInput="SemisimpleLieAlgebra{} A_1";
 //  civilizedInput="f{}0:=1;\nf{}1:=f{}2;\nf{}{{x}}:=f{}(x-1)+f{}(x-2);\nf{}1";
+//  civilizedInput="1+1";
+//  civilizedInput="{{a}}*a:=a^2;\nx*x";
+  //civilizedInput="Matrix{}(A,5,6)";
+//  civilizedInput="\\begin{array}{cc} a &a \\end{array}";
+//  civilizedInput="\\begin{array}{cc}x&((2,3),a,a,((b,a),a,a,b,(a,b)))\\\\ 1\\end{array}";
+//  civilizedInput="fib{}1:=1;\nfib{}0:=1;\nfib{}{{n}}:=fib{}(n-1)+fib{}(n-2);\nfib{}10";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -237,7 +247,7 @@ int main(int argc, char **argv)
     std::cout << "\n</FORM>";
     CommandList theComputation;
     theComputation.init(theGlobalVariables);
-    theComputation.flagLogSyntaxRules=false;
+    theComputation.flagLogSyntaxRules=inputRankString=="2";
     if (civilizedInput!="")
     { std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
       theComputation.Evaluate(civilizedInput);

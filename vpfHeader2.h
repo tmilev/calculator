@@ -240,6 +240,7 @@ void MakeVariableNonBounD
   Expression(const Expression& other)
   { this->operator=(other);
   }
+  bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
   bool IsRationalNumber();
   bool IsInteger();
   bool IsSmallInteger(int& whichInteger);

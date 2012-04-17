@@ -257,6 +257,23 @@ int main(int argc, char **argv)
     std::cout << "</td><td valign=\"top\">";
     std::cout << theComputation.theLog;
     std::cout << "</td></tr></table>";
+    std::stringstream tempStream3;
+    static_html5(tempStream3);
+  //  static_html6(tempStream3);
+    std::cout << tempStream3.str();
+  //  std::cout << "</div>";
+    std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
+    bool isFirst=true;
+    for (int i=0; i<theComputation.theNonBoundVars.size; i++)
+    { VariableNonBound& currentVar=theComputation.theNonBoundVars[i];
+      if (true)
+      { if (!isFirst)
+          std::cout << ",";
+        isFirst=false;
+        std::cout << "\"" << currentVar.theName << "\"";
+      }
+    }
+    std::cout << ");\n  var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>\n";
     std::cout << "</body></html>";
     return 0;
   }

@@ -139,7 +139,7 @@ int main(int argc, char **argv)
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<Monomial<Rational> >::PreferredHashSize=100;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
   std::string inputString, inputPatH;
   std::string tempS;
 	std::cin >> inputString;
@@ -212,7 +212,7 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
+  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -227,6 +227,8 @@ int main(int argc, char **argv)
 //  civilizedInput="\\begin{array}{cc} a &a \\end{array}";
 //  civilizedInput="\\begin{array}{cc}x&((2,3),a,a,((b,a),a,a,b,(a,b)))\\\\ 1\\end{array}";
 //  civilizedInput="fib{}1:=1;\nfib{}0:=1;\nfib{}{{n}}:=fib{}(n-1)+fib{}(n-2);\nfib{}10";
+//  civilizedInput="hwv{}(B_3,(x_1,0,1),(1,0,0))";
+//  civilizedInput="Polynomial{} (1)";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -246,16 +248,22 @@ int main(int argc, char **argv)
   //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
     std::cout << "\n</FORM>";
     CommandList theComputation;
+    theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
+
     theComputation.init(theGlobalVariables);
     theComputation.flagLogSyntaxRules=inputRankString=="2";
     if (civilizedInput!="")
     { std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
       theComputation.Evaluate(civilizedInput);
-      std::cout << "<hr><b>Result.</b><br>";
+      std::cout << "<hr>";
       std::cout <<  theComputation.output;
     }
+
     std::cout << "</td><td valign=\"top\">";
     std::cout << theComputation.theLog;
+    std::cout << "<b>CommandList status. </b><br>";
+    std::cout << theComputation.ElementToString();
+
     std::cout << "</td></tr></table>";
     std::stringstream tempStream3;
     static_html5(tempStream3);

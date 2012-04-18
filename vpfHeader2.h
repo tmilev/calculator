@@ -49,6 +49,10 @@ public:
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
 ;
+  template<class theType>
+  bool IsOfType()const;
+  template<class theType>
+  theType GetValue()const;
   bool IsEqualToOne()const;
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
@@ -111,18 +115,18 @@ class Function
   std::string theName;
   std::string theArgumentList;
   std::string theDescription;
-  std::string theExampleArguments;
+  std::string theExample;
+  bool flagNameIsUsed;
   typedef  bool (*FunctionAddress)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments);
   FunctionAddress theFunction;
-  std::string ElementToString()const
-  { return this->theName;
-  }
+  std::string ElementToString(CommandList& theBoss)const;
   void operator =(const Function& other)
   { this->theName=other.theName;
     this->theArgumentList=other.theArgumentList;
     this->theDescription=other.theDescription;
-    this->theExampleArguments=other.theExampleArguments;
+    this->theExample=other.theExample;
     this->theFunction=other.theFunction;
+    this->flagNameIsUsed=other.flagNameIsUsed;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentList==other.theArgumentList &&
@@ -133,13 +137,14 @@ class Function
   ( const Function::FunctionAddress& functionPointer,
     const std::string& functionName,
     const std::string& argumentList,
-    const std::string& description, const std::string& exampleArguments
+    const std::string& description, const std::string& inputExample, bool inputFlagNameIsUsed
   )
   { this->theFunction=functionPointer;
     this->theName=functionName;
     this->theDescription=description;
-    this->theExampleArguments=exampleArguments;
+    this->theExample=inputExample;
     this->theArgumentList=argumentList;
+    this->flagNameIsUsed=inputFlagNameIsUsed;
   }
   inline static int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -240,6 +245,11 @@ void MakeVariableNonBounD
   Expression(const Expression& other)
   { this->operator=(other);
   }
+  template <class theType>
+  bool GetVector
+  (Vector<theType>& output, int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
+   std::stringstream* comments=0)
+  ;
   bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
   bool IsRationalNumber();
   bool IsInteger();
@@ -434,14 +444,20 @@ public:
   std::string input;
   std::string output;
   std::string theLog;
-//following are the variout hardcoded data structures.
+  std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
+  //Following are containers for data structures that are implemented in C++.
+  //These objects are dynamically allocated and used by the calculator as requested
+  //by various predefined function handlers.
   List<SemisimpleLieAlgebra> theLieAlgebras;
   HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
   HashedListB<Data, Data::HashFunction> theData;
 //end of hardcoded data structures
-  std::string ElementToString();
   double StartTimeInSeconds;
+
+  std::string ElementToString();
+  std::string ElementToStringNonBoundVars();
+  std::string ElementToStringFunctionHandlers();
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
@@ -819,6 +835,9 @@ public:
   static bool fElementSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fHWV
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   void AddEmptyHeadedCommand();
   CommandList()
   { this->theGlobalVariableS=0;
@@ -826,9 +845,8 @@ public:
   void AddOperationNoFail
   (const std::string& theOpName,
    const Function::FunctionAddress& theFunAddress,
-   const std::string& opFunctionTechnicalName,
-   const std::string& opArgumentList="", const std::string& opDescription="",
-   const std::string& opExample=""
+   const std::string& opArgumentList, const std::string& opDescription,
+   const std::string& opExample, bool inputNameUsed
    )
    ;
   void AddNonBoundVarMustBeNew

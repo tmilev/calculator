@@ -640,6 +640,151 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   return false;
 }
 
+template <class theType>
+bool Expression::GetVector
+(Vector<theType>& output, int targetDimNonMandatory, Function::FunctionAddress conversionFunction, std::stringstream* comments)
+{ if (this->theOperation!=this->theBoss->opList())
+  { if (targetDimNonMandatory!=-1)
+      if (targetDimNonMandatory!=1)
+        return false;
+    Data* currentData;
+    if (this->theOperation!=this->theBoss->opData())
+    { Expression tempExpression=*this;
+      if (conversionFunction!=0)
+        if (!conversionFunction(*this->theBoss, this->IndexBoundVars, tempExpression, comments))
+          return false;
+      if (tempExpression.theOperation!=this->theBoss->opData())
+        return false;
+      currentData=&this->theBoss->theData[tempExpression.theData];
+    } else
+      currentData=&this->theBoss->theData[this->theData];
+    if (!currentData->IsOfType<theType>())
+      return false;
+    output.SetSize(1);
+    output.TheObjects[0]=currentData->GetValue<theType>();
+    return true;
+  }
+  if (targetDimNonMandatory!=-1)
+    if (targetDimNonMandatory!=this->children.size)
+      return false;
+  output.SetSize(this->children.size);
+  for (int i=0; i<output.size; i++)
+  { Expression& currentE=this->children[i];
+    Data* currentData;
+    if (this->theOperation!=this->theBoss->opData())
+    { Expression tempExpression=currentE;
+      if (conversionFunction!=0)
+        if (!conversionFunction(*this->theBoss, this->IndexBoundVars, tempExpression, 0))
+          return false;
+      if (tempExpression.theOperation!=this->theBoss->opData())
+        return false;
+      currentData=&this->theBoss->theData[tempExpression.theData];
+    } else
+      currentData=&this->theBoss->theData[currentE.theData];
+    if (!currentData->IsOfType<theType>())
+      return false;
+    output.TheObjects[i]=currentData->GetValue<theType>();
+  }
+  return true;
+}
+
+bool CommandList::fHWV
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.children.size!=3)
+  { if (comments!=0)
+      *comments << "Function HWV is expected to have three arguments: SS algebra type, List{}, List{}. ";
+    return false;
+  }
+  Expression& leftE=theExpression.children[0];
+  Expression& middleE=theExpression.children[1];
+  Expression& rightE=theExpression.children[2];
+  Expression resultSSalgebraE;
+  resultSSalgebraE=leftE;
+  if (!CommandList::fSSAlgebra(theCommands, inputIndexBoundVars, resultSSalgebraE, comments))
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+    return false;
+  }
+  if  (resultSSalgebraE.errorString!="")
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+    return false;
+  }
+  if (resultSSalgebraE.theOperation!=theCommands.opData())
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+    return false;
+  }
+  Data& theSSdata=theCommands.theData[resultSSalgebraE.theData];
+  if (theSSdata.type!=Data::typeSSalgebra)
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+    return false;
+  }
+  if (theSSdata.GetSmallInt()>= theCommands.theLieAlgebras.size)
+  { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
+    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
+    assert(false);
+  }
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theLieAlgebras[theSSdata.GetSmallInt()];
+  int theRank=theSSalgebra.GetRank();
+  Vector<PolynomialRationalCoeff> highestWeight;
+  Vector<Rational> parabolicSel;
+  if (!middleE.GetVector<PolynomialRationalCoeff>(highestWeight, theRank, &CommandList::fPolynomial, comments))
+  { if(comments!=0)
+      *comments << "Failed to convert the second argument of HWV to a list of " << theRank
+      << " polynomials. The second argument you gave is " << middleE.ElementToString() << ".";
+    return false;
+  }
+  if (!rightE.GetVector<Rational>(parabolicSel, theRank, 0, comments))
+  { if(comments!=0)
+      *comments << "Failed to convert the third argument of HWV to a list of " << theRank
+      << " rationals. The third argument you gave is " << rightE.ElementToString() << ".";
+    return false;
+  }
+    Vector<RationalFunction> theWeight;
+/*  theWeight=weight;
+  RationalFunction RFOne, RFZero;
+  RFOne.MakeNVarConst(theNode.impliedNumVars, 1, & theGlobalVariables);
+  RFZero.Nullify(theNode.impliedNumVars, & theGlobalVariables);
+  std::string report;
+  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
+  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theNode.owner->theModulePolys;
+  int indexOfModule=-1;
+  Selection selectionParSel;
+  selectionParSel=parSel;
+  for (int i=0; i<theMods.size; i++)
+  { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
+    if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
+          selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
+    { indexOfModule=i;
+      break;
+    }
+  }
+  if (indexOfModule==-1)
+  { indexOfModule=theMods.size;
+    theMods.SetSize(theMods.size+1);
+  }
+  ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
+  if (!theMod.flagIsInitialized)
+  { assert(theWeight[0].NumVars==RFOne.NumVars);
+    bool isGood=theMod.MakeFromHW
+    (theNode.owner->theHmm.theRange(), theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
+
+    out << report;
+    if (!isGood)
+      return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  }
+  theElt.MakeHWV(theMods, indexOfModule, RFOne);
+  theNode.outputString=out.str();
+  theNode.ExpressionType=theNode.typeGenVermaElt;
+  return theNode.errorNoError;*/
+  if (comments!=0)
+    *comments << "Yeeeepeeeeeee!!!!!  "
+    << "<br>The highest weight: " << highestWeight.ElementToString() << "<br> The par sel: " << parabolicSel.ElementToString();
+  return false;
+}
+
 bool CommandList::fMatrix
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=3)
@@ -686,7 +831,7 @@ bool CommandList::fMatrix
 
 bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ Data outputData;
+{ Data outputData(theCommands);
   std::stringstream errorLog;
   outputData.type=outputData.typePoly;
   HashedList<Expression> VariableImages;
@@ -696,13 +841,12 @@ bool CommandList::fPolynomial
   }
   theExpression.theOperation=theCommands.opData();
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(outputData);
-  std::stringstream out;
-  for (int i=0; i<VariableImages.size; i++)
-  { out  << "<br> x_{" << i+1 << "}:=" << VariableImages[i].ElementToString(0, 10);
-    if (i!=VariableImages.size-1)
-      out << ";";
-  }
-  theExpression.theComments=out.str();
+  if (comments!=0)
+    for (int i=0; i<VariableImages.size; i++)
+    { *comments  << "x_{" << i+1 << "}:=" << VariableImages[i].ElementToString(0, 10);
+      if (i!=VariableImages.size-1)
+        *comments << ";<br>";
+    }
   return true;
 }
 
@@ -750,10 +894,15 @@ bool CommandList::fSSAlgebra
   { errorStream << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.";
     return theExpression.SetError(errorStream.str());
   }
+  int oldSize=theCommands.theLieAlgebras.size;
   SemisimpleLieAlgebra theSSalgebra;
   theSSalgebra.ComputeChevalleyConstantS(theWeylLetter, theRank, theCommands.theLieAlgebras, *theCommands.theGlobalVariableS);
   Data tempData(theCommands);
   tempData.theRational.GetElement()=theCommands.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(theSSalgebra);
+  if (oldSize<theCommands.theLieAlgebras.size)
+    if (comments!=0)
+      *comments << "Lie algebra of type " << theSSalgebra.GetLieAlgebraName()
+      << " generated. The resulting multiplication table is " << theSSalgebra.ElementToString(*theCommands.theGlobalVariableS);
   tempData.type=tempData.typeSSalgebra;
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(tempData);
   theExpression.theOperation=theCommands.opData();
@@ -821,6 +970,9 @@ void CommandList::initPredefinedVars()
   ("UnionNoRepetition", & this->EvaluateStandardUnionNoRepetition, "",
    "Makes a union without repetition of the elements of its arguments. \
    UnionNoRepetition{}(X, Y) equals X \\sqcup Y. ", "");
+  this->AddNonBoundVarMustBeNew
+  ("hwv", & this->fHWV, "",
+   "Highest weight vector . ", "hwv{}(B_3, (x_1,0,1),(1,0,0))");
 
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
@@ -854,28 +1006,28 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->syntaxErrors="";
   this->evaluationErrors.SetSize(0);
   this->targetProperties.SetSize(0);
-  this->AddOperationNoFail("+",this->EvaluateStandardPlus, "Plus", "", "", "");
-  this->AddOperationNoFail("-", this->EvaluateStandardMinus, "Minus", "", "", "");
-  this->AddOperationNoFail("/", this->EvaluateStandardDivide, "Divide", "", "", "");
-  this->AddOperationNoFail("*", this->EvaluateStandardTimes, "Times", "", "", "");
-  this->AddOperationNoFail("[]", this->EvaluateStandardLieBracket, "LieBracket", "", "", "");
-  this->AddOperationNoFail(":=", 0, ":=", "", "", "");
-  this->AddOperationNoFail("if:=", 0, "if:=", "", "", "");
-  this->AddOperationNoFail("^", 0, "Power", "", "", "");
-  this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual, "==", "", "", "");
+  this->AddOperationNoFail("+", this->EvaluateStandardPlus, "", "", "", false);
+  this->AddOperationNoFail("-", this->EvaluateStandardMinus, "", "", "", false);
+  this->AddOperationNoFail("/", this->EvaluateStandardDivide, "", "", "", false);
+  this->AddOperationNoFail("*", this->EvaluateStandardTimes, "", "", "", false);
+  this->AddOperationNoFail("[]", this->EvaluateStandardLieBracket, "", "", "", false);
+  this->AddOperationNoFail(":=", 0, "", "", "", false);
+  this->AddOperationNoFail("if:=", 0, "", "", "", false);
+  this->AddOperationNoFail("^", 0, "", "", "", false);
+  this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual, "", "", "", false);
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
   //expression
-  this->AddOperationNoFail("{}", this->EvaluateStandardFunction, "ApplyFunction", "", "", "");
+  this->AddOperationNoFail("{}", this->EvaluateStandardFunction, "", "", "", false);
   //the following is the binding variable operation
-  this->AddOperationNoFail("VariableNonBound", 0, "VariableNonBound", "", "", "");
-  this->AddOperationNoFail("VariableBound", 0, "BoundVariable", "", "", "");
-  this->AddOperationNoFail("OperationList", 0, "OperationList", "", "", "");
+  this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
+  this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
+  this->AddOperationNoFail("OperationList", 0, "", "", "", false);
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
-  this->AddOperationNoFail("\\cup", this->EvaluateStandardUnion, "Union", "", "", "");
-  this->AddOperationNoFail("\\sqcup", this->EvaluateStandardUnionNoRepetition, "UnionNoRepetition", "", "", "");
-  this->AddOperationNoFail("Error", 0, "Error", "", "", "");
-  this->AddOperationNoFail("Data", 0, "Data", "", "", "");
-  this->AddOperationNoFail(";", 0, "EndStatement", "", "", "");
+  this->AddOperationNoFail("\\cup", this->EvaluateStandardUnion, "", "", "", false);
+  this->AddOperationNoFail("\\sqcup", this->EvaluateStandardUnionNoRepetition, "", "", "", false);
+  this->AddOperationNoFail("Error", 0, "", "", "", false);
+  this->AddOperationNoFail("Data", 0, "", "", "", false);
+  this->AddOperationNoFail(";", 0, "", "", "", false);
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
@@ -1445,7 +1597,7 @@ bool CommandList::ExtractPolyRational
       }
     }
   }
-  if (theInput.theData==this->opData())
+  if (theInput.theOperation==this->opData())
   { Data& theData=this->theData[theInput.theData];
     if (theData.type==theData.typeRational)
     { output.MakeNVarConst(0, theData.theRational.GetElement());
@@ -1567,9 +1719,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   { debugString=theExpression.ElementToString();
   }
   if (theExpression.IndexBoundVars!=-1)
-  { if (debugString=="fib{{}(2-1)}")
-      debugString=theExpression.ElementToString();
-    indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
+  { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
     if (indexInCache!=-1)
     { theExpression=
       this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache];
@@ -1641,9 +1791,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
           }
       }
     if (theExpression.IndexBoundVars!=-1)
-    { if (debugString=="fib{{}(2-1)}")
-        debugStringIntermediate=theExpression.ElementToString();
-      this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
+    { this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
       if (NonReduced)
       { if (currentExpressionTransformations.Contains(theExpression))
         { std::stringstream errorStream;
@@ -1795,15 +1943,15 @@ void CommandList::EvaluateCommands()
     out << this->syntaxErrors;
     out << "<hr>";
   }
+  std::string startingExpressionString=this->theCommands.ElementToString(0,10000);
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, 0, this->MaxRecursionDepthDefault, thePairs, &loggingStream);
   std::stringstream comments;
-  out << "<table><tr><td>" << this->theCommands.ElementToString(0, 10000)
-  << "</td><td>" << this->theCommands.ElementToString(0, 10000, true, false, false, &comments) << "</td></tr></table>";
+  out << "<table border=\"1\" ><tr><th>Your input</th><th>Result</th><th>Result in LaTeX</th></tr><tr><td>"<< startingExpressionString << "</td><td>"  << this->theCommands.ElementToString(0, 10000)
+  << "</td><td>" << this->theCommands.ElementToString(0, 10000, true, false, false, &comments) << "</td></tr>";
   if (comments.str()!="")
-    out << comments.str();
-  loggingStream << "<b>CommandList status. </b><br>";
-  loggingStream << this->ElementToString();
+    out << "<tr><td colspan=\"3\"> "<< comments.str() << "</td></tr>";
+  out << "</table>";
   this->theLog= loggingStream.str();
   this->output=out.str();
 }
@@ -2016,11 +2164,13 @@ std::string Expression::ElementToString
     { out << "<tr><td>";
       if (useLatex && recursionDepth==0)
         out << CGI::GetHtmlMathSpanFromLatexFormula
-        (this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments));
+        (this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+         +((i!=this->children.size-1)?";": ""));
       else
-        out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
-      if (i!=this->children.size-1)
-        out << ";";
+      { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+        if (i!=this->children.size-1)
+          out << ";";
+      }
 //      out << "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Context index: " << this->IndexBoundVars;
       out << "</td></tr>";
     }
@@ -2036,7 +2186,7 @@ std::string Expression::ElementToString
     out << ")";
   if (outComments!=0)
   { if (this->theComments!="" || additionalDataComments!="")
-      *outComments << "<br>Comments to expression " << out.str() << ":<br>";
+      *outComments << "Comments to expression " << out.str() << ":<br>";
     if (this->theComments!="")
       *outComments << this->theComments << "<br>";
     if (additionalDataComments!="")
@@ -2083,13 +2233,12 @@ std::string VariableNonBound::GetHandlerFunctionName(CommandList& owner)
 void CommandList::AddOperationNoFail
   (const std::string& theOpName,
    const Function::FunctionAddress& theFunAddress,
-   const std::string& opFunctionTechnicalName,
    const std::string& opArgumentList, const std::string& opDescription,
-   const std::string& opExample
+   const std::string& opExample, bool inputNameNotUsed
    )
 { VariableNonBound theVar;
   if (theFunAddress!=0)
-  { Function currentFunction(theFunAddress, opFunctionTechnicalName, opArgumentList, opDescription, opExample);
+  { Function currentFunction(theFunAddress, theOpName, opArgumentList, opDescription, opExample, inputNameNotUsed);
     theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(currentFunction);
   } else
     theVar.HandlerFunctionIndex=-1;
@@ -2112,12 +2261,66 @@ int CommandList:: AddNonBoundVarReturnVarIndex
   if (theIndex!=-1)
     return theIndex;
   if (funHandler!=0)
-  { Function theFun(funHandler, theName, argList, description, exampleArgs);
+  { Function theFun(funHandler, theName, argList, description, exampleArgs, true);
     theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(theFun);
   }
   this->theNonBoundVars.AddOnTop(theVar);
   this->theDictionary.AddNoRepetition(theName);
   return this->theNonBoundVars.size-1;
+}
+
+std::string CommandList::ElementToStringNonBoundVars()
+{ std::stringstream out;
+  std::string openTag1="<span style=\"color:#0000FF\">";
+  std::string closeTag1="</span>";
+  std::string openTag2="<span style=\"color:#FF0000\">";
+  std::string closeTag2="</span>";
+  out << "<br>\n" << this->theNonBoundVars.size << " global variables " << " (= "
+  << this->NumPredefinedVars  << " predefined + " << this->theNonBoundVars.size-this->NumPredefinedVars
+  << " user-defined). <br>Predefined: \n<br>\n";
+  for (int i=0; i<this->theNonBoundVars.size; i++)
+  { out << openTag1 << this->theNonBoundVars[i].theName << closeTag1;
+    std::string handlerName=this->theNonBoundVars[i].GetHandlerFunctionName(*this);
+    if (handlerName!="")
+      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
+    if (i!=this->theNonBoundVars.size-1)
+    { out << ", ";
+      if (i==this->NumPredefinedVars-1 )
+        out << "<br>user-defined:\n<br>\n";
+    }
+  }
+  return out.str();
+}
+
+std::string Function::ElementToString(CommandList& theBoss)const
+{ std::stringstream out;
+  out << "<span style=\"display: inline\" id=\"functionBox" << this->theName << "\" >";
+  if (this->flagNameIsUsed)
+    out << this->theName << "{}(" << this->theArgumentList << ")";
+  else
+    out << this->theName;
+  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->theName
+  << "');\">More/less info</button><span id=\"fun" << this->theName
+  << "\" style=\"display: none\"><br>";
+  if (!this->flagNameIsUsed)
+    out << "This function is invoked indirectly as an operation handler. ";
+  out << this->theDescription << "<br>Example. <a href=\""
+  << theBoss.DisplayNameCalculator  << "?"
+  << " textType=Calculator&textDim=1&textInput="
+  << CGI::UnCivilizeStringCGI(this->theExample)
+  << "\"> " << this->theExample << "</a></span></span>";
+  return out.str();
+}
+
+std::string CommandList::ElementToStringFunctionHandlers()
+{ std::stringstream out;
+  out << "<br>\n Handler functions (" << this->theFunctions.size << " total):<br>\n";
+  for (int i=0; i<this->theFunctions.size; i++)
+  { out << "\n" << this->theFunctions[i].ElementToString(*this);
+    if (i!=this->theFunctions.size-1)
+      out << "<br>";
+  }
+  return out.str();
 }
 
 std::string CommandList::ElementToString()
@@ -2132,6 +2335,7 @@ std::string CommandList::ElementToString()
   double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds;
   out << "<br>Elapsed time since evaluation was started: "
   << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).";
+  out << this->ElementToStringFunctionHandlers();
   out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
@@ -2147,36 +2351,13 @@ std::string CommandList::ElementToString()
     if(i!=this->operations.size-1)
       out << ", ";
   }
-  out << "<br>\n Handler functions (" << this->theFunctions.size << " total):<br>\n";
-  for (int i=0; i<this->theFunctions.size; i++)
-  { out << "\n" << openTag2 << this->theFunctions[i].ElementToString() << closeTag2;
-    if (this->theFunctions[i].theFunction==0)
-      out << " [empty function]";
-//    else
-//      out << "@" << std::hex << this->theFunctions[i].theFunction;
-    if (i!=this->theFunctions.size-1)
-      out << ", ";
-  }
   out << "<br>\n Dictionary (" << this->theDictionary.size << " total):\n<br>\n";
   for (int i=0; i<this->theDictionary.size; i++)
   { out << openTag1 << this->theDictionary[i] << closeTag1;
     if (i!=this->theDictionary.size-1)
       out << ", ";
   }
-  out << "<br>\n" << this->theNonBoundVars.size << " global variables " << " (= "
-  << this->NumPredefinedVars  << " predefined + " << this->theNonBoundVars.size-this->NumPredefinedVars
-  << " user-defined). <br>Predefined: \n<br>\n";
-  for (int i=0; i<this->theNonBoundVars.size; i++)
-  { out << openTag1 << this->theNonBoundVars[i].theName << closeTag1;
-    std::string handlerName=this->theNonBoundVars[i].GetHandlerFunctionName(*this);
-    if (handlerName!="")
-      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
-    if (i!=this->theNonBoundVars.size-1)
-    { out << ", ";
-      if (i==this->NumPredefinedVars-1 )
-        out << "<br>user-defined:\n<br>\n";
-    }
-  }
+  out << this->ElementToStringNonBoundVars();
   out << "<br>\nData entries (" << this->theData.size << " total):\n<br>\n";
   for (int i=0; i<this->theData.size; i++)
   { out << openTag3 << this->theData[i].ElementToString() << closeTag3;
@@ -2429,10 +2610,10 @@ std::string Data::ElementToString(std::stringstream* comments)const
   { case Data::typeSSalgebra:
       out << "SemisimpleLieAlgebra{}("
       << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].GetLieAlgebraName(false) << ")";
-      if (comments!=0)
-        *comments << "Comments to data " << out.str() << ":<br>"
-        << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
-        ElementToString(*this->owner->theGlobalVariableS);
+//      if (comments!=0)
+//        *comments << "Comments to data " << out.str() << ":<br>"
+//        << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
+//        ElementToString(*this->owner->theGlobalVariableS);
       return out.str();
     case Data::typeElementSSalgebra:
       out << this->owner->theLieAlgebraElements[this->theRational.GetElementConst().NumShort].ElementToString();
@@ -2440,7 +2621,8 @@ std::string Data::ElementToString(std::stringstream* comments)const
     case Data::typeRational:
       return this->theRational.GetElementConst().ElementToString();
     case Data::typePoly:
-      return this->thePoly.GetElementConst().ElementToString();
+      out << "Polynomial{}(" << this->thePoly.GetElementConst().ElementToString() << ")";
+      return out.str();
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -2777,4 +2959,39 @@ bool CommandList::ReplaceXByConCon
   //    this->DecreaseStackSetCharacterRanges(2);
   return true;
 }
+
+template < >
+bool Data::IsOfType<PolynomialRationalCoeff>()const
+{ return this->type==this->typePoly;
+}
+
+template < >
+PolynomialRationalCoeff Data::GetValue<PolynomialRationalCoeff>()const
+{ if (this->type!=this->typePoly)
+  { std::cout << "This is a programming error. Data of type "
+    << this->ElementToStringDataType()
+    << " is treated as if it were data of type Polynomial."
+    << " Please debug file " << __FILE__ << " line " <<__LINE__;
+    assert(false);
+  }
+  return this->thePoly.GetElementConst();
+}
+
+template < >
+bool Data::IsOfType<Rational>()const
+{ return this->type==this->typeRational;
+}
+
+template < >
+Rational Data::GetValue<Rational>()const
+{ if (this->type!=this->typeRational)
+  { std::cout << "This is a programming error. Data of type "
+    << this->ElementToStringDataType()
+    << " is treated as if it were data of type Rational."
+    << " Please debug file " << __FILE__ << " line " <<__LINE__;
+    assert(false);
+  }
+  return this->theRational.GetElementConst();
+}
+
 

@@ -955,21 +955,34 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::initPredefinedVars()
-{ this->AddNonBoundVarMustBeNew("IsInteger", &this->fIsInteger, "", " returns 1 if the argument is an integer, 0 otherwise. ", "");
-  this->AddNonBoundVarMustBeNew("SemisimpleLieAlgebra", & this->fSSAlgebra, "", "creates a semisimple Lie algebra (at the moment implemented for simple Lie algebras only).", "");
-  this->AddNonBoundVarMustBeNew("Polynomial", & this->fPolynomial, "", "Creates an internal data structure representation of a polynomial expression, implemented without use of expression trees.", "");
+{ this->AddNonBoundVarMustBeNew
+("IsInteger", &this->fIsInteger, "",
+ " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ", "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
+  this->AddNonBoundVarMustBeNew
+  ("SemisimpleLieAlgebra", & this->fSSAlgebra, "",
+   "Creates a simple Lie algebra. Will be changed to creating a semisimple Lie algebra in the foreseeable future. \
+   Creates a function that returns the elements of a simple Lie algebra with Weyl type and rank \
+   given in the format WeylLetter_Rank.  \
+   Elements of the cartan are addressed as arguments of the form (0,s), root system generators are addressed \
+   with one index only. ", "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
+  this->AddNonBoundVarMustBeNew
+  ("Polynomial", & this->fPolynomial, "",
+   "Creates a c++ representation of a polynomial expression. The data structure is implemented without \
+   use of expression trees, and obeys substitution rules as a single object (expression with a single node).",
+   "Polynomial{}(x(x+y)^2+(x{}x)^2)");
   this->AddNonBoundVarMustBeNew
   ("FunctionToMatrix", & this->fMatrix, "",
-   "Creates a matrix from a function. \
-   For example, FunctionToMatrix{}(A,5,6) will create a 5 by six matrix with entries A_{1,1} to A_{5,6} ", "");
+   "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
+   the third- the number of columns.\
+   ", "X:=FunctionToMatrix{}(A,5,6); A{}({{a}},{{b}}):=a+b; X;");
   this->AddNonBoundVarMustBeNew
   ("Union", & this->EvaluateStandardUnion, "",
-   "Makes a union of the elements of its arguments. \
-   Union{}(X, Y) equals X \\cup Y. ", "");
+   "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
+   "X:=FunctionToMatrix{}(A,3,4); Union{}X; A{}({{i}},{{j}}):=i*i-j*j; Union{}X ");
   this->AddNonBoundVarMustBeNew
   ("UnionNoRepetition", & this->EvaluateStandardUnionNoRepetition, "",
-   "Makes a union without repetition of the elements of its arguments. \
-   UnionNoRepetition{}(X, Y) equals X \\sqcup Y. ", "");
+   "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
+   "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
   this->AddNonBoundVarMustBeNew
   ("hwv", & this->fHWV, "",
    "Highest weight vector . ", "hwv{}(B_3, (x_1,0,1),(1,0,0))");
@@ -1006,25 +1019,57 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->syntaxErrors="";
   this->evaluationErrors.SetSize(0);
   this->targetProperties.SetSize(0);
-  this->AddOperationNoFail("+", this->EvaluateStandardPlus, "", "", "", false);
-  this->AddOperationNoFail("-", this->EvaluateStandardMinus, "", "", "", false);
-  this->AddOperationNoFail("/", this->EvaluateStandardDivide, "", "", "", false);
-  this->AddOperationNoFail("*", this->EvaluateStandardTimes, "", "", "", false);
-  this->AddOperationNoFail("[]", this->EvaluateStandardLieBracket, "", "", "", false);
+  this->AddOperationNoFail
+  ("+", this->EvaluateStandardPlus, "",
+   "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
+    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", false);
+  this->AddOperationNoFail
+  ("-", this->EvaluateStandardMinus, "",
+   "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
+   -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", false);
+  this->AddOperationNoFail
+  ("/", this->EvaluateStandardDivide, "",
+    "If a and b are rational computes a/b. Otherwise does nothing.", "3/5+(a+b)/5", false);
+  this->AddOperationNoFail
+  ("*", this->EvaluateStandardTimes, "",
+   "1) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))). \
+   2) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; {{c}}*({{a}}+{{b}}):=c*a+c*b. \
+   3) 3.1) If a and b are rational, computes a*b. 3.2) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). \
+   3.3) If the expression is of the form a*(b*c) and  a and b are rational, substitutes a*(b*c) by (a*b)*c. \
+   3.4) If the expression is of the form a*(b*c) and b is rational but a is not, substitutes the expression by b*(a*c). ",
+   "2*c_1*d*3", false);
+  this->AddOperationNoFail
+  ("[]", this->EvaluateStandardLieBracket, "",
+   "Lie bracket. Not documented at the moment, as the calculator implementation of semisimple Lie \
+   algebra elements might change.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
   this->AddOperationNoFail(":=", 0, "", "", "", false);
   this->AddOperationNoFail("if:=", 0, "", "", "", false);
   this->AddOperationNoFail("^", 0, "", "", "", false);
-  this->AddOperationNoFail("==", this->EvaluateStandardEqualEqual, "", "", "", false);
+  this->AddOperationNoFail
+  ("==", this->EvaluateStandardEqualEqual, "",
+   "Evaluates to 1 if the left argument equals the right argument, otherwise evaluates to zero.",
+   "x==y; x:=1; y:=1; x==y", false);
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
   //expression
-  this->AddOperationNoFail("{}", this->EvaluateStandardFunction, "", "", "", false);
+  this->AddOperationNoFail
+  ("{}", this->EvaluateStandardFunction, "",
+   "1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
+   2) If the first argument is of type predefined data but not rational, invokes the c++ implementation of the \
+   dereference operator of the data. \
+   3) If the first argument of {} has a hard-coded handler function, invokes that function.", "f{}(x)+1{}(x)-(1/2){}x ", false);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
   this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
   this->AddOperationNoFail("OperationList", 0, "", "", "", false);
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
-  this->AddOperationNoFail("\\cup", this->EvaluateStandardUnion, "", "", "", false);
-  this->AddOperationNoFail("\\sqcup", this->EvaluateStandardUnionNoRepetition, "", "", "", false);
+  this->AddOperationNoFail
+  ("\\cup", this->EvaluateStandardUnion, "",
+   "If all arguments of \\cup are of type list, substitutes the expression with a list containing \
+   the union of all members (with repetition).", "x\\cup List{} x \\cup List{}x \\cup (a,b,x)", false);
+  this->AddOperationNoFail
+  ("\\sqcup", this->EvaluateStandardUnionNoRepetition, "",
+   "If all arguments of \\sqcup are of type list, substitutes the expression with a list containing \
+   the union of all members; all repeating members are discarded.", "(x,y,x)\\sqcup(1,x,y,2)", false);
   this->AddOperationNoFail("Error", 0, "", "", "", false);
   this->AddOperationNoFail("Data", 0, "", "", "", false);
   this->AddOperationNoFail(";", 0, "", "", "", false);
@@ -1568,10 +1613,15 @@ bool CommandList::ExtractPolyRational
     for (int i=0; i<theInput.children.size; i++)
     { if (!this->ExtractPolyRational(bufferPoly, theInput.children[i], VariableImages, RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
         return false;
+//      assert(bufferPoly.NumVars<VariableImages.size);
       bufferPoly.SetNumVariablesSubDeletedVarsByOne(VariableImages.size);
       output.SetNumVariablesSubDeletedVarsByOne(VariableImages.size);
       if (theInput.theOperation==this->opTimes())
-        output*=bufferPoly;
+      { if (i==0)
+          output=bufferPoly;
+        else
+          output*=bufferPoly;
+      }
       else if (theInput.theOperation==this->opMinus())
       { if (theInput.children.size==1)
           output.Subtract(bufferPoly);
@@ -1580,7 +1630,11 @@ bool CommandList::ExtractPolyRational
         else
           output.Subtract(bufferPoly);
       } else if (theInput.theOperation==this->opPlus())
-        output+=bufferPoly;
+      { if (i==0)
+          output=bufferPoly;
+        else
+          output+=bufferPoly;
+      }
     }
     return true;
   }
@@ -2294,27 +2348,31 @@ std::string CommandList::ElementToStringNonBoundVars()
 
 std::string Function::ElementToString(CommandList& theBoss)const
 { std::stringstream out;
-  out << "<span style=\"display: inline\" id=\"functionBox" << this->theName << "\" >";
+  out << "<span style=\"display: inline\" id=\"functionBox" << CGI::clearSlashes(this->theName) << "\" >";
   if (this->flagNameIsUsed)
     out << this->theName << "{}(" << this->theArgumentList << ")";
   else
     out << this->theName;
-  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << this->theName
-  << "');\">More/less info</button><span id=\"fun" << this->theName
+  out <<  "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << CGI::clearSlashes(this->theName)
+  << "');\">More/less info</button><span id=\"fun" << CGI::clearSlashes(this->theName)
   << "\" style=\"display: none\"><br>";
   if (!this->flagNameIsUsed)
     out << "This function is invoked indirectly as an operation handler. ";
-  out << this->theDescription << "<br>Example. <a href=\""
-  << theBoss.DisplayNameCalculator  << "?"
-  << " textType=Calculator&textDim=1&textInput="
-  << CGI::UnCivilizeStringCGI(this->theExample)
-  << "\"> " << this->theExample << "</a></span></span>";
+
+  out << this->theDescription;
+  if (this->theExample!="")
+  out << "<br>Example. <a href=\""
+    << theBoss.DisplayNameCalculator  << "?"
+    << " textType=Calculator&textDim=1&textInput="
+    << CGI::UnCivilizeStringCGI(this->theExample)
+    << "\"> " << this->theExample << "</a>" ;
+    out << "</span></span>";
   return out.str();
 }
 
 std::string CommandList::ElementToStringFunctionHandlers()
 { std::stringstream out;
-  out << "<br>\n Handler functions (" << this->theFunctions.size << " total):<br>\n";
+  out << "\n <b>Handler functions (" << this->theFunctions.size << " total).</b><br>\n";
   for (int i=0; i<this->theFunctions.size; i++)
   { out << "\n" << this->theFunctions[i].ElementToString(*this);
     if (i!=this->theFunctions.size-1)
@@ -2335,7 +2393,7 @@ std::string CommandList::ElementToString()
   double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds;
   out << "<br>Elapsed time since evaluation was started: "
   << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).";
-  out << this->ElementToStringFunctionHandlers();
+  out << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr>";
   out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;

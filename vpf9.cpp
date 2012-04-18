@@ -486,6 +486,14 @@ void CGI::clearDollarSigns(std::string& theString, std::string& output)
   output=out.str();
 }
 
+std::string CGI::clearSlashes(const std::string& theString)
+{ std::stringstream out;
+  for(unsigned int i=0; i<theString.size(); i++)
+    if(theString[i]!='\\')
+      out << theString[i];
+  return out.str();
+}
+
 void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 { std::stringstream out;
   for(unsigned int i=0; i<theString.size(); i++)

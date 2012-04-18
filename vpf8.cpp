@@ -5711,6 +5711,7 @@ std::string CGI::UnCivilizeStringCGI(const std::string& input)
       case '[': out << "%5B"; break;
       case ']': out << "%5D"; break;
       case ',': out << "%2C"; break;
+      case '=': out << "%3D"; break;
       case '{': out << "%7B"; break;
       case ';': out << "%3B"; break;
       case '/': out << "%2F"; break;

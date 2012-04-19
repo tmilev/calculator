@@ -151,6 +151,7 @@ template < > int HashedListB<MonomialUniversalEnveloping<RationalFunction>, Mono
 template < > int HashedListB<MonomialGeneralizedVerma<RationalFunction>, MonomialGeneralizedVerma<RationalFunction>::HashFunction >::PreferredHashSize=50;
 template < > int HashedListB<MonomialTensorGeneralizedVermas<RationalFunction>, MonomialTensorGeneralizedVermas<RationalFunction>::HashFunction >::PreferredHashSize=50;
 template < > int HashedListB<std::string, MathRoutines::hashString>::PreferredHashSize=50;
+template < > int HashedListB<ElementTensorsGeneralizedVermas<RationalFunction>, ElementTensorsGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=50;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -22652,20 +22653,18 @@ void MatrixLargeRational::FindZeroEigenSpaceOneOneForEachNonPivot(roots& output)
 }
 
 void ElementSimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (int generatorIndex, SemisimpleLieAlgebra& owner)
+  (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { //Changing RootSystem order invalidates this function!
-  if (owner.owner==0 || owner.indexInOwner==-1)
+  if (&inputOwners==0 || inputIndexInOwners==-1)
   { std::cout << " This is a programming error: usage of non-initialized Semisimple Lie algebra. Please debug file "
     << __FILE__ << " line " << __LINE__;
     assert(false);
   }
-  this->ownerArray=owner.owner;
-  this->indexOfOwnerAlgebra=owner.indexInOwner;
-  int numPosRoots=owner.theWeyl.RootsOfBorel.size;
-  int theDimension=owner.theWeyl.CartanSymmetric.NumRows;
-  this->Nullify(owner);
+  this->Nullify(inputOwners, inputIndexInOwners);
+  int numPosRoots=this->GetOwner().theWeyl.RootsOfBorel.size;
+  int theDimension=this->GetOwner().theWeyl.CartanSymmetric.NumRows;
   if(generatorIndex< numPosRoots || generatorIndex>=numPosRoots+theDimension)
-  { this->SetCoefficient(owner.theWeyl.RootSystem.TheObjects[owner.ChevalleyGeneratorIndexToRootIndex(generatorIndex)], 1, owner);
+  { this->SetCoefficient(this->GetOwner().theWeyl.RootSystem.TheObjects[this->GetOwner().ChevalleyGeneratorIndexToRootIndex(generatorIndex)], 1, this->GetOwner());
     return;
   }
   this->Hcomponent.MakeEi(theDimension, generatorIndex-numPosRoots);
@@ -23272,8 +23271,8 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
   this->Evaluated=true;
   for (int i=0; i<this->children.size; i++)
   { if (this->Operation==Parser::tokenEmbedding)
-      this->ContextLieAlgebra=&this->owner->theHmm.theDomain();
-    this->owner->TheObjects[this->children.TheObjects[i]].ContextLieAlgebra=this->ContextLieAlgebra;
+      this->IndexContextLieAlgebra=this->owner->theHmm.theDomain().indexInOwner;
+    this->owner->TheObjects[this->children.TheObjects[i]].IndexContextLieAlgebra=this->IndexContextLieAlgebra;
     this->owner->TheObjects[this->children.TheObjects[i]].Evaluate(theGlobalVariables);
     if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError)
     { this->CopyError(this->owner->TheObjects[this->children.TheObjects[i]]);
@@ -23335,7 +23334,7 @@ void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
           MonomialUniversalEnveloping<PolynomialRationalCoeff> tempMon;
           tempMon.operator=(leftNode.UEElement.GetElement().TheObjects[0]);
           tempMon.Powers.TheObjects[0].MultiplyBy(rightNode.polyValue.GetElement());
-          this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
+          this->UEElement.GetElement().Nullify(this->owner->theAlgebras, this->IndexContextLieAlgebra);
           this->UEElement.GetElement().AddMonomial(tempMon);
           this->ExpressionType=this->typeUEelement;
           return;
@@ -23426,7 +23425,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     return;
   }
   int theIndex= rightNode.intValue;
-  int theDimension= this->ContextLieAlgebra->theWeyl.CartanSymmetric.NumRows;
+  int theDimension= this->GetContextLieAlgebra().theWeyl.CartanSymmetric.NumRows;
   if (leftNode.Operation==Parser::tokenH)
   { theIndex--;
     if (theIndex>=theDimension || theIndex<0)
@@ -23435,18 +23434,18 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     }
     root tempRoot;
     tempRoot.MakeEi(theDimension, theIndex);
-    this->UEElement.GetElement().AssignElementCartan(tempRoot, 0, *this->ContextLieAlgebra);
+    this->UEElement.GetElement().AssignElementCartan(tempRoot, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
   if (leftNode.Operation==Parser::tokenG)
-  { theIndex=this->ContextLieAlgebra->DisplayIndexToRootIndex(theIndex);
-    theIndex=this->ContextLieAlgebra->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(theIndex);
-    if (theIndex<0 || theIndex>this->ContextLieAlgebra->theWeyl.RootSystem.size+theDimension)
+  { theIndex=this->GetContextLieAlgebra().DisplayIndexToRootIndex(theIndex);
+    theIndex=this->GetContextLieAlgebra().RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(theIndex);
+    if (theIndex<0 || theIndex>this->GetContextLieAlgebra().theWeyl.RootSystem.size+theDimension)
     { this->SetError(this->errorBadIndex);
       return;
     }
-    this->UEElement.GetElement().MakeOneGeneratorCoeffOne(theIndex, 0, *this->ContextLieAlgebra);
+    this->UEElement.GetElement().MakeOneGeneratorCoeffOne(theIndex, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return;
   }
@@ -23462,15 +23461,15 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     this->ExpressionType=this->typeWeylAlgebraElement;
   }
   if (leftNode.Operation==Parser::tokenF)
-  { if (theIndex>0 && theIndex<=this->ContextLieAlgebra->GetNumPosRoots())
-      theIndex+= this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
+  { if (theIndex>0 && theIndex<=this->GetContextLieAlgebra().GetNumPosRoots())
+      theIndex+= this->GetContextLieAlgebra().GetNumPosRoots()+this->GetContextLieAlgebra().GetRank()-1;
     else if (theIndex==0)
-      theIndex=this->ContextLieAlgebra->GetNumPosRoots()+this->ContextLieAlgebra->GetRank()-1;
+      theIndex=this->GetContextLieAlgebra().GetNumPosRoots()+this->GetContextLieAlgebra().GetRank()-1;
     else if (theIndex<0)
-      theIndex+= this->ContextLieAlgebra->GetNumPosRoots();
+      theIndex+= this->GetContextLieAlgebra().GetNumPosRoots();
     else
       theIndex--;
-    if (theIndex<0 || theIndex>this->ContextLieAlgebra->theWeyl.RootSystem.size+this->ContextLieAlgebra->GetRank())
+    if (theIndex<0 || theIndex>this->GetContextLieAlgebra().theWeyl.RootSystem.size+this->GetContextLieAlgebra().GetRank())
     { this->SetError(this->errorBadIndex);
       return;
     }
@@ -23511,7 +23510,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->polyValue.GetElement().Nullify(this->impliedNumVars);
       break;
     case ParserNode::typeUEelement:
-      this->UEElement.GetElement().Nullify(*this->ContextLieAlgebra);
+      this->UEElement.GetElement().Nullify(this->owner->theAlgebras, this->IndexContextLieAlgebra);
       break;
     case ParserNode::typeUEElementOrdered:
       this->UEElementOrdered.GetElement().Nullify(this->owner->testAlgebra);
@@ -23534,7 +23533,7 @@ void ParserNode::InitForAddition(GlobalVariables* theContext)
       this->owner->SetNumVarsModulePolys(this->impliedNumVars);
     break;
     case ParserNode::typeCharSSFDMod:
-      this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
+      this->theChar.GetElement().Nullify(this->owner->theAlgebras, this->IndexContextLieAlgebra);
       break;
     default:
       break;
@@ -23547,7 +23546,7 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
   if(this->ExpressionType==this->typePoly)
     this->polyValue.GetElement().MakeNVarConst(this->impliedNumVars, (Rational)1);
   if(this->ExpressionType==this->typeUEelement)
-    this->UEElement.GetElement().AssignInt(1, this->impliedNumVars, *this->ContextLieAlgebra);
+    this->UEElement.GetElement().AssignInt(1, this->impliedNumVars, this->GetContextLieAlgebra());
   if(this->ExpressionType==this->typeUEElementOrdered)
   { PolynomialRationalCoeff PolyOne;
     PolyOne.MakeNVarConst(this->impliedNumVars, (Rational) 1);
@@ -23558,7 +23557,7 @@ void ParserNode::InitForMultiplication(GlobalVariables* theContext)
   if (this->ExpressionType==this->typeRationalFunction)
     this->ratFunction.GetElement().MakeNVarConst(this->impliedNumVars, (Rational) 1, theContext);
   if (this->ExpressionType==this->typeCharSSFDMod)
-    this->theChar.GetElement().MakeTrivial(*this->ContextLieAlgebra);
+    this->theChar.GetElement().MakeTrivial(this->owner->theAlgebras, this->IndexContextLieAlgebra);
 }
 
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables)
@@ -23932,7 +23931,7 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
 
 void Parser::Clear()
 { this->theValue.Clear();
-  this->theValue.UEElement.GetElement().Nullify(this->theHmm.theRange());
+  this->theValue.UEElement.GetElement().Nullify(this->theAlgebras, 0);
   this->TokenStack.size=0;
   this->ValueStack.size=0;
 }
@@ -24101,8 +24100,8 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 (MonomialUniversalEnveloping<PolynomialRationalCoeff>& input,
  ElementUniversalEnveloping<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
 { ElementUniversalEnveloping<PolynomialRationalCoeff> tempElt;
-  output.Nullify(this->theRange());
-  output.MakeConst(input.Coefficient, this->theRange());
+  output.Nullify(*this->owners, this->indexRange);
+  output.MakeConst(input.Coefficient, *this->owners, this->indexRange);
   for (int i=0; i<input.generatorsIndices.size; i++)
   { if (input.generatorsIndices.TheObjects[i]>=this->imagesAllChevalleyGenerators.size)
       return false;
@@ -24123,7 +24122,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 (ElementUniversalEnveloping<PolynomialRationalCoeff>& input,
  ElementUniversalEnveloping<PolynomialRationalCoeff>& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=&input);
-  output.Nullify(this->theRange());
+  output.Nullify(*this->owners, this->indexRange);
   ElementUniversalEnveloping<PolynomialRationalCoeff> tempElt;
   for (int i=0; i<input.size; i++)
   { if(!this->ApplyHomomorphism(input.TheObjects[i], tempElt, theGlobalVariables))
@@ -24147,17 +24146,17 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   { ElementSimpleLieAlgebra& tempElt1=this->imagesAllChevalleyGenerators.TheObjects[i];
     ElementSimpleLieAlgebra& tempElt2=this->domainAllChevalleyGenerators.TheObjects[i];
     tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i, this->theDomain());
+    (i, *this->owners, this->indexDomain);
     tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i, this->theRange());
+    (i, *this->owners, this->indexRange);
   }
   for (int i=0; i<theWeylDim; i++)
   { ElementSimpleLieAlgebra& tempElt1=this->imagesSimpleChevalleyGenerators.TheObjects[i];
     tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i, this->theRange());
+    (i, *this->owners, this->indexRange);
     ElementSimpleLieAlgebra& tempElt2=this->imagesSimpleChevalleyGenerators.TheObjects[theWeylDim+i];
     tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i+numPosRoots, this->theRange());
+    (i+numPosRoots, *this->owners, this->indexRange);
   }
 //  std::cout << this->ElementToString(theGlobalVariables);
 }
@@ -24465,7 +24464,7 @@ void ParserNode::Clear()
   this->children.size=0;
   this->rationalValue.MakeZero();
   if (this->owner!=0)
-    this->ContextLieAlgebra=&this->owner->theHmm.theRange();
+    this->IndexContextLieAlgebra=this->owner->theHmm.indexRange;
 }
 
 std::string SemisimpleLieAlgebra::GetLetterFromGeneratorIndex
@@ -25245,11 +25244,11 @@ void EigenVectorComputation::MakeGenericMonomialBranchingCandidate
 { int RangeRank=theHmm.theRange().theWeyl.CartanSymmetric.NumRows;
   int numPosRootsRange=theHmm.theRange().theWeyl.RootsOfBorel.size;
   int dimPosPartQuotient=numPosRootsRange- theHmm.theDomain().theWeyl.RootsOfBorel.size;
-  theElt.Nullify(theHmm.theRange());
+  theElt.Nullify(*theHmm.owners, theHmm.indexRange);
   MonomialUniversalEnveloping<PolynomialRationalCoeff> tempMon;
   PolynomialRationalCoeff tempP;
   tempP.MakeNVarConst((int) RangeRank+dimPosPartQuotient, (Rational) 1);
-  tempMon.MakeConst(tempP, theHmm.theRange());
+  tempMon.MakeConst(tempP, *theHmm.owners, theHmm.indexRange);
   roots selectedRootSpaces;
   //int indexFirstPosRootDomain=theHmm.theDomain.theWeyl.RootsOfBorel.size+ theHmm.theDomain.theWeyl.CartanSymmetric.NumRows;
   selectedRootSpaces.Reserve(theHmm.theDomain().theWeyl.RootsOfBorel.size);
@@ -25263,7 +25262,8 @@ void EigenVectorComputation::MakeGenericMonomialBranchingCandidate
   ElementSimpleLieAlgebra tempElt2;
   int numFound=0;
   for (int i=0; i<numPosRootsRange; i++)
-  { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, theHmm.theRange());
+  { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *theHmm.owners, theHmm.indexRange);
     tempElt2.ElementToVectorRootSpacesFirstThenCartan(tempRoot);
     selectedRootSpaces.AddOnTop(tempRoot);
     if (selectedRootSpaces.GetRankOfSpanOfElements(theGlobalVariables)==selectedRootSpaces.size)
@@ -25279,14 +25279,13 @@ void EigenVectorComputation::MakeGenericMonomialBranchingCandidate
 
 void EigenVectorComputation::MakeGenericVermaElement
 (ElementUniversalEnveloping<PolynomialRationalCoeff>& theElt, SemisimpleLieAlgebra& owner)
-{ theElt.owner=&owner;
+{ theElt.Nullify(*owner.owner, owner.indexInOwner);
   int numPosRoots= owner.theWeyl.RootsOfBorel.size;
   int theRank=owner.theWeyl.CartanSymmetric.NumRows;
-  theElt.Nullify(owner);
   MonomialUniversalEnveloping<PolynomialRationalCoeff> tempMon;
   PolynomialRationalCoeff tempP;
   tempP.MakeNVarConst((int) theRank+numPosRoots, (Rational) 1);
-  tempMon.MakeConst(tempP, owner);
+  tempMon.MakeConst(tempP, *theElt.owners, theElt.indexInOwners);
   for (int i=0; i<numPosRoots; i++)
   { tempP.MakeNVarDegOnePoly(theRank+numPosRoots, theRank+i, (Rational) 1);
     tempMon.MultiplyByGeneratorPowerOnTheRight(i, tempP);
@@ -25463,7 +25462,8 @@ void SSalgebraModuleOld::InduceFromEmbedding(std::stringstream& out, Homomorphis
   PolynomialOutputFormat theFormat;
   theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i<numGeneratorsRange; i++)
-  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, theHmm.theRange());
+  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *theHmm.owners, theHmm.indexRange);
     currentElt.ElementToVectorNegativeRootSpacesFirst(currentElementRootForm);
     if (!BasisAllFoundElements.LinSpanContainsRoot(currentElementRootForm, theGlobalVariables))
     { this->ExtractHighestWeightVectorsFromVector(currentElementRootForm, newlyFoundStartingVectors, posGeneratorsMatForm, negGeneratorsMatForm);
@@ -25675,7 +25675,7 @@ void SSalgebraModuleOld::ConvertElementsToAdMatrixFormNegativeRootSpacesFirst
   root tempRoot;
   for (int i=0; i<numGenerators; i++)
   { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i, ambientLieAlgebra);
+    (i, *ambientLieAlgebra.owner, ambientAlgebrA.indexInOwner);
     ambientLieAlgebra.LieBracket(input, tempElt1, tempElt2);
     tempElt2.ElementToVectorNegativeRootSpacesFirst(tempRoot);
     for (int j=0; j<numGenerators; j++)
@@ -25821,7 +25821,7 @@ void SSalgebraModuleOld::mapInvariantsToEmbedding
   { ElementUniversalEnveloping<PolynomialRationalCoeff>& currentElt=
     this->invariantsMappedToEmbedding.TheObjects[i];
     Polynomial<Rational>& currentPoly=this->invariantsFound.TheObjects[i];
-    currentElt.Nullify(owner);
+    currentElt.Nullify(*owner.owner, owner.indexInOwner);
     for (int k=0; k<currentPoly.size; k++)
     { this->mapMonomialToEmbedding(currentPoly.TheObjects[k], currentElt, owner, out, theGlobalVariables, theRingUnit, theRingZero);
     }
@@ -25842,13 +25842,13 @@ void SSalgebraModuleOld::mapMonomialToEmbedding
   ElementUniversalEnveloping<PolynomialRationalCoeff> tempElt;
   ElementUniversalEnveloping<PolynomialRationalCoeff> currentContribution;
   ElementUniversalEnveloping<PolynomialRationalCoeff> theUEUnit;
-  theUEUnit.MakeConst((Rational) 1, 0, owner);
+  theUEUnit.MakeConst((Rational) 1, 0, *owner.owner, owner.indexInOwner);
 
   List<int> permutationMap;
   thePermutation.GetPermutationLthElementIsTheImageofLthIndex(permutationMap);
   out << input.ElementToString(PolyFormatLocal);
   for (int i=0; i<numPermutations; i++, thePermutation.incrementAndGetPermutation(permutationMap))
-  { currentContribution.MakeConst((Rational)1, 0, owner);
+  { currentContribution.MakeConst((Rational)1, 0, *owner.owner, owner.indexInOwner);
     for (int j=0; j<input.NumVariables; j++)
       if (input.degrees[j]>0)
       { tempElt.AssignElementLieAlgebra(this->moduleElementsEmbedded.TheObjects[permutationMap.TheObjects[j]], 0, owner);
@@ -25894,7 +25894,7 @@ void ElementUniversalEnveloping<CoefficientType>::AssignFromCoordinateFormWRTBas
 { /*int numVars=0;
   if (theBasis.size>0)
     numVars= theBasis.TheObjects[0].GetNumVariables();*/
-  this->Nullify(owner);
+  this->Nullify(*owner.owner, owner.indexInOwner);
   ElementUniversalEnveloping<CoefficientType> tempElt;
   for (int i=0; i<input.size; i++)
     if (!input.TheObjects[i].IsEqualToZero())
@@ -25925,7 +25925,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   polyOne.MakeOne(numVars);
   polyZero.Nullify(numVars);
   for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
-  { Accum.MakeConst((Rational) 1, 0, *this);
+  { Accum.MakeConst((Rational) 1, 0, *this->owner, this->indexInOwner);
     for (int j=0; j<theSel.elements.size; j++)
       if (theSel.elements.TheObjects[j]<numGenerators)
       { int generatorIndex=theSel.elements.TheObjects[j];
@@ -26038,7 +26038,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   out << "<br> Partitioning roots: " << theVP.PartitioningRoots.ElementToString();
   for (int i=0; i<numGenerators; i++)
   { ElementUniversalEnveloping<PolynomialRationalCoeff>& currentUE=generatorsBeingActedOn.TheObjects[i];
-    currentUE.MakeOneGeneratorCoeffOne(i, 0, *this);
+    currentUE.MakeOneGeneratorCoeffOne(i, 0, *this->owner, this->indexInOwner);
   }
   theVP.theRoot=theWeight;
   theVP.ComputeAllPartitions();
@@ -26086,7 +26086,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   theBracketsOfTheElements.ListActualSizeIncrement=50;
   theBracketsOfTheElements.size=0;
   for (int i=0; i<theVP.thePartitions.size; i++)
-  { Accum.MakeConst((Rational) 1, 0, *this);
+  { Accum.MakeConst((Rational) 1, 0, *this->owner, this->indexInOwner);
     List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
     for (int generatorIndex=0; generatorIndex<currentPartition.size; generatorIndex++)
     { int generatorPower=currentPartition.TheObjects[generatorIndex];
@@ -26192,7 +26192,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
   MonomialUniversalEnveloping<PolynomialRationalCoeff> currentMon;
   ElementUniversalEnveloping<PolynomialRationalCoeff> tempElt;
   for (int i=0; i<output.size; i++)
-  { currentMon.Nullify(theDomainDimension, inputHmm.theRange());
+  { currentMon.Nullify(theDomainDimension, *inputHmm.owners, inputHmm.indexRange);
     Rational tempRat=1;
     currentMon.Coefficient.ComputeDebugString();
     currentMon.Coefficient.MakeNVarConst((int)theDimension, tempRat);
@@ -26202,7 +26202,7 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
       (inputHmm.theRange().RootToIndexInUE(-inputHmm.theRange().theWeyl.RootsOfBorel[j]), polyN);
     }
     out << currentMon.ElementToString(false, false, theGlobalVariables, tempFormat) << "<br>" ;
-    tempElt.Nullify(inputHmm.theRange());
+    tempElt.Nullify(*inputHmm.owners, inputHmm.indexRange);
     tempElt.AddOnTop(currentMon);
     output.TheObjects[i]=tempElt;
   }
@@ -26221,7 +26221,6 @@ std::string EigenVectorComputation::ComputeEigenVectorsOfWeight
   { List<ElementUniversalEnveloping<PolynomialRationalCoeff> >& currentTargets= targets.TheObjects[i];
     List<ElementUniversalEnveloping<PolynomialRationalCoeff> >& currentTargetsNoMod= targetsNoMod.TheObjects[i];
     theSimpleGenerator.AssignElementLieAlgebra(inputHmm.imagesSimpleChevalleyGenerators.TheObjects[i], theDimension, inputHmm.theRange());
-    theSimpleGenerator.ComputeDebugString(theGlobalVariables, tempFormat);
     out << "Generator number " << i+1 << ": " << beginMath;
     for (int j=0; j<output.size; j++)
     { theSimpleGenerator.LieBracketOnTheRight(output.TheObjects[j], tempElt);
@@ -26501,7 +26500,8 @@ void SemisimpleLieAlgebraOrdered::init
   Vector<Rational> coordsInCurrentBasis;
   ElementSimpleLieAlgebra currentElt;
   for (int i=0; i<owner.GetNumGenerators(); i++)
-  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, this->theOwner);
+  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *owner.owner, owner.indexInOwner);
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
       this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis.TheObjects[j];
@@ -26519,7 +26519,8 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder
   defaultOrder.SetSize(owner.GetNumGenerators());
   for (int i=0; i<defaultOrder.size; i++)
   { ElementSimpleLieAlgebra& currentElt=defaultOrder.TheObjects[i];
-    currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, owner);
+    currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *owner.owner, owner.indexInOwner);
   }
   this->init(defaultOrder, owner, theGlobalVariables);
 }
@@ -26587,9 +26588,9 @@ bool ParserNode::ConvertToNextType
     }
     if (GoalType==this->typeCharSSFDMod)
     { MonomialChar<Rational> tempMon;
-      tempMon.weightFundamentalCoords.MakeZero(this->ContextLieAlgebra->GetRank());
+      tempMon.weightFundamentalCoords.MakeZero(this->GetContextLieAlgebra().GetRank());
       tempMon.Coefficient=this->rationalValue;
-      this->theChar.GetElement().Nullify(this->ContextLieAlgebra);
+      this->theChar.GetElement().Nullify(this->owner->theAlgebras, this->IndexContextLieAlgebra);
       this->theChar.GetElement()+=tempMon;
       this->ExpressionType=this->typeCharSSFDMod;
       return true;
@@ -26613,7 +26614,7 @@ bool ParserNode::ConvertToNextType
       typeToConvertTo=this->typeWeylAlgebraElement;
     switch (typeToConvertTo)
     { case ParserNode::typeUEelement:
-        this->UEElement.GetElement().MakeConst(this->polyValue.GetElement(), *this->ContextLieAlgebra);
+        this->UEElement.GetElement().MakeConst(this->polyValue.GetElement(), this->owner->theAlgebras, this->IndexContextLieAlgebra);
         this->ExpressionType=this->typeUEelement;
         return true;
       case ParserNode::typeWeylAlgebraElement:
@@ -27090,7 +27091,7 @@ void ParserNode::CopyValue(const ParserNode& other)
 { this->intValue=other.intValue;
   this->ErrorType=other.ErrorType;
   this->rationalValue=other.rationalValue;
-  this->ContextLieAlgebra=other.ContextLieAlgebra;
+  this->IndexContextLieAlgebra=other.IndexContextLieAlgebra;
   this->children.CopyFromBase(other.children);
   this->Evaluated= other.Evaluated;
   this->outputString= other.outputString;

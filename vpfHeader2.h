@@ -16,9 +16,10 @@ public:
   MemorySaving<PolynomialRationalCoeff> thePoly;
   MemorySaving<RationalFunction> theRationalFunction;
   MemorySaving<std::string> theError;
+  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   int type;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra
+  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra, typeEltTensorGenVermasOverRF
   };
   Data (const Rational& x, CommandList& inputOwner)
   { this->owner=&inputOwner;
@@ -44,11 +45,13 @@ public:
     }
   }
   bool MakeElementSemisimpleLieAlgebra
-(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int theDisplayIndex, std::stringstream* comments)
+(CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+ int theDisplayIndex, std::stringstream* comments)
   ;
   bool MakeElementSemisimpleLieAlgebra
-(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
-;
+(CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+ int index1, int index2, std::stringstream* comments)
+ ;
   template<class theType>
   bool IsOfType()const;
   template<class theType>
@@ -449,6 +452,8 @@ public:
   //Following are containers for data structures that are implemented in C++.
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
+  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
+  List<ModuleSSalgebraNew<RationalFunction> > theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
   HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
   HashedListB<Data, Data::HashFunction> theData;

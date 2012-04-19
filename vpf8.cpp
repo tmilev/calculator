@@ -6521,7 +6521,8 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     if(usePNG)
       out << "$";
     for (int i=0; i<numRoots+theDimension; i++)
-    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this);
+    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (i, *this->owner, this->indexInOwner);
       tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
       (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
       out << " & ";
@@ -6535,7 +6536,8 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     Rational tempRat;
     //int lineCounter=0;
     for (int i=0; i<theDimension+numRoots; i++)
-    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i,*this);
+    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (i,*this->owner, this->indexInOwner);
       tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
       (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
       if(usePNG)
@@ -6544,7 +6546,8 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
       if(usePNG)
         out << "$";
       for (int j=0; j<numRoots+theDimension; j++)
-      { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this);
+      { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+        (j, *this->owner, this->indexInOwner);
         this->LieBracket(tempElt1, tempElt2, tempElt3);
         tempS=tempElt3.ElementToStringNegativeRootSpacesFirst
           (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
@@ -8781,7 +8784,7 @@ int ParserNode::EvaluateDrawWeightSupport
   //roots theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange());
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeNoMults(report, theGlobalVariables, theDV, 10000);
@@ -8813,7 +8816,7 @@ int ParserNode::EvaluateDrawWeightSupportWithMults
   //roots theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
-  theChar.MakeFromWeight(highestWeightSimpleCoords, &theNode.owner->theHmm.theRange());
+  theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
   DrawingVariables theDV;
   std::string report;
   theChar.DrawMeWithMults(report, theGlobalVariables, theDV, 10000);
@@ -9483,17 +9486,16 @@ int ParserNode::EvaluateModVermaRelations
 template<class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left)
 { ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
-  tempElt1.AssignElementLieAlgebra(left, this->GetNumVariables(), *this->owner);
+  tempElt1.AssignElementLieAlgebra(left, this->GetNumVariables(), this->GetOwner());
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
 
 template<class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
-  (const ElementUniversalEnveloping<CoefficientType>& input,
-   ElementUniversalEnveloping<CoefficientType>& output,
+  (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
-{ output.Nullify(*this->owner);
+{ output.Nullify(*this->owners, this->indexInOwners);
   ElementSimpleLieAlgebra tempElt;
   output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
@@ -9502,7 +9504,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
       return false;
     for (int j=0; j<nextCycleSize; j++)
     { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-        (this->generatorsIndices[i], *this->owner) ;
+        (this->generatorsIndices[i], *this->owners, this->indexInOwners) ;
       output.LieBracketOnTheLeft(tempElt);
     }
   }
@@ -9515,7 +9517,7 @@ bool ElementUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
-  output.Nullify(*this->owner);
+  output.Nullify(*this->owners, this->indexInOwners);
   ElementUniversalEnveloping<CoefficientType> summand;
   for (int i=0; i<this->size; i++)
   { if(!this->TheObjects[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
@@ -9545,11 +9547,11 @@ int ParserNode::EvaluateMakeCasimir
 { theNode.ExpressionType=theNode.typeUEelement;
   if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
     theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
-  theNode.UEElement.GetElement().MakeCasimir(*theNode.ContextLieAlgebra, 0, theGlobalVariables);
+  theNode.UEElement.GetElement().MakeCasimir(theNode.GetContextLieAlgebra(), 0, theGlobalVariables);
   std::stringstream out;
-  out << "Context Lie algebra: " << theNode.ContextLieAlgebra->GetLieAlgebraName
-  (theNode.ContextLieAlgebra->theWeyl.WeylLetter, theNode.ContextLieAlgebra->GetRank());
-  out << ". The coefficient: " << theNode.ContextLieAlgebra->theWeyl.GetKillingDivTraceRatio().ElementToString()
+  out << "Context Lie algebra: " << theNode.GetContextLieAlgebra().GetLieAlgebraName
+  (theNode.GetContextLieAlgebra().theWeyl.WeylLetter, theNode.GetContextLieAlgebra().GetRank());
+  out << ". The coefficient: " << theNode.GetContextLieAlgebra().theWeyl.GetKillingDivTraceRatio().ElementToString()
   <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
   theNode.outputString=out.str();
 
@@ -9758,16 +9760,16 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   PolynomialRationalCoeff polyOne;
   polyOne.MakeNVarConst(0, (Rational) 1);
   if (leftNode.Operation==Parser::tokenG)
-  { if (!this->ContextLieAlgebra->theWeyl.IsARoot(theWeight))
+  { if (!this->GetContextLieAlgebra().theWeyl.IsARoot(theWeight))
       return this->SetError(this->errorDunnoHowToDoOperation);
-    theUEElement.MakeOneGeneratorCoeffOne(theWeight, 0, *this->ContextLieAlgebra);
+    theUEElement.MakeOneGeneratorCoeffOne(theWeight, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return this->errorNoError;
   }
   if (leftNode.Operation==Parser::tokenH)
-  { if (theWeight.size!=this->ContextLieAlgebra->GetRank())
+  { if (theWeight.size!=this->GetContextLieAlgebra().GetRank())
       return this->SetError(this->errorDimensionProblem);
-    theUEElement.AssignElementCartan(theWeight, 0, *this->ContextLieAlgebra);
+    theUEElement.AssignElementCartan(theWeight, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
     this->ExpressionType=this->typeUEelement;
     return this->errorNoError;
   }

@@ -13,6 +13,7 @@ template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
 template < > int List<Function>::ListActualSizeIncrement=50;
 template < > int List<Data>::ListActualSizeIncrement=500;
 template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
+template < > int List<ElementTensorsGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=50;
 
 
 inline int IntIdentity(const int& x)
@@ -765,9 +766,8 @@ bool CommandList::fHWV
   RFOne.MakeNVarConst(theNumVars, 1, theCommands.theGlobalVariableS);
   RFZero.Nullify(theNumVars, theCommands.theGlobalVariableS);
   std::string report;
-  Data theElementData(theCommands);
-  theElementData.type=theElementData.typeEltTensorGenVermasOverRF;
-  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theElementData.theElementTensorGenVermas.GetElement();
+  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
+  //=theElementData.theElementTensorGenVermas.GetElement();
   List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theCategoryOmodules;
   int indexOfModule=-1;
   Selection selectionParSel;
@@ -798,10 +798,10 @@ bool CommandList::fHWV
     }
   }
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-  theExpression.MakeDatA(theElementData, theCommands, inputIndexBoundVars);
-  if (comments!=0)
-    *comments << "Yeeeepeeeeeee!!!!!  "
-    << "<br>The highest weight: " << highestWeight.ElementToString() << "<br> The par sel: " << parabolicSel.ElementToString();
+  Data outputData;
+  outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt);
+  theExpression.MakeDatA(outputData, theCommands, inputIndexBoundVars);
+//  std::cout <<"<hr>" << outputData.ElementToString();
   return true;
 }
 
@@ -922,7 +922,7 @@ bool CommandList::fSSAlgebra
   if (oldSize<theCommands.theLieAlgebras.size)
     if (comments!=0)
       *comments << "Lie algebra of type " << theSSalgebra.GetLieAlgebraName()
-      << " generated. The resulting multiplication table is " << theSSalgebra.ElementToString(*theCommands.theGlobalVariableS);
+      << " generated. The resulting Lie bracket pairing table is " << theSSalgebra.ElementToString(*theCommands.theGlobalVariableS);
   tempData.type=tempData.typeSSalgebra;
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(tempData);
   theExpression.theOperation=theCommands.opData();
@@ -2605,6 +2605,7 @@ bool Data::operator==(const Data& other)
   switch(this->type)
   { case Data::typeSSalgebra:
     case Data::typeElementSSalgebra:
+    case Data::typeEltTensorGenVermasOverRF:
     case Data::typeRational:
       return this->theRational.GetElement()==other.theRational.GetElementConst();
     case Data::typePoly:
@@ -2624,12 +2625,11 @@ int Data::HashFunction()const
 { switch (this->type)
   { case Data::typeSSalgebra:
     case Data::typeElementSSalgebra:
+    case Data::typeEltTensorGenVermasOverRF:
     case Data::typeRational:
       return this->theRational.GetElementConst().HashFunction()*this->type;
     case Data::typePoly:
       return this->thePoly.GetElementConst().HashFunction()*this->type;
-    case Data::typeEltTensorGenVermasOverRF:
-      return this->theElementTensorGenVermas.GetElementConst().HashFunction();
     case Data::typeError:
       return MathRoutines::hashString(this->theError.GetElementConst());
     default:
@@ -2658,12 +2658,12 @@ void Data::operator=(const Data& other)
   this->type=other.type;
   this->owner=other.owner;
   switch(this->type)
-  { case Data::typeElementSSalgebra:
+  { case Data::typeEltTensorGenVermasOverRF:
+    case Data::typeElementSSalgebra:
     case Data::typeSSalgebra:
     case Data::typeRational: this->theRational=other.theRational; break;
     case Data::typePoly: this->thePoly=other.thePoly; break;
     case Data::typeError: this->theError=other.theError; break;
-    case Data::typeEltTensorGenVermasOverRF: this->theElementTensorGenVermas=other.theElementTensorGenVermas; break;
     default:
       std::cout << "This is a programming error: operator= does not cover type "
       << this->ElementToStringDataType()
@@ -2710,7 +2710,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
       out << "Polynomial{}(" << this->thePoly.GetElementConst().ElementToString() << ")";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
-      return this->theElementTensorGenVermas.GetElementConst().ElementToString(*this->owner->theGlobalVariableS);
+      return this->owner->theElemenentsGeneralizedVermaModuleTensors[this->GetSmallInt()].ElementToString(*this->owner->theGlobalVariableS);
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -2835,6 +2835,15 @@ bool Data::MakeElementSemisimpleLieAlgebra
   this->theRational.GetElement()=inputOwner.theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(tempElt);
   return true;
 }
+
+void Data::MakeElementTensorGeneralizedVermas
+(CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
+{ this->owner=&theBoss;
+  this->theRational.GetElement()=
+  this->owner->theElemenentsGeneralizedVermaModuleTensors.AddNoRepetitionOrReturnIndexFirst(theElt);
+  this->type=this->typeEltTensorGenVermasOverRF;
+}
+
 
 SemisimpleLieAlgebra& ElementSimpleLieAlgebra::GetOwner()
 { if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)

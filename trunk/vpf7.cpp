@@ -1454,13 +1454,13 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->theHWSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordS);
   this->theHWDualCoordS= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFundamentalCoordS);
 
-  std::cout << "<br>input fund coords base field: " << HWFundCoords.ElementToString();
+/*  std::cout << "<br>input fund coords base field: " << HWFundCoords.ElementToString();
   std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ElementToStringGeneric();
   std::cout << "<br>dual coords: " << this->theHWDualCoordsBaseField.ElementToStringGeneric();
   std::cout << "<br>fund coords no base field: " << this->theHWFundamentalCoordS.ElementToString();
   std::cout << "<br>fund coords: " << this->theHWFundamentalCoordsBaseField.ElementToString();
   std::cout << "<br>simple coords no base field: " << this->theHWSimpleCoordS.ElementToString();
-
+*/
   this->theChaR.MakeFromWeight(this->theHWSimpleCoordS, *this->theAlgebras, this->indexAlgebra);
 
   LittelmannPath startingPath;

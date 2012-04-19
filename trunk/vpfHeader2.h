@@ -19,7 +19,7 @@ public:
   MemorySaving<PolynomialRationalCoeff> thePoly;
   MemorySaving<RationalFunction> theRationalFunction;
   MemorySaving<std::string> theError;
-  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
+//  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   int type;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra, typeEltTensorGenVermasOverRF
@@ -47,6 +47,9 @@ public:
         break;
     }
   }
+  void MakeElementTensorGeneralizedVermas
+  ( CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
+  ;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
@@ -72,8 +75,13 @@ public:
       return false;
     return this->theRational.GetElement().IsInteger();
   }
-  int GetSmallInt()
-  { return this->theRational.GetElement().NumShort;
+  int GetSmallInt()const
+  { if (this->theRational.IsZeroPointer())
+    { std::cout << "This is a programming error. Data::GetSmallInt is called on non-properly initialized data. "
+      << " Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+      assert(false);
+    }
+    return this->theRational.GetElementConst().NumShort;
   }
   bool SetError(const std::string& inputError)
   { this->FreeMemory();
@@ -461,6 +469,7 @@ public:
   List<SemisimpleLieAlgebra> theLieAlgebras;
   HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
   HashedListB<Data, Data::HashFunction> theData;
+  List<ElementTensorsGeneralizedVermas<RationalFunction> > theElemenentsGeneralizedVermaModuleTensors;
 //end of hardcoded data structures
   double StartTimeInSeconds;
 

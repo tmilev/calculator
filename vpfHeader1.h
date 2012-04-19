@@ -6518,6 +6518,15 @@ inline void TemplatePolynomial<TemplateMonomial, Element>::operator =(const Temp
 }
 
 template <class TemplateMonomial, class Element>
+inline bool TemplatePolynomial<TemplateMonomial, Element>::operator==
+(const TemplatePolynomial<TemplateMonomial, Element>& right)
+{ TemplatePolynomial<TemplateMonomial, Element> difference;
+  difference=*this;
+  difference-=right;
+  return difference.IsEqualToZero();
+}
+
+template <class TemplateMonomial, class Element>
 void TemplatePolynomial<TemplateMonomial, Element>::WriteToFile
 (std::fstream& output)
 { output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
@@ -17257,33 +17266,34 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
   PolynomialOutputFormat theFormat;
   theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   MonomialTensorGeneralizedVermas<CoefficientType>& firstMon=this->TheObjects[0];
-  bool includeV=false;
+  bool useBrackets=false;
   int indexInOwnerFirst=-1;
   if (firstMon.theMons.size!=1)
-    includeV=true;
+    useBrackets=true;
   else
     indexInOwnerFirst=firstMon.theMons[0].indexInOwner;
   for (int i=1; i< this->size; i++)
   { MonomialTensorGeneralizedVermas<CoefficientType>& curMon=this->TheObjects[i];
     if (curMon.theMons.size!=1)
-    { includeV=true;
+    { useBrackets=true;
       break;
     }
     if (curMon.theMons[0].indexInOwner!=indexInOwnerFirst)
-    { includeV=true;
+    { useBrackets=true;
       break;
     }
   }
-  if (!includeV)
+  if (useBrackets)
     out << "(";
   for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ElementToString(theGlobalVariables, theFormat, includeV);
+  { tempS=this->TheObjects[i].ElementToString(theGlobalVariables, theFormat, useBrackets);
     if (i!=0 && tempS[0]!='-')
       out << "+";
     out << tempS;
   }
-  if (!includeV)
-    out << ")" << firstMon.theMons[0].owneR->TheObjects[indexInOwnerFirst].ElementToStringHWV();
+  if (useBrackets)
+    out << ")";
+  out << firstMon.theMons[0].owneR->TheObjects[indexInOwnerFirst].ElementToStringHWV();
 //  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
 //  for (int i=0; i<this->size; i++)
 //  { std::cout << this->TheObjects[i].HashFunction() << ", ";

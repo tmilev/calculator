@@ -1,4 +1,6 @@
-#include<sstream>
+#include "vpf.h"
+ProjectInformationInstance ProjectInfoStaticHtmlcpp(__FILE__, "Static cpp file with html strings. The file is automatically generated from the RootSystem.html file. ");
+
 void static_html2(std::stringstream& output){
 output << " <html>\n";
 output << " <head> \n";

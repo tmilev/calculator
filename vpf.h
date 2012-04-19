@@ -46,4 +46,8 @@
 //The split into sub-headers is needed to speed up compilation times.
 #include "vpfHeader1.h"
 #include "vpfHeader2.h"
+#ifndef ProjectInfoVpfHalreadyDefined
+#define ProjectInfoVpfHalreadyDefined
+static ProjectInformationInstance ProjectInfoVpfH("vpf.h", "Wrapper header file (includes everything).");
+#endif
 #endif

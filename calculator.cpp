@@ -15,12 +15,11 @@
 #ifndef __DATE__
 #define __DATE__ " unknown date "
 #endif
+ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculator web interface.");
 
 //#undef ANNOYINGSTATISTICS
 //#define ANNOYINGSTATISTICS std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
 
-
-extern int GlobalPointerCounter;
 
 void getPath(char* path, std::string& output)
 { if (path==0) return;
@@ -212,7 +211,6 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-//  inputWeylString="Calculator";
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -229,6 +227,8 @@ int main(int argc, char **argv)
 //  civilizedInput="fib{}1:=1;\nfib{}0:=1;\nfib{}{{n}}:=fib{}(n-1)+fib{}(n-2);\nfib{}10";
 //  civilizedInput="hwv{}(B_3,(x_1,0,1),(1,0,0))";
 //  civilizedInput="Polynomial{} (1)";
+//  civilizedInput="hwv{}(B_3, (x_1,0,1),(1,0,0))";
+//  inputWeylString="Calculator";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -260,8 +260,9 @@ int main(int argc, char **argv)
     }
 
     std::cout << "</td><td valign=\"top\">";
+    std::cout << ProjectInformation::GetMainProjectInfo().ElementToString();
     std::cout << theComputation.theLog;
-    std::cout << "<b>CommandList status. </b><br>";
+    std::cout << "<hr><b>CommandList status. </b><br>";
     std::cout << theComputation.ElementToString();
 
     std::cout << "</td></tr></table>";
@@ -596,54 +597,12 @@ int main(int argc, char **argv)
   << " seconds. The time limit can be changed if you install from source by editing (file) calculator.cpp (function) main() (variable) "
   << "theGlobalVariables.MaxAllowedComputationTimeInSeconds ."
   << "<br> Clicking \"Go\" + blank screen = calculator bug. <br> Clicking \"Go\" + \"Internal server error\"=  serious calculator bug.<br> Clicking \"Go\" + wrong result= <b>very serious calculator bug</b>.";
-  std::cout << "<br>Bug reports = our wholehearted gratitude.<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
-  std::cout << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
-  std::cout << "<div id=\"sourceDetails\" style=\"display: none\">";
-	std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf.h?view=markup\"> Vector partition c++(1 out of 4 files (header file))</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf9.cpp?view=markup\"> Vector partition c++(2 out of 4 files (.cpp))</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf8.cpp?view=markup\"> Vector partition c++(3 out of 4 files (.cpp))</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/vpf7.cpp?view=markup\"> Vector partition c++(4 out of 4 files (.cpp))</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/calculator.cpp?view=markup\"> Calculator interface c++ (1 out of 2 files)</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/RootSystem.html.cpp?view=markup\"> Calculator interface c++ (2 out of 2 files)</a>\n";
-  std::cout << " <br>\n";
-  std::cout << " The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
-  std::cout << " <br>The calculator errors get caught either by 1) in-line asserts() (blank screen), or 2) by Apache/the system (internal server error)."
-  << "  \n<br> All precomputed data is stored <a href=\""
+  std::cout << "<br>Bug reports = our wholehearted gratitude.<br>";
+  std::cout << "  \n<br> All precomputed data is stored <a href=\""
   << theParser.DisplayPathOutputFolder
-  <<"\">here</a> (the precomputed data is stored as usual files). \
-  <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() \
-  calls. The LaTeX logs can be found by viewing the calculator page's source. <br> \
-  The html output is hardcoded: either by hand or transformed from a separate .html file using a \
-  micro-tool written for the purpose. ";
-  std::cout << " ";
-  std::cout << " \n";
-  std::cout << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> \
-  In order to get the calculator running on your machine you need to do the following. \
-  Simplifying the installation procedure is on our to-do list. \
-  <br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. \
-  <br>1) Download the c++ files in the links above. Alternatively you can check out the program's "
-  << " svn repository. The svn check out command is  &nbsp&nbsp  svn co https://vectorpartition.svn.sourceforge.net/svnroot/vectorpartition vectorpartition &nbsp&nbsp."
-  << "<br>2) Put them in a c++ project and make sure the following includes work:"
-  << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. "
-  << "They should work by default on almost any Linux distro. "
-  << "<br>3) Build the project to a console application named  &nbsp&nbsp calculator &nbsp&nbsp with default console application settings.  "
-  << "<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called "
-  << "&nbsp&nbsp ServerBase/    &nbsp&nbsp."
-  << "<br>5) Create folders &nbsp&nbsp ServerBase/cgi-bin  &nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
-  << "<br>6) Enable full read/write access for every user in the folder &nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
-  << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
-  << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts "
-  << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
-  << "<br>9) Configure the Apache server so the adress of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
-  << "<br>10) The basic installation is now complete; test the calculator by running it through your web browser."
-  << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp.";
-	std::cout <<	"</div>";
+  << "\">here</a> (the precomputed data is stored as usual files). ";
+  std::cout << "<br><button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('debugDetails');\">Debugging info</button>";
+  std::cout << ProjectInformation::GetMainProjectInfo().ElementToString();
   std::cout << "<div id=\"debugDetails\" style=\"display: none\">";
   std::cout << "<br>Debugging printouts follow.<br>Number of pointers used:" << ParallelComputing::GlobalPointerCounter << "<br>raw input string: " << inputString;
   std::cout << "<br>civilized input strings: " << civilizedInputSafish << "<br> chopped strings: <br>";

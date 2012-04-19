@@ -1,6 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1.h"
+ProjectInformationInstance ProjectInfoVpf9cpp(__FILE__, "Main implementation file. ");
+
 
 
 
@@ -24,7 +26,6 @@ int ParallelComputing::GlobalPointerCounter=0;
 int ParallelComputing::PointerCounterPeakRamUse=0;
 
 void (*CGI::functionCGIServerIgnoreUserAbort) (void)=0;
-
 
 Integer Integer::TheRingUnit(1) ;
 Integer Integer::TheRingMUnit(-1);
@@ -287,6 +288,7 @@ bool QuasiNumber::flagAnErrorHasOccurredTimeToPanic=false;
 bool IntegerPoly::flagAnErrorHasOccurredTimeToPanic=false;
 bool MatrixLargeRational::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
+
 
 void CombinatorialChamberContainer::GlueOverSubdividedChambersCheckLowestIndex(GlobalVariables& theGlobalVariables)
 { for (; ; )

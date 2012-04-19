@@ -6,7 +6,10 @@
 //the following  include contains all the c++ math routines used in the calculator.
 //The calculator uses relatively few functions, nevertheless the include is needed.
 #include "vpfHeader1.h"
-
+#ifndef ProjectInfoVpfHeader2AlreadyDefined
+#define ProjectInfoVpfHeader2AlreadyDefined
+static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
+#endif
 
 class Data
 {
@@ -48,6 +51,7 @@ public:
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
   ;
+  int GetDynamicSubtypeInfo();
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)

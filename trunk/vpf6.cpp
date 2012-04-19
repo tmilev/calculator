@@ -726,7 +726,8 @@ bool CommandList::fHWV
     << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
     assert(false);
   }
-  SemisimpleLieAlgebra& theSSalgebra=theCommands.theLieAlgebras[theSSdata.GetSmallInt()];
+  int indexOfAlgebra=theSSdata.GetSmallInt();
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theLieAlgebras[indexOfAlgebra];
   int theRank=theSSalgebra.GetRank();
   Vector<PolynomialRationalCoeff> highestWeight;
   Vector<Rational> parabolicSel;
@@ -742,17 +743,20 @@ bool CommandList::fHWV
       << " rationals. The third argument you gave is " << rightE.ElementToString() << ".";
     return false;
   }
-    Vector<RationalFunction> theWeight;
-/*  theWeight=weight;
+  Vector<RationalFunction> theWeight;
+  theWeight=highestWeight;
+  int theNumVars=highestWeight[0].NumVars;
   RationalFunction RFOne, RFZero;
-  RFOne.MakeNVarConst(theNode.impliedNumVars, 1, & theGlobalVariables);
-  RFZero.Nullify(theNode.impliedNumVars, & theGlobalVariables);
+  RFOne.MakeNVarConst(theNumVars, 1, theCommands.theGlobalVariableS);
+  RFZero.Nullify(theNumVars, theCommands.theGlobalVariableS);
   std::string report;
-  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
-  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theNode.owner->theModulePolys;
+  Data theElementData(theCommands);
+  theElementData.type=theElementData.typeEltTensorGenVermasOverRF;
+  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theElementData.theElementTensorGenVermas.GetElement();
+  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theCategoryOmodules;
   int indexOfModule=-1;
   Selection selectionParSel;
-  selectionParSel=parSel;
+  selectionParSel=parabolicSel;
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
     if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
@@ -769,20 +773,21 @@ bool CommandList::fHWV
   if (!theMod.flagIsInitialized)
   { assert(theWeight[0].NumVars==RFOne.NumVars);
     bool isGood=theMod.MakeFromHW
-    (theNode.owner->theHmm.theRange(), theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
-
-    out << report;
+    (theCommands.theLieAlgebras, indexOfAlgebra, theWeight, selectionParSel,
+     *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
+    if (comments!=0)
+      *comments << report;
     if (!isGood)
-      return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+    { theExpression.SetError("Error while generating highest weight module. See comments for details. ");
+      return true;
+    }
   }
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeGenVermaElt;
-  return theNode.errorNoError;*/
+  theExpression.MakeDatA(theElementData, theCommands, inputIndexBoundVars);
   if (comments!=0)
     *comments << "Yeeeepeeeeeee!!!!!  "
     << "<br>The highest weight: " << highestWeight.ElementToString() << "<br> The par sel: " << parabolicSel.ElementToString();
-  return false;
+  return true;
 }
 
 bool CommandList::fMatrix
@@ -1053,10 +1058,13 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   //expression
   this->AddOperationNoFail
   ("{}", this->EvaluateStandardFunction, "",
-   "1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
+   "The first argument of this operator represents a name of the function, the second argument represents the argument of that function.  \
+   1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
    2) If the first argument is of type predefined data but not rational, invokes the c++ implementation of the \
    dereference operator of the data. \
-   3) If the first argument of {} has a hard-coded handler function, invokes that function.", "f{}(x)+1{}(x)-(1/2){}x ", false);
+   3) If the first argument of {} has a hard-coded handler function {} invokes that hard-coded function onto the second argument.\
+   If the invocation of the hard-coded function is successful, the expression is substituted with the result of that invocation.",
+   "f{}(x)+1{}(x)-(1/2){}x ", false);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
   this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
@@ -2747,8 +2755,10 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 }
 
 bool Data::MakeElementSemisimpleLieAlgebra
-(CommandList& owner, SemisimpleLieAlgebra& ownerAlgebra, int index1, int index2, std::stringstream* comments)
-{ bool isGood=(index1==0 && index2 <=ownerAlgebra.GetRank() && index2>0);
+(CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+ int index1, int index2, std::stringstream* comments)
+{ SemisimpleLieAlgebra& ownerAlgebra=inputOwners[inputIndexInOwners];
+  bool isGood=(index1==0 && index2 <=ownerAlgebra.GetRank() && index2>0);
   if (!isGood)
   { if (comments!=0)
       *comments
@@ -2763,7 +2773,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   ElementSimpleLieAlgebra tempElt;
   int actualIndeX=index2-1+ownerAlgebra.GetNumPosRoots();
   tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (actualIndeX, ownerAlgebra);
+  (actualIndeX, inputOwners, inputIndexInOwners);
   this->owner=&owner;
   this->type=this->typeElementSSalgebra;
   this->theRational.GetElement()=owner.theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(tempElt);
@@ -2771,8 +2781,10 @@ bool Data::MakeElementSemisimpleLieAlgebra
 }
 
 bool Data::MakeElementSemisimpleLieAlgebra
-(CommandList& inputOwner, SemisimpleLieAlgebra& ownerAlgebra, int theDisplayIndex, std::stringstream* comments)
-{ bool isGood=(theDisplayIndex>0 && theDisplayIndex<= ownerAlgebra.GetNumPosRoots()) ||
+(CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+ int theDisplayIndex, std::stringstream* comments)
+{ SemisimpleLieAlgebra& ownerAlgebra=inputOwners[inputIndexInOwners];
+  bool isGood=(theDisplayIndex>0 && theDisplayIndex<= ownerAlgebra.GetNumPosRoots()) ||
   (theDisplayIndex<0 && theDisplayIndex>=- ownerAlgebra.GetNumPosRoots());
   if (!isGood)
   { if (comments!=0)
@@ -2795,7 +2807,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   else
     actualIndex+=ownerAlgebra.GetNumPosRoots()+ownerAlgebra.GetRank()-1;
   tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (actualIndex, ownerAlgebra);
+  (actualIndex, inputOwners, inputIndexInOwners);
   this->owner=&inputOwner;
   this->type=this->typeElementSSalgebra;
   this->theRational.GetElement()=inputOwner.theLieAlgebraElements.AddNoRepetitionOrReturnIndexFirst(tempElt);
@@ -2853,7 +2865,7 @@ bool Data::OperatorDereference
         return false;
       }
       return output.MakeElementSemisimpleLieAlgebra
-      (*this->owner, this->owner->theLieAlgebras[this->GetSmallInt()], whichInteger1, whichInteger2, comments);
+      (*this->owner, this->owner->theLieAlgebras, this->GetSmallInt(), whichInteger1, whichInteger2, comments);
     default:
       return false;
   }
@@ -2871,7 +2883,7 @@ bool Data::OperatorDereference
         return false;
       }
       return output.MakeElementSemisimpleLieAlgebra
-      (*this->owner, this->owner->theLieAlgebras[this->GetSmallInt()], whichInteger, comments);
+      (*this->owner, this->owner->theLieAlgebras, this->GetSmallInt(), whichInteger, comments);
     default:
       return false;
   }

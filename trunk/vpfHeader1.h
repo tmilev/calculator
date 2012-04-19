@@ -2681,6 +2681,7 @@ public:
     if (this->IsNegative())
       output.sign=-1;
   }
+  inline void SetDynamicSubtype(int dummyParameter){}
   inline void GetNumUnsigned(LargeIntUnsigned& output)
   { if (this->Extended==0)
     { if (this->NumShort<0)
@@ -4952,7 +4953,6 @@ public:
   std::string DebugString;
   // returns the number of lines used
   int StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const;
-
   void  ElementToString(std::string& output)const{ output=this->ElementToString();}
   std::string ElementToString()const{ PolynomialOutputFormat LocalFormat; return this->ElementToString(false, LocalFormat);}
   std::string ElementToString(bool breakLinesLatex, const PolynomialOutputFormat& PolyFormatLocal)const
@@ -5076,6 +5076,9 @@ public:
   void IncreaseNumVariablesShiftVarIndicesToTheRight(int theShift){this->IncreaseNumVariablesWithShiftToTheRight(theShift, theShift);};
   void IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
+  inline void SetDynamicSubtype(int newNumVars)
+  { this->SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  }
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { int result=-1;
     for (int i=0; i<this->size; i++)
@@ -5891,7 +5894,13 @@ public:
   ;
   void MultiplyBy(const RationalFunction& other){this->operator*=(other);}
   void Add(const RationalFunction& other)
-  { assert(this->NumVars==other.NumVars);
+  { if (this->NumVars!=other.NumVars)
+    { std::cout << "This is a programming error: attempting to add a rational function of "
+      << this->NumVars << " variables and a rational function of " << other.NumVars << " variables. "
+      << "A conversion function must be explicitly called before adding the two. "
+      << "Please debug file " << __FILE__ << " line " << __LINE__;
+      assert(false);
+    }
     assert(this->checkConsistency());
     assert(other.checkConsistency());
     assert(this!=&other);
@@ -11492,6 +11501,36 @@ public:
   }
 };
 
+class ProjectInformation
+{
+  public:
+  static ProjectInformation& GetMainProjectInfo()
+  { //This is required to avoid the static initialization order fiasco.
+    //For more information, google "static initialization order fiasco"
+    //and go to the first link. The solution used here was proposed inside that link.
+    static ProjectInformation MainProjectInfo;
+    return MainProjectInfo;
+  }
+  List<std::string> FileNames;
+  List<std::string> FileDescriptions;
+  std::string ElementToString();
+  MutexWrapper infoIsInitialized;
+  void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
+};
+
+class ProjectInformationInstance
+{
+  public:
+  ProjectInformationInstance(const std::string& fileName, const std::string& fileDescription)
+  { ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
+  }
+};
+
+#ifndef ProjectInformationInstancevpfHeader1instanceDefined
+#define ProjectInformationInstancevpfHeader1instanceDefined
+static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header file. ");
+#endif
+
 struct CGI
 {
 public:
@@ -12218,8 +12257,11 @@ public:
   { this->Clear();
   }
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables)
+  (GlobalVariables& theGlobalVariables)const
     ;
+  int HashFunction()const
+  { return this->::TemplatePolynomial<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
+  }
   inline static int HashFunction(const ElementTensorsGeneralizedVermas<CoefficientType>& input)
   { return input.::TemplatePolynomial<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
   }
@@ -17206,7 +17248,7 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables)
+  (GlobalVariables& theGlobalVariables)const
 { if (this->size==0)
     return "0";
   root parSel;

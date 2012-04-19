@@ -59,7 +59,8 @@ void writeStatic(const std::string& fileIn, const std::string& fileoutName, int 
   tempS2.append(fileoutName);
   std::fstream fileout;
   fileout.open(tempS2.c_str(), std::fstream::out| std::fstream::trunc);
-  fileout << "#include<sstream>\n";
+  fileout << "#include \"vpf.h\"\n";
+  fileout << "ProjectInformationInstance ProjectInfoStaticHtmlcpp(__FILE__, \"Static cpp file with html strings. The file is automatically generated from the RootSystem.html file. \");\n\n";
   tempS=thePath;
   tempS.append(fileIn);
   fileHeaderHtml.open(fileIn.c_str(), std::fstream::in|std::fstream::out);

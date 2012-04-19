@@ -1,6 +1,7 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpf.h"
+ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
 
 template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
@@ -668,6 +669,8 @@ bool Expression::GetVector
     if (targetDimNonMandatory!=this->children.size)
       return false;
   output.SetSize(this->children.size);
+  int dynamicSubTypeInfo=-1;
+  bool needDynamicSubtypeConversion=false;
   for (int i=0; i<output.size; i++)
   { Expression& currentE=this->children[i];
     Data* currentData;
@@ -683,8 +686,20 @@ bool Expression::GetVector
       currentData=&this->theBoss->theData[currentE.theData];
     if (!currentData->IsOfType<theType>())
       return false;
+    if (dynamicSubTypeInfo==-1)
+      dynamicSubTypeInfo=currentData->GetDynamicSubtypeInfo();
+    else
+    { int currentDynamicSubtype =currentData->GetDynamicSubtypeInfo();
+      if (currentDynamicSubtype!=dynamicSubTypeInfo)
+      { dynamicSubTypeInfo=MathRoutines::Maximum(currentDynamicSubtype, dynamicSubTypeInfo);
+        needDynamicSubtypeConversion=true;
+      }
+    }
     output.TheObjects[i]=currentData->GetValue<theType>();
   }
+  if (needDynamicSubtypeConversion)
+    for (int i=0; i<output.size; i++)
+      output[i].SetDynamicSubtype(dynamicSubTypeInfo);
   return true;
 }
 
@@ -2613,11 +2628,13 @@ int Data::HashFunction()const
       return this->theRational.GetElementConst().HashFunction()*this->type;
     case Data::typePoly:
       return this->thePoly.GetElementConst().HashFunction()*this->type;
+    case Data::typeEltTensorGenVermasOverRF:
+      return this->theElementTensorGenVermas.GetElementConst().HashFunction();
     case Data::typeError:
       return MathRoutines::hashString(this->theError.GetElementConst());
     default:
       std::cout << "This is a programming error. Data::HashFunction() does not cover type "
-      << this->type << ", please debug line"
+      << this->ElementToStringDataType() << ", please debug line "
       << __LINE__;
       assert(false);
       return 0;
@@ -2646,6 +2663,7 @@ void Data::operator=(const Data& other)
     case Data::typeRational: this->theRational=other.theRational; break;
     case Data::typePoly: this->thePoly=other.thePoly; break;
     case Data::typeError: this->theError=other.theError; break;
+    case Data::typeEltTensorGenVermasOverRF: this->theElementTensorGenVermas=other.theElementTensorGenVermas; break;
     default:
       std::cout << "This is a programming error: operator= does not cover type "
       << this->ElementToStringDataType()
@@ -2660,8 +2678,10 @@ std::string Data::ElementToStringDataType() const
     case Data::typeSSalgebra: return "SemisimpleLieAlgebra";
     case Data::typeRational:  return "Rational";
     case Data::typeError:  return "Error";
+    case Data::typeEltTensorGenVermasOverRF: return "ElementOfTensorProductOfGeneralizedVermaModules";
     default:
-      std::cout << "This is a programming error: Data::ElementToStringDataType does not cover all cases. Please "
+      std::cout << "This is a programming error: Data::ElementToStringDataType does not cover type "
+      << this->type <<  ". Please "
       << " debug file " << __FILE__ << " line " << __LINE__ << ".";
       assert(false);
       return "unknown";
@@ -2689,6 +2709,8 @@ std::string Data::ElementToString(std::stringstream* comments)const
     case Data::typePoly:
       out << "Polynomial{}(" << this->thePoly.GetElementConst().ElementToString() << ")";
       return out.str();
+    case Data::typeEltTensorGenVermasOverRF:
+      return this->theElementTensorGenVermas.GetElementConst().ElementToString(*this->owner->theGlobalVariableS);
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -2886,6 +2908,20 @@ bool Data::OperatorDereference
       (*this->owner, this->owner->theLieAlgebras, this->GetSmallInt(), whichInteger, comments);
     default:
       return false;
+  }
+}
+
+int Data::GetDynamicSubtypeInfo()
+{ switch (this->type)
+  { case Data::typeRational:
+      return 0;
+    case Data::typePoly:
+      return this->thePoly.GetElementConst().NumVars;
+    default:
+      std::cout << "This is a programming error: function Data::GetDynamicSubtypeInfo does not handle all possible cases. "
+      << "Please debug file " << __FILE__ << " line " << __LINE__ << ".";
+      assert(false);
+      return 0;
   }
 }
 

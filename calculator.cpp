@@ -127,7 +127,7 @@ std::string GetSelectHTMLStringTEmp
       output << " selected=\"selected\"";
     output << ">" << optionsRank[i] << "</option>\n";
   }
-  output << " </select> Root system.\n";
+  output << " </select> Select root system to use the old calculator interface (deprecated).\n";
   return output.str();
 }
 int main(int argc, char **argv)
@@ -211,6 +211,21 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
+  if (inputWeylString!="")
+  { theParser.DefaultWeylLetter=inputWeylString[0];
+  }
+  else
+  { theParser.DefaultWeylLetter='B';
+    inputWeylString="Calculator";
+  }
+  if (inputRankString!="")
+  { std::stringstream tempStream;
+    tempStream << inputRankString;
+    tempStream.seekg(0);
+    tempStream >> theParser.DefaultWeylRank;
+  } else
+    theParser.DefaultWeylRank=3;
+
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -227,8 +242,8 @@ int main(int argc, char **argv)
 //  civilizedInput="fib{}1:=1;\nfib{}0:=1;\nfib{}{{n}}:=fib{}(n-1)+fib{}(n-2);\nfib{}10";
 //  civilizedInput="hwv{}(B_3,(x_1,0,1),(1,0,0))";
 //  civilizedInput="Polynomial{} (1)";
-  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;\nresult:=g_1 hwv{}(B_3, (x_1,0,1),(1,0,0));\n hwv{}(B_3, (x_1,0,1),(1,0,0)):=v_\\lambda;\n result \n ";
-  inputWeylString="Calculator";
+//  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;\nresult:=g_1 hwv{}(B_3, (x_1,0,1),(1,0,0));\n hwv{}(B_3, (x_1,0,1),(1,0,0)):=v_\\lambda;\n result \n ";
+//  inputWeylString="Calculator";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -241,10 +256,12 @@ int main(int argc, char **argv)
     std::string civilizedInputSafish;
     if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
       std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
-    std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\" >";
+    std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\""
+    << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings();  this.form.submit(); return false;}\" >";
     std::cout << civilizedInputSafish;
     std::cout << "</textarea>\n<br>\n";
-    std::cout << "<input type=\"submit\" name=\"buttonGo\" value=\"Go\" onmousedown=\"storeSettings();\" > ";
+    std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
+    << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
   //  std::cout << "<a href=\"/tmp/indicator.html\" target=\"_blank\"> Indicator window  </a>";
     std::cout << "\n</FORM>";
     CommandList theComputation;
@@ -286,17 +303,6 @@ int main(int argc, char **argv)
     std::cout << "</body></html>";
     return 0;
   }
-  if (inputWeylString!="")
-    theParser.DefaultWeylLetter=inputWeylString[0];
-  else
-    theParser.DefaultWeylLetter='B';
-  if (inputRankString!="")
-  { std::stringstream tempStream;
-    tempStream << inputRankString;
-    tempStream.seekg(0);
-    tempStream >> theParser.DefaultWeylRank;
-  } else
-    theParser.DefaultWeylRank=3;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
 //  civilizedInput="(x_1\\mapsto 0: g_{-1}g_{-2}g_{-3})";

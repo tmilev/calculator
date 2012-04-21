@@ -3104,6 +3104,27 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
 }
 
 template <class CoefficientType>
+void MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+  (ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ MonomialGeneralizedVerma<CoefficientType> currentMon;
+  for (int j=0; j<theUE.size; j++)
+  { currentMon.theMonCoeffOne=theUE[j];
+    currentMon.theMonCoeffOne*=this->theMonCoeffOne;
+    currentMon.Coefficient=this->Coefficient;
+    currentMon.SimplifyNormalizeCoeffs();
+
+    currentMon.owneR=this->owneR;
+    currentMon.indexFDVector=this->indexFDVector;
+    currentMon.indexInOwner=this->indexInOwner;
+
+    outputAccum.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
+  }
+//  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
+}
+
+
+template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -3111,20 +3132,7 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   MonomialGeneralizedVerma<CoefficientType> currentMon;
   output.Nullify(*this->owneR);
   for (int i=0; i<this->size; i++)
-    for (int j=0; j<theUE.size; j++)
-    { currentMon.theMonCoeffOne=theUE[j];
-      currentMon.theMonCoeffOne*=this->TheObjects[j].theMonCoeffOne;
-      currentMon.Coefficient=this->TheObjects[j].Coefficient;
-      currentMon.SimplifyNormalizeCoeffs();
-
-      currentMon.owneR=this->owneR;
-      currentMon.indexFDVector=this->TheObjects[i].indexFDVector;
-      currentMon.indexInOwner=this->TheObjects[i].indexInOwner;
-
-
-      output.ReduceMonAndAddToMe(currentMon, theGlobalVariables, theRingUnit, theRingZero);
-
-    }
+    this->TheObjects[i].MultiplyMeByUEEltOnTheLeft(theUE, output, theGlobalVariables, theRingUnit, theRingZero);
   *this=output;
 //  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
 }
@@ -3170,23 +3178,23 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
 }
 
 template <class CoefficientType>
-void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
-  (const MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ if (theMon.Coefficient.IsEqualToZero())
+void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
+(ElementSumGeneralizedVermas<CoefficientType>& outputAccum, GlobalVariables& theGlobalVariables,
+  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+{ if (this->Coefficient.IsEqualToZero())
     return;
-  PolynomialOutputFormat theFormat;
+//  PolynomialOutputFormat theFormat;
 //  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
-  ModuleSSalgebraNew<CoefficientType>& theMod=theMon.owneR->TheObjects[theMon.indexInOwner];
+  ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
 //  std::cout << "<br>";
   //for (int i=0; i<theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts.size; i++)
   //{ std::cout << "<br>generator index " << i << " has order " << theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts[i];
   //}
   ElementUniversalEnveloping<CoefficientType> theUEelt;
-  theUEelt=theMon.theMonCoeffOne;
-  theUEelt*=theMon.Coefficient;
+  theUEelt=this->theMonCoeffOne;
+  theUEelt*=this->Coefficient;
 //  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
 //  std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
@@ -3225,20 +3233,28 @@ void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
 //      << " free action plus <br>"
 //      << tempMat1.ElementToString(true, false);
     newMon.owneR=this->owneR;
-    newMon.indexInOwner=theMon.indexInOwner;
+    newMon.indexInOwner=this->indexInOwner;
     for (int i=0; i<tempMat1.NumRows; i++)
-      if (!tempMat1.elements[i][theMon.indexFDVector].IsEqualToZero())
+      if (!tempMat1.elements[i][this->indexFDVector].IsEqualToZero())
       { newMon.theMonCoeffOne=currentMon;
         newMon.Coefficient=theRingUnit;
         newMon.SimplifyNormalizeCoeffs();
         newMon.indexFDVector=i;
-        newMon.Coefficient*=tempMat1.elements[i][theMon.indexFDVector];
-        this->operator+=(newMon);
+        newMon.Coefficient*=tempMat1.elements[i][this->indexFDVector];
+        outputAccum+=(newMon);
       }
   }
 //  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
 //  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
   theMod.GetOwner().OrderSSLieAlgebraStandard();
+}
+
+
+template <class CoefficientType>
+void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
+  (const MonomialGeneralizedVerma<CoefficientType>& theMon, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ theMon.ReduceMe(*this, theGlobalVariables, theRingUnit, theRingZero);
 }
 
 template  <class CoefficientType>

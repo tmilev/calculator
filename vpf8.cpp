@@ -9094,43 +9094,6 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output, bool disp
   output=out.str();
 }
 
-int ParserNode::EvaluateEigenOrdered
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root theWeight;
-  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if(!theWeight.IsIntegral())
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
-  if (theHmm.theDomain().GetRank()!=theWeight.size)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  List<ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> > theList;
-  EigenVectorComputation theEigenComputation;
-  theNode.outputString=theEigenComputation.ComputeEigenVectorsOfWeightConventionOrdered
-  (theHmm, theNode.owner->testAlgebra, theList, theWeight, theGlobalVariables)
-  ;
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateEigen
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root theWeight;
-  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if(!theWeight.IsIntegral())
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
-  if (theHmm.theDomain().GetRank()!=theWeight.size)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  List<ElementUniversalEnveloping<PolynomialRationalCoeff> > theList;
-  EigenVectorComputation theEigenComputation;
-  theNode.outputString=theEigenComputation.ComputeEigenVectorsOfWeight
-  (theHmm, theNode.owner->testAlgebra, theList, theWeight, theGlobalVariables);
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
-}
-
 int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange().theWeyl;
@@ -9245,57 +9208,6 @@ void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariabl
 { this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
 
-int ParserNode::EvaluateDecomposeOverSubalgebra
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ EigenVectorComputation theComp;
-  //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
-  //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
-  //ParserNode& argumentNode=theNode.owner->TheObjects[theArgumentList[0]];
-  Parser& theParseR=*theNode.owner;
-  if (theParseR.DefaultWeylLetter!='B' || theParseR.DefaultWeylRank!=3)
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  roots theAlgebraWeights;
-  theParseR.theHmm.GetWeightsGmodKInSimpleCoordsK(theComp.theModuleWeightsShifted, theGlobalVariables);
-  theParseR.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
-
-  if (theParseR.testAlgebra.theOrder.size==0)
-    theParseR.initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
-  GeneralizedVermaModuleData<RationalFunction> theData;
-  ElementGeneralizedVermaOld<RationalFunction> startingElement;
-  RationalFunction RFOne, RFZero;
-  RFZero.Nullify(theParseR.theHmm.theRange().GetRank(), &theGlobalVariables);
-  RFOne.MakeNVarConst(theParseR.theHmm.theRange().GetRank(), (Rational) 1, &theGlobalVariables);
-  theData.init(theParseR, &theGlobalVariables, RFOne, RFZero);
-  theData.VermaHWSubNthElementImageNthCoordSimpleBasis.MakeIdSubstitution(3);
-  int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  theIndex+=3;
-  if (theIndex<0 || theIndex>6)
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  startingElement.AssignDefaultGeneratorIndex(theIndex, theData, &theGlobalVariables);
-  List<ElementGeneralizedVermaOld<RationalFunction> > theEigenVectors;
-  std::stringstream out;
-  PolynomialOutputFormat tempFormat;
-  out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
-  out << startingElement.Decompose(theParseR, theEigenVectors, theGlobalVariables);
-
-  theNode.ExpressionType=ParserNode::typeString;
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateSecretSauceOrdered
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ EigenVectorComputation theComp;
-  //Note: the ComputeAndReturnStringOrdered following code might relocate the *this object
-  //Until I think of a more conceptual solution I shall use the below safe but rather ugly workaround
-  int indexInOwneR=theNode.indexInOwner;
-  Parser* theOwner=theNode.owner;
-  std::string buffer=theComp.ComputeAndReturnStringOrdered(theGlobalVariables, *theNode.owner, indexInOwneR);
-  theOwner->TheObjects[indexInOwneR].outputString=buffer;
-  theOwner->TheObjects[indexInOwneR].ExpressionType=ParserNode::typeArray;
-  return theNode.errorNoError;
-}
-
 void PolynomialsRationalCoeff::MakeConstantShiftCoordinatesAreAdded(root& shiftPerVariable)
 { assert(shiftPerVariable.size>0);
   this->MakeIdSubstitution(shiftPerVariable.size, (Rational) 0);
@@ -9337,12 +9249,17 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   std::stringstream out;
   outputVectors.size=0;
   PolynomialOutputFormat tempFormat;
+  PolynomialRationalCoeff polyOne, polyZero;
+  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
+  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
   ElementGeneralizedVermaOld<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
   remainderElement=*this;
   CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
   List<int> GeneratorSequence, GeneratorPowers;
   ElementUniversalEnveloping<PolynomialRationalCoeff> abstractCasimir, embeddedCasimirNonOrdered;
-  abstractCasimir.MakeCasimir(theParser.theHmm.theDomain(), theParser.theHmm.theRange().GetRank(), theGlobalVariables);
+  abstractCasimir.MakeCasimir
+  (theParser.theHmm.theDomain(), theGlobalVariables, polyOne, polyZero)
+  ;
   out << "<br>abstract Casimir: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
   (abstractCasimir.ElementToString(theGlobalVariables, tempFormat));
@@ -9350,9 +9267,6 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   tempFormat.alphabetBases[0]="g";
   tempFormat.alphabetBases[1]="h";
   theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
-  PolynomialRationalCoeff polyOne, polyZero;
-  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
-  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
   embeddedCasimirNonOrdered.Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br> embedded Casimir non-ordered: "
   << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
@@ -9432,30 +9346,6 @@ std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
   return out.str();
 }
 
-std::string EigenVectorComputation::ComputeAndReturnStringOrdered
-(GlobalVariables& theGlobalVariables, Parser& theParser, int NodeIndex)
-{ std::stringstream out;
-//  TranslationFunctorGmodKVermaModule theTranslationFunctor;
-//  out << theTranslationFunctor.RunTheComputationSl2StringVersion(theParser, theGlobalVariables, *this);
-  roots theAlgebraWeights;
-  theParser.theHmm.GetWeightsGmodKInSimpleCoordsK(this->theModuleWeightsShifted, theGlobalVariables);
-  theParser.theHmm.GetWeightsKInSimpleCoordsK(theAlgebraWeights, theGlobalVariables);
-  GeneralizedVermaModuleData<RationalFunction> theData;
-  ElementGeneralizedVermaOld<RationalFunction> startingElement;
-//  this->PrepareCartanSub(theParser.testAlgebra, theData.VermaHWSubNthElementImageNthCoordSimpleBasis, theGlobalVariables);
-  RationalFunction RFOne, RFZero;
-  RFZero.Nullify(theParser.theHmm.theRange().GetRank(), &theGlobalVariables);
-  RFOne.MakeNVarConst(theParser.theHmm.theRange().GetRank(), (Rational) 1, &theGlobalVariables);
-  theData.init(theParser, &theGlobalVariables, RFOne, RFZero);
-//  startingElement.AssignDefaultGeneratorIndex(0, theData, &theGlobalVariables);
-  startingElement.AssignDefaultGeneratorIndex(6, theData, &theGlobalVariables);
-  List<ElementGeneralizedVermaOld<RationalFunction> > theEigenVectors;
-  PolynomialOutputFormat tempFormat;
-  out << "<br>the starting element is: " << startingElement.ElementToString(tempFormat, theGlobalVariables);
-  out << startingElement.Decompose(theParser, theEigenVectors, theGlobalVariables);
-  return out.str();
-}
-
 int ParserNode::EvaluateModVermaRelations
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { ParserNode& theArgument=theNode.owner->TheObjects[theArgumentList[0]];
@@ -9485,8 +9375,14 @@ int ParserNode::EvaluateModVermaRelations
 
 template<class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left)
-{ ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
-  tempElt1.AssignElementLieAlgebra(left, this->GetNumVariables(), this->GetOwner());
+{ if (this->IsEqualToZero())
+  { this->Nullify(*this->owners, this->indexInOwners);
+    return;
+  }
+  ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
+  tempElt1.AssignElementLieAlgebra
+  (left, *this->owners, this->indexInOwners, this->TheObjects[0].Coefficient.GetOne(),
+   this->TheObjects[0].Coefficient.GetZero());
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
@@ -9547,7 +9443,11 @@ int ParserNode::EvaluateMakeCasimir
 { theNode.ExpressionType=theNode.typeUEelement;
   if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
     theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
-  theNode.UEElement.GetElement().MakeCasimir(theNode.GetContextLieAlgebra(), 0, theGlobalVariables);
+  PolynomialRationalCoeff polyOne, polyZero;
+  polyOne.MakeNVarConst(0,1);
+  polyZero.Nullify(0);
+  theNode.UEElement.GetElement().MakeCasimir
+  (theNode.GetContextLieAlgebra(), theGlobalVariables, polyOne, polyZero);
   std::stringstream out;
   out << "Context Lie algebra: " << theNode.GetContextLieAlgebra().GetLieAlgebraName
   (theNode.GetContextLieAlgebra().theWeyl.WeylLetter, theNode.GetContextLieAlgebra().GetRank());
@@ -9757,19 +9657,23 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
     return this->SetError(this->errorBadIndex);
   ElementUniversalEnveloping<PolynomialRationalCoeff>& theUEElement=this->UEElement.GetElement();
-  PolynomialRationalCoeff polyOne;
+  PolynomialRationalCoeff polyOne, PolyZero;
   polyOne.MakeNVarConst(0, (Rational) 1);
+  PolyZero.Nullify(0);
   if (leftNode.Operation==Parser::tokenG)
   { if (!this->GetContextLieAlgebra().theWeyl.IsARoot(theWeight))
       return this->SetError(this->errorDunnoHowToDoOperation);
-    theUEElement.MakeOneGeneratorCoeffOne(theWeight, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
+    theUEElement.MakeOneGeneratorCoeffOne
+    (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
     this->ExpressionType=this->typeUEelement;
     return this->errorNoError;
   }
   if (leftNode.Operation==Parser::tokenH)
   { if (theWeight.size!=this->GetContextLieAlgebra().GetRank())
       return this->SetError(this->errorDimensionProblem);
-    theUEElement.AssignElementCartan(theWeight, 0, this->owner->theAlgebras, this->IndexContextLieAlgebra);
+    PolynomialRationalCoeff PolyZero;
+    theUEElement.AssignElementCartan
+    (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
     this->ExpressionType=this->typeUEelement;
     return this->errorNoError;
   }
@@ -10198,14 +10102,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateG2InB3MultsParabolic
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("decomposeXtimesVinGenericVerma",
-   "(Integer)",
-   "<b>Experimental, please don't use.</b> Let v be the highest weight element of B3.",
-   "decomposeXtimesVinGenericVerma()",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateDecomposeOverSubalgebra
    );
   this->AddOneFunctionToDictionaryNoFail
   ("modOutVermaRelations",

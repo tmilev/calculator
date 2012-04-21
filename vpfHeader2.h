@@ -22,7 +22,8 @@ public:
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   int type;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra, typeEltTensorGenVermasOverRF
+  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
+    typeEltTensorGenVermasOverRF, typeMonomialGenVerma
   };
   Data (const Rational& x, CommandList& inputOwner)
   { this->owner=&inputOwner;
@@ -47,6 +48,9 @@ public:
         break;
     }
   }
+  void MakeMonomialGeneralizedVerma
+(CommandList& theBoss, MonomialGeneralizedVerma<RationalFunction>& theElt)
+;
   void MakeElementTensorGeneralizedVermas
   ( CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
   ;
@@ -75,14 +79,9 @@ public:
       return false;
     return this->theRational.GetElement().IsInteger();
   }
-  int GetSmallInt()const
-  { if (this->theRational.IsZeroPointer())
-    { std::cout << "This is a programming error. Data::GetSmallInt is called on non-properly initialized data. "
-      << " Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
-      assert(false);
-    }
-    return this->theRational.GetElementConst().NumShort;
-  }
+  ElementSimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
+  int GetSmallInt()const;
+  MonomialGeneralizedVerma<RationalFunction>& GetMonGenVerma()const;
   bool SetError(const std::string& inputError)
   { this->FreeMemory();
     this->type=this->typeError;
@@ -203,6 +202,7 @@ class Expression
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
   }
+  Data& GetData()const;
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -470,6 +470,7 @@ public:
   HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
   HashedListB<Data, Data::HashFunction> theData;
   List<ElementTensorsGeneralizedVermas<RationalFunction> > theElemenentsGeneralizedVermaModuleTensors;
+  List<MonomialGeneralizedVerma<RationalFunction> > theMonomialsGeneralizedVerma;
 //end of hardcoded data structures
   double StartTimeInSeconds;
 
@@ -828,6 +829,9 @@ public:
   ;
   static bool EvaluateDoDistribute
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+  ;
+  static bool EvaluateDoMultiplyIfPossible
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)

@@ -48,11 +48,14 @@ public:
         break;
     }
   }
+  void MakePoly
+(CommandList& theBoss, const PolynomialRationalCoeff& inputPoly)
+;
   void MakeMonomialGeneralizedVerma
-(CommandList& theBoss, MonomialGeneralizedVerma<RationalFunction>& theElt)
+(CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
 ;
   void MakeElementTensorGeneralizedVermas
-  ( CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
+  (CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
   ;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
@@ -203,6 +206,17 @@ class Expression
     this->operator=(tempExp);
   }
   Data& GetData()const;
+  void MakeMonomialGenVerma
+  (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+  { Data tempData;
+    tempData.MakeMonomialGeneralizedVerma(newBoss, inputMon);
+    this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
+  }
+  void MakePoly(const PolynomialRationalCoeff& inputData, CommandList& newBoss, int inputIndexBoundVars)
+  { Data tempData;
+    tempData.MakePoly(newBoss, inputData);
+    this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
+  }
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -783,6 +797,9 @@ public:
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   bool CollectSummands(int inputIndexBoundVars, Expression& theExpression);
+bool CollectSummands
+(List<Expression>& summands, bool needSimplification, int inputIndexBoundVars, Expression& theExpression)
+;
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
    int RecursionDepth=0, int MaxRecursionDepth=500, std::stringstream* theLog=0)
@@ -794,6 +811,12 @@ public:
   static bool EvaluateStandardUnion
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+static bool EvaluateDereferenceOneArgument
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool EvaluateStandardUnionNoRepetition
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -820,9 +843,6 @@ public:
   ;
   static bool EvaluateDoAssociatE
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* coments, int theOperation)
-  ;
-  static bool EvaluateDoCollect
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoExtractBaseMultiplication
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)

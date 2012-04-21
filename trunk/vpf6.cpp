@@ -1084,10 +1084,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   ("{}", this->EvaluateStandardFunction, "",
    "The first argument of this operator represents a name of the function, the second argument represents the argument of that function.  \
    1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
-   2) If the first argument is of type predefined data but not rational, invokes the c++ implementation of the \
-   dereference operator of the data. \
-   3) If the first argument of {} has a hard-coded handler function {} invokes that hard-coded function onto the second argument.\
-   If the invocation of the hard-coded function is successful, the expression is substituted with the result of that invocation.",
+   2) If both the first and the second argument are of type Data, tries a series of pre-defined rules for applying\
+   the left argument to the right argument. \
+   3) If the first argument of {} is of type NonBoundVariable and has a hard-coded handler function {} \
+   invokes the hard-coded function onto the second argument.\
+   If the invocation is successful, the expression is substituted with the result.",
    "f{}(x)+1{}(x)-(1/2){}x ", false);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
@@ -1147,7 +1148,12 @@ bool CommandList::CollectSummands(int inputIndexBoundVars, Expression& theExpres
   summands.SetSize(0);
   bool needSimplification=this->AppendSummandsReturnTrueIfOrderNonCanonical
   (theExpression, summands, 0, this->MaxRecursionDepthDefault);
-  HashedList<Expression> summandsNoCoeff;
+  return this->CollectSummands(summands, needSimplification, inputIndexBoundVars, theExpression);
+}
+
+bool CommandList::CollectSummands
+(List<Expression>& summands, bool needSimplification, int inputIndexBoundVars, Expression& theExpression)
+{ HashedList<Expression> summandsNoCoeff;
   List<Rational> theCoeffs;
   Rational constTerm=0;
   bool foundConstTerm=false;
@@ -1295,31 +1301,16 @@ Data& Expression::GetData()const
   return this->theBoss->theData[this->theData];
 }
 
+void Data::MakePoly
+(CommandList& theBoss, const PolynomialRationalCoeff& inputPoly)
+{ this->owner=&theBoss;
+  this->thePoly.GetElement()=inputPoly;
+  this->type=this->typePoly;
+}
+
 bool CommandList::EvaluateDoMultiplyIfPossible
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.theOperation!=theCommands.opTimes())
-    return false;
-  Expression& leftE=theExpression.children[0];
-  Expression& rightE=theExpression.children[1];
-  if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
-    return false;
-  Data& LeftD=leftE.GetData();
-  Data& RightD=rightE.GetData();
-  if (LeftD.type==Data::typeElementSSalgebra && RightD.type==Data::typeMonomialGenVerma)
-  { MonomialGeneralizedVerma<RationalFunction>& theMon=RightD.GetMonGenVerma();
-    int numVars=theMon.Coefficient.NumVars;
-    ElementSimpleLieAlgebra& leftLieElt=LeftD.GetEltSimpleLieAlgebra();
-    ElementSumGeneralizedVermas<RationalFunction> result;
-    ElementUniversalEnveloping<RationalFunction> containerUE;
-    RationalFunction RFOne, RFZero;
-    RFZero.Nullify(numVars, theCommands.theGlobalVariableS);
-    RFOne.MakeNVarConst(numVars, 1, theCommands.theGlobalVariableS);
-    containerUE.AssignElementLieAlgebra(leftLieElt, *leftLieElt.ownerArray, leftLieElt.indexOfOwnerAlgebra, RFOne, RFZero);
-//    theMon.MultiplyMeByUEEltOnTheLeft(containerUE, result, *theCommands.theGlobalVariableS,
-
-
-  }
-  return false;
+{ return false;
 }
 
 bool CommandList::EvaluateStandardTimes
@@ -1499,6 +1490,85 @@ bool CommandList::EvaluateIf
   return false;
 }
 
+bool CommandList::EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opApplyFunction())
+    return false;
+  Expression& leftE=theExpression.children[0];
+  Expression& rightE=theExpression.children[1];
+  if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
+    return false;
+  Data& LeftD=leftE.GetData();
+  Data& RightD=rightE.GetData();
+//  std::string debugString=LeftD.ElementToString();
+//  if (debugString=="g_{-1}")
+//    std::cout << "!!!!";
+  if (LeftD.type==Data::typeElementSSalgebra && RightD.type==Data::typeMonomialGenVerma)
+  { std::cout <<"Ere I am JJ!";
+    MonomialGeneralizedVerma<RationalFunction>& theMon=RightD.GetMonGenVerma();
+    int numVars=theMon.Coefficient.NumVars;
+    ElementSimpleLieAlgebra& leftLieElt=LeftD.GetEltSimpleLieAlgebra();
+    ElementSumGeneralizedVermas<RationalFunction> result;
+    ElementUniversalEnveloping<RationalFunction> containerUE;
+    RationalFunction RFOne, RFZero;
+    RFZero.Nullify(numVars, theCommands.theGlobalVariableS);
+    RFOne.MakeNVarConst(numVars, 1, theCommands.theGlobalVariableS);
+    containerUE.AssignElementLieAlgebra
+    (leftLieElt, *leftLieElt.ownerArray, leftLieElt.indexOfOwnerAlgebra, RFOne, RFZero);
+    theMon.MultiplyMeByUEEltOnTheLeft
+    (containerUE, result, *theCommands.theGlobalVariableS, RFOne, RFZero)
+    ;
+    List<Expression> theSummands;
+    theSummands.SetSize(result.size);
+    Expression resultLeft, resultRight;
+    MonomialGeneralizedVerma<RationalFunction> tempMon;
+    PolynomialRationalCoeff tempCoeff;
+    for (int i=0; i<result.size; i++)
+    { tempMon=result[i];
+      tempMon.Coefficient.GetNumerator(tempCoeff);
+      tempMon.Coefficient=RFOne;
+      resultLeft.MakePoly(tempCoeff, theCommands, inputIndexBoundVars);
+      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
+      theSummands[i].MakeProducT(theCommands, inputIndexBoundVars, resultLeft, resultRight);
+    }
+    theCommands.CollectSummands(theSummands, true, inputIndexBoundVars, theExpression);
+    return true;
+  }
+  return false;
+}
+
+bool CommandList::EvaluateDereferenceOneArgument
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opApplyFunction())
+    return false;
+  Expression& functionNameNode =theExpression.children[0];
+  Expression& functionArgumentNode=theExpression.children[1];
+  if (functionNameNode.theOperation!=theCommands.opData() || functionArgumentNode.theOperation!=theCommands.opData())
+    return false;
+  Data& theFunData=functionNameNode.GetData();
+  Data tempData(theCommands);
+  if (functionArgumentNode.theOperation!=theCommands.opList())
+  { if (functionArgumentNode.theOperation!=theCommands.opData() )
+      return false;
+    if (!theFunData.OperatorDereference(theCommands.theData[functionArgumentNode.theData], tempData, comments))
+      return false;
+    theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+    return true;
+  }
+  if (functionArgumentNode.children.size!=2)
+    return false;
+  Expression& leftE=functionArgumentNode.children[0];
+  Expression& rightE=functionArgumentNode.children[1];
+  if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
+    return false;
+  Data& leftD=theCommands.theData[leftE.theData];
+  Data& rightD=theCommands.theData[rightE.theData];
+  if (!theFunData.OperatorDereference(leftD, rightD, tempData, comments))
+    return false;
+  theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
 bool CommandList::EvaluateStandardFunction
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opApplyFunction())
@@ -1517,37 +1587,19 @@ bool CommandList::EvaluateStandardFunction
 //    return true;
   Expression& functionNameNode =theExpression.children[0];
   Expression& functionArgumentNode=theExpression.children[1];
-
-  assert(theExpression.children.size==2);
-  if (functionNameNode.theOperation==theCommands.opData())
-  { Data tempData(theCommands);
-    Data& theFunData=theCommands.theData[functionNameNode.theData];
+  if (functionNameNode.theOperation=theCommands.opData() && functionArgumentNode.theOperation==theCommands.opData())
+  { Data& theFunData=functionNameNode.GetData();
     if (theFunData.type==Data::typeRational)
     { theExpression.AssignChild(0);
       return true;
     }
-    if (functionArgumentNode.theOperation!=theCommands.opList())
-    { if (functionArgumentNode.theOperation!=theCommands.opData() )
-        return false;
-      if (!theFunData.OperatorDereference
-          (theCommands.theData[functionArgumentNode.theData], tempData, comments))
-        return false;
-      theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+    if (theCommands.EvaluateDereferenceOneArgument(theCommands, inputIndexBoundVars, theExpression, comments))
       return true;
-    }
-    if (functionArgumentNode.children.size!=2)
-      return false;
-    Expression& leftE=functionArgumentNode.children[0];
-    Expression& rightE=functionArgumentNode.children[1];
-    if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
-      return false;
-    Data& leftD=theCommands.theData[leftE.theData];
-    Data& rightD=theCommands.theData[rightE.theData];
-    if (!theFunData.OperatorDereference(leftD, rightD, tempData, comments))
-      return false;
-    theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
-    return true;
+    if (theCommands.EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule(theCommands, inputIndexBoundVars, theExpression, comments))
+      return true;
   }
+  assert(theExpression.children.size==2);
+
   if (functionNameNode.theOperation!=theExpression.theBoss->opVariableNonBound())
     return false;
   Function::FunctionAddress theFun;
@@ -2944,7 +2996,7 @@ void Data::MakeElementTensorGeneralizedVermas
 }
 
 void Data::MakeMonomialGeneralizedVerma
-(CommandList& theBoss, MonomialGeneralizedVerma<RationalFunction>& theElt)
+(CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
 { this->owner=&theBoss;
   this->theRational.GetElement()=
   this->owner->theMonomialsGeneralizedVerma.AddNoRepetitionOrReturnIndexFirst(theElt);

@@ -6326,7 +6326,9 @@ void Monomial<Element>::GetMonomialWithCoeffOne(Monomial<Element>& output)
 
 template <class Element>
 bool Monomial<Element>::operator ==(const Monomial<Element>& m)const
-{ for(int i=0; i<this->NumVariables; i++)
+{ if (this->NumVariables!=m.NumVariables)
+    return false;
+  for(int i=0; i<this->NumVariables; i++)
     if (this->degrees[i]!=m.degrees[i])
       return false;
   return true;
@@ -6530,7 +6532,9 @@ inline void TemplatePolynomial<TemplateMonomial, Element>::operator =(const Temp
 template <class TemplateMonomial, class Element>
 inline bool TemplatePolynomial<TemplateMonomial, Element>::operator==
 (const TemplatePolynomial<TemplateMonomial, Element>& right)
-{ TemplatePolynomial<TemplateMonomial, Element> difference;
+{ if (this->NumVars!=right.NumVars)
+    return false;
+  TemplatePolynomial<TemplateMonomial, Element> difference;
   difference=*this;
   difference-=right;
   return difference.IsEqualToZero();

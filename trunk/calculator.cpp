@@ -127,7 +127,7 @@ std::string GetSelectHTMLStringTEmp
       output << " selected=\"selected\"";
     output << ">" << optionsRank[i] << "</option>\n";
   }
-  output << " </select> Select root system to use the old calculator interface (deprecated).\n";
+  output << " </select> Select Vector<Rational> system to use the old calculator interface (deprecated).\n";
   return output.str();
 }
 int main(int argc, char **argv)
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 #endif
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  HashedList<Monomial<Rational> >::PreferredHashSize=100;
+  HashedList<MonomialP>::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
   std::string inputString, inputPatH;
   std::string tempS;
@@ -166,9 +166,9 @@ int main(int argc, char **argv)
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
 	std::cout << "Content-Type: text/html\n\n";
-  std::cout << "<html><meta name=\"keywords\" content= \"root system, root system Lie algebra, "
+  std::cout << "<html><meta name=\"keywords\" content= \"Vector<Rational> system, Vector<Rational> system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
+  << "Vector<Rational> subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
@@ -245,6 +245,7 @@ int main(int argc, char **argv)
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;\nresult:=g_1 hwv{}(B_3, (x_1,0,1),(1,0,0));\n hwv{}(B_3, (x_1,0,1),(1,0,0)):=v_\\lambda;\n result \n ";
 //  inputWeylString="Calculator";
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\ng_{-1} hwv{}(B_3, (x_1,0,1),(1,0,0))";
+//  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} {}v";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -639,7 +640,7 @@ int main(int argc, char **argv)
   << theParser.DisplayNameCalculator << "?%20textType=" << theParser.DefaultWeylLetter
   << "&textDim=" << theParser.DefaultWeylRank << "&textInput=printRootSystem"
   << "\">Root system conventions used by the calculator</a>";
-//  << "<br> At the moment the G_2 and F_4 long-short root convention is different from LiE/Humphreys/wikipedia."
+//  << "<br> At the moment the G_2 and F_4 long-short Vector<Rational> convention is different from LiE/Humphreys/wikipedia."
 //  << " Changing according to the preceding convention.";
 
 //  << " uses javascript (+ dojo script from google for drawing lines and cirles).<br>";

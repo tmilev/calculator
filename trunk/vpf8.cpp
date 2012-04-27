@@ -1,6 +1,9 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader1.h"
+#include "vpfHeader1_2.h"
+ProjectInformationInstance ProjectInfoVpf8cpp(__FILE__, "Second main implementation file. ");
+
 
 void LargeIntUnsigned::AssignString(const std::string& input)
 { if (input.size()<10)
@@ -49,14 +52,15 @@ void Rational::AssignString(const std::string& input)
 }
 
 void GeneralizedVermaModuleCharacters::TransformToWeylProjective
-  (int indexOperator, root& startingNormal, root& outputNormal)
-{ MatrixLargeRational theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
-  root& theTranslation=this->theTranslationsProjectedBasisChanged.TheObjects[indexOperator];
+  (int indexOperator, Vector<Rational>& startingNormal, Vector<Rational>& outputNormal)
+{ Matrix<Rational>  theOperatorExtended=this->theLinearOperatorsExtended.TheObjects[indexOperator];
+  Vector<Rational>& theTranslation=this->theTranslationsProjectedBasisChanged.TheObjects[indexOperator];
   //the goddamned sign in front of theTranslation is now checked: it should be + and not -
-  Rational theConst=root::RootScalarEuclideanRoot(this->NonIntegralOriginModificationBasisChanged+theTranslation, startingNormal);
+  Rational theConst=Vector<Rational>::ScalarEuclidean
+  (this->NonIntegralOriginModificationBasisChanged+theTranslation, startingNormal);
   theOperatorExtended.Transpose();
   outputNormal=startingNormal;
-  theOperatorExtended.ActOnAroot(outputNormal);
+  theOperatorExtended.ActOnVectorColumn(outputNormal);
   outputNormal.SetSize(outputNormal.size+1);
   *outputNormal.LastObject()=-theConst;
 }
@@ -76,8 +80,8 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 { std::stringstream out;
   ConeComplex projectivizedChamberFinal;
   Cone currentProjectiveCone;
-  roots tempRoots, extraWeylChamberWalls;
-  root tempRoot, wallAtInfinity, wallToSliceWith;
+  Vectors<Rational> tempRoots, extraWeylChamberWalls;
+  Vector<Rational> tempRoot, wallAtInfinity, wallToSliceWith;
 //  int dimSmallerAlgebra=this->theLinearOperators.TheObjects[0].NumRows;
 //  int dimLargerAlgebra=this->theLinearOperators.TheObjects[0].NumCols;
 //  int dimFinal=dimSmallerAlgebra+dimLargerAlgebra+1;
@@ -128,44 +132,46 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 }
 
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-  (ElementSimpleLieAlgebra& input, ElementSimpleLieAlgebra& output)
+  (ElementSemisimpleLieAlgebra& input, ElementSemisimpleLieAlgebra& output)
 { assert(&output!=&input);
-  output.Nullify(*this->owners, this->indexRange);
-  for (int i=0; i<input.NonZeroElements.CardinalitySelection; i++)
-  { int currentIndex=input.NonZeroElements.elements[i];
-    output+=this->imagesAllChevalleyGenerators[currentIndex]*input.coeffsRootSpaces[currentIndex];
+  output.MakeZero(*this->owners, this->indexRange);
+  for (int i=0; i<input.size; i++)
+  { int currentIndex=input[i].theGeneratorIndex;
+    output+=this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
   }
-  output.Hcomponent.MakeZero(this->theRange().GetRank());
-  for (int i=0; i<input.Hcomponent.size; i++)
-    output.Hcomponent+=
-    this->imagesAllChevalleyGenerators
-    [this->theDomain().CartanIndexToChevalleyGeneratorIndex(i)].Hcomponent  *input.Hcomponent[i];
-  output.ComputeNonZeroElements();
 }
 
-void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(MatrixLargeRational& output)
+void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output)
 { output.init(this->theRange().GetRank(), this->theDomain().GetRank());
-  ElementSimpleLieAlgebra domainElt, imageElt;
-  domainElt.Nullify(*this->owners, this->indexDomain);
+  ElementSemisimpleLieAlgebra domainElt, imageElt;
   for (int i=0; i<this->theDomain().GetRank(); i++)
-  { domainElt.Hcomponent.MakeEi(this->theDomain().GetRank(), i);
-//    std::string tempS=domainElt.ElementToString();
+  { domainElt.AssignElementCartan
+    (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), *this->owners, this->indexDomain);
     this->ApplyHomomorphism(domainElt, imageElt);
-//    std::string tempS2=imageElt.ElementToString();
-    output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.Hcomponent);
+    output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
 }
 
-root ReflectionSubgroupWeylGroup::GetRho()
-{ root result;
+void ElementSemisimpleLieAlgebra::AssignElementCartan
+(const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+{ ChevalleyGenerator tempGen;
+  this->MakeZero(inputOwners, inputIndexInOwners);
+  for (int i=0; i<theH.size; i++)
+  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, inputOwners[inputIndexInOwners].CartanIndexToChevalleyGeneratorIndex(i));
+    this->AddMonomial(tempGen, theH[i]);
+  }
+}
+
+Vector<Rational> ReflectionSubgroupWeylGroup::GetRho()
+{ Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl.GetDim());
   result/=2;
   return result;
 }
 
 void ReflectionSubgroupWeylGroup::GetMatrixOfElement
-(ElementWeylGroup& input, MatrixLargeRational& outputMatrix)
-{ roots startBasis, imageBasis ;
+(ElementWeylGroup& input, Matrix<Rational> & outputMatrix)
+{ Vectors<Rational> startBasis, imageBasis ;
   startBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
   this->ActByElement(input, startBasis, imageBasis);
   outputMatrix.AssignRootsToRowsOfMatrix(imageBasis);
@@ -173,8 +179,8 @@ void ReflectionSubgroupWeylGroup::GetMatrixOfElement
 }
 
 void GeneralizedVermaModuleCharacters::initFromHomomorphism
-  (root& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
-{ roots tempRoots;
+  (Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> tempRoots;
   this->WeylLarger=input.theRange().theWeyl;
   this->WeylSmaller=input.theDomain().theWeyl;
   WeylGroup& theWeYl=input.theRange().theWeyl;
@@ -182,19 +188,21 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "projections: " << tempRoots.ElementToString();
   theWeYl.ComputeWeylGroup();
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
-  MatrixLargeRational theProjectionBasisChanged;
-  root startingWeight, projectedWeight;
+  Matrix<Rational>  theProjectionBasisChanged;
+  Vector<Rational> startingWeight, projectedWeight;
   PolynomialOutputFormat theFormat;
-  SSalgebraModuleOld tempM;
+  assert(false);
+//  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
   input.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
+  assert(false);
+//  tempM.InduceFromEmbedding(tempStream, input, theGlobalVariables);
   input.GetWeightsGmodKInSimpleCoordsK(this->GmodKnegativeWeightS, theGlobalVariables);
 //  this->log << "weights of g mod k: " << this->GmodKnegativeWeights.ElementToString();
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
-//  tempMat.ActOnRoots(this->GmodKnegativeWeightS);
+//  tempMat.ActOnVectorsColumn(this->GmodKnegativeWeightS);
   this->log << this->GmodKnegativeWeightS.ElementToString();
   this->preferredBasiS.SetSize(2);
   this->preferredBasiS[0]=-this->GmodKnegativeWeightS[1];
@@ -207,7 +215,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->preferredBasisChangE.Transpose();
   this->preferredBasisChangeInversE=this->preferredBasisChangE;
   this->preferredBasisChangeInversE.Invert();
-  this->preferredBasisChangeInversE.ActOnRoots(this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
+  this->preferredBasisChangeInversE.ActOnVectorsColumn
+  (this->GmodKnegativeWeightS, this->GmodKNegWeightsBasisChanged);
   this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ElementToString();
   for (int i=0; i<this->GmodKnegativeWeightS.size; i++)
     if (this->GmodKnegativeWeightS[i].IsPositiveOrZero())
@@ -224,15 +233,15 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   for (int i=0; i<input.theRange().GetRank(); i++)
   { startingWeight.MakeEi(input.theRange().GetRank(), i);
     input.ProjectOntoSmallCartan(startingWeight, projectedWeight, theGlobalVariables);
-    this->preferredBasisChangeInversE.ActOnAroot(projectedWeight);
+    this->preferredBasisChangeInversE.ActOnVectorColumn(projectedWeight);
     for (int j=0; j<projectedWeight.size; j++)
       theProjectionBasisChanged.elements[j][i]=projectedWeight[j];
   }
   ReflectionSubgroupWeylGroup theSubgroup;
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=theParabolicSel;
-  MatrixLargeRational DualCartanEmbedding;
+  Matrix<Rational>  DualCartanEmbedding;
   input.GetMapSmallCartanDualToLargeCartanDual(DualCartanEmbedding);
-  root ParabolicEvaluationRootImage, tempRoot;
+  Vector<Rational> ParabolicEvaluationRootImage, tempRoot;
   ParabolicEvaluationRootImage=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
   this->ParabolicSelectionSmallerAlgebra.init(input.theDomain().GetRank());
   for (int i=0; i<input.theDomain().GetRank(); i++)
@@ -257,14 +266,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nMatrix form of the elements of Weyl group of the Levi part of the parabolic (" << theSubgroup.size << " elements):\n";
 
   for (int i=0; i<theSubgroup.size; i++)
-  { MatrixLargeRational& currentLinearOperator=this->theLinearOperators[i];
+  { Matrix<Rational> & currentLinearOperator=this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
     this->log << "\n" << currentLinearOperator.ElementToString(false, false);
-    currentLinearOperator.ActOnAroot(theSubgroup.GetRho(), this->theTranslationS[i]);
+    currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i]-=theSubgroup.GetRho();
-    this->theTranslationS[i].MinusRoot();
-    theProjectionBasisChanged.ActOnAroot(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
+    this->theTranslationS[i].Minus();
+    theProjectionBasisChanged.ActOnVectorColumn(this->theTranslationS[i], this->theTranslationsProjectedBasisChanged[i]);
     if (theSubgroup[i].size%2==0)
       this->theCoeffs[i]=1;
     else
@@ -272,10 +281,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n" << theProjectionBasisChanged.ElementToString(false, false);
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
-  //List<MatrixLargeRational> tempList;
+  //List<Matrix<Rational> > tempList;
   for (int k=0; k<this->theLinearOperators.size; k++)
-  { MatrixLargeRational& currentLO=this->theLinearOperators.TheObjects[k];
-    MatrixLargeRational& currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
+  { Matrix<Rational> & currentLO=this->theLinearOperators.TheObjects[k];
+    Matrix<Rational> & currentLOExtended=this->theLinearOperatorsExtended.TheObjects[k];
     currentLO.MultiplyOnTheLeft(theProjectionBasisChanged);
     currentLO*=-1;
     //tempList.AddOnTopNoRepetition(this->theLinearOperators.TheObjects[i]);
@@ -292,14 +301,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   for (int i=0; i<this->ParabolicLeviPartRootSpacesZeroStandsForSelected.MaxSize; i++)
     if (!this->ParabolicLeviPartRootSpacesZeroStandsForSelected.selected[i])
       displayIndicesReflections.AddOnTop(i+1);
-  Matrix<PolynomialRationalCoeff> tempMatPoly;
-  Vector<PolynomialRationalCoeff> tempVect, tempVect2;
+  Matrix<Polynomial<Rational> > tempMatPoly;
+  Vector<Polynomial<Rational> > tempVect, tempVect2;
   tempVect.SetSize(input.theDomain().theWeyl.GetDim()+input.theRange().theWeyl.GetDim());
   for (int i=0; i<tempVect.size; i++)
     tempVect[i].MakeMonomialOneLetter(tempVect.size, i, 1, (Rational) 1);
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
-  PolynomialRationalCoeff polyZero;
-  polyZero.Nullify(tempVect.size);
+  Polynomial<Rational>  polyZero;
+  polyZero.MakeZero(tempVect.size);
   theFormat.alphabet[0]="x_1";
   theFormat.alphabet[1]="x_2";
   theFormat.alphabet[2]="y_1";
@@ -307,17 +316,18 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theFormat.alphabet[4]="y_3";
   tempRoot=theSubgroup.GetRho();
   this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
-  this->preferredBasisChangE.ActOnAroot(tempRoot);
-  tempRoot.MinusRoot();
-  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" << theSubgroup.GetRho().ElementToStringLetterFormat("\\eta")
-  << "$; $\\pr(\\rho)=" << tempRoot.ElementToStringLetterFormat("\\alpha") << "$."
+  this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
+  tempRoot.Minus();
+  this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" <<
+  theSubgroup.GetRho().ElementToStringLetterFormat("\\eta", true)
+  << "$; $\\pr(\\rho)=" << tempRoot.ElementToStringLetterFormat("\\alpha", true) << "$."
   ;
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ" << tempVect.ElementToString(theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
-  { MatrixLargeRational& currentLoExt=this->theLinearOperatorsExtended[i];
+  { Matrix<Rational> & currentLoExt=this->theLinearOperatorsExtended[i];
     for (int j=0; j<currentLoExt.NumRows; j++)
       for (int k=0; k<currentLoExt.NumCols; k++)
-        tempMatPoly.elements[j][k].MakeNVarConst(tempVect.size, currentLoExt.elements[j][k]);
+        tempMatPoly.elements[j][k].MakeConst(tempVect.size, currentLoExt.elements[j][k]);
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j=0; j<tempVect2.size; j++)
       tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];
@@ -333,7 +343,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->theExtendedIntegralLatticeMatForM.MakeFromMat(this->theExtendedIntegralLatticeMatForM.basisRationalForm);
   tempMat=theWeYl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
-  roots WallsWeylChamberLargerAlgebra;
+  Vectors<Rational> WallsWeylChamberLargerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
   { tempMat.RowToRoot(i, tempRoot);
     if(ParabolicEvaluationRootImage[i].IsEqualToZero())
@@ -343,7 +353,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   }
   this->log << "\n\n\n**************\nParabolic selection larger algebra:" << ParabolicEvaluationRootImage.ElementToString() << "\nWalls Weyl chamber larger algebra: " << WallsWeylChamberLargerAlgebra.ElementToString();
   this->log << "\n**************\n\n";
-  roots rootsGeneratingExtendedLattice;
+  Vectors<Rational> rootsGeneratingExtendedLattice;
   int totalDim=input.theRange().GetRank()+input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
   this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
@@ -360,7 +370,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   tempMat=input.theDomain().theWeyl.CartanSymmetric;
   tempMat.Invert(theGlobalVariables);
   tempRoots.size=0;
-  root ParabolicEvaluationRootSmallerAlgebra;
+  Vector<Rational> ParabolicEvaluationRootSmallerAlgebra;
   ParabolicEvaluationRootSmallerAlgebra=this->ParabolicSelectionSmallerAlgebra;
   for (int i=0; i<tempMat.NumRows; i++)
   { input.theDomain().theWeyl.CartanSymmetric.RowToRoot(i, tempRoot);
@@ -369,10 +379,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
       tempMat.RowToRoot(i, *tempRoots.LastObject());
     }
   }
-  this->preferredBasisChangeInversE.ActOnRoots(tempRoots);
+  this->preferredBasisChangeInversE.ActOnVectorsColumn(tempRoots);
   this->log << "**********************\n\n\n";
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ElementToString();
-  this->log << "the roots generating the chamber walls: " << tempRoots.ElementToString();
+  this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.ElementToString();
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
   this->log << "**********************\n\n\n";
@@ -380,7 +390,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[1].ElementToString(false, false) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
   tempMat.Transpose();
-  tempMat.ActOnRoots(this->PreimageWeylChamberSmallerAlgebra);
+  tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
   for (int i=0; i<this->PreimageWeylChamberSmallerAlgebra.size; i++)
   { this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].SetSize(input.theRange.GetRank()+input.theDomain.GetRank()+1);
     *this->PreimageWeylChamberSmallerAlgebra.TheObjects[i].LastObject()=0;
@@ -404,14 +414,14 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theGlobalVariables.MakeReport();
 }
 
-void WeylGroup::GetMatrixOfElement(int theIndex, MatrixLargeRational& outputMatrix)
+void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix)
 { assert(theIndex<this->size);
   this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
 }
 
 void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
-{ roots selectedRoots;
+{ Vectors<Rational> selectedRoots;
   selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
@@ -419,12 +429,12 @@ void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
     { selectedRoots.SetSize(selectedRoots.size+1);
       selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
     }
-  rootsCollection tempRootsCol;
+  List<Vectors<Rational> >  tempRootsCol;
   this->ComputeSubGroupFromGeneratingReflections(selectedRoots, tempRootsCol, theGlobalVariables, UpperLimitNumElements, true);
 }
 
-void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational& outputMatrix)
-{ root tempRoot;
+void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix)
+{ Vector<Rational> tempRoot;
   int theDim=this->CartanSymmetric.NumRows;
   outputMatrix.init(theDim, theDim);
   for (int i=0; i<theDim; i++)
@@ -437,58 +447,25 @@ void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, MatrixLargeRational&
 
 GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
-void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const root& input, root& output)
-{ MatrixLargeRational& currentExtendedOperator=this->theLinearOperatorsExtended[indexOperator];
-  root& currentTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
+void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output)
+{ Matrix<Rational> & currentExtendedOperator=this->theLinearOperatorsExtended[indexOperator];
+  Vector<Rational>& currentTranslation=this->theTranslationsProjectedBasisChanged[indexOperator];
   assert (!input.LastObject()->IsEqualToZero());
   output=input;
   Rational tempRat=*output.LastObject();
   output/=tempRat;
   output.size--;
-  currentExtendedOperator.ActOnAroot(output);
+  currentExtendedOperator.ActOnVectorColumn(output);
   output+=currentTranslation;
 }
 
-void MatrixLargeRational::GetMatrixIntWithDen(Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen)
-{ outputDen.MakeOne();
-  MatrixLargeRational tempMat;
-  tempMat=*this;
-  outputMat.init(this->NumRows, this->NumCols);
-  LargeIntUnsigned tempUI;
-  Rational tempRat;
-  for (int i=0; i<this->NumRows; i++)
-    for (int j=0; j<this->NumCols; j++)
-    { tempMat.elements[i][j].GetDen(tempUI);
-      if (!tempUI.IsEqualToOne())
-      { outputDen*=tempUI;
-        tempRat=tempUI;
-        tempMat*=tempRat;
-      }
-    }
-  for (int i=0; i<this->NumRows; i++)
-    for (int j=0; j<this->NumCols; j++)
-      tempMat.elements[i][j].GetNum(outputMat.elements[i][j]);
-}
-
-void MatrixLargeRational::GetMatrixIntWithDen(MatrixIntTightMemoryFit& outputMat, int& outputDen)
-{ outputDen=this->FindPositiveLCMCoefficientDenominatorsTruncated();
-  outputMat.init(this->NumRows, this->NumCols);
-  for (int i=0; i<this->NumRows; i++)
-    for (int j=0; j<this->NumCols; j++)
-      outputMat.elements[i][j]=(this->elements[i][j]*outputDen).NumShort;
-}
-
-void QPSub::MakeSubFromMatrixRational(MatrixLargeRational& input)
-{ input.GetMatrixIntWithDen(this->TheQNSub, this->QNSubDen);
-  this->MakeSubFromMatrixIntAndDen(this->TheQNSub, this->QNSubDen);
-}
-
-void GeneralizedVermaModuleCharacters::GetSubFromIndex(QPSub& output, int theIndex)
-{ MatrixLargeRational& theOperator=this->theLinearOperators.TheObjects[theIndex];
+void GeneralizedVermaModuleCharacters::GetSubFromIndex
+(PolynomialSubstitution<Rational>& outputSub, Matrix<LargeInt>& outputMat, LargeIntUnsigned& outputDen, int theIndex)
+{ Matrix<Rational> & theOperator=this->theLinearOperators.TheObjects[theIndex];
   int dimLargerAlgebra=theOperator.NumCols;
   int dimSmallerAlgebra=theOperator.NumRows;
-  root& theTranslation=this->theTranslationS[theIndex];
-  MatrixLargeRational tempMat;
+  Vector<Rational>& theTranslation=this->theTranslationS[theIndex];
+  Matrix<Rational> tempMat;
   tempMat.init(dimLargerAlgebra+dimSmallerAlgebra+1, dimSmallerAlgebra);
   tempMat.NullifyAll();
   for (int j=0; j<dimSmallerAlgebra; j++)
@@ -497,23 +474,11 @@ void GeneralizedVermaModuleCharacters::GetSubFromIndex(QPSub& output, int theInd
       tempMat.elements[i][j]-=theOperator.elements[j][i];
     tempMat.elements[dimLargerAlgebra+dimSmallerAlgebra][j]=-theTranslation.TheObjects[j];
   }
-  output.MakeSubFromMatrixRational(tempMat);
+  tempMat.GetMatrixIntWithDen(outputMat, outputDen);
+  outputSub.MakeSubFromMatrixIntAndDen(outputMat, outputDen);
 }
 
-std::string QPSub::ElementToString()
-{ std::stringstream out;
-  out << "Matrix den:" << this->QNSubDen << " and the matrix:\n";
-  for (int i=0; i<this->TheQNSub.NumRows; i++)
-  { for (int j=0; j<this->TheQNSub.NumCols; j++)
-      out << this->TheQNSub.elements[i][j] << "\t";
-    out << "\n";
-  }
-  for (int i=0; i<this->RationalPolyForm.size; i++)
-    out << "x_" << i+1 << "->" << this->RationalPolyForm.TheObjects[i].ElementToString() << ", ";
-  return out.str();
-}
-
-void Selection::operator=(const root& other)
+void Selection::operator=(const Vector<Rational>& other)
 { this->init(other.size);
   for (int i=0; i<other.size; i++)
     if (!other[i].IsEqualToZero())
@@ -525,7 +490,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   CGI::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
   this->thePfs.ComputeDebugString(theGlobalVariables);
@@ -535,13 +500,16 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
   out << "=" << this->thePfs.DebugString;
 //  int totalDim=this->theTranslationS[0].size+this->theTranslationsProjecteD[0].size;
   this->theQPsSubstituted.SetSize(this->projectivizedChambeR.size);
-  this->thePfs.theChambersOld.init();
-  this->thePfs.theChambersOld.theDirections=this->GmodKNegWeightsBasisChanged;
-  this->thePfs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
-  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
-  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
+  assert(false);
+//  this->thePfs.theChambersOld.init();
+//  this->thePfs.theChambersOld.theDirections=this->GmodKNegWeightsBasisChanged;
+//  this->thePfs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
+//  this->theQPsNonSubstituted.SetSize(this->thePfs.theChambersOld.size);
+//  this->theQPsSubstituted.SetSize(this->thePfs.theChambersOld.size);
   out << "\n\nThe vector partition functions in each chamber follow.";
   theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+  assert(false);
+/*
   for (int i=0; i<this->thePfs.theChambersOld.size; i++)
     if (this->thePfs.theChambersOld.TheObjects[i]!=0)
     { QuasiPolynomial& currentQPNoSub= this->theQPsNonSubstituted.TheObjects[i];
@@ -558,6 +526,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
         out << "; after substitution we get: " << currentQPSub.ElementToString(false, false);
       }
     }
+    */
 //  this->theParser.theHmm.theRange.theWeyl.GetIntegralLatticeInSimpleCoordinates(integralLattice);
   //out << "\nThe integral lattice:\n" << integralLattice.ElementToString(false, false);
   //this->theMultiplicitiesMaxOutputReport2.flush();
@@ -570,10 +539,11 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     for (int k=0; k<this->theLinearOperators.size; k++)
     { this->GetProjection(k, this->projectivizedChambeR.TheObjects[i].GetInternalPoint(), tempRoot);
       tempRoot-=this->NonIntegralOriginModificationBasisChanged;
-      int theIndex= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
+      assert(false);
+      int theIndex;//= this->thePfs.theChambersOld.GetFirstChamberIndexContainingPoint(tempRoot);
       if (theIndex!=-1)
-      { tempQP=this->theQPsSubstituted.TheObjects[theIndex].TheObjects[k];
-        tempQP*=this->theCoeffs.TheObjects[k];
+      { tempQP=this->theQPsSubstituted[theIndex][k];
+        tempQP*=this->theCoeffs[k];
         currentSum+=tempQP;
       }
       std::stringstream tempStream;
@@ -601,7 +571,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 
 int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots tempRoots;
+{ Vectors<Rational> tempRoots;
   int theDim;
   if(!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, tempRoots, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -615,7 +585,7 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
 
 int ParserNode::EvaluateG2InB3Computation
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root parSel;
+{ Vector<Rational> parSel;
   theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables);
   if (parSel.size!=3)
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -665,7 +635,7 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
 
 int ParserNode::EvaluateG2InB3MultsParabolic
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root highestWeight, parSel;
+{ Vector<Rational> highestWeight, parSel;
   ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
   if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
@@ -682,10 +652,10 @@ int ParserNode::EvaluateG2InB3MultsParabolic
 }
 
 void ConeComplex::InitFromAffineDirectionsAndRefine
-  (roots& inputDirections, roots& inputAffinePoints, GlobalVariables& theGlobalVariables)
+  (Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables)
 { assert(inputDirections.size==inputAffinePoints.size);
   assert(inputDirections.size>0);
-  roots projectivizedDirections;
+  Vectors<Rational> projectivizedDirections;
   projectivizedDirections.SetSize(inputDirections.size*2);
   int theAffineDim= inputDirections[0].size;
   for (int i=0; i<inputDirections.size; i++)
@@ -702,12 +672,12 @@ void ConeComplex::InitFromAffineDirectionsAndRefine
 }
 
 void ConeComplex::MakeAffineAndTransformToProjectiveDimPlusOne
-  (root& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& affinePoint, ConeComplex& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=this);
   output.init();
   Cone tempCone;
-  roots newNormals;
-  root tempRoot;
+  Vectors<Rational> newNormals;
+  Vector<Rational> tempRoot;
   int theAffineDim=affinePoint.size;
   for (int i=0; i<this->size; i++)
   { newNormals.SetSize(this->TheObjects[i].Normals.size+1);
@@ -728,19 +698,21 @@ Vector<CoefficientType> Vector<CoefficientType>::GetProjectivizedNormal(Vector<C
 }
 
 void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
-(root& input, root& output, GlobalVariables& theGlobalVariables)
+(Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
-  roots theBasis;
-  root tempRoot;
+  Vectors<Rational> theBasis;
+  Vector<Rational> tempRoot;
+  Vectors<Rational> bufferVect;
+  Matrix<Rational> bufferMat;
   theBasis.AssignMatrixRows(this->basisRationalForm);
-  input.GetCoordsInBasis(theBasis, tempRoot, theGlobalVariables);
+  input.GetCoordsInBasiS(theBasis, tempRoot, bufferVect, bufferMat);
   tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   tempMat=this->basisRationalForm;
   tempMat.Transpose();
-  tempMat.ActOnAroot(tempRoot, output);
+  tempMat.ActOnVectorColumn(tempRoot, output);
 /*
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(input);
   Lattice tempLattice=*this;
   tempLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
@@ -750,15 +722,15 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
   bool tempBool=  output.IsProportionalTo(input, tempRat);
   assert(tempBool);
   if (tempRat.IsNegative())
-    output.MinusRoot();*/
+    output.Minus();*/
 }
 
 bool Cone::GetLatticePointsInCone
-  (Lattice& theLattice, root& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
-   roots& outputPoints, root* shiftAllPointsBy)
+  (Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
+   Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)
 { if (upperBoundPointsInEachDim<=0)
     upperBoundPointsInEachDim=5;
-  root theActualShift=theShift;
+  Vector<Rational> theActualShift=theShift;
   theLattice.ReduceVector(theActualShift);
   int theDimAffine=this->GetDim();
   if (lastCoordinateIsOne)
@@ -775,8 +747,8 @@ bool Cone::GetLatticePointsInCone
     return false;
   outputPoints.Reserve(numCycles);
   outputPoints.size=0;
-  root candidatePoint;
-  roots LatticeBasis;
+  Vector<Rational> candidatePoint;
+  Vectors<Rational> LatticeBasis;
   LatticeBasis.AssignMatrixRows(theLattice.basisRationalForm);
   for (int i=0; i<numCycles; i++, boundingBox.IncrementSubset())
   { candidatePoint=theActualShift;
@@ -799,7 +771,7 @@ bool Cone::GetLatticePointsInCone
 
 void PiecewiseQuasipolynomial::operator*=(const Rational& other)
 { if (other.IsEqualToZero())
-  { this->Nullify(this->NumVariables, *this->theBuffers);
+  { this->MakeZero(this->NumVariables, *this->theBuffers);
     return;
   }
   for (int i=0; i<this->theQPs.size; i++)
@@ -817,13 +789,13 @@ void PiecewiseQuasipolynomial::operator+=(const PiecewiseQuasipolynomial& other)
 }
 
 bool PiecewiseQuasipolynomial::MakeVPF
-  (roots& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
+  (Vectors<Rational>& theRoots, std::string& outputstring, GlobalVariables& theGlobalVariables)
 { if (theRoots.size<=0)
   { outputstring = "Error.";
     return false;
   }
   this->theBuffers=& theGlobalVariables;
-  this->NumVariables=theRoots.GetDimensionOfElements();
+  this->NumVariables=theRoots.GetDim();
   partFractions theFracs;
   PolynomialOutputFormat theFormat;
   std::stringstream out;
@@ -838,12 +810,13 @@ bool PiecewiseQuasipolynomial::MakeVPF
   theFracs.split(theGlobalVariables, 0);
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ElementToString(theGlobalVariables, theFormat));
   //theFracs.theChambers.InitFromDirectionsAndRefine(theRoots, theGlobalVariables);
-  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
-  theFracs.theChambersOld.theDirections=theRoots;
-  theFracs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
-  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld, theGlobalVariables);
+  assert(false);
+//  theFracs.theChambersOld.AmbientDimension=theRoots[0].size;
+//  theFracs.theChambersOld.theDirections=theRoots;
+//  theFracs.theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
+//  theFracs.theChambers.AssignCombinatorialChamberComplex(theFracs.theChambersOld, theGlobalVariables);
   this->theQPs.SetSize(theFracs.theChambers.size);
-  root indicator;
+  Vector<Rational> indicator;
   for (int i=0; i< theFracs.theChambers.size; i++)
   { indicator= theFracs.theChambers[i].GetInternalPoint();
     theFracs.GetVectorPartitionFunction(this->theQPs[i], indicator, theGlobalVariables);
@@ -853,9 +826,9 @@ bool PiecewiseQuasipolynomial::MakeVPF
   baseLattice.MakeFromRoots(theRoots);
   Cone baseCone;
   baseCone.CreateFromVertices(theRoots, theGlobalVariables);
-  root shiftRoot;
+  Vector<Rational> shiftRoot;
   baseLattice.GetInternalPointInConeForSomeFundamentalDomain(shiftRoot, baseCone, theGlobalVariables);
-  shiftRoot.MinusRoot();
+  shiftRoot.Minus();
 //  std::cout << "shiftRoot: " << shiftRoot.ElementToString();
   theFracs.theChambers.MakeAffineAndTransformToProjectiveDimPlusOne
   (shiftRoot, this->theProjectivizedComplex, theGlobalVariables);
@@ -864,12 +837,13 @@ bool PiecewiseQuasipolynomial::MakeVPF
 }
 
 bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
-(root& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
-{ root coordsInBasis;
+(Vector<Rational>& output, Cone& coneContainingOutputPoint, GlobalVariables& theGlobalVariables)
+{ Vector<Rational> coordsInBasis;
   coneContainingOutputPoint.GetInternalPoint(output);
-  roots basisRoots;
+  Vectors<Rational> basisRoots, bufferVect;
+  Matrix<Rational> bufferMat;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
-  if (!output.GetCoordsInBasis(basisRoots, coordsInBasis, theGlobalVariables))
+  if (!output.GetCoordsInBasiS(basisRoots, coordsInBasis, bufferVect, bufferMat))
     return false;
   Rational maxCoord=coordsInBasis[0];
   if (maxCoord<0)
@@ -884,9 +858,9 @@ bool Lattice::GetInternalPointInConeForSomeFundamentalDomain
   return true;
 }
 
-void Cone::TranslateMeMyLastCoordinateAffinization(root& theTranslationVector)
+void Cone::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector)
 { assert(theTranslationVector.size==this->GetDim()-1);
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<this->Normals.size; i++)
   { tempRoot=this->Normals[i];
     tempRoot.size--;
@@ -904,9 +878,9 @@ void Cone::TranslateMeMyLastCoordinateAffinization(root& theTranslationVector)
     }
 }
 
-void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(roots& output)const
-{ HashedList<root> outputHashed;
-  root tempRoot;
+void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Vectors<Rational>& output)const
+{ HashedList<Vector<Rational> > outputHashed;
+  Vector<Rational> tempRoot;
   for (int i=0; i< this->size; i++)
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
     { tempRoot=this->TheObjects[i].Normals[j];
@@ -917,7 +891,7 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(ro
 }
 
 void ConeComplex::RefineMakeCommonRefinement(const ConeComplex& other, GlobalVariables& theGlobalVariables)
-{ roots newWalls;
+{ Vectors<Rational> newWalls;
   Cone tempCone=this->ConvexHull;
   if (tempCone.MakeConvexHullOfMeAnd(other.ConvexHull, theGlobalVariables))
   { this->GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
@@ -932,7 +906,7 @@ void ConeComplex::RefineMakeCommonRefinement(const ConeComplex& other, GlobalVar
   this->Refine(theGlobalVariables);
 }
 
-void ConeComplex::TranslateMeMyLastCoordinateAffinization(root& theTranslationVector, GlobalVariables& theGlobalVariables)
+void ConeComplex::TranslateMeMyLastCoordinateAffinization(Vector<Rational>& theTranslationVector, GlobalVariables& theGlobalVariables)
 { ConeComplex myCopy;
   myCopy=*this;
   this->init();
@@ -942,7 +916,7 @@ void ConeComplex::TranslateMeMyLastCoordinateAffinization(root& theTranslationVe
     tempCone.TranslateMeMyLastCoordinateAffinization(theTranslationVector);
     this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
   }
-  root normalNoAffinePart, newNormal;
+  Vector<Rational> normalNoAffinePart, newNormal;
   for (int j=0; j<myCopy.splittingNormals.size; j++)
   { normalNoAffinePart= myCopy.splittingNormals[j];
     newNormal=normalNoAffinePart;
@@ -952,9 +926,9 @@ void ConeComplex::TranslateMeMyLastCoordinateAffinization(root& theTranslationVe
   }
 }
 
-void PiecewiseQuasipolynomial::TranslateArgument(root& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables)
+void PiecewiseQuasipolynomial::TranslateArgument(Vector<Rational>& translateToBeAddedToArgument, GlobalVariables& theGlobalVariables)
 { assert(this->theBuffers!=0);
-  root chamberShift=-translateToBeAddedToArgument;
+  Vector<Rational> chamberShift=-translateToBeAddedToArgument;
 //  std::cout << "the translation: " << translateToBeAddedToArgument.ElementToString();
   this->theProjectivizedComplex.TranslateMeMyLastCoordinateAffinization(chamberShift, theGlobalVariables);
   QuasiPolynomial tempQP;
@@ -990,10 +964,10 @@ std::string PiecewiseQuasipolynomial::ElementToString(bool useLatex, bool useHtm
 
 void PiecewiseQuasipolynomial::DrawMe
 (DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber,
- root* distinguishedPoint)
+ Vector<Rational>* distinguishedPoint)
 { PolynomialOutputFormat theFormat;
-  roots latticePoints;
-  HashedList<root> theLatticePointsFinal;
+  Vectors<Rational> latticePoints;
+  HashedList<Vector<Rational> > theLatticePointsFinal;
   List<int> theLatticePointColors;
   List<int> tempList;
   if (numLatticePointsPerDim<0)
@@ -1008,7 +982,7 @@ void PiecewiseQuasipolynomial::DrawMe
     (false, theDrawingVars, theFormat, chamberWallColor);
     std::stringstream tempStream;
     tempStream << i+1;
-    root tempRoot=this->theProjectivizedComplex[i].GetInternalPoint();
+    Vector<Rational> tempRoot=this->theProjectivizedComplex[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
 //    theDrawingVars.drawTextAtVectorBuffer
 //     (tempRoot, tempStream.str(), chamberWallColor, theDrawingVars.PenStyleNormal, 0);
@@ -1038,8 +1012,8 @@ void PiecewiseQuasipolynomial::DrawMe
   }
 }
 
-Rational QuasiPolynomial::Evaluate(const root& input)
-{ root testLatticeBelonging;
+Rational QuasiPolynomial::Evaluate(const Vector<Rational>& input)
+{ Vector<Rational> testLatticeBelonging;
   for (int i=0; i<this->LatticeShifts.size; i++)
   { testLatticeBelonging=this->LatticeShifts[i]-input;
     if (this->AmbientLatticeReduced.IsInLattice(testLatticeBelonging))
@@ -1051,18 +1025,18 @@ Rational QuasiPolynomial::Evaluate(const root& input)
   return 0;
 }
 
-Rational PiecewiseQuasipolynomial::Evaluate(const root& input)
+Rational PiecewiseQuasipolynomial::Evaluate(const Vector<Rational>& input)
 { assert(input.size==this->theProjectivizedComplex.GetDim()-1);
-  root ProjectivizedInput=input;
+  Vector<Rational> ProjectivizedInput=input;
   ProjectivizedInput.SetSize(input.size+1);
   *ProjectivizedInput.LastObject()=1;
   return this->EvaluateInputProjectivized(ProjectivizedInput);
 }
 
-Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const root& input)
+Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Rational>& input)
 { Rational result;
   assert(input.size==this->theProjectivizedComplex.GetDim());
-  root AffineInput=input;
+  Vector<Rational> AffineInput=input;
   AffineInput.SetSize(input.size-1);
   int theIndex=this->theProjectivizedComplex.GetLowestIndexchamberContaining(input);
   if (theIndex==-1)
@@ -1129,9 +1103,9 @@ void PiecewiseQuasipolynomial::MakeCommonRefinement(const ConeComplex& other)
 }
 
 void Lattice::GetDefaultFundamentalDomainInternalPoint
-(root& output)
+(Vector<Rational>& output)
 { output.MakeZero(this->GetDim());
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
   { this->basisRationalForm.RowToRoot(i, tempRoot);
     output+=tempRoot;
@@ -1139,7 +1113,7 @@ void Lattice::GetDefaultFundamentalDomainInternalPoint
   output/=2;
 }
 
-bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
+bool partFractions::split(GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator)
 { //partFraction::flagAnErrorHasOccurredTimeToPanic=true;
   //this->flagAnErrorHasOccurredTimeToPanic=true;
   if (!this->flagInitialized)
@@ -1154,8 +1128,6 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 //    this->CompareCheckSums(theGlobalVariables);
     this->RemoveRedundantShortRoots(theGlobalVariables, Indicator);
     //this->ComputeDebugString();
-    this->UncoverBracketsNumerators(theGlobalVariables, Indicator);
-    //partFraction::UncoveringBrackets=true;
     //this->ComputeDebugString();
     this->CompareCheckSums(theGlobalVariables);
     this->IndexLowestNonProcessed= this->size;
@@ -1167,32 +1139,32 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, root* Indicator)
 }
 
 void Cone::ChangeBasis
-  (MatrixLargeRational& theLinearMap, GlobalVariables& theGlobalVariables)
-{ //roots newNormals;
-//  MatrixLargeRational tempMat=theLinearMap;
-  theLinearMap.ActOnRoots(this->Normals);
+  (Matrix<Rational> & theLinearMap, GlobalVariables& theGlobalVariables)
+{ //Vectors<Rational> newNormals;
+//  Matrix<Rational>  tempMat=theLinearMap;
+  theLinearMap.ActOnVectorsColumn(this->Normals);
   this->CreateFromNormals(this->Normals, theGlobalVariables);
 }
 
-root WeylGroup::GetSimpleCoordinatesFromFundamental
+Vector<Rational> WeylGroup::GetSimpleCoordinatesFromFundamental
 (const Vector<Rational>& inputInFundamentalCoords)
-{ MatrixLargeRational& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
-  root result;
+{ Matrix<Rational> & tempMat=*this->GetMatrixFundamentalToSimpleCoords();
+  Vector<Rational> result;
   result=inputInFundamentalCoords;
-  tempMat.ActOnAroot(result);
+  tempMat.ActOnVectorColumn(result);
   return result;
 }
 
 Vector<Rational> WeylGroup::GetFundamentalCoordinatesFromSimple
 (const Vector<Rational>& inputInFundamentalCoords)
-{ MatrixLargeRational& tempMat=*this->GetMatrixSimpleToFundamentalCoords();
+{ Matrix<Rational> & tempMat=*this->GetMatrixSimpleToFundamentalCoords();
   Vector<Rational> result=inputInFundamentalCoords;
   tempMat.ActOnVectorColumn(result);
   return result;
 }
 
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
-  (root& highestWeightLargerAlgebraFundamentalCoords, root& parabolicSel, Parser& theParser,
+  (Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, Parser& theParser,
    GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   WeylGroup& LargerWeyl=theParser.theHmm.theRange().theWeyl;
@@ -1202,14 +1174,14 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
   this->TransformToWeylProjectiveStep1(theGlobalVariables);
   this->TransformToWeylProjectiveStep2(theGlobalVariables);
-  root highestWeightLargerAlgSimpleCoords;
+  Vector<Rational> highestWeightLargerAlgSimpleCoords;
   highestWeightLargerAlgSimpleCoords=LargerWeyl.GetSimpleCoordinatesFromFundamental
   (highestWeightLargerAlgebraFundamentalCoords);
 
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
 
 
-  root tempRoot, ZeroRoot;
+  Vector<Rational> tempRoot, ZeroRoot;
   DrawingVariables& drawOps=theGlobalVariables.theDrawingVariables;
   int theSmallDim=SmallerWeyl.CartanSymmetric.NumRows;
 //  drawOps.theBuffer.initDimensions(theSmallDim, 1);
@@ -1229,10 +1201,10 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   //std::cout << "<hr>" << this->GmodKNegWeightsBasisChanged.ElementToString() << "<hr>";
   std::string tempS;
   theStartingPoly.MakeVPF(this->GmodKNegWeightsBasisChanged, tempS, theGlobalVariables);
-  roots translationsProjectedFinal;
+  Vectors<Rational> translationsProjectedFinal;
   translationsProjectedFinal.SetSize(this->theLinearOperators.size);
-  this->theLinearOperators[0].ActOnAroot(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
-//  translationsProjectedFinal[0].MinusRoot();
+  this->theLinearOperators[0].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[0]);
+//  translationsProjectedFinal[0].Minus();
   out << "<br>Input so(7)-highest weight: " << highestWeightLargerAlgSimpleCoords.ElementToString();
   out << "<br>Input parabolics selections: " << parabolicSel.ElementToString();
   out << "<br>the argument translations: " << this->theTranslationsProjectedBasisChanged.ElementToString();
@@ -1245,8 +1217,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Cone smallWeylChamber;
   tempMat=SmallerWeyl.CartanSymmetric;
   tempMat.Invert();
-  roots tempVertices;
-  root tMpRt;
+  Vectors<Rational> tempVertices;
+  Vector<Rational> tMpRt;
   tMpRt=this->ParabolicSelectionSmallerAlgebra;
 //  std::cout << "<br>sel smaller: " << tMpRt.ElementToString();
   for (int i=0; i<this->ParabolicSelectionSmallerAlgebra.MaxSize; i++)
@@ -1267,16 +1239,16 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   ;
 //  std::cout << "<br> after the basis change: " << smallWeylChamber.ElementToString(false, true, theFormat);
   out << "<br> The small Weyl chamber: " << smallWeylChamber.ElementToString(false, true, theFormat);
-  root highestWeightSmallAlgBasisChanged= -translationsProjectedFinal[0];
+  Vector<Rational> highestWeightSmallAlgBasisChanged= -translationsProjectedFinal[0];
 //  std::cout << highestWeightSmallAlgBasisChanged.ElementToString();
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=100;
   for (int i=0; i<this->theLinearOperators.size; i++)
-  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
+  { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlgSimpleCoords, translationsProjectedFinal[i]);
     translationsProjectedFinal[i]+=this->theTranslationsProjectedBasisChanged[i];
     drawOps.drawCircleAtVectorBuffer(-translationsProjectedFinal[i], 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(250,0,0));
   }
   out << "<br>the translations projected final: " << translationsProjectedFinal.ElementToString();
-  Accum.Nullify(theStartingPoly.NumVariables, theGlobalVariables);
+  Accum.MakeZero(theStartingPoly.NumVariables, theGlobalVariables);
   for (int i=0; i<this->theLinearOperators.size; i++)
   { theSubbedPoly=theStartingPoly;
     theSubbedPoly*=this->theCoeffs[i];
@@ -1315,8 +1287,8 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 /*  out << refinedProjectivized.ElementToString(false, true);*/
 /*
   for (int i=0; i<this->theLinearOperators.size; i++)
-  { this->theLinearOperators[i].ActOnAroot(highestWeightLargerAlg, tempRoot);
-    tempRoot.MinusRoot();
+  { this->theLinearOperators[i].ActOnVectorColumn(highestWeightLargerAlg, tempRoot);
+    tempRoot.Minus();
     tempRoot-=this->theTranslationsProjecteD[i];
     drawOps.
     drawCircleAtVectorBuffer(tempRoot, 2, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,100));
@@ -1348,20 +1320,20 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
 (int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   std::stringstream out;
-  roots& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
+  Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
   List<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
   {//type D or E
-    //in type D first comes the triple node, then the long string, then the one-root strings
+    //in type D first comes the triple node, then the long string, then the one-Vector<Rational> strings
     // the long string is oriented with the end that is connected to the triple node having
     //smaller index
-    //in type E similarly the longest string comes first oriented with the root that is linked to the triple node having smaller index
+    //in type E similarly the longest string comes first oriented with the Vector<Rational> that is linked to the triple node having smaller index
     // then comes the second longest string (oriented in the same fashion)
-    // and last the one-root string
-    root tripleNode;
+    // and last the one-Vector<Rational> string
+    Vector<Rational> tripleNode;
     int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
-    tripleNode.Assign( currentComponent.TheObjects[tripleNodeindex]);
-    roots tempRoots;
+    tripleNode=( currentComponent.TheObjects[tripleNodeindex]);
+    Vectors<Rational> tempRoots;
     tempRoots.CopyFromBase(currentComponent);
     tempRoots.PopIndexSwapWithLast(tripleNodeindex);
     DynkinDiagramRootSubalgebra tempDiagram;
@@ -1416,7 +1388,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
         out << this->SetComponent("A'", numLength1, indexComponent);
     }
     else
-    {//the longer root should have smaller index
+    {//the longer Vector<Rational> should have smaller index
       Rational greaterlength, tempRat;
       int numGreaterLength=numLength2;
       int numSmallerLength=numLength1;
@@ -1497,10 +1469,10 @@ void DynkinDiagramRootSubalgebra::ElementToStrinG
 
 void WeylGroup::GetWeylChamber
 (Cone& output, GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational tempMat;
+{ Matrix<Rational>  tempMat;
   tempMat=this->CartanSymmetric;
   tempMat.Invert();
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempRoots.AssignMatrixRows(tempMat);
   output.CreateFromVertices(tempRoots, theGlobalVariables);
 //  output.CreateFromNormals(tempRoots, theGlobalVariables);
@@ -1511,9 +1483,9 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
 { std::stringstream out;
   int totalDimAffine=this->WeylLarger.GetDim()+this->WeylSmaller.GetDim();
   int smallDim=this->WeylSmaller.GetDim();
-  root normal;
+  Vector<Rational> normal;
   normal.MakeZero(totalDimAffine+1);
-  roots newWalls;
+  Vectors<Rational> newWalls;
   ConeComplex tempComplex;
   tempComplex=this->projectivizedChambeR;
   for (int i=0; i<this->WeylChamberSmallerAlgebra.Normals.size; i++)
@@ -1530,10 +1502,10 @@ std::string GeneralizedVermaModuleCharacters::CheckMultiplicitiesVsOrbits
 }
 
 void GeneralizedVermaModuleCharacters::IncrementComputation
-  (root& parabolicSel, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 //  this->UpperLimitChambersForDebugPurposes=5;
-  PolynomialRationalCoeff::PreferredHashSize=10;
+  Polynomial<Rational> ::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=parabolicSel;
   if (false)
@@ -1597,69 +1569,28 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
   this->thePauseControlleR.ExitComputation();
 }
 
-void CombinatorialChamberContainer::initCharacterComputation
-  (WeylGroup& inputWeyl, roots& inputWeights, GlobalVariables& theGlobalVariables)
-{ this->flagSliceWithAWallInitDone=true;
-  this->AmbientWeyl.GetElement()=inputWeyl;
-  this->theDirections=inputWeights;
-  this->init();
-  this->SliceTheEuclideanSpace(theGlobalVariables, false);
-  this->drawOutput(theGlobalVariables.theDrawingVariables, this->IndicatorRoot, 0);
-  WeylGroup& theWeyl= this->AmbientWeyl.GetElement();
-  MatrixLargeRational tempMat;
-  tempMat=theWeyl.CartanSymmetric;
-  tempMat.Invert(theGlobalVariables);
-  roots tempRoots;
-  tempRoots.AssignMatrixRows(tempMat);
-  this->WeylChamber.ComputeFromDirections(tempRoots, theGlobalVariables, theWeyl.GetDim());
-  this->TransformToWeylProjective(theGlobalVariables);
-  this->NumAffineHyperplanesProcessed=-1;
-}
 
-void WallData::TransformToWeylProjective
-  (GlobalVariables& theGlobalVariables)
-{ root tempRoot;
-  int startingDimension=this->normal.size;
-  tempRoot.MakeZero(startingDimension*2+1);
-  for (int i=0; i<startingDimension; i++)
-  { tempRoot.TheObjects[i]=this->normal.TheObjects[i];
-    tempRoot.TheObjects[i+startingDimension]= -this->normal.TheObjects[i];
-  }
-  this->normal=tempRoot;
-}
-
-void CombinatorialChamberContainer::GetWeylChamberWallsForCharacterComputation(roots& output)
-{ output.SetSize(this->WeylChamber.size+1);
-  int startingDimension=(this->AmbientDimension-1)/2;
-  for (int i=0; i<this->WeylChamber.size; i++)
-  { output.TheObjects[i].MakeZero(this->AmbientDimension);
-    for(int j=0; j<startingDimension; j++)
-      output.TheObjects[i].TheObjects[startingDimension+j]=this->WeylChamber.TheObjects[i].TheObjects[j];
-    output.TheObjects[i].ComputeDebugString();
-  }
-  output.LastObject()->MakeZero(this->AmbientDimension);
-  *output.LastObject()->LastObject()=1;
-}
-
-void CombinatorialChamber::TransformToWeylProjective
-  (CombinatorialChamberContainer& owner, GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->Externalwalls.size; i++)
+void Cone::TransformToWeylProjective
+  (ConeComplex& owner, GlobalVariables& theGlobalVariables)
+{ assert(false);
+/*
+  for (int i=0; i<this->Externalwalls.size; i++)
     this->Externalwalls.TheObjects[i].TransformToWeylProjective(theGlobalVariables);
   WallData newWall;
   this->Externalwalls.Reserve(owner.WeylChamber.size+this->Externalwalls.size);
-  roots newExternalWalls;
+  Vectors<Rational> newExternalWalls;
   owner.GetWeylChamberWallsForCharacterComputation(newExternalWalls);
   for (int i=0; i<newExternalWalls.size; i++)
   { newWall.normal=newExternalWalls.TheObjects[i];
     this->Externalwalls.AddOnTop(newWall);
   }
   this->AllVertices.size=0;
-  this->ComputeVerticesFromNormals(owner, theGlobalVariables);
+  this->ComputeVerticesFromNormals(owner, theGlobalVariables);*/
 }
 
-void CombinatorialChamberContainer::TransformToWeylProjective
+void ConeComplex::TransformToWeylProjective
   (GlobalVariables& theGlobalVariables)
-{ this->AmbientWeyl.GetElement().ComputeWeylGroup();
+{/* this->AmbientWeyl.GetElement().ComputeWeylGroup();
   this->log << this->AmbientWeyl.GetElement().ElementToString();
   std::string tempS;
   this->ElementToString(tempS);
@@ -1667,8 +1598,8 @@ void CombinatorialChamberContainer::TransformToWeylProjective
   this->log << tempS;
   this->NewHyperplanesToSliceWith.size=0;
   this->theHyperplanes.size=0;
-  root wallToSliceWith;
-//  roots oldDirections;
+  Vector<Rational> wallToSliceWith;
+//  Vectors<Rational> oldDirections;
   for (int k=0; k<this->AmbientWeyl.GetElement().size; k++)
     for (int i=0; i<this->size; i++)
       if (this->TheObjects[i]!=0)
@@ -1692,7 +1623,7 @@ void CombinatorialChamberContainer::TransformToWeylProjective
 //      theVertices.AddRootSnoRepetition(this->TheObjects[i]->AllVertices);
     }
   //this->startingCones.initFromDirections()
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<this->TheGlobalConeNormals.size; i++)
   { tempRoot.MakeZero(this->AmbientDimension);
     int startingDim=this->TheGlobalConeNormals.TheObjects[i].size;
@@ -1702,7 +1633,7 @@ void CombinatorialChamberContainer::TransformToWeylProjective
     }
     this->TheGlobalConeNormals.TheObjects[i]=tempRoot;
   }
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   this->GetWeylChamberWallsForCharacterComputation(tempRoots);
   this->TheGlobalConeNormals.AddListOnTop(tempRoots);
   this->log << "the global cone normals: " << this->TheGlobalConeNormals.ElementToString();
@@ -1710,152 +1641,7 @@ void CombinatorialChamberContainer::TransformToWeylProjective
   this->log << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=this->log.str();
-  theGlobalVariables.MakeReport();
-}
-
-std::string roots::ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, PolynomialOutputFormat& theFormat)
-{ std::stringstream out;
-  std::string tempS;
-  std::string theLetter="x";
-  if (useLatex)
-    out << "\\begin{array}{l}";
-  for (int i=0; i<this->size; i++)
-  { root& current=this->TheObjects[i];
-    tempS= current.ElementToStringLetterFormat(theFormat, useLatex, LastVarIsConstant);
-    if (tempS=="")
-      out << "(0";
-    out << tempS;
-    if (!LastVarIsConstant)
-    { if (useLatex)
-        out << "\\geq 0\\\\";
-      else
-        out << "=>0\n";
-    } else
-    { if (useLatex)
-        out << "\\geq " << (-(*current.LastObject())).ElementToString() << "\\\\";
-      else
-        out << "=>" <<  (-(*current.LastObject())).ElementToString();
-    }
-    if (tempS=="")
-      out << ")";
-    if (useHtml)
-      out << "<br>";
-    else
-      out << "\n";
-  }
-  if (useLatex)
-    out << "\\end{array}";
-  return out.str();
-}
-
-void CombinatorialChamber::ElementToInequalitiesString(std::string& output, CombinatorialChamberContainer& owner, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal)
-{ int theDimension=owner.AmbientDimension;
-  this->SortNormals();
-  this->AllVertices.QuickSortAscending();
-  std::string tempS; std::stringstream out;
-  if (useLatex)
-    out << "\n\\begin{eqnarray*}\n";
-  if (useHtml)
-    out << "\n<br>\n";
-  for (int i=0; i<this->Externalwalls.size; i++)
-  { root& currentNormal= this->ExternalwallsNormalsSorted.TheObjects[i];
-    for (int j=0; j<theDimension; j++)
-    { currentNormal.TheObjects[j].ElementToString(tempS);
-      if (tempS!="0")
-      { if (tempS=="1")
-        { tempS="";
-          out << '+';
-        }
-        if (tempS=="-1")
-          tempS="-";
-        if (j!=0)
-          if (tempS.size()!=0)
-            if (tempS[0]!='-')
-              out << '+';
-        out << tempS << PolyFormatLocal.GetLetterIndex(j);
-      }
-    }
-    if (this->Externalwalls.TheObjects[i].flagIsClosed)
-    { if (useLatex)
-        out << "& \\geq & 0\\\\";
-      if (useHtml)
-        out << " >= 0\n<br>\n";
-      if (!(useHtml || useLatex))
-        out << ">=0\n";
-    } else
-    { if (useLatex)
-        out << "& > & 0\\\\";
-      if (useHtml)
-        out << " > 0\n<br>\n";
-      if (!(useHtml || useLatex))
-        out << ">0\n";
-    }
-  }
-  if (useLatex)
-    out << "\\end{eqnarray*}";
-  output=out.str();
-}
-
-bool CombinatorialChamberContainer::oneStepChamberSlice(GlobalVariables& theGlobalVariables)
-{ if (this->PreferredNextChambers.size==0 && this->NumAffineHyperplanesProcessed<this->NewHyperplanesToSliceWith.size)
-  this->NumAffineHyperplanesProcessed++;
-  if (!(this->NumAffineHyperplanesProcessed < this->NewHyperplanesToSliceWith.size))
-  { this->flagDrawingProjective=false;
-//    this->ProjectToDefaultAffineSpace(theGlobalVariables);
-    std::stringstream out;
-    this->ComputeDebugString();
-    out << this->DebugString;
-    theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-    return false;
-  }
-  if (this->PreferredNextChambers.size==0)
-    this->SliceWithAWallInitSimple(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
-  else
-    this->SliceWithAWallOneIncrement(this->NewHyperplanesToSliceWith.TheObjects[this->NumAffineHyperplanesProcessed], theGlobalVariables);
-  std::stringstream out;
-  //this->ComputeDebugString();
-  out << "Next chamber to slice: " << this->indexNextChamberToSlice;
-  out << "Preferred next chambers:  ";
-  for (int i=0; i<this->PreferredNextChambers.size; i++)
-    out << this->PreferredNextChambers.TheObjects[i] << ",";
-  out << "\nProcessed hyperplanes: " << this->NumAffineHyperplanesProcessed  << " out of " << this->NewHyperplanesToSliceWith.size << "\n";
-  out << "Number of chamber pointers (including zero pointers): " << this->size;
-  //out << this->DebugString;
-  theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-  theGlobalVariables.MakeReport();
-  return true;
-}
-
-void CombinatorialChamberContainer::GetAffineWallImage
-  (int indexWeylElement, WallData& input, root& output, GlobalVariables& theGlobalVariables)
-{ WeylGroup& currentWeyl=this->AmbientWeyl.GetElement();
-  Vector<PolynomialRationalCoeff> tempRoot;
-  PolynomialRationalCoeff tempP, PZero;
-  PZero.Nullify(this->AmbientDimension);
-  tempRoot.SetSize(this->AmbientDimension);
-  for (int i=0; i<this->AmbientDimension; i++)
-  { tempP.MakeMonomialOneLetter(this->AmbientDimension, i, 1, (Rational) 1);
-    tempRoot.TheObjects[i]=tempP;
-  }
-  this->log << "\nConverting: " << input.normal.ElementToString() << ". Action of element " << indexWeylElement << " on " << tempRoot.ElementToString();
-  currentWeyl.ActOn(indexWeylElement, tempRoot, true, true, PZero);
-  this->log << ": " << tempRoot.ElementToString();
-  output.MakeZero(this->AmbientDimension*2+1);
-  for (int i=0; i<this->AmbientDimension; i++)
-  { output.TheObjects[i]=input.normal.TheObjects[i];
-    PolynomialRationalCoeff& tempP=tempRoot.TheObjects[i];
-    for (int j=0; j< tempP.size; j++)
-    { Monomial<Rational>& tempMon=tempP.TheObjects[j];
-      int theVarIndex;
-      if (tempMon.IsAConstant())
-        (*output.LastObject())+=-tempMon.Coefficient*output.TheObjects[i];
-      else
-      { if (!tempMon.IsOneLetterFirstDegree(theVarIndex))
-          assert(false);
-        output.TheObjects[theVarIndex+this->AmbientDimension]+=-tempMon.Coefficient*output.TheObjects[i];
-      }
-    }
-  }
+  theGlobalVariables.MakeReport();*/
 }
 
 int ParserNode::EvaluateWeylAction
@@ -1877,14 +1663,14 @@ int ParserNode::EvaluateWeylAction
   theWeyl.ComputeWeylGroup(51840);
 //  std::cout << theWeight.ElementToString();
   out << "We denote the Weyl group elements by using their minimal-length expressions using simple reflections.<br>"
-  << " In what follows, s_{\\eta_ i} denotes the reflection with respect to the i^th simple root. <br>The elements of the Weyl group are given in Bruhat order, "
+  << " In what follows, s_{\\eta_ i} denotes the reflection with respect to the i^th simple Vector<Rational>. <br>The elements of the Weyl group are given in Bruhat order, "
   << "i.e. are sorted according to the length of their expression using simple reflections.<br>";
   if (theWeyl.size>=51840)
     out << "Only the first 51840 elements have been computed. <br> If you want a larger computation <br> please use the C++ code directly.";
   out << "Number of elements: " << theWeyl.size << "<br>";
   Vector<RationalFunction> theOrbitElement;
   RationalFunction RFZero;
-  RFZero.Nullify(theNode.impliedNumVars, &theGlobalVariables);
+  RFZero.MakeZero(theNode.impliedNumVars, &theGlobalVariables);
   std::stringstream tempStream;
   tempStream << "\\begin{array}{rcl}";
   for (int i=0; i<theWeyl.size; i++)
@@ -1903,82 +1689,8 @@ int ParserNode::EvaluateWeylAction
   return theNode.errorNoError;
 }
 
-void CombinatorialChamberContainer::SliceWithAWallInitSimple(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->flagMakingASingleHyperplaneSlice=true;
-  this->flagSliceWithAWallInitDone=false;
-  this->PurgeZeroPointers();
-  this->PreferredNextChambers.size=0;
-  this->LabelAllUnexplored();
-  this->PreferredNextChambers.size=0;
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=0)
-      this->PreferredNextChambers.AddOnTop(i);
-  this->indexNextChamberToSlice=*this->PreferredNextChambers.LastObject();
-  this->PreferredNextChambers.PopLastObject();
-  this->flagSliceWithAWallInitDone=true;
-}
-
-void CombinatorialChamberContainer::SliceWithAWallInit(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->flagMakingASingleHyperplaneSlice=true;
-  this->flagSliceWithAWallInitDone=false;
-  this->PurgeZeroPointers();
-  this->PreferredNextChambers.size=0;
-  this->LabelAllUnexplored();
-  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  if (this->flagAnErrorHasOcurredTimeToPanic)
-    TheKillerFacetNormal.ComputeDebugString();
-  for (int i=0; i<this->size; i++)
-  { if (this->flagAnErrorHasOcurredTimeToPanic)
-      this->ComputeDebugString();
-    if (this->TheObjects[i]!=0)
-    { this->indexNextChamberToSlice=i;
-      if (this->TheObjects[i]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
-      { delete this->TheObjects[i];
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter--;
-  ParallelComputing::CheckPointerCounters();
-#endif
-        this->TheObjects[i]=0;
-        break;
-      }
-    }
-  }
-  this->flagSliceWithAWallInitDone=true;
-}
-
-void CombinatorialChamberContainer::SliceWithAWall(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ this->SliceWithAWallInitSimple(TheKillerFacetNormal, theGlobalVariables);
-  while (this->PreferredNextChambers.size>0)
-    this->SliceWithAWallOneIncrement(TheKillerFacetNormal, theGlobalVariables);
-  this->PurgeZeroPointers();
-  this->PurgeInternalWalls();
-}
-
-void CombinatorialChamberContainer::SliceWithAWallOneIncrement(root& TheKillerFacetNormal, GlobalVariables& theGlobalVariables)
-{ root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
-  if (!this->flagSliceWithAWallInitDone)
-    this->SliceWithAWallInitSimple(TheKillerFacetNormal, theGlobalVariables);
-  else
-    if(this->PreferredNextChambers.size>0)
-    { this->indexNextChamberToSlice=this->PreferredNextChambers.TheObjects[0];
-      if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]!=0)
-        if (!this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->flagExplored)
-          if (this->TheObjects[this->PreferredNextChambers.TheObjects[0]]->SplitChamber(TheKillerFacetNormal, *this, tempRoot, theGlobalVariables))
-          { delete this->TheObjects[this->PreferredNextChambers.TheObjects[0]];
-  #ifdef CGIversionLimitRAMuse
-    ParallelComputing::GlobalPointerCounter--;
-    ParallelComputing::CheckPointerCounters();
-  #endif
-            this->TheObjects[this->PreferredNextChambers.TheObjects[0]]=0;
-          }
-      this->PreferredNextChambers.PopIndexShiftUp(0);
-      if (this->flagAnErrorHasOcurredTimeToPanic)
-        this->ComputeDebugString();
-    }
-}
-
 void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
-(MatrixLargeRational& output, root& outputTranslation, roots& NonParams, int numParams)
+(Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams)
 { //reminder: the very last variable comes from the projectivization and contributes to the translation only!
   int numNonParams=NonParams.size;
   output.init(numParams+numNonParams-1, numParams-1);
@@ -1994,7 +1706,7 @@ void GeneralizedVermaModuleCharacters::GetSubFromNonParamArray
 }
 
 void ConeLatticeAndShiftMaxComputation::init
-(root& theNEq, Cone& startingCone, Lattice& startingLattice, root& startingShift)
+(Vector<Rational>& theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational>& startingShift)
 { ConeLatticeAndShift theCLS;
   theCLS.theProjectivizedCone=startingCone;
   theCLS.theLattice=startingLattice;
@@ -2014,15 +1726,15 @@ void ConeLatticeAndShiftMaxComputation::init
 
 int ParserNode::EvaluateFindExtremaInDirectionOverLattice
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ PolynomialRationalCoeff& theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
+{ Polynomial<Rational> & theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
  // int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
   //int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
   ParserNode& theShiftNode= theNode.owner->TheObjects[theArgumentList[1]];
   Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList[2]].theLattice.GetElement();
   Cone& currentCone=theNode.owner->TheObjects[theArgumentList[3]].theCone.GetElement();
   int numNonParam=theNode.owner->TheObjects[theArgumentList[4]].intValue;
-  root theShift;
-  root theNEqBeforeCheck, theNEq;
+  Vector<Rational> theShift;
+  Vector<Rational> theNEqBeforeCheck, theNEq;
   if(!theLinPoly.IsLinearGetRootConstantTermLastCoordinate(theNEqBeforeCheck, (Rational) 0))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   if(theNEqBeforeCheck.size>currentCone.GetDim())
@@ -2042,7 +1754,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
     return theNode.SetError(errorImplicitRequirementNotSatisfied);
   GeneralizedVermaModuleCharacters tempChars;
   List<int> nodesCurrentRoot;
-  List<roots> outputParamChambers, outputNonParamVertices;
+  List<Vectors<Rational> > outputParamChambers, outputNonParamVertices;
   PolynomialOutputFormat tempFormat;
   std::stringstream out;
   PolynomialOutputFormat theFormat;
@@ -2076,7 +1788,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
 int ParserNode::EvaluateSliceCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Cone& theCone=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theCone.GetElement();
-  root theDirection;
+  Vector<Rational> theDirection;
   if (! theNode.owner->TheObjects[theArgumentList.TheObjects[1]].GetRootRationalDontUseForFunctionArguments(theDirection, theGlobalVariables))
     return theNode.errorProgramming;
   if (theCone.GetDim()!=theDirection.size)
@@ -2095,7 +1807,7 @@ int ParserNode::EvaluateSliceCone
 }
 
 bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection
-  (root& SlicingDirection, root& normal1, root& normal2, root& output)
+  (Vector<Rational>& SlicingDirection, Vector<Rational>& normal1, Vector<Rational>& normal2, Vector<Rational>& output)
 { // we are looking for a normal n of the form n=t1*normal1+t2*normal2
   // such that  <t1*normal1+t2*normal2, slicingDirection>=0
   Rational normal1ScalarDirection=normal1.ScalarEuclidean(SlicingDirection);
@@ -2112,7 +1824,7 @@ bool Cone::ProduceNormalFromTwoNormalsAndSlicingDirection
 }
 
 void Cone::SliceInDirection
-  (root& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables)
 { output.init();
   output.AddNonRefinedChamberOnTopNoRepetition(*this, theGlobalVariables);
   output.slicingDirections.AddOnTop(theDirection);
@@ -2121,10 +1833,10 @@ void Cone::SliceInDirection
   //std::cout <<output.ElementToString(false, true);
 }
 
-void Lattice::ApplyLinearMap(MatrixLargeRational& theMap, Lattice& output)
-{ roots tempRoots;
+void Lattice::ApplyLinearMap(Matrix<Rational> & theMap, Lattice& output)
+{ Vectors<Rational> tempRoots;
   tempRoots.AssignMatrixRows(this->basisRationalForm);
-  theMap.ActOnRoots(tempRoots);
+  theMap.ActOnVectorsColumn(tempRoots);
   output.MakeFromRoots(tempRoots);
 }
 
@@ -2142,7 +1854,7 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   }*/
   out << "<hr><hr>Cones not processed(number of cones " << this->theConesLargerDim.size << "):\n<hr>\n";
   DrawingVariables theDrawingVariables;
-  PolynomialRationalCoeff tempP;
+  Polynomial<Rational>  tempP;
   for (int i=0; i<this->theConesLargerDim.size; i++)
   { out << "";// << this->theConesLargerDim[i].ElementToString(theFormat);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].ElementToString();
@@ -2176,12 +1888,12 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
     theGlobalVariables.MakeReport();
   }
   this->theFinalRepresentatives.size=0;
-  roots tempRoots, tempRoots2;
+  Vectors<Rational> tempRoots, tempRoots2;
   tempRoots2.SetSize(1);
   for (int i=0; i<this->theConesLargerDim.size; i++)
   { tempRoots2[0]=this->theConesLargerDim[i].theShift;
     this->theConesLargerDim[i].theLattice.GetAllRepresentativesProjectingDownTo(this->theFinalRougherLattice, tempRoots2, tempRoots);
-    this->theFinalRepresentatives.AddRootSnoRepetition(tempRoots);
+    this->theFinalRepresentatives.AddOnTopNoRepetition(tempRoots);
     std::stringstream tempStream;
     tempStream << "Computing representative " << i+1 << " out of " << this->theConesLargerDim.size;
     tempStream << "\nSo far " << this->theFinalRepresentatives.size << " found.";
@@ -2191,7 +1903,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
   this->complexStartingPerRepresentative.SetSize(this->theFinalRepresentatives.size);
   this->startingLPtoMaximize.SetSize(this->theFinalRepresentatives.size);
   this->finalMaxima.SetSize(this->theFinalRepresentatives.size);
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<this->theFinalRepresentatives.size; i++)
     for (int j=0; j<this->theConesLargerDim.size; j++)
     { tempRoot=this->theFinalRepresentatives[i];
@@ -2206,14 +1918,14 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
 /*void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep2TrimChamberForMultOne
     (Controller& thePauseController, GlobalVariables& theGlobalVariables)
 { Cone trimmedCone;
-  roots tempRoots;
-  root multFreeWall;
+  Vectors<Rational> tempRoots;
+  Vector<Rational> multFreeWall;
   int startingNumCones=this->theConesLargerDim.size;
   int numKilledCones=0;
   for (int i=0; i<this->theConesLargerDim.size; i++)
   { trimmedCone.Normals=this->theConesLargerDim[i].theProjectivizedCone.Normals;
     multFreeWall=this->LPtoMaximizeLargerDim[i];
-    multFreeWall.MinusRoot();
+    multFreeWall.Minus();
     *multFreeWall.LastObject()+=1;
     trimmedCone.Normals.AddOnTop(multFreeWall);
     trimmedCone.CreateFromNormals(trimmedCone.Normals, theGlobalVariables);
@@ -2310,14 +2022,14 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
 }
 
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
-(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
- List<ConeLatticeAndShift>& outputAppend, MatrixLargeRational& theProjectionLatticeLevel,
+(Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine,
+ List<ConeLatticeAndShift>& outputAppend, Matrix<Rational> & theProjectionLatticeLevel,
  GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational matVertices;
+{ Matrix<Rational>  matVertices;
   matVertices.AssignRootsToRowsOfMatrix(this->theProjectivizedCone.Vertices);
-  roots theNormals;
+  Vectors<Rational> theNormals;
   matVertices.FindZeroEigenSpace(theNormals, theGlobalVariables);
-  root preferredNormal;
+  Vector<Rational> preferredNormal;
   for (int i=0; i<theNormals.size; i++)
     if (!theNormals[i][0].IsEqualToZero())
     { preferredNormal=theNormals[i];
@@ -2327,7 +2039,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   preferredNormal.ShiftToTheLeftOnePos();
   preferredNormal/=-firstCoord;
   ConeLatticeAndShift tempCLS;
-  roots newNormals=this->theProjectivizedCone.Normals;
+  Vectors<Rational> newNormals=this->theProjectivizedCone.Normals;
   Rational firstCoordNewNormal, tempRat;
   for (int i=0; i<newNormals.size; i++)
   { firstCoordNewNormal=newNormals[i][0];
@@ -2339,9 +2051,9 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
   tempCLS.theShift=this->theShift;
   tempCLS.theShift.ShiftToTheLeftOnePos();
   this->theLattice.ApplyLinearMap(theProjectionLatticeLevel, tempCLS.theLattice);
-  root tempRoot;
+  Vector<Rational> tempRoot;
   tempRoot=theLPToMaximizeAffine.GetShiftToTheLeftOnePosition();
-  //root tempRoot2;
+  //Vector<Rational> tempRoot2;
   //tempRoot2=preferredNormal;
   tempRoot+=(preferredNormal*theLPToMaximizeAffine[0]);
   if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
@@ -2351,20 +2063,20 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParamDegenerate
 }
 
 void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
-(root& theLPToMaximizeAffine, roots& outputAppendLPToMaximizeAffine,
+(Vector<Rational>& theLPToMaximizeAffine, Vectors<Rational>& outputAppendLPToMaximizeAffine,
  List<ConeLatticeAndShift>& outputAppend,
  GlobalVariables& theGlobalVariables)
-{ root direction;
+{ Vector<Rational> direction;
   PolynomialOutputFormat theFormat;
   int theDimProjectivized=this->GetDimProjectivized();
-  MatrixLargeRational theProjectionLatticeLevel;
-  MatrixLargeRational theProjectionAffine;
+  Matrix<Rational>  theProjectionLatticeLevel;
+  Matrix<Rational>  theProjectionAffine;
   theProjectionLatticeLevel.init(theDimProjectivized-2, theDimProjectivized-1);
   theProjectionLatticeLevel.NullifyAll();
   for (int i=0; i<theProjectionLatticeLevel.NumRows; i++)
     theProjectionLatticeLevel.elements[i][i+1]=1;
   direction.MakeEi(theDimProjectivized, 0);
-  if (!this->theProjectivizedCone.Vertices.LinSpanContainsRoot(direction, theGlobalVariables))
+  if (!this->theProjectivizedCone.Vertices.LinSpanContainsRoot(direction))
   { this->FindExtremaInDirectionOverLatticeOneNonParamDegenerateCase
       (theLPToMaximizeAffine, outputAppendLPToMaximizeAffine, outputAppend, theProjectionLatticeLevel,
        theGlobalVariables);
@@ -2381,23 +2093,23 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   complexBeforeProjection.init();
   complexBeforeProjection.AddNonRefinedChamberOnTopNoRepetition(this->theProjectivizedCone, theGlobalVariables);
   if (direction.ScalarEuclidean(theLPToMaximizeAffine).IsNegative())
-    direction.MinusRoot();
+    direction.Minus();
   complexBeforeProjection.slicingDirections.AddOnTop(direction);
   complexBeforeProjection.slicingDirections.AddOnTop(-direction);
 //  std::cout << "<hr>complex before refining: <br>\n" << complexBeforeProjection.ElementToString(false, true);
   complexBeforeProjection.Refine(theGlobalVariables);
 //  std::cout << "<hr>complex before projection: <br>\n" << complexBeforeProjection.ElementToString(false, true);
-  root tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine, exitNormalLatticeLevel, enteringNormalLatticeLevel, exitNormalShiftedAffineProjected;
-  root directionSmallerDim, directionSmallerDimOnLattice;
-  root theShiftReduced=this->theShift;
+  Vector<Rational> tempRoot, extraEquation, exitNormalAffine, enteringNormalAffine, exitNormalLatticeLevel, enteringNormalLatticeLevel, exitNormalShiftedAffineProjected;
+  Vector<Rational> directionSmallerDim, directionSmallerDimOnLattice;
+  Vector<Rational> theShiftReduced=this->theShift;
   this->theLattice.ReduceVector(theShiftReduced);
-  roots exitRepresentatives, exitWallsShifted;
-  roots currentShifts;
+  Vectors<Rational> exitRepresentatives, exitWallsShifted;
+  Vectors<Rational> currentShifts;
   Lattice exitRougherLattice;
   ConeLatticeAndShift tempCLS;
   directionSmallerDim.MakeEi(theDimProjectivized-1, 0);
 //  std::cout << "<hr>";
-  roots theNewNormals;
+  Vectors<Rational> theNewNormals;
   for (int i=0; i<complexBeforeProjection.size; i++)
   { Cone& currentCone=complexBeforeProjection.TheObjects[i];
     int numNonPerpWalls=0;
@@ -2405,7 +2117,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
     bool foundEnteringNormal=false;
     bool foundExitNormal=false;
     for (int j=0; j<currentCone.Normals.size; j++)
-    { root& currentNormal=currentCone.Normals.TheObjects[j];
+    { Vector<Rational>& currentNormal=currentCone.Normals.TheObjects[j];
       if (currentNormal[0].IsEqualToZero())
       { tempRoot=currentNormal.GetShiftToTheLeftOnePosition();
         theNewNormals.AddOnTop(tempRoot);
@@ -2455,7 +2167,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       tempRoot-=exitNormalShiftedAffineProjected*theLPToMaximizeAffine[0]/exitNormalAffine[0];
       outputAppendLPToMaximizeAffine.AddOnTop(tempRoot);
       assert(tempCLS.theProjectivizedCone.Normals.size>0);
-      roots tempTempRoots=tempCLS.theProjectivizedCone.Normals;
+      Vectors<Rational> tempTempRoots=tempCLS.theProjectivizedCone.Normals;
       //bool tempBool=
       tempCLS.theProjectivizedCone.CreateFromNormals(tempTempRoots, theGlobalVariables);
       /*if (!tempBool)
@@ -2482,7 +2194,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
       //assert(tempBool);
       //std::cout << tempCLS.theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
       if (!tempCLS.theProjectivizedCone.flagIsTheZeroCone)
-      { theProjectionLatticeLevel.ActOnAroot(exitRepresentatives[j], tempCLS.theShift);
+      { theProjectionLatticeLevel.ActOnVectorColumn(exitRepresentatives[j], tempCLS.theShift);
         outputAppend.AddOnTop(tempCLS);
         if (tempCLS.GetDimProjectivized()==0)
         { theGlobalVariables.theIndicatorVariables.StatusString1=tempTempRoots.ElementToString();
@@ -2501,24 +2213,24 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
 }
 
 void ConeComplex::GetNewVerticesAppend
-  (Cone& myDyingCone, root& killerNormal, HashedList<root>& outputVertices, GlobalVariables& theGlobalVariables)
+  (Cone& myDyingCone, Vector<Rational>& killerNormal, HashedList<Vector<Rational> >& outputVertices, GlobalVariables& theGlobalVariables)
 { int theDimMinusTwo=killerNormal.size-2;
   int theDim=killerNormal.size;
   int numCycles=MathRoutines::NChooseK(myDyingCone.Normals.size, theDimMinusTwo);
-  Selection& theSel=theGlobalVariables.selComputeNormalExcludingIndex;
-  Selection& nonPivotPoints=theGlobalVariables.selNonPivotPointsNewSplit;
+  Selection theSel=theGlobalVariables.selGetNewVerticesAppend.GetElement();
+  Selection nonPivotPoints=theGlobalVariables.selGetNewVerticesAppend2.GetElement();
   theSel.init(myDyingCone.Normals.size);
 //  int IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore;
-  MatrixLargeRational& theLinearAlgebra=theGlobalVariables.matComputeNormalExcludingIndex;
-  MatrixLargeRational matEmpty;
+  Matrix<Rational> & theLinearAlgebra=theGlobalVariables.matGetNewVerticesAppend.GetElement();
+  Matrix<Rational>  matEmpty;
   theLinearAlgebra.init(theDimMinusTwo+1, theDim);
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<numCycles; i++)
   { theSel.incrementSelectionFixedCardinality(theDimMinusTwo);//, IndexLastZeroWithOneBefore, NumOnesAfterLastZeroWithOneBefore);
     //int LowestRowUnchanged=theDimMinusTwo-2-NumOnesAfterLastZeroWithOneBefore;
     //for (int j=theDimMinusTwo-1; j>LowestRowUnchanged; j--)
     for (int j=0; j<theDimMinusTwo; j++)
-    { root& currentNormal=myDyingCone.Normals.TheObjects[theSel.elements[j]];
+    { Vector<Rational>& currentNormal=myDyingCone.Normals.TheObjects[theSel.elements[j]];
       for (int k=0; k<theDim; k++)
         theLinearAlgebra.elements[j][k]=currentNormal.TheObjects[k];
     }
@@ -2531,7 +2243,7 @@ void ConeComplex::GetNewVerticesAppend
       if (myDyingCone.IsInCone(tempRoot))
         outputVertices.AddNoRepetition(tempRoot);
       else
-      { tempRoot.MinusRoot();
+      { tempRoot.Minus();
         if (myDyingCone.IsInCone(tempRoot))
           outputVertices.AddNoRepetition(tempRoot);
       }
@@ -2540,15 +2252,18 @@ void ConeComplex::GetNewVerticesAppend
 }
 
 bool ConeComplex::SplitChamber
-(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, root& killerNormal, GlobalVariables& theGlobalVariables)
+(int indexChamberBeingRefined, bool weAreSlicingInDirection, bool weAreChopping, Vector<Rational>& killerNormal, GlobalVariables& theGlobalVariables)
 { Cone& myDyingCone=this->TheObjects[indexChamberBeingRefined];
 /*  if (!myDyingCone.flagHasSufficientlyManyVertices)
   { this->flagChambersHaveTooFewVertices=true;
     return false;
   }*/
-  Cone& newPlusCone= theGlobalVariables.coneBuffer1NewSplit;
-  Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit;
-  bool needToRecomputeVertices=(myDyingCone.Normals.GetRankOfSpanOfElements(theGlobalVariables)<this->GetDim());
+  Cone& newPlusCone= theGlobalVariables.coneBuffer1NewSplit.GetElement();
+  Cone& newMinusCone=theGlobalVariables.coneBuffer2NewSplit.GetElement();
+  Matrix<Rational>& bufferMat=theGlobalVariables.matSplitChamberBuff.GetElement();
+  Selection& bufferSel=theGlobalVariables.selSplitChamber.GetElement();
+  bool needToRecomputeVertices=
+  (myDyingCone.Normals.GetRankOfSpanOfElements(bufferMat, bufferSel)<this->GetDim());
 //  newPlusCone.flagHasSufficientlyManyVertices=true;
 //  newMinusCone.flagHasSufficientlyManyVertices=true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -2563,11 +2278,11 @@ bool ConeComplex::SplitChamber
   }
   newPlusCone.Vertices.size=0; newPlusCone.Normals.size=0;
   newMinusCone.Vertices.size=0; newMinusCone.Normals.size=0;
-  HashedList<root>& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit;
+  HashedList<Vector<Rational> >& ZeroVertices=theGlobalVariables.hashedRootsNewChamberSplit.GetElement();
   ZeroVertices.Clear();
   Rational tempRat;
   for (int i=0; i<myDyingCone.Vertices.size; i++)
-  { root::RootScalarEuclideanRoot(killerNormal, myDyingCone.Vertices.TheObjects[i], tempRat);
+  { tempRat=Vector<Rational>::ScalarEuclidean(killerNormal, myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsPositive())
       newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsEqualToZero())
@@ -2579,10 +2294,10 @@ bool ConeComplex::SplitChamber
     return false;
   this->GetNewVerticesAppend(myDyingCone, killerNormal, ZeroVertices, theGlobalVariables);
   for (int i=0; i<myDyingCone.Normals.size; i++)
-  { if (newPlusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals.TheObjects[i]))
-      newPlusCone.Normals.AddOnTop(myDyingCone.Normals.TheObjects[i]);
-    if (newMinusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals.TheObjects[i]))
-      newMinusCone.Normals.AddOnTop(myDyingCone.Normals.TheObjects[i]);
+  { if (newPlusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i]))
+      newPlusCone.Normals.AddOnTop(myDyingCone.Normals[i]);
+    if (newMinusCone.Vertices.HasAnElementPerpendicularTo(myDyingCone.Normals[i]))
+      newMinusCone.Normals.AddOnTop(myDyingCone.Normals[i]);
   }
   newPlusCone.Normals.AddOnTop(killerNormal);
   newMinusCone.Normals.AddOnTop(-killerNormal);
@@ -2617,7 +2332,7 @@ bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVa
   { this->operator=(other);
     return true;
   }
-  roots newVertices;
+  Vectors<Rational> newVertices;
   newVertices.AddListOnTop(other.Vertices);
   newVertices.AddListOnTop(this->Vertices);
   this->CreateFromVertices(newVertices, theGlobalVariables);
@@ -2638,7 +2353,7 @@ void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
   for (; currentCone.LowestIndexNotCheckedForChopping<this->splittingNormals.size; currentCone.LowestIndexNotCheckedForChopping++)
    if (this->SplitChamber(this->indexLowestNonRefinedChamber, false, true, this->splittingNormals.TheObjects[currentCone.LowestIndexNotCheckedForChopping], theGlobalVariables))
       return;
-  root currentNewWall;
+  Vector<Rational> currentNewWall;
   for (; currentCone.LowestIndexNotCheckedForSlicingInDirection< this->slicingDirections.size; currentCone.LowestIndexNotCheckedForSlicingInDirection++)
     for (int i=0; i<currentCone.Normals.size; i++)
       if (this->slicingDirections.TheObjects[currentCone.LowestIndexNotCheckedForSlicingInDirection].ScalarEuclidean(currentCone.Normals.TheObjects[i]).IsPositive())
@@ -2650,7 +2365,7 @@ void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
   this->indexLowestNonRefinedChamber++;
 }
 
-void ConeComplex::InitFromDirectionsAndRefine(roots& inputVectors, GlobalVariables& theGlobalVariables)
+void ConeComplex::InitFromDirectionsAndRefine(Vectors<Rational>& inputVectors, GlobalVariables& theGlobalVariables)
 { this->init();
   Cone startingCone;
   startingCone.CreateFromVertices(inputVectors, theGlobalVariables);
@@ -2712,9 +2427,9 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
     }
     return;
   }
-  MatrixLargeRational& theMat=theGlobalVariables.matComputeNormalFromSelection;
-  MatrixLargeRational emptyMat;
-  root tempRoot;
+  Matrix<Rational>& theMat=theGlobalVariables.matComputeNormalFromSelection.GetElement();
+  Matrix<Rational> emptyMat;
+  Vector<Rational> tempRoot;
   theMat.init(theDim-1, theDim);
   for (int i=0; i<numCycles; i++)
   { theSel.incrementSelectionFixedCardinality(theDim-1);
@@ -2723,10 +2438,10 @@ void Cone::ComputeVerticesFromNormalsNoFakeVertices
         theMat.elements[j][k]=this->Normals.TheObjects[theSel.elements[j]].TheObjects[k];
     theMat.GaussianEliminationByRows(theMat, emptyMat, nonPivotPoints);
     if (nonPivotPoints.CardinalitySelection==1)
-    { theMat.NonPivotPointsToRoot(nonPivotPoints, tempRoot);
+    { theMat.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot);
       bool tempBool=this->IsInCone(tempRoot);
       if (!tempBool)
-      { tempRoot.MinusRoot();
+      { tempRoot.Minus();
         tempBool=this->IsInCone(tempRoot);
       }
       if (tempBool)
@@ -2744,12 +2459,12 @@ bool Cone::EliminateFakeNormalsUsingVertices
     this->Normals.SetSize(0);
     return false;
   }
-  roots& verticesOnWall=theGlobalVariables.rootsGeneralPurposeBuffer2;
+  Vectors<Rational>& verticesOnWall=theGlobalVariables.rootsEliminateFakeNormalsUsingVertices.GetElement();
   if (numAddedFakeWalls!=0)
   { //we modify the normals so that they lie in the subspace spanned by the vertices
-    MatrixLargeRational tempMat, matNormals, gramMatrixInverted;
+    Matrix<Rational> tempMat, matNormals, gramMatrixInverted;
     tempMat.AssignRootsToRowsOfMatrix(this->Vertices);
-    roots NormalsToSubspace;
+    Vectors<Rational> NormalsToSubspace;
     tempMat.FindZeroEigenSpace(NormalsToSubspace, theGlobalVariables);
     if (NormalsToSubspace.size>0)
     { matNormals.AssignRootsToRowsOfMatrix(NormalsToSubspace);
@@ -2758,10 +2473,10 @@ bool Cone::EliminateFakeNormalsUsingVertices
       gramMatrixInverted.Transpose();
       gramMatrixInverted.MultiplyOnTheLeft(matNormals);
       gramMatrixInverted.Invert(theGlobalVariables);
-      root tempRoot;
+      Vector<Rational> tempRoot;
       for (int i=0; i<this->Normals.size; i++)
-      { matNormals.ActOnAroot(this->Normals[i], tempRoot);
-        gramMatrixInverted.ActOnAroot(tempRoot);
+      { matNormals.ActOnVectorColumn(this->Normals[i], tempRoot);
+        gramMatrixInverted.ActOnVectorColumn(tempRoot);
         for (int j=0; j<tempRoot.size; j++)
           this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
         this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
@@ -2780,16 +2495,18 @@ bool Cone::EliminateFakeNormalsUsingVertices
       }
     }
   }
-  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(theGlobalVariables);
+  Matrix<Rational>& tempMatX=theGlobalVariables.matEliminateFakeNormalsUsingVertices.GetElement();
+  Selection& tempSelX=theGlobalVariables.selEliminateFakeNormalsUsingVertices.GetElement();
+  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(tempMatX, tempSelX);
   if (DesiredRank>1)
     for (int i=0; i<this->Normals.size; i++)
-    { root& currentNormal=this->Normals.TheObjects[i];
+    { Vector<Rational>& currentNormal=this->Normals.TheObjects[i];
       verticesOnWall.size=0;
       bool wallIsGood=false;
       for (int j=0; j<this->Vertices.size; j++)
-        if (root::RootScalarEuclideanRoot(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
+        if (Vector<Rational>::ScalarEuclidean(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
         { verticesOnWall.AddOnTop(this->Vertices.TheObjects[j]);
-          int theRank=verticesOnWall.GetRankOfSpanOfElements(theGlobalVariables);
+          int theRank=verticesOnWall.GetRankOfSpanOfElements(tempMatX, tempSelX);
           if (theRank< verticesOnWall.size)
             verticesOnWall.PopLastObject();
           else
@@ -2822,7 +2539,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
   return numAddedFakeWalls==0;
 }
 
-bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVariables)
+bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables& theGlobalVariables)
 { this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
  // std::cout << inputVertices.ElementToString();
@@ -2834,11 +2551,14 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
     return false;
   }
   this->Normals.size=0;
-  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(theGlobalVariables);
-  int theDim=inputVertices.GetDimensionOfElements();
-  roots extraVertices;
+  Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
+  Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
+  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(tempMat, tempSel);
+  int theDim=inputVertices.GetDim();
+  Vectors<Rational>& extraVertices=theGlobalVariables.rootsCreateFromVertices.GetElement();
+  extraVertices.SetSize(0);
   if (rankVerticesSpan<theDim)
-  { MatrixLargeRational tempMat;
+  { Matrix<Rational>  tempMat;
     tempMat.AssignRootsToRowsOfMatrix(inputVertices);
     tempMat.FindZeroEigenSpace(extraVertices);
     for (int i=0; i<extraVertices.size; i++)
@@ -2849,7 +2569,7 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
   int NumCandidates = MathRoutines::NChooseK(inputVertices.size, rankVerticesSpan-1);
   Selection theSelection;
   theSelection.init(inputVertices.size);
-  root normalCandidate;
+  Vector<Rational> normalCandidate;
   for (int i=0; i<NumCandidates; i++)
   { theSelection.incrementSelectionFixedCardinality(rankVerticesSpan-1);
     for (int j=0; j<theSelection.CardinalitySelection; j++)
@@ -2868,7 +2588,7 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
       }
       normalCandidate.ScaleByPositiveRationalToIntegralMinHeight();
       if ((hasNegative && !hasPositive))
-        normalCandidate.MinusRoot();
+        normalCandidate.Minus();
       if (!(hasNegative && hasPositive))
         this->Normals.AddOnTopNoRepetition(normalCandidate);
     }
@@ -2879,7 +2599,8 @@ bool Cone::CreateFromVertices(roots& inputVertices, GlobalVariables& theGlobalVa
 }
 
 bool Cone::CreateFromNormalS
-  (roots& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+  (Vectors<Rational>& inputNormals, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices,
+   GlobalVariables& theGlobalVariables)
 { this->flagIsTheZeroCone=false;
   this->LowestIndexNotCheckedForChopping=0;
   this->LowestIndexNotCheckedForSlicingInDirection=0;
@@ -2893,11 +2614,13 @@ bool Cone::CreateFromNormalS
       i--;
     }
   int numAddedFakeWalls=0;
+  Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
+  Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
-    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(theGlobalVariables)<theDim; i++)
-    { root tempRoot;
+    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(tempMat, tempSel)<theDim; i++)
+    { Vector<Rational> tempRoot;
       tempRoot.MakeEi(theDim, i);
-      if(!this->Normals.LinSpanContainsRoot(tempRoot, theGlobalVariables))
+      if(!this->Normals.LinSpanContainsRoot(tempRoot, tempMat, tempSel))
       { numAddedFakeWalls++;
         this->Normals.AddOnTop(tempRoot);
       }
@@ -2907,7 +2630,7 @@ bool Cone::CreateFromNormalS
 //  std::cout << "<br>Vertices before adding minus vertices: " << this->Vertices.ElementToString();
   if (numAddedFakeWalls>0)
   { this->Normals.SetSize(this->Normals.size-numAddedFakeWalls);
-    root tempRoot;
+    Vector<Rational> tempRoot;
     int originalSize=this->Vertices.size;
     for (int i=0; i<originalSize; i++)
     { tempRoot=-this->Vertices[i];
@@ -2921,7 +2644,7 @@ bool Cone::CreateFromNormalS
 
 void ConeComplex::initFromCones
 (List<Cone>& NormalsOfCones, bool AssumeConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
-{ List<roots> tempRoots;
+{ List<Vectors<Rational> > tempRoots;
   tempRoots.SetSize(NormalsOfCones.size);
   for (int i=0; i<NormalsOfCones.size; i++)
     tempRoots[i]=NormalsOfCones[i].Normals;
@@ -2929,7 +2652,7 @@ void ConeComplex::initFromCones
 }
 
 void ConeComplex::initFromCones
-(List<roots>& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
+(List<Vectors<Rational> >& NormalsOfCones, bool UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { Cone tempCone;
   this->Clear();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
@@ -2945,7 +2668,7 @@ void ConeComplex::initFromCones
     theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
     theGlobalVariables.MakeReport();
   }
-  root tempRoot;
+  Vector<Rational> tempRoot;
   this->splittingNormals.Clear();
   for (int i=0; i<this->size; i++)
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
@@ -3001,7 +2724,7 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
   if (useHtml)
     out << "<br>";
   out << "Normals of walls to refine by: ";
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempRoots.CopyFromBase(this->splittingNormals);
   out << tempRoots.ElementToString(useLatex, useHtml, false);
   if (this->slicingDirections.size>0)
@@ -3022,16 +2745,16 @@ std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
 
 int ParserNode::EvaluateGroebner
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ List<PolynomialRationalCoeff> inputBasis, outputGroebner;
+{ List<Polynomial<Rational> > inputBasis, outputGroebner;
   theNode.impliedNumVars= theNode.GetMaxImpliedNumVarsChildren();
   for (int i=0; i<theArgumentList.size; i++)
-  { PolynomialRationalCoeff& currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
+  { Polynomial<Rational> & currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
     currentPoly.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
     outputGroebner.AddOnTop(currentPoly);
   }
   inputBasis=outputGroebner;
-  PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
-  Monomial<Rational> bufferMon1, bufferMon2;
+  Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
+  MonomialP bufferMon1, bufferMon2;
   RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, & theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting basis: ";
@@ -3050,29 +2773,29 @@ int ParserNode::EvaluateGroebner
 }
 
 void RationalFunction::GetRelations
-  ( List<PolynomialRationalCoeff>& theGenerators, GlobalVariables& theGlobalVariables
+  ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
    )
 { if (theGenerators.size==0)
     return;
-  List<PolynomialRationalCoeff> theGroebnerBasis;
+  List<Polynomial<Rational> > theGroebnerBasis;
   theGroebnerBasis=theGenerators;
   int numStartingGenerators=theGenerators.size;
   int numStartingVariables= theGenerators.TheObjects[0].NumVars;
-  PolynomialRationalCoeff tempP;
+  Polynomial<Rational>  tempP;
   PolynomialOutputFormat tempFormat;
   for (int i=0; i<numStartingGenerators; i++)
-  { PolynomialRationalCoeff& currentPoly=theGroebnerBasis.TheObjects[i];
+  { Polynomial<Rational> & currentPoly=theGroebnerBasis.TheObjects[i];
     currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
     tempP.MakeNVarDegOnePoly(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
     currentPoly+=tempP;
 //  std::cout << currentPoly.ElementToString(false, tempFormat) << "<br>";
   }
-  PolynomialRationalCoeff buffer1, buffer2, buffer3, buffer4;
-  Monomial<Rational> bufferMon1, bufferMon2;
+  Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
+  MonomialP bufferMon1, bufferMon2;
   RationalFunction::TransformToReducedGroebnerBasis
   (
    theGroebnerBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
-   & Monomial<Rational>::LeftIsGEQLexicographicLastVariableWeakest, & theGlobalVariables
+   & MonomialP::LeftIsGEQLexicographicLastVariableWeakest, & theGlobalVariables
   );
 //  std::cout << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
@@ -3081,7 +2804,7 @@ void RationalFunction::GetRelations
   theGenerators.Reserve(theGroebnerBasis.size);
   theGenerators.size=0;
   for (int i=0; i<theGroebnerBasis.size; i++)
-  { PolynomialRationalCoeff& currentPoly= theGroebnerBasis.TheObjects[i];
+  { Polynomial<Rational> & currentPoly= theGroebnerBasis.TheObjects[i];
     bool bad=false;
     for (int j=0; j<numStartingVariables; j++)
       if(currentPoly.GetMaxPowerOfVariableIndex(j)>0)
@@ -3095,10 +2818,10 @@ void RationalFunction::GetRelations
 
 int ParserNode::EvaluateRelations
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ List<PolynomialRationalCoeff> inputBasis, outputRelations;
+{ List<Polynomial<Rational> > inputBasis, outputRelations;
   theNode.impliedNumVars= theNode.GetMaxImpliedNumVarsChildren();
   for (int i=0; i<theArgumentList.size; i++)
-  { PolynomialRationalCoeff& currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
+  { Polynomial<Rational> & currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
     currentPoly.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
     outputRelations.AddOnTop(currentPoly);
   }
@@ -3124,7 +2847,7 @@ int ParserNode::EvaluateRelations
 
 int ParserNode::EvaluateCone
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots theNormals;
+{ Vectors<Rational> theNormals;
   int theDim;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theNormals, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -3138,7 +2861,7 @@ int ParserNode::EvaluateCone
 
 int ParserNode::EvaluateConeFromVertices
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots theVertices;
+{ Vectors<Rational> theVertices;
   int theDim;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVertices, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -3151,39 +2874,38 @@ int ParserNode::EvaluateConeFromVertices
 }
 
 bool ConeComplex::findMaxLFOverConeProjective
-  (Cone& input, List<PolynomialRationalCoeff>& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
-{ roots HyperPlanesCorrespondingToLF;
+  (Cone& input, List<Polynomial<Rational> >& inputLinPolys, List<int>& outputMaximumOverEeachSubChamber, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> HyperPlanesCorrespondingToLF;
   if (input.Normals.size<1 || inputLinPolys.size<1)
     return false;
   int theDim=input.Normals.TheObjects[0].size;
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
   for (int i=0; i<inputLinPolys.size; i++)
-  { PolynomialRationalCoeff& currentPoly=inputLinPolys.TheObjects[i];
+  { Polynomial<Rational> & currentPoly=inputLinPolys.TheObjects[i];
     if (currentPoly.TotalDegree()!=1 || theDim!=currentPoly.NumVars)
     { std::cout << "u messed up the dim! The num vars is " << currentPoly.NumVars << " and the dim of the cone is " << theDim;
       return false;
     }
-    root& newWall=HyperPlanesCorrespondingToLF.TheObjects[i];
+    Vector<Rational>& newWall=HyperPlanesCorrespondingToLF.TheObjects[i];
     newWall.MakeZero(theDim);
     for (int j=0; j<currentPoly.size; j++)
       for (int k=0; k<theDim; k++)
-        if (currentPoly.TheObjects[j].degrees[k]==1)
-        { newWall.TheObjects[k]=currentPoly.TheObjects[j].Coefficient;
+        if (currentPoly[j][k]==1)
+        { newWall[k]=currentPoly.theCoeffs[j];
           break;
         }
   }
   return this->findMaxLFOverConeProjective
-  (input, HyperPlanesCorrespondingToLF,
-   outputMaximumOverEeachSubChamber, theGlobalVariables);
+  (input, HyperPlanesCorrespondingToLF, outputMaximumOverEeachSubChamber, theGlobalVariables);
 }
 
 bool ConeComplex::findMaxLFOverConeProjective
-  (Cone& input, roots& inputLFsLastCoordConst,
+  (Cone& input, Vectors<Rational>& inputLFsLastCoordConst,
    List<int>& outputMaximumOverEeachSubChamber,
    GlobalVariables& theGlobalVariables)
 { this->init();
   this->AddNonRefinedChamberOnTopNoRepetition(input, theGlobalVariables);
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<inputLFsLastCoordConst.size; i++)
     for (int j=i+1; j<inputLFsLastCoordConst.size; j++)
     { tempRoot=inputLFsLastCoordConst[i]-inputLFsLastCoordConst[j];
@@ -3198,11 +2920,9 @@ bool ConeComplex::findMaxLFOverConeProjective
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].GetInternalPoint(tempRoot);
     bool isInitialized=false;
-    tempRoot.ComputeDebugString();
     for (int j=0; j<inputLFsLastCoordConst.size; j++)
       if (!isInitialized || tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0)>theMax)
-      { inputLFsLastCoordConst.TheObjects[j].ComputeDebugString();
-        theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0);
+      { theMax=tempRoot.ScalarEuclidean(inputLFsLastCoordConst.TheObjects[j], (Rational) 0);
         outputMaximumOverEeachSubChamber.TheObjects[i]=j;
         isInitialized=true;
       }
@@ -3220,7 +2940,7 @@ void Lattice::Reduce
 { //////////////////////////////////the below function is for debugging purposes only!
   //Don't wanna mess around with #ifdefs, but it should be surrounded by #ifdef DEBUG .... #endif
   //bool flagTesting=true;
-  //static MatrixLargeRational testMatrix;
+  //static Matrix<Rational>  testMatrix;
   //if (flagTesting)
   //  this->TestGaussianEliminationEuclideanDomainRationals(testMatrix);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3251,7 +2971,7 @@ void Lattice::Reduce
 //  }
 }
 
-void Lattice::TestGaussianEliminationEuclideanDomainRationals(MatrixLargeRational& output)
+void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output)
 { output.AssignMatrixIntWithDen(this->basis, this->Den);
   std::stringstream out;
   std::cout << "Test output: " << output.ElementToString(true, false);
@@ -3286,7 +3006,7 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
 }
 
 bool ParserNode::GetRootSRationalDontUseForFunctionArguments
-(roots& output, int& outputDim, GlobalVariables& theGlobalVariables)
+(Vectors<Rational>& output, int& outputDim, GlobalVariables& theGlobalVariables)
 { if (this->ExpressionType!=this->typeArray)
   { if (this->ExpressionType!=this->typeRational)
       return false;
@@ -3308,7 +3028,7 @@ bool ParserNode::GetRootSRationalDontUseForFunctionArguments
 }
 
 bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
-(List<int>& theArgumentList, List<roots>& output, int& outputRootsSize, int& outputDim,
+(List<int>& theArgumentList, List<Vectors<Rational> >& output, int& outputRootsSize, int& outputDim,
  GlobalVariables& theGlobalVariables)
 { ParserNode& firstNode= this->owner->TheObjects[theArgumentList[0]];
   if (firstNode.ExpressionType!=this->typeArray)
@@ -3324,7 +3044,7 @@ bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
   }
   output.SetSize(theArgumentList.size);
   outputRootsSize=firstNode.children.size;
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   int currentDim;
   for (int i=0; i<theArgumentList.size; i++)
   { ParserNode& currentNode=this->owner->TheObjects[theArgumentList[i]];
@@ -3339,7 +3059,7 @@ bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
 }
 
 bool ParserNode::GetRootsEqualDimNoConversionNoEmptyArgument
-(List<int>& theArgumentList, roots& output, int& outputDim)
+(List<int>& theArgumentList, Vectors<Rational>& output, int& outputDim)
 { ParserNode& firstNode= this->owner->TheObjects[theArgumentList.TheObjects[0]];
   output.SetSize(theArgumentList.size);
   if (firstNode.ExpressionType!=this->typeArray)
@@ -3367,7 +3087,7 @@ bool ParserNode::GetRootsEqualDimNoConversionNoEmptyArgument
 
 int ParserNode::EvaluateLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots LatticeBase;
+{ Vectors<Rational> LatticeBase;
   int theDim=-1;
   if(!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, LatticeBase, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -3377,14 +3097,14 @@ int ParserNode::EvaluateLattice
   return theNode.errorNoError;
 }
 
-void Lattice::MakeFromMat(const MatrixLargeRational& input)
+void Lattice::MakeFromMat(const Matrix<Rational> & input)
 { this->basisRationalForm=input;
   this->basisRationalForm.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
 }
 
-void Lattice::MakeFromRoots(const roots& input)
-{ MatrixLargeRational tempMat;
+void Lattice::MakeFromRoots(const Vectors<Rational>& input)
+{ Matrix<Rational>  tempMat;
   tempMat.AssignRootsToRowsOfMatrix(input);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
@@ -3393,7 +3113,7 @@ void Lattice::MakeFromRoots(const roots& input)
 std::string Lattice::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
   out << "L=<";
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempRoots.AssignMatrixRows(this->basisRationalForm);
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
   { out << tempRoots.TheObjects[i].ElementToString();
@@ -3451,15 +3171,15 @@ void LargeIntUnsigned::DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& 
 //returning false means that the lattice given as rougher is not actually rougher than the current lattice
 //or that there are too many representatives
 bool Lattice::GetAllRepresentatives
-  (const Lattice& rougherLattice, roots& output)const
+  (const Lattice& rougherLattice, Vectors<Rational>& output)const
 { output.size=0;
   if (this->basis.NumRows!=rougherLattice.basis.NumRows)
     return false;
   List<int> thePeriods;
-  roots thePeriodVectors;
+  Vectors<Rational> thePeriodVectors;
   thePeriods.SetSize(this->basis.NumRows);
   thePeriodVectors.SetSize(this->basis.NumRows);
-  root tempRoot, tempRoot2;
+  Vector<Rational> tempRoot, tempRoot2;
   int col=0;
   int theDim=this->GetDim();
   Rational currentPeriod;
@@ -3504,8 +3224,8 @@ bool Lattice::GetAllRepresentatives
 }
 
 bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralStepsInDirection
-  (root& startingPoint, root& theAffineHyperplane, root& theDirection, root& outputPoint)
-{ root theNormal=theAffineHyperplane;
+  (Vector<Rational>& startingPoint, Vector<Rational>& theAffineHyperplane, Vector<Rational>& theDirection, Vector<Rational>& outputPoint)
+{ Vector<Rational> theNormal=theAffineHyperplane;
   theNormal.SetSize(theAffineHyperplane.size-1);
   Rational theShift=-(*theAffineHyperplane.LastObject());
   if (theNormal.ScalarEuclidean(startingPoint)==theShift)
@@ -3531,8 +3251,8 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
 }
 
 bool Lattice::GetAllRepresentativesProjectingDownTo
-  (const Lattice& rougherLattice, roots& startingShifts, roots& output)const
-{ roots tempRepresentatives;
+  (const Lattice& rougherLattice, Vectors<Rational>& startingShifts, Vectors<Rational>& output)const
+{ Vectors<Rational> tempRepresentatives;
   if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
     return false;
   output.Reserve(startingShifts.size*tempRepresentatives.size);
@@ -3550,12 +3270,12 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
   Lattice OldLattice;
   OldLattice=this->AmbientLatticeReduced;
   this->AmbientLatticeReduced.IntersectWith(latticeToRoughenBy);
-  roots representativesQuotientLattice;
+  Vectors<Rational> representativesQuotientLattice;
   //std::cout << "getting all representatives of " << OldLattice.ElementToString() << "inside" << this->AmbientLatticeReduced.ElementToString();
   //std::cout << "<br><br><br><br>*********<br><br><br><br>";
   OldLattice.GetAllRepresentatives(this->AmbientLatticeReduced, representativesQuotientLattice);
-  roots OldLatticeShifts=this->LatticeShifts;
-  List<PolynomialRationalCoeff> oldValues;
+  Vectors<Rational> OldLatticeShifts=this->LatticeShifts;
+  List<Polynomial<Rational> > oldValues;
   oldValues=this->valueOnEachLatticeShift;
   this->LatticeShifts.SetSize(OldLatticeShifts.size*representativesQuotientLattice.size);
   this->valueOnEachLatticeShift.SetSize(this->LatticeShifts.size);
@@ -3569,7 +3289,7 @@ void QuasiPolynomial::MakeRougherLattice(const Lattice& latticeToRoughenBy)
 void Lattice::GetDualLattice(Lattice& output)const
 { if (this->GetRank()!=this->GetDim())
     return;
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   tempMat=this->basisRationalForm;
   tempMat.Invert();
   tempMat.Transpose();
@@ -3578,30 +3298,28 @@ void Lattice::GetDualLattice(Lattice& output)const
 }
 
 bool Lattice::FindOnePreimageInLatticeOf
-    (const MatrixLargeRational& theLinearMap, const roots& input, roots& output, GlobalVariables& theGlobalVariables)
-{ Vectors<Rational> thisBasis, tempInput, tempOutput;
+    (const Matrix<Rational> & theLinearMap, const Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> thisBasis;
   thisBasis.AssignMatrixRows(this->basisRationalForm);
   theLinearMap.ActOnVectorsColumn(thisBasis, (Rational) 0);
-  input.GetVectorsRational(tempInput);
-  bool result=tempInput.GetIntegralCoordsInBasisIfTheyExist(thisBasis, tempOutput, (Rational) 1, (Rational) -1, (Rational) 0);
-  output.AssignVectorsRational(tempOutput);
+  bool result=input.GetIntegralCoordsInBasisIfTheyExist(thisBasis, output, 1, -1, 0);
   //std::cout << "<hr>acting by " << this->basisRationalForm.ElementToString(true, false) << " on " << output.ElementToString();
-  MatrixLargeRational tempMat;
+  Matrix<Rational> tempMat;
   tempMat=this->basisRationalForm;
   tempMat.Transpose();
-  tempMat.ActOnRoots(output);
+  tempMat.ActOnVectorsColumn(output);
   //std::cout << "<br> to get " << output.ElementToString();
   return result;
 }
 
 void Lattice::IntersectWithPreimageOfLattice
-  (const MatrixLargeRational& theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
-{ roots startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
-  roots resultNonKernelPart, resultKernelPart, result, tempRoots;
+  (const Matrix<Rational> & theLinearMap, const Lattice& other, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> startingBasis, imageStartingBasis, basisImageIntersection, basisImageIntersectionInCoordsWRTimageStartingBasis, ImageBasisInImageStartingBasisCoords;
+  Vectors<Rational> resultNonKernelPart, resultKernelPart, result, tempRoots;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
   //std::cout << "<br>Starting basis: " << startingBasis.ElementToString();
   //std::cout << "<br>The linear map: " << theLinearMap.ElementToString(true, false);
-  theLinearMap.ActOnRoots(startingBasis, imageStartingBasis);
+  theLinearMap.ActOnVectorsColumn(startingBasis, imageStartingBasis);
   //std::cout << "<br>Image of starting basis: " << imageStartingBasis.ElementToString();
   Lattice ImageLattice;
   ImageLattice.MakeFromRoots(imageStartingBasis);
@@ -3609,15 +3327,15 @@ void Lattice::IntersectWithPreimageOfLattice
   //std::cout << "<br>Image lattice: " << ImageLattice.ElementToString(true, false);
   basisImageIntersection.AssignMatrixRows(ImageLattice.basisRationalForm);
   Vectors<Rational> tempBasisImageIntersection, tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords;
-  basisImageIntersection.GetVectorsRational(tempBasisImageIntersection);
-  imageStartingBasis.GetVectorsRational(tempImageStartingBasis);
+  basisImageIntersection=(tempBasisImageIntersection);
+  imageStartingBasis=(tempImageStartingBasis);
   bool tempBool= tempBasisImageIntersection.GetIntegralCoordsInBasisIfTheyExist(tempImageStartingBasis, tempImageBasisInImageStartingBasisCoords, (Rational) 1, (Rational) -1, (Rational) 0);
-  ImageBasisInImageStartingBasisCoords.AssignVectorsRational(tempImageBasisInImageStartingBasisCoords);
+  ImageBasisInImageStartingBasisCoords=(tempImageBasisInImageStartingBasisCoords);
   assert(tempBool);
   //std::cout << "<br> Basis of image lattice expressed in coordinates with respect to image of starting basis: " << ImageBasisInImageStartingBasisCoords.ElementToString();
   resultNonKernelPart.SetSize(ImageBasisInImageStartingBasisCoords.size);
   for (int i=0; i<resultNonKernelPart.size; i++)
-  { root& currentRoot=resultNonKernelPart.TheObjects[i];
+  { Vector<Rational>& currentRoot=resultNonKernelPart.TheObjects[i];
     currentRoot.MakeZero(this->GetDim());
     for (int j=0; j<startingBasis.size; j++)
       currentRoot+=startingBasis.TheObjects[j]*ImageBasisInImageStartingBasisCoords.TheObjects[i].TheObjects[j];
@@ -3635,7 +3353,9 @@ void Lattice::IntersectWithPreimageOfLattice
 }
 
 void Lattice::IntersectWith(const Lattice& other)
-{ roots commonBasis, otherBasis, startBasis;
+{ Vectors<Rational> commonBasis, otherBasis, startBasis;
+  Vectors<Rational> bufferVect;
+  Matrix<Rational> bufferMat;
   startBasis.AssignMatrixRows(this->basisRationalForm);
   otherBasis.AssignMatrixRows(other.basisRationalForm);
   GlobalVariables theGlobalVariables;
@@ -3650,11 +3370,11 @@ void Lattice::IntersectWith(const Lattice& other)
 //  std::cout << "<br> linear space intersected with this lattice: " << thisLatticeIntersected.ElementToString(true, false);
   otherLatticeIntersected.IntersectWithLinearSubspaceSpannedBy(commonBasis);
 //  std::cout << "<br> linear space intersected with other lattice: " << otherLatticeIntersected.ElementToString(true, false);
-  roots thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
+  Vectors<Rational> thisCommonBasis, otherCommonBasis, thisCommonCoords, otherCommonCoords;
   thisCommonBasis.AssignMatrixRows(thisLatticeIntersected.basisRationalForm);
   otherCommonBasis.AssignMatrixRows(otherLatticeIntersected.basisRationalForm);
-  thisCommonBasis.GetCoordsInBasis(commonBasis, thisCommonCoords, theGlobalVariables);
-  otherCommonBasis.GetCoordsInBasis(commonBasis, otherCommonCoords, theGlobalVariables);
+  thisCommonBasis.GetCoordsInBasis(commonBasis, thisCommonCoords, bufferVect, bufferMat);
+  otherCommonBasis.GetCoordsInBasis(commonBasis, otherCommonCoords, bufferVect, bufferMat);
 //  std::cout << "<br>this lattice intersection new coords: " << thisCommonBasis.ElementToString();
 //  std::cout << "<br>other lattice intersection new coords: " << otherBasis.ElementToString();
   Lattice thisCommonCoordsLattice, otherCommonCoordsLattice;
@@ -3664,13 +3384,13 @@ void Lattice::IntersectWith(const Lattice& other)
 //  std::cout << "<br> linear space intersected with other lattice new coords: " << otherCommonCoordsLattice.ElementToString(true, false);
   thisCommonCoordsLattice.IntersectWithBothOfMaxRank(otherCommonCoordsLattice);
 //  std::cout << "<br> intersection lattice new coords: " << thisCommonCoordsLattice.ElementToString(true, false);
-  roots resultBasis;
+  Vectors<Rational> resultBasis;
   resultBasis.SetSize(thisCommonCoordsLattice.basisRationalForm.NumRows);
   for (int i=0; i<resultBasis.size; i++)
-  { root& currentRoot=resultBasis.TheObjects[i];
+  { Vector<Rational>& currentRoot=resultBasis.TheObjects[i];
     currentRoot.MakeZero(this->GetDim());
     for (int j=0; j<thisCommonCoordsLattice.basisRationalForm.NumCols; j++)
-      currentRoot+=thisCommonCoordsLattice.basisRationalForm.elements[i][j]*commonBasis.TheObjects[j];
+      currentRoot+=commonBasis[j]*thisCommonCoordsLattice.basisRationalForm.elements[i][j];
   }
   this->MakeFromRoots(resultBasis);
 //  std::cout << "<br>final answer: intersection is: " << this->ElementToString(true, false);
@@ -3762,7 +3482,7 @@ std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const 
       out << ", \\mathrm{~where~} \\Lambda=<";
     if (useLatex && !useHtml)
       out << " where $\\Lambda=\\left\\langle\\begin{array}{c}";
-    roots tempRoots;
+    Vectors<Rational> tempRoots;
     tempRoots.AssignMatrixRows(this->AmbientLatticeReduced.basisRationalForm);
     for (int i=0; i<tempRoots.size; i++)
     { out << tempRoots.TheObjects[i].ElementToString();
@@ -3801,8 +3521,8 @@ bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVaria
 
 bool ParserNode::GetRootRationalFromFunctionArguments
 (//List<int>& argumentList,
- root& output, GlobalVariables& theGlobalVariables)
-{ roots tempRoots;
+ Vector<Rational>& output, GlobalVariables& theGlobalVariables)
+{ Vectors<Rational> tempRoots;
   int theDim;
   this->GetRootsEqualDimNoConversionNoEmptyArgument(this->children, tempRoots, theDim);
   if (tempRoots.size!=1)
@@ -3812,7 +3532,7 @@ bool ParserNode::GetRootRationalFromFunctionArguments
 }
 
 void QuasiPolynomial::MakeFromPolyShiftAndLattice
-(const PolynomialRationalCoeff& inputPoly, const root& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
+(const Polynomial<Rational> & inputPoly, const Vector<Rational>& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { this->AmbientLatticeReduced=theLattice;
   this->LatticeShifts.SetSize(1);
   this->LatticeShifts.TheObjects[0]=theShift;
@@ -3822,7 +3542,7 @@ void QuasiPolynomial::MakeFromPolyShiftAndLattice
 }
 
 bool Lattice::ReduceVector(Vector<Rational>& theVector)const
-{ root output;
+{ Vector<Rational> output;
   assert(theVector.size==this->GetDim());
   Vectors<Rational> basisRoots;
   basisRoots.AssignMatrixRows(this->basisRationalForm);
@@ -3861,10 +3581,10 @@ void QuasiPolynomial::MakeZeroLatTiceZn(int theDim)
 }
 
 void partFraction::GetRootsFromDenominator
-(partFractions& owner, roots& output)
+(partFractions& owner, Vectors<Rational>& output)
 { output.SetSize(this->IndicesNonZeroMults.size);
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
-  { output[i].AssignIntRoot(owner.RootsToIndices[this->IndicesNonZeroMults[i]]);
+  { output[i]=owner.startingVectors[this->IndicesNonZeroMults[i]];
     oneFracWithMultiplicitiesAndElongations& current=this->TheObjects[this->IndicesNonZeroMults[i]];
     assert(current.Elongations.size==1);
     output[i]*=current.Elongations[0];
@@ -3872,51 +3592,43 @@ void partFraction::GetRootsFromDenominator
 }
 
 void partFraction::ComputePolyCorrespondingToOneMonomial
-  (partFractions& owner, QuasiPolynomial& outputQP, int monomialIndex, roots& normals,
+  (QuasiPolynomial& outputQP, MonomialP& theMon, Vectors<Rational>& normals,
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
-{ int theDimension=owner.AmbientDimension;
-  root shiftRational; shiftRational.SetSize(theDimension);
-  Monomial<LargeInt>& currentMon=this->Coefficient.TheObjects[monomialIndex];
-  PolynomialRationalCoeff tempP, outputPolyPart;
-  for (int j=0; j<theDimension; j++)
-    shiftRational.TheObjects[j].AssignInteger(currentMon.degrees[j]);
-  Rational tempRat, tempRat2;
-  tempRat=currentMon.Coefficient;
-  outputPolyPart.MakeNVarConst((int)theDimension, tempRat);
-  for (int i=0; i<theDimension; i++)
-  { this->MakePolynomialFromOneNormal
-  (normals.TheObjects[i], shiftRational, this->TheObjects[this->IndicesNonZeroMults.TheObjects[i]].Multiplicities.TheObjects[0], tempP);
-    outputPolyPart.MultiplyBy(tempP);
+{ Polynomial<Rational> tempP, outputPolyPart;
+  Rational tempRat2;
+  outputPolyPart.MakeConst(theMon.size, 1);
+  for (int i=0; i<theMon.size; i++)
+  { this->MakePolynomialFromOneNormal(normals[i], theMon, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
+    outputPolyPart*=(tempP);
   }
-  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, shiftRational, theLattice, theGlobalVariables);
+  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon, theLattice, theGlobalVariables);
   this->AlreadyAccountedForInGUIDisplay=true;
 }
 
 void partFraction::GetVectorPartitionFunction
-  (partFractions& owner, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+  (partFractions& owner, Polynomial<LargeInt>& theCoeff, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { QuasiPolynomial shiftedPoly;
-  roots theNormals, theLatticeGenerators;
+  Vectors<Rational> theNormals, theLatticeGenerators;
   if (partFraction::MakingConsistencyCheck)
     partFraction::CheckSum.MakeZero();
-  if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-    this->ComputeDebugString(owner, theGlobalVariables);
   this->GetRootsFromDenominator(owner, theLatticeGenerators);
   Lattice theLattice;
   theLattice.MakeFromRoots(theLatticeGenerators);
 //  std::cout << "<hr><hr> the lattice generators: " << theLatticeGenerators.ElementToString();
 //  std::cout << "<br>Corresponding lattice: " << theLattice.ElementToString();
-  MatrixLargeRational theNormalsMatForm;
+  Matrix<Rational>  theNormalsMatForm;
   theNormalsMatForm.AssignRootsToRowsOfMatrix(theLatticeGenerators);
   theNormalsMatForm.Invert();
   theNormals.AssignMatrixColumns(theNormalsMatForm);
   output.MakeZeroLatTiceZn(owner.AmbientDimension);
 
-  for (int i=0; i<this->Coefficient.size; i++)
-  { this->ComputePolyCorrespondingToOneMonomial(owner, shiftedPoly, i, theNormals, theLattice, theGlobalVariables);
+  for (int i=0; i<theCoeff.size; i++)
+  { this->ComputePolyCorrespondingToOneMonomial(shiftedPoly, theCoeff[i], theNormals, theLattice, theGlobalVariables);
 //    output.ComputeDebugString();
 //    shiftedPoly.ComputeDebugString();
 //    std::cout << "<hr>Current fraction monomial " << i+1 << " out of " << this->Coefficient.size;
 //    std::cout << "<br>Contribution: " << shiftedPoly.ElementToString(true, false);
+    shiftedPoly*=theCoeff.theCoeffs[i];
     output+=shiftedPoly;
 //    std::cout << "<br>Accumulator: " << output.ElementToString(true, false);
 //    if (RecordNumMonomials)
@@ -3945,10 +3657,10 @@ void partFraction::GetVectorPartitionFunction
 }
 
 bool partFractions::GetVectorPartitionFunction
-  (QuasiPolynomial& output, root& newIndicator, GlobalVariables& theGlobalVariables)
+  (QuasiPolynomial& output, Vector<Rational>& newIndicator, GlobalVariables& theGlobalVariables)
 { if(this->AssureIndicatorRegularity(theGlobalVariables, newIndicator))
   { theGlobalVariables.theIndicatorVariables.flagRootIsModified=true;
-    theGlobalVariables.theIndicatorVariables.modifiedRoot.AssignRoot(newIndicator);
+    theGlobalVariables.theIndicatorVariables.modifiedRoot=(newIndicator);
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]="Indicator modified to regular";
     theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   } else
@@ -3958,7 +3670,7 @@ bool partFractions::GetVectorPartitionFunction
     return false;
   this->NumProcessedForVPFfractions=0;
   Rational oldCheckSum;
-  QuasiPolynomialOld oldOutput;
+//  QuasiPolynomialOld oldOutput;
   if (partFraction::MakingConsistencyCheck)
     partFractions::CheckSum.MakeZero();
   theGlobalVariables.theIndicatorVariables.NumProcessedMonomialsCurrentFraction=0;
@@ -3975,7 +3687,7 @@ bool partFractions::GetVectorPartitionFunction
     //}
     if (this->TheObjects[i].rootIsInFractionCone(*this, &newIndicator, theGlobalVariables))
     { partFraction& currentPF=this->TheObjects[i];
-      currentPF.GetVectorPartitionFunction(*this, tempQP, theGlobalVariables);
+      currentPF.GetVectorPartitionFunction(*this, this->theCoeffs[i], tempQP, theGlobalVariables);
 /*      if(partFraction::MakingConsistencyCheck)
       {  Rational tempLRat2, tempLRat3, tempLRat4;
         std::string tempS1, tempS2, tempS3, tempS4;
@@ -4030,23 +3742,6 @@ bool partFractions::GetVectorPartitionFunction
   return true;
 }
 
-bool PolynomialRationalCoeff::GetIntegerPoly(Polynomial<LargeInt>& output)const
-{ output.Nullify(this->NumVars);
-  Monomial<LargeInt> tempM;
-  tempM.init(this->NumVars);
-  output.Reserve(this->size);
-  for (int i=0; i<this->size; i++)
-  { Monomial<Rational>& currentMon=this->TheObjects[i];
-    if (!currentMon.Coefficient.IsInteger())
-      return false;
-    for (int j=0; j<this->NumVars; j++)
-      tempM.degrees[i]=currentMon.degrees[i];
-    currentMon.Coefficient.GetNum(tempM.Coefficient);
-    output.AddMonomial(tempM);
-  }
-  return true;
-}
-
 void LargeInt::WriteToFile(std::fstream& output)
 { std::string tempS;
   this->ElementToString(tempS);
@@ -4095,7 +3790,7 @@ int ParserNode::EvaluateSplit
 
 int ParserNode::EvaluatePartialFractions
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots theVectors;
+{ Vectors<Rational> theVectors;
   int theDim=-1;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theVectors, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -4131,59 +3826,53 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
   this->ExpressionType=this->typeString;
 }
 
-void ConeComplex::AssignCombinatorialChamberComplex
-(CombinatorialChamberContainer& other, GlobalVariables& theGlobalVariables)
-{ this->init();
-  roots tempNormals;
-  Cone tempCone;
-  for (int i=0; i<other.size; i++)
-    if (other[i]!=0)
-    { other[i]->GetWallNormals(tempNormals);
-      tempCone.CreateFromNormals(tempNormals, theGlobalVariables);
-      this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
-    }
-}
-
 std::string partFractions::DoTheFullComputationReturnLatexFileString
-(GlobalVariables& theGlobalVariables, roots& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+(GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
 { std::string whatWentWrong;
   if (!this->ArgumentsAllowed(toBePartitioned, whatWentWrong, theGlobalVariables))
     return whatWentWrong;
-  this->theChambersOld.theDirections=toBePartitioned;
-  this->AmbientDimension=toBePartitioned.GetDimensionOfElements();
-  this->theChambersOld.AmbientDimension=toBePartitioned.GetDimensionOfElements();
-  this->theChambersOld.thePauseController.InitComputation();
+  assert(false);
+//  this->theChambersOld.theDirections=toBePartitioned;
+  this->AmbientDimension=toBePartitioned.GetDim();
+//  this->theChambersOld.AmbientDimension=toBePartitioned.GetDim();
+//  this->theChambersOld.thePauseController.InitComputation();
   //this->theChambers.ReadFromDefaultFile(theGlobalVariables);
   std::stringstream out;
   std::stringstream outHtml;
-  this->theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
-  this->theChambersOld.QuickSortAscending();
-  this->theChambersOld.LabelChamberIndicesProperly();
-  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld, theGlobalVariables);
+  assert(false);
+//  this->theChambersOld.SliceTheEuclideanSpace(theGlobalVariables, false);
+//  this->theChambersOld.QuickSortAscending();
+//  this->theChambersOld.LabelChamberIndicesProperly();
+//  this->theChambers.AssignCombinatorialChamberComplex(this->theChambersOld, theGlobalVariables);
 //  this->theChambersOld.drawOutput(theGlobalVariables.theDrawingVariables, tempRoot, 0);
-  this->theChambersOld.thePauseController.ExitComputation();
+//  this->theChambersOld.thePauseController.ExitComputation();
   this->theChambers.DrawMeProjective(0, true, theGlobalVariables.theDrawingVariables, theFormat);
   outHtml <<
     theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName
     (this->AmbientDimension);
-  root tempRoot; tempRoot.MakeZero(this->AmbientDimension);
+  Vector<Rational> tempRoot; tempRoot.MakeZero(this->AmbientDimension);
   tempRoot.MakeZero(this->AmbientDimension);
-  this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
+  assert(false);
+//  this->initFromRoots(theChambersOld.theDirections, theGlobalVariables);
   out << "\\documentclass{article}\\usepackage{amsmath, amsfonts, amssymb} \n\\begin{document}\n";
   out << "The vector partition funciton is the number of ways you can represent a vector $(x_1,\\dots, x_n)$ as a non-negative integral linear combination of "
-        << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: " << this->theChambersOld.theDirections.ElementToStringGeneric();
+        << " a given set of vectors.  You requested the vector partition function with respect to the set of vectors: ";
+  assert(false);
+//  out << this->theChambersOld.theDirections.ElementToStringGeneric();
   out << "\n\n The corresponding generating function is: " << this->ElementToString(theGlobalVariables, theFormat) << "= (after splitting acording to algorithm)";
   this->split(theGlobalVariables, 0);
   out << this->ElementToString(theGlobalVariables, theFormat);
-  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
-        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
-  outHtml << "There are " << this->theChambersOld.size << " systems of linear inequalities "
-  << " such that on each such system of inequalities the vector partition function is quasi-polynomial. "
-  << " A full list of the systems of inequalities (\"chambers\") and the corresponding quasi-polynomials follows.<hr> ";
+  assert(false);
+//  out << "Therefore the vector partition function is given by " << this->theChambersOld.GetNumNonZeroPointers()
+//        << " quasipolynomials depending on which set of linear inequalities is satisfied (each such set we call ``Chamber'').";
+//  outHtml << "There are " << this->theChambersOld.size << " systems of linear inequalities "
+//  << " such that on each such system of inequalities the vector partition function is quasi-polynomial. "
+//  << " A full list of the systems of inequalities (\"chambers\") and the corresponding quasi-polynomials follows.<hr> ";
   QuasiPolynomial tempQP;
   std::string tempS;
-  root tempIndicator;
-  for (int i=0; i<this->theChambersOld.size; i++)
+  Vector<Rational> tempIndicator;
+  assert(false);
+  /*for (int i=0; i<this->theChambersOld.size; i++)
     if (this->theChambersOld.TheObjects[i]!=0)
     { Cone& currentChamber=this->theChambers[i];
       tempIndicator=currentChamber.GetInternalPoint();
@@ -4198,6 +3887,7 @@ std::string partFractions::DoTheFullComputationReturnLatexFileString
       outHtml << "<br>Quasi-polynomial: " <<
       CGI::GetHtmlMathDivFromLatexFormulA(tempQP.ElementToString(useHtml, true, theFormat));
     }
+    */
   out << "\\end{document}";
   if (outputHtml!=0)
     *outputHtml=outHtml.str();
@@ -4215,7 +3905,7 @@ int ParserNode::EvaluateVPF
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { //partFractions& currentPF=theNode.thePFs.GetElement();
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=50;
-  roots toBePartitioned; int tempDim;
+  Vectors<Rational> toBePartitioned; int tempDim;
   theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
   std::stringstream out;
   PolynomialOutputFormat theFormat;
@@ -4244,7 +3934,7 @@ int ParserNode::EvaluateVPF
 int ParserNode::EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { partFractions& currentPF=theNode.thePFs.GetElement();
-  roots toBePartitioned; int tempDim;
+  Vectors<Rational> toBePartitioned; int tempDim;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   std::stringstream out;
@@ -4262,15 +3952,15 @@ int ParserNode::EvaluateVectorPFIndicator
   return theNode.errorNoError;
 }
 
-void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, const root& inputShift)
-{ root theShift=inputShift;
+void QuasiPolynomial::AddLatticeShift(const Polynomial<Rational> & input, const Vector<Rational>& inputShift)
+{ Vector<Rational> theShift=inputShift;
   this->AmbientLatticeReduced.ReduceVector(theShift);
   int index=this->LatticeShifts.IndexOfObject(theShift);
   if (index==-1)
   { index=this->LatticeShifts.size;
     this->LatticeShifts.AddOnTop(theShift);
     this->valueOnEachLatticeShift.ExpandOnTop(1);
-    this->valueOnEachLatticeShift.LastObject()->Nullify(input.NumVars);
+    this->valueOnEachLatticeShift.LastObject()->MakeZero(input.NumVars);
   }
   this->valueOnEachLatticeShift.TheObjects[index]+=input;
   if (this->valueOnEachLatticeShift.TheObjects[index].IsEqualToZero())
@@ -4280,7 +3970,7 @@ void QuasiPolynomial::AddLatticeShift(const PolynomialRationalCoeff& input, cons
 }
 
 void QuasiPolynomial::Substitution
-  (const MatrixLargeRational& mapFromNewSpaceToOldSpace,
+  (const Matrix<Rational> & mapFromNewSpaceToOldSpace,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { //Format of the substitution.
   //If we want to carry out a substitution in P(y_1, ..., y_m),
@@ -4297,19 +3987,19 @@ void QuasiPolynomial::Substitution
   assert(ambientLatticeNewSpace.GetDim()==mapFromNewSpaceToOldSpace.NumCols);
   output.AmbientLatticeReduced=ambientLatticeNewSpace;
   output.AmbientLatticeReduced.IntersectWithPreimageOfLattice(mapFromNewSpaceToOldSpace, this->AmbientLatticeReduced, theGlobalVariables);
-  roots allRepresentatives, imagesAllRepresentatives;
+  Vectors<Rational> allRepresentatives, imagesAllRepresentatives;
   bool tempBool=ambientLatticeNewSpace.GetAllRepresentatives(output.AmbientLatticeReduced, allRepresentatives);
   assert(tempBool);
-  mapFromNewSpaceToOldSpace.ActOnRoots(allRepresentatives, imagesAllRepresentatives);
-  PolynomialsRationalCoeff theSub;
+  mapFromNewSpaceToOldSpace.ActOnVectorsColumn(allRepresentatives, imagesAllRepresentatives);
+  PolynomialSubstitution<Rational> theSub;
   theSub.SetSize(this->GetNumVars());
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<theSub.size; i++)
   { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
     mapFromNewSpaceToOldSpace.RowToRoot(i, tempRoot);
     currentPoly.MakeLinPolyFromRootNoConstantTerm(tempRoot);
   }
-  PolynomialRationalCoeff tempP;
+  Polynomial<Rational>  tempP;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
   { this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, mapFromNewSpaceToOldSpace.NumCols, (Rational) 1);
     for (int j=0; j<allRepresentatives.size; j++)
@@ -4319,15 +4009,15 @@ void QuasiPolynomial::Substitution
 }
 
 void QuasiPolynomial::Substitution
-(const root& inputTranslationSubtractedFromArgument, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+(const Vector<Rational>& inputTranslationSubtractedFromArgument, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { //format of the translation. If the starting quasipolynomial was P(y_1, ..., y_n),
   //and the translation has coordinates (t_1, ..., t_n),
   //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
-  PolynomialsRationalCoeff theSub;
+  PolynomialSubstitution<Rational> theSub;
   theSub.MakeIdSubstitution(this->GetNumVars(), (Rational) 1);
   for (int i=0; i<theSub.size; i++)
     theSub.TheObjects[i].AddConstant(-inputTranslationSubtractedFromArgument[i]);
-  PolynomialRationalCoeff tempP;
+  Polynomial<Rational>  tempP;
   output.MakeZeroLatTiceZn(this->GetNumVars());
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
@@ -4337,7 +4027,7 @@ void QuasiPolynomial::Substitution
 }
 
 void QuasiPolynomial::Substitution
-  (const MatrixLargeRational& mapFromNewSpaceToOldSpace, const root& inputTranslationSubtractedFromArgument,
+  (const Matrix<Rational> & mapFromNewSpaceToOldSpace, const Vector<Rational>& inputTranslationSubtractedFromArgument,
    const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
 { QuasiPolynomial tempQP;
   this->Substitution(inputTranslationSubtractedFromArgument, tempQP, theGlobalVariables);
@@ -4345,24 +4035,24 @@ void QuasiPolynomial::Substitution
 }
 
 bool QuasiPolynomial::SubstitutionLessVariables
-  (const PolynomialsRationalCoeff& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
-{ MatrixLargeRational theLatticeSub;
+  (const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
+{ Matrix<Rational>  theLatticeSub;
   if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))
     return false;
-  MatrixLargeRational theSubLatticeShift;
+  Matrix<Rational>  theSubLatticeShift;
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   if(!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub, theGlobalVariables))
     return false;
   theSubLatticeShift.init(theLatticeSub.NumRows,1);
   for (int i=0; i<theSubLatticeShift.NumRows; i++)
     theSub.TheObjects[i].GetConstantTerm(theSubLatticeShift.elements[i][0], (Rational) 0);
-  MatrixLargeRational theShiftImage, shiftMatForm;
+  Matrix<Rational>  theShiftImage, shiftMatForm;
   output.LatticeShifts.size=0;
   output.valueOnEachLatticeShift.size=0;
   output.valueOnEachLatticeShift.Reserve(this->LatticeShifts.size);
   output.LatticeShifts.Reserve(this->LatticeShifts.size);
-  root tempRoot;
-  PolynomialRationalCoeff tempP;
+  Vector<Rational> tempRoot;
+  Polynomial<Rational>  tempP;
   for (int i=0; i<this->LatticeShifts.size; i++)
   { shiftMatForm.AssignVectorColumn(this->LatticeShifts.TheObjects[i]);
     shiftMatForm-=theSubLatticeShift;
@@ -4376,15 +4066,15 @@ bool QuasiPolynomial::SubstitutionLessVariables
 }
 
 bool Lattice::SubstitutionHomogeneous
-    (const PolynomialsRationalCoeff& theSub, GlobalVariables& theGlobalVariables)
-{ MatrixLargeRational matSub;
+    (const PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
+{ Matrix<Rational>  matSub;
   if (!this->GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, matSub, theGlobalVariables))
     return false;
   return this->SubstitutionHomogeneous(matSub, theGlobalVariables);
 }
 
 bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
-(const PolynomialsRationalCoeff& theSub, MatrixLargeRational& output, GlobalVariables& theGlobalVariables)
+(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational> & output, GlobalVariables& theGlobalVariables)
 { if (theSub.size<1)
     return false;
   int theTargetDim=theSub.TheObjects[0].NumVars;
@@ -4399,29 +4089,29 @@ bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
   return true;
 }
 
-void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
+void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& theNormal)
 { //std::cout << "<br>Starting lattice: " << this->ElementToString(true, false) << "<br>";
-  roots startingBasis, resultBasis;
+  Vectors<Rational> startingBasis, resultBasis;
   startingBasis.AssignMatrixRows(this->basisRationalForm);
   //std::cout << "Starting normal: " << theNormal.ElementToString();
-  root theScalarProducts;
+  Vector<Rational> theScalarProducts;
   theScalarProducts.SetSize(startingBasis.size);
   for (int i=0; i<this->basisRationalForm.NumRows; i++)
-    theScalarProducts.TheObjects[i]=root::RootScalarEuclideanRoot(startingBasis.TheObjects[i], theNormal);
+    theScalarProducts[i]=Vector<Rational>::ScalarEuclidean(startingBasis[i], theNormal);
   if (theScalarProducts.IsEqualToZero())
     return;
   //std::cout << "<br>the scalar products: " << theScalarProducts.ElementToString();
   int pivotColumnIndex=theScalarProducts.getIndexLastNonZeroCoordinate();
-  Rational pivotCoeff=theScalarProducts.TheObjects[pivotColumnIndex];
+  Rational pivotCoeff=theScalarProducts[pivotColumnIndex];
   theScalarProducts/=-pivotCoeff;
   //std::cout << "<br>the scalar products after scaling: " << theScalarProducts.ElementToString();
-  roots eigenSpacePlusOrthogonalComponent;
+  Vectors<Rational> eigenSpacePlusOrthogonalComponent;
   eigenSpacePlusOrthogonalComponent.SetSize(theScalarProducts.size);
   for (int i=0; i<theScalarProducts.size; i++)
     if (i!=pivotColumnIndex)
-    { root& currentRoot=eigenSpacePlusOrthogonalComponent.TheObjects[i];
+    { Vector<Rational>& currentRoot=eigenSpacePlusOrthogonalComponent.TheObjects[i];
       currentRoot.MakeZero(theScalarProducts.size);
-      currentRoot.TheObjects[i]=1;
+      currentRoot[i]=1;
       currentRoot.TheObjects[pivotColumnIndex]=theScalarProducts.TheObjects[i];
     }
   theScalarProducts.ScaleByPositiveRationalToIntegralMinHeight();
@@ -4436,7 +4126,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
   //std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ElementToString(true, false);
   resultBasis.Reserve(theScalarProducts.size-1);
-  root tempRoot, resultRoot; Rational orthogonalComponent;
+  Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
   { theZnLattice.basisRationalForm.RowToRoot(i, tempRoot);
     orthogonalComponent=tempRoot.ScalarEuclidean(theScalarProducts)/theScalarProducts.ScalarEuclidean(theScalarProducts);
@@ -4454,15 +4144,15 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const root& theNormal)
   //std::cout << "<br>Final answer lattice form: " << this->ElementToString(true, false);
 }
 
-void Lattice::IntersectWithLinearSubspaceSpannedBy(const roots& theSubspaceBasis)
-{ roots theNormals;
-  MatrixLargeRational theMat;
-  theSubspaceBasis.GetMatRootsToRows(theMat);
+void Lattice::IntersectWithLinearSubspaceSpannedBy(const Vectors<Rational>& theSubspaceBasis)
+{ Vectors<Rational> theNormals;
+  Matrix<Rational> theMat;
+  theSubspaceBasis.GetMatrixRootsToRows(theMat);
   theMat.FindZeroEigenSpace(theNormals);
   this->IntersectWithLinearSubspaceGivenByNormals(theNormals);
 }
 
-void Lattice::IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspaceNormals)
+void Lattice::IntersectWithLinearSubspaceGivenByNormals(const Vectors<Rational>& theSubspaceNormals)
 { //std::cout << "<br>********************Debug info for IntersectWithLinearSubspaceGivenByNormals*******************";
   for (int i=0; i<theSubspaceNormals.size; i++)
     this->IntersectWithLinearSubspaceGivenByNormal(theSubspaceNormals.TheObjects[i]);
@@ -4470,10 +4160,10 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormals(const roots& theSubspace
 }
 
 bool Lattice::SubstitutionHomogeneous
- (const MatrixLargeRational& theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
-{ /*roots preimageBasis;
+ (const Matrix<Rational> & theSub, Lattice& resultIsSubsetOf, GlobalVariables& theGlobalVariables)
+{ /*Vectors<Rational> preimageBasis;
   preimageBasis.AssignMatrixRows(this->basisRationalForm);
-  MatrixLargeRational theSubModifiable, currentBasisVector, oneSolution;
+  Matrix<Rational>  theSubModifiable, currentBasisVector, oneSolution;
   for (int i=0; i<preimageBasis.size; i++)
   { theSubModifiable=theSub;
     currentBasisVector.AssignVectorColumn(preimageBasis.TheObjects[i]);
@@ -4486,18 +4176,17 @@ return false;
 }
 
 bool Lattice::SubstitutionHomogeneous
-  (const MatrixLargeRational& theSub, GlobalVariables& theGlobalVariables)
+  (const Matrix<Rational> & theSub, GlobalVariables& theGlobalVariables)
 { int targetDim=theSub.NumCols;
   if (theSub.NumRows!=this->GetDim())
     return false;
   //std::cout <<"<br> the sub: " << theSub.ElementToString(true, false) << "<br>";
   int startingDim=this->GetDim();
-  MatrixLargeRational theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
+  Matrix<Rational>  theMat, oldBasisTransformed, matRelationBetweenStartingVariables;
   theMat=theSub;
   oldBasisTransformed=this->basisRationalForm;
   oldBasisTransformed.Transpose();
   Selection nonPivotPoints;
-  theMat.ComputeDebugString(false, false);
   //std::cout << "<br>the matrices to be transformed: " << theMat.ElementToString(true, false) << "<br>" << oldBasisTransformed.ElementToString(true, false);
   theMat.GaussianEliminationByRows(oldBasisTransformed, nonPivotPoints);
   //std::cout << "<br>afer transformation: " << theMat.ElementToString(true, false) << "<br>" << oldBasisTransformed.ElementToString(true, false);
@@ -4509,13 +4198,13 @@ bool Lattice::SubstitutionHomogeneous
   for (int i=0; i<numZeroRows; i++)
     for (int j=0; j<startingDim; j++)
       matRelationBetweenStartingVariables.elements[i][j]=oldBasisTransformed.elements[i+numNonZeroRows][j];
-  roots theEigenSpace;
+  Vectors<Rational> theEigenSpace;
   matRelationBetweenStartingVariables.FindZeroEigenSpace(theEigenSpace, theGlobalVariables);
   //std::cout << "<br>matRelationBetweenStartingVariables" <<  matRelationBetweenStartingVariables.ElementToString(true, false);
   for (int i=0; i<theEigenSpace.size; i++)
     theEigenSpace.TheObjects[i].ScaleByPositiveRationalToIntegralMinHeight();
   //std::cout << "the basis: " << theEigenSpace.ElementToString();
-  oldBasisTransformed.ActOnRoots(theEigenSpace);
+  oldBasisTransformed.ActOnVectorsColumn(theEigenSpace);
   //std::cout << "<br>the basis transformed: " << theEigenSpace.ElementToString();
   this->basisRationalForm.init(targetDim, targetDim);
   for (int i=0; i<targetDim; i++)
@@ -4558,22 +4247,22 @@ void Cone::WriteToFile
 
 bool Cone::ReadFromFile(std::fstream& output, GlobalVariables* theGlobalVariables)
 { if (theGlobalVariables!=0)
-    return this->ReadFromFile(output, theGlobalVariables->rootsConeWriteToFileBuffer, theGlobalVariables);
+    return this->ReadFromFile(output, theGlobalVariables->rootsConeWriteToFileBuffer.GetElement(), theGlobalVariables);
   else
-  { roots tempRoots;
+  { Vectors<Rational> tempRoots;
     return this->ReadFromFile(output, tempRoots, 0);
   }
 }
 
 bool Cone::ReadFromFile
-  (std::fstream& input, roots& buffer, GlobalVariables* theGlobalVariables)
+  (std::fstream& input, Vectors<Rational>& buffer, GlobalVariables* theGlobalVariables)
 { std::string tempS, rootString;
   int NumWordsRead;
   XMLRoutines::ReadThroughFirstOpenTag(input, NumWordsRead, this->GetXMLClassName());
   assert(NumWordsRead==0);
   input >> tempS;
   buffer.size=0;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   if (tempS!="Cone(")
   { std::cout << "tempS was instead " << tempS;
     XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsRead, this->GetXMLClassName());
@@ -4987,7 +4676,7 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading partial fractions... ";
     theGlobalVariables->MakeReport();
   }
-  this->thePfs.ReadFromFile(input, theGlobalVariables);
+//  this->thePfs.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading projectivized param complex... ";
     theGlobalVariables->MakeReport();
@@ -5037,8 +4726,8 @@ bool ConeComplex::ReadFromFile
   return true;
 }
 
-void WeylGroup::GetFundamentalWeightsInSimpleCoordinates(roots& output)
-{ MatrixLargeRational tempMat;
+void WeylGroup::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output)
+{ Matrix<Rational>  tempMat;
   tempMat=this->CartanSymmetric;
   Rational tempRat;
   for (int i=0; i<this->GetDim(); i++)
@@ -5052,7 +4741,7 @@ void WeylGroup::GetFundamentalWeightsInSimpleCoordinates(roots& output)
 
 void WeylGroup::GetIntegralLatticeInSimpleCoordinates(Lattice& output)
 { output.basisRationalForm=this->CartanSymmetric;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   for (int i=0; i<this->GetDim(); i++)
   { tempRoot.MakeEi(this->GetDim(), i);
     output.basisRationalForm.RowTimesScalar(i, 2/this->RootScalarCartanRoot(tempRoot, tempRoot));
@@ -5080,11 +4769,11 @@ int ParserNode::EvaluatePrintRootSystem
 { std::stringstream out;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   out << "<br>Symmetric Cartan matrix follows."
-  <<" The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>" <<
+  <<" The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>" <<
   CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (theNode.owner->theHmm.theRange().theWeyl.CartanSymmetric.ElementToString(false, true) );
   Rational tempRat;
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   tempMat = theWeyl.CartanSymmetric;
   tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
   out  << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ElementToString();
@@ -5104,17 +4793,17 @@ int ParserNode::EvaluatePrintRootSystem
   //Lattice tempLattice;
   //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
   //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ElementToString(true, false);
-  //roots integralRoots, integralRootsEpsForm;
-  roots fundamentalWeights, fundamentalWeightsEpsForm;
+  //Vectors<Rational> integralRoots, integralRootsEpsForm;
+  Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
   //integralRoots.AssignMatrixRows(tempLattice.basisRationalForm);
   //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm, theGlobalVariables);
   //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
   theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
-  roots simpleBasis, simplebasisEpsCoords;
-  out << "<hr> Half sum of positive roots: " << theWeyl.rho.ElementToString();
-  root tempRoot;
+  Vectors<Rational> simpleBasis, simplebasisEpsCoords;
+  out << "<hr> Half sum of positive Vectors<Rational>: " << theWeyl.rho.ElementToString();
+  Vector<Rational> tempRoot;
   theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot, theGlobalVariables);
-  out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ElementToStringEpsilonForm());
+  out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ElementToStringEpsilonForm(true, false));
   out << "<hr>Size of Weyl group according to formula: " <<
   theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ElementToString();
   out << "<hr>Simple basis (regular and epsilon coordinates): <table>";
@@ -5127,34 +4816,34 @@ int ParserNode::EvaluatePrintRootSystem
     << simpleBasis[i].ElementToString() << " </td><td>=</td> <td>"
     << CGI::
     GetHtmlMathFromLatexFormulA
-    (simplebasisEpsCoords[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
+    (simplebasisEpsCoords[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
     << "</td></tr>";
   }
   out << "</table>";
-  out << "<hr>The fundamental weights (the j^th fundamental weight is the weight that has scalar product 1 with the j^th simple root times 2 divided by the root length squared, and 0 with the remaining simple roots): ";
+  out << "<hr>The fundamental weights (the j^th fundamental weight is the weight that has scalar product 1 with the j^th simple Vector<Rational> times 2 divided by the Vector<Rational> length squared, and 0 with the remaining simple Vectors<Rational>): ";
   theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm, theGlobalVariables);
   out << "<table>";
   for (int i=0; i< fundamentalWeights.size; i++)
   { out << "<tr><td>" << fundamentalWeights[i].ElementToString() << "</td><td> =</td><td> "
     << CGI::
     GetHtmlMathFromLatexFormulA
-    (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(), "", "</td><td>", false, false)
+    (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
     << "</td></tr>";
   }
   out << "</table>";
   out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates (convention: Humphreys)</td></tr> ";
-  roots rootSystemEpsCoords;
+  Vectors<Rational> rootSystemEpsCoords;
   theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords, theGlobalVariables);
   for (int i=0; i<theWeyl.RootSystem.size; i++)
-  { root& current=theNode.owner->theHmm.theRange().theWeyl.RootSystem.TheObjects[i];
+  { Vector<Rational>& current=theNode.owner->theHmm.theRange().theWeyl.RootSystem.TheObjects[i];
     out << "<tr><td>" << current.ElementToString() << "</td><td>=</td><td>"
-    << rootSystemEpsCoords[i].ElementToStringLetterFormat("e")
+    << rootSystemEpsCoords[i].ElementToStringLetterFormat("e", false)
     << "</td></tr>";
   }
   out << "</table>";
   DrawingVariables theDV;
   theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, true, 0, true, 0);
-  out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
+  out << "<hr>Below a drawing of the Vector<Rational> system in its corresponding Coxeter plane "
   << "(computed as explained on John Stembridge's website). "
   << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
   << "<br>The grey lines are the edges of the Weyl chamber."
@@ -5167,8 +4856,8 @@ int ParserNode::EvaluatePrintRootSystem
 template<class CoefficientType>
 void Vectors<CoefficientType>::IntersectTwoLinSpaces
   (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
-   Vectors<CoefficientType>& output, const CoefficientType& theRingZero,
-   GlobalVariables& theGlobalVariables)
+   Vectors<CoefficientType>& output, GlobalVariables& theGlobalVariables, const CoefficientType& theRingZero
+   )
 { //std::cout << "<br>*****Debugging Intersection linear spaces: ";
   //std::cout << "<br>input first space: " << firstSpace.ElementToString();
   //std::cout << "<br>input second space: " << secondSpace.ElementToString();
@@ -5216,7 +4905,7 @@ void Vectors<CoefficientType>::IntersectTwoLinSpaces
 
 int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots theLinearMap;
+{ Vectors<Rational> theLinearMap;
   Lattice& firstLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theLattice.GetElement();
   Lattice& secondLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[1]].theLattice.GetElement();
   List<int> theMapTempList;
@@ -5224,7 +4913,7 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
   int theDim;
   if (!theNode.owner->TheObjects[theArgumentList.TheObjects[2]].GetRootsEqualDimNoConversionNoEmptyArgument(theMapTempList, theLinearMap, theDim))
     return theNode.SetError(theNode.errorDimensionProblem);
-  MatrixLargeRational theLinearMapMat;
+  Matrix<Rational>  theLinearMapMat;
   theLinearMapMat.AssignRootsToRowsOfMatrix(theLinearMap);
   if(theLinearMapMat.NumCols!=firstLattice.GetDim() || theLinearMapMat.NumRows!=secondLattice.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -5236,76 +4925,52 @@ int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
   return theNode.errorNoError;
 }
 
-void PolynomialsRationalCoeff::MakeLinearSubbedVarsCorrespondToMatRows(MatrixLargeRational& theMat, root& theConstants)
-{ MatrixLargeRational tempMat;
-  tempMat=theMat;
-  tempMat.Transpose();
-  tempMat.Resize(tempMat.NumRows+1, tempMat.NumCols, true);
-  for (int i=0; i<theConstants.size; i++)
-    tempMat.elements[tempMat.NumRows-1][i]=theConstants.TheObjects[i];
-  this->MakeLinearSubConstTermsLastRow(tempMat);
-}
-
-void PolynomialsRationalCoeff::MakeLinearSubConstTermsLastRow(MatrixLargeRational& theMat)
-{ this->SetSize(theMat.NumCols);
-  Monomial<Rational> tempM;
-  for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].Nullify((int)theMat.NumRows-1);
-    for (int j=0; j<theMat.NumRows-1; j++)
-    { tempM.init((int)theMat.NumRows-1);
-      tempM.degrees[j]=1;
-      tempM.Coefficient.Assign(theMat.elements[j][i]);
-      this->TheObjects[i].AddMonomial(tempM);
-    }
-    this->TheObjects[i].AddConstant(theMat.elements[theMat.NumRows-1][i]);
-  }
-}
-
 void Cone::IntersectAHyperplane
-  (root& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& theNormal, Cone& outputConeLowerDim, GlobalVariables& theGlobalVariables)
 { assert(!theNormal.IsEqualToZero());
   int theDimension=theNormal.size;
-  MatrixLargeRational tempMat, theEmbedding, theProjection;
+  Matrix<Rational>  tempMat, theEmbedding, theProjection;
   tempMat.AssignVectorRow(theNormal);
-  roots theBasis;
+  Vectors<Rational> theBasis;
   tempMat.FindZeroEigenSpace(theBasis);
   assert(theBasis.size==theNormal.size-1);
   theEmbedding.AssignRootsToRowsOfMatrix(theBasis);
   theEmbedding.Transpose();
   theBasis.AddOnTop(theNormal);
-  roots tempRoots, tempRoots2;
+  Vectors<Rational> tempRoots, tempRoots2, tempRoots3;
+  Matrix<Rational> tempMat2;
   tempRoots.MakeEiBasis(theDimension);
-  tempRoots.GetCoordsInBasis(theBasis, tempRoots2, theGlobalVariables);
+  tempRoots.GetCoordsInBasis(theBasis, tempRoots2, tempRoots3, tempMat2);
   theProjection.AssignRootsToRowsOfMatrix(tempRoots2);
   theProjection.Transpose();
   theProjection.Resize(theDimension-1, theDimension, false);
-  roots newNormals=this->Normals;
-  theProjection.ActOnRoots(newNormals);
+  Vectors<Rational> newNormals=this->Normals;
+  theProjection.ActOnVectorsColumn(newNormals);
   bool tempBool=outputConeLowerDim.CreateFromNormals(newNormals, theGlobalVariables);
   assert(!tempBool);
 
 }
 
 bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
-(PolynomialRationalCoeff& inputLPoly, root& output)
+(Polynomial<Rational>& inputLPoly, Vector<Rational>& output)
 { if (!inputLPoly.IsLinear())
     return false;
   output.MakeZero(inputLPoly.NumVars+1);
   for (int i=0; i<inputLPoly.size; i++)
   { int theIndex;
-    if (inputLPoly.TheObjects[i].::Monomial<Rational>::IsOneLetterFirstDegree(theIndex))
-      output.TheObjects[theIndex]=inputLPoly.TheObjects[i].Coefficient;
+    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(theIndex))
+      output[theIndex]=inputLPoly.theCoeffs[i];
     else
-      *output.LastObject()=inputLPoly.TheObjects[i].Coefficient;
+      *output.LastObject()=inputLPoly.theCoeffs[i];
   }
   return true;
 }
 
 bool Cone::SolveLPolyEqualsZeroIAmProjective
-  ( PolynomialRationalCoeff& inputLPoly,
+  ( Polynomial<Rational> & inputLPoly,
    Cone& outputCone, GlobalVariables& theGlobalVariables
    )
-{ root theNormal;
+{ Vector<Rational> theNormal;
   if (!this->GetRootFromLPolyConstantTermGoesToLastVariable(inputLPoly, theNormal))
     return false;
   this->IntersectAHyperplane(theNormal, outputCone, theGlobalVariables);
@@ -5538,7 +5203,7 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
   }
   theGlobalVariables.theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(theGlobalVariables.theIndicatorVariables.ProgressReportStrings.size+1, 5));
   std::stringstream out;
-  out << "Included root " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
+  out << "Included Vector<Rational> " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
   *theGlobalVariables.theIndicatorVariables.ProgressReportStrings.LastObject()=out.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
@@ -5744,7 +5409,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
 { std::stringstream out;
   PolynomialOutputFormat theFormat;
   int tempI=0;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   theFormat.alphabet.TheObjects[tempI]="x_1"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="x_2"; tempI++;
   theFormat.alphabet.TheObjects[tempI]="y_1"; tempI++;
@@ -5831,13 +5496,13 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
   (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
 { std::stringstream out1;
   std::string tempS1, tempS2;
-  root normalNoConstant;
+  Vector<Rational> normalNoConstant;
   int dimSmallerAlgebra=this->theLinearOperators.TheObjects[0].NumRows;
   int dimLargerAlgebra=this->theLinearOperators.TheObjects[0].NumCols;
   Rational theConst;
   out1 << "\\begin{tabular}{rcl}";
   for (int i=0; i<theCone.Normals.size; i++)
-  { root& currentNormal=theCone.Normals.TheObjects[i];
+  { Vector<Rational>& currentNormal=theCone.Normals.TheObjects[i];
     normalNoConstant=currentNormal;
     normalNoConstant.SetSize(dimSmallerAlgebra+dimLargerAlgebra);
     theConst=-(*currentNormal.LastObject());
@@ -5849,65 +5514,18 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
   return out1.str();
 }
 
-std::string root::ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)const
-{ PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex(inputLetter, tempFormat.alphabetBases[1]);
-  return this->ElementToStringLetterFormat(tempFormat, useLatex, DontIncludeLastVar);
-}
-
-std::string root::ElementToStringLetterFormat
-(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const
-{ if (this->IsEqualToZero())
-    return "0";
-  std::stringstream out;
-  std::string tempS;
-  bool found=false;
-  int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
-  for(int i=0; i<NumVars; i++)
-    if (!this->TheObjects[i].IsEqualToZero())
-    { this->TheObjects[i].ElementToString(tempS);
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (found)
-      { if (tempS.size()>0)
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      found=true;
-      out << tempS;
-      out << theFormat.GetLetterIndex(i);
-    }
-  return out.str();
-}
-
-bool MatrixLargeRational::IsIdMatrix()const
-{ if (this->NumRows!=this->NumCols || this->NumRows<=0)
-     return false;
-   for (int i=0; i<this->NumRows; i++)
-     for (int j=0; j<this->NumCols; j++)
-       if (i==j)
-       { if (!this->elements[i][j].IsEqualToOne())
-           return false;
-       } else
-         if (!this->elements[i][j].IsEqualToZero())
-           return false;
-   return true;
-}
-
-root oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int NumVars)
-{ root output;
+Vector<Rational> oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(int NumVars)
+{ Vector<Rational> output;
   output.SetSize(NumVars);
   for (int i=0; i<NumVars; i++)
     output.TheObjects[i]=i+2;
   return output;
 }
 
-bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVariables, root* Indicator, int theIndex)
-{ if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
+bool partFractions::RemoveRedundantShortRootsIndex
+(MonomialCollection<partFraction, Polynomial<LargeInt> >& output, int theIndex, GlobalVariables& theGlobalVariables,
+ Vector<Rational>* Indicator)
+ { if (!this->TheObjects[theIndex].rootIsInFractionCone(*this, Indicator, theGlobalVariables))
     return false;
   bool found=false;
   for (int k=0; k < this->TheObjects[theIndex].IndicesNonZeroMults.size; k++)
@@ -5920,72 +5538,42 @@ bool partFractions::RemoveRedundantShortRootsIndex(GlobalVariables& theGlobalVar
   }
   if (!found)
     return false;
-  partFraction& thePF= theGlobalVariables.fracRemoveRedundantRootsBuffer1;
-  thePF.Assign(this->TheObjects[theIndex]);
-  this->PopIndexSwapLastHashAndAccount(theIndex, theGlobalVariables, Indicator);
+  partFraction thePF;
   Rational localStartCheckSum, localEndCheckSum;
   std::string tempS, tempS1, tempS2;
-  Polynomial<LargeInt> ComputationalBufferCoefficient, tempIP;
-  PolyPartFractionNumerator ComputationalBufferCoefficientNonExpanded, tempPP;
-  ComputationalBufferCoefficient.AssignPolynomialLight(thePF.Coefficient);
-  thePF.CoefficientNonExpanded.ComputePolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded, this->AmbientDimension);
-  if (this->flagMakingProgressReport || this->flagAnErrorHasOccurredTimeToPanic)
-  { //thePF.ComputeDebugString(*this, theGlobalVariables);
-    //std::cout << thePF.DebugString;
-    thePF.ComputeOneCheckSum(*this, localStartCheckSum, this->AmbientDimension, theGlobalVariables);
-    localStartCheckSum.ElementToString(tempS2);
-  }
+  Polynomial<LargeInt> tempIP, currentCoeff;
+  this->PopMonomial(theIndex, thePF, currentCoeff);
   for (int k=0; k<thePF.IndicesNonZeroMults.size; k++)
   { int currentIndex=thePF.IndicesNonZeroMults.TheObjects[k];
     oneFracWithMultiplicitiesAndElongations& currentFrac = thePF.TheObjects[currentIndex];
     int LCMElongations = currentFrac.GetLCMElongations();
-    this->RootsToIndices.TheObjects[currentIndex].ElementToString(tempS);
+    this->startingVectors[currentIndex].ElementToString(tempS);
     while (currentFrac.Elongations.size>1)
     { for (int i=0; i<currentFrac.Elongations.size; i++)
-      { int ElongationValue=currentFrac.Elongations.TheObjects[i];
+      { int ElongationValue=currentFrac.Elongations[i];
         if (ElongationValue!=LCMElongations)
         { int numSummands=LCMElongations/ElongationValue;
-          if (thePF.UncoveringBrackets)
-          { thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
-            tempIP.ComputeDebugString();
-            tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
-            tempIP.ComputeDebugString();
-            ComputationalBufferCoefficient.MultiplyBy(tempIP);
-          }
-          else
-          { PolyPartFractionNumerator tempP;
-            thePF.GetNElongationPoly(*this, currentIndex, ElongationValue, numSummands, tempP, this->AmbientDimension);
-            tempP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
-//            this->CoefficientNonExpanded.ComputeDebugString();
-            ComputationalBufferCoefficientNonExpanded.MultiplyBy(tempP);
-//            this->CoefficientNonExpanded.ComputeDebugString();
-          }
-          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
+          thePF.GetNElongationPoly
+          (this->startingVectors, currentIndex, ElongationValue, numSummands, tempIP, this->AmbientDimension);
+          //tempIP.ComputeDebugString();
+          tempIP.RaiseToPower(currentFrac.Multiplicities.TheObjects[i], (LargeInt) 1);
+          //tempIP.ComputeDebugString();
+          currentCoeff*=tempIP;
+//          ComputationalBufferCoefficientNonExpanded.ComputeDebugString();
           currentFrac.AddMultiplicity(currentFrac.Multiplicities.TheObjects[i], LCMElongations);
           currentFrac.AddMultiplicity(-currentFrac.Multiplicities.TheObjects[i], ElongationValue);
-          thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+//          thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
           assert(localEndCheckSum.IsEqualTo(localStartCheckSum));
         }
       }
     }
     if (partFraction::MakingConsistencyCheck || this->flagAnErrorHasOccurredTimeToPanic)
-    { thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-      thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
-      localEndCheckSum.ElementToString(tempS1);
-      assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
+    { //thePF.ComputeOneCheckSum(*this, localEndCheckSum, this->AmbientDimension, theGlobalVariables);
+      //localEndCheckSum.ElementToString(tempS1);
+      //assert(localStartCheckSum.IsEqualTo(localEndCheckSum));
     }
   }
-  thePF.CoefficientNonExpanded.AssignPolyPartFractionNumerator(ComputationalBufferCoefficientNonExpanded);
-  thePF.Coefficient.AssignPolynomial(ComputationalBufferCoefficient);
-  int tempI = this->GetIndex(thePF);
-  if (tempI==-1)
-    this->AddAlreadyReduced(thePF, theGlobalVariables, Indicator);
-  else
-  { this->AccountPartFractionInternals(-1, tempI, Indicator, theGlobalVariables);
-    this->TheObjects[tempI].AddReturnShouldAttemptReduction(thePF, *this, theGlobalVariables);
-    this->AccountPartFractionInternals(1, tempI, Indicator, theGlobalVariables);
-  }
+  this->AddMonomial(thePF, currentCoeff);
   return true;
 }
 
@@ -6012,7 +5600,7 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   }
   slTwoInSlN theSl2;
   theNode.ExpressionType=theNode.typeString;
-  List<PolynomialRationalCoeff> outputList;
+  List<Polynomial<Rational> > outputList;
   std::string tempS;
   if (! theSl2.ComputeInvariantsOfDegree(thePartition, theDegree, outputList, tempS, theGlobalVariables))
   { theNode.outputString=tempS;
@@ -6028,21 +5616,7 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   return theNode.errorNoError;
 }
 
-void MatrixLargeRational::ActOnMonomialAsDifferentialOperator(Monomial<Rational>& input, PolynomialRationalCoeff& output)
-{ assert(this->NumRows==this->NumCols && this->NumRows==input.NumVariables);
-  Monomial<Rational> tempMon;
-  tempMon.init(tempMon.NumVariables);
-  output.Nullify(tempMon.NumVariables);
-  for (int i=0; i<this->NumRows; i++)
-    for (int j=0; j<this->NumCols; j++)
-    { tempMon=input;
-      tempMon.Coefficient*=tempMon.degrees[j];
-      tempMon.Coefficient*=this->elements[i][j];
-      tempMon.degrees[j]--;
-      tempMon.degrees[i]++;
-      output.AddMonomial(tempMon);
-    }
-}
+
 
 void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)const
 { std::stringstream out;
@@ -6177,20 +5751,20 @@ void LargeIntUnsigned::AssignFactorial(unsigned int x, GlobalVariables* theGloba
 }
 
 void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
-  (const root& theDirection, root& outputDirectionMultipleOnLattice, root& theShift, root& theAffineHyperplane,
-   roots& outputRepresentatives,
-   roots& movementInDirectionPerRepresentative,
+  (const Vector<Rational>& theDirection, Vector<Rational>& outputDirectionMultipleOnLattice, Vector<Rational>& theShift, Vector<Rational>& theAffineHyperplane,
+   Vectors<Rational>& outputRepresentatives,
+   Vectors<Rational>& movementInDirectionPerRepresentative,
    Lattice& outputRougherLattice,
    GlobalVariables& theGlobalVariables)
-{ root theNormal=theAffineHyperplane;
+{ Vector<Rational> theNormal=theAffineHyperplane;
   theNormal.SetSize(theNormal.size-1);
   if (theDirection.ScalarEuclidean(theNormal).IsEqualToZero())
     return;
   Rational theConstOnTheOtherSide=-*theAffineHyperplane.LastObject();
-  roots theBasis;
+  Vectors<Rational> theBasis;
   theBasis.AssignMatrixRows(this->basisRationalForm);
   Lattice theHyperplaneLatticeNoShift, theDirectionLattice;//, normalProjectionLattice, theTrueProjectionLattice;
-  roots tempRoots; //root tempRoot;
+  Vectors<Rational> tempRoots; //Vector<Rational> tempRoot;
   tempRoots.AddOnTop(theDirection);
   theDirectionLattice=*this;
   theDirectionLattice.IntersectWithLinearSubspaceSpannedBy(tempRoots);
@@ -6218,7 +5792,7 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   { tempRat=(theNormal.ScalarEuclidean(outputRepresentatives.TheObjects[i]) - theConstOnTheOtherSide)/unitMovement;
     tempRat.AssignFracValue();
     theShiftedConst=theConstOnTheOtherSide + tempRat;
-    root& currentMovement=movementInDirectionPerRepresentative.TheObjects[i];
+    Vector<Rational>& currentMovement=movementInDirectionPerRepresentative.TheObjects[i];
     currentMovement=theAffineHyperplane;
     *currentMovement.LastObject()=theShiftedConst;
     //std::cout << "<br>Representative: " << outputRepresentatives.TheObjects[i].ElementToString() << " and the hyperplane: " << currentMovement.ElementToString();
@@ -6233,7 +5807,7 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
   ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
-  root theAffineNormal, theRay, theRayMultiple, theShift;//, theRay;
+  Vector<Rational> theAffineNormal, theRay, theRayMultiple, theShift;//, theRay;
   if (!theHyperplaneNode.GetRootRationalDontUseForFunctionArguments(theAffineNormal, theGlobalVariables))
     return theNode.SetError(theNode.errorProgramming);
   if (!theDirectionNode.GetRootRationalDontUseForFunctionArguments(theRay, theGlobalVariables))
@@ -6245,7 +5819,7 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
   //int theDim=t;
   if (theAffineNormal.size-1!=currentLattice.GetDim() || currentLattice.GetRank()!=currentLattice.GetDim() || theRay.size!=currentLattice.GetDim() || theRay.size!=theShift.size)
     return theNode.SetError(theNode.errorDimensionProblem);
-  roots representatives, theMovements;
+  Vectors<Rational> representatives, theMovements;
   Lattice theRougherLattice;
   currentLattice.GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
   (theRay, theRayMultiple, theShift, theAffineNormal, representatives, theMovements, theRougherLattice, theGlobalVariables);
@@ -6253,7 +5827,7 @@ int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
 }
 
 bool slTwoInSlN::ComputeInvariantsOfDegree
-  (List<int>& decompositionDimensions, int theDegree, List<PolynomialRationalCoeff>& output, std::string& outputError, GlobalVariables& theGlobalVariables)
+  (List<int>& decompositionDimensions, int theDegree, List<Polynomial<Rational> >& output, std::string& outputError, GlobalVariables& theGlobalVariables)
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
@@ -6264,65 +5838,64 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   { outputError= " Computation too large. ";
     return false;
   }
-  PolynomialRationalCoeff basisMonsZeroWeight, basisMonsAll;
-  basisMonsZeroWeight.Nullify(this->theDimension);
-  basisMonsZeroWeight.Reserve(numCycles);
-  basisMonsAll.Nullify(this->theDimension);
-  basisMonsAll.Reserve(numCycles);
-  Monomial<Rational> theMon;
-  theMon.init(this->theDimension);
-  root theWeight;
-  root theCartanAction;
+  Polynomial<Rational>  basisMonsZeroWeight, basisMonsAll;
+  basisMonsZeroWeight.MakeZero(this->theDimension);
+  basisMonsZeroWeight.SetExpectedSize(numCycles);
+  basisMonsAll.MakeZero(this->theDimension);
+  basisMonsAll.SetExpectedSize(numCycles);
+  MonomialP theMon;
+  theMon.MakeZero(this->theDimension);
+  Vector<Rational> theWeight;
+  Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
   theWeight.SetSize(this->theDimension);
   for (int j=0; j<this->theDimension; j++)
     theCartanAction.TheObjects[j]=this->theH.elements[j][j];
   theSel.IncrementSubsetFixedCardinality(theDegree);
-  theMon.Coefficient.MakeOne();
+  Rational theMonCoeff=1;
   for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
   { for (int j=0; j<this->theDimension; j++)
-    { theMon.degrees[j]=theSel.Multiplicities.TheObjects[j];
-      theWeight.TheObjects[j]=theMon.degrees[j];
+    { theMon[j]=theSel.Multiplicities[j];
+      theWeight[j]=theMon[j];
     }
-    basisMonsAll.AddMonomial(theMon);
-    if (root::RootScalarEuclideanRoot(theWeight, theCartanAction).IsEqualToZero())
-      basisMonsZeroWeight.AddMonomial(theMon);
+    basisMonsAll.AddMonomial(theMon, theMonCoeff);
+    if (Vector<Rational>::ScalarEuclidean(theWeight, theCartanAction).IsEqualToZero())
+      basisMonsZeroWeight.AddMonomial(theMon, theMonCoeff);
   }
 //  std::cout << "<br>Num cycles:" << numCycles << "<br>The basis mons (there are " << basisMonsZeroWeight.size << " of them): "  << basisMonsZeroWeight.ElementToString(PolyFormatLocal);
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   tempMat.init(basisMonsAll.size*2, basisMonsZeroWeight.size);
 //  tempMat.init(basisMonsAll.size*numGenerators, basisMonsZeroWeight.size);
-  PolynomialRationalCoeff tempP;
+  Polynomial<Rational>  tempP;
   for (int l=0; l<2; l++)
     for (int k=0; k<basisMonsZeroWeight.size; k++)
     { if (l==0)
-        this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
+        this->theE.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       else
-        this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight.TheObjects[k], tempP);
+        this->theF.ActOnMonomialAsDifferentialOperator(basisMonsZeroWeight[k], tempP);
       for (int j=0; j<basisMonsAll.size; j++)
-      { int indexInResult=tempP.GetIndex(basisMonsAll.TheObjects[j]);
+      { int indexInResult=tempP.GetIndex(basisMonsAll[j]);
         int currentRow=l*basisMonsAll.size+j;
         if (indexInResult==-1)
           tempMat.elements[currentRow][k]=0;
         else
-          tempMat.elements[currentRow][k]=tempP.TheObjects[indexInResult].Coefficient;
+          tempMat.elements[currentRow][k]=tempP.theCoeffs[indexInResult];
       }
     }
 //  if (tempMat.NumRows<120)
 //    std::cout << "<div class=\"math\" scale=\"50\">" << tempMat.ElementToString(false, true) << "</div>";
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempMat.FindZeroEigenSpace(tempRoots, theGlobalVariables);
   output.SetSize(tempRoots.size);
-//  std::cout << "<br>invariants root form: " << tempRoots.ElementToString();
+//  std::cout << "<br>invariants Vector<Rational> form: " << tempRoots.ElementToString();
 //  std::cout << "<br> .... and the invariants are: ";
   for (int i=0; i<output.size; i++)
   { Polynomial<Rational>& current=output.TheObjects[i];
-    current.Nullify(this->theDimension);
+    current.MakeZero(this->theDimension);
     for (int j=0; j<basisMonsZeroWeight.size; j++)
       if (!tempRoots.TheObjects[i].TheObjects[j].IsEqualToZero())
-      { theMon.Assign(basisMonsZeroWeight.TheObjects[j]);
-        theMon.Coefficient=tempRoots.TheObjects[i].TheObjects[j];
-        current.AddMonomial(theMon);
+      { theMon=(basisMonsZeroWeight[j]);
+        current.AddMonomial(theMon, tempRoots[i][j]);
       }
  //   std::cout << "<br>Invariant " << i << ":<br>" << current.ElementToString(PolyFormatLocal);
   }
@@ -6343,7 +5916,7 @@ void GeneralizedVermaModuleCharacters::InitTheMaxComputation
   this->numNonZeroMults=0;
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   ConeLatticeAndShift currentCLS;
-  root theLPtoMax;
+  Vector<Rational> theLPtoMax;
   for (int i=0; i<this->theMultiplicities.size; i++)
     if (! this->theMultiplicities[i].IsEqualToZero())
     { currentCLS.theProjectivizedCone=this->projectivizedChambeR.TheObjects[i];
@@ -6387,66 +5960,73 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
   return out.str();
 }
 
-std::string ElementSimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
+std::string ElementSemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner,
    const PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
-  if (this->NonZeroElements.CardinalitySelection==0 && this->Hcomponent.IsEqualToZero())
+  if (this->size==0)
     return "0";
-  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
-  { int theIndex=this->NonZeroElements.elements[i];
-    int DisplayIndex=owner.RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(theIndex);
-    if (!this->coeffsRootSpaces.TheObjects[theIndex].IsNegative()&& i!=0)
-      out << "+";
-    tempS=this->coeffsRootSpaces.TheObjects[theIndex].ElementToString();
-    if (tempS=="1")
-      tempS="";
-    if (tempS=="-1")
-      tempS="-";
-    if (!useRootNotation)
-      out << tempS << thePolyFormat.alphabetBases[0] << "_{" << DisplayIndex << "}";
-    else
-    { out << tempS << thePolyFormat.alphabetBases[0] << "_{";
-      if (useEpsilonNotation)
-        out << owner.ElementToStringRootIndexToEpsForm(theIndex, theGlobalVariables);
+  bool isElementCartan=false;
+  for (int i=0; i<this->size; i++)
+  { int theIndex=this->TheObjects[i].theGeneratorIndex;
+    if (!owner.IsGeneratorFromCartan(theIndex))
+    { int DisplayIndex=owner.ChevalleyGeneratorIndexToDisplayIndex(theIndex);
+      if (!this->theCoeffs[theIndex].IsNegative()&& i!=0)
+        out << "+";
+      isElementCartan=true;
+      tempS=this->theCoeffs[theIndex].ElementToString();
+      if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (!useRootNotation)
+        out << tempS << thePolyFormat.alphabetBases[0] << "_{" << DisplayIndex << "}";
       else
-        out << owner.ElementToStringRootIndexToSimpleBasis(theIndex, theGlobalVariables);
-      out << "}";
+      { out << tempS << thePolyFormat.alphabetBases[0] << "_{";
+        int rootIndex=owner.ChevalleyGeneratorIndexToRootIndex(theIndex);
+        if (useEpsilonNotation)
+          out << owner.ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables);
+        else
+          out << owner.ElementToStringRootIndexToSimpleBasis(rootIndex, theGlobalVariables);
+        out << "}";
+      }
     }
   }
-  if (this->Hcomponent.IsEqualToZero())
-    return out.str();
-  if (useRootNotation)
-  { root tempRoot=this->Hcomponent;
-    if (useEpsilonNotation)
-      tempRoot=owner.theWeyl.GetEpsilonCoords(this->Hcomponent, theGlobalVariables);
-    bool isEmpty=(this->NonZeroElements.CardinalitySelection==0);
-    for (int i=0; i<tempRoot.size; i++)
-      if (!tempRoot.TheObjects[i].IsEqualToZero())
-      { tempRoot.TheObjects[i].ElementToString(tempS);
-        if (tempS=="1")
-          tempS="";
-        if (tempS=="-1")
-          tempS="-";
-        if (!isEmpty)
-        { if (tempS!="")
-          { if (tempS[0]!='-')
-               out << "+";
-          } else
-            out << "+";
+  Vector<Rational> theHComponent=this->GetCartanPart();
+  Vector<Rational> tempRoot;
+  if (!theHComponent.IsEqualToZero())
+  { if (useRootNotation)
+    { if (useEpsilonNotation)
+        tempRoot=owner.theWeyl.GetEpsilonCoords(theHComponent, theGlobalVariables);
+      bool isEmpty=isElementCartan;
+      for (int i=0; i<tempRoot.size; i++)
+        if (!tempRoot.TheObjects[i].IsEqualToZero())
+        { tempRoot.TheObjects[i].ElementToString(tempS);
+          if (tempS=="1")
+            tempS="";
+          if (tempS=="-1")
+            tempS="-";
+          if (!isEmpty)
+          { if (tempS!="")
+            { if (tempS[0]!='-')
+                 out << "+";
+            } else
+              out << "+";
+          }
+          out << tempS << "h_{";
+          out << ((useEpsilonNotation) ? "\\varepsilon" : "\\alpha");
+          out << "_{" << i+1 << "}}";
+          isEmpty=false;
         }
-        out << tempS << "h_{";
-        out << ((useEpsilonNotation) ? "\\varepsilon" : "\\alpha");
-        out << "_{" << i+1 << "}}";
-        isEmpty=false;
-      }
-  } else
-  { tempS=this->Hcomponent.ElementToStringLetterFormat(thePolyFormat.alphabetBases[1] , true);
-    if (tempS[0]!='-' && this->NonZeroElements.CardinalitySelection>0)
-      out << "+";
-    out << tempS;
+    } else
+    { tempS=theHComponent.ElementToStringLetterFormat(thePolyFormat.alphabetBases[1] , true);
+      if (tempS[0]!='-' && !isElementCartan)
+        out << "+";
+      out << tempS;
+    }
   }
+
   return out.str();
 }
 
@@ -6455,7 +6035,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
    PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   std::string beginMath;
   std::string endMath;
   if (!usePNG)
@@ -6468,11 +6048,11 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   int numRoots=this->theWeyl.RootSystem.size;
   int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  ElementSimpleLieAlgebra tempElt1, tempElt2, tempElt3;
+  ElementSemisimpleLieAlgebra tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   if (usePNG)
   { out << "\\begin{tabular}{cc}";
-    out << "\\hline generator &corresponding root space\\\\\\hline";
+    out << "\\hline generator &corresponding Vector<Rational> space\\\\\\hline";
     for (int i=0; i<numRoots+theDimension; i++)
     { if (i==numPosRoots)
       { if (useRootNotation)
@@ -6480,15 +6060,15 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
           << theFormat.alphabetBases[1] << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
           << theFormat.alphabetBases[0] << "_{\\alpha},"
           << theFormat.alphabetBases[0] << "_{-\\alpha}]$\\\\$"
-          << theFormat.alphabetBases[1] << "_\\alpha$ is dual to the root $\\alpha$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat.alphabetBases[1] << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
         else
           out << "\\hline\\begin{tabular}{c}$"
           << theFormat.alphabetBases[1] << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
           << theFormat.alphabetBases[0] << "_{i},"
           << theFormat.alphabetBases[0] << "_{-i}]$\\\\$"
-          << theFormat.alphabetBases[1] << "_i$ is dual to the root $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat.alphabetBases[1] << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
 //        out << "  \\\\\\hline";
-        //out << "\\hline generator & corresponding root space\\\\\\hline";
+        //out << "\\hline generator & corresponding Vector<Rational> space\\\\\\hline";
         i+=theDimension;
       }
       out << "$" << this->GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables);
@@ -6503,9 +6083,11 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
       }
       out << "$&";
       if (!useEpsilonNotation)
-        out << this->theWeyl.RootSystem.TheObjects[rootIndex].ElementToString() << "\\\\";
+        out << this->theWeyl.RootSystem[rootIndex].ElementToString() << "\\\\";
       else
-        out << "$" << this->theWeyl.GetEpsilonCoords(this->theWeyl.RootSystem.TheObjects[rootIndex], theGlobalVariables).ElementToStringEpsilonForm() << "$\\\\";
+        out << "$" << this->theWeyl.GetEpsilonCoords
+        (this->theWeyl.RootSystem[rootIndex], theGlobalVariables).ElementToStringEpsilonForm(true, false)
+        << "$\\\\";
     }
     out << "\\end{tabular}";
   }
@@ -6566,16 +6148,16 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   output=out.str();
 }
 
-void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
+void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
 { std::stringstream out; std::string tempS;
   if (this->IsEqualToZero())
     out << "0";
   if (useLatex)
     out << "$";
-  int numPosRoots=this->NonZeroElements.MaxSize/2;
-  for (int i=0; i<this->NonZeroElements.CardinalitySelection; i++)
-  { int actualIndex=this->NonZeroElements.elements[i];
-    this->coeffsRootSpaces.TheObjects[actualIndex].ElementToString(tempS);
+  int numPosRoots=this->GetOwner().GetNumPosRoots();
+  for (int i=0; i<this->size; i++)
+  { int actualIndex=this->TheObjects[i].theGeneratorIndex;
+    tempS=this->theCoeffs[actualIndex].ElementToString();
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -6587,11 +6169,12 @@ void ElementSimpleLieAlgebra::ElementToString(std::string& output, bool useHtml,
       } else
         out << "+";
     }
-    int DisplayIndex= (actualIndex<numPosRoots ) ? actualIndex-numPosRoots : actualIndex-numPosRoots+1;
-    out << tempS << "g_{" << DisplayIndex << "}";
+    if (!this->GetOwner().IsGeneratorFromCartan(actualIndex))
+    { int DisplayIndex= (actualIndex<numPosRoots ) ? actualIndex-numPosRoots : actualIndex-numPosRoots+1;
+      out << tempS << "g_{" << DisplayIndex << "}";
+    } else
+      out << "h_{" << actualIndex+1-numPosRoots << "}";
   }
-  if (!this->Hcomponent.IsEqualToZero())
-    out << this->Hcomponent.ElementToStringLetterFormat("h", useLatex);
   output= out.str();
 }
 
@@ -7221,7 +6804,7 @@ bool ConeComplex::DrawMeLastCoordAffine
     result=this->TheObjects[i].DrawMeLastCoordAffine(InitDrawVars, theDrawingVariables, theFormat) && result;
     std::stringstream tempStream;
     tempStream << i+1;
-    root tempRoot=this->TheObjects[i].GetInternalPoint();
+    Vector<Rational> tempRoot=this->TheObjects[i].GetInternalPoint();
     tempRoot.MakeAffineUsingLastCoordinate();
     theDrawingVariables.drawTextAtVectorBuffer
     (tempRoot, tempStream.str(), CGI::RedGreenBlue(0,0,0), theDrawingVariables.PenStyleNormal, 0);
@@ -7231,11 +6814,11 @@ bool ConeComplex::DrawMeLastCoordAffine
 }
 
 bool ConeComplex::DrawMeProjective
-(root* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
 { bool result=true;
-  root tempRoot;
-  roots tempRoots;
-  MatrixLargeRational tempMat;
+  Vector<Rational> tempRoot;
+  Vectors<Rational> tempRoots;
+  Matrix<Rational>  tempMat;
   if (this->GetDim()<=1)
     return false;
   if (InitDrawVars)
@@ -7263,9 +6846,9 @@ bool ConeComplex::DrawMeProjective
 bool Cone::DrawMeLastCoordAffine
 (bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat,
  int ChamberWallColor)
-{ root ZeroRoot;
+{ Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
-  roots VerticesScaled;
+  Vectors<Rational> VerticesScaled;
 //  VerticesScaled.Reserve(this->Vertices.size*2);
   VerticesScaled=this->Vertices;
   Rational tempRat;
@@ -7286,7 +6869,7 @@ bool Cone::DrawMeLastCoordAffine
       foundBadVertex=true;
     }
   }
-  root iScaledVertex, jScaledVertex;
+  Vector<Rational> iScaledVertex, jScaledVertex;
   if (InitDrawVars)
     theDrawingVariables.drawCoordSystemBuffer(theDrawingVariables, this->GetDim()-1,0);
   for (int k=0; k<this->Normals.size; k++)
@@ -7334,15 +6917,15 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
 }
 
 bool Cone::DrawMeProjective
-(root* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
-{ root ZeroRoot, coordCenter;
+(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+{ Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
   if (coordCenterTranslation==0)
     coordCenter=ZeroRoot;
   else
     coordCenter=*coordCenterTranslation;
 //  theDrawingVariables.theBuffer.init();
-  roots VerticesScaled=this->Vertices;
+  Vectors<Rational> VerticesScaled=this->Vertices;
   for (int i=0; i<VerticesScaled.size; i++)
   { Rational sumAbsValuesCoords=0;
     for (int j=0; j<this->GetDim(); j++)
@@ -7350,7 +6933,7 @@ bool Cone::DrawMeProjective
     assert(!sumAbsValuesCoords.IsEqualToZero());
     VerticesScaled[i]/=sumAbsValuesCoords;
   }
-  root tempRoot;
+  Vector<Rational> tempRoot;
   if (initTheDrawVars)
   { theDrawingVariables.theBuffer.MakeMeAStandardBasis(this->GetDim());
     for (int i=0; i<this->GetDim(); i++)
@@ -7503,15 +7086,15 @@ void DrawOperations::EnsureProperInitialization()
 
 void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 { this->ComputeRho(false);
-  root lowest=this->rho;
+  Vector<Rational> lowest=this->rho;
 //  std::cout << "rho: " << this->rho.ElementToString() << "<hr>";
-  roots tempRoots;
+  Vectors<Rational> tempRoots;
   tempRoots.MakeEiBasis(this->GetDim());
   this->GetLowestElementInOrbit(lowest, &outputWeylElt, tempRoots, false, false);
   //std::stringstream out;
   //out << outputWeylElt;
 //  out << "\n<br>";
-  //MatrixLargeRational tempMat;
+  //Matrix<Rational>  tempMat;
   //this->GetMatrixOfElement(outputWeylElt, tempMat);
   //out << tempMat.ElementToString(true, false);
   //std::cout << out.str();
@@ -7520,8 +7103,8 @@ void WeylGroup::GetLongestWeylElt(ElementWeylGroup& outputWeylElt)
 }
 
 void WeylGroup::GetExtremeElementInOrbit
-  (root& inputOutput, ElementWeylGroup* outputWeylElt,
-   roots& bufferEiBAsis,
+  (Vector<Rational>& inputOutput, ElementWeylGroup* outputWeylElt,
+   Vectors<Rational>& bufferEiBAsis,
    bool findLowest, bool RhoAction, bool UseMinusRho, int* sign,
    bool* stabilizerFound)
 { if (outputWeylElt!=0)
@@ -7559,35 +7142,15 @@ void WeylGroup::GetExtremeElementInOrbit
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
-bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(root& input)
+bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
 { ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
-  MatrixLargeRational matCoxeterElt;
+  Matrix<Rational>  matCoxeterElt;
   this->GetMatrixOfElement(tempElt, matCoxeterElt);
-  root tempRoot=input;
+  Vector<Rational> tempRoot=input;
   for (int i=0; i<this->GetDim(); i++)
-    matCoxeterElt.ActOnAroot(tempRoot);
+    matCoxeterElt.ActOnVectorColumn(tempRoot);
   return tempRoot==input;
-}
-
-void MatrixLargeRational::ApproximateLargestEigenSpace
-  (roots& outputBasis, const Rational& DesiredError, int SuggestedOrder, int numIterations)
-{ assert(false);
-  /*assert(this->NumRows==this->NumCols && this->NumRows>0);
-  outputBasis.SetSize(2);
-  outputBasis[0].MakeEi(this->NumCols,0);
-  outputBasis[1]=outputBasis[0];
-  root* r1=&outputBasis[0];
-  root* r2=&outputBasis[1];
-  if (numIterations<=0)
-    numIterations=1000;
-  //if (SuggestedOrder<1)
-  for (int i=0; i< numIterations; i++)
-  { this->ActOnAroot(*r1, *r2);
-    if (!r2->IsEqualToZero())
-      (*r2)/=r2->ScalarEuclidean(*r2);
-    MathRoutines::swap(r1, r2);
-  }*/
 }
 
 template<class Base>
@@ -7612,8 +7175,8 @@ std::iostream& operator<< (std::iostream& output, const CompleX<Base>& input)
   return output;
 }
 
-void WeylGroup::GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& output)
-{ roots basis;
+void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rational> & output)
+{ Vectors<Rational> basis;
   int theDim=this->GetDim();
   basis.MakeEiBasis(theDim);
 //  output.init(theDim, theDim);
@@ -7623,10 +7186,10 @@ void WeylGroup::GetMatrixReflection(root& reflectionRoot, MatrixLargeRational& o
   output.Transpose();
 }
 
-void rootSubalgebra::GetCoxeterElement(MatrixLargeRational& output)
+void rootSubalgebra::GetCoxeterElement(Matrix<Rational> & output)
 { int theDim=this->AmbientWeyl.GetDim();
   output.MakeIdMatrix(theDim);
-  MatrixLargeRational tempMat;
+  Matrix<Rational>  tempMat;
   for (int i=0; i<this->SimpleBasisK.size; i++)
   { this->AmbientWeyl.GetMatrixReflection(this->SimpleBasisK[i], tempMat);
     output.MultiplyOnTheLeft(tempMat);
@@ -7650,9 +7213,9 @@ void rootSubalgebra::GetCoxeterPlane
       outputBasis2.MakeEi(theDimension, 1);
     return;
   }
-  root ZeroRoot;
+  Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(theDimension);
-  MatrixLargeRational matCoxeterElt;
+  Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
   std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ElementToString(true, false);
 //  tempMat=matCoxeterElt;
@@ -7663,11 +7226,11 @@ void rootSubalgebra::GetCoxeterPlane
   { tempGroup.AmbientWeyl=this->AmbientWeyl;
     tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
-    root& lastRoot= *tempGroup.RootSubsystem.LastObject();
-    root lastRootInSimpleCoords;
-    lastRoot.GetCoordsInBasis(tempGroup.simpleGenerators, lastRootInSimpleCoords, theGlobalVariables);
+    Vector<Rational>& lastRoot= *tempGroup.RootSubsystem.LastObject();
+    Vector<Rational> lastRootInSimpleCoords;
+    lastRoot.GetCoordsInBasiS(tempGroup.simpleGenerators, lastRootInSimpleCoords);
     coxeterNumber=MathRoutines::Maximum
-    (lastRootInSimpleCoords.SumCoordinates().NumShort, coxeterNumber)
+    (lastRootInSimpleCoords.SumCoords().NumShort, coxeterNumber)
     ;
   }
   std::cout << "<hr>the corresponding Coxeter number: " << coxeterNumber;
@@ -7722,18 +7285,18 @@ void rootSubalgebra::GetCoxeterPlane
 void WeylGroup::GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 { this->ComputeRho(true);
-  root ZeroRoot;
+  Vector<Rational> ZeroRoot;
   int theDimension=this->GetDim();
   if (theDimension<2)
     return;
   ZeroRoot.MakeZero(theDimension);
   ElementWeylGroup tempElt;
   this->GetCoxeterElement(tempElt);
-  MatrixLargeRational matCoxeterElt, tempMat;
+  Matrix<Rational>  matCoxeterElt, tempMat;
   this->GetMatrixOfElement(tempElt, matCoxeterElt);
 //  std::cout << matCoxeterElt.ElementToString(true, false);
   tempMat=matCoxeterElt;
-  int coxeterNumber=this->RootSystem.LastObject()->SumCoordinates().NumShort+1;
+  int coxeterNumber=this->RootSystem.LastObject()->SumCoords().NumShort+1;
   for (int i=0; i<coxeterNumber-1; i++)
     tempMat.MultiplyOnTheLeft(matCoxeterElt);
 //  std::cout << "<br>coxeter transformation to the power of " << coxeterNumber << " equals: " << tempMat.ElementToString(true, false);
@@ -7781,10 +7344,10 @@ void WeylGroup::GetCoxeterPlane
 
 void WeylGroup::DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
- bool drawWeylChamber, root* bluePoint, bool LabelDynkinDiagramVertices, roots* predefinedProjectionPlane)
+ bool drawWeylChamber, Vector<Rational>* bluePoint, bool LabelDynkinDiagramVertices, Vectors<Rational>* predefinedProjectionPlane)
 { DrawOperations& output=outputDV.theBuffer;
   this->ComputeRho(true);
-  root ZeroRoot;
+  Vector<Rational> ZeroRoot;
   int theDimension=this->GetDim();
   ZeroRoot.MakeZero(theDimension);
   if (wipeCanvas)
@@ -7807,7 +7370,7 @@ void WeylGroup::DrawRootSystem
 //  tempStream << "<hr>the eigen mat:";
 //  tempStream << eigenMat;
 //  std::cout << tempStream.str();
-  roots RootSystemSorted;
+  Vectors<Rational> RootSystemSorted;
   RootSystemSorted.CopyFromBase(this->RootSystem);
   List<double> lengths;
   lengths.SetSize(RootSystemSorted.size);
@@ -7825,7 +7388,7 @@ void WeylGroup::DrawRootSystem
       { MathRoutines::swap(lengths[i], lengths[j]);
         MathRoutines::swap(RootSystemSorted[i], RootSystemSorted[j]);
       }
-  root differenceRoot;
+  Vector<Rational> differenceRoot;
   differenceRoot=RootSystemSorted[0]-RootSystemSorted[1];
   Rational minLength= this->RootScalarCartanRoot(differenceRoot, differenceRoot);
   for (int i=2; i<RootSystemSorted.size; i++)
@@ -7861,8 +7424,8 @@ void WeylGroup::DrawRootSystem
         output.drawLineBetweenTwoVectorsBuffer(RootSystemSorted[i], RootSystemSorted[j], DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0, 0, 255));
     }
   }
-  root tempRootRat;
-  roots epsNotationSimpleBasis;
+  Vector<Rational> tempRootRat;
+  Vectors<Rational> epsNotationSimpleBasis;
   epsNotationSimpleBasis.MakeEiBasis(theDimension);
   this->GetEpsilonCoords(epsNotationSimpleBasis, epsNotationSimpleBasis, theGlobalVariables);
   for (int i=0; i<theDimension; i++)
@@ -7871,9 +7434,9 @@ void WeylGroup::DrawRootSystem
     output.drawCircleAtVectorBuffer(tempRootRat, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     output.drawCircleAtVectorBuffer(tempRootRat, 4, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(255,0,0));
     if (LabelDynkinDiagramVertices)
-    { root& current=epsNotationSimpleBasis[i];
+    { Vector<Rational>& current=epsNotationSimpleBasis[i];
       output.drawTextAtVectorBuffer
-      (tempRootRat, current.ElementToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
+      (tempRootRat, current.ElementToStringLetterFormat("e", false, false),0, 10, DrawingVariables::TextStyleNormal);
     }
   }
   std::stringstream tempStream;
@@ -7891,7 +7454,7 @@ void WeylGroup::DrawRootSystem
 
 int ParserNode::EvaluateG2ParabolicSupport
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root highestWeight, parSel;
+{ Vector<Rational> highestWeight, parSel;
   ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
   if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
@@ -7905,10 +7468,10 @@ int ParserNode::EvaluateG2ParabolicSupport
   WeylGroup theWeyl;
   theWeyl.MakeG2();
   theWeyl.ComputeRho(true);
-  roots theNegativeRoots;
+  Vectors<Rational> theNegativeRoots;
   theNegativeRoots.CopyFromBase(theWeyl.RootSystem);
   theNegativeRoots.size=6;
-  out << "the negative roots of G_2: " << theNegativeRoots.ElementToString();
+  out << "the negative Vectors<Rational> of G_2: " << theNegativeRoots.ElementToString();
   std::string tempS;
   theChar.MakeVPF(theNegativeRoots, tempS, theGlobalVariables);
   theGlobalVariables.theDrawingVariables.theBuffer.MakeMeAStandardBasis(2);
@@ -7925,7 +7488,7 @@ int ParserNode::EvaluateG2ParabolicSupport
 
 int ParserNode::EvaluateDrawRootSystem
   (ParserNode& theNode, char theWeylLetter, int theDimension, GlobalVariables& theGlobalVariables,
-   root* bluePoint, bool wipeCanvas, bool LabelDynkin, bool DrawWeylChamber, roots* projectionPlane)
+   Vector<Rational>* bluePoint, bool wipeCanvas, bool LabelDynkin, bool DrawWeylChamber, Vectors<Rational>* projectionPlane)
 { WeylGroup theWeyl;
   theWeyl.MakeArbitrary(theWeylLetter, theDimension);
   theNode.impliedNumVars=theDimension;
@@ -7935,14 +7498,14 @@ int ParserNode::EvaluateDrawRootSystem
   theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
   theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
   std::stringstream out;
-  out << "<hr>Below is a javascript visualization of a root system drawn as described on John Stembridge's website"
+  out << "<hr>Below is a javascript visualization of a Vector<Rational> system drawn as described on John Stembridge's website"
   <<" (<a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">"
   << "http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>).<br>"
-  << "The darker red points can be rotated around by dragging them with the mouse pointer; they denote the simple positive roots.<br> "
+  << "The darker red points can be rotated around by dragging them with the mouse pointer; they denote the simple positive Vectors<Rational>.<br> "
   << "Mouse wheel zooms-in/out. <br>";
   out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeylLetter, theDimension);
   out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
-//  out << "<br>Note that for a root system of rank 4 or more there might be javascript-compilation lag.";
+//  out << "<br>Note that for a Vector<Rational> system of rank 4 or more there might be javascript-compilation lag.";
   theNode.outputString=out.str();
   theNode.theAnimation.GetElement().MakeZero();
   theNode.theAnimation.GetElement()+=theDrawOperators;
@@ -7953,16 +7516,8 @@ int ParserNode::EvaluateDrawRootSystem
 
 }
 
-Vector<double> root::GetVectorDouble()
-{ Vector<double> result;
-  result.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
-    result[i]=this->TheObjects[i].DoubleValue();
-  return result;
-}
-
 int ParserNode::EvaluateAnimateRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
 { char theWeylLetter= theNode.owner->DefaultWeylLetter;
   int theDim= theNode.owner->DefaultWeylRank;
   int NumFrameS=theNode.owner->TheObjects[theArgumentList[0]].intValue;
@@ -7971,7 +7526,7 @@ int ParserNode::EvaluateAnimateRootSystem
 //  std::cout << theArgumentList.size;
   if (theArgumentList.size<5 || theArgumentList.size%2 ==0)
     return theNode.SetError(theNode.errorBadOrNoArgument);
-  roots tempRootsX;
+  Vectors<Rational> tempRootsX;
   tempRootsX.SetSize(theArgumentList.size-1);
   for (int i=1; i<theArgumentList.size; i++)
   { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList[i]];
@@ -8207,7 +7762,7 @@ void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVa
 
 int ParserNode::EvaluateAnimateRootSystemBluePoint
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ root tempRoot;
+{ Vector<Rational> tempRoot;
   ParserNode& aNode=theNode.owner->TheObjects[theArgumentList[3]];
   aNode.GetRootRationalDontUseForFunctionArguments(tempRoot, theGlobalVariables);
   return theNode.EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, & tempRoot);
@@ -8242,7 +7797,7 @@ int ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
   Vector<double> start1, start2;
   rootSubalgebra& currentSA=theRootSAs[theIndex];
   std::stringstream out;
-  out << "The Dynkin diagram of the root Subalgebra is " << currentSA.theDynkinDiagram.DynkinStrinG << ". ";
+  out << "The Dynkin diagram of the Vector<Rational> Subalgebra is " << currentSA.theDynkinDiagram.DynkinStrinG << ". ";
   if (currentSA.SimpleBasisK.size<2)
   { out << "<br>The subalgebra is of rank less than two, using default Coxeter plane instead.";
   } else
@@ -8341,7 +7896,7 @@ int ParserNode::EvaluateAnimationDots
   theDrawOps.initDimensions(theWeyl.CartanSymmetric, theDraggableBasis, theFirstBasis, 1);
   theDrawOps.flagAnimatingMovingCoordSystem=true;
   ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[3]];
-  roots dots;
+  Vectors<Rational> dots;
   int thenewDim;
   if (!weightNode.GetRootsEqualDimNoConversionNoEmptyArgument(weightNode.children, dots, thenewDim))
     return theNode.SetError(errorDimensionProblem);
@@ -8393,7 +7948,7 @@ int ParserNode::EvaluateAnimationClearScreen
 }
 
 int ParserNode::EvaluateDrawRootSystemOld
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
 { char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
   int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
   theWeylLetter+='A';
@@ -8412,7 +7967,7 @@ int ParserNode::EvaluateDrawRootSystemLabelDynkin
 int ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { int theDim;
-  roots thePlane;
+  Vectors<Rational> thePlane;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, thePlane, theDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (theDim!=theNode.owner->DefaultWeylRank)
@@ -8424,7 +7979,7 @@ int ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
 }
 
 int ParserNode::EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, root* bluePoint)
+  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
 { char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
   int theDimension= theNode.owner->DefaultWeylRank;
   return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
@@ -8687,7 +8242,7 @@ class ImpreciseDouble
 
 int ParserNode::EvaluateLatticeImprecise
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ roots tempRoots;
+{ Vectors<Rational> tempRoots;
   int theDim=-1;
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, tempRoots, theDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
@@ -8722,13 +8277,13 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
-(root& highestWeightSimpleCoords, roots& outputWeightsSimpleCoords, int upperBoundWeights,
+(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights,
  GlobalVariables& theGlobalVariables)
-{ HashedList<root> theDominantWeights;
+{ HashedList<Vector<Rational> > theDominantWeights;
   double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
-  root highestWeightTrue=highestWeightSimpleCoords;
+  Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
   this->RaiseToDominantWeight(highestWeightTrue);
   std::stringstream out;
   if (highestWeightTrue!=highestWeightSimpleCoords)
@@ -8745,16 +8300,16 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
     out << "Trimmed the # of dominant weights - upper bound is " << upperBoundInt << ". <br>";
   else
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
-  roots tempRoots;
-  HashedList<root> finalWeights;
+  Vectors<Rational> tempRoots;
+  HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int )
   (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.Reserve(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
-  roots dominantWeightsNonHashed;
+  Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
-  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 10000);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 10000);
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
     if (!isTrimmed)
@@ -8770,18 +8325,18 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
 int ParserNode::EvaluateDrawWeightSupport
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  root highestWeightFundCoords;
+  Vector<Rational> highestWeightFundCoords;
   if (!theNode.GetRootRationalFromFunctionArguments(highestWeightFundCoords, theGlobalVariables))
     return theNode.SetError(theNode.errorDimensionProblem);
   if (highestWeightFundCoords.size!=theNode.owner->DefaultWeylRank)
     return theNode.SetError(theNode.errorDimensionProblem);
   if (!highestWeightFundCoords.IsIntegral())
-    return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  //roots fundamentalWeights;
-  root highestWeightSimpleCoords;
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  //Vectors<Rational> fundamentalWeights;
+  Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
-  //roots theWeightsToBeDrawn;
+  //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
@@ -8802,18 +8357,18 @@ int ParserNode::EvaluateDrawWeightSupport
 int ParserNode::EvaluateDrawWeightSupportWithMults
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  root highestWeightFundCoords;
+  Vector<Rational> highestWeightFundCoords;
   if (!theNode.GetRootRationalFromFunctionArguments(highestWeightFundCoords, theGlobalVariables))
     return theNode.SetError(theNode.errorDimensionProblem);
   if (highestWeightFundCoords.size!=theNode.owner->DefaultWeylRank)
     return theNode.SetError(theNode.errorDimensionProblem);
   if (!highestWeightFundCoords.IsIntegral())
     return  theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  //roots fundamentalWeights;
-  root highestWeightSimpleCoords;
+  //Vectors<Rational> fundamentalWeights;
+  Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
-  //roots theWeightsToBeDrawn;
+  //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
   charSSAlgMod theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
@@ -8917,9 +8472,9 @@ int ParserNode::EvaluateParabolicWeylGroups
 
 int ParserNode::EvaluateActByWeylAlgebraElement
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ PolynomialRationalCoeff& result= theNode.polyValue.GetElement();
+{ Polynomial<Rational> & result= theNode.polyValue.GetElement();
   ElementWeylAlgebra& left = theNode.owner->TheObjects[theArgumentList[0]].WeylAlgebraElement.GetElement();
-  PolynomialRationalCoeff& right = theNode.owner->TheObjects[theArgumentList[1]].polyValue.GetElement();
+  Polynomial<Rational> & right = theNode.owner->TheObjects[theArgumentList[1]].polyValue.GetElement();
   theNode.impliedNumVars=MathRoutines::Maximum(left.NumVariables, right.NumVars);
   result=right;
   result.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
@@ -8929,28 +8484,35 @@ int ParserNode::EvaluateActByWeylAlgebraElement
   return theNode.errorNoError;
 }
 
-void ElementWeylAlgebra::ActOnPolynomial(PolynomialRationalCoeff& thePoly)
+bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
 { assert(thePoly.NumVars==this->NumVariables);
-  PolynomialRationalCoeff result;
-  result.Nullify(this->NumVariables);
-  Monomial<Rational> tempMon;
+  Polynomial<Rational> result;
+  result.MakeZero(this->NumVariables);
+  MonomialP tempMon;
+  Rational coeffMon;
   for (int i=0; i<this->StandardOrder.size; i++)
-  { Monomial<Rational>& currentActingMon=this->StandardOrder[i];
+  { MonomialP& currentActingMon=this->StandardOrder[i];
+    if (!currentActingMon.IsIntegral())
+    { std::cout << "Element weyl algebra called inappropriately. Not raising alarm, although I should. ";
+      return false;
+    }
     for (int j=0; j<thePoly.size; j++)
-    { Monomial<Rational>& currentMon=thePoly[j];
+    { MonomialP& currentMon=thePoly[j];
       tempMon=currentMon;
-      tempMon.Coefficient*=currentActingMon.Coefficient;
+      coeffMon=thePoly.theCoeffs[j];
+      coeffMon*=this->StandardOrder.theCoeffs[i];
       for (int k=0; k<this->NumVariables; k++)
-      { for (int numDiff=currentActingMon.degrees[k+this->NumVariables]; numDiff>0; numDiff--)
-        { tempMon.Coefficient*=tempMon.degrees[k];
-          tempMon.degrees[k]--;
+      { for (int numDiff=currentActingMon[k+this->NumVariables].NumShort; numDiff>0; numDiff--)
+        { coeffMon*=tempMon[k];
+          tempMon[k]-=1;
         }
-        tempMon.degrees[k]+=currentActingMon.degrees[k];
+        tempMon[k]+=currentActingMon[k];
       }
-      result.AddMonomial(tempMon);
+      result.AddMonomial(tempMon, coeffMon);
     }
   }
   thePoly=result;
+  return true;
 }
 
 std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
@@ -9016,7 +8578,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     return "id";
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   Layers.Reserve(this->size);
   int GraphWidth=1;
   int oldLayerElementLength=-1;
@@ -9028,7 +8590,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     Layers.LastObject()->AddOnTop(i);
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
-  HashedList<root> orbit;
+  HashedList<Vector<Rational> > orbit;
   orbit.Reserve(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
@@ -9057,9 +8619,9 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output, bool disp
     DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
   DynkinDiagramRootSubalgebra tempDyn;
   tempDyn.ComputeDiagramTypeKeepInput(this->simpleGenerators, this->AmbientWeyl);
-  out << "Dynkin diagram & subalgebra of root subsystem generated by the given roots: "
+  out << "Dynkin diagram & subalgebra of Vector<Rational> subsystem generated by the given Vectors<Rational>: "
   << tempDyn.DynkinStrinG;
-  out << "<br>Simple roots:\n<br>\n ";
+  out << "<br>Simple Vectors<Rational>:\n<br>\n ";
   head << "\\begin{array}{rcl}";
   for (int i=0; i<this->simpleGenerators.size; i++)
     head << "\n\\eta_{" << DisplayIndicesSimpleGenerators[i] << "}&:=&" << this->simpleGenerators[i].ElementToString()
@@ -9068,7 +8630,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output, bool disp
   out << CGI::GetHtmlMathSpanFromLatexFormula(head.str());
   if (this->ExternalAutomorphisms.size>0)
   { out << "<br>Outer automorphisms: \n";
-    MatrixLargeRational tempMat;
+    Matrix<Rational>  tempMat;
     head2 << "\\begin{array}{rcl}";
     for (int i=0; i<this->ExternalAutomorphisms.size; i++)
     { tempMat.AssignRootsToRowsOfMatrix(this->ExternalAutomorphisms[i]);
@@ -9078,7 +8640,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output, bool disp
     head2 << "\\end{array}";
     out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());
   }
-  out << "<br>Half sum of the positive roots: " << this->GetRho().ElementToString();
+  out << "<br>Half sum of the positive Vectors<Rational>: " << this->GetRho().ElementToString();
   if (displayElements)
   { std::stringstream body;
     out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";
@@ -9097,7 +8659,7 @@ void ReflectionSubgroupWeylGroup::ElementToString(std::string& output, bool disp
 int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { WeylGroup& theAmbientWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  root tempRoot;
+  Vector<Rational> tempRoot;
   if (!theNode.GetRootRationalFromFunctionArguments(tempRoot, theGlobalVariables))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (tempRoot.size!=theAmbientWeyl.GetDim())
@@ -9171,10 +8733,10 @@ void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalV
 { if(this->DefaultWeylLetter!='B' || this->DefaultWeylRank!=3)
     return;
   this->theHmm.MakeG2InB3(*this, theGlobalVariables);
-  SSalgebraModuleOld theModule;
+//  SSalgebraModuleOld theModule;
   std::stringstream out;
-  theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
-  List<ElementSimpleLieAlgebra> theBasis;
+//  theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
+  List<ElementSemisimpleLieAlgebra> theBasis;
   theBasis.SetSize(this->theHmm.theRange().GetNumGenerators());
   for (int i=0; i<this->theHmm.imagesAllChevalleyGenerators.size; i++)
   { int theIndex=i;
@@ -9182,15 +8744,8 @@ void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalV
       theIndex=3+i;
     if (i>=8)
       theIndex=i+7;
-    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
+    ElementSemisimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
     currentElt=this->theHmm.imagesAllChevalleyGenerators.TheObjects[i];
-  }
-  for (int i=0; i<theModule.moduleElementsEmbedded.size; i++)
-  { int theIndex=i+6;
-    if (i>=3)
-      theIndex=8+i;
-    ElementSimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-    currentElt=theModule.moduleElementsEmbedded.TheObjects[i];
   }
   for (int i=0; i<theBasis.size; i++)
   { int displayIndex=i-9;
@@ -9208,14 +8763,7 @@ void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariabl
 { this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
 
-void PolynomialsRationalCoeff::MakeConstantShiftCoordinatesAreAdded(root& shiftPerVariable)
-{ assert(shiftPerVariable.size>0);
-  this->MakeIdSubstitution(shiftPerVariable.size, (Rational) 0);
-  for (int i=0; i<shiftPerVariable.size; i++)
-    this->TheObjects[i]+=shiftPerVariable[i];
-}
-
-void RationalFunction::Substitution(PolynomialsRationalCoeff& theSub)
+void RationalFunction::Substitution(PolynomialSubstitution<Rational>& theSub)
 { if (theSub.size<1)
     return;
 //  PolynomialOutputFormat tempFormat;
@@ -9239,113 +8787,6 @@ void RationalFunction::Substitution(PolynomialsRationalCoeff& theSub)
   }
 }
 
-template <class CoefficientType>
-std::string ElementGeneralizedVermaOld<CoefficientType>::Decompose
-  (Parser& theParser, List<ElementGeneralizedVermaOld<CoefficientType> >& outputVectors,
-    GlobalVariables& theGlobalVariables)
-{ //Index ordering of simpleNegGenerators:
-  //if simplePosGenerators.TheObjects[i] is a positive root space then its opposite root space should be
-  //simpleNegGenerators.TheObjects[i]
-  std::stringstream out;
-  outputVectors.size=0;
-  PolynomialOutputFormat tempFormat;
-  PolynomialRationalCoeff polyOne, polyZero;
-  polyOne.MakeNVarConst(this->theOwner->theRingUnit.NumVars, 1);
-  polyZero.Nullify(this->theOwner->theRingUnit.NumVars);
-  ElementGeneralizedVermaOld<CoefficientType> remainderElement, tempElt, currentHighestWeightElement;
-  remainderElement=*this;
-  CoefficientType tempCoeff, theCoeff, CentralCharacterActionAbsoluteHighestSmallerAlgebraVars, CentralCharacterActionAbsoluteHighest;
-  List<int> GeneratorSequence, GeneratorPowers;
-  ElementUniversalEnveloping<PolynomialRationalCoeff> abstractCasimir, embeddedCasimirNonOrdered;
-  abstractCasimir.MakeCasimir
-  (theParser.theHmm.theDomain(), theGlobalVariables, polyOne, polyZero)
-  ;
-  out << "<br>abstract Casimir: "
-  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (abstractCasimir.ElementToString(theGlobalVariables, tempFormat));
-  tempFormat.MakeAlphabetArbitraryWithIndex("x", "y");
-  tempFormat.alphabetBases[0]="g";
-  tempFormat.alphabetBases[1]="h";
-  theParser.theHmm.ApplyHomomorphism(abstractCasimir, embeddedCasimirNonOrdered, theGlobalVariables);
-  embeddedCasimirNonOrdered.Simplify(theGlobalVariables, polyOne, polyZero);
-  out << "<br> embedded Casimir non-ordered: "
-  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (embeddedCasimirNonOrdered.ElementToString(theGlobalVariables, tempFormat));
-  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> embeddedCasimir;
-  embeddedCasimir.AssignElementUniversalEnveloping
-  (embeddedCasimirNonOrdered, theParser.testAlgebra, polyOne, polyZero,
-   &theGlobalVariables);
-  out << "<br>the embedded Casimir is: "
-  << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
-  (embeddedCasimir.ElementToString(tempFormat, theGlobalVariables));
-  out << "<br>Weights of L: " << this->theOwner->theFDspaceWeights.ElementToString();
-  out <<"\n<br>\nHighest weight sub: "
-  << this->theOwner->VermaHWSubNthElementImageNthCoordSimpleBasis.ElementToString();
-  //return out.str();
-  theGlobalVariables.MakeStatusReport("Initializing Casimir done!\n" +out.str());
-  PolynomialsRationalCoeff theSub, SubLargerCartanToToSmaller, SubSmallerCartanToLarger;
-  ElementGeneralizedVermaOld<CoefficientType> highestElt, tempElt2;
-  highestElt.AssignDefaultGeneratorIndex(this->theOwner->theFDspace.size-1, *this->theOwner, &theGlobalVariables);
-  highestElt.ActOnMe(embeddedCasimir, tempElt2, &theGlobalVariables);
-  bool sanityCheck1= highestElt.IsProportionalTo(tempElt2, CentralCharacterActionAbsoluteHighest);
-
-  out << "\n<br>\nStarting character in Larger algebra coords:<br>"
-  << CentralCharacterActionAbsoluteHighest.ElementToString() << "<hr>";
-  Vectors<Rational> theBasis;
-  theBasis=this->theOwner->smallerCartanEmbedding;
-  int dimLargeCartan=theParser.theHmm.theRange().GetRank();
-  theBasis.BeefUpWithEiToLinearlyIndependentBasis(dimLargeCartan);
-  MatrixLargeRational matLargeToSmallSub;
-  matLargeToSmallSub.AssignVectorsToRows(theBasis);
-  matLargeToSmallSub.Invert();
-  SubLargerCartanToToSmaller.SetSize(dimLargeCartan);
-  SubSmallerCartanToLarger.SetSize(dimLargeCartan);
-  root tempRoot;
-  for (int i=0; i<dimLargeCartan; i++)
-  { matLargeToSmallSub.RowToRoot(i, tempRoot);
-    SubLargerCartanToToSmaller[i].MakeLinPolyFromRootNoConstantTerm(tempRoot);
-    tempRoot=theBasis[i];
-    SubSmallerCartanToLarger[i].MakeLinPolyFromRootNoConstantTerm(tempRoot);
-  }
-  CentralCharacterActionAbsoluteHighestSmallerAlgebraVars=CentralCharacterActionAbsoluteHighest;
-  CentralCharacterActionAbsoluteHighestSmallerAlgebraVars.Substitution(SubLargerCartanToToSmaller);
-  out << "\n<br>\nStarting character in Smaller algebra coords:<br>"
-  << CentralCharacterActionAbsoluteHighestSmallerAlgebraVars.ElementToString() << "<hr>";
-  List<CoefficientType> precomputedChars;
-  precomputedChars.SetSize(this->theOwner->theFDspaceWeights.size);
-  for (int k=this->theOwner->theFDspaceWeights.size-1; k>=0; k--)
-  { theSub=SubSmallerCartanToLarger;
-    root tempRoot=this->theOwner->theFDspaceWeights[k]- *this->theOwner->theFDspaceWeights.LastObject();
-    out << "<br>\n\n weight: " << tempRoot.ElementToString();
-    theParser.theHmm.theDomain().theWeyl.CartanSymmetric.ActOnAroot(tempRoot);
-    for (int l=0; l<tempRoot.size; l++)
-      theSub[l]-=tempRoot[l];
-    precomputedChars[k]=CentralCharacterActionAbsoluteHighestSmallerAlgebraVars;
-    precomputedChars[k].Substitution(theSub);
-    out << "  Corresponding character in larger algebra coords: <br>\n" << precomputedChars[k].ElementToString();
-  }
-  out << "<hr>";
-  assert(sanityCheck1);
-  for (int k= this->theOwner->theFDspace.size-1; k>=0; k--)
-  { //std::cout << "<br>remainder element: " << remainderElement.ElementToString();
-    std::stringstream progressReport;
-    progressReport << "Number of direct summands in the decomposition found: " << this->theOwner->theFDspace.size-1-k ;
-    progressReport << "\n\nproportionality coefficient: " << precomputedChars[k].ElementToString()
-    << ".\n\n Acting by Casimir - id (propotionality coefficient): ";
-    theGlobalVariables.MakeProgressReport(progressReport.str(), 0);
-    remainderElement.ActOnMe(embeddedCasimir, tempElt, &theGlobalVariables);
-    out << "<br>Casimir acting on" <<
-    CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(remainderElement.ElementToString(tempFormat, theGlobalVariables))
-    << " yields " << CGI::GetHtmlMathDivFromLatexAddBeginARCL(tempElt.ElementToString(tempFormat, theGlobalVariables));
-    remainderElement*=precomputedChars[k];
-    tempElt-=remainderElement;
-    remainderElement=tempElt;
-    remainderElement.ClearDenominators(tempCoeff);
-  }
-  out << "<br>remainder element after the procedure: " << remainderElement.ElementToString(tempFormat, theGlobalVariables);
-  return out.str();
-}
-
 int ParserNode::EvaluateModVermaRelations
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { ParserNode& theArgument=theNode.owner->TheObjects[theArgumentList[0]];
@@ -9357,16 +8798,17 @@ int ParserNode::EvaluateModVermaRelations
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
 ;
-  PolynomialRationalCoeff polyOne, polyZero;
-  polyOne.MakeNVarConst(theNode.impliedNumVars, 1);
-  polyZero.Nullify(theNode.impliedNumVars);
+  Polynomial<Rational>  polyOne, polyZero;
+  polyOne.MakeConst(theNode.impliedNumVars, 1);
+  polyZero.MakeZero(theNode.impliedNumVars);
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
   ;
-  //Needs to be rewritten! fix it!
-  theNode.UEElement.GetElement().ModOutVermaRelationS(theGlobalVariables);
+  assert(false);
+
+//  theNode.UEElement.GetElement().ModOutVermaRelations(theGlobalVariables);
   theNode.impliedNumVars=theNode.UEElement.GetElement().GetNumVariables();
   theNode.ExpressionType=theNode.typeUEelement;
   theNode.outputString=out.str();
@@ -9374,15 +8816,14 @@ int ParserNode::EvaluateModVermaRelations
 }
 
 template<class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSimpleLieAlgebra& left)
+void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra& left)
 { if (this->IsEqualToZero())
-  { this->Nullify(*this->owners, this->indexInOwners);
+  { this->MakeZero(*this->owners, this->indexInOwners);
     return;
   }
   ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
   tempElt1.AssignElementLieAlgebra
-  (left, *this->owners, this->indexInOwners, this->TheObjects[0].Coefficient.GetOne(),
-   this->TheObjects[0].Coefficient.GetZero());
+  (left, *this->owners, this->indexInOwners, this->theCoeffs[0].GetOne(), this->theCoeffs[0].GetZero());
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
@@ -9391,8 +8832,8 @@ template<class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
-{ output.Nullify(*this->owners, this->indexInOwners);
-  ElementSimpleLieAlgebra tempElt;
+{ output.MakeZero(*this->owners, this->indexInOwners);
+  ElementSemisimpleLieAlgebra tempElt;
   output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int nextCycleSize;
@@ -9404,7 +8845,6 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
       output.LieBracketOnTheLeft(tempElt);
     }
   }
-  output*=this->Coefficient;
   return true;
 }
 
@@ -9413,11 +8853,12 @@ bool ElementUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
-  output.Nullify(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owners, this->indexInOwners);
   ElementUniversalEnveloping<CoefficientType> summand;
   for (int i=0; i<this->size; i++)
   { if(!this->TheObjects[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
       return false;
+    summand*=this->theCoeffs[i];
     output+=summand;
   }
   return true;
@@ -9430,7 +8871,7 @@ int ParserNode::EvaluateAdjointAction
   theNode.impliedNumVars= MathRoutines::Maximum(actingNode.impliedNumVars, NodeBeingActedUpon.impliedNumVars);
   actingNode.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
   NodeBeingActedUpon.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
-  ElementUniversalEnveloping<PolynomialRationalCoeff>& output=theNode.UEElement.GetElement();
+  ElementUniversalEnveloping<Polynomial<Rational> >& output=theNode.UEElement.GetElement();
   if ( !actingNode.UEElement.GetElement().AdjointRepresentationAction
   (NodeBeingActedUpon.UEElement.GetElement(), output, theGlobalVariables))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
@@ -9443,9 +8884,9 @@ int ParserNode::EvaluateMakeCasimir
 { theNode.ExpressionType=theNode.typeUEelement;
   if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
     theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
-  PolynomialRationalCoeff polyOne, polyZero;
-  polyOne.MakeNVarConst(0,1);
-  polyZero.Nullify(0);
+  Polynomial<Rational>  polyOne, polyZero;
+  polyOne.MakeConst(0,1);
+  polyZero.MakeZero(0);
   theNode.UEElement.GetElement().MakeCasimir
   (theNode.GetContextLieAlgebra(), theGlobalVariables, polyOne, polyZero);
   std::stringstream out;
@@ -9455,70 +8896,6 @@ int ParserNode::EvaluateMakeCasimir
   <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
   theNode.outputString=out.str();
 
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateModVermaRelationsOrdered
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ ParserNode& theArgument=theNode.owner->TheObjects[theArgumentList[0]];
-  theNode.impliedNumVars=theArgument.impliedNumVars;
-  theNode.UEElementOrdered.GetElement()=theArgument.UEElementOrdered.GetElement();
-  std::stringstream out;
-  PolynomialOutputFormat tempFormat;
-  out << "The element you wanted to be modded out, before simplification: "
-  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables));
-  PolynomialRationalCoeff PolyOne, PolyZero;
-  int numVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->theHmm.theRange().GetRank());
-  PolyOne.MakeNVarConst(numVars, (Rational) 1);
-  PolyZero.Nullify(numVars);
-  theNode.UEElementOrdered.GetElement().Simplify(&theGlobalVariables, PolyOne, PolyZero);
-  out << "<br>And after simplification: "
-  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElementOrdered.GetElement().ElementToString(tempFormat, theGlobalVariables))
-  ;
-  //Needs to be rewritten! fix it!
-  theNode.UEElementOrdered.GetElement().ModOutVermaRelationSOld
-  (&theGlobalVariables, PolyOne, numVars);
-  theNode.ExpressionType=theNode.typeUEElementOrdered;
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ if (theNode.owner->DefaultWeylLetter!='B' || theNode.owner->DefaultWeylRank!=3)
-    return theNode.SetError(errorDunnoHowToDoOperation);
-  ParserNode& argumentNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& argumentUE=argumentNode.UEElementOrdered.GetElement();
-  int numVars=MathRoutines::Maximum(3, argumentUE.GetNumVariables());
-
-//  ElementUniversalEnvelopingOrdered<RationalFunction> argumentUErf;
-//  argumentUErf.AssignChangeCoefficientType<PolynomialRationalCoeff> (argumentUE);
-  GeneralizedVermaModuleData<PolynomialRationalCoeff> tempData;
-  Parser& theParser=*theNode.owner;
-  PolynomialRationalCoeff PolyOne, PolyZero;
-  PolyOne.MakeNVarConst(theParser.theHmm.theRange().GetRank(), (Rational) 1);
-  PolyZero.Nullify(theParser.theHmm.theRange().GetRank());
-  tempData.init(*theNode.owner, & theGlobalVariables, PolyOne, PolyZero);
-  PolynomialRationalCoeff polyOne;
-  polyOne.MakeNVarConst(numVars, (Rational)1);
-  argumentUE.SetNumVariables(numVars);
-  ElementGeneralizedVermaOld<PolynomialRationalCoeff> theAnswer;
-  SemisimpleLieAlgebraOrdered& ownerAlg=theNode.owner->testAlgebra;
-  if (! theAnswer.AssignElementUE(argumentUE, tempData, theGlobalVariables, polyOne))
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff>& theElt=theNode.UEElementOrdered.GetElement();
-  ElementUniversalEnvelopingOrdered<PolynomialRationalCoeff> tempElt;
-  theElt.Nullify(ownerAlg);
-  for (int i=0; i<theAnswer.leftComponents.size; i++)
-  { tempElt.AssignElementLieAlgebra(theAnswer.theOwner->theFDspace[i], PolyOne, PolyZero, ownerAlg);
-    tempElt*=theAnswer.leftComponents[i].theElT;
-    theElt+=tempElt;
-  }
-  PolynomialOutputFormat theFormat;
-  theNode.outputString=theAnswer.ElementToString(true, false, true, theFormat, theGlobalVariables);
-  theNode.ExpressionType=theNode.typeUEElementOrdered;
   return theNode.errorNoError;
 }
 
@@ -9574,92 +8951,18 @@ std::string SemisimpleLieAlgebraOrdered::GetGeneratorString
   return out.str();
 }
 
-template <class CoefficientType>
-bool  ElementGeneralizedVermaOld<CoefficientType>::AssignElementUE
-  (ElementUniversalEnvelopingOrdered<CoefficientType>& theElt,
-   GeneralizedVermaModuleData<CoefficientType>& owner,
-   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit)
-{ MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
-  ElementUniversalEnvelopingOrdered<CoefficientType> precedingMon, succeedingMon;
-//  int ambientRank=owner.theOwner.theOwner.GetRank();
-  assert(owner.theOwner!=0);
-  this->Nullify(owner);
-  theElt.ComputeDebugString();
-  for (int i=0; i<theElt.size; i++)
-  { MonomialUniversalEnvelopingOrdered<CoefficientType>& currentMon=theElt[i];
-    currentMon.ComputeDebugString();
-    bool found=false;
-//    bool doRecursiveCall=true;
-//    int numPosRootsLargeAlgebra=owner.theOwner.theOwner.GetNumPosRoots();
-//    int rankLarge=owner.theOwner.theOwner.GetRank();
-    int IndexFound=-1;
-    for (int j=0; j<currentMon.generatorsIndices.size; j++)
-    { int currentIndex=currentMon.generatorsIndices[j];
-      if (owner.theFDspace.ContainsObject(owner.theOwner->theOrder[currentIndex]))
-      { IndexFound=owner.theFDspace.IndexOfObject(owner.theOwner->theOrder[currentIndex]);
-        int thePower;
-        if (found || !currentMon.Powers[j].IsSmallInteger(thePower))
-          return false;
-        if (thePower!=1)
-          return false;
-        found=true;
-        tempMon=currentMon;
-        tempMon.generatorsIndices.size=j;
-        tempMon.Powers.size=j;
-        precedingMon.Nullify(*owner.theOwner);
-        precedingMon.AddMonomial(tempMon);
-        tempMon.Coefficient=theRingUnit;
-        tempMon.generatorsIndices.SetSize(currentMon.generatorsIndices.size-j-1);
-        tempMon.Powers.SetSize(tempMon.generatorsIndices.size);
-        for (int k=j+1; k<currentMon.generatorsIndices.size; k++)
-        { tempMon.generatorsIndices[k-j-1]=currentMon.generatorsIndices[k];
-          tempMon.Powers[k-j-1]=currentMon.Powers[k];
-        }
-        succeedingMon.Nullify(*owner.theOwner);
-        succeedingMon.AddMonomial(tempMon);
-      }
-    }
-    if (found)
-    { ElementGeneralizedVermaOld<CoefficientType> tempElt;
-      tempElt.AssignDefaultGeneratorIndex(IndexFound, owner, &theGlobalVariables);
-      precedingMon.ComputeDebugString();
-      ElementUniversalEnvelopingOrdered<CoefficientType> concatenationMon;
-      concatenationMon=precedingMon;
-      concatenationMon*=succeedingMon;
-      ElementVermaModuleOrdered<CoefficientType> tempV;
-      tempV.Nullify(*owner.theOwner, owner.VermaHWSubNthElementImageNthCoordSimpleBasis);
-      tempElt.leftComponents[IndexFound].AssignElementUniversalEnvelopingOrderedTimesHighestWeightVector
-      (concatenationMon, tempV, & theGlobalVariables, owner.theRingUnit);
-      if (!tempElt.leftComponents[IndexFound].IsEqualToZero())
-        this->operator+=(tempElt);
-//      precedingMon.ComputeDebugString();
-      precedingMon.LieBracketOnTheRight(owner.theFDspace[IndexFound], owner.theRingUnit, owner.theRingZero);
-      //precedingMon.ComputeDebugString();
-      precedingMon.Simplify(&theGlobalVariables, owner.theRingUnit, owner.theRingZero);
-      //precedingMon.ComputeDebugString();
-      precedingMon*=succeedingMon;
-      if (!precedingMon.IsEqualToZero())
-      { tempElt.AssignElementUE(precedingMon, owner, theGlobalVariables, theRingUnit);
-        this->operator+=(tempElt);
-      }
-    } else
-      return false;
-  }
-  return true;
-}
-
 int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)
 { ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
   ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
   if (leftNode.Operation!=Parser::tokenG && leftNode.Operation!=Parser::tokenH)
     return this->SetError(this->errorBadIndex);
-  root theWeight;
+  Vector<Rational> theWeight;
   if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
     return this->SetError(this->errorBadIndex);
-  ElementUniversalEnveloping<PolynomialRationalCoeff>& theUEElement=this->UEElement.GetElement();
-  PolynomialRationalCoeff polyOne, PolyZero;
-  polyOne.MakeNVarConst(0, (Rational) 1);
-  PolyZero.Nullify(0);
+  ElementUniversalEnveloping<Polynomial<Rational> >& theUEElement=this->UEElement.GetElement();
+  Polynomial<Rational>  polyOne, PolyZero;
+  polyOne.MakeConst(0, (Rational) 1);
+  PolyZero.MakeZero(0);
   if (leftNode.Operation==Parser::tokenG)
   { if (!this->GetContextLieAlgebra().theWeyl.IsARoot(theWeight))
       return this->SetError(this->errorDunnoHowToDoOperation);
@@ -9671,7 +8974,7 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   if (leftNode.Operation==Parser::tokenH)
   { if (theWeight.size!=this->GetContextLieAlgebra().GetRank())
       return this->SetError(this->errorDimensionProblem);
-    PolynomialRationalCoeff PolyZero;
+    Polynomial<Rational>  PolyZero;
     theUEElement.AssignElementCartan
     (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
     this->ExpressionType=this->typeUEelement;
@@ -9745,32 +9048,25 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   ("getWeylDim",
    "(Rational,...)",
    "Evaluates the Weyl dimension formula. Input: a vector in fundamental weight coordinates. \
-   The j^th fundamental weight is the weight that has scalar product 1 with the j^th simple root times 2 \
-   divided by the root length squared, and 0 with the remaining simple roots.",
+   The j^th fundamental weight is the weight that has scalar product 1 with the j^th simple Vector<Rational> times 2 \
+   divided by the Vector<Rational> length squared, and 0 with the remaining simple Vectors<Rational>.",
    "getWeylDim(0,0,1)",
     & ParserNode::EvaluateWeylDimFormula
    );
   this->AddOneFunctionToDictionaryNoFail
   ("printRootSystem",
    "()",
-   "Print the root system of the ambient Lie algebra.",
+   "Print the Vector<Rational> system of the ambient Lie algebra.",
    "printRootSystem",
    DefaultWeylLetter, DefaultWeylRank,
     & ParserNode::EvaluatePrintRootSystem
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("printBthreeDecomposedOverGtwo",
-   "()",
-   "Prints the decomposition of so(7) over G2. The G2-generators embedding is hardcoded according to an article of McGovern.",
-   "printBthreeDecomposedOverGtwo",
-    & ParserNode::EvaluatePrintDecomposition
    );
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeyl",
    "(RF,...)",
    "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. \
    For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the\
-    first and second simple roots, and x_1 is a variable. The coordinates can be arbitrary polynomials \
+    first and second simple Vectors<Rational>, and x_1 is a variable. The coordinates can be arbitrary polynomials \
     (rational functions work too but *very* slow). ",
    "actByWeyl(x_1, x_2, x_3)",
     & ParserNode::EvaluateWeylAction
@@ -9780,9 +9076,9 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "(RF,...)",
    "Act using the \\rho-modified action on a weight vector whose coordinates are given in simple basis coordinates. \
    For an element of the Weyl group w, the \\rho-modified action of w on \\alpha is given by w(\\alpha+\\rho)-\\rho, \
-   where \\rho is the half-sum of the positive roots of the ambient root system. \
+   where \\rho is the half-sum of the positive Vectors<Rational> of the ambient Vector<Rational> system. \
    This function is the affine \\rho-modification of the function ActByWeyl. The following example calls the action of the Weyl group\
-    of so(7); the half-sum of the positive roots of so(7) in simple coordinates equals (5/2,8/2,9/2).",
+    of so(7); the half-sum of the positive Vectors<Rational> of so(7) in simple coordinates equals (5/2,8/2,9/2).",
    "actByWeylRho(x_1-5/2, x_2-8/2,x_3-9/2)",
     & ParserNode::EvaluateWeylRhoAction
    );
@@ -9806,7 +9102,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "((Rational,...),...)",
    "Computes the vector partition function with respect to the input vectors, according to this \
    <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>. The example below is the Kostant partition function \
-   of root system of type A3 (sl(4)).",
+   of Vector<Rational> system of type A3 (sl(4)).",
    "vpfReport((1,0,0), (0,1,0), (0,0,1), (1,1,0), (0,1,1), (1,1,1))",
     & ParserNode::EvaluateVectorPFIndicator
    );
@@ -9815,7 +9111,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "((Rational,...),...)",
    "Computes the vector partition function with respect to the input vectors, according to this \
    <a href=\"http://arxiv.org/abs/0910.4675\"> text </a>. The example below is the Kostant partition function \
-   of root system of type B2 (so(5)).",
+   of Vector<Rational> system of type B2 (so(5)).",
    "vpf((-1,0), (0,-1), (-1,-1), (-1,-2))",
     & ParserNode::EvaluateVPF
    );
@@ -9839,7 +9135,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("printRootSubalgebras",
    "()",
-   "Computes all root subalgebras of the ambient Lie algebra. The computation is served from \
+   "Computes all Vector<Rational> subalgebras of the ambient Lie algebra. The computation is served from \
    the hard disk if it is already computed. \
    The function will redirect you to a new page, to return to the calculator use the back button.",
    "printRootSubalgebras",
@@ -9859,7 +9155,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("zprintSlTwosAndRootSAsFORCERecompute",
    "()",
-   "<b>Use only if there are broken links in root subalgebra/sl(2)-database. \
+   "<b>Use only if there are broken links in Vector<Rational> subalgebra/sl(2)-database. \
    When executing this command, please be patient and do not click any links until automatically redirected. </b> \
    I have a problem with setting up the Apache server and the way it handles SIGABORT signals \
    (this is what happens when you don't wait for the computation to finish and click on a link prematurely). \
@@ -9977,7 +9273,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemOld",
    "(Integer, Integer)",
-   "Draw the root system in its Coxeter plane. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank, which must be at most 8. The example draws E6.",
+   "Draw the Vector<Rational> system in its Coxeter plane. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank, which must be at most 8. The example draws E6.",
    "drawRootSystemOld(4,6)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateDrawRootSystemOld
@@ -9985,7 +9281,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystem",
    "()",
-   "Draw the root system of the ambient Lie algebra in its Coxeter plane. ",
+   "Draw the Vector<Rational> system of the ambient Lie algebra in its Coxeter plane. ",
    "drawRootSystem",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateDrawRootSystem
@@ -10001,13 +9297,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystem",
    "(Integer, (Rational,...),...)",
-   "Animate the root system. First argument N>=3 = number of frames. The remaining arguments \
+   "Animate the Vector<Rational> system. First argument N>=3 = number of frames. The remaining arguments \
    must describe an even number>=4 of elements of h* with rational coordinates, written in simple basis coordinates. \
    The consecutive pairs of such vectors parametrize the projection plane waypoints. More precisely, \
    each pair of input vectors must give an arbitrary basis of a ``waypoint'' projection plane.  \
    The animation will start at the first projection plane, fly through to the\
    second projection plane, then away to the third, and so on. When at the last frame, the animation will \
-   start backwards. The example rotates the root system of B3(so(7)) from a root subsystem of type B2(so(5)) to a \
+   start backwards. The example rotates the Vector<Rational> system of B3(so(7)) from a Vector<Rational> subsystem of type B2(so(5)) to a \
    plane the projection to which induces the embedding of exceptional Lie algebra G2 in B3. This \
    plane also coincides with one of the (finitely many) choices of a Coxeter plane of B3(so(7)). ",
    "animateRootSystem(100, (0,1,0),(0,0,1), (0,1,0),(1,0,2) )",
@@ -10017,7 +9313,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("animatePause",
    "(Integer)",
-   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "<b>Experimental.</b> Animate the Vector<Rational> system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
    "animatePause(100)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimationPause
@@ -10025,7 +9321,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("animateClearScreen",
    "(Integer, Integer)",
-   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "<b>Experimental.</b> Animate the Vector<Rational> system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
    "animateClearScreen(0,2)",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimationClearScreen
@@ -10033,7 +9329,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
   this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystemBlueDot",
    "(Integer, Integer, Integer, (Rational,...))",
-   "<b>Experimental.</b> Animate the root system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
+   "<b>Experimental.</b> Animate the Vector<Rational> system. First argument = weyl letter 0=A. Second argument=weyl rank. This argument= number of frames.",
    "animateRootSystemBlueDot(0,2, 16777216, ((1,0),(0,1)))",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSystemBluePoint
@@ -10082,13 +9378,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
    as well as the cosets \
    (given by minimal coset representatives) of the Weyl subgroup in question. \
-   The input must have as many integers as there are simple roots in the ambient \
-   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding \
+   The input must have as many integers as there are simple Vectors<Rational> in the ambient \
+   Lie algebra. If the Vector<Rational> is crossed out (i.e. not a Vector<Rational> space of the Levi part), one should put a 1 in the corresponding \
    coordinate. \
    Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
    calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; \
-   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple roots. \
-   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. \
+   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple Vectors<Rational>. \
+   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple Vector<Rational>. \
    You will get your output as a .png file link, you must click onto the link to see the end result. ",
    "parabolicsInfoBruhatGraph(1,0,0)",
 //   DefaultWeylLetter, DefaultWeylRank, true,
@@ -10109,35 +9405,13 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental, not tested completely.</b> Mods out the Verma relations. Let the the simple basis be alpha_1,...,alpha_n,\
     and its dual basis be beta_1,..., beta_n, i.e. the scalar product of alpha_i  and beta_j is 1 if i=j and 0 otherwise. Then the highest \
     weight is assumed to be x_1 beta_1 +...+x_n beta_n, where x_1,... x_n are variables. Assume a monomial is written so that all\
-    positive root generators are on the right side, all elements in the Cartan in the middle, and the negative root generators on the left (i.e\
+    positive Vector<Rational> generators are on the right side, all elements in the Cartan in the middle, and the negative Vector<Rational> generators on the left (i.e\
     the default calculator format). Then the Verma relations send the positive generators to zero; they send the element h_\\alpha_i to the \
     variable x_i, and finally they leave the negative generators untouched. The example mods out the Verma relations from the Casimir element, c. \
     The result is the general form of a character of Verma module.",
    "modOutVermaRelations(c)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateModVermaRelations
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("modOutVermaRelationsOrdered",
-   "(UEOrdered)",
-   "<b>Experimental, please don't use.</b> Same as modOutVermaRelations but uses the UEOrdered format.",
-   "modOutVermaRelationsOrdered(c)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateModVermaRelationsOrdered
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("adjointRepresentationAction",
-   "(UE, UE)",
-   "<b>Experimental. The implementation works horribly slowly at the moment. \
-   Might be fixed in the future, low priority.</b>\
-    Act  by the first argument using the adjoint representation on the second argument. \
-   For example, if u_1, u_2 and u_3 are of first degree, adjointRepresentationAction(u_1u_2,u_3) equals [u_1,[u_2,u_3]]. \
-   To avoid confusion, we note that adjointRepresentationAction(x,y) is generally NOT equal to [x,y]. The following example \
-   computes the action of the Casimir element on the first generator of the Chevalley-Weyl basis of \
-   the ambient Lie algebra.",
-   "adjointRepresentationAction(c, g_1)",
-   DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateAdjointAction
    );
   this->AddOneFunctionToDictionaryNoFail
   ("casimir",
@@ -10148,16 +9422,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateMakeCasimir
    );
 
-  this->AddOneFunctionToDictionaryNoFail
-  ("modOutSAVerma",
-   "(UEOrdered)",
-   "<b>Experimental, please don't use. This is testing code for resolving errors on new \
-   functions, not available in the function list.</b>\
-    Mod out the verma relations of the smaller algebra.",
-   "modOutSAVerma(f_1)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateModOutRelsFromGmodKtimesVerma
-   );
   this->AddOneFunctionToDictionaryNoFail
   ("actByWeylAlgebraElement",
    "(WeylAlgebraElement, Polynomial)",
@@ -10188,7 +9452,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("animateFlyThroughRootSAs",
    "()",
-   "<b> Experimental. This function shouldn't be visible, if it is, then somebody (*who can it be*) messed up.</b>Experiment: trying to make sense of coxeter planes for reducible root systems.",
+   "<b> Experimental. This function shouldn't be visible, if it is, then somebody (*who can it be*) messed up.</b>Experiment: trying to make sense of coxeter planes for reducible Vector<Rational> systems.",
    "animateFlyThroughRootSAs",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSAs
@@ -10204,11 +9468,11 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemFixProjection",
    "((Rational,...),(Rational,...))",
-   "Same as drawRootSystem but draws the root system in a user-defined projection plane.The first and the secondargument\
+   "Same as drawRootSystem but draws the Vector<Rational> system in a user-defined projection plane.The first and the secondargument\
    must be two vectors \
    forming a basis of the projection plane. The vectors must be given in simple basis coordinates. \
-   The example projects the root system of sl(8) onto the\
-   plane spanned by the root of the sl(2)-subalgebra given by 4+4 partition \
+   The example projects the Vector<Rational> system of sl(8) onto the\
+   plane spanned by the Vector<Rational> of the sl(2)-subalgebra given by 4+4 partition \
    and the weight corresponding to the element of the Cartan of sl(8) that commutes with the sl(2).",
    "drawRootSystemFixProjection( (3,4,3,0,3,4,3), (1,2,3,4,3,2,1))",
    'A', 7, true,
@@ -10244,8 +9508,8 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "((Polynomial,...),(Rational,...))",
    "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
    The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
-   In the second argument, a zero stands for a root space that is a root of the Levi part of the parabolic subalgebra. \
-   A non-zero element indicates that the corresponding root space that is not in the Levi part of \
+   In the second argument, a zero stands for a Vector<Rational> space that is a Vector<Rational> of the Levi part of the parabolic subalgebra. \
+   A non-zero element indicates that the corresponding Vector<Rational> space that is not in the Levi part of \
    the parabolic subalgebra.",
     "v((1,0,1), (1,0,0))",
    'B', 3, true,
@@ -10265,7 +9529,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "(Integer, LittelmannPath)",
    "<b>For testing purposes. Will remain in future versions only as a hidden function. </b> \
    The Littelmann e_\\alpha and f_\\alpha operators. \
-   The integer index gives the index of the simple root. Positive indices correspond to the Littelmann e_\\alpha operators, \
+   The integer index gives the index of the simple Vector<Rational>. Positive indices correspond to the Littelmann e_\\alpha operators, \
    Negative indices correspond to the f_\\alpha operators.",
     "eAlpha(-1, eAlpha(-2, littelmann(1,0,0))",
    'B', 3, true,
@@ -10278,10 +9542,10 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    connects with a straight line the zero weight with the weight given by the argument in fundamental \
    coordinates. The number of paths is capped at 1000; if you request a computation whose answer \
    has more than 1000 paths, you will be informed with an appropriate error message. \
-   Reference: P. Littelmann, Paths and root operators in representation theory. Let e_{\\alpha_i}, f_{\\alpha_i} \
-   be the root operators as defined in the cited article, where \\alpha_i denotes the i^th simple \
-   root. In the printouts, for i>=1, the expression g_{-i} denotes the root operator f_{\\alpha_i}, \
-   and the expression g_{i} denotes the root operator e_{\\alpha_i}. The notation g_{i} is a valid calculator input \
+   Reference: P. Littelmann, Paths and Vector<Rational> operators in representation theory. Let e_{\\alpha_i}, f_{\\alpha_i} \
+   be the Vector<Rational> operators as defined in the cited article, where \\alpha_i denotes the i^th simple \
+   Vector<Rational>. In the printouts, for i>=1, the expression g_{-i} denotes the Vector<Rational> operator f_{\\alpha_i}, \
+   and the expression g_{i} denotes the Vector<Rational> operator e_{\\alpha_i}. The notation g_{i} is a valid calculator input \
    and is also used to denote the i^th Chevalley-Weyl generator (i<0 allowed). \
     ",
     "allLittelmannPaths(0,1)",
@@ -10361,7 +9625,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "<b>Experimental, might be hidden or changed in future versions. \
    </b>Generates and prints out the ad(g_{\\alpha_i})-\"orbit\" of the first argument in \
    the Verma module of highest weight given in fundamental coordinates by the second argument, where \\alpha_i\
-   run over all simple positive roots of the ambient Lie algebra.",
+   run over all simple positive Vectors<Rational> of the ambient Lie algebra.",
     "isInproperSubmodule\
     (11/5 g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1}^{2}g_{-2}^{2}g_{-1}^{2} \
       - g_{-1}^{3}g_{-2}^{2}g_{-1}^{2}g_{-2}g_{-1}g_{-2}g_{-1} , (2,2))",

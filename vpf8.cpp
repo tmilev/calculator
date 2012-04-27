@@ -5960,76 +5960,6 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
   return out.str();
 }
 
-std::string ElementSemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner,
-   const PolynomialOutputFormat& thePolyFormat, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  std::string tempS;
-  if (this->size==0)
-    return "0";
-  bool isElementCartan=false;
-  for (int i=0; i<this->size; i++)
-  { int theIndex=this->TheObjects[i].theGeneratorIndex;
-    if (!owner.IsGeneratorFromCartan(theIndex))
-    { int DisplayIndex=owner.ChevalleyGeneratorIndexToDisplayIndex(theIndex);
-      if (!this->theCoeffs[theIndex].IsNegative()&& i!=0)
-        out << "+";
-      isElementCartan=true;
-      tempS=this->theCoeffs[theIndex].ElementToString();
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (!useRootNotation)
-        out << tempS << thePolyFormat.alphabetBases[0] << "_{" << DisplayIndex << "}";
-      else
-      { out << tempS << thePolyFormat.alphabetBases[0] << "_{";
-        int rootIndex=owner.ChevalleyGeneratorIndexToRootIndex(theIndex);
-        if (useEpsilonNotation)
-          out << owner.ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables);
-        else
-          out << owner.ElementToStringRootIndexToSimpleBasis(rootIndex, theGlobalVariables);
-        out << "}";
-      }
-    }
-  }
-  Vector<Rational> theHComponent=this->GetCartanPart();
-  Vector<Rational> tempRoot;
-  if (!theHComponent.IsEqualToZero())
-  { if (useRootNotation)
-    { if (useEpsilonNotation)
-        tempRoot=owner.theWeyl.GetEpsilonCoords(theHComponent, theGlobalVariables);
-      bool isEmpty=isElementCartan;
-      for (int i=0; i<tempRoot.size; i++)
-        if (!tempRoot.TheObjects[i].IsEqualToZero())
-        { tempRoot.TheObjects[i].ElementToString(tempS);
-          if (tempS=="1")
-            tempS="";
-          if (tempS=="-1")
-            tempS="-";
-          if (!isEmpty)
-          { if (tempS!="")
-            { if (tempS[0]!='-')
-                 out << "+";
-            } else
-              out << "+";
-          }
-          out << tempS << "h_{";
-          out << ((useEpsilonNotation) ? "\\varepsilon" : "\\alpha");
-          out << "_{" << i+1 << "}}";
-          isEmpty=false;
-        }
-    } else
-    { tempS=theHComponent.ElementToStringLetterFormat(thePolyFormat.alphabetBases[1] , true);
-      if (tempS[0]!='-' && !isElementCartan)
-        out << "+";
-      out << tempS;
-    }
-  }
-
-  return out.str();
-}
-
 void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
   (std::string& output, bool useRootNotation, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG,
    PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
@@ -6105,8 +6035,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     for (int i=0; i<numRoots+theDimension; i++)
     { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i, *this->owner, this->indexInOwner);
-      tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
-      (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+      tempS=tempElt1.ElementToString();
       out << " & ";
       if(usePNG)
         out << "$";
@@ -6115,13 +6044,14 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
         out << "$";
     }
     out << "\\\\\n";
+    if (useHtml)
+      out << "<hr>";
     Rational tempRat;
     //int lineCounter=0;
     for (int i=0; i<theDimension+numRoots; i++)
     { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i,*this->owner, this->indexInOwner);
-      tempS=tempElt1.ElementToStringNegativeRootSpacesFirst
-      (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+      tempS=tempElt1.ElementToString();
       if(usePNG)
         out << "$";
       out << tempS;
@@ -6131,8 +6061,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
       { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
         (j, *this->owner, this->indexInOwner);
         this->LieBracket(tempElt1, tempElt2, tempElt3);
-        tempS=tempElt3.ElementToStringNegativeRootSpacesFirst
-          (useRootNotation, useEpsilonNotation, *this, theFormat, theGlobalVariables);
+        tempS=tempElt3.ElementToString();
         out << "& ";
         if(usePNG)
           out << "$";
@@ -6155,25 +6084,31 @@ void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useH
   if (useLatex)
     out << "$";
   int numPosRoots=this->GetOwner().GetNumPosRoots();
+  bool found=false;
   for (int i=0; i<this->size; i++)
-  { int actualIndex=this->TheObjects[i].theGeneratorIndex;
-    tempS=this->theCoeffs[actualIndex].ElementToString();
-    if (tempS=="1")
-      tempS="";
-    if (tempS=="-1")
-      tempS="-";
-    if (i!=0)
-    { if (tempS!="")
-      { if (tempS[0]!='-')
+    if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))
+    { tempS=this->theCoeffs[i].ElementToString();
+      if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (i!=0)
+      { if (tempS!="")
+        { if (tempS[0]!='-')
+            out << "+";
+        } else
           out << "+";
-      } else
-        out << "+";
-    }
-    if (!this->GetOwner().IsGeneratorFromCartan(actualIndex))
-    { int DisplayIndex= (actualIndex<numPosRoots ) ? actualIndex-numPosRoots : actualIndex-numPosRoots+1;
+      }
+      int DisplayIndex= this->GetOwner().ChevalleyGeneratorIndexToDisplayIndex(this->TheObjects[i].theGeneratorIndex);
       out << tempS << "g_{" << DisplayIndex << "}";
-    } else
-      out << "h_{" << actualIndex+1-numPosRoots << "}";
+      found=true;
+    }
+  Vector<Rational> hComponent=this->GetCartanPart();
+  if (!hComponent.IsEqualToZero())
+  { std::string tempS=hComponent.ElementToStringLetterFormat("h", false);
+    if (tempS[0]!='-' && found)
+      out << "+";
+    out << tempS;
   }
   output= out.str();
 }
@@ -8309,7 +8244,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   finalWeights.SetHashSizE(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
-  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 10000);
+  this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 0, 10000);
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
     if (!isTrimmed)
@@ -8945,7 +8880,7 @@ std::string SemisimpleLieAlgebraOrdered::GetGeneratorString
     mustUsebracketsWhenRaisingToPower=false;
   }
   else
-  { out << this->theOrder[theIndex].ElementToStringNegativeRootSpacesFirst(false, false, this->theOwner, theFormat, theGlobalVariables);
+  { out << this->theOrder[theIndex].ElementToString();
     mustUsebracketsWhenRaisingToPower=this->theOrder[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
   }
   return out.str();

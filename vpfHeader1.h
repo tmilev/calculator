@@ -1806,6 +1806,10 @@ public:
   { this->selected[index]=false;
     this->ComputeIndicesFromSelection();
   }
+  void MakeFullSelection(int inputMaxSize)
+  { this->init(inputMaxSize);
+    this->MakeFullSelection();
+  }
   void MakeFullSelection()
   { for (int i=0; i<this->MaxSize; i++)
     { this->elements[i]=i;
@@ -2866,7 +2870,7 @@ ParallelComputing::GlobalPointerCounter++;
   Rational(int n, int d){this->Extended=0; this->AssignNumeratorAndDenominator(n, d); ParallelComputing::SafePointDontCallMeFromDestructors();}
   Rational(const LargeInt& other){this->Extended=0; *this=other;}
   Rational(const LargeIntUnsigned& other){this->Extended=0; *this=other;}
-  Rational(){this->Extended=0; ParallelComputing::SafePointDontCallMeFromDestructors();}
+  Rational(): NumShort(0), DenShort(0), Extended(0){ ParallelComputing::SafePointDontCallMeFromDestructors();}
   Rational(int n){this->Extended=0; this->AssignNumeratorAndDenominator(n, 1); ParallelComputing::SafePointDontCallMeFromDestructors(); }
   Rational(const Rational& right){this->Extended=0; this->Assign(right); ParallelComputing::SafePointDontCallMeFromDestructors();}
 //  Rational(int x){this->Extended=0; this->AssignInteger(x); };
@@ -7031,11 +7035,7 @@ public:
   bool ElementToStringNeedsBracketsForMultiplication()const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
   void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);}
-  std::string ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, SemisimpleLieAlgebra& owner, const PolynomialOutputFormat& thePolyFormat,
-   GlobalVariables& theGlobalVariables)
-;
-  Vector<Rational> GetCartanPart();
+  Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
   ;

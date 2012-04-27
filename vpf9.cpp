@@ -3691,7 +3691,7 @@ void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors
     }
 }
 
-void WeylGroup::Assign(const WeylGroup& right)
+void WeylGroup::operator=(const WeylGroup& right)
 { this->WeylLetter=right.WeylLetter;
   this->LongRootLength.Assign(right.LongRootLength);
 //  this->ShortRootLength.Assign(right.ShortRootLength);
@@ -3701,8 +3701,8 @@ void WeylGroup::Assign(const WeylGroup& right)
   this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
   this->CartanSymmetric=(right.CartanSymmetric);
   this->CopyFromHash(right);
-  this->RootSystem.CopyFromHash(right.RootSystem);
-  this->RootsOfBorel.CopyFromBase(right.RootsOfBorel);
+  this->RootSystem=(right.RootSystem);
+  this->RootsOfBorel=(right.RootsOfBorel);
   this->rho=right.rho;
   this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
   this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
@@ -3723,11 +3723,20 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
   { tempRoot.MakeEi(theDimension, i);
     startRoots.AddOnTop(tempRoot);
   }
-  this->GenerateOrbit(startRoots, false, tempHashedRootS, false);
+
+  int estimatedNumRoots=0;
+  switch (this->GetDim())
+  { case 8: estimatedNumRoots=240; break;
+    case 7: estimatedNumRoots=126; break;
+    case 6: estimatedNumRoots=72; break;
+    case 4: estimatedNumRoots=48; break;
+    default: estimatedNumRoots= this->GetDim()*this->GetDim()*4; break;
+  }
+  this->GenerateOrbit(startRoots, false, tempHashedRootS, false, estimatedNumRoots);
   this->RootSystem.Clear();
   this->RootsOfBorel.size=0;
   this->RootsOfBorel.Reserve(tempHashedRootS.size/2);
-  this->RootSystem.Reserve(tempHashedRootS.size);
+  this->RootSystem.SetExpectedSize(tempHashedRootS.size);
   for (int i=0; i<tempHashedRootS.size; i++)
     if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
       this->RootsOfBorel.AddOnTop(tempHashedRootS.TheObjects[i]);
@@ -3741,21 +3750,22 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
   template <class CoefficientType>
 bool WeylGroup::GenerateOrbit
   (Vectors<CoefficientType>& theRoots, bool RhoAction, HashedList<Vector<CoefficientType> >& output,
-   bool UseMinusRho, WeylGroup* outputSubset, int UpperLimitNumElements)
+   bool UseMinusRho, int expectedOrbitSize, WeylGroup* outputSubset, int UpperLimitNumElements)
 { output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots.TheObjects[i]);
   Vector<Rational> currentRoot;
   ElementWeylGroup tempEW;
-  int expectedNumElements=(this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim())).NumShort;
-  if (UpperLimitNumElements>0 && expectedNumElements>UpperLimitNumElements)
-    expectedNumElements=UpperLimitNumElements;
-  output.SetExpectedSize(expectedNumElements);
+  if (expectedOrbitSize<=0)
+    expectedOrbitSize=(this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim())).NumShort;
+  if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
+    expectedOrbitSize=UpperLimitNumElements;
+  output.SetExpectedSize(expectedOrbitSize);
   if (outputSubset!=0)
   { if (UpperLimitNumElements!=-1)
-      expectedNumElements=MathRoutines::Minimum(UpperLimitNumElements, expectedNumElements);
+      expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
     tempEW.size=0;
-    outputSubset->SetExpectedSize(expectedNumElements);
+    outputSubset->SetExpectedSize(expectedOrbitSize);
     outputSubset->CartanSymmetric=this->CartanSymmetric;
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
@@ -4263,7 +4273,7 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
   this->Clear();
   HashedList<Vector<Rational> > tempRoots2;
   tempRoots2.Clear();
-  this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, this, UpperLimitNumElements);
+  this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, this, UpperLimitNumElements);
 }
 
 void WeylGroup::ComputeDebugString()
@@ -4290,7 +4300,7 @@ void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& othe
 { this->CopyFromHash(other);
   this->simpleGenerators.CopyFromBase(other.simpleGenerators);
   this->ExternalAutomorphisms.CopyFromBase(other.ExternalAutomorphisms);
-  this->AmbientWeyl.Assign(other.AmbientWeyl);
+  this->AmbientWeyl=(other.AmbientWeyl);
 }
 
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()

@@ -792,7 +792,6 @@ public:
   Vectors<Rational> RootsOfBorel;
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
-  void Assign(const WeylGroup& right);
   void ComputeRho(bool Recompute);
   void ComputeDebugString();
   void ElementToString(std::string& output);
@@ -919,7 +918,9 @@ public:
   template <class CoefficientType>
   bool GenerateOrbit
   (Vectors<CoefficientType>& theRoots, bool RhoAction, HashedList<Vector<CoefficientType> >& output,
-   bool UseMinusRho, WeylGroup* outputSubset=0, int UpperLimitNumElements=0);
+   bool UseMinusRho, int expectedOrbitSize=-1, WeylGroup* outputSubset=0, int UpperLimitNumElements=-1)
+   ;
+//  int GetNumRootsFromFormula();
   void GenerateRootSystemFromKillingFormMatrix();
   void WriteToFile(std::fstream& output);
   void ReadFromFile(std::fstream& input);
@@ -999,12 +1000,11 @@ public:
   void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational> & theH);
   int length(int index);
-  void operator=(const WeylGroup& other){this->Assign(other);}
+  void operator=(const WeylGroup& other);
   bool operator==(const WeylGroup& other)
   { return this->CartanSymmetric==other.CartanSymmetric;
   }
 };
-
 
 template <class Element>
 void WeylGroup::SimpleReflection
@@ -1407,6 +1407,8 @@ public:
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
+  List<SemisimpleLieAlgebra>* ownerArray;
+  int indexInOnwer;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
@@ -1498,6 +1500,8 @@ public:
     this->NumLinesPerTableLatex=20;
     this->NumColsPerTableLatex=4;
     this->UpperLimitNumElementsWeyl=0;
+    this->ownerArray=0;
+    this->indexInOnwer=-1;
     this->initForNilradicalGeneration();
   }
 };
@@ -1637,7 +1641,7 @@ public:
   void Assign(const SemisimpleLieAlgebra& other)
   { this->owner=other.owner;
     this->indexInOwner=other.indexInOwner;
-    this->theWeyl.Assign(other.theWeyl);
+    this->theWeyl=(other.theWeyl);
     this->ChevalleyConstants=other.ChevalleyConstants;
 //    this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
     this->theLiebrackets=(other.theLiebrackets);
@@ -1738,7 +1742,15 @@ public:
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int ChevalleyGeneratorIndexToRootIndex(int theIndex)const;
   int ChevalleyGeneratorIndexToElementCartanIndex(int theIndex){ return theIndex-this->theWeyl.RootsOfBorel.size;}
-  int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const{ return this->RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(this->ChevalleyGeneratorIndexToRootIndex(theIndex));}
+  int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const
+  { //std::cout << "<br>num pos roots: " <<  this->GetNumPosRoots();
+   // std::cout << " rank: "<< this->GetRank();
+    if (theIndex<this->GetNumPosRoots())
+      return theIndex-this->GetNumPosRoots();
+    if (theIndex>=this->GetNumPosRoots()+this->GetRank())
+      return theIndex+1-this->GetNumPosRoots()-this->GetRank();
+    return theIndex-this->GetNumPosRoots();
+  }
   bool AreOrderedProperly(int leftIndex, int rightIndex);
   bool IsGeneratorFromCartan(int theIndex)
   { return theIndex>=this->GetNumPosRoots() && theIndex<this->GetNumPosRoots()+this->GetRank();
@@ -1757,10 +1769,7 @@ public:
   void GenerateVermaMonomials(Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables)
   ;
   void ComputeChevalleyConstantS
-  (char WeylLetter, int Rank, List<SemisimpleLieAlgebra>& owner, GlobalVariables& theGlobalVariables)
-  ;
-  void ComputeChevalleyConstantS
-  (WeylGroup& input, GlobalVariables& theGlobalVariables)
+(GlobalVariables& theGlobalVariables)
   ;
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
   //then the below function computes n_{-\epsilon, -\zeta}

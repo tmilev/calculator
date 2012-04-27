@@ -839,7 +839,7 @@ output << " The basis vectors correspond to the vertices of the Dynkin diagram.<
 output << " You can drag the center and the basis vectors.<button onclick=\"switchMenu('rotationExplanation')\">More info</button>\n";
 output << " <br>\n";
 output << " <div id=\"rotationExplanation\" style=\"display: none\">\n";
-output << " The i^th vector corresponds to the i^th node of the Dynkin diagram of the root system.<br>\n";
+output << " The i^th vector corresponds to the i^th node of the Dynkin diagram of the Vector<Rational> system.<br>\n";
 output << " The nodes are labeled in Bourbaki order.<br>\n";
 output << " Let the two dimensional plane we project onto be spanned by vectors e_1 and e_2.<br>\n";
 output << " Let v be a basis vector which you drag, with orthogonal projection in the (e_1,e_2) plane equal to v' <br>\n";
@@ -853,7 +853,7 @@ output << " If the above is the case, you will not be able to modify the length 
 output << " <textarea id=\"debugField\" cols=\"128\" rows=\"15\">\n";
 output << " </textarea><br>\n";
 output << " </div><br>\n";
-output << " The root system in simple basis coordinates follows. <br>\n";
+output << " The Vector<Rational> system in simple basis coordinates follows. <br>\n";
 output << " \n";
 output << " \n";
 output << " <textarea id=\"outputField\">\n";

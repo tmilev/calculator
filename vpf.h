@@ -1,14 +1,16 @@
 //*********************************************************************************************************
 //*********************************************************************************************************
 //Vector partition function - a mathematical library  with focus on
-//1) symbolic computation (in full generality);
+//1) symbolic computation (with the goal of becoming a complete computer algebra system);
 //2) computations in the area of Lie representation theory;
 //3) computations with vector partition functions.
 //
 //CopyRight (C) 2009-2012: Todor Milev
 //email: todor.milev@gmail.com
 //
-//Contributors: Todor Milev, Thomas Bliem
+//C++, javascript: Todor Milev
+//svn repository and help with C++ templates: Thomas Bliem
+//javascript autocomplete code: Madan Chaudhary
 //
 //This is free software. You are welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
@@ -45,6 +47,7 @@
 //This header file includes the various sub-headers.
 //The split into sub-headers is needed to speed up compilation times.
 #include "vpfHeader1.h"
+#include "vpfHeader1_2.h"
 #include "vpfHeader2.h"
 #ifndef ProjectInfoVpfHalreadyDefined
 #define ProjectInfoVpfHalreadyDefined

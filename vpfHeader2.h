@@ -6,53 +6,47 @@
 //the following  include contains all the c++ math routines used in the calculator.
 //The calculator uses relatively few functions, nevertheless the include is needed.
 #include "vpfHeader1.h"
+#include "vpfHeader1_2.h"
 #ifndef ProjectInfoVpfHeader2AlreadyDefined
 #define ProjectInfoVpfHeader2AlreadyDefined
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 #endif
 
+class PolynomialOfExpressions;
+
 class Data
 {
 public:
+
   CommandList* owner;
-  MemorySaving<Rational> theRational;
-  MemorySaving<PolynomialRationalCoeff> thePoly;
-  MemorySaving<RationalFunction> theRationalFunction;
+  int theIndex;
+  int type;
   MemorySaving<std::string> theError;
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
-  int type;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma
   };
-  Data (const Rational& x, CommandList& inputOwner)
-  { this->owner=&inputOwner;
-    this->type=this->typeRational;
-    this->theRational.GetElement()=x;
-  }
-  Data(CommandList& theOwner) : owner(&theOwner), type(Data::typeError) {}
-  Data()
-  { this->owner=0;
-    this->type=this->typeError;
-  }
-  Data(const Data& otherData)
-  { this->operator=(otherData);
-  }
-  void FreeMemory()
-  { switch (this->type)
-    { case Data::typeSSalgebra:
-      case Data::typeRational: this->theRational.FreeMemory(); break;
-      case Data::typePoly: this->thePoly.FreeMemory(); break;
-      case Data::typeRationalFunction: this->theRationalFunction.FreeMemory(); break;
-      default:
-        break;
-    }
-  }
-  void MakePoly
-(CommandList& theBoss, const PolynomialRationalCoeff& inputPoly)
-;
+  void operator=(const Data& other);
+  bool operator==(const Data& other)const;
+  int HashFunction()const;
+  static inline int HashFunction(const Data& input)  {return input.HashFunction();}
+  Data (const Rational& x, CommandList& inputOwner);
+  Data(CommandList& theOwner): theIndex(-1){this->type=this->typeError; this->owner=&theOwner;}
+  Data():owner(0), theIndex(-1){this->type=this->typeError;}
+  Data(const Data& otherData) {this->operator=(otherData);}
+  bool SetError(const std::string& inputError);
+  bool IsEqualToOne()const;
+  PolynomialOfExpressions& GetPoly()const;
   void MakeMonomialGeneralizedVerma
 (CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
+;
+  void MakeSSAlgebra (CommandList& theBoss, const SemisimpleLieAlgebra& inputAlgebra);
+  void MakeRational
+(CommandList& theBoss, const Rational& inputRational)
+;
+  void MakePoly
+(CommandList& theBoss, const PolynomialOfExpressions& inputPoly)
 ;
   void MakeElementTensorGeneralizedVermas
   (CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
@@ -69,48 +63,23 @@ public:
   template<class theType>
   bool IsOfType()const;
   template<class theType>
-  theType GetValue()const;
-  bool IsEqualToOne()const;
+  theType GetValueCopy()const;
+  template<class theType>
+  theType& GetValuE()const;
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
-  { if (this->type!=this->typeRational)
-      return false;
-    return this->theRational.GetElementConst().IsSmallInteger(whichInteger);
-  }
-  bool IsInteger()
-  { if (this->type!=this->typeRational)
-      return false;
-    return this->theRational.GetElement().IsInteger();
-  }
-  ElementSimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
-  int GetSmallInt()const;
+  ;
+  bool IsInteger();
+  ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
+  int GetSmallInT()const;
   MonomialGeneralizedVerma<RationalFunction>& GetMonGenVerma()const;
-  bool SetError(const std::string& inputError)
-  { this->FreeMemory();
-    this->type=this->typeError;
-    this->theError.GetElement()=inputError;
-    return false;
-  }
   bool operator+=(const Data& other);
-  bool operator*=(const Rational& other)
-  { Data Other(other, *this->owner);
-    return this->operator*=(Other);
-  }
-  bool operator/=(const Data& other)
-  ;
-  bool operator*=(const Data& other)
-  ;
-  void operator=(const Data& other);
-  bool operator==(const Data& other);
+  bool operator*=(const Rational& other);
+  bool operator/=(const Data& other)  ;
+  bool operator*=(const Data& other)  ;
   std::string ElementToString(std::stringstream* comments=0)const;
   std::string ElementToStringDataType()const;
-  bool operator!=(const Data& other)
-  { return ! this->operator==(other);
-  }
-  int HashFunction()const;
-  static inline int HashFunction(const Data& input)
-  { return input.HashFunction();
-  }
+  bool operator!=(const Data& other)const;
   static bool LieBracket
   (Data& left, Data& right, Data& output, std::stringstream* comments)
   ;
@@ -208,15 +177,8 @@ class Expression
   Data& GetData()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
-  { Data tempData;
-    tempData.MakeMonomialGeneralizedVerma(newBoss, inputMon);
-    this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
-  }
-  void MakePoly(const PolynomialRationalCoeff& inputData, CommandList& newBoss, int inputIndexBoundVars)
-  { Data tempData;
-    tempData.MakePoly(newBoss, inputData);
-    this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
-  }
+ ;
+  void MakePoly(const PolynomialOfExpressions& inputData, CommandList& newBoss, int inputIndexBoundVars);
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -252,7 +214,10 @@ void MakeVariableNonBounD
    bool AddCurlyBraces=false, std::stringstream* outComments=0)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static int HashFunction(const Expression& input)
-  { return input.HashFunctionRecursive(0, 1000);
+  { return input.HashFunction();
+  }
+  int HashFunction()const
+  { return this->HashFunctionRecursive(0, 1000);
   }
   int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth)const
   { if (RecursionDepth>MaxRecursionDepth)
@@ -424,6 +389,41 @@ class VariableNonBound
   }
 };
 
+class PolynomialOfExpressions
+{
+  public:
+  Polynomial<Rational> thePoly;
+  HashedList<Expression> VariableImages;
+  void operator=(const PolynomialOfExpressions& other);
+  bool operator==(const PolynomialOfExpressions& other)
+  { return this->thePoly==other.thePoly && this->VariableImages==other.VariableImages;
+  }
+  static inline int HashFunction(const PolynomialOfExpressions& input){return input.HashFunction();}
+  int HashFunction()const
+;
+  void MakeZero();
+  void MakeConst(const Rational& input)
+  ;
+  std::string ElementToString()const;
+  void SetDynamicSubtype(int inputNumVars);
+};
+
+class ObjectContainer
+{ //Following are containers for data structures that are implemented in C++.
+  //These objects are dynamically allocated and used by the calculator as requested
+  //by various predefined function handlers.
+public:
+  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theTensorElts;
+  List<ModuleSSalgebraNew<RationalFunction> >  theCategoryOmodules;
+  List<SemisimpleLieAlgebra> theLieAlgebras;
+  HashedList<ElementSemisimpleLieAlgebra>  theLieAlgebraElements;
+  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theElemenentsGeneralizedVermaModuleTensors;
+  HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
+  HashedList<PolynomialOfExpressions>  thePolys;
+  HashedList<RationalFunction>  theRFs;
+  HashedList<Rational>  theRationals;
+  void reset();
+};
 
 class CommandList
 {
@@ -475,17 +475,8 @@ public:
   std::string theLog;
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
-  //Following are containers for data structures that are implemented in C++.
-  //These objects are dynamically allocated and used by the calculator as requested
-  //by various predefined function handlers.
-  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
-  List<ModuleSSalgebraNew<RationalFunction> > theCategoryOmodules;
-  List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<ElementSimpleLieAlgebra> theLieAlgebraElements;
-  HashedListB<Data, Data::HashFunction> theData;
-  List<ElementTensorsGeneralizedVermas<RationalFunction> > theElemenentsGeneralizedVermaModuleTensors;
-  List<MonomialGeneralizedVerma<RationalFunction> > theMonomialsGeneralizedVerma;
-//end of hardcoded data structures
+  HashedList<Data> theData;
+  ObjectContainer theObjectContainer;
   double StartTimeInSeconds;
 
   std::string ElementToString();
@@ -741,7 +732,7 @@ public:
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
   bool ExtractPolyRational
-  (PolynomialRationalCoeff& output, const Expression& theInput, HashedList<Expression>& VariableImages,
+  (PolynomialOfExpressions& output, HashedList<Expression>& VariableImagesBuffer, const Expression& theInput,
    int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
   ;
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
@@ -779,16 +770,6 @@ public:
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    int RecursionDepth, int maxRecursionDepth, std::stringstream* theLog=0, bool logAttempts=false)
   ;
-/*  Expression GetProperty(const std::string& propertyName, int theData=0)
-  { ExpressionProperty result;
-    result.value=theData;
-    result.nameIndex=this->thePropertyNames.GetIndex(propertyName);
-    if (result.nameIndex==-1)
-    { this->thePropertyNames.AddOnTop(propertyName);
-      result.nameIndex=this->thePropertyNames.size()-1;
-    }
-    return result;
-  }*/
   bool isADigit(const std::string& input, int& whichDigit)
   { if (input.size()!=1)
       return false;
@@ -881,9 +862,7 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   void AddEmptyHeadedCommand();
-  CommandList()
-  { this->theGlobalVariableS=0;
-  }
+  CommandList();
   void AddOperationNoFail
   (const std::string& theOpName,
    const Function::FunctionAddress& theFunAddress,

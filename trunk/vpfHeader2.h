@@ -41,7 +41,9 @@ public:
   void MakeMonomialGeneralizedVerma
 (CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
 ;
-  void MakeSSAlgebra (CommandList& theBoss, const SemisimpleLieAlgebra& inputAlgebra);
+  void MakeSSAlgebra
+  (CommandList& theBoss, char WeylLetter, int WeylRank)
+  ;
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
 ;
@@ -56,6 +58,7 @@ public:
  int theDisplayIndex, std::stringstream* comments)
   ;
   int GetDynamicSubtypeInfo();
+  SemisimpleLieAlgebra& GetSSLieAlgebra()const;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)

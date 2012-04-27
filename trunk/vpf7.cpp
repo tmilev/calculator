@@ -138,7 +138,7 @@ bool charSSAlgMod::DrawMe
     dominantWeightsNonHashed.AddOnTop
     (theWeyl.GetSimpleCoordinatesFromFundamental(currentMon.weightFundamentalCoords));
     bool isTrimmed=!theWeyl.GenerateOrbit
-    (dominantWeightsNonHashed, false, finalWeights, false, 0, upperBoundWeights);
+    (dominantWeightsNonHashed, false, finalWeights, false, 0,  0, upperBoundWeights);
     totalNumWeights+=finalWeights.size;
     if (isTrimmed || totalNumWeights>upperBoundWeights)
     { out << "Did not generate all weights of the module due to RAM limits. ";
@@ -213,7 +213,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
 //  std::cout << "weights of smaller module: " << weightsLeftSimpleCoords.ElementToString();
   for (int i=0; i<weightsLeftSimpleCoords.size; i++)
   { tempRoots[0]=weightsLeftSimpleCoords[i];
-    theWeyl.GenerateOrbit(tempRoots, false, currentOrbit, false, 0, OrbitSizeHardLimit);
+    theWeyl.GenerateOrbit(tempRoots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
     if (currentOrbit.size>=OrbitSizeHardLimit)
     { errorLog << "Error: orbit layer size exceeded hard-coded limit of " << OrbitSizeHardLimit << ".";
       return errorLog.str();

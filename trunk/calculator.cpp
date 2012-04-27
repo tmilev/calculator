@@ -242,10 +242,11 @@ int main(int argc, char **argv)
 //  civilizedInput="fib{}1:=1;\nfib{}0:=1;\nfib{}{{n}}:=fib{}(n-1)+fib{}(n-2);\nfib{}10";
 //  civilizedInput="hwv{}(B_3,(x_1,0,1),(1,0,0))";
 //  civilizedInput="Polynomial{} (1)";
-//  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;\nresult:=g_1 hwv{}(B_3, (x_1,0,1),(1,0,0));\n hwv{}(B_3, (x_1,0,1),(1,0,0)):=v_\\lambda;\n result \n ";
+//  civilizedInput="g:= SemisimpleLieAlgebra{}B_3:=g_1 hwv{}(B_3, (x_1,0,1),(1,0,0));\n hwv{}(B_3, (x_1,0,1),(1,0,0)):=v_\\lambda;\n result \n ";
 //  inputWeylString="Calculator";
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\ng_{-1} hwv{}(B_3, (x_1,0,1),(1,0,0))";
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} {}v";
+//civilizedInput="g:=SemisimpleLieAlgebra{} B_3";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

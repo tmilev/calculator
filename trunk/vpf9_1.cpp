@@ -305,7 +305,7 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 }
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
-{ this->AmbientWeyl.Assign(right.AmbientWeyl);
+{ this->AmbientWeyl=(right.AmbientWeyl);
   this->genK.CopyFromBase(right.genK);
   this->AllRootsK.CopyFromBase(right.AllRootsK);
   this->CentralizerKmods.Assign(right.CentralizerKmods);
@@ -333,7 +333,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
   rootSubalgebras rootSAsGenerateAll;
   rootSAsGenerateAll.SetSize(this->AmbientWeyl.CartanSymmetric.NumRows*2+1);
   rootSAsGenerateAll.TheObjects[0].genK.size=0;
-  rootSAsGenerateAll.TheObjects[0].AmbientWeyl.Assign(this->AmbientWeyl);
+  rootSAsGenerateAll.TheObjects[0].AmbientWeyl=(this->AmbientWeyl);
   rootSAsGenerateAll.TheObjects[0].ComputeAll();
   this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSAsGenerateAll, 1, theGlobalVariables);
   if (sort)
@@ -356,7 +356,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
   if (RecursionDepth>=bufferSAs.size)
     bufferSAs.SetSize(bufferSAs.size+this->AmbientWeyl.CartanSymmetric.NumRows);
   bufferSAs.TheObjects[RecursionDepth].genK = bufferSAs.TheObjects[RecursionDepth-1].genK;
-  bufferSAs.TheObjects[RecursionDepth].AmbientWeyl.Assign(this->AmbientWeyl);
+  bufferSAs.TheObjects[RecursionDepth].AmbientWeyl=(this->AmbientWeyl);
   //if (RecursionDepth>4)
    // return;
   for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size; k++)
@@ -435,9 +435,9 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   for (int i=0; i<SelectedBasisRoots.MaxSize; i++)
     if (!SelectedBasisRoots.selected[i])
       selectedRootsBasisCentralizer.AddOnTop(theRootSA.SimpleBasisCentralizerRoots.TheObjects[i]);
-  outputSubgroup.AmbientWeyl.Assign(theRootSA.AmbientWeyl);
+  outputSubgroup.AmbientWeyl=(theRootSA.AmbientWeyl);
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
-  outputSubgroup.AmbientWeyl.Assign(this->AmbientWeyl);
+  outputSubgroup.AmbientWeyl=(this->AmbientWeyl);
   theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
   //theSubgroup.ElementToString(tempS);
@@ -451,7 +451,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
   this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(outputSubgroup.ExternalAutomorphisms);
-  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl.Assign(this->AmbientWeyl);
+  this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl=(this->AmbientWeyl);
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   //theSubgroup.ComputeDebugString();
 }
@@ -585,9 +585,10 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
         return false;
     }
   leftSA.genK.size=0; rightSA.genK.size=0;
-  leftSA.AmbientWeyl.Assign(this->AmbientWeyl);
-  rightSA.AmbientWeyl.Assign(this->AmbientWeyl);
-  leftSA.genK.AddListOnTop(domainRec); rightSA.genK.AddListOnTop(rangeRec);
+  leftSA.AmbientWeyl=(this->AmbientWeyl);
+  rightSA.AmbientWeyl=(this->AmbientWeyl);
+  leftSA.genK.AddListOnTop(domainRec);
+  rightSA.genK.AddListOnTop(rangeRec);
   leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
   if (RecursionDepth!=0)
     if (leftSA.theDynkinDiagram.DynkinStrinG!=rightSA.theDynkinDiagram.DynkinStrinG || leftSA.theCentralizerDiagram.DynkinStrinG!=rightSA.theCentralizerDiagram.DynkinStrinG || rightSA.kModules.size!=leftSA.kModules.size)
@@ -1879,7 +1880,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   {//  assert(false);
   }
   ReflectionSubgroupWeylGroup tempSubgroup;
-  tempSubgroup.AmbientWeyl.Assign(owner.AmbientWeyl);
+  tempSubgroup.AmbientWeyl=(owner.AmbientWeyl);
   tempSubgroup.ComputeSubGroupFromGeneratingReflections(tempRoots, tempSubgroup.ExternalAutomorphisms, theGlobalVariables, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
   tempRoots.CopyFromBase(tempSubgroup.RootSubsystem);
@@ -2458,36 +2459,28 @@ void coneRelations::ElementToString
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS
-(char WeylLetter, int Rank, List<SemisimpleLieAlgebra>& owner, GlobalVariables& theGlobalVariables)
-{ this->theWeyl.MakeArbitrary(WeylLetter, Rank);
-  //the following initialization code stinks. This following piece of code caused me half an hour of painful debugging.
-  //I need a better scheme.
-  //until such is found, this uglyness must stay.
-  this->owner=&owner;
-  this->indexInOwner=this->owner->IndexOfObject(*this);
-  if (this->indexInOwner==-1)
-  { this->indexInOwner=this->owner->size;
-    this->owner->AddOnTop(*this);
+(GlobalVariables& theGlobalVariables)
+{ ANNOYINGSTATISTICS;
+  if (&this->owner->TheObjects[this->indexInOwner]!=this)
+  { std::cout << "This is a programming error: a semisimple Lie algebra cannot exist on its own, it must belong "
+    << "to some container array. " << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
+    << " line " << __LINE__ << ".";
   }
-  this->ComputeChevalleyConstantS(this->theWeyl, theGlobalVariables);
-  this->owner->TheObjects[this->indexInOwner]=*this;
-  //end of stinky part
-}
-
-void SemisimpleLieAlgebra::ComputeChevalleyConstantS(WeylGroup& input, GlobalVariables& theGlobalVariables)
-{ this->theWeyl.CartanSymmetric=(input.CartanSymmetric);
   this->theWeyl.ComputeRho(true);
+  ANNOYINGSTATISTICS;
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
+  ANNOYINGSTATISTICS;
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
+  ANNOYINGSTATISTICS;
   this->Computed.NullifyAll(false);
+  ANNOYINGSTATISTICS;
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic=false;
   Vectors<Rational>& posRoots=this->theWeyl.RootsOfBorel;
-  nonExploredRoots.init(posRoots.size);
-  for (int i=0; i<posRoots.size; i++)
-    nonExploredRoots.AddSelectionAppendNewIndex(i);
-  Vector<Rational> tempRoot;
+
+  nonExploredRoots.MakeFullSelection(posRoots.size);
   ANNOYINGSTATISTICS;
+  Vector<Rational> tempRoot;
 //  std::cout << "<hr>time before running initilization cycle: " << theGlobalVariables.GetElapsedSeconds();
   for (int i=0; i<this->theWeyl.RootSystem.size; i++)
     for(int j=i; j<this->theWeyl.RootSystem.size; j++)
@@ -2556,10 +2549,26 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS(WeylGroup& input, GlobalVar
     nonExploredRoots.ComputeIndicesFromSelection();
   }
 //  this->ComputeDebugString();
-//  this->TestForConsistency(theGlobalVariables);
 //  std::cout << "<hr>time before computing multiplication table for chevalley constants:" << theGlobalVariables.GetElapsedSeconds();
   ANNOYINGSTATISTICS;
+  int oldBufferSize= HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize;
+  HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=1;
   this->ComputeMultTable(theGlobalVariables);
+  HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=oldBufferSize;
+  ANNOYINGSTATISTICS;
+
+//  std::cout << this->ChevalleyConstants.ElementToString(true, false);
+//  std::cout << this->ElementToString(theGlobalVariables);
+//  std::cout.flush();
+//  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
+//    for (int j=0; j<this->t
+//  std::cout << "<br>pos roots: " << this->GetNumPosRoots();
+  if (this->GetNumPosRoots()<=0)
+  { std::cout << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. "
+    << " Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    assert(false);
+  }
+//  this->TestForConsistency(theGlobalVariables);
 }
 
 void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
@@ -2593,7 +2602,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
       { this->theLiebrackets.elements[i][j].AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
         (i, *this->owner, this->indexInOwner);
         hRoot.MakeEi(theRank, j-numPosRoots);
-        this->theLiebrackets.elements[i][j]*=-Vector<Rational>::ScalarProduct(hRoot, rightWeight, this->theWeyl.CartanSymmetric);
+        this->theLiebrackets.elements[i][j]*=-Vector<Rational>::ScalarProduct(hRoot, leftWeight, this->theWeyl.CartanSymmetric);
         continue;
       }
       if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
@@ -2601,9 +2610,17 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
         if (newIndex!=-1)
         { this->theLiebrackets.elements[i][j].AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
           (newIndex, *this->owner, this->indexInOwner);
-          this->theLiebrackets.elements[i][j]*=this->ChevalleyConstants.elements[i][j];
+          int leftIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
+          int rightIndex=this->ChevalleyGeneratorIndexToRootIndex(j);
+          this->theLiebrackets.elements[i][j]*=this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else
-          this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
+        { if (!(leftWeight+rightWeight).IsEqualToZero())
+            this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
+          else
+          { ElementSemisimpleLieAlgebra& current=this->theLiebrackets.elements[i][j];
+            current.AssignElementCartan(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this->owner, this->indexInOwner);
+          }
+        }
         continue;
       }
     }
@@ -2712,26 +2729,33 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
-  ElementSemisimpleLieAlgebra g1, g2, g3, g123, g231, g312, temp;
-  g1.MakeZero(*this->owner, this->indexInOwner);
-  g2.MakeZero(*this->owner, this->indexInOwner);
-  g3.MakeZero(*this->owner, this->indexInOwner);
+  ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
-  { g1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this->owner, this->indexInOwner);
+  { g1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *this->owner, this->indexInOwner);
     for (int j=0; j<this->GetNumGenerators(); j++)
-    { g2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(j, *this->owner, this->indexInOwner);
+    { g2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (j, *this->owner, this->indexInOwner);
       for (int k=0; k<this->GetNumGenerators(); k++)
-      { g3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(k, *this->owner, this->indexInOwner);
-        this->LieBracket(g2, g3, temp); this->LieBracket(g1, temp, g123);
-        this->LieBracket(g3, g1, temp); this->LieBracket(g2, temp, g231);
-        this->LieBracket(g1, g2, temp); this->LieBracket(g3, temp, g312);
+      { g3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+        (k, *this->owner, this->indexInOwner);
+        this->LieBracket(g2, g3, g23); this->LieBracket(g1, g23, g123);
+        this->LieBracket(g3, g1, g31); this->LieBracket(g2, g31, g231);
+        this->LieBracket(g1, g2, g12); this->LieBracket(g3, g12, g312);
         temp=g123;
         temp+=g231;
         temp+=g312;
         if (!temp.IsEqualToZero())
         { std::cout << "This is a programming error. The computed structure constants are wrong: "
-          << " the Jacobi identity fails. Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
+          << " the Jacobi identity fails. More precisely, I get that "
+          << "<br>[" << g1.ElementToString() << ", " << g2.ElementToString() << "]=" << g12.ElementToString()
+          << "<br>[" << g2.ElementToString() << ", " << g3.ElementToString() << "]=" << g23.ElementToString()
+          << "<br>[" << g3.ElementToString() << ", " << g1.ElementToString() << "]=" << g31.ElementToString()
+          << "<br>g123= " << g123.ElementToString() << "<br>g231="
+          << g231.ElementToString()
+          << "<br>g312=" << g312.ElementToString() << "<br>"
+          << " Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
           << " line " << __LINE__ << ". ";
           assert(false);
           return false;
@@ -3105,8 +3129,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain, Ve
   //rootSubalgebra::ProblemCounter++;
   rootSubalgebra& theDomainRootSA = theGlobalVariables.rootSAAttemptExtensionToIso1.GetElement();
   rootSubalgebra& theRangeRootSA = theGlobalVariables.rootSAAttemptExtensionToIso2.GetElement();
-  theDomainRootSA.AmbientWeyl.Assign(theWeyl);
-  theRangeRootSA.AmbientWeyl.Assign(theWeyl);
+  theDomainRootSA.AmbientWeyl=(theWeyl);
+  theRangeRootSA.AmbientWeyl=(theWeyl);
   theDomainRootSA.genK.CopyFromBase(Domain);
   theRangeRootSA.genK.CopyFromBase(Range);
   theDomainRootSA.ComputeAllButAmbientWeyl();

@@ -666,7 +666,9 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char Wey
   this->FindSl2Subalgebras(output, theGlobalVariables);
 }
 
-void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables, SemisimpleLieAlgebra& theLieAlgebra)
+void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
+(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables,
+ SemisimpleLieAlgebra& theLieAlgebra)
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   Vectors<Rational> RootsWithCharacteristic2;
@@ -680,7 +682,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition(SltwoSubalgebras& 
     for (int j=0; j<theRelativeDimension; j++)
       InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarCartanRoot(this->SimpleBasisK.TheObjects[k], this->SimpleBasisK.TheObjects[j]);
   InvertedRelativeKillingForm.Invert(theGlobalVariables);
-  theLieAlgebra.ComputeChevalleyConstantS(this->AmbientWeyl, theGlobalVariables);
+  theLieAlgebra.theWeyl=this->AmbientWeyl;
+  theLieAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
   //int relativeDimension =
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> tempRoots;
@@ -935,7 +938,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& the
 }
 
 Vector<Rational> ElementSemisimpleLieAlgebra::GetCartanPart
-()
+()const
 { Vector<Rational> result;
   ChevalleyGenerator tempGen;
   int theRank=this->GetOwner().GetRank();
@@ -1468,7 +1471,7 @@ void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank
   for (int i=0; i<this->theLetters.size; i++)
   { this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
     this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-    this->theCandidateSubAlgebras.TheObjects[i].owner[0].theWeyl.Assign(this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl);
+    this->theCandidateSubAlgebras.TheObjects[i].owner[0].theWeyl=(this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl);
     int theDimension = this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.CartanSymmetric.NumRows;
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
@@ -1947,7 +1950,7 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, Globa
   assert(tempS=="Simple_basis_k:");
   this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
   this->genK.CopyFromBase(this->SimpleBasisK);
-  this->AmbientWeyl.Assign(owner.AmbientWeyl);
+  this->AmbientWeyl=(owner.AmbientWeyl);
   this->ComputeAll();
 }
 
@@ -2351,9 +2354,10 @@ void ElementSemisimpleLieAlgebra::ElementToVectorNegativeRootSpacesFirst(Vector<
     output[this->TheObjects[i].theGeneratorIndex]=this->theCoeffs[i];
 }
 
-void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational> & outputAuto, bool useNegativeRootsFirst)
+void SemisimpleLieAlgebra::ComputeOneAutomorphism
+(GlobalVariables& theGlobalVariables, Matrix<Rational> & outputAuto, bool useNegativeRootsFirst)
 { rootSubalgebra theRootSA;
-  theRootSA.AmbientWeyl.Assign(this->theWeyl);
+  theRootSA.AmbientWeyl=(this->theWeyl);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   ReflectionSubgroupWeylGroup theAutos;
@@ -2375,7 +2379,8 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism(GlobalVariables& theGlobalVari
   NonExplored.init(numRoots);
   NonExplored.MakeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
-  this->ComputeChevalleyConstantS(this->theWeyl, theGlobalVariables);
+
+  this->ComputeChevalleyConstantS(theGlobalVariables);
   List<ElementSemisimpleLieAlgebra> Domain, Range;
   Range.SetSize(numRoots+theDimension);
   Domain.SetSize(numRoots+theDimension);
@@ -2552,7 +2557,7 @@ Parser::ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVari
 
 void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theHmm.theRange().ComputeChevalleyConstantS
-  (this->DefaultWeylLetter, this->DefaultWeylRank, this->theAlgebras, theGlobalVariables)
+  (theGlobalVariables)
   ;
   ANNOYINGSTATISTICS;
   //std::cout << "<hr>Chevalley constants computed on the " << theGlobalVariables.GetElapsedSeconds() << " second.";
@@ -3500,8 +3505,8 @@ void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobal
 
 bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators
 (GlobalVariables& theGlobalVariables)
-{ this->theDomain().ComputeChevalleyConstantS(this->theDomain().theWeyl, theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS(this->theRange().theWeyl, theGlobalVariables);
+{ this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
   int theDomainDimension= this->theDomain().theWeyl.CartanSymmetric.NumRows;
   Selection NonExplored;
   int numRoots= this->theDomain().theWeyl.RootSystem.size;
@@ -3654,8 +3659,8 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 (char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
 { this->owners=&ownerOfAlgebras;
   this->owners->SetSize(2);
-  this->theDomain().ComputeChevalleyConstantS(theWeylLetter, theWeylDim, ownerOfAlgebras, theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS(theWeylLetter, theWeylDim, ownerOfAlgebras, theGlobalVariables);
+  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
   this->domainAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
@@ -3686,10 +3691,9 @@ void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables
   owner.theAlgebras.SetSize(2);
   owner.DefaultWeylLetter='B';
   owner.DefaultWeylRank=3;
-  owner.theHmm.theRange().ComputeChevalleyConstantS
-  (owner.DefaultWeylLetter, owner.DefaultWeylRank, owner.theAlgebras, theGlobalVariables);
-  this->theDomain().ComputeChevalleyConstantS('G', 2, owner.theAlgebras, theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS('B', 3, owner.theAlgebras, theGlobalVariables);
+  owner.theHmm.theRange().ComputeChevalleyConstantS( theGlobalVariables);
+  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
   this->imagesSimpleChevalleyGenerators.SetSize(4);
   (owner.ParseAndCompute("g_2", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[0]);
   (owner.ParseAndCompute("g_1+g_3", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[1]);

@@ -305,7 +305,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   Vector<Polynomial<Rational> > tempVect, tempVect2;
   tempVect.SetSize(input.theDomain().theWeyl.GetDim()+input.theRange().theWeyl.GetDim());
   for (int i=0; i<tempVect.size; i++)
-    tempVect[i].MakeMonomialOneLetter(tempVect.size, i, 1, (Rational) 1);
+    tempVect[i].MakeMonomial(tempVect.size, i, 1, (Rational) 1);
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
   Polynomial<Rational>  polyZero;
   polyZero.MakeZero(tempVect.size);

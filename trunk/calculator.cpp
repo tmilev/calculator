@@ -277,7 +277,7 @@ int main(int argc, char **argv)
     { std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
       theComputation.Evaluate(civilizedInput);
       std::cout << "<hr>";
-      std::cout <<  theComputation.output;
+      std::cout <<  theComputation.outputString;
     }
 
     std::cout << "</td><td valign=\"top\">";

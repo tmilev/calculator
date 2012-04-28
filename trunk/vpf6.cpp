@@ -1468,12 +1468,10 @@ bool CommandList::fMatrix
 
 bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ DataOfExpressions<Polynomial<Rational> > outputPoly;
+{ /*DataOfExpressions<Polynomial<Rational> > outputPoly;
   std::stringstream errorLog;
-  HashedList<Expression> varImagesBuffer;
   Data outputData(theCommands);
-  if (!theCommands.ExtractData<DataOfExpressions<Polynomial<Rational> > >
-      (outputPoly, varImagesBuffer, theExpression, 0, 10000, &errorLog))
+  if (!theCommands.ExtractData<Polynomial<Rational> >(outputPoly, theExpression, 10000, &errorLog))
   { outputData.SetError(errorLog.str());
     return true;
   }
@@ -1487,12 +1485,31 @@ bool CommandList::fPolynomial
         *comments << ";<br>";
     }
   return true;
+  */
+  return false;
 }
 
 bool CommandList::fUniversalEnvelopingAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{
-  return true;
+{ /*DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > outputUE;
+  std::stringstream errorLog;
+  HashedList<Expression> varImagesBuffer;
+  Data outputData(theCommands);
+  if (!theCommands.ExtractData<ElementUniversalEnveloping<RationalFunction> >(outputUE, theExpression, 10000, &errorLog))
+  { outputData.SetError(errorLog.str());
+    return true;
+  }
+  outputData.MakeUE(theCommands, outputUE);
+  theExpression.theOperation=theCommands.opData();
+  theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(outputData);
+  if (comments!=0)
+    for (int i=0; i<outputUE.VariableImages.size; i++)
+    { *comments  << "x_{" << i+1 << "}:=" << outputUE.VariableImages[i].ElementToString(0, 10);
+      if (i!=outputUE.VariableImages.size-1)
+        *comments << ";<br>";
+    }
+  return true;*/
+  return false;
 }
 
 bool CommandList::fSSAlgebra
@@ -2333,7 +2350,7 @@ bool Expression::operator==
 
 template <class dataType>
 bool CommandList::ExtractData
-(dataType& output, HashedList<Expression>& VariableImagesBuffer,
+(dataType& outputBuffer, DataOfExpressions<dataType>& finalOutput,
  const Expression& theInput, int RecursionDepth, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog)
 { if (RecursionDepth>MaxRecursionDepthMustNotPopStack)
   { if (errorLog!=0)
@@ -2342,37 +2359,32 @@ bool CommandList::ExtractData
     return false;
   }
   if (RecursionDepth==0)
-  { VariableImagesBuffer.Clear();
-    output.MakeZero(0);
-  }
+    finalOutput.VariableImages.Clear();
   if (theInput.theOperation==this->opTimes() || theInput.theOperation==this->opPlus() || theInput.theOperation==this->opMinus())
-  { dataType bufferPoly;
+  { dataType bufferData;
     for (int i=0; i<theInput.children.size; i++)
-    { if (!this->ExtractData(bufferPoly, VariableImagesBuffer, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+    { if (!this->ExtractData(bufferData, finalOutput, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
         return false;
-//      assert(bufferPoly.NumVars<VariableImages.size);
-      bufferPoly.theBuiltIn.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
-      bufferPoly.VariableImages=VariableImagesBuffer;
-      output.theBuiltIn.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
-      output.VariableImages=VariableImagesBuffer;
+      outputBuffer.SetNumVariables(finalOutput.VariableImages.size);
+      bufferData.SetNumVariables(finalOutput.VariableImages.size);
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
-          output=bufferPoly;
+          outputBuffer=bufferData;
         else
-          output.theBuiltIn*=bufferPoly.theBuiltIn;
+          outputBuffer*=bufferData;
       }
       else if (theInput.theOperation==this->opMinus())
       { if (theInput.children.size==1)
-          output.theBuiltIn-=(bufferPoly.theBuiltIn);
+          outputBuffer-=(bufferData);
         else if (i==0)
-          output.theBuiltIn+=bufferPoly.theBuiltIn;
+          outputBuffer+=bufferData;
         else
-          output.theBuiltIn-=(bufferPoly.theBuiltIn);
+          outputBuffer-=(bufferData);
       } else if (theInput.theOperation==this->opPlus())
       { if (i==0)
-          output.theBuiltIn=bufferPoly.theBuiltIn;
+          outputBuffer=bufferData;
         else
-          output.theBuiltIn+=bufferPoly.theBuiltIn;
+          outputBuffer+=bufferData;
       }
     }
     return true;
@@ -2383,9 +2395,9 @@ bool CommandList::ExtractData
     if (right.theOperation==this->opData())
     { int  thePower=0;
       if (this->theData[right.theData].IsSmallInteger(thePower))
-      { if(!this->ExtractData(output, VariableImagesBuffer, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+      { if(!this->ExtractData(outputBuffer, finalOutput, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
           return false;
-        output.theBuiltIn.RaiseToPower(thePower, 1);
+        outputBuffer.RaiseToPower(thePower);
         return true;
       }
     }
@@ -2393,14 +2405,13 @@ bool CommandList::ExtractData
   if (theInput.theOperation==this->opData())
   { Data& theData=this->theData[theInput.theData];
     if (theData.type==theData.typeRational)
-    { output.MakeConst(theData.GetValuE<Rational>());
+    { outputBuffer=finalOutput.GetConst(theData.GetValuE<Rational>());
       return true;
     }
   }
   std::string debugString=theInput.ElementToString();
-  int theIndex=VariableImagesBuffer.AddNoRepetitionOrReturnIndexFirst(theInput);
-  output.theBuiltIn.MakeMonomialOneLetter(VariableImagesBuffer.size, theIndex, 1, 1);
-  output.VariableImages=VariableImagesBuffer;
+  int theIndex=finalOutput.VariableImages.AddNoRepetitionOrReturnIndexFirst(theInput);
+  outputBuffer=finalOutput.GetPolynomialMonomial(theIndex);
   return true;
 }
 
@@ -2746,7 +2757,7 @@ void CommandList::EvaluateCommands()
     out << "<tr><td colspan=\"3\"> "<< comments.str() << "</td></tr>";
   out << "</table>";
   this->theLog= loggingStream.str();
-  this->output=out.str();
+  this->outputString=out.str();
 }
 
 std::string SyntacticElement::ElementToString(CommandList& theBoss)
@@ -3470,18 +3481,6 @@ template <class dataType>
 void DataOfExpressions<dataType>::operator=(const DataOfExpressions<dataType>& other)
 { this->theBuiltIn=other.theBuiltIn;
   this->VariableImages=other.VariableImages;
-}
-
-template <class dataType>
-void DataOfExpressions<dataType>::MakeZero(int subtypeInfo)
-{ this->theBuiltIn.MakeZero(subtypeInfo);
-  this->VariableImages.Clear();
-}
-
-template <class dataType>
-void DataOfExpressions<dataType>::MakeConst(const Rational& input)
-{ this->theBuiltIn.MakeConst(0, input);
-  this->VariableImages.Clear();
 }
 
 template <class dataType>

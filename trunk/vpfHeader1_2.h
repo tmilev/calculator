@@ -3324,7 +3324,7 @@ void MonomialTensorGeneralizedVermas <CoefficientType>::SimplifyNormalizeCoeffs
       return;
     }
     this->Coefficient*=currentCF;
-    currentCF=currentCF.GetUnit();
+    currentCF=currentCF.GetOne();
   }
 }
 
@@ -6820,7 +6820,7 @@ void ElementUniversalEnveloping<CoefficientType>::RaiseToPower(int thePower)
   buffer=*this;
   if (this->size==0)
     return;
-  this->MakeConst(1, this->theCoeffs[0].NumVars, *this->owners, this->indexInOwners);
+  this->MakeConst(this->theCoeffs[0].GetOne(), *this->owners, this->indexInOwners);
   for (int i=0; i<thePower; i++)
     this->operator*=(buffer);
 }

@@ -3036,7 +3036,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     }
     this->impliedNumVars=theIndex+1;
     this->owner->MaxFoundVars=MathRoutines::Maximum(this->impliedNumVars, this->owner->MaxFoundVars);
-    this->polyValue.GetElement().MakeMonomialOneLetter(this->impliedNumVars, theIndex, 1, (Rational) 1);
+    this->polyValue.GetElement().MakeMonomial(this->impliedNumVars, theIndex, 1, (Rational) 1);
     this->ExpressionType=this->typePoly;
     return;
   }
@@ -4336,7 +4336,7 @@ void RationalFunction::lcm
   rightTemp.SetNumVariablesSubDeletedVarsByOne((int)theNumVars+1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
   rightTemp.ScaleToIntegralNoGCDCoeffs();
-  tempP.MakeMonomialOneLetter((int)theNumVars+1,(int) theNumVars, 1, (Rational) 1);
+  tempP.MakeMonomial((int)theNumVars+1,(int) theNumVars, 1, (Rational) 1);
   leftTemp*=(tempP);
   tempP*=-1;
   tempP+=1;

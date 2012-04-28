@@ -12,12 +12,12 @@
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 #endif
 
-class PolynomialOfExpressions;
+template <class dataType>
+class DataOfExpressions;
 
 class Data
 {
 public:
-
   CommandList* owner;
   int theIndex;
   int type;
@@ -25,7 +25,7 @@ public:
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
-    typeEltTensorGenVermasOverRF, typeMonomialGenVerma
+    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeUE
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -37,7 +37,7 @@ public:
   Data(const Data& otherData) {this->operator=(otherData);}
   bool SetError(const std::string& inputError);
   bool IsEqualToOne()const;
-  PolynomialOfExpressions& GetPoly()const;
+  DataOfExpressions<Polynomial<Rational> >& GetPoly()const;
   void MakeMonomialGeneralizedVerma
 (CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
 ;
@@ -48,7 +48,7 @@ public:
 (CommandList& theBoss, const Rational& inputRational)
 ;
   void MakePoly
-(CommandList& theBoss, const PolynomialOfExpressions& inputPoly)
+(CommandList& theBoss, const DataOfExpressions<Polynomial<Rational> >& inputPoly)
 ;
   void MakeElementTensorGeneralizedVermas
   (CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
@@ -181,7 +181,7 @@ class Expression
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
-  void MakePoly(const PolynomialOfExpressions& inputData, CommandList& newBoss, int inputIndexBoundVars);
+  void MakePoly(const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars);
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -392,19 +392,20 @@ class VariableNonBound
   }
 };
 
-class PolynomialOfExpressions
+template <class dataType>
+class DataOfExpressions
 {
   public:
-  Polynomial<Rational> thePoly;
+  dataType theBuiltIn;
   HashedList<Expression> VariableImages;
-  void operator=(const PolynomialOfExpressions& other);
-  bool operator==(const PolynomialOfExpressions& other)
-  { return this->thePoly==other.thePoly && this->VariableImages==other.VariableImages;
+  void operator=(const DataOfExpressions<dataType>& other);
+  bool operator==(const DataOfExpressions<dataType>& other)
+  { return this->theBuiltIn==other.theBuiltIn && this->VariableImages==other.VariableImages;
   }
-  static inline int HashFunction(const PolynomialOfExpressions& input){return input.HashFunction();}
+  static inline int HashFunction(const DataOfExpressions<dataType>& input){return input.HashFunction();}
   int HashFunction()const
 ;
-  void MakeZero();
+  void MakeZero(int subtypeInfo);
   void MakeConst(const Rational& input)
   ;
   std::string ElementToString()const;
@@ -422,8 +423,8 @@ public:
   HashedList<ElementSemisimpleLieAlgebra>  theLieAlgebraElements;
   HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theElemenentsGeneralizedVermaModuleTensors;
   HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
-  HashedList<PolynomialOfExpressions>  thePolys;
-  HashedList<RationalFunction>  theRFs;
+  HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
+  HashedList<RationalFunction> theRFs;
   HashedList<Rational>  theRationals;
   void reset();
 };
@@ -734,8 +735,9 @@ public:
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
-  bool ExtractPolyRational
-  (PolynomialOfExpressions& output, HashedList<Expression>& VariableImagesBuffer, const Expression& theInput,
+template <class dataType>
+  bool ExtractData
+  (dataType& output, HashedList<Expression>& VariableImagesBuffer, const Expression& theInput,
    int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
   ;
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
@@ -765,8 +767,7 @@ public:
     return false;
   }
   Expression* PatternMatch
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression,
-   ExpressionPairs& bufferPairs, int RecursionDepth,
+  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth,
    int MaxRecursionDepth, Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
@@ -855,7 +856,13 @@ static bool EvaluateDereferenceOneArgument
   static bool fPolynomial
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fUniversalEnvelopingAlgebra
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fSSAlgebra
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fHWTAABF
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fElementSSAlgebra
@@ -867,16 +874,12 @@ static bool EvaluateDereferenceOneArgument
   void AddEmptyHeadedCommand();
   CommandList();
   void AddOperationNoFail
-  (const std::string& theOpName,
-   const Function::FunctionAddress& theFunAddress,
-   const std::string& opArgumentList, const std::string& opDescription,
-   const std::string& opExample, bool inputNameUsed
-   )
+  (const std::string& theOpName, const Function::FunctionAddress& theFunAddress, const std::string& opArgumentList,
+   const std::string& opDescription, const std::string& opExample, bool inputNameUsed)
    ;
   void AddNonBoundVarMustBeNew
   (const std::string& theName, const Function::FunctionAddress& funHandler,
-   const std::string& argList, const std::string& description, const std::string& exampleArgs
-   )
+   const std::string& argList, const std::string& description, const std::string& exampleArgs)
   { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
     if (theIndex!=this->theNonBoundVars.size-1)
       assert(false);
@@ -888,20 +891,15 @@ static bool EvaluateDereferenceOneArgument
   }
   int AddNonBoundVarReturnVarIndex
 (const std::string& theName, const Function::FunctionAddress& funHandler,
-  const std::string& argList, const std::string& description, const std::string& exampleArgs
-)
+  const std::string& argList, const std::string& description, const std::string& exampleArgs)
 ;
   void init(GlobalVariables& inputGlobalVariables);
   void initPredefinedVars()
   ;
-  void initTargetProperties()
-  {// this->AddTargetProperty("IsDistributed", & this->EvaluateDoDistribute);
-  }
   void ExtractExpressions();
   void EvaluateCommands();
   bool EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, int RecursionDepth, int maxRecursionDepth,
- ExpressionPairs& bufferPairs, std::stringstream* theLog=0)
+(Expression& theExpression, int RecursionDepth, int maxRecursionDepth, ExpressionPairs& bufferPairs, std::stringstream* theLog=0)
  ;
   void Evaluate(const std::string& theInput)
   { if (this->theGlobalVariableS==0)

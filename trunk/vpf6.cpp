@@ -8,7 +8,7 @@ template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHas
 template < > int HashedListB<int, MathRoutines::IntIdentity>::PreferredHashSize=50;
 template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
 template < > int HashedListB<Function, Function::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<PolynomialOfExpressions, PolynomialOfExpressions::HashFunction>::PreferredHashSize=100;
+template < > int HashedListB<DataOfExpressions<Polynomial<Rational> >, DataOfExpressions<Polynomial<Rational> >::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<RationalFunction, RationalFunction::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<Rational, Rational::HashFunction>::PreferredHashSize=100;
 
@@ -17,12 +17,12 @@ template < > int List<Function>::ListActualSizeIncrement=50;
 template < > int List<Data>::ListActualSizeIncrement=500;
 template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
 template < > int List<ElementTensorsGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=50;
-template < > int List<PolynomialOfExpressions>::ListActualSizeIncrement=50;
+template < > int List<DataOfExpressions<Polynomial<Rational> > >::ListActualSizeIncrement=50;
 
 //Note: due to the messed up C++ templates, the following template specialization funcitons must appear
 //here and nowhere else. C++ is a dirty buggy language.
 template < >
-PolynomialOfExpressions& Data::GetValuE()const
+DataOfExpressions<Polynomial<Rational> >& Data::GetValuE()const
 { if (this->type!=this->typePoly)
   { std::cout << "This is a programming error. Data of type " << this->ElementToStringDataType()
     << " is treated as if it were data of type Polynomial."
@@ -84,7 +84,7 @@ bool Data::IsOfType<Rational>()const
 }
 
 template < >
-bool Data::IsOfType<PolynomialOfExpressions>()const
+bool Data::IsOfType<DataOfExpressions<Polynomial<Rational> > >()const
 { return this->type==this->typePoly;
 }
 
@@ -165,13 +165,12 @@ bool Data::LieBracket
   return false;
 }
 
-
 int Data::GetDynamicSubtypeInfo()
 { switch (this->type)
   { case Data::typeRational:
       return 0;
     case Data::typePoly:
-      return this->GetPoly().thePoly.NumVars;
+      return this->GetPoly().theBuiltIn.NumVars;
     default:
       std::cout << "This is a programming error: function Data::GetDynamicSubtypeInfo does not handle all possible cases. "
       << "Please debug file " << __FILE__ << " line " << __LINE__ << ".";
@@ -268,7 +267,7 @@ int Data::GetSmallInT()const
 { return this->GetValuE<Rational>().NumShort;
 }
 
-PolynomialOfExpressions& Data::GetPoly()const
+DataOfExpressions<Polynomial<Rational> >& Data::GetPoly()const
 { if (this->type!=this->typePoly)
   { std::cout << "This is a programming error. Data::GetPoly is called on Data of type "
     << this->ElementToStringDataType()
@@ -385,7 +384,7 @@ Data& Expression::GetData()const
 }
 
 void Data::MakePoly
-(CommandList& theBoss, const PolynomialOfExpressions& inputPoly)
+(CommandList& theBoss, const DataOfExpressions<Polynomial<Rational> >& inputPoly)
 { this->owner=&theBoss;
   this->type=this->typePoly;
   this->theIndex=theBoss.theObjectContainer.thePolys.AddNoRepetitionOrReturnIndexFirst(inputPoly);
@@ -581,7 +580,7 @@ CommandList::CommandList()
 }
 
 void Expression::MakePoly
-(const PolynomialOfExpressions& inputData, CommandList& newBoss, int inputIndexBoundVars)
+(const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars)
 { Data tempData;
   tempData.MakePoly(newBoss, inputData);
   this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
@@ -1275,6 +1274,47 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   return false;
 }
 
+bool CommandList::fHWTAABF
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{/*
+  List<Polynomial<Rational> > weight;
+  theNode.impliedNumVars=theNode.owner->MaxFoundVars;
+  if (!weightNode.GetListDontUseForFunctionArguments<Polynomial<Rational> >
+      (weight, theGlobalVariables, theNode.typePoly, theNode.impliedNumVars))
+    return theNode.SetError(theNode.errorBadOrNoArgument);
+  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
+  if (weight.size!=theSSalgebra.GetRank())
+    return theNode.SetError(theNode.errorDimensionProblem);
+  ElementUniversalEnveloping<Polynomial<Rational> >& leftElt=leftNode.UEElement.GetElement();
+  ElementUniversalEnveloping<Polynomial<Rational> >& rightElt=rightNode.UEElement.GetElement();
+  leftElt.SetNumVariables(theNode.impliedNumVars);
+  rightElt.SetNumVariables(theNode.impliedNumVars);
+  Polynomial<Rational>  theRingZero, theRingUnit;
+  int& numVars= theNode.impliedNumVars;
+  theRingZero.MakeZero(numVars);
+  theRingUnit.MakeOne(numVars);
+  List<Polynomial<Rational> > theHW;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  std::stringstream out;
+  out << "Highest weight in fundamental coords: " << weight.ElementToString() << "<br>";
+  theHW.SetSize(weight.size);
+  leftElt.GetOwner().OrderSSalgebraForHWbfComputation();
+  for (int i=0; i<weight.size; i++)
+  { theHW[i]=weight[i];
+    theHW[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
+  }
+  if(!leftElt.HWTAAbilinearForm(rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
+    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+//  Polynomial<Rational>  symmTerm;
+//  if(!rightElt.HWTAAbilinearForm
+//     (leftElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
+//  return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
+  leftElt.GetOwner().OrderSSLieAlgebraStandard();
+//  theNode.polyValue.GetElement()+=symmTerm;
+  theNode.ExpressionType=theNode.typePoly;
+  theNode.outputString=out.str();*/
+  return false;
+}
 
 bool CommandList::fHWV
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
@@ -1317,9 +1357,10 @@ bool CommandList::fHWV
   int indexOfAlgebra=theSSdata.theIndex;
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
   int theRank=theSSalgebra.GetRank();
-  Vector<PolynomialOfExpressions> highestWeight;
+  Vector<DataOfExpressions<Polynomial<Rational> > > highestWeight;
   Vector<Rational> parabolicSel;
-  if (!middleE.GetVector<PolynomialOfExpressions>(highestWeight, theRank, &CommandList::fPolynomial, comments))
+  if (!middleE.GetVector<DataOfExpressions<Polynomial<Rational> > >
+      (highestWeight, theRank, &CommandList::fPolynomial, comments))
   { if(comments!=0)
       *comments << "Failed to convert the second argument of HWV to a list of " << theRank
       << " polynomials. The second argument you gave is " << middleE.ElementToString() << ".";
@@ -1334,8 +1375,8 @@ bool CommandList::fHWV
   Vector<RationalFunction> theWeight;
   theWeight.SetSize(highestWeight.size);
   for (int i=0; i<theWeight.size; i++)
-    theWeight[i]=highestWeight[i].thePoly;
-  int theNumVars=highestWeight[0].thePoly.NumVars;
+    theWeight[i]=highestWeight[i].theBuiltIn;
+  int theNumVars=highestWeight[0].theBuiltIn.NumVars;
   RationalFunction RFOne, RFZero;
   RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
   RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
@@ -1367,7 +1408,7 @@ bool CommandList::fHWV
     if (comments!=0)
       *comments << report;
     if (!isGood)
-    { theExpression.SetError("Error while generating highest weight module. See comments for details. ");
+    { theExpression.SetError("Error while generating highest weight module. See comments for details. "+(*comments).str());
       return true;
     }
   }
@@ -1427,25 +1468,30 @@ bool CommandList::fMatrix
 
 bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ assert(false);
-  return false;
-//  PolynomialOfExpressions outputPoly;
-//  std::stringstream errorLog;
-//  HashedList<Expression> varImagesBuffer;
-//  Data outputData(theCommands);
-//  if (!theCommands.ExtractPolyRational(outputPoly, varImagesBuffer, theExpression, 0, 10000, &errorLog))
-//  { outputData.SetError(errorLog.str());
-//    return true;
-//  }
-//  outputData.MakePoly(theCommands, outputPoly);
-//  theExpression.theOperation=theCommands.opData();
-//  theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(outputData);
-//  if (comments!=0)
-//    for (int i=0; i<outputPoly.VariableImages.size; i++)
-//    { *comments  << "x_{" << i+1 << "}:=" << outputPoly.VariableImages[i].ElementToString(0, 10);
-//      if (i!=outputPoly.VariableImages.size-1)
-//        *comments << ";<br>";
-//    }
+{ DataOfExpressions<Polynomial<Rational> > outputPoly;
+  std::stringstream errorLog;
+  HashedList<Expression> varImagesBuffer;
+  Data outputData(theCommands);
+  if (!theCommands.ExtractData<DataOfExpressions<Polynomial<Rational> > >
+      (outputPoly, varImagesBuffer, theExpression, 0, 10000, &errorLog))
+  { outputData.SetError(errorLog.str());
+    return true;
+  }
+  outputData.MakePoly(theCommands, outputPoly);
+  theExpression.theOperation=theCommands.opData();
+  theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(outputData);
+  if (comments!=0)
+    for (int i=0; i<outputPoly.VariableImages.size; i++)
+    { *comments  << "x_{" << i+1 << "}:=" << outputPoly.VariableImages[i].ElementToString(0, 10);
+      if (i!=outputPoly.VariableImages.size-1)
+        *comments << ";<br>";
+    }
+  return true;
+}
+
+bool CommandList::fUniversalEnvelopingAlgebra
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{
   return true;
 }
 
@@ -1717,7 +1763,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedVars();
-  this->initTargetProperties();
 }
 
 bool CommandList::CollectSummands(int inputIndexBoundVars, Expression& theExpression)
@@ -1862,12 +1907,11 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
   //handle Rational*Rational:
-  assert(false);
   if (leftE.theOperation==theCommands.opData() && rightE.theOperation==theCommands.opData())
   { Data& leftD=theCommands.theData[leftE.theData];
     Data& rightD=theCommands.theData[rightE.theData];
     if (leftD.type==leftD.typeRational && rightD.type==rightD.typeRational)
-    {// theExpression.MakeDatA(leftD*rightD, theCommands, inputIndexBoundVars);
+    { theExpression.MakeDatA(leftD*rightD, theCommands, inputIndexBoundVars);
       return true;
     }
   }
@@ -1891,7 +1935,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     { Data& leftD=theCommands.theData[leftE.theData];
       Data& righLefttD=theCommands.theData[rightLeftE.theData];
       if (leftD.type==leftD.typeRational && righLefttD.type==righLefttD.typeRational)
-      {// leftE.MakeDatA(leftD*righLefttD, theCommands, inputIndexBoundVars);
+      { leftE.MakeDatA(leftD*righLefttD, theCommands, inputIndexBoundVars);
         rightE.AssignChild(1);
         result=true;
       }
@@ -2029,34 +2073,33 @@ bool CommandList::EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
   if (LeftD.type==Data::typeElementSSalgebra && RightD.type==Data::typeMonomialGenVerma)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...";
     assert(false);
-//    MonomialGeneralizedVerma<RationalFunction>& theMon=RightD.GetMonGenVerma();
-//    int numVars=theMon.Coefficient.NumVars;
-//    ElementSemisimpleLieAlgebra& leftLieElt=LeftD.GetEltSimpleLieAlgebra();
-//    ElementSumGeneralizedVermas<RationalFunction> result;
-//    ElementUniversalEnveloping<RationalFunction> containerUE;
-//    RationalFunction RFOne, RFZero;
-//    RFZero.MakeZero(numVars, theCommands.theGlobalVariableS);
-//    RFOne.MakeConst(numVars, 1, theCommands.theGlobalVariableS);
-//    containerUE.AssignElementLieAlgebra
-//    (leftLieElt, *leftLieElt.ownerArray, leftLieElt.indexOfOwnerAlgebra, RFOne, RFZero);
-//    theMon.MultiplyMeByUEEltOnTheLeft
-//    (containerUE, result, *theCommands.theGlobalVariableS, RFOne, RFZero)
-//    ;
-//    List<Expression> theSummands;
-//    theSummands.SetSize(result.size);
-//    Expression resultLeft, resultRight;
-//    MonomialGeneralizedVerma<RationalFunction> tempMon;
-//    PolynomialOfExpressions tempCoeff;
-//    for (int i=0; i<result.size; i++)
-//    { tempMon=result[i];
-//      tempMon.Coefficient.GetNumerator(tempCoeff.thePoly);
-//      tempMon.Coefficient=RFOne;
-//      resultLeft.MakePoly(tempCoeff, theCommands, inputIndexBoundVars);
-//      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
-//      theSummands[i].MakeProducT(theCommands, inputIndexBoundVars, resultLeft, resultRight);
-//    }
-//    theCommands.CollectSummands(theSummands, true, inputIndexBoundVars, theExpression);
-//    return true;
+    MonomialGeneralizedVerma<RationalFunction>& theMon=RightD.GetMonGenVerma();
+    ModuleSSalgebraNew<RationalFunction>& theMod=theMon.GetOwner();
+    ElementSemisimpleLieAlgebra& leftLieElt=LeftD.GetEltSimpleLieAlgebra();
+    ElementSumGeneralizedVermas<RationalFunction> result;
+    ElementUniversalEnveloping<RationalFunction> containerUE;
+    RationalFunction RFOne, RFZero;
+    int numVars=theMod.GetNumVars();
+    RFZero.MakeZero(numVars, theCommands.theGlobalVariableS);
+    RFOne.MakeConst(numVars, 1, theCommands.theGlobalVariableS);
+    containerUE.AssignElementLieAlgebra
+    (leftLieElt, *leftLieElt.ownerArray, leftLieElt.indexOfOwnerAlgebra, RFOne, RFZero);
+    theMon.MultiplyMeByUEEltOnTheLeft
+    (RFOne, containerUE, result, *theCommands.theGlobalVariableS, RFOne, RFZero)
+    ;
+    List<Expression> theSummands;
+    theSummands.SetSize(result.size);
+    Expression resultLeft, resultRight;
+    MonomialGeneralizedVerma<RationalFunction> tempMon;
+    DataOfExpressions<Polynomial<Rational> > tempCoeff;
+    for (int i=0; i<result.size; i++)
+    { tempMon=result[i];
+      resultLeft.MakePoly(tempCoeff, theCommands, inputIndexBoundVars);
+      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
+      theSummands[i].MakeProducT(theCommands, inputIndexBoundVars, resultLeft, resultRight);
+    }
+    theCommands.CollectSummands(theSummands, true, inputIndexBoundVars, theExpression);
+    return true;
   }
   return false;
 }
@@ -2070,7 +2113,6 @@ bool CommandList::EvaluateDereferenceOneArgument
   if (functionNameNode.theOperation!=theCommands.opData() )
     return false;
   Data& theFunData=functionNameNode.GetData();
-  assert(false);
   Data tempData(theCommands);
   if (functionArgumentNode.theOperation!=theCommands.opList())
   { if (functionArgumentNode.theOperation!=theCommands.opData() )
@@ -2289,8 +2331,9 @@ bool Expression::operator==
   return this->theBoss->ExpressionsAreEqual(*this, other);
 }
 
-bool CommandList::ExtractPolyRational
-(PolynomialOfExpressions& output, HashedList<Expression>& VariableImagesBuffer,
+template <class dataType>
+bool CommandList::ExtractData
+(dataType& output, HashedList<Expression>& VariableImagesBuffer,
  const Expression& theInput, int RecursionDepth, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog)
 { if (RecursionDepth>MaxRecursionDepthMustNotPopStack)
   { if (errorLog!=0)
@@ -2300,36 +2343,36 @@ bool CommandList::ExtractPolyRational
   }
   if (RecursionDepth==0)
   { VariableImagesBuffer.Clear();
-    output.MakeZero();
+    output.MakeZero(0);
   }
   if (theInput.theOperation==this->opTimes() || theInput.theOperation==this->opPlus() || theInput.theOperation==this->opMinus())
-  { PolynomialOfExpressions bufferPoly;
+  { dataType bufferPoly;
     for (int i=0; i<theInput.children.size; i++)
-    { if (!this->ExtractPolyRational(bufferPoly, VariableImagesBuffer, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+    { if (!this->ExtractData(bufferPoly, VariableImagesBuffer, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
         return false;
 //      assert(bufferPoly.NumVars<VariableImages.size);
-      bufferPoly.thePoly.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
+      bufferPoly.theBuiltIn.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
       bufferPoly.VariableImages=VariableImagesBuffer;
-      output.thePoly.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
+      output.theBuiltIn.SetNumVariablesSubDeletedVarsByOne(VariableImagesBuffer.size);
       output.VariableImages=VariableImagesBuffer;
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
           output=bufferPoly;
         else
-          output.thePoly*=bufferPoly.thePoly;
+          output.theBuiltIn*=bufferPoly.theBuiltIn;
       }
       else if (theInput.theOperation==this->opMinus())
       { if (theInput.children.size==1)
-          output.thePoly-=(bufferPoly.thePoly);
+          output.theBuiltIn-=(bufferPoly.theBuiltIn);
         else if (i==0)
-          output.thePoly+=bufferPoly.thePoly;
+          output.theBuiltIn+=bufferPoly.theBuiltIn;
         else
-          output.thePoly-=(bufferPoly.thePoly);
+          output.theBuiltIn-=(bufferPoly.theBuiltIn);
       } else if (theInput.theOperation==this->opPlus())
       { if (i==0)
-          output.thePoly=bufferPoly.thePoly;
+          output.theBuiltIn=bufferPoly.theBuiltIn;
         else
-          output.thePoly+=bufferPoly.thePoly;
+          output.theBuiltIn+=bufferPoly.theBuiltIn;
       }
     }
     return true;
@@ -2340,9 +2383,9 @@ bool CommandList::ExtractPolyRational
     if (right.theOperation==this->opData())
     { int  thePower=0;
       if (this->theData[right.theData].IsSmallInteger(thePower))
-      { if(!this->ExtractPolyRational(output, VariableImagesBuffer, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+      { if(!this->ExtractData(output, VariableImagesBuffer, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
           return false;
-        output.thePoly.RaiseToPower(thePower, 1);
+        output.theBuiltIn.RaiseToPower(thePower, 1);
         return true;
       }
     }
@@ -2356,7 +2399,7 @@ bool CommandList::ExtractPolyRational
   }
   std::string debugString=theInput.ElementToString();
   int theIndex=VariableImagesBuffer.AddNoRepetitionOrReturnIndexFirst(theInput);
-  output.thePoly.MakeMonomialOneLetter(VariableImagesBuffer.size, theIndex, 1, 1);
+  output.theBuiltIn.MakeMonomialOneLetter(VariableImagesBuffer.size, theIndex, 1, 1);
   output.VariableImages=VariableImagesBuffer;
   return true;
 }
@@ -3404,11 +3447,12 @@ bool CommandList::ReplaceXByConCon
   return true;
 }
 
-std::string PolynomialOfExpressions::ElementToString()const
+template<class dataType>
+std::string DataOfExpressions<dataType>::ElementToString()const
 { PolynomialOutputFormat tempFormat;
   for (int i=0; i<this->VariableImages.size; i++)
     tempFormat.SetLetterIndex(this->VariableImages[i].ElementToString(), i);
-  return this->thePoly.ElementToString(tempFormat);
+  return this->theBuiltIn.ElementToString(tempFormat);
 }
 
 void ObjectContainer::reset()
@@ -3422,32 +3466,33 @@ void ObjectContainer::reset()
   this->theRFs.Clear();
 }
 
-void PolynomialOfExpressions::operator=(const PolynomialOfExpressions& other)
-{ this->thePoly=other.thePoly;
+template <class dataType>
+void DataOfExpressions<dataType>::operator=(const DataOfExpressions<dataType>& other)
+{ this->theBuiltIn=other.theBuiltIn;
   this->VariableImages=other.VariableImages;
 }
 
-void PolynomialOfExpressions::MakeZero()
-{ this->thePoly.MakeZero(0);
+template <class dataType>
+void DataOfExpressions<dataType>::MakeZero(int subtypeInfo)
+{ this->theBuiltIn.MakeZero(subtypeInfo);
   this->VariableImages.Clear();
 }
 
-void PolynomialOfExpressions::MakeConst(const Rational& input)
-{ this->thePoly.MakeConst(0, input);
+template <class dataType>
+void DataOfExpressions<dataType>::MakeConst(const Rational& input)
+{ this->theBuiltIn.MakeConst(0, input);
   this->VariableImages.Clear();
 }
 
-int PolynomialOfExpressions::HashFunction()const
-{ return SomeRandomPrimes[0]*this->thePoly.HashFunction()
+template <class dataType>
+int DataOfExpressions<dataType>::HashFunction()const
+{ return SomeRandomPrimes[0]*this->theBuiltIn.HashFunction()
   +SomeRandomPrimes[1]*this->VariableImages.HashFunction();
 }
 
-int PolynomialOfExpressions(const PolynomialOfExpressions& input)
-{ return input.HashFunction();
-}
-
-void PolynomialOfExpressions::SetDynamicSubtype(int inputNumVars)
-{ this->thePoly.SetNumVariables(inputNumVars);
+template <class dataType>
+void DataOfExpressions<dataType>::SetDynamicSubtype(int inputNumVars)
+{ this->theBuiltIn.SetNumVariables(inputNumVars);
 }
 
 

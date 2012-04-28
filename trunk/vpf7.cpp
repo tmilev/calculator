@@ -1322,7 +1322,11 @@ void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
     currentBF.init(currentWordList.size, currentWordList.size);
     for (int i=0; i<currentWordList.size; i++)
       for (int j=i; j<currentWordList.size; j++)
-      { currentWordList[i].HWTAAbilinearForm
+      { PolynomialOutputFormat tempF;
+        tempF.MakeAlphabetArbitraryWithIndex("g", "h");
+        std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ElementToString(false, false, theGlobalVariables, tempF);
+        std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ElementToString(false, false, theGlobalVariables, tempF);
+        currentWordList[i].HWTAAbilinearForm
         (currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
         ;
         if (i!=j)
@@ -2051,6 +2055,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyTransposeAntiAutoOnMe()
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theRank=this->GetOwner().GetRank();
   CoefficientType theCoeff;
+  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
     theCoeff=this->theCoeffs[i];
@@ -2142,45 +2147,7 @@ int ParserNode::EvaluateHWMTABilinearForm
 
 int ParserNode::EvaluateHWTAABilinearForm
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ List<Polynomial<Rational> > weight;
-  ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
-  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
-  theNode.impliedNumVars=theNode.owner->MaxFoundVars;
-  if (!weightNode.GetListDontUseForFunctionArguments<Polynomial<Rational> >
-      (weight, theGlobalVariables, theNode.typePoly, theNode.impliedNumVars))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
-  if (weight.size!=theSSalgebra.GetRank())
-    return theNode.SetError(theNode.errorDimensionProblem);
-  ElementUniversalEnveloping<Polynomial<Rational> >& leftElt=leftNode.UEElement.GetElement();
-  ElementUniversalEnveloping<Polynomial<Rational> >& rightElt=rightNode.UEElement.GetElement();
-  leftElt.SetNumVariables(theNode.impliedNumVars);
-  rightElt.SetNumVariables(theNode.impliedNumVars);
-  Polynomial<Rational>  theRingZero, theRingUnit;
-  int& numVars= theNode.impliedNumVars;
-  theRingZero.MakeZero(numVars);
-  theRingUnit.MakeOne(numVars);
-  List<Polynomial<Rational> > theHW;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  std::stringstream out;
-  out << "Highest weight in fundamental coords: " << weight.ElementToString() << "<br>";
-  theHW.SetSize(weight.size);
-  leftElt.GetOwner().OrderSSalgebraForHWbfComputation();
-  for (int i=0; i<weight.size; i++)
-  { theHW[i]=weight[i];
-    theHW[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
-  }
-  if(!leftElt.HWTAAbilinearForm(rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-//  Polynomial<Rational>  symmTerm;
-//  if(!rightElt.HWTAAbilinearForm
-//     (leftElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
-//  return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  leftElt.GetOwner().OrderSSLieAlgebraStandard();
-//  theNode.polyValue.GetElement()+=symmTerm;
-  theNode.ExpressionType=theNode.typePoly;
-  theNode.outputString=out.str();
+{
   return theNode.errorNoError;
 }
 
@@ -2272,7 +2239,11 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
 { output=theRingZero;
   CoefficientType tempCF;
   ElementUniversalEnveloping<CoefficientType> TAleft;
+  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   TAleft=*this;
+  TAleft.CheckNumCoeffsConsistency(__FILE__, __LINE__);
+  std::cout << "<hr>TAleft: " << TAleft.ElementToString();
+  std::cout << "<br>right:" << right.ElementToString();
   if (!TAleft.ApplyTransposeAntiAutoOnMe())
     return false;
   ElementUniversalEnveloping<CoefficientType> Accum, intermediateAccum, tempElt, startingElt;

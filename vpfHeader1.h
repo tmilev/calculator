@@ -4300,6 +4300,14 @@ public:
   void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   int TotalDegree();
+  void CheckNumCoeffsConsistency(const char* fileName, int lineName)
+  { if (this->theCoeffs.size!=this->size)
+    { std::cout << "This is a programming error: a monomial collection has " << this->size << " monomials but "
+      << this->theCoeffs.size << " coefficients. Please debug file " << CGI::GetHtmlLinkFromFileName(fileName)
+      << " line " << lineName << ". ";
+      assert(false);
+    }
+  }
   bool IsEqualToZero()const;
   int FindMaxPowerOfVariableIndex(int VariableIndex);
   void MakeZero(){this->Clear(); this->theCoeffs.size=0;}
@@ -5477,14 +5485,14 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
 }
 
 template <class Element>
-void Polynomial<Element>::MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const Element& Coeff)
-{ if (LetterIndex<0 || LetterIndex>=NumVars)
-  { std::cout << "This is a programming error: you asked to create a monomial of " << NumVars << " variables "
+void Polynomial<Element>::MakeMonomialOneLetter(int inputNumVars, int LetterIndex, int Power, const Element& Coeff)
+{ if (LetterIndex<0 || LetterIndex>=inputNumVars)
+  { std::cout << "This is a programming error: you asked to create a monomial of " << inputNumVars << " variables "
     << " of the form x_{" << LetterIndex+1 << "}.  An error check should be performed at an earlier point in the program. "
     << "Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
     assert(false);
   }
-  this->MakeZero(this->NumVars);
+  this->MakeZero(inputNumVars);
   MonomialP tempM;
   tempM.MakeZero(this->NumVars);
   tempM[LetterIndex]=Power;

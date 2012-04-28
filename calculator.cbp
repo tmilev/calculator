@@ -27,7 +27,6 @@
 		<Linker>
 			<Add library="libpthread" />
 		</Linker>
-		<Unit filename="A_compilation_test_file.cpp" />
 		<Unit filename="RootSystem.html.cpp" />
 		<Unit filename="calculator.cpp" />
 		<Unit filename="vpf.h" />

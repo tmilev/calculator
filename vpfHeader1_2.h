@@ -2397,9 +2397,9 @@ public:
   void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
   { this->ElementToString(output, false, false, theGlobalVariables, theFormat);
   }
-  std::string ElementToString()
+  std::string ElementToString()const
 ;
-  void ElementToString(std::string& output)
+  void ElementToString(std::string& output)const
   { output=this->ElementToString();
   }
   void ElementToString
@@ -2422,8 +2422,7 @@ public:
     return tempS;
   }
   std::string ElementToString
-  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables,
-   const PolynomialOutputFormat& theFormat)const
+  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
   { std::string tempS;
     this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables, theFormat);
     return tempS;
@@ -2592,7 +2591,7 @@ static bool GetBasisFromSpanOfElements
     }
   }
   void operator=(const ElementUniversalEnveloping<CoefficientType>& other)
-  { this->CopyFromHash(other);
+  { this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>::operator=(other);
     this->owners=other.owners;
     this->indexInOwners=other.indexInOwners;
   }
@@ -5727,7 +5726,7 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
 }
 
 template <class CoefficientType>
-std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()
+std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()const
 { GlobalVariables theGlobalVariables;
   PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
@@ -5863,8 +5862,8 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRightIndexAroundLeft
-(int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(int theIndeX, ElementUniversalEnveloping<CoefficientType>& output, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { if (theIndeX==this->generatorsIndices.size-1)
     return;
   output.MakeZero(*this->owners, this->indexInOwners);
@@ -5892,9 +5891,8 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRigh
   (rightGeneratorIndeX, *this->owners, this->indexInOwners);
   tempLefttElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (leftGeneratorIndeX, *this->owners, this->indexInOwners);
-  std::cout << "This is a programming error: CommuteConsecutiveIndicesRightIndexAroundLeft has not been proofread.";
-  assert(false);
-
+//  std::cout << "This is a programming error: CommuteConsecutiveIndicesRightIndexAroundLeft has not been proofread.";
+//  assert(false);
   do
   { //acquiredCoefficienT.ComputeDebugString();
     //theRightPoweR.ComputeDebugString();
@@ -6677,8 +6675,8 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordsInBasis
 
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpanOfElements
-  (int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<CoefficientType> >& outputCoordinates,
-   ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
+(int numVars, List<ElementUniversalEnvelopingOrdered>& theElements, Vectors<Polynomial<CoefficientType> >& outputCoordinates,
+ ElementUniversalEnvelopingOrdered& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
     return;
   outputCorrespondingMonomials.MakeZero(*theElements.TheObjects[0].owner);

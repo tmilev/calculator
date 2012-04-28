@@ -6083,7 +6083,6 @@ void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useH
     out << "0";
   if (useLatex)
     out << "$";
-  int numPosRoots=this->GetOwner().GetNumPosRoots();
   bool found=false;
   for (int i=0; i<this->size; i++)
     if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))

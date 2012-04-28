@@ -47,6 +47,9 @@ public:
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
 ;
+  void MakeUE
+(CommandList& theBoss, const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& inputUE)
+;
   void MakePoly
 (CommandList& theBoss, const DataOfExpressions<Polynomial<Rational> >& inputPoly)
 ;
@@ -405,8 +408,9 @@ class DataOfExpressions
   static inline int HashFunction(const DataOfExpressions<dataType>& input){return input.HashFunction();}
   int HashFunction()const
 ;
-  void MakeZero(int subtypeInfo);
-  void MakeConst(const Rational& input)
+  dataType GetPolynomialMonomial(int theIndex);
+  dataType GetConst
+  (const Rational& input)
   ;
   std::string ElementToString()const;
   void SetDynamicSubtype(int inputNumVars);
@@ -431,6 +435,11 @@ public:
 
 class CommandList
 {
+  template <class dataType>
+  bool ExtractData
+(dataType& outputBuffer, DataOfExpressions<dataType>& finalOutput,
+ const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
+  ;
 public:
 //control sequences parametrize the syntactical elements
   HashedListB<std::string, MathRoutines::hashString> controlSequences;
@@ -474,8 +483,8 @@ public:
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
-  std::string input;
-  std::string output;
+  std::string inputString;
+  std::string outputString;
   std::string theLog;
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
@@ -735,11 +744,12 @@ public:
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
-template <class dataType>
+  template <class dataType>
   bool ExtractData
-  (dataType& output, HashedList<Expression>& VariableImagesBuffer, const Expression& theInput,
-   int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
-  ;
+  (DataOfExpressions<dataType>& outputMustBeInitializedToZero,
+   const Expression& theInput, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog=0)
+  { return this->ExtractData(outputMustBeInitializedToZero.theBuiltIn, outputMustBeInitializedToZero, theInput, 0, MaxRecursionDepthMustNotPopStack, errorLog);
+  }
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
@@ -903,12 +913,12 @@ static bool EvaluateDereferenceOneArgument
  ;
   void Evaluate(const std::string& theInput)
   { if (this->theGlobalVariableS==0)
-    { this->output= "This is a programming error: commandList not initialized properly. Please report this bug. ";
+    { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
       return;
     }
     this->StartTimeInSeconds=this->theGlobalVariableS->GetElapsedSeconds();
-    this->input=theInput;
-    this->ParseFillDictionary(this->input);
+    this->inputString=theInput;
+    this->ParseFillDictionary(this->inputString);
     this->ExtractExpressions();
     this->EvaluateCommands();
   }

@@ -2725,7 +2725,7 @@ ParallelComputing::GlobalPointerCounter++;
   Rational GetZero()
   { return 0;
   }
-  Rational GetUnit()
+  Rational GetOne()
   { return 1;
   }
   void AssignFracValue();
@@ -4219,7 +4219,7 @@ public:
   }
   template <class Element>
   void Substitution(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, int NumVarTarget, const Element& theRingUnit);
-  void MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power);
+  void MakeMonomial(int NumVars, int LetterIndex, int Power);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { for (int i=this->size-1; i>=0; i--)
       if (this->TheObjects[i]!=0)
@@ -4467,7 +4467,7 @@ public:
 
   void GetConstantTerm(CoefficientType& output, const CoefficientType& theRingZero);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
-  void MakeMonomialOneLetter(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff);
+  void MakeMonomial(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
@@ -4601,7 +4601,7 @@ public:
           return false;
     return true;
   }
-  void RaiseToPower(int d, const CoefficientType& theRingUniT)
+  void RaiseToPower(int d, const CoefficientType& theRingUniT=1)
   { if (d==1)
       return;
     Polynomial<CoefficientType> theOne;
@@ -4877,7 +4877,7 @@ public:
     }
     return false;
   }
-  RationalFunction GetUnit()const
+  RationalFunction GetOne()const
   { RationalFunction tempRat;
     tempRat.MakeConst(this->NumVars, 1, this->context);
     return tempRat;
@@ -5485,7 +5485,7 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
 }
 
 template <class Element>
-void Polynomial<Element>::MakeMonomialOneLetter(int inputNumVars, int LetterIndex, int Power, const Element& Coeff)
+void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, int Power, const Element& Coeff)
 { if (LetterIndex<0 || LetterIndex>=inputNumVars)
   { std::cout << "This is a programming error: you asked to create a monomial of " << inputNumVars << " variables "
     << " of the form x_{" << LetterIndex+1 << "}.  An error check should be performed at an earlier point in the program. "

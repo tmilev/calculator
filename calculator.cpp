@@ -248,6 +248,8 @@ int main(int argc, char **argv)
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} {}v";
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3";
 //  civilizedInput="hwv{}(B_3, (x_1,0,1),(1,0,0))";
+//  inputWeylString="B";
+//  civilizedInput="g:=SemisimpleLieAlgebra{}G_2;\nUE{}(g_1+2g_2)";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

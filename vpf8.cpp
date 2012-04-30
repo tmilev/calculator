@@ -5960,14 +5960,16 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
   return out.str();
 }
 
-void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
-  (std::string& output, bool useRootNotation, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG,
-   PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
+std::string SemisimpleLieAlgebra::ElementToString(const PolynomialOutputFormat& theFormat)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot;
   std::string beginMath;
   std::string endMath;
+  bool usePNG=false;
+  bool useRootNotation=false;
+  bool useHtml=true;
+
   if (!usePNG)
   { beginMath="<DIV class=\"math\" scale=\"50\">\\begin{array}{";
     endMath="\\end{array}</DIV>";
@@ -6001,23 +6003,10 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
         //out << "\\hline generator & corresponding Vector<Rational> space\\\\\\hline";
         i+=theDimension;
       }
-      out << "$" << this->GetLetterFromGeneratorIndex(i, false, false, theFormat, theGlobalVariables);
+      out << "$" << this->GetStringFromChevalleyGenerator(i, theFormat);
       int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
-      if (useRootNotation)
-      { out << ":=" << theFormat.alphabetBases[0] << "_{";
-        if (useEpsilonNotation)
-          out << this->ElementToStringRootIndexToEpsForm(rootIndex, theGlobalVariables);
-        else
-          out << this->ElementToStringRootIndexToSimpleBasis(rootIndex, theGlobalVariables);
-        out<< "}";
-      }
       out << "$&";
-      if (!useEpsilonNotation)
-        out << this->theWeyl.RootSystem[rootIndex].ElementToString() << "\\\\";
-      else
-        out << "$" << this->theWeyl.GetEpsilonCoords
-        (this->theWeyl.RootSystem[rootIndex], theGlobalVariables).ElementToStringEpsilonForm(true, false)
-        << "$\\\\";
+      out << this->theWeyl.RootSystem[rootIndex].ElementToString() << "\\\\";
     }
     out << "\\end{tabular}";
   }
@@ -6035,7 +6024,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     for (int i=0; i<numRoots+theDimension; i++)
     { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i, *this->owner, this->indexInOwner);
-      tempS=tempElt1.ElementToString();
+      tempS=tempElt1.ElementToString(theFormat);
       out << " & ";
       if(usePNG)
         out << "$";
@@ -6051,7 +6040,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     for (int i=0; i<theDimension+numRoots; i++)
     { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i,*this->owner, this->indexInOwner);
-      tempS=tempElt1.ElementToString();
+      tempS=tempElt1.ElementToString(theFormat);
       if(usePNG)
         out << "$";
       out << tempS;
@@ -6061,7 +6050,7 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
       { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
         (j, *this->owner, this->indexInOwner);
         this->LieBracket(tempElt1, tempElt2, tempElt3);
-        tempS=tempElt3.ElementToString();
+        tempS=tempElt3.ElementToString(theFormat);
         out << "& ";
         if(usePNG)
           out << "$";
@@ -6074,15 +6063,14 @@ void SemisimpleLieAlgebra::ElementToStringNegativeRootSpacesFirst
     out << endMath;
   } else
     out << "\\begin{tabular}{c} table trimmed to avoid LaTeX/browser memory issues.\\end{tabular}";
-  output=out.str();
+  return out.str();
 }
 
-void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const
+std::string ElementSemisimpleLieAlgebra::ElementToString
+(const PolynomialOutputFormat& theFormat)const
 { std::stringstream out; std::string tempS;
   if (this->IsEqualToZero())
     out << "0";
-  if (useLatex)
-    out << "$";
   bool found=false;
   for (int i=0; i<this->size; i++)
     if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))
@@ -6098,8 +6086,7 @@ void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useH
         } else
           out << "+";
       }
-      int DisplayIndex= this->GetOwner().ChevalleyGeneratorIndexToDisplayIndex(this->TheObjects[i].theGeneratorIndex);
-      out << tempS << "g_{" << DisplayIndex << "}";
+      out << tempS << this->GetOwner().GetStringFromChevalleyGenerator(this->TheObjects[i].theGeneratorIndex, theFormat);
       found=true;
     }
   Vector<Rational> hComponent=this->GetCartanPart();
@@ -6109,7 +6096,7 @@ void ElementSemisimpleLieAlgebra::ElementToString(std::string& output, bool useH
       out << "+";
     out << tempS;
   }
-  output= out.str();
+  return out.str();
 }
 
 void DrawOperations::MakeMeAStandardBasis(int theDim)
@@ -8727,10 +8714,9 @@ int ParserNode::EvaluateModVermaRelations
   theNode.impliedNumVars=theArgument.impliedNumVars;
   theNode.UEElement.GetElement()=theArgument.UEElement.GetElement();
   std::stringstream out;
-  PolynomialOutputFormat tempFormat;
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
+  ( theNode.UEElement.GetElement().ElementToString(theGlobalVariables.theDefaultLieFormat))
 ;
   Polynomial<Rational>  polyOne, polyZero;
   polyOne.MakeConst(theNode.impliedNumVars, 1);
@@ -8738,12 +8724,12 @@ int ParserNode::EvaluateModVermaRelations
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ElementToString(true, theGlobalVariables, tempFormat))
+  (theNode.UEElement.GetElement().ElementToString(theGlobalVariables.theDefaultLieFormat))
   ;
   assert(false);
 
 //  theNode.UEElement.GetElement().ModOutVermaRelations(theGlobalVariables);
-  theNode.impliedNumVars=theNode.UEElement.GetElement().GetNumVariables();
+  theNode.impliedNumVars=theNode.UEElement.GetElement().GetNumVars();
   theNode.ExpressionType=theNode.typeUEelement;
   theNode.outputString=out.str();
   return theNode.errorNoError;
@@ -8831,58 +8817,6 @@ int ParserNode::EvaluateMakeCasimir
   theNode.outputString=out.str();
 
   return theNode.errorNoError;
-}
-
-std::string SemisimpleLieAlgebraOrdered::GetGeneratorString
-  (int theIndex, bool formatCalculator, bool& mustUsebracketsWhenRaisingToPower,
-   const PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  mustUsebracketsWhenRaisingToPower=true;
-  if (this->theOwner.theWeyl.WeylLetter=='B' && this->theOwner.theWeyl.GetDim()==3)
-  { if (formatCalculator)
-    { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
-      if (displayIndex==12)
-        displayIndex=0;
-      out << "f_{" << displayIndex << "}";
-      mustUsebracketsWhenRaisingToPower=false;
-      return out.str();
-    }
-    bool isInGmodK=false;
-    if ((theIndex>=6 && theIndex<9) ||
-        (theIndex>=11 && theIndex<15)        )
-      isInGmodK=true;
-    if (isInGmodK)
-    { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
-      if (displayIndex==12)
-        displayIndex=0;
-      out << "f_{" << displayIndex << "}";
-      mustUsebracketsWhenRaisingToPower=false;
-    } else
-    { WeylGroup tempWeyl;
-      tempWeyl.MakeG2();
-      tempWeyl.ComputeRho(true);
-      if (theIndex<6)
-        out << "g'_{" << tempWeyl.RootSystem[theIndex].
-        ElementToStringLetterFormat("\\alpha", true, false) << "}";
-      else if (theIndex<11)
-        out << "h'_{\\alpha_" << theIndex-8 << "}";
-      else
-        out << "g'_{" << tempWeyl.RootSystem[theIndex-9].
-        ElementToStringLetterFormat("\\alpha", true, false) << "}";
-      mustUsebracketsWhenRaisingToPower=true;
-    }
-    return out.str();
-  }
-  if (formatCalculator)
-  { int displayIndex=this->GetDisplayIndexFromGeneratorIndex(theIndex);
-    out << "f_{" << displayIndex << "}";
-    mustUsebracketsWhenRaisingToPower=false;
-  }
-  else
-  { out << this->theOrder[theIndex].ElementToString();
-    mustUsebracketsWhenRaisingToPower=this->theOrder[theIndex].MustUseBracketsWhenDisplayingMeRaisedToPower();
-  }
-  return out.str();
 }
 
 int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)

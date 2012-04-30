@@ -4150,6 +4150,7 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
+  std::string ElementToString(const PolynomialOutputFormat& inputFormat)const;
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
@@ -4538,7 +4539,7 @@ public:
   void IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   inline void SetNumVariables(int newNumVars){this->SetNumVariablesSubDeletedVarsByOne(newNumVars);}
-  inline int GetNumVariables()
+  inline int GetNumVars()
   { return this->NumVars;
   }
   inline void SetDynamicSubtype(int newNumVars)
@@ -5082,6 +5083,9 @@ public:
     this->ReduceMemory();
     this->SimplifyLeadingCoefficientOnly();
     assert(this->checkConsistency());
+  }
+  void MakeOne(int theNumVars, GlobalVariables* theContext)
+  { this->MakeConst(theNumVars, 1, theContext);
   }
   void MakeZero(int theNumVars, GlobalVariables* theContext)
   { this->NumVars=theNumVars;
@@ -6713,7 +6717,7 @@ public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
   PolynomialOutputFormat theDefaultPolyFormat;
-  PolynomialOutputFormat theDefaultLieFromat;
+  PolynomialOutputFormat theDefaultLieFormat;
 
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
@@ -7038,11 +7042,8 @@ class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator,
 public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
-  void ElementToString(std::string& output){this->ElementToString(output, false, false);}
-  std::string ElementToString()const { std::string output; this->ElementToString(output, false, false); return output;}
   bool ElementToStringNeedsBracketsForMultiplication()const;
-  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)const;
-  void ElementToString(std::string& output, bool useHtml, bool useLatex)const{ this->ElementToString(output, useHtml, useLatex, false, 0, 0);}
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
   Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
@@ -7077,6 +7078,11 @@ public:
   static void GetBasisFromSpanOfElements
   (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunction>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
     ;
+  int GetFirstOwnerIndex()
+  { if (this->size<=0)
+      return -1;
+    return this->TheObjects[0].indexOfOwnerAlgebra;
+  }
   void ActOnMe
   (const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner)
   ;
@@ -7735,7 +7741,6 @@ inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(MonomialP& inpu
       output.AddMonomial(tempMon, coeff);
     }
 }
-
 
 template <typename Element>
 void Matrix<Element>::FindZeroEigenSpaceOneOneForEachNonPivot(Vectors<Element>& output)

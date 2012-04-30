@@ -2729,6 +2729,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
+  PolynomialOutputFormat& theFormat=theGlobalVariables.theDefaultLieFormat;
   ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
@@ -2749,12 +2750,12 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
         if (!temp.IsEqualToZero())
         { std::cout << "This is a programming error. The computed structure constants are wrong: "
           << " the Jacobi identity fails. More precisely, I get that "
-          << "<br>[" << g1.ElementToString() << ", " << g2.ElementToString() << "]=" << g12.ElementToString()
-          << "<br>[" << g2.ElementToString() << ", " << g3.ElementToString() << "]=" << g23.ElementToString()
-          << "<br>[" << g3.ElementToString() << ", " << g1.ElementToString() << "]=" << g31.ElementToString()
-          << "<br>g123= " << g123.ElementToString() << "<br>g231="
-          << g231.ElementToString()
-          << "<br>g312=" << g312.ElementToString() << "<br>"
+          << "<br>[" << g1.ElementToString(theFormat) << ", " << g2.ElementToString(theFormat) << "]=" << g12.ElementToString(theFormat)
+          << "<br>[" << g2.ElementToString(theFormat) << ", " << g3.ElementToString(theFormat) << "]=" << g23.ElementToString(theFormat)
+          << "<br>[" << g3.ElementToString(theFormat) << ", " << g1.ElementToString(theFormat) << "]=" << g31.ElementToString(theFormat)
+          << "<br>g123= " << g123.ElementToString(theFormat) << "<br>g231="
+          << g231.ElementToString(theFormat)
+          << "<br>g312=" << g312.ElementToString(theFormat) << "<br>"
           << " Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
           << " line " << __LINE__ << ". ";
           assert(false);
@@ -2902,150 +2903,6 @@ void SemisimpleLieAlgebra::GetAd(Matrix<Rational>& output, ElementSemisimpleLieA
     this->LieBracket(e, theGen, theResult);
     for (int j=0; j<theResult.size; j++)
       output.elements[i][theResult[j].theGeneratorIndex]=theResult.theCoeffs[j];
-  }
-}
-
-void SemisimpleLieAlgebra::ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings)
-{ std::stringstream outTable, outNotation;
-  std::string tempS;
-  if (physicalPath==0 || htmlServerPath==0 || outputPNGFileNames==0 || outputLatexToPNGstrings==0)
-    usePNG=false;
-  if(usePNG)
-  { useHtml=true;
-    useLatex=true;
-  }
-  int numRoots=this->theWeyl.RootSystem.size;
-  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
-  Vectors<Rational> theBasis;
-  theBasis.SetSize(theDimension);
-  if (usePNG)
-    outNotation << "\\begin{tabular}{l}";
-  for (int i=0; i<theDimension; i++)
-  { theBasis.TheObjects[i].MakeZero(theDimension);
-    theBasis.TheObjects[i].TheObjects[i].MakeOne();
-    outNotation << theBasis.TheObjects[i].ElementToString();
-    outNotation << "$=:\\alpha_{" << i+1 << "}$ \\\\";
-  }
-  Vector<Rational> tempRoot;
-  for (int i=theDimension; i<numRoots; i++)
-  { this->theWeyl.RootSystem[i].GetCoordsInBasiS(theBasis, tempRoot);
-    //this->theWeyl.RootSystem.TheObjects[i].ComputeDebugString();
-    //tempRoot.ComputeDebugString();
-    this->theWeyl.RootSystem.TheObjects[i].ElementToString(tempS);
-    outNotation << tempS << "=";
-    outNotation << "$";
-    for (int j=0; j<theDimension; j++)
-    { tempRoot.TheObjects[j].ElementToString(tempS);
-      if (tempS!="0")
-      { if (tempS=="1")
-          tempS="";
-        if (tempS=="-1")
-          tempS="-";
-        if (j!=0)
-        { if (tempS!="")
-          { if (tempS[0]!='-')
-              outNotation << "+";
-          } else
-            outNotation << "+";
-        }
-        outNotation << tempS << "\\alpha_{" << j+1 << "}";
-      }
-    }
-    outNotation << "=: \\alpha_{" << i+1 << "} $";
-    if (usePNG)
-      outNotation << "\\\\";
-  }
-  for (int i=0; i<theDimension; i++)
-  { outNotation << " $h_{\\alpha_" << i+1 << "} (g^{\\gamma}) := \\langle\\gamma, \\alpha_{" << i+1 << " } \\rangle g^{\\gamma}$, for any $\\gamma$.\n\n";
-    if (usePNG)
-      outNotation << "\\\\\n";
-  }
-  outTable << "\n\n";
-  if (usePNG)
-    outNotation << "\\end{tabular}";
-  if (useLatex)
-  { outTable << "\\begin{tabular}{c";
-    for(int i=0; i<numRoots; i++)
-      outTable << "c";
-    outTable << "}";
-    outTable << "$[\\bullet, \\bullet]$&";
-  }
-  for (int i=0; i<numRoots; i++)
-  { outTable << "$g^{\\alpha_{" << i+1 << "}}$";
-    if (i!=numRoots-1)
-      outTable << "&";
-  }
-  outTable << "\\\\\n";
-  Rational tempRat;
-  for (int i=0; i<this->ChevalleyConstants.NumRows; i++)
-  { outTable << "$g^{\\alpha_{" << i+1 << "}}$&";
-    for (int j=0; j<this->ChevalleyConstants.NumCols; j++)
-    { if (this->Computed.elements[i][j])
-      { this->ChevalleyConstants.elements[i][j].ElementToString(tempS);
-        if (tempS=="1")
-          tempS="";
-        if (tempS=="-1")
-          tempS="-";
-        if (tempS=="0")
-          outTable << "0, ";
-        else
-        { tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
-          int index=this->theWeyl.RootSystem.GetIndex(tempRoot);
-          outTable << "$" << tempS << "g^{\\alpha_{" << index+1 << "}}$, ";
-        }
-      }
-      else
-      { Vector<Rational>& theRoot= this->theWeyl.RootSystem.TheObjects[i];
-        tempRat=2;
-        tempRat.DivideBy(this->theWeyl.RootScalarCartanRoot(theRoot, theRoot));
-        if (theRoot.IsNegativeOrZero())
-          tempRat.Minus();
-        tempRat.ElementToString(tempS);
-        if (tempS=="1")
-          tempS="";
-        if (tempS=="-1")
-          tempS="-";
-        outTable << "$"<< tempS << "h_{\\alpha_{" << i+1 << "}}$";
-      }
-      if (useLatex && j!=this->ChevalleyConstants.NumCols-1)
-        outTable << " & ";
-      else
-        if(!useLatex)
-          outTable << "\t";
-    }
-    if (useLatex)
-      outTable << "\\\\";
-    outTable << "\n";
-  }
-  if (useLatex)
-    outTable << "\\end{tabular}";
-  //this->ChevalleyConstants.ElementToString(tempS);
-  //out <<"\n"<< tempS<<"\n";
-  if (usePNG)
-  { std::stringstream out2;
-    out2 << "<BODY><HTML></BODY>";
-    ///////////////////////////
-    tempS=outNotation.str();
-    outputLatexToPNGstrings->AddOnTop(tempS);
-    tempS=*physicalPath;
-    tempS.append("notation.tex");
-    outputPNGFileNames->AddOnTop(tempS);
-    out2 << "<img src=\"" << (*htmlServerPath) << "notation.png\">\n<br>\n";
-    ///////////////////////////
-    tempS= outTable.str();
-    outputLatexToPNGstrings->AddOnTop(tempS);
-    tempS=*physicalPath;
-    tempS.append("StructureConstants_latex.tex");
-    outputPNGFileNames->AddOnTop(tempS);
-    out2 << "<img src=\"" << (*htmlServerPath) << "StructureConstants_latex.png\">";
-    ///////////////////////////
-    out2 << "</BODY></HTML>";
-    output=out2.str();
-  }
-  else
-  { tempS=outTable.str();
-    outNotation << tempS;
-    output=outNotation.str();
   }
 }
 

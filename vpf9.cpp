@@ -20,7 +20,7 @@ GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->ProgressReportDepth=-1;
   this->MaxAllowedComputationTimeInSeconds=1000000;
-  this->theDefaultLieFromat.MakeAlphabetArbitraryWithIndex("g", "h");
+  this->theDefaultLieFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   this->callSystem=0;
 }
 
@@ -1797,7 +1797,7 @@ void partFraction::PrepareFraction
     powerDropB=0;
   else
     powerDropA=0;
-  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetNumVariables());
+  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetNumVars());
   for (int i=0; i<powerDropB; i++)
     outputCommonCoeff*=(AminusNbetaPoly);
   output.DecreasePowerOneFrac(indexA, powerDropA);

@@ -25,7 +25,7 @@ public:
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
-    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeUE
+    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -47,6 +47,9 @@ public:
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
 ;
+  template<class dataType>
+  void Make(CommandList& theBoss, const dataType& input)
+  ;
   void MakeUE
 (CommandList& theBoss, const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& inputUE)
 ;
@@ -68,6 +71,10 @@ public:
  ;
   template<class theType>
   bool IsOfType()const;
+  template<class theType>
+  bool ConvertToType
+  (theType& output, const theType& initializingElement)const
+  ;
   template<class theType>
   theType GetValueCopy()const;
   template<class theType>
@@ -408,9 +415,11 @@ class DataOfExpressions
   static inline int HashFunction(const DataOfExpressions<dataType>& input){return input.HashFunction();}
   int HashFunction()const
 ;
-  dataType GetPolynomialMonomial(int theIndex);
+  dataType GetPolynomialMonomial
+(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)
+  ;
   dataType GetConst
-  (const Rational& input)
+ (const Rational& input, GlobalVariables& theGlobalVariables)
   ;
   std::string ElementToString()const;
   void SetDynamicSubtype(int inputNumVars);
@@ -428,6 +437,7 @@ public:
   HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theElemenentsGeneralizedVermaModuleTensors;
   HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
   HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
+  HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >  theUEs;
   HashedList<RationalFunction> theRFs;
   HashedList<Rational>  theRationals;
   void reset();
@@ -866,7 +876,7 @@ static bool EvaluateDereferenceOneArgument
   static bool fPolynomial
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool fUniversalEnvelopingAlgebra
+  static bool fElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fSSAlgebra
@@ -877,6 +887,9 @@ static bool EvaluateDereferenceOneArgument
 ;
   static bool fElementSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  bool GetIndexAmbientUEAlgebra
+  (int& outputIndex, Expression& inputExpression, std::stringstream* comments, int RecursionDepth=0, int MaxRecursionDepth=10000)
 ;
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)

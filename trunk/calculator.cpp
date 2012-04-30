@@ -250,6 +250,19 @@ int main(int argc, char **argv)
 //  civilizedInput="hwv{}(B_3, (x_1,0,1),(1,0,0))";
 //  inputWeylString="B";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2;\nUE{}(g_1+2g_2)";
+  /*civilizedInput="A_1:=1/12x_1^{2}+1/2x_1+5/12;\n\
+A_2:=1/12x_1^{2}+7/12x_1+1/2;\n\
+A_3:=1/12x_1^{2}+7/12x_1+1;\n\
+A_4:=1/12x_1^{2}+2/3x_1+1;\n\
+A_5:=1/12x_1^{2}+2/3x_1+1 ;\n\
+A_6:=1/12x_1^{2}+3/4x_1+7/6;\n\
+A_7:=1/12x_1^{2}+3/4x_1+5/3;\n\
+A_8:=1/12x_1^{2}+5/6x_1+7/4;\n\
+Solve{}({{a}}x_1+{{b}}):=-b/a;\n\
+Solve{}({{a}}x_1):=0;\n\
+B{}({{a}},{{b}}):=Solve{}(A_a-A_b);\n\
+UnionNoRepetition{}\n\
+FunctionToMatrix{}(B,8,8)";*/
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

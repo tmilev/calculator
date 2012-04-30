@@ -222,9 +222,12 @@ Data::Data(const Rational& x, CommandList& inputOwner)
 }
 
 bool Data::IsSmallInteger(int & whichInteger)const
-{ if (this->type!=this->typeRational)
-    return false;
-  return this->owner->theObjectContainer.theRationals[this->theIndex].IsSmallInteger(whichInteger);
+{ switch (this->type)
+  { case Data::typeRational:
+      return this->GetValuE<Rational>().IsSmallInteger(whichInteger);
+    default:
+      return false;
+  }
 }
 
 bool Data::IsInteger()
@@ -2327,9 +2330,7 @@ assert(false);
 bool Expression::IsSmallInteger(int& whichInteger)
 { if (this->theOperation!=this->theBoss->opData())
     return false;
-assert (false);
-return false;
-//  return this->theBoss->theData[this->theData].IsSmallInteger(whichInteger);
+  return this->theBoss->theData[this->theData].IsSmallInteger(whichInteger);
 }
 
 bool CommandList::EvaluateStandardUnion
@@ -2381,9 +2382,8 @@ bool CommandList::EvaluateStandardDivide
   Expression& leftE= theExpression.children[0];
   Expression& rightE= theExpression.children[1];
   if (rightE.IsRationalNumber() && !leftE.IsRationalNumber())
-  { assert(false);
-    Data tempData(1, theCommands);
-//    tempData/=theCommands.theData[rightE.theData];
+  { Data tempData(1, theCommands);
+    tempData/=theCommands.theData[rightE.theData];
     rightE=leftE;
     leftE.MakeDatA(tempData, theCommands, inputIndexBoundVars);
     return true;
@@ -2394,9 +2394,14 @@ bool CommandList::EvaluateStandardDivide
   Data& rightData=theCommands.theData[rightE.theData];
   if (leftData.type!=leftData.typeRational || rightData.type!=rightData.typeRational)
     return false;
-assert(false);
-//  Data resultData=leftData/rightData;
-//  theExpression.MakeDatA(resultData, theCommands, inputIndexBoundVars);
+  if (rightData.GetValuE<Rational>().IsEqualToZero())
+  { if (comments!=0)
+      *comments << "Error: attempt to divide " << leftData.ElementToString() << " by 0.";
+    theExpression.SetError("Error:DivByZero");
+    return true;
+  }
+  Data resultData=leftData/rightData;
+  theExpression.MakeDatA(resultData, theCommands, inputIndexBoundVars);
   return true;
 }
 

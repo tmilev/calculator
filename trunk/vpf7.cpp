@@ -1322,10 +1322,8 @@ void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
     currentBF.init(currentWordList.size, currentWordList.size);
     for (int i=0; i<currentWordList.size; i++)
       for (int j=i; j<currentWordList.size; j++)
-      { PolynomialOutputFormat tempF;
-        tempF.MakeAlphabetArbitraryWithIndex("g", "h");
-        std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ElementToString(false, false, theGlobalVariables, tempF);
-        std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ElementToString(false, false, theGlobalVariables, tempF);
+      { std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ElementToString(theGlobalVariables.theDefaultLieFormat);
+        std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ElementToString(theGlobalVariables.theDefaultLieFormat);
         currentWordList[i].HWTAAbilinearForm
         (currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
         ;
@@ -1547,7 +1545,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       this->theGeneratingWordsNonReducedWeights.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
       if (outputReport!=0)
       { monomialDetailStream << "<br>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
-        << currentList[j].ElementToString(false, false, theGlobalVariables, tempFormat) << "  v( "
+        << currentList[j].ElementToString(tempFormat) << "  v( "
         << this->theHWFundamentalCoordsBaseField.ElementToString() << ", "
         << Vector<Rational>(this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() << ")";
 ;
@@ -1565,8 +1563,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
         for (int i=0; i<currentList.size; i++)
         { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
-          monomialDetailStream << "<br>monomial " << i+1 << ": "
-          << currentElt.ElementToString(false, false, theGlobalVariables, tempFormat);
+          monomialDetailStream << "<br>monomial " << i+1 << ": " << currentElt.ElementToString(tempFormat);
         }
         monomialDetailStream << "; Matrix of Shapovalov form associated to current weight level: <br> "
         << theBF.ElementToString(true, false) << " corresonding inverted matrix:<br>";
@@ -1597,7 +1594,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         Vector<Rational>& simpleWeight=this->weightsSimpleGens[theIndex];
         List<List<ElementUniversalEnveloping<CoefficientType> > >& currentAction= this->actionsSimpleGens[theIndex];
         if (outputReport!=0)
-          out2 << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(theGlobalVariables, tempFormat);
+          out2 << "<hr>Simple generator: " << theSimpleGenerator.ElementToString(tempFormat);
         Matrix<CoefficientType>& theMatrix=this->actionsSimpleGensMatrixForM[theIndex];
         this->GetMatrixHomogenousElt
         (theSimpleGenerator, currentAction, simpleWeight, theMatrix, theGlobalVariables,
@@ -1638,7 +1635,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
     { latexTableStream << "&action of $"
       << this->theSimpleGens
-      [this->parabolicSelectionSelectedAreElementsLevi.elements[i]+ this->GetOwner().GetRank()].ElementToString()
+      [this->parabolicSelectionSelectedAreElementsLevi.elements[i]+ this->GetOwner().GetRank()]
+      .ElementToString(theGlobalVariables.theDefaultLieFormat)
       << "$";
     }
     latexTableStream << "\\\\\n";
@@ -1655,8 +1653,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
             latexTableStream << "+";
           latexTableStream << stringWeightTemp;
         }
-        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ElementToString
-        (false, false, theGlobalVariables, tempFormat);
+        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ElementToString(tempFormat);
         if (theMonString=="1")
           theMonString="";
         latexTableStream << "$&$" << theMonString << "  v_\\lambda$";
@@ -2169,8 +2166,8 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   PolynomialOutputFormat tempFormat;
   tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   if (logStream!=0)
-  { *logStream << "backtraced elt: " << MTright.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-    *logStream << "this element: " << this->ElementToString(theGlobalVariables, tempFormat) << "<br>";
+  { *logStream << "backtraced elt: " << MTright.ElementToString(tempFormat) << "<br>";
+    *logStream << "this element: " << this->ElementToString(tempFormat) << "<br>";
    // for (int i=0; i<subHiGoesToIthElement->size; i++)
    // { *logStream << subHiGoesToIthElement->TheObjects[i].ElementToString();
    // }
@@ -2179,7 +2176,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   { intermediateAccum=*this;
     intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
     if (logStream!=0)
-      *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat)
+      *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(tempFormat)
       << "<br>";
     intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<CoefficientType>& rightMon=MTright[j];
@@ -2191,18 +2188,18 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
         { tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
-          { *logStream << "tempElt before mult: " << tempElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+          { *logStream << "tempElt before mult: " << tempElt.ElementToString(tempFormat) << "<br>";
+            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(tempFormat) << "<br>";
           }
           intermediateAccum.MultiplyBy(tempElt);
           if (logStream!=0)
-            *logStream << "intermediate before simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate before simplification: " << intermediateAccum.ElementToString(tempFormat) << "<br>";
           intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(tempFormat) << "<br>";
           intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after Verma rels: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate after Verma rels: " << intermediateAccum.ElementToString(tempFormat) << "<br>";
         }
       else
         return false;
@@ -2213,7 +2210,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
       output+=intermediateAccum.theCoeffs[theIndex];
   }
   if (logStream!=0)
-    *logStream << "final UE element: " << Accum.ElementToString(false, theGlobalVariables, tempFormat);
+    *logStream << "final UE element: " << Accum.ElementToString(tempFormat);
   return true;
 }
 
@@ -2242,8 +2239,8 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   TAleft=*this;
   TAleft.CheckNumCoeffsConsistency(__FILE__, __LINE__);
-  std::cout << "<hr>TAleft: " << TAleft.ElementToString();
-  std::cout << "<br>right:" << right.ElementToString();
+  std::cout << "<hr>TAleft: " << TAleft.ElementToString(theGlobalVariables.theDefaultLieFormat);
+  std::cout << "<br>right:" << right.ElementToString(theGlobalVariables.theDefaultLieFormat);
   if (!TAleft.ApplyTransposeAntiAutoOnMe())
     return false;
   ElementUniversalEnveloping<CoefficientType> Accum, intermediateAccum, tempElt, startingElt;
@@ -2254,8 +2251,6 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   Accum.MakeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<CoefficientType> constMon;
   constMon.MakeConst(*this->owners, this->indexInOwners);
-  PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //    std::cout << "<hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr>"
 //  << "hw: " << subHiGoesToIthElement->ElementToString()
 //  << "<hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr>"
@@ -2263,18 +2258,18 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
  // << "," << right.ElementToStringCalculatorFormat(theGlobalVariables, tempFormat) << ")";
 
   if (logStream!=0)
-  { *logStream << "left eltement transposed: " << TAleft.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-    *logStream << "right element: " << right.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+  { *logStream << "left eltement transposed: " << TAleft.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
+    *logStream << "right element: " << right.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
   }
   startingElt=right;
   startingElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
   if (logStream!=0)
     *logStream << "right element after simplification: "
-    << startingElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+    << startingElt.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
   startingElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
   if (logStream!=0)
     *logStream << "right element after Verma rels: "
-    << startingElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+    << startingElt.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
   CoefficientType leftMonCoeff;
   for (int j=0; j<TAleft.size; j++)
   { intermediateAccum=startingElt;
@@ -2288,17 +2283,17 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
           { //*logStream << "tempElt before mult: " << tempElt.ElementToString(theGlobalVariables, tempFormat) << "<br>";
-            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate before mult: " << intermediateAccum.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
           }
           intermediateAccum.MultiplyBy(tempElt);
           if (logStream!=0)
-            *logStream << "intermediate before simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate before simplification: " << intermediateAccum.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
           intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate after simplification: " << intermediateAccum.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
           intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
           if (logStream!=0)
-            *logStream << "intermediate after Verma rels: " << intermediateAccum.ElementToString(theGlobalVariables, tempFormat) << "<br>";
+            *logStream << "intermediate after Verma rels: " << intermediateAccum.ElementToString(theGlobalVariables.theDefaultLieFormat) << "<br>";
         }
       else
       { this->GetOwner().UEGeneratorOrderIncludingCartanElts=oldOrder;
@@ -2311,7 +2306,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
       output+=intermediateAccum.theCoeffs[theIndex];
   }
   if (logStream!=0)
-    *logStream << "final UE element: " << Accum.ElementToString(false, theGlobalVariables, tempFormat);
+    *logStream << "final UE element: " << Accum.ElementToString(theGlobalVariables.theDefaultLieFormat);
   this->GetOwner().UEGeneratorOrderIncludingCartanElts=oldOrder;
   return true;
 }
@@ -2374,7 +2369,7 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
   theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   for (int i=0; i< theOrbit.size; i++)
   { ElementUniversalEnveloping<CoefficientType>& current=theOrbit[i];
-    out << "<br>" << current.ElementToString(theGlobalVariables, theFormat);
+    out << "<br>" << current.ElementToString(theFormat);
   }
   return out.str();
 }
@@ -2565,7 +2560,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
 
     if (currentElt.size>1)
       out << "(";
-    out << currentElt.ElementToString(false, theGlobalVariables, theFormat);
+    out << currentElt.ElementToString(theFormat);
     if (currentElt.size>1)
       out << ")";
     out << " v(" << this->theHWFundamentalCoordS.ElementToString() << "," << ((Vector<Rational>)this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() << ")" ;
@@ -2971,10 +2966,7 @@ std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
   << DisplayNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
 
   std::string latexCommandTemp;
-  if (!CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+".png") ||
-      !CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+"RootFormat.png" ) ||
-      !CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.png")
-      )
+  if (!CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+".png") )
   { out << "<br>the file: " << PhysicalNameLieBracketFullPathNoEnding << ".png" << " was just created<br>";
     std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
     std::stringstream tempCommand;
@@ -2987,18 +2979,11 @@ std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
     CGI::OpenFileCreateIfNotPresent(lieBracketFile3, PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
     PolynomialOutputFormat tempFormat;
     tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, false, false, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, true, false, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile2 << "\\documentclass{article}\\usepackage{longtable}\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
-    this->theHmm.theRange().ElementToStringNegativeRootSpacesFirst(tempS, true, true, false, true, true, tempFormat, theGlobalVariables);
-    lieBracketFile3 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n" << tempS << "\n\\end{document}";
+    ;
+    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n"
+    << this->theHmm.theRange().ElementToString(tempFormat) << "\n\\end{document}";
     this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +".tex");
-    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +"RootFormat.tex");
-    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +"EpsFormat.tex");
     this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + ".dvi -o " + PhysicalNameLieBracketFullPathNoEnding + ".png -T tight");
-    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + "RootFormat.dvi -o " + PhysicalNameLieBracketFullPathNoEnding + "RootFormat.png -T tight");
-    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + "EpsFormat.dvi -o " + PhysicalNameLieBracketFullPathNoEnding + "EpsFormat.png -T tight");
   }
   return out.str();
 }

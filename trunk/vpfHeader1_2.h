@@ -1651,23 +1651,6 @@ public:
   }
   SemisimpleLieAlgebra(): owner(0), indexInOwner(-1){ }
   void ComputeMultTable(GlobalVariables& theGlobalVariables);
-  void ElementToString(std::string& output, bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables){ this->ElementToString(output, useHtml, useLatex, false, theGlobalVariables, 0, 0, 0, 0); }
-  void ElementToString(std::string& output, bool useHtml, bool useLatex, bool usePNG, GlobalVariables& theGlobalVariables, std::string* physicalPath, std::string* htmlServerPath, List<std::string>* outputPNGFileNames, List<std::string>* outputLatexToPNGstrings);
-  void ElementToStringNegativeRootSpacesFirst
-  (std::string& output, bool useRootNotation, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
-  ;
-  std::string ElementToStringNegativeRootSpacesFirst
-  (bool useRootNotation, bool useEpsilonNotation, bool useHtml, bool useLatex, bool usePNG, PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
-  { std::string tempS;
-    this->ElementToStringNegativeRootSpacesFirst(tempS, useRootNotation, useEpsilonNotation, useHtml, useLatex, usePNG, theFormat, theGlobalVariables);
-    return tempS;
-  }
-  std::string ElementToString(GlobalVariables& theGlobalVariables)
-  { this->CheckConsistency();
-    PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    return this->ElementToStringNegativeRootSpacesFirst(false, false, true, false, false, tempFormat, theGlobalVariables);
-  }
   void CheckConsistency()
   { if (this->owner==0 || this->indexInOwner==-1)
     { std::cout << "This is a programming error. Use of non-initialized semisimple Lie algebra. Please debug file "
@@ -1675,16 +1658,10 @@ public:
       assert(false);
     }
   }
-  std::string ElementToStringLieBracketPairing();
-  std::string ElementToStringRootIndexToEpsForm(int theIndex, GlobalVariables& theGlobalVariables)
-  { return this->theWeyl.GetEpsilonCoords
-    (this->theWeyl.RootSystem[theIndex], theGlobalVariables).
-    ElementToStringEpsilonForm(false, false);
-  }
-  std::string ElementToStringRootIndexToSimpleBasis
-  (int theIndex, GlobalVariables& theGlobalVariables)
-  { return this->theWeyl.RootSystem[theIndex].ElementToStringLetterFormat("\\alpha", true);
-  }
+  std::string ElementToString(const PolynomialOutputFormat& inputFormat) ;
+  std::string GetStringFromChevalleyGenerator
+  (int theIndex, const PolynomialOutputFormat& thePolynomialFormat)const
+  ;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
   }
@@ -1752,7 +1729,7 @@ public:
     return theIndex-this->GetNumPosRoots();
   }
   bool AreOrderedProperly(int leftIndex, int rightIndex);
-  bool IsGeneratorFromCartan(int theIndex)
+  bool IsGeneratorFromCartan(int theIndex)const
   { return theIndex>=this->GetNumPosRoots() && theIndex<this->GetNumPosRoots()+this->GetRank();
   }
   bool AreOppositeRootSpaces(int leftIndex, int rightIndex)
@@ -1762,10 +1739,6 @@ public:
     int right=this->ChevalleyGeneratorIndexToRootIndex(rightIndex);
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
-  std::string GetLetterFromGeneratorIndex
-  (int theIndex, bool useRootIndices, bool useEpsCoords, const PolynomialOutputFormat& theFormat,
-   GlobalVariables& theGlobalVariables)
-;
   void GenerateVermaMonomials(Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables)
   ;
   void ComputeChevalleyConstantS
@@ -1909,10 +1882,6 @@ public:
   //The weights are in increasing order
   //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator in the current coordinates
   Matrix<Rational>  ChevalleyGeneratorsInCurrentCoords;
-  std::string GetGeneratorString
-  (int theIndex, bool formatCalculator, bool& mustUsebracketsWhenRaisingToPower,
-   const PolynomialOutputFormat& theFormat, GlobalVariables& theGlobalVariables)
-     ;
   void AssignGeneratorCoeffOne(int theIndex, ElementSemisimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);}
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
   void GetLinearCombinationFrom
@@ -2120,7 +2089,7 @@ public:
   void Simplify
   (GlobalVariables* theContext,
     const CoefficientType& theRingUnit=1,  const CoefficientType& theRingZero=0);
-  int GetNumVariables()const
+  int GetNumVars()const
   { if (this->size==0)
       return 0;
     else
@@ -2233,13 +2202,9 @@ class MonomialUniversalEnveloping
 {
 private:
 public:
-  std::string DebugString;
   std::string ElementToString
-  (bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
+  (const PolynomialOutputFormat& theFormat)const
   ;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
-  { this->DebugString=this->ElementToString(false, false, theGlobalVariables, theFormat);
-  }
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
@@ -2385,7 +2350,7 @@ public:
 };
 
 template <class CoefficientType>
-class ElementUniversalEnveloping: public MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType >
+class ElementUniversalEnveloping: public MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
 {
 private:
   void CleanUpZeroCoeff();
@@ -2393,40 +2358,7 @@ private:
 public:
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
-
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  { this->ElementToString(output, false, false, theGlobalVariables, theFormat);
-  }
-  std::string ElementToString()const
-;
-  void ElementToString(std::string& output)const
-  { output=this->ElementToString();
-  }
-  void ElementToString
-  (std::string& output, bool useRootIndices, bool includeEpsilonCoords,
-   GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  ;
-  std::string ElementToString(GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  { std::string tempS;
-    this->ElementToString(tempS, theGlobalVariables, theFormat);
-    return tempS;
-  }
-  std::string ElementToString(bool useLatex, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  { std::string tempS;
-    this->ElementToString(tempS, useLatex, false, theGlobalVariables, theFormat);
-    return tempS;
-  }
-  std::string ElementToStringCalculatorFormat(GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  { std::string tempS;
-    this->ElementToString(tempS, false, false, theGlobalVariables, theFormat);
-    return tempS;
-  }
-  std::string ElementToString
-  (bool useLatex, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat)const
-  { std::string tempS;
-    this->ElementToString(tempS, useLatex, includeEpsilonCoords, theGlobalVariables, theFormat);
-    return tempS;
-  }
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2504,10 +2436,10 @@ public:
   void Simplify
   (GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
-  int GetNumVariables()
+  int GetNumVars()const
   { if (this->size<1)
       return 0;
-    return this->theCoeffs[0].GetNumVariables();
+    return this->theCoeffs[0].GetNumVars();
   }
   inline void MultiplyBy(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight)
   { this->operator*=(standsOnTheRight);
@@ -5176,7 +5108,7 @@ void ElementVermaModuleOrdered<CoefficientType>::ActOnMe
   output.theElT.Simplify(theContext, theRingUnit, theRingZero);
   output.theSubNthElementIsImageNthCoordSimpleBasis=this->theSubNthElementIsImageNthCoordSimpleBasis;
 //  std::cout << "<br>and the result before modding out is: " << output.ElementToString();
-//  int numVars=output.theElt.GetNumVariables();
+//  int numVars=output.theElt.GetNumVars();
   output.theElT.ModOutVermaRelationSOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, theContext, theRingUnit);
 //  std::cout << "<br>and after modding out we get: " << output.ElementToString();
 }
@@ -5726,15 +5658,6 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
 }
 
 template <class CoefficientType>
-std::string ElementUniversalEnveloping<CoefficientType>::ElementToString()const
-{ GlobalVariables theGlobalVariables;
-  PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-  return this->ElementToString(theGlobalVariables, tempFormat);
-}
-
-
-template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
   (GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, bool includeV)
 { std::stringstream out;
@@ -5759,15 +5682,14 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
     tempS="";
   if (tempS=="-1")
     tempS="-";
-  tempS+=this->theMonCoeffOne.ElementToString(false, false, theGlobalVariables, theFormat);
+  tempS+=this->theMonCoeffOne.ElementToString(theFormat);
   if (tempS=="1")
     tempS="";
   if (tempS=="-1")
     tempS="-";
   std::stringstream out;
   out << tempS;
-  tempS= theMod.theGeneratingWordsNonReduced[this->indexFDVector].
-  ElementToString(false, false, theGlobalVariables, theFormat);
+  tempS= theMod.theGeneratingWordsNonReduced[this->indexFDVector].ElementToString(theFormat);
   if (tempS!="1")
     out << tempS;
   if (includeV)
@@ -5999,17 +5921,15 @@ void MonomialUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVar
 
 template <class CoefficientType>
 std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString
-(bool useRootIndices, bool useEpsilonCoords, GlobalVariables& theGlobalVariables,
- const PolynomialOutputFormat& theFormat)const
+(const PolynomialOutputFormat& theFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->owners==0 || this->indexInOwners==-1)
     return "(Error:Programming:NonInitializedMonomial)";
   for (int i=0; i<this->generatorsIndices.size; i++)
-  { CoefficientType& thePower=this->Powers.TheObjects[i];
-    int theIndex=this->generatorsIndices.TheObjects[i];
-    tempS=this->GetOwner().GetLetterFromGeneratorIndex
-    (theIndex, useRootIndices, useEpsilonCoords, theFormat, theGlobalVariables);
+  { CoefficientType& thePower=this->Powers[i];
+    int theIndex=this->generatorsIndices[i];
+    tempS=this->GetOwner().GetStringFromChevalleyGenerator(theIndex, theFormat);
     //if (thePower>1)
     //  out << "(";
     out << tempS;
@@ -6252,7 +6172,7 @@ void ElementUniversalEnveloping<CoefficientType>::SubstitutionCoefficients
   CoefficientType tempCF;
   for (int i=0; i<this->size; i++)
   { currentMon=this->TheObjects[i];
-    this->theCoeffs[i].Substitution(theSub, this->theCoeffs[i].GetNumVariables(), 1);
+    this->theCoeffs[i].Substitution(theSub, this->theCoeffs[i].GetNumVars(), 1);
     endResult.AddMonomial(currentMon, tempCF);
   }
   if (theContext!=0)
@@ -6473,29 +6393,36 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::ElementToString
-(std::string& output, bool useRootIndices, bool includeEpsilonCoords, GlobalVariables& theGlobalVariables,
- const PolynomialOutputFormat& theFormat)const
-{ std::stringstream out;
+std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(const PolynomialOutputFormat& theFormat)const
+{ if (this->size==0)
+    return "0";
+  std::stringstream out;
   std::string tempS;
-  if (this->size==0)
-    out << "0";
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
-  { MonomialUniversalEnveloping<CoefficientType>& current=this->TheObjects[i];
-    tempS=current.ElementToString
-    (useRootIndices, includeEpsilonCoords, theGlobalVariables, theFormat);
-    if (i!=0)
-      if (tempS.size()>0)
-        if (tempS[0]!='-')
-          out << '+';
-    out << tempS;
+  { tempS=this->theCoeffs[i].ElementToString(theFormat);
+    MonomialUniversalEnveloping<CoefficientType>& current=this->TheObjects[i];
+    if (current.generatorsIndices.size>0)
+    { if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (i!=0)
+      { if (tempS.size()>0)
+        { if (tempS[0]!='-')
+            out << "+";
+        } else
+          out << "+";
+      }
+      out << tempS << current.ElementToString(theFormat);
+    } else
+      out << tempS;
     if (((int)out.tellp())- IndexCharAtLastLineBreak> 150)
     { IndexCharAtLastLineBreak=out.tellp();
       out << "\\\\&&";
     }
   }
-  output=out.str();
+  return out.str();
 }
 
 
@@ -6737,7 +6664,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeConst
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeZero(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-{ this->Clear();
+{ this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType >::MakeZero();
   this->owners=&inputOwners;
   this->indexInOwners=inputIndexInOwners;
 }
@@ -6888,8 +6815,8 @@ std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
   { CoefficientType& thePower=this->Powers[i];
     int theIndex=this->generatorsIndices[i];
     bool usebrackets=false;
-    tempS=this->owner->GetGeneratorString
-    (theIndex, useCalculatorFormat, usebrackets, PolyFormatLocal, theGlobalVariables)
+    tempS=this->owner->theOwner.GetStringFromChevalleyGenerator
+    (theIndex, PolyFormatLocal)
     ;
     if (usebrackets)
       out << "(";

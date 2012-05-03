@@ -53,7 +53,7 @@ std::string DataOfExpressions<dataType>::ElementToString()const
 //  this->theBuiltIn.ElementToString();
   for (int i=0; i<this->VariableImages.size; i++)
     tempFormat.SetLetterIndex(this->VariableImages[i].ElementToString(), i);
-  return this->theBuiltIn.ElementToString(tempFormat);
+  return this->theBuiltIn.ElementToString(&tempFormat);
 }
 
 template < >
@@ -315,14 +315,14 @@ std::string Data::ElementToString(std::stringstream* comments)const
       return out.str();
     case Data::typeMonomialGenVerma:
       out << this->owner->theObjectContainer.theMonomialsGeneralizedVerma[this->theIndex].ElementToString
-      (*this->owner->theGlobalVariableS, this->owner->theGlobalVariableS->theDefaultLieFormat, true);
+      (&this->owner->theGlobalVariableS->theDefaultLieFormat, true);
       return out.str();
     case Data::typeElementUE:
       out << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString();
       return out.str();
     case Data::typeElementSSalgebra:
       out << this->owner->theObjectContainer.theLieAlgebraElements[this->theIndex]
-      .ElementToString(this->owner->theGlobalVariableS->theDefaultLieFormat);
+      .ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
       return out.str();
     case Data::typeRational:
       return this->GetValuE<Rational>().ElementToString();
@@ -331,7 +331,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
       << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString() << ")";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
-      return this->owner->theObjectContainer.theElemenentsGeneralizedVermaModuleTensors[this->theIndex].ElementToString(*this->owner->theGlobalVariableS);
+      return this->owner->theObjectContainer.theElemenentsGeneralizedVermaModuleTensors[this->theIndex].ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -1420,7 +1420,7 @@ bool CommandList::fHWTAABF
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(numVars, theCommands.theGlobalVariableS);
   theRingUnit.MakeOne(numVars, theCommands.theGlobalVariableS);
-  List<RationalFunction > theHW;
+  Vector<RationalFunction > theHW;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
   out << "Highest weight in fundamental coords: " << weight.ElementToString() << "<br>";
@@ -1738,7 +1738,7 @@ bool CommandList::fSSAlgebra
     if (comments!=0)
       *comments << "Lie algebra of type " << tempData.GetSSLieAlgebra().GetLieAlgebraName()
       << " generated. The resulting Lie bracket pairing table is "
-      << tempData.GetSSLieAlgebra().ElementToString(theCommands.theGlobalVariableS->theDefaultLieFormat);
+      << tempData.GetSSLieAlgebra().ElementToString(&theCommands.theGlobalVariableS->theDefaultLieFormat);
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(tempData);
   theExpression.theOperation=theCommands.opData();
   theExpression.children.SetSize(0);
@@ -2553,16 +2553,16 @@ bool CommandList::ExtractData
         return false;
       outputBuffer.SetNumVariables(finalOutput.VariableImages.size);
       bufferData.SetNumVariables(finalOutput.VariableImages.size);
-      std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
-      std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+      std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
           outputBuffer=bufferData;
         else
-        { std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat)
-          << " and " << bufferData.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+        { std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          << " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
           outputBuffer*=bufferData;
-          std::cout << "<br>Result: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          std::cout << "<br>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
       else if (theInput.theOperation==this->opMinus())
@@ -2576,14 +2576,14 @@ bool CommandList::ExtractData
       { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
         if (i==0)
         { outputBuffer=bufferData;
-          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat)
-          << ", which should equal the bufferData: " << bufferData.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          << ", which should equal the bufferData: " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
         }
         else
-        { std::cout << "<hr>Adding: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat)
-          << " and " << bufferData.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+        { std::cout << "<hr>Adding: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          << " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
           outputBuffer+=bufferData;
-          std::cout << "<hr>Result: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          std::cout << "<hr>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
     }
@@ -2606,7 +2606,7 @@ bool CommandList::ExtractData
   { Data& theData=this->theData[theInput.theData];
     std::cout << "<hr>attempting to convert " << theData.ElementToString();
     if (theData.ConvertToType<dataType>(outputBuffer, finalOutput.theBuiltIn))
-    { std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+    { std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       return true;
     }
   } else
@@ -2616,7 +2616,7 @@ bool CommandList::ExtractData
   int theIndex=finalOutput.VariableImages.AddNoRepetitionOrReturnIndexFirst(theInput);
   outputBuffer=finalOutput.GetPolynomialMonomial(1, theIndex, *this->theGlobalVariableS);
   std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
-  << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
   return true;
 }
 
@@ -3746,7 +3746,7 @@ bool Data::ConvertToType<ElementUniversalEnveloping<RationalFunction> >
       std::cout << " " << this->ElementToString() << " converted to: ";
       output.AssignElementLieAlgebra
       (this->GetEltSimpleLieAlgebra(), *initializingElement.owners, initializingElement.indexInOwners, RFOne, RFZero);
-      std::cout << "<br>" << output.ElementToString(this->owner->theGlobalVariableS->theDefaultLieFormat);
+      std::cout << "<br>" << output.ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
       return true;
     case Data::typeRational:
       RFOne*=this->GetValuE<Rational>();

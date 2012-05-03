@@ -116,7 +116,6 @@ struct CGI;
 
 //The calculator parsing routines:
 class CommandList;
-class Command;
 class VariableNonBound;
 class Function;
 class Expression;
@@ -380,7 +379,7 @@ public:
     return result;
   }
   template<class Element>
-  static inline std::string ElementToStringBrackets(const Element& input, const PolynomialOutputFormat& theFormat)
+  static inline std::string ElementToStringBrackets(const Element& input, PolynomialOutputFormat* theFormat)
   { if (!input.ElementToStringNeedsBracketsForMultiplication())
       return input.ElementToString(theFormat);
     std::string result;
@@ -815,7 +814,6 @@ public:
   }
 };
 
-
 class ProjectInformation
 {
   public:
@@ -853,7 +851,6 @@ std::iostream& operator<< (std::iostream& output, const List<Object>& theList)
     output << theList.TheObjects[i] << " ";
   return output;
 }
-
 
 template <class Object>
 std::iostream& operator >> (std::iostream& input, List<Object>& theList)
@@ -1109,7 +1106,6 @@ public:
   { this->CopyFromHash(From);
   }
 };
-
 
 //NOTE NOTE NOTE NOTE!!!!!!!
 //If you get an error message like "could not convert template argument blah blah blah "
@@ -2029,7 +2025,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
   offset=0; blockIndex=0;
   for (int i=0; i<this->NumRows; i++)
   { for (int j=0; j<this->NumCols; j++)
-    { this->elements[i][j].ElementToString(tempS);
+    { tempS=this->elements[i][j].ElementToString();
       out << tempS;
       if (j!=this->NumCols-1)
         out << " & ";
@@ -2063,7 +2059,7 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
   { if (useHtml)
       out << "<tr>";
     for (int j=0; j<this->NumCols; j++)
-    { this->elements[i][j].ElementToString(tempS);
+    { tempS=this->elements[i][j].ElementToString();
       if (useHtml)
         out << "<td>";
       out << tempS;
@@ -2341,7 +2337,7 @@ public:
   //the above choice of CarryOverBound facilitates very quick conversions of Large integers into decimal, with
   //relatively small loss of speed and RAM memory.
 //  static const unsigned int CarryOverBound=2147483648UL; //=2^31
-  //The following must be less than or equal to the square Vector<Rational>  of CarryOverBound.
+  //The following must be less than or equal to the square root of CarryOverBound.
   //It is used for quick multiplication of Rational-s.
   static const int SquareRootOfCarryOverBound=31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound=32768; //=2^15
@@ -2782,13 +2778,7 @@ ParallelComputing::GlobalPointerCounter++;
     this->Extended->num.sign*=x.sign; this->Simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){ this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify(); }
-  void ElementToString(std::string& output)const;
-  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS;}
-  std::string ElementToString(const PolynomialOutputFormat& notUsed)const
-  { std::string tempS;
-    this->ElementToString(tempS);
-    return tempS;
-  }
+  std::string ElementToString(PolynomialOutputFormat* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;
   inline bool IsEqualToOne()const
@@ -3088,7 +3078,7 @@ public:
   { std::string result="Vector_" + CoefficientType::GetXMLClassName();
     return result;
   }
-  void ElementToString(std::string& output)const
+  std::string ElementToString()const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -3098,9 +3088,9 @@ public:
         out << ", ";
     }
     out << ")";
-    output=out.str();
+    return out.str();
   }
-  void ElementToString(std::string& output, PolynomialOutputFormat& theFormat)const
+  std::string ElementToString(PolynomialOutputFormat* theFormat)const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -3110,12 +3100,8 @@ public:
         out << ", ";
     }
     out << ")";
-    output=out.str();
+    return out.str();
   }
-  std::string ElementToString()const{ std::string tempS; this->ElementToString(tempS); return tempS; }
-  std::string ElementToString
-  (PolynomialOutputFormat& theFormat)const{ std::string tempS; this->ElementToString(tempS, theFormat); return tempS; }
-
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar=false);
   std::string ElementToStringLetterFormat
   (const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const;
@@ -3281,18 +3267,6 @@ static void ProjectOntoHyperPlane
       return true;
     }
     return false;
-  }
-  void ElementToString(std::string& output, bool useLaTeX)const
-  { output.clear();
-    std::string tempStr;
-    output.append("(");
-    for(int i=0; i<this->size; i++)
-    { this->TheObjects[i].ElementToString(tempStr);
-      output.append(tempStr);
-      if (i!=this->size-1)
-        output.append(", ");
-    }
-    output.append(")");
   }
   void MakeZero(int theDim, const CoefficientType& theRingZero=0)
   { this->SetSize(theDim);
@@ -3723,7 +3697,7 @@ class Vectors: public List<Vector<CoefficientType> >
     if (useHtml && makeTable)
       out << "<table>";
     for (int i=0; i<this->size; i++)
-    { this->TheObjects[i].ElementToString(tempS, useLaTeX);
+    { tempS=this->TheObjects[i].ElementToString();
       if (useHtml && makeTable)
         out << "<tr><td>";
       out << tempS;
@@ -3786,7 +3760,7 @@ class Vectors: public List<Vector<CoefficientType> >
     { this->TheObjects[i].ElementToString(tempS);
       out << tempS;
        if (i!=this->size-1)
-        out <<" + ";
+        out << " + ";
     }
     return out.str();
   }
@@ -4108,7 +4082,7 @@ std::string Vector<CoefficientType>::ElementToStringLetterFormat
   int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
   for(int i=0; i<NumVars; i++)
     if (!this->TheObjects[i].IsEqualToZero())
-    { this->TheObjects[i].ElementToString(tempS);
+    { tempS=this->TheObjects[i].ElementToString();
       if (tempS=="1")
         tempS="";
       if (tempS=="-1")
@@ -4150,7 +4124,7 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
-  std::string ElementToString(const PolynomialOutputFormat& inputFormat)const;
+  std::string ElementToString(PolynomialOutputFormat* inputFormat)const;
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
@@ -4173,7 +4147,7 @@ public:
   static inline int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormat)const;
+  std::string ElementToString(PolynomialOutputFormat* PolyFormat=0)const;
   void MakeZeroDegrees();
   bool operator>(const MonomialP& other)const
   { if (this->operator==(other))
@@ -4269,7 +4243,7 @@ public:
   int NumVars;
   List<CoefficientType> theCoeffs;
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
+  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
   static int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
   { return SomeRandomPrimes[0]* input.theCoeffs.HashFunction()
     +SomeRandomPrimes[1]*input.::HashedList<TemplateMonomial>::HashFunction();
@@ -4706,7 +4680,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
     if (numDisplayedEltsMinus1ForAll==-1)
       numDisplayedEltsMinus1ForAll=this->size;
     for (int i=0; i<this->size; i++)
-    { out << "x_{" << i+1 << "} \\mapsto " << this->TheObjects[i].ElementToString(PolyFormatLocal);
+    { out << "x_{" << i+1 << "} \\mapsto " << this->TheObjects[i].ElementToString(&PolyFormatLocal);
       if (i!=this->size-1)
         out << ", ";
     }
@@ -4860,8 +4834,7 @@ public:
   int NumVars;
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
-  std::string ElementToString()const {return this->ElementToString(true, false);}
-  std::string ElementToString(bool useLatex, bool breakLinesLatex)const;
+  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
   bool ElementToStringNeedsBracketsForMultiplication()const
   { switch(this->expressionType)
     { case RationalFunction::typeRational: return false;
@@ -4882,8 +4855,6 @@ public:
   }
   int GetNumVars() {return this->NumVars;}
   void Substitution(PolynomialSubstitution<Rational>& theSub);
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const{return this->ElementToString(true, true);}
-  void ElementToString(std::string& output)const{output=this->ElementToString(true, false);}
   RationalFunction()
   { this->NumVars=0;
     this->expressionType=this->typeRational;
@@ -5204,15 +5175,6 @@ public:
     assert(this->checkConsistency());
   }
   void Minus(){this->operator*=((Rational) -1); assert(this->checkConsistency());}
-};
-
-class rootRationalFunction: public List<RationalFunction>
-{
-public:
-  std::string DebugString;
-  std::string ElementToString();
-  void ComputeDebugString(){this->DebugString=this->ElementToString();}
-  void ScaleToPolynomial();
 };
 
 template <class Element>
@@ -5543,7 +5505,7 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
 
 template <class TemplateMonomial, class Element>
 std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
-(const PolynomialOutputFormat& theFormat)const
+(PolynomialOutputFormat* theFormat)const
 { std::stringstream out;
   std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
@@ -7020,7 +6982,7 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool ElementToStringNeedsBracketsForMultiplication()const;
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
+  std::string ElementToString(PolynomialOutputFormat* theFormat)const;
   Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)

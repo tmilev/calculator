@@ -133,8 +133,8 @@ public:
   Vectors<Rational> LatticeShifts;
   std::string DebugString;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
-  std::string ElementToString(bool useHtml, bool useLatex){PolynomialOutputFormat tempFormat; return this->ElementToString(useHtml, useLatex, tempFormat);}
-  std::string ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat);
+  std::string ElementToString(bool useHtml, bool useLatex){return this->ElementToString(useHtml, useLatex, 0);}
+  std::string ElementToString(bool useHtml, bool useLatex, PolynomialOutputFormat* thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ElementToString(false, false);}
   Rational Evaluate(const Vector<Rational> & input);
   void AddLatticeShift(const Polynomial<Rational> & input, const Vector<Rational> & inputShift);
@@ -329,7 +329,6 @@ public:
   int SizeWithoutDebugString();
 };
 
-
 class Cone
 {
   void ComputeVerticesFromNormalsNoFakeVertices(GlobalVariables& theGlobalVariables);
@@ -342,7 +341,7 @@ public:
 //  bool flagHasSufficientlyManyVertices;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
-  std::string ElementToString(PolynomialOutputFormat& theFormat){return this->ElementToString(false, false, theFormat);}
+  std::string ElementToString(PolynomialOutputFormat* theFormat=0){return this->ElementToString(false, false, *theFormat);}
   void TransformToWeylProjective
   (ConeComplex& owner, GlobalVariables& theGlobalVariables)
   ;
@@ -396,7 +395,6 @@ public:
       return 0;
     return this->Normals.TheObjects[0].size;
   }
-  void ComputeDebugString(){ PolynomialOutputFormat theFormat; this->DebugString=this->ElementToString(theFormat);}
   void SliceInDirection
   (Vector<Rational> & theDirection, ConeComplex& output, GlobalVariables& theGlobalVariables )
 ;
@@ -779,9 +777,8 @@ class WeylGroup: public HashedList<ElementWeylGroup>
     this->flagFundamentalToSimpleMatricesAreComputed=true;
   }
 public:
-  std::string DebugString;
-  Matrix<Rational>  CartanSymmetric;
-  Vector<Rational>  rho;
+  Matrix<Rational> CartanSymmetric;
+  Vector<Rational> rho;
   char WeylLetter;
   Rational LongRootLength;
   //Rational LongLongScalarProdPositive;
@@ -793,9 +790,7 @@ public:
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void ComputeRho(bool Recompute);
-  void ComputeDebugString();
-  void ElementToString(std::string& output);
-  std::string ElementToString(){ std::string tempS; this->ElementToString(tempS); return tempS;}
+  std::string ElementToString();
   void MakeArbitrary(char WeylGroupLetter, int n);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
@@ -816,23 +811,23 @@ public:
   { this->ComputeFundamentalToSimpleMatrices();
     return &this->FundamentalToSimpleCoords;
   }
-  Matrix<Rational> * GetMatrixSimpleToFundamentalCoords()
+  Matrix<Rational>* GetMatrixSimpleToFundamentalCoords()
   { this->ComputeFundamentalToSimpleMatrices();
     return &this->SimpleToFundamentalCoords;
   }
-  Vector<Rational>  GetSimpleCoordinatesFromFundamental
+  Vector<Rational> GetSimpleCoordinatesFromFundamental
   (const Vector<Rational>& inputInFundamentalCoords)
   ;
   Vector<Rational> GetFundamentalCoordinatesFromSimple
   (const Vector<Rational>& inputInSimpleCoords)
   ;
-  Vector<Rational>  GetDualCoordinatesFromSimple
+  Vector<Rational> GetDualCoordinatesFromSimple
   (const Vector<Rational> & inputInSimpleCoords)
   { return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
   }
-  Vector<Rational>  GetDualCoordinatesFromFundamental
+  Vector<Rational> GetDualCoordinatesFromFundamental
   (const Vector<Rational> & inputInFundamentalCoords)
-  { Vector<Rational>  result=inputInFundamentalCoords;
+  { Vector<Rational> result=inputInFundamentalCoords;
     assert(result.size==this->GetDim());
     for (int i=0; i<result.size; i++)
       result[i]*=this->CartanSymmetric.elements[i][i]/2;
@@ -1658,9 +1653,9 @@ public:
       assert(false);
     }
   }
-  std::string ElementToString(const PolynomialOutputFormat& inputFormat) ;
+  std::string ElementToString(PolynomialOutputFormat* inputFormat);
   std::string GetStringFromChevalleyGenerator
-  (int theIndex, const PolynomialOutputFormat& thePolynomialFormat)const
+  (int theIndex, PolynomialOutputFormat* thePolynomialFormat)const
   ;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
@@ -1911,13 +1906,12 @@ public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
   std::string ElementToString
-(bool useLatex, bool useCalculatorFormat,
- const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+(bool useLatex, bool useCalculatorFormat, PolynomialOutputFormat* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 ;
   void ComputeDebugString()
   { GlobalVariables theGlobalVariables;
     PolynomialOutputFormat PolyFormatLocal;
-    this->DebugString=this->ElementToString(false, true, PolyFormatLocal, theGlobalVariables);
+    this->DebugString=this->ElementToString(false, true, &PolyFormatLocal, theGlobalVariables);
   }
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
   // Powers gives the powers of the generators in the order specified in the owner
@@ -2024,22 +2018,22 @@ public:
   void ElementToString
 (std::string& output, bool useLatex,
  bool useCalculatorFormat,
- const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
   ;
   std::string ElementToString
-  (bool useLatex, bool useCalculatorFormat, const PolynomialOutputFormat& PolyFormatLocal,
+  (bool useLatex, bool useCalculatorFormat, PolynomialOutputFormat& PolyFormatLocal,
    GlobalVariables& theGlobalVariables)const
   { std::string tempS;
     this->ElementToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
   std::string ElementToString
-  (const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  (PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
   { std::string tempS;
     this->ElementToString(tempS, true, true, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const
+  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal)const
   { GlobalVariables theGlobalVariables;
     return this->ElementToString(PolyFormatLocal, theGlobalVariables);
   }
@@ -2203,7 +2197,7 @@ class MonomialUniversalEnveloping
 private:
 public:
   std::string ElementToString
-  (const PolynomialOutputFormat& theFormat)const
+  (PolynomialOutputFormat* theFormat=0)const
   ;
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
@@ -2249,12 +2243,12 @@ public:
   }
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
-   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
   void ModOutVermaRelations
   (CoefficientType& outputCoeff, GlobalVariables* theContext,
-   const List<CoefficientType>* subHiGoesToIthElement=0, const CoefficientType& theRingUnit=1,
+   const Vector<CoefficientType>* subHiGoesToIthElement=0, const CoefficientType& theRingUnit=1,
    const CoefficientType& theRingZero=0)
 ;
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex=0);
@@ -2353,7 +2347,7 @@ private:
 public:
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
+  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2363,21 +2357,21 @@ public:
   }
   bool HWMTAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
-   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
   std::string IsInProperSubmodule
-  (const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+  (const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
-   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
-   const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+   const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   { ElementUniversalEnveloping<CoefficientType> tempElt;
     tempElt.MakeZero(*this->owners, this->indexInOwners);
@@ -2448,7 +2442,7 @@ public:
    GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero);
   void ModOutVermaRelations
-  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
+  (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   static void GetCoordinateFormOfSpanOfElements
@@ -2767,7 +2761,7 @@ class ConeLatticeAndShiftMaxComputation
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
-  std::string ElementToString(PolynomialOutputFormat& theFormat);
+  std::string ElementToString(PolynomialOutputFormat* theFormat=0);
   void init
   (Vector<Rational> & theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift)
   ;
@@ -2967,9 +2961,9 @@ public:
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
   Vectors<Rational> weightsSimpleGens;
 
-  List<CoefficientType> theHWDualCoordsBaseField;
+  Vector<CoefficientType> theHWDualCoordsBaseField;
 
-  List<Rational> theHWDualCoordS;
+  Vector<Rational> theHWDualCoordS;
   Vector<Rational>  theHWSimpleCoordS;
   Vector<Rational>  theHWFundamentalCoordS;
   Vector<CoefficientType> theHWFundamentalCoordsBaseField;
@@ -3036,7 +3030,7 @@ public:
 (char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
   ;
   void IntermediateStepForMakeFromHW
-( List<CoefficientType>& HWDualCoordS, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+( Vector<CoefficientType>& HWDualCoordS, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
   const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
@@ -3060,7 +3054,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   void ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
    ElementUniversalEnveloping<CoefficientType>& outputHomogeneous,
-   int indexInputBasis, const List<CoefficientType>& subHiGoesToIthElement,
+   int indexInputBasis, const Vector<CoefficientType>& subHiGoesToIthElement,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero
    )
   ;
@@ -3098,10 +3092,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat, bool includeV)const
-  ;
-  void ElementToString
-  (std::string& output, PolynomialOutputFormat& theFormat)const
+  (PolynomialOutputFormat* theFormat, bool includeV=true)const
   ;
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
@@ -3220,7 +3211,7 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
-  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, bool includeV)
+  std::string ElementToString(PolynomialOutputFormat* theFormat, bool includeV=true)
   ;
   MonomialTensorGeneralizedVermas(){}
   void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
@@ -3300,7 +3291,7 @@ public:
   { this->Clear();
   }
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables)const
+  (PolynomialOutputFormat* theFormat=0)const
     ;
   int HashFunction()const
   { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
@@ -5653,14 +5644,14 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
 
 template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat, bool includeV)
+  (PolynomialOutputFormat* theFormat, bool includeV)
 { std::stringstream out;
   std::string tempS;
   if (this->theMons.size>1)
     for (int i=0; i<this->theMons.size; i++)
-      out << "(" << this->theMons[i].ElementToString(theGlobalVariables, theFormat, includeV) << ")";
+      out << "(" << this->theMons[i].ElementToString(theFormat, includeV) << ")";
   else
-    out << this->theMons[0].ElementToString(theGlobalVariables, theFormat, includeV);
+    out << this->theMons[0].ElementToString(theFormat, includeV);
 //  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";
 //  for (int i=0; i<this->theMons.size; i++)
 //    std::cout << this->theMons[i].HashFunction() << ", ";
@@ -5669,7 +5660,7 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables, const PolynomialOutputFormat& theFormat, bool includeV)const
+  (PolynomialOutputFormat* theFormat, bool includeV)const
 { ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   std::string tempS;
   if (tempS=="1")
@@ -5731,14 +5722,13 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables)const
+  (PolynomialOutputFormat* theFormat)const
 { if (this->size==0)
     return "0";
-  Vector<Rational>  parSel;
+  Vector<Rational> parSel;
   std::stringstream out;
   std::string tempS;
-  PolynomialOutputFormat theFormat;
-  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  theFormat->MakeAlphabetArbitraryWithIndex("g", "h");
   MonomialTensorGeneralizedVermas<CoefficientType>& firstMon=this->TheObjects[0];
   bool useBrackets=false;
   int indexInOwnerFirst=-1;
@@ -5760,7 +5750,7 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
   if (useBrackets)
     out << "(";
   for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ElementToString(theGlobalVariables, theFormat, useBrackets);
+  { tempS=this->TheObjects[i].ElementToString(theFormat, useBrackets);
     if (i!=0 && tempS[0]!='-')
       out << "+";
     out << tempS;
@@ -5914,8 +5904,7 @@ void MonomialUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVar
 }
 
 template <class CoefficientType>
-std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString
-(const PolynomialOutputFormat& theFormat)const
+std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString(PolynomialOutputFormat* theFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->owners==0 || this->indexInOwners==-1)
@@ -6277,7 +6266,7 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-  (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement,
+  (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   ElementUniversalEnveloping<CoefficientType> output;
@@ -6342,11 +6331,11 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
 }
 
 template <class CoefficientType>
-std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(const PolynomialOutputFormat& theFormat)const
+std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(PolynomialOutputFormat* theFormat)const
 { if (this->size==0)
     return "0";
-  std::cout << "<br>std::string ElementUniversalEnveloping<CoefficientType>::ElementToString called. ";
-  std::cout << "Num mons: " << this->size;
+//  std::cout << "<br>std::string ElementUniversalEnveloping<CoefficientType>::ElementToString called. ";
+//  std::cout << "Num mons: " << this->size;
 
   std::stringstream out;
   std::string tempS;
@@ -6746,7 +6735,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByGeneratorPow
 template <class CoefficientType>
 std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 (bool useLatex, bool useCalculatorFormat,
- const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ PolynomialOutputFormat* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { if (this->owner==0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->IsEqualToZero())
@@ -6792,8 +6781,7 @@ std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 (std::string& output, bool useLatex,
- bool useCalculatorFormat,
- const PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ bool useCalculatorFormat, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)
@@ -6801,7 +6789,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::ElementToString
   int IndexCharAtLastLineBreak=0;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnvelopingOrdered<CoefficientType>& current=this->TheObjects[i];
-    tempS=current.ElementToString(false, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
+    tempS=current.ElementToString(false, useCalculatorFormat, &PolyFormatLocal, theGlobalVariables);
     if (i!=0)
       if (tempS.size()>0)
         if (tempS[0]!='-')

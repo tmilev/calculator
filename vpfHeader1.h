@@ -6536,10 +6536,10 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
-  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ElementToString();
+//  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ElementToString();
   if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
     return false;
-  std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ElementToString();
+  //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ElementToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
   CoefficientType tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
@@ -6549,7 +6549,7 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
   { bufferMat.elements[i][0].Minus();
     output[i]=(bufferMat.elements[i][0]);
   }
-  std::cout << "outpuf final: " << output.ElementToString();
+//  std::cout << "outpuf final: " << output.ElementToString();
   return true;
 }
 

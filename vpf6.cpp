@@ -14,6 +14,7 @@ template < > int HashedListB<Rational, Rational::HashFunction>::PreferredHashSiz
 template < > int HashedListB<DataOfExpressions<ElementUniversalEnveloping<Rational> >,DataOfExpressions<ElementUniversalEnveloping<Rational> >::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >,DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<DataOfExpressions<RationalFunction>,DataOfExpressions<RationalFunction>::HashFunction>::PreferredHashSize=100;
+template < > int HashedListB<ElementSumGeneralizedVermas<RationalFunction>,ElementSumGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=100;
 
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
 template < > int List<Function>::ListActualSizeIncrement=50;
@@ -23,6 +24,7 @@ template < > int List<ElementTensorsGeneralizedVermas<RationalFunction> >::ListA
 template < > int List<DataOfExpressions<Polynomial<Rational> > >::ListActualSizeIncrement=50;
 template < > int List<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >::ListActualSizeIncrement=10;
 template < > int List<DataOfExpressions<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<ElementSumGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
 
 //Note: due to the messed up C++ templates, the following template specialization funcitons must appear
 //here and nowhere else. C++ is a dirty buggy language.
@@ -185,6 +187,13 @@ bool Data::IsOfType<DataOfExpressions<Polynomial<Rational> > >()const
 { return this->type==this->typePoly;
 }
 
+void Expression::MakeEltSumGenVermas
+  (const ElementSumGeneralizedVermas<RationalFunction>& inputElt, CommandList& newBoss, int inputIndexBoundVars)
+{ Data tempData;
+  tempData.MakeSumGenVermaElts(newBoss, inputElt);
+  this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
+}
+
 bool Data::MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
@@ -330,6 +339,9 @@ std::string Data::ElementToString(std::stringstream* comments)const
       out << "Polynomial{}("
       << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString() << ")";
       return out.str();
+    case Data::typeEltSumGenVermas:
+      return this->owner->theObjectContainer.theSumGenVermaElts[this->theIndex]
+      .ElementToString();
     case Data::typeEltTensorGenVermasOverRF:
       return this->owner->theObjectContainer.theElemenentsGeneralizedVermaModuleTensors[this->theIndex].ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
     case Data::typeError:
@@ -533,6 +545,7 @@ std::string Data::ElementToStringDataType() const
     case Data::typeError:  return "Error";
     case Data::typeElementUE: return "ElementUniversalEnveloping";
     case Data::typeEltTensorGenVermasOverRF: return "ElementOfTensorProductOfGeneralizedVermaModules";
+    case Data::typeEltSumGenVermas: return "ElementSumGeneralizedVermaModules";
     case Data::typeMonomialGenVerma: return "MonomialGeneralizedVerma";
     default:
       std::cout << "This is a programming error: Data::ElementToStringDataType does not cover type "
@@ -547,6 +560,12 @@ int Data::HashFunction()const
 { return this->theIndex*SomeRandomPrimes[0]+this->type*SomeRandomPrimes[1];
 }
 
+void Data::MakeSumGenVermaElts
+(CommandList& theBoss, const ElementSumGeneralizedVermas<RationalFunction>& theElt)
+{ this->owner=&theBoss;
+  this->type=this->typeEltSumGenVermas;
+  this->theIndex=theBoss.theObjectContainer.theSumGenVermaElts.AddNoRepetitionOrReturnIndexFirst(theElt);
+}
 
 bool Data::MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
@@ -2288,19 +2307,7 @@ bool CommandList::EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
     theMon.MultiplyMeByUEEltOnTheLeft
     (RFOne, containerUE, result, *theCommands.theGlobalVariableS, RFOne, RFZero)
     ;
-    List<Expression> theSummands;
-    theSummands.SetSize(result.size);
-    Expression resultLeft, resultRight;
-    MonomialGeneralizedVerma<RationalFunction> tempMon;
-    DataOfExpressions<Polynomial<Rational> > tempCoeff;
-    for (int i=0; i<result.size; i++)
-    { tempMon=result[i];
-      resultLeft.MakePoly(tempCoeff, theCommands, inputIndexBoundVars);
-      assert(false);
-//      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
-      theSummands[i].MakeProducT(theCommands, inputIndexBoundVars, resultLeft, resultRight);
-    }
-    theCommands.CollectSummands(theSummands, true, inputIndexBoundVars, theExpression);
+    theExpression.MakeEltSumGenVermas(result, theCommands, inputIndexBoundVars);
     return true;
   }
   return false;
@@ -2553,16 +2560,16 @@ bool CommandList::ExtractData
         return false;
       outputBuffer.SetNumVariables(finalOutput.VariableImages.size);
       bufferData.SetNumVariables(finalOutput.VariableImages.size);
-      std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
-      std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
           outputBuffer=bufferData;
         else
-        { std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          << " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+        { //std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
           outputBuffer*=bufferData;
-          std::cout << "<br>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          //std::cout << "<br>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
       else if (theInput.theOperation==this->opMinus())
@@ -2576,14 +2583,14 @@ bool CommandList::ExtractData
       { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
         if (i==0)
         { outputBuffer=bufferData;
-          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          << ", which should equal the bufferData: " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+//          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+//          << ", which should equal the bufferData: " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
         }
         else
-        { std::cout << "<hr>Adding: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          << " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+        { //std::cout << "<hr>Adding: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
           outputBuffer+=bufferData;
-          std::cout << "<hr>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          //std::cout << "<hr>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
     }
@@ -2604,19 +2611,19 @@ bool CommandList::ExtractData
   }
   if (theInput.theOperation==this->opData())
   { Data& theData=this->theData[theInput.theData];
-    std::cout << "<hr>attempting to convert " << theData.ElementToString() << "<br>";
+//    std::cout << "<hr>attempting to convert " << theData.ElementToString() << "<br>";
     if (theData.ConvertToType<dataType>(outputBuffer, finalOutput.theBuiltIn))
-    { std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+    { //std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       return true;
     }
-  } else
-  { std::cout << "Input is of type " << theInput.GetOperation();
-  }
+  }// else
+  //{ //std::cout << "Input is of type " << theInput.GetOperation();
+  //}
   std::string debugString=theInput.ElementToString();
   int theIndex=finalOutput.VariableImages.AddNoRepetitionOrReturnIndexFirst(theInput);
   outputBuffer=finalOutput.GetPolynomialMonomial(1, theIndex, *this->theGlobalVariableS);
-  std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
-  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+//  std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
+//  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
   return true;
 }
 

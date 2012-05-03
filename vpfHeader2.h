@@ -25,7 +25,7 @@ public:
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
-    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE
+    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -40,6 +40,9 @@ public:
   DataOfExpressions<Polynomial<Rational> >& GetPoly()const;
   void MakeMonomialGeneralizedVerma
 (CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
+;
+  void MakeSumGenVermaElts
+(CommandList& theBoss, const ElementSumGeneralizedVermas<RationalFunction>& theElt)
 ;
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
@@ -192,6 +195,12 @@ class Expression
   Data& GetData()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+ ;
+  void MakeEltSumGenVermas
+  (const ElementSumGeneralizedVermas<RationalFunction>& inputElt, CommandList& newBoss, int inputIndexBoundVars)
+ ;
+  void MakeElementTensorsGeneralizedVermas
+  (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakePoly(const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars);
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
@@ -435,13 +444,14 @@ public:
   HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theTensorElts;
   List<ModuleSSalgebraNew<RationalFunction> >  theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<ElementSemisimpleLieAlgebra>  theLieAlgebraElements;
+  HashedList<ElementSemisimpleLieAlgebra> theLieAlgebraElements;
   HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theElemenentsGeneralizedVermaModuleTensors;
   HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
   HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
   HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >  theUEs;
   HashedList<DataOfExpressions<RationalFunction> > theRFs;
   HashedList<Rational> theRationals;
+  HashedList<ElementSumGeneralizedVermas<RationalFunction> > theSumGenVermaElts;
   void reset();
 };
 

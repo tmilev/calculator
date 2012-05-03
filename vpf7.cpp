@@ -3408,10 +3408,9 @@ void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
   { tempMon= this->TheObjects[i];
     tempMon.ModOutVermaRelations(acquiredCoeff, theContext, subHiGoesToIthElement, theRingUnit, theRingZero);
     acquiredCoeff*=this->theCoeffs[i];
-    std::cout << "<hr><hr>Adding " << tempMon.ElementToString() << " times " << acquiredCoeff.ElementToString() << " to " << output.ElementToString();
+//    std::cout << "<hr><hr>Adding " << tempMon.ElementToString() << " times " << acquiredCoeff.ElementToString() << " to " << output.ElementToString();
     output.AddMonomial(tempMon, acquiredCoeff);
-    std::cout <<"<br> to obtain " << output.ElementToString();
-
+//    std::cout <<"<br> to obtain " << output.ElementToString();
   }
   this->operator=(output);
 }

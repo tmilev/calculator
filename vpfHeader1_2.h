@@ -874,8 +874,8 @@ public:
   void GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(const Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
   void GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
-  Vector<Rational>  GetEpsilonCoords(const Vector<Rational> & input, GlobalVariables& theGlobalVariables)
-  { Vector<Rational>  tempRoot;
+  Vector<Rational> GetEpsilonCoords(const Vector<Rational> & input, GlobalVariables& theGlobalVariables)
+  { Vector<Rational> tempRoot;
     this->GetEpsilonCoords(input, tempRoot, theGlobalVariables);
     return tempRoot;
   }
@@ -1936,11 +1936,6 @@ public:
   (GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement=0,
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
      ;
-  void ModOutVermaRelationSOld(bool SubHighestWeightWithZeroes);
-  void ModOutVermaRelationSOld
-  (bool SubHighestWeightWithZeroes, const PolynomialSubstitution<Rational>& highestWeightSub,
-   GlobalVariables* theContext, const CoefficientType& theRingUnit)
-  ;
   void SetNumVariables(int newNumVars);
   int HashFunction() const;
   static inline int HashFunction(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
@@ -2347,7 +2342,6 @@ private:
 public:
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
-  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2395,10 +2389,6 @@ public:
   void MakeOneGenerator
 (int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners, const CoefficientType& theRingUnit)
   ;
-  bool ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const Vector<Rational> & theHWsimpleCoords,
-   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
-   ;
   void MakeOneGeneratorCoeffOne
 (int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -5909,6 +5899,8 @@ std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString(Polyno
   std::string tempS;
   if (this->owners==0 || this->indexInOwners==-1)
     return "(Error:Programming:NonInitializedMonomial)";
+  if (this->generatorsIndices.size==0)
+    return "1";
   for (int i=0; i<this->generatorsIndices.size; i++)
   { CoefficientType& thePower=this->Powers[i];
     int theIndex=this->generatorsIndices[i];
@@ -6265,24 +6257,6 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-  (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ MonomialUniversalEnveloping<CoefficientType> tempMon;
-  ElementUniversalEnveloping<CoefficientType> output;
-  output.MakeZero(*this->owners, this->indexInOwners);
-  CoefficientType theCoeff, acquiredCoeff;
-  for (int i=0; i<this->size; i++)
-  { tempMon= this->TheObjects[i];
-    theCoeff=this->theCoeffs[i];
-    tempMon.ModOutVermaRelations(acquiredCoeff, theContext, subHiGoesToIthElement, theRingUnit, theRingZero);
-    theCoeff*=acquiredCoeff;
-    output.AddMonomial(tempMon, acquiredCoeff);
-  }
-  this->operator=(output);
-}
-
-template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfElements
   (int numVars, List<ElementUniversalEnveloping<CoefficientType> >& theElements,
    Vectors<CoefficientType>& outputCoordinates, ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
@@ -6328,42 +6302,6 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
       tempCF*=input.TheObjects[i]; //<- to facilitate type conversion we call extra assignment
       this->AddMonomial(tempMon, tempCF);
     }
-}
-
-template <class CoefficientType>
-std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(PolynomialOutputFormat* theFormat)const
-{ if (this->size==0)
-    return "0";
-//  std::cout << "<br>std::string ElementUniversalEnveloping<CoefficientType>::ElementToString called. ";
-//  std::cout << "Num mons: " << this->size;
-
-  std::stringstream out;
-  std::string tempS;
-  int IndexCharAtLastLineBreak=0;
-  for (int i=0; i<this->size; i++)
-  { tempS=this->theCoeffs[i].ElementToString(theFormat);
-    MonomialUniversalEnveloping<CoefficientType>& current=this->TheObjects[i];
-    if (current.generatorsIndices.size>0)
-    { if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (i!=0)
-      { if (tempS.size()>0)
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      out << tempS << current.ElementToString(theFormat);
-    } else
-      out << tempS;
-    if (((int)out.tellp())- IndexCharAtLastLineBreak> 150)
-    { IndexCharAtLastLineBreak=out.tellp();
-      out << "\\\\&&";
-    }
-  }
-  return out.str();
 }
 
 template <class CoefficientType>

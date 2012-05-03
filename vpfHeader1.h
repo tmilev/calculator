@@ -1315,7 +1315,6 @@ public:
     *this=tempMat;
   }
   void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
-  void ElementToString(std::string& output)const;
   void ActMultiplyVectorRowOnTheRight(Vector<Element>& theRoot,  const Element& TheRingZero)const{ Vector<Element> output; this->ActMultiplyVectorRowOnTheRight(theRoot, output, TheRingZero); theRoot=output; }
   void ActMultiplyVectorRowOnTheRight(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
   { assert(&input!=&output);
@@ -1349,16 +1348,21 @@ public:
   }
   void ActOnVectorsColumn(const Vectors<Element>& input, Vectors<Element>& output, const Element& TheRingZero=0)const
   { assert(&input!=&output);
-    assert(this->NumCols==input.size);
+    if (input.size==0)
+      return;
+    if (this->NumCols!=input.GetDim())
+    { std::cout << "This is a programming error: attempting to act by " << this->ElementToString() << "(an " << this->NumRows << " x "
+      << this->NumCols << " matrix) on a column vector " << input.ElementToString() << "(dimension " << input.size << ").";
+      assert(false);
+    }
     output.SetSize(input.size);
     for (int i=0; i<input.size; i++)
-      this->ActOnVectorColumn(input.TheObjects[i], output.TheObjects[i], TheRingZero);
+      this->ActOnVectorColumn(input[i], output[i], TheRingZero);
   }
   void ActOnVectorColumn(Vector<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vector<Element> buffer; this->ActOnVectorColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
   void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
-  void ElementToString(std::string& output, bool useHtml, bool useLatex)const ;
+  std::string ElementToString(bool useHtml=true, bool useLatex=false)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
-  std::string ElementToString(bool useHtml, bool useLatex)const{std::string tempS; this->ElementToString(tempS, useHtml, useLatex); return tempS;}
   void MakeIdMatrix(int theDimension, const Element& theRingUnit=1, const Element& theRingZero=0)
   { this->init(theDimension, theDimension);
     for (int i=0; i<theDimension; i++)
@@ -2001,11 +2005,6 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Ele
 }
 
 template <typename Element>
-inline void Matrix<Element>::ElementToString(std::string& output)const
-{ this->ElementToString(output, false, false);
-}
-
-template <typename Element>
 std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 { std::stringstream out;
   std::string tempS;
@@ -2044,7 +2043,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 }
 
 template <typename Element>
-inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, bool useLatex)const
+std::string Matrix<Element>::ElementToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
   std::string tempS;
   if (useHtml)
@@ -2081,7 +2080,7 @@ inline void Matrix<Element>::ElementToString(std::string& output, bool useHtml, 
     out << "</table>";
   if (useLatex)
     out << "\\end{array}\\right)";
-  output = out.str();
+  return out.str();
 }
 
 template<typename Element>
@@ -4819,7 +4818,6 @@ private:
     }
     return true;
   }
-  RationalFunction(const RationalFunction& other){this->Assign(other);}
 public:
   friend std::iostream& operator<< (std::iostream& output, const RationalFunction& theRF)
   { output << theRF.ElementToString();
@@ -4853,8 +4851,12 @@ public:
     tempRat.MakeZero(this->NumVars, this->context);
     return tempRat;
   }
+
   int GetNumVars() {return this->NumVars;}
   void Substitution(PolynomialSubstitution<Rational>& theSub);
+  RationalFunction(const RationalFunction& other)
+  { this->Assign(other);
+  }
   RationalFunction()
   { this->NumVars=0;
     this->expressionType=this->typeRational;
@@ -4903,6 +4905,7 @@ public:
   { return input.HashFunction();
   }
   inline void operator=(int other){this->MakeConst(0, other, 0);}
+  inline void operator=(const Rational& other){this->MakeConst(0, other, 0);}
   inline void operator=(const RationalFunction& other){this->Assign(other);}
   void Assign(const RationalFunction& other)
   { this->expressionType=other.expressionType;
@@ -5501,39 +5504,6 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
     }
   WhichIndex=-1;
   return false;
-}
-
-template <class TemplateMonomial, class Element>
-std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
-(PolynomialOutputFormat* theFormat)const
-{ std::stringstream out;
-  std::string tempS1, tempS2;
-  List<TemplateMonomial> sortedMons;
-  sortedMons=*this;
-  sortedMons.QuickSortDescending();
-  for (int i=0; i<sortedMons.size; i++)
-  { TemplateMonomial& currentMon=sortedMons[i];
-    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
-    tempS1=currentCoeff.ElementToString();
-    tempS2=currentMon.ElementToString(theFormat);
-    if (tempS2!="")
-    { if (tempS1=="1")
-        tempS1="";
-      if (tempS1=="-1")
-        tempS1="-";
-      if (i>0)
-      { if (tempS1.size()>0)
-        { if (tempS1[0]!='-')
-            out << "+";
-        }
-        else
-          out << "+";
-      }
-    } else
-      out << "+";
-    out << tempS1 <<tempS2;
-  }
-  return out.str();
 }
 
 template <class Element>
@@ -6566,17 +6536,20 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
-//  bufferVectors.ComputeDebugString();
+  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ElementToString();
   if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
     return false;
+  std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ElementToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
-  bufferMat/=bufferMat.elements[bufferMat.NumRows-1][0];
+  CoefficientType tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
+  bufferMat/=tempCF;
   output.SetSize(bufferMat.NumRows-1);
   for (int i=0; i<bufferMat.NumRows-1; i++)
   { bufferMat.elements[i][0].Minus();
-    output.TheObjects[i].Assign(bufferMat.elements[i][0]);
+    output[i]=(bufferMat.elements[i][0]);
   }
+  std::cout << "outpuf final: " << output.ElementToString();
   return true;
 }
 

@@ -3993,19 +3993,21 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   if (!tempBool)
   { output.SetSize(input.size);
     for(int i=0; i<input.size; i++)
-      output.TheObjects[i].MakeZero(0);
+      output[i].MakeZero(0);
     return;
   }
   basisChange.Resize(0, 0, true);
   for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
-  { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings.TheObjects[i].at(0), tempDyn.SimpleBasesConnectedComponents.TheObjects[i].size, theGlobalVariables, tempMat);
+  { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, theGlobalVariables, tempMat);
     basisChange.DirectSumWith(tempMat, (Rational) 0);
     //basisChange.ComputeDebugString();
   }
   simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
+  std::cout << "<br>simple basis: " << simpleBasis.ElementToString();
+  std::cout << "<br>to be converted: " << input.ElementToString();
   coordsInNewBasis.SetSize(input.size);
   for (int i=0; i<input.size; i++)
-    input.TheObjects[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis.TheObjects[i]);
+    input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);
   //basisChange.ComputeDebugString();
   //coordsInNewBasis.ComputeDebugString();
   basisChange.ActOnVectorsColumn(coordsInNewBasis, output);

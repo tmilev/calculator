@@ -1681,7 +1681,6 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
       if (i!=outputUE.VariableImages.size-1)
         *comments << ";<br>";
     }
-
   return true;
 }
 
@@ -1839,7 +1838,7 @@ void CommandList::initPredefinedVars()
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
-   "g:=SemisimpleLieAlgebra{} G_2;\nv:=hwvbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
+   "g:=SemisimpleLieAlgebra{} G_2;\nv:=hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
 
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
@@ -2274,7 +2273,7 @@ bool CommandList::EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
 //    std::cout << "!!!!";
   if (LeftD.type==Data::typeElementSSalgebra && RightD.type==Data::typeMonomialGenVerma)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...";
-    assert(false);
+//    assert(false);
     MonomialGeneralizedVerma<RationalFunction>& theMon=RightD.GetMonGenVerma();
     ModuleSSalgebraNew<RationalFunction>& theMod=theMon.GetOwner();
     ElementSemisimpleLieAlgebra& leftLieElt=LeftD.GetEltSimpleLieAlgebra();
@@ -2297,7 +2296,8 @@ bool CommandList::EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
     for (int i=0; i<result.size; i++)
     { tempMon=result[i];
       resultLeft.MakePoly(tempCoeff, theCommands, inputIndexBoundVars);
-      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
+      assert(false);
+//      resultRight.MakeMonomialGenVerma(tempMon, theCommands, inputIndexBoundVars);
       theSummands[i].MakeProducT(theCommands, inputIndexBoundVars, resultLeft, resultRight);
     }
     theCommands.CollectSummands(theSummands, true, inputIndexBoundVars, theExpression);
@@ -2604,7 +2604,7 @@ bool CommandList::ExtractData
   }
   if (theInput.theOperation==this->opData())
   { Data& theData=this->theData[theInput.theData];
-    std::cout << "<hr>attempting to convert " << theData.ElementToString();
+    std::cout << "<hr>attempting to convert " << theData.ElementToString() << "<br>";
     if (theData.ConvertToType<dataType>(outputBuffer, finalOutput.theBuiltIn))
     { std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       return true;

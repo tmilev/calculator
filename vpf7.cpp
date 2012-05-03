@@ -1729,12 +1729,13 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
         return;
       if (subHiGoesToIthElement==0)
       { this->MakeZero(theRingZero, *this->owner);
+
         return;
       }
       CoefficientType theSubbedH=theRingZero;
       Vector<Rational>& currentH=this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent;
-      for (int i=0; i<currentH.size; i++)
-        theSubbedH+=(*subHiGoesToIthElement)[i]*currentH[i];
+      for (int j=0; j<currentH.size; j++)
+        theSubbedH+=(*subHiGoesToIthElement)[j]*currentH[j];
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);
 //      this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.ComputeDebugString();
       //assert(this->Coefficient.checkConsistency());
@@ -1813,26 +1814,6 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExperi
 }
 
 template <class CoefficientType>
-bool ElementUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
-(GlobalVariables* theContext, const Vector<Rational>& theHWsimpleCoords, const CoefficientType& theRingUnit,
- const CoefficientType& theRingZero)
-{ MonomialUniversalEnveloping<CoefficientType> tempMon;
-  ElementUniversalEnveloping<CoefficientType> output;
-  output.MakeZero(*this->owner);
-  bool result=false;
-  for (int i=0; i<this->size; i++)
-  { tempMon= this->TheObjects[i];
-//    tempMon.ComputeDebugString();
-    if (tempMon.ModOutFDRelationsExperimental(theContext, theHWsimpleCoords, theRingUnit, theRingZero))
-      result=true;
-//    tempMon.ComputeDebugString();
-    output.AddMonomial(tempMon);
-  }
-  this->operator=(output);
-  return result;
-}
-
-template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::GetCoordsInBasis
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<CoefficientType>& output,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
@@ -1890,12 +1871,10 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-  (CoefficientType& outputCoeff, GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement, const CoefficientType& theRingUnit,
-   const CoefficientType& theRingZero)
+(CoefficientType& outputCoeff, GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theDimension=this->GetOwner().GetRank();
-  ElementSemisimpleLieAlgebra currentElt;
-  CoefficientType tempCF;
   outputCoeff=theRingUnit;
   if (subHiGoesToIthElement!=0)
     std::cout << "<br>The subHiGoesToIthElement: " << subHiGoesToIthElement->ElementToString();
@@ -1903,32 +1882,26 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
   { int IndexCurrentGenerator=this->generatorsIndices[i];
     if (IndexCurrentGenerator>=numPosRoots+theDimension)
     { this->MakeZero(theRingZero, *this->owners, this->indexInOwners);
+      outputCoeff=theRingZero;
       return;
     }
     if (IndexCurrentGenerator<numPosRoots)
       return;
     if (IndexCurrentGenerator>=numPosRoots && IndexCurrentGenerator<numPosRoots+theDimension)
-    { int theDegree;
+    { if (subHiGoesToIthElement==0)
+      { this->MakeZero(theRingZero, *this->owners, this->indexInOwners);
+        outputCoeff=theRingZero;
+        return;
+      }
+      int theDegree;
       if (!this->Powers[i].IsSmallInteger(theDegree))
         return;
-      if (subHiGoesToIthElement==0)
-      { this->MakeZero(theRingZero, *this->owners, this->indexInOwners);
-        return;
-      }
+      int hIndex=IndexCurrentGenerator-numPosRoots;
       CoefficientType theSubbedH;
-      theSubbedH=theRingZero;
-      currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-      (IndexCurrentGenerator, *this->owners, this->indexInOwners);
-      Vector<Rational> currentH=currentElt.GetCartanPart();
-      for (int i=0; i<currentH.size; i++)
-      { tempCF=(*subHiGoesToIthElement)[i];
-        tempCF*=currentH[i];
-        theSubbedH+=tempCF;
-      }
+      theSubbedH=(*subHiGoesToIthElement)[hIndex];
       MathRoutines::RaiseToPower(theSubbedH, theDegree, theRingUnit);
-//      this->owner->theOrder.TheObjects[IndexCurrentGenerator].Hcomponent.ComputeDebugString();
-      //assert(this->Coefficient.checkConsistency());
       outputCoeff*=(theSubbedH);
+      std::cout << "&nbsp outputCoeff=" << outputCoeff.ElementToString();
       //assert(this->Coefficient.checkConsistency());
       this->generatorsIndices.size--;
       this->Powers.size--;
@@ -3388,6 +3361,59 @@ std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std:
     out << " (" << fileDesc << ")";
   out << "</a>\n";
   return out.str();
+}
+
+template <class TemplateMonomial, class Element>
+std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
+(PolynomialOutputFormat* theFormat)const
+{ if (this->size==0)
+    return "0";
+  std::stringstream out;
+  std::string tempS1, tempS2;
+  List<TemplateMonomial> sortedMons;
+  sortedMons=*this;
+  sortedMons.QuickSortDescending();
+  for (int i=0; i<sortedMons.size; i++)
+  { TemplateMonomial& currentMon=sortedMons[i];
+    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    tempS1=currentCoeff.ElementToString();
+    tempS2=currentMon.ElementToString(theFormat);
+    if (tempS1=="1" && tempS2!="1")
+      tempS1="";
+    if (tempS1=="-1"&& tempS2!="1")
+      tempS1="-";
+    if(tempS2!="1")
+      tempS1+=tempS2;
+    if (i>0)
+    { if (tempS1.size()>0)
+      { if (tempS1[0]!='-')
+          out << "+";
+      } else
+        out << "+";
+    }
+    out << tempS1;
+  }
+  return out.str();
+}
+
+template <class CoefficientType>
+void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
+  (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ MonomialUniversalEnveloping<CoefficientType> tempMon;
+  ElementUniversalEnveloping<CoefficientType> output;
+  output.MakeZero(*this->owners, this->indexInOwners);
+  CoefficientType acquiredCoeff;
+  for (int i=0; i<this->size; i++)
+  { tempMon= this->TheObjects[i];
+    tempMon.ModOutVermaRelations(acquiredCoeff, theContext, subHiGoesToIthElement, theRingUnit, theRingZero);
+    acquiredCoeff*=this->theCoeffs[i];
+    std::cout << "<hr><hr>Adding " << tempMon.ElementToString() << " times " << acquiredCoeff.ElementToString() << " to " << output.ElementToString();
+    output.AddMonomial(tempMon, acquiredCoeff);
+    std::cout <<"<br> to obtain " << output.ElementToString();
+
+  }
+  this->operator=(output);
 }
 
 std::string ProjectInformation::ElementToString()

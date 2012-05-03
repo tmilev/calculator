@@ -3130,6 +3130,12 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   (const MonomialGeneralizedVerma<CoefficientType>& theMon, const CoefficientType& theMonCoeff, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
+  int HashFunction()const
+  { return this->MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >::HashFunction();
+  }
+  static int HashFunction(const ElementSumGeneralizedVermas<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   ElementSumGeneralizedVermas():owneR(0){}
   void MakeHWV
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
@@ -3151,7 +3157,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
     this->owneR=&theOwner;
   }
   std::string ElementToString
-  (GlobalVariables& theGlobalVariables)
+  (PolynomialOutputFormat* theFormat=0)
     ;
   void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
   { this->owneR=other.owneR;
@@ -5675,19 +5681,17 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
-  (GlobalVariables& theGlobalVariables)
+  (PolynomialOutputFormat* theFormat)
 { if (this->size==0)
     return "0";
   Vector<Rational>  parSel;
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
-  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   std::string tempS;
   for (int i=0; i<this->size; i++)
   { MonomialGeneralizedVerma<CoefficientType>& currentMon=this->TheObjects[i];
     ModuleSSalgebraNew<CoefficientType>& theMod=currentMon.owneR->TheObjects[currentMon.indexInOwner];
     parSel= theMod.parabolicSelectionNonSelectedAreElementsLevi;
-    tempS=currentMon.ElementToString(theGlobalVariables, theFormat);
+    tempS=currentMon.ElementToString(theFormat);
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -5700,8 +5704,7 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
         out << "+";
     }
     out << tempS;
-    tempS= theMod.theGeneratingWordsNonReduced[currentMon.indexFDVector].
-    ElementToString(false, false, theGlobalVariables, theFormat);
+    tempS= theMod.theGeneratingWordsNonReduced[currentMon.indexFDVector].ElementToString(theFormat);
     if (tempS!="1")
       out << tempS;
     out << "v(" << theMod.theHWFundamentalCoordsBaseField.ElementToString() << ","

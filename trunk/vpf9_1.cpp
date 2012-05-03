@@ -2970,11 +2970,7 @@ void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>
 { Vectors<Rational> tempRoots;
   Vectors<Rational> tempInput, tempOutput;
   tempInput.AddOnTop(input);
-  tempRoots.SetSize(this->CartanSymmetric.NumRows);
-  for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-  { tempRoots.TheObjects[i].MakeZero(this->CartanSymmetric.NumRows);
-    tempRoots.TheObjects[i].TheObjects[i].MakeOne();
-  }
+  tempRoots.MakeEiBasis(this->GetDim());
   this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput, theGlobalVariables);
   output=tempOutput.TheObjects[0];
 }

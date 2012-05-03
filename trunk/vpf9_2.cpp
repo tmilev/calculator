@@ -535,10 +535,10 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     out << "\nSimple basis subalgebra: " << tempS;
     currentSA.theDynkinDiagram.GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
     if (!usePNG)
-      tempMat.ElementToString(tempS, useHtml, useLatex);
+      tempS=tempMat.ElementToString(useHtml, useLatex);
     else
     { std::stringstream tempStreamX;
-      tempMat.ElementToString(tempS, false, true);
+      tempS=tempMat.ElementToString(false, true);
       tempStreamX << "\\[" << tempS << "\\]";
       tempS=tempStreamX.str();
     }
@@ -6566,11 +6566,13 @@ std::string MonomialP::ElementToString(PolynomialOutputFormat* theFormat)const
   MemorySaving<PolynomialOutputFormat> tempFormat;
   if (theFormat==0)
     theFormat=&tempFormat.GetElement();
+  if (this->IsAConstant())
+    return "1";
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].IsEqualToZero())
     { out << theFormat->GetLetterIndex(i);
-      if (this->TheObjects[i]!=1)
-        out << "{" << this->TheObjects[i] << "}";
+      if (!(this->TheObjects[i]==1))
+        out << "^{" << this->TheObjects[i] << "}";
     }
   return out.str();
 }

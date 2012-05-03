@@ -1998,7 +1998,7 @@ void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Ele
     { output.elements[i][j]=theRingZero;
       for (int k=0; k<this->NumRows; k++)
       { tempEl.Assign(input.elements[i][k]);
-        tempEl.MultiplyBy(this->elements[k][j]);
+        tempEl*=(this->elements[k][j]);
         output.elements[i][j]+=(tempEl);
       }
     }
@@ -4173,13 +4173,7 @@ public:
   static inline int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
-  void StringStreamPrintOutAppend(std::stringstream& out, const PolynomialOutputFormat& PolyFormat)const;
-  std::string ElementToString()
-  { PolynomialOutputFormat tempFormat;
-    return this->ElementToString(tempFormat);
-  }
-  void ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormat);
-  std::string ElementToString(PolynomialOutputFormat& PolyFormat){std::string tempS; this->ElementToString(tempS, PolyFormat); return tempS;}
+  std::string ElementToString(const PolynomialOutputFormat& PolyFormat)const;
   void MakeZeroDegrees();
   bool operator>(const MonomialP& other)const
   { if (this->operator==(other))
@@ -4275,16 +4269,7 @@ public:
   int NumVars;
   List<CoefficientType> theCoeffs;
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
-  // returns the number of lines used
-  int StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const;
-  void  ElementToString(std::string& output)const{ output=this->ElementToString();}
-  std::string ElementToString()const{ PolynomialOutputFormat LocalFormat; return this->ElementToString(false, LocalFormat);}
-  std::string ElementToString(bool breakLinesLatex, const PolynomialOutputFormat& PolyFormatLocal)const
-  { std::string output; output.clear();
-    this->StringPrintOutAppend(output, PolyFormatLocal, breakLinesLatex); return output;
-  }
-  void ElementToString(std::string& output, PolynomialOutputFormat& PolyFormatLocal)const{ output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true);};
-  std::string ElementToString(const PolynomialOutputFormat& PolyFormatLocal)const{ std::string output; output.clear(); this->StringPrintOutAppend(output, PolyFormatLocal, true); return output;};
+  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
   static int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
   { return SomeRandomPrimes[0]* input.theCoeffs.HashFunction()
     +SomeRandomPrimes[1]*input.::HashedList<TemplateMonomial>::HashFunction();
@@ -4487,6 +4472,9 @@ public:
     result.MakeZero(this->NumVars);
     return result;
   }
+  void MakeConst(const CoefficientType& theConst)
+  { this->MakeConst(0, theConst);
+  }
   void MakeConst(int inputNumVars, const CoefficientType& theConst)
   { this->MakeZero(inputNumVars);
     MonomialP theZeroMon;
@@ -4635,6 +4623,9 @@ public:
   void operator=(const Polynomial<CoefficientType>& other)
   { this->NumVars=other.NumVars;
     this->::MonomialCollection<MonomialP, CoefficientType>::operator=(other);
+  }
+  void operator=(const CoefficientType& other)
+  { this->MakeConst(other);
   }
   template <class otherType>
   void AssignOtherType(const Polynomial<otherType>& other)
@@ -4801,17 +4792,12 @@ public:
   void ScaleToIntegralNoGCDCoeffs();
 };
 
-std::iostream& operator<<(std::iostream& output, const RationalFunction& theRF);
-std::iostream& operator>>(std::iostream& input, RationalFunction& theRF);
+//std::iostream& operator<<(std::iostream& output, const RationalFunction& theRF);
+//std::iostream& operator>>(std::iostream& input, RationalFunction& theRF);
 
 class RationalFunction
 {
 private:
-  friend std::iostream& operator<< (std::iostream& output, const RationalFunction& theRF)
-  { output << theRF.ElementToString();
-    return output;
-  }
-  friend std::iostream& operator>> (std::iostream& input, RationalFunction& theRF);
   void AddSameTypes(const RationalFunction& other)
   { switch (this->expressionType)
     { case RationalFunction::typeRational: this->ratValue+=other.ratValue; break;
@@ -4861,6 +4847,12 @@ private:
   }
   RationalFunction(const RationalFunction& other){this->Assign(other);}
 public:
+  friend std::iostream& operator<< (std::iostream& output, const RationalFunction& theRF)
+  { output << theRF.ElementToString();
+    return output;
+  }
+  friend std::iostream& operator>> (std::iostream& input, RationalFunction& theRF);
+
   MemorySaving<Polynomial<Rational> > Numerator;
   MemorySaving<Polynomial<Rational> > Denominator;
   GlobalVariables* context;
@@ -4892,7 +4884,24 @@ public:
   void Substitution(PolynomialSubstitution<Rational>& theSub);
   std::string ElementToString(const PolynomialOutputFormat& theFormat)const{return this->ElementToString(true, true);}
   void ElementToString(std::string& output)const{output=this->ElementToString(true, false);}
-  RationalFunction(){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->context=0;}
+  RationalFunction()
+  { this->NumVars=0;
+    this->expressionType=this->typeRational;
+    this->ratValue.MakeZero();
+    this->context=0;
+  }
+  RationalFunction(int other)
+  { this->NumVars=0;
+    this->expressionType=this->typeRational;
+    this->context=0;
+    this->operator=(other);
+  }
+  RationalFunction(const Rational& other)
+  { this->NumVars=0;
+    this->expressionType=this->typeRational;
+    this->context=0;
+    this->operator=(other);
+  }
   void RaiseToPower(int thePower);
 //  RationalFunction(const RationalFunction& other){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->operator=(other);}
   void ReduceMemory()
@@ -4922,6 +4931,7 @@ public:
   static inline int HashFunction(const RationalFunction& input)
   { return input.HashFunction();
   }
+  inline void operator=(int other){this->MakeConst(0, other, 0);}
   inline void operator=(const RationalFunction& other){this->Assign(other);}
   void Assign(const RationalFunction& other)
   { this->expressionType=other.expressionType;
@@ -5002,18 +5012,22 @@ public:
   void ClearDenominators
   (RationalFunction& outputWasMultipliedBy)
   ;
-  void MultiplyBy(const RationalFunction& other){this->operator*=(other);}
-  void Add(const RationalFunction& other)
-  { if (this->NumVars!=other.NumVars)
-    { std::cout << "This is a programming error: attempting to add a rational function of "
-      << this->NumVars << " variables and a rational function of " << other.NumVars << " variables. "
-      << "A conversion function must be explicitly called before adding the two. "
-      << "Please debug file " << __FILE__ << " line " << __LINE__;
-      assert(false);
+  void operator+=(const RationalFunction& other)
+  { if (this==&other)
+    { *this*=(Rational)2;
+      return;
+    }
+    if (this->NumVars!=other.NumVars)
+    { int newNumvars=MathRoutines::Maximum(this->NumVars, other.NumVars);
+      RationalFunction tempRF;
+      tempRF=other;
+      this->SetNumVariables(newNumvars);
+      tempRF.SetNumVariables(newNumvars);
+      *this+=tempRF;
+      return;
     }
     assert(this->checkConsistency());
     assert(other.checkConsistency());
-    assert(this!=&other);
     if (this->context==0)
       this->context=other.context;
     if (other.expressionType< this->expressionType)
@@ -5041,16 +5055,15 @@ public:
   inline bool operator==(const RationalFunction& other){return this->IsEqualTo(other);}
   void Simplify();
   void SimplifyLeadingCoefficientOnly();
-  void operator+=(const RationalFunction& other){this->Add(other);}
   void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeConst(this->NumVars, (Rational) theConstant, this->context); (*this)+=tempRF;}
   void operator*=(const RationalFunction& other);
   void operator*=(const Polynomial<Rational> & other);
   void operator*=(const Rational& other);
-  void operator-=(const Rational& theConstant)
-  { RationalFunction tempRF;
-    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
-    (*this)+=tempRF;
-  }
+//  void operator-=(const Rational& theConstant)
+//  { RationalFunction tempRF;
+//    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
+//    (*this)+=tempRF;
+//  }
   bool operator>(const RationalFunction& other)const
   { if (this->expressionType<other.expressionType)
       return false;
@@ -5181,19 +5194,13 @@ public:
     this->operator+=(tempRF);
     assert(this->checkConsistency());
   }
-  inline void operator/=(const Rational& input)
-  { Rational tempRat=input;
-    tempRat.Invert();
-    this->operator*=(tempRat);
-    assert(this->checkConsistency());
-  }
   inline void operator/=(const RationalFunction& other)
   { RationalFunction tempRF;
     if (other.context!=0)
       this->context=other.context;
     tempRF=other;
     tempRF.Invert();
-    this->MultiplyBy(tempRF);
+    *this*=(tempRF);
     assert(this->checkConsistency());
   }
   void Minus(){this->operator*=((Rational) -1); assert(this->checkConsistency());}
@@ -5535,66 +5542,36 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
 }
 
 template <class TemplateMonomial, class Element>
-int MonomialCollection<TemplateMonomial, Element>::StringPrintOutAppend(std::string& output, const PolynomialOutputFormat& PolyFormat, bool breakLinesLatex)const
+std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
+(const PolynomialOutputFormat& theFormat)const
 { std::stringstream out;
-  int NumChars=0;
-  int TotalNumLines=0;
-  std::string tempS;
-  const std::string LatexBeginString=""; // "\\begin{eqnarray*}\n&&";
-//  if (PolyFormat.UsingLatexFormat)
-//  { out <<LatexBeginString;
-//  }
-  if (this->size==0)
-  { output.append("0");
-    return 0;
-  }
+  std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
-  sortedMons.CopyFromBase(*this);
+  sortedMons=*this;
   sortedMons.QuickSortDescending();
   for (int i=0; i<sortedMons.size; i++)
-  { sortedMons[i].ElementToString(tempS, PolyFormat);
-    if (tempS[0]=='0')
-      tempS.erase(0, 1);
-    if (tempS.size()!=0)
-    { if (tempS[0]!='-'){out << "+"; }
-      out << tempS;
-      if (PolyFormat.UsingLatexFormat)
-      { if (((signed)tempS.size())> PolyFormat.LatexMaxLineLength)
-        { bool found=false; int extraChars=0;
-          for (int j=(signed)tempS.size(); j>=1; j--)
-            if (tempS[j]=='\\' && tempS[j-1]=='\\')
-            { found=true; break; }
-            else
-              extraChars++;
-          if (found) NumChars=extraChars; else  NumChars+=extraChars;
+  { TemplateMonomial& currentMon=sortedMons[i];
+    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    tempS1=currentCoeff.ElementToString();
+    tempS2=currentMon.ElementToString(theFormat);
+    if (tempS2!="")
+    { if (tempS1=="1")
+        tempS1="";
+      if (tempS1=="-1")
+        tempS1="-";
+      if (i>0)
+      { if (tempS1.size()>0)
+        { if (tempS1[0]!='-')
+            out << "+";
         }
         else
-          NumChars+= tempS.size();
-        if (breakLinesLatex && NumChars>PolyFormat.LatexMaxLineLength)
-        { NumChars=0;
-          out << "\\\\&&\n ";
-          TotalNumLines++;
-        }
+          out << "+";
       }
-      if (PolyFormat.cutOffString && out.str().size()> PolyFormat.cutOffSize)
-      { out << "...";
-        break;
-      }
-    }
+    } else
+      out << "+";
+    out << tempS1 <<tempS2;
   }
-//  std::string tempS;
-  tempS= out.str();
-  if (tempS.size()!=0)
-    if (tempS[0]=='+')
-      tempS.erase(0, 1);
-  if (PolyFormat.UsingLatexFormat)
-    if (tempS[LatexBeginString.size()]=='+')
-      tempS.erase(LatexBeginString.size(), 1);
-  output.append(tempS);
-  return TotalNumLines;
-//  if (PolyFormat.UsingLatexFormat)
-//  { output.append("\\end{eqnarray*}");
-//  }
+  return out.str();
 }
 
 template <class Element>

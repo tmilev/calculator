@@ -2252,7 +2252,6 @@ public:
    const List<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
   ;
-  void ModOutVermaRelationS(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables);
   void ModOutVermaRelations
   (CoefficientType& outputCoeff, GlobalVariables* theContext,
    const List<CoefficientType>* subHiGoesToIthElement=0, const CoefficientType& theRingUnit=1,
@@ -2290,10 +2289,6 @@ public:
   bool SwitchConsecutiveIndicesIfTheyCommute
 (int theLeftIndex)
   ;
-  bool ModOutFDRelationsExperimental
-    (GlobalVariables* theContext, const Vector<Rational> & theHWsimpleCoords,
-   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
-;
   void MakeConst(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwner)
   { this->generatorsIndices.size=0;
     this->Powers.size=0;
@@ -2434,7 +2429,8 @@ public:
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify
-  (GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  (GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   int GetNumVars()const
   { if (this->size<1)
@@ -2542,8 +2538,6 @@ static bool GetBasisFromSpanOfElements
   ElementUniversalEnveloping<CoefficientType>():owners(0), indexInOwners(-1){}
   ElementUniversalEnveloping<CoefficientType>(const ElementUniversalEnveloping<CoefficientType>& other){this->operator=(other);}
 };
-
-
 
 class SltwoSubalgebras : public HashedList<slTwo>
 {
@@ -5607,7 +5601,7 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element &output, const E
     this->SwitchTwoRows(i, tempI);
     if(tempI!=i){output.Minus(); }
     tempRat.Assign(this->elements[i][i]);
-    output.MultiplyBy(tempRat);
+    output*=(tempRat);
     tempRat.Invert();
     this->RowTimesScalar(i, tempRat);
     for (int j=i+1; j<dim; j++)
@@ -5948,52 +5942,6 @@ std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelationS
-(bool SubHighestWeightWithZeroes, GlobalVariables& theGlobalVariables)
-{ int numPosRoots=this->GetOwner().theWeyl.RootsOfBorel.size;
-  int theDimension=this->GetOwner().theWeyl.CartanSymmetric.NumRows;
-  int theNumVars=this->Coefficient.NumVars;
-//  this->ComputeDebugString(theGlobalVariables);
-  if (theNumVars<theDimension && !SubHighestWeightWithZeroes)
-  { this->SetNumVariables(theDimension);
-    theNumVars=theDimension;
-  }
-  for (int i=this->generatorsIndices.size-1; i>=0; i--)
-  { int IndexCurrentRoot=this->GetOwner().ChevalleyGeneratorIndexToRootIndex(generatorsIndices.TheObjects[i]);
-    //ChevalleyGeneratorToRootIndex returns a negative value if the generator is an element of the Cartan
-    //the order of Vectors<Rational> is: first negative, then positive, in ascending grlex order.
-    if (IndexCurrentRoot>=numPosRoots)
-    { this->MakeZero(theNumVars, *this->owners, this->indexInOwners);
-      return;
-    }
-    if (IndexCurrentRoot<numPosRoots && IndexCurrentRoot>=0)
-      return;
-    if (IndexCurrentRoot<0)//the generator is an element of the Cartan
-    { if (this->Powers.TheObjects[i].TotalDegree()!=0)
-        return;
-      int theDegree;
-      if (!this->Powers[i].IsSmallInteger(theDegree))
-        return;
-      if (SubHighestWeightWithZeroes)
-      { this->MakeZero(theNumVars, *this->owners, this->indexInOwners);
-        return;
-      }
-      Polynomial<Rational> tempP;
-      Vector<Rational>  tempRoot;
-      tempRoot.MakeEi(theNumVars, this->GetOwner().ChevalleyGeneratorIndexToElementCartanIndex(this->generatorsIndices.TheObjects[i]));
-      tempP.MakeLinPolyFromRootNoConstantTerm(tempRoot);
-      ElementUniversalEnveloping<CoefficientType> tempOne;
-      tempOne.MakeConst(tempP.GetOne(),  this->owners, this->indexInOwner);
-      if (theDegree!=1)
-        tempP.RaiseToPower(theDegree, tempOne, (Rational) 1);
-      this->Coefficient*=(tempP);
-      this->generatorsIndices.size--;
-      this->Powers.size--;
-    }
-  }
-}
-
-template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MakeZero
 (int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { this->Coefficient.MakeZero(numVars);
@@ -6206,6 +6154,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
             (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
         { tempMon.CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer, theRingUnit, theRingZero);
           buffer*=currentCoeff;
+          *this+=buffer;
           reductionOccurred=true;
           break;
         }
@@ -6396,6 +6345,9 @@ template <class CoefficientType>
 std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(const PolynomialOutputFormat& theFormat)const
 { if (this->size==0)
     return "0";
+  std::cout << "<br>std::string ElementUniversalEnveloping<CoefficientType>::ElementToString called. ";
+  std::cout << "Num mons: " << this->size;
+
   std::stringstream out;
   std::string tempS;
   int IndexCharAtLastLineBreak=0;
@@ -6425,7 +6377,6 @@ std::string ElementUniversalEnveloping<CoefficientType>::ElementToString(const P
   return out.str();
 }
 
-
 template <class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::CommutingLeftIndexAroundRightIndexAllowed
 (CoefficientType& theLeftPower, int leftGeneratorIndex,
@@ -6452,7 +6403,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfThe
     return false;
   int leftGenerator=this->generatorsIndices[theLeftIndex];
   int rightGenerator=this->generatorsIndices[theLeftIndex+1];
-  if (this->GetOwner().theLiebrackets.elements[leftGenerator][rightGenerator].IsEqualToZero())
+  if (!this->GetOwner().theLiebrackets.elements[leftGenerator][rightGenerator].IsEqualToZero())
     return false;
   this->generatorsIndices.SwapTwoIndices(theLeftIndex, theLeftIndex+1);
   this->SimplifyEqualConsecutiveGenerators(theLeftIndex-1);

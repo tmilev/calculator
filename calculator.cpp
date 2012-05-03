@@ -263,6 +263,11 @@ Solve{}({{a}}x_1):=0;\n\
 B{}({{a}},{{b}}):=Solve{}(A_a-A_b);\n\
 UnionNoRepetition{}\n\
 FunctionToMatrix{}(B,8,8)";*/
+//  civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nv:=hwvbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))";
+//  civilizedInput="SemisimpleLieAlgebra{} G_2;\nUE{}(g_1 )";
+//  civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nUE{}(g_2 g_1+g_1)";
+//  civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nUE{}(2x_1 g_2 g_1+3g_1)";
+//  civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_-1, g_-1, (1,0))";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

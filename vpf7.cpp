@@ -1892,56 +1892,6 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
 }
 
 template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::ModOutFDRelationsExperimental
-  (GlobalVariables* theContext, const Vector<Rational>& theHWsimpleCoords, const CoefficientType& theRingUnit,
-   const CoefficientType& theRingZero)
-{ WeylGroup& theWeyl=this->owner->theWeyl;
-  Vector<Rational> theHWsimpleCoordsTrue=theHWsimpleCoords;
-  theWeyl.RaiseToDominantWeight(theHWsimpleCoordsTrue);
-  Vector<Rational> theHWdualCoords=theWeyl.GetDualCoordinatesFromFundamental
-  (theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoordsTrue));
-  List<CoefficientType> theSub;
-  theSub.SetSize(theHWdualCoords.size);
-  for (int i=0; i<theHWdualCoords.size; i++)
-    theSub[i]=theHWdualCoords[i];
-  this->ModOutVermaRelations(theContext, &theSub, theRingUnit, theRingZero);
-  int numPosRoots=this->GetOwner().GetNumPosRoots();
-  //int theDimension=this->owner->theOwner.GetRank();
-  Vector<Rational> currentWeight=theHWsimpleCoordsTrue;
-  Vector<Rational> testWeight;
-  ElementSemisimpleLieAlgebra currentElt;
-  for (int k=this->generatorsIndices.size-1; k>=0; k--)
-  { int IndexCurrentGenerator=this->generatorsIndices[k];
-    if (IndexCurrentGenerator>=numPosRoots)
-      return false;
-    currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (IndexCurrentGenerator, *this->owner);
-    if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size>1)
-      return false;
-    int thePower=0;
-    if (!this->Powers[k].IsSmallInteger(thePower))
-      return false;
-    int rootIndex= this->GetOwner().ChevalleyGeneratorIndexToRootIndex(currentElt[0].theGeneratorIndex);
-    Vector<Rational>& currentRoot=theWeyl.RootSystem[rootIndex];
-//    std::cout << "<hr>The power: " << thePower;
-    for (int j=0; j<thePower; j++)
-    { currentWeight+=currentRoot;
-//      std::cout << "<br>current weight is: " << currentWeight.ElementToString();
-      testWeight=currentWeight;
-      theWeyl.RaiseToDominantWeight(testWeight);
-//      std::cout << "; raised to highest: " << testWeight.ElementToString();
-//      std::cout << "<br>theHWsimpleCoordsTrue-currentWeight raised to highest = "
-//      << (theHWsimpleCoordsTrue-testWeight).ElementToString();
-      if (!(theHWsimpleCoordsTrue-testWeight).IsPositiveOrZero())
-      { this->MakeZero(theRingZero, *this->owner);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
   (CoefficientType& outputCoeff, GlobalVariables* theContext, const List<CoefficientType>* subHiGoesToIthElement, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)

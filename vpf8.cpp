@@ -5610,12 +5610,11 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   std::stringstream out;
   out << "A basis for the invariants of degree " << theDegree << " is given by (number of elements: " << outputList.size << ")";
   for (int i=0; i<outputList.size; i++)
-  { out << "<br>" << outputList.TheObjects[i].ElementToString() << ", ";
+  { out << "<br>" << outputList.TheObjects[i].ElementToString(theGlobalVariables.theDefaultPolyFormat) << ", ";
   }
   theNode.outputString=out.str();
   return theNode.errorNoError;
 }
-
 
 
 void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)const

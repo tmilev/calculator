@@ -69,6 +69,8 @@ public:
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)
  ;
+  ElementUniversalEnveloping<RationalFunction>& GetUE()const;
+  SemisimpleLieAlgebra* GetAmbientSSLieAlgebra()const;
   template<class theType>
   bool IsOfType()const;
   template<class theType>
@@ -438,8 +440,8 @@ public:
   HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
   HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
   HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >  theUEs;
-  HashedList<RationalFunction> theRFs;
-  HashedList<Rational>  theRationals;
+  HashedList<DataOfExpressions<RationalFunction> > theRFs;
+  HashedList<Rational> theRationals;
   void reset();
 };
 

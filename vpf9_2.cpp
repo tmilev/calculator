@@ -590,7 +590,7 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { this->theSystemToBeSolved.TheObjects[i].ElementToString(tempS, PolyFormatLocal);
+  { tempS=this->theSystemToBeSolved.TheObjects[i].ElementToString(PolyFormatLocal);
     if (tempS=="")
     { if (useLatex || usePNG)
         tempStreamActual << "~\\\\";
@@ -4128,11 +4128,11 @@ std::string RationalFunction::ElementToString(bool useLatex, bool breakLinesLate
   bool hasDenominator=(this->expressionType==this->typeRationalFunction);
   if (hasDenominator && useLatex)
     out << "\\frac{";
-  out << this->Numerator.GetElementConst().ElementToString(breakLinesLatex, PolyFormatLocal);
+  out << this->Numerator.GetElementConst().ElementToString(PolyFormatLocal);
   if (hasDenominator)
   { if (useLatex)
       out << "}{";
-    out << this->Denominator.GetElementConst().ElementToString(breakLinesLatex, PolyFormatLocal);
+    out << this->Denominator.GetElementConst().ElementToString(PolyFormatLocal);
     if (useLatex)
       out << "}";
   }
@@ -4377,7 +4377,8 @@ void RationalFunction::operator*=(const Polynomial<Rational> & other)
   Polynomial<Rational>  theGCD, theResult, tempP;
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    out << "Multiplying " << this->ElementToString(this->context->theDefaultPolyFormat) << " by "
+    << other.ElementToString(this->context->theDefaultPolyFormat);
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4400,7 +4401,8 @@ void RationalFunction::operator*=(const Polynomial<Rational> & other)
   this->SimplifyLeadingCoefficientOnly();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    out << "Multiplying " << this->ElementToString(this->context->theDefaultPolyFormat) << " by "
+    << other.ElementToString(this->context->theDefaultPolyFormat);
     out << " and the result is:\n" << this->ElementToString();
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
@@ -4426,10 +4428,15 @@ void RationalFunction::operator*=(const Rational& other)
 }
 
 void RationalFunction::operator*=(const RationalFunction& other)
-{ assert(this->NumVars==other.NumVars);
-  assert(this->checkConsistency());
-  assert(other.checkConsistency());
-  assert(this!=&other);
+{ if (this->NumVars!=other.NumVars || this==&other)
+  { RationalFunction tempRF;
+    tempRF=other;
+    int maxNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
+    this->SetNumVariables(maxNumVars);
+    tempRF.SetNumVariables(maxNumVars);
+    *this*=tempRF;
+    return;
+  }
   if (other.context!=0)
     this->context=other.context;
   if (other.IsEqualToZero() || this->IsEqualToZero())
@@ -5340,7 +5347,8 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
       if (found)
         report << ",";
       found=true;
-      report << tempP.ElementToString() << " \\mapsto " << tempP.ElementToString();
+      report << tempP.ElementToString(theGlobalVariables.theDefaultPolyFormat) << " \\mapsto "
+      << tempP.ElementToString(theGlobalVariables.theDefaultPolyFormat);
       if (i<NumVarsDoubled/2)
         numImpliedXsubs++;
       else
@@ -5364,7 +5372,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ElementToString();
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
   if (lastNode.ExpressionType==this->typePoly)
-    out << lastNode.polyValue.GetElement().ElementToString() << ")";
+    out << lastNode.polyValue.GetElement().ElementToString(theGlobalVariables.theDefaultPolyFormat) << ")";
   else
     out << " ... )";
   if (found)
@@ -5718,9 +5726,6 @@ void ElementSemisimpleLieAlgebra::GetBasisFromSpanOfElements
 
 }
 
-
-
-
 bool ElementSemisimpleLieAlgebra::GetCoordsInBasis(const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const
 { Vectors<Rational> tempBasis;
   Vector<Rational> tempRoot;
@@ -5743,14 +5748,12 @@ bool RationalFunction::gcdQuicK
     else
       output.MakeConst(left.NumVars, (Rational) 1);
   } else
-  { std::string tempS1, tempS2, tempS3, tempS4;
-    tempS1=left.ElementToString();
-    tempS2=right.ElementToString();
-    if ((&right)==(Polynomial<Rational> *)0x82ea6b8)
-      std::cout << tempS1;
+  { //std::string tempS1, tempS2, tempS3, tempS4;
+//    tempS1=left.ElementToString(theGlobalVariables.theDefaultPolyFormat);
+//    tempS2=right.ElementToString(theGlobalVariables.theDefaultPolyFormat);
     right.DivideBy(left, quotient, remainder);
-    tempS3=quotient.ElementToString();
-    tempS4=remainder.ElementToString();
+//    tempS3=quotient.ElementToString();
+//    tempS4=remainder.ElementToString();
     if (remainder.IsEqualToZero())
       output=left;
     else
@@ -6537,12 +6540,6 @@ bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& m)const
   return true;
 }
 
-void MonomialP::ElementToString(std::string& output, const PolynomialOutputFormat& PolyFormatLocal)
-{ std::stringstream out;
-//  this->StringStreamPrintOutAppend(out, PolyFormatLocal);
-  output=out.str();
-}
-
 void MonomialP::MultiplyBy(const MonomialP& other)
 { int numCycles=MathRoutines::Minimum(this->size, other.size);
   for (int i=0; i<numCycles; i++)
@@ -6586,3 +6583,13 @@ void MathRoutines::NChooseK(int n, int k, LargeInt& result)
   }
 }
 
+std::string MonomialP::ElementToString(const PolynomialOutputFormat& theFormat)const
+{ std::stringstream out;
+  for (int i=0; i<this->size; i++)
+    if (!this->TheObjects[i].IsEqualToZero())
+    { out << theFormat.GetLetterIndex(i);
+      if (this->TheObjects[i]!=1)
+        out << "{" << this->TheObjects[i] << "}";
+    }
+  return out.str();
+}

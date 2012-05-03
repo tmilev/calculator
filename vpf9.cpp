@@ -382,10 +382,8 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   zeroRoot.MakeZero(theDimension);
   for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i);
-    std::string tempS; std::stringstream out;
-    tempRoot.ElementToString(tempS);
-    out << tempS;
-    tempS=out.str();
+    std::string tempS;
+    tempS=tempRoot.ElementToString();
     TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210));
     TDV.drawTextAtVectorBuffer(tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
     TDV.drawCircleAtVectorBuffer(tempRoot, 2, TDV.PenStyleNormal, CGI::RedGreenBlue(100, 200, 100) );
@@ -782,7 +780,7 @@ inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
   return tempRat.IsPositiveOrZero();
 }
 
-inline void Rational::ElementToString(std::string& output)const
+inline std::string Rational::ElementToString(PolynomialOutputFormat* notUsed)const
 { std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;
@@ -796,7 +794,7 @@ inline void Rational::ElementToString(std::string& output)const
     if (tempS!="1")
       out << "/" << tempS;
   }
-  output = out.str();
+  return out.str();
 }
 
 PolynomialOutputFormat::PolynomialOutputFormat(const std::string& AlphabetBase1, const std::string& AlphabetBase2)
@@ -852,9 +850,7 @@ void PolynomialOutputFormat::MakeAlphabetxi()
 }
 
 void Rational::WriteToFile(std::fstream& output)
-{ std::string tempS;
-  this->ElementToString(tempS);
-  output << tempS;
+{ output <<   this->ElementToString();
 }
 
 inline void Rational::RaiseToPower(int x)
@@ -1721,7 +1717,7 @@ void partFraction::ComputeOneCheckSuM
   Vector<Rational> CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(owner.AmbientDimension);
   std::string tempS;
   if (this->flagAnErrorHasOccurredTimeToPanic && Rational::flagAnErrorHasOccurredTimeToPanic)
-  { output.ElementToString(tempS);
+  { tempS= output.ElementToString();
   }
   //output.ElementToString(tempS);
   Rational tempRat;
@@ -1781,7 +1777,6 @@ bool partFraction::rootIsInFractionCone(partFractions& owner, Vector<Rational>* 
     tempRoots.AddOnTop(owner.startingVectors[tempI]);
   }
   tempCone.CreateFromVertices(tempRoots, theGlobalVariables);
-  tempCone.ComputeDebugString();
   this->IsIrrelevant=! tempCone.IsInCone(*theRoot);
   this->RelevanceIsComputed=true;
   return !this->IsIrrelevant;
@@ -2334,8 +2329,8 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
   }*/
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic)
     { std::string tempS1, tempS2;
-      this->StartCheckSum.ElementToString(tempS1);
-      this->EndCheckSum.ElementToString(tempS2);
+      tempS1=this->StartCheckSum.ElementToString();
+      tempS2=this->EndCheckSum.ElementToString();
       std::stringstream out1, out2;
       out1 << "Starting checksum: " << tempS1;
       out2 << "  Ending checksum: " << tempS2;
@@ -3058,9 +3053,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobal
   output << "Indices_of_roots:\n";
   PolynomialOutputFormat PolyFormatLocal;
   for (int i=0; i<this->startingVectors.size; i++)
-  { this->startingVectors[i].ElementToString(tempS);
-    output << "| " << i << "    " << tempS << "\n";
-  }
+    output << "| " << i << "    " << this->startingVectors[i].ElementToString() << "\n";
   output << "Alphabet_used:\n";
   for (int i=0; i<this->AmbientDimension; i++)
     output << PolyFormatLocal.GetLetterIndex(i) << " ";
@@ -3228,33 +3221,33 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum
     tempRat2=1;
     for (int j=0; j<theDimension; j++)
     { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      { theExp.ElementToString(tempS);
+      { tempS=theExp.ElementToString();
       }
       tempRat3=CheckSumRoot[j];
       if (!tempRat3.IsEqualToZero())
         tempRat3.RaiseToPower((theExp[j]*this->Elongations[i]).NumShort);
       tempRat2*=tempRat3;
       if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      { tempRat2.ElementToString(tempS);
+      { tempS=tempRat2.ElementToString();
       }
     }
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-    { tempRat.ElementToString(tempS);
+    { tempS=tempRat.ElementToString();
     }
     tempRat-=tempRat2;
     tempRat.RaiseToPower(this->Multiplicities[i]);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      tempRat.ElementToString(tempS);
+      tempS=tempRat.ElementToString();
     output.MultiplyBy(tempRat);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      output.ElementToString(tempS);
+      tempS=output.ElementToString();
   }
   if (output.IsEqualToZero())
   { std::string tempS;
   }
   output.Invert();
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-    output.ElementToString(tempS);
+    tempS=output.ElementToString();
 }
 
 int oneFracWithMultiplicitiesAndElongations::GetMultiplicityLargestElongation()
@@ -3642,7 +3635,7 @@ void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool 
   }
   if (this->flagAnErrorHasOcurredTimeToPanic)
   { std::string tempS;
-    alphaShift.ElementToString(tempS);
+    tempS=alphaShift.ElementToString();
   }
   alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
   if (RhoAction)
@@ -3829,13 +3822,12 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
   output.CopyFromBase(this->RootsOfBorel);
 }
 
-void WeylGroup::ElementToString(std::string& output)
+std::string WeylGroup::ElementToString()
 { std::string tempS;
   std::stringstream out;
   out << "Size: " << this->size << "\n";
-//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n";
-  this->rho.ElementToString(tempS);
-  out << "rho:" << tempS << "\n";
+//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  out << "rho:" << this->rho.ElementToString() << "\n";
   this->RootSystem.ElementToStringGeneric(tempS);
   out << "Root system(" << this->RootSystem.size << " elements):\n" << tempS << "\n";
   out << "Elements of the group:\n";
@@ -3843,7 +3835,7 @@ void WeylGroup::ElementToString(std::string& output)
   { this->TheObjects[i].ElementToString(tempS);
     out << i << ". " << tempS << "\n";
   }
-  output= out.str();
+  return out.str();
 }
 
 bool WeylGroup::IsAddmisibleDynkinType(char candidateLetter, int n)
@@ -4276,10 +4268,6 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
   this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, this, UpperLimitNumElements);
 }
 
-void WeylGroup::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
-}
-
 int WeylGroup::length(int index)
 { return this->TheObjects[this->size-1].size-this->TheObjects[index].size;
 }
@@ -4441,9 +4429,9 @@ void VermaModulesWithMultiplicities::ElementToString(std::string& output)
   std::stringstream out;
   out << "Next to explore: " << this->NextToExplore << "\n Orbit of rho:\n";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
-    out << tempS << "   :  " << this->TheMultiplicities.TheObjects[i];
-    if (this->Explored.TheObjects[i])
+  { tempS=this->TheObjects[i].ElementToString();
+    out << tempS << "   :  " << this->TheMultiplicities[i];
+    if (this->Explored[i])
       out << " Explored\n";
     else
       out << " not Explored\n";
@@ -4451,8 +4439,8 @@ void VermaModulesWithMultiplicities::ElementToString(std::string& output)
   out << "Bruhat order:\n";
   for (int i=0; i<this->size; i++)
   { out << i << ".   ";
-    for(int j=0; j<this->BruhatOrder.TheObjects[i].size; j++)
-      out << this->BruhatOrder.TheObjects[i].TheObjects[j] << ", ";
+    for(int j=0; j<this->BruhatOrder[i].size; j++)
+      out << this->BruhatOrder[i][j] << ", ";
     out << "\n";
   }
   this->RPolysToString(tempS);

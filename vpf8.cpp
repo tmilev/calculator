@@ -322,7 +322,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   theSubgroup.GetRho().ElementToStringLetterFormat("\\eta", true)
   << "$; $\\pr(\\rho)=" << tempRoot.ElementToStringLetterFormat("\\alpha", true) << "$."
   ;
-  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ" << tempVect.ElementToString(theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
+  this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
+  << tempVect.ElementToString(&theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
   for (int i=0; i<this->theLinearOperatorsExtended.size; i++)
   { Matrix<Rational> & currentLoExt=this->theLinearOperatorsExtended[i];
     for (int j=0; j<currentLoExt.NumRows; j++)
@@ -332,7 +333,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     for (int j=0; j<tempVect2.size; j++)
       tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];
     this->log << "\n$" <<  theSubgroup[i].ElementToString(true, false, "\\eta", & displayIndicesReflections) << "$&$"
-    << tempVect2.ElementToString(theFormat) << "$\\\\";
+    << tempVect2.ElementToString(&theFormat) << "$\\\\";
   }
   this->log <<"\\end{longtable}\n\n";
 //  this->log << "\n\n\nThere are " << tempList.size << " different operators.";
@@ -359,7 +360,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\n" << tempMat.ElementToString(false, false) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ElementToString(false, false);
   this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
-  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
+  this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ElementToString(&theFormat) << "\n";
   this->PreimageWeylChamberSmallerAlgebra.Normals=this->WeylChamberSmallerAlgebra.Normals;
   for (int i=0; i<this->PreimageWeylChamberLargerAlgebra.Normals.size; i++)
   { tempRoot.MakeZero(input.theRange().GetRank()+input.theDomain().GetRank()+1);
@@ -384,7 +385,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nthe smaller parabolic selection: " << this->ParabolicSelectionSmallerAlgebra.ElementToString();
   this->log << "the Vectors<Rational> generating the chamber walls: " << tempRoots.ElementToString();
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
-  this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
+  this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
   this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[0].ElementToString(false, false) << "\n";
   this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[1].ElementToString(false, false) << "\n";
@@ -406,8 +407,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
 
   tempRoot.MakeEi(input.theRange().GetRank()+input.theDomain().GetRank()+1, input.theRange().GetRank()+input.theDomain().GetRank());
   this->PreimageWeylChamberLargerAlgebra.Normals.AddOnTop(tempRoot);
-  this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(theFormat) << "\n";
-  this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(theFormat) << "\n";
+  this->log << "\nPreimage Weyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ElementToString(&theFormat) << "\n";
+  this->log << "\nPreimage Weyl chamber larger algebra: " << this->PreimageWeylChamberLargerAlgebra.ElementToString(&theFormat) << "\n";
 
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   theGlobalVariables.theIndicatorVariables.StatusString1=this->log.str();
@@ -559,7 +560,7 @@ void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=tempStream.str();
     theGlobalVariables.MakeReport();
     out << "\nChamber " << i+1 << ": the quasipolynomial is: " << currentSum.ElementToString(false, false);
-    out << "\nThe chamber is: " << this->projectivizedChambeR.TheObjects[i].ElementToString(theFormat);
+    out << "\nThe chamber is: " << this->projectivizedChambeR.TheObjects[i].ElementToString(&theFormat);
   }
 //  this->projectivizedChamber.ComputeDebugString();
 //  out << "\n\n" << this->projectivizedChamber.DebugString;
@@ -1755,31 +1756,19 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   GeneralizedVermaModuleCharacters tempChars;
   List<int> nodesCurrentRoot;
   List<Vectors<Rational> > outputParamChambers, outputNonParamVertices;
-  PolynomialOutputFormat tempFormat;
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
   out << "Input data: normal: " << theNEq.ElementToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
-  << "; cone: " << currentCone.ElementToString(false, true, false, true, theFormat);
+  << "; cone: " << currentCone.ElementToString(false, true, false, true, theGlobalVariables.theDefaultPolyFormat);
   std::cout << "Input data: normal: " << theNEq.ElementToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
-  << "; cone: " << currentCone.ElementToString(false, true, false, true, theFormat);
+  << "; cone: " << currentCone.ElementToString(false, true, false, true, theGlobalVariables.theDefaultPolyFormat);
   ConeLatticeAndShiftMaxComputation theComputation;
   theComputation.init(theNEq, currentCone, currentLattice, theShift);
   Controller pauseController;
   theComputation.numNonParaM=numNonParam;
   theComputation.FindExtremaParametricStep1(pauseController, false, theGlobalVariables);
-  for (int i=0; i<MathRoutines::Minimum(theShift.size, theFormat.alphabet.size); i++)
-//    if (i<numNonParam)
-  { std::stringstream tempStream;
-    tempStream << "x_{" << i+1+numNonParam << "}";
-    theFormat.alphabet[i]=tempStream.str();
-  } /*else
-  { std::stringstream tempStream;
-    tempStream << "y_{" << i-numNonParam+1 << "}";
-    theFormat.alphabet[i]=tempStream.str();
-  }*/
-  out << "<hr><hr><hr>" << theComputation.ElementToString(theFormat);
+  out << "<hr><hr><hr>" << theComputation.ElementToString(&theGlobalVariables.theDefaultPolyFormat);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -1841,7 +1830,7 @@ void Lattice::ApplyLinearMap(Matrix<Rational> & theMap, Lattice& output)
 }
 
 std::string ConeLatticeAndShiftMaxComputation::ElementToString
-  (PolynomialOutputFormat& theFormat)
+  (PolynomialOutputFormat* theFormat)
 { std::stringstream out;
   out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.ElementToString(true, false) << "<hr><hr>";
 /*  if (this->complexStartingPerRepresentative.size>0)
@@ -1859,7 +1848,7 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   { out << "";// << this->theConesLargerDim[i].ElementToString(theFormat);
     //out << "<br>" << this->LPtoMaximizeLargerDim[i].ElementToString();
     theDrawingVariables.theBuffer.init();
-    out << "<br>" << this->theConesLargerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+    out << "<br>" << this->theConesLargerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, *theFormat);
     out << "<br>over " << this->theConesLargerDim[i].theShift.ElementToString() << " + " << this->theConesLargerDim[i].theLattice.ElementToString();
     tempP.MakeLinPolyFromRootLastCoordConst(this->LPtoMaximizeLargerDim[i]);
     out << "<br>the function we have maxed, as a function of the remaining variables, is: " << tempP.ElementToString(theFormat) << "<hr><hr>";
@@ -1867,10 +1856,10 @@ std::string ConeLatticeAndShiftMaxComputation::ElementToString
   if (this->theConesSmallerDim.size>0)
   { out << "<br>Cones processed: <br>";
     for (int i=0; i<this->theConesSmallerDim.size; i++)
-    { out << this->theConesSmallerDim[i].ElementToString(theFormat);
+    { out << this->theConesSmallerDim[i].ElementToString(*theFormat);
       //out << "<br>" << this->LPtoMaximizeSmallerDim[i].ElementToString();
       theDrawingVariables.theBuffer.init();
-      out << this->theConesSmallerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, theFormat);
+      out << this->theConesSmallerDim[i].theProjectivizedCone.DrawMeToHtmlLastCoordAffine(theDrawingVariables, *theFormat);
     }
   }
   return out.str();
@@ -2084,7 +2073,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
   }
   if (outputAppend.size>=10)
   { std::stringstream tempStream;
-    tempStream << "<hr><hr><hr><hr>The bad cone:" << this->theProjectivizedCone.ElementToString(theFormat);
+    tempStream << "<hr><hr><hr><hr>The bad cone:" << this->theProjectivizedCone.ElementToString(&theFormat);
     theGlobalVariables.theIndicatorVariables.StatusString1=tempStream.str();
     theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
     theGlobalVariables.MakeReport();
@@ -2761,11 +2750,11 @@ int ParserNode::EvaluateGroebner
   std::stringstream out1, out2;
   PolynomialOutputFormat theFormat;
   for(int i=0; i<inputBasis.size; i++)
-    out1 << inputBasis.TheObjects[i].ElementToString(theFormat) << ", ";
+    out1 << inputBasis.TheObjects[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out1.str());
   out << "<br>Reduced Groebner basis:";
   for(int i=0; i<outputGroebner.size; i++)
-    out2 << outputGroebner.TheObjects[i].ElementToString(theFormat) << ", ";
+    out2 << outputGroebner.TheObjects[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
@@ -2832,13 +2821,13 @@ int ParserNode::EvaluateRelations
   PolynomialOutputFormat theFormat;
   std::stringstream out3;
   for(int i=0; i<inputBasis.size; i++)
-    out3 << " u_{" << i+1+theNode.impliedNumVars << "}:=" << inputBasis[i].ElementToString(theFormat) << ", ";
+    out3 << " u_{" << i+1+theNode.impliedNumVars << "}:=" << inputBasis[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathSpanFromLatexFormula(out3.str());
   out << "<br>Resulting relations:";
   std::stringstream out2;
   theFormat.MakeAlphabetArbitraryWithIndex("u", "v");
   for(int i=0; i<outputRelations.size; i++)
-    out2 << outputRelations.TheObjects[i].ElementToString(theFormat) << ", ";
+    out2 << outputRelations.TheObjects[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathSpanFromLatexFormula(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
@@ -3422,7 +3411,7 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
     this->AddLatticeShift(tempQP.valueOnEachLatticeShift.TheObjects[i], tempQP.LatticeShifts.TheObjects[i]);
 }
 
-std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, const PolynomialOutputFormat& thePolyFormat)
+std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, PolynomialOutputFormat* thePolyFormat)
 { std::stringstream out;
   //if (useHtml)
 //  out << "the lattice: " << this->AmbientLatticeReduced.ElementToString(useHtml, useLatex);
@@ -5443,7 +5432,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
       DisplayIndicesprojectivizedChambers.AddOnTop(numFoundChambers);
       out << this->PrepareReportOneCone(theFormat, this->projectivizedChambeR[i], theGlobalVariables) << "&";
       out << "\\begin{tabular}{c}";
-      out << theMult.ElementToString(false, true, theFormat) << "\\end{tabular}\\\\\n";
+      out << theMult.ElementToString(false, true, &theFormat) << "\\end{tabular}\\\\\n";
     } else
       DisplayIndicesprojectivizedChambers.AddOnTop(-1);
   }
@@ -5547,7 +5536,7 @@ bool partFractions::RemoveRedundantShortRootsIndex
   { int currentIndex=thePF.IndicesNonZeroMults.TheObjects[k];
     oneFracWithMultiplicitiesAndElongations& currentFrac = thePF.TheObjects[currentIndex];
     int LCMElongations = currentFrac.GetLCMElongations();
-    this->startingVectors[currentIndex].ElementToString(tempS);
+    tempS= this->startingVectors[currentIndex].ElementToString();
     while (currentFrac.Elongations.size>1)
     { for (int i=0; i<currentFrac.Elongations.size; i++)
       { int ElongationValue=currentFrac.Elongations[i];
@@ -5610,7 +5599,7 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   std::stringstream out;
   out << "A basis for the invariants of degree " << theDegree << " is given by (number of elements: " << outputList.size << ")";
   for (int i=0; i<outputList.size; i++)
-  { out << "<br>" << outputList.TheObjects[i].ElementToString(theGlobalVariables.theDefaultPolyFormat) << ", ";
+  { out << "<br>" << outputList.TheObjects[i].ElementToString(&theGlobalVariables.theDefaultPolyFormat) << ", ";
   }
   theNode.outputString=out.str();
   return theNode.errorNoError;
@@ -5959,7 +5948,7 @@ std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theForm
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::ElementToString(const PolynomialOutputFormat& theFormat)
+std::string SemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFormat)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot;
@@ -5988,16 +5977,16 @@ std::string SemisimpleLieAlgebra::ElementToString(const PolynomialOutputFormat& 
     { if (i==numPosRoots)
       { if (useRootNotation)
           out << "\\hline\\begin{tabular}{c}$"
-          << theFormat.alphabetBases[1] << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
-          << theFormat.alphabetBases[0] << "_{\\alpha},"
-          << theFormat.alphabetBases[0] << "_{-\\alpha}]$\\\\$"
-          << theFormat.alphabetBases[1] << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat->alphabetBases[1] << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
+          << theFormat->alphabetBases[0] << "_{\\alpha},"
+          << theFormat->alphabetBases[0] << "_{-\\alpha}]$\\\\$"
+          << theFormat->alphabetBases[1] << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
         else
           out << "\\hline\\begin{tabular}{c}$"
-          << theFormat.alphabetBases[1] << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
-          << theFormat.alphabetBases[0] << "_{i},"
-          << theFormat.alphabetBases[0] << "_{-i}]$\\\\$"
-          << theFormat.alphabetBases[1] << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat->alphabetBases[1] << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
+          << theFormat->alphabetBases[0] << "_{i},"
+          << theFormat->alphabetBases[0] << "_{-i}]$\\\\$"
+          << theFormat->alphabetBases[1] << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
 //        out << "  \\\\\\hline";
         //out << "\\hline generator & corresponding Vector<Rational> space\\\\\\hline";
         i+=theDimension;
@@ -6065,8 +6054,7 @@ std::string SemisimpleLieAlgebra::ElementToString(const PolynomialOutputFormat& 
   return out.str();
 }
 
-std::string ElementSemisimpleLieAlgebra::ElementToString
-(const PolynomialOutputFormat& theFormat)const
+std::string ElementSemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFormat)const
 { std::stringstream out; std::string tempS;
   if (this->IsEqualToZero())
     out << "0";
@@ -8715,7 +8703,7 @@ int ParserNode::EvaluateModVermaRelations
   std::stringstream out;
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ElementToString(theGlobalVariables.theDefaultLieFormat))
+  ( theNode.UEElement.GetElement().ElementToString(&theGlobalVariables.theDefaultLieFormat))
 ;
   Polynomial<Rational>  polyOne, polyZero;
   polyOne.MakeConst(theNode.impliedNumVars, 1);
@@ -8723,7 +8711,7 @@ int ParserNode::EvaluateModVermaRelations
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (theNode.UEElement.GetElement().ElementToString(theGlobalVariables.theDefaultLieFormat))
+  (theNode.UEElement.GetElement().ElementToString(&theGlobalVariables.theDefaultLieFormat))
   ;
   assert(false);
 

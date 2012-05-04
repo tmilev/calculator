@@ -2605,7 +2605,7 @@ class ElementWeylAlgebra
 {
 private:
   //the standard order is as follows. First come the variables, then the differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
-  Polynomial<Rational>  StandardOrder;
+  Polynomial<Rational> StandardOrder;
 public:
   std::string DebugString;
   void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ElementToString(this->DebugString, useXYs, true, useBeginEqnArray); }
@@ -2642,7 +2642,9 @@ public:
     this->StandardOrder.IncreaseNumVariables(thePoly.NumVars);
     this->NumVariables=thePoly.NumVars;
   }
-  void Subtract(const ElementWeylAlgebra& other){ this->StandardOrder-=(other.StandardOrder);}
+  void Subtract(const ElementWeylAlgebra& other)
+  { this->StandardOrder-=(other.StandardOrder);
+  }
   void MakeConst(int NumVars, const Rational& theConst);
   void SubstitutionTreatPartialsAndVarsAsIndependent
   (PolynomialSubstitution<Rational>& theSub)
@@ -6134,37 +6136,6 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
       tempCF*=input.TheObjects[i]; //<- to facilitate type conversion we call extra assignment
       this->AddMonomial(tempMon, tempCF);
     }
-}
-
-template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfTheyCommute
-(int theLeftIndex)
-{ if (theLeftIndex>= this->generatorsIndices.size-1)
-    return false;
-  int leftGenerator=this->generatorsIndices[theLeftIndex];
-  int rightGenerator=this->generatorsIndices[theLeftIndex+1];
-  if (!this->GetOwner().theLiebrackets.elements[leftGenerator][rightGenerator].IsEqualToZero())
-    return false;
-  this->generatorsIndices.SwapTwoIndices(theLeftIndex, theLeftIndex+1);
-  this->SimplifyEqualConsecutiveGenerators(theLeftIndex-1);
-  return true;
-}
-
-template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
-{ if (lowestNonReducedIndex<0)
-    lowestNonReducedIndex=0;
-  bool result=false;
-  for (int next=lowestNonReducedIndex+1, current=lowestNonReducedIndex; next<this->generatorsIndices.size; next++)
-    if (this->generatorsIndices[current]==this->generatorsIndices[next])
-    { result=true;
-      this->Powers[current]+=this->Powers[next];
-    }
-    else
-    { current++;
-      this->Powers[current]=this->Powers[next];
-    }
-  return result;
 }
 
 template <class CoefficientType>

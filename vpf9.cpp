@@ -528,7 +528,6 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
   return result;
 }
 
-
 void Selection::init(int maxNumElements)
 { if (maxNumElements<=0)
   { this->MaxSize=0;

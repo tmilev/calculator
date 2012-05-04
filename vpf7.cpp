@@ -3424,7 +3424,10 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
   CoefficientType currentCoeff;
   outpuT.MakeZero(*this->owners, this->indexInOwners);
   for (; this->size>0; )
-  { this->PopMonomial(this->size-1, tempMon, currentCoeff);
+  { PolynomialOutputFormat tempFormat;
+    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    std::cout << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ElementToString(&tempFormat);
+    this->PopMonomial(this->size-1, tempMon, currentCoeff);
     bool reductionOccurred=false;
     for (int i=0; i<tempMon.generatorsIndices.size-1; i++)
       if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i+1]))
@@ -3452,6 +3455,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
       }
     if(!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
+    std::cout << "-<br>(" << (*this+outpuT).ElementToString(&tempFormat) << ")<br>(this should simplify to zero).";
   }
   *this=outpuT;
 }
@@ -3476,6 +3480,38 @@ bool MonomialUniversalEnveloping<CoefficientType>::CommutingABntoBnAPlusLowerOrd
   if(rightGeneratorIndex>= numPosRoots && rightGeneratorIndex<numPosRoots+theDimension)
     return this->GetOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].IsEqualToZero();
   return true;
+}
+
+template <class CoefficientType>
+bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfTheyCommute
+(int theLeftIndex)
+{ if (theLeftIndex>= this->generatorsIndices.size-1)
+    return false;
+  int leftGenerator=this->generatorsIndices[theLeftIndex];
+  int rightGenerator=this->generatorsIndices[theLeftIndex+1];
+  if (!this->GetOwner().theLiebrackets.elements[leftGenerator][rightGenerator].IsEqualToZero())
+    return false;
+  this->generatorsIndices.SwapTwoIndices(theLeftIndex, theLeftIndex+1);
+  this->Powers.SwapTwoIndices(theLeftIndex, theLeftIndex+1);
+  this->SimplifyEqualConsecutiveGenerators(theLeftIndex-1);
+  return true;
+}
+
+template <class CoefficientType>
+bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
+{ if (lowestNonReducedIndex<0)
+    lowestNonReducedIndex=0;
+  bool result=false;
+  for (int next=lowestNonReducedIndex+1, current=lowestNonReducedIndex; next<this->generatorsIndices.size; next++)
+    if (this->generatorsIndices[current]==this->generatorsIndices[next])
+    { result=true;
+      this->Powers[current]+=this->Powers[next];
+    }
+    else
+    { current++;
+      this->Powers[current]=this->Powers[next];
+    }
+  return result;
 }
 
 template <class CoefficientType>
@@ -3504,43 +3540,45 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
     tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
   MonomialUniversalEnveloping<CoefficientType> startMon;
   startMon=tempMon;
-  ElementSemisimpleLieAlgebra adResulT, tempLefttElt;
-  adResulT.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  ElementSemisimpleLieAlgebra adAToTheIthOfB, aElt;
+  adAToTheIthOfB.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (rightGeneratorIndeX, *this->owners, this->indexInOwners);
-  tempLefttElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  aElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (leftGeneratorIndeX, *this->owners, this->indexInOwners);
   //Formula realized:
-  //a^m b =\sum_{i=0}^\infty \binom{m}{i} b^{m-i} (-\ad b)^i (a).
+  //a^n b =\sum_{i=0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
-  //(L_b-ad_b)^n=(R_b)^n.
+  //(L_a)^n=(R_a+ad_a)^n.
   do
   { //acquiredCoefficienT.ComputeDebugString();
     //theRightPoweR.ComputeDebugString();
     //theLeftPoweR.ComputeDebugString();
     //adResulT.ComputeDebugString(*this->owner, false, false);
     //tempMon.ComputeDebugString();
-    for (int i=0; i<adResulT.size; i++)
-    { int theNewGeneratorIndex=adResulT[i].theGeneratorIndex;
+    for (int i=0; i<adAToTheIthOfB.size; i++)
+    { int theNewGeneratorIndex=adAToTheIthOfB[i].theGeneratorIndex;
       tempMon=startMon;
       incomingAcquiredCoefficienT=acquiredCoefficienT;
-      incomingAcquiredCoefficienT*=adResulT.theCoeffs[i];
+      incomingAcquiredCoefficienT*=adAToTheIthOfB.theCoeffs[i];
       tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
       tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
       tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
       for (int i=indexA+2; i<this->generatorsIndices.size; i++)
-        tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
+        tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
       //tempMon.ComputeDebugString();
       output.AddMonomial(tempMon, incomingAcquiredCoefficienT);
     }
-    acquiredCoefficienT*=(theLeftPoweR);
-    theLeftPoweR-=1;
-    tempMon=startMon;
-    this->GetOwner().LieBracket(tempLefttElt, adResulT, adResulT);
     powerDroP++;
+    acquiredCoefficienT*=(theLeftPoweR);
     acquiredCoefficienT/=(powerDroP);
+    theLeftPoweR-=1;
+//    std::cout <<"<hr>(ad_a)(" << adAToTheIthOfB.ElementToString(0) << ") =";
+    this->GetOwner().LieBracket(aElt, adAToTheIthOfB, adAToTheIthOfB);
+//    std::cout << adAToTheIthOfB.ElementToString(0);
     //adResulT.ComputeDebugString(*this->owner, false, false);
-  }while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
+  }while(!adAToTheIthOfB.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
+//  std::cout << "<hr>final output: " << this->ElementToString() << " = " << output.ElementToString();
 }
 
 template <class CoefficientType>

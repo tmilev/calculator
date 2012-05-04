@@ -4239,7 +4239,8 @@ class MonomialCollection : public HashedList<TemplateMonomial>
 private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
 public:
-  int NumVars;
+  MonomialCollection(){};
+  MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   List<CoefficientType> theCoeffs;
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
   std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
@@ -4305,7 +4306,7 @@ public:
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   bool operator== (const MonomialCollection<TemplateMonomial, CoefficientType>& other)const;
   inline void operator+=(const MonomialCollection<TemplateMonomial, CoefficientType>& other);
-  MonomialCollection<TemplateMonomial, CoefficientType> operator*(const CoefficientType& other)
+  MonomialCollection<TemplateMonomial, CoefficientType> operator*(const CoefficientType& other)const
   { MonomialCollection<TemplateMonomial, CoefficientType> result=*this;
     result*=other;
     return result;
@@ -4313,14 +4314,19 @@ public:
 //  inline void operator+=(const TemplateMonomial& m)
 //  { this->AddMonomial(m, 1);
 //  }
+  MonomialCollection<TemplateMonomial, CoefficientType> operator+(const MonomialCollection<TemplateMonomial, CoefficientType>& other)const
+  { MonomialCollection<TemplateMonomial, CoefficientType> output=*this;
+    output+=other;
+    return output;
+  }
   inline void operator+=(const CoefficientType& other)
   { TemplateMonomial tempM;
-    tempM.MakeZero(this->NumVars);
+    tempM.MakeZero();
     this->AddMonomial(tempM, other);
   }
   inline void operator-=(const CoefficientType& other)
   { TemplateMonomial tempM;
-    tempM.MakeZero(this->NumVars);
+    tempM.MakeZero();
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
@@ -4593,6 +4599,38 @@ public:
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
+  void operator-=(const CoefficientType& other)
+  { MonomialP tempMon;
+    tempMon.MakeZero(this->NumVars);
+    this->SubtractMonomial(tempMon, other);
+  }
+  void operator-=(const Polynomial& other)
+  { if (other.NumVars!=this->NumVars || this==&other)
+    { int newNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
+      Polynomial<CoefficientType> otherNew=other;
+      otherNew.SetNumVariables(newNumVars);
+      this->SetNumVariables(newNumVars);
+      *this-=otherNew;
+      return;
+    }
+    this->::MonomialCollection<MonomialP, CoefficientType>::operator-=(other);
+  }
+  void operator+=(const CoefficientType& other)
+  { MonomialP tempMon;
+    tempMon.MakeZero(this->NumVars);
+    this->AddMonomial(tempMon, other);
+  }
+  void operator+=(const Polynomial& other)
+  { if (other.NumVars!=this->NumVars || this==&other)
+    { int newNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
+      Polynomial<CoefficientType> otherNew=other;
+      otherNew.SetNumVariables(newNumVars);
+      this->SetNumVariables(newNumVars);
+      *this+=otherNew;
+      return;
+    }
+    this->::MonomialCollection<MonomialP, CoefficientType>::operator+=(other);
+  }
   void operator=(const Polynomial<CoefficientType>& other)
   { this->NumVars=other.NumVars;
     this->::MonomialCollection<MonomialP, CoefficientType>::operator=(other);
@@ -5269,16 +5307,15 @@ template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::WriteToFile
 (std::fstream& output)
 { output << XMLRoutines::GetOpenTagNoInputCheckAppendSpacE(this->GetXMLClassName());
-  output << "nv: " << this->NumVars << " numMons: " << this->size;
+  output << " numMons: " << this->size;
   for (int i=0; i<this->size; i++)
   { output << " ";
     if (i>0)
       if (! this->theCoeffs[i].BeginsWithMinus())
         output << "+ ";
     this->theCoeffs[i].WriteToFile(output);
-    for (int j=0; j<this->NumVars; j++)
-      if(this->TheObjects[i][j]!=0)
-        output << " x_ " << j+1 << " ^ " << this->TheObjects[i][j];
+    TemplateMonomial& tempM=this->TheObjects[i];
+    tempM.WriteToFile(output);
   }
   output << XMLRoutines::GetCloseTagNoInputCheckAppendSpacE(this->GetXMLClassName()) << "\n";
 }
@@ -5286,41 +5323,26 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::WriteToFile
 template <class TemplateMonomial, class CoefficientType>
 inline bool MonomialCollection<TemplateMonomial, CoefficientType>::ReadFromFile
 (std::fstream& input, GlobalVariables* theGlobalVariables)
-{ int numReadWords, candidateVars, varIndex, targetSize;
+{ int numReadWords, targetSize;
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string ReaderString;
   bool result=true;
-  input >> ReaderString >> candidateVars >> ReaderString >> targetSize;
-  if (ReaderString!="numMons:" || candidateVars<0)
+  input >> ReaderString >> targetSize;
+  if (ReaderString!="numMons:" )
   { assert(false);
     return false;
   }
   this->MakeZero();
   TemplateMonomial tempM;
-  tempM.MakeZero(candidateVars);
   this->Reserve(targetSize);
   input.ignore();
   CoefficientType theCoeff;
   for (int i=0; i<targetSize; i++)
   { if (input.peek()=='+')
       input >> ReaderString;
-    tempM.MakeZero(candidateVars);
+//    input.ignore();
     theCoeff.ReadFromFile(input);
-    input.ignore();
-    for (int j=0; j<candidateVars; j++)
-    { if (input.peek()!='x')
-        break;
-      input >> ReaderString;
-      assert(ReaderString=="x_");
-      input >> varIndex;
-      varIndex--;
-      if (varIndex>=candidateVars)
-      { result=false;
-        break;
-      }
-      input >> ReaderString >> tempM[varIndex];
-      input.ignore();
-    }
+    tempM.ReadFromFile(input);
     if (!result)
       break;
     this->AddMonomial(tempM, theCoeff);

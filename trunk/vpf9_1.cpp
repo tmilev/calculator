@@ -2846,7 +2846,12 @@ void ElementSemisimpleLieAlgebra::MakeZero(List<SemisimpleLieAlgebra>& owners, i
 
 void SemisimpleLieAlgebra::LieBracket
 (const ElementSemisimpleLieAlgebra& g1, const ElementSemisimpleLieAlgebra& g2, ElementSemisimpleLieAlgebra& output)
-{ assert(&output!=&g1 && &output!=&g2);
+{ if (&output==&g1 || &output==&g2)
+  { ElementSemisimpleLieAlgebra outputNew;
+    this->LieBracket(g1, g2, outputNew);
+    output=outputNew;
+    return;
+  }
   output.MakeZero(*this->owner, this->indexInOwner);
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
     return;

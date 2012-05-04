@@ -270,6 +270,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //  civilizedInput="g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_-1, g_-1, (1,0))";
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
+//  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;UE{}(g_{-1}^{2}g_{-2}g_{-3})";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);

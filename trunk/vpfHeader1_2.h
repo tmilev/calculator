@@ -2267,13 +2267,11 @@ public:
     this->Powers.size=0;
     this->generatorsIndices.size=0;
   }
-  bool CommutingLeftIndexAroundRightIndexAllowed
-(CoefficientType& theLeftPower, int leftGeneratorIndex,
- CoefficientType& theRightPower, int rightGeneratorIndex)
+  bool CommutingABntoBnAPlusLowerOrderAllowed
+(CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex)
    ;
-  bool CommutingRightIndexAroundLeftIndexAllowed
-(CoefficientType& theLeftPower, int leftGeneratorIndex,
- CoefficientType& theRightPower, int rightGeneratorIndex)
+  bool CommutingAnBtoBAnPlusLowerOrderAllowed
+(CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex)
    ;
   bool SwitchConsecutiveIndicesIfTheyCommute
 (int theLeftIndex)
@@ -2299,8 +2297,8 @@ public:
 (int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
-  void CommuteConsecutiveIndicesRightIndexAroundLeft
-(int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
+  void CommuteAnBtoBAnPlusLowerOrder
+(int indexA, ElementUniversalEnveloping<CoefficientType>& output,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
   MonomialUniversalEnveloping():owners(0), indexInOwners(-1){}
@@ -5758,134 +5756,6 @@ std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
   return out.str();
 }
 
-
-template <class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesRightIndexAroundLeft
-(int theIndeX, ElementUniversalEnveloping<CoefficientType>& output, const CoefficientType& theRingUnit,
- const CoefficientType& theRingZero)
-{ if (theIndeX==this->generatorsIndices.size-1)
-    return;
-  output.MakeZero(*this->owners, this->indexInOwners);
-  MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.init(*this->owners, this->indexInOwners);
-  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
-  tempMon.Powers.size=0;
-  tempMon.generatorsIndices.size=0;
-  int rightGeneratorIndeX= this->generatorsIndices.TheObjects[theIndeX+1];
-  int leftGeneratorIndeX=this->generatorsIndices.TheObjects[theIndeX];
-  CoefficientType theRightPoweR, theLeftPoweR;
-  theRightPoweR= this->Powers.TheObjects[theIndeX+1];
-  theLeftPoweR= this->Powers.TheObjects[theIndeX];
-  theRightPoweR-=1;
-  int powerDroP=0;
-  CoefficientType acquiredCoefficienT, incomingAcquiredCoefficienT;
-  acquiredCoefficienT=theRingUnit;
-  for (int i=0; i<theIndeX; i++)
-    tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
-  MonomialUniversalEnveloping<CoefficientType> startMon;
-  startMon=tempMon;
-  ElementSemisimpleLieAlgebra adResulT, tempElT, tempLefttElt;
-  adResulT.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (rightGeneratorIndeX, *this->owners, this->indexInOwners);
-  tempLefttElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (leftGeneratorIndeX, *this->owners, this->indexInOwners);
-//  std::cout << "This is a programming error: CommuteConsecutiveIndicesRightIndexAroundLeft has not been proofread.";
-//  assert(false);
-  do
-  { //acquiredCoefficienT.ComputeDebugString();
-    //theRightPoweR.ComputeDebugString();
-    //theLeftPoweR.ComputeDebugString();
-    //adResulT.ComputeDebugString(*this->owner, false, false);
-    //tempMon.ComputeDebugString();
-    for (int i=0; i<adResulT.size; i++)
-    { int theNewGeneratorIndex=adResulT[i].theGeneratorIndex;
-      tempMon=startMon;
-      incomingAcquiredCoefficienT=acquiredCoefficienT;
-      incomingAcquiredCoefficienT*=adResulT.theCoeffs[i];
-      tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
-      tempMon.MultiplyByGeneratorPowerOnTheRight(leftGeneratorIndeX, theLeftPoweR);
-      tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndeX, theRightPoweR);
-      for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
-        tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices.TheObjects[i], this->Powers.TheObjects[i]);
-      //tempMon.ComputeDebugString();
-      output.AddMonomial(tempMon, incomingAcquiredCoefficienT);
-    }
-    acquiredCoefficienT*=(theLeftPoweR);
-    theLeftPoweR-=1;
-    tempMon=startMon;
-    this->GetOwner().LieBracket(tempLefttElt, adResulT, tempElT);
-    adResulT=tempElT;
-    powerDroP++;
-    acquiredCoefficienT/=(powerDroP);
-    //adResulT.ComputeDebugString(*this->owner, false, false);
-  }while(!adResulT.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
-}
-
-template <class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeftIndexAroundRight
-(int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ if (theIndeX==this->generatorsIndices.size-1)
-    return;
-  output.MakeZero(*this->owners, this->indexInOwners);
-  MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.init(*this->owners, this->indexInOwners);
-  tempMon.Powers.Reserve(this->generatorsIndices.size+2);
-  tempMon.generatorsIndices.Reserve(this->generatorsIndices.size+2);
-  tempMon.Powers.size=0;
-  tempMon.generatorsIndices.size=0;
-  int rightGeneratorIndex= this->generatorsIndices[theIndeX+1];
-  int leftGeneratorIndex=this->generatorsIndices[theIndeX];
-  CoefficientType theRightPower, theLeftPower;
-  theRightPower= this->Powers[theIndeX+1];
-  theLeftPower= this->Powers[theIndeX];
-  theLeftPower-=1;
-  int powerDrop=0;
-  CoefficientType acquiredCoefficient, incomingAcquiredCoefficient;
-  acquiredCoefficient=theRingUnit;
-  for (int i=0; i<theIndeX; i++)
-    tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
-  tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[theIndeX], theLeftPower);
-  MonomialUniversalEnveloping<CoefficientType> startMon, tempMon2;
-  startMon=tempMon;
-  ElementSemisimpleLieAlgebra adResult, tempElt, tempRightElt;
-  adResult.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (leftGeneratorIndex, *this->owners, this->indexInOwners);
-  tempRightElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (rightGeneratorIndex, *this->owners, this->indexInOwners);
-//  tempRightElt.ComputeDebugString(*this->owner, false, false);
-  std::cout << "This is a programming error: CommuteConsecutiveIndicesLeftIndexAroundRight has not been proofread.";
-  assert(false);
-  do
-  { //acquiredCoefficient.ComputeDebugString();
-    //theRightPower.ComputeDebugString();
-    //adResult.ComputeDebugString(*this->owner, false, false);
-    //tempMon.ComputeDebugString();
-    tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
-    //tempMon.ComputeDebugString();
-    for (int i=0; i<adResult.size; i++)
-    { int theNewGeneratorIndex= adResult[i].theGeneratorIndex;
-      tempMon=startMon;
-      incomingAcquiredCoefficient=acquiredCoefficient;
-      incomingAcquiredCoefficient*=(adResult.theCoeffs[i]);
-      tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
-      for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
-        tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
-      //tempMon.ComputeDebugString();
-      output.AddMonomial(tempMon, incomingAcquiredCoefficient);
-    }
-    acquiredCoefficient*=(theRightPower);
-    theRightPower-=1;
-    tempMon=startMon;
-    this->GetOwner().LieBracket(adResult, tempRightElt, tempElt);
-    adResult=tempElt;
-    powerDrop++;
-    acquiredCoefficient/=(powerDrop);
-    //adResult.ComputeDebugString(*this->owner, false, false);
-  }while(!adResult.IsEqualToZero() && !acquiredCoefficient.IsEqualToZero());
-}
-
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVars)
 {//the below code is wrong messed up with substitutions!
@@ -6117,47 +5987,6 @@ void ElementUniversalEnveloping<CoefficientType>::SubstitutionCoefficients
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::Simplify
-(GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ ElementUniversalEnveloping<CoefficientType> buffer;
-  ElementUniversalEnveloping<CoefficientType> outpuT;
-  MonomialUniversalEnveloping<CoefficientType> tempMon;
-  CoefficientType currentCoeff;
-  outpuT.MakeZero(*this->owners, this->indexInOwners);
-  for (; this->size>0; )
-  { this->PopMonomial(this->size-1,tempMon, currentCoeff);
-    bool reductionOccurred=false;
-    for (int i=0; i<tempMon.generatorsIndices.size-1; i++)
-      if (!this->GetOwner().AreOrderedProperly(tempMon.generatorsIndices[i], tempMon.generatorsIndices[i+1]))
-      { if (tempMon.SwitchConsecutiveIndicesIfTheyCommute(i))
-        { this->AddMonomial(tempMon, currentCoeff);
-          reductionOccurred=true;
-          break;
-        }
-        if (tempMon.CommutingRightIndexAroundLeftIndexAllowed
-            (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
-        { tempMon.CommuteConsecutiveIndicesRightIndexAroundLeft(i, buffer, theRingUnit, theRingZero);
-          buffer*=currentCoeff;
-          *this+=buffer;
-          reductionOccurred=true;
-          break;
-        }
-        if (tempMon.CommutingLeftIndexAroundRightIndexAllowed
-            (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
-        { tempMon.CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer, theRingUnit, theRingZero);
-          buffer*=currentCoeff;
-          *this+=buffer;
-          reductionOccurred=true;
-          break;
-        }
-      }
-    if(!reductionOccurred)
-      outpuT.AddMonomial(tempMon, currentCoeff);
-  }
-  *this=outpuT;
-}
-
-template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheRight
 (const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output)
 { ElementUniversalEnveloping<CoefficientType> tempElt, tempElt2;
@@ -6308,25 +6137,6 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
 }
 
 template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::CommutingLeftIndexAroundRightIndexAllowed
-(CoefficientType& theLeftPower, int leftGeneratorIndex,
- CoefficientType& theRightPower, int rightGeneratorIndex)
-{ if (!theLeftPower.IsSmallInteger())
-    return false;
-  if(theRightPower.IsSmallInteger())
-    return true;
-  int numPosRoots=this->GetOwner().theWeyl.RootsOfBorel.size;
-  int theDimension= this->GetOwner().theWeyl.CartanSymmetric.NumRows;
-  if(rightGeneratorIndex>= numPosRoots && rightGeneratorIndex<numPosRoots+theDimension)
-  { if (this->GetOwner().theLiebrackets.elements[leftGeneratorIndex][rightGeneratorIndex].IsEqualToZero())
-      return true;
-    else
-      return false;
-  } else
-    return true;
-}
-
-template <class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfTheyCommute
 (int theLeftIndex)
 { if (theLeftIndex>= this->generatorsIndices.size-1)
@@ -6355,14 +6165,6 @@ bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGener
       this->Powers[current]=this->Powers[next];
     }
   return result;
-}
-
-template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::CommutingRightIndexAroundLeftIndexAllowed
-(CoefficientType& theLeftPower, int leftGeneratorIndex,
- CoefficientType& theRightPower, int rightGeneratorIndex)
-{ return this->CommutingLeftIndexAroundRightIndexAllowed
-(theRightPower, rightGeneratorIndex, theLeftPower, leftGeneratorIndex);
 }
 
 template <class CoefficientType>

@@ -3747,13 +3747,13 @@ bool Data::ConvertToType<ElementUniversalEnveloping<RationalFunction> >
   RationalFunction RFOne, RFZero;
   RFOne.MakeOne(numVars, this->owner->theGlobalVariableS);
   RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
-  std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
+//  std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
   switch (this->type)
   { case Data::typeElementSSalgebra:
-      std::cout << " " << this->ElementToString() << " converted to: ";
+//      std::cout << " " << this->ElementToString() << " converted to: ";
       output.AssignElementLieAlgebra
       (this->GetEltSimpleLieAlgebra(), *initializingElement.owners, initializingElement.indexInOwners, RFOne, RFZero);
-      std::cout << "<br>" << output.ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
+//      std::cout << "<br>" << output.ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
       return true;
     case Data::typeRational:
       RFOne*=this->GetValuE<Rational>();
@@ -3762,7 +3762,7 @@ bool Data::ConvertToType<ElementUniversalEnveloping<RationalFunction> >
     case Data::typeElementUE:
       return true;
     default:
-      std::cout << " No conversion found.";
+//      std::cout << " No conversion found.";
       return false;
   }
 }
@@ -3771,7 +3771,7 @@ template <>
 bool Data::ConvertToType<Polynomial<Rational> >
 (Polynomial<Rational> & output,
   const Polynomial<Rational>& initializingElement)const
-{ std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
+{// std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
   switch (this->type)
   { case Data::typeRational:
       output.MakeConst(this->GetValuE<Rational>());
@@ -3791,7 +3791,7 @@ bool Data::ConvertToType<Polynomial<Rational> >
     case Data::typeElementUE:
       return true;
     default:
-      std::cout << " No conversion found.";
+//      std::cout << " No conversion found.";
       return false;
   }
 }

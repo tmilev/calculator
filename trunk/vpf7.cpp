@@ -1327,6 +1327,7 @@ void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
         currentWordList[i].HWTAAbilinearForm
         (currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
         ;
+//        std::cout << "[" << currentWordList[i].ElementToString() << ", " << currentWordList[j].ElementToString() << "]=" <<currentBF.elements[i][j].ElementToString();
         if (i!=j)
           currentBF.elements[j][i]=currentBF.elements[i][j];
       }
@@ -1552,12 +1553,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseField, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
   if (outputReport!=0)
-    for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
-    { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[i];
-      Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[i];
+    for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
+    { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
+      Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[k];
       if (outputReport!=0)
-      { monomialDetailStream << "<hr>weight in simple coords: " << this->theModuleWeightsSimpleCoords[i].ElementToString();
-        List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[i];
+      { monomialDetailStream << "<hr>weight in simple coords: " << this->theModuleWeightsSimpleCoords[k].ElementToString();
+        List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
         for (int i=0; i<currentList.size; i++)
         { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
           monomialDetailStream << "<br>monomial " << i+1 << ": " << currentElt.ElementToString(&theGlobalVariables.theDefaultLieFormat);
@@ -2143,7 +2144,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   tempElt1.MakeZero(*this->owners, this->indexInOwners);
   tempElt1.AddMonomial(*this, theRingUnit);
   tempElt2.MakeZero(*this->owners, this->indexInOwners);
-  tempElt2.AddMonomial(*this, theRingUnit);
+  tempElt2.AddMonomial(right, theRingUnit);
   return tempElt1.HWTAAbilinearForm
   (tempElt2, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
 }
@@ -3424,9 +3425,9 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
   CoefficientType currentCoeff;
   outpuT.MakeZero(*this->owners, this->indexInOwners);
   for (; this->size>0; )
-  { PolynomialOutputFormat tempFormat;
-    tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-    std::cout << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ElementToString(&tempFormat);
+  {// PolynomialOutputFormat tempFormat;
+    //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+    //std::cout << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ElementToString(&tempFormat);
     this->PopMonomial(this->size-1, tempMon, currentCoeff);
     bool reductionOccurred=false;
     for (int i=0; i<tempMon.generatorsIndices.size-1; i++)
@@ -3455,7 +3456,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
       }
     if(!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
-    std::cout << "-<br>(" << (*this+outpuT).ElementToString(&tempFormat) << ")<br>(this should simplify to zero).";
+//    std::cout << "-<br>(" << (*this+outpuT).ElementToString(&tempFormat) << ")<br>(this should simplify to zero).";
   }
   *this=outpuT;
 }

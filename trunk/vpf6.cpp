@@ -118,7 +118,7 @@ DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetValuE
 template < >
 ElementSemisimpleLieAlgebra & Data::GetValuE()const
 { if (this->type!=this->typeElementSSalgebra)
-  { std::cout << "This is a programming error. Data::GetEltSimpleLieAlgebra is called on Data of type "
+  { std::cout << "This is a programming error. Data::GetValue_ElementSemisimpleLieAlgebra is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
     << " line " << __LINE__ << ". ";
     assert(false);
@@ -136,8 +136,8 @@ ElementSemisimpleLieAlgebra & Data::GetValuE()const
 
 template < >
 DataOfExpressions<RationalFunction> & Data::GetValuE()const
-{ if (this->type!=this->typeElementSSalgebra)
-  { std::cout << "This is a programming error. Data::GetValue<DataOfExpressions<RationalFunction> > is called on Data of type "
+{ if (this->type!=this->typeRationalFunction)
+  { std::cout << "This is a programming error. Data::GetValue_DataOfExpressions_RationalFunction is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
     << " line " << __LINE__ << ". ";
     assert(false);
@@ -156,7 +156,7 @@ DataOfExpressions<RationalFunction> & Data::GetValuE()const
 template < >
 RationalFunction& Data::GetValuE()const
 { if (this->type!=this->typeElementSSalgebra)
-  { std::cout << "This is a programming error. Data::GetValue<RationalFunction > is called on Data of type "
+  { std::cout << "This is a programming error. Data::GetValue_RationalFunction is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
     << " line " << __LINE__ << ". ";
     assert(false);
@@ -333,6 +333,8 @@ std::string Data::ElementToString(std::stringstream* comments)const
       out << this->owner->theObjectContainer.theLieAlgebraElements[this->theIndex]
       .ElementToString(&this->owner->theGlobalVariableS->theDefaultLieFormat);
       return out.str();
+    case Data::typeRationalFunction:
+      return this->GetValuE<DataOfExpressions<RationalFunction> >().ElementToString();
     case Data::typeRational:
       return this->GetValuE<Rational>().ElementToString();
     case Data::typePoly:
@@ -410,7 +412,7 @@ SemisimpleLieAlgebra* Data::GetAmbientSSLieAlgebra()const
     case Data::typeElementSSalgebra:
       return &this->GetEltSimpleLieAlgebra().GetOwner();
     case Data::typeElementUE:
-      return &this->GetUE().GetOwner();
+      return &this->GetUE().theBuiltIn.GetOwner();
     default: return 0;
   }
 }
@@ -433,8 +435,8 @@ SemisimpleLieAlgebra& Data::GetSSLieAlgebra()const
   return this->owner->theObjectContainer.theLieAlgebras[this->theIndex];
 }
 
-ElementUniversalEnveloping<RationalFunction>& Data::GetUE()const
-{ return this->GetValuE<ElementUniversalEnveloping<RationalFunction> >();
+DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetUE()const
+{ return this->GetValuE<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >();
 }
 
 Data Data::operator*(const Data& right)
@@ -518,6 +520,13 @@ void Data::MakeRational
   this->theIndex=theBoss.theObjectContainer.theRationals.AddNoRepetitionOrReturnIndexFirst(inputRational);
 }
 
+void Data::MakeRF
+(CommandList& theBoss, const DataOfExpressions<RationalFunction>& inputRF)
+{ this->owner=&theBoss;
+  this->type=this->typeRationalFunction;
+  this->theIndex=theBoss.theObjectContainer.theRFs.AddNoRepetitionOrReturnIndexFirst(inputRF);
+}
+
 void Data::MakeUE
 (CommandList& theBoss, const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& inputUE)
 { this->theIndex= theBoss.theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(inputUE);
@@ -543,6 +552,7 @@ std::string Data::ElementToStringDataType() const
     case Data::typeRational:  return "Rational";
     case Data::typePoly: return "Polynomial";
     case Data::typeError:  return "Error";
+    case Data::typeRationalFunction: return "RationalFunction";
     case Data::typeElementUE: return "ElementUniversalEnveloping";
     case Data::typeEltTensorGenVermasOverRF: return "ElementOfTensorProductOfGeneralizedVermaModules";
     case Data::typeEltSumGenVermas: return "ElementSumGeneralizedVermaModules";
@@ -703,6 +713,13 @@ void Expression::MakePoly
 (const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars)
 { Data tempData;
   tempData.MakePoly(newBoss, inputData);
+  this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
+}
+
+void Expression::MakeRF
+(const DataOfExpressions<RationalFunction>& inputData, CommandList& newBoss, int inputIndexBoundVars)
+{ Data tempData;
+  tempData.MakeRF(newBoss, inputData);
   this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
 }
 
@@ -1427,36 +1444,38 @@ bool CommandList::fHWTAABF
   for (int i=0; i<weightData.size; i++)
   { weight[i]=weightData[i].theBuiltIn;
   }
-  ElementUniversalEnveloping<RationalFunction>& leftElt= leftD.GetUE();
-  ElementUniversalEnveloping<RationalFunction>& rightElt= rightD.GetUE();
-  int numVars=MathRoutines::Maximum(leftElt.GetNumVars(), rightElt.GetNumVars());
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt= leftD.GetUE();
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt= rightD.GetUE();
+  int numVars=MathRoutines::Maximum(leftElt.theBuiltIn.GetNumVars(), rightElt.theBuiltIn.GetNumVars());
+  std::cout << "<b>Fix the setnumvariables use!</b>";
   for (int i=0; i<weight.size; i++)
     numVars= MathRoutines::Maximum(weight[i].GetNumVars(), numVars);
-  leftElt.SetNumVariables(numVars);
-  rightElt.SetNumVariables(numVars);
+  leftElt.theBuiltIn.SetNumVariables(numVars);
+  rightElt.theBuiltIn.SetNumVariables(numVars);
   for (int i=0; i<weight.size; i++)
     weight[i].SetNumVariables(numVars);
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(numVars, theCommands.theGlobalVariableS);
   theRingUnit.MakeOne(numVars, theCommands.theGlobalVariableS);
-  Vector<RationalFunction > theHW;
+  Vector<RationalFunction> theHW;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
   out << "Highest weight in fundamental coords: " << weight.ElementToString() << "<br>";
   theHW.SetSize(weight.size);
-  leftElt.GetOwner().OrderSSalgebraForHWbfComputation();
+  leftElt.theBuiltIn.GetOwner().OrderSSalgebraForHWbfComputation();
   for (int i=0; i<weight.size; i++)
   { theHW[i]=weight[i];
     theHW[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
   }
-  RationalFunction output;
-  if(!leftElt.HWTAAbilinearForm(rightElt, output, &theHW, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, comments))
-  { theExpression.SetError("Error: couldnt compute Shapovalov form.");
+  DataOfExpressions<RationalFunction> output;
+  if(!leftElt.theBuiltIn.HWTAAbilinearForm(rightElt.theBuiltIn, output.theBuiltIn, &theHW, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, comments))
+  { theExpression.SetError("Error: couldn't compute Shapovalov form.");
     return true;
   }
-  std::cout << " and the big bad result is " << output.ElementToString();
+  theExpression.MakeRF(output, theCommands, inputIndexBoundVars);
+//  std::cout << " and the big bad result is " << output.ElementToString();
 
-  return false;
+  return true;
 }
 
 bool CommandList::fHWV

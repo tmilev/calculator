@@ -4003,8 +4003,8 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
     //basisChange.ComputeDebugString();
   }
   simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
-  std::cout << "<br>simple basis: " << simpleBasis.ElementToString();
-  std::cout << "<br>to be converted: " << input.ElementToString();
+//  std::cout << "<br>simple basis: " << simpleBasis.ElementToString();
+//  std::cout << "<br>to be converted: " << input.ElementToString();
   coordsInNewBasis.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);

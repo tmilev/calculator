@@ -50,6 +50,9 @@ public:
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
 ;
+  void MakeRF
+(CommandList& theBoss, const DataOfExpressions<RationalFunction>& inputRF)
+;
   template<class dataType>
   void Make(CommandList& theBoss, const dataType& input)
   ;
@@ -72,7 +75,7 @@ public:
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)
  ;
-  ElementUniversalEnveloping<RationalFunction>& GetUE()const;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& GetUE()const;
   SemisimpleLieAlgebra* GetAmbientSSLieAlgebra()const;
   template<class theType>
   bool IsOfType()const;
@@ -203,6 +206,7 @@ class Expression
   (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakePoly(const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars);
+  void MakeRF(const DataOfExpressions<RationalFunction>& inputData, CommandList& newBoss, int inputIndexBoundVars);
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)

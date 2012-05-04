@@ -271,6 +271,9 @@ FunctionToMatrix{}(B,8,8)";*/
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3;UE{}(g_{-1}^{2}g_{-2}g_{-3})";
+//inputWeylString="A";
+//inputRankString="2";
+//civilizedInput=" irreducibleRep(1,1)";
   if (inputWeylString=="Calculator")
   { std::stringstream tempStreamXX;
     static_html4(tempStreamXX);
@@ -332,6 +335,8 @@ FunctionToMatrix{}(B,8,8)";*/
   }
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   ANNOYINGSTATISTICS;
+  std::cout << "<b>Some functions are down due to a ground-up reworking of the C++ code. "
+  << "They will be back online as soon as possible. </b>";
 //  civilizedInput="(x_1\\mapsto 0: g_{-1}g_{-2}g_{-3})";
 //  civilizedInput="splitFDPartGenVermaOverLeviParabolic((0, 1,1),(1,0,0), (1,0,1))";
 //  civilizedInput="h_2 v((1,0),(0,0))";
@@ -352,7 +357,8 @@ FunctionToMatrix{}(B,8,8)";*/
 
 //  civilizedInput="gTwoInBthreeMultsParabolic((2,0,0), (1,0,0) )";
 //  civilizedInput="splitIrrepOverLeviParabolic((1,1),(0,1))";
-//  theParser.DefaultWeylLetter='G';
+//  civilizedInput=" irreducibleRep(1,1)";
+//  theParser.DefaultWeylLetter='A';
 //  theParser.DefaultWeylRank=2;
 
 //  civilizedInput="splitCharOverLeviParabolic(char(1,1),(0,1))";

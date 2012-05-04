@@ -3654,6 +3654,12 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
 (char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
 { this->owners=&ownerOfAlgebras;
   this->owners->SetSize(2);
+  this->theDomain().indexInOwner=0;
+  this->theDomain().owner=this->owners;
+  this->theRange().indexInOwner=1;
+  this->theRange().owner=this->owners;
+  this->theDomain().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
+  this->theRange().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
   this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
   this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
@@ -3686,9 +3692,14 @@ void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables
   owner.theAlgebras.SetSize(2);
   owner.DefaultWeylLetter='B';
   owner.DefaultWeylRank=3;
-  owner.theHmm.theRange().ComputeChevalleyConstantS( theGlobalVariables);
-  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theDomain().owner=this->owners;
+  this->theDomain().indexInOwner=0;
+  this->theRange().owner=this->owners;
+  this->theRange().indexInOwner=1;
+  this->owners->TheObjects[0].theWeyl.MakeG2();
+  this->owners->TheObjects[1].theWeyl.MakeArbitrary('B',3);
   this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
   this->imagesSimpleChevalleyGenerators.SetSize(4);
   (owner.ParseAndCompute("g_2", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[0]);
   (owner.ParseAndCompute("g_1+g_3", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[1]);
@@ -4912,7 +4923,8 @@ int SemisimpleLieAlgebraOrdered::GetDisplayIndexFromGeneratorIndex(int Generator
 
 void SemisimpleLieAlgebraOrdered::init
 (List<ElementSemisimpleLieAlgebra>& inputOrder, SemisimpleLieAlgebra& owner, GlobalVariables& theGlobalVariables)
-{ if (inputOrder.size!=owner.GetNumGenerators())
+{ return;
+  if (inputOrder.size!=owner.GetNumGenerators())
     return;
   this->theOwner=owner;
   this->theOrder=inputOrder;

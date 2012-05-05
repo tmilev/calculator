@@ -50,11 +50,11 @@ ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
 
 template <class dataType >
 std::string DataOfExpressions<dataType>::ElementToString()const
-{ PolynomialOutputFormat tempFormat;
-  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+{ FormatExpressions tempFormat;
 //  this->theBuiltIn.ElementToString();
+  tempFormat.polyAlphabeT.SetSize(this->VariableImages.size);
   for (int i=0; i<this->VariableImages.size; i++)
-    tempFormat.SetLetterIndex(this->VariableImages[i].ElementToString(), i);
+    tempFormat.polyAlphabeT[i]=this->VariableImages[i].ElementToString();
   return this->theBuiltIn.ElementToString(&tempFormat);
 }
 
@@ -3813,4 +3813,52 @@ bool Data::ConvertToType<Polynomial<Rational> >
 //      std::cout << " No conversion found.";
       return false;
   }
+}
+
+void CommandList::InitJavaScriptDisplayIndicator()
+{ std::stringstream output;
+  output << " <!>\n";
+  output << " <script type=\"text/javascript\"> \n";
+  output << " var timeOutCounter=0;\n";
+  output << " window.setTimeout(\"progressReport()\",1000);\n";
+  output << " var newReportString=\"\";\n";
+  output << " function progressReport()\n";
+  output << " { timeOutCounter++;\n";
+  output << "   var oRequest = new XMLHttpRequest();\n";
+  output << "   var sURL  = \"" << this->indicatorReportFileNameDisplay << "\";\n";
+  output << "   oRequest.open(\"GET\",sURL,false);\n";
+  output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
+  output << "   oRequest.send(null)\n";
+  output << "   if (oRequest.status==200)\n";
+  output << "   { newReportString= oRequest.responseText;\n";
+  output << "     el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+  output << "   }\n";
+  output << "   window.setTimeout(\"progressReport()\",1000);\n";
+  output << " }\n";
+  output << " </script>\n";
+  output << " <div id=\"idProgressReport\">\n";
+  output << " </div>\n";
+  output << " \n";
+  output << " \n";
+  this->javaScriptDisplayingIndicator=output.str();
+}
+
+void CommandList::initDefaultFolderAndFileNames
+  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
+{ this->PhysicalPathServerBase=inputPathBinaryBaseIsFolderBelow+"../";
+  this->DisplayPathServerBase=inputDisplayPathBase;
+
+  this->PhysicalPathOutputFolder=this->PhysicalPathServerBase+"output/";
+  this->DisplayPathOutputFolder= this->DisplayPathServerBase + "output/";
+
+  this->userLabel=scrambledIP;
+
+  this->PhysicalNameDefaultOutput=this->PhysicalPathOutputFolder+"default"+this->userLabel+"output";
+  this->DisplayNameDefaultOutputNoPath="default"+this->userLabel+"output";
+  this->DisplayNameDefaultOutput=this->DisplayPathOutputFolder+this->DisplayNameDefaultOutputNoPath;
+
+  this->indicatorFileName=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
+  this->indicatorFileNameDisplay=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
+  this->indicatorReportFileName=this->PhysicalPathOutputFolder +"report"+ this->userLabel+ ".txt" ;
+  this->indicatorReportFileNameDisplay=this->DisplayPathOutputFolder+"report"+this->userLabel + ".txt" ;
 }

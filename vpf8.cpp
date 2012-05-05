@@ -190,7 +190,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->NonIntegralOriginModificationBasisChanged="(1/2,1/2)";
   Matrix<Rational>  theProjectionBasisChanged;
   Vector<Rational> startingWeight, projectedWeight;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   assert(false);
 //  SSalgebraModuleOld tempM;
   std::stringstream tempStream;
@@ -309,11 +309,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
   Polynomial<Rational>  polyZero;
   polyZero.MakeZero(tempVect.size);
-  theFormat.alphabet[0]="x_1";
-  theFormat.alphabet[1]="x_2";
-  theFormat.alphabet[2]="y_1";
-  theFormat.alphabet[3]="y_2";
-  theFormat.alphabet[4]="y_3";
+  theFormat.polyAlphabeT.SetSize(5);
+  theFormat.polyAlphabeT[0]="x_1";
+  theFormat.polyAlphabeT[1]="x_2";
+  theFormat.polyAlphabeT[2]="y_1";
+  theFormat.polyAlphabeT[3]="y_2";
+  theFormat.polyAlphabeT[4]="y_3";
   tempRoot=theSubgroup.GetRho();
   this->theLinearOperators[0].ActOnVectorColumn(tempRoot);
   this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
@@ -490,7 +491,7 @@ void Selection::operator=(const Vector<Rational>& other)
 void GeneralizedVermaModuleCharacters::ComputeQPsFromChamberComplex
 (GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   Vector<Rational> tempRoot;
   CGI::OpenFileCreateIfNotPresent(this->theMultiplicitiesMaxOutputReport2, "/home/todor/math/vectorpartition/trunk/ExtremaPolys.txt", false, true, false);
   this->thePfs.initFromRoots(this->GmodKNegWeightsBasisChanged, theGlobalVariables);
@@ -578,7 +579,7 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
     return theNode.SetError(theNode.errorDimensionProblem);
   ConeComplex tempComplex;
   tempComplex.InitFromDirectionsAndRefine(tempRoots, theGlobalVariables);
-  PolynomialOutputFormat tempFormat;
+  FormatExpressions tempFormat;
   theNode.outputString=tempComplex.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, tempFormat);
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -617,12 +618,13 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
 (GlobalVariables& theGlobalVariables)
 { assert(this->theMultiplicities.size== this->projectivizedChambeR.size);
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
-  theFormat.alphabet[0]="x_1";
-  theFormat.alphabet[1]="x_2";
-  theFormat.alphabet[2]="y_1";
-  theFormat.alphabet[3]="y_2";
-  theFormat.alphabet[4]="y_3";
+  FormatExpressions theFormat;
+  theFormat.polyAlphabeT.SetSize(5);
+  theFormat.polyAlphabeT[0]="x_1";
+  theFormat.polyAlphabeT[1]="x_2";
+  theFormat.polyAlphabeT[2]="y_1";
+  theFormat.polyAlphabeT[3]="y_2";
+  theFormat.polyAlphabeT[4]="y_3";
   out << "Number chambers: " << projectivizedChambeR.size << " of them " << this->numNonZeroMults << " non-zero.";
   int numInequalities=0;
   for (int i=0; i<this->projectivizedChambeR.size; i++)
@@ -798,7 +800,7 @@ bool PiecewiseQuasipolynomial::MakeVPF
   this->theBuffers=& theGlobalVariables;
   this->NumVariables=theRoots.GetDim();
   partFractions theFracs;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   std::stringstream out;
   std::string whatWentWrong;
   if (!theFracs.ArgumentsAllowed(theRoots, whatWentWrong, theGlobalVariables))
@@ -941,7 +943,7 @@ void PiecewiseQuasipolynomial::TranslateArgument(Vector<Rational>& translateToBe
 
 std::string PiecewiseQuasipolynomial::ElementToString(bool useLatex, bool useHtml)
 { std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   for (int i=0; i<this->theProjectivizedComplex.size; i++)
   { Cone& currentCone= this->theProjectivizedComplex[i];
     QuasiPolynomial& currentQP=this->theQPs[i];
@@ -966,7 +968,7 @@ std::string PiecewiseQuasipolynomial::ElementToString(bool useLatex, bool useHtm
 void PiecewiseQuasipolynomial::DrawMe
 (DrawingVariables& theDrawingVars, int numLatticePointsPerDim, Cone* RestrictingChamber,
  Vector<Rational>* distinguishedPoint)
-{ PolynomialOutputFormat theFormat;
+{ FormatExpressions theFormat;
   Vectors<Rational> latticePoints;
   HashedList<Vector<Rational> > theLatticePointsFinal;
   List<int> theLatticePointColors;
@@ -1053,7 +1055,7 @@ Rational PiecewiseQuasipolynomial::EvaluateInputProjectivized(const Vector<Ratio
       { static bool firstFail=true;
         if (!firstFail)
           break;
-        PolynomialOutputFormat tempFormat;
+        FormatExpressions tempFormat;
         std::cout << "<hr>Error!!! Failed on chamber " << theIndex+1 << " and " << i+1;
         std::cout << "<br>Evaluating at point " << AffineInput.ElementToString() << "<br>";
         std::cout << "<br>Chamber " << theIndex+1 << ": "
@@ -1191,7 +1193,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   WeylGroup tmpWeyl;
   tmpWeyl.MakeAn(2);
   drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1; drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
   drawOps.theBuffer.BasisProjectionPlane[0][1][0]=1;  drawOps.theBuffer.BasisProjectionPlane[0][1][1]=1;
   drawOps.theBuffer.ModifyToOrthonormalNoShiftSecond
@@ -1787,7 +1789,7 @@ int ParserNode::EvaluateSliceCone
     return theNode.errorImplicitRequirementNotSatisfied;
   }
   ConeComplex theComplex;
-  PolynomialOutputFormat tempFormat;
+  FormatExpressions tempFormat;
   theCone.SliceInDirection(theDirection, theComplex, theGlobalVariables);
   theNode.outputString=theComplex.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, tempFormat);
 //  theNode.outputString=theComplex.ElementToString(false, true);
@@ -1830,7 +1832,7 @@ void Lattice::ApplyLinearMap(Matrix<Rational> & theMap, Lattice& output)
 }
 
 std::string ConeLatticeAndShiftMaxComputation::ElementToString
-  (PolynomialOutputFormat* theFormat)
+  (FormatExpressions* theFormat)
 { std::stringstream out;
   out << "<hr>Resulting lattice: " << this->theFinalRougherLattice.ElementToString(true, false) << "<hr><hr>";
 /*  if (this->complexStartingPerRepresentative.size>0)
@@ -1977,7 +1979,7 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep5
 void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep1
     (Controller& thePauseController, bool assumeNewConesHaveSufficientlyManyProjectiveVertices, GlobalVariables& theGlobalVariables)
 { //std::cout << "<hr>starting complex: " << this->ElementToString();
-  PolynomialOutputFormat tempFormat;
+  FormatExpressions tempFormat;
   for (; this->numProcessedNonParam<this->numNonParaM; this->numProcessedNonParam++)
   { while(this->theConesLargerDim.size>0)
     { ConeLatticeAndShift& currentCLS=*this->theConesLargerDim.LastObject();
@@ -2056,7 +2058,7 @@ void ConeLatticeAndShift::FindExtremaInDirectionOverLatticeOneNonParam
  List<ConeLatticeAndShift>& outputAppend,
  GlobalVariables& theGlobalVariables)
 { Vector<Rational> direction;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   int theDimProjectivized=this->GetDimProjectivized();
   Matrix<Rational>  theProjectionLatticeLevel;
   Matrix<Rational>  theProjectionAffine;
@@ -2673,7 +2675,7 @@ void ConeComplex::initFromCones
     }
 }
 
-std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat)
+std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, FormatExpressions& theFormat)
 { std::stringstream out;
   if (this->flagIsTheZeroCone)
     out << "The cone is the zero cone.";
@@ -2705,7 +2707,7 @@ std::string Cone::ElementToString(bool useLatex, bool useHtml, bool PrepareMathR
 
 std::string ConeComplex::ElementToString(bool useLatex, bool useHtml)
 { std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   out << "Number of chambers: " << this->size;
   if (useHtml)
     out << "<br>";
@@ -2748,7 +2750,7 @@ int ParserNode::EvaluateGroebner
   std::stringstream out;
   out << "<br>Starting basis: ";
   std::stringstream out1, out2;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   for(int i=0; i<inputBasis.size; i++)
     out1 << inputBasis.TheObjects[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out1.str());
@@ -2771,7 +2773,7 @@ void RationalFunction::GetRelations
   int numStartingGenerators=theGenerators.size;
   int numStartingVariables= theGenerators.TheObjects[0].NumVars;
   Polynomial<Rational>  tempP;
-  PolynomialOutputFormat tempFormat;
+  FormatExpressions tempFormat;
   for (int i=0; i<numStartingGenerators; i++)
   { Polynomial<Rational> & currentPoly=theGroebnerBasis.TheObjects[i];
     currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
@@ -2818,14 +2820,14 @@ int ParserNode::EvaluateRelations
   RationalFunction::GetRelations(outputRelations, theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting elements:";
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   std::stringstream out3;
   for(int i=0; i<inputBasis.size; i++)
     out3 << " u_{" << i+1+theNode.impliedNumVars << "}:=" << inputBasis[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathSpanFromLatexFormula(out3.str());
   out << "<br>Resulting relations:";
   std::stringstream out2;
-  theFormat.MakeAlphabetArbitraryWithIndex("u", "v");
+  theFormat.polyDefaultLetter="u";
   for(int i=0; i<outputRelations.size; i++)
     out2 << outputRelations.TheObjects[i].ElementToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathSpanFromLatexFormula(out2.str());
@@ -2842,7 +2844,7 @@ int ParserNode::EvaluateCone
     return theNode.SetError(theNode.errorDimensionProblem);
   Cone& currentCone=theNode.theCone.GetElement();
   currentCone.CreateFromNormals(theNormals, theGlobalVariables);
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.outputString=currentCone.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, theFormat);
   theNode.ExpressionType=theNode.typeCone;
   return theNode.errorNoError;
@@ -2856,7 +2858,7 @@ int ParserNode::EvaluateConeFromVertices
     return theNode.SetError(theNode.errorDimensionProblem);
   Cone& currentCone=theNode.theCone.GetElement();
   currentCone.CreateFromVertices(theVertices, theGlobalVariables);
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.outputString=currentCone.DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, theFormat);
   theNode.ExpressionType=theNode.typeCone;
   return theNode.errorNoError;
@@ -3411,7 +3413,7 @@ void QuasiPolynomial::operator+=(const QuasiPolynomial& other)
     this->AddLatticeShift(tempQP.valueOnEachLatticeShift.TheObjects[i], tempQP.LatticeShifts.TheObjects[i]);
 }
 
-std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, PolynomialOutputFormat* thePolyFormat)
+std::string QuasiPolynomial::ElementToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat)
 { std::stringstream out;
   //if (useHtml)
 //  out << "the lattice: " << this->AmbientLatticeReduced.ElementToString(useHtml, useLatex);
@@ -3788,7 +3790,7 @@ int ParserNode::EvaluatePartialFractions
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   std::string tempS;
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.thePFs.GetElement().ElementToString(tempS, theGlobalVariables, theFormat);
   out << "<div class=\"math\">" << tempS << "</div>";
   theNode.outputString=out.str();
@@ -3816,7 +3818,7 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
 }
 
 std::string partFractions::DoTheFullComputationReturnLatexFileString
-(GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+(GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml)
 { std::string whatWentWrong;
   if (!this->ArgumentsAllowed(toBePartitioned, whatWentWrong, theGlobalVariables))
     return whatWentWrong;
@@ -3897,7 +3899,7 @@ int ParserNode::EvaluateVPF
   Vectors<Rational> toBePartitioned; int tempDim;
   theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim);
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
 //  theFormat.alphabet.TheObjects[0]="t_1";
 //  theFormat.alphabet.TheObjects[1]="t_2";
   PiecewiseQuasipolynomial& thePQP=theNode.thePiecewiseQP.GetElement();
@@ -3927,7 +3929,7 @@ int ParserNode::EvaluateVectorPFIndicator
   if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, toBePartitioned, tempDim))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
 //  theFormat.alphabet.TheObjects[0]="t_1";
 //  theFormat.alphabet.TheObjects[1]="t_2";
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=50;
@@ -5154,7 +5156,7 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
     return theNode.SetError(theNode.errorDimensionProblem);
   Cone& currentCone=coneNode.theCone.GetElement();
   currentCone.SolveLPolyEqualsZeroIAmProjective(polyNode.polyValue.GetElement(), theNode.theCone.GetElement(), theGlobalVariables);
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.outputString=theNode.theCone.GetElement().ElementToString(false, true, theFormat);
   return theNode.errorNoError;
 }
@@ -5162,7 +5164,7 @@ int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
 int ParserNode::EvaluateDrawConeAffine
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { theGlobalVariables.theDrawingVariables.theBuffer.init();
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.outputString= theNode.owner->TheObjects[theArgumentList[0]].theCone.GetElement().DrawMeToHtmlLastCoordAffine(theGlobalVariables.theDrawingVariables, theFormat);
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -5171,7 +5173,7 @@ int ParserNode::EvaluateDrawConeAffine
 int ParserNode::EvaluateDrawConeProjective
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { theGlobalVariables.theDrawingVariables.theBuffer.init();
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   theNode.outputString= theNode.owner->TheObjects[theArgumentList[0]].theCone.GetElement().DrawMeToHtmlProjective(theGlobalVariables.theDrawingVariables, theFormat);
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -5195,34 +5197,6 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
   out << "Included Vector<Rational> " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
   *theGlobalVariables.theIndicatorVariables.ProgressReportStrings.LastObject()=out.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
-void Parser::InitJavaScriptDisplayIndicator()
-{ std::stringstream output;
-  output << " <!>\n";
-  output << " <script type=\"text/javascript\"> \n";
-  output << " var timeOutCounter=0;\n";
-  output << " window.setTimeout(\"progressReport()\",1000);\n";
-  output << " var newReportString=\"\";\n";
-  output << " function progressReport()\n";
-  output << " { timeOutCounter++;\n";
-  output << "   var oRequest = new XMLHttpRequest();\n";
-  output << "   var sURL  = \"" << this->indicatorReportFileNameDisplay << "\";\n";
-  output << "   oRequest.open(\"GET\",sURL,false);\n";
-  output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
-  output << "   oRequest.send(null)\n";
-  output << "   if (oRequest.status==200)\n";
-  output << "   { newReportString= oRequest.responseText;\n";
-  output << "     el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
-  output << "   }\n";
-  output << "   window.setTimeout(\"progressReport()\",1000);\n";
-  output << " }\n";
-  output << " </script>\n";
-  output << " <div id=\"idProgressReport\">\n";
-  output << " </div>\n";
-  output << " \n";
-  output << " \n";
-  this->javaScriptDisplayingIndicator=output.str();
 }
 
 int ParserNode::EvaluatePrintRootSAsAndSlTwos
@@ -5396,14 +5370,15 @@ std::string ParserFunction::ElementToString(bool useHtml, bool useLatex, Parser&
 
 std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& theGlobalVariables)
 { std::stringstream out;
-  PolynomialOutputFormat theFormat;
+  FormatExpressions theFormat;
   int tempI=0;
   Vector<Rational> tempRoot;
-  theFormat.alphabet.TheObjects[tempI]="x_1"; tempI++;
-  theFormat.alphabet.TheObjects[tempI]="x_2"; tempI++;
-  theFormat.alphabet.TheObjects[tempI]="y_1"; tempI++;
-  theFormat.alphabet.TheObjects[tempI]="y_2"; tempI++;
-  theFormat.alphabet.TheObjects[tempI]="y_3"; tempI++;
+  theFormat.polyAlphabeT.SetSize(5);
+  theFormat.polyAlphabeT[tempI]="x_1"; tempI++;
+  theFormat.polyAlphabeT[tempI]="x_2"; tempI++;
+  theFormat.polyAlphabeT[tempI]="y_1"; tempI++;
+  theFormat.polyAlphabeT[tempI]="y_2"; tempI++;
+  theFormat.polyAlphabeT[tempI]="y_3"; tempI++;
   out << "\\documentclass{article}\\usepackage{amsmath, longtable, amsfonts, amssymb, verbatim, hyperref}"
   << "\n\\begin{document}\\tiny\n";
   out << "\n The chamber complex + multiplicities follow.\n\n\n"
@@ -5482,7 +5457,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReport(GlobalVariables& the
 }
 
 std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
-  (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
+  (FormatExpressions& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
 { std::stringstream out1;
   std::string tempS1, tempS2;
   Vector<Rational> normalNoConstant;
@@ -5819,7 +5794,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 { this->initFromModuleDecomposition(decompositionDimensions, false, false);
   SelectionWithMaxMultiplicity theSel;
   theSel.initMaxMultiplicity(this->theDimension, theDegree);
-  PolynomialOutputFormat PolyFormatLocal;
+  FormatExpressions PolyFormatLocal;
   outputError="";
   int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
   if (numCycles<=0)
@@ -5941,14 +5916,14 @@ std::string DrawingVariables::GetColorHtmlFromColorIndex(int colorIndex)
   return out.str();
 }
 
-std::string ConeLatticeAndShift::ElementToString(PolynomialOutputFormat& theFormat)
+std::string ConeLatticeAndShift::ElementToString(FormatExpressions& theFormat)
 { std::stringstream out;
   out << this->theProjectivizedCone.ElementToString(false, true, true, true, theFormat);
   out << "<br>Shift+lattice: " << this->theShift.ElementToString() << " + " << this->theLattice.ElementToString();
   return out.str();
 }
 
-std::string SemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFormat)
+std::string SemisimpleLieAlgebra::ElementToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot;
@@ -5977,16 +5952,16 @@ std::string SemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFor
     { if (i==numPosRoots)
       { if (useRootNotation)
           out << "\\hline\\begin{tabular}{c}$"
-          << theFormat->alphabetBases[1] << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
-          << theFormat->alphabetBases[0] << "_{\\alpha},"
-          << theFormat->alphabetBases[0] << "_{-\\alpha}]$\\\\$"
-          << theFormat->alphabetBases[1] << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat->chevalleyHgeneratorLetter << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
+          << theFormat->chevalleyGgeneratorLetter << "_{\\alpha},"
+          << theFormat->chevalleyGgeneratorLetter << "_{-\\alpha}]$\\\\$"
+          << theFormat->chevalleyHgeneratorLetter << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
         else
           out << "\\hline\\begin{tabular}{c}$"
-          << theFormat->alphabetBases[1] << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
-          << theFormat->alphabetBases[0] << "_{i},"
-          << theFormat->alphabetBases[0] << "_{-i}]$\\\\$"
-          << theFormat->alphabetBases[1] << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
+          << theFormat->chevalleyHgeneratorLetter << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
+          << theFormat->chevalleyGgeneratorLetter << "_{i},"
+          << theFormat->chevalleyGgeneratorLetter << "_{-i}]$\\\\$"
+          << theFormat->chevalleyHgeneratorLetter << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
 //        out << "  \\\\\\hline";
         //out << "\\hline generator & corresponding Vector<Rational> space\\\\\\hline";
         i+=theDimension;
@@ -6054,7 +6029,7 @@ std::string SemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFor
   return out.str();
 }
 
-std::string ElementSemisimpleLieAlgebra::ElementToString(PolynomialOutputFormat* theFormat)const
+std::string ElementSemisimpleLieAlgebra::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out; std::string tempS;
   if (this->IsEqualToZero())
     out << "0";
@@ -6669,7 +6644,7 @@ out
 }
 
 std::string ConeComplex::DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { bool isBad=false;
   isBad=this->DrawMeLastCoordAffine(true, theDrawingVariables, theFormat);
   std::stringstream out;
@@ -6685,7 +6660,7 @@ std::string ConeComplex::DrawMeToHtmlLastCoordAffine
 }
 
 std::string ConeComplex::DrawMeToHtmlProjective
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { bool isGood=true;
   isGood=this->DrawMeProjective(0, true, theDrawingVariables, theFormat);
   std::stringstream out;
@@ -6701,7 +6676,7 @@ std::string ConeComplex::DrawMeToHtmlProjective
 }
 
 bool ConeComplex::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { bool result=true;
   if (InitDrawVars)
     theDrawingVariables.theBuffer.initDimensions(this->GetDim()-1, 1);
@@ -6722,7 +6697,7 @@ bool ConeComplex::DrawMeLastCoordAffine
 }
 
 bool ConeComplex::DrawMeProjective
-(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(Vector<Rational>* coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { bool result=true;
   Vector<Rational> tempRoot;
   Vectors<Rational> tempRoots;
@@ -6752,7 +6727,7 @@ bool ConeComplex::DrawMeProjective
 }
 
 bool Cone::DrawMeLastCoordAffine
-(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat,
+(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat,
  int ChamberWallColor)
 { Vector<Rational> ZeroRoot;
   ZeroRoot.MakeZero(this->GetDim()-1);
@@ -6805,7 +6780,7 @@ bool Cone::DrawMeLastCoordAffine
 }
 
 std::string Cone::DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { if (this->flagIsTheZeroCone)
     return "The cone is empty.";
   if (this->Normals.size<1)
@@ -6825,7 +6800,7 @@ std::string Cone::DrawMeToHtmlLastCoordAffine
 }
 
 bool Cone::DrawMeProjective
-(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(Vector<Rational>* coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { Vector<Rational> ZeroRoot, coordCenter;
   ZeroRoot.MakeZero(this->GetDim());
   if (coordCenterTranslation==0)
@@ -6864,7 +6839,7 @@ bool Cone::DrawMeProjective
   return true;
 }
 
-std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+std::string Cone::DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 { if (this->flagIsTheZeroCone)
     return "The cone is the zero cone (i.e. contains only the origin).";
   if (this->Normals.size<=0)
@@ -7314,7 +7289,7 @@ void WeylGroup::DrawRootSystem
   if (drawWeylChamber)
   { Cone theWeylChamber;
     this->GetWeylChamber(theWeylChamber, theGlobalVariables);
-    PolynomialOutputFormat tempFormat;
+    FormatExpressions tempFormat;
     theWeylChamber.DrawMeProjective(0, false, outputDV, tempFormat);
   }
   theGlobalVariables.theDrawingVariables.DefaultHtmlHeight=600;
@@ -8674,7 +8649,7 @@ void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariabl
 void RationalFunction::Substitution(PolynomialSubstitution<Rational>& theSub)
 { if (theSub.size<1)
     return;
-//  PolynomialOutputFormat tempFormat;
+//  FormatExpressions tempFormat;
   Rational rationalOne=1;
   switch(this->expressionType)
   { case RationalFunction::typeRational: return;

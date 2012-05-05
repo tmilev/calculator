@@ -134,7 +134,7 @@ public:
   std::string DebugString;
   List<Polynomial<Rational> > valueOnEachLatticeShift;
   std::string ElementToString(bool useHtml, bool useLatex){return this->ElementToString(useHtml, useLatex, 0);}
-  std::string ElementToString(bool useHtml, bool useLatex, PolynomialOutputFormat* thePolyFormat);
+  std::string ElementToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ElementToString(false, false);}
   Rational Evaluate(const Vector<Rational> & input);
   void AddLatticeShift(const Polynomial<Rational> & input, const Vector<Rational> & inputShift);
@@ -294,8 +294,8 @@ public:
   void AssignDenominatorOnly(const partFraction& p);
   void AssignNoIndicesNonZeroMults(partFraction& p);
   int getSmallestNonZeroIndexGreaterThanOrEqualTo(partFractions& owner, int minIndex);
-  int ControlLineSizeFracs(std::string& output, PolynomialOutputFormat& PolyFormatLocal);
-  int ControlLineSizeStringPolys(std::string& output, PolynomialOutputFormat& PolyFormatLocal);
+  int ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal);
+  int ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal);
   //void swap(int indexA, int indexB);
   partFraction();
   ~partFraction();
@@ -322,7 +322,7 @@ public:
   bool initFromRoots(partFractions& owner, Vectors<Rational>& input);
   std::string ElementToString
 (partFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
- PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
+ FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
    ;
   void ReadFromFile(partFractions& owner, std::fstream& input, GlobalVariables* theGlobalVariables, int theDimension);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
@@ -341,14 +341,14 @@ public:
 //  bool flagHasSufficientlyManyVertices;
   int LowestIndexNotCheckedForChopping;
   int LowestIndexNotCheckedForSlicingInDirection;
-  std::string ElementToString(PolynomialOutputFormat* theFormat=0){return this->ElementToString(false, false, *theFormat);}
+  std::string ElementToString(FormatExpressions* theFormat=0){return this->ElementToString(false, false, *theFormat);}
   void TransformToWeylProjective
   (ConeComplex& owner, GlobalVariables& theGlobalVariables)
   ;
-  std::string ElementToString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){return this->ElementToString(useLatex, useHtml, false, false, theFormat);}
-  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, PolynomialOutputFormat& theFormat);
-  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
-  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  std::string ElementToString(bool useLatex, bool useHtml, FormatExpressions& theFormat){return this->ElementToString(useLatex, useHtml, false, false, theFormat);}
+  std::string ElementToString(bool useLatex, bool useHtml, bool PrepareMathReport, bool lastVarIsConstant, FormatExpressions& theFormat);
+  std::string DrawMeToHtmlProjective(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
+  std::string DrawMeToHtmlLastCoordAffine(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector);
   bool IsAnHonest1DEdgeAffine(Vector<Rational> & vertex1, Vector<Rational> & vertex2)
   { int numCommonWalls=0;
@@ -369,10 +369,10 @@ public:
     return this->IsAnHonest1DEdgeAffine(vertex1, vertex2);
   }
   bool DrawMeLastCoordAffine
-  (bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat,
+  (bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat,
    int ChamberWallColor=0);
   bool DrawMeProjective
-(Vector<Rational> * coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(Vector<Rational> * coordCenterTranslation, bool initTheDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
   ;
   bool IsInCone(const Vector<Rational>& point) const;
   bool IsInCone(const Vectors<Rational>& vertices)const
@@ -502,7 +502,7 @@ class ConeLatticeAndShift
   bool ReadFromFile
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
-  std::string ElementToString(PolynomialOutputFormat& theFormat);
+  std::string ElementToString(FormatExpressions& theFormat);
   int GetDimProjectivized(){return this->theProjectivizedCone.GetDim();}
   int GetDimAffine(){return this->theProjectivizedCone.GetDim()-1;}
 };
@@ -538,7 +538,7 @@ public:
   void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals
     (Vectors<Rational>& output)const
   ;
-  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat);
+  bool DrawMeLastCoordAffine(bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat);
   void TranslateMeMyLastCoordinateAffinization(Vector<Rational> & theTranslationVector, GlobalVariables& theGlobalVariables);
   void InitFromDirectionsAndRefine
   (Vectors<Rational>& inputVectors, GlobalVariables& theGlobalVariables)
@@ -547,13 +547,13 @@ public:
   (Vectors<Rational>& inputDirections, Vectors<Rational>& inputAffinePoints, GlobalVariables& theGlobalVariables)
   ;
   std::string DrawMeToHtmlLastCoordAffine
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 ;
   bool DrawMeProjective
-(Vector<Rational> * coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(Vector<Rational> * coordCenterTranslation, bool InitDrawVars, DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
   ;
   std::string DrawMeToHtmlProjective
-(DrawingVariables& theDrawingVariables, PolynomialOutputFormat& theFormat)
+(DrawingVariables& theDrawingVariables, FormatExpressions& theFormat)
 ;
   std::string ElementToString(){return this->ElementToString(false, false);}
   std::string ElementToString(bool useLatex, bool useHtml);
@@ -680,7 +680,7 @@ public:
   void ComputeTable(int theDimension);
   void PrepareCheckSums(GlobalVariables& theGlobalVariables);
   std::string DoTheFullComputationReturnLatexFileString
-  (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, PolynomialOutputFormat& theFormat, std::string* outputHtml)
+  (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml)
   ;
   bool ArgumentsAllowed
   (Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
@@ -721,15 +721,15 @@ public:
   void PrepareIndicatorVariables();
   void initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables);
   void IncreaseHighestIndex(int increment);
-  std::string ElementToString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat){std::string tempS; this->ElementToString(tempS, theGlobalVariables, theFormat);  return tempS;}
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
+  std::string ElementToString(GlobalVariables& theGlobalVariables, FormatExpressions& theFormat){std::string tempS; this->ElementToString(tempS, theGlobalVariables, theFormat);  return tempS;}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
   int ElementToString
   (std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
-   GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+   GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
    ;
   int ElementToStringBasisChange
   (Matrix<LargeInt>& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat,
- bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& PolyFormatLocal)
+ bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& PolyFormatLocal)
 ;
   int ElementToStringOutputToFile(std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
   int ElementToStringBasisChangeOutputToFile(Matrix<LargeInt>& VarChange, bool UsingVarChange, std::fstream& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables);
@@ -1506,11 +1506,11 @@ class slTwo
 {
 public:
   std::string DebugString;
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, PolynomialOutputFormat& PolyFormatLocal);
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, PolynomialOutputFormat& PolyFormatLocal){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);}
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal);
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, FormatExpressions& PolyFormatLocal){ this->ElementToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);}
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ PolynomialOutputFormat PolyFormatLocal; this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); }
+  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ FormatExpressions PolyFormatLocal; this->ElementToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); }
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
@@ -1653,9 +1653,9 @@ public:
       assert(false);
     }
   }
-  std::string ElementToString(PolynomialOutputFormat* inputFormat);
+  std::string ElementToString(FormatExpressions* inputFormat);
   std::string GetStringFromChevalleyGenerator
-  (int theIndex, PolynomialOutputFormat* thePolynomialFormat)const
+  (int theIndex, FormatExpressions* thePolynomialFormat)const
   ;
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
@@ -1906,11 +1906,11 @@ public:
   SemisimpleLieAlgebraOrdered* owner;
   std::string DebugString;
   std::string ElementToString
-(bool useLatex, bool useCalculatorFormat, PolynomialOutputFormat* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+(bool useLatex, bool useCalculatorFormat, FormatExpressions* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 ;
   void ComputeDebugString()
   { GlobalVariables theGlobalVariables;
-    PolynomialOutputFormat PolyFormatLocal;
+    FormatExpressions PolyFormatLocal;
     this->DebugString=this->ElementToString(false, true, &PolyFormatLocal, theGlobalVariables);
   }
   // SelectedIndices gives the non-zero powers of the generators participating in the monomial
@@ -2013,28 +2013,28 @@ public:
   void ElementToString
 (std::string& output, bool useLatex,
  bool useCalculatorFormat,
- PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
   ;
   std::string ElementToString
-  (bool useLatex, bool useCalculatorFormat, PolynomialOutputFormat& PolyFormatLocal,
+  (bool useLatex, bool useCalculatorFormat, FormatExpressions& PolyFormatLocal,
    GlobalVariables& theGlobalVariables)const
   { std::string tempS;
     this->ElementToString(tempS, useLatex, useCalculatorFormat, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
   std::string ElementToString
-  (PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+  (FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
   { std::string tempS;
     this->ElementToString(tempS, true, true, PolyFormatLocal, theGlobalVariables);
     return tempS;
   }
-  std::string ElementToString(PolynomialOutputFormat& PolyFormatLocal)const
+  std::string ElementToString(FormatExpressions& PolyFormatLocal)const
   { GlobalVariables theGlobalVariables;
     return this->ElementToString(PolyFormatLocal, theGlobalVariables);
   }
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
   void ComputeDebugString()
-  { PolynomialOutputFormat tempFormat;
+  { FormatExpressions tempFormat;
     GlobalVariables theGlobalVariables;
     this->DebugString=this->ElementToString(tempFormat, theGlobalVariables);
   }
@@ -2192,7 +2192,7 @@ class MonomialUniversalEnveloping
 private:
 public:
   std::string ElementToString
-  (PolynomialOutputFormat* theFormat=0)const
+  (FormatExpressions* theFormat=0)const
   ;
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
@@ -2751,7 +2751,7 @@ class ConeLatticeAndShiftMaxComputation
   Vectors<Rational> LPtoMaximizeLargerDim;
   Vectors<Rational> LPtoMaximizeSmallerDim;
 
-  std::string ElementToString(PolynomialOutputFormat* theFormat=0);
+  std::string ElementToString(FormatExpressions* theFormat=0);
   void init
   (Vector<Rational> & theNEq, Cone& startingCone, Lattice& startingLattice, Vector<Rational> & startingShift)
   ;
@@ -3082,7 +3082,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ElementToString
-  (PolynomialOutputFormat* theFormat, bool includeV=true)const
+  (FormatExpressions* theFormat, bool includeV=true)const
   ;
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
@@ -3157,7 +3157,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
     this->owneR=&theOwner;
   }
   std::string ElementToString
-  (PolynomialOutputFormat* theFormat=0)
+  (FormatExpressions* theFormat=0)
     ;
   void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
   { this->owneR=other.owneR;
@@ -3207,7 +3207,7 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
-  std::string ElementToString(PolynomialOutputFormat* theFormat, bool includeV=true)
+  std::string ElementToString(FormatExpressions* theFormat, bool includeV=true)
   ;
   MonomialTensorGeneralizedVermas(){}
   void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
@@ -3287,7 +3287,7 @@ public:
   { this->Clear();
   }
   std::string ElementToString
-  (PolynomialOutputFormat* theFormat=0)const
+  (FormatExpressions* theFormat=0)const
     ;
   int HashFunction()const
   { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
@@ -3307,8 +3307,8 @@ private:
 public:
   std::string DebugString;
   std::string outputString;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat){ this->ElementToString(this->DebugString, theGlobalVariables, theFormat); }
-  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
+  void ComputeDebugString(GlobalVariables& theGlobalVariables, FormatExpressions& theFormat){ this->ElementToString(this->DebugString, theGlobalVariables, theFormat); }
+  void ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
   Parser* owner;
   int indexParentNode;
   int indexInOwner;
@@ -3367,18 +3367,18 @@ public:
   void InitForAddition(GlobalVariables* theContext);
   void InitForMultiplication(GlobalVariables* theContext);
   std::string ElementToStringValueAndType
-  (bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
+  (bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString, FormatExpressions& theFormat)
   { return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables, displayOutputString, theFormat);
   }
   std::string ElementToStringValueAndType
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, FormatExpressions& theFormat)
 ;
   SemisimpleLieAlgebra& GetContextLieAlgebra();
-  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
   { return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables, theFormat);
   }
   std::string ElementToStringValueOnlY
-  (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 ;
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<Rational>& theSub, int theDimension);
@@ -3813,6 +3813,8 @@ public:
 
   std::string DisplayPathServerBase;
   std::string PhysicalPathServerBase;
+  char DefaultWeylLetter;
+  int DefaultWeylRank;
 
   std::string DisplayPathOutputFolder;
   std::string PhysicalPathOutputFolder;
@@ -3826,8 +3828,6 @@ public:
   std::string indicatorReportFileName;
   std::string indicatorReportFileNameDisplay;
   std::string userLabel;
-  char DefaultWeylLetter;
-  int DefaultWeylRank;
   int MaxFoundVars;
   bool flagDisplayIndicator;
   ParserNode theValue;
@@ -3843,14 +3843,10 @@ public:
   int GetNumVarsModulePolys();
   void SetNumVarsModulePolys(int NumVars);
 //  SemisimpleLieAlgebra theLieAlgebra;
-  void initDefaultFolderAndFileNames
-  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
-  ;
-  void InitJavaScriptDisplayIndicator();
-  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
   { this->ElementToString(includeLastNode, DebugString, true, theGlobalVariables, theFormat);
   }
-  void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat);
+  void ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
   enum tokenTypes
   { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  //=8
     tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13
@@ -4012,11 +4008,11 @@ public:
   void InitAndTokenize(const std::string& input);
   void Evaluate(GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplify
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 ;
   void ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables);
   std::string ParseEvaluateAndSimplifyPart2
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 ;
   ElementUniversalEnveloping<Polynomial<Rational> > ParseAndCompute
   (const std::string& input, GlobalVariables& theGlobalVariables)
@@ -4091,8 +4087,8 @@ public:
   ElementUniversalEnvelopingOrdered<CoefficientType> theElT;
   std::string DebugString;
   PolynomialSubstitution<CoefficientType> theSubNthElementIsImageNthCoordSimpleBasis;
-  void ComputeDebugString(){PolynomialOutputFormat tempFormat; this->DebugString=this->ElementToString(tempFormat);}
-  std::string ElementToString(const PolynomialOutputFormat& theFormat)const;
+  void ComputeDebugString(){FormatExpressions tempFormat; this->DebugString=this->ElementToString(tempFormat);}
+  std::string ElementToString(const FormatExpressions& theFormat)const;
   void ElementToString(std::string& output)const{output=this->ElementToString();}
   bool IsEqualToZero()const {return this->theElT.IsEqualToZero();}
   bool ElementToStringNeedsBracketsForMultiplication()const;
@@ -4274,7 +4270,7 @@ public:
   (std::fstream& input, GlobalVariables* theGlobalVariables)
   ;
   std::string PrepareReportOneCone
-  (PolynomialOutputFormat& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
+  (FormatExpressions& theFormat, Cone& theCone, GlobalVariables& theGlobalVariables)
   ;
   void GetProjection(int indexOperator, const Vector<Rational> & input, Vector<Rational> & output);
   void SplitByMultiplicityFreeWall(Cone& theCone, ConeComplex& output);
@@ -4369,8 +4365,8 @@ public:
   bool ElementsHaveNonNegativeScalarProduct(const Vector<Rational> & theRoot)const;
   bool ElementsHavePositiveScalarProduct(const Vector<Rational> & theRoot)const;
   bool ElementsHaveNonPositiveScalarProduct(const Vector<Rational> & theRoot)const;
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, PolynomialOutputFormat& theFormat){ return this->ElementsToInequalitiesString(useLatex, useHtml, false, theFormat);}
-  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, PolynomialOutputFormat& theFormat);
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, FormatExpressions& theFormat){ return this->ElementsToInequalitiesString(useLatex, useHtml, false, theFormat);}
+  std::string ElementsToInequalitiesString(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat);
   bool ContainsOppositeRoots();
   bool PerturbVectorToRegular(Vector<Rational> &output, GlobalVariables& theGlobalVariables, int theDimension);
   void GetCoordsInBasis(Vectors<Rational>& inputBasis, Vectors<Rational>& outputCoords, GlobalVariables& theGlobalVariables);
@@ -5064,7 +5060,7 @@ void ElementVermaModuleOrdered<CoefficientType>::MultiplyOnTheLeft
 }
 
 template <class CoefficientType>
-std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString(const PolynomialOutputFormat& theFormat)const
+std::string ElementVermaModuleOrdered<CoefficientType>::ElementToString(const FormatExpressions& theFormat)const
 { std::stringstream out;
   std::string tempS=MathRoutines::ElementToStringBrackets(this->theElT, theFormat);
   if (tempS.size()>1)
@@ -5640,7 +5636,7 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
 
 template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
-  (PolynomialOutputFormat* theFormat, bool includeV)
+  (FormatExpressions* theFormat, bool includeV)
 { std::stringstream out;
   std::string tempS;
   if (this->theMons.size>1)
@@ -5656,7 +5652,7 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
-  (PolynomialOutputFormat* theFormat, bool includeV)const
+  (FormatExpressions* theFormat, bool includeV)const
 { ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   std::string tempS;
   if (tempS=="1")
@@ -5681,7 +5677,7 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
-  (PolynomialOutputFormat* theFormat)
+  (FormatExpressions* theFormat)
 { if (this->size==0)
     return "0";
   Vector<Rational>  parSel;
@@ -5707,21 +5703,18 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
     tempS= theMod.theGeneratingWordsNonReduced[currentMon.indexFDVector].ElementToString(theFormat);
     if (tempS!="1")
       out << tempS;
-    out << "v(" << theMod.theHWFundamentalCoordsBaseField.ElementToString() << ","
-    << parSel.ElementToString() << ")";
   }
   return out.str();
 }
 
 template <class CoefficientType>
 std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
-  (PolynomialOutputFormat* theFormat)const
+  (FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
   Vector<Rational> parSel;
   std::stringstream out;
   std::string tempS;
-  theFormat->MakeAlphabetArbitraryWithIndex("g", "h");
   MonomialTensorGeneralizedVermas<CoefficientType>& firstMon=this->TheObjects[0];
   bool useBrackets=false;
   int indexInOwnerFirst=-1;
@@ -5769,7 +5762,7 @@ void MonomialUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVar
 }
 
 template <class CoefficientType>
-std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString(PolynomialOutputFormat* theFormat)const
+std::string MonomialUniversalEnveloping<CoefficientType>::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   std::string tempS;
   if (this->owners==0 || this->indexInOwners==-1)
@@ -5944,8 +5937,8 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
   }
   *this/=theWeyl.GetKillingDivTraceRatio();
 // Check that the ninja formula is correct:
-  PolynomialOutputFormat tempPolyFormat;
-  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+//  FormatExpressions tempPolyFormat;
+//  tempPolyFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "Killing divided by trace ratio:" << theWeyl.GetKillingDivTraceRatio().ElementToString();
 //  std::cout << "<br>casimir: " << this->ElementToString(false, false, theGlobalVariables, tempPolyFormat);
 //  std::cout << "<br>check element: " << checkElement.ElementToString(false, false, theGlobalVariables, tempPolyFormat);
@@ -6449,7 +6442,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByGeneratorPow
 template <class CoefficientType>
 std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 (bool useLatex, bool useCalculatorFormat,
- PolynomialOutputFormat* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ FormatExpressions* PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { if (this->owner==0)
     return "faulty monomial non-initialized owner. Slap the programmer.";
   if (this->IsEqualToZero())
@@ -6495,7 +6488,7 @@ std::string MonomialUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::ElementToString
 (std::string& output, bool useLatex,
- bool useCalculatorFormat, PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
+ bool useCalculatorFormat, FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables)const
 { std::stringstream out;
   std::string tempS;
   if (this->size==0)

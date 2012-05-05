@@ -497,7 +497,7 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
     output << "\n<br>\n";
 }
 
-void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, PolynomialOutputFormat& PolyFormatLocal)
+void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal)
 { std::stringstream out;  std::string tempS;
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  this->hCharacteristic.ElementToString() << "</a>";
   tempS=this->preferredAmbientSimpleBasis.ElementToString(false, false, false);
@@ -1247,7 +1247,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
 
 void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::string tempS; std::stringstream out; std::stringstream body;
-  PolynomialOutputFormat PolyFormatLocal;
+  FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer, PolyFormatLocal);
   //  body<< "Index "<< i<<": ";
@@ -2561,7 +2561,7 @@ void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVaria
 }
 
 std::string Parser::ParseEvaluateAndSimplifyPart2
-(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { this->Evaluate(theGlobalVariables);
   int numVars=this->theValue.impliedNumVars;
   Polynomial<Rational>  polyOne, polyZero;
@@ -2585,7 +2585,7 @@ std::string Parser::ParseEvaluateAndSimplifyPart2
 }
 
 std::string Parser::ParseEvaluateAndSimplify
-(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+(const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { this->ParseEvaluateAndSimplifyPart1(input, theGlobalVariables);
   return this->ParseEvaluateAndSimplifyPart2(input, useHtml, theGlobalVariables, theFormat);
 }
@@ -3361,7 +3361,7 @@ ParserNode::ParserNode()
   this->Clear();
 }
 
-void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { std::stringstream out; std::string tempS;
   std::string htmlSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
@@ -3481,7 +3481,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
   return out.str();
 }
 
-void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { std::stringstream out; std::string tempS;
   this->owner->TokenToStringStream(out, this->Operation);
   if (this->Operation==Parser::tokenFunction)
@@ -3983,22 +3983,22 @@ void ParserNode::Clear()
     this->IndexContextLieAlgebra=this->owner->theHmm.indexRange;
 }
 
-std::string ChevalleyGenerator::ElementToString(PolynomialOutputFormat* inputFormat)const
+std::string ChevalleyGenerator::ElementToString(FormatExpressions* inputFormat)const
 { if (this-> indexOfOwnerAlgebra<0 || this->ownerArray==0)
     return "(ErrorProgramming:Non-Initialized-Chevalley-Weyl-Generator)";
   return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra].GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
 
 std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator
-(int theIndex, PolynomialOutputFormat* thePolynomialFormat)const
+(int theIndex, FormatExpressions* thePolynomialFormat)const
 { std::stringstream out;
-  MemorySaving<PolynomialOutputFormat> tempFormat;
+  MemorySaving<FormatExpressions> tempFormat;
   if (thePolynomialFormat==0)
     thePolynomialFormat=&tempFormat.GetElement();
   if (this->IsGeneratorFromCartan(theIndex))
-    out << thePolynomialFormat->alphabetBases[1] << "_{" << theIndex-this->GetNumPosRoots()+1 << "}";
+    out << thePolynomialFormat->chevalleyHgeneratorLetter << "_{" << theIndex-this->GetNumPosRoots()+1 << "}";
   else
-  { out << thePolynomialFormat->alphabetBases[0] << "_{";
+  { out << thePolynomialFormat->chevalleyGgeneratorLetter << "_{";
     if (theIndex>=this->GetNumPosRoots())
       out << theIndex-this->GetNumPosRoots()-this->GetRank()+1;
     else
@@ -4131,7 +4131,7 @@ std::string VectorPartition::ElementToString(bool useHtml)
   return out.str();
 }
 
-std::string RationalFunction::ElementToString(PolynomialOutputFormat* theFormat)const
+std::string RationalFunction::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   if (this->expressionType==this->typeRational)
   { out << this->ratValue.ElementToString();
@@ -5153,7 +5153,7 @@ bool ElementSemisimpleLieAlgebra::IsACoeffOneChevalleyGenerator(int& outputGener
 }
 
 std::string ParserNode::ElementToStringValueOnlY
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { std::stringstream LatexOutput;
   int i; //can't declare variables within a switch clause!
   switch (this->ExpressionType)
@@ -5209,7 +5209,7 @@ std::string ParserNode::ElementToStringValueOnlY
 }
 
 std::string ParserNode::ElementToStringValueAndType
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, PolynomialOutputFormat& theFormat)
+(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, FormatExpressions& theFormat)
 { std::stringstream out;
   std::string stringValueOnly= this->ElementToStringValueOnlY(useHtml, RecursionDepth, maxRecursionDepth, theGlobalVariables, theFormat);
   switch (this->ExpressionType)
@@ -6374,21 +6374,34 @@ void CGI::CivilizedStringTranslationFromCGI(std::string& input, std::string& out
   output=out.str();
 }
 
-void CGI::ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output)
+void CGI::ChopCGIInputStringToMultipleStrings
+(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames)
 { int inputLength= (signed) input.size();
-  bool reading=false;
-  output.SetSize(1);
+  bool readingData=false;
+  outputData.Reserve(10);
+  outputFieldNames.Reserve(10);
+  outputData.SetSize(1);
+  outputFieldNames.SetSize(1);
+  outputData[0]="";
+  outputFieldNames[0]="";
   for (int i=0; i<inputLength; i++)
   { if (input[i]=='=')
-      reading=!reading;
+      readingData=!readingData;
     if (input[i]=='&')
-    { output.SetSize(output.size+1);
-      output.LastObject()->reserve(1000);
-      *output.LastObject()="";
-      reading=false;
+    { outputData.SetSize(outputData.size+1);
+      outputFieldNames.SetSize(outputData.size);
+      outputData.LastObject()->reserve(1000);
+      outputFieldNames.LastObject()->reserve(20);
+      *outputFieldNames.LastObject()="";
+      *outputData.LastObject()="";
+      readingData=false;
     }
-    if (input[i]!='=' && input[i]!='&' && reading)
-      output.LastObject()->push_back(input[i]);
+    if (input[i]!='=' && input[i]!='&')
+    { if (readingData)
+        outputData.LastObject()->push_back(input[i]);
+      else
+        outputFieldNames.LastObject()->push_back(input[i]);
+    }
   }
 }
 
@@ -6573,16 +6586,16 @@ void MathRoutines::NChooseK(int n, int k, LargeInt& result)
   }
 }
 
-std::string MonomialP::ElementToString(PolynomialOutputFormat* theFormat)const
+std::string MonomialP::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  MemorySaving<PolynomialOutputFormat> tempFormat;
+  MemorySaving<FormatExpressions> tempFormat;
   if (theFormat==0)
     theFormat=&tempFormat.GetElement();
   if (this->IsAConstant())
     return "1";
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].IsEqualToZero())
-    { out << theFormat->GetLetterIndex(i);
+    { out << theFormat->GetPolyLetter(i);
       if (!(this->TheObjects[i]==1))
         out << "^{" << this->TheObjects[i] << "}";
     }

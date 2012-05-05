@@ -518,6 +518,22 @@ public:
   ObjectContainer theObjectContainer;
   double StartTimeInSeconds;
 
+  char DefaultWeylLetter;
+  int DefaultWeylRank;
+  std::string javaScriptDisplayingIndicator;
+  std::string indicatorReportFileName;
+  std::string DisplayPathServerBase;
+  std::string PhysicalPathServerBase;
+  std::string DisplayPathOutputFolder;
+  std::string PhysicalPathOutputFolder;
+  std::string DisplayNameDefaultOutput;
+  std::string DisplayNameDefaultOutputNoPath;
+  std::string PhysicalNameDefaultOutput;
+  std::string indicatorFileName;
+  std::string indicatorFileNameDisplay;
+  std::string indicatorReportFileNameDisplay;
+  std::string userLabel;
+
   std::string ElementToString();
   std::string ElementToStringNonBoundVars();
   std::string ElementToStringFunctionHandlers();
@@ -954,6 +970,12 @@ static bool EvaluateDereferenceOneArgument
   bool isLeftSeparator(char c);
   bool isRightSeparator(char c);
   void ParseFillDictionary(const std::string& input);
+
+  void initDefaultFolderAndFileNames
+  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
+  ;
+  void InitJavaScriptDisplayIndicator();
+
 };
 
 #endif

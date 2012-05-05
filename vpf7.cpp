@@ -410,7 +410,7 @@ Rational WeylGroup::EstimateNumDominantWeightsBelow
   int theDim=this->GetDim();
   Vectors<Rational> strechedVertices=theWeylChamber.Vertices;
   std::string tempS;
-  PolynomialOutputFormat tempFormat;
+  FormatExpressions tempFormat;
   tempS=theWeylChamber.ElementToString(tempFormat);
   assert(strechedVertices.size==theDim);
   Rational result=1;
@@ -2824,25 +2824,6 @@ void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(Vector<Rational>& theWei
 
 }
 
-void Parser::initDefaultFolderAndFileNames
-  (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
-{ this->PhysicalPathServerBase=inputPathBinaryBaseIsFolderBelow+"../";
-  this->DisplayPathServerBase=inputDisplayPathBase;
-
-  this->PhysicalPathOutputFolder=this->PhysicalPathServerBase+"output/";
-  this->DisplayPathOutputFolder= this->DisplayPathServerBase + "output/";
-
-  this->userLabel=scrambledIP;
-
-  this->PhysicalNameDefaultOutput=this->PhysicalPathOutputFolder+"default"+this->userLabel+"output";
-  this->DisplayNameDefaultOutputNoPath="default"+this->userLabel+"output";
-  this->DisplayNameDefaultOutput=this->DisplayPathOutputFolder+this->DisplayNameDefaultOutputNoPath;
-
-  this->indicatorFileName=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
-  this->indicatorFileNameDisplay=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
-  this->indicatorReportFileName=this->PhysicalPathOutputFolder +"report"+ this->userLabel+ ".txt" ;
-  this->indicatorReportFileNameDisplay=this->DisplayPathOutputFolder+"report"+this->userLabel + ".txt" ;
-}
 
 std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
 (GlobalVariables& theGlobalVariables)
@@ -2968,7 +2949,7 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
   RationalFunction RFone, RFZero;
   RFone.MakeConst(theNode.impliedNumVars, 1, &theGlobalVariables);
   RFZero.MakeConst(theNode.impliedNumVars, 0, &theGlobalVariables);
-//  PolynomialOutputFormat theFormat;
+//  FormatExpressions theFormat;
 //  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "<br>Acting on " << theNode.theGenVermaElt.GetElement().ElementToString(theGlobalVariables)
 //  << " by " << tempElt.ElementToString(theGlobalVariables, theFormat);
@@ -3064,7 +3045,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     << "Hence I do not crash the calculator, but display this benign warning message.";
     return;
   }
-//  PolynomialOutputFormat theFormat;
+//  FormatExpressions theFormat;
 //  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
 //  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
@@ -3276,7 +3257,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
   theGenerator.MakeOneGenerator
   (indexGenerator, *theOwner[0].theAlgebras, theOwner[0].indexAlgebra, theRingUnit);
   ;
-//  PolynomialOutputFormat tempFormat;
+//  FormatExpressions tempFormat;
 //  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   CoefficientType currentCoeff;
   for (int i=0; i<this->size; i++)
@@ -3308,7 +3289,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
 template <class CoefficientType>
 std::string ModuleSSalgebraNew<CoefficientType>::ElementToString()const
 { std::stringstream out;
-  GlobalVariables theGlobalVariables; PolynomialOutputFormat theformat;
+  GlobalVariables theGlobalVariables; FormatExpressions theformat;
   out << "<br><b>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ElementToString() << "</b>";
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ElementToString();
   out << "<br>Actions generators matrix form (" << this->actionsGeneratorsMaT.size << "): ";
@@ -3366,7 +3347,7 @@ std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std:
 
 template <class TemplateMonomial, class Element>
 std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
-(PolynomialOutputFormat* theFormat)const
+(FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
   std::stringstream out;
@@ -3425,7 +3406,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
   CoefficientType currentCoeff;
   outpuT.MakeZero(*this->owners, this->indexInOwners);
   for (; this->size>0; )
-  {// PolynomialOutputFormat tempFormat;
+  {// FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
     //std::cout << "<hr>(At the start of reduction cycle) *this+output - (At the end of reduction cycle)(*this+output)=<br>" << (*this+outpuT).ElementToString(&tempFormat);
     this->PopMonomial(this->size-1, tempMon, currentCoeff);

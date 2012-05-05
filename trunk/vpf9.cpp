@@ -20,7 +20,6 @@ GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->ProgressReportDepth=-1;
   this->MaxAllowedComputationTimeInSeconds=1000000;
-  this->theDefaultLieFormat.MakeAlphabetArbitraryWithIndex("g", "h");
   this->callSystem=0;
 }
 
@@ -38,11 +37,11 @@ Rational partFractions::CheckSum;
 Rational partFraction::CheckSum;
 Rational partFraction::CheckSum2;
 
-int PolynomialOutputFormat::LatexMaxLineLength=100;
-int PolynomialOutputFormat::LatexCutOffLine=15;
-bool PolynomialOutputFormat::UsingLatexFormat=true;
-bool PolynomialOutputFormat::CarriageReturnRegular=true;
-PolynomialOutputFormat PolyFormatNumFrac;
+int FormatExpressions::LatexMaxLineLength=100;
+int FormatExpressions::LatexCutOffLine=15;
+bool FormatExpressions::UsingLatexFormat=true;
+bool FormatExpressions::CarriageReturnRegular=true;
+FormatExpressions PolyFormatNumFrac;
 
 int CGI::GlobalFormulaIdentifier=0;
 
@@ -779,7 +778,7 @@ inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
   return tempRat.IsPositiveOrZero();
 }
 
-inline std::string Rational::ElementToString(PolynomialOutputFormat* notUsed)const
+inline std::string Rational::ElementToString(FormatExpressions* notUsed)const
 { std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;
@@ -796,56 +795,23 @@ inline std::string Rational::ElementToString(PolynomialOutputFormat* notUsed)con
   return out.str();
 }
 
-PolynomialOutputFormat::PolynomialOutputFormat(const std::string& AlphabetBase1, const std::string& AlphabetBase2)
-{ this->MakeAlphabetArbitraryWithIndex(AlphabetBase1, AlphabetBase2);
-  this->ExtraLinesCounterLatex=0;
-}
-
-PolynomialOutputFormat::PolynomialOutputFormat()
-{ this->MakeAlphabetxi();
-  this->ExtraLinesCounterLatex=0;
+FormatExpressions::FormatExpressions()
+{ this->ExtraLinesCounterLatex=0;
   this->flagUseCalculatorFormatForUEOrdered=true;
-}
-
-std::string PolynomialOutputFormat::GetLetterIndex(int index)const
-{ if (index<this->alphabet.size)
-    return this->alphabet.TheObjects[index];
-  std::stringstream out;
-  out << "x_{" << index+1 << "}";
-  std::string tempS=out.str();
-  return tempS;
-}
-
-void PolynomialOutputFormat::SetLetterIndex(const std::string& theLetter, int index)
-{ if (index<this->alphabet.size)
-    this->alphabet.TheObjects[index]=theLetter;
-}
-
-void PolynomialOutputFormat::MakeAlphabetArbitraryWithIndex(const std::string& AlphabetBase1, const std::string& AlphabetBase2)
-{ this->alphabetBases.SetSize(2);
-  this->alphabetBases[0]=AlphabetBase1;
-  this->alphabetBases[1]=AlphabetBase2;
-  this->alphabet.SetSize(20);
-  for (int i=0; i<this->alphabet.size; i++)
-  { std::stringstream out;
-    out << AlphabetBase1 << "_";
-     if (i>=9)
-      out << "{";
-    out << i+1;
-     if (i>=9)
-      out << "}";
-    this->alphabet.TheObjects[i]=out.str();
-  }
+  this->chevalleyGgeneratorLetter="g";
+  this->chevalleyHgeneratorLetter="h";
+  this->polyDefaultLetter="x";
   this->cutOffString=false;
   this->cutOffSize=500;
 }
 
-void PolynomialOutputFormat::MakeAlphabetyi()
-{ this->MakeAlphabetArbitraryWithIndex("y", "z");
-}
-
-void PolynomialOutputFormat::MakeAlphabetxi()
-{ this->MakeAlphabetArbitraryWithIndex("x", "y");
+std::string FormatExpressions::GetPolyLetter(int index)const
+{ if (index<this->polyAlphabeT.size)
+    return this->polyAlphabeT[index];
+  std::stringstream out;
+  out << this->polyDefaultLetter << "_{" << index+1 << "}";
+  std::string tempS=out.str();
+  return tempS;
 }
 
 void Rational::WriteToFile(std::fstream& output)
@@ -1730,7 +1696,7 @@ void partFraction::ComputeOneCheckSuM
 
 std::string partFraction::ElementToString
 (partFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
- PolynomialOutputFormat& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
+ FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
 { std::stringstream out;
   std::string tempS, stringPoly;
   NumLinesUsed=0;
@@ -2712,7 +2678,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
   }
 }
 
-int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
+int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { Matrix<LargeInt> tempMat;
   return this->ElementToStringBasisChange(tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables, theFormat);
 }
@@ -2724,7 +2690,7 @@ int partFractions::ElementToStringOutputToFile(std::fstream& output, bool LatexF
 
 int partFractions::ElementToStringBasisChange
 (Matrix<LargeInt>& VarChange, bool UsingVarChange, std::string& output, bool LatexFormat,
- bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& PolyFormatLocal)
+ bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& PolyFormatLocal)
 { std::stringstream out;
   std::string tempS;
   int TotalLines=0;
@@ -2746,7 +2712,7 @@ int partFractions::ElementToStringBasisChange
       }
       else
         out << "\n";
-      if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
+      if (LatexFormat && (TotalLines-LastCutOff)> FormatExpressions::LatexCutOffLine)
       { out << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
@@ -2773,7 +2739,7 @@ int partFractions::ElementToStringBasisChangeOutputToFile
  bool includeNumerator, GlobalVariables& theGlobalVariables)
 { std::string tempS;
   int TotalLines=0;
-  PolynomialOutputFormat PolyFormatLocal;
+  FormatExpressions PolyFormatLocal;
   PolyFormatLocal.ExtraLinesCounterLatex=0;
   if (LatexFormat)
     output << "\\begin{eqnarray*}\n";
@@ -2792,7 +2758,7 @@ int partFractions::ElementToStringBasisChangeOutputToFile
       }
       else
         output << "\n";
-      if (LatexFormat && (TotalLines-LastCutOff)> PolynomialOutputFormat::LatexCutOffLine)
+      if (LatexFormat && (TotalLines-LastCutOff)> FormatExpressions::LatexCutOffLine)
       { output << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
@@ -2806,7 +2772,7 @@ int partFractions::ElementToStringBasisChangeOutputToFile
 #ifdef WIN32
 #pragma warning(disable:4018)//grrrrr
 #endif
-int partFraction::ControlLineSizeFracs(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
+int partFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
@@ -2821,7 +2787,7 @@ int partFraction::ControlLineSizeFracs(std::string& output, PolynomialOutputForm
   return NumLinesAdded;
 }
 
-int partFraction::ControlLineSizeStringPolys(std::string& output, PolynomialOutputFormat& PolyFormatLocal)
+int partFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal)
 { int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
@@ -3027,22 +2993,22 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 }
 
 void partFractions::ComputeDebugString(GlobalVariables& theGlobalVariables)
-{ PolynomialOutputFormat tempFormat;
-  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
+{ FormatExpressions tempFormat;
+  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
 }
 
-void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, PolynomialOutputFormat& theFormat)
-{ this->ElementToString(output, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, theFormat);
+void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
+{ this->ElementToString(output, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables)
-{ PolynomialOutputFormat theFormat;
-  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, false, theGlobalVariables, theFormat);
+{ FormatExpressions theFormat;
+  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, false, false, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables)
-{ PolynomialOutputFormat theFormat;
-  this->ElementToString(this->DebugString, PolynomialOutputFormat::UsingLatexFormat, true, true, theGlobalVariables, theFormat);
+{ FormatExpressions theFormat;
+  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, true, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -3050,12 +3016,12 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobal
   output << "Dimension: ";
   output << this->AmbientDimension << "\n";
   output << "Indices_of_roots:\n";
-  PolynomialOutputFormat PolyFormatLocal;
+  FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->startingVectors.size; i++)
     output << "| " << i << "    " << this->startingVectors[i].ElementToString() << "\n";
   output << "Alphabet_used:\n";
   for (int i=0; i<this->AmbientDimension; i++)
-    output << PolyFormatLocal.GetLetterIndex(i) << " ";
+    output << PolyFormatLocal.GetPolyLetter(i) << " ";
   output << "\n" << "Number_of_fractions: " << this->size << "\n";
   for (int i=0; i<this->size; i++)
     this->TheObjects[i].WriteToFile(output, theGlobalVariables);
@@ -3083,8 +3049,8 @@ void partFractions::ComputeSupport(List<Vectors<Rational> >& output, std::string
 }
 
 void partFractions::ComputeDebugStringBasisChange(Matrix<LargeInt>& VarChange, GlobalVariables& theGlobalVariables)
-{ PolynomialOutputFormat tempFormat;
-  this->ElementToStringBasisChange(VarChange, true, this->DebugString, PolynomialOutputFormat::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
+{ FormatExpressions tempFormat;
+  this->ElementToStringBasisChange(VarChange, true, this->DebugString, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
 }
 
 bool partFractions::IsHigherThanWRTWeight(const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights)
@@ -3280,7 +3246,7 @@ void oneFracWithMultiplicitiesAndElongations::AddMultiplicity(int MultiplicityIn
 void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
 (partFractions& owner, int indexElongation, Matrix<LargeInt>& VarChange,
  bool UsingVarChange, std::string& output, bool LatexFormat, int indexInFraction, int theDimension,
- PolynomialOutputFormat& PolyFormatLocal)
+ FormatExpressions& PolyFormatLocal)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot2, tempRoot;
@@ -3307,7 +3273,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
     out << "\\frac{1}{(1-";
   for(int i=0; i<NumCoords; i++)
     if (tempRoot[i]!=0)
-    { out << PolyFormatLocal.GetLetterIndex(i);
+    { out << PolyFormatLocal.GetPolyLetter(i);
       if (tempRoot[i]!=1)
         out << "^{" << tempRoot[i].ElementToString() << "}";
     }
@@ -4602,8 +4568,8 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
 
 void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
 { this->GeneratePartialBruhatOrder();
-  PolynomialOutputFormat PolyFormatLocal;
-  PolyFormatLocal.SetLetterIndex("q", 0);
+  FormatExpressions PolyFormatLocal;
+  PolyFormatLocal.polyDefaultLetter="q";
   this->ComputeRPolys();
 //  this->ComputeDebugString();
   this->KLPolys.SetSize(this->size);

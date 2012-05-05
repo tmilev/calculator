@@ -107,7 +107,7 @@ class Selection;
 class SubsetWithMultiplicities;
 
 //the following classes have to do with user interface/displaying/drawing information
-class PolynomialOutputFormat;
+class FormatExpressions;
 struct IndicatorWindowVariables;
 class DrawingVariables;
 class DrawOperations;
@@ -379,7 +379,7 @@ public:
     return result;
   }
   template<class Element>
-  static inline std::string ElementToStringBrackets(const Element& input, PolynomialOutputFormat* theFormat)
+  static inline std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat)
   { if (!input.ElementToStringNeedsBracketsForMultiplication())
       return input.ElementToString(theFormat);
     std::string result;
@@ -1235,7 +1235,7 @@ public:
   static std::string clearSlashes(const std::string& theString);
   static void clearDollarSigns(std::string& theString, std::string& output);
   static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
-  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& output);
+  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames);
   static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
   static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
@@ -2777,7 +2777,7 @@ ParallelComputing::GlobalPointerCounter++;
     this->Extended->num.sign*=x.sign; this->Simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){ this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify(); }
-  std::string ElementToString(PolynomialOutputFormat* notUsed=0)const;
+  std::string ElementToString(FormatExpressions* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;
   inline bool IsEqualToOne()const
@@ -3089,7 +3089,7 @@ public:
     out << ")";
     return out.str();
   }
-  std::string ElementToString(PolynomialOutputFormat* theFormat)const
+  std::string ElementToString(FormatExpressions* theFormat)const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -3103,7 +3103,7 @@ public:
   }
   std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar=false);
   std::string ElementToStringLetterFormat
-  (const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const;
+  (const FormatExpressions& theFormat, bool useLatex, bool DontIncludeLastVar)const;
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml)
   { return this->ElementToStringLetterFormat("\\varepsilon", useLatex, false);
   }
@@ -3684,7 +3684,7 @@ class Vectors: public List<Vector<CoefficientType> >
     return out.str();
   }
   std::string ElementsToInequalitiesString
-(bool useLatex, bool useHtml, bool LastVarIsConstant, PolynomialOutputFormat& theFormat)
+(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)
 ;
   std::string ElementToString(bool useLaTeX, bool useHtml, bool makeTable)const
   { std::stringstream out;
@@ -4046,20 +4046,18 @@ bool ComputeNormalFromSelectionAndExtraRoot
   }
 };
 
-struct PolynomialOutputFormat
-{ List<std::string> alphabet;
-  void operator=(const PolynomialOutputFormat& other);
+struct FormatExpressions
+{ void operator=(const FormatExpressions& other);
 public:
   //alphabetBases must contain at least two elements
-  List<std::string> alphabetBases;
-  std::string GetLetterIndex(int index)const;
-  void SetLetterIndex(const std::string& theLetter, int index);
-  PolynomialOutputFormat();
-  PolynomialOutputFormat(const std::string& AlphabetBase1, const std::string& AlphabetBase2);
-  void MakeNumPartFrac();
-  void MakeAlphabetArbitraryWithIndex(const std::string& AlphabetBase1, const std::string& AlphabetBase2);
-  void MakeAlphabetxi();
-  void MakeAlphabetyi();
+  std::string chevalleyGgeneratorLetter;
+  std::string chevalleyHgeneratorLetter;
+  std::string polyDefaultLetter;
+  List<std::string> polyAlphabeT;
+  std::string GetPolyLetter(int index)const;
+  std::string GetChevalleyHletter(int index)const;
+  std::string GetChevalleyGletter(int index)const;
+  FormatExpressions();
   int ExtraLinesCounterLatex;
   static int LatexCutOffLine;
   static int LatexMaxLineLength;
@@ -4072,7 +4070,7 @@ public:
 
 template <class CoefficientType>
 std::string Vector<CoefficientType>::ElementToStringLetterFormat
-(const PolynomialOutputFormat& theFormat, bool useLatex, bool DontIncludeLastVar)const
+(const FormatExpressions& theFormat, bool useLatex, bool DontIncludeLastVar)const
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out;
@@ -4095,7 +4093,7 @@ std::string Vector<CoefficientType>::ElementToStringLetterFormat
       }
       found=true;
       out << tempS;
-      out << theFormat.GetLetterIndex(i);
+      out << theFormat.GetPolyLetter(i);
     }
   return out.str();
 }
@@ -4106,7 +4104,7 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   int theGeneratorIndex;
-  ChevalleyGenerator(): ownerArray(0),indexOfOwnerAlgebra(-1), theGeneratorIndex(-1){}
+  ChevalleyGenerator(): ownerArray(0), indexOfOwnerAlgebra(-1), theGeneratorIndex(-1){}
   static int HashFunction(const ChevalleyGenerator& input)
   { return input.theGeneratorIndex+input.indexOfOwnerAlgebra*SomeRandomPrimes[0];
   }
@@ -4123,7 +4121,7 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
-  std::string ElementToString(PolynomialOutputFormat* inputFormat)const;
+  std::string ElementToString(FormatExpressions* inputFormat)const;
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
@@ -4146,7 +4144,7 @@ public:
   static inline int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
-  std::string ElementToString(PolynomialOutputFormat* PolyFormat=0)const;
+  std::string ElementToString(FormatExpressions* PolyFormat=0)const;
   void MakeZeroDegrees();
   bool operator>(const MonomialP& other)const
   { if (this->operator==(other))
@@ -4243,7 +4241,7 @@ public:
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   List<CoefficientType> theCoeffs;
   bool ElementToStringNeedsBracketsForMultiplication()const{return this->size>1;}
-  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
+  std::string ElementToString(FormatExpressions* theFormat=0)const;
   static int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
   { return SomeRandomPrimes[0]* input.theCoeffs.HashFunction()
     +SomeRandomPrimes[1]*input.::HashedList<TemplateMonomial>::HashFunction();
@@ -4581,7 +4579,7 @@ public:
 (const Vector<CoefficientType>& input, CoefficientType& output, const CoefficientType& theRingZero=0)
   ;
   bool IsProportionalTo(const Polynomial<CoefficientType>& other, CoefficientType& TimesMeEqualsOther, const CoefficientType& theRingUnit)const;
-  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, PolynomialOutputFormat& PolyFormatLocal);
+  void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
   int GetIndexMaxMonomial( bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right))
   { if (this->size==0)
       return -1;
@@ -4713,7 +4711,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   void ElementToString(std::string& output, int numDisplayedEltsMinus1ForAll)
   { std::stringstream out;
     output.clear();
-    PolynomialOutputFormat PolyFormatLocal;
+    FormatExpressions PolyFormatLocal;
     if (numDisplayedEltsMinus1ForAll==-1)
       numDisplayedEltsMinus1ForAll=this->size;
     for (int i=0; i<this->size; i++)
@@ -4870,7 +4868,7 @@ public:
   int NumVars;
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
-  std::string ElementToString(PolynomialOutputFormat* theFormat=0)const;
+  std::string ElementToString(FormatExpressions* theFormat=0)const;
   bool ElementToStringNeedsBracketsForMultiplication()const
   { switch(this->expressionType)
     { case RationalFunction::typeRational: return false;
@@ -5709,7 +5707,7 @@ void Polynomial<Element>::Substitution
 (const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, int NumVarTarget,
  const Element& theRingUnit)
 { //std::cout << "<hr><hr><hr>Making a substitution ";
-  //PolynomialOutputFormat theFormat;
+  //FormatExpressions theFormat;
   //std::cout << "into this piece of crap:<br> " << this->ElementToString(theFormat);
   Polynomial<Element> Accum, TempPoly;
   Accum.Clear();
@@ -5761,7 +5759,7 @@ void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const E
 template <class Element>
 void PolynomialSubstitution<Element>::PrintPolys(std::string &output, Element& TheRingUnit, Element& TheRingZero)
 { std::stringstream out;
-  PolynomialOutputFormat PolyFormatLocal;
+  FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->size; i++)
   { std::string tempS;
     out << i << ". ";
@@ -5840,7 +5838,7 @@ public:
   void OneFracToStringBasisChange
   (partFractions& owner, int indexElongation, Matrix<LargeInt>& VarChange, bool UsingVarChange,
    std::string& output, bool LatexFormat, int indexInFraction, int theDimension,
-   PolynomialOutputFormat& PolyFormatLocal);
+   FormatExpressions& PolyFormatLocal);
 };
 
 class ElementWeylGroup: public List<int>
@@ -6461,7 +6459,7 @@ void Vectors<CoefficientType>::GaussianEliminationForNormalComputation(Matrix<Co
 
 template <class CoefficientType>
 std::string Vectors<CoefficientType>::ElementsToInequalitiesString
-(bool useLatex, bool useHtml, bool LastVarIsConstant, PolynomialOutputFormat& theFormat)
+(bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)
 { std::stringstream out;
   std::string tempS;
   std::string theLetter="x";
@@ -6650,12 +6648,12 @@ private:
 public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
-  PolynomialOutputFormat theDefaultPolyFormat;
-  PolynomialOutputFormat theDefaultLieFormat;
+  FormatExpressions theDefaultPolyFormat;
+  FormatExpressions theDefaultLieFormat;
 
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
-  PolynomialOutputFormat thePolyFormat;
+  FormatExpressions thePolyFormat;
   Controller theLocalPauseController;
 
   //buffers:
@@ -6977,7 +6975,7 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool ElementToStringNeedsBracketsForMultiplication()const;
-  std::string ElementToString(PolynomialOutputFormat* theFormat)const;
+  std::string ElementToString(FormatExpressions* theFormat)const;
   Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)

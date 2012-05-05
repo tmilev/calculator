@@ -2730,7 +2730,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
-  PolynomialOutputFormat& theFormat=theGlobalVariables.theDefaultLieFormat;
+  FormatExpressions& theFormat=theGlobalVariables.theDefaultLieFormat;
   ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)

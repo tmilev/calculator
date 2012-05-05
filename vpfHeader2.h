@@ -38,12 +38,6 @@ public:
   bool SetError(const std::string& inputError);
   bool IsEqualToOne()const;
   DataOfExpressions<Polynomial<Rational> >& GetPoly()const;
-  void MakeMonomialGeneralizedVerma
-(CommandList& theBoss, const MonomialGeneralizedVerma<RationalFunction>& theElt)
-;
-  void MakeSumGenVermaElts
-(CommandList& theBoss, const ElementSumGeneralizedVermas<RationalFunction>& theElt)
-;
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
   ;
@@ -63,7 +57,7 @@ public:
 (CommandList& theBoss, const DataOfExpressions<Polynomial<Rational> >& inputPoly)
 ;
   void MakeElementTensorGeneralizedVermas
-  (CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt)
+(CommandList& theBoss, DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> >& theElt)
   ;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
@@ -71,12 +65,13 @@ public:
   ;
   int GetDynamicSubtypeInfo();
   SemisimpleLieAlgebra& GetSSLieAlgebra()const;
+  ElementSumGeneralizedVermas<RationalFunction>& GetEltSumGenVerma()const;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)
  ;
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& GetUE()const;
-  SemisimpleLieAlgebra* GetAmbientSSLieAlgebra()const;
+  int GetIndexAmbientSSLieAlgebra()const;
   template<class theType>
   bool IsOfType()const;
   template<class theType>
@@ -90,6 +85,9 @@ public:
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   ;
+  bool MultiplyBy(const Data& right, Data& output)
+  ;
+
   bool IsInteger();
   ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
   int GetSmallInT()const;
@@ -198,9 +196,6 @@ class Expression
   Data& GetData()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
- ;
-  void MakeEltSumGenVermas
-  (const ElementSumGeneralizedVermas<RationalFunction>& inputElt, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakeElementTensorsGeneralizedVermas
   (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
@@ -436,6 +431,9 @@ class DataOfExpressions
   dataType GetConst
  (const Rational& input, GlobalVariables& theGlobalVariables)
   ;
+  template<class otherType>
+  void MakeVariableUnion(DataOfExpressions<otherType>& other)
+  ;
   std::string ElementToString()const;
   void SetDynamicSubtype(int inputNumVars);
 };
@@ -445,17 +443,13 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theTensorElts;
-  List<ModuleSSalgebraNew<RationalFunction> >  theCategoryOmodules;
+  DataOfExpressions<List<ModuleSSalgebraNew<RationalFunction> > >  theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<ElementSemisimpleLieAlgebra> theLieAlgebraElements;
-  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> >  theElemenentsGeneralizedVermaModuleTensors;
-  HashedList<MonomialGeneralizedVerma<RationalFunction> >  theMonomialsGeneralizedVerma;
+  HashedList<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > > theTensorElts;
   HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
-  HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >  theUEs;
+  HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > > theUEs;
   HashedList<DataOfExpressions<RationalFunction> > theRFs;
   HashedList<Rational> theRationals;
-  HashedList<ElementSumGeneralizedVermas<RationalFunction> > theSumGenVermaElts;
   void reset();
 };
 

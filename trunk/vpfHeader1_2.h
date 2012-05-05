@@ -3157,7 +3157,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
     this->owneR=&theOwner;
   }
   std::string ElementToString
-  (FormatExpressions* theFormat=0)
+  (FormatExpressions* theFormat=0)const
     ;
   void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
   { this->owneR=other.owneR;
@@ -5677,7 +5677,7 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
 
 template <class CoefficientType>
 std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
-  (FormatExpressions* theFormat)
+  (FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
   Vector<Rational>  parSel;

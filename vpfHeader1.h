@@ -101,6 +101,8 @@ class Vectors;
 class MonomialP;
 template <class CoefficientType>
 class Polynomial;
+template <class CoefficientType>
+class PolynomialSubstitution;
 
 //combinatorial classes
 class Selection;
@@ -1385,6 +1387,8 @@ public:
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j].SetNumVariables(GoalNumVars);
   }
+  void Substitution(const PolynomialSubstitution<Rational>& theSub)
+  ;
   inline Element ScalarProduct(const Vector<Element>& left, const Vector<Element>& right){ return this->ScalarProduct(left, right, (Element) 0);}
   Element ScalarProduct(const Vector<Element>& left, const Vector<Element>& right, const Element& theRingZero)
   { assert(left.size==this->NumCols && right.size==this->NumRows);
@@ -4184,7 +4188,9 @@ public:
     return whichLetter!=-1;
   }
   template <class Element>
-  void Substitution(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, int NumVarTarget, const Element& theRingUnit);
+  void Substitution
+(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)
+  ;
   void MakeMonomial(int NumVars, int LetterIndex, int Power);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
   { for (int i=this->size-1; i>=0; i--)
@@ -4430,7 +4436,7 @@ public:
 
   void GetConstantTerm(CoefficientType& output, const CoefficientType& theRingZero);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
-  void MakeMonomial(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff);
+  void MakeMonomial(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff=1);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
   void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
@@ -4518,8 +4524,10 @@ public:
   }
   void ScaleToPositiveMonomials(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<CoefficientType>& output);
-  void Substitution(const List<Polynomial<CoefficientType> >& TheSubstitution, Polynomial<CoefficientType>& output, int NumVarTarget, const CoefficientType& theRingUnit);
-  void Substitution(const List<Polynomial<CoefficientType> >& TheSubstitution, int NumVarTarget, const CoefficientType& theRingUnit= (CoefficientType)1);
+  void Substitution
+  (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit=1,
+   const CoefficientType& theRingZero=0)
+   ;
   int TotalDegree()const;
   bool IsEqualToOne()const
   { CoefficientType tempC;
@@ -4889,7 +4897,7 @@ public:
   }
 
   int GetNumVars() {return this->NumVars;}
-  void Substitution(PolynomialSubstitution<Rational>& theSub);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other)
   { this->Assign(other);
   }
@@ -5217,8 +5225,12 @@ public:
 };
 
 template <class Element>
-void MonomialP::Substitution(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, int NumVarTarget, const Element& theRingUnit)
-{ output.MakeConst(NumVarTarget, 1);
+void MonomialP::Substitution
+(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)
+{ int NumVarTarget=0;
+  if (TheSubstitution.size>0)
+    NumVarTarget=TheSubstitution[0].NumVars;
+  output.MakeConst(NumVarTarget, 1);
   if (this->IsAConstant())
     return;
   Polynomial<Element> tempPoly;
@@ -5229,7 +5241,7 @@ void MonomialP::Substitution(const List<Polynomial<Element> >& TheSubstitution, 
     if (this->TheObjects[i]!=0)
     { if (!this->TheObjects[i].IsSmallInteger())
       { std::cout << "This is a programming error. I cannot carry out a substitution in a monomial "
-        <<  " that has exponent which is not a small integer: it is " << this->TheObjects[i] << " instead.";
+        << " that has exponent which is not a small integer: it is " << this->TheObjects[i] << " instead.";
         assert(false);
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();
@@ -5702,30 +5714,34 @@ int Polynomial<Element>::TotalDegree()const
   return result;
 }
 
-template <class Element>
-void Polynomial<Element>::Substitution
-(const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, int NumVarTarget,
- const Element& theRingUnit)
+template <class CoefficientType>
+void Polynomial<CoefficientType>::Substitution
+(const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit,
+ const CoefficientType& theRingZero)
 { //std::cout << "<hr><hr><hr>Making a substitution ";
   //FormatExpressions theFormat;
   //std::cout << "into this piece of crap:<br> " << this->ElementToString(theFormat);
-  Polynomial<Element> Accum, TempPoly;
+  if (this->NumVars==0 || TheSubstitution.size==0)
+    return;
+  if (TheSubstitution.size!=this->NumVars)
+  { std::cout << "This is a programming error: attempting to carry out a substitution"
+    << "in a polynomial of " << this->NumVars << " variables while specifying the images of only "
+    << TheSubstitution.size << " of the variables. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
+    << " line " << __LINE__ << ".";
+    assert(false);
+  }
+  Polynomial<CoefficientType> Accum, TempPoly;
   Accum.Clear();
-  Accum.NumVars=NumVarTarget;
+  Accum.NumVars=TheSubstitution[0].NumVars;
   for(int i=0; i<this->size; i++)
-  { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, NumVarTarget, theRingUnit);
+  { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, theRingUnit);
+    TempPoly*=this->theCoeffs[i];
     Accum+=(TempPoly);
     //std::cout << "<br>So far accum is :<br> " << Accum.ElementToString(theFormat);
   }
-  output=(Accum);
+  *this=(Accum);
   //std::cout << "<hr>to finally get<br>" << output.ElementToString(theFormat);
 }
-
-template <class Element>
-void Polynomial<Element>::Substitution(const List<Polynomial<Element> >& TheSubstitution, int NumVarTarget, const Element& theRingUnit)
-{ this->Substitution(TheSubstitution, *this, NumVarTarget, theRingUnit);
-}
-
 
 template <class Element>
 void Polynomial<Element>::MakeOne(int inputNumVars)

@@ -2979,7 +2979,6 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
 //  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
 }
 
-
 template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,

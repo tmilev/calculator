@@ -2248,6 +2248,7 @@ public:
 ;
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex=0);
   void SetNumVariables(int newNumVars);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
   int HashFunction() const;
   static inline int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
   { return input.HashFunction();
@@ -2476,6 +2477,9 @@ static bool GetBasisFromSpanOfElements
   void SubstitutionCoefficients
 (PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  ;
+  void Substitution
+(const PolynomialSubstitution<Rational>& theSub)
   ;
   void MakeCasimir
 (SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
@@ -2954,8 +2958,8 @@ public:
   Vector<CoefficientType> theHWDualCoordsBaseField;
 
   Vector<Rational> theHWDualCoordS;
-  Vector<Rational>  theHWSimpleCoordS;
-  Vector<Rational>  theHWFundamentalCoordS;
+  Vector<Rational> theHWSimpleCoordS;
+  Vector<Rational> theHWFundamentalCoordS;
   Vector<CoefficientType> theHWFundamentalCoordsBaseField;
 
 //  List<List<Matrix<CoefficientType> > >
@@ -2964,9 +2968,13 @@ public:
   charSSAlgMod theChaR;
   Selection parabolicSelectionNonSelectedAreElementsLevi;
   Selection parabolicSelectionSelectedAreElementsLevi;
-
   bool flagIsInitialized;
-
+  bool operator==(const ModuleSSalgebraNew<CoefficientType>& other)
+  { return
+    this->indexAlgebra==other.indexAlgebra
+    && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
+    && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
+  }
   void operator=(const ModuleSSalgebraNew<CoefficientType>& other)
   { if (this==&other)
       return;
@@ -3000,6 +3008,7 @@ public:
 
   }
   void SetNumVariables(int GoalNumVars);
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
 //  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
 //  List
@@ -3097,6 +3106,7 @@ class MonomialGeneralizedVerma
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
+  void Substitution(const PolynomialSubstitution<Rational>& theSub);
   int HashFunction()const
   { return this->indexFDVector*SomeRandomPrimes[0]+this->indexInOwner*SomeRandomPrimes[1];
   }
@@ -3207,6 +3217,10 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
+  void Substitution(const PolynomialSubstitution<Rational>& theSub)
+  { for (int i=0; i<this->theMons.size; i++)
+      this->theMons[i].Substitution(theSub);
+  }
   std::string ElementToString(FormatExpressions* theFormat, bool includeV=true)
   ;
   MonomialTensorGeneralizedVermas(){}
@@ -3267,6 +3281,8 @@ public:
    ;
   void MakeHWV
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+  ;
+  void Substitution(const PolynomialSubstitution<Rational>& theSub)
   ;
   void SetNumVariables
   (int GoalNumVars)
@@ -5634,6 +5650,51 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
   }
 }
 
+template<class Element>
+void Matrix<Element>::Substitution(const PolynomialSubstitution<Rational>& theSub)
+{ for (int i=0; i<this->NumRows; i++)
+    for (int j=0; j<this->NumCols; j++)
+      this->elements[i][j].Substitution(theSub);
+}
+
+template<class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::Substitution
+(const PolynomialSubstitution<Rational>& theSub)
+{ for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
+    this->actionsGeneratorsMaT[i].Substitution(theSub);
+  for (int i=0; i<this->actionsGeneratorS.size; i++)
+    for (int j=0; j<this->actionsGeneratorS[i].size; j++)
+      for (int k=0; k<this->actionsGeneratorS[i][j].size; k++)
+        this->actionsGeneratorS[i][j][k].Substitution(theSub);
+  List<MonomialUniversalEnveloping<CoefficientType> > oldGeneratingWordsNonReduced;
+  oldGeneratingWordsNonReduced.CopyFromBase(this->theGeneratingWordsNonReduced);
+  this->theGeneratingWordsNonReduced.Clear();
+  for (int i=0; i<oldGeneratingWordsNonReduced.size; i++)
+  { oldGeneratingWordsNonReduced[i].Substitution(theSub);
+    this->theGeneratingWordsNonReduced.AddOnTop(oldGeneratingWordsNonReduced[i]);
+  }
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+    for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
+      this->theGeneratingWordsGrouppedByWeight[i][j].Substitution(theSub);;
+  for (int i=0; i<this->theSimpleGens.size; i++)
+    this->theSimpleGens[i].Substitution(theSub);;
+  for (int i=0; i<this->actionsSimpleGens.size; i++)
+    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
+      for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
+        this->actionsSimpleGens[i][j][k].Substitution(theSub);;
+  for (int i=0; i<this->actionsSimpleGensMatrixForM.size; i++)
+  { this->actionsSimpleGensMatrixForM[i].Substitution(theSub);;
+  }
+  for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
+  { this->theBilinearFormsAtEachWeightLevel[i].Substitution(theSub);;
+    this->theBilinearFormsInverted[i].Substitution(theSub);;
+  }
+  for (int i=0; i<this->theHWDualCoordsBaseField.size; i++)
+  { this->theHWDualCoordsBaseField[i].Substitution(theSub);;
+    this->theHWFundamentalCoordsBaseField[i].Substitution(theSub);;
+  }
+}
+
 template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
   (FormatExpressions* theFormat, bool includeV)
@@ -6653,6 +6714,58 @@ void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Elem
     }
     this->TheObjects[i]+=(theMat.elements[theMat.NumRows-1][i]);
   }
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
+  (const PolynomialSubstitution<Rational>& theSub)
+{ ElementTensorsGeneralizedVermas<CoefficientType> output;
+  MonomialTensorGeneralizedVermas<CoefficientType> currentMon;
+  output.MakeZero();
+  CoefficientType tempCF;
+  for (int i=0; i<this->size; i++)
+  { currentMon=this->TheObjects[i];
+    currentMon.Substitution(theSub);
+    tempCF=this->theCoeffs[i];
+    tempCF.Substitution(theSub);
+    output.AddMonomial(currentMon, tempCF);
+  }
+  *this=output;
+//  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
+}
+
+template <class CoefficientType>
+void MonomialGeneralizedVerma<CoefficientType>::Substitution
+(const PolynomialSubstitution<Rational>& theSub)
+{ this->theMonCoeffOne.Substitution(theSub);
+  ModuleSSalgebraNew<CoefficientType> newOwner;
+  newOwner=this->owneR->TheObjects[this->indexInOwner];
+  newOwner.Substitution(theSub);
+  this->indexInOwner=this->owneR->AddNoRepetitionOrReturnIndexFirst(newOwner);
+}
+
+template <class CoefficientType>
+void ElementUniversalEnveloping<CoefficientType>::Substitution
+(const PolynomialSubstitution<Rational>& theSub)
+{ ElementUniversalEnveloping<CoefficientType> output;
+  output.MakeZero(*this->owners, this->indexInOwners);
+  MonomialUniversalEnveloping<CoefficientType> theMon;
+  CoefficientType tempCF;
+  for (int i=0; i<this->size; i++)
+  { theMon=this->TheObjects[i];
+    theMon.Substitution(theSub);
+    tempCF=this->theCoeffs[i];
+    tempCF.Substitution(theSub);
+    output.AddMonomial(theMon, tempCF);
+  }
+  *this=output;
+}
+
+template <class CoefficientType>
+void MonomialUniversalEnveloping<CoefficientType>::Substitution(const PolynomialSubstitution<Rational>& theSub)
+{ for (int i=0; i<this->generatorsIndices.size; i++)
+    this->Powers[i].Substitution(theSub);
+  this->SimplifyEqualConsecutiveGenerators(0);
 }
 
 #endif

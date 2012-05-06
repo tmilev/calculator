@@ -306,6 +306,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //inputRankString="2";
 //civilizedInput=" irreducibleRep(1,1)";
 //  civilizedInput="a";
+//  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\nv";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

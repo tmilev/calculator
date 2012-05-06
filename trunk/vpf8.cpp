@@ -3992,7 +3992,8 @@ void QuasiPolynomial::Substitution
   }
   Polynomial<Rational>  tempP;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
-  { this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, mapFromNewSpaceToOldSpace.NumCols, (Rational) 1);
+  { tempP=this->valueOnEachLatticeShift[i];
+    tempP.Substitution(theSub);
     for (int j=0; j<allRepresentatives.size; j++)
       if (imagesAllRepresentatives.TheObjects[j]==this->LatticeShifts.TheObjects[i])
         output.AddLatticeShift(tempP, allRepresentatives.TheObjects[j]);
@@ -4012,7 +4013,8 @@ void QuasiPolynomial::Substitution
   output.MakeZeroLatTiceZn(this->GetNumVars());
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
-  { this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, this->GetNumVars(), (Rational) 1);
+  { tempP=this->valueOnEachLatticeShift[i];
+    tempP.Substitution(theSub);
     output.AddLatticeShift(tempP, this->LatticeShifts.TheObjects[i]+inputTranslationSubtractedFromArgument);
   }
 }
@@ -4049,7 +4051,8 @@ bool QuasiPolynomial::SubstitutionLessVariables
     shiftMatForm-=theSubLatticeShift;
     if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage))
     { tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
-      this->valueOnEachLatticeShift.TheObjects[i].Substitution(theSub, tempP, tempRoot.size, (Rational) 1);
+      tempP=this->valueOnEachLatticeShift[i];
+      tempP.Substitution(theSub);
       output.AddLatticeShift(tempP, tempRoot);
     }
   }
@@ -8646,7 +8649,7 @@ void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariabl
 { this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
 
-void RationalFunction::Substitution(PolynomialSubstitution<Rational>& theSub)
+void RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theSub)
 { if (theSub.size<1)
     return;
 //  FormatExpressions tempFormat;

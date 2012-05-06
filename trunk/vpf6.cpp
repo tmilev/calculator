@@ -27,7 +27,7 @@ template < > int List<DataOfExpressions<ElementUniversalEnveloping<RationalFunct
 template < > int List<DataOfExpressions<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<ElementSumGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > >::ListActualSizeIncrement=10;
-
+template < > int List<ModuleSSalgebraNew<RationalFunction> >::ListActualSizeIncrement=10;
 //If you get a specialization after instantiation error:
 //due to the messed up C++ templates, the following template specialization funcitons must appear
 //here and nowhere else. C++ is a dirty buggy language.
@@ -3717,7 +3717,21 @@ int DataOfExpressions<dataType>::HashFunction()const
 template <class dataType>
 template <class otherType>
 void DataOfExpressions<dataType>::MakeVariableUnion(DataOfExpressions<otherType>& other)
-{
+{ PolynomialSubstitution<Rational> leftSub, rightSub;
+  HashedList<Expression> finalVars=this->VariableImages;
+  finalVars.AddNoRepetition(other.VariableImages);
+  if (finalVars.size!=this->VariableImages.size)
+  { leftSub.SetSize(finalVars.size);
+    for (int i=0; i<this->VariableImages.size; i++)
+      leftSub[i].MakeMonomial(finalVars.size, finalVars.GetIndex(this->VariableImages[i]),1);
+    this->theBuiltIn.Substitution(leftSub);
+  }
+  if (finalVars.size!=other.VariableImages.size)
+  { rightSub.SetSize(finalVars.size);
+    for (int i=0; i<other.VariableImages.size; i++)
+      rightSub[i].MakeMonomial(finalVars.size, finalVars.GetIndex(other.VariableImages[i]),1);
+    other.theBuiltIn.Substitution(leftSub);
+  }
 }
 
 template <class dataType>

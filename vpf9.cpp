@@ -145,7 +145,7 @@ std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
 
 //template < > int ListPointers<partFraction>::MemoryAllocationIncrement=100;
-ListPointers<partFraction> partFraction::GlobalCollectorPartFraction;
+//ListPointers<partFraction> partFraction::GlobalCollectorPartFraction;
 bool partFraction::UseGlobalCollector=true;
 bool partFraction::flagAnErrorHasOccurredTimeToPanic=false;
 bool partFractions::flagSplitTestModeNoNumerators=false;
@@ -2875,7 +2875,7 @@ void partFractions::operator=(const partFractions& other)
   this->IndicesDoublesOfRedundantShortRoots=other.IndicesDoublesOfRedundantShortRoots;
   this->NumNonRedundantShortRoots=other.NumNonRedundantShortRoots;
   this->weights=other.weights;
-  this->CopyFromHash(other);
+  this->::HashedList<partFraction>::operator=(other);
   this->flagInitialized=other.flagInitialized;
   this->SplitStepsCounter=other.SplitStepsCounter;
   this->AmbientDimension=other.AmbientDimension;
@@ -3658,7 +3658,7 @@ void WeylGroup::operator=(const WeylGroup& right)
 //  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
   this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
   this->CartanSymmetric=(right.CartanSymmetric);
-  this->CopyFromHash(right);
+  this->::HashedList<ElementWeylGroup>::operator=(right);
   this->RootSystem=(right.RootSystem);
   this->RootsOfBorel=(right.RootsOfBorel);
   this->rho=right.rho;
@@ -4252,7 +4252,7 @@ void WeylGroup::ComputeRho(bool Recompute)
 }
 
 void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& other)
-{ this->CopyFromHash(other);
+{ this->::HashedList<ElementWeylGroup>::operator=(other);
   this->simpleGenerators.CopyFromBase(other.simpleGenerators);
   this->ExternalAutomorphisms.CopyFromBase(other.ExternalAutomorphisms);
   this->AmbientWeyl=(other.AmbientWeyl);

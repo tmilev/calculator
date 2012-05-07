@@ -865,23 +865,28 @@ std::iostream& operator >> (std::iostream& input, List<Object>& theList)
   return input;
 }
 
+//class HashedListOfReferences is to be used in the same way as class HashedList.
+//The essential difference between HashedListOfReferences and HashedList is in the way the objects are
+//stored in memory. A copy of each object of HashedListOfReferences
+// is allocated with an individual copy constructor (call of  new Object; rather than new Object[size];),
+//and a pointer to the so allocated memory is stored.
+//Motivation for this class: when a pointer/reference to an object is requested,
+//the class returns a pointer to the individually allocated object. This piece of memory is allocated exactly once,
+//i.e. the individual piece of memory never moves, and is thus completely safe to pass the object around.
+
 template <class Object>
-class ListPointers: public List<Object*>
+class HashedListReferences
 {
-private:
-  void QuickSortAscending(int BottomIndex, int TopIndex);
 public:
-  //ListPointers();
+  List<Object*> theReferences;
+  MemorySaving<List<int> > IndicesOfObjectsOfGivenHashValue;
   void KillAllElements();
   void KillElementIndex(int i);
-  bool AddObjectNoRepetitionOfPointer(Object* o);
-  void PopAllOccurrencesSwapWithLast(Object* o);
-  int ObjectPointerToIndex(Object* o);
+  bool AddOnTop(const Object& o);
   void resizeToLargerCreateNewObjects(int increase);
   void IncreaseSizeWithZeroPointers(int increase);
   void initAndCreateNewObjects(int d);
-  bool IsAnElementOf(Object* o);
-  void QuickSortAscending();
+  ~HashedListReferences(){this->KillAllElements(); };
 };
 
 template <class Object, int hashFunction(const Object&)>
@@ -1056,6 +1061,11 @@ public:
   }
   void QuickSortAscending(){ List<Object> theList; theList=*this; theList.QuickSortAscending(); this->operator=(theList);}
   void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->operator=(theList);}
+  HashedListB(const HashedListB& other)
+  { this->HashSize=0;
+    this->TheHashedArrays=0;
+    this->operator=(other);
+  }
   HashedListB()
   { this->HashSize=0;
     this->TheHashedArrays=0;
@@ -1081,7 +1091,7 @@ public:
     }
     return out.str();
   }
-  void CopyFromHash(const HashedListB<Object, hashFunction>& From)
+  void operator=(const HashedListB<Object, hashFunction>& From)
   { if (&From==this)
       return;
     this->ClearHashes();
@@ -1103,9 +1113,6 @@ public:
     this->SetExpectedSize(other.size);
     for (int i=0; i<other.size; i++)
       this->AddOnTop(other.TheObjects[i]);
-  }
-  inline void operator=(const HashedListB<Object, hashFunction>& From)
-  { this->CopyFromHash(From);
   }
 };
 
@@ -4600,7 +4607,7 @@ public:
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
   int GetIndexMaxMonomialTotalDegThenLexicographic();
-  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
+//  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();

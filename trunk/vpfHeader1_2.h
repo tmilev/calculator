@@ -206,7 +206,7 @@ public:
   static bool MakingConsistencyCheck;
   static Rational CheckSum, CheckSum2;
   static Vector<Rational> theVectorToBePartitioned;
-  static ListPointers<partFraction> GlobalCollectorPartFraction;
+//  static ListPointers<partFraction> GlobalCollectorPartFraction;
   void ComputePolyCorrespondingToOneMonomial
   (QuasiPolynomial& outputQP, MonomialP& theMon, Vectors<Rational>& normals,
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
@@ -2141,7 +2141,7 @@ public:
   (const ElementSemisimpleLieAlgebra& right, const CoefficientType& ringUnit, const CoefficientType& ringZero)
   ;
   void operator=(const ElementUniversalEnvelopingOrdered& other)
-  { this->CopyFromHash(other);
+  { this->::HashedList<MonomialUniversalEnvelopingOrdered<CoefficientType> >::operator=(other);
     this->owner=other.owner;
   }
   template<class OtherCoefficientType>
@@ -4522,30 +4522,6 @@ void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
 }
 
 template <class Object>
-void ListPointers<Object>::QuickSortAscending()
-{ this->QuickSortAscending(0, this->size-1);
-}
-
-template <class Object>
-void ListPointers<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
-{ if (TopIndex<=BottomIndex)
-    return;
-  int LowIndex = BottomIndex+1;
-  int HighIndex = TopIndex;
-  for (; LowIndex<=HighIndex; LowIndex++)
-    if (this->TheObjects[LowIndex]->operator>(*this->TheObjects[BottomIndex]))
-    { this->SwapTwoIndices(LowIndex, HighIndex);
-      LowIndex--;
-      HighIndex--;
-    }
-  if (this->TheObjects[HighIndex]->operator>(*this->TheObjects[BottomIndex]))
-    HighIndex--;
-  this->SwapTwoIndices(BottomIndex, HighIndex);
-  this->QuickSortAscending(BottomIndex, HighIndex-1);
-  this->QuickSortAscending(HighIndex+1, TopIndex);
-}
-
-template <class Object>
 void List<Object>::AddListOnTop(const List<Object>& theList)
 { int oldsize= this->size;
   int otherSize=theList.size;
@@ -4851,15 +4827,8 @@ void List<Object>::AddOnTop(const Object& o)
   this->size++;
 }
 
-template <class Object>
-class ListPointersKillOnExit: public ListPointers<Object>
-{
-public:
-  ~ListPointersKillOnExit(){this->KillAllElements(); };
-};
-
 template<class Object>
-void ListPointers<Object>::IncreaseSizeWithZeroPointers(int increase)
+void HashedListReferences<Object>::IncreaseSizeWithZeroPointers(int increase)
 { if (increase<=0)
     return;
   if (this->ActualSize<this->size+increase)
@@ -4880,7 +4849,7 @@ ParallelComputing::GlobalPointerCounter+=increase;
 }
 
 template<class Object>
-void ListPointers<Object>::initAndCreateNewObjects(int d)
+void HashedListReferences<Object>::initAndCreateNewObjects(int d)
 { this->KillAllElements();
   this->SetSize(d);
   for (int i=0; i<d; i++)
@@ -4892,26 +4861,7 @@ ParallelComputing::GlobalPointerCounter+=d;
 }
 
 template<class Object>
-void ListPointers<Object>::KillElementIndex(int i)
-{ delete this->TheObjects[i];
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter--;
-  ParallelComputing::CheckPointerCounters();
-#endif
-  this->size--;
-  this->TheObjects[i]=this->TheObjects[this->size];
-}
-
-template<class Object>
-int ListPointers<Object>::ObjectPointerToIndex(Object* o)
-{ for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]==o)
-      return i;
-  return -1;
-}
-
-template<class Object>
-void ListPointers<Object>::resizeToLargerCreateNewObjects(int increase)
+void HashedListReferences<Object>::resizeToLargerCreateNewObjects(int increase)
 { if (increase<=0)
     return;
   int oldsize= this->size;
@@ -4925,7 +4875,7 @@ ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
 }
 
 template<class Object>
-void ListPointers<Object>::KillAllElements()
+void HashedListReferences<Object>::KillAllElements()
 { for (int i =0; i<this->size; i++)
   { delete this->TheObjects[i];
 #ifdef CGIversionLimitRAMuse
@@ -4938,7 +4888,7 @@ void ListPointers<Object>::KillAllElements()
 }
 
 template<class Object>
-bool ListPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
+bool HashedListReferences<Object>::AddOnTop(const Object& o)
 { if (this->ContainsObject(o)==-1)
   { this->AddOnTop(o);
     return true;
@@ -4946,23 +4896,6 @@ bool ListPointers<Object>::AddObjectNoRepetitionOfPointer(Object* o)
   return false;
 }
 
-template<class Object>
-bool ListPointers<Object>::IsAnElementOf(Object* o)
-{ for(int i=0; i<this->size; i++)
-    if (this->TheObjects[i]==o)
-      return true;
-  return false;
-}
-
-template <class Object>
-void ListPointers<Object>::PopAllOccurrencesSwapWithLast(Object* o)
-{ for (int i =0; i<this->size; i++)
-    if (o==this->TheObjects[i])
-    { this->TheObjects[i]=this->TheObjects[this->size-1];
-      this->size--;
-      i--;
-    }
-}
 class VermaModulesWithMultiplicities: public HashedList<Vector<Rational> >
 {
 public:

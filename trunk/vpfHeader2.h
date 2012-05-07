@@ -24,7 +24,7 @@ public:
   MemorySaving<std::string> theError;
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra, typeElementSSalgebra,
+  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas
   };
   void operator=(const Data& other);

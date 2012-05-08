@@ -67,6 +67,7 @@ bool Data::ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFu
       output.VariableImages=initializingElement.VariableImages;
       return true;
     case Data::typeElementUE:
+      output=this->GetUE();
       return true;
     default:
 //      std::cout << " No conversion found.";
@@ -276,6 +277,7 @@ bool Data::LieBracket
     DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
     result.VariableImages=leftCopy.VariableImages;
     leftCopy.theBuiltIn.LieBracketOnTheRight(rightCopy.theBuiltIn, result.theBuiltIn);
+    result.theBuiltIn.Simplify(*left.owner->theGlobalVariableS);
     output.owner=left.owner;
     output.type=output.typeElementUE;
     output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
@@ -2092,6 +2094,7 @@ bool CommandList::EvaluateDoMultiplyIfPossible
     return false;
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
+  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
   if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
     return false;
   Data& LeftD=leftE.GetData();
@@ -2103,7 +2106,7 @@ bool CommandList::EvaluateDoMultiplyIfPossible
   return true;
 }
 
-bool Data::MultiplyBy(const Data& right, Data& output)
+bool Data::MultiplyBy(const Data& right, Data& output)const
 { static bool theGhostHasAppeared=false;
   if (right.type==Data::typeEltTensorGenVermasOverRF)
   { DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > rightElt;
@@ -2129,7 +2132,64 @@ bool Data::MultiplyBy(const Data& right, Data& output)
     output.MakeElementTensorGeneralizedVermas(*this->owner, rightElt);
     return true;
   }
+  if (this->type!=Data::typeElementUE && right.type!=Data::typeElementUE)
+    return false;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
+  if (this->type==Data::typeElementUE)
+  { result.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
+    result.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
+  } else
+  { result.theBuiltIn.owners=&right.owner->theObjectContainer.theLieAlgebras;
+    result.theBuiltIn.indexInOwners=right.GetIndexAmbientSSLieAlgebra();
+  }
+  if (!right.ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(rightElt, result))
+    return false;
+  if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, result))
+    return false;
+  if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
+      || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
+    return false;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftCopy=leftElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightCopy=rightElt;
+  result=leftCopy;
+  result.MakeVariableUnion(rightCopy);
+  std::cout << "left: " << result.ElementToString();
+  std::cout << "<br>right: " << rightCopy.ElementToString();
+  result.theBuiltIn*=rightCopy.theBuiltIn;
+  //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
+  output.owner=this->owner;
+  output.type=output.typeElementUE;
+  output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
+  return true;
   return false;
+}
+
+bool Data::Add(const Data& right, Data& output)const
+{ if (this->type!=Data::typeElementUE)
+  { if (right.type==Data::typeElementUE)
+      return right.Add(*this, output);
+    return false;
+  }
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=this->GetUE();
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt=right.GetUE();
+  if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
+      || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
+    return false;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftCopy=leftElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightCopy=rightElt;
+  leftCopy.MakeVariableUnion(rightCopy);
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
+  result=leftCopy;
+  std::cout << "left: " << result.ElementToString();
+  std::cout << "<br>right: " << rightCopy.ElementToString();
+  result.theBuiltIn+=rightCopy.theBuiltIn;
+  //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
+  output.owner=this->owner;
+  output.type=output.typeElementUE;
+  output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
+  return true;
 }
 
 bool CommandList::EvaluateStandardTimes
@@ -2286,7 +2346,16 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
 
 bool CommandList::EvaluateStandardPlus
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ return theCommands.CollectSummands(inputIndexBoundVars, theExpression);
+{ if (theExpression.children.size==2)
+  { Expression& leftE=theExpression.children[0];
+    Expression& rightE=theExpression.children[1];
+    if (leftE.theOperation==theCommands.opData() && rightE.theOperation==theCommands.opData())
+    { Data tempData;
+      if (leftE.GetData().Add(rightE.GetData(), tempData))
+        theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+    }
+  }
+  return theCommands.CollectSummands(inputIndexBoundVars, theExpression);
 }
 
 bool CommandList::EvaluateIf

@@ -307,6 +307,8 @@ FunctionToMatrix{}(B,8,8)";*/
 //civilizedInput=" irreducibleRep(1,1)";
 //  civilizedInput="a";
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
+//  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; 2 h_1";
+//  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; 2 g_{0,1}";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -364,7 +366,7 @@ FunctionToMatrix{}(B,8,8)";*/
       std::cout << "\"" << currentVar.theName << "\"";
     }
   }
-  std::cout << ");\n  var obj = actb(document.getElementById('textInputID'), functionNameArray);</script>\n";
+  std::cout << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
   std::cout << "</body></html>";
   return 0;
 }

@@ -4362,8 +4362,16 @@ void RationalFunction::lcm
   output.MakeZero(theNumVars);
 }
 
-void RationalFunction::operator*=(const Polynomial<Rational> & other)
-{ if (other.IsEqualToZero())
+void RationalFunction::operator*=(const Polynomial<Rational>& other)
+{ if (this->NumVars!=other.NumVars)
+  { int NewNumVars=MathRoutines::Maximum(other.NumVars, this->NumVars);
+    Polynomial<Rational> otherNew=other;
+    otherNew.SetNumVariables(NewNumVars);
+    this->SetNumVariables(NewNumVars);
+    *this*=otherNew;
+    return;
+  }
+  if (other.IsEqualToZero())
   { this->MakeZero(this->NumVars, this->context);
     return;
   }

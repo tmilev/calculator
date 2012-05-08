@@ -59,18 +59,21 @@ public:
   void MakeElementTensorGeneralizedVermas
 (CommandList& theBoss, DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> >& theElt)
   ;
+  void GetContext(HashedList<Expression>& output)const;
+  void GetCommonContext(const Data& other, HashedList<Expression>& output)const
+  ;
+
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
   ;
   int GetDynamicSubtypeInfo();
   SemisimpleLieAlgebra& GetSSLieAlgebra()const;
-  ElementSumGeneralizedVermas<RationalFunction>& GetEltSumGenVerma()const;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int index1, int index2, std::stringstream* comments)
  ;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& GetUE()const;
+  const  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& GetUE()const;
   int GetIndexAmbientSSLieAlgebra()const;
   template<class theType>
   bool IsOfType()const;
@@ -81,7 +84,7 @@ public:
   template<class theType>
   theType GetValueCopy()const;
   template<class theType>
-  theType& GetValuE()const;
+  const  theType& GetValuE()const;
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   ;
@@ -91,7 +94,7 @@ public:
   ;
   bool Exponentiate(const Data& right, Data& output)const
   ;
-  bool IsInteger();
+  bool IsInteger()const;
   ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
   int GetSmallInT()const;
   MonomialGeneralizedVerma<RationalFunction>& GetMonGenVerma()const;
@@ -106,10 +109,10 @@ public:
   (Data& left, Data& right, Data& output, std::stringstream* comments)
   ;
   bool OperatorDereference
-  (const Data& argument, Data& output, std::stringstream* comments)
+  (const Data& argument, Data& output, std::stringstream* comments)const
   ;
   bool OperatorDereference
-  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)
+  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
   Data operator/(const Data& right);
   Data operator*(const Data& right);
@@ -196,7 +199,7 @@ class Expression
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
   }
-  Data& GetData()const;
+  const Data& GetData()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
@@ -273,7 +276,7 @@ void MakeVariableNonBounD
   bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
   bool IsRationalNumber();
   bool IsElementUE()const;
-  bool IsInteger();
+  bool IsInteger()const;
   bool IsSmallInteger(int& whichInteger);
   bool IsSmallInteger(){int tempI; return this->IsSmallInteger(tempI);}
   bool AreEqualExcludingChildren(const Expression& other) const
@@ -430,13 +433,15 @@ class DataOfExpressions
   int HashFunction()const
 ;
   dataType GetPolynomialMonomial
-(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)
+(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
   ;
   dataType GetConst
  (const Rational& input, GlobalVariables& theGlobalVariables)
   ;
   template<class otherType>
   void MakeVariableUnion(DataOfExpressions<otherType>& other)
+  ;
+  bool SetVariables(const HashedList<Expression>& newVariableImages)
   ;
   std::string ElementToString()const;
   void SetDynamicSubtype(int inputNumVars);
@@ -458,11 +463,14 @@ public:
 };
 
 class CommandList
-{
-  template <class dataType>
-  bool ExtractData
-(dataType& outputBuffer, DataOfExpressions<dataType>& finalOutput,
+{ template <class dataType>
+  bool ExtractPMTDtreeFromContextRecursive
+(DataOfExpressions<dataType>& output, const DataOfExpressions<dataType>& inputContextInitializedWithZeroElement,
  const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
+  ;
+template <class dataType>
+  bool ExtractPMTDtreeContext
+(HashedList<Expression>& output, const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
   ;
 public:
 //control sequences parametrize the syntactical elements
@@ -784,12 +792,6 @@ public:
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
 ;
-  template <class dataType>
-  bool ExtractData
-  (DataOfExpressions<dataType>& outputMustBeInitializedToZero,
-   const Expression& theInput, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog=0)
-  { return this->ExtractData(outputMustBeInitializedToZero.theBuiltIn, outputMustBeInitializedToZero, theInput, 0, MaxRecursionDepthMustNotPopStack, errorLog);
-  }
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
@@ -798,6 +800,10 @@ public:
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
   }
+  template <class dataType>
+  bool ExtractPMTDtree
+  (DataOfExpressions<dataType>& output, const dataType& thePMDTinitializer, const Expression& theInput, std::stringstream* errorLog=0)
+  ;
   void SpecializeBoundVars
 (Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
   ;
@@ -876,7 +882,7 @@ static bool EvaluateDereferenceOneArgument
   static bool StandardFunction
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardEqualEqual
+  static bool StandardEqualEqual
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoAssociatE

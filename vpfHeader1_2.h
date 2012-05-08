@@ -2294,7 +2294,7 @@ public:
   (ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0 )
   ;
-  void CommuteConsecutiveIndicesLeftIndexAroundRight
+  void CommuteABntoBnAPlusLowerOrder
 (int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
@@ -2466,7 +2466,7 @@ static bool GetBasisFromSpanOfElements
   ;
   void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower);
-  bool IsAPowerOfASingleGenerator()
+  bool IsAPowerOfASingleGenerator()const
   { if (this->size!=1)
       return false;
     if (!this->theCoeffs[0].IsEqualToOne())

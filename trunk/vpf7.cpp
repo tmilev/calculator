@@ -3357,7 +3357,7 @@ std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
-    tempS1=currentCoeff.ElementToString();
+    tempS1=currentCoeff.ElementToString(theFormat);
     tempS2=currentMon.ElementToString(theFormat);
     if (tempS1=="1" && tempS2!="1")
       tempS1="";
@@ -3425,14 +3425,14 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
           reductionOccurred=true;
           break;
         }
-/*        if (tempMon.CommutingLeftIndexAroundRightIndexAllowed
+        if (tempMon.CommutingABntoBnAPlusLowerOrderAllowed
             (tempMon.Powers[i], tempMon.generatorsIndices[i], tempMon.Powers[i+1], tempMon.generatorsIndices[i+1]))
-        { tempMon.CommuteConsecutiveIndicesLeftIndexAroundRight(i, buffer, theRingUnit, theRingZero);
+        { tempMon.CommuteABntoBnAPlusLowerOrder(i, buffer, theRingUnit, theRingZero);
           buffer*=currentCoeff;
           *this+=buffer;
           reductionOccurred=true;
           break;
-        }*/
+        }
       }
     if(!reductionOccurred)
       outpuT.AddMonomial(tempMon, currentCoeff);
@@ -3532,12 +3532,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
   //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
   //(L_a)^n=(R_a+ad_a)^n.
   do
-  { //acquiredCoefficienT.ComputeDebugString();
-    //theRightPoweR.ComputeDebugString();
-    //theLeftPoweR.ComputeDebugString();
-    //adResulT.ComputeDebugString(*this->owner, false, false);
-    //tempMon.ComputeDebugString();
-    for (int i=0; i<adAToTheIthOfB.size; i++)
+  { for (int i=0; i<adAToTheIthOfB.size; i++)
     { int theNewGeneratorIndex=adAToTheIthOfB[i].theGeneratorIndex;
       tempMon=startMon;
       incomingAcquiredCoefficienT=acquiredCoefficienT;
@@ -3557,19 +3552,15 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
 //    std::cout <<"<hr>(ad_a)(" << adAToTheIthOfB.ElementToString(0) << ") =";
     this->GetOwner().LieBracket(aElt, adAToTheIthOfB, adAToTheIthOfB);
 //    std::cout << adAToTheIthOfB.ElementToString(0);
-    //adResulT.ComputeDebugString(*this->owner, false, false);
   }while(!adAToTheIthOfB.IsEqualToZero() && !acquiredCoefficienT.IsEqualToZero());
 //  std::cout << "<hr>final output: " << this->ElementToString() << " = " << output.ElementToString();
 }
 
 template <class CoefficientType>
-void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeftIndexAroundRight
+void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
 (int theIndeX, ElementUniversalEnveloping<CoefficientType>& output,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ std::cout << "Programming error: this function has not been thoroughly checked, and is suspected to have a bug."
-  << " Crashing just in case it does indeed have a bug.";
-  assert(false);
-  if (theIndeX==this->generatorsIndices.size-1)
+{ if (theIndeX==this->generatorsIndices.size-1)
     return;
   output.MakeZero(*this->owners, this->indexInOwners);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
@@ -3592,40 +3583,36 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteConsecutiveIndicesLeft
   tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[theIndeX], theLeftPower);
   MonomialUniversalEnveloping<CoefficientType> startMon, tempMon2;
   startMon=tempMon;
-  ElementSemisimpleLieAlgebra adResult, tempElt, tempRightElt;
+  ElementSemisimpleLieAlgebra adResult, tempElt, rightGeneratorElt;
   adResult.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (leftGeneratorIndex, *this->owners, this->indexInOwners);
-  tempRightElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  rightGeneratorElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (rightGeneratorIndex, *this->owners, this->indexInOwners);
-//  tempRightElt.ComputeDebugString(*this->owner, false, false);
-  std::cout << "This is a programming error: CommuteConsecutiveIndicesLeftIndexAroundRight has not been proofread.";
-  assert(false);
+  std::cout << this->ElementToString() << "=";
+  //Formula realized:
+  //a b^n  &=&\sum_{i=0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
+  //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
+  //Then L_x and R_x commute and L_x-R_x=ad_x, i.e.
+  //(L_b-ad_b)^n=R_b^n.
   do
-  { //acquiredCoefficient.ComputeDebugString();
-    //theRightPower.ComputeDebugString();
-    //adResult.ComputeDebugString(*this->owner, false, false);
-    //tempMon.ComputeDebugString();
-    tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
-    //tempMon.ComputeDebugString();
-    for (int i=0; i<adResult.size; i++)
+  { for (int i=0; i<adResult.size; i++)
     { int theNewGeneratorIndex= adResult[i].theGeneratorIndex;
       tempMon=startMon;
+      tempMon.MultiplyByGeneratorPowerOnTheRight(rightGeneratorIndex, theRightPower);
       incomingAcquiredCoefficient=acquiredCoefficient;
       incomingAcquiredCoefficient*=(adResult.theCoeffs[i]);
       tempMon.MultiplyByGeneratorPowerOnTheRight(theNewGeneratorIndex, theRingUnit);
       for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
-      //tempMon.ComputeDebugString();
       output.AddMonomial(tempMon, incomingAcquiredCoefficient);
+      std::cout << "+(" << incomingAcquiredCoefficient.ElementToString() << ")" << tempMon.ElementToString();
     }
     acquiredCoefficient*=(theRightPower);
     theRightPower-=1;
-    tempMon=startMon;
-    this->GetOwner().LieBracket(adResult, tempRightElt, tempElt);
+    this->GetOwner().LieBracket(adResult, rightGeneratorElt, tempElt);
     adResult=tempElt;
     powerDrop++;
     acquiredCoefficient/=(powerDrop);
-    //adResult.ComputeDebugString(*this->owner, false, false);
   }while(!adResult.IsEqualToZero() && !acquiredCoefficient.IsEqualToZero());
 }
 

@@ -33,7 +33,7 @@ template < > int List<ModuleSSalgebraNew<RationalFunction> >::ListActualSizeIncr
 //here and nowhere else. C++ is a dirty buggy language.
 
 template < >
-Rational& Data::GetValuE<Rational>()const
+const Rational& Data::GetValuE<Rational>()const
 { if (this->type!=this->typeRational)
   { std::cout << "This is a programming error. Rational Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
@@ -49,6 +49,24 @@ Rational& Data::GetValuE<Rational>()const
     assert(false);
   }
   return this->owner->theObjectContainer.theRationals[this->theIndex];
+}
+
+template <>
+bool Data::ConvertToType<DataOfExpressions<Polynomial<Rational> > >
+(DataOfExpressions<Polynomial<Rational> >& output, const DataOfExpressions<Polynomial<Rational> >& initializingElement)const
+{ //  std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
+  switch (this->type)
+  { case Data::typeRational:
+      output.VariableImages=initializingElement.VariableImages;
+      output.theBuiltIn.MakeConst(output.VariableImages.size, this->GetValuE<Rational>());
+      return true;
+    case Data::typePoly:
+      output=this->GetPoly();
+      return output.SetVariables(initializingElement.VariableImages);
+    default:
+//      std::cout << " No conversion found.";
+      return false;
+  }
 }
 
 template <>
@@ -68,7 +86,7 @@ bool Data::ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFu
       return true;
     case Data::typeElementUE:
       output=this->GetUE();
-      return true;
+      return output.SetVariables(initializingElement.VariableImages);
     default:
 //      std::cout << " No conversion found.";
       return false;
@@ -111,7 +129,7 @@ bool Data::ConvertToType<ElementUniversalEnveloping<RationalFunction> >
 }
 
 template < >
-ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
+const ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
 { if (this->type!=this->typeElementUE)
   { std::cout << "This is a programming error. Data::GetValuE_ElementUniversalEnveloping_RationalFunction is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
@@ -131,16 +149,19 @@ ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
 
 template <class dataType >
 std::string DataOfExpressions<dataType>::ElementToString()const
-{ FormatExpressions tempFormat;
+{ FormatExpressions tempFormat;//, tempFormat2;
 //  this->theBuiltIn.ElementToString();
   tempFormat.polyAlphabeT.SetSize(this->VariableImages.size);
+//  std::stringstream out;
   for (int i=0; i<this->VariableImages.size; i++)
-    tempFormat.polyAlphabeT[i]=this->VariableImages[i].ElementToString();
-  return this->theBuiltIn.ElementToString(&tempFormat);
+  { tempFormat.polyAlphabeT[i]=this->VariableImages[i].ElementToString();
+//    out << "<br>Variable" << i+1 << "=" << tempFormat.polyAlphabeT[i];
+  }
+  return this->theBuiltIn.ElementToString(&tempFormat);//+"="+ this->theBuiltIn.ElementToString(&tempFormat)+out.str();
 }
 
 template < >
-DataOfExpressions<Polynomial<Rational> >& Data::GetValuE()const
+const DataOfExpressions<Polynomial<Rational> >& Data::GetValuE()const
 { if (this->type!=this->typePoly)
   { std::cout << "This is a programming error. Data of type " << this->ElementToStringDataType()
     << " is treated as if it were data of type Polynomial."
@@ -159,7 +180,7 @@ DataOfExpressions<Polynomial<Rational> >& Data::GetValuE()const
 }
 
 template < >
-DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetValuE()const
+const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetValuE()const
 { if (this->type!=this->typeElementUE)
   { std::cout << "This is a programming error. Data::GetValuE<ElementUniversalEnveloping<RationalFunction> > is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
@@ -178,7 +199,7 @@ DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetValuE
 }
 
 template < >
-DataOfExpressions<RationalFunction>& Data::GetValuE()const
+const DataOfExpressions<RationalFunction>& Data::GetValuE()const
 { if (this->type!=this->typeRationalFunction)
   { std::cout << "This is a programming error. Data::GetValue_DataOfExpressions_RationalFunction is called on Data of type "
     << this->ElementToStringDataType() << ". Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ )
@@ -266,8 +287,8 @@ bool Data::LieBracket
     return true;
   }
   if (left.type==Data::typeElementUE || right.type==Data::typeElementUE)
-  { DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=left.GetUE();
-    DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt=right.GetUE();
+  { const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=left.GetUE();
+    const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt=right.GetUE();
     if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
         || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
       return false;
@@ -319,10 +340,41 @@ bool Data::IsSmallInteger(int & whichInteger)const
   }
 }
 
-bool Data::IsInteger()
+bool Data::IsInteger()const
 { if (this->type!=this->typeRational)
     return false;
   return this->GetValuE<Rational>().IsInteger();
+}
+
+void Data::GetContext(HashedList<Expression>& output)const
+{ switch (this->type)
+  { case Data::typeElementUE:
+      output = this->GetUE().VariableImages;
+      return;
+    case Data::typePoly:
+      output = this->GetPoly().VariableImages;
+      return;
+    case Data::typeRationalFunction:
+      output = this->GetValuE<DataOfExpressions<RationalFunction> >().VariableImages;
+      return;
+//    case Data::typeEltTensorGenVermasOverRF:
+//      output = this->GetValuE<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > >().VariableImages;
+ //     return;
+    case typeRational:
+      output.Clear();
+      return;
+    default:
+      std::cout << "This is a programming error: Data::GetContext does not cover all possible cases. Please debug "
+      << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      assert(false);
+  }
+}
+
+void Data::GetCommonContext(const Data& other, HashedList<Expression>& output)const
+{ HashedList<Expression> Context2;
+  this->GetContext(output);
+  other.GetContext(Context2);
+  output.AddNoRepetition(Context2);
 }
 
 std::string Data::ElementToString(std::stringstream* comments)const
@@ -339,7 +391,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
 //        ElementToString(*this->owner->theGlobalVariableS);
       return out.str();
     case Data::typeElementUE:
-      out << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString();
+      out <<"UE{}{" << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString() << "}";
       return out.str();
     case Data::typeRationalFunction:
       return this->GetValuE<DataOfExpressions<RationalFunction> >().ElementToString();
@@ -439,7 +491,7 @@ SemisimpleLieAlgebra& Data::GetSSLieAlgebra()const
   return this->owner->theObjectContainer.theLieAlgebras[this->theIndex];
 }
 
-DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetUE()const
+const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& Data::GetUE()const
 { return this->GetValuE<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >();
 }
 
@@ -478,10 +530,12 @@ bool Data::operator==(const Data& other)const
     return false;
   if (this->type==this->typeError)
     return this->theError.GetElementConst()==other.theError.GetElementConst();
+//  if (this->theContextIndex!=other.theContextIndex)
+//    return false;
   return this->theIndex==other.theIndex;
 }
 
-Data& Expression::GetData()const
+const Data& Expression::GetData()const
 { if (this->theOperation!=this->theBoss->opData())
   { std::cout << "This is a programming error. Expression::GetData is called on an object that is not of type Data. "
     << " Please debug file " << __FILE__ << " line " << __LINE__ << ".";
@@ -631,7 +685,7 @@ bool Data::operator/=(const Data& other)
 }
 
 bool Data::OperatorDereference
-  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)
+  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
 { int whichInteger1, whichInteger2;
   switch(this->type)
   { case Data::typeSSalgebra:
@@ -650,7 +704,7 @@ bool Data::OperatorDereference
   }
 }
 
-bool Data::OperatorDereference(const Data& argument, Data& output, std::stringstream* comments)
+bool Data::OperatorDereference(const Data& argument, Data& output, std::stringstream* comments)const
 { int whichInteger;
   switch(this->type)
   { case Data::typeSSalgebra:
@@ -1403,8 +1457,8 @@ bool CommandList::fHWTAABF
     return false;
   if (!theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, rightExpression, comments))
     return false;
-  Data& leftD=leftExpression.GetData();
-  Data& rightD=rightExpression.GetData();
+  const Data& leftD=leftExpression.GetData();
+  const Data& rightD=rightExpression.GetData();
   int indexSSalgebra;
   if (!theCommands.GetIndexAmbientUEAlgebra(indexSSalgebra, theExpression, comments))
   { theExpression.SetError("Error: could not resolve Lie algebra owner ");
@@ -1422,22 +1476,24 @@ bool CommandList::fHWTAABF
   }
   Vector<RationalFunction> weight;
   weight.SetSize(weightData.size);
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt= leftD.GetUE();
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightElt= rightD.GetUE();
+  std::cout << "<br>starting left elt before conversion: " << leftElt.ElementToString();
+  std::cout << "<br>starting right elt before conversion: " << rightElt.ElementToString();
+  leftElt.MakeVariableUnion(rightElt);
   for (int i=0; i<weightData.size; i++)
-  { weight[i]=weightData[i].theBuiltIn;
+    leftElt.MakeVariableUnion(weightData[i]);
+  rightElt.MakeVariableUnion(leftElt);
+  for (int i=0; i<weightData.size; i++)
+  { weightData[i].MakeVariableUnion(leftElt);
+    weight[i]=weightData[i].theBuiltIn;
   }
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt= leftD.GetUE();
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt= rightD.GetUE();
-  int numVars=MathRoutines::Maximum(leftElt.theBuiltIn.GetNumVars(), rightElt.theBuiltIn.GetNumVars());
-  std::cout << "<b>Fix the setnumvariables use!</b>";
-  for (int i=0; i<weight.size; i++)
-    numVars= MathRoutines::Maximum(weight[i].GetNumVars(), numVars);
-  leftElt.theBuiltIn.SetNumVariables(numVars);
-  rightElt.theBuiltIn.SetNumVariables(numVars);
-  for (int i=0; i<weight.size; i++)
-    weight[i].SetNumVariables(numVars);
+  std::cout << "<br>starting left elt after conversion: " << leftElt.ElementToString();
+  std::cout << "<br>starting right elt after conversion: " << rightElt.ElementToString();
+
   RationalFunction theRingZero, theRingUnit;
-  theRingZero.MakeZero(numVars, theCommands.theGlobalVariableS);
-  theRingUnit.MakeOne(numVars, theCommands.theGlobalVariableS);
+  theRingZero.MakeZero(leftElt.VariableImages.size, theCommands.theGlobalVariableS);
+  theRingUnit.MakeOne(leftElt.VariableImages.size, theCommands.theGlobalVariableS);
   Vector<RationalFunction> theHW;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
@@ -1611,20 +1667,13 @@ bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { DataOfExpressions<Polynomial<Rational> > outputPoly;
   std::stringstream errorLog;
-  Data outputData(theCommands);
-  if (!theCommands.ExtractData<Polynomial<Rational> >(outputPoly, theExpression, 10000, &errorLog))
-  { outputData.SetError(errorLog.str());
+  Polynomial<Rational> pZero;
+  pZero=0;
+  if (!theCommands.ExtractPMTDtree<Polynomial<Rational> >(outputPoly, pZero, theExpression, &errorLog))
+  { theExpression.SetError("failed to convert to polynomial with error message: "+errorLog.str());
     return true;
   }
-  outputData.MakePoly(theCommands, outputPoly);
-  theExpression.theOperation=theCommands.opData();
-  theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(outputData);
-  if (comments!=0)
-    for (int i=0; i<outputPoly.VariableImages.size; i++)
-    { *comments  << "x_{" << i+1 << "}:=" << outputPoly.VariableImages[i].ElementToString(0, 10);
-      if (i!=outputPoly.VariableImages.size-1)
-        *comments << ";<br>";
-    }
+  theExpression.MakePoly(outputPoly, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -1634,7 +1683,7 @@ bool CommandList::GetIndexAmbientUEAlgebra
   if (RecursionDepth>MaxRecursionDepth)
     return false;
   if (inputExpression.theOperation==this->opData())
-  { Data& currentData=inputExpression.GetData();
+  { const Data& currentData=inputExpression.GetData();
     if (currentData.type==currentData.typeElementUE)
       outputIndex= currentData.GetValuE<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >().theBuiltIn.indexInOwners;
     if (currentData.type==currentData.typePoly|| currentData.type== currentData.typeRational
@@ -1678,10 +1727,11 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
       << " trying to apply fElementUniversalEnvelopingAlgebra on " << theExpression.ElementToString();
     return false;
   }
-  outputUE.theBuiltIn.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexAmbientAlgebra);
+  ElementUniversalEnveloping<RationalFunction> ueZero;
+  ueZero.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexAmbientAlgebra);
   //outputUE
-  if (!theCommands.ExtractData<ElementUniversalEnveloping<RationalFunction> >(outputUE, theExpression, 10000, &errorLog))
-  { outputData.SetError(errorLog.str());
+  if (!theCommands.ExtractPMTDtree(outputUE, ueZero, theExpression, &errorLog))
+  { theExpression.SetError(errorLog.str());
     return true;
   }
   std::cout << outputUE.ElementToString();
@@ -1823,7 +1873,7 @@ void CommandList::initPredefinedVars()
   ("UE", & this->fElementUniversalEnvelopingAlgebra, "",
    "Creates a c++ representation of an element of a universal enveloping algebra. The data structure is implemented without \
    use of expression trees, and obeys substitution rules as a single object (expression with a single node).",
-   "SemisimpleLieAlgebra{} G_2;\nUE{}(g_1g_2-g_2g_1+g_3^2)");
+   "g:=SemisimpleLieAlgebra{} G_2;\nUE{}(g_1g_2-g_2g_1+g_3^2)");
   this->AddNonBoundVarMustBeNew
   ("FunctionToMatrix", & this->fMatrix, "",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
@@ -1853,7 +1903,7 @@ void CommandList::initPredefinedVars()
    be a projection map onto Cv that maps every weight vector of M of weight different from the \
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
-   "g:=SemisimpleLieAlgebra{} G_2;\nv:=hwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
+   "g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
 
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
@@ -1913,9 +1963,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    algebra elements might change.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
   this->AddOperationNoFail(":=", 0, "", "", "", false);
   this->AddOperationNoFail("if:=", 0, "", "", "", false);
-  this->AddOperationNoFail("^", 0, "", "", "", false);
+  this->AddOperationNoFail("^", this->StandardPower, "", "Not documented at the moment.", "", false);
   this->AddOperationNoFail
-  ("==", this->EvaluateStandardEqualEqual, "",
+  ("==", this->StandardEqualEqual, "",
    "Evaluates to 1 if the left argument equals the right argument, otherwise evaluates to zero.",
    "x==y; x:=1; y:=1; x==y", false);
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
@@ -2090,13 +2140,13 @@ bool CommandList::CollectSummands
 
 bool CommandList::DoThePowerIfPossible
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.theOperation!=theCommands.opTimes() )
+{ if (theExpression.theOperation!=theCommands.opThePower() )
     return false;
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
-//  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
   if (leftE.theOperation!=theCommands.opData())
     return false;
+//  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
   if (leftE.IsElementUE())
     if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
     { if (comments!=0)
@@ -2104,8 +2154,10 @@ bool CommandList::DoThePowerIfPossible
         << ", to type polynomial. ";
       return false;
     }
-  Data& LeftD=leftE.GetData();
-  Data& RightD=rightE.GetData();
+//  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+
+  const Data& LeftD=leftE.GetData();
+  const Data& RightD=rightE.GetData();
   Data outputD;
   if (!LeftD.Exponentiate(RightD, outputD))
     return false;
@@ -2122,9 +2174,10 @@ bool CommandList::DoMultiplyIfPossible
 //  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
   if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
     return false;
-  Data& LeftD=leftE.GetData();
-  Data& RightD=rightE.GetData();
+  const Data& LeftD=leftE.GetData();
+  const Data& RightD=rightE.GetData();
   Data outputD;
+//  std::cout << "<br>attempting to make standard multiplication<br>";
   if (!LeftD.MultiplyBy(RightD, outputD))
     return false;
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
@@ -2141,65 +2194,31 @@ bool Data::Exponentiate(const Data& right, Data& output)const
       return true;
     }
   }
-/*  if (this->type!=this->typeElementUE || right!=this->typePoly)
+  if (this->type!=this->typeElementUE || right.type!=this->typePoly)
     return false;
-  DataOfExpressions<Polynomial<Rational> > rightElt;
-    DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
-    leftElt.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
-    leftElt.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
-    if (!right.ConvertToType<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > >(rightElt, rightElt))
-      return false;
-    if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, leftElt))
-      return false;
-    if (!theGhostHasAppeared)
-    { std::cout << "Ere I am J.H. ... The ghost in the machine...";
-      theGhostHasAppeared=true;
-    }
-    rightElt.MakeVariableUnion(leftElt);
-    RationalFunction RFOne, RFZero;
-    int numVars=leftElt.VariableImages.size;
-    RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
-    RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
-    rightElt.theBuiltIn.MultiplyMeByUEEltOnTheLeft
-    (this->owner->theObjectContainer.theCategoryOmodules.theBuiltIn, leftElt.theBuiltIn, *this->owner->theGlobalVariableS, RFOne, RFZero)
-    ;
-    output.MakeElementTensorGeneralizedVermas(*this->owner, rightElt);
-    return true;
-  }
-  if (this->type!=Data::typeElementUE && right.type!=Data::typeElementUE)
+//  std::cout << "<br>before exponentiation: raising " << this->ElementToString() << " to power " << right.ElementToString();
+  const DataOfExpressions<Polynomial<Rational> >& rightElt= right.GetPoly();
+  const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=this->GetUE();
+  const ElementUniversalEnveloping<RationalFunction>& leftUE=leftElt.theBuiltIn;
+  if (!leftUE.IsAPowerOfASingleGenerator())
     return false;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightElt;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
-  if (this->type==Data::typeElementUE)
-  { result.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
-    result.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
-  } else
-  { result.theBuiltIn.owners=&right.owner->theObjectContainer.theLieAlgebras;
-    result.theBuiltIn.indexInOwners=right.GetIndexAmbientSSLieAlgebra();
-  }
-  if (!right.ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(rightElt, result))
-    return false;
-  if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, result))
-    return false;
-  if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
-      || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
-    return false;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftCopy=leftElt;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightCopy=rightElt;
-  result=leftCopy;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >result;
+  result=leftElt;
+  DataOfExpressions<Polynomial<Rational> >rightCopy;
+  rightCopy=rightElt;
   result.MakeVariableUnion(rightCopy);
-  std::cout << "left: " << result.ElementToString();
-  std::cout << "<br>right: " << rightCopy.ElementToString();
-  result.theBuiltIn*=rightCopy.theBuiltIn;
-  //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
+
+//  std::cout << "<br>before exponentiation next step: raising " << result.ElementToString() << " to power " << rightCopy.ElementToString() << " = " << rightCopy.theBuiltIn.ElementToString();
+//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals " << result.theBuiltIn[0].Powers[0].ElementToString();
+  result.theBuiltIn[0].Powers[0]*=rightCopy.theBuiltIn;
+//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals after multiplication to: " << result.theBuiltIn[0].Powers[0].ElementToString();
+
   output.owner=this->owner;
   output.type=output.typeElementUE;
   output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
+//  std::cout << "<br>the very final result of exponentiation: " << output.ElementToString();
   return true;
-  return false;*/
 }
-
 
 bool Data::MultiplyBy(const Data& right, Data& output)const
 { static bool theGhostHasAppeared=false;
@@ -2229,9 +2248,13 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
   }
   if (this->type!=Data::typeElementUE && right.type!=Data::typeElementUE)
     return false;
+  if (this->type!=Data::typeElementUE)
+    return right.MultiplyBy(*this, output);
+//  std::cout << "<br>before the multiplication: " << this->ElementToString() << " * " << right.ElementToString();
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightElt;
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
+
   if (this->type==Data::typeElementUE)
   { result.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
     result.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
@@ -2239,6 +2262,7 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
   { result.theBuiltIn.owners=&right.owner->theObjectContainer.theLieAlgebras;
     result.theBuiltIn.indexInOwners=right.GetIndexAmbientSSLieAlgebra();
   }
+  this->GetCommonContext(right, result.VariableImages);
   if (!right.ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(rightElt, result))
     return false;
   if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, result))
@@ -2246,12 +2270,11 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
   if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
       || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
     return false;
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftCopy=leftElt;
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightCopy=rightElt;
-  result=leftCopy;
+  result=leftElt;
   result.MakeVariableUnion(rightCopy);
-  std::cout << "left: " << result.ElementToString();
-  std::cout << "<br>right: " << rightCopy.ElementToString();
+//  std::cout << "left: " << result.ElementToString();
+//  std::cout << "<br>right: " << rightCopy.ElementToString();
   result.theBuiltIn*=rightCopy.theBuiltIn;
   //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
   output.owner=this->owner;
@@ -2266,8 +2289,8 @@ bool Data::Add(const Data& right, Data& output)const
       return right.Add(*this, output);
     return false;
   }
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=this->GetUE();
-  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt=right.GetUE();
+  const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& leftElt=this->GetUE();
+  const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& rightElt=right.GetUE();
   if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
       || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
     return false;
@@ -2276,8 +2299,8 @@ bool Data::Add(const Data& right, Data& output)const
   leftCopy.MakeVariableUnion(rightCopy);
   DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
   result=leftCopy;
-  std::cout << "left: " << result.ElementToString();
-  std::cout << "<br>right: " << rightCopy.ElementToString();
+//  std::cout << "left: " << result.ElementToString();
+//  std::cout << "<br>right: " << rightCopy.ElementToString();
   result.theBuiltIn+=rightCopy.theBuiltIn;
   //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
   output.owner=this->owner;
@@ -2490,7 +2513,7 @@ bool CommandList::EvaluateDereferenceOneArgument
   Expression& functionArgumentNode=theExpression.children[1];
   if (functionNameNode.theOperation!=theCommands.opData() )
     return false;
-  Data& theFunData=functionNameNode.GetData();
+  const Data& theFunData=functionNameNode.GetData();
   Data tempData(theCommands);
   if (functionArgumentNode.theOperation!=theCommands.opList())
   { if (functionArgumentNode.theOperation!=theCommands.opData() )
@@ -2532,7 +2555,7 @@ bool CommandList::StandardFunction
 //    return true;
   Expression& functionNameNode =theExpression.children[0];
   if (functionNameNode.theOperation==theCommands.opData())
-  { Data& theFunData=functionNameNode.GetData();
+  { const Data& theFunData=functionNameNode.GetData();
     if (theFunData.type==Data::typeRational)
     { theExpression.AssignChild(0);
       return true;
@@ -2557,7 +2580,7 @@ bool CommandList::StandardFunction
   return false;
 }
 
-bool CommandList::EvaluateStandardEqualEqual
+bool CommandList::StandardEqualEqual
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { assert(theExpression.children.size==2);
   Expression& left=theExpression.children[0];
@@ -2595,12 +2618,10 @@ bool Expression::IsRationalNumber()
   return false;
 }
 
-bool Expression::IsInteger()
+bool Expression::IsInteger()const
 { if (this->theOperation!=this->theBoss->opData())
     return false;
-assert(false);
-
-//  return this->theBoss->theData[this->theData].IsInteger();
+  return this->GetData().IsInteger();
 }
 
 bool Expression::IsElementUE()const
@@ -2717,8 +2738,24 @@ bool Expression::operator==(const Expression& other)const
 }
 
 template <class dataType>
-bool CommandList::ExtractData
-(dataType& outputBuffer, DataOfExpressions<dataType>& finalOutput,
+bool CommandList::ExtractPMTDtreeContext
+(HashedList<Expression>& output, const Expression& theInput, int RecursionDepth, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog)
+{
+}
+
+template <class dataType>
+bool CommandList::ExtractPMTDtree
+  (DataOfExpressions<dataType>& output, const dataType& thePMDTinitializer, const Expression& theInput, std::stringstream* errorLog)
+{ DataOfExpressions<dataType> theZero;
+  theZero.theBuiltIn=thePMDTinitializer;
+  if (!this->ExtractPMTDtreeContext<dataType>(theZero.VariableImages, theInput, 0, 10000, errorLog))
+    return false;
+  return this->ExtractPMTDtreeFromContextRecursive(output, theZero, theInput, 0, 10000, errorLog);
+}
+
+template <class dataType>
+bool CommandList::ExtractPMTDtreeFromContextRecursive
+(DataOfExpressions<dataType>& output, const DataOfExpressions<dataType>& inputContextInitializedWithZeroElement,
  const Expression& theInput, int RecursionDepth, int MaxRecursionDepthMustNotPopStack, std::stringstream* errorLog)
 { if (RecursionDepth>MaxRecursionDepthMustNotPopStack)
   { if (errorLog!=0)
@@ -2726,45 +2763,42 @@ bool CommandList::ExtractData
       << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
     return false;
   }
-  if (RecursionDepth==0)
-    finalOutput.VariableImages.Clear();
   if (theInput.theOperation==this->opTimes() || theInput.theOperation==this->opPlus() || theInput.theOperation==this->opMinus())
-  { dataType bufferData;
+  { DataOfExpressions<dataType> bufferData;
     for (int i=0; i<theInput.children.size; i++)
-    { if (!this->ExtractData(bufferData, finalOutput, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+    { if (!this->ExtractPMTDtreeFromContextRecursive(bufferData, inputContextInitializedWithZeroElement, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
         return false;
-      outputBuffer.SetNumVariables(finalOutput.VariableImages.size);
-      bufferData.SetNumVariables(finalOutput.VariableImages.size);
       //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
-          outputBuffer=bufferData;
+          output=bufferData;
         else
         { //std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
           //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputBuffer*=bufferData;
+          output.theBuiltIn*=bufferData.theBuiltIn;
           //std::cout << "<br>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
       else if (theInput.theOperation==this->opMinus())
       { if (theInput.children.size==1)
-          outputBuffer-=(bufferData);
-        else if (i==0)
-          outputBuffer+=bufferData;
+        { output=bufferData;
+          output.theBuiltIn*=-1;
+        } else if (i==0)
+          output=bufferData;
         else
-          outputBuffer-=(bufferData);
+          output.theBuiltIn-=(bufferData.theBuiltIn);
       } else if (theInput.theOperation==this->opPlus())
       { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
         if (i==0)
-        { outputBuffer=bufferData;
+        { output=bufferData;
 //          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
 //          << ", which should equal the bufferData: " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
         }
         else
         { //std::cout << "<hr>Adding: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
           //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputBuffer+=bufferData;
+          output.theBuiltIn+=bufferData.theBuiltIn;
           //std::cout << "<hr>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
@@ -2777,9 +2811,9 @@ bool CommandList::ExtractData
     if (right.theOperation==this->opData())
     { int  thePower=0;
       if (this->theData[right.theData].IsSmallInteger(thePower))
-      { if(!this->ExtractData(outputBuffer, finalOutput, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
+      { if(!this->ExtractPMTDtreeFromContextRecursive(output, inputContextInitializedWithZeroElement, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
           return false;
-        outputBuffer.RaiseToPower(thePower);
+        output.theBuiltIn.RaiseToPower(thePower);
         return true;
       }
     }
@@ -2787,16 +2821,19 @@ bool CommandList::ExtractData
   if (theInput.theOperation==this->opData())
   { Data& theData=this->theData[theInput.theData];
 //    std::cout << "<hr>attempting to convert " << theData.ElementToString() << "<br>";
-    if (theData.ConvertToType<dataType>(outputBuffer, finalOutput.theBuiltIn))
+    if (theData.ConvertToType(output, inputContextInitializedWithZeroElement))
     { //std::cout << "<br>outputBuffer converted to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
       return true;
     }
   }// else
   //{ //std::cout << "Input is of type " << theInput.GetOperation();
   //}
-  std::string debugString=theInput.ElementToString();
-  int theIndex=finalOutput.VariableImages.AddNoRepetitionOrReturnIndexFirst(theInput);
-  outputBuffer=finalOutput.GetPolynomialMonomial(1, theIndex, *this->theGlobalVariableS);
+//  std::string debugString=theInput.ElementToString();
+  int theIndex=inputContextInitializedWithZeroElement.VariableImages.GetIndex(theInput);
+  if (theIndex==-1)
+    return false;
+  output.VariableImages=inputContextInitializedWithZeroElement.VariableImages;
+  output.theBuiltIn=inputContextInitializedWithZeroElement.GetPolynomialMonomial(1, theIndex, *this->theGlobalVariableS);
 //  std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
 //  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
   return true;
@@ -3695,6 +3732,7 @@ void Data::operator=(const Data& other)
   this->type=other.type;
   this->owner=other.owner;
   this->theIndex=other.theIndex;
+//  this->theContextIndex=other.theContextIndex;
   this->theError=other.theError;
 }
 
@@ -3876,21 +3914,23 @@ int DataOfExpressions<dataType>::HashFunction()const
 template <class dataType>
 template <class otherType>
 void DataOfExpressions<dataType>::MakeVariableUnion(DataOfExpressions<otherType>& other)
-{ PolynomialSubstitution<Rational> leftSub, rightSub;
-  HashedList<Expression> finalVars=this->VariableImages;
+{ HashedList<Expression> finalVars=this->VariableImages;
   finalVars.AddNoRepetition(other.VariableImages);
-  if (finalVars.size!=this->VariableImages.size)
-  { leftSub.SetSize(finalVars.size);
-    for (int i=0; i<this->VariableImages.size; i++)
-      leftSub[i].MakeMonomial(finalVars.size, finalVars.GetIndex(this->VariableImages[i]),1);
-    this->theBuiltIn.Substitution(leftSub);
-  }
-  if (finalVars.size!=other.VariableImages.size)
-  { rightSub.SetSize(finalVars.size);
-    for (int i=0; i<other.VariableImages.size; i++)
-      rightSub[i].MakeMonomial(finalVars.size, finalVars.GetIndex(other.VariableImages[i]),1);
-    other.theBuiltIn.Substitution(leftSub);
-  }
+  this->SetVariables(finalVars);
+  other.SetVariables(finalVars);
+}
+
+template <class dataType>
+bool DataOfExpressions<dataType>::SetVariables(const HashedList<Expression>& newVariableImages)
+{ PolynomialSubstitution<Rational> theSub;
+  if (!newVariableImages.Contains(this->VariableImages))
+    return false;
+  theSub.SetSize(this->VariableImages.size);
+  for (int i=0; i<this->VariableImages.size; i++)
+    theSub[i].MakeMonomial(newVariableImages.size, newVariableImages.GetIndex(this->VariableImages[i]),1);
+  this->theBuiltIn.Substitution(theSub);
+  this->VariableImages=newVariableImages;
+  return true;
 }
 
 template <class dataType>
@@ -3912,7 +3952,7 @@ DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >::GetConst
 template <>
 ElementUniversalEnveloping<RationalFunction>
 DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >::GetPolynomialMonomial
-(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)
+(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
 { ElementUniversalEnveloping<RationalFunction> output;
   Polynomial<Rational> thePoly;
   thePoly.MakeNVarDegOnePoly(this->VariableImages.size, inputNonZeroIndex, inputCoeff);
@@ -3926,7 +3966,7 @@ DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >::GetPolynomialM
 template <>
 Polynomial<Rational>
 DataOfExpressions<Polynomial<Rational> >::GetPolynomialMonomial
-(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)
+(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
 { Polynomial<Rational> output;
   output.MakeNVarDegOnePoly(this->VariableImages.size, inputNonZeroIndex, inputCoeff);
   return output;
@@ -3945,7 +3985,7 @@ bool Data::ConvertToType<Polynomial<Rational> >
       return true;
     case Data::typeRationalFunction:
       if (this->GetValuE<DataOfExpressions<RationalFunction> >().theBuiltIn.expressionType==RationalFunction::typePoly)
-      { output=this->GetValuE<DataOfExpressions<RationalFunction> >().theBuiltIn.Numerator.GetElement();
+      { output=this->GetValuE<DataOfExpressions<RationalFunction> >().theBuiltIn.Numerator.GetElementConst();
         return true;
       }
       if (this->GetValuE<DataOfExpressions<RationalFunction> >().theBuiltIn.expressionType==RationalFunction::typeRational)

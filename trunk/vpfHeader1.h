@@ -1012,8 +1012,15 @@ public:
     this->TheHashedArrays[i1Hash].AddOnTop(i2);
     this->TheHashedArrays[i2Hash].AddOnTop(i1);
   }
-
-  inline bool Contains(const Object& o) {return this->GetIndex(o)!=-1; }
+  inline bool Contains(const Object& o)const
+  { return this->GetIndex(o)!=-1;
+  }
+  inline bool Contains(const List<Object>& theList)const
+  { for (int i=0; i<theList.size; i++)
+      if (this->GetIndex(theList[i])==-1)
+        return false;
+    return true;
+  }
   int GetIndex(const Object& o) const
   { int hashIndex = this->GetHash(o);
     for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
@@ -1148,7 +1155,8 @@ public:
   inline void AddNoRepetition(const List<Object>& theList){ this->HashedListB<Object, Object::HashFunction>::AddNoRepetition(theList);}
   inline void PopIndexSwapWithLast(int index){ this->HashedListB<Object, Object::HashFunction>::PopIndexSwapWithLast(index);}
   inline void SwapTwoIndicesHash(int i1, int i2){this->HashedListB<Object, Object::HashFunction>::SwapTwoIndicesHash(i1, i2);}
-  inline bool Contains(const Object& o){return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
+  inline bool Contains(const Object& o)const{return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
+  inline bool Contains(const List<Object>& o)const{return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
   inline int GetIndex(const Object& o) const{return this->HashedListB<Object, Object::HashFunction>::GetIndex(o); }
   inline int GetIndexIMustContainTheObject(const Object& o) const {return this->HashedListB<Object, Object::HashFunction>::GetIndexIMustContainTheObject(o);}
   inline void SetExpectedSize(int expectedSize) {this->HashedListB<Object, Object::HashFunction>::SetExpectedSize(expectedSize); }
@@ -5703,7 +5711,12 @@ void Polynomial<CoefficientType>::Substitution
 { //std::cout << "<hr><hr><hr>Making a substitution ";
   //FormatExpressions theFormat;
   //std::cout << "into this piece of crap:<br> " << this->ElementToString(theFormat);
-  if (this->NumVars==0 || TheSubstitution.size==0)
+  if (this->NumVars==0)
+  { if (TheSubstitution.size!=0)
+      this->SetNumVariables(TheSubstitution[0].NumVars);
+    return;
+  }
+  if (TheSubstitution.size==0)
     return;
   if (TheSubstitution.size!=this->NumVars)
   { std::cout << "This is a programming error: attempting to carry out a substitution"

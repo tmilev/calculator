@@ -4789,33 +4789,6 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   void MakeIdSubstitution(int numVars);
 };
 
-class PolynomialRatCoeff : public Polynomial<Rational>
-{
-public:
-  void Evaluate(Vector<Rational>& values, Rational& output);
-  void Evaluate(const Vector<Rational> & values, Rational& output){ this->::Polynomial<Rational>::Evaluate(values, output, (Rational) 0);}
-  void MakePolyFromDirectionAndNormal(Vector<Rational> & direction, Vector<Rational> & normal, Rational& Correction, GlobalVariables& theGlobalVariables);
-  void MakePolyExponentFromIntRoot(Vector<LargeInt>& r, GlobalVariables& theGlobalVariables);
-  void MakeLinPolyFromInt(int theDimension, int x1, int x2, int x3, int x4, int x5);
-  bool GetIntegerPoly(Polynomial<LargeInt>& output)const;
-  int FindGCMCoefficientDenominators();
-  Rational FindGCDCoefficientDenominators();
-  Rational FindGCDCoefficientNumerators();
-  void MakeLinearPoly(int NumVars);
-  void ClearDenominators(Rational& output)
-  { output.MakeOne();
-    Rational tempRat;
-    for (int i=0; i<this->size; i++)
-      if (!this->theCoeffs[i].IsInteger())
-      { this->theCoeffs[i].GetDen(tempRat);
-        *this*=tempRat;
-        output*=tempRat;
-      }
-  }
-  void MakePChooseK(const Polynomial<Rational> & P, int k, Polynomial<Rational> & output);
-  void ScaleToIntegralNoGCDCoeffs();
-};
-
 //std::iostream& operator<<(std::iostream& output, const RationalFunction& theRF);
 //std::iostream& operator>>(std::iostream& input, RationalFunction& theRF);
 

@@ -85,12 +85,12 @@ public:
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   ;
-
   bool Add(const Data& right, Data& output)const
   ;
   bool MultiplyBy(const Data& right, Data& output)const
   ;
-
+  bool Exponentiate(const Data& right, Data& output)const
+  ;
   bool IsInteger();
   ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
   int GetSmallInT()const;
@@ -272,6 +272,7 @@ void MakeVariableNonBounD
   ;
   bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
   bool IsRationalNumber();
+  bool IsElementUE()const;
   bool IsInteger();
   bool IsSmallInteger(int& whichInteger);
   bool IsSmallInteger(){int tempI; return this->IsSmallInteger(tempI);}
@@ -854,22 +855,25 @@ static bool EvaluateDereferenceOneArgument
   static bool EvaluateStandardUnionNoRepetition
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardPlus
+  static bool StandardPlus
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardTimes
+  static bool StandardPower
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardDivide
+  static bool StandardTimes
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardLieBracket
+  static bool StandardDivide
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardMinus
+  static bool StandardLieBracket
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool EvaluateStandardFunction
+  static bool StandardMinus
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool StandardFunction
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateStandardEqualEqual
@@ -884,7 +888,10 @@ static bool EvaluateDereferenceOneArgument
   static bool EvaluateDoDistribute
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
   ;
-  static bool EvaluateDoMultiplyIfPossible
+  static bool DoThePowerIfPossible
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool DoMultiplyIfPossible
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft

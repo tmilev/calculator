@@ -20,7 +20,6 @@ ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculato
 //#undef ANNOYINGSTATISTICS
 //#define ANNOYINGSTATISTICS std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
 
-
 void getPath(char* path, std::string& output)
 { if (path==0) return;
   int length=0;
@@ -309,6 +308,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //  civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; 2 h_1";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; 2 g_{0,1}";
+//civilizedInput="g_{1}^2g_{1}";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

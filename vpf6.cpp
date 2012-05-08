@@ -1288,7 +1288,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     std::cout <<"<hr>" << this->ElementToStringSyntacticStack();
   if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression while reducing " << this->ElementToStringSyntacticStack()
-    << " does not have properly initialized context.";
+    << " does not have properly initialized context. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__;
     assert(false);
   }
   if (secondToLastS==":" && lastS=="=")
@@ -1888,18 +1888,18 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->evaluationErrors.SetSize(0);
   this->targetProperties.SetSize(0);
   this->AddOperationNoFail
-  ("+", this->EvaluateStandardPlus, "",
+  ("+", this->StandardPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", false);
   this->AddOperationNoFail
-  ("-", this->EvaluateStandardMinus, "",
+  ("-", this->StandardMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", false);
   this->AddOperationNoFail
-  ("/", this->EvaluateStandardDivide, "",
+  ("/", this->StandardDivide, "",
     "If a and b are rational computes a/b. Otherwise does nothing.", "3/5+(a+b)/5", false);
   this->AddOperationNoFail
-  ("*", this->EvaluateStandardTimes, "",
+  ("*", this->StandardTimes, "",
    "<br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, substitutes a*b by the result of the built-in handler.<br>\n \
    2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
    3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
@@ -1908,7 +1908,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    4.3) If the expression is of the form a*(b*c) and b is rational but a is not, substitutes the expression by b*(a*c). <br>",
    "2*c_1*d*3", false);
   this->AddOperationNoFail
-  ("[]", this->EvaluateStandardLieBracket, "",
+  ("[]", this->StandardLieBracket, "",
    "Lie bracket. Not documented at the moment, as the calculator implementation of semisimple Lie \
    algebra elements might change.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
   this->AddOperationNoFail(":=", 0, "", "", "", false);
@@ -1921,7 +1921,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
   //expression
   this->AddOperationNoFail
-  ("{}", this->EvaluateStandardFunction, "",
+  ("{}", this->StandardFunction, "",
    "The first argument of this operator represents a name of the function, the second argument represents the argument of that function.  \
    1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
    2) If the first argument is of type Data, tries a series of pre-defined rules for applying\
@@ -2088,13 +2088,38 @@ bool CommandList::CollectSummands
   return true;
 }
 
-bool CommandList::EvaluateDoMultiplyIfPossible
+bool CommandList::DoThePowerIfPossible
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opTimes() )
     return false;
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
-  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
+//  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
+  if (leftE.theOperation!=theCommands.opData())
+    return false;
+  if (leftE.IsElementUE())
+    if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
+    { if (comments!=0)
+        *comments << "<br>Failed to convert " << rightE.ElementToString() << ", the exponent of " << leftE.ElementToString()
+        << ", to type polynomial. ";
+      return false;
+    }
+  Data& LeftD=leftE.GetData();
+  Data& RightD=rightE.GetData();
+  Data outputD;
+  if (!LeftD.Exponentiate(RightD, outputD))
+    return false;
+  theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool CommandList::DoMultiplyIfPossible
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opTimes() )
+    return false;
+  Expression& leftE=theExpression.children[0];
+  Expression& rightE=theExpression.children[1];
+//  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
   if (leftE.theOperation!=theCommands.opData() || rightE.theOperation!=theCommands.opData())
     return false;
   Data& LeftD=leftE.GetData();
@@ -2105,6 +2130,76 @@ bool CommandList::EvaluateDoMultiplyIfPossible
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
+
+bool Data::Exponentiate(const Data& right, Data& output)const
+{ if (right.type==Data::typeRational && this->type==typeRational)
+  { int thePower;
+    if (right.IsSmallInteger(thePower))
+    { Rational resultRat=this->owner->theObjectContainer.theRationals[this->theIndex];
+      resultRat.RaiseToPower(thePower);
+      output.MakeRational(*this->owner, resultRat);
+      return true;
+    }
+  }
+/*  if (this->type!=this->typeElementUE || right!=this->typePoly)
+    return false;
+  DataOfExpressions<Polynomial<Rational> > rightElt;
+    DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
+    leftElt.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
+    leftElt.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
+    if (!right.ConvertToType<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > >(rightElt, rightElt))
+      return false;
+    if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, leftElt))
+      return false;
+    if (!theGhostHasAppeared)
+    { std::cout << "Ere I am J.H. ... The ghost in the machine...";
+      theGhostHasAppeared=true;
+    }
+    rightElt.MakeVariableUnion(leftElt);
+    RationalFunction RFOne, RFZero;
+    int numVars=leftElt.VariableImages.size;
+    RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
+    RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
+    rightElt.theBuiltIn.MultiplyMeByUEEltOnTheLeft
+    (this->owner->theObjectContainer.theCategoryOmodules.theBuiltIn, leftElt.theBuiltIn, *this->owner->theGlobalVariableS, RFOne, RFZero)
+    ;
+    output.MakeElementTensorGeneralizedVermas(*this->owner, rightElt);
+    return true;
+  }
+  if (this->type!=Data::typeElementUE && right.type!=Data::typeElementUE)
+    return false;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > result;
+  if (this->type==Data::typeElementUE)
+  { result.theBuiltIn.owners=&this->owner->theObjectContainer.theLieAlgebras;
+    result.theBuiltIn.indexInOwners=this->GetIndexAmbientSSLieAlgebra();
+  } else
+  { result.theBuiltIn.owners=&right.owner->theObjectContainer.theLieAlgebras;
+    result.theBuiltIn.indexInOwners=right.GetIndexAmbientSSLieAlgebra();
+  }
+  if (!right.ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(rightElt, result))
+    return false;
+  if (!this->ConvertToType<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > >(leftElt, result))
+    return false;
+  if (leftElt.theBuiltIn.owners!=rightElt.theBuiltIn.owners
+      || leftElt.theBuiltIn.indexInOwners!=rightElt.theBuiltIn.indexInOwners)
+    return false;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > leftCopy=leftElt;
+  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > rightCopy=rightElt;
+  result=leftCopy;
+  result.MakeVariableUnion(rightCopy);
+  std::cout << "left: " << result.ElementToString();
+  std::cout << "<br>right: " << rightCopy.ElementToString();
+  result.theBuiltIn*=rightCopy.theBuiltIn;
+  //result.theBuiltIn.Simplify(*this->owner->theGlobalVariableS);
+  output.owner=this->owner;
+  output.type=output.typeElementUE;
+  output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
+  return true;
+  return false;*/
+}
+
 
 bool Data::MultiplyBy(const Data& right, Data& output)const
 { static bool theGhostHasAppeared=false;
@@ -2163,7 +2258,6 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
   output.type=output.typeElementUE;
   output.theIndex=output.owner->theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(result);
   return true;
-  return false;
 }
 
 bool Data::Add(const Data& right, Data& output)const
@@ -2192,10 +2286,19 @@ bool Data::Add(const Data& right, Data& output)const
   return true;
 }
 
-bool CommandList::EvaluateStandardTimes
+bool CommandList::StandardPower
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
-  if (theCommands.EvaluateDoMultiplyIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
+  if (theCommands.DoThePowerIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
+    return true;
+  //std::cout << "<br>After do associate: " << theExpression.ElementToString();
+  return false;
+}
+
+bool CommandList::StandardTimes
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
+  if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
     return true;
   if (theCommands.EvaluateDoDistribute
       (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes(), theCommands.opPlus()))
@@ -2344,7 +2447,7 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
   return true;
 }
 
-bool CommandList::EvaluateStandardPlus
+bool CommandList::StandardPlus
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size==2)
   { Expression& leftE=theExpression.children[0];
@@ -2411,14 +2514,14 @@ bool CommandList::EvaluateDereferenceOneArgument
   return true;
 }
 
-bool CommandList::EvaluateStandardFunction
+bool CommandList::StandardFunction
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opApplyFunction())
     return false;
   if (theExpression.children.size==0)
   { theExpression.errorString=
     "Programming error: function has no name; this should never happen. \
-    Please dubug function CommandList::EvaluateStandardFunction";
+    Please dubug function CommandList::StandardFunction";
     return true;
   }
 //  if (theCommands.EvaluateDoLeftDistributeBracketIsOnTheLeft
@@ -2466,7 +2569,7 @@ bool CommandList::EvaluateStandardEqualEqual
   return true;
 }
 
-bool CommandList::EvaluateStandardLieBracket
+bool CommandList::StandardLieBracket
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=2)
     return false;
@@ -2498,6 +2601,12 @@ bool Expression::IsInteger()
 assert(false);
 
 //  return this->theBoss->theData[this->theData].IsInteger();
+}
+
+bool Expression::IsElementUE()const
+{ if (this->theOperation!=this->theBoss->opData())
+    return false;
+  return this->GetData().type==Data::typeElementUE;
 }
 
 bool Expression::IsSmallInteger(int& whichInteger)
@@ -2548,7 +2657,7 @@ bool CommandList::EvaluateStandardUnionNoRepetition
   return true;
 }
 
-bool CommandList::EvaluateStandardDivide
+bool CommandList::StandardDivide
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=2)
     return false;
@@ -2578,7 +2687,7 @@ bool CommandList::EvaluateStandardDivide
   return true;
 }
 
-bool CommandList::EvaluateStandardMinus
+bool CommandList::StandardMinus
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=1&& theExpression.children.size!=2)
   { theExpression.errorString="Programming error: operation - takes one or two arguments.";

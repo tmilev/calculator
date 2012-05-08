@@ -637,7 +637,7 @@ void Selection::ReadFromFile(std::fstream& input)
   input >> tempS >> card;
   assert(tempS=="cardinality:");
   for (int i=0; i<card; i++)
-  { input>>tempI;
+  { input >> tempI;
     this->AddSelectionAppendNewIndex(tempI);
   }
 }

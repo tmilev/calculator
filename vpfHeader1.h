@@ -5084,6 +5084,7 @@ public:
   void operator*=(const RationalFunction& other);
   void operator*=(const Polynomial<Rational> & other);
   void operator*=(const Rational& other);
+  void operator*=(int other){*this*=(Rational)other;}
 //  void operator-=(const Rational& theConstant)
 //  { RationalFunction tempRF;
 //    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
@@ -5689,6 +5690,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractMonomial
   if (j==-1)
   { this->::HashedList<TemplateMonomial>::AddOnTop(inputMon);
     this->theCoeffs.AddOnTop(inputCoeff);
+    *this->theCoeffs.LastObject()*=-1;
   } else
   { this->theCoeffs[j]-=inputCoeff;
     if (this->theCoeffs[j].IsEqualToZero())

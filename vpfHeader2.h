@@ -85,7 +85,10 @@ public:
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   ;
-  bool MultiplyBy(const Data& right, Data& output)
+
+  bool Add(const Data& right, Data& output)const
+  ;
+  bool MultiplyBy(const Data& right, Data& output)const
   ;
 
   bool IsInteger();

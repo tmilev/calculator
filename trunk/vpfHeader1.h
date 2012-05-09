@@ -1172,7 +1172,6 @@ public:
   void operator=(const List<Object>& other)
   { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
   }
-
 };
 
 struct CGI
@@ -4279,7 +4278,7 @@ public:
   void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   int TotalDegree();
-  void CheckNumCoeffsConsistency(const char* fileName, int lineName)
+  void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->size)
     { std::cout << "This is a programming error: a monomial collection has " << this->size << " monomials but "
       << this->theCoeffs.size << " coefficients. Please debug file " << CGI::GetHtmlLinkFromFileName(fileName)
@@ -4430,6 +4429,12 @@ public:
   void AddMonomial(const MonomialP& inputMon, const CoefficientType& inputCoeff)
   { this->::MonomialCollection<MonomialP, CoefficientType>::AddMonomial(inputMon, inputCoeff);
   }
+  int HashFunction()const
+  { return this->::MonomialCollection<MonomialP, CoefficientType>::HashFunction();
+  }
+  static inline int HashFunction(const Polynomial<CoefficientType>& input)
+  { return input.HashFunction();
+  }
   void MultiplyBy
   (const MonomialP& other, const CoefficientType& theCoeff)
   { Polynomial<CoefficientType> output;
@@ -4452,9 +4457,9 @@ public:
   void GetConstantTerm(CoefficientType& output, const CoefficientType& theRingZero);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
   void MakeMonomial(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff=1);
-  void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff);
-  void MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
-  void MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
+  void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff);
+  void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
+  void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
   void MakeLinPolyFromRootNoConstantTerm(const Vector<Rational> & r);
   void MakeLinPolyFromRootLastCoordConst(const Vector<Rational> & input);
   void MakePolyFromDirectionAndNormal
@@ -4771,7 +4776,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   void MakeLinearSubOnLastVariable(int NumVars, Polynomial<Rational> & LastVarSub)
   { this->SetSize(NumVars);
     for (int i=0; i<NumVars-1; i++)
-      this->TheObjects[i].MakeNVarDegOnePoly(NumVars, i, 1);
+      this->TheObjects[i].MakeDegreeOne(NumVars, i, 1);
     this->TheObjects[NumVars-1]=LastVarSub;
   }
   void MakeSubNVarForOtherChamber(Vector<Rational> & direction, Vector<Rational> & normal, Rational& Correction, GlobalVariables& theGlobalVariables)
@@ -4783,7 +4788,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
       TempPoly2=TempPoly;
       TempPoly2*=direction[i];
       TempPoly2*=-1;
-      this->TheObjects[i].MakeNVarDegOnePoly(direction.size, i, 1);
+      this->TheObjects[i].MakeDegreeOne(direction.size, i, 1);
       this->TheObjects[i]+=TempPoly2;
     }
   }
@@ -4791,7 +4796,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   { this->SetSize(direction.size);
     for (int i=0; i<direction.size; i++)
     { Rational tempRat; tempRat.Assign(direction.TheObjects[i]); tempRat.Minus();
-      this->TheObjects[i].MakeNVarDegOnePoly((int)(direction.size+1), i, direction.size, 1, tempRat);
+      this->TheObjects[i].MakeDegreeOne((int)(direction.size+1), i, direction.size, 1, tempRat);
     }
   }
   void MakeIdSubstitution(int numVars);
@@ -5002,6 +5007,12 @@ public:
     if (mustSimplify)
       this->Simplify();
     assert(this->checkConsistency());
+  }
+  void MakeOneLetterMon(int inputNumVars, int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables)
+  { this->expressionType=this->typePoly;
+    this->NumVars=inputNumVars;
+    this->Numerator.GetElement().MakeDegreeOne(this->NumVars, theIndex, theCoeff);
+    this->context=&theGlobalVariables;
   }
   void GetNumerator(Polynomial<Rational> & output)
   { switch(this->expressionType)
@@ -5744,7 +5755,7 @@ void Polynomial<Element>::MakeOne(int inputNumVars)
 }
 
 template <class Element>
-void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const Element& coeff)
+void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex, const Element& coeff)
 { this->MakeZero(NVar);
   MonomialP tempM;
   tempM.MakeEi(this->NumVars, NonZeroIndex);
@@ -5752,7 +5763,7 @@ void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const E
 }
 
 template <class Element>
-void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int NonZeroIndex2, const Element& coeff1, const Element& coeff2)
+void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const Element& coeff1, const Element& coeff2)
 { this->MakeZero(NVar);
   MonomialP tempM;
   tempM.MakeEi(this->NumVars, NonZeroIndex1);
@@ -5762,8 +5773,8 @@ void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex1, int No
 }
 
 template <class Element>
-void Polynomial<Element>::MakeNVarDegOnePoly(int NVar, int NonZeroIndex, const Element& coeff1, const Element& ConstantTerm)
-{ this->MakeNVarDegOnePoly(NVar, NonZeroIndex, coeff1);
+void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex, const Element& coeff1, const Element& ConstantTerm)
+{ this->MakeDegreeOne(NVar, NonZeroIndex, coeff1);
   *this+=ConstantTerm;
 }
 
@@ -5793,7 +5804,7 @@ MakeIdLikeInjectionSub
   this->SetSize(numStartingVars);
   for (int i=0; i<this->size; i++)
   { Polynomial<Element>& currentPoly=this->TheObjects[i];
-    currentPoly.MakeNVarDegOnePoly(numTargetVarsMustBeLargerOrEqual, i, theRingUnit);
+    currentPoly.MakeDegreeOne(numTargetVarsMustBeLargerOrEqual, i, theRingUnit);
   }
 }
 
@@ -5818,7 +5829,7 @@ template <class Element>
 void PolynomialSubstitution<Element>::MakeSubstitutionLastVariableToEndPoint(int numVars, Polynomial<Element>& EndPoint)
 { this->SetSize(numVars);
   for (int i=0; i<numVars-1; i++)
-    this->TheObjects[i].MakeNVarDegOnePoly(numVars, i, Element::TheRingUnit);
+    this->TheObjects[i].MakeDegreeOne(numVars, i, Element::TheRingUnit);
   this->TheObjects[numVars-1].CopyFromPoly(EndPoint);
 }
 

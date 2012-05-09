@@ -2777,7 +2777,7 @@ void RationalFunction::GetRelations
   for (int i=0; i<numStartingGenerators; i++)
   { Polynomial<Rational> & currentPoly=theGroebnerBasis.TheObjects[i];
     currentPoly.SetNumVariablesSubDeletedVarsByOne(numStartingVariables+numStartingGenerators);
-    tempP.MakeNVarDegOnePoly(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
+    tempP.MakeDegreeOne(numStartingVariables+numStartingGenerators, i+numStartingVariables, (Rational) -1);
     currentPoly+=tempP;
 //  std::cout << currentPoly.ElementToString(false, tempFormat) << "<br>";
   }

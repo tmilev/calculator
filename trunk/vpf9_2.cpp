@@ -4537,7 +4537,7 @@ void RationalFunction::SimplifyLeadingCoefficientOnly()
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output)
 { int theRank=theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots=theAlgebra.theWeyl.RootsOfBorel.size;
-  output.MakeNVarDegOnePoly((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
+  output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
 Rational WeylGroup::WeylDimFormulaFromSimpleCoords(Vector<Rational>& theWeightInSimpleCoords)

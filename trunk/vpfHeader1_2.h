@@ -825,10 +825,16 @@ public:
   (const Vector<Rational> & inputInSimpleCoords)
   { return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
   }
-  Vector<Rational> GetDualCoordinatesFromFundamental
-  (const Vector<Rational> & inputInFundamentalCoords)
-  { Vector<Rational> result=inputInFundamentalCoords;
-    assert(result.size==this->GetDim());
+  template <class CoefficientType>
+  Vector<CoefficientType> GetDualCoordinatesFromFundamental
+  (const Vector<CoefficientType>& inputInFundamentalCoords)
+  { Vector<CoefficientType> result=inputInFundamentalCoords;
+    if (result.size!=this->GetDim())
+    { std::cout << "This is a programming error. The input fundamental weight has " << result.size
+      << " coordinates, while the rank of the Weyl group is " << this->GetDim() << ". Please debug file "
+      << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      assert(false);
+    }
     for (int i=0; i<result.size; i++)
       result[i]*=this->CartanSymmetric.elements[i][i]/2;
     return result;
@@ -2360,12 +2366,12 @@ public:
   bool HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)const
   ;
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)const
   { ElementUniversalEnveloping<CoefficientType> tempElt;
     tempElt.MakeZero(*this->owners, this->indexInOwners);
     tempElt.AddMonomial(right, theRingUnit);
@@ -2445,8 +2451,12 @@ public:
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    GlobalVariables& theGlobalVariables)const
 ;
-
-
+  static inline int HashFunction (const ElementUniversalEnveloping<CoefficientType>& input)
+  { return input.HashFunction();
+  }
+  int HashFunction()const
+  { return this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>::HashFunction();
+  }
 template<class CoefficientTypeQuotientField>
 static bool GetBasisFromSpanOfElements
   (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
@@ -2485,13 +2495,13 @@ static bool GetBasisFromSpanOfElements
 (SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
-  void LieBracketOnTheRight(const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output);
+  void LieBracketOnTheRight(const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output)const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
   { Rational tempRat=coeff;
     this->MakeConst(tempRat, numVars, *theOwner.owner, theOwner.indexInOwner);
   }
-  SemisimpleLieAlgebra& GetOwner(){return this->owners->TheObjects[this->indexInOwners];}
+  SemisimpleLieAlgebra& GetOwner()const{return this->owners->TheObjects[this->indexInOwners];}
   template <class otherType>
   void Assign(const ElementUniversalEnveloping<otherType>& other)
   { this->owners=other.owners;
@@ -3261,7 +3271,7 @@ public MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, Coef
 {
 public:
   void MultiplyMeByUEEltOnTheLeft
-  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, ElementUniversalEnveloping<CoefficientType>& theUE,
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, const ElementUniversalEnveloping<CoefficientType>& theUE,
    GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
@@ -5897,7 +5907,7 @@ void ElementUniversalEnveloping<CoefficientType>::SubstitutionCoefficients
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheRight
-(const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output)
+(const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output)const
 { ElementUniversalEnveloping<CoefficientType> tempElt, tempElt2;
   tempElt=*this;
   tempElt*=right;

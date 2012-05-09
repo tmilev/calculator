@@ -312,6 +312,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;\n[g_2, g_{-9}^{n_5}g_{-8}^{n_4}g_{-6}^{n_3}g_{-4}^{n_2}g_{-1}^{n_1}]";
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]";
 //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;UE{}(g_3^2)";
+civilizedInput="g:=SemisimpleLieAlgebra{} B_3;v:=hwv{}(B_3, (x_1,0,1),(1,0,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

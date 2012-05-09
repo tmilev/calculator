@@ -11,15 +11,14 @@
 #define ProjectInfoVpfHeader2AlreadyDefined
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 #endif
-
-template <class dataType>
-class DataOfExpressions;
+class Context;
 
 class Data
 {
 public:
   CommandList* owner;
   int theIndex;
+  int theContextIndex;
   int type;
   MemorySaving<std::string> theError;
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
@@ -32,12 +31,11 @@ public:
   int HashFunction()const;
   static inline int HashFunction(const Data& input)  {return input.HashFunction();}
   Data (const Rational& x, CommandList& inputOwner);
-  Data(CommandList& theOwner): theIndex(-1){this->type=this->typeError; this->owner=&theOwner;}
-  Data():owner(0), theIndex(-1){this->type=this->typeError;}
+  Data(CommandList& theOwner): theIndex(-1), theContextIndex(-1){this->type=this->typeError; this->owner=&theOwner;}
+  Data():owner(0), theIndex(-1), theContextIndex(-1){this->type=this->typeError;}
   Data(const Data& otherData) {this->operator=(otherData);}
   bool SetError(const std::string& inputError);
   bool IsEqualToOne()const;
-  DataOfExpressions<Polynomial<Rational> >& GetPoly()const;
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
   ;
@@ -45,46 +43,59 @@ public:
 (CommandList& theBoss, const Rational& inputRational)
 ;
   void MakeRF
-(CommandList& theBoss, const DataOfExpressions<RationalFunction>& inputRF)
+(CommandList& theBoss, const RationalFunction& inputRF, int inputContextIndex)
 ;
   template<class dataType>
   void Make(CommandList& theBoss, const dataType& input)
   ;
   void MakeUE
-(CommandList& theBoss, const DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& inputUE)
+(CommandList& theBoss, const ElementUniversalEnveloping<RationalFunction>& inputUE, int inputContextIndex)
 ;
   void MakePoly
-(CommandList& theBoss, const DataOfExpressions<Polynomial<Rational> >& inputPoly)
+(CommandList& theBoss, const Polynomial<Rational>& inputPoly, int inputContextIndex)
 ;
   void MakeElementTensorGeneralizedVermas
-(CommandList& theBoss, DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> >& theElt)
+(CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt, int inputContextIndex)
   ;
-  void GetContext(HashedList<Expression>& output)const;
-  void GetCommonContext(const Data& other, HashedList<Expression>& output)const
-  ;
-
+  int GetNumContextVars()const;
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
   ;
-  int GetDynamicSubtypeInfo();
-  SemisimpleLieAlgebra& GetSSLieAlgebra()const;
+  static bool MergeContexts
+  (Data& left, Data& right)
+  ;
+  bool SetContextResizesContextArray(const Context& inputContext);
+  const Context& GetContext()const;
   bool MakeElementSemisimpleLieAlgebra
-(CommandList& owner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
- int index1, int index2, std::stringstream* comments)
+(CommandList& inputOwner, int inputIndexInOwners, int index1, int index2, std::stringstream* comments)
  ;
-  const  DataOfExpressions<ElementUniversalEnveloping<RationalFunction> >& GetUE()const;
+  const ElementUniversalEnveloping<RationalFunction>& GetUE()const;
+  const RationalFunction& GetRF()const;
   int GetIndexAmbientSSLieAlgebra()const;
+  SemisimpleLieAlgebra& GetAmbientSSAlgebra()const;
   template<class theType>
   bool IsOfType()const;
+
   template<class theType>
-  bool ConvertToType
-  (theType& output, const theType& initializingElement)const
+  bool ConvertToTypE
+  ()
   ;
+  bool MergeContext
+  (Context& outputInputContext);
+  template<class theType>
+  bool MergeContextsAndConvertToType
+  (Context& outputInputContext)
+  ;
+  template<class theType>
+  bool ConvertToTypeResizesContextArrays
+  (const Context& desiredNewContext)
+  ;
+
   template<class theType>
   theType GetValueCopy()const;
   template<class theType>
-  const  theType& GetValuE()const;
+  const theType& GetValuE()const;
   bool IsEqualToZero()const;
   bool IsSmallInteger(int & whichInteger)const
   ;
@@ -106,7 +117,7 @@ public:
   std::string ElementToStringDataType()const;
   bool operator!=(const Data& other)const;
   static bool LieBracket
-  (Data& left, Data& right, Data& output, std::stringstream* comments)
+  (const Data& left, const Data& right, Data& output, std::stringstream* comments)
   ;
   bool OperatorDereference
   (const Data& argument, Data& output, std::stringstream* comments)const
@@ -206,8 +217,10 @@ class Expression
   void MakeElementTensorsGeneralizedVermas
   (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
-  void MakePoly(const DataOfExpressions<Polynomial<Rational> >& inputData, CommandList& newBoss, int inputIndexBoundVars);
-  void MakeRF(const DataOfExpressions<RationalFunction>& inputData, CommandList& newBoss, int inputIndexBoundVars);
+  void MakePoly
+(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
+  ;
+  void MakeRF(const RationalFunction& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
   void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -270,7 +283,7 @@ void MakeVariableNonBounD
   }
   template <class theType>
   bool GetVector
-  (Vector<theType>& output, int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
+  (Vector<theType>& output, Context& inputStartingContext, int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
    std::stringstream* comments=0)
   ;
   bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
@@ -419,32 +432,33 @@ class VariableNonBound
   }
 };
 
-template <class dataType>
-class DataOfExpressions
-{
-  public:
-  dataType theBuiltIn;
+class Context
+{ public:
   HashedList<Expression> VariableImages;
-  void operator=(const DataOfExpressions<dataType>& other);
-  bool operator==(const DataOfExpressions<dataType>& other)
-  { return this->theBuiltIn==other.theBuiltIn && this->VariableImages==other.VariableImages;
+  int indexAmbientSSalgebra;
+  CommandList* theOwner;
+  Context(CommandList& inputOwner):indexAmbientSSalgebra(-1){this->theOwner=&inputOwner;}
+  Context():indexAmbientSSalgebra(-1),theOwner(0){}
+  void operator=(const Context& other);
+  bool operator==(const Context& other)
+  { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
-  static inline int HashFunction(const DataOfExpressions<dataType>& input){return input.HashFunction();}
+  static inline int HashFunction(const Context& input){return input.HashFunction();}
   int HashFunction()const
+  { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
+  }
+  bool MergeContextWith(const Context& other)
+  { this->VariableImages.AddNoRepetition(other.VariableImages);
+    if (this->indexAmbientSSalgebra==-1)
+    { this->indexAmbientSSalgebra=other.indexAmbientSSalgebra;
+      return true;
+    }
+    return this->indexAmbientSSalgebra==other.indexAmbientSSalgebra;
+  }
+  template <class dataType>
+  dataType GetPolynomialMonomial(int theIndex, GlobalVariables& theGlobalVariables)const;
+  bool GetPolySubFromVaraibleSuperSet(const Context& theSuperset, PolynomialSubstitution<Rational>& output)const
 ;
-  dataType GetPolynomialMonomial
-(const Rational& inputCoeff, int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
-  ;
-  dataType GetConst
- (const Rational& input, GlobalVariables& theGlobalVariables)
-  ;
-  template<class otherType>
-  void MakeVariableUnion(DataOfExpressions<otherType>& other)
-  ;
-  bool SetVariables(const HashedList<Expression>& newVariableImages)
-  ;
-  std::string ElementToString()const;
-  void SetDynamicSubtype(int inputNumVars);
 };
 
 class ObjectContainer
@@ -452,25 +466,27 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  DataOfExpressions<List<ModuleSSalgebraNew<RationalFunction> > >  theCategoryOmodules;
+  List<ModuleSSalgebraNew<RationalFunction> > theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<DataOfExpressions<ElementTensorsGeneralizedVermas<RationalFunction> > > theTensorElts;
-  HashedList<DataOfExpressions<Polynomial<Rational> > >  thePolys;
-  HashedList<DataOfExpressions<ElementUniversalEnveloping<RationalFunction> > > theUEs;
-  HashedList<DataOfExpressions<RationalFunction> > theRFs;
+  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
+  HashedList<Polynomial<Rational> > thePolys;
+  HashedList<ElementUniversalEnveloping<RationalFunction> > theUEs;
+  HashedList<RationalFunction> theRFs;
   HashedList<Rational> theRationals;
+  HashedList<Context> theContexts;
   void reset();
 };
 
 class CommandList
 { template <class dataType>
-  bool ExtractPMTDtreeFromContextRecursive
-(DataOfExpressions<dataType>& output, const DataOfExpressions<dataType>& inputContextInitializedWithZeroElement,
+  bool EvaluatePMTDtreeFromContextRecursive
+(dataType& output, const Context& inputContext,
  const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
   ;
 template <class dataType>
   bool ExtractPMTDtreeContext
-(HashedList<Expression>& output, const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
+(Context& outputContext, const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000,
+ std::stringstream* errorLog=0)
   ;
 public:
 //control sequences parametrize the syntactical elements
@@ -801,8 +817,8 @@ public:
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
   }
   template <class dataType>
-  bool ExtractPMTDtree
-  (DataOfExpressions<dataType>& output, const dataType& thePMDTinitializer, const Expression& theInput, std::stringstream* errorLog=0)
+  bool EvaluatePMTDtree
+  (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
   ;
   void SpecializeBoundVars
 (Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
@@ -929,9 +945,6 @@ static bool EvaluateDereferenceOneArgument
 ;
   static bool fElementSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-;
-  bool GetIndexAmbientUEAlgebra
-  (int& outputIndex, Expression& inputExpression, std::stringstream* comments, int RecursionDepth=0, int MaxRecursionDepth=10000)
 ;
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)

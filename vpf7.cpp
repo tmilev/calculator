@@ -2153,7 +2153,7 @@ template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
    const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)const
 { output=theRingZero;
   CoefficientType tempCF;
   ElementUniversalEnveloping<CoefficientType> TAleft;
@@ -2994,7 +2994,7 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
-  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, ElementUniversalEnveloping<CoefficientType>& theUE,
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, const ElementUniversalEnveloping<CoefficientType>& theUE,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementTensorsGeneralizedVermas<CoefficientType> output, tempET;
   output.MakeZero();

@@ -443,6 +443,7 @@ class Context
   bool operator==(const Context& other)
   { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
+  std::string ElementToString()const;
   static inline int HashFunction(const Context& input){return input.HashFunction();}
   int HashFunction()const
   { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
@@ -450,9 +451,9 @@ class Context
   bool MergeContextWith(const Context& other)
   { this->VariableImages.AddNoRepetition(other.VariableImages);
     if (this->indexAmbientSSalgebra==-1)
-    { this->indexAmbientSSalgebra=other.indexAmbientSSalgebra;
+      this->indexAmbientSSalgebra=other.indexAmbientSSalgebra;
+    if (other.indexAmbientSSalgebra==-1)
       return true;
-    }
     return this->indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
   template <class dataType>

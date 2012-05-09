@@ -144,11 +144,15 @@ template <>
 bool Data::ConvertToTypE<RationalFunction>()
 { if (this->theContextIndex==-1)
     return false;
-  RationalFunction output;
+  MemorySaving<RationalFunction> output;
   switch (this->type)
   { case Data::typeRational:
-      output.MakeConst(this->GetContext().VariableImages.size, this->GetValuE<Rational>(), this->owner->theGlobalVariableS);
-      this->MakeRF(*this->owner, output, this->theContextIndex);
+      output.GetElement().MakeConst(this->GetContext().VariableImages.size, this->GetValuE<Rational>(), this->owner->theGlobalVariableS);
+      this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
+      return true;
+    case Data::typePoly:
+      output.GetElement()=this->GetValuE<Polynomial<Rational> >();
+      this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
     case Data::typeRationalFunction:
       return true;
@@ -197,20 +201,29 @@ bool Data::SetContextResizesContextArray
     return false;
   this->theContextIndex=candidateIndex;
   MemorySaving<RationalFunction> tempRF;
+  MemorySaving<Polynomial<Rational> > tempP;
   MemorySaving<ElementUniversalEnveloping<RationalFunction> > tempEUE;
   switch(this->type)
   { case Data::typeRational:
       return true;
     case Data::typeElementUE:
-      tempRF.GetElement().Substitution(polySub);
+      tempEUE.GetElement()=this->GetUE();
+      tempEUE.GetElement().Substitution(polySub);
       this->MakeUE(*this->owner, tempEUE.GetElement(), candidateIndex);
       return true;
+    case Data::typePoly:
+      tempP.GetElement()=this->GetValuE<Polynomial<Rational> >();
+      tempP.GetElement().Substitution(polySub);
+      this->MakePoly(*this->owner, tempP.GetElement(), candidateIndex);
+      return true;
     case Data::typeRationalFunction:
+      tempRF.GetElement()=this->GetRF();
       tempRF.GetElement().Substitution(polySub);
       this->MakeRF(*this->owner, tempRF.GetElement(), candidateIndex);
       return true;
     default:
-      std::cout << "This is a programing error: Data::SetContextResizesContextArray does not cover all posisble cases. "
+      std::cout << "This is a programing error: Data::SetContextResizesContextArray does not cover the case of data of type "
+      << this->ElementToStringDataType() << ". "
       << " Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
       assert(false);
       return false;
@@ -381,6 +394,12 @@ std::string Data::ElementToString(std::stringstream* comments)const
 { std::stringstream out;
   if (this->owner==0)
     return "(ProgrammingError:NoOwner)";
+  FormatExpressions theFormat;
+  if (this->theContextIndex!=-1)
+  { theFormat.polyAlphabeT.SetSize(this->GetContext().VariableImages.size);
+    for (int i=0; i<this->GetContext().VariableImages.size; i++)
+      theFormat.polyAlphabeT[i]=this->GetContext().VariableImages[i].ElementToString();
+  }
   switch(this->type)
   { case Data::typeSSalgebra:
       out << "SemisimpleLieAlgebra{}("
@@ -391,7 +410,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
 //        ElementToString(*this->owner->theGlobalVariableS);
       return out.str();
     case Data::typeElementUE:
-      out <<"UE{}{" << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString() << "}";
+      out <<"UE{}{" << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString(&theFormat) << "}";
       return out.str();
     case Data::typeRationalFunction:
       return this->GetValuE<RationalFunction>().ElementToString();
@@ -399,7 +418,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
       return this->GetValuE<Rational>().ElementToString();
     case Data::typePoly:
       out << "Polynomial{}("
-      << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString() << ")";
+      << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString(&theFormat) << ")";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
       return this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString();
@@ -559,6 +578,9 @@ void Data::MakeSSAlgebra
   SemisimpleLieAlgebra tempSS;
   tempSS.theWeyl.MakeArbitrary(WeylLetter, WeylRank);
   this->theIndex=theBoss.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSS);
+  Context newContext;
+  newContext.indexAmbientSSalgebra=this->theIndex;
+  this->theContextIndex= theBoss.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(newContext);
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].indexInOwner=this->theIndex;
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].owner=& theBoss.theObjectContainer.theLieAlgebras;
 }
@@ -696,6 +718,7 @@ bool Data::OperatorDereference(const Data& argument, Data& output, std::stringst
         << argument.ElementToString() << " which is not a small integer. ";
         return false;
       }
+      output.theContextIndex=this->theContextIndex;
       return output.MakeElementSemisimpleLieAlgebra
       (*this->owner, this->owner->theObjectContainer.theLieAlgebras, this->theIndex,
        whichInteger, comments);
@@ -2055,7 +2078,7 @@ bool CommandList::DoThePowerIfPossible
   Expression& rightE=theExpression.children[1];
   if (leftE.theOperation!=theCommands.opData())
     return false;
-//  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
   if (leftE.IsElementUE())
     if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
     { if (comments!=0)
@@ -2063,13 +2086,14 @@ bool CommandList::DoThePowerIfPossible
         << ", to type polynomial. ";
       return false;
     }
-//  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
 
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
   if (!LeftD.Exponentiate(RightD, outputD))
     return false;
+  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ElementToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
@@ -2086,15 +2110,19 @@ bool CommandList::DoMultiplyIfPossible
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
-//  std::cout << "<br>attempting to make standard multiplication<br>";
+  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ElementToString() << " and " << LeftD.ElementToString();
   if (!LeftD.MultiplyBy(RightD, outputD))
+  { std::cout << "<br>multiplication not successful";
     return false;
+  }
+  std::cout << "<br> multiplication successful, result: " << outputD.ElementToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
 
 bool Data::Exponentiate(const Data& right, Data& output)const
-{ if (right.type==Data::typeRational && this->type==typeRational)
+{ std::cout << "<br>Attempting to apply the power " << right.ElementToString() << " on " << this->ElementToString();
+  if (right.type==Data::typeRational && this->type==typeRational)
   { int thePower;
     if (right.IsSmallInteger(thePower))
     { Rational resultRat=this->owner->theObjectContainer.theRationals[this->theIndex];
@@ -2103,13 +2131,17 @@ bool Data::Exponentiate(const Data& right, Data& output)const
       return true;
     }
   }
-  if (this->type!=this->typeElementUE || right.type!=this->typeRationalFunction)
-    return false;
-  if (!this->GetUE().IsAPowerOfASingleGenerator())
+  if (this->type!=this->typeElementUE)
     return false;
   Data rightCopy=right;
   output=*this;
   if (!Data::MergeContexts(output, rightCopy))
+    return false;
+  if (!rightCopy.ConvertToTypE<RationalFunction>())
+    return false;
+  std::cout << "<br>so far, so good, said the falling guy around somewhere the second floor. "
+  << " left: " << output.ElementToString() << " right: " << rightCopy.ElementToString();
+  if (!this->GetUE().IsAPowerOfASingleGenerator())
     return false;
   ElementUniversalEnveloping<RationalFunction> result=output.GetUE();
 //  std::cout << "<br>before exponentiation next step: raising " << result.ElementToString() << " to power " << rightCopy.ElementToString() << " = " << rightCopy.theBuiltIn.ElementToString();
@@ -2480,8 +2512,11 @@ bool CommandList::StandardLieBracket
   Data& leftD=theCommands.theData[leftE.theData];
   Data& rightD=theCommands.theData[rightE.theData];
   Data newData(theCommands);
+  std::cout << "<br>attempting to lie bracket " << leftD.ElementToString() << " and " << rightD.ElementToString();
   if (!Data::LieBracket(leftD, rightD, newData, comments))
+  { std::cout  << "<br>Lie bracket unsucessful";
     return false;
+  }
   theExpression.MakeDatA(newData, theCommands, inputIndexBoundVars);
   return true;
 }
@@ -2617,7 +2652,7 @@ template <class dataType>
 bool CommandList::ExtractPMTDtreeContext
 (Context& outputContext, const Expression& theInput, int RecursionDepth, int MaxRecursionDepthMustNotPopStack,
  std::stringstream* errorLog)
-{if (RecursionDepth>MaxRecursionDepthMustNotPopStack)
+{ if (RecursionDepth>MaxRecursionDepthMustNotPopStack)
   { if (errorLog!=0)
       *errorLog << "Max recursion depth of " << MaxRecursionDepthMustNotPopStack
       << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
@@ -2638,10 +2673,15 @@ bool CommandList::ExtractPMTDtreeContext
         (outputContext, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog);
   if (theInput.theOperation==this->opData())
   { if (theInput.GetData().theContextIndex!=-1)
-      outputContext.MergeContextWith(theInput.GetData().GetContext());
+    { std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ElementToString();
+      if (!outputContext.MergeContextWith(theInput.GetData().GetContext()))
+        return false;
+      std::cout << " with end commulative context: " << outputContext.ElementToString();
+    }
     return true;
   }
   outputContext.VariableImages.AddNoRepetition(theInput);
+  std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ElementToString() << " with resulting accummulated context: " << outputContext.ElementToString();
   return true;
 }
 
@@ -2650,6 +2690,7 @@ bool CommandList::EvaluatePMTDtree
  (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog)
 { if (!this->ExtractPMTDtreeContext<dataType>(outputContext, theInput, 0, 10000, errorLog))
     return false;
+  std::cout << "<br>The extracted context is: " << outputContext.ElementToString();
   return this->EvaluatePMTDtreeFromContextRecursive(output, outputContext, theInput, 0, 10000, errorLog);
 }
 
@@ -2729,6 +2770,7 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
   int theIndex=inputContext.VariableImages.GetIndex(theInput);
   if (theIndex==-1)
     return false;
+  std::cout << "<br>the inputContext is: " << inputContext.ElementToString();
   output=inputContext.GetPolynomialMonomial<dataType>(theIndex, *this->theGlobalVariableS);
 //  std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
 //  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
@@ -3824,6 +3866,7 @@ ElementUniversalEnveloping<RationalFunction> Context::GetPolynomialMonomial
   ElementUniversalEnveloping<RationalFunction> output;
   RationalFunction theRF;
   theRF.MakeOneLetterMon(this->VariableImages.size, theIndex, 1, theGlobalVariables);
+  std::cout << "<br>this->indexAmbientSSalgebra=  " << this->indexAmbientSSalgebra;
   output.MakeConst(theRF, this->theOwner->theObjectContainer.theLieAlgebras, this->indexAmbientSSalgebra);
   return output;
 }
@@ -3848,6 +3891,14 @@ Context::GetPolynomialMonomial
 { RationalFunction output;
   output.MakeOneLetterMon(this->VariableImages.size, inputNonZeroIndex, 1, theGlobalVariables);
   return output;
+}
+
+std::string Context::ElementToString()const
+{ std::stringstream out;
+  for (int i=0; i<this->VariableImages.size; i++)
+    out << "<br>Variable " << i+1 << "=" << this->VariableImages[i].ElementToString();
+  out << "<br>Ambient Lie algebra index: " << this->indexAmbientSSalgebra;
+  return out.str();
 }
 
 void CommandList::InitJavaScriptDisplayIndicator()

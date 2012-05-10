@@ -1628,7 +1628,7 @@ bool CommandList::fHWV
   Data outputData;
   int outputContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(hwContext);
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-  std::cout <<"<br>theElt:" << theElt.ElementToString();
+//  std::cout <<"<br>theElt:" << theElt.ElementToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
   theExpression.MakeDatA(outputData, theCommands, inputIndexBoundVars);
 //  std::cout <<"<hr>" << outputData.ElementToString();
@@ -1924,7 +1924,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    algebra elements might change.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
   this->AddOperationNoFail(":=", 0, "", "", "", false);
   this->AddOperationNoFail("if:=", 0, "", "", "", false);
-  this->AddOperationNoFail("^", this->StandardPower, "", "Not documented at the moment.", "", false);
+  this->AddOperationNoFail("^", this->StandardPower, "", "Soon to be documented.", "g:=SemisimpleLieAlgebra{}G_2;\n7^100g_1^{x_1}g_2^2", false);
   this->AddOperationNoFail
   ("==", this->StandardEqualEqual, "",
    "Evaluates to 1 if the left argument equals the right argument, otherwise evaluates to zero.",
@@ -2107,7 +2107,7 @@ bool CommandList::DoThePowerIfPossible
   Expression& rightE=theExpression.children[1];
   if (leftE.theOperation!=theCommands.opData())
     return false;
-  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+//  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
   if (leftE.IsElementUE())
     if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
     { if (comments!=0)
@@ -2115,14 +2115,14 @@ bool CommandList::DoThePowerIfPossible
         << ", to type polynomial. ";
       return false;
     }
-  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+//  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
 
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
   if (!LeftD.Exponentiate(RightD, outputD))
     return false;
-  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ElementToString();
+//  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ElementToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
@@ -2139,18 +2139,18 @@ bool CommandList::DoMultiplyIfPossible
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
-  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ElementToString() << " and " << LeftD.ElementToString();
+//  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ElementToString() << " and " << LeftD.ElementToString();
   if (!LeftD.MultiplyBy(RightD, outputD))
-  { std::cout << "<br>multiplication not successful";
+  {// std::cout << "<br>multiplication not successful";
     return false;
   }
-  std::cout << "<br> multiplication successful, result: " << outputD.ElementToString();
+//  std::cout << "<br> multiplication successful, result: " << outputD.ElementToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
 
 bool Data::Exponentiate(const Data& right, Data& output)const
-{ std::cout << "<br>Attempting to apply the power " << right.ElementToString() << " on " << this->ElementToString();
+{ //std::cout << "<br>Attempting to apply the power " << right.ElementToString() << " on " << this->ElementToString();
   if (right.type==Data::typeRational && this->type==typeRational)
   { int thePower;
     if (right.IsSmallInteger(thePower))
@@ -2168,8 +2168,8 @@ bool Data::Exponentiate(const Data& right, Data& output)const
     return false;
   if (!rightCopy.ConvertToTypE<RationalFunction>())
     return false;
-  std::cout << "<br>so far, so good, said the falling guy around somewhere the second floor. "
-  << " left: " << output.ElementToString() << " right: " << rightCopy.ElementToString();
+//  std::cout << "<br>so far, so good, said the falling guy around somewhere the second floor. "
+//  << " left: " << output.ElementToString() << " right: " << rightCopy.ElementToString();
   if (!this->GetUE().IsAPowerOfASingleGenerator())
     return false;
   ElementUniversalEnveloping<RationalFunction> result=output.GetUE();
@@ -2183,9 +2183,9 @@ bool Data::Exponentiate(const Data& right, Data& output)const
 }
 
 bool Data::MultiplyBy(const Data& right, Data& output)const
-{ static bool theGhostHasAppeared=false;
-  if (right.type==Data::typeEltTensorGenVermasOverRF)
-  { output=right;
+{ if (right.type==Data::typeEltTensorGenVermasOverRF)
+  { static bool theGhostHasAppeared=false;
+    output=right;
     Data leftCopy=*this;
     if (! output.MergeContexts(leftCopy, output))
       return false;
@@ -2199,7 +2199,7 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
     int numVars=leftCopy.GetNumContextVars();
     RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
     RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
-    ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
+    ElementTensorsGeneralizedVermas<RationalFunction> outputElt = right.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
     outputElt.MultiplyMeByUEEltOnTheLeft
     (this->owner->theObjectContainer.theCategoryOmodules, leftCopy.GetUE(), *this->owner->theGlobalVariableS, RFOne, RFZero)
     ;
@@ -2541,9 +2541,9 @@ bool CommandList::StandardLieBracket
   Data& leftD=theCommands.theData[leftE.theData];
   Data& rightD=theCommands.theData[rightE.theData];
   Data newData(theCommands);
-  std::cout << "<br>attempting to lie bracket " << leftD.ElementToString() << " and " << rightD.ElementToString();
+//  std::cout << "<br>attempting to lie bracket " << leftD.ElementToString() << " and " << rightD.ElementToString();
   if (!Data::LieBracket(leftD, rightD, newData, comments))
-  { std::cout  << "<br>Lie bracket unsucessful";
+  { //std::cout  << "<br>Lie bracket unsucessful";
     return false;
   }
   theExpression.MakeDatA(newData, theCommands, inputIndexBoundVars);

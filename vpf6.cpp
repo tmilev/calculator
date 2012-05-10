@@ -2199,10 +2199,11 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
     int numVars=leftCopy.GetNumContextVars();
     RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
     RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
-    ElementTensorsGeneralizedVermas<RationalFunction> outputElt = right.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
-    outputElt.MultiplyMeByUEEltOnTheLeft
-    (this->owner->theObjectContainer.theCategoryOmodules, leftCopy.GetUE(), *this->owner->theGlobalVariableS, RFOne, RFZero)
-    ;
+    ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
+    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
+    if (!right.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyMeByUEEltOnTheLeft
+        (leftCopy.GetUE(), outputElt, this->owner->theObjectContainer.theCategoryOmodules, *this->owner->theGlobalVariableS, RFOne, RFZero))
+      return false;
     output.MakeElementTensorGeneralizedVermas(*this->owner, outputElt, output.theContextIndex);
     return true;
   }

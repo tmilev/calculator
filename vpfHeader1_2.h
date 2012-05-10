@@ -3270,15 +3270,16 @@ class ElementTensorsGeneralizedVermas :
 public MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >
 {
 public:
-  void MultiplyMeByUEEltOnTheLeft
-  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, const ElementUniversalEnveloping<CoefficientType>& theUE,
-   GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  bool MultiplyMeByUEEltOnTheLeft
+  (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
-  void MultiplyMeByUEEltOnTheLeft
-  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, MonomialUniversalEnveloping<CoefficientType>& theUE,
-   const CoefficientType& theCoeff,
-   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  bool MultiplyMeByUEEltOnTheLeft
+  (const MonomialUniversalEnveloping<CoefficientType>& theUE, const CoefficientType& theCoeff,
+   ElementTensorsGeneralizedVermas<CoefficientType>& output,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   void MultiplyMeByElementLieAlg
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int indexGenerator,
@@ -6631,4 +6632,284 @@ void MonomialUniversalEnveloping<CoefficientType>::Substitution(const Polynomial
   this->SimplifyEqualConsecutiveGenerators(0);
 }
 
+template <class CoefficientType>
+bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+  (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+{ ElementTensorsGeneralizedVermas<CoefficientType> tempET;
+  output.MakeZero();
+  for (int i=0; i<theUE.size; i++)
+  { if (!this->MultiplyMeByUEEltOnTheLeft(theUE[i], theUE.theCoeffs[i], tempET, theOwner, theGlobalVariables, theRingUnit, theRingZero))
+      return false;
+    output+=tempET;
+  }
+  return true;
+  //for (int i=0; i<theOwner.size; i++)
+  //{ //std::cout << "<hr><hr>Module" << i+1 << "<br>" << theOwner[i].ElementToString();
+  //}
+}
+
+template <class CoefficientType>
+bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+(const MonomialUniversalEnveloping<CoefficientType>& theUE, const CoefficientType& theCoeff,
+ ElementTensorsGeneralizedVermas<CoefficientType>& output,
+ List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+{ if (theCoeff.IsEqualToZero())
+  { output.MakeZero();
+    return true;
+  }
+  output*=(theCoeff);
+  for(int i=theUE.Powers.size-1; i>=0; i--)
+  { int thePower;
+    if (!theUE.Powers[i].IsSmallInteger(thePower))
+      return false;
+    int theIndex=theUE.generatorsIndices[i];
+    for (int j=0; j<thePower; j++)
+    //{ //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << this->ElementToString(theGlobalVariables);
+      output.MultiplyMeByElementLieAlg(theOwner, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      //std::cout <<"<br>to get: " << this->ElementToString(theGlobalVariables);
+    //}
+  }
+  return true;
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int indexGenerator, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ if (theOwner.size<=0)
+    return;
+  ElementTensorsGeneralizedVermas<CoefficientType> output;
+  output.MakeZero();
+  MonomialTensorGeneralizedVermas<CoefficientType> accumMon, monActedOn;
+  ElementSumGeneralizedVermas<CoefficientType> tempElt;
+  ElementUniversalEnveloping<CoefficientType> theGenerator;
+  theGenerator.MakeOneGenerator
+  (indexGenerator, *theOwner[0].theAlgebras, theOwner[0].indexAlgebra, theRingUnit);
+  ;
+//  FormatExpressions tempFormat;
+//  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+  CoefficientType currentCoeff;
+  for (int i=0; i<this->size; i++)
+  { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
+    accumMon.theMons.SetSize(0);
+    for (int j=0; j<currentMon.theMons.size; j++)
+    { tempElt.MakeZero(theOwner);
+      tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
+//      std::cout << "<hr> Acting by " << theGenerator.ElementToString(true, theGlobalVariables, tempFormat)
+//      << " on " << tempElt.ElementToString(theGlobalVariables) << "<br>";
+      tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
+//      std::cout << "<br> result: " << tempElt.ElementToString(theGlobalVariables);
+      for (int k=0; k<tempElt.size; k++)
+      { currentCoeff=this->theCoeffs[i];
+        currentCoeff*=tempElt.theCoeffs[k];
+        monActedOn=accumMon;
+        monActedOn*=(tempElt[k]);
+        for (int l=j+1; l<currentMon.theMons.size; l++)
+          monActedOn*=currentMon.theMons[l];
+        output.AddMonomial(monActedOn, currentCoeff);
+//        std::cout << "<br>accounted: " << monActedOn.ElementToString(theGlobalVariables, tempFormat);
+      }
+      accumMon*=currentMon.theMons[j];
+    }
+  }
+  *this=output;
+}
+
+template <class CoefficientType>
+void MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+(const CoefficientType& theCoeff, ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
+GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ MonomialGeneralizedVerma<CoefficientType> currentMon;
+  CoefficientType currentCoeff;
+  for (int j=0; j<theUE.size; j++)
+  { currentMon.theMonCoeffOne=theUE[j];
+    currentMon.theMonCoeffOne*=this->theMonCoeffOne;
+    currentMon.owneR=this->owneR;
+    currentMon.indexFDVector=this->indexFDVector;
+    currentMon.indexInOwner=this->indexInOwner;
+    currentCoeff=theCoeff;
+    currentCoeff*=theUE.theCoeffs[j];
+    outputAccum.ReduceMonAndAddToMe(currentMon, currentCoeff, theGlobalVariables, theRingUnit, theRingZero);
+  }
+//  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
+}
+
+template <class CoefficientType>
+void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
+  (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
+  MonomialGeneralizedVerma<CoefficientType> currentMon;
+  Accum.MakeZero(*this->owneR);
+  for (int i=0; i<this->size; i++)
+  { this->TheObjects[i].MultiplyMeByUEEltOnTheLeft(this->theCoeffs[i], theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
+    Accum+=buffer;
+  }
+  *this=Accum;
+//  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
+}
+
+template <class CoefficientType>
+void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
+(const CoefficientType& myCoeff, ElementSumGeneralizedVermas<CoefficientType>& outputAccum, GlobalVariables& theGlobalVariables,
+  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+{ if (myCoeff.IsEqualToZero())
+  { std::cout << "Warning: this is likely a programming error: if it is not, this message needs to be removed. "
+    << " MonomialGeneralizedVerma<CoefficientType>::ReduceMe is called with a zero coefficient input. "
+    << " At the moment I programmed this function, I did not foresee any uses of ReduceMe with zero coefficient input, "
+    << " however I was not able to affirm that will never happen. "
+    << "Hence I do not crash the calculator, but display this benign warning message.";
+    return;
+  }
+//  FormatExpressions theFormat;
+//  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
+//  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
+  ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
+  theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+//  std::cout << "<br>";
+  //for (int i=0; i<theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts.size; i++)
+  //{ std::cout << "<br>generator index " << i << " has order " << theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts[i];
+  //}
+  ElementUniversalEnveloping<CoefficientType> theUEelt;
+  theUEelt.MakeZero(*this->GetOwner().theAlgebras, this->GetOwner().indexAlgebra);
+  theUEelt.AddMonomial(this->theMonCoeffOne, myCoeff);
+//  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
+  theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
+//  std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
+  MonomialUniversalEnveloping<CoefficientType> currentMon;
+  MonomialGeneralizedVerma<CoefficientType> newMon;
+  CoefficientType theCoeff;
+  Matrix<CoefficientType> tempMat1, tempMat2;
+//  std::cout << theMod.ElementToString();
+//  std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
+//  << theMod.theModuleWeightsSimpleCoords.size;
+  for (int l=0; l<theUEelt.size; l++)
+  { currentMon=theUEelt[l];
+//    std::cout << "<br> Processing monomial " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat);
+    tempMat1.MakeIdMatrix(theMod.theGeneratingWordsNonReduced.size, theRingUnit, theRingZero);
+    for (int k=currentMon.Powers.size-1; k>=0; k--)
+    { int thePower;
+      if (!currentMon.Powers[k].IsSmallInteger(thePower))
+        break;
+      int theIndex=currentMon.generatorsIndices[k];
+      tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
+//      std::cout << "<hr>Action generator " << theIndex << ":<br>"
+//      << tempMat2.ElementToString(true, false);
+      if (tempMat2.NumRows==0)
+      { if (theIndex>=theMod.GetOwner().GetRank()+theMod.GetOwner().GetNumPosRoots())
+//        { std::cout << "<br>Error! Accum: " << this->ElementToString(theGlobalVariables);
+          return;
+//        }
+        break;
+      }
+      for (int s=0; s<thePower; s++)
+        tempMat1.MultiplyOnTheLeft(tempMat2, theRingZero);
+      currentMon.Powers.size--;
+      currentMon.generatorsIndices.size--;
+    }
+//      std::cout << "<br> Action is the " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat)
+//      << " free action plus <br>"
+//      << tempMat1.ElementToString(true, false);
+    newMon.owneR=this->owneR;
+    newMon.indexInOwner=this->indexInOwner;
+//    CoefficientType newCoeff;
+    for (int i=0; i<tempMat1.NumRows; i++)
+      if (!tempMat1.elements[i][this->indexFDVector].IsEqualToZero())
+      { newMon.theMonCoeffOne=currentMon;
+        newMon.indexFDVector=i;
+        outputAccum.AddMonomial(newMon, tempMat1.elements[i][this->indexFDVector]);
+      }
+  }
+//  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
+//  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+  theMod.GetOwner().OrderSSLieAlgebraStandard();
+}
+
+template <class CoefficientType>
+void ElementSumGeneralizedVermas<CoefficientType>::ReduceMonAndAddToMe
+  (const MonomialGeneralizedVerma<CoefficientType>& theMon, const CoefficientType& theMonCoeff, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ theMon.ReduceMe(theMonCoeff, *this, theGlobalVariables, theRingUnit, theRingZero);
+}
+
+template <class CoefficientType>
+Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGeneratorIndex
+(int generatorIndex, GlobalVariables& theGlobalVariables,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{ int numGenerators=this->GetOwner().GetNumGenerators();
+  int theDim=this->GetOwner().GetRank();
+  int numPosRoots=this->GetOwner().GetNumPosRoots();
+  assert(generatorIndex>=0 && generatorIndex<numGenerators);
+  if (this->ComputedGeneratorActions.selected[generatorIndex])
+  { //std::cout << "<br>generator index " << generatorIndex << " is precomputed: "
+    //<< this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
+    return this->actionsGeneratorsMaT[generatorIndex];
+  }
+  this->ComputedGeneratorActions.AddSelectionAppendNewIndex(generatorIndex);
+  ElementUniversalEnveloping<CoefficientType> tempElt;
+  Vector<Rational> theWeight;
+  tempElt.MakeOneGenerator(generatorIndex,*this->theAlgebras, this->indexAlgebra, theRingUnit);
+  theWeight.MakeZero(theDim);
+  if (generatorIndex<numPosRoots)
+    theWeight=this->GetOwner().theWeyl.RootSystem[generatorIndex];
+  if(generatorIndex>=numPosRoots+theDim)
+    theWeight=this->GetOwner().theWeyl.RootSystem[generatorIndex-theDim];
+  for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+    if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
+    { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
+      { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
+//        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+        return this->actionsGeneratorsMaT[generatorIndex];
+      } else
+      { this->actionsGeneratorsMaT[generatorIndex].init
+        (this->theGeneratingWordsNonReduced.size,this->theGeneratingWordsNonReduced.size);
+        this->actionsGeneratorsMaT[generatorIndex].NullifyAll(theRingZero);
+//        std::cout << "<br>generator index " << generatorIndex << " has ZERO action. ";
+        return this->actionsGeneratorsMaT[generatorIndex];
+      }
+    }
+
+  this->GetMatrixHomogenousElt
+  (tempElt, this->actionsGeneratorS[generatorIndex], theWeight,
+   this->actionsGeneratorsMaT[generatorIndex], theGlobalVariables, theRingUnit, theRingZero);
+//  std::cout << "<br>generator index " << generatorIndex << " has been computed to be: "
+//  << this->actionsGeneratorsMaT[generatorIndex].ElementToString(true, false);
+  return this->actionsGeneratorsMaT[generatorIndex];
+}
+
+template  <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::
+GetMatrixHomogenousElt
+(ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
+  List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
+  Vector<Rational>& weightUEEltSimpleCoords, Matrix<CoefficientType>& output,
+  GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+{//  std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ElementToString();
+  this->GetAdActionHomogenousElT
+  (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theGlobalVariables, theRingUnit, theRingZero)
+  ;
+  output.init(this->theGeneratingWordsNonReduced.size, this->theGeneratingWordsNonReduced.size);
+  output.NullifyAll(theRingZero);
+  for (int j=0; j<outputSortedByArgumentWeight.size; j++)
+    for (int k=0; k<outputSortedByArgumentWeight[j].size; k++)
+    { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->theGeneratingWordsGrouppedByWeight[j][k];
+      ElementUniversalEnveloping<CoefficientType>& imageCurrentMon=outputSortedByArgumentWeight[j][k];
+      int indexColumn=this->theGeneratingWordsNonReduced.GetIndex(currentMon);
+      assert(indexColumn!=-1);
+      for (int l=0; l< imageCurrentMon.size; l++)
+      { int indexRow=this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
+        assert(indexRow!=-1);
+        output.elements[indexRow][indexColumn]=imageCurrentMon.theCoeffs[l];
+//        std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
+      }
+    }
+  if (!this->flagIsInitialized)
+    return;
+//  std::cout << "<hr><hr><hr><hr><hr>input GetMatrixHomogenousElt: " << inputHomogeneous.ElementToString();
+//  std::cout << "<hr>status of the module @ GetMatrixHomogenousElt" << this->ElementToString();
+//  std::cout << "<hr>output GetMatrixHomogenousElt: " << output.ElementToString(true, false);
+}
 #endif

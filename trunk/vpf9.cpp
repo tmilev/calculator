@@ -80,6 +80,7 @@ template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
 template < > int List<affineCone>::ListActualSizeIncrement=1;
 template < > int List<int>::ListActualSizeIncrement=10;
 template < > int List<char>::ListActualSizeIncrement=5;
+template < > int List<bool>::ListActualSizeIncrement=5;
 template < > int List<partFraction>::ListActualSizeIncrement=1000;
 template < > int List<oneFracWithMultiplicitiesAndElongations>::ListActualSizeIncrement=1;
 template < > int List<ElementWeylGroup>::ListActualSizeIncrement= 101680;

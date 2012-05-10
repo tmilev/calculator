@@ -501,7 +501,21 @@ public:
   }
   const Object& GetElementConst()const;
   Object& GetElement();
-
+  bool operator==(const MemorySaving<Object>& other)const
+  { if (this->IsZeroPointer()!=other.IsZeroPointer())
+      return false;
+    if (this->IsZeroPointer())
+      return true;
+    return this->GetElementConst()==other.GetElementConst();
+  }
+  int HashFunction()const
+  { if (this->IsZeroPointer())
+      return 0;
+    return this->GetElementConst().HashFunction();
+  }
+  static inline int HashFunction(const MemorySaving<Object>& input)
+  { return input.HashFunction();
+  }
   bool IsZeroPointer()const{return this->theValue==0;}
   void FreeMemory();
   MemorySaving(){this->theValue=0;}

@@ -314,6 +314,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //civilizedInput="g:=SemisimpleLieAlgebra{} G_2;UE{}(g_3^2)";
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;v:=hwv{}(B_3, (x_1,0,1),(1,0,0))";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i};g_{-1}^{n_1} hwv{}(B_3, (x_1,0,0),(1,0,0))";
+ // civilizedInput="IsInteger{}1";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

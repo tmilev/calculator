@@ -111,8 +111,8 @@ public:
   MonomialGeneralizedVerma<RationalFunction>& GetMonGenVerma()const;
   bool operator+=(const Data& other);
   bool operator*=(const Rational& other);
-  bool operator/=(const Data& other)  ;
-  bool operator*=(const Data& other)  ;
+  bool operator/=(const Data& other);
+  bool operator*=(const Data& other);
   std::string ElementToString(std::stringstream* comments=0)const;
   std::string ElementToStringDataType()const;
   bool operator!=(const Data& other)const;
@@ -135,10 +135,12 @@ class Function
   //the functions may not possess a name.
   //If you want your function to possess a name, use a VariableNonBound which has a member function handler.
   std::string theName;
-  std::string theArgumentList;
+  MemorySaving<List<std::string> > theArgumentList;
   std::string theDescription;
   std::string theExample;
-  bool flagNameIsUsed;
+  bool flagNameIsVisible;
+  MemorySaving<List<Expression> > theArgumentPatterns;
+  MemorySaving<List<bool> > theArgumentPatternIsParsed;
   typedef  bool (*FunctionAddress)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments);
   FunctionAddress theFunction;
   std::string ElementToString(CommandList& theBoss)const;
@@ -148,7 +150,7 @@ class Function
     this->theDescription=other.theDescription;
     this->theExample=other.theExample;
     this->theFunction=other.theFunction;
-    this->flagNameIsUsed=other.flagNameIsUsed;
+    this->flagNameIsVisible=other.flagNameIsVisible;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentList==other.theArgumentList &&
@@ -156,23 +158,24 @@ class Function
   }
   Function(){this->theFunction=0;}
   Function
-  ( const Function::FunctionAddress& functionPointer,
-    const std::string& functionName,
-    const std::string& argumentList,
-    const std::string& description, const std::string& inputExample, bool inputFlagNameIsUsed
-  )
+  (const Function::FunctionAddress& functionPointer, const std::string& functionName, const std::string& argumentList,
+   const std::string& description, const std::string& inputExample, bool inputflagNameIsVisible)
   { this->theFunction=functionPointer;
     this->theName=functionName;
     this->theDescription=description;
     this->theExample=inputExample;
-    this->theArgumentList=argumentList;
-    this->flagNameIsUsed=inputFlagNameIsUsed;
+    if (argumentList!="")
+    { this->theArgumentList.GetElement().AddOnTop(argumentList);
+      this->theArgumentPatternIsParsed.GetElement().AddOnTop(false);
+      this->theArgumentPatterns.GetElement().SetSize(1);
+    }
+    this->flagNameIsVisible=inputflagNameIsVisible;
   }
   inline static int HashFunction(const Function& input)
   { return input.HashFunction();
   }
   int HashFunction()const
-  { return ((int) this->theFunction)+SomeRandomPrimes[1]*MathRoutines::hashString(theArgumentList);
+  { return (int) this->theFunction;
   }
 };
 
@@ -239,7 +242,8 @@ void MakeVariableNonBounD
   void MakeFunction
   (CommandList& owner, int inputIndexBoundVars, const Expression& argument, int functionIndex)
 ;
-  Function::FunctionAddress GetFunctionFromVarName();
+  Function::FunctionAddress GetFunctionAddressFromVarName();
+  Function& GetFunctionFromVarNamE();
   void MakeProducT
   (CommandList& owner, int inputIndexBoundVars, const Expression& left, const Expression& right)
   ;
@@ -286,7 +290,7 @@ void MakeVariableNonBounD
   (Vector<theType>& output, Context& inputStartingContext, int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
    std::stringstream* comments=0)
   ;
-  bool HasBoundVariables(int Recursion, int MaxRecursionDepth);
+  bool HasBoundVariables();
   bool IsRationalNumber();
   bool IsElementUE()const;
   bool IsInteger()const;
@@ -505,7 +509,9 @@ public:
   List<int> targetProperties;
   HashedListB<std::string, MathRoutines::hashString> theDictionary;
   List<Expression> buffer1, buffer2;
-  int MaxRecursionDepthDefault;
+  int MaxRecursionDeptH;
+  int RecursionDeptH;
+  int DepthRecursionReached;
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
   double MaxAllowedTimeInSeconds;
@@ -523,8 +529,11 @@ public:
   int numEmptyTokensStart;
   Expression theCommands;
 //  std::vector<std::stringstream> theLogs;
-  List<SyntacticElement> syntacticSoup;
-  List<SyntacticElement> syntacticStack;
+  List<SyntacticElement> syntacticSouP;
+  List<SyntacticElement> syntacticStacK;
+
+  List<SyntacticElement>* CurrrentSyntacticSouP;
+  List<SyntacticElement>* CurrentSyntacticStacK;
 
   List<ExpressionContext> theExpressionContext;
   ////
@@ -568,10 +577,10 @@ public:
   bool DecreaseStackSetCharacterRanges(int decrease)
   { if (decrease<=0)
       return true;
-    assert( this->syntacticStack.size-decrease>0);
-    this->syntacticStack[this->syntacticStack.size-decrease-1].IndexLastCharPlusOne=
-    this->syntacticStack[this->syntacticStack.size-1].IndexLastCharPlusOne;
-    this->syntacticStack.SetSize(this->syntacticStack.size-decrease);
+    assert((*this->CurrentSyntacticStacK).size-decrease>0);
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1].IndexLastCharPlusOne=
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].IndexLastCharPlusOne;
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
   std::string ElementToStringSyntacticStack();
@@ -630,15 +639,15 @@ public:
   bool ReplaceCEByC();
   bool ReplaceCCByC();
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
-  { return this->ReplaceEXEByEusingO(this->syntacticStack[this->syntacticStack.size-2].controlIndex, formatOptions);
+  { return this->ReplaceEXEByEusingO((*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex, formatOptions);
   }
   bool ReplaceXEXEXByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
   ;
   bool ReplaceEXEByEusingO(int theOperation, int formatOptions=Expression::formatDefault)
   ;
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
-  { this->syntacticStack[this->syntacticStack.size-2].controlIndex=theCon;
-    this->syntacticStack[this->syntacticStack.size-2].theData.format=theFormat;
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=theCon;
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
     this->DecreaseStackSetCharacterRanges(1);
     return true;
   }
@@ -651,29 +660,29 @@ public:
   bool ReplaceXXXXByConCon(int con1, int con2, int inputFormat1=Expression::formatDefault, int inputFormat2=Expression::formatDefault);
   bool ReplaceXXXXByCon(int con1, int inputFormat1=Expression::formatDefault);
   bool ReplaceXXYByY()
-  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-1];
-    this->syntacticStack.SetSize(this->syntacticStack.size-2);
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-2);
     return true;
   }
   bool ReplaceXYYXByYY()
-  { this->syntacticStack[this->syntacticStack.size-4]=this->syntacticStack[this->syntacticStack.size-3];
-    this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
-    this->syntacticStack.SetSize(this->syntacticStack.size-2);
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-2);
     return true;
   }
   bool ReplaceXYXByY()
-  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
     this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
   bool ReplaceXYByY()
-  { this->syntacticStack[this->syntacticStack.size-2]=this->syntacticStack[this->syntacticStack.size-1];
-    this->syntacticStack.SetSize(this->syntacticStack.size-1);
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
     return true;
   }
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault)
-  { this->syntacticStack[this->syntacticStack.size-3]=this->syntacticStack[this->syntacticStack.size-2];
-    this->syntacticStack[this->syntacticStack.size-3].theData.format=inputFormat;
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
     this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
@@ -693,7 +702,7 @@ public:
   bool ApplyOneRule(const std::string& lookAhead);
   void resetStack()
   { SyntacticElement emptyElement=this->GetEmptySyntacticElement();
-    this->syntacticStack.initFillInObject(this->numEmptyTokensStart, emptyElement);
+    (*this->CurrentSyntacticStacK).initFillInObject(this->numEmptyTokensStart, emptyElement);
   }
   int conError()
   { return this->controlSequences.GetIndexIMustContainTheObject("Error");
@@ -807,45 +816,31 @@ public:
   { return this->operations.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical
-  (Expression& theExpression, List<Expression>& output, int theOp, int RecursionDepth, int MaxRecursionDepth)
+  (Expression& theExpression, List<Expression>& output, int theOp)
 ;
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
-  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes(), RecursionDepth, MaxRecursionDepth);
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
   bool AppendSummandsReturnTrueIfOrderNonCanonical
-  (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
-  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus(), RecursionDepth, MaxRecursionDepth);
+  (Expression& theExpression, List<Expression>& output)
+  { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
   template <class dataType>
   bool EvaluatePMTDtree
   (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
   ;
   void SpecializeBoundVars
-(Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs, int RecursionDepth, int MaxRecursionDepth)
+(Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs)
   ;
-  bool ExpressionHasBoundVars(Expression& theExpression, int RecursionDepth, int MaxRecursionDepth)
-  { if (RecursionDepth>MaxRecursionDepth)
-    { std::stringstream out;
-      out << "Max recursion depth of " << MaxRecursionDepth << " exceeded.";
-      theExpression.errorString=out.str();
-      return false;
-    }
-    if (theExpression.theOperation==this->opVariableBound())
-      return true;
-    else
-      for (int i=0; i<theExpression.children.size; i++)
-        if (this->ExpressionHasBoundVars(theExpression.children[i], RecursionDepth+1, MaxRecursionDepth+1))
-          return true;
-    return false;
-  }
+  bool ExpressionHasBoundVars(Expression& theExpression);
   Expression* PatternMatch
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs, int RecursionDepth,
-   int MaxRecursionDepth, Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
+  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+   Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   int RecursionDepth, int maxRecursionDepth, std::stringstream* theLog=0, bool logAttempts=false)
+    std::stringstream* theLog=0, bool logAttempts=false)
   ;
   bool isADigit(const std::string& input, int& whichDigit)
   { if (input.size()!=1)
@@ -860,7 +855,7 @@ bool CollectSummands
 ;
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
-   int RecursionDepth=0, int MaxRecursionDepth=500, std::stringstream* theLog=0)
+   std::stringstream* theLog=0)
   ;
   bool ExpressionsAreEqual
   (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
@@ -975,10 +970,12 @@ static bool EvaluateDereferenceOneArgument
   void init(GlobalVariables& inputGlobalVariables);
   void initPredefinedVars()
   ;
-  void ExtractExpressions();
+  bool ExtractExpressions
+(Expression& outputExpression, std::string* outputErrors)
+    ;
   void EvaluateCommands();
   bool EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, int RecursionDepth, int maxRecursionDepth, ExpressionPairs& bufferPairs, std::stringstream* theLog=0)
+(Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* theLog=0)
  ;
   void Evaluate(const std::string& theInput)
   { if (this->theGlobalVariableS==0)
@@ -987,19 +984,46 @@ static bool EvaluateDereferenceOneArgument
     }
     this->StartTimeInSeconds=this->theGlobalVariableS->GetElapsedSeconds();
     this->inputString=theInput;
-    this->ParseFillDictionary(this->inputString);
-    this->ExtractExpressions();
+    this->ParseAndExtractExpressions(theInput, this->theCommands, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
     this->EvaluateCommands();
+  }
+  bool ParseAndExtractExpressions
+  (const std::string& theInputString, Expression& outputExp, List<SyntacticElement>& outputSynSoup,
+   List<SyntacticElement>& outputSynStack, std::string* outputSynErrors)
+  { this->CurrentSyntacticStacK=&outputSynStack;
+    this->CurrrentSyntacticSouP=&outputSynSoup;
+    this->ParseFillDictionary(theInputString);
+    bool result=this->ExtractExpressions(outputExp, outputSynErrors);
+    this->CurrentSyntacticStacK=&this->syntacticStacK;
+    this->CurrrentSyntacticSouP=&this->syntacticSouP;
+    return result;
   }
   bool isLeftSeparator(char c);
   bool isRightSeparator(char c);
-  void ParseFillDictionary(const std::string& input);
+  void ParseFillDictionary
+  (const std::string& input)
+  ;
 
   void initDefaultFolderAndFileNames
   (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
   ;
   void InitJavaScriptDisplayIndicator();
 
+};
+
+class IncrementRecursion
+{ CommandList* theBoss;
+  public:
+  IncrementRecursion(CommandList& owner)
+  { owner.RecursionDeptH++;
+    if (owner.DepthRecursionReached<owner.RecursionDeptH)
+      owner.DepthRecursionReached=owner.RecursionDeptH;
+    this->theBoss=&owner;
+
+  }
+  ~IncrementRecursion()
+  { this->theBoss->RecursionDeptH--;
+  }
 };
 
 #endif

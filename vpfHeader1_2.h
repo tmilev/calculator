@@ -3090,7 +3090,7 @@ class MonomialGeneralizedVerma
   int indexFDVector;
   MonomialGeneralizedVerma(): owneR(0), indexInOwner(-1), indexFDVector(-1) { }
   void MultiplyMeByUEEltOnTheLeft
-  (const CoefficientType& theCoeff, ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
+  (const CoefficientType& theCoeff, const ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
@@ -3143,7 +3143,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   public:
   List<ModuleSSalgebraNew<CoefficientType> >* owneR;
   void MultiplyMeByUEEltOnTheLeft
-  (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
+  (const ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
   void ReduceMonAndAddToMe
@@ -3237,6 +3237,8 @@ public:
   void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
   { this->theMons=other.theMons;
   }
+  void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
+  ;
   bool operator==(const MonomialTensorGeneralizedVermas<CoefficientType>& other)const
   { if (this->theMons.size!=other.theMons.size)
       return false;
@@ -3319,6 +3321,10 @@ public:
   int HashFunction()const
   { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
   }
+  void operator=(const ElementTensorsGeneralizedVermas<CoefficientType>& other)
+  { this->::MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType>::operator=(other);
+  }
+  void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other);
   static int HashFunction(const ElementTensorsGeneralizedVermas<CoefficientType>& input)
   { return input.HashFunction();
   }
@@ -6633,6 +6639,23 @@ void MonomialUniversalEnveloping<CoefficientType>::Substitution(const Polynomial
 }
 
 template <class CoefficientType>
+void MonomialTensorGeneralizedVermas<CoefficientType>::operator=
+(const MonomialGeneralizedVerma<CoefficientType>& other)
+{ this->theMons.SetSize(1);
+  this->theMons[0]=other;
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
+{ this->MakeZero();
+  MonomialTensorGeneralizedVermas<CoefficientType> theMon;
+  for (int i=0; i<other.size; i++)
+  { theMon=other[i];
+    this->AddMonomial(theMon, other.theCoeffs[i]);
+  }
+}
+
+template <class CoefficientType>
 bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
    List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
@@ -6641,7 +6664,20 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
   output.MakeZero();
   for (int i=0; i<theUE.size; i++)
   { if (!this->MultiplyMeByUEEltOnTheLeft(theUE[i], theUE.theCoeffs[i], tempET, theOwner, theGlobalVariables, theRingUnit, theRingZero))
-      return false;
+    { ElementSumGeneralizedVermas<CoefficientType> tempOutput;
+      for (int j=0; j<this->size; j++)
+      { MonomialTensorGeneralizedVermas<CoefficientType> currentMon=this->TheObjects[j];
+        if (currentMon.theMons.size!=1)
+          return false;
+        MonomialGeneralizedVerma<CoefficientType>& currentSingleMon=currentMon.theMons[0];
+        if (j==0)
+          tempOutput.MakeZero(*currentSingleMon.owneR);
+        tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
+      }
+      tempOutput.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables, theRingUnit, theRingZero);
+      output=tempOutput;
+      return true;
+    }
     output+=tempET;
   }
   return true;
@@ -6660,6 +6696,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
   { output.MakeZero();
     return true;
   }
+  output=*this;
   output*=(theCoeff);
   for(int i=theUE.Powers.size-1; i>=0; i--)
   { int thePower;
@@ -6720,7 +6757,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
 
 template <class CoefficientType>
 void MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLeft
-(const CoefficientType& theCoeff, ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
+(const CoefficientType& theCoeff, const ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& outputAccum,
 GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialGeneralizedVerma<CoefficientType> currentMon;
   CoefficientType currentCoeff;
@@ -6739,7 +6776,7 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
 
 template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
-  (ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
+  (const ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
   MonomialGeneralizedVerma<CoefficientType> currentMon;

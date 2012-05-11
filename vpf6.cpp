@@ -446,7 +446,7 @@ std::string Data::ElementToString(std::stringstream* comments)const
       << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString(&theFormat) << ")";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
-      return this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString();
+      return this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString(&theFormat);
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -1505,9 +1505,9 @@ bool CommandList::fHWTAABF
   { std::cout << "This shouldn't happen!";
     return false;
   }
-  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ElementToString();
-  std::cout << "<br>starting right elt after conversion: " << rightD.ElementToString();
-  std::cout << "Highest weight in fundamental coords after conversion: " << weight.ElementToString() << "<br>";
+//  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ElementToString();
+//  std::cout << "<br>starting right elt after conversion: " << rightD.ElementToString();
+//  std::cout << "Highest weight in fundamental coords after conversion: " << weight.ElementToString() << "<br>";
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(leftD.GetNumContextVars(), theCommands.theGlobalVariableS);
   theRingUnit.MakeOne(rightD.GetNumContextVars(), theCommands.theGlobalVariableS);
@@ -1713,7 +1713,7 @@ bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
-    << " (in mathematical language Type_Rank). Instead I recieved " << theExpression.ElementToString() << " at file "
+    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ElementToString() << " at file "
     << __FILE__ << " line " <<  __LINE__ << ".";
   if (theExpression.children.size!=2)
   { errorStream << " The input of the function does not have two arguments";
@@ -1842,11 +1842,11 @@ void CommandList::initPredefinedVars()
    the third- the number of columns.\
    ", "X:=FunctionToMatrix{}(A,5,6); A{}({{a}},{{b}}):=a+b; X;");
   this->AddNonBoundVarMustBeNew
-  ("Union", & this->EvaluateStandardUnion, "",
+  ("Union", & this->StandardUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); Union{}X; A{}({{i}},{{j}}):=i*i-j*j; Union{}X ");
   this->AddNonBoundVarMustBeNew
-  ("UnionNoRepetition", & this->EvaluateStandardUnionNoRepetition, "",
+  ("UnionNoRepetition", & this->StandardUnionNoRepetition, "",
    "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
   this->AddNonBoundVarMustBeNew
@@ -1866,6 +1866,11 @@ void CommandList::initPredefinedVars()
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
    "g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
+  this->AddNonBoundVarMustBeNew
+  ("WeylDimFormula", & this->fWeylDimFormula, "",
+   "Weyl dimension formula. First argument gives the type of the Weyl group of the simple Lie algebra in the form Type_Rank (e.g. E_6).\
+   The second argument gives the highest weight in fundamental coordinates. ",
+   "WeylDimFormula{}(G_2, (1,0));\nWeylDimFormula{}(E_6, (2,0,0,0,0,0));");
 
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
@@ -1950,11 +1955,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoFail("OperationList", 0, "", "", "", false);
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
   this->AddOperationNoFail
-  ("\\cup", this->EvaluateStandardUnion, "",
+  ("\\cup", this->StandardUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with a list containing \
    the union of all members (with repetition).", "x\\cup List{} x \\cup List{}x \\cup (a,b,x)", false);
   this->AddOperationNoFail
-  ("\\sqcup", this->EvaluateStandardUnionNoRepetition, "",
+  ("\\sqcup", this->StandardUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list containing \
    the union of all members; all repeating members are discarded.", "(x,y,x)\\sqcup(1,x,y,2)", false);
   this->AddOperationNoFail("Error", 0, "", "", "", false);
@@ -2203,7 +2208,7 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
     RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
     RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
     ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
-    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
+//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
     if (!right.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyMeByUEEltOnTheLeft
         (leftCopy.GetUE(), outputElt, this->owner->theObjectContainer.theCategoryOmodules, *this->owner->theGlobalVariableS, RFOne, RFZero))
       return false;
@@ -2505,7 +2510,14 @@ bool CommandList::StandardFunction
       return true;
   }
   assert(theExpression.children.size==2);
-
+  int theIndex;
+  if (functionNameNode.theOperation==theCommands.opList())
+    if (theExpression.children[1].IsSmallInteger(theIndex))
+      if (theIndex<=functionNameNode.children.size && theIndex>0)
+      { functionNameNode.AssignChild(theIndex-1);
+        theExpression.AssignChild(0);
+        return true;
+      }
   if (functionNameNode.theOperation!=theExpression.theBoss->opVariableNonBound())
     return false;
   Function::FunctionAddress theFun;
@@ -2608,7 +2620,7 @@ bool Expression::IsSmallInteger(int& whichInteger)
   return this->theBoss->theData[this->theData].IsSmallInteger(whichInteger);
 }
 
-bool CommandList::EvaluateStandardUnion
+bool CommandList::StandardUnion
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size==1)
   { theExpression.AssignChild(0);
@@ -2629,7 +2641,7 @@ bool CommandList::EvaluateStandardUnion
   return true;
 }
 
-bool CommandList::EvaluateStandardUnionNoRepetition
+bool CommandList::StandardUnionNoRepetition
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size==1)
   { theExpression.AssignChild(0);
@@ -3139,7 +3151,6 @@ bool CommandList::ExpressionHasBoundVars(Expression& theExpression)
   return false;
 }
 
-
 bool CommandList::ExtractExpressions
 (Expression& outputExpression, std::string* outputErrors)
 { std::string lookAheadToken;
@@ -3208,11 +3219,14 @@ void CommandList::EvaluateCommands()
   std::stringstream comments;
   out << "<table border=\"1\" ><tr><th>Your input</th><th>Result</th><th>Result in LaTeX</th></tr><tr><td>"<< startingExpressionString << "</td><td>"  << this->theCommands.ElementToString(0, 10000)
   << "</td><td>" << this->theCommands.ElementToString(0, 10000, true, false, false, &comments) << "</td></tr>";
-  if (comments.str()!="")
-    out << "<tr><td colspan=\"3\"> "<< comments.str() << "</td></tr>";
   out << "</table>";
   this->theLog= loggingStream.str();
   this->outputString=out.str();
+  if (comments.str()!="")
+  { std::stringstream commentsStream;
+    commentsStream << "<span>"<< comments.str() << "</span>";
+    this->outputCommentsString=commentsStream.str();
+  }
 }
 
 std::string SyntacticElement::ElementToString(CommandList& theBoss)

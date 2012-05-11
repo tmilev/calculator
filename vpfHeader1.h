@@ -6677,6 +6677,8 @@ void Matrix<Element>::NonPivotPointsToEigenVector
 
 class GlobalVariables
 {
+  //I love doxygen!
+  /// @cond
 private:
   FeedDataToIndicatorWindow FeedDataToIndicatorWindowDefault;
   double (*getElapsedTimePrivate)();
@@ -6840,6 +6842,7 @@ public:
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
   }
+  /// @endcond
 };
 
 template <class CoefficientType>

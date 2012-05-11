@@ -8878,15 +8878,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateSlTwoInSlN
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("getWeylDim",
-   "(Rational,...)",
-   "Evaluates the Weyl dimension formula. Input: a vector in fundamental weight coordinates. \
-   The j^th fundamental weight is the weight that has scalar product 1 with the j^th simple Vector<Rational> times 2 \
-   divided by the Vector<Rational> length squared, and 0 with the remaining simple Vectors<Rational>.",
-   "getWeylDim(0,0,1)",
-    & ParserNode::EvaluateWeylDimFormula
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("printRootSystem",
    "()",
    "Print the Vector<Rational> system of the ambient Lie algebra.",

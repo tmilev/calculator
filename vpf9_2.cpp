@@ -3805,21 +3805,6 @@ void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
   this->outputString=out.str();
 }
 
-int ParserNode::EvaluateWeylDimFormula
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ HomomorphismSemisimpleLieAlgebra& theHmm= theNode.owner->theHmm;
-  Vector<Rational> theWeight;
-  int theDimension=theArgumentList.size;
-  if (theDimension!=theHmm.theRange().theWeyl.GetDim())
-    return theNode.SetError(theNode.errorDimensionProblem);
-  theWeight.MakeZero(theDimension);
-  for (int i=0; i<theArgumentList.size; i++)
-    theWeight[i]=theNode.owner->TheObjects[theArgumentList[i]].rationalValue;
-  theNode.rationalValue= theHmm.theRange().theWeyl.WeylDimFormula(theWeight, theGlobalVariables);
-  theNode.ExpressionType=theNode.typeRational;
-  return theNode.errorNoError;
-}
-
 bool Parser::LookUpInDictionaryAndAdd(std::string& input)
 { switch (input.at(0))
   { case '0': this->TokenBuffer.AddOnTop(Parser::tokenDigit); this->ValueBuffer.AddOnTop(0); return true;

@@ -5660,7 +5660,10 @@ std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
-    tempS1=currentCoeff.ElementToString(theFormat);
+    if (currentCoeff.ElementToStringNeedsBracketsForMultiplication())
+      tempS1="("+currentCoeff.ElementToString(theFormat)+ ")";
+    else
+      tempS1=currentCoeff.ElementToString(theFormat);
     tempS2=currentMon.ElementToString(theFormat);
     if (tempS1=="1" && tempS2!="1")
       tempS1="";

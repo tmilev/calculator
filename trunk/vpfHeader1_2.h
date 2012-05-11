@@ -3068,12 +3068,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    )
   ;
   std::string ElementToString()const;
-  std::string ElementToStringHWV()const
-  { return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ElementToString() + ","
-    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString() + ")";
+  std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
+  { return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ElementToString(theFormat) + ","
+    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ElementToString(theFormat) + ")";
   }
   void SplitOverLevi
-  (std::string* Report, Vector<Rational> & splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
@@ -3101,7 +3101,7 @@ class MonomialGeneralizedVerma
   }
 
   std::string ElementToString
-  (FormatExpressions* theFormat, bool includeV=true)const
+  (FormatExpressions* theFormat=0, bool includeV=true)const
   ;
   bool IsEqualToZero()const
   { return this->Coefficient.IsEqualToZero();
@@ -3216,8 +3216,7 @@ public:
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->theMons.size);
     int result=0;
     for (int i=0; i<numCycles; i++)
-    { result+=SomeRandomPrimes[i]*this->theMons[i].HashFunction();
-    }
+      result+=SomeRandomPrimes[i]*this->theMons[i].HashFunction();
     return result;
   }
   static int HashFunction(const MonomialTensorGeneralizedVermas<CoefficientType>& input)
@@ -3231,7 +3230,7 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].Substitution(theSub);
   }
-  std::string ElementToString(FormatExpressions* theFormat, bool includeV=true)
+  std::string ElementToString(FormatExpressions* theFormat=0, bool includeV=true)const
   ;
   MonomialTensorGeneralizedVermas(){}
   void operator=(const MonomialTensorGeneralizedVermas<CoefficientType>& other)
@@ -3246,6 +3245,16 @@ public:
       if(!(this->theMons[i]==other.theMons[i]))
         return false;
     return true;
+  }
+  bool operator>(const MonomialTensorGeneralizedVermas<CoefficientType>& other)const
+  { if (this->theMons.size>other.theMons.size)
+      return true;
+    if (other.theMons.size>this->theMons.size)
+      return false;
+    ///This might need a rewrite. As it is, it will cause monomials to be sorted according to the
+    ///alphabetical order of their human-readable strings. If I have time, I will make a better scheme for
+    ///comparison.
+    return this->ElementToString()>other.ElementToString();
   }
 };
 
@@ -5567,7 +5576,7 @@ void ModuleSSalgebraNew<CoefficientType>::Substitution
 
 template <class CoefficientType>
 std::string MonomialTensorGeneralizedVermas<CoefficientType>::ElementToString
-  (FormatExpressions* theFormat, bool includeV)
+  (FormatExpressions* theFormat, bool includeV)const
 { std::stringstream out;
   std::string tempS;
   if (this->theMons.size>1)
@@ -5601,7 +5610,7 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ElementToString
   if (tempS!="1")
     out << tempS;
   if (includeV)
-    out << theMod.ElementToStringHWV();
+    out << theMod.ElementToStringHWV(theFormat);
 //  std::cout << "<br>MonomialP " << out.str() << " has indexInOwner " << this->indexInOwner;
   return out.str();
 }
@@ -5638,48 +5647,43 @@ std::string ElementSumGeneralizedVermas<CoefficientType>::ElementToString
   return out.str();
 }
 
+template <class TemplateMonomial, class Element>
+std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
+(FormatExpressions* theFormat)const
+{ if (this->size==0)
+    return "0";
+  std::stringstream out;
+  std::string tempS1, tempS2;
+  List<TemplateMonomial> sortedMons;
+  sortedMons=*this;
+  sortedMons.QuickSortDescending();
+  for (int i=0; i<sortedMons.size; i++)
+  { TemplateMonomial& currentMon=sortedMons[i];
+    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    tempS1=currentCoeff.ElementToString(theFormat);
+    tempS2=currentMon.ElementToString(theFormat);
+    if (tempS1=="1" && tempS2!="1")
+      tempS1="";
+    if (tempS1=="-1"&& tempS2!="1")
+      tempS1="-";
+    if(tempS2!="1")
+      tempS1+=tempS2;
+    if (i>0)
+    { if (tempS1.size()>0)
+      { if (tempS1[0]!='-')
+          out << "+";
+      } else
+        out << "+";
+    }
+    out << tempS1;
+  }
+  return out.str();
+}
+
 template <class CoefficientType>
 std::string ElementTensorsGeneralizedVermas<CoefficientType>::ElementToString
   (FormatExpressions* theFormat)const
-{ if (this->size==0)
-    return "0";
-  Vector<Rational> parSel;
-  std::stringstream out;
-  std::string tempS;
-  MonomialTensorGeneralizedVermas<CoefficientType>& firstMon=this->TheObjects[0];
-  bool useBrackets=false;
-  int indexInOwnerFirst=-1;
-  if (firstMon.theMons.size!=1)
-    useBrackets=true;
-  else
-    indexInOwnerFirst=firstMon.theMons[0].indexInOwner;
-  for (int i=1; i< this->size; i++)
-  { MonomialTensorGeneralizedVermas<CoefficientType>& curMon=this->TheObjects[i];
-    if (curMon.theMons.size!=1)
-    { useBrackets=true;
-      break;
-    }
-    if (curMon.theMons[0].indexInOwner!=indexInOwnerFirst)
-    { useBrackets=true;
-      break;
-    }
-  }
-  if (useBrackets)
-    out << "(";
-  for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ElementToString(theFormat, useBrackets);
-    if (i!=0 && tempS[0]!='-')
-      out << "+";
-    out << tempS;
-  }
-  if (useBrackets)
-    out << ")";
-  out << firstMon.theMons[0].owneR->TheObjects[indexInOwnerFirst].ElementToStringHWV();
-//  std::cout << "<br>" << out.str() << " has " << this->size << " monomials with hash functions ";
-//  for (int i=0; i<this->size; i++)
-//  { std::cout << this->TheObjects[i].HashFunction() << ", ";
-//  }
-  return out.str();
+{ return this->::MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType>::ElementToString(theFormat);
 }
 
 template <class CoefficientType>
@@ -6704,9 +6708,9 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLef
       return false;
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
-    //{ //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << this->ElementToString(theGlobalVariables);
+    //{ //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << this->ElementToString();
       output.MultiplyMeByElementLieAlg(theOwner, theIndex, theGlobalVariables, theRingUnit, theRingZero);
-      //std::cout <<"<br>to get: " << this->ElementToString(theGlobalVariables);
+      //std::cout <<"<br>to get: " << this->ElementToString();
     //}
   }
   return true;
@@ -6735,10 +6739,10 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
     for (int j=0; j<currentMon.theMons.size; j++)
     { tempElt.MakeZero(theOwner);
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
-//      std::cout << "<hr> Acting by " << theGenerator.ElementToString(true, theGlobalVariables, tempFormat)
-//      << " on " << tempElt.ElementToString(theGlobalVariables) << "<br>";
+ //     std::cout << "<hr> Acting by " << theGenerator.ElementToString()
+ //     << " on " << tempElt.ElementToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
-//      std::cout << "<br> result: " << tempElt.ElementToString(theGlobalVariables);
+//      std::cout << "<br> result: " << tempElt.ElementToString();
       for (int k=0; k<tempElt.size; k++)
       { currentCoeff=this->theCoeffs[i];
         currentCoeff*=tempElt.theCoeffs[k];
@@ -6747,7 +6751,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyMeByElementLieAlg
         for (int l=j+1; l<currentMon.theMons.size; l++)
           monActedOn*=currentMon.theMons[l];
         output.AddMonomial(monActedOn, currentCoeff);
-//        std::cout << "<br>accounted: " << monActedOn.ElementToString(theGlobalVariables, tempFormat);
+//        std::cout << "<br>accounted: " << monActedOn.ElementToString();
       }
       accumMon*=currentMon.theMons[j];
     }
@@ -6769,7 +6773,9 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
     currentMon.indexInOwner=this->indexInOwner;
     currentCoeff=theCoeff;
     currentCoeff*=theUE.theCoeffs[j];
+//    std::cout << "<hr>Applying " << theUE[j].ElementToString() << " on " << this->ElementToString();
     outputAccum.ReduceMonAndAddToMe(currentMon, currentCoeff, theGlobalVariables, theRingUnit, theRingZero);
+  //  std::cout << "<br>and accummulating to obtain " << outputAccum.ElementToString() << "<hr>";
   }
 //  std::cout << "<hr>result: " << this->ElementToString(theGlobalVariables);
 }
@@ -6782,7 +6788,9 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   MonomialGeneralizedVerma<CoefficientType> currentMon;
   Accum.MakeZero(*this->owneR);
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].MultiplyMeByUEEltOnTheLeft(this->theCoeffs[i], theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
+  { //std::cout << "<hr>Multiplying " << this->TheObjects[i].ElementToString() << " by " << theUE.ElementToString();
+    this->TheObjects[i].MultiplyMeByUEEltOnTheLeft(this->theCoeffs[i], theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
+    //std::cout << "<br>to obtain " << buffer.ElementToString();
     Accum+=buffer;
   }
   *this=Accum;
@@ -6801,31 +6809,29 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     << "Hence I do not crash the calculator, but display this benign warning message.";
     return;
   }
-//  FormatExpressions theFormat;
-//  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-//  std::cout << "<br>Reducing  " << theMon.ElementToString( theGlobalVariables, theFormat);
+  //std::cout << "<hr><hr>Reducing  " << this->ElementToString();
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-//  std::cout << "<br>";
-  //for (int i=0; i<theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts.size; i++)
-  //{ std::cout << "<br>generator index " << i << " has order " << theMod.theAlgebra->UEGeneratorOrderIncludingCartanElts[i];
+  //std::cout << "<br>";
+  //for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
+  //{ std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
   //}
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().theAlgebras, this->GetOwner().indexAlgebra);
   theUEelt.AddMonomial(this->theMonCoeffOne, myCoeff);
-//  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
+  //std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-//  std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
+  //std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
   CoefficientType theCoeff;
   Matrix<CoefficientType> tempMat1, tempMat2;
 //  std::cout << theMod.ElementToString();
-//  std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
-//  << theMod.theModuleWeightsSimpleCoords.size;
+  //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
+  //<< theMod.theModuleWeightsSimpleCoords.size;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
-//    std::cout << "<br> Processing monomial " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat);
+    //std::cout << "<br> Processing monomial " << currentMon.ElementToString();
     tempMat1.MakeIdMatrix(theMod.theGeneratingWordsNonReduced.size, theRingUnit, theRingZero);
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { int thePower;
@@ -6833,13 +6839,13 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         break;
       int theIndex=currentMon.generatorsIndices[k];
       tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
-//      std::cout << "<hr>Action generator " << theIndex << ":<br>"
-//      << tempMat2.ElementToString(true, false);
+      //std::cout << "<hr>Action generator " << theIndex << ":<br>"
+      //<< tempMat2.ElementToString();
       if (tempMat2.NumRows==0)
-      { if (theIndex>=theMod.GetOwner().GetRank()+theMod.GetOwner().GetNumPosRoots())
-//        { std::cout << "<br>Error! Accum: " << this->ElementToString(theGlobalVariables);
-          return;
-//        }
+      { //if (theIndex>=theMod.GetOwner().GetRank()+theMod.GetOwner().GetNumPosRoots())
+        //{ std::cout << "<br>Error! Accum: " << this->ElementToString();
+        //return;
+        //}
         break;
       }
       for (int s=0; s<thePower; s++)
@@ -6847,9 +6853,9 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
     }
-//      std::cout << "<br> Action is the " << currentMon.ElementToString(false, false, theGlobalVariables, theFormat)
+//      std::cout << "<br> Action is the " << currentMon.ElementToString()
 //      << " free action plus <br>"
-//      << tempMat1.ElementToString(true, false);
+//      << tempMat1.ElementToString();
     newMon.owneR=this->owneR;
     newMon.indexInOwner=this->indexInOwner;
 //    CoefficientType newCoeff;
@@ -6857,11 +6863,14 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       if (!tempMat1.elements[i][this->indexFDVector].IsEqualToZero())
       { newMon.theMonCoeffOne=currentMon;
         newMon.indexFDVector=i;
+//        std::cout << "<br>adding to " << outputAccum.ElementToString() << " the monomial " << newMon.ElementToString() << " with coefficient "
+//        << tempMat1.elements[i][this->indexFDVector].ElementToString() << " to obtain ";
         outputAccum.AddMonomial(newMon, tempMat1.elements[i][this->indexFDVector]);
+//        std::cout << outputAccum.ElementToString();
       }
   }
-//  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString(true, false);
-//  std::cout << "<br> Accum: " << this->ElementToString(theGlobalVariables);
+//  std::cout << "<br>Matrix of the action: " << tempMat1.ElementToString();
+//  std::cout << "<br> Accum: " << this->ElementToString();
   theMod.GetOwner().OrderSSLieAlgebraStandard();
 }
 

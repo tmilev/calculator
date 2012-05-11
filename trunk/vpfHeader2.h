@@ -543,6 +543,7 @@ public:
   List<std::string> evaluationErrors;
   std::string inputString;
   std::string outputString;
+  std::string outputCommentsString;
   std::string theLog;
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
@@ -861,7 +862,7 @@ bool CollectSummands
   (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
   ;
 
-  static bool EvaluateStandardUnion
+  static bool StandardUnion
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
 static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
@@ -870,7 +871,7 @@ static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
 static bool EvaluateDereferenceOneArgument
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
-  static bool EvaluateStandardUnionNoRepetition
+  static bool StandardUnionNoRepetition
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardPlus
@@ -940,6 +941,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fElementSSAlgebra
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fWeylDimFormula
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fHWV

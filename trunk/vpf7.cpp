@@ -3067,39 +3067,6 @@ std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std:
   return out.str();
 }
 
-template <class TemplateMonomial, class Element>
-std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
-(FormatExpressions* theFormat)const
-{ if (this->size==0)
-    return "0";
-  std::stringstream out;
-  std::string tempS1, tempS2;
-  List<TemplateMonomial> sortedMons;
-  sortedMons=*this;
-  sortedMons.QuickSortDescending();
-  for (int i=0; i<sortedMons.size; i++)
-  { TemplateMonomial& currentMon=sortedMons[i];
-    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
-    tempS1=currentCoeff.ElementToString(theFormat);
-    tempS2=currentMon.ElementToString(theFormat);
-    if (tempS1=="1" && tempS2!="1")
-      tempS1="";
-    if (tempS1=="-1"&& tempS2!="1")
-      tempS1="-";
-    if(tempS2!="1")
-      tempS1+=tempS2;
-    if (i>0)
-    { if (tempS1.size()>0)
-      { if (tempS1[0]!='-')
-          out << "+";
-      } else
-        out << "+";
-    }
-    out << tempS1;
-  }
-  return out.str();
-}
-
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
   (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,

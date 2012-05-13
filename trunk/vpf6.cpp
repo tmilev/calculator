@@ -15,6 +15,8 @@ template < > int HashedListB<ElementUniversalEnveloping<RationalFunction> ,Eleme
 template < > int HashedListB<ElementSumGeneralizedVermas<RationalFunction>,ElementSumGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<Polynomial<Rational>, Polynomial<Rational>::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<Context, Context::HashFunction>::PreferredHashSize=100;
+template < > int HashedListB<Vector<RationalFunction>, Vector<RationalFunction>::HashFunction>::PreferredHashSize=10;
+template < > int HashedListB<MonomialChar<RationalFunction>, MonomialChar<RationalFunction>::HashFunction>::PreferredHashSize=10;
 
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
 template < > int List<Function>::ListActualSizeIncrement=50;
@@ -25,6 +27,8 @@ template < > int List<ElementSumGeneralizedVermas<RationalFunction> >::ListActua
 template < > int List<ModuleSSalgebraNew<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<Context>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<MonomialChar<RationalFunction> >::ListActualSizeIncrement=10;
+
 //If you get a specialization after instantiation error:
 //due to the messed up C++ templates, the following template specialization funcitons must appear
 //here and nowhere else. C++ is a dirty buggy language.
@@ -415,7 +419,7 @@ const Context& Data::GetContext()const
   return this->owner->theObjectContainer.theContexts[this->theContextIndex];
 }
 
-std::string Data::ElementToString(std::stringstream* comments)const
+std::string Data::ElementToString(std::stringstream* comments, bool isFinal)const
 { std::stringstream out;
   if (this->owner==0)
     return "(ProgrammingError:NoOwner)";
@@ -434,6 +438,11 @@ std::string Data::ElementToString(std::stringstream* comments)const
 //        << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
 //        ElementToString(*this->owner->theGlobalVariableS);
       return out.str();
+    case Data::typeString:
+      if (isFinal)
+        return this->owner->theObjectContainer.theStrings[this->theIndex];
+      else
+        return "(string not shown to avoid javascript problems)";
     case Data::typeElementUE:
       out <<"UE{}{" << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString(&theFormat) << "}";
       return out.str();
@@ -596,6 +605,14 @@ void Data::MakeUE
   this->owner=&theBoss;
 }
 
+void Data::MakeString
+(CommandList& theBoss, const std::string& inputString, const Context& inputContext)
+{ this->theIndex= theBoss.theObjectContainer.theStrings.AddNoRepetitionOrReturnIndexFirst(inputString);
+  this->type=this->typeString;
+  this->theContextIndex=theBoss.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(inputContext);
+  this->owner=&theBoss;
+}
+
 void Data::MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
 { this->owner=&theBoss;
@@ -613,6 +630,7 @@ void Data::MakeSSAlgebra
 std::string Data::ElementToStringDataType() const
 { switch(this->type)
   { case Data::typeSSalgebra: return "SemisimpleLieAlgebra";
+    case Data::typeString: return "String";
     case Data::typeRational:  return "Rational";
     case Data::typePoly: return "Polynomial";
     case Data::typeError:  return "Error";
@@ -778,6 +796,13 @@ void Expression::MakePoly
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
 { Data tempData;
   tempData.MakePoly(newBoss, inputData, inputContextIndex);
+  this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
+}
+
+void Expression::MakeString
+(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
+{ Data tempData;
+  tempData.MakeString(newBoss, theString, inputContext);
   this->MakeDatA(tempData, newBoss, inputIndexBoundVars);
 }
 
@@ -1711,7 +1736,8 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
 
 bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ std::stringstream errorStream;
+{ IncrementRecursion recursionCounter(theCommands);
+  std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
     << " (in mathematical language Type_Rank). Instead I received " << theExpression.ElementToString() << " at file "
     << __FILE__ << " line " <<  __LINE__ << ".";
@@ -1871,7 +1897,19 @@ void CommandList::initPredefinedVars()
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
    "WeylDimFormula{}(G_2, (1,0));\nWeylDimFormula{}(E_6, (2,0,0,0,0,0));");
-
+  this->AddNonBoundVarMustBeNew
+  ("DecomposeInducingRepGenVermaModule", & this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
+   "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
+   The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
+   fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
+   The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
+   "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
+/*  this->AddNonBoundVarMustBeNew
+  ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
+   "Prints sl(2) subalgebras and root subalgebras. \
+   The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
+   "printSlTwoSubalgebrasAndRootSubalgebras{}(G_2)");
+*/
   this->NumPredefinedVars=this->theNonBoundVars.size;
 }
 
@@ -3224,7 +3262,7 @@ void CommandList::EvaluateCommands()
   this->outputString=out.str();
   if (comments.str()!="")
   { std::stringstream commentsStream;
-    commentsStream << "<span>"<< comments.str() << "</span>";
+    commentsStream << "<b>Comments.</b><br><span>"<< comments.str() << "</span>";
     this->outputCommentsString=commentsStream.str();
   }
 }
@@ -3285,7 +3323,7 @@ int Expression::GetNumCols()const
 
 std::string Expression::ElementToString
 (int recursionDepth, int maxRecursionDepth, bool useLatex, bool AddBrackets, bool AddCurlyBraces,
- std::stringstream* outComments)const
+ std::stringstream* outComments, bool isFinal)const
 { if (maxRecursionDepth>0)
     if(recursionDepth>maxRecursionDepth)
       return "(...)";
@@ -3367,9 +3405,13 @@ std::string Expression::ElementToString
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->theNonBoundVars[this->theData].theName;
   else if (this->theOperation==this->theBoss->opData())
-  { std::stringstream dataComments;
-    out << this->theBoss->theData[this->theData].ElementToString(&dataComments);
-    additionalDataComments=dataComments.str();
+  { if(useLatex && this->GetData().type==Data::typeString)
+      out << "(string)";
+    else
+    { std::stringstream dataComments;
+      out << this->GetData().ElementToString(&dataComments, isFinal);
+      additionalDataComments=dataComments.str();
+    }
   }
   else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
@@ -3658,18 +3700,21 @@ std::string CommandList::ElementToString()
   out << this->ElementToStringNonBoundVars();
   out << "<br>\nData entries (" << this->theData.size << " total):\n<br>\n";
   for (int i=0; i<this->theData.size; i++)
-  { out << openTag3 << this->theData[i].ElementToString() << closeTag3;
+  { out << openTag3 << this->theData[i].ElementToString(0, false) << closeTag3;
     if (i!=this->theData.size-1)
       out  << ", ";
   }
   out << "<hr>";
   for (int k=0; k<this->theExpressionContext.size; k++)
   { ExpressionContext& currentContext=this->theExpressionContext[k];
-    out <<"<hr>" << "Context "<< k+1;
+    out <<"<hr>" << "Context " << k+1;
     out << "<br>\n Cached expressions (" << currentContext.cachedExpressions.size << " total):\n<br>\n";
     for (int i=0; i<currentContext.cachedExpressions.size; i++)
-      out << currentContext.cachedExpressions[i].ElementToString() << " -> "
-      << currentContext.imagesCachedExpressions[i].ElementToString() << "<br>";
+    { out << currentContext.cachedExpressions[i].ElementToString(0, 100, false, false, false, 0, false)
+      << " -> " << currentContext.imagesCachedExpressions[i].ElementToString(0, 100, false, false, false, 0, false);
+      if (i!=currentContext.cachedExpressions.size-1)
+        out << "<br>";
+    }
     if (currentContext.BoundVariables.size>0)
     { out << "Bound variables:<br>\n ";
       for (int i=0; i<currentContext.BoundVariables.size; i++)

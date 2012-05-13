@@ -1149,23 +1149,6 @@ void Cone::ChangeBasis
   this->CreateFromNormals(this->Normals, theGlobalVariables);
 }
 
-Vector<Rational> WeylGroup::GetSimpleCoordinatesFromFundamental
-(const Vector<Rational>& inputInFundamentalCoords)
-{ Matrix<Rational> & tempMat=*this->GetMatrixFundamentalToSimpleCoords();
-  Vector<Rational> result;
-  result=inputInFundamentalCoords;
-  tempMat.ActOnVectorColumn(result);
-  return result;
-}
-
-Vector<Rational> WeylGroup::GetFundamentalCoordinatesFromSimple
-(const Vector<Rational>& inputInFundamentalCoords)
-{ Matrix<Rational> & tempMat=*this->GetMatrixSimpleToFundamentalCoords();
-  Vector<Rational> result=inputInFundamentalCoords;
-  tempMat.ActOnVectorColumn(result);
-  return result;
-}
-
 std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWeight
   (Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords, Vector<Rational>& parabolicSel, Parser& theParser,
    GlobalVariables& theGlobalVariables)
@@ -4847,56 +4830,6 @@ int ParserNode::EvaluatePrintRootSystem
   return theNode.errorNoError;
 }
 
-template<class CoefficientType>
-void Vectors<CoefficientType>::IntersectTwoLinSpaces
-  (const Vectors<CoefficientType>& firstSpace, const Vectors<CoefficientType>& secondSpace,
-   Vectors<CoefficientType>& output, GlobalVariables& theGlobalVariables, const CoefficientType& theRingZero
-   )
-{ //std::cout << "<br>*****Debugging Intersection linear spaces: ";
-  //std::cout << "<br>input first space: " << firstSpace.ElementToString();
-  //std::cout << "<br>input second space: " << secondSpace.ElementToString();
-  Vectors<CoefficientType> firstReduced, secondReduced;
-  Selection tempSel;
-  firstSpace.SelectABasis(firstReduced, theRingZero, tempSel, theGlobalVariables);
-  secondSpace.SelectABasis(secondReduced, theRingZero, tempSel, theGlobalVariables);
-  //std::cout << "<br>first selected basis: " << firstSpace.ElementToString();
-  //std::cout << "<br>second selected basis: " << secondSpace.ElementToString();
-  if (firstReduced.size==0 || secondReduced.size==0)
-  { output.size=0;
-    return;
-  }
-  int theDim=firstReduced.TheObjects[0].size;
-  Matrix<CoefficientType> theMat;
-  theMat.init(theDim, firstReduced.size+secondReduced.size);
-  for (int i=0; i<theDim; i++)
-  { for (int j=0; j<firstReduced.size; j++)
-      theMat.elements[i][j]=firstReduced.TheObjects[j].TheObjects[i];
-    for (int j=0; j<secondReduced.size; j++)
-    { theMat.elements[i][firstReduced.size+j]=theRingZero;
-      theMat.elements[i][firstReduced.size+j]-=secondReduced.TheObjects[j].TheObjects[i];
-    }
-  }
-  Matrix<CoefficientType> matEmpty;
-  //std::cout << "<br>The matrix before the gaussian elimination:" << theMat.ElementToString(true, false);
-  theMat.GaussianEliminationByRows(matEmpty, tempSel);
-  //std::cout << "<br>The matrix after the gaussian elimination:" << theMat.ElementToString(true, false);
-  output.Reserve(tempSel.CardinalitySelection);
-  output.size=0;
-  Vector<CoefficientType> nextIntersection;
-  for(int i=0; i<tempSel.CardinalitySelection; i++)
-  { int currentIndex=tempSel.elements[i];
-    //std::cout << "<br>current pivot index : " << currentIndex;
-    assert(currentIndex>=firstReduced.size);
-    nextIntersection.MakeZero(theDim, theRingZero);
-    for (int j=0; j<firstReduced.size; j++)
-      if (!tempSel.selected[j])
-        nextIntersection+=firstReduced.TheObjects[j]*theMat.elements[j][currentIndex];
-    output.AddOnTop(nextIntersection);
-  }
-  //std::cout << "<br> final output: " << output.ElementToString();
-  //std::cout << "<br>******************End of debugging linear space intersections";
-}
-
 int ParserNode::EvaluateIntersectLatticeWithPreimageLattice
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vectors<Rational> theLinearMap;
@@ -5200,91 +5133,6 @@ void rootSubalgebras::MakeProgressReportGenerationSubalgebras(rootSubalgebras& b
   out << "Included Vector<Rational> " << currentIndex+1 << " out of " << TotalIndex << " Total found SAs: " << this->size;
   *theGlobalVariables.theIndicatorVariables.ProgressReportStrings.LastObject()=out.str();
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
-int ParserNode::EvaluatePrintRootSAsAndSlTwos
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos,
-   bool forceRecompute)
-{ std::stringstream outSltwoPath, outMainPath, out, outSltwoDisplayPath, outMainDisplayPath;
-  CGI::SetCGIServerIgnoreUserAbort();
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000;
-  char weylLetter=theNode.owner->DefaultWeylLetter;
-  int theRank=theNode.owner->DefaultWeylRank;
-  outMainPath << theNode.owner->PhysicalPathOutputFolder <<  weylLetter << theRank << "/";
-  outMainDisplayPath << theNode.owner->DisplayPathOutputFolder << weylLetter << theRank << "/";
-  outSltwoPath << outMainPath.str() << "sl2s/";
-  outSltwoDisplayPath << outMainDisplayPath.str() << "sl2s/";
-  bool NeedToCreateFolders=(!CGI::FileExists(outMainPath.str()) || !CGI::FileExists(outSltwoPath.str()));
-  if (NeedToCreateFolders)
-  { std::stringstream outMkDirCommand1, outMkDirCommand2;
-    outMkDirCommand1 << "mkdir " << outMainPath.str();
-    outMkDirCommand2 << "mkdir " << outSltwoPath.str();
-    theNode.owner->SystemCommands.AddOnTop(outMkDirCommand1.str());
-    theNode.owner->SystemCommands.AddOnTop(outMkDirCommand2.str());
-    out << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection."
-    <<  " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
-    << "(Apache server configuration) problem.</b><br><br>"
-    << "<META http-equiv=\"refresh\" content=\"3; url="
-    << theNode.owner->DisplayNameCalculator << "?"
-    << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput=";
-    out << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed);
-    out << "\">  Redirecting in 3 seconds";
-    theNode.outputString=out.str();
-    theNode.ExpressionType=theNode.typeString;
-    return theNode.errorNoError;
-  }
-  std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
-  outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
-  outSltwoFileDisplayName << outSltwoDisplayPath.str() << "sl2s.html";
-  outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
-  outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
-  bool mustRecompute=forceRecompute;
-  if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
-    mustRecompute=true;
-  bool showIndicator=theNode.owner->flagDisplayIndicator;
-  if (mustRecompute)
-  { if (showIndicator)
-    { out << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. <br>Appologies for this technical (Apache server configuration) problem. <br>Hope to alleviate it soon.</b>"
-      << "<br>Below is an indicator for the progress of the computation."
-      << "<br> The computation is slow, up to around 10 minutes for E_8."
-      << "<br>Once it is done, you should be redirected automatically to the result page."
-      << "<br>To go back to the calculator main page use the back button on your browser.";
-      std::stringstream afterSystemCommands;
-      std::stringstream noindicatorLink;
-      afterSystemCommands << "<META http-equiv=\"refresh\" content=\"0; url=";
-      noindicatorLink << theNode.owner->DisplayNameCalculator << "?"
-      << " textType=" << weylLetter << "&textDim=" << theRank << "&textInput="
-      << CGI::UnCivilizeStringCGI(theNode.owner->StringBeingParsed+ " NoIndicator");
-      afterSystemCommands << noindicatorLink.str() << "\">";
-      theNode.owner->afterSystemCommands=afterSystemCommands.str();
-      out << "\n<br>\nComputing ...<br>" << theNode.owner->javaScriptDisplayingIndicator;
-      theGlobalVariables.ClearIndicatorVars();
-      theGlobalVariables.MakeReport();
-      theNode.outputString=out.str();
-      theNode.ExpressionType=theNode.typeString;
-      return theNode.errorNoError;
-    } else
-    { SltwoSubalgebras theSl2s;
-      theSl2s.owner[0].FindSl2Subalgebras(theSl2s, weylLetter, theRank, theGlobalVariables);
-      std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
-      theSl2s.ElementToHtml
-      (theGlobalVariables, theSl2s.owner[0].theWeyl, true, PathSl2, DisplayPathSl2, theNode.owner->DisplayNameCalculator);
-      theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
-      theNode.owner->SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
-    }
-  }
-//  std::stringstream afterSystemCommands;
-  out << "<META http-equiv=\"refresh\" content=\"0; url=";
-  if (!redirectToSlTwos)
-    out << outRootHtmlDisplayName.str();
-  else
-    out << outSltwoFileDisplayName.str();
-  out << "\">";
-  //theNode.owner->afterSystemCommands=afterSystemCommands.str();
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-//  theGlobalVariables.MaxAllowedComputationTimeInSeconds=oldMaxAllowedComputationTimeInSeconds;
-  return theNode.errorNoError;
 }
 
 std::string Parser::GetFunctionDescription()
@@ -6145,15 +5993,28 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "></div>";
   out
   << "<br>The projection plane (drawn on the screen) is spanned by the following two vectors<br> \n";
-  List<List<std::string> > textEbasisNames;
-  textEbasisNames.SetSize(2);
+  List<List<std::string> > textEbasisNamesUserInput;
+  List<List<std::string> > textEbasisNamesReadOnly;
+  textEbasisNamesUserInput.SetSize(2);
+  textEbasisNamesReadOnly.SetSize(2);
   for (int i=0; i<2; i++)
-  { textEbasisNames[i].SetSize(theDimension);
+  { textEbasisNamesReadOnly[i].SetSize(theDimension);
     for (int j=0; j<theDimension; j++)
     { std::stringstream tmpStream;
-      tmpStream << "textEbasis" << timesCalled << "_" << i << "_" << j;
-      textEbasisNames[i][j]=tmpStream.str();
-      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNames[i][j]
+      tmpStream << "textEbasisReadOnly" << timesCalled << "_" << i << "_" << j;
+      textEbasisNamesReadOnly[i][j]=tmpStream.str();
+      out << "<span id=\"" << textEbasisNamesReadOnly[i][j]
+      << "\"> </span>\n";
+    }
+    out << "<br>";
+  }
+  for (int i=0; i<2; i++)
+  { textEbasisNamesUserInput[i].SetSize(theDimension);
+    for (int j=0; j<theDimension; j++)
+    { std::stringstream tmpStream, tmpStream2;
+      tmpStream << "textEbasisUserInput" << timesCalled << "_" << i << "_" << j;
+      textEbasisNamesUserInput[i][j]=tmpStream.str();
+      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j]
       << "\">" << "</textarea>\n";
     }
     out << "<br>";
@@ -6233,9 +6094,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     << "  VectorE1ConeStart" << timesCalled << "[" << i << "]=VectorE1Cone" << timesCalled << "[" << i << "];\n"
     << "  VectorE2ConeStart" << timesCalled << "[" << i << "]=VectorE2Cone" << timesCalled << "[" << i << "];\n"
     << "  VectorE1ConeGoal" << timesCalled << "[" << i << "]=document.getElementById(\""
-    << textEbasisNames[0][i] << "\").value;\n"
+    << textEbasisNamesUserInput[0][i] << "\").value;\n"
     << "  VectorE2ConeGoal" << timesCalled << "[" << i << "]=document.getElementById(\""
-    << textEbasisNames[1][i] << "\").value;\n";
+    << textEbasisNamesUserInput[1][i] << "\").value;\n";
   out
   << "  changeProjectionPlaneUser" << timesCalled << "();\n"
   << "\n}\n";
@@ -6502,9 +6363,9 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   << "(VectorE2Cone" << timesCalled << ", " << eiBasis << "[i]);\n"
   << "  }\n";
   for (int j=0; j<theDimension; j++)
-    out << "  document.getElementById(\"" << textEbasisNames[0][j] << "\").value="
+    out << "  document.getElementById(\"" << textEbasisNamesReadOnly[0][j] << "\").innerHTML="
     << "VectorE1Cone" << timesCalled << "[" << j << "];\n"
-    << "  document.getElementById(\"" << textEbasisNames[1][j] << "\").value="
+    << "  document.getElementById(\"" << textEbasisNamesReadOnly[1][j] << "\").innerHTML="
     << "VectorE2Cone" << timesCalled << "[" << j << "];\n";
   out
   << "  for (var i=0; i<" << this->theBuffer.BasisToDrawCirclesAt.size << "; i++)\n"
@@ -8224,7 +8085,7 @@ int ParserNode::EvaluateDrawWeightSupport
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
-  charSSAlgMod theChar;
+  charSSAlgMod<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
   DrawingVariables theDV;
   std::string report;
@@ -8256,7 +8117,7 @@ int ParserNode::EvaluateDrawWeightSupportWithMults
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
   //Vectors<Rational> theWeightsToBeDrawn;
   std::stringstream out;
-  charSSAlgMod theChar;
+  charSSAlgMod<Rational> theChar;
   theChar.MakeFromWeight(highestWeightSimpleCoords, theNode.owner->theAlgebras, 0);
   DrawingVariables theDV;
   std::string report;
@@ -8961,39 +8822,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateRelations
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("printRootSubalgebras",
-   "()",
-   "Computes all Vector<Rational> subalgebras of the ambient Lie algebra. The computation is served from \
-   the hard disk if it is already computed. \
-   The function will redirect you to a new page, to return to the calculator use the back button.",
-   "printRootSubalgebras",
-   DefaultWeylLetter, DefaultWeylRank,
-    & ParserNode::EvaluatePrintRootSAs
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("printSlTwos",
-   "()",
-   "Computes all sl(2) subalgebras (equivalently, all nilpotent orbits) of the ambient Lie algebra over the complex numbers. \
-   The computation is served from the hard disk if it is already computed. \
-   The function will redirect you to a new page, to return to the calculator use the back button.",
-   "printSlTwos",
-   DefaultWeylLetter, DefaultWeylRank,
-    & ParserNode::EvaluatePrintSlTwos
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("zprintSlTwosAndRootSAsFORCERecompute",
-   "()",
-   "<b>Use only if there are broken links in Vector<Rational> subalgebra/sl(2)-database. \
-   When executing this command, please be patient and do not click any links until automatically redirected. </b> \
-   I have a problem with setting up the Apache server and the way it handles SIGABORT signals \
-   (this is what happens when you don't wait for the computation to finish and click on a link prematurely). \
-   This function is a temporary solution to this (minor) technical problem. \
-   The function name starts with z because it is meant to be used rarely.",
-   "zprintSlTwosAndRootSAsFORCERecompute",
-    DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluatePrintRootSAsForceRecompute
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("factorial",
    "(Integer)",
    "Returns the factorial of a non-negative integer.<=5000",
@@ -9474,18 +9302,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     "splitIrrepOverLeviParabolic((1,1),(0,1))",
    'B', 2, true,
     & ParserNode::EvaluateSplitIrrepOverLeviParabolic
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("splitFDPartGenVermaOverLeviParabolic",
-   "( (Rational, ...), (Rational, ...), (Rational, ...))",
-   "<b>Might be hidden or changed in future versions. \
-   </b>Splits the inducing module of a generalized verma module with highest weight vector given \
-   by the first two arguments over \
-   the Levi part of the parabolic subalgebra given by the \
-   third argument.",
-    "splitFDPartGenVermaOverLeviParabolic((0, 1,1),(1,0,0), (1,0,1))",
-   'B', 3, true,
-    & ParserNode::EvaluateSplitFDPartGenVermaOverLeviParabolic
    );
   this->AddOneFunctionToDictionaryNoFail
   ("splitCharOverLeviParabolic",

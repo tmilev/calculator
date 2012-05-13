@@ -80,31 +80,6 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   }
 }
 
-bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated(const Vector<Rational>& input, Vectors<Rational>& outputOrbit, int UpperLimitNumElements)
-{ HashedList<Vector<Rational> > theOrbit;
-  bool result = true;
-  theOrbit.Clear();
-  Vector<Rational> tempRoot=input;
-  theOrbit.AddOnTop(tempRoot);
-  for (int i=0; i<theOrbit.size; i++)
-  { for (int j=0; j<this->simpleGenerators.size; j++)
-    { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[j], theOrbit.TheObjects[i], false, tempRoot);
-      theOrbit.AddNoRepetition(tempRoot);
-    }
-    for (int j=1; j<this->ExternalAutomorphisms.size; j++)
-    { theOrbit[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], tempRoot);
-      theOrbit.AddNoRepetition(tempRoot);
-    }
-    if (UpperLimitNumElements>0)
-      if (theOrbit.size>=UpperLimitNumElements)
-      { result=false;
-        break;
-      }
-  }
-  outputOrbit.CopyFromBase(theOrbit);
-  return result;
-}
-
 void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<Rational>& theRoot)
 { Vector<Rational> tempRoot;
   this->ActByElement(index, theRoot, tempRoot);
@@ -2447,14 +2422,6 @@ bool SemisimpleLieAlgebra::IsInTheWeightSupport(Vector<Rational>& theWeight, Vec
   return true;
 }
 
-bool WeylGroup::IsDominantWeight(Vector<Rational>& theWeight)
-{ int theDimension= this->CartanSymmetric.NumRows;
-  for (int i=0; i<theDimension; i++)
-    if (this->GetScalarProdSimpleRoot(theWeight, i).IsNegative())
-      return false;
-  return true;
-}
-
 void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables)
 { /*Vectors<Rational> weightSupport;
   this->GenerateWeightSupport(theHighestWeight, weightSupport, theGlobalVariables);
@@ -4118,11 +4085,18 @@ std::string VectorPartition::ElementToString(bool useHtml)
 
 std::string RationalFunction::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out;
+  out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
   if (this->expressionType==this->typeRational)
-  { out << this->ratValue.ElementToString();
+  { out << "(type: rational)";
+    out << this->ratValue.ElementToString();
     return out.str();
   }
   bool hasDenominator=(this->expressionType==this->typeRationalFunction);
+  if (hasDenominator)
+    out << "(type: honest RF)";
+  else
+    out << "(type: poly)";
+
 //  if (hasDenominator && useLatex)
 //    out << "\\frac{";
   out << this->Numerator.GetElementConst().ElementToString(theFormat);
@@ -4523,20 +4497,6 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
 { int theRank=theAlgebra.theWeyl.CartanSymmetric.NumRows;
   int numPosRoots=theAlgebra.theWeyl.RootsOfBorel.size;
   output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
-}
-
-Rational WeylGroup::WeylDimFormulaFromSimpleCoords(Vector<Rational>& theWeightInSimpleCoords)
-{ Rational Result=1;
-  for (int i=0; i<this->RootsOfBorel.size; i++)
-  { Result.MultiplyBy(this->RootScalarCartanRoot(this->rho+theWeightInSimpleCoords, this->RootsOfBorel.TheObjects[i]));
-    Result/=this->RootScalarCartanRoot(this->rho, this->RootsOfBorel.TheObjects[i]);
-  }
-  return Result;
-}
-
-Rational WeylGroup::WeylDimFormula(Vector<Rational>& theWeightInFundamentalCoords)
-{ Vector<Rational> theWeightInSimpleCoords= this->GetSimpleCoordinatesFromFundamental(theWeightInFundamentalCoords);
-  return this->WeylDimFormulaFromSimpleCoords(theWeightInSimpleCoords);
 }
 
 std::string SemisimpleSubalgebras::ElementToString()
@@ -5005,9 +4965,9 @@ bool ParserNode::ConvertToNextType
     if (GoalType==this->typeCharSSFDMod)
     { MonomialChar<Rational> tempMon;
       tempMon.weightFundamentalCoords.MakeZero(this->GetContextLieAlgebra().GetRank());
-      tempMon.Coefficient=this->rationalValue;
+//      tempMon.Coefficient=this->rationalValue;
       this->theChar.GetElement().MakeZero(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-      this->theChar.GetElement()+=tempMon;
+//      this->theChar.GetElement()+=tempMon;
       this->ExpressionType=this->typeCharSSFDMod;
       return true;
     }
@@ -5173,9 +5133,9 @@ std::string ParserNode::ElementToStringValueOnlY
       << "\n\\end{array}";
       break;
     case ParserNode::typeCharSSFDMod:
-      LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->theChar.GetElement().ElementToString("char", "", true)
-      << "\\end{array}";
+    //  LatexOutput << "\\begin{array}{rcl}&&\n"
+//      << this->theChar.GetElement().ElementToString("char", "", true)
+  //    << "\\end{array}";
       break;
     case ParserNode::typeGenVermaElt:
       LatexOutput << this->theGenVermaElt.GetElement().ElementToString(&theFormat);
@@ -5857,7 +5817,7 @@ void RationalFunction::ClearDenominators
   }
 }
 
-bool ElementSemisimpleLieAlgebra::ElementToStringNeedsBracketsForMultiplication()const
+bool ElementSemisimpleLieAlgebra::NeedsBrackets()const
 { return this->size>1;
 }
 
@@ -6272,7 +6232,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typeCharSSFDMod:
         theGlobalVariables.MaxAllowedComputationTimeInSeconds=MathRoutines::Maximum
         (theGlobalVariables.MaxAllowedComputationTimeInSeconds, 30);
-        tempS=(this->theChar.GetElement().MultiplyBy(currentChild.theChar.GetElement(), theGlobalVariables));
+//        tempS=(this->theChar.GetElement().MultiplyBy(currentChild.theChar.GetElement(), theGlobalVariables));
         if (tempS!="")
         { this->ExpressionType=this->typeError;
           this->ErrorType=this->errorImplicitRequirementNotSatisfied;

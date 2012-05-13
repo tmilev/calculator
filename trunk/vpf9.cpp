@@ -3547,37 +3547,6 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
     }
 }
 
-void WeylGroup::ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<Rational> &Beta, bool RhoAction, Vector<Rational>& Output)
-{ Rational alphaShift, tempRat, lengthA;
-  Vector<Rational> result;
-  result=(Beta);
-  alphaShift.MakeZero();
-  lengthA.MakeZero();
-  if (RhoAction)
-    result+=(this->rho);
-  for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-    for (int j=0; j<this->CartanSymmetric.NumCols; j++)
-    { tempRat.Assign(result[j]);
-      tempRat.MultiplyBy(alpha[i]);
-      tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]*(-2));
-      alphaShift+=(tempRat);
-      tempRat.Assign(alpha[i]);
-      tempRat.MultiplyBy(alpha[j]);
-      tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]);
-      lengthA+=(tempRat);
-    }
-  alphaShift.DivideBy(lengthA);
-  Output.SetSize(this->CartanSymmetric.NumRows);
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat=(alphaShift);
-    tempRat.MultiplyBy(alpha[i]);
-    tempRat+=(result[i]);
-    Output[i]=(tempRat);
-  }
-  if (RhoAction)
-    Output-=this->rho;
-}
-
 void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement)
 {  Rational coefficient, tempRat;
   coefficient.Assign(DualSpaceElement.TheObjects[index]);
@@ -3704,67 +3673,6 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
     this->RootSystem.AddOnTop(-this->RootsOfBorel.TheObjects[i]);
   for (int i=0; i<this->RootsOfBorel.size; i++)
     this->RootSystem.AddOnTop(this->RootsOfBorel.TheObjects[i]);
-}
-
-  template <class CoefficientType>
-bool WeylGroup::GenerateOrbit
-  (Vectors<CoefficientType>& theRoots, bool RhoAction, HashedList<Vector<CoefficientType> >& output,
-   bool UseMinusRho, int expectedOrbitSize, WeylGroup* outputSubset, int UpperLimitNumElements)
-{ output.Clear();
-  for (int i=0; i<theRoots.size; i++)
-    output.AddOnTop(theRoots.TheObjects[i]);
-  Vector<Rational> currentRoot;
-  ElementWeylGroup tempEW;
-  if (expectedOrbitSize<=0)
-    expectedOrbitSize=(this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim())).NumShort;
-  if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
-    expectedOrbitSize=UpperLimitNumElements;
-  output.SetExpectedSize(expectedOrbitSize);
-  if (outputSubset!=0)
-  { if (UpperLimitNumElements!=-1)
-      expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
-    tempEW.size=0;
-    outputSubset->SetExpectedSize(expectedOrbitSize);
-    outputSubset->CartanSymmetric=this->CartanSymmetric;
-    outputSubset->Clear();
-    outputSubset->AddOnTop(tempEW);
-  }
-  for (int i=0; i<output.size; i++)
-  { if (outputSubset!=0)
-      tempEW=outputSubset->TheObjects[i];
-    for (int j=0; j<this->CartanSymmetric.NumRows; j++)
-    { currentRoot=output[i];
-      //if (this->flagAnErrorHasOcurredTimeToPanic)
-      //{ currentRoot.ComputeDebugString();
-      //}
-      this->SimpleReflection(j, currentRoot, RhoAction, UseMinusRho);
-      //if (this->flagAnErrorHasOcurredTimeToPanic)
-      //{ currentRoot.ComputeDebugString();
-      //}
-      if (output.AddNoRepetition(currentRoot))
-        if (outputSubset!=0)
-        { tempEW.AddOnTop(j);
-          outputSubset->AddOnTop(tempEW);
-          tempEW.PopIndexSwapWithLast(tempEW.size-1);
-        }
-      if (UpperLimitNumElements>0)
-        if (output.size>=UpperLimitNumElements)
-          return false;
-    }
-  }
-  return true;
-}
-
-void WeylGroup::RootScalarCartanRoot(const Vector<Rational>& r1, const Vector<Rational>& r2, Rational& output)const
-{ output.MakeZero();
-  for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-    for (int j=0; j<this->CartanSymmetric.NumCols; j++)
-    { Rational tempRat;
-      tempRat.Assign(r1.TheObjects[i]);
-      tempRat.MultiplyBy(r2.TheObjects[j]);
-      tempRat.MultiplyBy(this->CartanSymmetric.elements[i][j]);
-      output+=(tempRat);
-    }
 }
 
 void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)

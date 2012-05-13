@@ -4085,18 +4085,17 @@ std::string VectorPartition::ElementToString(bool useHtml)
 
 std::string RationalFunction::ElementToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
+  //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
   if (this->expressionType==this->typeRational)
-  { out << "(type: rational)";
+  { //out << "(type: rational)";
     out << this->ratValue.ElementToString();
     return out.str();
   }
   bool hasDenominator=(this->expressionType==this->typeRationalFunction);
-  if (hasDenominator)
-    out << "(type: honest RF)";
-  else
-    out << "(type: poly)";
-
+  //if (hasDenominator)
+    //out << "(type: honest RF)";
+  //else
+    //out << "(type: poly)";
 //  if (hasDenominator && useLatex)
 //    out << "\\frac{";
   out << this->Numerator.GetElementConst().ElementToString(theFormat);

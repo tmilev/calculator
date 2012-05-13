@@ -5682,7 +5682,7 @@ std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
   List<TemplateMonomial> sortedMons;
   sortedMons=*this;
   sortedMons.QuickSortDescending();
-  out << "(hash: " << this->HashFunction() << ")";
+//  out << "(hash: " << this->HashFunction() << ")";
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
@@ -7317,11 +7317,11 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
   for (int i=0; i<theOrbit.size; i++)
   { for (int j=0; j<this->simpleGenerators.size; j++)
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
-      int oldsize=theOrbit.size;
-      std::string debugString=tempRoot.ElementToString();
+//      int oldsize=theOrbit.size;
+//      std::string debugString=tempRoot.ElementToString();
       theOrbit.AddNoRepetition(tempRoot);
-      if (oldsize<theOrbit.size)
-        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
+//      if (oldsize<theOrbit.size)
+//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { ExternalAutosOverAmbientField.GetElement()=this->ExternalAutomorphisms[j];

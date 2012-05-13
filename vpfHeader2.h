@@ -24,7 +24,8 @@ public:
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
-    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas
+    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
+    typeString
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -50,6 +51,9 @@ public:
   ;
   void MakeUE
 (CommandList& theBoss, const ElementUniversalEnveloping<RationalFunction>& inputUE, int inputContextIndex)
+;
+  void MakeString
+(CommandList& theBoss, const std::string& inputString, const Context& inputContext)
 ;
   void MakePoly
 (CommandList& theBoss, const Polynomial<Rational>& inputPoly, int inputContextIndex)
@@ -113,7 +117,7 @@ public:
   bool operator*=(const Rational& other);
   bool operator/=(const Data& other);
   bool operator*=(const Data& other);
-  std::string ElementToString(std::stringstream* comments=0)const;
+  std::string ElementToString(std::stringstream* comments=0, bool isFinal=true)const;
   std::string ElementToStringDataType()const;
   bool operator!=(const Data& other)const;
   static bool LieBracket
@@ -228,6 +232,9 @@ class Expression
   ;
   void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
   ;
+  void MakeString
+(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
+;
   void MakeInt(int theInt, CommandList& newBoss, int inputIndexBoundVars)
   ;
 void MakeVariableNonBoundNoProperties
@@ -257,7 +264,7 @@ void MakeVariableNonBounD
   ;
   std::string ElementToString
   (int recursionDepth=0, int maxRecursionDepth=1000, bool useLatex=false, bool AddBrackets=false,
-   bool AddCurlyBraces=false, std::stringstream* outComments=0)const;
+   bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -479,6 +486,7 @@ public:
   HashedList<RationalFunction> theRFs;
   HashedList<Rational> theRationals;
   HashedList<Context> theContexts;
+  HashedListB<std::string, MathRoutines::hashString> theStrings;
   void reset();
 };
 
@@ -541,6 +549,7 @@ public:
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
+  std::string inputStringRawestOfTheRaw;
   std::string inputString;
   std::string outputString;
   std::string outputCommentsString;
@@ -566,6 +575,7 @@ public:
   std::string indicatorFileNameDisplay;
   std::string indicatorReportFileNameDisplay;
   std::string userLabel;
+  List<std::string> SystemCommands;
 
   std::string ElementToString();
   std::string ElementToStringNonBoundVars();
@@ -931,6 +941,9 @@ static bool EvaluateDereferenceOneArgument
   static bool fPolynomial
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -947,6 +960,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fHWV
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fRootSAsAndSltwos
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   void AddEmptyHeadedCommand();

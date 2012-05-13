@@ -161,19 +161,19 @@ int main(int argc, char **argv)
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   HashedList<MonomialP>::PreferredHashSize=100;
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
-  std::string inputString, inputPatH;
+  std::string inputPatH;
   std::string tempS;
-	std::cin >> inputString;
+	std::cin >> theParser.inputStringRawestOfTheRaw;
   ComputationComplete=false;
-	if (inputString=="")
+	if (theParser.inputStringRawestOfTheRaw=="")
 	{
 #ifdef WIN32
     char buffer[2000];
 		size_t tempI=1500;
 		::getenv_s(&tempI, buffer, 1500, "QUERY_STRING");
-		inputString=buffer;
+		theParser.inputStringRawestOfTheRaw=buffer;
 #else
-		inputString=getenv("QUERY_STRING");
+		theParser.inputStringRawestOfTheRaw=getenv("QUERY_STRING");
 //		inputString=::getenv("QUERY_STRING");
 #endif
     IPAdressCaller=getenv("REMOTE_ADDR");
@@ -209,7 +209,8 @@ int main(int argc, char **argv)
 //  std::cout << "Raw input: " << inputString << "<hr>";
   CGI::functionCGIServerIgnoreUserAbort=&ignoreUserAbortSignal;
   List<std::string> inputStrings, inputStringNames;
-  CGI::ChopCGIInputStringToMultipleStrings(inputString, inputStrings, inputStringNames);
+  CGI::ChopCGIInputStringToMultipleStrings
+  (theParser.inputStringRawestOfTheRaw, inputStrings, inputStringNames);
 //  std::cout << "Chopped strings: ";
 //  for (int i=0; i<inputStrings.size; i++)
 //    std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
@@ -241,21 +242,6 @@ int main(int argc, char **argv)
   optionsRank.AddOnTop("6");
   optionsRank.AddOnTop("7");
   optionsRank.AddOnTop("8");
-  if (inputWeylString!="")
-  { theParser.DefaultWeylLetter=inputWeylString[0];
-  }
-  else
-  { theParser.DefaultWeylLetter='B';
-    inputWeylString="Calculator";
-  }
-  if (inputRankString!="")
-  { std::stringstream tempStream;
-    tempStream << inputRankString;
-    tempStream.seekg(0);
-    tempStream >> theParser.DefaultWeylRank;
-  } else
-    theParser.DefaultWeylRank=3;
-
 //  civilizedInput="a{}b";
 //  civilizedInput="Polynomial{}(a+a_1)";
 //  civilizedInput="[a,b,c]";
@@ -315,14 +301,20 @@ FunctionToMatrix{}(B,8,8)";*/
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;v:=hwv{}(B_3, (x_1,0,1),(1,0,0))";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i};g_{-1}^{n_1} hwv{}(B_3, (x_1,0,0),(1,0,0))";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}A_1; h_{{i}}:=g_{0, i}; (h_1)hwv{}(A_1, (x_1),(1))";
+//if (civilizedInput=="")
+//civilizedInput="printSlTwoSubalgebrasAndRootSubalgebras{}(G_2)";
+//  civilizedInput="WeylDimFormula{}(G_2, (1,x_1));";
+//  civilizedInput="WeylDimFormula{}(G_2, (1,0));WeylDimFormula{}(E_6, (2,0,0,0,0,0));";
+//  civilizedInput="DecomposeInducingRepGenVermaModule{}(B_2,(x_1, 1),(1,0), (1,1))";
+civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(x_1, 1,0),(1,0,0), (1,0,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\"" <<
   theParser.DisplayNameCalculator << "\">\n" ;
   std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString, inputStringNames.ContainsObject("checkUsePreamble"))
-  <<  tempStreamXX.str();
-   std::cout << "\n<br>\n";
+  << tempStreamXX.str();
+  std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
     std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
@@ -333,7 +325,8 @@ FunctionToMatrix{}(B,8,8)";*/
   std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
-    std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << inputString << "\">Link to your input.</a><br>";
+    std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << theParser.inputStringRawestOfTheRaw
+    << "\">Link to your input.</a><br>";
   std::cout << "\n</FORM>";
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   theParser.init(theGlobalVariables);
@@ -383,7 +376,19 @@ FunctionToMatrix{}(B,8,8)";*/
     }
   }
   std::cout << ");\n  var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
+//  for(int i=0; i<theParser.SystemCommands.size; i++)
+//  { std::cout << "<br>About to execute: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
+ //   system(theParser.SystemCommands[i].c_str());
+ // }
+
   std::cout << "</body></html>";
+  std::cout << "<!--";
+  std::cout.flush();
+  for(int i=0; i<theParser.SystemCommands.size; i++)
+  { std::cout << "\n\ncommand: " << theParser.SystemCommands[i].c_str() << "\n" ;
+    system(theParser.SystemCommands[i].c_str());
+  }
+  std::cout << "-->";
   return 0;
 }
 

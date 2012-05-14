@@ -2794,13 +2794,12 @@ void ParserNode::Evaluate(GlobalVariables& theGlobalVariables)
     case Parser::tokenVariable: break;
     case Parser::tokenPartialDerivative: break;
     case Parser::tokenX: break;
-    case Parser::tokenC: ParserNode::EvaluateMakeCasimir(*this, this->children, theGlobalVariables); break;
     case Parser::tokenDivide: this->EvaluateDivide(theGlobalVariables); break;
     case Parser::tokenUnderscore: this->EvaluateUnderscore(theGlobalVariables); break;
     case Parser::tokenInteger: this->EvaluateInteger(theGlobalVariables); break;
     case Parser::tokenLieBracket: this->EvaluateLieBracket(theGlobalVariables); break;
     case Parser::tokenPower: this->EvaluateThePower(theGlobalVariables); break;
-    case Parser::tokenEmbedding: this->EvaluateEmbedding(theGlobalVariables); break;
+//    case Parser::tokenEmbedding: this->EvaluateEmbedding(theGlobalVariables); break;
     case Parser::tokenFunction: this->EvaluateFunction(theGlobalVariables); break;
     case Parser::tokenFunctionNoArgument: this->EvaluateFunction(theGlobalVariables); break;
     case Parser::tokenArraY: this->ExpressionType=this->typeArray; break;
@@ -3221,23 +3220,6 @@ void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
     this->SetError(this->errorProgramming);
 }
 
-void ParserNode::EvaluateEmbedding(GlobalVariables& theGlobalVariables)
-{ if (!this->children.size==1)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
-  ParserNode& child= this->owner->TheObjects[this->children.TheObjects[0]];
-  if (child.ExpressionType!=this->typeUEelement)
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
-  if (! this->owner->theHmm.ApplyHomomorphism(child.UEElement.GetElement(), this->UEElement.GetElement(), theGlobalVariables))
-  { this->SetError(this->errorBadIndex);
-    return;
-  }
-  this->ExpressionType=this->typeUEelement;
-}
-
 void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
   { this->SetError(this->errorOperationByUndefinedOrErrorType);
@@ -3580,20 +3562,20 @@ void HomomorphismSemisimpleLieAlgebra::ProjectOntoSmallCartan
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(MonomialUniversalEnveloping<Polynomial<Rational> >& input,
- ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
-{ ElementUniversalEnveloping<Polynomial<Rational> > tempElt;
+(MonomialUniversalEnveloping<RationalFunction>& input, const RationalFunction& theCoeff,
+ ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+{ ElementUniversalEnveloping<RationalFunction> tempElt;
   output.MakeZero(*this->owners, this->indexRange);
-  Polynomial<Rational> polyOne;
-  polyOne.MakeOne(0);
-  output.MakeConst(polyOne, *this->owners, this->indexRange);
+  RationalFunction polyOne;
+  polyOne=theCoeff.GetOne();
+  output.MakeConst(theCoeff, *this->owners, this->indexRange);
   for (int i=0; i<input.generatorsIndices.size; i++)
-  { if (input.generatorsIndices.TheObjects[i]>=this->imagesAllChevalleyGenerators.size)
+  { if (input.generatorsIndices[i]>=this->imagesAllChevalleyGenerators.size)
       return false;
     tempElt.AssignElementLieAlgebra
-    (this->imagesAllChevalleyGenerators.TheObjects[input.generatorsIndices.TheObjects[i]],
+    (this->imagesAllChevalleyGenerators[input.generatorsIndices[i]],
      *this->owners, this->indexRange, polyOne, polyOne.GetZero());
-    Polynomial<Rational> & thePower=input.Powers.TheObjects[i];
+    RationalFunction& thePower=input.Powers[i];
     int theIntegralPower;
     if (!thePower.IsSmallInteger(theIntegralPower))
       return false;
@@ -3604,13 +3586,13 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 }
 
 bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-(ElementUniversalEnveloping<Polynomial<Rational> >& input,
- ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+(ElementUniversalEnveloping<RationalFunction>& input,
+ ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=&input);
   output.MakeZero(*this->owners, this->indexRange);
-  ElementUniversalEnveloping<Polynomial<Rational> > tempElt;
+  ElementUniversalEnveloping<RationalFunction> tempElt;
   for (int i=0; i<input.size; i++)
-  { if(!this->ApplyHomomorphism(input.TheObjects[i], tempElt, theGlobalVariables))
+  { if(!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt, theGlobalVariables))
       return false;
     output+=tempElt;
   }
@@ -3650,36 +3632,6 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
     (i+numPosRoots, *this->owners, this->indexRange);
   }
 //  std::cout << this->ElementToString(theGlobalVariables);
-}
-
-void HomomorphismSemisimpleLieAlgebra::MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables)
-{ this->owners=&owner.theAlgebras;
-  this->indexRange=1;
-  this->indexDomain=0;
-  owner.theAlgebras.SetSize(2);
-  owner.DefaultWeylLetter='B';
-  owner.DefaultWeylRank=3;
-  this->theDomain().owner=this->owners;
-  this->theDomain().indexInOwner=0;
-  this->theRange().owner=this->owners;
-  this->theRange().indexInOwner=1;
-  this->owners->TheObjects[0].theWeyl.MakeG2();
-  this->owners->TheObjects[1].theWeyl.MakeArbitrary('B',3);
-  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
-  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
-  this->imagesSimpleChevalleyGenerators.SetSize(4);
-  (owner.ParseAndCompute("g_2", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[0]);
-  (owner.ParseAndCompute("g_1+g_3", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[1]);
-  (owner.ParseAndCompute("g_{-2}", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[2]);
-  (owner.ParseAndCompute("g_{-1}+g_{-3}", theGlobalVariables)).ConvertToLieAlgebraElementIfPossible(this->imagesSimpleChevalleyGenerators.TheObjects[3]);
-  this->ComputeHomomorphismFromImagesSimpleChevalleyGenerators(theGlobalVariables);
-  owner.Clear();
-  this->GetRestrictionAmbientRootSystemToTheSmallerCartanSA(this->RestrictedRootSystem, theGlobalVariables);
-  //this->ComputeDebugString(true, theGlobalVariables);
-  //std::cout << this->DebugString;
-  //if (this->CheckClosednessLieBracket(theGlobalVariables))
-  //{ std::cout <<"good good good good!!!!";
-  //}
 }
 
 void HomomorphismSemisimpleLieAlgebra::ElementToString

@@ -308,6 +308,7 @@ FunctionToMatrix{}(B,8,8)";*/
 //  civilizedInput="DecomposeInducingRepGenVermaModule{}(B_2,(x_1, 1),(1,0), (1,1))";
 //civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(x_1, 1,0),(1,0,0), (1,0,0))";
 //civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(a,0,1),(1,0,0), (1,0,1))";
+//  civilizedInput=" g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);hmmG2inB3{}(g_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

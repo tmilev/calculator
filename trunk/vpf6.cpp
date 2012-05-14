@@ -1904,6 +1904,14 @@ void CommandList::initPredefinedVars()
    fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
    The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
+  this->AddNonBoundVarMustBeNew
+  ("Casimir", & this->fCasimir, "",
+   "Gives the Casimir element. ",
+   "Casimir{}(G_2)");
+  this->AddNonBoundVarMustBeNew
+  ("hmmG2inB3", & this->fEmbedG2inB3, "",
+   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
+   "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);hmmG2inB3{}(g_2) ");
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \

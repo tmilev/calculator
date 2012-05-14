@@ -1905,12 +1905,12 @@ public:
   (ElementSemisimpleLieAlgebra& input, ElementSemisimpleLieAlgebra& output)
   ;
   bool ApplyHomomorphism
-  (ElementUniversalEnveloping<Polynomial<Rational> >& input,
-   ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+  (ElementUniversalEnveloping<RationalFunction>& input,
+   ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
    ;
   bool ApplyHomomorphism
-  (MonomialUniversalEnveloping<Polynomial<Rational> >& input,
-   ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+(MonomialUniversalEnveloping<RationalFunction>& input, const RationalFunction& theCoeff,
+ ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
    ;
 };
 
@@ -4315,11 +4315,11 @@ public:
     int numReadWords;
     Vector<Rational>  parSel; parSel=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
     if (theGlobalVariables!=0)
-    { this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
+    { //this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
       this->initFromHomomorphism(parSel, this->theParser.theHmm, *theGlobalVariables);
     } else
     { GlobalVariables tempGlobalVars;
-      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
+//      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
       this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
     }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
@@ -6038,10 +6038,9 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
   tempMon.Powers[0]=theRingUnit;
   CoefficientType tempCF;
   for (int i=0; i<input.size; i++)
-  { int theIndex=input[i].theGeneratorIndex;
-    tempCF=theRingUnit; //<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
+  { tempCF=theRingUnit; //<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
     tempCF*=input.theCoeffs[i];//<- to facilitate implicit type conversion: theRingUnit does not have to be of type Rational
-    tempMon.generatorsIndices[0]=theIndex;
+    tempMon.generatorsIndices[0]=input[i].theGeneratorIndex;
     this->AddMonomial(tempMon, tempCF);
   }
 }
@@ -7433,21 +7432,21 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 //        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
-    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
+   // std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
     bufferCoeff=hwPlusRhoSquared;
     bufferCoeff-=this->AmbientWeyl.RootScalarCartanRoot
     (outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     assert(!bufferCoeff.IsEqualToZero());
     currentAccum/=bufferCoeff;
-    std::cout << "<br>Coeff we divide by: " << bufferCoeff.ElementToString()
-    ;
+//    std::cout << "<br>Coeff we divide by: " << bufferCoeff.ElementToString()
+ //   ;
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of "
     << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
     theGlobalVariables.MakeStatusReport(out.str());
-    std::cout
-    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
+//    std::cout
+  //  << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
  //   theGlobalVariables.MakeStatusReport(out.str());
 //    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
 //    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";

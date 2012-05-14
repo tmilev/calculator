@@ -370,6 +370,88 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   return theNode.errorNoError;
 }
 
+bool CommandList::fCasimir
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ IncrementRecursion recursionCounter(theCommands);
+  if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments))
+    return theExpression.SetError("Failed to convert the argument "+theExpression.ElementToString()+ " to a semisimple Lie algebra. ");
+  if (theExpression.errorString!="")
+    return theExpression.SetError("While trying to generate Lie algebra for the Casimir element, I got the error: " + theExpression.errorString);
+  SemisimpleLieAlgebra& theSSowner=theExpression.GetData().GetAmbientSSAlgebra();
+  if (theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds<50)
+    theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=50;
+  RationalFunction rfOne, rfZero;
+  rfOne.MakeOne(0, theCommands.theGlobalVariableS);
+  rfZero.MakeZero(0, theCommands.theGlobalVariableS);
+  ElementUniversalEnveloping<RationalFunction> theCasimir;
+  theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
+  if (comments!=0)
+  { *comments << "Context Lie algebra: " << theSSowner.GetLieAlgebraName
+    (theSSowner.theWeyl.WeylLetter, theSSowner.GetRank());
+    *comments << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ElementToString()
+    <<  ". The Casimir element of the ambient Lie algebra. ";
+  }
+  Data tempData;
+  tempData.MakeUE(theCommands, theCasimir, theExpression.GetData().theContextIndex);
+  theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool CommandList::fEmbedG2inB3
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ bool success=theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, theExpression, comments);
+  if (!success || !theExpression.IsElementUE())
+    return theExpression.SetError("Failed to convert argument to element of the Universal enveloping algebra. ");
+  SemisimpleLieAlgebra& ownerSS=theExpression.GetData().GetAmbientSSAlgebra();
+  if (ownerSS.GetRank()!=2 || ownerSS.theWeyl.WeylLetter!='G')
+    return theExpression.SetError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.");
+  Data g2Data, b3Data;
+  b3Data.MakeSSAlgebra(theCommands, 'B', 3);
+  g2Data.MakeSSAlgebra(theCommands, 'G', 2);
+  HomomorphismSemisimpleLieAlgebra theHmm;
+  theHmm.owners=&theCommands.theObjectContainer.theLieAlgebras;
+  theHmm.indexRange=b3Data.theIndex;
+  theHmm.indexDomain=g2Data.theIndex;
+  theHmm.theRange().ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+  theHmm.theDomain().ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+  ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
+  g_2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (13, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  g_m2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (7, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  g_1plusg_3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (12, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (14, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  g_1plusg_3+=tempElt;
+  g_m1plusg_m3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (6, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (8, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
+  g_m1plusg_m3+=tempElt;
+
+  std::cout << "<hr>g_2: " << g_2.ElementToString();
+  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ElementToString();
+  std::cout << "<hr>g_{-2}: " << g_m2.ElementToString();
+  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ElementToString();
+  theHmm.imagesSimpleChevalleyGenerators.SetSize(4);
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_2;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_1plusg_3;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m2;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m1plusg_m3;
+  theHmm.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*theCommands.theGlobalVariableS);
+  theHmm.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(theHmm.RestrictedRootSystem, *theCommands.theGlobalVariableS);
+  ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetData().GetUE();
+  ElementUniversalEnveloping<RationalFunction> output;
+  if(!theHmm.ApplyHomomorphism(argument, output, *theCommands.theGlobalVariableS))
+    return theExpression.SetError("Failed to apply homomorphism for unspecified reason");
+  Data tempData;
+  tempData.MakeUE(theCommands, output, b3Data.theContextIndex);
+  theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+
 class DoxygenInstance
 {
   public:

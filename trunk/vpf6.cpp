@@ -17,6 +17,7 @@ template < > int HashedListB<Polynomial<Rational>, Polynomial<Rational>::HashFun
 template < > int HashedListB<Context, Context::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<Vector<RationalFunction>, Vector<RationalFunction>::HashFunction>::PreferredHashSize=10;
 template < > int HashedListB<MonomialChar<RationalFunction>, MonomialChar<RationalFunction>::HashFunction>::PreferredHashSize=10;
+template < > int HashedListB<DataCruncher, DataCruncher::HashFunction>::PreferredHashSize=100;
 
 template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
 template < > int List<Function>::ListActualSizeIncrement=50;
@@ -28,6 +29,7 @@ template < > int List<ModuleSSalgebraNew<RationalFunction> >::ListActualSizeIncr
 template < > int List<Context>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialChar<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<DataCruncher>::ListActualSizeIncrement=50;
 
 //If you get a specialization after instantiation error:
 //due to the messed up C++ templates, the following template specialization funcitons must appear
@@ -201,6 +203,13 @@ bool Data::ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >()
       conversionBuffer.MakeConst(RFOne, this->owner->theObjectContainer.theLieAlgebras, theAlgebraIndex);
       this->MakeUE(*this->owner, conversionBuffer, this->theContextIndex);
       return true;
+    case Data::typePoly:
+      if (this->GetValuE<Polynomial<Rational> >().NumVars!=this->GetNumContextVars())
+        return false;
+      RFOne*=this->GetValuE<Polynomial<Rational> >();
+      conversionBuffer.MakeConst(RFOne, this->owner->theObjectContainer.theLieAlgebras, theAlgebraIndex);
+      this->MakeUE(*this->owner, conversionBuffer, this->theContextIndex);
+      return true;
     case Data::typeElementUE:
       return true;
     default:
@@ -247,7 +256,10 @@ bool Data::SetContextResizesContextArray
       return true;
     case Data::typeEltTensorGenVermasOverRF:
       tempETGV.GetElement()=this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+      std::cout << "<br>before the sub: " << tempETGV.GetElement().ElementToString();
+      std::cout << "<br>ze sub is: " << polySub.ElementToString();
       tempETGV.GetElement().Substitution(polySub);
+      std::cout << "<br>after the sub: " << tempETGV.GetElement().ElementToString();
       this->MakeElementTensorGeneralizedVermas(*this->owner, tempETGV.GetElement(), candidateIndex);
       return true;
     default:
@@ -455,7 +467,9 @@ std::string Data::ElementToString(std::stringstream* comments, bool isFinal)cons
       << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString(&theFormat) << ")";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
-      return this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString(&theFormat);
+      out << "EltTensor{}{" << this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString(&theFormat)
+      << "}";
+      return out.str();
     case Data::typeError:
       out << "(Error)";
       if (comments!=0)
@@ -1652,10 +1666,10 @@ bool CommandList::fHWV
   Data outputData;
   int outputContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(hwContext);
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-//  std::cout <<"<br>theElt:" << theElt.ElementToString();
+  std::cout << "<br>theElt:" << theElt.ElementToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
   theExpression.MakeDatA(outputData, theCommands, inputIndexBoundVars);
-//  std::cout <<"<hr>" << outputData.ElementToString();
+  std::cout << "<hr>" << outputData.ElementToString();
   return true;
 }
 
@@ -1725,7 +1739,7 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   { theExpression.SetError("Couldn't extract  Plus_Minus_Times_Division subtree. See comments.");
     return true;
   }
-  std::cout << outputUE.ElementToString();
+//  std::cout << outputUE.ElementToString();
   outputUE.Simplify(*theCommands.theGlobalVariableS,1, 0);
   int finalContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(finalContext);
   Data outputData;
@@ -1839,6 +1853,36 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
         result=true;
     }
   return result;
+}
+
+void CommandList::initCrunchers()
+{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
+
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::MultiplyUEByAny);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::MultiplyUEByAny);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::MultiplyUEByAny);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeElementUE, Data::MultiplyUEByAny);
+
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeElementUE, Data::MultiplyAnyByUE);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeElementUE, Data::MultiplyAnyByUE);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeElementUE, Data::MultiplyAnyByUE);
+
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::MultiplyRatOrPolyByRatOrPoly);
+
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::AddUEToAny);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::AddUEToAny);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::AddUEToAny);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeElementUE, Data::AddUEToAny);
+
+  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::AddRatOrPolyToRatOrPoly);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::AddRatOrPolyToRatOrPoly);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::AddRatOrPolyToRatOrPoly);
 }
 
 void CommandList::initPredefinedVars()
@@ -2045,6 +2089,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedVars();
+  this->initCrunchers();
 }
 
 bool CommandList::CollectSummands(int inputIndexBoundVars, Expression& theExpression)
@@ -2170,7 +2215,8 @@ bool CommandList::DoThePowerIfPossible
       return false;
     }
 //  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
-
+  if (rightE.theOperation!=theCommands.opData())
+    return false;
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
@@ -2194,10 +2240,11 @@ bool CommandList::DoMultiplyIfPossible
   const Data& RightD=rightE.GetData();
   Data outputD;
 //  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ElementToString() << " and " << LeftD.ElementToString();
-  if (!LeftD.MultiplyBy(RightD, outputD))
-  {// std::cout << "<br>multiplication not successful";
+  DataCruncher::CruncherDataTypes theCruncher= theCommands.GetMultiplicativeCruncher(LeftD.type, RightD.type);
+  if (theCruncher==0)
     return false;
-  }
+  if (!theCruncher(LeftD, RightD, outputD, comments))
+    return false;
 //  std::cout << "<br> multiplication successful, result: " << outputD.ElementToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
@@ -2205,14 +2252,25 @@ bool CommandList::DoMultiplyIfPossible
 
 bool Data::Exponentiate(const Data& right, Data& output)const
 { //std::cout << "<br>Attempting to apply the power " << right.ElementToString() << " on " << this->ElementToString();
-  if (right.type==Data::typeRational && this->type==typeRational)
+  Rational resultRat;
+  MemorySaving<Polynomial<Rational> > tempP;
+
+  if (right.type==Data::typeRational)
   { int thePower;
     if (right.IsSmallInteger(thePower))
-    { Rational resultRat=this->owner->theObjectContainer.theRationals[this->theIndex];
-      resultRat.RaiseToPower(thePower);
-      output.MakeRational(*this->owner, resultRat);
-      return true;
-    }
+      switch (this->type)
+      { case Data::typeRational:
+          resultRat=this->owner->theObjectContainer.theRationals[this->theIndex];
+          resultRat.RaiseToPower(thePower);
+          output.MakeRational(*this->owner, resultRat);
+          return true;
+        case Data::typePoly:
+          tempP.GetElement()=this->GetValuE<Polynomial<Rational> >();
+          tempP.GetElement().RaiseToPower(thePower);
+          output.MakePoly(*this->owner, tempP.GetElement(), this->theContextIndex);
+          return true;
+        default: break;
+      }
   }
   if (this->type!=this->typeElementUE)
     return false;
@@ -2236,37 +2294,82 @@ bool Data::Exponentiate(const Data& right, Data& output)const
   return true;
 }
 
-bool Data::MultiplyBy(const Data& right, Data& output)const
-{ if (right.type==Data::typeEltTensorGenVermasOverRF)
-  { static bool theGhostHasAppeared=false;
-    output=right;
-    Data leftCopy=*this;
-    if (! output.MergeContexts(leftCopy, output))
-      return false;
-    if (!leftCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> > ())
-      return false;
-    if (!theGhostHasAppeared)
-    { std::cout << "Ere I am J.H. ... The ghost in the machine...";
-      theGhostHasAppeared=true;
-    }
-    RationalFunction RFOne, RFZero;
-    int numVars=leftCopy.GetNumContextVars();
-    RFZero.MakeZero(numVars, this->owner->theGlobalVariableS);
-    RFOne.MakeConst(numVars, 1, this->owner->theGlobalVariableS);
-    ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
-//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
-    if (!right.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyMeByUEEltOnTheLeft
-        (leftCopy.GetUE(), outputElt, this->owner->theObjectContainer.theCategoryOmodules, *this->owner->theGlobalVariableS, RFOne, RFZero))
-      return false;
-    output.MakeElementTensorGeneralizedVermas(*this->owner, outputElt, output.theContextIndex);
-    return true;
-  }
-  if (this->type!=Data::typeElementUE && right.type!=Data::typeElementUE)
+bool Data::MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
     return false;
-  if (this->type!=Data::typeElementUE)
-    return right.MultiplyBy(*this, output);
-//  std::cout << "<br>before the multiplication: " << this->ElementToString() << " * " << right.ElementToString();
-  output=*this;
+  if (!rightCopy.ConvertToTypE<Polynomial<Rational> >())
+    return false;
+  if(!output.ConvertToTypE<Polynomial<Rational> >())
+    return false;
+  Polynomial<Rational> result;
+  result=output.GetValuE<Polynomial<Rational> >();
+  result*=rightCopy.GetValuE<Polynomial<Rational> >();
+  output.MakePoly(*output.owner, result, output.theContextIndex);
+  return true;
+}
+
+bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(output, rightCopy))
+    return false;
+  if (!rightCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
+    return false;
+  ElementUniversalEnveloping<RationalFunction> result;
+  result=output.GetUE();
+  result+=rightCopy.GetUE();
+  //  result.Simplify(*this->owner->theGlobalVariableS);
+  output.MakeUE(*output.owner, result, output.theContextIndex);
+  return true;
+}
+
+bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ static bool theGhostHasAppeared=false;
+  output=right;
+  Data leftCopy=left;
+  std::cout << "<br>before merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+  if (!output.MergeContexts(leftCopy, output))
+    return false;
+  std::cout << "<br>after merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+  if (!leftCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> > ())
+    return false;
+  std::cout << "<br>after conversion left copy is: " << leftCopy.ElementToString();
+  if (!theGhostHasAppeared)
+  { std::cout << "Ere I am J.H. ... The ghost in the machine...";
+    theGhostHasAppeared=true;
+  }
+  RationalFunction RFOne, RFZero;
+  int numVars=leftCopy.GetNumContextVars();
+  RFZero.MakeZero(numVars, leftCopy.owner->theGlobalVariableS);
+  RFOne.MakeConst(numVars, 1, leftCopy.owner->theGlobalVariableS);
+  ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
+//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
+  if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyMeByUEEltOnTheLeft
+        (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
+    return false;
+  output.MakeElementTensorGeneralizedVermas(*leftCopy.owner, outputElt, output.theContextIndex);
+  return true;
+}
+
+bool Data::AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+    return false;
+  if (!output.ConvertToTypE<Polynomial<Rational> >())
+    return false;
+  if (!rightCopy.ConvertToTypE<Polynomial<Rational> >())
+    return false;
+  Polynomial<Rational> resultpoly=output.GetValuE<Polynomial<Rational> >();
+  resultpoly+=rightCopy.GetValuE<Polynomial<Rational> >();
+  output.MakePoly(*output.owner, resultpoly, output.theContextIndex);
+  return true;
+}
+
+bool Data::MultiplyUEByAny(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))
     return false;
@@ -2276,28 +2379,7 @@ bool Data::MultiplyBy(const Data& right, Data& output)const
   result=output.GetUE();
   result*=rightCopy.GetUE();
 //  result.Simplify(*this->owner->theGlobalVariableS);
-  output.MakeUE(*this->owner, result, output.theContextIndex);
-  return true;
-}
-
-bool Data::Add(const Data& right, Data& output)const
-{ if (this->type!=Data::typeElementUE)
-  { if (right.type==Data::typeElementUE)
-      return right.Add(*this, output);
-    return false;
-  }
-//  std::cout << "<br>before the multiplication: " << this->ElementToString() << " * " << right.ElementToString();
-  output=*this;
-  Data rightCopy=right;
-  if (!output.MergeContexts(rightCopy, output))
-    return false;
-  if (!rightCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
-    return false;
-  ElementUniversalEnveloping<RationalFunction> result;
-  result=output.GetUE();
-  result+=rightCopy.GetUE();
-//  result.Simplify(*this->owner->theGlobalVariableS);
-  output.MakeUE(*this->owner, result, output.theContextIndex);
+  output.MakeUE(*output.owner, result, output.theContextIndex);
   return true;
 }
 
@@ -2468,9 +2550,13 @@ bool CommandList::StandardPlus
   { Expression& leftE=theExpression.children[0];
     Expression& rightE=theExpression.children[1];
     if (leftE.theOperation==theCommands.opData() && rightE.theOperation==theCommands.opData())
-    { Data tempData;
-      if (leftE.GetData().Add(rightE.GetData(), tempData))
-        theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+    { Data outputD;
+      DataCruncher::CruncherDataTypes theCruncher= theCommands.GetAdditiveCruncher(leftE.GetData().type, rightE.GetData().type);
+      if (theCruncher!=0)
+        if (theCruncher(leftE.GetData(), rightE.GetData(), outputD, comments))
+        { theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
+          return true;
+        }
     }
   }
   return theCommands.CollectSummands(inputIndexBoundVars, theExpression);

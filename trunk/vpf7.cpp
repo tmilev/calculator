@@ -2248,7 +2248,9 @@ bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfThe
 
 template <class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
-{ if (lowestNonReducedIndex<0)
+{ if (this->generatorsIndices.size<1)
+    return false;
+  if (lowestNonReducedIndex<0)
     lowestNonReducedIndex=0;
   bool result=false;
   for (int next=lowestNonReducedIndex+1; next<this->generatorsIndices.size; next++)

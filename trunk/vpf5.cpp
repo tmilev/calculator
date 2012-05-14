@@ -430,10 +430,10 @@ bool CommandList::fEmbedG2inB3
   (8, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
   g_m1plusg_m3+=tempElt;
 
-  std::cout << "<hr>g_2: " << g_2.ElementToString();
-  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ElementToString();
-  std::cout << "<hr>g_{-2}: " << g_m2.ElementToString();
-  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ElementToString();
+//  std::cout << "<hr>g_2: " << g_2.ElementToString();
+//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ElementToString();
+//  std::cout << "<hr>g_{-2}: " << g_m2.ElementToString();
+//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ElementToString();
   theHmm.imagesSimpleChevalleyGenerators.SetSize(4);
   theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_2;
   theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_1plusg_3;

@@ -7069,7 +7069,7 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool NeedsBrackets()const;
-  std::string ElementToString(FormatExpressions* theFormat)const;
+  std::string ElementToString(FormatExpressions* theFormat=0)const;
   Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)

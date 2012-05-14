@@ -2251,15 +2251,18 @@ bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGener
 { if (lowestNonReducedIndex<0)
     lowestNonReducedIndex=0;
   bool result=false;
-  for (int next=lowestNonReducedIndex+1, current=lowestNonReducedIndex; next<this->generatorsIndices.size; next++)
-    if (this->generatorsIndices[current]==this->generatorsIndices[next])
+  for (int next=lowestNonReducedIndex+1; next<this->generatorsIndices.size; next++)
+    if (this->generatorsIndices[lowestNonReducedIndex]==this->generatorsIndices[next])
     { result=true;
-      this->Powers[current]+=this->Powers[next];
+      this->Powers[lowestNonReducedIndex]+=this->Powers[next];
     }
     else
-    { current++;
-      this->Powers[current]=this->Powers[next];
+    { lowestNonReducedIndex++;
+      this->Powers[lowestNonReducedIndex]=this->Powers[next];
+      this->generatorsIndices[lowestNonReducedIndex]=this->generatorsIndices[next];
     }
+  this->generatorsIndices.SetSize(lowestNonReducedIndex+1);
+  this->Powers.SetSize(lowestNonReducedIndex+1);
   return result;
 }
 

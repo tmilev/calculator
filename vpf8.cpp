@@ -1499,7 +1499,7 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
     this->ReadFromDefaultFile(&theGlobalVariables);
   switch (this->computationPhase)
   { case 0:
-      this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
+//      this->theParser.theHmm.MakeG2InB3(this->theParser, theGlobalVariables);
       this->initFromHomomorphism(parabolicSel, this->theParser.theHmm, theGlobalVariables);
       this->TransformToWeylProjectiveStep1(theGlobalVariables);
       out << theGlobalVariables.theIndicatorVariables.StatusString1;
@@ -4612,10 +4612,10 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   if (theGlobalVariables!=0)
     theGlobalVariables->IncrementReadWriteDepth();
   if (theGlobalVariables!=0)
-    this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
+{} //   this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
   else
   { GlobalVariables tempGlobalVars;
-    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
+{}//    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
   }
   if (theGlobalVariables!=0)
   { theGlobalVariables->theIndicatorVariables.StatusString1="";
@@ -8479,7 +8479,7 @@ int ParserNode::EvaluateParabolicWeylGroupsBruhatGraph
 void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables)
 { if(this->DefaultWeylLetter!='B' || this->DefaultWeylRank!=3)
     return;
-  this->theHmm.MakeG2InB3(*this, theGlobalVariables);
+//  this->theHmm.MakeG2InB3(*this, theGlobalVariables);
 //  SSalgebraModuleOld theModule;
   std::stringstream out;
 //  theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
@@ -8622,26 +8622,6 @@ int ParserNode::EvaluateAdjointAction
   (NodeBeingActedUpon.UEElement.GetElement(), output, theGlobalVariables))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   theNode.ExpressionType=theNode.typeUEelement;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateMakeCasimir
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ theNode.ExpressionType=theNode.typeUEelement;
-  if (theGlobalVariables.MaxAllowedComputationTimeInSeconds<20)
-    theGlobalVariables.MaxAllowedComputationTimeInSeconds=20;
-  Polynomial<Rational>  polyOne, polyZero;
-  polyOne.MakeConst(0,1);
-  polyZero.MakeZero(0);
-  theNode.UEElement.GetElement().MakeCasimir
-  (theNode.GetContextLieAlgebra(), theGlobalVariables, polyOne, polyZero);
-  std::stringstream out;
-  out << "Context Lie algebra: " << theNode.GetContextLieAlgebra().GetLieAlgebraName
-  (theNode.GetContextLieAlgebra().theWeyl.WeylLetter, theNode.GetContextLieAlgebra().GetRank());
-  out << ". The coefficient: " << theNode.GetContextLieAlgebra().theWeyl.GetKillingDivTraceRatio().ElementToString()
-  <<  ". The Casimir element of the ambient Lie algebra. Denoted also by c.";
-  theNode.outputString=out.str();
-
   return theNode.errorNoError;
 }
 
@@ -9071,14 +9051,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "modOutVermaRelations(c)",
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateModVermaRelations
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("casimir",
-   "()",
-   "Gives the Casimir element of the ambient Lie algebra. You can also use the one-letter alias c.",
-   "c",
-   DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateMakeCasimir
    );
 
   this->AddOneFunctionToDictionaryNoFail

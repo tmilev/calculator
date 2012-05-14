@@ -7317,13 +7317,13 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
   for (int i=0; i<theOrbit.size; i++)
   { for (int j=0; j<this->simpleGenerators.size; j++)
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
-      int oldsize=theOrbit.size;
-      std::string debugString=tempRoot.ElementToString() ;
+//      int oldsize=theOrbit.size;
+//      std::string debugString=tempRoot.ElementToString() ;
       theOrbit.AddNoRepetition(tempRoot);
-      if (oldsize<theOrbit.size)
-        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
-      else
-        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " NOT added, ";
+//      if (oldsize<theOrbit.size)
+//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
+//      else
+//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " NOT added, ";
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { ExternalAutosOverAmbientField.GetElement()=this->ExternalAutomorphisms[j];

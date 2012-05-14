@@ -105,8 +105,6 @@ public:
   ;
   bool Add(const Data& right, Data& output)const
   ;
-  bool MultiplyBy(const Data& right, Data& output)const
-  ;
   bool Exponentiate(const Data& right, Data& output)const
   ;
   bool IsInteger()const;
@@ -129,6 +127,17 @@ public:
   bool OperatorDereference
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
+  static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyUEByAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyAnyByUE(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
+  { if (left.type==Data::typeRational || left.type==Data::typePoly || left.type==Data::typeRationalFunction)
+      return Data::MultiplyUEByAny(right, left, output, comments);
+    return false;
+  }
+  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
+;
   Data operator/(const Data& right);
   Data operator*(const Data& right);
 };
@@ -490,6 +499,31 @@ public:
   void reset();
 };
 
+class DataCruncher
+{
+public:
+  typedef  bool (*CruncherDataTypes)(const Data& left, const Data& right, Data& output, std::stringstream* comments);
+  int leftType; int RightType;
+  CruncherDataTypes theCruncher;
+  DataCruncher():leftType(-1), RightType(-1), theCruncher(0){}
+  DataCruncher(int inputLeftType, int inputRightType, CruncherDataTypes inputCruncher)
+  { this->leftType=inputLeftType;
+    this->RightType=inputRightType;
+    this->theCruncher=inputCruncher;
+  }
+  bool operator==(const DataCruncher& other)
+  { return this->leftType==other.leftType && this->RightType==other.RightType;
+  }
+  void operator=(const DataCruncher& other)
+  { this->leftType=other.leftType;
+    this->RightType=other.RightType;
+    this->theCruncher=other.theCruncher;
+  }
+  static unsigned int HashFunction(const DataCruncher& input)
+  { return input.leftType*SomeRandomPrimes[0]+input.RightType*SomeRandomPrimes[1];
+  }
+};
+
 class CommandList
 { template <class dataType>
   bool EvaluatePMTDtreeFromContextRecursive
@@ -557,6 +591,8 @@ public:
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
   HashedList<Data> theData;
+  HashedList<DataCruncher> theMultiplicativeDataCrunchers;
+  HashedList<DataCruncher> theAdditiveDataCrunchers;
   ObjectContainer theObjectContainer;
   double StartTimeInSeconds;
 
@@ -610,7 +646,38 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
-
+  void RegisterMultiplicativeDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
+    if (this->theMultiplicativeDataCrunchers.Contains(d))
+    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
+      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      assert(false);
+    }
+    this->theMultiplicativeDataCrunchers.AddOnTop(d);
+  }
+  DataCruncher::CruncherDataTypes GetMultiplicativeCruncher(int inputLeftType, int inputRightType)
+  { DataCruncher d(inputLeftType, inputRightType, 0);
+    int theIndex=this->theMultiplicativeDataCrunchers.GetIndex(d);
+    if (theIndex==-1)
+      return 0;
+    return this->theMultiplicativeDataCrunchers[theIndex].theCruncher;
+  }
+  void RegisterAdditiveDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
+    if (this->theAdditiveDataCrunchers.Contains(d))
+    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
+      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      assert(false);
+    }
+    this->theAdditiveDataCrunchers.AddOnTop(d);
+  }
+  DataCruncher::CruncherDataTypes GetAdditiveCruncher(int inputLeftType, int inputRightType)
+  { DataCruncher d(inputLeftType, inputRightType, 0);
+    int theIndex=this->theAdditiveDataCrunchers.GetIndex(d);
+    if (theIndex==-1)
+      return 0;
+    return this->theAdditiveDataCrunchers[theIndex].theCruncher;
+  }
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
@@ -994,6 +1061,7 @@ static bool EvaluateDereferenceOneArgument
   const std::string& argList, const std::string& description, const std::string& exampleArgs)
 ;
   void init(GlobalVariables& inputGlobalVariables);
+  void initCrunchers();
   void initPredefinedVars()
   ;
   bool ExtractExpressions

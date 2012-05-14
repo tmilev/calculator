@@ -5,7 +5,7 @@ ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for
 
 template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<int, MathRoutines::IntIdentity>::PreferredHashSize=50;
+template < > int HashedListB<int, MathRoutines::IntUnsignIdentity>::PreferredHashSize=50;
 template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
 template < > int HashedListB<Function, Function::HashFunction>::PreferredHashSize=100;
 //template < > int HashedListB<DataOfExpressions<Polynomial<Rational> >, DataOfExpressions<Polynomial<Rational> >::HashFunction>::PreferredHashSize=100;
@@ -648,7 +648,7 @@ std::string Data::ElementToStringDataType() const
   }
 }
 
-int Data::HashFunction()const
+unsigned int Data::HashFunction()const
 { return this->theIndex*SomeRandomPrimes[0]+this->type*SomeRandomPrimes[1];
 }
 

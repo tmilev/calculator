@@ -752,9 +752,9 @@ void Selection::Assign(const Selection& right)
   this->CardinalitySelection=right.CardinalitySelection;
 }
 
-int Selection::HashFunction() const
+unsigned int Selection::HashFunction() const
 { int tempMin=MathRoutines::Minimum(SomeRandomPrimesSize, this->MaxSize);
-  int result=0;
+  unsigned int result=0;
   for (int i=0; i<tempMin; i++)
     if (this->selected[i])
       result+=i*SomeRandomPrimes[i];
@@ -2222,8 +2222,8 @@ partFraction::~partFraction()
     TheObjects[this->indexInGlobalCollectorPartFraction]=0; */
 }
 
-int partFraction::HashFunction() const
-{ int result=0;
+unsigned int partFraction::HashFunction() const
+{ unsigned int result=0;
   for (int i=0; i<this->size; i++)
     result+=SomeRandomPrimes[i]*this->TheObjects[i].HashFunction();
   return result;
@@ -3123,8 +3123,8 @@ void oneFracWithMultiplicitiesAndElongations::operator =(oneFracWithMultipliciti
   this->Elongations.CopyFromLight(right.Elongations);
 }
 
-int oneFracWithMultiplicitiesAndElongations::HashFunction() const
-{ return this->GetTotalMultiplicity();
+unsigned int oneFracWithMultiplicitiesAndElongations::HashFunction() const
+{ return (unsigned) this->GetTotalMultiplicity();
 }
 
 void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(Polynomial<LargeInt>& output, int MultiplicityIndex, Vector<Rational>& theExponent)
@@ -4201,9 +4201,9 @@ bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
   return true;
 }
 
-int ElementWeylGroup::HashFunction() const
+unsigned int ElementWeylGroup::HashFunction() const
 { int top = MathRoutines::Minimum(this->size, ::SomeRandomPrimesSize);
-  int result =0;
+  unsigned int result =0;
   for (int i=0; i<top; i++)
     result+=this->TheObjects[i]*::SomeRandomPrimes[i];
   return result;

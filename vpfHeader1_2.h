@@ -275,8 +275,8 @@ public:
   ;
   bool AreEqual(partFraction& p);
   bool IsReduced();
-  int HashFunction() const;
-  static inline int HashFunction(const partFraction& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const partFraction& input)
   { return input.HashFunction();
   }
   int MultiplyByOneFrac(oneFracWithMultiplicitiesAndElongations& f);
@@ -417,10 +417,10 @@ public:
     this->Vertices.sum(output, this->Vertices[0].size);
   }
   Vector<Rational>  GetInternalPoint(){Vector<Rational>  result; this->GetInternalPoint(result); return result;}
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->Vertices.HashFunction();
   }
-  static inline int HashFunction(const Cone& input)
+  static inline unsigned int HashFunction(const Cone& input)
   { return input.HashFunction();
   }
   bool ProduceNormalFromTwoNormalsAndSlicingDirection
@@ -1278,14 +1278,14 @@ public:
     this->DebugString= right.DebugString;
   }
   bool operator==(const coneRelation& right){ return this->DebugString==right.DebugString; }
-  int HashFunction() const
-  { int tempI= ::MathRoutines::Minimum((int)this->DebugString.length(), ::SomeRandomPrimesSize);
-    int result=0;
+  unsigned int HashFunction() const
+  { int tempI= ::MathRoutines::Minimum((int) this->DebugString.length(), ::SomeRandomPrimesSize);
+    unsigned int result=0;
     for (int i=0; i<tempI; i++)
       result+= this->DebugString[i]*::SomeRandomPrimes[i];
     return result;
   }
-  static inline int HashFunction(const coneRelation& input)
+  static inline unsigned int HashFunction(const coneRelation& input)
   { return input.HashFunction();
   }
   coneRelation(){this->IndexOwnerRootSubalgebra=-1; }
@@ -1626,17 +1626,16 @@ public:
   {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
      return this->hCharacteristic==(right.hCharacteristic);
   }
-  int HashFunction() const
+  unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result=0;
     for (int i=0; i<tempI; i++)
       result+= this->hCharacteristic.TheObjects[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
-  static inline int HashFunction(const slTwo& input)
+  static inline unsigned int HashFunction(const slTwo& input)
   { return input.HashFunction();
   }
-
 };
 
 class VectorPartition
@@ -1988,8 +1987,8 @@ public:
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
      ;
   void SetNumVariables(int newNumVars);
-  int HashFunction() const;
-  static inline int HashFunction(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input)
   { return input.HashFunction();
   }
   void GetDegree(Polynomial<Rational> & output)
@@ -2300,8 +2299,8 @@ public:
   bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex=0);
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  int HashFunction() const;
-  static inline int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
   { return input.HashFunction();
   }
   void GetDegree(Polynomial<Rational> & output)
@@ -2496,10 +2495,10 @@ public:
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    GlobalVariables& theGlobalVariables)const
 ;
-  static inline int HashFunction (const ElementUniversalEnveloping<CoefficientType>& input)
+  static inline unsigned int HashFunction (const ElementUniversalEnveloping<CoefficientType>& input)
   { return input.HashFunction();
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>::HashFunction();
   }
 template<class CoefficientTypeQuotientField>
@@ -2770,10 +2769,10 @@ public:
     return out.str();
   }
   void Simplify();
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->Waypoints.HashFunction();
   }
-  static inline int HashFunction(const LittelmannPath& input)
+  static inline unsigned int HashFunction(const LittelmannPath& input)
   { return input.HashFunction();
   }
   bool IsEqualToZero()const
@@ -2903,10 +2902,10 @@ public:
   std::string ElementToString
   (FormatExpressions* theFormat=0)
   ;
-  inline int HashFunction()const
+  inline unsigned int HashFunction()const
   { return weightFundamentalCoords.HashFunction();
   }
-  static inline int HashFunction(const MonomialChar<CoefficientType>& input)
+  static inline unsigned int HashFunction(const MonomialChar<CoefficientType>& input)
   { return input.HashFunction();
   }
   inline bool operator==(const MonomialChar<CoefficientType>& other) const
@@ -3154,10 +3153,10 @@ class MonomialGeneralizedVerma
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->indexFDVector*SomeRandomPrimes[0]+this->indexInOwner*SomeRandomPrimes[1];
   }
-  static inline int HashFunction(const MonomialGeneralizedVerma<CoefficientType>& input)
+  static inline unsigned int HashFunction(const MonomialGeneralizedVerma<CoefficientType>& input)
   { return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
@@ -3187,10 +3186,10 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   (const MonomialGeneralizedVerma<CoefficientType>& theMon, const CoefficientType& theMonCoeff, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >::HashFunction();
   }
-  static int HashFunction(const ElementSumGeneralizedVermas<CoefficientType>& input)
+  static unsigned int HashFunction(const ElementSumGeneralizedVermas<CoefficientType>& input)
   { return input.HashFunction();
   }
   ElementSumGeneralizedVermas():owneR(0){}
@@ -3249,14 +3248,14 @@ public:
   void operator*=(const MonomialGeneralizedVerma<CoefficientType>& other)
   { this->theMons.AddOnTop(other);
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->theMons.size);
-    int result=0;
+    unsigned int result=0;
     for (int i=0; i<numCycles; i++)
       result+=SomeRandomPrimes[i]*this->theMons[i].HashFunction();
     return result;
   }
-  static int HashFunction(const MonomialTensorGeneralizedVermas<CoefficientType>& input)
+  static unsigned int HashFunction(const MonomialTensorGeneralizedVermas<CoefficientType>& input)
   { return input.HashFunction();
   }
   void SetNumVariables(int GoalNumVars)
@@ -3364,14 +3363,14 @@ public:
   std::string ElementToString
   (FormatExpressions* theFormat=0)const
     ;
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->:: MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType >::HashFunction();
   }
   void operator=(const ElementTensorsGeneralizedVermas<CoefficientType>& other)
   { this->::MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, CoefficientType>::operator=(other);
   }
   void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other);
-  static int HashFunction(const ElementTensorsGeneralizedVermas<CoefficientType>& input)
+  static unsigned int HashFunction(const ElementTensorsGeneralizedVermas<CoefficientType>& input)
   { return input.HashFunction();
   }
 };
@@ -3845,10 +3844,10 @@ public:
   bool MakeMe
   (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
   ;
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->GetHashFromString(this->functionName);
   }
-  static inline int HashFunction(const ParserFunction& input)
+  static inline unsigned int HashFunction(const ParserFunction& input)
   { return input.HashFunction();
   }
   int GetHashFromString(const std::string& input)const
@@ -4424,8 +4423,8 @@ public:
   void ComputeDebugString(){this->ElementToString(this->DebugString); }
   //void InduceFromFacet(Facet& input);
   //the below returns false if the projection is not of full dimension
-  int HashFunction()const;
-  static inline int HashFunction(const affineHyperplane& input)
+  unsigned int HashFunction()const;
+  static inline unsigned int HashFunction(const affineHyperplane& input)
   { return input.HashFunction();
   }
 //  bool ProjectFromFacet(Facet& input);
@@ -4453,8 +4452,8 @@ class affineCone
 {
 public:
   affineHyperplanes theWalls;
-  int HashFunction() const;
-  inline static int HashFunction(const affineCone& input){return input.HashFunction();}
+  unsigned int HashFunction() const;
+  inline static unsigned int HashFunction(const affineCone& input){return input.HashFunction();}
   inline int GetDimension();
   void SuperimposeAffineCones(affineCones& theOtherComplex);
   //void induceFromCombinatorialChamber(CombinatorialChamber& input);
@@ -5765,7 +5764,7 @@ void MonomialUniversalEnveloping<CoefficientType>::MakeZero
 }
 
 template <class CoefficientType>
-int MonomialUniversalEnveloping<CoefficientType>::HashFunction() const
+unsigned int MonomialUniversalEnveloping<CoefficientType>::HashFunction() const
 { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
   int result=0;
   for (int i=0; i<top; i++)
@@ -6372,7 +6371,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MakeZero(const Coeffic
 }
 
 template <class CoefficientType>
-int MonomialUniversalEnvelopingOrdered<CoefficientType>::HashFunction() const
+unsigned int MonomialUniversalEnvelopingOrdered<CoefficientType>::HashFunction() const
 { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
   int result=0;
   for (int i=0; i<top; i++)
@@ -7364,8 +7363,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
   }
   hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
   hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
-  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ElementToString();
-  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ElementToString();
+//  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ElementToString();
+//  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ElementToString();
   ///////////////////////////
   HashedList<Vector<CoefficientType> > outputDomWeightsSimpleCoordsLeviPart;
 
@@ -7396,7 +7395,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 //  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
-std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ElementToString();
+//std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ElementToString();
   Vector<CoefficientType> convertor;
   CoefficientType bufferCoeff;
   for (int k=1; k< outputDomWeightsSimpleCoordsLeviPart.size; k++)
@@ -7411,13 +7410,13 @@ std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  
         currentDominantRepresentative=currentWeight;
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
-        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
+//        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
         int theIndex=outputDomWeightsSimpleCoordsLeviPart.GetIndex(currentDominantRepresentative);
-        std::cout << "<br>index of currentDomain rep: " << theIndex;
+//        std::cout << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
-        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
+//        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
         if (!Explored[theIndex])
         { std::stringstream errorLog;
           errorLog << "This is an internal error check. If you see it, that means " << " that the Freudenthal algorithm implementation is "
@@ -7430,8 +7429,8 @@ std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  
         bufferCoeff=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff*=outputMultsSimpleCoords[theIndex];
         currentAccum+=bufferCoeff;
-        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
-        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
+//        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
+//        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
     std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
@@ -7468,7 +7467,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
-  std::cout << "Splitting parabolic selection: " << splittingParSel.ElementToString();
+//  std::cout << "Splitting parabolic selection: " << splittingParSel.ElementToString();
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
   outputWeylSub.ComputeRootSubsystem();
   ReflectionSubgroupWeylGroup complementGroup;
@@ -7478,9 +7477,9 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
   complementGroup.MakeParabolicFromSelectionSimpleRoots(this->listOwners->TheObjects[this->indexInOwners].theWeyl, invertedSel, theGlobalVariables,1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ElementToString(false);
-  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ElementToString(false);
-  std::cout << this->ElementToString();
-  std::cout << out.str();
+//  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ElementToString(false);
+//  std::cout << this->ElementToString();
+//  std::cout << out.str();
   charSSAlgMod charAmbientFDWeyl, remainingCharDominantLevi;
   ReflectionSubgroupWeylGroup theFDWeyl;
   theFDWeyl.MakeParabolicFromSelectionSimpleRoots
@@ -7499,8 +7498,8 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
         *Report=tempS;
       return false;
     }
-    std::cout << "<hr>FreudenthalEval on " << currentMon.ElementToString() << " generated the following report: "
-    << tempS << "<hr>";
+//    std::cout << "<hr>FreudenthalEval on " << currentMon.ElementToString() << " generated the following report: "
+//    << tempS << "<hr>";
     for (int j=0; j<tempHashedRoots.size; j++)
     { bufferCoeff=this->theCoeffs[i];
       tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[j]);
@@ -7508,8 +7507,8 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
       charAmbientFDWeyl.AddMonomial(tempMon, bufferCoeff);
     }
   }
-  std::cout << "<hr>" << tempS;
-  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ElementToString();
+//  std::cout << "<hr>" << tempS;
+//  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ElementToString();
 
   remainingCharDominantLevi.Reset();
   Vectors<CoefficientType> orbitDom;
@@ -7525,24 +7524,24 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
         *Report=out.str();
       return false;
     }
-    std::cout << "<hr>the orbit with highest weight "
-    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ElementToString()
-    << " is: ";
-    for (int l=0; l<orbitDom.size; l++)
-      std::cout <<"<br>" << orbitDom[l].ElementToString();
-    std::cout << "<hr>of them dominant are: <br>";
+//    std::cout << "<hr>the orbit with highest weight "
+//    << theWeyL.GetSimpleCoordinatesFromFundamental(charAmbientFDWeyl[i].weightFundamentalCoords).ElementToString()
+//    << " is: ";
+//    for (int l=0; l<orbitDom.size; l++)
+//      std::cout <<"<br>" << orbitDom[l].ElementToString();
+//    std::cout << "<hr>of them dominant are: <br>";
     for (int k=0; k<orbitDom.size; k++)
       if (outputWeylSub.IsDominantWeight(orbitDom[k]))
       { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
-        std::cout << "<br>" << orbitDom[k].ElementToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ElementToString();
+//        std::cout << "<br>" << orbitDom[k].ElementToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ElementToString();
       }
   }
   output.Reset();
   out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (remainingCharDominantLevi.ElementToString());
-  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (remainingCharDominantLevi.ElementToString());
+//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+// (remainingCharDominantLevi.ElementToString());
 
   Vector<CoefficientType> simpleGeneratorBaseField;
   while(!remainingCharDominantLevi.IsEqualToZero())
@@ -7568,17 +7567,17 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
         *Report=tempS;
       return false;
     }
-    std::cout << "<hr>accounting " << localHighest.ElementToString() << " with coeff "
-    << highestCoeff.ElementToString() << "<br>"
-    << remainingCharDominantLevi.ElementToString();
+//    std::cout << "<hr>accounting " << localHighest.ElementToString() << " with coeff "
+//    << highestCoeff.ElementToString() << "<br>"
+//    << remainingCharDominantLevi.ElementToString();
     for (int i=0; i<tempHashedRoots.size; i++)
     { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(tempHashedRoots[i]);
       bufferCoeff=tempMults[i];
       bufferCoeff*=highestCoeff;
       remainingCharDominantLevi.SubtractMonomial(tempMon, bufferCoeff);
-      std::cout << "<br>-(" << bufferCoeff.ElementToString() << ")" << tempMon.ElementToString();
+//      std::cout << "<br>-(" << bufferCoeff.ElementToString() << ")" << tempMon.ElementToString();
     }
-    std::cout << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ElementToString();
+//    std::cout << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ElementToString();
   }
   out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (output.ElementToString())

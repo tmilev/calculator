@@ -92,7 +92,7 @@ template <class Object>
 class List;
 template <class Object>
 class Matrix;
-template <class Object, int hashFunction(const Object&)>
+template <class Object, unsigned int hashFunction(const Object&)>
 class HashedListB;
 template <class Object>
 class HashedList;
@@ -392,14 +392,14 @@ public:
     result.append(")");
     return result;
   }
-  inline static int IntIdentity(const int& input)
-  { return input;
+  inline static unsigned int IntUnsignIdentity(const int& input)
+  { return (unsigned) input;
   }
-  static int hashString(const std::string& x)
+  static unsigned int hashString(const std::string& x)
   { int numCycles=x.size();
     if (numCycles>SomeRandomPrimesSize)
       numCycles=SomeRandomPrimesSize;
-    int result=0;
+    unsigned int result=0;
     for (int i=0; i<numCycles; i++)
       result+=x[i]*SomeRandomPrimes[i];
     return result;
@@ -905,7 +905,7 @@ public:
   ~HashedListReferences(){this->KillAllElements(); };
 };
 
-template <class Object, int hashFunction(const Object&)>
+template <class Object, unsigned int hashFunction(const Object&)>
 class HashedListB: public List<Object>
 {
 private:
@@ -1869,8 +1869,8 @@ public:
   void init(int maxNumElements);
   void ComputeIndicesFromSelection();
   void initNoMemoryAllocation();
-  int HashFunction() const;
-  static inline int HashFunction(const Selection& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const Selection& input)
   { return input.HashFunction();
   }
   std::string DebugString;
@@ -2774,12 +2774,12 @@ ParallelComputing::GlobalPointerCounter++;
     *this-=tempRat;
   }
   void MultiplyBy(const Rational& r);
-  int HashFunction() const
+  unsigned int HashFunction() const
   { if (this->Extended==0)
       return this->NumShort*SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1];
     return this->Extended->num.HashFunction()*SomeRandomPrimes[0]+this->Extended->den.HashFunction()*SomeRandomPrimes[1];
   }
-  static inline int HashFunction(const Rational& input)
+  static inline unsigned int HashFunction(const Rational& input)
   { return input.HashFunction();
   }
   inline void ComputeDebugString(){}
@@ -3281,10 +3281,10 @@ static void ProjectOntoHyperPlane
   { this->MakeZero(DesiredDimension, theRingZero);
     this->TheObjects[NonZeroIndex]=theRingUnit;
   }
-  inline static int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
+  inline static unsigned int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
 
-  int HashFunction() const
-  { int result=0;
+  unsigned int HashFunction() const
+  { unsigned int result=0;
     int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
     for (int i=0; i<theSize; i++)
       result+=  this->TheObjects[i].HashFunction()*  ::SomeRandomPrimes[i];
@@ -4167,10 +4167,10 @@ public:
   int indexOfOwnerAlgebra;
   int theGeneratorIndex;
   ChevalleyGenerator(): ownerArray(0), indexOfOwnerAlgebra(-1), theGeneratorIndex(-1){}
-  static int HashFunction(const ChevalleyGenerator& input)
+  static unsigned int HashFunction(const ChevalleyGenerator& input)
   { return input.theGeneratorIndex+input.indexOfOwnerAlgebra*SomeRandomPrimes[0];
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
   void MakeGenerator(List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner, int inputGeneratorIndex)
@@ -4200,10 +4200,10 @@ class MonomialP: public Vector<Rational>
 private:
 public:
   inline static std::string GetXMLClassName(){ return "MonomialP"; }
-  int HashFunction() const
+  unsigned  int HashFunction() const
   { return this->Vector<Rational>::HashFunction();
   }
-  static inline int HashFunction(const MonomialP& input)
+  static inline unsigned int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
   std::string ElementToString(FormatExpressions* PolyFormat=0)const;
@@ -4475,10 +4475,10 @@ public:
   void AddMonomial(const MonomialP& inputMon, const CoefficientType& inputCoeff)
   { this->::MonomialCollection<MonomialP, CoefficientType>::AddMonomial(inputMon, inputCoeff);
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->::MonomialCollection<MonomialP, CoefficientType>::HashFunction();
   }
-  static inline int HashFunction(const Polynomial<CoefficientType>& input)
+  static inline unsigned int HashFunction(const Polynomial<CoefficientType>& input)
   { return input.HashFunction();
   }
   void MultiplyBy
@@ -4983,7 +4983,7 @@ public:
     this->Numerator.GetElement()=other;
     this->ReduceMemory();
   }
-  inline int HashFunction()const
+  inline unsigned int HashFunction()const
   { switch(this->expressionType)
     { case RationalFunction::typeRational:
         return this->ratValue.HashFunction();
@@ -4993,10 +4993,10 @@ public:
         return this->Numerator.GetElementConst().HashFunction()*SomeRandomPrimes[0]+
         this->Denominator.GetElementConst().HashFunction()*SomeRandomPrimes[1];
       default:
-        return -1;
+        return (unsigned)-1;
     }
   }
-  static inline int HashFunction(const RationalFunction& input)
+  static inline unsigned int HashFunction(const RationalFunction& input)
   { return input.HashFunction();
   }
   inline void operator=(int other){this->MakeConst(0, other, 0);}
@@ -5917,8 +5917,8 @@ public:
   void invert();
   void init();
   static Vector<Rational> GetCheckSumRoot(int NumVars);
-  int HashFunction() const;
-  static inline int HashFunction(const oneFracWithMultiplicitiesAndElongations& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const oneFracWithMultiplicitiesAndElongations& input)
   { return input.HashFunction();
   }
   void ComputeOneCheckSum(Rational& output, Vector<Rational>& theExp, int theDimension);
@@ -5946,8 +5946,8 @@ public:
   (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter, const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
   ;
   void ComputeDebugString();
-  int HashFunction() const;
-  static inline int HashFunction(const ElementWeylGroup& input)
+  unsigned int HashFunction() const;
+  static inline unsigned int HashFunction(const ElementWeylGroup& input)
   { return input.HashFunction();
   }
   void operator=(const ElementWeylGroup& right);
@@ -7133,11 +7133,11 @@ public:
   void MakeZero
   (List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
   ;
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0]
     +this->::MonomialCollection<ChevalleyGenerator, Rational>::HashFunction()*SomeRandomPrimes[1];
   }
-  static int HashFunction(const ElementSemisimpleLieAlgebra& input)
+  static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input)
   { return input.HashFunction();
   }
 };

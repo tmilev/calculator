@@ -29,8 +29,8 @@ public:
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
-  int HashFunction()const;
-  static inline int HashFunction(const Data& input)  {return input.HashFunction();}
+  unsigned int HashFunction()const;
+  static inline unsigned int HashFunction(const Data& input)  {return input.HashFunction();}
   Data (const Rational& x, CommandList& inputOwner);
   Data(CommandList& theOwner): theIndex(-1), theContextIndex(-1){this->type=this->typeError; this->owner=&theOwner;}
   Data():owner(0), theIndex(-1), theContextIndex(-1){this->type=this->typeError;}
@@ -175,11 +175,11 @@ class Function
     }
     this->flagNameIsVisible=inputflagNameIsVisible;
   }
-  inline static int HashFunction(const Function& input)
+  inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
   }
-  int HashFunction()const
-  { return (int) this->theFunction;
+  unsigned int HashFunction()const
+  { return (unsigned int) this->theFunction;
   }
 };
 
@@ -266,10 +266,10 @@ void MakeVariableNonBounD
   (int recursionDepth=0, int maxRecursionDepth=1000, bool useLatex=false, bool AddBrackets=false,
    bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
-  static int HashFunction(const Expression& input)
+  static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->HashFunctionRecursive(0, 1000);
   }
   int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth)const
@@ -356,7 +356,7 @@ class ExpressionPairs
 {
 public:
   std::string ElementToString();
-  HashedListB<int, MathRoutines::IntIdentity> BoundVariableIndices;
+  HashedListB<int, MathRoutines::IntUnsignIdentity> BoundVariableIndices;
   HashedList<Expression> variableImages;
   void reset()
   { this->BoundVariableIndices.Clear();
@@ -417,7 +417,7 @@ class VariableNonBound
   public:
   std::string theName;
   int HandlerFunctionIndex;
-  inline static int HashFunction(const VariableNonBound& input)
+  inline static unsigned int HashFunction(const VariableNonBound& input)
   { return MathRoutines::hashString(input.theName);
   }
   VariableNonBound(const char x[]):theName(x), HandlerFunctionIndex(-1){}
@@ -431,7 +431,7 @@ class VariableNonBound
   Function::FunctionAddress GetFunction
   (CommandList& owner)
   ;
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return VariableNonBound::HashFunction(*this);
   }
   void operator=(const VariableNonBound& other)
@@ -455,8 +455,8 @@ class Context
   { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
   std::string ElementToString()const;
-  static inline int HashFunction(const Context& input){return input.HashFunction();}
-  int HashFunction()const
+  static inline unsigned int HashFunction(const Context& input){return input.HashFunction();}
+  unsigned int HashFunction()const
   { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
   }
   bool MergeContextWith(const Context& other)

@@ -1510,11 +1510,11 @@ inline int affineCone::GetDimension()
   return this->theWalls.TheObjects[0].affinePoint.size;
 }
 
-inline int affineCone::HashFunction() const
+inline unsigned int affineCone::HashFunction() const
 { int tempMin=MathRoutines::Minimum(this->theWalls.size, ::SomeRandomPrimesSize);
-  int result=0;
+  unsigned int result=0;
   for (int i=0; i<tempMin; i++)
-    result+= this->theWalls.TheObjects[i].HashFunction()*::SomeRandomPrimes[i];
+    result+= this->theWalls[i].HashFunction()*::SomeRandomPrimes[i];
   return result;
 }
 
@@ -1584,8 +1584,8 @@ void affineHyperplane::ElementToString(std::string& output)
   output= out.str();
 }
 
-int affineHyperplane::HashFunction() const
-{ //warning: if normal gets streched, the hashfunction will change!
+unsigned int affineHyperplane::HashFunction() const
+{ //warning: if normal gets streched, the hashfunction should not change!
   Vector<Rational> tempNormal;
   tempNormal=(this->normal);
   tempNormal.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();

@@ -1083,7 +1083,7 @@ public:
   template <class CoefficientType>
   bool FreudenthalEvalIrrepIsWRTLeviPart
 (Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoords,
- List<CoefficientType>& outputMultsSimpleCoords, std::string& outputDetails,
+ List<CoefficientType>& outputMultsSimpleCoordS, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
   void MakeParabolicFromSelectionSimpleRoots
@@ -7317,11 +7317,13 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
   for (int i=0; i<theOrbit.size; i++)
   { for (int j=0; j<this->simpleGenerators.size; j++)
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
-//      int oldsize=theOrbit.size;
-//      std::string debugString=tempRoot.ElementToString();
+      int oldsize=theOrbit.size;
+      std::string debugString=tempRoot.ElementToString() ;
       theOrbit.AddNoRepetition(tempRoot);
-//      if (oldsize<theOrbit.size)
-//        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
+      if (oldsize<theOrbit.size)
+        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
+      else
+        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " NOT added, ";
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { ExternalAutosOverAmbientField.GetElement()=this->ExternalAutomorphisms[j];
@@ -7340,18 +7342,35 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
 
 template <class CoefficientType>
 bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
-(Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoords,
+(Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoordS,
  List<CoefficientType>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRootSubsystem();
-  Vectors<Rational> EiBasis;
-  EiBasis.MakeEiBasis(this->AmbientWeyl.GetDim());
+  Vector<Rational> EiVect;
   List<bool> Explored;
-  Vector<CoefficientType> hwSimpleCoords;
-  hwSimpleCoords=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
+  CoefficientType theRingZero;
+  theRingZero=inputHWfundamentalCoords[0].GetZero();
+  /////////////////////////
+  Vector<CoefficientType> hwSimpleCoordsLeviPart, hwSimpleCoordsNilPart;
+  hwSimpleCoordsLeviPart=inputHWfundamentalCoords;
+  hwSimpleCoordsNilPart=inputHWfundamentalCoords;
+  for (int i=0; i<hwSimpleCoordsLeviPart.size; i++)
+  { EiVect.MakeEi(hwSimpleCoordsLeviPart.size, i);
+    if (!this->RootsOfBorel.ContainsObject(EiVect))
+      hwSimpleCoordsLeviPart[i]=theRingZero;
+    else
+      hwSimpleCoordsNilPart[i]=theRingZero;
+  }
+  hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
+  hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
+  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ElementToString();
+  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ElementToString();
+  ///////////////////////////
+  HashedList<Vector<CoefficientType> > outputDomWeightsSimpleCoordsLeviPart;
+
   if (!this->GetAlLDominantWeightsHWFDIM
-      (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
+      (hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
     << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
@@ -7360,26 +7379,27 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
     return false;
   }
 //  std::cout << "Highest weight: " << hwSimpleCoords.ElementToString() << "<br>Dominant weights wrt. levi part("
-//  << outputDominantWeightsSimpleCoords.size << "):<br> ";
-//  for (int i=0; i<outputDominantWeightsSimpleCoords.size; i++)
-//    std::cout << "<br>" << outputDominantWeightsSimpleCoords[i].ElementToString();
-  Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
-  outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
+//  << outputDomWeightsSimpleCoordsLeviPart.size << "):<br> ";
+//  for (int i=0; i<outputDomWeightsSimpleCoordsLeviPart.size; i++)
+//    std::cout << "<br>" << outputDomWeightsSimpleCoordsLeviPart[i].ElementToString();
+  Explored.initFillInObject(outputDomWeightsSimpleCoordsLeviPart.size, false);
+  outputMultsSimpleCoords.SetSize(outputDomWeightsSimpleCoordsLeviPart.size);
   Vector<CoefficientType> currentWeight, currentDominantRepresentative;
   Vector<CoefficientType> Rho;
   Rho=this->GetRho();//<-implicit type conversion here!
 //  std::cout << "<br> Rho equals: " << Rho.ElementToString();
   //out << "<br> Rho equals: " << Rho.ElementToString();
   CoefficientType hwPlusRhoSquared;
-  hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoords+Rho, hwSimpleCoords+Rho);
+  hwPlusRhoSquared=this->AmbientWeyl.RootScalarCartanRoot(hwSimpleCoordsLeviPart+Rho, hwSimpleCoordsLeviPart+Rho);
   Explored[0]=true;
   outputMultsSimpleCoords[0]=1;
 //  std::cout << "<br>time for generating weights and initializations: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
+std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ElementToString();
   Vector<CoefficientType> convertor;
   CoefficientType bufferCoeff;
-  for (int k=1; k< outputDominantWeightsSimpleCoords.size; k++)
+  for (int k=1; k< outputDomWeightsSimpleCoordsLeviPart.size; k++)
   { Explored[k]=true;
     CoefficientType& currentAccum=outputMultsSimpleCoords[k];
     currentAccum=0;
@@ -7387,17 +7407,17 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
       for (int i=1; ; i++)
       { convertor=this->RootsOfBorel[j];
         convertor*=i;
-        currentWeight= outputDominantWeightsSimpleCoords[k]+convertor;
+        currentWeight= outputDomWeightsSimpleCoordsLeviPart[k]+convertor;
         currentDominantRepresentative=currentWeight;
 //        double startLocal=theGlobalVariables.GetElapsedSeconds();
         this->RaiseToDominantWeight(currentDominantRepresentative);
-//        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
-        int theIndex=outputDominantWeightsSimpleCoords.GetIndex(currentDominantRepresentative);
-//        std::cout << "<br>index of currentDomain rep: " << theIndex;
+        std::cout << "<br>currentDominant representative: " << currentDominantRepresentative.ElementToString();
+        int theIndex=outputDomWeightsSimpleCoordsLeviPart.GetIndex(currentDominantRepresentative);
+        std::cout << "<br>index of currentDomain rep: " << theIndex;
         //totalTimeSpentOnHashIndexing+=theGlobalVariables.GetElapsedSeconds()-beforeHash;
         if (theIndex==-1)
           break;
-//        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
+        std::cout << "<br> summing over weight: " << currentWeight.ElementToString();
         if (!Explored[theIndex])
         { std::stringstream errorLog;
           errorLog << "This is an internal error check. If you see it, that means " << " that the Freudenthal algorithm implementation is "
@@ -7410,32 +7430,34 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
         bufferCoeff=this->AmbientWeyl.RootScalarCartanRoot(currentWeight, convertor);
         bufferCoeff*=outputMultsSimpleCoords[theIndex];
         currentAccum+=bufferCoeff;
-//        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
-//        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
+        std::cout << "<hr>current weight: " << currentWeight.ElementToString();
+        std::cout << "<br>current dominant representative " << currentDominantRepresentative.ElementToString();
       }
     currentAccum*=2;
-//    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
-//    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->AmbientWeyl.RootScalarCartanRoot
-//   (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho))
-//    .ElementToString()
-    ;
+    std::cout << "<br>hwPlusRhoSquared: " << hwPlusRhoSquared.ElementToString();
     bufferCoeff=hwPlusRhoSquared;
     bufferCoeff-=this->AmbientWeyl.RootScalarCartanRoot
-    (outputDominantWeightsSimpleCoords[k]+Rho, outputDominantWeightsSimpleCoords[k]+Rho);
+    (outputDomWeightsSimpleCoordsLeviPart[k]+Rho, outputDomWeightsSimpleCoordsLeviPart[k]+Rho);
     //bufferCoeff now holds the denominator participating in the Freudenthal formula.
     assert(!bufferCoeff.IsEqualToZero());
     currentAccum/=bufferCoeff;
+    std::cout << "<br>Coeff we divide by: " << bufferCoeff.ElementToString()
+    ;
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of "
-    << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
+    << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
     theGlobalVariables.MakeStatusReport(out.str());
-//    std::cout
-//    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
+    std::cout
+    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
  //   theGlobalVariables.MakeStatusReport(out.str());
 //    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
 //    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
 //    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
   }
+  outputDominantWeightsSimpleCoordS.Clear();
+  outputDominantWeightsSimpleCoordS.SetExpectedSize(outputDomWeightsSimpleCoordsLeviPart.size);
+  for (int i=0; i<outputDomWeightsSimpleCoordsLeviPart.size; i++)
+    outputDominantWeightsSimpleCoordS.AddOnTop(outputDomWeightsSimpleCoordsLeviPart[i]+hwSimpleCoordsNilPart);
 //  std::cout << "<br>Total freudenthal running time: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
   return true;
 }
@@ -7508,18 +7530,18 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
     << " is: ";
     for (int l=0; l<orbitDom.size; l++)
       std::cout <<"<br>" << orbitDom[l].ElementToString();
-    out << "<br>of them dominant are: <br>";
+    std::cout << "<hr>of them dominant are: <br>";
     for (int k=0; k<orbitDom.size; k++)
       if (outputWeylSub.IsDominantWeight(orbitDom[k]))
       { tempMon.weightFundamentalCoords=theWeyL.GetFundamentalCoordinatesFromSimple(orbitDom[k]);
         remainingCharDominantLevi.AddMonomial(tempMon, charAmbientFDWeyl.theCoeffs[i]);
-        std::cout <<"<br>" << orbitDom[k].ElementToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ElementToString();
+        std::cout << "<br>" << orbitDom[k].ElementToString() << " with coeff " << charAmbientFDWeyl.theCoeffs[i].ElementToString();
       }
   }
   output.Reset();
   out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (remainingCharDominantLevi.ElementToString());
-  std::cout << "Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
   (remainingCharDominantLevi.ElementToString());
 
   Vector<CoefficientType> simpleGeneratorBaseField;

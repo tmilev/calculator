@@ -5376,7 +5376,7 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
   { int indexInOther=other.GetIndex(this->TheObjects[i]);
     if (indexInOther==-1)
       return false;
-    if (!(this->TheObjects[i]==other.TheObjects[indexInOther]))
+    if (!(this->theCoeffs[i]==other.theCoeffs[indexInOther]))
       return false;
   }
   return true;

@@ -37,10 +37,6 @@ Rational partFractions::CheckSum;
 Rational partFraction::CheckSum;
 Rational partFraction::CheckSum2;
 
-int FormatExpressions::LatexMaxLineLength=100;
-int FormatExpressions::LatexCutOffLine=15;
-bool FormatExpressions::UsingLatexFormat=true;
-bool FormatExpressions::CarriageReturnRegular=true;
 FormatExpressions PolyFormatNumFrac;
 
 int CGI::GlobalFormulaIdentifier=0;
@@ -802,8 +798,10 @@ FormatExpressions::FormatExpressions()
   this->chevalleyGgeneratorLetter="g";
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
-  this->cutOffString=false;
-  this->cutOffSize=500;
+  this->MaxLineLength=100;
+  this->flagUseHTML=true;
+  this->flagUseLatex=false;
+  this->MaxLinesPerPage=40;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -1710,7 +1708,7 @@ std::string partFraction::ElementToString
   tempS= out.str();
   if (LatexFormat)
   { out << stringPoly;
-    if (stringPoly.size()>(unsigned) PolyFormatLocal.LatexMaxLineLength)
+    if (stringPoly.size()>(unsigned) PolyFormatLocal.MaxLineLength)
     { out << ("\\\\\n&&");
       NumLinesUsed++;
     }
@@ -2713,7 +2711,7 @@ int partFractions::ElementToStringBasisChange
       }
       else
         out << "\n";
-      if (LatexFormat && (TotalLines-LastCutOff)> FormatExpressions::LatexCutOffLine)
+      if (LatexFormat && (TotalLines-LastCutOff)> 40)
       { out << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
@@ -2759,7 +2757,7 @@ int partFractions::ElementToStringBasisChangeOutputToFile
       }
       else
         output << "\n";
-      if (LatexFormat && (TotalLines-LastCutOff)> FormatExpressions::LatexCutOffLine)
+      if (LatexFormat && (TotalLines-LastCutOff)> 20)
       { output << "\\end{eqnarray*}\\begin{eqnarray*}\n";
         LastCutOff=TotalLines;
       }
@@ -2774,11 +2772,11 @@ int partFractions::ElementToStringBasisChangeOutputToFile
 #pragma warning(disable:4018)//grrrrr
 #endif
 int partFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& PolyFormatLocal)
-{ int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
+{ int numCutOffs= output.size()% PolyFormatLocal.MaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
   for (int i=0; i<numCutOffs; i++)
-    for ( int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j<((int) output.size())-1; j++)
+    for ( int j=LastCutOffIndex+PolyFormatLocal.MaxLineLength; j<((int) output.size())-1; j++)
       if (output[j]=='\\' && output[j+1]=='f')
       { output.insert(j, "\\\\\n&&");
         NumLinesAdded++;
@@ -2789,11 +2787,11 @@ int partFraction::ControlLineSizeFracs(std::string& output, FormatExpressions& P
 }
 
 int partFraction::ControlLineSizeStringPolys(std::string& output, FormatExpressions& PolyFormatLocal)
-{ int numCutOffs= output.size()% PolyFormatLocal.LatexMaxLineLength;
+{ int numCutOffs= output.size()% PolyFormatLocal.MaxLineLength;
   int LastCutOffIndex=0;
   int NumLinesAdded=0;
   for(int i=0; i<numCutOffs; i++)
-    for(int j=LastCutOffIndex+PolyFormatLocal.LatexMaxLineLength; j<(int)(output.size())-1; j++)
+    for(int j=LastCutOffIndex+PolyFormatLocal.MaxLineLength; j<(int)(output.size())-1; j++)
       if ((output[j]=='+'||output[j]=='-')&&output[j-1]!='{')
       { output.insert(j, "\\\\\n&&");
         NumLinesAdded++;
@@ -2995,21 +2993,21 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 
 void partFractions::ComputeDebugString(GlobalVariables& theGlobalVariables)
 { FormatExpressions tempFormat;
-  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
+  this->ElementToString(this->DebugString, tempFormat.flagUseLatex, false, true, theGlobalVariables, tempFormat);
 }
 
 void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-{ this->ElementToString(output, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, theFormat);
+{ this->ElementToString(output, theFormat.flagUseLatex, false, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables)
 { FormatExpressions theFormat;
-  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, false, false, theGlobalVariables, theFormat);
+  this->ElementToString(this->DebugString, theFormat.flagUseLatex, false, false, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables)
 { FormatExpressions theFormat;
-  this->ElementToString(this->DebugString, FormatExpressions::UsingLatexFormat, true, true, theGlobalVariables, theFormat);
+  this->ElementToString(this->DebugString, theFormat.flagUseLatex, true, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -3051,7 +3049,7 @@ void partFractions::ComputeSupport(List<Vectors<Rational> >& output, std::string
 
 void partFractions::ComputeDebugStringBasisChange(Matrix<LargeInt>& VarChange, GlobalVariables& theGlobalVariables)
 { FormatExpressions tempFormat;
-  this->ElementToStringBasisChange(VarChange, true, this->DebugString, FormatExpressions::UsingLatexFormat, false, true, theGlobalVariables, tempFormat);
+  this->ElementToStringBasisChange(VarChange, true, this->DebugString, tempFormat.flagUseLatex, false, true, theGlobalVariables, tempFormat);
 }
 
 bool partFractions::IsHigherThanWRTWeight(const Vector<Rational>& left, const Vector<Rational>& r, const Vector<Rational>& theWeights)

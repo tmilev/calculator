@@ -4121,13 +4121,11 @@ public:
   std::string GetChevalleyGletter(int index)const;
   FormatExpressions();
   int ExtraLinesCounterLatex;
-  static int LatexCutOffLine;
-  static int LatexMaxLineLength;
-  static bool UsingLatexFormat;
-  static bool CarriageReturnRegular;
+  int MaxLineLength;
+  int MaxLinesPerPage;
+  bool flagUseLatex;
+  bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
-  bool cutOffString;
-  unsigned cutOffSize;
 };
 
 template <class CoefficientType>

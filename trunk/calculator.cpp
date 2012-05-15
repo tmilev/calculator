@@ -316,6 +316,7 @@ x_1:= Polynomial{} x_1;\
 g_{-2} v_\\lambda\
 )";*/
 //civilizedInput="g:= SemisimpleLieAlgebra{}B_3; v_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));g_2(g_{-2} v_\\lambda)";
+//civilizedInput="g:=SemisimpleLieAlgebra{} B_3;c:=hmmG2inB3{}(Casimir{}G_2);hwTAAbf{}(c, 1, (x_1,2,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

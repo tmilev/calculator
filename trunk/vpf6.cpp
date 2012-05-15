@@ -256,10 +256,10 @@ bool Data::SetContextResizesContextArray
       return true;
     case Data::typeEltTensorGenVermasOverRF:
       tempETGV.GetElement()=this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
-      std::cout << "<br>before the sub: " << tempETGV.GetElement().ElementToString();
-      std::cout << "<br>ze sub is: " << polySub.ElementToString();
+//      std::cout << "<br>before the sub: " << tempETGV.GetElement().ElementToString();
+//      std::cout << "<br>ze sub is: " << polySub.ElementToString();
       tempETGV.GetElement().Substitution(polySub);
-      std::cout << "<br>after the sub: " << tempETGV.GetElement().ElementToString();
+//      std::cout << "<br>after the sub: " << tempETGV.GetElement().ElementToString();
       this->MakeElementTensorGeneralizedVermas(*this->owner, tempETGV.GetElement(), candidateIndex);
       return true;
     default:
@@ -1508,20 +1508,28 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 
 bool CommandList::fHWTAABF
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.children.size!=3)
+{ IncrementRecursion theRecursionCounter(theCommands);
+  if (theExpression.children.size!=3)
     return false;
   Expression leftExpression=theExpression.children[0];
   Expression rightExpression=theExpression.children[1];
   Expression& weightExpression=theExpression.children[2];
-  if (!theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, leftExpression, comments))
+  theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, leftExpression, comments);
+  theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, rightExpression, comments);
+  if (leftExpression.theOperation!=theCommands.opData() || rightExpression.theOperation!=theCommands.opData())
+  { std::cout << "<br>left: "<< leftExpression.ElementToString();
+    std::cout << "<br>right: "<< rightExpression.ElementToString();
     return false;
-  if (!theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, rightExpression, comments))
-    return false;
+  }
   Data leftD=leftExpression.GetData();
   Data rightD=rightExpression.GetData();
   std::cout << "<br>starting left elt before merging: " << leftD.ElementToString();
   std::cout << "<br>starting right elt before conversion: " << rightD.ElementToString();
   if (!Data::MergeContexts(leftD, rightD))
+    return false;
+  if (!leftD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
+    return false;
+  if (!rightD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
     return false;
   std::cout << "<br>Merge successful!<br>left elt after merging: " << leftD.ElementToString();
   std::cout << "<br>right elt after merging: " << rightD.ElementToString();
@@ -1544,9 +1552,12 @@ bool CommandList::fHWTAABF
   { std::cout << "This shouldn't happen!";
     return false;
   }
-//  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ElementToString();
-//  std::cout << "<br>starting right elt after conversion: " << rightD.ElementToString();
-//  std::cout << "Highest weight in fundamental coords after conversion: " << weight.ElementToString() << "<br>";
+  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ElementToString();
+  std::cout << "<br>starting right elt after conversion: " << rightD.ElementToString();
+  std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ElementToString();
+  std::cout << "<br>Left context: " << leftD.GetContext().ElementToString();
+  std::cout << "<br>Right context: " << rightD.GetContext().ElementToString();
+
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(leftD.GetNumContextVars(), theCommands.theGlobalVariableS);
   theRingUnit.MakeOne(rightD.GetNumContextVars(), theCommands.theGlobalVariableS);
@@ -1556,6 +1567,7 @@ bool CommandList::fHWTAABF
   theSSalgebra.OrderSSalgebraForHWbfComputation();
   hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunction output;
+  std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ElementToString();
   if(!leftD.GetUE().HWTAAbilinearForm(rightD.GetUE(), output, &hwDualCoords, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, comments))
   { theExpression.SetError("Error: couldn't compute Shapovalov form, see comments.");
     return true;
@@ -1666,10 +1678,10 @@ bool CommandList::fHWV
   Data outputData;
   int outputContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(hwContext);
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-  std::cout << "<br>theElt:" << theElt.ElementToString();
+//  std::cout << "<br>theElt:" << theElt.ElementToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
   theExpression.MakeDatA(outputData, theCommands, inputIndexBoundVars);
-  std::cout << "<hr>" << outputData.ElementToString();
+//  std::cout << "<hr>" << outputData.ElementToString();
   return true;
 }
 
@@ -1736,11 +1748,12 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   HashedList<Expression> varImagesBuffer;
   Context finalContext(theCommands);
   if (!theCommands.EvaluatePMTDtree(outputUE, finalContext, theExpression, comments))
-  { theExpression.SetError("Couldn't extract  Plus_Minus_Times_Division subtree. See comments.");
-    return true;
-  }
+  //{ theExpression.SetError("Couldn't extract  Plus_Minus_Times_Division subtree. See comments.");
+    return false;
+//  }
 //  std::cout << outputUE.ElementToString();
-  outputUE.Simplify(*theCommands.theGlobalVariableS,1, 0);
+
+//  outputUE.Simplify(*theCommands.theGlobalVariableS,1, 0);
   int finalContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(finalContext);
   Data outputData;
   outputData.MakeUE(theCommands, outputUE, finalContextIndex);
@@ -2320,7 +2333,7 @@ bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::st
   ElementUniversalEnveloping<RationalFunction> result;
   result=output.GetUE();
   result+=rightCopy.GetUE();
-  //  result.Simplify(*this->owner->theGlobalVariableS);
+//  result.Simplify(*output.owner->theGlobalVariableS);
   output.MakeUE(*output.owner, result, output.theContextIndex);
   return true;
 }
@@ -2329,13 +2342,13 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
 { static bool theGhostHasAppeared=false;
   output=right;
   Data leftCopy=left;
-  std::cout << "<br>before merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+//  std::cout << "<br>before merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
   if (!output.MergeContexts(leftCopy, output))
     return false;
-  std::cout << "<br>after merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+//  std::cout << "<br>after merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
   if (!leftCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> > ())
     return false;
-  std::cout << "<br>after conversion left copy is: " << leftCopy.ElementToString();
+  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ElementToString();
   if (!theGhostHasAppeared)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...";
     theGhostHasAppeared=true;
@@ -2378,7 +2391,7 @@ bool Data::MultiplyUEByAny(const Data& left, const Data& right, Data& output, st
   ElementUniversalEnveloping<RationalFunction> result;
   result=output.GetUE();
   result*=rightCopy.GetUE();
-//  result.Simplify(*this->owner->theGlobalVariableS);
+  //result.Simplify(*output.owner->theGlobalVariableS);
   output.MakeUE(*output.owner, result, output.theContextIndex);
   return true;
 }

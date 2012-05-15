@@ -1805,6 +1805,8 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   if (logStream!=0)
     *logStream << "final UE element: " << Accum.ElementToString(&theGlobalVariables.theDefaultLieFormat);
   this->GetOwner().UEGeneratorOrderIncludingCartanElts=oldOrder;
+//  if (logStream!=0)
+//    std::cout << "<hr>" << logStream->str();
   return true;
 }
 

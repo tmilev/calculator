@@ -399,8 +399,8 @@ bool CommandList::fCasimir
 
 bool CommandList::fEmbedG2inB3
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ bool success=theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, theExpression, comments);
-  if (!success || !theExpression.IsElementUE())
+{ theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, theExpression, comments);
+  if (!theExpression.IsElementUE())
     return theExpression.SetError("Failed to convert argument to element of the Universal enveloping algebra. ");
   SemisimpleLieAlgebra& ownerSS=theExpression.GetData().GetAmbientSSAlgebra();
   if (ownerSS.GetRank()!=2 || ownerSS.theWeyl.WeylLetter!='G')

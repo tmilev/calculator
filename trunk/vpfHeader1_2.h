@@ -5579,23 +5579,24 @@ void ModuleSSalgebraNew<CoefficientType>::Substitution
   }
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
-      this->theGeneratingWordsGrouppedByWeight[i][j].Substitution(theSub);;
+      this->theGeneratingWordsGrouppedByWeight[i][j].Substitution(theSub);
   for (int i=0; i<this->theSimpleGens.size; i++)
-    this->theSimpleGens[i].Substitution(theSub);;
+    this->theSimpleGens[i].Substitution(theSub);
   for (int i=0; i<this->actionsSimpleGens.size; i++)
     for (int j=0; j<this->actionsSimpleGens[i].size; j++)
       for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
-        this->actionsSimpleGens[i][j][k].Substitution(theSub);;
+        this->actionsSimpleGens[i][j][k].Substitution(theSub);
   for (int i=0; i<this->actionsSimpleGensMatrixForM.size; i++)
-  { this->actionsSimpleGensMatrixForM[i].Substitution(theSub);;
+  { this->actionsSimpleGensMatrixForM[i].Substitution(theSub);
   }
   for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
-  { this->theBilinearFormsAtEachWeightLevel[i].Substitution(theSub);;
-    this->theBilinearFormsInverted[i].Substitution(theSub);;
+  { this->theBilinearFormsAtEachWeightLevel[i].Substitution(theSub);
+    this->theBilinearFormsInverted[i].Substitution(theSub);
   }
   for (int i=0; i<this->theHWDualCoordsBaseField.size; i++)
-  { this->theHWDualCoordsBaseField[i].Substitution(theSub);;
-    this->theHWFundamentalCoordsBaseField[i].Substitution(theSub);;
+  { this->theHWDualCoordsBaseField[i].Substitution(theSub);
+    this->theHWFundamentalCoordsBaseField[i].Substitution(theSub);
+    this->theHWSimpleCoordSBaseField[i].Substitution(theSub);
   }
 }
 
@@ -5683,6 +5684,7 @@ std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
   sortedMons=*this;
   sortedMons.QuickSortDescending();
 //  out << "(hash: " << this->HashFunction() << ")";
+  int cutOffCounter=0;
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
@@ -5700,11 +5702,24 @@ std::string MonomialCollection<TemplateMonomial, Element>::ElementToString
     if (i>0)
     { if (tempS1.size()>0)
       { if (tempS1[0]!='-')
-          out << "+";
+        { out << "+";
+          cutOffCounter+=1;
+        }
       } else
-        out << "+";
+      { out << "+";
+        cutOffCounter+=1;
+      }
     }
     out << tempS1;
+    cutOffCounter+=tempS1.size();
+    if (theFormat!=0)
+      if (cutOffCounter>theFormat->MaxLineLength)
+      { cutOffCounter=0;
+        if (theFormat->flagUseLatex)
+          out << " \\\\&& ";
+        if (theFormat->flagUseHTML)
+          out << " <br>";
+      }
   }
   return out.str();
 }
@@ -6627,13 +6642,13 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
   CoefficientType tempCF;
   for (int i=0; i<this->size; i++)
   { currentMon=this->TheObjects[i];
-    std::cout << "<br>currentMon before sub: " << currentMon.ElementToString();
+//    std::cout << "<br>currentMon before sub: " << currentMon.ElementToString();
     currentMon.Substitution(theSub);
-    std::cout << "<br>currentMon after sub: " << currentMon.ElementToString();
+//    std::cout << "<br>currentMon after sub: " << currentMon.ElementToString();
     tempCF=this->theCoeffs[i];
-    std::cout << "<br>cf before sub: " << tempCF.ElementToString();
+//    std::cout << "<br>cf before sub: " << tempCF.ElementToString();
     tempCF.Substitution(theSub);
-    std::cout << "<br>cf after sub: " << tempCF.ElementToString();
+//    std::cout << "<br>cf after sub: " << tempCF.ElementToString();
     output.AddMonomial(currentMon, tempCF);
   }
   *this=output;
@@ -6643,15 +6658,15 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
 template <class CoefficientType>
 void MonomialGeneralizedVerma<CoefficientType>::Substitution
 (const PolynomialSubstitution<Rational>& theSub)
-{ std::cout << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ElementToString();
+{ //std::cout << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ElementToString();
   this->theMonCoeffOne.Substitution(theSub);
-  std::cout << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ElementToString();
+  //std::cout << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ElementToString();
   ModuleSSalgebraNew<CoefficientType> newOwner;
   newOwner=this->owneR->TheObjects[this->indexInOwner];
   newOwner.Substitution(theSub);
-  std::cout << "<br>old index in owner: " << this->indexInOwner;
+  //std::cout << "<br>old index in owner: " << this->indexInOwner;
   this->indexInOwner=this->owneR->AddNoRepetitionOrReturnIndexFirst(newOwner);
-  std::cout << "<br>new index in owner: " << this->indexInOwner;
+  //std::cout << "<br>new index in owner: " << this->indexInOwner;
 }
 
 template <class CoefficientType>
@@ -6809,7 +6824,7 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
     currentMon.indexInOwner=this->indexInOwner;
     currentCoeff=theCoeff;
     currentCoeff*=theUE.theCoeffs[j];
-    std::cout << "<hr>Applying " << theUE[j].ElementToString() << " on " << this->ElementToString();
+ //   std::cout << "<hr>Applying " << theUE[j].ElementToString() << " on " << this->ElementToString();
     outputAccum.ReduceMonAndAddToMe(currentMon, currentCoeff, theGlobalVariables, theRingUnit, theRingZero);
   //  std::cout << "<br>and accummulating to obtain " << outputAccum.ElementToString() << "<hr>";
   }
@@ -6855,7 +6870,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().theAlgebras, this->GetOwner().indexAlgebra);
   theUEelt.AddMonomial(this->theMonCoeffOne, myCoeff);
-  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
+//  std::cout << " <br>the UE elt before simplifying: " << theUEelt.ElementToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
   //std::cout << " <br>the UE elt after simplifying: " << theUEelt.ElementToString();
   MonomialUniversalEnveloping<CoefficientType> currentMon;
@@ -6865,6 +6880,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 //  std::cout << theMod.ElementToString();
   //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
+  CoefficientType theCF;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
     //std::cout << "<br> Processing monomial " << currentMon.ElementToString();
@@ -6901,7 +6917,9 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         newMon.indexFDVector=i;
 //        std::cout << "<br>adding to " << outputAccum.ElementToString() << " the monomial " << newMon.ElementToString() << " with coefficient "
 //        << tempMat1.elements[i][this->indexFDVector].ElementToString() << " to obtain ";
-        outputAccum.AddMonomial(newMon, tempMat1.elements[i][this->indexFDVector]);
+        theCF=theUEelt.theCoeffs[l];
+        theCF*=tempMat1.elements[i][this->indexFDVector];
+        outputAccum.AddMonomial(newMon, theCF);
 //        std::cout << outputAccum.ElementToString();
       }
   }
@@ -7627,7 +7645,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   this->theChaR.SplitCharOverLevi
   (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
    subWeyl, theGlobalVariables);
-/*  Vector<Rational> theHWsimpleCoords, theHWfundCoords;
+  Vector<Rational> theHWsimpleCoords, theHWfundCoords;
   std::stringstream out;
   if(Report!=0)
     out << *Report;
@@ -7714,7 +7732,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
   if (Report!=0)
-    *Report=out.str();*/
+    *Report=out.str();
 }
 
 template <class CoefficientType>

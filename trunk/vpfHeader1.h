@@ -375,20 +375,20 @@ public:
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input)
   { if (!input.NeedsBrackets())
-      return input.ElementToString();
+      return input.ToString();
     std::string result;
     result.append("(");
-    result.append(input.ElementToString());
+    result.append(input.ToString());
     result.append(")");
     return result;
   }
   template<class Element>
   static inline std::string ElementToStringBrackets(const Element& input, FormatExpressions* theFormat)
   { if (!input.NeedsBrackets())
-      return input.ElementToString(theFormat);
+      return input.ToString(theFormat);
     std::string result;
     result.append("(");
-    result.append(input.ElementToString(theFormat));
+    result.append(input.ToString(theFormat));
     result.append(")");
     return result;
   }
@@ -760,10 +760,10 @@ public:
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
   std::string ElementToStringGeneric()const{ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;}
-  std::string ElementToString()const
+  std::string ToString()const
   { return this->ElementToStringGeneric();
   }
-  void ElementToString(std::string& output)const
+  void ToString(std::string& output)const
   { output=this->ElementToStringGeneric();
   }
   void ElementToStringGeneric(std::string& output)const;
@@ -844,7 +844,7 @@ class ProjectInformation
   }
   List<std::string> FileNames;
   List<std::string> FileDescriptions;
-  std::string ElementToString();
+  std::string ToString();
   MutexWrapper infoIsInitialized;
   void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
 };
@@ -1104,11 +1104,11 @@ public:
     this->HashSize=0;
     this->TheHashedArrays=0;
   }
-  std::string ElementToString()const
+  std::string ToString()const
   { std::stringstream out;
     out << this->size << " hashed objects:";
     for (int i=0; i<this->size; i++)
-    { out << this->TheObjects[i].ElementToString();
+    { out << this->TheObjects[i].ToString();
       if (i!=this->size-1)
         out << ", ";
     }
@@ -1181,7 +1181,7 @@ public:
 //  inline void AssignList(const List<Object>& other){this->HashedListB<Object, Object::HashFunction>::AssignList(other); }
   inline void QuickSortAscending(){ this->HashedListB<Object, Object::HashFunction>::QuickSortAscending();}
   inline void QuickSortDescending(){this->HashedListB<Object, Object::HashFunction>::QuickSortDescending();}
-  inline std::string ElementToString()const {return this->HashedListB<Object, Object::HashFunction>::ElementToString();}
+  inline std::string ToString()const {return this->HashedListB<Object, Object::HashFunction>::ToString();}
   void operator=(const HashedListB<Object, Object::HashFunction>& other)
   { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
   }
@@ -1385,8 +1385,8 @@ public:
     if (input.size==0)
       return;
     if (this->NumCols!=input.GetDim())
-    { std::cout << "This is a programming error: attempting to act by " << this->ElementToString() << "(an " << this->NumRows << " x "
-      << this->NumCols << " matrix) on a column vector " << input.ElementToString() << "(dimension " << input.size << ").";
+    { std::cout << "This is a programming error: attempting to act by " << this->ToString() << "(an " << this->NumRows << " x "
+      << this->NumCols << " matrix) on a column vector " << input.ToString() << "(dimension " << input.size << ").";
       assert(false);
     }
     output.SetSize(input.size);
@@ -1400,7 +1400,7 @@ public:
     inputOutput=buffer;
   }
   void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
-  std::string ElementToString(bool useHtml=true, bool useLatex=false)const;
+  std::string ToString(bool useHtml=true, bool useLatex=false)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const Element& theRingUnit=1, const Element& theRingZero=0)
   { this->init(theDimension, theDimension);
@@ -1783,7 +1783,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
   Element tempElt;
   int row=0;
   while(row<this->NumRows && col<this->NumCols)
-  { //std::cout << "<br>****************row: " << row << " status: " << this->ElementToString(true, false);
+  { //std::cout << "<br>****************row: " << row << " status: " << this->ToString(true, false);
     int findPivotRow=-1;
     for (int i=row; i<this->NumRows; i++)
       if(!this->elements[i][col].IsEqualToZero())
@@ -1795,7 +1795,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       if (this->elements[row][col]<0)
         this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
       int ExploringRow= row+1;
-//      std::cout << "<br>before second while: " << this->ElementToString(true, false);
+//      std::cout << "<br>before second while: " << this->ToString(true, false);
       while (ExploringRow<this->NumRows)
       { Element& PivotElt=this->elements[row][col];
         Element& otherElt=this->elements[ExploringRow][col];
@@ -1810,14 +1810,14 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
           ExploringRow++;
         else
           this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
-//        std::cout << "<br>second while cycle end: " << this->ElementToString(true, false);
+//        std::cout << "<br>second while cycle end: " << this->ToString(true, false);
       }
       Element& PivotElt = this->elements[row][col];
       for (int i=0; i<row; i++)
       { tempElt =this->elements[i][col]/PivotElt;
-//        std::cout << " the floor of " << tempElt.ElementToString();
+//        std::cout << " the floor of " << tempElt.ToString();
         tempElt.AssignFloor();
-//        std::cout << " is " << tempElt.ElementToString();
+//        std::cout << " is " << tempElt.ToString();
         this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
         if (this->elements[i][col].IsNegative())
           this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
@@ -1825,7 +1825,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
       row++;
     }
     col++;
-//    std::cout << "end of cycle status: " << this->ElementToString(true, false) << "<br>****************";
+//    std::cout << "end of cycle status: " << this->ToString(true, false) << "<br>****************";
   }
 }
 
@@ -1875,8 +1875,8 @@ public:
   }
   std::string DebugString;
   void ComputeDebugString();
-  std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
-  void ElementToString(std::string& output)const;
+  std::string ToString()const {std::string tempS; this->ToString(tempS); return tempS;}
+  void ToString(std::string& output)const;
   void incrementSelection();
   int SelectionToIndex();
   void ExpandMaxSize();
@@ -1919,9 +1919,9 @@ class SelectionWithMultiplicities
 {
 public:
   std::string DebugString;
-  void ComputeDebugString(){this->ElementToString(this->DebugString); }
-  void ElementToString(std::string& output);
-  std::string ElementToString(){std::string tempS; this->ElementToString(tempS); return tempS;}
+  void ComputeDebugString(){this->ToString(this->DebugString); }
+  void ToString(std::string& output);
+  std::string ToString(){std::string tempS; this->ToString(tempS); return tempS;}
   List<int> elements;
   List<int> Multiplicities;
   int CardinalitySelectionWithoutMultiplicities();
@@ -2065,7 +2065,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
   offset=0; blockIndex=0;
   for (int i=0; i<this->NumRows; i++)
   { for (int j=0; j<this->NumCols; j++)
-    { tempS=this->elements[i][j].ElementToString();
+    { tempS=this->elements[i][j].ToString();
       out << tempS;
       if (j!=this->NumCols-1)
         out << " & ";
@@ -2084,7 +2084,7 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
 }
 
 template <typename Element>
-std::string Matrix<Element>::ElementToString(bool useHtml, bool useLatex)const
+std::string Matrix<Element>::ToString(bool useHtml, bool useLatex)const
 { std::stringstream out;
   std::string tempS;
   if (useHtml)
@@ -2099,7 +2099,7 @@ std::string Matrix<Element>::ElementToString(bool useHtml, bool useLatex)const
   { if (useHtml)
       out << "<tr>";
     for (int j=0; j<this->NumCols; j++)
-    { tempS=this->elements[i][j].ElementToString();
+    { tempS=this->elements[i][j].ToString();
       if (useHtml)
         out << "<td>";
       out << tempS;
@@ -2313,10 +2313,10 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Ele
 //      if (i==9 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic)
 //      { std::cout << tempS;
 //      }
-//      tempS=tempElement.ElementToString();
+//      tempS=tempElement.ToString();
       tempElement.Invert();
 //      assert(tempElement.checkConsistency());
-//      tempS=tempElement.ElementToString();
+//      tempS=tempElement.ToString();
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       output.RowTimesScalar(NumFoundPivots, tempElement);
 //      assert(tempElement.checkConsistency());
@@ -2324,13 +2324,13 @@ void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Ele
         if (j!=NumFoundPivots)
           if (!mat.elements[j][i].IsEqualToZero())
           { //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-            //{ tempS=tempElement.ElementToString();
+            //{ tempS=tempElement.ToString();
               //mat.ComputeDebugString();
             //}
             tempElement=(mat.elements[j][i]);
             tempElement.Minus();
             //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-              //tempS=tempElement.ElementToString();
+              //tempS=tempElement.ToString();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
             output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
             //assert(tempElement.checkConsistency());
@@ -2382,9 +2382,9 @@ public:
   static const int SquareRootOfCarryOverBound=31000; //31000*31000=961000000<1000000000
 //  static const int SquareRootOfCarryOverBound=32768; //=2^15
   void SubtractSmallerPositive(const LargeIntUnsigned& x);
-  void ElementToString(std::string& output)const;
+  void ToString(std::string& output)const;
   void ElementToStringLargeElementDecimal(std::string& output)const;
-  inline std::string ElementToString()const {std::string tempS; this->ElementToString(tempS); return tempS;}
+  inline std::string ToString()const {std::string tempS; this->ToString(tempS); return tempS;}
   void DivPositive(const LargeIntUnsigned& x, LargeIntUnsigned& quotientOutput, LargeIntUnsigned& remainderOutput) const;
   void MakeOne();
   void Add(const LargeIntUnsigned& x);
@@ -2481,13 +2481,14 @@ public:
   LargeIntUnsigned value;
   void MultiplyBy(const LargeInt& x){ this->sign*=x.sign; this->value.MultiplyBy(x.value); }
   void MultiplyByInt(int x);
-  void ElementToString(std::string& output)const;
-  inline std::string ElementToString()const{std::string tempS; this->ElementToString(tempS); return tempS;}
+  void ToString(std::string& output)const;
+  inline std::string ToString(FormatExpressions* theFormat=0)const{std::string tempS; this->ToString(tempS); return tempS;}
   bool IsPositive()const{return this->sign==1 && (this->value.IsPositive()); }
   bool IsNegative()const{return this->sign==-1&& (this->value.IsPositive()); }
   inline bool BeginsWithMinus(){return this->IsNegative();}
   inline bool IsPositiveOrZero()const{return !this->IsNegative(); }
   inline bool IsNonPositive()const{return !this->IsPositive(); }
+  bool NeedsBrackets()const{return false;}
   bool IsEqualTo(const LargeInt& x)const;
   bool IsEqualToZero()const{ return this->value.IsEqualToZero(); }
   bool IsEqualToOne()const{ return this->value.IsEqualToOne() && this->sign==1; }
@@ -2573,7 +2574,7 @@ class Rational
 { friend Rational operator-(const Rational& argument);
   friend Rational operator/(int left, const Rational& right);
   friend std::ostream& operator << (std::ostream& output, const Rational& theRat)
-  { output << theRat.ElementToString();
+  { output << theRat.ToString();
     return output;
   }
   friend std::istream& operator >> (std::istream& input, const Rational& output)
@@ -2821,7 +2822,7 @@ ParallelComputing::GlobalPointerCounter++;
     this->Extended->num.sign*=x.sign; this->Simplify();
   }
   void DivideByLargeIntegerUnsigned(LargeIntUnsigned& x){ this->InitExtendedFromShortIfNeeded(); this->Extended->den.MultiplyBy(x); this->Simplify(); }
-  std::string ElementToString(FormatExpressions* notUsed=0)const;
+  std::string ToString(FormatExpressions* notUsed=0)const;
   bool IsEqualTo(const Rational& r) const;
   bool IsGreaterThanOrEqualTo(const Rational& right)const;
   inline bool IsEqualToOne()const
@@ -2952,6 +2953,7 @@ ParallelComputing::GlobalPointerCounter++;
   }
   inline void operator-=(const Rational& right){this->Subtract(right); }
   inline void operator*=(const Rational& right){this->MultiplyBy(right); }
+//  inline void operator*=(const Polynomial<Rational>& right);
   inline void operator/=(const Rational& right){this->DivideBy(right);}
 //  inline void operator/=(const LargeInt& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
 //  inline void operator/=(const LargeIntUnsigned& right){Rational tempRat; tempRat=right; this->DivideBy(tempRat);}
@@ -2993,7 +2995,7 @@ public:
   Rational a;
   Rational b;
   friend std::iostream& operator<< (std::iostream& output, const Qsqrt2& theElt)
-  { output << theElt.ElementToString();
+  { output << theElt.ToString();
     return output;
   }
   void operator =(const Qsqrt2& other)
@@ -3021,15 +3023,15 @@ public:
   void Assign(const Qsqrt2& other)
   { this->operator=(other);
   }
-  void ElementToString(std::string& output)
-  { output=this->ElementToString();
+  void ToString(std::string& output)
+  { output=this->ToString();
   }
-  std::string ElementToString()const
+  std::string ToString()const
   { if (this->IsEqualToZero())
       return "0";
     std::stringstream out;
     if (!this->a.IsEqualToZero())
-    { out << this->a.ElementToString();
+    { out << this->a.ToString();
       if (this->b.IsPositive())
         out << "+";
     }
@@ -3042,7 +3044,7 @@ public:
         tempRat.Minus();
       }
       if (tempRat!=1)
-        out << tempRat.ElementToString();
+        out << tempRat.ToString();
       out << "\\sqrt{2}";
     }
     return out.str();
@@ -3077,8 +3079,8 @@ public:
     result*=oldOther;
     result-=old;
     if (!result.IsEqualToZero())
-    { std::cout << "  start " << old.ElementToString() << "; oldOther: " << otheR.ElementToString();
-      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ElementToString();
+    { std::cout << "  start " << old.ToString() << "; oldOther: " << otheR.ToString();
+      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ToString();
       old/=oldOther;
     }
     assert(result.IsEqualToZero());
@@ -3121,7 +3123,7 @@ public:
   { std::string result="Vector_" + CoefficientType::GetXMLClassName();
     return result;
   }
-  std::string ElementToString()const
+  std::string ToString()const
   { std::stringstream out;
     out.precision(5);
     out << "(";
@@ -3133,12 +3135,12 @@ public:
     out << ")";
     return out.str();
   }
-  std::string ElementToString(FormatExpressions* theFormat)const
+  std::string ToString(FormatExpressions* theFormat)const
   { std::stringstream out;
     out.precision(5);
     out << "(";
     for(int i=0; i<this->size; i++)
-    { out << this->TheObjects[i].ElementToString(theFormat);
+    { out << this->TheObjects[i].ToString(theFormat);
       if (i!=this->size-1)
         out << ", ";
     }
@@ -3707,7 +3709,7 @@ template <class CoefficientType>
 class Vectors: public List<Vector<CoefficientType> >
 {
   public:
-  std::string ElementToString()const{return this->ElementToString(false, false, false);}
+  std::string ToString()const{return this->ToString(false, false, false);}
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable)
   { std::string tempS; std::stringstream out;
     if (useLatex)
@@ -3745,7 +3747,7 @@ class Vectors: public List<Vector<CoefficientType> >
   std::string ElementsToInequalitiesString
 (bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)
 ;
-  std::string ElementToString(bool useLaTeX, bool useHtml, bool makeTable)const
+  std::string ToString(bool useLaTeX, bool useHtml, bool makeTable)const
   { std::stringstream out;
     std::string tempS;
     if (!useLaTeX && !useHtml)
@@ -3755,7 +3757,7 @@ class Vectors: public List<Vector<CoefficientType> >
     if (useHtml && makeTable)
       out << "<table>";
     for (int i=0; i<this->size; i++)
-    { tempS=this->TheObjects[i].ElementToString();
+    { tempS=this->TheObjects[i].ToString();
       if (useHtml && makeTable)
         out << "<tr><td>";
       out << tempS;
@@ -3815,7 +3817,7 @@ class Vectors: public List<Vector<CoefficientType> >
   { std::stringstream out;
     std::string tempS;
     for (int i=0; i<this->size; i++)
-    { this->TheObjects[i].ElementToString(tempS);
+    { this->TheObjects[i].ToString(tempS);
       out << tempS;
        if (i!=this->size-1)
         out << " + ";
@@ -4121,8 +4123,10 @@ public:
   std::string GetChevalleyGletter(int index)const;
   FormatExpressions();
   int ExtraLinesCounterLatex;
+  int MaxRecursionDepthPerExpression;
   int MaxLineLength;
   int MaxLinesPerPage;
+  bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
@@ -4139,7 +4143,7 @@ std::string Vector<CoefficientType>::ElementToStringLetterFormat
   int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
   for(int i=0; i<NumVars; i++)
     if (!this->TheObjects[i].IsEqualToZero())
-    { tempS=this->TheObjects[i].ElementToString();
+    { tempS=this->TheObjects[i].ToString();
       if (tempS=="1")
         tempS="";
       if (tempS=="-1")
@@ -4181,7 +4185,7 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
-  std::string ElementToString(FormatExpressions* inputFormat)const;
+  std::string ToString(FormatExpressions* inputFormat)const;
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
@@ -4204,7 +4208,7 @@ public:
   static inline unsigned int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
-  std::string ElementToString(FormatExpressions* PolyFormat=0)const;
+  std::string ToString(FormatExpressions* PolyFormat=0)const;
   void MakeZeroDegrees();
   bool operator>(const MonomialP& other)const
   { if (this->operator==(other))
@@ -4289,7 +4293,7 @@ public:
 
 template <class Element>
 std::iostream& operator <<(std::iostream& output, const Polynomial<Element>& input)
-{ output << input.ElementToString();
+{ output << input.ToString();
   return output;
 }
 
@@ -4303,7 +4307,7 @@ public:
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   List<CoefficientType> theCoeffs;
   bool NeedsBrackets()const{return this->size>1;}
-  std::string ElementToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   static int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
   { int result=0;
     for (int i=0; i<input.size; i++)
@@ -4442,8 +4446,9 @@ class ElementCommutativeAlgebra: public MonomialCollection<TemplateMonomial, Coe
     TemplateMonomial bufferMon;
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
-  inline void operator*=(const CoefficientType& other)
-  { this->::MonomialCollection<TemplateMonomial, CoefficientType>::operator*=(other);
+  template <class otherType>
+  inline void operator*=(const otherType& other)
+  { this->::MonomialCollection<TemplateMonomial, CoefficientType>::operator*= (other);
   }
   void RaiseToPower
 (int d, ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
@@ -4689,6 +4694,17 @@ public:
     }
     this->::MonomialCollection<MonomialP, CoefficientType>::operator-=(other);
   }
+  void operator*=(const Polynomial<CoefficientType>& other)
+  { if (this->NumVars!=other.NumVars)
+    { std::cout << "This is not supposed to happen, or is it?";
+      assert(false);
+    }
+    this->::ElementCommutativeAlgebra<MonomialP, CoefficientType>::operator*=((ElementCommutativeAlgebra<MonomialP, CoefficientType>) other);
+  }
+  template <class otherType>
+  inline void operator*=(const otherType& other)
+  { this->::MonomialCollection<MonomialP, CoefficientType>::operator*= (other);
+  }
   void operator+=(const CoefficientType& other)
   { MonomialP tempMon;
     tempMon.MakeZero(this->NumVars);
@@ -4759,7 +4775,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeZero((int)NumVars);
   }
-  std::string ElementToString(int numDisplayedEltsMinus1ForAll=-1){std::string tempS; this->ElementToString(tempS, numDisplayedEltsMinus1ForAll); return tempS;}
+  std::string ToString(int numDisplayedEltsMinus1ForAll=-1){std::string tempS; this->ToString(tempS, numDisplayedEltsMinus1ForAll); return tempS;}
   void ComputeDebugString();
   bool operator==(const PolynomialSubstitution& right);
   void Substitution(PolynomialSubstitution<Element>& theSub, int NumVarsTarget)
@@ -4784,14 +4800,14 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
     tempMat.AssignMatrixIntWithDen(theMat, Den);
     this->MakeLinearSubConstTermsLastRow(tempMat);
   }
-  void ElementToString(std::string& output, int numDisplayedEltsMinus1ForAll)
+  void ToString(std::string& output, int numDisplayedEltsMinus1ForAll)
   { std::stringstream out;
     output.clear();
     FormatExpressions PolyFormatLocal;
     if (numDisplayedEltsMinus1ForAll==-1)
       numDisplayedEltsMinus1ForAll=this->size;
     for (int i=0; i<this->size; i++)
-    { out << "x_{" << i+1 << "} \\mapsto " << this->TheObjects[i].ElementToString(&PolyFormatLocal);
+    { out << "x_{" << i+1 << "} \\mapsto " << this->TheObjects[i].ToString(&PolyFormatLocal);
       if (i!=this->size-1)
         out << ", ";
     }
@@ -4905,7 +4921,7 @@ private:
   }
 public:
   friend std::iostream& operator<< (std::iostream& output, const RationalFunction& theRF)
-  { output << theRF.ElementToString();
+  { output << theRF.ToString();
     return output;
   }
   friend std::iostream& operator>> (std::iostream& input, RationalFunction& theRF);
@@ -4917,7 +4933,7 @@ public:
   int NumVars;
   int expressionType;
   enum typeExpression{ typeRational=0, typePoly=1, typeRationalFunction=2, typeError=3};
-  std::string ElementToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   bool NeedsBrackets()const
   { switch(this->expressionType)
     { case RationalFunction::typeRational: return false;
@@ -5113,7 +5129,7 @@ public:
     }
     if (this->expressionType==other.expressionType)
     { std::string tempS;
-      tempS=other.ElementToString();
+      tempS=other.ToString();
       this->AddSameTypes(other);
       assert(this->checkConsistency());
       return;
@@ -5301,7 +5317,7 @@ void MonomialP::Substitution
   if (this->IsAConstant())
     return;
   Polynomial<Element> tempPoly;
-//  std::cout << "<hr>subbing in monomial " << this->ElementToString();
+//  std::cout << "<hr>subbing in monomial " << this->ToString();
 //  output.ComputeDebugString();
   assert(TheSubstitution.size==this->size);
   for (int i=0; i<this->size; i++)
@@ -5318,7 +5334,7 @@ void MonomialP::Substitution
       output*=(tempPoly);
 //      output.ComputeDebugString();
     }
-//  std::cout << " to get: " << output.ElementToString();
+//  std::cout << " to get: " << output.ToString();
 }
 
 template <class Element>
@@ -5475,7 +5491,7 @@ void Polynomial<Element>::Evaluate
     for (int j=0; j<this->NumVars; j++)
     { if (!this->TheObjects[i][j].IsSmallInteger() )
       { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose"
-        <<  i+1 << "^{th} variable is raised is raised to the power " << this->TheObjects[i][j].ElementToString()
+        <<  i+1 << "^{th} variable is raised is raised to the power " << this->TheObjects[i][j].ToString()
         << ". Raising variables to power is allowed only if the power is a small integer. ";
         assert(false);
         return;
@@ -5725,8 +5741,11 @@ void Polynomial<Element>::TimesInteger(int a)
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
-{ if (inputCoeff.IsEqualToZero())
+{ //this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+  if (inputCoeff.IsEqualToZero())
+  { //assert(inputCoeff.ToString()=="0");
     return;
+  }
   int j= this->GetIndex(inputMon);
   if (j==-1)
   { this->::HashedList<TemplateMonomial>::AddOnTop(inputMon);
@@ -5788,7 +5807,7 @@ void Polynomial<CoefficientType>::Substitution
  const CoefficientType& theRingZero)
 { //std::cout << "<hr><hr><hr>Making a substitution ";
   //FormatExpressions theFormat;
-  //std::cout << "into this piece of crap:<br> " << this->ElementToString(theFormat);
+  //std::cout << "into this piece of crap:<br> " << this->ToString(theFormat);
   if (this->NumVars==0)
   { if (TheSubstitution.size!=0)
       this->SetNumVariables(TheSubstitution[0].NumVars);
@@ -5810,10 +5829,10 @@ void Polynomial<CoefficientType>::Substitution
   { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, theRingUnit);
     TempPoly*=this->theCoeffs[i];
     Accum+=(TempPoly);
-    //std::cout << "<br>So far accum is :<br> " << Accum.ElementToString(theFormat);
+    //std::cout << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
   }
   *this=(Accum);
-  //std::cout << "<hr>to finally get<br>" << output.ElementToString(theFormat);
+  //std::cout << "<hr>to finally get<br>" << output.ToString(theFormat);
 }
 
 template <class Element>
@@ -5923,7 +5942,7 @@ public:
   bool IsHigherThan(oneFracWithMultiplicitiesAndElongations& f);
   void operator=(oneFracWithMultiplicitiesAndElongations& right);
   bool operator==(oneFracWithMultiplicitiesAndElongations& right);
-  std::string ElementToString(int index, bool LatexFormat);
+  std::string ToString(int index, bool LatexFormat);
   void OneFracToStringBasisChange
   (partFractions& owner, int indexElongation, Matrix<LargeInt>& VarChange, bool UsingVarChange,
    std::string& output, bool LatexFormat, int indexInFraction, int theDimension,
@@ -5934,13 +5953,13 @@ class ElementWeylGroup: public List<int>
 {
 public:
   std::string DebugString;
-  void ElementToString(std::string& output){output=this->ElementToString();}
-  std::string ElementToString() {return this->ElementToString(false, true, "\\eta", 0);}
-  std::string ElementToString
+  void ToString(std::string& output){output=this->ToString();}
+  std::string ToString() {return this->ToString(false, true, "\\eta", 0);}
+  std::string ToString
   (bool useLatex, bool useHtml, const std::string& simpleRootLetter, List<int>* DisplayIndicesOfSimpleRoots)
-  { return this->ElementToString(-1, useLatex, useHtml, simpleRootLetter, "a", DisplayIndicesOfSimpleRoots);
+  { return this->ToString(-1, useLatex, useHtml, simpleRootLetter, "a", DisplayIndicesOfSimpleRoots);
   }
-  std::string ElementToString
+  std::string ToString
   (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter, const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
   ;
   void ComputeDebugString();
@@ -5958,8 +5977,8 @@ public:
   std::string DebugString;
   int theWeightIndex;
   void ComputeDebugString();
-  void ElementToString(std::string& output);
-  void ElementToString(std::string& output, int KLindex);
+  void ToString(std::string& output);
+  void ToString(std::string& output, int KLindex);
 };
 
 //this class is in effect a remake of Polynomial<int>; Use only to minimize RAM usage.
@@ -5979,7 +5998,7 @@ public:
   void MakeQuadratic(int x2Term, int x1Term, int constTerm);
   void MakeZero();
   void ComputeDebugString();
-  void ElementToString(std::string& output);
+  void ToString(std::string& output);
   void SubstitutionOneOverX();
   int Substitution(int x);
   void MultiplyBy(OneVarIntPolynomial& p);
@@ -6000,8 +6019,8 @@ public:
   std::string DebugString;
   int theWeightIndex;
   void ComputeDebugString();
-  void ElementToString(std::string& output){}
-  void ElementToString(std::string& output, int KLindex){}
+  void ToString(std::string& output){}
+  void ToString(std::string& output, int KLindex){}
 };
 
 class LaTeXProcedures
@@ -6373,7 +6392,7 @@ public:
   int indexPhysicalFrame;
   int indexPhysicalDrawOp;
   int selectedPlaneInPhysicalDrawOp;
-  std::string ElementToString();
+  std::string ToString();
   void operator=(const VirtualDrawOp& other)
   { this->theVirtualOp=other.theVirtualOp;
     this->indexPhysicalFrame=other.indexPhysicalFrame;
@@ -6391,7 +6410,7 @@ public:
   bool flagAnimating;
   bool flagIsPausedWhileAnimating;
   int indexVirtualOp;
-  std::string ElementToString();
+  std::string ToString();
   bool IncrementOpReturnNeedsRedraw();
   int GetIndexCurrentPhysicalFrame();
   void DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVariables& theGlobalVariables);
@@ -6567,9 +6586,9 @@ std::string Vectors<CoefficientType>::ElementsToInequalitiesString
         out << "=>0\n";
     } else
     { if (useLatex)
-        out << "\\geq " << (-(*current.LastObject())).ElementToString() << "\\\\";
+        out << "\\geq " << (-(*current.LastObject())).ToString() << "\\\\";
       else
-        out << "=>" <<  (-(*current.LastObject())).ElementToString();
+        out << "=>" <<  (-(*current.LastObject())).ToString();
     }
     if (tempS=="")
       out << ")";
@@ -6608,15 +6627,15 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
     for (int j=0; j<theDim; j++)
       bufferMatGaussianElimination.elements[i][j]=inputBasis.TheObjects[i].TheObjects[j];
   bufferMatGaussianEliminationCC.MakeIdMatrix(bufferMatGaussianElimination.NumRows, theRingUnit, theRingZero);
-  //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ElementToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ElementToString(true, false);
+  //std::cout << "<br> the matrix before integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   bufferMatGaussianElimination.GaussianEliminationEuclideanDomain(&bufferMatGaussianEliminationCC, theRingMinusUnit, theRingUnit);
-  //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ElementToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ElementToString(true, false);
+  //std::cout << "<br> the matrix after integral gaussian elimination: " << bufferMatGaussianElimination.ToString(true, false) << " and the other matrix: " << bufferMatGaussianEliminationCC.ToString(true, false);
   Vector<CoefficientType> tempRoot, theCombination;
   assert(this!=&output);
   output.MakeZero(inputBasis.size, theRingZero);
   theCombination=*this;
   int col=0;
-//  std::cout << "<br>vector whose coords we wanna find: " << this->ElementToString();
+//  std::cout << "<br>vector whose coords we wanna find: " << this->ToString();
   for (int i=0; i<inputBasis.size; i++)
   { for (; col<theDim; col++)
       if (!bufferMatGaussianElimination.elements[i][col].IsEqualToZero())
@@ -6631,9 +6650,9 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
   }
   if (!theCombination.IsEqualToZero())
     return false;
-//  std::cout << "<br>" << bufferMatGaussianEliminationCC.ElementToString(true, false) << " acting on " << output.ElementToString();
+//  std::cout << "<br>" << bufferMatGaussianEliminationCC.ToString(true, false) << " acting on " << output.ToString();
   bufferMatGaussianEliminationCC.ActMultiplyVectorRowOnTheRight(output, theRingZero);
-//  std::cout << " gives " << output.ElementToString();
+//  std::cout << " gives " << output.ToString();
   return true;
 }
 
@@ -6645,10 +6664,10 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);
-//  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ElementToString();
+//  std::cout << "<br>input for GetLinearDependence: " << bufferVectors.ToString();
   if(!bufferVectors.GetLinearDependence(bufferMat, theRingUnit, theRingZero))
     return false;
-  //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ElementToString();
+  //std::cout << "<br>output for GetLinearDependence: "<< bufferMat.ToString();
 //  tempRoots.ComputeDebugString();
 //  tempMat.ComputeDebugString();
   CoefficientType tempCF=bufferMat.elements[bufferMat.NumRows-1][0];
@@ -6658,7 +6677,7 @@ bool Vector<CoefficientType>::GetCoordsInBasiS
   { bufferMat.elements[i][0].Minus();
     output[i]=(bufferMat.elements[i][0]);
   }
-//  std::cout << "outpuf final: " << output.ElementToString();
+//  std::cout << "outpuf final: " << output.ToString();
   return true;
 }
 
@@ -6685,7 +6704,7 @@ bool Vectors<CoefficientType>::GetLinearDependence
 { Matrix<CoefficientType> tempMat;
   Selection nonPivotPoints;
   this->GetLinearDependenceRunTheLinearAlgebra(outputTheLinearCombination, tempMat, nonPivotPoints);
-  //std::cout << tempMat.ElementToString(true, false);
+  //std::cout << tempMat.ToString(true, false);
   if (nonPivotPoints.CardinalitySelection==0)
     return false;
 //  outputTheLinearCombination.ComputeDebugString();
@@ -7005,12 +7024,12 @@ class CompleX
   public:
   Base Im;
   Base Re;
-  std::string ElementToString()
+  std::string ToString()
   { std::stringstream tempStream;
     tempStream << *this;
     return tempStream.str();
   }
-  void ElementToString(std::string& output){ output=this->ElementToString(); }
+  void ToString(std::string& output){ output=this->ToString(); }
   friend std::iostream& operator<< <Base>(std::iostream& output, const CompleX<Base>& input);
   void operator*=(const CompleX<Base>& other)
   { CompleX Accum;
@@ -7067,7 +7086,7 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool NeedsBrackets()const;
-  std::string ElementToString(FormatExpressions* theFormat=0)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   Vector<Rational> GetCartanPart()const;
   void AssignRootSpace
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
@@ -7694,11 +7713,11 @@ bool Matrix<Element>::SystemLinearEqualitiesWithPositiveColumnVectorHasNonNegati
 //  std::stringstream out;
 //  for (int i=0; i<BaseVariables.CardinalitySelection; i++)
 //  { int tempI=BaseVariables.elements[i];
-//    matX.elements[tempI][0].ElementToString(tempS);
+//    matX.elements[tempI][0].ToString(tempS);
 //    out << tempS <<"(";
 //    if (tempI<matA.NumCols)
 //    {  for (int j=0; j<matA.NumRows; j++)
-//      { matA.elements[j][tempI].ElementToString(tempS);
+//      { matA.elements[j][tempI].ToString(tempS);
 //        out << tempS;
 //        if (j!=matA.NumRows-1)
 //          out <<", ";

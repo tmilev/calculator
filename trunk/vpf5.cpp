@@ -22,8 +22,8 @@ bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunction>(const
   { std::cout << "This might or might not be a programming mistake: I am being asked whether a weight"
     << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
     << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
-    << " More precisely, the scalar product of " << theWeight.ElementToString() << " and " << tempVect.ElementToString()
-    << " equals " << tempRF.ElementToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
+    << " equals " << tempRF.ToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
     << " whether a non-constant function is positive or not. "
     << " If this is not a programming mistake, you might want to consider introducing a substitution "
     << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
@@ -51,8 +51,8 @@ bool WeylGroup::IsDominantWRTgenerator<RationalFunction>(const Vector<RationalFu
   { std::cout << "This might or might not be a programming mistake: I am being asked whether a weight"
     << " with rational function coefficients is dominant. I took the scalar products with the positive simple roots "
     << " whose reflections generate the ambient group, however one of the scalar products in question was non-constant. "
-    << " More precisely, the scalar product of " << theWeight.ElementToString() << " and " << tempVect.ElementToString()
-    << " equals " << tempRF.ElementToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
+    << " More precisely, the scalar product of " << theWeight.ToString() << " and " << tempVect.ToString()
+    << " equals " << tempRF.ToString() << ". I cannot decide (more precisely, do not want to *silently* decide for you) "
     << " whether a non-constant function is positive or not. "
     << " If this is not a programming mistake, you might want to consider introducing a substitution "
     << " evaluating the rational function, some sort of a monomial order, or some other method of deciding the \"sign\" of a rational function."
@@ -157,7 +157,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
 
 bool CommandList::fWeylDimFormula
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(theCommands);
+{ IncrementRecursion recursionCounter(&theCommands);
   SemisimpleLieAlgebra* theSSowner=0;
   if (theExpression.children.size!=2)
   { theExpression.SetError("This function takes 2 arguments");
@@ -165,7 +165,7 @@ bool CommandList::fWeylDimFormula
   }
   Expression LieAlgebraNameNode=theExpression.children[0];
   if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, LieAlgebraNameNode, comments))
-  { theExpression.SetError("Failed to convert the first argument of "+theExpression.ElementToString()+ " to a semisimple Lie algebra. ");
+  { theExpression.SetError("Failed to convert the first argument of "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
     return true;
   }
   if (LieAlgebraNameNode.errorString!="")
@@ -184,11 +184,11 @@ bool CommandList::fWeylDimFormula
   rfOne.MakeOne(tempContext.VariableImages.size, theCommands.theGlobalVariableS);
   Vector<RationalFunction> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
-  //std::cout << "The fundamental coords: " << theWeight.ElementToString();
+  //std::cout << "The fundamental coords: " << theWeight.ToString();
   if (comments!=0)
-    *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ElementToString();
+    *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
   RationalFunction tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
-  //std::cout << "<br>The result: " << tempRF.ElementToString();
+  //std::cout << "<br>The result: " << tempRF.ToString();
   theExpression.MakeRF(tempRF, newContext, theCommands, inputIndexBoundVars);
   return true;
 }
@@ -197,11 +197,11 @@ bool CommandList::fRootSAsAndSltwos
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
   Expression* zeTrueArgument=& theExpression;
-  std::cout << "ze expression i get: " << theExpression.ElementToString() << "<hr>";
-  std::cout << "which is of type " << theExpression.ElementToString();
+  std::cout << "ze expression i get: " << theExpression.ToString() << "<hr>";
+  std::cout << "which is of type " << theExpression.ToString();
   if (theExpression.theOperation==theCommands.opList() && theExpression.children.size>0)
   { zeTrueArgument=&theExpression.children[0];
-    std::cout << "ZeTRueArgument: " << zeTrueArgument->ElementToString();
+    std::cout << "ZeTRueArgument: " << zeTrueArgument->ToString();
     //showIndicator=false;
   }
   if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, *zeTrueArgument, comments))
@@ -294,7 +294,7 @@ bool CommandList::fRootSAsAndSltwos
 
 bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(theCommands);
+{ IncrementRecursion recursionCounter(&theCommands);
   if (theExpression.children.size!=4)
     return theExpression.SetError("The function expects 4 arguments.");
 
@@ -321,10 +321,10 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
     return theExpression.SetError("Failed to extract parabolic selection from the fourth argument");
   if (comments!=0)
   { *comments << "Your input weight in fundamental coordinates: "
-    << theWeightFundCoords.ElementToString();
-    *comments << "<br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ElementToString();
-    *comments << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ElementToString() << ".";
-    *comments << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ElementToString() << ".";
+    << theWeightFundCoords.ToString();
+    *comments << "<br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
+    *comments << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << ".";
+    *comments << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
   }
   ModuleSSalgebraNew<RationalFunction> theMod;
   Selection selInducing= inducingParSel;
@@ -352,9 +352,9 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   std::stringstream out;
   out << "Your input weight in fundamental coordinates: "
   << theWeyl.GetFundamentalCoordinatesFromSimple(theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords)  )
-  .ElementToString();
-  out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ElementToString();
-  out << ".<br>Your parabolic subalgebra selection: " << parSel.ElementToString() << ".";
+  .ToString();
+  out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
+  out << ".<br>Your parabolic subalgebra selection: " << parSel.ToString() << ".";
   ModuleSSalgebraNew<Rational> theMod;
 
   Selection emptySel;
@@ -372,9 +372,9 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
 
 bool CommandList::fCasimir
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(theCommands);
+{ IncrementRecursion recursionCounter(&theCommands);
   if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments))
-    return theExpression.SetError("Failed to convert the argument "+theExpression.ElementToString()+ " to a semisimple Lie algebra. ");
+    return theExpression.SetError("Failed to convert the argument "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
   if (theExpression.errorString!="")
     return theExpression.SetError("While trying to generate Lie algebra for the Casimir element, I got the error: " + theExpression.errorString);
   SemisimpleLieAlgebra& theSSowner=theExpression.GetData().GetAmbientSSAlgebra();
@@ -388,7 +388,7 @@ bool CommandList::fCasimir
   if (comments!=0)
   { *comments << "Context Lie algebra: " << theSSowner.GetLieAlgebraName
     (theSSowner.theWeyl.WeylLetter, theSSowner.GetRank());
-    *comments << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ElementToString()
+    *comments << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
     <<  ". The Casimir element of the ambient Lie algebra. ";
   }
   Data tempData;
@@ -430,10 +430,10 @@ bool CommandList::fEmbedG2inB3
   (8, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
   g_m1plusg_m3+=tempElt;
 
-//  std::cout << "<hr>g_2: " << g_2.ElementToString();
-//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ElementToString();
-//  std::cout << "<hr>g_{-2}: " << g_m2.ElementToString();
-//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ElementToString();
+//  std::cout << "<hr>g_2: " << g_2.ToString();
+//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
+//  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
+//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
   theHmm.imagesSimpleChevalleyGenerators.SetSize(4);
   theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_2;
   theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_1plusg_3;

@@ -317,6 +317,9 @@ g_{-2} v_\\lambda\
 )";*/
 //civilizedInput="g:= SemisimpleLieAlgebra{}B_3; v_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));g_2(g_{-2} v_\\lambda)";
 //civilizedInput="g:=SemisimpleLieAlgebra{} B_3;c:=hmmG2inB3{}(Casimir{}G_2);hwTAAbf{}(c, 1, (x_1,2,0))";
+//civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i}; v_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));(g_{-5}g_{-1}g_{5}+2g_{-1}h_{3}+2g_{-1}h_{2}+2g_{-1}) v_\\lambda";
+ // civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i}; c:= hmmG2inB3{}( Casimir{}G_2); x_1:= Polynomial{} x_1;
+ // v_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));(g_5g_{-5}g_{-1}) v_\\lambda;";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -347,7 +350,7 @@ g_{-2} v_\\lambda\
       civilizedInput=tempStream.str()+civilizedInput;
     }
     theParser.Evaluate(civilizedInput);
-    std::cout << "<hr>";
+//    std::cout << "<hr>";
     std::cout <<  theParser.outputString;
   }
 //  theComputation.flagLogSyntaxRules=inputRankString=="2";
@@ -363,10 +366,10 @@ g_{-2} v_\\lambda\
     std::cout << "</td>";
   }
   std::cout << "<td valign=\"top\">";
-  std::cout << ProjectInformation::GetMainProjectInfo().ElementToString();
+  std::cout << ProjectInformation::GetMainProjectInfo().ToString();
   std::cout << theParser.theLog;
   std::cout << "<hr><b>CommandList status. </b><br>";
-  std::cout << theParser.ElementToString();
+  std::cout << theParser.ToString();
 
   std::cout << "</td></tr></table>";
   std::stringstream tempStream3;

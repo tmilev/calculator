@@ -228,7 +228,7 @@ void ElementWeylAlgebra::MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTh
   this->StandardOrder=Accum;
 }
 
-void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
+void ElementWeylAlgebra::ToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
 { std::stringstream out;
   std::string tempS;
   int numLettersSinceLastNewLine=0;
@@ -237,7 +237,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>&
   if (this->StandardOrder.IsEqualToZero())
     out << 0;
   for (int i=0; i<this->StandardOrder.size; i++)
-  { tempS=this->StandardOrder.theCoeffs[i].ElementToString();
+  { tempS=this->StandardOrder.theCoeffs[i].ToString();
     bool hasMinus=(tempS[0]=='-');
     if (this->StandardOrder[i].TotalDegree()!=0)
     { if (tempS=="1")
@@ -273,7 +273,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, List<std::string>&
   output=out.str();
 }
 
-void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
+void ElementWeylAlgebra::ToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
 { List<std::string> alphabet;
   alphabet.SetSize(this->NumVariables);
   int numCycles=this->NumVariables;
@@ -290,7 +290,7 @@ void ElementWeylAlgebra::ElementToString(std::string& output, bool useXYs, bool 
       alphabet.TheObjects[i+numCycles]= out2.str();
     }
   }
-  this->ElementToString(output, alphabet, useLatex, useBeginEqnArray);
+  this->ToString(output, alphabet, useLatex, useBeginEqnArray);
 }
 
 void ElementWeylAlgebra::SetNumVariables(int newNumVars)
@@ -429,7 +429,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
     }
     out << "</tr>\n";
   }
-  out << "<tr><td align=\"center\"> " << this->hCharacteristic.ElementToString() << "</td>";
+  out << "<tr><td align=\"center\"> " << this->hCharacteristic.ToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
     CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
@@ -472,10 +472,10 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
     output << "\n<br>\n";
 }
 
-void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal)
+void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal)
 { std::stringstream out;  std::string tempS;
-  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  this->hCharacteristic.ElementToString() << "</a>";
-  tempS=this->preferredAmbientSimpleBasis.ElementToString(false, false, false);
+  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  this->hCharacteristic.ToString() << "</a>";
+  tempS=this->preferredAmbientSimpleBasis.ToString(false, false, false);
   if (physicalPath==0 || htmlPathServer==0)
   { usePNG=false;
     useHtml=false;
@@ -504,16 +504,16 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
     out << tempS;
     if(useHtml)
       out << "</a>";
-    tempS = tempRoots.ElementToString(useLatex, useHtml, false);
+    tempS = tempRoots.ToString(useLatex, useHtml, false);
     if (useHtml)
       out << "<br>";
     out << "\nSimple basis subalgebra: " << tempS;
     currentSA.theDynkinDiagram.GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
     if (!usePNG)
-      tempS=tempMat.ElementToString(useHtml, useLatex);
+      tempS=tempMat.ToString(useHtml, useLatex);
     else
     { std::stringstream tempStreamX;
-      tempS=tempMat.ElementToString(false, true);
+      tempS=tempMat.ToString(false, true);
       tempStreamX << "\\[" << tempS << "\\]";
       tempS=tempStreamX.str();
     }
@@ -535,36 +535,36 @@ void slTwo::ElementToString(std::string& output, GlobalVariables& theGlobalVaria
   if (useHtml)
     out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
-  tempS=this->theH.ElementToString(&PolyFormatLocal);
+  tempS=this->theH.ToString(&PolyFormatLocal);
   tempStreamH << "\n$h=$ $" << tempS << "$";
   tempS= tempStreamH.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamE << "\n$e=$ $" << this->theE.ElementToString(&PolyFormatLocal) << "$";
+  tempStreamE << "\n$e=$ $" << this->theE.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamF << "\n$f=$ $" << this->theF.ElementToString(&PolyFormatLocal) << "$";
+  tempStreamF << "\n$f=$ $" << this->theF.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
-  this->bufferEbracketF.ElementToString(&PolyFormatLocal);
+  this->bufferEbracketF.ToString(&PolyFormatLocal);
   tempStreamEF << "\n$[e, f]=$ $" << tempS << "$";
   tempS= tempStreamEF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ElementToString(&PolyFormatLocal) << "$";
+  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamHE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ElementToString(&PolyFormatLocal) << "$";
+  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamHF.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  //this->theSystemMatrixForm.ElementToString(tempS);
+  //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
-  //this->theSystemColumnVector.ElementToString(tempS);
+  //this->theSystemColumnVector.ToString(tempS);
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { tempS=this->theSystemToBeSolved.TheObjects[i].ElementToString(&PolyFormatLocal);
+  { tempS=this->theSystemToBeSolved.TheObjects[i].ToString(&PolyFormatLocal);
     if (tempS=="")
     { if (useLatex || usePNG)
         tempStreamActual << "~\\\\";
@@ -1177,7 +1177,7 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
       out << "<tr><td>Bad values of h</td><td>";
-    tempS= this->BadHCharacteristics.ElementToString();
+    tempS= this->BadHCharacteristics.ToString();
     out << tempS;
     if (useHtml)
       out << "</td></tr>";
@@ -1186,10 +1186,10 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   { slTwo& theSl2= this->TheObjects[i];
     if (useHtml)
       out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index" << i << "\"title=\"" << tooltipHchar << "\" >";
-    out << theSl2.hCharacteristic.ElementToString();
+    out << theSl2.hCharacteristic.ToString();
     if (useHtml)
       out << "</a></td><td title=\"" << tooltipHvalue << "\">";
-    out << theSl2.theH.GetCartanPart().ElementToString();
+    out << theSl2.theH.GetCartanPart().ToString();
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     if (useHtml && usePNG)
@@ -1220,11 +1220,11 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
   output= out.str();
 }
 
-void SltwoSubalgebras::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+void SltwoSubalgebras::ToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
 { std::string tempS; std::stringstream out; std::stringstream body;
   FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer, PolyFormatLocal);
+  { this->TheObjects[i].ToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer, PolyFormatLocal);
   //  body<< "Index "<< i<<": ";
     if(useHtml)
       body << "<br>";
@@ -1273,7 +1273,7 @@ void SltwoSubalgebras::ElementToHtml
   outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a>"
   << "<br> <a href=\""<< DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
-  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
+  this->ToString(tempS, theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
   out << tempS;
   if(usePNG)
   { fileName= physicalPath;
@@ -1296,14 +1296,14 @@ void SltwoSubalgebras::ElementToHtml
   }
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
-  this->ElementToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
+  this->ToString(tempS, theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  this->owner[0].ElementToString(&theGlobalVariables.theDefaultLieFormat);
+  this->owner[0].ToString(&theGlobalVariables.theDefaultLieFormat);
   theFile << tempS;
   theFile.close();
   if (usePNG)
@@ -1359,12 +1359,12 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    out << numInnerIsos.ElementToString();
+    out << numInnerIsos.ToString();
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    out << (numInnerIsos*theOuterIsos.size).ElementToString();
+    out << (numInnerIsos*theOuterIsos.size).ToString();
     if (useHtml)
       out << "</td></tr>";
     if (useLatex)
@@ -1398,7 +1398,7 @@ void reductiveSubalgebras::FindTheReductiveSubalgebras(char WeylLetter, int Weyl
   out << tempS;
 //  this->theSl2s.ElementToStringModuleDecompositionMinimalContainingRegularSAs(tempS, false, true);
 //  out << tempS;
-  this->theSl2s.ElementToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
+  this->theSl2s.ToString(tempS, theGlobalVariables, this->theSl2s.theRootSAs.AmbientWeyl, false, true, false, 0, 0);
   out << tempS;
   theGlobalVariables.theIndicatorVariables.StatusString1.append(tempS);
   theGlobalVariables.theIndicatorVariables.StatusString1= out.str();
@@ -1642,7 +1642,7 @@ void reductiveSubalgebras::ElementToStringCandidatePrincipalSl2s(bool useLatex, 
     { out << " Matching actual sl(2)'s: ";
       for (int j=0; j<this->IndicesMatchingActualSl2s.TheObjects[i].size; j++)
       { int tempI= this->IndicesMatchingActualSl2s.TheObjects[i].TheObjects[j];
-        out << this->theSl2s.TheObjects[tempI].hCharacteristic.ElementToString() << ", ";
+        out << this->theSl2s.TheObjects[tempI].hCharacteristic.ToString() << ", ";
       }
     }
     if (useHtml)
@@ -1840,7 +1840,7 @@ void DrawingVariables::drawString(DrawElementInputOutput& theDrawData, const std
 
 void Rational::DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData)
 { std::string tempS;
-  tempS=this->ElementToString();
+  tempS=this->ToString();
   theGlobalVariables.theDrawingVariables.theBuffer.drawTextBuffer(theDrawData.TopLeftCornerX, theDrawData.TopLeftCornerY, tempS, 0, theGlobalVariables.theDrawingVariables.fontSizeNormal, theGlobalVariables.theDrawingVariables.TextStyleNormal);
   theDrawData.outputHeight=10;
   theDrawData.outputWidth=10*tempS.size();
@@ -2343,7 +2343,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
 //  Matrix<Rational>  theDet=mapOnRootSpaces;
 //  Rational tempRat;
 //  theDet.ComputeDeterminantOverwriteMatrix(tempRat);
-//  std::cout << " ... and the det is: " << tempRat.ElementToString();
+//  std::cout << " ... and the det is: " << tempRat.ToString();
   Selection NonExplored;
   int numRoots= this->theWeyl.RootSystem.size;
   NonExplored.init(numRoots);
@@ -2748,7 +2748,7 @@ void Parser::ParseAndCompute(const std::string& input, std::string& output, Glob
   this->Parse(input);
   out << "\\begin{eqnarray*}&& " << input << " = \\\\\n";
   this->Evaluate(theGlobalVariables);
-//  this->WeylAlgebraValue.ElementToString(tempS, false, true, false);
+//  this->WeylAlgebraValue.ToString(tempS, false, true, false);
   out << tempS;
   out << "\\end{eqnarray*}";
   output=out.str();
@@ -3310,7 +3310,7 @@ ParserNode::ParserNode()
   this->Clear();
 }
 
-void Parser::ElementToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
+void Parser::ToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { std::stringstream out; std::string tempS;
   std::string htmlSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(this->StringBeingParsed, htmlSafish))
@@ -3340,7 +3340,7 @@ void Parser::ElementToString(bool includeLastNode, std::string& output, bool use
   if(!includeLastNode)
     NumDisplayedNodes--;
   for (int i=0; i<NumDisplayedNodes; i++)
-  { this->TheObjects[i].ElementToString(tempS, theGlobalVariables, theFormat);
+  { this->TheObjects[i].ToString(tempS, theGlobalVariables, theFormat);
     out << " Index: " << i << " " << tempS << ";\n";
     if (useHtml)
       out << "<br>";
@@ -3430,7 +3430,7 @@ std::string ParserNode::ElementToStringErrorCode(bool useHtml)
   return out.str();
 }
 
-void ParserNode::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
+void ParserNode::ToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { std::stringstream out; std::string tempS;
   this->owner->TokenToStringStream(out, this->Operation);
   if (this->Operation==Parser::tokenFunction)
@@ -3477,7 +3477,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
 //      std::cout <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
     }
   }
-//  std::cout << this->ElementToString(theGlobalVariables) << "<br>";
+//  std::cout << this->ToString(theGlobalVariables) << "<br>";
   Vector<Rational> right;
   while (NonExplored.CardinalitySelection>0)
   { for (int i=0; i<NonExplored.CardinalitySelection; i++)
@@ -3631,10 +3631,10 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
     tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
     (i+numPosRoots, *this->owners, this->indexRange);
   }
-//  std::cout << this->ElementToString(theGlobalVariables);
+//  std::cout << this->ToString(theGlobalVariables);
 }
 
-void HomomorphismSemisimpleLieAlgebra::ElementToString
+void HomomorphismSemisimpleLieAlgebra::ToString
 (std::string& output, bool useHtml, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS, tempS2;
@@ -3648,14 +3648,14 @@ void HomomorphismSemisimpleLieAlgebra::ElementToString
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->imagesSimpleChevalleyGenerators.size; i++)
-  { out <<  this->imagesSimpleChevalleyGenerators.TheObjects[i].ElementToString(&theGlobalVariables.theDefaultLieFormat) << "\n\n";
+  { out <<  this->imagesSimpleChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat) << "\n\n";
     if (useHtml)
       out << "<br>";
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i=0; i<this->domainAllChevalleyGenerators.size; i++)
-  { out << this->imagesAllChevalleyGenerators.TheObjects[i].ElementToString(&theGlobalVariables.theDefaultLieFormat)
-    << " \\mapsto " << this->domainAllChevalleyGenerators.TheObjects[i].ElementToString(&theGlobalVariables.theDefaultLieFormat)
+  { out << this->imagesAllChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat)
+    << " \\mapsto " << this->domainAllChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat)
     << "\n\n";
     if  (useHtml)
       out << "<br>";
@@ -3690,8 +3690,8 @@ void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
   WeylGroup& theWeyl=this->owner->theHmm.theRange().theWeyl;
   theWeyl.ComputeWeylGroup(51840);
   out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">"
-  << this->owner->theHmm.theRange().theWeyl.CartanSymmetric.ElementToString(false, true) << "</div>Root system:";
-  out << "<br>Size of Weyl group by formula: " << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ElementToString();
+  << this->owner->theHmm.theRange().theWeyl.CartanSymmetric.ToString(false, true) << "</div>Root system:";
+  out << "<br>Size of Weyl group by formula: " << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
   out << "<br>Explicitly computed elements: " << theWeyl.size;
   out << "<br>Each element is parametrized by a list of simple reflections. <br>For example an element parametrized by 1,2 corresponds to the element <span class=\"math\">s_{\\alpha_1}s_{\\alpha_2}</span>,";
   out << " where <span class=\"math\">s_{\\beta}</span> is the reflection with respect to <span class=\"math\">\\beta</span> and <span class=\"math\">\\alpha_i</span> is the i^th simple Vector<Rational>";
@@ -3719,8 +3719,8 @@ void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
   Rational tempRat;
   tempMat2.ComputeDeterminantOverwriteMatrix(tempRat);
   out << "<br>one outer automorphism of the Lie algebra is realized as the following matrix. <br> The coordinates of the matrix are given in the ordered basis ";
-  out << " <div class=\"math\" scale=\"50\"> g_{-n}, \\dots, g_{-1}, h_1,\\dots, h_k, g_1,\\dots, g_n</div> where the generators are as in the table on the right.<br> Its determinant is \n" << tempRat.ElementToString();
-  out << "<div class=\"math\" scale=\"50\">" << tempMat.ElementToString(false, true) << "</div>";
+  out << " <div class=\"math\" scale=\"50\"> g_{-n}, \\dots, g_{-1}, h_1,\\dots, h_k, g_1,\\dots, g_n</div> where the generators are as in the table on the right.<br> Its determinant is \n" << tempRat.ToString();
+  out << "<div class=\"math\" scale=\"50\">" << tempMat.ToString(false, true) << "</div>";
   this->outputString=out.str();
 }
 
@@ -3887,7 +3887,7 @@ void ParserNode::Clear()
     this->IndexContextLieAlgebra=this->owner->theHmm.indexRange;
 }
 
-std::string ChevalleyGenerator::ElementToString(FormatExpressions* inputFormat)const
+std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat)const
 { if (this-> indexOfOwnerAlgebra<0 || this->ownerArray==0)
     return "(ErrorProgramming:Non-Initialized-Chevalley-Weyl-Generator)";
   return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra].GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
@@ -4009,9 +4009,9 @@ void VectorPartition::ComputeAllPartitionsRecursive(int currentIndex, List<int>&
   }
 }
 
-std::string VectorPartition::ElementToString(bool useHtml)
+std::string VectorPartition::ToString(bool useHtml)
 { std::stringstream out;
-  out << this->theRoot.ElementToString() << "\n\n";
+  out << this->theRoot.ToString() << "\n\n";
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->thePartitions.size; i++)
@@ -4025,7 +4025,7 @@ std::string VectorPartition::ElementToString(bool useHtml)
         found=true;
         if (theCoefficient>1)
           out << theCoefficient;
-        out << this->PartitioningRoots.TheObjects[j].ElementToString();
+        out << this->PartitioningRoots.TheObjects[j].ToString();
       }
     }
     out << "\n\n";
@@ -4035,12 +4035,12 @@ std::string VectorPartition::ElementToString(bool useHtml)
   return out.str();
 }
 
-std::string RationalFunction::ElementToString(FormatExpressions* theFormat)const
+std::string RationalFunction::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
   if (this->expressionType==this->typeRational)
   { //out << "(type: rational)";
-    out << this->ratValue.ElementToString();
+    out << this->ratValue.ToString();
     return out.str();
   }
   bool hasDenominator=(this->expressionType==this->typeRationalFunction);
@@ -4050,11 +4050,11 @@ std::string RationalFunction::ElementToString(FormatExpressions* theFormat)const
     //out << "(type: poly)";
 //  if (hasDenominator && useLatex)
 //    out << "\\frac{";
-  out << this->Numerator.GetElementConst().ElementToString(theFormat);
+  out << this->Numerator.GetElementConst().ToString(theFormat);
   if (hasDenominator)
   { //if (useLatex)
     //  out << "}{";
-    out << this->Denominator.GetElementConst().ElementToString(theFormat);
+    out << this->Denominator.GetElementConst().ToString(theFormat);
     //if (useLatex)
     //  out << "}";
   }
@@ -4161,7 +4161,7 @@ void RationalFunction::TransformToReducedGroebnerBasis
       if (!tempP.IsEqualToZero())
       { tempP.ScaleToIntegralNoGCDCoeffs();
         theBasis.AddOnTop(tempP);
-        //std::cout << "<br> new element found: " << tempP.ElementToString();
+        //std::cout << "<br> new element found: " << tempP.ToString();
       }
       if (theGlobalVariables!=0)
         if (theGlobalVariables->GetFeedDataToIndicatorWindowDefault()!=0)
@@ -4175,7 +4175,7 @@ void RationalFunction::TransformToReducedGroebnerBasis
   }
 //  std::cout << "<br> ... and the basis before reduction is: <br>";
 //  for (int i=0; i<theBasis.size; i++)
-//    std::cout << theBasis.TheObjects[i].ElementToString() << ", ";
+//    std::cout << theBasis.TheObjects[i].ToString() << ", ";
   RationalFunction::ReduceGroebnerBasis(theBasis, buffer1, MonomialOrderLeftIsGreaterThanOrEqualToRight);
 
 }
@@ -4251,12 +4251,12 @@ void RationalFunction::lcm
   tempList.AddOnTop(rightTemp);
 //  std::cout << "<br>In the beginning: <br>";
 //  for (int i=0; i<tempList.size; i++)
-//  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ElementToString() << "<br>\n";
+//  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ToString() << "<br>\n";
 //  }
   RationalFunction::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, 0);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
-//  { std::cout << tempList.TheObjects[i].ElementToString() << "<br>\n";
+//  { std::cout << tempList.TheObjects[i].ToString() << "<br>\n";
 //  }
   for(int i=0; i<tempList.size; i++)
   { Polynomial<Rational> & current=tempList.TheObjects[i];
@@ -4295,8 +4295,8 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other)
   Polynomial<Rational> theGCD, theResult, tempP;
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString(&this->context->theDefaultPolyFormat) << " by "
-    << other.ElementToString(&this->context->theDefaultPolyFormat);
+    out << "Multiplying " << this->ToString(&this->context->theDefaultPolyFormat) << " by "
+    << other.ToString(&this->context->theDefaultPolyFormat);
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4319,9 +4319,9 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other)
   this->SimplifyLeadingCoefficientOnly();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString(&this->context->theDefaultPolyFormat) << " by "
-    << other.ElementToString(&this->context->theDefaultPolyFormat);
-    out << " and the result is:\n" << this->ElementToString();
+    out << "Multiplying " << this->ToString(&this->context->theDefaultPolyFormat) << " by "
+    << other.ToString(&this->context->theDefaultPolyFormat);
+    out << " and the result is:\n" << this->ToString();
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4390,7 +4390,7 @@ void RationalFunction::operator*=(const RationalFunction& other)
 //  tempde_Bugger.ComputeDebugString();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
+    out << "Multiplying " << this->ToString() << " by " << other.ToString();
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4413,8 +4413,8 @@ void RationalFunction::operator*=(const RationalFunction& other)
   this->SimplifyLeadingCoefficientOnly();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ElementToString() << " by " << other.ElementToString();
-    out << " and the result is:\n" << this->ElementToString();
+    out << "Multiplying " << this->ToString() << " by " << other.ToString();
+    out << " and the result is:\n" << this->ToString();
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4450,7 +4450,7 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
   output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
-std::string SemisimpleSubalgebras::ElementToString()
+std::string SemisimpleSubalgebras::ToString()
 { std::stringstream out; std::string tempS;
   this->theHcandidates.ElementToStringGeneric(tempS);
   out << tempS;
@@ -4588,7 +4588,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
     tempElt.operator=(Accum);
     tempElt.SetNumVariables(numVars);
     candidateElements.AddOnTop(tempElt);
-//    out << "<br>" << Accum.ElementToString(true);
+//    out << "<br>" << Accum.ToString(true);
     for (int j=0; j<theGenerators.size; j++)
     { tempElt2.operator=(theGenerators.TheObjects[j]);
       tempElt2.SetNumVariables(numVars);
@@ -4600,9 +4600,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators.TheObjects[j].ElementToString(&theGlobalVariables.theDefaultLieFormat) << "," << Accum.ElementToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
+      out << "[" << theGenerators.TheObjects[j].ToString(&theGlobalVariables.theDefaultLieFormat) << "," << Accum.ToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ElementToString(&theGlobalVariables.theDefaultLieFormat);
+      out << currentOutput.ToString(&theGlobalVariables.theDefaultLieFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -4615,17 +4615,17 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis.TheObjects[i].ElementToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
+    out << theMonBasis.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
     for (int i=0; i<candidateElements.size; i++)
     { Vector<Polynomial<Rational> >& currentRoot=theBasisRootForm.TheObjects[k+i*theGenerators.size];
-      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ElementToString();
+      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ToString();
       for (int j=0; j<currentRoot.size; j++)
         theSystem.elements[currentRoot.size*k+j][i]=currentRoot.TheObjects[j];
     }
-  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ElementToString(false, true) << "</div>";
+  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ToString(false, true) << "</div>";
   List<List<RationalFunction> > theEigenVectors;
   Polynomial<Rational> ::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
@@ -4641,7 +4641,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   { List<RationalFunction>& currentEigen=theEigenVectors.TheObjects[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ElementToString(&theGlobalVariables.theDefaultLieFormat);
+    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultLieFormat);
   }
 }
 
@@ -4681,8 +4681,8 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   List<ElementUniversalEnveloping<Polynomial<Rational> > > generatorsBeingActedOn;
   generatorsBeingActedOn.SetSize(numGenerators);
   theVP.PartitioningRoots.operator=(this->theWeyl.RootsOfBorel);
-  out << "<br>" << theWeight.ElementToString() << "<br> the H's: " << theHs.ElementToString();
-  out << "<br> Partitioning Vectors<Rational>: " << theVP.PartitioningRoots.ElementToString();
+  out << "<br>" << theWeight.ToString() << "<br> the H's: " << theHs.ToString();
+  out << "<br> Partitioning Vectors<Rational>: " << theVP.PartitioningRoots.ToString();
   Polynomial<Rational>  polyZeroZeroVars;
   polyZeroZeroVars.MakeZero(0);
   for (int i=0; i<numGenerators; i++)
@@ -4691,7 +4691,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   }
   theVP.theRoot=theWeight;
   theVP.ComputeAllPartitions();
-  out << "<br><br>" << theVP.ElementToString(true);
+  out << "<br><br>" << theVP.ToString(true);
   Vector<Rational> accumulatedHweight, tempRoot;
   for (int i=0; i<theVP.thePartitions.size; i++)
   { List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
@@ -4723,7 +4723,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
         break;
     }
     if (isGood)
-    { out << "<br>" << accumulatedHweight.ElementToString();
+    { out << "<br>" << accumulatedHweight.ToString();
       out << " is good";
     } else
     { theVP.thePartitions.PopIndexSwapWithLast(i);
@@ -4746,7 +4746,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
     tempElt.operator=(Accum);
     tempElt.SetNumVariables(numVars);
     candidateElements.AddOnTop(tempElt);
-//    out << "<br>" << Accum.ElementToString(true);
+//    out << "<br>" << Accum.ToString(true);
     for (int j=0; j<theGenerators.size; j++)
     { tempElt2.operator=(theGenerators.TheObjects[j]);
       tempElt2.SetNumVariables(numVars);
@@ -4758,10 +4758,10 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators[j].ElementToString(&theGlobalVariables.theDefaultLieFormat) << ","
-      << Accum.ElementToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
+      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultLieFormat) << ","
+      << Accum.ToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ElementToString(&theGlobalVariables.theDefaultLieFormat);
+      out << currentOutput.ToString(&theGlobalVariables.theDefaultLieFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -4773,17 +4773,17 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis[i].ElementToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
+    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
     for (int i=0; i<candidateElements.size; i++)
     { Vector<Polynomial<Rational> >& currentRoot=theBasisRootForm[k+i*theGenerators.size];
-      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ElementToString();
+      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ToString();
       for (int j=0; j<currentRoot.size; j++)
         theSystem.elements[currentRoot.size*k+j][i]=currentRoot[j];
     }
-  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ElementToString(false, true) << "</div>";
+  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ToString(false, true) << "</div>";
   List<List<RationalFunction> > theEigenVectors;
   Polynomial<Rational> ::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
@@ -4797,7 +4797,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   { List<RationalFunction>& currentEigen=theEigenVectors[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ElementToString(&theGlobalVariables.theDefaultLieFormat);
+    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultLieFormat);
   }
 }
 
@@ -4843,12 +4843,12 @@ void SemisimpleLieAlgebraOrdered::init
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
       this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis.TheObjects[j];
-//    std::cout << "<br> " << currentElt.ElementToString() << " in new coords becomes: " << coordsInCurrentBasis.ElementToString();
+//    std::cout << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();
   }
-//  std::cout << this->ChevalleyGeneratorsInCurrentCoords.ElementToString(true, false) << "<br><br>";
+//  std::cout << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false) << "<br><br>";
 
  // this->ChevalleyGeneratorsInCurrentCoords.Invert(theGlobalVariables);
-  //std::cout << this->ChevalleyGeneratorsInCurrentCoords.ElementToString(true, false);
+  //std::cout << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false);
 }
 
 void SemisimpleLieAlgebraOrdered::initDefaultOrder
@@ -5062,12 +5062,12 @@ std::string ParserNode::ElementToStringValueOnlY
   int i; //can't declare variables within a switch clause!
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: LatexOutput << this->intValue; break;
-    case ParserNode::typeRational: LatexOutput << this->rationalValue.ElementToString(); break;
-    case ParserNode::typePoly: LatexOutput << "\\begin{array}{rcl}&&\n" << this->polyValue.GetElement().ElementToString(&theFormat) << "\n\\end{array}"; break;
-    case ParserNode::typeRationalFunction: LatexOutput << "\\begin{array}{rcl}&&\n" << this->ratFunction.GetElement().ElementToString(&theFormat) << "\n\\end{array}"; break;
+    case ParserNode::typeRational: LatexOutput << this->rationalValue.ToString(); break;
+    case ParserNode::typePoly: LatexOutput << "\\begin{array}{rcl}&&\n" << this->polyValue.GetElement().ToString(&theFormat) << "\n\\end{array}"; break;
+    case ParserNode::typeRationalFunction: LatexOutput << "\\begin{array}{rcl}&&\n" << this->ratFunction.GetElement().ToString(&theFormat) << "\n\\end{array}"; break;
     case ParserNode::typeUEElementOrdered:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->UEElementOrdered.GetElement().ElementToString
+      << this->UEElementOrdered.GetElement().ToString
       (true, theFormat.flagUseCalculatorFormatForUEOrdered, theFormat, theGlobalVariables)
       << "\n\\end{array}";
       break;
@@ -5075,25 +5075,25 @@ std::string ParserNode::ElementToStringValueOnlY
       break;
     case ParserNode::typeUEelement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->UEElement.GetElement().ElementToString(&theFormat)
+      << this->UEElement.GetElement().ToString(&theFormat)
       << "\n\\end{array}";
       break;
     case ParserNode::typeWeylAlgebraElement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->WeylAlgebraElement.GetElement().ElementToString(true)
+      << this->WeylAlgebraElement.GetElement().ToString(true)
       << "\n\\end{array}";
       break;
     case ParserNode::typeCharSSFDMod:
     //  LatexOutput << "\\begin{array}{rcl}&&\n"
-//      << this->theChar.GetElement().ElementToString("char", "", true)
+//      << this->theChar.GetElement().ToString("char", "", true)
   //    << "\\end{array}";
       break;
     case ParserNode::typeGenVermaElt:
-      LatexOutput << this->theGenVermaElt.GetElement().ElementToString(&theFormat);
+      LatexOutput << this->theGenVermaElt.GetElement().ToString(&theFormat);
       break;
-    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ElementToString(theGlobalVariables, theFormat); break;
-    case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ElementToString(true, false); break;
-//    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ElementToString(false, false, true, false, theFormat); break;
+    case ParserNode::typePartialFractions: LatexOutput << this->thePFs.GetElement().ToString(theGlobalVariables, theFormat); break;
+    case ParserNode::typeLattice: LatexOutput << this->theLattice.GetElement().ToString(true, false); break;
+//    case ParserNode::typeCone: LatexOutput << this->theCone.GetElement().ToString(false, false, true, false, theFormat); break;
     case ParserNode::typeArray:
       LatexOutput << "(";
       RecursionDepth++;
@@ -5124,7 +5124,7 @@ std::string ParserNode::ElementToStringValueAndType
     case ParserNode::typeUEElementOrdered: out << "an element of U(g) ordered:"; break;
     case ParserNode::typeUEelement: out << " an element of U(g) of value: "; break;
     case ParserNode::typeWeylAlgebraElement: out << " a Weyl algebra element: "; break;
-    case ParserNode::typeLittelman: out << "a Littelmann path: " << this->theLittelmann.GetElement().ElementToString(); break;
+    case ParserNode::typeLittelman: out << "a Littelmann path: " << this->theLittelmann.GetElement().ToString(); break;
     case ParserNode::typeArray: out << " an array of " << this->children.size << " elements. "; break;
     case ParserNode::typeString: out << "<br>A printout of value: "; break;
     case ParserNode::typeCharSSFDMod: out << "Character of a finite dimensional representation of the ambient"
@@ -5252,7 +5252,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
       if (found)
         report << ",";
       found=true;
-      report << tempP.ElementToString(&theGlobalVariables.theDefaultPolyFormat) << " \\mapsto " << tempP.ElementToString(&theGlobalVariables.theDefaultPolyFormat);
+      report << tempP.ToString(&theGlobalVariables.theDefaultPolyFormat) << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultPolyFormat);
       if (i<NumVarsDoubled/2)
         numImpliedXsubs++;
       else
@@ -5273,10 +5273,10 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
       theSub[i]+=tempP;
     }
   }
-  out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ElementToString();
+  out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ToString();
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
   if (lastNode.ExpressionType==this->typePoly)
-    out << lastNode.polyValue.GetElement().ElementToString(&theGlobalVariables.theDefaultPolyFormat) << ")";
+    out << lastNode.polyValue.GetElement().ToString(&theGlobalVariables.theDefaultPolyFormat) << ")";
   else
     out << " ... )";
   if (found)
@@ -5298,7 +5298,7 @@ void ParserNode::TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<
   for (int i=0; i<theSub.size; i++)
     theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
   int minNumberVarsAfterSub=theSub.GetHighestIndexSuchThatHigherIndexVarsDontParticipate()+1;
-//      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ElementToString() << "<br>";
+//      std::cout << "minNumberVarsAfterSub: " << minNumberVarsAfterSub << "  " << theSub.ToString() << "<br>";
   for (int i=0; i<theDimension; i++)
     theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(minNumberVarsAfterSub);
   this->impliedNumVars=minNumberVarsAfterSub;
@@ -5318,11 +5318,11 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
     case ParserNode::typeIntegerOrIndex:
     case ParserNode::typeRational:
     case ParserNode::typePoly:
- //     std::cout << "<br> ... and the sub is: " << theSub.ElementToString();
+ //     std::cout << "<br> ... and the sub is: " << theSub.ToString();
       theSub.SetSize(theDimension);
       for (int i=0; i<theDimension; i++)
         theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
-   //   std::cout << "<br> ... and the sub is: " << theSub.ElementToString();
+   //   std::cout << "<br> ... and the sub is: " << theSub.ToString();
       this->polyValue.GetElement().Substitution(theSub, theDimension, ratOne);
       this->ExpressionType=this->typePoly;
       return this->errorNoError;
@@ -5349,7 +5349,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
       this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, theDimension);
       if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
-      this->outputString=this->theLattice.GetElement().ElementToString(true, false);
+      this->outputString=this->theLattice.GetElement().ToString(true, false);
       return this->errorNoError;
     case ParserNode::typeQuasiPolynomial:
       if(theDimension!=this->theQP.GetElement().GetNumVars())
@@ -5358,7 +5358,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
       tempQP=this->theQP.GetElement();
       if (!tempQP.SubstitutionLessVariables(theSub, this->theQP.GetElement(), theGlobalVariables))
         return this->SetError(this->errorImplicitRequirementNotSatisfied);
-      this->outputString=this->theQP.GetElement().ElementToString(true, false);
+      this->outputString=this->theQP.GetElement().ToString(true, false);
       return this->errorNoError;
     default:
       return this->SetError(this->errorDunnoHowToDoOperation);
@@ -5556,7 +5556,7 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
 void ElementWeylAlgebra::SubstitutionTreatPartialsAndVarsAsIndependent
 (PolynomialSubstitution<Rational>& theSub)
 { assert(theSub.size==this->NumVariables*2);
-//  std::cout << "<br>...and the sub is: " << theSub.ElementToString();
+//  std::cout << "<br>...and the sub is: " << theSub.ToString();
   this->StandardOrder.Substitution(theSub, this->NumVariables*2, (Rational) 1);
 }
 
@@ -5643,11 +5643,11 @@ bool RationalFunction::gcdQuicK
       output.MakeConst(left.NumVars, (Rational) 1);
   } else
   { //std::string tempS1, tempS2, tempS3, tempS4;
-//    tempS1=left.ElementToString(theGlobalVariables.theDefaultPolyFormat);
-//    tempS2=right.ElementToString(theGlobalVariables.theDefaultPolyFormat);
+//    tempS1=left.ToString(theGlobalVariables.theDefaultPolyFormat);
+//    tempS2=right.ToString(theGlobalVariables.theDefaultPolyFormat);
     right.DivideBy(left, quotient, remainder);
-//    tempS3=quotient.ElementToString();
-//    tempS4=remainder.ElementToString();
+//    tempS3=quotient.ToString();
+//    tempS4=remainder.ToString();
     if (remainder.IsEqualToZero())
       output=left;
     else
@@ -5863,7 +5863,7 @@ std::string slTwoInSlN::ElementMatrixToTensorString(const Matrix<Rational> & inp
   for (int i=0; i<input.NumRows; i++)
     for(int j=0; j<input.NumCols; j++)
       if (!input.elements[i][j].IsEqualToZero())
-      { tempS=input.elements[i][j].ElementToString();
+      { tempS=input.elements[i][j].ToString();
         if (tempS=="-1")
           tempS="-";
         if (tempS=="1")
@@ -5898,9 +5898,9 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector
   Rational theCoeff, tempRat;
   int largestPowerNotKillingInput;
   while(!remainder.IsEqualToZero() )
-  { //std::cout << "<br>remainder:<div class=\"math\">" << remainder.ElementToString(false, true) << "</div>";
+  { //std::cout << "<br>remainder:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
     this->ClimbUpFromVector(remainder, highestWeightVector, largestPowerNotKillingInput);
-    //std::cout << "<br>highest weight vector:<div class=\"math\">" << highestWeightVector.ElementToString(false, true) << "</div>";
+    //std::cout << "<br>highest weight vector:<div class=\"math\">" << highestWeightVector.ToString(false, true) << "</div>";
     this->ClimbDownFromHighestWeightAlongSl2String(highestWeightVector, component, theCoeff, largestPowerNotKillingInput);
     for (int i=0; i<this->theProjectors.size; i++)
     { Matrix<Rational> & currentProjector=this->theProjectors.TheObjects[i];
@@ -5915,13 +5915,13 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector
     //assert(!theCoeff.IsEqualToZero());
     component/=(theCoeff);
     outputDecompositionOfInput.AddOnTop(component);
-    //std::cout << "<br>component:<div class=\"math\">" << component.ElementToString(false, true) << "</div><br><br><br><br>";
+    //std::cout << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
     remainder.Subtract(component);
   }
   //remainder.NullifyAll();
 //  for (int i=0; i<outputVectors.size; i++)
 //    remainder.Add(outputVectors.TheObjects[i]);
-//  std::cout << "<br>sum of all components:<div class=\"math\">" << remainder.ElementToString(false, true) << "</div>";
+//  std::cout << "<br>sum of all components:<div class=\"math\">" << remainder.ToString(false, true) << "</div>";
 
 }
 
@@ -6041,7 +6041,7 @@ std::string slTwoInSlN::initFromModuleDecomposition
     << endMath << ", highest weight of ";
     out << beginMath << this->ElementModuleIndexToString(i, useHtml) << endMath;
    //for (int j=1; j<this->theGmodKModules.TheObjects[i].size; j++)
-   //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ElementToString(false, true) << "</div>";
+   //   out << "<br><div class=\"math\">" << this->theGmodKModules.TheObjects[i].TheObjects[j].ToString(false, true) << "</div>";
    // out << "<br><br><br>";
   }
   if (computePairingTable)
@@ -6091,8 +6091,8 @@ std::string slTwoInSlN::PairTwoIndices
         for (int k=0; k<HighestWeightsContainingModules.size; k++)
         { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k])==-1)
-            std::cout << newLine << beginMath << "[" << leftElt.ElementToString(false, true) << ", "
-            << rightElt.ElementToString(false, true) << "]=" << tempMat.ElementToString(false, true) << endMath;
+            std::cout << newLine << beginMath << "[" << leftElt.ToString(false, true) << ", "
+            << rightElt.ToString(false, true) << "]=" << tempMat.ToString(false, true) << endMath;
         }
       }
     }
@@ -6205,7 +6205,7 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
       case ParserNode::typeLattice:
         this->theLattice.GetElement()=this->owner->TheObjects[this->children.TheObjects[0]].theLattice.GetElement();
         this->theLattice.GetElement().IntersectWith(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
-        this->outputString=this->theLattice.GetElement().ElementToString();
+        this->outputString=this->theLattice.GetElement().ToString();
         return this->errorNoError;
       default: return this->SetError(this->errorMultiplicationByNonAllowedTypes);
     }
@@ -6243,10 +6243,10 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       case ParserNode::typeLattice:
         this->theLattice.GetElement()=currentChild.theLattice.GetElement();
         this->theLattice.GetElement().RefineByOtherLattice(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
-        this->outputString=this->theLattice.GetElement().ElementToString();
+        this->outputString=this->theLattice.GetElement().ToString();
         return this->errorNoError;
       case ParserNode::typeQuasiPolynomial: this->theQP.GetElement()+=currentChild.theQP.GetElement();
-        this->outputString=this->theQP.GetElement().ElementToString(true, false);
+        this->outputString=this->theQP.GetElement().ToString(true, false);
         break;
       case ParserNode::typeAnimation:
         this->theAnimation.GetElement()+=currentChild.theAnimation.GetElement();
@@ -6490,7 +6490,7 @@ void MathRoutines::NChooseK(int n, int k, LargeInt& result)
   }
 }
 
-std::string MonomialP::ElementToString(FormatExpressions* theFormat)const
+std::string MonomialP::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   MemorySaving<FormatExpressions> tempFormat;
   if (theFormat==0)

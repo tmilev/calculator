@@ -440,7 +440,7 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   outputSubgroup.AmbientWeyl=(this->AmbientWeyl);
   theRootSA.GenerateIsomorphismsPreservingBorel(theRootSA, theGlobalVariables, &outputSubgroup, true);
   //std::string tempS;
-  //theSubgroup.ElementToString(tempS);
+  //theSubgroup.ToString(tempS);
   //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
   //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
@@ -541,7 +541,7 @@ void rootSubalgebra::ComputeRootsOfK()
 }
 
 void rootSubalgebra::ComputeDebugString(GlobalVariables& theGlobalVariables)
-{ this->ElementToString(this->DebugString, theGlobalVariables);
+{ this->ToString(this->DebugString, theGlobalVariables);
 }
 
 int rootSubalgebra::ProblemCounter2=0;
@@ -694,7 +694,7 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   out << ".html";
   MyPath=out.str();
   CGI::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
-  this->ElementToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
+  this->ToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
   << " Vector<Rational> subalgebra of type " << this->theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
@@ -735,7 +735,7 @@ void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std:
   }
 }
 
-void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
   std::string tempS;
   std::string latexFooter, latexHeader;
@@ -763,7 +763,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     if (useHtml)
       out << "<br> <a href=\"./rootHtml.html\">Back to Vector<Rational> subsystem table </a> ";
   }
-  tempS=this->SimpleBasisK.ElementToString(useLatex, useHtml, false);
+  tempS=this->SimpleBasisK.ToString(useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\n";
   if (useLatex)
@@ -800,7 +800,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     out << "<br>\n simple basis centralizer: ";
   if (useLatex)
     out << "; simple basis centralizer: ";
-  tempS=this->SimpleBasisCentralizerRoots.ElementToString(true, true, false);
+  tempS=this->SimpleBasisCentralizerRoots.ToString(true, true, false);
   out << tempS;
   if (sl2s!=0)
   { if (useHtml)
@@ -815,7 +815,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       slTwo& theSl2 = sl2s->TheObjects[theSl2index];
       if (useHtml)
         out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
-      out << theSl2.hCharacteristic.ElementToString() << ", ";
+      out << theSl2.hCharacteristic.ToString() << ", ";
       if (useHtml)
         out << "</a>";
       bool isS_subalgebra=true;
@@ -834,7 +834,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out << "\n<br>\n";
     out << "\nS-sl(2) subalgebras in k (total " << hCharacteristics_S_subalgebras.size << "): ";
     for (int i=0; i<hCharacteristics_S_subalgebras.size; i++)
-      out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ElementToString() << ", ";
+      out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ToString() << ", ";
   }
   if (useHtml)
   { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
@@ -876,7 +876,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
   out << latexHeader;
   this->kModulesgEpsCoords.SetSize(this->kModules.size);
   for (int i=0; i<this->kModules.size; i++)
-  { tempS=this->LowestWeightsGmodK[i].ElementToString();
+  { tempS=this->LowestWeightsGmodK[i].ToString();
     if (useHtml)
       out << "\n<tr><td>";
     if (useLatex)
@@ -892,7 +892,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
     if (useLatex)
       out << " & ";
     out << tempS;
-    tempS=this->HighestWeightsGmodK[i].ElementToString();
+    tempS=this->HighestWeightsGmodK[i].ToString();
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
@@ -902,7 +902,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out << "</td><td>";
     if (useLatex)
       out << " & \n";
-    out << this->kModules[i].ElementToString(useLatex, useHtml, true);
+    out << this->kModules[i].ToString(useLatex, useHtml, true);
     if (useHtml)
       out << "</td><td>";
     if (i>=this->kModulesgEpsCoords.size)
@@ -949,7 +949,7 @@ void rootSubalgebra::ElementToString(std::string& output, SltwoSubalgebras* sl2s
       out << "\n\n Pairing table:\n\n";
     if (useLatex)
       out << "\n\n\\noindent Pairing table:\n\n\\noindent";
-    this->theMultTable.ElementToString(tempS, useLatex, useHtml, *this);
+    this->theMultTable.ToString(tempS, useLatex, useHtml, *this);
     out << tempS << "\n";
   }
   output=out.str();
@@ -1052,7 +1052,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
 (const Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
 { this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.Reserve(simpleBasisInput.size);
-  std::string tempS= simpleBasisInput.ElementToString();
+  std::string tempS= simpleBasisInput.ToString();
   //if (tempS=="Num Vectors<Rational>: 2\n(1, 0, 0), (0, 1, 1)")
   //  tempS="!!";
   for (int i=0; i<simpleBasisInput.size; i++)
@@ -1367,13 +1367,13 @@ bool rootSubalgebra::LinCombToString(Vector<Rational>& alphaRoot, int coeff, Vec
   if (coeff==1)
     return false;
   std::stringstream out;
-  std::string tempS=alphaRoot.ElementToString();
+  std::string tempS=alphaRoot.ToString();
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension+1;
   for (int i=0; i<theDimension; i++)
   {  //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
-    tempS=linComb[i].ElementToString();
+    tempS=linComb[i].ToString();
     if (tempS!="0")
     { if (tempS=="-1")
         tempS="-";
@@ -1394,13 +1394,13 @@ bool rootSubalgebra::LinCombToStringDistinguishedIndex(int distinguished, Vector
   if (coeff==1)
     return false;
   std::stringstream out;
-  std::string tempS=alphaRoot.ElementToString();
+  std::string tempS=alphaRoot.ToString();
   out << "(" << tempS << ")&$";
   out << coeff << "\\alpha_" << theDimension+1;
   for (int i=0; i<theDimension; i++)
   { //if (linComb.coordinates[i].IsEqualToZero())
     //  return false;
-    tempS=linComb.TheObjects[i].ElementToString();
+    tempS=linComb.TheObjects[i].ToString();
     if (tempS!="0")
     { if (tempS=="-1")
         tempS="-";
@@ -1575,11 +1575,11 @@ void affineHyperplane::MakeFromNormalAndPoint(Vector<Rational>& inputPoint, Vect
   this->normal=(inputNormal);
 }
 
-void affineHyperplane::ElementToString(std::string& output)
+void affineHyperplane::ToString(std::string& output)
 { std::stringstream out;
-  std::string tempS=this->affinePoint.ElementToString();
+  std::string tempS=this->affinePoint.ToString();
   out << "point: " << tempS;
-  tempS=this->normal.ElementToString();
+  tempS=this->normal.ToString();
   out << " normal: " << tempS;
   output= out.str();
 }
@@ -1593,21 +1593,21 @@ unsigned int affineHyperplane::HashFunction() const
   return this->normal.HashFunction()+ tempRat.HashFunction();
 }
 
-void affineHyperplanes::ElementToString(std::string& output)
+void affineHyperplanes::ToString(std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
   { std::string tempS;
-    this->TheObjects[i].ElementToString(tempS);
+    this->TheObjects[i].ToString(tempS);
     out << "index: " << i << " " << tempS << "\n";
   }
   output= out.str();
 }
 
-void multTableKmods::ElementToString(std::string& output, rootSubalgebra& owner)
-{ this->ElementToString(output, false, false, owner);
+void multTableKmods::ToString(std::string& output, rootSubalgebra& owner)
+{ this->ToString(output, false, false, owner);
 }
 
-void multTableKmods::ElementToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner)
+void multTableKmods::ToString(std::string& output, bool useLaTeX, bool useHtml, rootSubalgebra& owner)
 {  std::stringstream out;
   out << "\t";
   if (!(useLaTeX||useHtml))
@@ -1718,7 +1718,7 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<theRoots.size; i++)
-  { tempS=coeffs.TheObjects[i].ElementToString();
+  { tempS=coeffs.TheObjects[i].ToString();
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -1726,7 +1726,7 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
     assert(!(tempS=="0"));
     out<< tempS;
     if (!EpsilonForm)
-      tempS=theRoots[i].ElementToString();
+      tempS=theRoots[i].ToString();
     else
       tempS=theRoots[i].ElementToStringEpsilonForm(true, false);
     out << "(" << tempS << ")";
@@ -1747,7 +1747,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
     out << "}";
   }
   for (int i=0; i<theRoots.size; i++)
-  { tempS=coeffs.TheObjects[i].ElementToString();
+  { tempS=coeffs.TheObjects[i].ToString();
     if (tempS=="1")
       tempS="";
     if (tempS=="-1")
@@ -1755,7 +1755,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
     assert(!(tempS=="0"));
     out << tempS;
     if (!useLatex)
-    { tempS=theRoots.TheObjects[i].ElementToString();
+    { tempS=theRoots.TheObjects[i].ToString();
       out << "(" << tempS << ")";
       if (i!=theRoots.size-1)
         out << " + ";
@@ -1798,7 +1798,7 @@ void coneRelation::RelationOneSideToString(std::string& output, const std::strin
   output=out.str();
 }
 
-int coneRelation::ElementToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts)
+int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool useLatex, bool includeScalarsProductsEachSide, bool includeMixedScalarProducts)
 { std::string tempS;
   std::stringstream out;
   assert(this->AlphaCoeffs.size==this->Alphas.size);
@@ -1848,7 +1848,7 @@ int coneRelation::RootsToScalarProductString(Vectors<Rational>& inputLeft, Vecto
       if ( i<j || letterTypeLeft!=letterTypeRight)
       { owner.AmbientWeyl.RootScalarCartanRoot(inputLeft.TheObjects[i], inputRight.TheObjects[j], tempRat);
         if (!tempRat.IsEqualToZero())
-        { tempS=tempRat.ElementToString();
+        { tempS=tempRat.ToString();
           out << "$\\langle" << letterTypeLeft << "_" << i+1 << ", " << letterTypeRight << "_" << j+1 << "\\rangle=" << tempS << "$, ";
           numLinesLatex++;
         }
@@ -2237,7 +2237,7 @@ void rootSubalgebras::ElementToHtml(std::string& header, std::string& pathPhysic
     this->TheObjects[i].ElementToHtml(i, childrenPathPhysical, Sl2s, theGlobalVariables);
 }
 
-void rootSubalgebras::ElementToString
+void rootSubalgebras::ToString
 (std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords,
  std::string* htmlPathPhysical, std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out; std::string tempS;
@@ -2251,7 +2251,7 @@ void rootSubalgebras::ElementToString
   //this->ElementToStringCentralizerIsomorphisms(tempS, useLatex, useHtml, theGlobalVariables);
   //out << tempS;
 /*  for (int i=0; i<this->size; i++)
-  {  this->TheObjects[i].ElementToString(tempS, sl2s, i, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
+  {  this->TheObjects[i].ToString(tempS, sl2s, i, useLatex, useHtml, includeKEpsCoords, theGlobalVariables);
     out << tempS <<"\n\n";
   }*/
   output= out.str();
@@ -2400,7 +2400,7 @@ void coneRelations::GetLatexHeaderAndFooter(std::string& outputHeader, std::stri
   outputFooter.append("\\end{tabular}");
 }
 
-void coneRelations::ElementToString
+void coneRelations::ToString
 (std::string& output, rootSubalgebras& owners, bool useLatex, bool useHtml, std::string* htmlPathPhysical,
  std::string* htmlPathServer, GlobalVariables& theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out;
@@ -2422,7 +2422,7 @@ void coneRelations::ElementToString
        //     <<"</tr>";
       //}
     }
-    lineCounter+=this->TheObjects[i].ElementToString(tempS, owners, useLatex, true, true);
+    lineCounter+=this->TheObjects[i].ToString(tempS, owners, useLatex, true, true);
     out << tempS;
     if (useLatex)
       out << "\\\\";
@@ -2452,7 +2452,7 @@ void coneRelations::ElementToString
   if (useLatex)
     out << footer;
   if (this->flagIncludeSubalgebraDataInDebugString)
-  { owners.ElementToString
+  { owners.ToString
     (tempS, 0, useLatex, useHtml, false, htmlPathPhysical, htmlPathServer, theGlobalVariables, DisplayNameCalculator);
     out << "\n\n\\newpage" << tempS;
   }
@@ -2558,8 +2558,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
   HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=oldBufferSize;
   ANNOYINGSTATISTICS;
 
-//  std::cout << this->ChevalleyConstants.ElementToString(true, false);
-//  std::cout << this->ElementToString(theGlobalVariables);
+//  std::cout << this->ChevalleyConstants.ToString(true, false);
+//  std::cout << this->ToString(theGlobalVariables);
 //  std::cout.flush();
 //  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
 //    for (int j=0; j<this->t
@@ -2751,12 +2751,12 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
         if (!temp.IsEqualToZero())
         { std::cout << "This is a programming error. The computed structure constants are wrong: "
           << " the Jacobi identity fails. More precisely, I get that "
-          << "<br>[" << g1.ElementToString(&theFormat) << ", " << g2.ElementToString(&theFormat) << "]=" << g12.ElementToString(&theFormat)
-          << "<br>[" << g2.ElementToString(&theFormat) << ", " << g3.ElementToString(&theFormat) << "]=" << g23.ElementToString(&theFormat)
-          << "<br>[" << g3.ElementToString(&theFormat) << ", " << g1.ElementToString(&theFormat) << "]=" << g31.ElementToString(&theFormat)
-          << "<br>g123= " << g123.ElementToString(&theFormat) << "<br>g231="
-          << g231.ElementToString(&theFormat)
-          << "<br>g312=" << g312.ElementToString(&theFormat) << "<br>"
+          << "<br>[" << g1.ToString(&theFormat) << ", " << g2.ToString(&theFormat) << "]=" << g12.ToString(&theFormat)
+          << "<br>[" << g2.ToString(&theFormat) << ", " << g3.ToString(&theFormat) << "]=" << g23.ToString(&theFormat)
+          << "<br>[" << g3.ToString(&theFormat) << ", " << g1.ToString(&theFormat) << "]=" << g31.ToString(&theFormat)
+          << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231="
+          << g231.ToString(&theFormat)
+          << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
           << " Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
           << " line " << __LINE__ << ". ";
           assert(false);

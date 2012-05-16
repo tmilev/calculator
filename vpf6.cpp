@@ -191,12 +191,14 @@ template <>
 bool Data::ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >()
 { int theAlgebraIndex=this->GetIndexAmbientSSLieAlgebra();
   if (theAlgebraIndex==-1)
+  { std::cout << "theAlgebraIndex equals -1 for data " << this->ToString();
     return false;
+  }
   int numVars=this->GetNumContextVars();
   RationalFunction RFOne;
   RFOne.MakeOne(numVars, this->owner->theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunction> conversionBuffer;
-//  std::cout << "<hr><hr>attempting to convert: " << this->ElementToString();
+//  std::cout << "<hr><hr>attempting to convert: " << this->ToString();
   switch (this->type)
   { case Data::typeRational:
       RFOne*=this->GetValuE<Rational>();
@@ -256,10 +258,10 @@ bool Data::SetContextResizesContextArray
       return true;
     case Data::typeEltTensorGenVermasOverRF:
       tempETGV.GetElement()=this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
-//      std::cout << "<br>before the sub: " << tempETGV.GetElement().ElementToString();
-//      std::cout << "<br>ze sub is: " << polySub.ElementToString();
+//      std::cout << "<br>before the sub: " << tempETGV.GetElement().ToString();
+//      std::cout << "<br>ze sub is: " << polySub.ToString();
       tempETGV.GetElement().Substitution(polySub);
-//      std::cout << "<br>after the sub: " << tempETGV.GetElement().ElementToString();
+//      std::cout << "<br>after the sub: " << tempETGV.GetElement().ToString();
       this->MakeElementTensorGeneralizedVermas(*this->owner, tempETGV.GetElement(), candidateIndex);
       return true;
     default:
@@ -431,15 +433,17 @@ const Context& Data::GetContext()const
   return this->owner->theObjectContainer.theContexts[this->theContextIndex];
 }
 
-std::string Data::ElementToString(std::stringstream* comments, bool isFinal)const
+std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpressions* inputFormat)const
 { std::stringstream out;
   if (this->owner==0)
     return "(ProgrammingError:NoOwner)";
   FormatExpressions theFormat;
+  if (inputFormat!=0)
+    theFormat.flagUseLatex=inputFormat->flagUseLatex;
   if (this->theContextIndex!=-1)
   { theFormat.polyAlphabeT.SetSize(this->GetContext().VariableImages.size);
     for (int i=0; i<this->GetContext().VariableImages.size; i++)
-      theFormat.polyAlphabeT[i]=this->GetContext().VariableImages[i].ElementToString();
+      theFormat.polyAlphabeT[i]=this->GetContext().VariableImages[i].ToString();
   }
   switch(this->type)
   { case Data::typeSSalgebra:
@@ -448,7 +452,7 @@ std::string Data::ElementToString(std::stringstream* comments, bool isFinal)cons
 //      if (comments!=0)
 //        *comments << "Comments to data " << out.str() << ":<br>"
 //        << this->owner->theLieAlgebras[this->theRational.GetElementConst().NumShort].
-//        ElementToString(*this->owner->theGlobalVariableS);
+//        ToString(*this->owner->theGlobalVariableS);
       return out.str();
     case Data::typeString:
       if (isFinal)
@@ -456,19 +460,29 @@ std::string Data::ElementToString(std::stringstream* comments, bool isFinal)cons
       else
         return "(string not shown to avoid javascript problems)";
     case Data::typeElementUE:
-      out <<"UE{}{" << this->owner->theObjectContainer.theUEs[this->theIndex].ElementToString(&theFormat) << "}";
+      if (theFormat.flagUseLatex)
+        out << "\\begin{array}{rcl}&&";
+      out << "UE{}(" << this->owner->theObjectContainer.theUEs[this->theIndex].ToString(&theFormat) << ")";
+      if (theFormat.flagUseLatex)
+        out << "\\end{array}";
       return out.str();
     case Data::typeRationalFunction:
-      return this->GetValuE<RationalFunction>().ElementToString();
+      return this->GetValuE<RationalFunction>().ToString();
     case Data::typeRational:
-      return this->GetValuE<Rational>().ElementToString();
+      return this->GetValuE<Rational>().ToString();
     case Data::typePoly:
-      out << "Polynomial{}("
-      << this->owner->theObjectContainer.thePolys[this->theIndex].ElementToString(&theFormat) << ")";
+      if (theFormat.flagUseLatex)
+        out << "\\begin{array}{rcl}&& ";
+      out << "Polynomial{}(" << this->owner->theObjectContainer.thePolys[this->theIndex].ToString(&theFormat) << ")";
+      if (theFormat.flagUseLatex)
+        out << "\\end{array}";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
-      out << "EltTensor{}{" << this->owner->theObjectContainer.theTensorElts[this->theIndex].ElementToString(&theFormat)
-      << "}";
+      if (theFormat.flagUseLatex)
+        out << "\\begin{array}{rcl}&& ";
+      out << "EltTensor{}(" << this->owner->theObjectContainer.theTensorElts[this->theIndex].ToString(&theFormat) << ")";
+      if (theFormat.flagUseLatex)
+        out <<"\\end{array}";
       return out.str();
     case Data::typeError:
       out << "(Error)";
@@ -693,6 +707,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   tempUE.AssignElementLieAlgebra(tempElt, inputOwners, inputIndexInOwners, rfOne, rfZero);
   Context newContext(*this->owner);
   newContext.indexAmbientSSalgebra=inputIndexInOwners;
+  this->theContextIndex=inputOwner.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(newContext);
   this->owner=&inputOwner;
   this->type=this->typeElementUE;
   this->theIndex=inputOwner.theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(tempUE);
@@ -753,7 +768,7 @@ bool Data::OperatorDereference
       if (!argument1.IsSmallInteger(whichInteger1) ||!argument2.IsSmallInteger(whichInteger2) )
       { if (comments!=0)
         *comments << "You requested element of a semisimple Lie algebra labeled by ("
-        << argument1.ElementToString() << ", " << argument2.ElementToString()
+        << argument1.ToString() << ", " << argument2.ToString()
         << ")  which is not a pair of small integers. ";
         return false;
       }
@@ -772,7 +787,7 @@ bool Data::OperatorDereference(const Data& argument, Data& output, std::stringst
       if (!argument.IsSmallInteger(whichInteger))
       { if (comments!=0)
         *comments << "You requested element of a semisimple Lie algebra labeled by "
-        << argument.ElementToString() << " which is not a small integer. ";
+        << argument.ToString() << " which is not a small integer. ";
         return false;
       }
       output.theContextIndex=this->theContextIndex;
@@ -1049,11 +1064,11 @@ SyntacticElement CommandList::GetEmptySyntacticElement()
   return result;
 }
 
-std::string ExpressionPairs::ElementToString()
+std::string ExpressionPairs::ToString()
 { std::stringstream out;
   out << "the pairs: ";
   for (int i=0; i<this->BoundVariableIndices.size; i++)
-    out << this->BoundVariableIndices[i] << "->" << this->variableImages[i].ElementToString() << "<br>";
+    out << this->BoundVariableIndices[i] << "->" << this->variableImages[i].ToString() << "<br>";
   return out.str();
 }
 
@@ -1508,31 +1523,36 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 
 bool CommandList::fHWTAABF
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion theRecursionCounter(theCommands);
+{ IncrementRecursion theRecursionCounter(&theCommands);
   if (theExpression.children.size!=3)
+  { if (comments!=0)
+      *comments << "Error: this function expects 3 arguments. ";
     return false;
+  }
   Expression leftExpression=theExpression.children[0];
   Expression rightExpression=theExpression.children[1];
   Expression& weightExpression=theExpression.children[2];
   theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, leftExpression, comments);
   theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, rightExpression, comments);
   if (leftExpression.theOperation!=theCommands.opData() || rightExpression.theOperation!=theCommands.opData())
-  { std::cout << "<br>left: "<< leftExpression.ElementToString();
-    std::cout << "<br>right: "<< rightExpression.ElementToString();
+  { std::cout << "<br>left: "<< leftExpression.ToString();
+    std::cout << "<br>right: "<< rightExpression.ToString();
     return false;
   }
   Data leftD=leftExpression.GetData();
   Data rightD=rightExpression.GetData();
-  std::cout << "<br>starting left elt before merging: " << leftD.ElementToString();
-  std::cout << "<br>starting right elt before conversion: " << rightD.ElementToString();
+  std::cout << "<br>starting left elt before merging: " << leftD.ToString();
+  std::cout << "<br>starting right elt before conversion: " << rightD.ToString();
   if (!Data::MergeContexts(leftD, rightD))
+  { std::cout << "failed to merge contexts: " ;
     return false;
+  }
   if (!leftD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
     return false;
   if (!rightD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
     return false;
-  std::cout << "<br>Merge successful!<br>left elt after merging: " << leftD.ElementToString();
-  std::cout << "<br>right elt after merging: " << rightD.ElementToString();
+  std::cout << "<br>Merge successful!<br>left elt after merging: " << leftD.ToString();
+  std::cout << "<br>right elt after merging: " << rightD.ToString();
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[leftD.GetIndexAmbientSSLieAlgebra()];
   Vector<RationalFunction> weight;
   Context finalContext=leftD.GetContext();
@@ -1540,7 +1560,7 @@ bool CommandList::fHWTAABF
       (weight, finalContext, theSSalgebra.GetRank(), theCommands.fPolynomial, comments))
   { std::stringstream errorStream;
     errorStream << "Error: could not obtain highest weight from the third argument which is "
-    << weightExpression.ElementToString();
+    << weightExpression.ToString();
     theExpression.SetError(errorStream.str());
     return true;
   }
@@ -1552,11 +1572,11 @@ bool CommandList::fHWTAABF
   { std::cout << "This shouldn't happen!";
     return false;
   }
-  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ElementToString();
-  std::cout << "<br>starting right elt after conversion: " << rightD.ElementToString();
-  std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ElementToString();
-  std::cout << "<br>Left context: " << leftD.GetContext().ElementToString();
-  std::cout << "<br>Right context: " << rightD.GetContext().ElementToString();
+  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ToString();
+  std::cout << "<br>starting right elt after conversion: " << rightD.ToString();
+  std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ToString();
+  std::cout << "<br>Left context: " << leftD.GetContext().ToString();
+  std::cout << "<br>Right context: " << rightD.GetContext().ToString();
 
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(leftD.GetNumContextVars(), theCommands.theGlobalVariableS);
@@ -1567,14 +1587,14 @@ bool CommandList::fHWTAABF
   theSSalgebra.OrderSSalgebraForHWbfComputation();
   hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunction output;
-  std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ElementToString();
+  std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
   if(!leftD.GetUE().HWTAAbilinearForm(rightD.GetUE(), output, &hwDualCoords, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, comments))
   { theExpression.SetError("Error: couldn't compute Shapovalov form, see comments.");
     return true;
   }
   int newContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(finalContext);
   theExpression.MakeRF(output, newContextIndex, theCommands, inputIndexBoundVars);
-//  std::cout << " and the big bad result is " << output.ElementToString();
+//  std::cout << " and the big bad result is " << output.ToString();
 
   return true;
 }
@@ -1593,23 +1613,23 @@ bool CommandList::fHWV
   resultSSalgebraE=leftE;
   if (!CommandList::fSSAlgebra(theCommands, inputIndexBoundVars, resultSSalgebraE, comments))
   { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
     return false;
   }
   if  (resultSSalgebraE.errorString!="")
   { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
     return false;
   }
   if (resultSSalgebraE.theOperation!=theCommands.opData())
   { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
     return false;
   }
   Data& theSSdata=theCommands.theData[resultSSalgebraE.theData];
   if (theSSdata.type!=Data::typeSSalgebra)
   { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ElementToString();
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
     return false;
   }
   if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
@@ -1627,17 +1647,17 @@ bool CommandList::fHWV
       (highestWeightFundCoords, hwContext, theRank, &CommandList::fPolynomial, comments))
   { if(comments!=0)
       *comments << "Failed to convert the second argument of HWV to a list of " << theRank
-      << " polynomials. The second argument you gave is " << middleE.ElementToString() << ".";
+      << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return false;
   }
   if (!rightE.GetVector<Rational>(parabolicSel, emptyContext, theRank, 0, comments))
   { if(comments!=0)
       *comments << "Failed to convert the third argument of HWV to a list of " << theRank
-      << " rationals. The third argument you gave is " << rightE.ElementToString() << ".";
+      << " rationals. The third argument you gave is " << rightE.ToString() << ".";
     return false;
   }
-//  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ElementToString() << "<br>";
-//  std::cout << "<br>parabolic selection: " << parabolicSel.ElementToString();
+//  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
+//  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
   int theNumVars=hwContext.VariableImages.size;
   RationalFunction RFOne, RFZero;
@@ -1678,10 +1698,10 @@ bool CommandList::fHWV
   Data outputData;
   int outputContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(hwContext);
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
-//  std::cout << "<br>theElt:" << theElt.ElementToString();
+//  std::cout << "<br>theElt:" << theElt.ToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
   theExpression.MakeDatA(outputData, theCommands, inputIndexBoundVars);
-//  std::cout << "<hr>" << outputData.ElementToString();
+//  std::cout << "<hr>" << outputData.ToString();
   return true;
 }
 
@@ -1751,9 +1771,9 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   //{ theExpression.SetError("Couldn't extract  Plus_Minus_Times_Division subtree. See comments.");
     return false;
 //  }
-//  std::cout << outputUE.ElementToString();
+//  std::cout << outputUE.ToString();
 
-//  outputUE.Simplify(*theCommands.theGlobalVariableS,1, 0);
+  outputUE.Simplify(*theCommands.theGlobalVariableS,1, 0);
   int finalContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(finalContext);
   Data outputData;
   outputData.MakeUE(theCommands, outputUE, finalContextIndex);
@@ -1763,10 +1783,10 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
 
 bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(theCommands);
+{ IncrementRecursion recursionCounter(&theCommands);
   std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
-    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ElementToString() << " at file "
+    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ToString() << " at file "
     << __FILE__ << " line " <<  __LINE__ << ".";
   if (theExpression.children.size!=2)
   { errorStream << " The input of the function does not have two arguments";
@@ -1775,8 +1795,8 @@ bool CommandList::fSSAlgebra
   Expression& typeE=theExpression.children[0];
   Expression& rankE=theExpression.children[1];
   if (rankE.theOperation!=theCommands.opData() || typeE.theOperation!=theCommands.opVariableNonBound())
-  { errorStream << " The first node is " << typeE.ElementToString() << ". The second node is "
-    << rankE.ElementToString();
+  { errorStream << " The first node is " << typeE.ToString() << ". The second node is "
+    << rankE.ToString();
     return theExpression.SetError(errorStream.str());
   }
   int theRank=1;
@@ -1815,7 +1835,7 @@ bool CommandList::fSSAlgebra
     if (comments!=0)
       *comments << "Lie algebra of type " << tempData.GetAmbientSSAlgebra().GetLieAlgebraName()
       << " generated. The resulting Lie bracket pairing table is "
-      << tempData.GetAmbientSSAlgebra().ElementToString(&theCommands.theGlobalVariableS->theDefaultLieFormat);
+      << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultLieFormat);
   theExpression.theData=theCommands.theData.AddNoRepetitionOrReturnIndexFirst(tempData);
   theExpression.theOperation=theCommands.opData();
   theExpression.children.SetSize(0);
@@ -1823,7 +1843,7 @@ bool CommandList::fSSAlgebra
 }
 
 bool Expression::HasBoundVariables()
-{ IncrementRecursion recursionCounter(*this->theBoss);
+{ IncrementRecursion recursionCounter(this->theBoss);
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
   { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
     << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
@@ -1850,7 +1870,7 @@ bool CommandList::fIsInteger
 
 bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
   bool result=false;
@@ -2119,8 +2139,8 @@ bool CommandList::CollectSummands
   List<Rational> theCoeffs;
   Rational constTerm=0;
   bool foundConstTerm=false;
-//  std::cout << "<b>" << theExpression.ElementToString() << "</b>";
-//  if (theExpression.ElementToString()=="(4)*(a) b+(a) b")
+//  std::cout << "<b>" << theExpression.ToString() << "</b>";
+//  if (theExpression.ToString()=="(4)*(a) b+(a) b")
 //    std::cout << "problem!";
 //assert(false);
 //return false;
@@ -2163,11 +2183,11 @@ bool CommandList::CollectSummands
 /*
   std::cout << "<hr>summands: ";
   for (unsigned i=0; i< summands.size(); i++)
-    std::cout << summands[i].ElementToString() << ", ";
+    std::cout << summands[i].ToString() << ", ";
   std::cout << " const term: " << constTerm;
     std::cout << "<br>coeff->summand_no_coeff: ";
   for (int i=0; i< summandsNoCoeff.size(); i++)
-    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ElementToString() << ", ";
+    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ToString() << ", ";
   std::cout << " const term: " << constTerm;
 */
   if (!needSimplification)
@@ -2219,15 +2239,15 @@ bool CommandList::DoThePowerIfPossible
   Expression& rightE=theExpression.children[1];
   if (leftE.theOperation!=theCommands.opData())
     return false;
-//  std::cout << "Gonna apply the power to " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+//  std::cout << "Gonna apply the power to " << leftE.ToString() <<  " with strength " << rightE.ToString();
   if (leftE.IsElementUE())
     if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
     { if (comments!=0)
-        *comments << "<br>Failed to convert " << rightE.ElementToString() << ", the exponent of " << leftE.ElementToString()
+        *comments << "<br>Failed to convert " << rightE.ToString() << ", the exponent of " << leftE.ToString()
         << ", to type polynomial. ";
       return false;
     }
-//  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ElementToString() <<  " with strength " << rightE.ElementToString();
+//  std::cout << "<br>After eventual conversion I am using the power on " << leftE.ToString() <<  " with strength " << rightE.ToString();
   if (rightE.theOperation!=theCommands.opData())
     return false;
   const Data& LeftD=leftE.GetData();
@@ -2235,7 +2255,7 @@ bool CommandList::DoThePowerIfPossible
   Data outputD;
   if (!LeftD.Exponentiate(RightD, outputD))
     return false;
-//  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ElementToString();
+//  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
@@ -2252,19 +2272,19 @@ bool CommandList::DoMultiplyIfPossible
   const Data& LeftD=leftE.GetData();
   const Data& RightD=rightE.GetData();
   Data outputD;
-//  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ElementToString() << " and " << LeftD.ElementToString();
+//  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ToString() << " and " << LeftD.ToString();
   DataCruncher::CruncherDataTypes theCruncher= theCommands.GetMultiplicativeCruncher(LeftD.type, RightD.type);
   if (theCruncher==0)
     return false;
   if (!theCruncher(LeftD, RightD, outputD, comments))
     return false;
-//  std::cout << "<br> multiplication successful, result: " << outputD.ElementToString();
+//  std::cout << "<br> multiplication successful, result: " << outputD.ToString();
   theExpression.MakeDatA(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
 
 bool Data::Exponentiate(const Data& right, Data& output)const
-{ //std::cout << "<br>Attempting to apply the power " << right.ElementToString() << " on " << this->ElementToString();
+{ //std::cout << "<br>Attempting to apply the power " << right.ToString() << " on " << this->ToString();
   Rational resultRat;
   MemorySaving<Polynomial<Rational> > tempP;
 
@@ -2294,16 +2314,16 @@ bool Data::Exponentiate(const Data& right, Data& output)const
   if (!rightCopy.ConvertToTypE<RationalFunction>())
     return false;
 //  std::cout << "<br>so far, so good, said the falling guy around somewhere the second floor. "
-//  << " left: " << output.ElementToString() << " right: " << rightCopy.ElementToString();
+//  << " left: " << output.ToString() << " right: " << rightCopy.ToString();
   if (!this->GetUE().IsAPowerOfASingleGenerator())
     return false;
   ElementUniversalEnveloping<RationalFunction> result=output.GetUE();
-//  std::cout << "<br>before exponentiation next step: raising " << result.ElementToString() << " to power " << rightCopy.ElementToString() << " = " << rightCopy.theBuiltIn.ElementToString();
-//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals " << result.theBuiltIn[0].Powers[0].ElementToString();
+//  std::cout << "<br>before exponentiation next step: raising " << result.ToString() << " to power " << rightCopy.ToString() << " = " << rightCopy.theBuiltIn.ToString();
+//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals " << result.theBuiltIn[0].Powers[0].ToString();
   result[0].Powers[0]*=rightCopy.GetRF();
-//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals after multiplication to: " << result.theBuiltIn[0].Powers[0].ElementToString();
+//  std::cout << "<br>result.theBuiltIn[0].Powers[0] equals after multiplication to: " << result.theBuiltIn[0].Powers[0].ToString();
   output.MakeUE(*this->owner, result, output.theContextIndex);
-//  std::cout << "<br>the very final result of exponentiation: " << output.ElementToString();
+//  std::cout << "<br>the very final result of exponentiation: " << output.ToString();
   return true;
 }
 
@@ -2327,9 +2347,13 @@ bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::st
 { output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(output, rightCopy))
+  { std::cout << "failed to merge contexts!";
     return false;
+  }
   if (!rightCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
+  { std::cout << "failed to convert " << rightCopy.ToString();
     return false;
+  }
   ElementUniversalEnveloping<RationalFunction> result;
   result=output.GetUE();
   result+=rightCopy.GetUE();
@@ -2342,13 +2366,13 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
 { static bool theGhostHasAppeared=false;
   output=right;
   Data leftCopy=left;
-//  std::cout << "<br>before merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+//  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
     return false;
-//  std::cout << "<br>after merge left and right are: " << leftCopy.ElementToString() << " and " << output.ElementToString();
+//  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!leftCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> > ())
     return false;
-  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ElementToString();
+//  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
   if (!theGhostHasAppeared)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...";
     theGhostHasAppeared=true;
@@ -2358,8 +2382,8 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
   RFZero.MakeZero(numVars, leftCopy.owner->theGlobalVariableS);
   RFOne.MakeConst(numVars, 1, leftCopy.owner->theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
-//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ElementToString() << " * " << output.ElementToString();
-  if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyMeByUEEltOnTheLeft
+//    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
+  if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyOnTheLeft
         (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
     return false;
   output.MakeElementTensorGeneralizedVermas(*leftCopy.owner, outputElt, output.theContextIndex);
@@ -2398,22 +2422,22 @@ bool Data::MultiplyUEByAny(const Data& left, const Data& right, Data& output, st
 
 bool CommandList::StandardPower
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
+{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   if (theCommands.DoThePowerIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
     return true;
-  //std::cout << "<br>After do associate: " << theExpression.ElementToString();
+  //std::cout << "<br>After do associate: " << theExpression.ToString();
   return false;
 }
 
 bool CommandList::StandardTimes
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ElementToString();
+{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
     return true;
   if (theCommands.EvaluateDoDistribute
       (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes(), theCommands.opPlus()))
     return true;
-  //std::cout << "<br>After distribute: " << theExpression.ElementToString();
+  //std::cout << "<br>After distribute: " << theExpression.ToString();
   if (theCommands.EvaluateDoAssociatE
       (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes()))
     return true;
@@ -2421,7 +2445,7 @@ bool CommandList::StandardTimes
     return true;
   if (theExpression.children.size!=2)
     return false;
-  //std::cout << "<br>After do associate: " << theExpression.ElementToString();
+  //std::cout << "<br>After do associate: " << theExpression.ToString();
   return false;
 }
 
@@ -2482,7 +2506,7 @@ bool CommandList::EvaluateDoAssociatE
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theOperation)
 { List<Expression>& opands=theCommands.buffer1;
   opands.SetSize(0);
-  //std::cout << "<br>At start of do associate: " << theExpression.ElementToString();
+  //std::cout << "<br>At start of do associate: " << theExpression.ToString();
   bool needsModification=theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
   (theExpression, opands, theOperation);
   if (!needsModification)
@@ -2495,7 +2519,7 @@ bool CommandList::EvaluateDoAssociatE
     currentExpression=&currentExpression->children[1];
   }
   *currentExpression=*opands.LastObject();
-  //std::cout << "<br>At end do associate: " << theExpression.ElementToString();
+  //std::cout << "<br>At end do associate: " << theExpression.ToString();
   return true;
 }
 
@@ -2683,12 +2707,12 @@ bool CommandList::StandardFunction
         std::string err;
         if (!theCommands.ParseAndExtractExpressions(theArgs[i], thePattern, theSynSoup, theSynStack, &err))
         { std::cout << "This is a programming error: failed to parse the hard-coded argument list string " << theArgs[i]
-          << " encoding the built-in function " << funHandle.ElementToString(theCommands)
+          << " encoding the built-in function " << funHandle.ToString(theCommands)
           << ".  The error message was: " << err << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__)
           << " line " << __LINE__ << ".";
           assert(false);
         }
-        std::cout << " to get: " << thePattern.ElementToString();
+        std::cout << " to get: " << thePattern.ToString();
       }
       ExpressionPairs tempPairs;
       if (theCommands.ExpressionMatchesPattern(thePattern, result, tempPairs))
@@ -2730,7 +2754,7 @@ bool CommandList::StandardLieBracket
   Data& leftD=theCommands.theData[leftE.theData];
   Data& rightD=theCommands.theData[rightE.theData];
   Data newData(theCommands);
-//  std::cout << "<br>attempting to lie bracket " << leftD.ElementToString() << " and " << rightD.ElementToString();
+//  std::cout << "<br>attempting to lie bracket " << leftD.ToString() << " and " << rightD.ToString();
   if (!Data::LieBracket(leftD, rightD, newData, comments))
   { //std::cout  << "<br>Lie bracket unsucessful";
     return false;
@@ -2828,7 +2852,7 @@ bool CommandList::StandardDivide
     return false;
   if (rightData.GetValuE<Rational>().IsEqualToZero())
   { if (comments!=0)
-      *comments << "Error: attempt to divide " << leftData.ElementToString() << " by 0.";
+      *comments << "Error: attempt to divide " << leftData.ToString() << " by 0.";
     theExpression.SetError("Error:DivByZero");
     return true;
   }
@@ -2856,7 +2880,7 @@ bool CommandList::StandardMinus
   minusOne.MakeInt(-1, theCommands, inputIndexBoundVars);
   result.MakeProducT(theCommands, inputIndexBoundVars, minusOne, *toBeTransformed);
   *toBeTransformed=result;
-  //std::cout << toBeTransformed->ElementToString();
+  //std::cout << toBeTransformed->ToString();
   return true;
 }
 
@@ -2891,15 +2915,15 @@ bool CommandList::ExtractPMTDtreeContext
         (outputContext, theInput.children[0], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog);
   if (theInput.theOperation==this->opData())
   { if (theInput.GetData().theContextIndex!=-1)
-    {// std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ElementToString();
+    {// std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ToString();
       if (!outputContext.MergeContextWith(theInput.GetData().GetContext()))
         return false;
-      //std::cout << " with end commulative context: " << outputContext.ElementToString();
+      //std::cout << " with end commulative context: " << outputContext.ToString();
     }
     return true;
   }
   outputContext.VariableImages.AddNoRepetition(theInput);
-//  std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ElementToString() << " with resulting accummulated context: " << outputContext.ElementToString();
+//  std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ToString() << " with resulting accummulated context: " << outputContext.ToString();
   return true;
 }
 
@@ -2908,7 +2932,7 @@ bool CommandList::EvaluatePMTDtree
  (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog)
 { if (!this->ExtractPMTDtreeContext<dataType>(outputContext, theInput, 0, 10000, errorLog))
     return false;
-//  std::cout << "<br>The extracted context is: " << outputContext.ElementToString();
+//  std::cout << "<br>The extracted context is: " << outputContext.ToString();
   return this->EvaluatePMTDtreeFromContextRecursive(output, outputContext, theInput, 0, 10000, errorLog);
 }
 
@@ -2927,16 +2951,16 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
     for (int i=0; i<theInput.children.size; i++)
     { if (!this->EvaluatePMTDtreeFromContextRecursive(bufferData, inputContext, theInput.children[i], RecursionDepth+1, MaxRecursionDepthMustNotPopStack, errorLog))
         return false;
-      //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
-      //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (theInput.theOperation==this->opTimes())
       { if (i==0)
           output=bufferData;
         else
-        { //std::cout << "<hr>Multiplying: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+        { //std::cout << "<hr>Multiplying: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
           output*=bufferData;
-          //std::cout << "<br>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          //std::cout << "<br>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
       else if (theInput.theOperation==this->opMinus())
@@ -2948,17 +2972,17 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
         else
           output-=(bufferData);
       } else if (theInput.theOperation==this->opPlus())
-      { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ElementToString(this->theGlobalVariableS->theDefaultLieFormat);
+      { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ToString(this->theGlobalVariableS->theDefaultLieFormat);
         if (i==0)
         { output=bufferData;
-//          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-//          << ", which should equal the bufferData: " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+//          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
+//          << ", which should equal the bufferData: " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
         }
         else
-        { //std::cout << "<hr>Adding: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+        { //std::cout << "<hr>Adding: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
+          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
           output+=bufferData;
-          //std::cout << "<hr>Result: " << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
+          //std::cout << "<hr>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
     }
@@ -2979,7 +3003,7 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
   }
   if (theInput.theOperation==this->opData())
   { Data theData=this->theData[theInput.theData];
-//    std::cout << "<hr>attempting to convert " << theData.ElementToString() << "<br>";
+//    std::cout << "<hr>attempting to convert " << theData.ToString() << "<br>";
     if (!theData.ConvertToTypeResizesContextArrays<dataType>(inputContext))
       return false;
     output=theData.GetValuE<dataType>();
@@ -2988,19 +3012,20 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
   int theIndex=inputContext.VariableImages.GetIndex(theInput);
   if (theIndex==-1)
     return false;
-//  std::cout << "<br>the inputContext is: " << inputContext.ElementToString();
+//  std::cout << "<br>the inputContext is: " << inputContext.ToString();
   output=inputContext.GetPolynomialMonomial<dataType>(theIndex, *this->theGlobalVariableS);
 //  std::cout << "<hr>Output buffer status at recursion depth " << RecursionDepth << ": "
-//  << outputBuffer.ElementToString(&this->theGlobalVariableS->theDefaultLieFormat);
+//  << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
   return true;
 }
 
 bool CommandList::ExpressionsAreEqual
-  (const Expression& left, const Expression& right, int RecursionDepth, int MaxRecursionDepth)
-{ if (RecursionDepth>MaxRecursionDepth)
+  (const Expression& left, const Expression& right)
+{ IncrementRecursion recursionCounter(this);
+  if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Error: maximium recursion depth of " << MaxRecursionDepth << " exceeded while comparing expressions: " ;
-    out << left.ElementToString() << " and " << right.ElementToString();
+    out << "Error: maximium recursion depth of " << this->MaxRecursionDeptH << " exceeded while comparing expressions: " ;
+    out << left.ToString() << " and " << right.ToString();
     std::cout << out.str();
     this->evaluationErrors.AddOnTop(out.str());
     return false;
@@ -3008,7 +3033,7 @@ bool CommandList::ExpressionsAreEqual
   if (!left.AreEqualExcludingChildren(right))
     return false;
   for (int i=0; i<left.children.size; i++)
-    if (!this->ExpressionsAreEqual (left.children[i], right.children[i], RecursionDepth+1, MaxRecursionDepth))
+    if (!this->ExpressionsAreEqual (left.children[i], right.children[i]))
       return false;
   return true;
 }
@@ -3016,7 +3041,7 @@ bool CommandList::ExpressionsAreEqual
 bool CommandList::ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
    std::stringstream* theLog)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   assert(thePattern.theBoss==this && input.theBoss==this);
   static int ExpressionMatchesPatternDebugCounter=-1;
@@ -3025,14 +3050,14 @@ bool CommandList::ExpressionMatchesPattern
 //  std::cout << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
   if (printLocalDebugInfo)
-  { std::cout << " <hr> current input: " << input.ElementToString() << "<br>current pattern: " << thePattern.ElementToString();
-    std::cout << "<br> current matched expressions: " << matchedExpressions.ElementToString();
+  { std::cout << " <hr> current input: " << input.ToString() << "<br>current pattern: " << thePattern.ToString();
+    std::cout << "<br> current matched expressions: " << matchedExpressions.ToString();
   }
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Max recursion depth of " << this->MaxRecursionDeptH << " exceeded whlie trying to match expression pattern "
-    << thePattern.ElementToString() << " onto expression " << input.ElementToString();
+    << thePattern.ToString() << " onto expression " << input.ToString();
     this->evaluationErrors.AddOnTop(out.str());
     return false;
   }
@@ -3064,7 +3089,7 @@ bool CommandList::ExpressionMatchesPattern
 
 bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 (Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* theLog)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
@@ -3081,7 +3106,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     return true;
   if (this->ExpressionStack.Contains(theExpression))
   { std::stringstream errorStream;
-    errorStream << "I think I have detected a cycle: " << theExpression.ElementToString()
+    errorStream << "I think I have detected a cycle: " << theExpression.ToString()
     << " is transformed to an expression that contains the starting expression. ";
     theExpression.SetError(errorStream.str());
     return true;
@@ -3091,7 +3116,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   std::string debugString="non-initialized";
   std::string debugStringIntermediate="non-initialized";
 
-  debugString=theExpression.ElementToString();
+  debugString=theExpression.ToString();
   //std::cout << "<hr> At error counter " << errorCounter << " expression is: " << debugString;
   this->ExpressionStack.AddOnTop(theExpression);
   HashedList<Expression> currentExpressionTransformations;
@@ -3101,7 +3126,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   int counter=-1;
   int indexInCache=-1;
   if (theExpression.IndexBoundVars==3)
-  { debugString=theExpression.ElementToString();
+  { debugString=theExpression.ToString();
   }
   if (theExpression.IndexBoundVars!=-1)
   { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
@@ -3145,7 +3170,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
         out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
-        << " while simplifying " << theExpression.ElementToString();
+        << " while simplifying " << theExpression.ToString();
         theExpression.errorString=out.str();
       }
       this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
@@ -3155,7 +3180,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     if (theFun!=0)
       if (theFun(*this, theExpression.IndexBoundVars, theExpression, &comments))
         NonReduced=true;
-//    std::cout << "<br>after standard eval: " << theExpression.ElementToString();
+//    std::cout << "<br>after standard eval: " << theExpression.ToString();
 //    for (unsigned i=0; i<this->targetProperties.size(); i++)
 //      if (theExpression.GetPropertyValue(this->targetProperties[i])!=1)
 //        if (this->theNonBoundVars[this->targetProperties[i]].theHandler!=0)
@@ -3180,7 +3205,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       if (NonReduced)
       { if (currentExpressionTransformations.Contains(theExpression))
         { std::stringstream errorStream;
-          errorStream << "I think I detected a substitution cycle, " << theExpression.ElementToString()
+          errorStream << "I think I detected a substitution cycle, " << theExpression.ToString()
           << " appears twice in the reduction cycle";
           theExpression.SetError(errorStream.str());
           break;
@@ -3200,7 +3225,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 Expression* CommandList::PatternMatch
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    Expression* condition, std::stringstream* theLog, bool logAttempts)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH
@@ -3211,20 +3236,20 @@ Expression* CommandList::PatternMatch
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
     return 0;
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>found pattern: " << theExpression.ElementToString() << " -> " << thePattern.ElementToString();
+    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> " << thePattern.ToString();
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ElementToString();
+    (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
   this->SpecializeBoundVars(tempExp, inputIndexBoundVars, bufferPairs);
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>Specialized condition: " << tempExp.ElementToString() << "; evaluating...";
+    (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
   ExpressionPairs tempPairs;
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (tempExp, tempPairs, theLog);
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ElementToString() << "; evaluating...";
+    (*theLog) << "<hr>The evaluated specialized condition: " << tempExp.ToString() << "; evaluating...";
   if (tempExp.theOperation==this->opData())
     if (this->theData[tempExp.theData].IsEqualToOne())
       return & theExpression;
@@ -3233,7 +3258,7 @@ Expression* CommandList::PatternMatch
 
 void CommandList::SpecializeBoundVars
 (Expression& toBeSubbed, int targetinputIndexBoundVars, ExpressionPairs& matchedPairs)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   toBeSubbed.IndexBoundVars=targetinputIndexBoundVars;
   if (toBeSubbed.theOperation==this->opVariableBound())
   { int indexMatching= matchedPairs.BoundVariableIndices.GetIndex(toBeSubbed.theData);
@@ -3249,13 +3274,13 @@ void CommandList::SpecializeBoundVars
 bool CommandList::ProcessOneExpressionOnePatternOneSub
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    std::stringstream* theLog, bool logAttempts)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   assert(thePattern.theOperation==this->opDefine() ||
   thePattern.theOperation==this->opDefineConditional());
   assert(thePattern.children.size==2 || thePattern.children.size==3);
   if (theLog!=0 && logAttempts)
-  { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ElementToString();
-    (*theLog) << " by pattern " << thePattern.ElementToString();
+  { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
+    (*theLog) << " by pattern " << thePattern.ToString();
   }
   Expression& currentPattern=thePattern.children[0];
   Expression* theCondition=0;
@@ -3280,7 +3305,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
 }
 
 bool CommandList::ExpressionHasBoundVars(Expression& theExpression)
-{ IncrementRecursion recursionCounter(*this);
+{ IncrementRecursion recursionCounter(this);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Max recursion depth of " << this->MaxRecursionDeptH << " exceeded.";
@@ -3345,14 +3370,14 @@ void CommandList::EvaluateCommands()
   ExpressionPairs thePairs;
 
 //  this->theLogs.resize(this->theCommands.size());
-//this->ElementToString();
+//this->ToString();
   std::stringstream loggingStream;
   if (this->syntaxErrors!="")
   { out << "<hr><b>Syntax errors encountered</b><br>";
     out << this->syntaxErrors;
     out << "<hr>";
   }
-  std::string startingExpressionString=this->theCommands.ElementToString(0,10000);
+  std::string startingExpressionString=this->theCommands.ToString(0,10000);
   this->RecursionDeptH=0;
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, thePairs, &loggingStream);
@@ -3362,9 +3387,10 @@ void CommandList::EvaluateCommands()
     assert(false);
   }
   std::stringstream comments;
-  out << "<table border=\"1\" ><tr><th>Your input</th><th>Result</th><th>Result in LaTeX</th></tr><tr><td>"<< startingExpressionString << "</td><td>"  << this->theCommands.ElementToString(0, 10000)
-  << "</td><td>" << this->theCommands.ElementToString(0, 10000, true, false, false, &comments) << "</td></tr>";
-  out << "</table>";
+  FormatExpressions theFormat;
+  theFormat.flagMakingExpressionTableWithLatex=true;
+  theFormat.flagUseLatex=false;
+  out << this->theCommands.ToString(&theFormat, false, false, &comments); //<< "</td></tr>";
   this->theLog= loggingStream.str();
   this->outputString=out.str();
   if (comments.str()!="")
@@ -3374,7 +3400,7 @@ void CommandList::EvaluateCommands()
   }
 }
 
-std::string SyntacticElement::ElementToString(CommandList& theBoss)
+std::string SyntacticElement::ToString(CommandList& theBoss)
 { std::stringstream out;
   bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError()
   || this->controlIndex==theBoss.conList() ;
@@ -3386,7 +3412,7 @@ std::string SyntacticElement::ElementToString(CommandList& theBoss)
     out << theBoss.controlSequences[this->controlIndex];
   if (makeTable)
   { out << "</td></tr><tr><td>";
-    out << this->theData.ElementToString(0, 10);
+    out << this->theData.ToString(0, 10);
     if (this->ErrorString!="")
       out << "</td></tr><tr><td>" << this->ErrorString;
     out << "</td></tr></table>";
@@ -3405,7 +3431,7 @@ Function& Expression::GetFunctionFromVarNamE()
 { assert(this->theBoss!=0);
   if (this->theOperation!=this->theBoss->opVariableNonBound())
   { std::cout << "This is a programming error. Attempting to extract a built-in Function name from expression "
-    << this->ElementToString() << " which is not a variable name. "
+    << this->ToString() << " which is not a variable name. "
     << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
     assert(false);
   }
@@ -3428,13 +3454,19 @@ int Expression::GetNumCols()const
   return theMax;
 }
 
-std::string Expression::ElementToString
-(int recursionDepth, int maxRecursionDepth, bool useLatex, bool AddBrackets, bool AddCurlyBraces,
- std::stringstream* outComments, bool isFinal)const
-{ if (maxRecursionDepth>0)
-    if(recursionDepth>maxRecursionDepth)
+std::string Expression::ToString
+(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces, std::stringstream* outComments, bool isFinal)const
+{ IncrementRecursion theRecursionCounter(this->theBoss);
+  bool MakingExpressionTableWithLatex=false;
+  if (this->theBoss!=0)
+  { if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
       return "(...)";
-  if (this->theBoss==0)
+    if (theFormat!=0)
+    { if (this->theBoss->RecursionDeptH>theFormat->MaxRecursionDepthPerExpression)
+        return "(...)";
+      MakingExpressionTableWithLatex=(theFormat->flagMakingExpressionTableWithLatex && (this->theBoss->RecursionDeptH==1));
+    }
+  } else
     return "(ProgrammingErrorNoBoss)";
   assert((int)(this->theBoss)!=-1);
   std::stringstream out;
@@ -3456,17 +3488,17 @@ std::string Expression::ElementToString
   if (AddCurlyBraces)
     out << "{";
   if (this->theOperation==this->theBoss->opDefine())
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << ":=" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+    out << this->children[0].ToString(theFormat, false, false, outComments)
+    << ":=" << this->children[1].ToString(theFormat, false, false, outComments);
   else if (this->theOperation==this->theBoss->opDefineConditional())
-    out <<  this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments) << " :if "
-    << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, true, false, outComments)
-    << ":=" << this->children[2].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+    out <<  this->children[0].ToString(theFormat, false, false, outComments) << " :if "
+    << this->children[1].ToString(theFormat, true, false, outComments)
+    << ":=" << this->children[2].ToString(theFormat, false, false, outComments);
   else if (this->theOperation==this->theBoss->opDivide() )
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForMultiplication(), false, outComments)
-    << "/" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
+    << "/" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
   else if (this->theOperation==this->theBoss->opTimes() )
-  { std::string tempS=this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForMultiplication(), false, outComments);
+  { std::string tempS=this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
     //if (false)
    // {
     if (tempS=="-1")
@@ -3478,15 +3510,15 @@ std::string Expression::ElementToString
     out << tempS;
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
-    out << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+    out << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
   }
   else if (this->theOperation==this->theBoss->opThePower())
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForThePower(), false, outComments)
-    << "^{" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments) << "}";
+    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForThePower(), false, outComments)
+    << "^{" << this->children[1].ToString(theFormat, false, false, outComments) << "}";
   else if (this->theOperation==this->theBoss->opPlus() )
   { assert(this->children.size>=2);
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForAddition(), false, outComments);
-    std::string tempS=this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[1].NeedBracketsForAddition(), false, outComments);
+    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments);
+    std::string tempS=this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
     if (tempS.size()>0)
       if (tempS[0]!='-')
         out << "+";
@@ -3494,12 +3526,12 @@ std::string Expression::ElementToString
   }
   else if (this->theOperation==this->theBoss->opMinus())
   { if ( this->children.size==1)
-      out << "-" << this->children[0].ElementToString
-      (recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForMultiplication(), false, outComments);
+      out << "-" << this->children[0].ToString
+      (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
     else
     { assert(children.size==2);
-      out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForAddition(), false, outComments)
-      << "-" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[1].NeedBracketsForAddition(), false, outComments);
+      out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments)
+      << "-" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
     }
   }
   else if (this->theOperation==this->theBoss->opVariableBound())
@@ -3512,67 +3544,68 @@ std::string Expression::ElementToString
   else if (this->theOperation==this->theBoss->opVariableNonBound())
     out << this->theBoss->theNonBoundVars[this->theData].theName;
   else if (this->theOperation==this->theBoss->opData())
-  { if(useLatex && this->GetData().type==Data::typeString)
-      out << "(string)";
-    else
-    { std::stringstream dataComments;
-      out << this->GetData().ElementToString(&dataComments, isFinal);
-      additionalDataComments=dataComments.str();
-    }
+  { bool useLatex=false;
+    if (theFormat!=0)
+      useLatex=theFormat->flagUseLatex;
+    std::stringstream dataComments;
+    out << this->GetData().ToString(&dataComments, isFinal && !useLatex, theFormat);
+    additionalDataComments=dataComments.str();
   }
   else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
-        out <<  this->children[0].ElementToString
-        (recursionDepth+1, maxRecursionDepth, useLatex, false, this->children[0].NeedBracketsForFunctionName(), outComments)
-        << "_" << this->children[1].ElementToString
-        (recursionDepth+1, maxRecursionDepth, useLatex, false, this->children[1].NeedBracketsForFunctionName(), outComments) << "";
+        out <<  this->children[0].ToString
+        (theFormat, false, this->children[0].NeedBracketsForFunctionName(), outComments)
+        << "_" << this->children[1].ToString
+        (theFormat, false, this->children[1].NeedBracketsForFunctionName(), outComments) << "";
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  this->children[0].ElementToString
-        (recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "\\cdot(" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments) << ")";
+        out <<  this->children[0].ToString
+        (theFormat, this->children[0].NeedBracketsForFunctionName(), false, outComments)
+        << "\\cdot(" << this->children[1].ToString(theFormat, false, false, outComments) << ")";
         break;
       default:
-        out << this->children[0].ElementToString
-        (recursionDepth+1, maxRecursionDepth, useLatex, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "{{}" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << "}";
+        out << this->children[0].ToString
+        (theFormat, this->children[0].NeedBracketsForFunctionName(), false, outComments)
+        << "{{}" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << "}";
         break;
     }
   }
   else if (this->theOperation==this->theBoss->opEqualEqual())
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "==" << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+    out << this->children[0].ToString(theFormat, false, false, outComments)
+    << "==" << this->children[1].ToString(theFormat, false, false, outComments);
   else if (this->theOperation==this->theBoss->opList())
   { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+        { out << this->children[i].ToString(theFormat, false, false, outComments);
           if (i!=this->children.size-1)
             out << "& ";
         }
         break;
       case Expression::formatMatrix:
-        if (useLatex)
+        if (theFormat!=0)
+          if (theFormat->flagUseLatex)
           out << "\\left(";
         out << "\\begin{array}{";
         for (int i=0; i<this->GetNumCols(); i++)
           out << "c";
         out << "} ";
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+        { out << this->children[i].ToString(theFormat, false, false, outComments);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
         }
         out << " \\end{array}";
-        if (useLatex)
-          out << "\\right)";
+        if (theFormat!=0)
+          if (theFormat->flagUseLatex)
+            out << "\\right)";
         break;
       default:
         out << "(";
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+        { out << this->children[i].ToString(theFormat, false, false, outComments);
           if (i!=this->children.size-1)
             out << ", ";
         }
@@ -3580,27 +3613,41 @@ std::string Expression::ElementToString
         break;
     }
   } else if (this->theOperation==this->theBoss->opLieBracket())
-    out << "[" << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "," << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+    out << "[" << this->children[0].ToString(theFormat, false, false, outComments)
+    << "," << this->children[1].ToString(theFormat, false, false, outComments)
     << "]";
   else if (this->theOperation==this->theBoss->opUnion())
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "\\cup " << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+    out << this->children[0].ToString(theFormat, false, false, outComments)
+    << "\\cup " << this->children[1].ToString(theFormat, false, false, outComments)
     ;
   else if (this->theOperation==this->theBoss->opUnionNoRepetition())
-    out << this->children[0].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-    << "\\sqcup " << this->children[1].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
+    out << this->children[0].ToString(theFormat, false, false, outComments)
+    << "\\sqcup " << this->children[1].ToString(theFormat, false, false, outComments)
     ;
   else if (this->theOperation==this->theBoss->opEndStatement())
-  { out << "<table>";
+  { if (!MakingExpressionTableWithLatex)
+      out << "<table>";
+    else
+      out << "<table><tr><th>Result</th><th>Result in LaTeX</th></tr>";
     for (int i=0; i<this->children.size; i++)
-    { out << "<tr><td>";
-      if (useLatex && recursionDepth==0)
-        out << CGI::GetHtmlMathSpanFromLatexFormula
-        (this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments)
-         +((i!=this->children.size-1)?";": ""));
+    { out << "<tr><td valign=\"top\">";
+      if (MakingExpressionTableWithLatex)
+      { out << "<hr>" << this->children[i].ToString(theFormat, false, false, outComments);
+        if (i!=this->children.size-1)
+          out << ";";
+        bool oldLatexFormat=false;
+        if (theFormat!=0)
+        { oldLatexFormat=theFormat->flagUseLatex;
+          theFormat->flagUseLatex=true;
+        }
+        out << "</td><td valign=\"top\"><hr>" << CGI::GetHtmlMathSpanFromLatexFormula(this->children[i].ToString(theFormat, false, false, outComments));
+        if (theFormat!=0)
+          theFormat->flagUseLatex=oldLatexFormat;
+        if (i!=this->children.size-1)
+          out << ";";
+      }
       else
-      { out << this->children[i].ElementToString(recursionDepth+1, maxRecursionDepth, useLatex, false, false, outComments);
+      { out << this->children[i].ToString(theFormat, false, false, outComments);
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -3625,8 +3672,8 @@ std::string Expression::ElementToString
     if (additionalDataComments!="")
       *outComments << additionalDataComments;
   }
-  if (useLatex && recursionDepth==0 && this->theOperation!=theBoss->opEndStatement())
-    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
+//  if (useLatex && recursionDepth==0 && this->theOperation!=theBoss->opEndStatement())
+//    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
   return out.str();
 }
 
@@ -3725,7 +3772,7 @@ std::string CommandList::ElementToStringNonBoundVars()
   return out.str();
 }
 
-std::string Function::ElementToString(CommandList& theBoss)const
+std::string Function::ToString(CommandList& theBoss)const
 { std::stringstream out;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
@@ -3762,14 +3809,14 @@ std::string CommandList::ElementToStringFunctionHandlers()
 { std::stringstream out;
   out << "\n <b>Handler functions (" << this->theFunctions.size << " total).</b><br>\n";
   for (int i=0; i<this->theFunctions.size; i++)
-  { out << "\n" << this->theFunctions[i].ElementToString(*this);
+  { out << "\n" << this->theFunctions[i].ToString(*this);
     if (i!=this->theFunctions.size-1)
       out << "<br>";
   }
   return out.str();
 }
 
-std::string CommandList::ElementToString()
+std::string CommandList::ToString()
 { std::stringstream out;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
@@ -3807,7 +3854,7 @@ std::string CommandList::ElementToString()
   out << this->ElementToStringNonBoundVars();
   out << "<br>\nData entries (" << this->theData.size << " total):\n<br>\n";
   for (int i=0; i<this->theData.size; i++)
-  { out << openTag3 << this->theData[i].ElementToString(0, false) << closeTag3;
+  { out << openTag3 << this->theData[i].ToString(0, false) << closeTag3;
     if (i!=this->theData.size-1)
       out  << ", ";
   }
@@ -3817,8 +3864,8 @@ std::string CommandList::ElementToString()
     out <<"<hr>" << "Context " << k+1;
     out << "<br>\n Cached expressions (" << currentContext.cachedExpressions.size << " total):\n<br>\n";
     for (int i=0; i<currentContext.cachedExpressions.size; i++)
-    { out << currentContext.cachedExpressions[i].ElementToString(0, 100, false, false, false, 0, false)
-      << " -> " << currentContext.imagesCachedExpressions[i].ElementToString(0, 100, false, false, false, 0, false);
+    { out << currentContext.cachedExpressions[i].ToString(0, false, false, 0, false)
+      << " -> " << currentContext.imagesCachedExpressions[i].ToString(0, false, false, 0, false);
       if (i!=currentContext.cachedExpressions.size-1)
         out << "<br>";
     }
@@ -4028,7 +4075,7 @@ std::string CommandList::ElementToStringSyntacticStack()
   if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
     out << "<table border=\"1\"><tr><td>";
   for (int i=this->numEmptyTokensStart; i<(*this->CurrentSyntacticStacK).size; i++)
-  { out << (*this->CurrentSyntacticStacK)[i].ElementToString(*this);
+  { out << (*this->CurrentSyntacticStacK)[i].ToString(*this);
     if (HasMoreThanOneSignificantEntriesOrIsNotExpression)
     { out << "</td>";
       if (i!=(*this->CurrentSyntacticStacK).size-1)
@@ -4170,10 +4217,10 @@ Context::GetPolynomialMonomial
   return output;
 }
 
-std::string Context::ElementToString()const
+std::string Context::ToString()const
 { std::stringstream out;
   for (int i=0; i<this->VariableImages.size; i++)
-    out << "<br>Variable " << i+1 << "=" << this->VariableImages[i].ElementToString();
+    out << "<br>Variable " << i+1 << "=" << this->VariableImages[i].ToString();
   out << "<br>Ambient Lie algebra index: " << this->indexAmbientSSalgebra;
   return out.str();
 }

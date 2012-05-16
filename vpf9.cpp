@@ -379,7 +379,7 @@ void DrawingVariables::drawCoordSystemBuffer(DrawingVariables& TDV, int theDimen
   for (int i=0; i<theDimension; i++)
   { tempRoot.MakeEi(theDimension, i);
     std::string tempS;
-    tempS=tempRoot.ElementToString();
+    tempS=tempRoot.ToString();
     TDV.drawLineBetweenTwoVectorsBuffer(zeroRoot, tempRoot, TDV.PenStyleNormal, CGI::RedGreenBlue(210, 210, 210));
     TDV.drawTextAtVectorBuffer(tempRoot, tempS, CGI::RedGreenBlue(100, 200, 100), TDV.TextStyleNormal, LatexOutFile);
     TDV.drawCircleAtVectorBuffer(tempRoot, 2, TDV.PenStyleNormal, CGI::RedGreenBlue(100, 200, 100) );
@@ -618,7 +618,7 @@ void Selection::ExpandMaxSize()
 }
 
 void Selection::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
+{ this->ToString(this->DebugString);
 }
 
 void Selection::WriteToFile(std::fstream& output)
@@ -639,12 +639,12 @@ void Selection::ReadFromFile(std::fstream& input)
   }
 }
 
-void Selection::ElementToString(std::string& output)const
+void Selection::ToString(std::string& output)const
 { std::stringstream out;
   out << "Cardinality: " << this->CardinalitySelection << "\n";
   Vector<Rational> tempRoot;
   tempRoot=*this;
-  out << tempRoot.ElementToString();
+  out << tempRoot.ToString();
   output=out.str();
 }
 
@@ -775,7 +775,7 @@ inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
   return tempRat.IsPositiveOrZero();
 }
 
-inline std::string Rational::ElementToString(FormatExpressions* notUsed)const
+inline std::string Rational::ToString(FormatExpressions* notUsed)const
 { std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;
@@ -783,9 +783,9 @@ inline std::string Rational::ElementToString(FormatExpressions* notUsed)const
       out << "/" << this->DenShort;
   } else
   { std::string tempS;
-    this->Extended->num.ElementToString(tempS);
+    this->Extended->num.ToString(tempS);
     out << tempS;
-    this->Extended->den.ElementToString(tempS);
+    this->Extended->den.ToString(tempS);
     if (tempS!="1")
       out << "/" << tempS;
   }
@@ -802,6 +802,8 @@ FormatExpressions::FormatExpressions()
   this->flagUseHTML=true;
   this->flagUseLatex=false;
   this->MaxLinesPerPage=40;
+  this->flagMakingExpressionTableWithLatex=false;
+  this->MaxRecursionDepthPerExpression=500;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -814,7 +816,7 @@ std::string FormatExpressions::GetPolyLetter(int index)const
 }
 
 void Rational::WriteToFile(std::fstream& output)
-{ output <<   this->ElementToString();
+{ output <<   this->ToString();
 }
 
 inline void Rational::RaiseToPower(int x)
@@ -1095,8 +1097,8 @@ void Rational::Simplify()
     LargeIntUnsigned::gcd(this->Extended->den, this->Extended->num.value, tempI);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
     { std::string tempS1, tempS2, tempS3;
-      tempI.ElementToString(tempS1);
-      this->ElementToString(tempS2);
+      tempI.ToString(tempS1);
+      this->ToString(tempS2);
     }*/
     LargeIntUnsigned tempI2;
     this->Extended->den.DivPositive(tempI, this->Extended->den, tempI2);
@@ -1249,7 +1251,7 @@ void LargeInt::MultiplyByInt(int x)
   this->MultiplyBy(tempI);
 }
 
-void LargeIntUnsigned::ElementToString(std::string& output)const
+void LargeIntUnsigned::ToString(std::string& output)const
 { if (this->IsEqualToZero())
   { output="0";
     return;
@@ -1286,7 +1288,7 @@ double LargeInt::GetDoubleValue()
 { return this->sign* this->value.GetDoubleValue();
 }
 
-void LargeInt::ElementToString(std::string& output)const
+void LargeInt::ToString(std::string& output)const
 { std::stringstream out;
   if (this->IsEqualToZero())
   { output.assign("0");
@@ -1295,7 +1297,7 @@ void LargeInt::ElementToString(std::string& output)const
   if (this->sign==-1)
     out << "-";
   std::string tempS;
-  this->value.ElementToString(tempS);
+  this->value.ToString(tempS);
   out << tempS;
   output=out.str();
 }
@@ -1373,38 +1375,38 @@ void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b,
   p.Assign(a);
   q.Assign(b);
   /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-  { p.ElementToString(tempSP);
-    q.ElementToString(tempSQ);
-    r.ElementToString(tempSR);
-    temp.ElementToString(tempS);
+  { p.ToString(tempSP);
+    q.ToString(tempSQ);
+    r.ToString(tempSR);
+    temp.ToString(tempS);
   }*/
   while(!q.IsEqualToZero() )
   { /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ElementToString(tempSP);
-      q.ElementToString(tempSQ);
-      r.ElementToString(tempSR);
-      temp.ElementToString(tempS);
+    { p.ToString(tempSP);
+      q.ToString(tempSQ);
+      r.ToString(tempSR);
+      temp.ToString(tempS);
     }*/
     p.DivPositive(q, temp, r);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ElementToString(tempSP);
-      q.ElementToString(tempSQ);
-      r.ElementToString(tempSR);
-      temp.ElementToString(tempS);
+    { p.ToString(tempSP);
+      q.ToString(tempSQ);
+      r.ToString(tempSR);
+      temp.ToString(tempS);
     }*/
     p.Assign(q);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ElementToString(tempSP);
-      q.ElementToString(tempSQ);
-      r.ElementToString(tempSR);
-      temp.ElementToString(tempS);
+    { p.ToString(tempSP);
+      q.ToString(tempSQ);
+      r.ToString(tempSR);
+      temp.ToString(tempS);
     }*/
     q.Assign(r);
     /*if (Rational::flagAnErrorHasOccurredTimeToPanic)
-    { p.ElementToString(tempSP);
-      q.ElementToString(tempSQ);
-      r.ElementToString(tempSR);
-      temp.ElementToString(tempS);
+    { p.ToString(tempSP);
+      q.ToString(tempSQ);
+      r.ToString(tempSR);
+      temp.ToString(tempS);
     }*/
   }
   output.Assign(p);
@@ -1681,19 +1683,19 @@ void partFraction::ComputeOneCheckSuM
   Vector<Rational> CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(owner.AmbientDimension);
   std::string tempS;
   if (this->flagAnErrorHasOccurredTimeToPanic && Rational::flagAnErrorHasOccurredTimeToPanic)
-  { tempS= output.ElementToString();
+  { tempS= output.ToString();
   }
-  //output.ElementToString(tempS);
+  //output.ToString(tempS);
   Rational tempRat;
   for (int i=0; i<this->IndicesNonZeroMults.size; i++)
   { this->TheObjects[this->IndicesNonZeroMults[i]].ComputeOneCheckSum(tempRat, owner.startingVectors[this->IndicesNonZeroMults[i]], theDimension);
-    //tempRat.ElementToString(tempS);
+    //tempRat.ToString(tempS);
     output.MultiplyBy(tempRat);
-    //output.ElementToString(tempS);
+    //output.ToString(tempS);
   }
 }
 
-std::string partFraction::ElementToString
+std::string partFraction::ToString
 (partFractions& owner, bool LatexFormat, bool includeVPsummand, bool includeNumerator,
  FormatExpressions& PolyFormatLocal, GlobalVariables& theGlobalVariables, int& NumLinesUsed)
 { std::stringstream out;
@@ -1702,7 +1704,7 @@ std::string partFraction::ElementToString
 //  int OldCutOff=0;
 //  int theDimension= owner.startingVectors[0].size;
   for (int i =0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(i, LatexFormat);
+  { this->TheObjects[i].ToString(i, LatexFormat);
     out << tempS;
   }
   tempS= out.str();
@@ -1879,8 +1881,8 @@ bool partFraction::DecomposeFromLinRelation
     std::string tempS1, tempS2;
     Accum.ComputeOneCheckSum(tempRat2);
     this->ComputeOneCheckSum(tempRat);
-    tempRat.ElementToString(tempS1);
-    this->CheckSum2.ElementToString(tempS2);
+    tempRat.ToString(tempS1);
+    this->CheckSum2.ToString(tempS2);
     tempRat2.Subtract(tempRat);
     assert(oldCheckSum.IsEqualTo(tempRat2));
   }*/
@@ -2288,13 +2290,13 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
   //partFraction::MakingConsistencyCheck=true;
   /*if (partFraction::MakingConsistencyCheck)
   {  this->ComputeDebugString();
-    tempRat2.ElementToString(tempS2);
-    tempRat.ElementToString(tempS1);
+    tempRat2.ToString(tempS2);
+    tempRat.ToString(tempS1);
   }*/
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic)
     { std::string tempS1, tempS2;
-      tempS1=this->StartCheckSum.ElementToString();
-      tempS2=this->EndCheckSum.ElementToString();
+      tempS1=this->StartCheckSum.ToString();
+      tempS2=this->EndCheckSum.ToString();
       std::stringstream out1, out2;
       out1 << "Starting checksum: " << tempS1;
       out2 << "  Ending checksum: " << tempS2;
@@ -2380,7 +2382,7 @@ bool partFractions::splitClassicalRootSystem(bool ShouldElongate, GlobalVariable
   Rational::flagAnErrorHasOccurredTimeToPanic=true;
   this->PrepareCheckSums(theGlobalVariables);
   std::string tempS;
-  this->CheckSum.ElementToString(tempS);
+  this->CheckSum.ToString(tempS);
   // if IndicatorRoot is zero then the caller has forgotten
   // to set the flagUsingIndicatorRoot to false
   partFraction tempF;
@@ -2677,7 +2679,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
   }
 }
 
-int partFractions::ElementToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
+int partFractions::ToString(std::string& output, bool LatexFormat, bool includeVPsummand, bool includeNumerator, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
 { Matrix<LargeInt> tempMat;
   return this->ElementToStringBasisChange(tempMat, false, output, LatexFormat, includeVPsummand, includeNumerator, theGlobalVariables, theFormat);
 }
@@ -2861,7 +2863,7 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
   }
   if (this->flagMakingProgressReport)
   { std::stringstream out;
-    out << "Checksum: " << output.ElementToString();
+    out << "Checksum: " << output.ToString();
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]= out.str();
     theGlobalVariables.MakeReport();
   }
@@ -2993,21 +2995,21 @@ bool partFractions::VerifyFileComputedContributions(GlobalVariables&  theGlobalV
 
 void partFractions::ComputeDebugString(GlobalVariables& theGlobalVariables)
 { FormatExpressions tempFormat;
-  this->ElementToString(this->DebugString, tempFormat.flagUseLatex, false, true, theGlobalVariables, tempFormat);
+  this->ToString(this->DebugString, tempFormat.flagUseLatex, false, true, theGlobalVariables, tempFormat);
 }
 
-void partFractions::ElementToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-{ this->ElementToString(output, theFormat.flagUseLatex, false, true, theGlobalVariables, theFormat);
+void partFractions::ToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
+{ this->ToString(output, theFormat.flagUseLatex, false, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringNoNumerator(GlobalVariables& theGlobalVariables)
 { FormatExpressions theFormat;
-  this->ElementToString(this->DebugString, theFormat.flagUseLatex, false, false, theGlobalVariables, theFormat);
+  this->ToString(this->DebugString, theFormat.flagUseLatex, false, false, theGlobalVariables, theFormat);
 }
 
 void partFractions::ComputeDebugStringWithVPfunction(GlobalVariables& theGlobalVariables)
 { FormatExpressions theFormat;
-  this->ElementToString(this->DebugString, theFormat.flagUseLatex, true, true, theGlobalVariables, theFormat);
+  this->ToString(this->DebugString, theFormat.flagUseLatex, true, true, theGlobalVariables, theFormat);
 }
 
 void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
@@ -3017,7 +3019,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobal
   output << "Indices_of_roots:\n";
   FormatExpressions PolyFormatLocal;
   for (int i=0; i<this->startingVectors.size; i++)
-    output << "| " << i << "    " << this->startingVectors[i].ElementToString() << "\n";
+    output << "| " << i << "    " << this->startingVectors[i].ToString() << "\n";
   output << "Alphabet_used:\n";
   for (int i=0; i<this->AmbientDimension; i++)
     output << PolyFormatLocal.GetPolyLetter(i) << " ";
@@ -3185,33 +3187,33 @@ void oneFracWithMultiplicitiesAndElongations::ComputeOneCheckSum
     tempRat2=1;
     for (int j=0; j<theDimension; j++)
     { if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      { tempS=theExp.ElementToString();
+      { tempS=theExp.ToString();
       }
       tempRat3=CheckSumRoot[j];
       if (!tempRat3.IsEqualToZero())
         tempRat3.RaiseToPower((theExp[j]*this->Elongations[i]).NumShort);
       tempRat2*=tempRat3;
       if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      { tempS=tempRat2.ElementToString();
+      { tempS=tempRat2.ToString();
       }
     }
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-    { tempS=tempRat.ElementToString();
+    { tempS=tempRat.ToString();
     }
     tempRat-=tempRat2;
     tempRat.RaiseToPower(this->Multiplicities[i]);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      tempS=tempRat.ElementToString();
+      tempS=tempRat.ToString();
     output.MultiplyBy(tempRat);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-      tempS=output.ElementToString();
+      tempS=output.ToString();
   }
   if (output.IsEqualToZero())
   { std::string tempS;
   }
   output.Invert();
   if (partFraction::flagAnErrorHasOccurredTimeToPanic)
-    tempS=output.ElementToString();
+    tempS=output.ToString();
 }
 
 int oneFracWithMultiplicitiesAndElongations::GetMultiplicityLargestElongation()
@@ -3274,7 +3276,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
     if (tempRoot[i]!=0)
     { out << PolyFormatLocal.GetPolyLetter(i);
       if (tempRoot[i]!=1)
-        out << "^{" << tempRoot[i].ElementToString() << "}";
+        out << "^{" << tempRoot[i].ToString() << "}";
     }
   out << ")";
   if (this->Multiplicities[indexElongation]>1)
@@ -3284,7 +3286,7 @@ void oneFracWithMultiplicitiesAndElongations::OneFracToStringBasisChange
   output= out.str();
 }
 
-std::string oneFracWithMultiplicitiesAndElongations::ElementToString
+std::string oneFracWithMultiplicitiesAndElongations::ToString
 (int index, bool LatexFormat)
 { if (this->Multiplicities.size==0)
     return "";
@@ -3388,7 +3390,7 @@ void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
   this->elements.size=0;
 }
 
-void SelectionWithMultiplicities::ElementToString(std::string& output)
+void SelectionWithMultiplicities::ToString(std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->elements.size; i++)
     out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: " <<this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
@@ -3568,7 +3570,7 @@ void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool 
   }
   if (this->flagAnErrorHasOcurredTimeToPanic)
   { std::string tempS;
-    tempS=alphaShift.ElementToString();
+    tempS=alphaShift.ToString();
   }
   alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
   if (RhoAction)
@@ -3694,17 +3696,17 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
   output.CopyFromBase(this->RootsOfBorel);
 }
 
-std::string WeylGroup::ElementToString()
+std::string WeylGroup::ToString()
 { std::string tempS;
   std::stringstream out;
   out << "Size: " << this->size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
-  out << "rho:" << this->rho.ElementToString() << "\n";
+  out << "rho:" << this->rho.ToString() << "\n";
   this->RootSystem.ElementToStringGeneric(tempS);
   out << "Root system(" << this->RootSystem.size << " elements):\n" << tempS << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ElementToString(tempS);
+  { this->TheObjects[i].ToString(tempS);
     out << i << ". " << tempS << "\n";
   }
   return out.str();
@@ -3875,8 +3877,8 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
     //basisChange.ComputeDebugString();
   }
   simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
-//  std::cout << "<br>simple basis: " << simpleBasis.ElementToString();
-//  std::cout << "<br>to be converted: " << input.ElementToString();
+//  std::cout << "<br>simple basis: " << simpleBasis.ToString();
+//  std::cout << "<br>to be converted: " << input.ToString();
   coordsInNewBasis.SetSize(input.size);
   for (int i=0; i<input.size; i++)
     input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);
@@ -4298,12 +4300,12 @@ bool VermaModulesWithMultiplicities::IsMaxNonEplored(int index)
   return true;
 }
 
-void VermaModulesWithMultiplicities::ElementToString(std::string& output)
+void VermaModulesWithMultiplicities::ToString(std::string& output)
 { std::string tempS;
   std::stringstream out;
   out << "Next to explore: " << this->NextToExplore << "\n Orbit of rho:\n";
   for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ElementToString();
+  { tempS=this->TheObjects[i].ToString();
     out << tempS << "   :  " << this->TheMultiplicities[i];
     if (this->Explored[i])
       out << " Explored\n";
@@ -4621,7 +4623,7 @@ void VermaModulesWithMultiplicities::KLPolysToString(std::string &output)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<this->KLPolys.size; i++)
-  { this->KLPolys.TheObjects[i].ElementToString(tempS, i);
+  { this->KLPolys.TheObjects[i].ToString(tempS, i);
     out << tempS << "\n";
   }
   output = out.str();
@@ -4631,7 +4633,7 @@ void VermaModulesWithMultiplicities::RPolysToString(std::string &output)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<this->RPolys.size; i++)
-  { this->RPolys.TheObjects[i].ElementToString(tempS, i);
+  { this->RPolys.TheObjects[i].ToString(tempS, i);
     out << tempS << "\n";
   }
   output = out.str();
@@ -4747,10 +4749,10 @@ void OneVarIntPolynomial::MakeMonomial(int coeff, int power)
 }
 
 void OneVarIntPolynomial::ComputeDebugString()
-{ this->ElementToString(this->DebugString);
+{ this->ToString(this->DebugString);
 }
 
-void OneVarIntPolynomial::ElementToString(std::string& output)
+void OneVarIntPolynomial::ToString(std::string& output)
 { std::stringstream out;
   std::string tempS;
   for (int i=this->RationalPart.size-1; i>=0; i--)
@@ -4865,7 +4867,7 @@ void partFraction::EvaluateIntPoly
 { std::string tempS1, tempS2;
   output.MakeZero();
   //if(this->flagAnErrorHasOccurredTimeToPanic)
-  //{ output.ElementToString(tempS1);
+  //{ output.ToString(tempS1);
   //}
   for (int i=0; i<input.size; i++)
   { Rational tempRat1, tempRat2;
@@ -4881,15 +4883,15 @@ void partFraction::EvaluateIntPoly
       ParallelComputing::SafePointDontCallMeFromDestructors();
     }
 //    if(this->flagAnErrorHasOccurredTimeToPanic)
-//    { output.ElementToString(tempS2);
-//      tempRat1.ElementToString(tempS1);
+//    { output.ToString(tempS2);
+//      tempRat1.ToString(tempS1);
 //      if (i==5)
 //      { //Rational::flagAnErrorHasOccurredTimeToPanic=true;
 //      }
 //    }
     output+=(tempRat1);
 //    if(this->flagAnErrorHasOccurredTimeToPanic)
-//    { output.ElementToString(tempS2);
+//    { output.ToString(tempS2);
 //    }
   }
 }

@@ -115,7 +115,7 @@ public:
   bool operator*=(const Rational& other);
   bool operator/=(const Data& other);
   bool operator*=(const Data& other);
-  std::string ElementToString(std::stringstream* comments=0, bool isFinal=true)const;
+  std::string ToString(std::stringstream* comments=0, bool isFinal=true, FormatExpressions* inputFormat=0)const;
   std::string ElementToStringDataType()const;
   bool operator!=(const Data& other)const;
   static bool LieBracket
@@ -156,7 +156,7 @@ class Function
   MemorySaving<List<bool> > theArgumentPatternIsParsed;
   typedef  bool (*FunctionAddress)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments);
   FunctionAddress theFunction;
-  std::string ElementToString(CommandList& theBoss)const;
+  std::string ToString(CommandList& theBoss)const;
   void operator =(const Function& other)
   { this->theName=other.theName;
     this->theArgumentList=other.theArgumentList;
@@ -271,9 +271,8 @@ void MakeVariableNonBounD
   void MakeXOX
   (CommandList& owner, int inputIndexBoundVars, int theOp, const Expression& left, const Expression& right)
   ;
-  std::string ElementToString
-  (int recursionDepth=0, int maxRecursionDepth=1000, bool useLatex=false, bool AddBrackets=false,
-   bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true)const;
+  std::string ToString
+  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -364,7 +363,7 @@ void MakeVariableNonBounD
 class ExpressionPairs
 {
 public:
-  std::string ElementToString();
+  std::string ToString();
   HashedListB<int, MathRoutines::IntUnsignIdentity> BoundVariableIndices;
   HashedList<Expression> variableImages;
   void reset()
@@ -388,7 +387,7 @@ class SyntacticElement
     this->IndexFirstChar=other.IndexFirstChar;
     this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
   }
-  std::string ElementToString(CommandList& theBoss);
+  std::string ToString(CommandList& theBoss);
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->ErrorString="";
@@ -463,7 +462,7 @@ class Context
   bool operator==(const Context& other)
   { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
-  std::string ElementToString()const;
+  std::string ToString()const;
   static inline unsigned int HashFunction(const Context& input){return input.HashFunction();}
   unsigned int HashFunction()const
   { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
@@ -613,7 +612,7 @@ public:
   std::string userLabel;
   List<std::string> SystemCommands;
 
-  std::string ElementToString();
+  std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ElementToStringFunctionHandlers();
   SyntacticElement GetSyntacticElementEnd()
@@ -936,7 +935,7 @@ bool CollectSummands
    std::stringstream* theLog=0)
   ;
   bool ExpressionsAreEqual
-  (const Expression& left, const Expression& right, int RecursionDepth=0, int MaxRecursionDepth=500)
+  (const Expression& left, const Expression& right)
   ;
 
   static bool StandardUnion
@@ -1108,15 +1107,17 @@ static bool EvaluateDereferenceOneArgument
 class IncrementRecursion
 { CommandList* theBoss;
   public:
-  IncrementRecursion(CommandList& owner)
-  { owner.RecursionDeptH++;
-    if (owner.DepthRecursionReached<owner.RecursionDeptH)
-      owner.DepthRecursionReached=owner.RecursionDeptH;
-    this->theBoss=&owner;
-
+  IncrementRecursion(CommandList* owner): theBoss(0)
+  { if (owner!=0)
+    { owner->RecursionDeptH++;
+      if (owner->DepthRecursionReached<owner->RecursionDeptH)
+        owner->DepthRecursionReached=owner->RecursionDeptH;
+      this->theBoss=owner;
+    }
   }
   ~IncrementRecursion()
-  { this->theBoss->RecursionDeptH--;
+  { if (this->theBoss!=0)
+      this->theBoss->RecursionDeptH--;
   }
 };
 

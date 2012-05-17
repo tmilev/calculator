@@ -128,16 +128,21 @@ public:
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyEltTensorByCoeff(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
+  { if (right.type==Data::typeRational || right.type==Data::typePoly || right.type==Data::typeRationalFunction)
+      return Data::MultiplyAnyByEltTensor(right, left, output, comments);
+    return false;
+  }
   static bool MultiplyUEByAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByUE(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
   { if (left.type==Data::typeRational || left.type==Data::typePoly || left.type==Data::typeRationalFunction)
       return Data::MultiplyUEByAny(right, left, output, comments);
     return false;
   }
-  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
-;
+  static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   Data operator/(const Data& right);
   Data operator*(const Data& right);
 };
@@ -555,7 +560,6 @@ public:
   int DepthRecursionReached;
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
-  double MaxAllowedTimeInSeconds;
   ///////////////////////////////////////////////////////////////////////////
   bool flagTimeLimitErrorDetected;
   bool flagFirstErrorEncountered;
@@ -593,7 +597,7 @@ public:
   HashedList<DataCruncher> theMultiplicativeDataCrunchers;
   HashedList<DataCruncher> theAdditiveDataCrunchers;
   ObjectContainer theObjectContainer;
-  double StartTimeInSeconds;
+  double StartTimeEvaluationInSecondS;
 
   char DefaultWeylLetter;
   int DefaultWeylRank;
@@ -1075,7 +1079,7 @@ static bool EvaluateDereferenceOneArgument
     { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
       return;
     }
-    this->StartTimeInSeconds=this->theGlobalVariableS->GetElapsedSeconds();
+    this->StartTimeEvaluationInSecondS=this->theGlobalVariableS->GetElapsedSeconds();
     this->inputString=theInput;
     this->ParseAndExtractExpressions(theInput, this->theCommands, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
     this->EvaluateCommands();

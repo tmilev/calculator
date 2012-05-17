@@ -1223,6 +1223,8 @@ public:
   inline static std::string GetHtmlLinkFromFileName(const std::string& fileName)
   { return CGI::GetHtmlLinkFromFileName(fileName, "");
   }
+  static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
+  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags()
   { std::stringstream output;
@@ -1259,7 +1261,7 @@ public:
   static std::string GetHtmlButton
   (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
 ;
-  static std::string GetHtmlSpanHidableStartsHidden
+  static std::string GetHtmlSpanHidableStartsHiddeN
   (const std::string& input)
 ;
   static bool FileExists(const std::string& theFileName);

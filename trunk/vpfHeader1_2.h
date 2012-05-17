@@ -3318,18 +3318,18 @@ public MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, Coef
 public:
   bool MultiplyOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   bool MultiplyOnTheLeft
   (const MonomialUniversalEnveloping<CoefficientType>& theUE,
    ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   void MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int indexGenerator, GlobalVariables& theGlobalVariables,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,  int indexGenerator, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   void MultiplyBy
@@ -6682,14 +6682,14 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::operator=(const ElementSu
 template <class CoefficientType>
 bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { ElementTensorsGeneralizedVermas<CoefficientType> buffer;
   output.MakeZero();
   for (int i=0; i<theUE.size; i++)
-  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, theOwner, theGlobalVariables, theRingUnit, theRingZero))
+  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, theOwner, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
     { ElementSumGeneralizedVermas<CoefficientType> tempOutput;
-      std::cout << "<hr>emergency mode!";
+//      std::cout << "<hr>emergency mode!";
       for (int j=0; j<this->size; j++)
       { MonomialTensorGeneralizedVermas<CoefficientType> currentMon=this->TheObjects[j];
         if (currentMon.theMons.size!=1)
@@ -6704,8 +6704,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
       return true;
     }
     buffer*=theUE.theCoeffs[i];
-    std::cout << "<br>and your beloved buffer, after being multiplied by "
-    << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
+//    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
     output+=buffer;
   }
   return true;
@@ -6718,7 +6717,7 @@ template <class CoefficientType>
 bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 (const MonomialUniversalEnveloping<CoefficientType>& theUE,
  ElementTensorsGeneralizedVermas<CoefficientType>& output,
- List<ModuleSSalgebraNew<CoefficientType> >& theOwner,
+ List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
  GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { assert(&output!=this);
   output=*this;
@@ -6729,10 +6728,10 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
       return false;
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
-    { std::cout <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
-      output.MultiplyByElementLieAlg(buffer, theOwner, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+    { //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
+      output.MultiplyByElementLieAlg(buffer, theOwner, ownerAlgebra, theIndex, theGlobalVariables, theRingUnit, theRingZero);
       output=buffer;
-      std::cout << "<br>to get: " << output.ToString();
+      //std::cout << "<br>to get: " << output.ToString();
     }
   }
   return true;
@@ -6741,7 +6740,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int indexGenerator, GlobalVariables& theGlobalVariables,
+   List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { if (theOwner.size<=0 || this->size<0)
     return;
@@ -6751,7 +6750,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
   ElementUniversalEnveloping<CoefficientType> theGenerator;
 
   theGenerator.MakeOneGenerator
-  (indexGenerator, *theOwner[this->GetIndexOwnerModule()].theAlgebras, theOwner[this->GetIndexOwnerModule()].indexAlgebra, theRingUnit);
+  (indexGenerator, *ownerAlgebra.owner, ownerAlgebra.indexInOwner, theRingUnit);
   ;
 //  FormatExpressions tempFormat;
 //  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
@@ -6762,25 +6761,22 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
     for (int j=0; j<currentMon.theMons.size; j++)
     { tempElt.MakeZero(theOwner);
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
-      std::cout << "<hr> Acting by " << theGenerator.ToString()
-      << " on " << tempElt.ToString() << "<br>";
+//      std::cout << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
-      if (tempElt.size>0)
-        std::cout << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
+//      if (tempElt.size>0)
+//        std::cout << "<br> result: " << tempElt.ToString() << ", the first coeff of tempElt is : " << tempElt.theCoeffs[0].ToString();
       for (int k=0; k<tempElt.size; k++)
       { currentCoeff=this->theCoeffs[i];
-        std::cout << "<br>coeff: " << currentCoeff.ToString() << " times " << tempElt.theCoeffs[k].ToString()
-        << " equals ";
+//        std::cout << "<br>coeff: " << currentCoeff.ToString() << " times " << tempElt.theCoeffs[k].ToString() << " equals ";
         currentCoeff*=tempElt.theCoeffs[k];
-        std::cout << currentCoeff.ToString();
+//        std::cout << currentCoeff.ToString();
         monActedOn=accumMon;
         monActedOn*=(tempElt[k]);
         for (int l=j+1; l<currentMon.theMons.size; l++)
           monActedOn*=currentMon.theMons[l];
-        std::cout << "<br>Adding: " << currentCoeff.ToString() << " times " << monActedOn.ToString() << " to "
-        << output.ToString();
+//        std::cout << "<br>Adding: " << currentCoeff.ToString() << " times " << monActedOn.ToString() << " to " << output.ToString();
         output.AddMonomial(monActedOn, currentCoeff);
-        std::cout << "<br>to get " << output.ToString();
+//        std::cout << "<br>to get " << output.ToString();
       }
       accumMon*=currentMon.theMons[j];
     }
@@ -6805,12 +6801,12 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
 //    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
 //    << " times " << theUE[j].ToString() << " on " << this->ToString();
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
-    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
+//    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
-    std::cout << " equals: " << buffer.ToString();
+//    std::cout << " equals: " << buffer.ToString();
   }
-  std::cout << "<br>result: " << this->ToString();
+//  std::cout << "<br>result: " << this->ToString();
 }
 
 template <class CoefficientType>
@@ -6818,21 +6814,19 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
-std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
+//std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
   Accum.MakeZero(*this->owneR);
   for (int i=0; i<this->size; i++)
-  { std::cout << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString()
-    << " by " << this->theCoeffs[i].ToString();
+  {// std::cout << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
     this->TheObjects[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
-    std::cout << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
-
+    //std::cout << "<br>buffer " << buffer.ToString() << " multiplied by coeff " << this->theCoeffs[i].ToString();
     buffer*=this->theCoeffs[i];
-    std::cout << "<br>to obtain " << buffer.ToString();
+//    std::cout << "<br>to obtain " << buffer.ToString();
     Accum+=buffer;
-    std::cout << " <br> to accummulate to " << Accum.ToString();
+//    std::cout << " <br> to accummulate to " << Accum.ToString();
   }
   *this=Accum;
-  std::cout << "<br>To get in the damned end: " << this->ToString();
+//  std::cout << "<br>To get in the damned end: " << this->ToString();
 }
 
 template <class CoefficientType>
@@ -6849,9 +6843,9 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   ElementUniversalEnveloping<CoefficientType> theUEelt;
   theUEelt.MakeZero(*this->GetOwner().theAlgebras, this->GetOwner().indexAlgebra);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
-  std::cout << " <br>the monomial:" << this->ToString();
+//  std::cout << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
-  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
+//  std::cout << " <br>the corresponding ue with F.D. part cut off: " << theUEelt.ToString();
 
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
@@ -6871,8 +6865,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         break;
       int theIndex=currentMon.generatorsIndices[k];
       tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
-//      std::cout << "<hr>Action generator " << theIndex << ":<br>"
-//      << tempMat2.ToString();
+      //std::cout << "<hr>Action generator " << theIndex << ":<br>" << tempMat2.ToString();
       if (tempMat2.NumRows==0)
       { //if (theIndex>=theMod.GetOwner().GetRank()+theMod.GetOwner().GetNumPosRoots())
         //{ std::cout << "<br>Error! Accum: " << this->ToString();
@@ -6901,7 +6894,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       }
   }
 //  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
-  std::cout << "<br> Final output: " << output.ToString();
+//  std::cout << "<br> Final output: " << output.ToString();
   theMod.GetOwner().OrderSSLieAlgebraStandard();
 }
 

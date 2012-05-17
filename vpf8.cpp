@@ -6729,7 +6729,7 @@ std::string CGI::GetHtmlButton
   return out.str();
 }
 
-std::string CGI::GetHtmlSpanHidableStartsHidden
+std::string CGI::GetHtmlSpanHidableStartsHiddeN
   (const std::string& input)
 { std::stringstream out;
   CGI::GlobalFormulaIdentifier ++;

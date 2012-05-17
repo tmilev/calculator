@@ -1414,7 +1414,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //  const SyntacticElement& ninthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
   if (this->flagLogSyntaxRules)
-    std::cout <<"<hr>" << this->ElementToStringSyntacticStack();
+    std::cout << "<hr>" << this->ElementToStringSyntacticStack();
   if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression while reducing " << this->ElementToStringSyntacticStack()
     << " does not have properly initialized context. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__;
@@ -1535,24 +1535,24 @@ bool CommandList::fHWTAABF
   theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, leftExpression, comments);
   theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, rightExpression, comments);
   if (leftExpression.theOperation!=theCommands.opData() || rightExpression.theOperation!=theCommands.opData())
-  { std::cout << "<br>left: "<< leftExpression.ToString();
-    std::cout << "<br>right: "<< rightExpression.ToString();
+  { //std::cout << "<br>left: "<< leftExpression.ToString();
+    //std::cout << "<br>right: "<< rightExpression.ToString();
     return false;
   }
   Data leftD=leftExpression.GetData();
   Data rightD=rightExpression.GetData();
-  std::cout << "<br>starting left elt before merging: " << leftD.ToString();
-  std::cout << "<br>starting right elt before conversion: " << rightD.ToString();
+  //std::cout << "<br>starting left elt before merging: " << leftD.ToString();
+  //std::cout << "<br>starting right elt before conversion: " << rightD.ToString();
   if (!Data::MergeContexts(leftD, rightD))
-  { std::cout << "failed to merge contexts: " ;
+  { //std::cout << "failed to merge contexts: " ;
     return false;
   }
   if (!leftD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
     return false;
   if (!rightD.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
     return false;
-  std::cout << "<br>Merge successful!<br>left elt after merging: " << leftD.ToString();
-  std::cout << "<br>right elt after merging: " << rightD.ToString();
+  //std::cout << "<br>Merge successful!<br>left elt after merging: " << leftD.ToString();
+  //std::cout << "<br>right elt after merging: " << rightD.ToString();
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[leftD.GetIndexAmbientSSLieAlgebra()];
   Vector<RationalFunction> weight;
   Context finalContext=leftD.GetContext();
@@ -1572,11 +1572,11 @@ bool CommandList::fHWTAABF
   { std::cout << "This shouldn't happen!";
     return false;
   }
-  std::cout << "<br>starting left elt after the very final conversion: " << leftD.ToString();
-  std::cout << "<br>starting right elt after conversion: " << rightD.ToString();
-  std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ToString();
-  std::cout << "<br>Left context: " << leftD.GetContext().ToString();
-  std::cout << "<br>Right context: " << rightD.GetContext().ToString();
+  //std::cout << "<br>starting left elt after the very final conversion: " << leftD.ToString();
+  //std::cout << "<br>starting right elt after conversion: " << rightD.ToString();
+  //std::cout << "<br>Highest weight in fundamental coords after conversion: " << weight.ToString();
+  //std::cout << "<br>Left context: " << leftD.GetContext().ToString();
+  //std::cout << "<br>Right context: " << rightD.GetContext().ToString();
 
   RationalFunction theRingZero, theRingUnit;
   theRingZero.MakeZero(leftD.GetNumContextVars(), theCommands.theGlobalVariableS);
@@ -1587,7 +1587,7 @@ bool CommandList::fHWTAABF
   theSSalgebra.OrderSSalgebraForHWbfComputation();
   hwDualCoords=theWeyl.GetDualCoordinatesFromFundamental(weight);
   RationalFunction output;
-  std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
+  //std::cout << "<br>The highest weight in dual coordinates, as I understand it:" << hwDualCoords.ToString();
   if(!leftD.GetUE().HWTAAbilinearForm(rightD.GetUE(), output, &hwDualCoords, *theCommands.theGlobalVariableS, theRingUnit, theRingZero, comments))
   { theExpression.SetError("Error: couldn't compute Shapovalov form, see comments.");
     return true;
@@ -1889,11 +1889,13 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::initCrunchers()
-{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
+{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRational, Data::MultiplyEltTensorByCoeff);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typePoly, Data::MultiplyEltTensorByCoeff);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRationalFunction, Data::MultiplyEltTensorByCoeff);
 
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::MultiplyUEByAny);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::MultiplyUEByAny);
@@ -1908,6 +1910,7 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::MultiplyRatOrPolyByRatOrPoly);
 
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeEltTensorGenVermasOverRF, Data::AddEltTensorToEltTensor);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::AddUEToAny);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::AddUEToAny);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::AddUEToAny);
@@ -2004,7 +2007,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
   this->DepthRecursionReached=0;
-  this->MaxAllowedTimeInSeconds=inputGlobalVariables.MaxAllowedComputationTimeInSeconds/2;
   this->flagLogSyntaxRules=false;
   this->flagNewContextNeeded=true;
   this->MaxLatexChars=2000;
@@ -2347,11 +2349,11 @@ bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::st
 { output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(output, rightCopy))
-  { std::cout << "failed to merge contexts!";
+  { //std::cout << "failed to merge contexts!";
     return false;
   }
   if (!rightCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >())
-  { std::cout << "failed to convert " << rightCopy.ToString();
+  { //std::cout << "failed to convert " << rightCopy.ToString();
     return false;
   }
   ElementUniversalEnveloping<RationalFunction> result;
@@ -2384,9 +2386,27 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
   ElementTensorsGeneralizedVermas<RationalFunction> outputElt;
 //    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyOnTheLeft
-        (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
+        (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, leftCopy.GetAmbientSSAlgebra(),
+         *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
     return false;
   output.MakeElementTensorGeneralizedVermas(*leftCopy.owner, outputElt, output.theContextIndex);
+  return true;
+}
+
+bool Data::AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+//  std::cout << "Adding tensor elt to tensor elt!";
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+  { if (comments!=0)
+      *comments << "failed to merge contexts trying to add " << left.ToString() << " to " << right.ToString();
+    return false;
+  }
+  ElementTensorsGeneralizedVermas<RationalFunction> result;
+  result=output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  result+=rightCopy.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  output.MakeElementTensorGeneralizedVermas(*left.owner, result, output.theContextIndex);
+  //std::cout << "result of addition: " << result.ToString();
   return true;
 }
 
@@ -2588,6 +2608,7 @@ bool CommandList::StandardPlus
     Expression& rightE=theExpression.children[1];
     if (leftE.theOperation==theCommands.opData() && rightE.theOperation==theCommands.opData())
     { Data outputD;
+//      std::cout << "<br>Getting additive cruncher for " << leftE.ToString( ) << " + " << rightE.ToString();
       DataCruncher::CruncherDataTypes theCruncher= theCommands.GetAdditiveCruncher(leftE.GetData().type, rightE.GetData().type);
       if (theCruncher!=0)
         if (theCruncher(leftE.GetData(), rightE.GetData(), outputD, comments))
@@ -2878,7 +2899,7 @@ bool CommandList::StandardMinus
   }
   Expression result, minusOne;
   minusOne.MakeInt(-1, theCommands, inputIndexBoundVars);
-  result.MakeProducT(theCommands, inputIndexBoundVars, minusOne, *toBeTransformed);
+  result.MakeProducT(theCommands, inputIndexBoundVars, *toBeTransformed, minusOne);
   *toBeTransformed=result;
   //std::cout << toBeTransformed->ToString();
   return true;
@@ -3113,10 +3134,10 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   }
   static int errorCounter=0;
   errorCounter++;
-  std::string debugString="non-initialized";
-  std::string debugStringIntermediate="non-initialized";
+//  std::string debugString="non-initialized";
+//  std::string debugStringIntermediate="non-initialized";
 
-  debugString=theExpression.ToString();
+//  debugString=theExpression.ToString();
   //std::cout << "<hr> At error counter " << errorCounter << " expression is: " << debugString;
   this->ExpressionStack.AddOnTop(theExpression);
   HashedList<Expression> currentExpressionTransformations;
@@ -3125,9 +3146,6 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   bool NonReduced=true;
   int counter=-1;
   int indexInCache=-1;
-  if (theExpression.IndexBoundVars==3)
-  { debugString=theExpression.ToString();
-  }
   if (theExpression.IndexBoundVars!=-1)
   { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
     if (indexInCache!=-1)
@@ -3143,10 +3161,10 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   bool resultExpressionIsFree=true;
   while (NonReduced)
   { if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
-      if (this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds >this->MaxAllowedTimeInSeconds)
+      if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2)
       { if (!this->flagTimeLimitErrorDetected)
-          std::cout << "<br><b>Max allowed computational time is " << this->MaxAllowedTimeInSeconds << ";  so far, "
-          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeInSeconds  << " have elapsed -> aborting computation ungracefully.</b>";
+          std::cout << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2 << ";  so far, "
+          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS  << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
         this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
         return true;
@@ -3154,8 +3172,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     counter++;
     NonReduced=false;
     for (int i=0; i<theExpression.children.size; i++)
-    { if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound
-          (theExpression.children[i], bufferPairs, theLog))
+    { if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, theLog))
         resultExpressionIsFree=false;
       if (theExpression.children[i].errorString!="")
       { this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
@@ -3395,7 +3412,7 @@ void CommandList::EvaluateCommands()
   this->outputString=out.str();
   if (comments.str()!="")
   { std::stringstream commentsStream;
-    commentsStream << "<b>Comments.</b><br><span>"<< comments.str() << "</span>";
+    commentsStream << "<b>Comments.</b><br><span>" << comments.str() << "</span>";
     this->outputCommentsString=commentsStream.str();
   }
 }
@@ -3773,24 +3790,22 @@ std::string CommandList::ElementToStringNonBoundVars()
 }
 
 std::string Function::ToString(CommandList& theBoss)const
-{ std::stringstream out;
+{ std::stringstream out2;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<span style=\"display: inline\" id=\"functionBox" << CGI::clearSlashes(this->theName) << "\" >";
+  out2 << "<span style=\"display: inline\" id=\"functionBox" << CGI::clearSlashes(this->theName) << "\" >";
   if (this->flagNameIsVisible)
-  { out << openTag2 << this->theName << closeTag2;
+  { out2 << openTag2 << this->theName << closeTag2;
     if (!this->theArgumentList.IsZeroPointer())
       for (int i=0; i<this->theArgumentList.GetElementConst().size; i++)
-      { out << "{}(" << this->theArgumentList.GetElementConst()[i] << ")";
+      { out2 << "{}(" << this->theArgumentList.GetElementConst()[i] << ")";
         if (i!=this->theArgumentList.GetElementConst().size-1)
-          out << ", ";
+          out2 << ", ";
       }
   }
   else
-    out << openTag2 << this->theName << closeTag2;
-  out << "<button" << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('fun" << CGI::clearSlashes(this->theName)
-  << "');\">More/less info</button><span id=\"fun" << CGI::clearSlashes(this->theName)
-  << "\" style=\"display: none\"><br>";
+    out2 << openTag2 << this->theName << closeTag2;
+ std::stringstream out;
   if (!this->flagNameIsVisible)
     out << "This function is invoked indirectly as an operation handler. ";
 
@@ -3801,8 +3816,9 @@ std::string Function::ToString(CommandList& theBoss)const
     << " textType=Calculator&textDim=1&textInput="
     << CGI::UnCivilizeStringCGI(this->theExample)
     << "\"> " << this->theExample << "</a>" ;
-    out << "</span></span>";
-  return out.str();
+  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());//, "Expand/collapse.", "fun"+CGI::clearSlashes(this->theName));
+  out2 << "<span>";
+  return out2.str() ;
 }
 
 std::string CommandList::ElementToStringFunctionHandlers()
@@ -3817,19 +3833,28 @@ std::string CommandList::ElementToStringFunctionHandlers()
 }
 
 std::string CommandList::ToString()
-{ std::stringstream out;
+{ std::stringstream out, out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
   std::string openTag3="<span style=\"color:#00FF00\">";
   std::string closeTag3="</span>";
-  out << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
-  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeInSeconds;
-  out << "<br>Elapsed time since evaluation was started: "
-  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).";
-  out << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached;
-  out << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr>";
+  out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
+
+  double globalStartTime= this->theGlobalVariableS->GetElapsedSeconds();
+  out2 << "<br>Calculator boot from start of main() (excluding static initializations + executable load): "
+  << globalStartTime << " seconds (" << globalStartTime*1000 << " millisecond(s)).";
+  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeEvaluationInSecondS;
+  out2 << "<br>Elapsed time since evaluation was started: "
+  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " millisecond(s)).";
+  out2 << "<br>Maximum computation time: " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2
+  << " seconds. ";
+  if (this->DepthRecursionReached>0)
+    out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+
+  out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b><br>";
+
   out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
@@ -3878,7 +3903,8 @@ std::string CommandList::ToString()
       }
     }
   }
-  return out.str();
+  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());//, "Expand/collapse.");
+  return out2.str();
 }
 
 std::string Expression::GetOperation()const
@@ -4190,7 +4216,7 @@ ElementUniversalEnveloping<RationalFunction> Context::GetPolynomialMonomial
   ElementUniversalEnveloping<RationalFunction> output;
   RationalFunction theRF;
   theRF.MakeOneLetterMon(this->VariableImages.size, theIndex, 1, theGlobalVariables);
-  std::cout << "<br>this->indexAmbientSSalgebra=  " << this->indexAmbientSSalgebra;
+//  std::cout << "<br>this->indexAmbientSSalgebra=  " << this->indexAmbientSSalgebra;
   output.MakeConst(theRF, this->theOwner->theObjectContainer.theLieAlgebras, this->indexAmbientSSalgebra);
   return output;
 }

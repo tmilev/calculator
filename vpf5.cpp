@@ -451,6 +451,23 @@ bool CommandList::fEmbedG2inB3
   return true;
 }
 
+std::string CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
+{ std::stringstream out;
+  out<< "<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script>";
+  return out.str();
+}
+
+std::string CGI::GetSliderSpanStartsHidden(const std::string& content, const std::string& label, const std::string& desiredID)
+{ std::stringstream out;
+  CGI::GlobalFormulaIdentifier++;
+  std::stringstream idStringStream;
+  idStringStream << desiredID;
+  if (desiredID=="")
+    idStringStream << "UnnamedSpan" << CGI::GlobalFormulaIdentifier;
+  out << "<a href=\"javascript:;\" onmusedown=\"document.getElementById('"  << idStringStream.str() << "').slideToggle('slow');\">Expand/collapse</a>";
+  out << "<span id=\"" << idStringStream.str() << "\" style=\"display:none\">" << content << "</span>";
+  return out.str();
+}
 
 class DoxygenInstance
 {

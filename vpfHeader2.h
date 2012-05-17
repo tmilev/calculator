@@ -501,6 +501,7 @@ public:
   HashedList<Context> theContexts;
   HashedListB<std::string, MathRoutines::hashString> theStrings;
   void reset();
+  std::string ToString();
 };
 
 class DataCruncher
@@ -1027,6 +1028,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fWeylDimFormula
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fAnimateLittelmannPaths
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fHWV

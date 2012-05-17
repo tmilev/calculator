@@ -2753,6 +2753,9 @@ public:
 (List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
  Selection* parabolicNonSelectedAreInLeviPart=0)
 ;
+std::string GenerateOrbitAndAnimate
+(GlobalVariables& theGlobalVariables)
+;
   bool MinimaAreIntegral();
   std::string ToString(bool useSimpleCoords=true)
   { if (this->Waypoints.size==0)

@@ -467,7 +467,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
         out << "\\end{array}";
       return out.str();
     case Data::typeRationalFunction:
-      return this->GetValuE<RationalFunction>().ToString();
+      return this->GetValuE<RationalFunction>().ToString(&theFormat);
     case Data::typeRational:
       return this->GetValuE<Rational>().ToString();
     case Data::typePoly:
@@ -1978,6 +1978,10 @@ void CommandList::initPredefinedVars()
    The second argument gives the highest weight in fundamental coordinates. ",
    "WeylDimFormula{}(G_2, (1,0));\nWeylDimFormula{}(E_6, (2,0,0,0,0,0));");
   this->AddNonBoundVarMustBeNew
+  ("animateLittelmannPaths", & this->fAnimateLittelmannPaths, "",
+   "Animates Littelmann paths. Presented first on the seminar in Charles University Prague. ",
+   "animateLittelmannPaths{}(A_2, (1,0));");
+  this->AddNonBoundVarMustBeNew
   ("DecomposeInducingRepGenVermaModule", & this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
    "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
    The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
@@ -2067,13 +2071,15 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoFail
   ("{}", this->StandardFunction, "",
    "The first argument of this operator represents a name of the function, the second argument represents the argument of that function.  \
-   1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
-   2) If the first argument is of type Data, tries a series of pre-defined rules for applying\
-   the left argument to the right argument. \
-   3) If the first argument of {} is of type NonBoundVariable and has a hard-coded handler function {} \
-   invokes the hard-coded function onto the second argument.\
-   If the invocation is successful, the expression is substituted with the result.",
-   "f{}(x)+1{}(x)-(1/2){}x ", false);
+   <br>1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
+   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of the function, depending on the types of the arguments.\
+   <br>3) If the first argument is of type list and the second argument is a small integer between 1 and the number of elements in the list,\
+   the operation substitutes the list with the element indexed by the second argument.\
+   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded handler function, the handler is invoked onto the second argument.\
+   If the invocation is successful, the expression is substituted with the result, otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
+   the only noticeable difference is that the functions invoked in (2) are anonymous from the calculator standpoint (i.e. have only technical c++ names), \
+   while the functions in (4) have human-readable calculator-visible names. In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
+   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", false);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
   this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
@@ -3832,6 +3838,19 @@ std::string CommandList::ElementToStringFunctionHandlers()
   return out.str();
 }
 
+std::string ObjectContainer::ToString()
+{ std::stringstream out;
+  if (this->theLieAlgebras.size>0)
+  { out << "Lie algebras created (" << this->theLieAlgebras.size << " total): ";
+    for (int i=0; i<this->theLieAlgebras.size; i++)
+    { out << this->theLieAlgebras[i].GetLieAlgebraName(true);
+      if (i!=this->theLieAlgebras.size-1)
+        out << ", ";
+    }
+  }
+  return out.str();
+}
+
 std::string CommandList::ToString()
 { std::stringstream out, out2;
   std::string openTag1="<span style=\"color:#0000FF\">";
@@ -3841,21 +3860,27 @@ std::string CommandList::ToString()
   std::string openTag3="<span style=\"color:#00FF00\">";
   std::string closeTag3="</span>";
   out2 << " Total number of pattern matches performed: " << this->TotalNumPatternMatchedPerformed << "";
-
-  double globalStartTime= this->theGlobalVariableS->GetElapsedSeconds();
-  out2 << "<br>Calculator boot from start of main() (excluding static initializations + executable load): "
-  << globalStartTime << " seconds (" << globalStartTime*1000 << " millisecond(s)).";
-  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds() - this->StartTimeEvaluationInSecondS;
-  out2 << "<br>Elapsed time since evaluation was started: "
-  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " millisecond(s)).";
+  double elapsedSecs=this->theGlobalVariableS->GetElapsedSeconds();
+  out2 << "<br>Computation time: "
+  << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
+  std::stringstream tempStreamTime;
+  tempStreamTime <<  " Of them "
+  << this->StartTimeEvaluationInSecondS
+  << " seconds (" << this->StartTimeEvaluationInSecondS*1000 << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " ("
+  << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000 << " milliseconds) user computation.<br>"
+  << "Boot time is measured from start of main() until evaluation start and excludes static initializations + executable load. "
+  << "Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
+  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
   out2 << "<br>Maximum computation time: " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2
   << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
 
-  out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b><br>";
-
-  out << "<br>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
+  out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
+  out << "<br><b>Object container information</b>."
+  << "The object container is the data structure storing all c++ built-in data types requested by the user<br> "
+  << this->theObjectContainer.ToString();
+  out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
   { out << openTag1 << this->controlSequences[i] << closeTag1;
     if (i!=this->controlSequences.size)

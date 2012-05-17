@@ -6406,6 +6406,15 @@ public:
 class AnimationBuffer
 {
 public:
+//the following items are a part of a dirty hack i need to do for an
+//under-stress presentation. Please do not use them !
+//they need a rewrite!
+  std::string GetHtmlFromDrawOperationsCreateDivWithUniqueName
+  (int theDimension)
+  ;
+  List<DrawingVariables> theFrames;
+  DrawOperations theBuffer;
+////////////////////////////////////////end of dirty hack
   DrawOperations stillFrame;
   List<DrawOperations> thePhysicalDrawOps;
   List<VirtualDrawOp> theVirtualOpS;

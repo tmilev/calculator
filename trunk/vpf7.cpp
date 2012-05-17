@@ -2389,7 +2389,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
 
 std::string ProjectInformation::ToString()
 { std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator</button>";
+  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator (expand/collapse)</button>";
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
   for (int i=0; i<this->FileNames.size; i++)
   { out << " <br>\n";

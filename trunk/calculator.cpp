@@ -325,6 +325,7 @@ g_{-2} v_\\lambda\
  // v_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));(g_5g_{-5}g_{-1}) v_\\lambda;";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i}; c:= hmmG2inB3{}( Casimir{}G_2);\n x_1:= Polynomial{} x_1;\nv_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));\nc v_\\lambda;";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_2; \nv_\\lambda:=hwv{}(B_2, (1,1), (1,1)); \n-1/3g_{-4}v_\\lambda";
+//civilizedInput="animateLittelmannPaths{}(A_2, (1,0));";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -393,7 +394,7 @@ g_{-2} v_\\lambda\
       std::cout << "\"" << currentVar.theName << "\"";
     }
   }
-  std::cout << ");\n  var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
+  std::cout << ");\n  //var obj = actb(document.getElementById('textInputID'), functionNameArray);\n</script>\n";
 //  for(int i=0; i<theParser.SystemCommands.size; i++)
 //  { std::cout << "<br>About to execute: " << theParser.SystemCommands.TheObjects[i].c_str() << "\n" ;
  //   system(theParser.SystemCommands[i].c_str());

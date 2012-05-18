@@ -518,8 +518,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   Vectors<double> draggableBAsis;
   this->owner->GetCoxeterPlane(coxPlane[0], coxPlane[1], theGlobalVariables);
 //  theBuffer.theBuffer.initDimensions(this->owner.CartanSymmetric, draggableBAsis, coxPlane, 1);
-  DrawingVariables tempDV;
+  DrawingVariables tempDV, tempDV2;
   this->owner->DrawRootSystem(tempDV, true, theGlobalVariables, true);
+  this->owner->DrawRootSystem(tempDV2, true, theGlobalVariables, true);
   theBuffer.theBuffer=tempDV.theBuffer;
   theBuffer.theFrames.SetSize(theOrbit.size);
   for (int i=0; i<theOrbit.size; i++)
@@ -528,11 +529,17 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     currentOps.theBuffer=tempDV.theBuffer;
     for (int j=0; j<currentPath.Waypoints.size; j++)
     { if (j!=currentPath.Waypoints.size-1)
-        currentOps.drawLineBetweenTwoVectorsBuffer(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+      { currentOps.drawLineBetweenTwoVectorsBuffer(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+        tempDV2.theBuffer.drawLineBetweenTwoVectorsBuffer(currentPath.Waypoints[j], currentPath.Waypoints[j+1], DrawingVariables::PenStyleNormal, 0);
+      }
       currentOps.drawCircleAtVectorBuffer(currentPath.Waypoints[j], 2, DrawingVariables::PenStyleNormal, 0);
+      tempDV2.theBuffer.drawCircleAtVectorBuffer(currentPath.Waypoints[j], 4, DrawingVariables::PenStyleNormal, 0);
     }
   }
+  out << "<br>Animation of the Littelmann paths follows.";
   out << theBuffer.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
+  out << "<br>Here are all Littelmann paths drawn simultaneously. ";
+  out << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "Littelmann paths (" << theOrbit.size << " total):<br>";
   for (int i=0; i<theOrbit.size; i++)
     out << theOrbit[i].ToString() << "<br>";

@@ -1979,8 +1979,10 @@ void CommandList::initPredefinedVars()
    "WeylDimFormula{}(G_2, (1,0));\nWeylDimFormula{}(E_6, (2,0,0,0,0,0));");
   this->AddNonBoundVarMustBeNew
   ("animateLittelmannPaths", & this->fAnimateLittelmannPaths, "",
-   "Animates Littelmann paths. Presented first on the seminar in Charles University Prague. ",
-   "animateLittelmannPaths{}(A_2, (1,0));");
+   "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. Presented first on the seminar in Charles University Prague. \
+   The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
+   ",
+   "animateLittelmannPaths{}(G_2, (2,0));");
   this->AddNonBoundVarMustBeNew
   ("DecomposeInducingRepGenVermaModule", & this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
    "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\

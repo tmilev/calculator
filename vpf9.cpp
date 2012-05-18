@@ -36,8 +36,7 @@ bool partFraction::MakingConsistencyCheck=false;
 Rational partFractions::CheckSum;
 Rational partFraction::CheckSum;
 Rational partFraction::CheckSum2;
-
-FormatExpressions PolyFormatNumFrac;
+int DrawingVariables::NumHtmlGraphics=0;
 
 int CGI::GlobalFormulaIdentifier=0;
 
@@ -53,7 +52,7 @@ template < > int HashedListB<affineHyperplane, affineHyperplane::HashFunction>::
 template < > int HashedListB<coneRelation, coneRelation::HashFunction>::PreferredHashSize=1000;
 template < > int HashedListB<slTwo, slTwo::HashFunction>::PreferredHashSize=1000;
 template < > int HashedListB<ElementSemisimpleLieAlgebra, ElementSemisimpleLieAlgebra::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<MonomialUniversalEnveloping<Polynomial<Rational> >, MonomialUniversalEnveloping<Polynomial<Rational> >::HashFunction >::PreferredHashSize=10000;
+template < > int HashedListB<MonomialUniversalEnveloping<Polynomial<Rational> >, MonomialUniversalEnveloping<Polynomial<Rational> >::HashFunction>::PreferredHashSize=10000;
 template < > int HashedListB<MonomialUniversalEnvelopingOrdered<Polynomial<Rational> >, MonomialUniversalEnvelopingOrdered<Polynomial<Rational> >::HashFunction >::PreferredHashSize=20;
 template < > int HashedListB<MonomialUniversalEnvelopingOrdered<RationalFunction>, MonomialUniversalEnvelopingOrdered<RationalFunction>::HashFunction >::PreferredHashSize=20;
 template < > int HashedListB<Cone, Cone::HashFunction>::PreferredHashSize=10000;
@@ -157,7 +156,6 @@ bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
 bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
-int RankGlobal;
 //FacetPointers TheBigFacetOutput;
 //DrawingVariables TDV(200, 400);
 template< >
@@ -183,7 +181,6 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->theDrawTextFunction=0;
   this->theDrawCircleFunction=0;
   this->theDrawClearScreenFunction=0;
-  this->NumHtmlGraphics=0;
   this->fontSizeNormal=10;
   this->fontSizeSubscript=6;
   this->flagLaTeXDraw= false;

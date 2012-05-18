@@ -79,7 +79,7 @@ template<class CoefficientType>
 class ElementTensorsGeneralizedVermas;
 
 
-//classes related to integer programming (polyhedra, lattices, quasipolynomials)
+//classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
 class Cone;
 class ConeComplex;
 class Lattice;
@@ -888,7 +888,7 @@ std::iostream& operator >> (std::iostream& input, List<Object>& theList)
 //and a pointer to the so allocated memory is stored.
 //Motivation for this class: when a pointer/reference to an object is requested,
 //the class returns a pointer to the individually allocated object. This piece of memory is allocated exactly once,
-//i.e. the individual piece of memory never moves, and is thus completely safe to pass the object around.
+//i.e. the individual piece of memory never moves, and is thus completely safe to pass a reference of the object around.
 
 template <class Object>
 class HashedListReferences
@@ -1142,7 +1142,7 @@ public:
 //NOTE NOTE NOTE NOTE!!!!!!!
 //If you get an error message like "could not convert template argument blah blah blah "
 //this might mean you have a compile-time cyclic dependency
-//(it manifests itself compile-time only, due to the way in which memory is allocated in C++).
+//(it is due to the way in which memory is allocated in C++).
 //It is usually fixed by one of the following.
 //1) placing constructors out of .h files into .cpp files.
 //2) Removing all compile-time object constructions (i.e. transformations like
@@ -5236,27 +5236,27 @@ public:
    ;
   static void TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& theBasis,
-   Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3,
-   Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, GlobalVariables* theGlobalVariables)
+   Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational> & buffer3,
+   Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, GlobalVariables* theGlobalVariables)
   { RationalFunction::TransformToReducedGroebnerBasis
     (
      theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &MonomialP::LeftIsGEQLexicographicLastVariableStrongest, theGlobalVariables
      );
   }
   static void TransformToReducedGroebnerBasis
-    (List<Polynomial<Rational> >& theBasis, Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
+    (List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
   bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right), GlobalVariables* theGlobalVariables
  )
  ;
   static void RemainderDivisionWithRespectToBasis
-(Polynomial<Rational> & input, List<Polynomial<Rational> >& theBasis, Polynomial<Rational> & outputRemainder, Polynomial<Rational> & buffer1,
- Polynomial<Rational> & buffer2, MonomialP& bufferMon1,
+(Polynomial<Rational>& input, List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& outputRemainder, Polynomial<Rational>& buffer1,
+ Polynomial<Rational>& buffer2, MonomialP& bufferMon1,
  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
  )
  ;
   static void RemainderDivision
-(Polynomial<Rational> & input, Polynomial<Rational> & divisor, Polynomial<Rational> & outputRemainder,
- Polynomial<Rational> & buffer, MonomialP& bufferMon1,
+(Polynomial<Rational>& input, Polynomial<Rational>& divisor, Polynomial<Rational>& outputRemainder,
+ Polynomial<Rational>& buffer, MonomialP& bufferMon1,
    bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
  )
    ;
@@ -5269,10 +5269,10 @@ public:
   static void ScaleClearDenominator
   (List<RationalFunction>& input, Vector<Polynomial<Rational> >& output)
   ;
-  static void gcd(const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, Polynomial<Rational> & buffer5, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
-  static void lcm(const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
-  static inline void lcm(Polynomial<Rational> & left, Polynomial<Rational> & right, Polynomial<Rational> & output)
-  { Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4; List<Polynomial<Rational> > bufferList; MonomialP tempMon1, tempMon2;
+  static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, Polynomial<Rational> & buffer5, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
+  static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
+  static inline void lcm(Polynomial<Rational>& left, Polynomial<Rational> & right, Polynomial<Rational> & output)
+  { Polynomial<Rational> buffer1, buffer2, buffer3, buffer4; List<Polynomial<Rational> > bufferList; MonomialP tempMon1, tempMon2;
     RationalFunction::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
   }
   inline void operator-=(int other)
@@ -5494,7 +5494,8 @@ void Polynomial<Element>::Evaluate
     { if (!this->TheObjects[i][j].IsSmallInteger() )
       { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose"
         <<  i+1 << "^{th} variable is raised is raised to the power " << this->TheObjects[i][j].ToString()
-        << ". Raising variables to power is allowed only if the power is a small integer. ";
+        << ". Raising variables to power is allowed only if the power is a small integer. If the user has requested such an operation, it"
+        << " *must* be intercepted at an earlier level (and the user must be informed).";
         assert(false);
         return;
       }
@@ -6044,8 +6045,6 @@ public:
   static void GetStringFromColorIndex(int ColorIndex, std::string &output, DrawingVariables& drawInput);
 };
 
-
-
 class permutation: public SelectionWithDifferentMaxMultiplicities
 {
 public:
@@ -6055,7 +6054,6 @@ public:
   void GetPermutationLthElementIsTheImageofLthIndex(List<int>& output);
   int GetNumPermutations() {return this->getTotalNumSubsets();}
 };
-
 
 struct IndicatorWindowVariables
 {
@@ -6461,7 +6459,7 @@ public:
   bool flagDrawingInvisibles;
   bool flagDrawingLinkToOrigin;
   int Selected;
-  int NumHtmlGraphics;
+  static int NumHtmlGraphics;
   int textX;
   int textY;
   int fontSizeNormal;
@@ -7469,9 +7467,9 @@ template <class CoefficientType>
 bool Vectors<CoefficientType>::GetNormalSeparatingCones
 (GlobalVariables& theGlobalVariables, int theDimension, List<Vector<CoefficientType> >& coneStrictlyPositiveCoeffs,
   List<Vector<CoefficientType> >& coneNonNegativeCoeffs, Vector<CoefficientType>& outputNormal)
-{ Matrix<Rational> & matA= theGlobalVariables.matConeCondition1.GetElement();
-  Matrix<Rational> & matb= theGlobalVariables.matConeCondition2.GetElement();
-  Matrix<Rational> & matX= theGlobalVariables.matConeCondition3.GetElement();
+{ Matrix<Rational>& matA= theGlobalVariables.matConeCondition1.GetElement();
+  Matrix<Rational>& matb= theGlobalVariables.matConeCondition2.GetElement();
+  Matrix<Rational>& matX= theGlobalVariables.matConeCondition3.GetElement();
   if (coneStrictlyPositiveCoeffs.size==0)
     return true;
   int numRows= coneStrictlyPositiveCoeffs.size + coneNonNegativeCoeffs.size;
@@ -7526,9 +7524,9 @@ template <class CoefficientType>
 bool Vectors<CoefficientType>::ConesIntersect
 (GlobalVariables& theGlobalVariables, List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
  int theDimension)
-{ Matrix<Rational> & matA= theGlobalVariables.matConeCondition1.GetElement();
-  Matrix<Rational> & matb= theGlobalVariables.matConeCondition2.GetElement();
-  Matrix<Rational> & matX= theGlobalVariables.matConeCondition3.GetElement();
+{ Matrix<Rational>& matA= theGlobalVariables.matConeCondition1.GetElement();
+  Matrix<Rational>& matb= theGlobalVariables.matConeCondition2.GetElement();
+  Matrix<Rational>& matX= theGlobalVariables.matConeCondition3.GetElement();
   if (StrictCone.size==0)
     return false;
   int numCols= StrictCone.size + NonStrictCone.size;

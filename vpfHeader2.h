@@ -202,7 +202,7 @@ class Expression
   { this->theBoss=0;
     this->children.size=0;
     this->theOperation=-1;
-    this->theData=0;
+    this->theData=-1;
     this->errorString="";
     this->format=this->formatDefault;
     this->theComments="";

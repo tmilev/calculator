@@ -881,6 +881,108 @@ std::iostream& operator >> (std::iostream& input, List<Object>& theList)
   return input;
 }
 
+struct CGI
+{
+public:
+  static std::stringstream outputStream;
+  static int GlobalFormulaIdentifier;
+  static int numLinesAll;
+  static int numRegularLines;
+  static int numDashedLines;
+  static int numDottedLines;
+  static int shiftX;
+  static int shiftY;
+  static int scale;
+  static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
+  static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
+  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
+  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
+  static std::string UnCivilizeStringCGI(const std::string& input);
+  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
+  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
+  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
+  static std::string RemovePathFromFileName(const std::string& fileName)
+  {unsigned startNameWithoutFolderInfo=0;
+    for (unsigned i=0; i<fileName.size(); i++)
+      if (fileName[i]=='/' || fileName[i]=='\\')
+        startNameWithoutFolderInfo=i+1;
+    std::stringstream nameWithoutFolderInfo;
+    for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
+      nameWithoutFolderInfo << fileName[i];
+    return nameWithoutFolderInfo.str();
+  }
+  inline static std::string GetHtmlLinkFromFileName(const std::string& fileName)
+  { return CGI::GetHtmlLinkFromFileName(fileName, "");
+  }
+  static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
+  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
+  static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
+  static std::string GetPleaseDebugFileMessage(const std::string& file, int line)
+  { std::stringstream out;
+    out << "Please debug file " << CGI::GetHtmlLinkFromFileName(file) << " line " << line << ".";
+    return out.str();
+  }
+  static std::string GetHtmlSwitchMenuDoNotEncloseInTags()
+  { std::stringstream output;
+    output << "<script src=\"/vpf/jsmath/easy/load.js\"></script> ";
+    output << " <script type=\"text/javascript\"> \n";
+    output << " function switchMenu(obj)\n";
+    output << " { var el = document.getElementById(obj);	\n";
+    output << "   if ( el.style.display != \"none\" ) \n";
+    output << "     el.style.display = 'none';\n";
+    output << "   else \n";
+    output << "     el.style.display = '';\n";
+    output << " }\n";
+    output << "</script>";
+    return output.str();
+  }
+  static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
+  static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
+  static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
+  { return CGI::GetHtmlMathFromLatexFormulA(input, "", "", true, false);
+  }
+  static std::string GetHtmlMathDivFromLatexAddBeginARCL(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);
+  }
+  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);
+  }
+  static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
+  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
+  }
+  static std::string GetHtmlMathFromLatexFormulA
+  (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
+;
+  static std::string GetStyleButtonLikeHtml(){return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";}
+  static std::string GetHtmlButton
+  (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
+;
+  static std::string GetHtmlSpanHidableStartsHiddeN
+  (const std::string& input)
+;
+  static bool FileExists(const std::string& theFileName);
+  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
+  static std::string clearSlashes(const std::string& theString);
+  static void clearDollarSigns(std::string& theString, std::string& output);
+  static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
+  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames);
+  static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
+  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
+  static inline int RedGreenBlue(int r, int g, int b)
+  { r=r%256;
+    g=g%256;
+    b=b%256;
+    return r*65536+g*256+b;
+  }
+  static void FormatCPPSourceCode(const std::string& FileName);
+  static void(*functionCGIServerIgnoreUserAbort)(void);
+  static void SetCGIServerIgnoreUserAbort()
+  { if (CGI::functionCGIServerIgnoreUserAbort!=0)
+      CGI::functionCGIServerIgnoreUserAbort();
+  }
+};
+
 //class HashedListOfReferences is to be used in the same way as class HashedList.
 //The essential difference between HashedListOfReferences and HashedList is in the way the objects are
 //stored in memory. A copy of each object of HashedListOfReferences
@@ -1048,7 +1150,13 @@ public:
   }
   inline int GetIndexIMustContainTheObject(const Object& o) const
   { int result=this->GetIndex(o);
-    assert(result!=-1);
+    if (result==-1)
+    { std::cout << "This is a programming error: the programmer has requested the index of object "
+      << o << " with a function that does not allow failure. "
+      << " However, the container array does not contain his object. "
+      << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     return result;
   }
   void SetExpectedSize(int expectedSize)
@@ -1187,103 +1295,6 @@ public:
   }
   void operator=(const List<Object>& other)
   { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
-  }
-};
-
-struct CGI
-{
-public:
-  static std::stringstream outputStream;
-  static int GlobalFormulaIdentifier;
-  static int numLinesAll;
-  static int numRegularLines;
-  static int numDashedLines;
-  static int numDottedLines;
-  static int shiftX;
-  static int shiftY;
-  static int scale;
-  static void outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter);
-  static void PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines);
-  static void CivilizedStringTranslationFromVPold(std::string& input, std::string& output);
-  static void CivilizedStringTranslationFromCGI(std::string& input, std::string& output);
-  static std::string UnCivilizeStringCGI(const std::string& input);
-  static void ReplaceEqualitiesAndAmpersantsBySpaces(std::string& inputOutput);
-  static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
-  static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
-  static std::string RemovePathFromFileName(const std::string& fileName)
-  {unsigned startNameWithoutFolderInfo=0;
-    for (unsigned i=0; i<fileName.size(); i++)
-      if (fileName[i]=='/' || fileName[i]=='\\')
-        startNameWithoutFolderInfo=i+1;
-    std::stringstream nameWithoutFolderInfo;
-    for (unsigned i=startNameWithoutFolderInfo; i<fileName.size(); i++)
-      nameWithoutFolderInfo << fileName[i];
-    return nameWithoutFolderInfo.str();
-  }
-  inline static std::string GetHtmlLinkFromFileName(const std::string& fileName)
-  { return CGI::GetHtmlLinkFromFileName(fileName, "");
-  }
-  static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
-  static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
-  static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
-  static std::string GetHtmlSwitchMenuDoNotEncloseInTags()
-  { std::stringstream output;
-    output << "<script src=\"/vpf/jsmath/easy/load.js\"></script> ";
-    output << " <script type=\"text/javascript\"> \n";
-    output << " function switchMenu(obj)\n";
-    output << " { var el = document.getElementById(obj);	\n";
-    output << "   if ( el.style.display != \"none\" ) \n";
-    output << "     el.style.display = 'none';\n";
-    output << "   else \n";
-    output << "     el.style.display = '';\n";
-    output << " }\n";
-    output << "</script>";
-    return output.str();
-  }
-  static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
-  static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
-  static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
-  { return CGI::GetHtmlMathFromLatexFormulA(input, "", "", true, false);
-  }
-  static std::string GetHtmlMathDivFromLatexAddBeginARCL(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);
-  }
-  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);
-  }
-  static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
-  { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
-  }
-  static std::string GetHtmlMathFromLatexFormulA
-  (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
-;
-  static std::string GetStyleButtonLikeHtml(){return " style=\"background:none; border:0; text-decoration:underline; color:blue; cursor:pointer\" ";}
-  static std::string GetHtmlButton
-  (const std::string& buttonID, const std::string& theScript, const std::string& buttonText)
-;
-  static std::string GetHtmlSpanHidableStartsHiddeN
-  (const std::string& input)
-;
-  static bool FileExists(const std::string& theFileName);
-  static bool OpenFileCreateIfNotPresent(std::fstream& theFile, const std::string& theFileName, bool OpenInAppendMode, bool truncate, bool openAsBinary);
-  static std::string clearSlashes(const std::string& theString);
-  static void clearDollarSigns(std::string& theString, std::string& output);
-  static void subEqualitiesWithSimeq(std::string& theString, std::string& output);
-  static void ChopCGIInputStringToMultipleStrings(const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames);
-  static void ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, std::string& output, bool useHtml);
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip, bool useHtml){ std::string result; CGI::ElementToStringTooltip(input, inputTooltip, result, useHtml); return result; };
-  static std::string ElementToStringTooltip(const std::string& input, const std::string& inputTooltip){ return CGI::ElementToStringTooltip(input, inputTooltip, true); };
-  static inline int RedGreenBlue(int r, int g, int b)
-  { r=r%256;
-    g=g%256;
-    b=b%256;
-    return r*65536+g*256+b;
-  }
-  static void FormatCPPSourceCode(const std::string& FileName);
-  static void(*functionCGIServerIgnoreUserAbort)(void);
-  static void SetCGIServerIgnoreUserAbort()
-  { if (CGI::functionCGIServerIgnoreUserAbort!=0)
-      CGI::functionCGIServerIgnoreUserAbort();
   }
 };
 

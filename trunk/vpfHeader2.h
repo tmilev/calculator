@@ -25,7 +25,7 @@ public:
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
-    typeString
+    typeString, typeVariableNonBound
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -52,8 +52,14 @@ public:
   void MakeUE
 (CommandList& theBoss, const ElementUniversalEnveloping<RationalFunction>& inputUE, int inputContextIndex)
 ;
+  void MakeVariableNonBound
+(CommandList& theBoss, const VariableNonBound& input)
+;
   void MakeString
 (CommandList& theBoss, const std::string& inputString, const Context& inputContext)
+;
+  void MakeString
+(CommandList& theBoss, const std::string& inputString, int contextIndex)
 ;
   void MakePoly
 (CommandList& theBoss, const Polynomial<Rational>& inputPoly, int inputContextIndex)
@@ -143,8 +149,8 @@ public:
   static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  Data operator/(const Data& right);
-  Data operator*(const Data& right);
+  Data operator/(const Data& right)const;
+  Data operator*(const Data& right)const;
 };
 
 class Function
@@ -202,15 +208,14 @@ class Expression
   { this->theBoss=0;
     this->children.size=0;
     this->theOperation=-1;
-    this->theData=-1;
+    this->theDatA=-1;
     this->errorString="";
     this->format=this->formatDefault;
-    this->theComments="";
     this->IndexBoundVars=inputIndexBoundVars;
   }
   public:
   int theOperation;
-  int theData;
+  int theDatA;
   List<Expression> children;
   std::string errorString;
   ///////////////////////////////////////
@@ -218,7 +223,6 @@ class Expression
   int format;
   int IndexBoundVars;
   CommandList* theBoss;
-  std::string theComments;
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
@@ -231,35 +235,43 @@ class Expression
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
   }
-  const Data& GetData()const;
+  const Data& GetAtomicValue()const;
+  Rational GetRationalValue()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakeElementTensorsGeneralizedVermas
   (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
-  void MakePoly
+  void MakePolyAtom
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
   ;
-  void MakeRF(const RationalFunction& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
-  void MakeDatA(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
+  void MakePolY
+(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
   ;
-  void MakeDatA(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
+  void MakeRFAtom(const RationalFunction& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
+  void MakeAtom(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
-  void MakeString
+  void MakeAtom(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
+  ;
+  void MakeAtom(int input, CommandList& newBoss, int inputIndexBoundVars)
+  { this->MakeAtom((Rational) input, newBoss, inputIndexBoundVars);
+  }
+  void MakeAtom(const VariableNonBound& input, CommandList& newBoss, int inputIndexBoundVars)
+  ;
+  void MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
 ;
   void MakeInt(int theInt, CommandList& newBoss, int inputIndexBoundVars)
   ;
-void MakeVariableNonBoundNoProperties
-  (CommandList& owner, int inputIndexBoundVars, int varIndex)
-;
 void MakeVariableNonBounD
-  (CommandList& owner, int inputIndexBoundVars, int varIndex)
+  (CommandList& owner, int inputIndexBoundVars, const std::string& varName)
 ;
   void MakeFunction
   (CommandList& owner, int inputIndexBoundVars, const Expression& argument, const std::string& functionName)
 ;
+  bool EvaluatesToAtom()const;
+  bool EvaluatesToVariableNonBound()const;
   void MakeFunction
   (CommandList& owner, int inputIndexBoundVars, const Expression& argument, int functionIndex)
 ;
@@ -288,7 +300,7 @@ void MakeVariableNonBounD
   int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth)const
   { if (RecursionDepth>MaxRecursionDepth)
       return 0;
-    int result=(this->theOperation+1)*SomeRandomPrimes[0]+(this->theData+SomeRandomPrimes[1])*SomeRandomPrimes[2];
+    int result=(this->theOperation+1)*SomeRandomPrimes[0]+(this->theDatA+SomeRandomPrimes[1])*SomeRandomPrimes[2];
     int numCycles=MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
     for (int i=0; i<numCycles; i++)
       result+=this->children[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
@@ -311,15 +323,16 @@ void MakeVariableNonBounD
    std::stringstream* comments=0)
   ;
   bool HasBoundVariables();
-  bool IsRationalNumber();
+//  bool IsRationalAtom()const;
+  bool EvaluatesToRational()const;
   bool IsElementUE()const;
   bool IsInteger()const;
-  bool IsSmallInteger(int& whichInteger);
-  bool IsSmallInteger(){int tempI; return this->IsSmallInteger(tempI);}
+  bool EvaluatesToSmallInteger(int& whichInteger)const;
+  bool EvaluatesToSmallInteger()const{int tempI; return this->EvaluatesToSmallInteger(tempI);}
   bool AreEqualExcludingChildren(const Expression& other) const
   { return
     this->theBoss==other.theBoss &&
-    this->theData==other.theData &&
+    this->theDatA==other.theDatA &&
     this->theOperation==other.theOperation &&
     this->children.size==other.children.size &&
     this->errorString==other.errorString
@@ -333,36 +346,15 @@ void MakeVariableNonBounD
   bool NeedBracketsForThePower()const;
   bool operator==(const Expression& other)const;
   void CopyValueFromNoChildrenCopy(const Expression& other)
-  { this->theComments=other.theComments;
-    this->theBoss=other.theBoss;
-    this->theData=other.theData;
+  { this->theBoss=other.theBoss;
+    this->theDatA=other.theDatA;
     this->theOperation=other.theOperation;
     this->errorString=other.errorString;
     this->children.SetSize(other.children.size);
     this->format=other.format;
     this->IndexBoundVars=other.IndexBoundVars;
   }
-  inline void operator=(const Expression& other)
-  { //warning: we are assuming that invoking function OperatorAssignRecursively
-    // recursively RecursionDepthThatWouldNonPopTheStack times
-    //will not pop the stack. If this is not the case, the program might crash unexpectedly.
-    const int RecursionDepthThatWouldNonPopTheStack=10000;
-    this->OperatorAssignRecursively(other, 0, RecursionDepthThatWouldNonPopTheStack);
-  }
-  void OperatorAssignRecursively(const Expression& other, int RecursionDepth, int MaxRecursionDepth)
-  { if (this==&other)
-      return;
-    this->CopyValueFromNoChildrenCopy(other);
-    if (RecursionDepth>MaxRecursionDepth)
-    { std::stringstream out;
-      out << "Error while copying expression: expression depth exceeded maximum allowed depth of " << MaxRecursionDepth;
-      this->errorString=out.str();
-      return;
-    }
-    this->children.SetSize(other.children.size);
-    for (int i=0; i<other.children.size; i++)
-      this->children[i].OperatorAssignRecursively(other.children[i], RecursionDepth+1, MaxRecursionDepth);
-  }
+  void operator=(const Expression& other);
 };
 
 class ExpressionPairs
@@ -428,6 +420,10 @@ public:
 class VariableNonBound
 {
   public:
+  friend std::ostream& operator << (std::ostream& output, const VariableNonBound& theV)
+  { output << theV.ToString();
+    return output;
+  }
   std::string theName;
   int HandlerFunctionIndex;
   inline static unsigned int HashFunction(const VariableNonBound& input)
@@ -437,12 +433,13 @@ class VariableNonBound
   VariableNonBound(const std::string& input):theName(input), HandlerFunctionIndex(-1) {}
   VariableNonBound():HandlerFunctionIndex(-1) {}
   std::string GetHandlerFunctionName(CommandList& owner);
+  std::string ToString()const{return this->theName;}
   //C++ does have horrible syntax:
 //the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
 // as input
 //[Edit:] masked the horror in a typedef. Now the horror lies in a single isolated line. Nevertheless, a horror.
   Function::FunctionAddress GetFunction
-  (CommandList& owner)
+  (CommandList& owner)const
   ;
   unsigned int HashFunction()const
   { return VariableNonBound::HashFunction(*this);
@@ -500,6 +497,8 @@ public:
   HashedList<Rational> theRationals;
   HashedList<Context> theContexts;
   HashedListB<std::string, MathRoutines::hashString> theStrings;
+  HashedList<VariableNonBound> theNonBoundVars;
+
   void reset();
   std::string ToString();
 };
@@ -533,12 +532,11 @@ class CommandList
 { template <class dataType>
   bool EvaluatePMTDtreeFromContextRecursive
 (dataType& output, const Context& inputContext,
- const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000, std::stringstream* errorLog=0)
+ const Expression& theInput, std::stringstream* errorLog=0)
   ;
 template <class dataType>
   bool ExtractPMTDtreeContext
-(Context& outputContext, const Expression& theInput, int RecursionDepth=0, int MaxRecursionDepthMustNotPopStack=10000,
- std::stringstream* errorLog=0)
+  (Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
   ;
 public:
 //control sequences parametrize the syntactical elements
@@ -548,13 +546,9 @@ public:
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
 //operations are in fact realized as elements of type VariableNonBound.
   HashedList<VariableNonBound> operations;
-//Non bound variables can only be data entries of an expression x for which x.theOperation
-//equals x.theBoss->opVariableNonBound()
-  HashedList<VariableNonBound> theNonBoundVars;
 
   HashedList<Function> theFunctions;
   List<int> targetProperties;
-  HashedListB<std::string, MathRoutines::hashString> theDictionary;
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
   int RecursionDeptH;
@@ -591,7 +585,6 @@ public:
   std::string inputString;
   std::string outputString;
   std::string outputCommentsString;
-  std::string theLog;
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
   HashedList<Data> theData;
@@ -768,7 +761,7 @@ public:
     this->DecreaseStackSetCharacterRanges(2);
     return true;
   }
-  bool ReplaceObyE();
+  bool ReplaceAbyE();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
@@ -795,8 +788,8 @@ public:
   int conBindVariable()
   { return this->controlSequences.GetIndexIMustContainTheObject("{{}}");
   }
-  int conData()
-  { return this->controlSequences.GetIndexIMustContainTheObject("Data");
+  int conInteger()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Integer");
   }
   int conEqualEqual()
   { return this->controlSequences.GetIndexIMustContainTheObject("==");
@@ -858,14 +851,11 @@ public:
   int opThePower()
   { return this->operations.GetIndexIMustContainTheObject("^");
   }
-  int opVariableNonBound()
-  { return this->operations.GetIndexIMustContainTheObject("VariableNonBound");
-  }
   int opEqualEqual()
   { return this->operations.GetIndexIMustContainTheObject("==");
   }
-  int opData()
-  { return this->operations.GetIndexIMustContainTheObject("Data");
+  int opAtom()
+  { return this->operations.GetIndexIMustContainTheObject("Atom");
   }
   int opList()
   { return this->operations.GetIndexIMustContainTheObject("OperationList");
@@ -1054,14 +1044,15 @@ static bool EvaluateDereferenceOneArgument
   void AddNonBoundVarMustBeNew
   (const std::string& theName, const Function::FunctionAddress& funHandler,
    const std::string& argList, const std::string& description, const std::string& exampleArgs)
-  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
-    if (theIndex!=this->theNonBoundVars.size-1)
-      assert(false);
-  }
+   ;
+//  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
+//    if (theIndex!=this->theNonBoundVars.size-1)
+//      assert(false);
+//  }
   int GetIndexNonBoundVar(const std::string& theName)
   { VariableNonBound tempVar;
     tempVar.theName=theName;
-    return this->theNonBoundVars.GetIndex(tempVar);
+    return this->theObjectContainer.theNonBoundVars.GetIndex(tempVar);
   }
   int AddNonBoundVarReturnVarIndex
 (const std::string& theName, const Function::FunctionAddress& funHandler,
@@ -1076,7 +1067,7 @@ static bool EvaluateDereferenceOneArgument
     ;
   void EvaluateCommands();
   bool EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* theLog=0)
+(Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments=0)
  ;
   void Evaluate(const std::string& theInput)
   { if (this->theGlobalVariableS==0)

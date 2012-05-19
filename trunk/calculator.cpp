@@ -326,6 +326,10 @@ g_{-2} v_\\lambda\
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_3; h_{{i}}:=g_{0, i}; c:= hmmG2inB3{}( Casimir{}G_2);\n x_1:= Polynomial{} x_1;\nv_\\lambda:=hwv{}(B_3, (x_1, 2,0), (1,0,0));\nc v_\\lambda;";
 //  civilizedInput="g:= SemisimpleLieAlgebra{}B_2; \nv_\\lambda:=hwv{}(B_2, (1,1), (1,1)); \n-1/3g_{-4}v_\\lambda";
 //civilizedInput="animateLittelmannPaths{}(A_2, (1,0));";
+//civilizedInput="1";
+//civilizedInput="g:=SemisimpleLieAlgebra{}A_1;";
+//civilizedInput="Polynomial{}(x(x+y)^2)";
+
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -373,7 +377,6 @@ g_{-2} v_\\lambda\
   }
   std::cout << "<td valign=\"top\">";
   std::cout << ProjectInformation::GetMainProjectInfo().ToString();
-  std::cout << theParser.theLog;
   std::cout << "<hr><b>CommandList status. </b><br>";
   std::cout << theParser.ToString();
 
@@ -385,8 +388,8 @@ g_{-2} v_\\lambda\
 //  std::cout << "</div>";
   std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
   bool isFirst=true;
-  for (int i=0; i<theParser.theNonBoundVars.size; i++)
-  { VariableNonBound& currentVar=theParser.theNonBoundVars[i];
+  for (int i=0; i<theParser.theObjectContainer.theNonBoundVars.size; i++)
+  { VariableNonBound& currentVar=theParser.theObjectContainer.theNonBoundVars[i];
     if (true)
     { if (!isFirst)
         std::cout << ",";
@@ -410,6 +413,5 @@ g_{-2} v_\\lambda\
   std::cout << "-->";
   return 0;
 }
-
 
 

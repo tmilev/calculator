@@ -172,7 +172,7 @@ bool CommandList::fWeylDimFormula
   { theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
     return true;
   }
-  theSSowner=&LieAlgebraNameNode.GetData().GetAmbientSSAlgebra();
+  theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<RationalFunction> theWeight;
   Context tempContext(theCommands);
   if (!theExpression.children[1].GetVector<RationalFunction>(theWeight, tempContext, theSSowner->GetRank(), theCommands.fPolynomial, comments))
@@ -189,7 +189,7 @@ bool CommandList::fWeylDimFormula
     *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
   RationalFunction tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   //std::cout << "<br>The result: " << tempRF.ToString();
-  theExpression.MakeRF(tempRF, newContext, theCommands, inputIndexBoundVars);
+  theExpression.MakeRFAtom(tempRF, newContext, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -210,7 +210,7 @@ bool CommandList::fAnimateLittelmannPaths
   { theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
     return true;
   }
-  theSSowner=&LieAlgebraNameNode.GetData().GetAmbientSSAlgebra();
+  theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<Rational> theWeight;
   Context tempContext(theCommands);
   if (!theExpression.children[1].GetVector<Rational>(theWeight, tempContext, theSSowner->GetRank(), 0, comments))
@@ -224,7 +224,7 @@ bool CommandList::fAnimateLittelmannPaths
     *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  theExpression.MakeString
+  theExpression.MakeStringAtom
   (theCommands, inputIndexBoundVars, thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), tempContext)
 ;
   return true;
@@ -250,7 +250,7 @@ bool CommandList::fRootSAsAndSltwos
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=10000;
-  SemisimpleLieAlgebra& ownerSS=zeTrueArgument->GetData().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSS=zeTrueArgument->GetAtomicValue().GetAmbientSSAlgebra();
   char weylLetter=ownerSS.theWeyl.WeylLetter;
   int theRank=ownerSS.theWeyl.GetDim();
 
@@ -345,7 +345,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 
   Vector<RationalFunction> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
-  SemisimpleLieAlgebra& ownerSS=typeNode.GetData().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSS=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Context finalContext;
@@ -369,7 +369,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
   std::string report;
   theMod.SplitOverLevi(& report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0);
-  theExpression.MakeString(theCommands, inputIndexBoundVars, report, finalContext);
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, report, finalContext);
   return true;
 }
 
@@ -414,7 +414,7 @@ bool CommandList::fCasimir
     return theExpression.SetError("Failed to convert the argument "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
   if (theExpression.errorString!="")
     return theExpression.SetError("While trying to generate Lie algebra for the Casimir element, I got the error: " + theExpression.errorString);
-  SemisimpleLieAlgebra& theSSowner=theExpression.GetData().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& theSSowner=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   if (theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds<50)
     theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=50;
   RationalFunction rfOne, rfZero;
@@ -429,8 +429,8 @@ bool CommandList::fCasimir
     <<  ". The Casimir element of the ambient Lie algebra. ";
   }
   Data tempData;
-  tempData.MakeUE(theCommands, theCasimir, theExpression.GetData().theContextIndex);
-  theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+  tempData.MakeUE(theCommands, theCasimir, theExpression.GetAtomicValue().theContextIndex);
+  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -439,7 +439,7 @@ bool CommandList::fEmbedG2inB3
 { theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, theExpression, comments);
   if (!theExpression.IsElementUE())
     return theExpression.SetError("Failed to convert argument to element of the Universal enveloping algebra. ");
-  SemisimpleLieAlgebra& ownerSS=theExpression.GetData().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   if (ownerSS.GetRank()!=2 || ownerSS.theWeyl.WeylLetter!='G')
     return theExpression.SetError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.");
   Data g2Data, b3Data;
@@ -478,13 +478,13 @@ bool CommandList::fEmbedG2inB3
   theHmm.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m1plusg_m3;
   theHmm.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*theCommands.theGlobalVariableS);
   theHmm.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(theHmm.RestrictedRootSystem, *theCommands.theGlobalVariableS);
-  ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetData().GetUE();
+  ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetAtomicValue().GetUE();
   ElementUniversalEnveloping<RationalFunction> output;
   if(!theHmm.ApplyHomomorphism(argument, output, *theCommands.theGlobalVariableS))
     return theExpression.SetError("Failed to apply homomorphism for unspecified reason");
   Data tempData;
   tempData.MakeUE(theCommands, output, b3Data.theContextIndex);
-  theExpression.MakeDatA(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -671,6 +671,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << "<hr>";
 
   out << "<script type=\"text/javascript\">\n";
+
   if (this->theBuffer.ProjectionsEiVectors.size!= theDimension || this->theBuffer.theBilinearForm.NumRows!=theDimension)
   { this->theBuffer.MakeMeAStandardBasis(theDimension);
     //std::cout << "made a standard basis!";
@@ -874,9 +875,6 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << "var globalFrameCounter=0;\n";
   int frameDelay=3000;
   out
-  << "window.setTimeout(\"incrementGlobalFrameCounter" << timesCalled << "()\"," << frameDelay << ");\n"
-;
-  out
   << "function incrementGlobalFrameCounter" << timesCalled << "(){\n"
   << "globalFrameCounter++;\n"
   << "if (globalFrameCounter>=" << this->theFrames.size << ")\n"
@@ -956,11 +954,18 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   out << "}\n"
   << "function " << theInitFunctionName << "(){\n"
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
-  << theSurfaceName << "  = dojox.gfx.createSurface(node," << boss->DefaultHtmlWidth << "," << boss->DefaultHtmlHeight << ");\n"
+//  << " dojo.require(\"dojox.gfx\", function(){"
+  << "if (dojox.gfx!=undefined){"
+  << theSurfaceName << "  = dojox.gfx.createSurface(node,"
+  << boss->DefaultHtmlWidth << "," << boss->DefaultHtmlHeight << ");\n"
+//  << "});\n"
+  << "  ComputeProjections" << timesCalled << "();\n"
   << theDrawFunctionName << "();\n";
   if (this->theBuffer.BasisProjectionPlane.size>2)
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
-  out << " }\n";
+  if (this->theFrames.size>1)
+    out <<"window.setTimeout(\"incrementGlobalFrameCounter" << timesCalled << "()\"," << frameDelay << ");\n";
+  out << " }}\n";
   out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
   << "var clickTolerance=5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"
@@ -1161,12 +1166,20 @@ out
 //  << basisName << "[i][1]*=GraphicsUnitCone" << timesCalled << "/(GraphicsUnitCone" << timesCalled << "-theWheelDelta);\n"
 //  << "}\n"
   << theDrawFunctionName << "();\n}\n";
-
-  out
-  << "dojo.require(\"dojox.gfx\");\n"
-  << "dojo.addOnLoad(" << theInitFunctionName << ");\n"
-//  << "dojo.addOnLoad(" << theDrawFunctionName << ");\n"
-  << "</script>\n"
+out
+//<< " dojo.require(\"dojox.gfx\");"
+//<< "dojo.ready(function(){\n";
+//out
+//<< theInitFunctionName << "();\n"
+//<< "});\n"
+<< "function dojoOnLoadDoesntWork" << timesCalled << " (){\n"
+<< "  if (" << theSurfaceName << "==0){\n  "
+<< theInitFunctionName << "();\n"
+<< "  window.setTimeout(function(){dojoOnLoadDoesntWork" << timesCalled << "();}, 1000);\n"
+<< "  }\n"
+<< "}"
+<< "dojoOnLoadDoesntWork" << timesCalled << "();\n"
+<< "</script>\n"
   ;
   return out.str();
 }

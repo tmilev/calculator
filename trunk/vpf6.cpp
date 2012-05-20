@@ -1423,6 +1423,8 @@ bool CommandList::LookAheadAllowsTimes(const std::string& lookAhead)
     lookAhead=="+" || lookAhead=="-" ||
     lookAhead=="*" || lookAhead=="/" ||
     lookAhead=="Expression" || lookAhead==")" ||
+    lookAhead=="(" || lookAhead=="[" ||
+    lookAhead=="{" ||
     lookAhead=="Variable" || lookAhead=="," ||
     lookAhead==";" || lookAhead=="]" ||
     lookAhead=="}" || lookAhead==":"
@@ -1948,8 +1950,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::initCrunchers()
-{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyUEByAny);
+{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRational, Data::MultiplyEltTensorByCoeff);

@@ -1190,12 +1190,11 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->ComputedGeneratorActions.init(this->GetOwner().GetNumGenerators());
   this->actionsGeneratorS.SetSize(this->GetOwner().GetNumGenerators());
   this->actionsGeneratorsMaT.SetSize(this->GetOwner().GetNumGenerators());
+  Vector<CoefficientType> currentWeightFundCoords;
+  Vector<CoefficientType> hwFundCoordsTrimmedBaseField;
+  hwFundCoordsTrimmedBaseField=this->theHWFundamentalCoordS;
   if (outputReport!=0)
   { std::stringstream latexTableStream;
-    Vector<CoefficientType> tempV;
-    tempV=this->theHWFundamentalCoordsBaseField;
-    for (int i=0; i<tempV.size; i++)
-      tempV[i]-=this->theHWFundamentalCoordS[i];
     latexTableStream << "<hr>Ready copy +paste for your .tex file:<br> <br>"
     << "\\begin{tabular}{lll";
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
@@ -1203,8 +1202,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     latexTableStream << "} \n\\hline\\hline \\multicolumn{"
     << this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection+3
     << "}{|c|}{ Highest weight $\\lambda="
-    << tempV.ElementToStringLetterFormat("\\omega", false, false)
-    << "+" << theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables).ElementToStringEpsilonForm(true, false)
+    << this->theHWFundamentalCoordsBaseField.ElementToStringLetterFormat("\\omega", false, false)
     << "$}\\\\\\hline Element& weight & monomial expression";
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
     { latexTableStream << "&action of $"
@@ -1219,14 +1217,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
       { monCounter++;
         latexTableStream << "$m_{" << monCounter << "}$&";
-        std::string stringWeightTemp=theWeyl.GetEpsilonCoords
-        (this->theModuleWeightsSimpleCoords[i], theGlobalVariables).ElementToStringEpsilonForm(true, false);
-        latexTableStream << "\n$" << tempV.ElementToStringLetterFormat("\\omega", false, false);
-        if (stringWeightTemp!="0")
-        { if (stringWeightTemp[0]!='-')
-            latexTableStream << "+";
-          latexTableStream << stringWeightTemp;
-        }
+        currentWeightFundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+        latexTableStream << "\n$" << (this->theHWFundamentalCoordsBaseField+currentWeightFundCoords-hwFundCoordsTrimmedBaseField).ElementToStringLetterFormat("\\omega", false, false);
         std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ToString(&theGlobalVariables.theDefaultLieFormat);
         if (theMonString=="1")
           theMonString="";

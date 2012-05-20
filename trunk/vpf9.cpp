@@ -3623,7 +3623,8 @@ void WeylGroup::operator=(const WeylGroup& right)
 //  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
 //  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
 //  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
-  this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
+  this->MatrixSendsSimpleVectorsToEpsilonVectors=right.MatrixSendsSimpleVectorsToEpsilonVectors;
+//  this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
   this->CartanSymmetric=(right.CartanSymmetric);
   this->::HashedList<ElementWeylGroup>::operator=(right);
   this->RootSystem=(right.RootSystem);
@@ -3774,7 +3775,7 @@ void WeylGroup::MakeDn(int n)
   this->CartanSymmetric.elements[n-2][n-1]=0;
   this->CartanSymmetric.elements[n-3][n-1]=-1;
   this->CartanSymmetric.elements[n-1][n-3]=-1;
-  this->UpdateIntBuffer();
+//  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeAn(int n)
@@ -3796,7 +3797,7 @@ void WeylGroup::MakeAn(int n)
     this->CartanSymmetric.elements[i][i+1]=-1;
   }
   this->CartanSymmetric.elements[n-1][n-1]=2;
-  this->UpdateIntBuffer();
+//  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeEn(int n)
@@ -3812,7 +3813,7 @@ void WeylGroup::MakeEn(int n)
   this->CartanSymmetric.elements[1][3]=-1;
   this->CartanSymmetric.elements[2][0]=-1;
   this->CartanSymmetric.elements[3][1]=-1;
-  this->UpdateIntBuffer();
+//  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeF4()
@@ -3825,11 +3826,11 @@ void WeylGroup::MakeF4()
 
   this->rho.SetSize(4);
   this->CartanSymmetric.init(4, 4);
-  this->CartanSymmetric.elements[0][0]=2 ; this->CartanSymmetric.elements[0][1]=-1; this->CartanSymmetric.elements[0][2]=0 ; this->CartanSymmetric.elements[0][3]=0 ;
-  this->CartanSymmetric.elements[1][0]=-1; this->CartanSymmetric.elements[1][1]=2 ; this->CartanSymmetric.elements[1][2]=-2; this->CartanSymmetric.elements[1][3]=0 ;
-  this->CartanSymmetric.elements[2][0]=0 ; this->CartanSymmetric.elements[2][1]=-2; this->CartanSymmetric.elements[2][2]=4 ; this->CartanSymmetric.elements[2][3]=-2;
-  this->CartanSymmetric.elements[3][0]=0 ; this->CartanSymmetric.elements[3][1]=0 ; this->CartanSymmetric.elements[3][2]=-2; this->CartanSymmetric.elements[3][3]=4 ;
-  this->UpdateIntBuffer();
+  this->CartanSymmetric.elements[0][0]=4 ; this->CartanSymmetric.elements[0][1]=-2; this->CartanSymmetric.elements[0][2]=0 ; this->CartanSymmetric.elements[0][3]=0 ;
+  this->CartanSymmetric.elements[1][0]=-2; this->CartanSymmetric.elements[1][1]=4 ; this->CartanSymmetric.elements[1][2]=-2; this->CartanSymmetric.elements[1][3]=0 ;
+  this->CartanSymmetric.elements[2][0]=0 ; this->CartanSymmetric.elements[2][1]=-2; this->CartanSymmetric.elements[2][2]=2 ; this->CartanSymmetric.elements[2][3]=-1;
+  this->CartanSymmetric.elements[3][0]=0 ; this->CartanSymmetric.elements[3][1]=0 ; this->CartanSymmetric.elements[3][2]=-1; this->CartanSymmetric.elements[3][3]=2 ;
+//  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeG2()
@@ -3841,21 +3842,20 @@ void WeylGroup::MakeG2()
 //  this->ShortShortScalarProdPositive=1;
   this->rho.SetSize(2);
   this->CartanSymmetric.init(2, 2);
-  this->CartanSymmetric.elements[0][0]=6;
-  this->CartanSymmetric.elements[1][1]=2;
+  this->CartanSymmetric.elements[0][0]=2;
+  this->CartanSymmetric.elements[1][1]=6;
   this->CartanSymmetric.elements[1][0]=-3;
   this->CartanSymmetric.elements[0][1]=-3;
-  this->UpdateIntBuffer();
+//  this->UpdateIntBuffer();
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra
-(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output,
- GlobalVariables& theGlobalVariables)
-{ Matrix<Rational> & basisChange = theGlobalVariables.matGetEpsilonCoords2.GetElement();
-  Matrix<Rational> & tempMat = theGlobalVariables.matGetEpsilonCoords3.GetElement();
-  DynkinDiagramRootSubalgebra& tempDyn = theGlobalVariables.dynGetEpsCoords.GetElement();
-  Vectors<Rational>& simpleBasis = theGlobalVariables.rootsGetEpsCoords2.GetElement();
-  Vectors<Rational>& coordsInNewBasis = theGlobalVariables.rootsGetEpsCoords3.GetElement();
+(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
+{ Matrix<Rational>& basisChange = this->buffer1NotCopied.GetElement();
+  Matrix<Rational>& tempMat = this->buffer2NotCopied.GetElement();
+  DynkinDiagramRootSubalgebra& tempDyn = this->bufferDynNotCopied.GetElement();
+  Vectors<Rational>& simpleBasis = this->buffer1VectorsNotCopied.GetElement();
+  Vectors<Rational>& coordsInNewBasis = this->buffer2VectorsNotCopied.GetElement();
   simpleBasis.CopyFromBase(generators);
   tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
   bool tempBool = true;
@@ -3869,7 +3869,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   }
   basisChange.Resize(0, 0, true);
   for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
-  { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, theGlobalVariables, tempMat);
+  { this->GetEpsilonMatrix(tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, tempMat);
     basisChange.DirectSumWith(tempMat, (Rational) 0);
     //basisChange.ComputeDebugString();
   }
@@ -3885,11 +3885,14 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
 //  output.ComputeDebugString();
 }
 
-void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
-{ Matrix<Rational>& tempMat=theGlobalVariables.matGetEpsilonCoords.GetElement();
-  this->GetEpsilonMatrix(WeylLetter, WeylRank, theGlobalVariables, tempMat);
+void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational>& input, Vector<Rational>& output)
+{ bool needsComputation=this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer();
+  Matrix<Rational>& tempMat=this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement();
+  if (needsComputation)
+    this->GetEpsilonMatrix(WeylLetter, WeylRank, tempMat);
 //  tempMat.ComputeDebugString();
-  Vector<Rational> result; result.MakeZero(tempMat.NumRows);
+  Vector<Rational> result;
+  result.MakeZero(tempMat.NumRows);
   Rational tempRat;
   for (int i=0; i<tempMat.NumRows; i++)
     for (int j=0; j<input.size; j++)
@@ -3901,9 +3904,8 @@ void WeylGroup::GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational
   output=(result);
 }
 
-void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, Matrix<Rational> & output)
-{ //longer Vector<Rational> has always smaller index
-  if (WeylLetter=='A')
+void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output)
+{ if (WeylLetter=='A')
   { output.init(WeylRank+1, WeylRank);
     output.NullifyAll();
     for (int i=0; i<WeylRank; i++)
@@ -4051,34 +4053,42 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables&
     output.elements[7][4]=RHalf;
   }
   if (WeylLetter=='F')
-  { //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
-    // longer Vectors<Rational> have smaller indices
+  { //convention different from Humpreys, Introduction to Lie algebras and representation theory, page 65
+    //rather using current version of Wikipedia, 20 May 2012,
+    //http://en.wikipedia.org/wiki/Root_system#F4
+    //Wikipedia gives the following advice: the first three roots are the same as the root system of B_3
+    //the last one is the -1/2(e_1+e_2+e_3+e_4)
     output.init(4, 4);
     output.NullifyAll();
-    //eps_1:
-    output.elements[0][3]=RHalf;
-    //eps_2:
-    output.elements[1][0]=1;
-    output.elements[1][3]=RMHalf;
-    //eps_3:
-    output.elements[2][0]=-1;
+    //image of first simple root (long one):
+    output.elements[0][0]=1;
+    output.elements[1][0]=-1;
+    //image of second simple root (long one):
+    output.elements[1][1]=-1;
     output.elements[2][1]=1;
-    output.elements[2][3]=RMHalf;
-    //eps_4:
-    output.elements[3][1]=-1;
+    //image of third simple root (short one)
     output.elements[3][2]=1;
+    //image of fourth simple root (short one)
+    output.elements[0][3]=RMHalf;
+    output.elements[1][3]=RMHalf;
+    output.elements[2][3]=RMHalf;
     output.elements[3][3]=RMHalf;
+    //eps_2:
+    //eps_4:
   }
   if (WeylLetter=='G')
-  { // longer Vectors<Rational> have smaller indices
+  { //taken from Humpreys, Introduction to Lie algebras and representation theory, page 65
+    // the long root has the higher index
     output.init(3, 2);
     output.NullifyAll();
-    output.elements[0][0]=-2;
-    output.elements[1][0]=1;
-    output.elements[2][0]=1;
+    //image of the first simple root(short one):
+    output.elements[0][0]=1;
+    output.elements[1][0]=-1;
+    //image of second simple root:
+    output.elements[0][1]=-2;
+    output.elements[1][1]=1;
+    output.elements[2][1]=1;
 
-    output.elements[0][1]=1;
-    output.elements[1][1]=-1;
   }
 }
 
@@ -4086,13 +4096,8 @@ void WeylGroup::MakeBn(int n)
 { this->MakeAn(n);
   if (n<1)
     return;
-//  this->ShortRootLength=1;
-//  this->LongLongScalarProdPositive=1;
-//  this->ShortLongScalarProdPositive=1;
-//  this->ShortShortScalarProdPositive=0;
   this->WeylLetter='B';
   this->CartanSymmetric.elements[n-1][n-1]=1;
-  this->UpdateIntBuffer();
 }
 
 void WeylGroup::MakeCn(int n)
@@ -4100,15 +4105,10 @@ void WeylGroup::MakeCn(int n)
   if(n<2)
     return;
   this->LongRootLength=4;
-//  this->ShortRootLength=2;
-//  this->LongLongScalarProdPositive=2;
-//  this->ShortLongScalarProdPositive=2;
-//  this->ShortShortScalarProdPositive=1;
   this->WeylLetter='C';
   this->CartanSymmetric.elements[n-1][n-1]=4;
   this->CartanSymmetric.elements[n-2][n-1]=-2;
   this->CartanSymmetric.elements[n-1][n-2]=-2;
-  this->UpdateIntBuffer();
 }
 
 bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input)

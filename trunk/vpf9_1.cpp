@@ -269,18 +269,18 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
   int theDimension=this->AmbientWeyl.CartanSymmetric.NumRows;
   simpleBasisG.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
-  { simpleBasisG.TheObjects[i].MakeZero(theDimension);
-    simpleBasisG.TheObjects[i].TheObjects[i]=1;
+  { simpleBasisG[i].MakeZero(theDimension);
+    simpleBasisG[i][i]=1;
   }
   this->SimpleBasisK.GetGramMatrix(InvertedGramMatrix, this->AmbientWeyl.CartanSymmetric);
   InvertedGramMatrix.Invert(theGlobalVariables);
   Vector<Rational> tempRoot, tempRoot2, tempRoot3;
   for(int i=0; i<this->kModules.size; i++)
   { tempRoots.size=0;
-    for (int j=0; j<this->kModules.TheObjects[i].size; j++)
+    for (int j=0; j<this->kModules[i].size; j++)
     { tempRoot.SetSize(this->SimpleBasisK.size);
       for (int k=0; k<this->SimpleBasisK.size; k++)
-        this->AmbientWeyl.RootScalarCartanRoot(  this->kModules.TheObjects[i].TheObjects[j], this->SimpleBasisK.TheObjects[k], tempRoot.TheObjects[k]);
+        this->AmbientWeyl.RootScalarCartanRoot(  this->kModules[i][j], this->SimpleBasisK[k], tempRoot[k]);
       InvertedGramMatrix.ActOnVectorColumn(tempRoot, tempRoot3);
       tempRoot2.MakeZero(this->AmbientWeyl.CartanSymmetric.NumRows);
       for (int j=0; j<this->SimpleBasisK.size; j++)
@@ -288,11 +288,11 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
       tempRoots.AddOnTop(tempRoot2);
     }
 //    tempRoots.ComputeDebugString();
-    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords.TheObjects[i], theGlobalVariables);
-    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules.TheObjects[i], this->kModulesgEpsCoords.TheObjects[i], theGlobalVariables);
+    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, tempRoots, this->kModulesKepsCoords[i]);
+    this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->kModules[i], this->kModulesgEpsCoords[i]);
     Vector<Rational> tempRoot;
-    if (this->kModulesKepsCoords.TheObjects[i].size>0)
-    { this->kModulesKepsCoords.TheObjects[i].average(tempRoot, this->kModulesKepsCoords.TheObjects[i].TheObjects[0].size);
+    if (this->kModulesKepsCoords[i].size>0)
+    { this->kModulesKepsCoords[i].average(tempRoot, this->kModulesKepsCoords[i][0].size);
       assert(tempRoot.IsEqualToZero());
     }
    // this->kModulesgEpsCoords.TheObjects[i].Average
@@ -300,8 +300,8 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
     //assert(tempRoot.IsEqualToZero());
   //  this->kModulesEpsCoords.TheObjects[i].ComputeDebugString();
   }
-  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, this->SimpleBasisK, this->SimpleBasisKEpsCoords, theGlobalVariables);
-  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->SimpleBasisK, this->SimpleBasisgEpsCoords, theGlobalVariables);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(this->SimpleBasisK, this->SimpleBasisK, this->SimpleBasisKEpsCoords);
+  this->AmbientWeyl.GetEpsilonCoordsWRTsubalgebra(simpleBasisG, this->SimpleBasisK, this->SimpleBasisgEpsCoords);
 }
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
@@ -906,7 +906,7 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
     if (useHtml)
       out << "</td><td>";
     if (i>=this->kModulesgEpsCoords.size)
-      this->AmbientWeyl.GetEpsilonCoords(this->kModules[i], this->kModulesgEpsCoords[i], theGlobalVariables);
+      this->AmbientWeyl.GetEpsilonCoords(this->kModules[i], this->kModulesgEpsCoords[i]);
     out << this->kModulesgEpsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
     if (useLatex)
       out << " & \n";
@@ -1939,7 +1939,7 @@ void coneRelation::GetEpsilonCoords(Vectors<Rational>& input, Vectors<Rational>&
   for(int i=0; i<input.size; i++)
   { tempRoots.AssignListList(this->theDiagram.SimpleBasesConnectedComponents);
     input.TheObjects[i].GetCoordsInBasiS(tempRoots, tempRoot);
-    theWeyl.GetEpsilonCoords(WeylLetter, WeylRank, tempRoots, tempRoot, output.TheObjects[i], theGlobalVariables);
+    theWeyl.GetEpsilonCoords(WeylLetter, WeylRank, tempRoots, tempRoot, output.TheObjects[i]);
   }
 }
 
@@ -2965,18 +2965,18 @@ void WeylGroup::GenerateRootSubsystem(Vectors<Rational>& theRoots)
     }
 }
 
-void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
 { Vectors<Rational> tempRoots;
   tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output, theGlobalVariables);
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
 }
 
-void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output, GlobalVariables& theGlobalVariables)
+void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
 { Vectors<Rational> tempRoots;
   Vectors<Rational> tempInput, tempOutput;
   tempInput.AddOnTop(input);
   tempRoots.MakeEiBasis(this->GetDim());
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput, theGlobalVariables);
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
   output=tempOutput.TheObjects[0];
 }
 

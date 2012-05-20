@@ -198,7 +198,7 @@ int main(int argc, char **argv)
   //below follows a script for collapsing and expanding menus
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n"
-  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
+//  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
   << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
   ANNOYINGSTATISTICS;
   //std::cout << IPAdressCaller;

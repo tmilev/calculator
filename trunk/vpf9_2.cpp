@@ -2080,7 +2080,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       out << "$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DynkinStrinG << "; ";
       if (!includeMatrixForm)
         out <<"\\\\";
-      currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2, theGlobalVariables);
+      currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2);
       tempS=tempRoots2.ElementToStringEpsilonForm(true, false, false);
       out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
       if (includeMatrixForm)
@@ -2122,7 +2122,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   Matrix<int> tempMat;
   int theDimension=this->AmbientWeyl.CartanSymmetric.NumRows;
   if (this->AmbientWeyl.WeylLetter=='B')
-  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
+  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2+1, 1, 0);
     tempMat.elements[theDimension][theDimension]=0;
     for (int i=0; i<epsCoords.size; i++)
@@ -2184,7 +2184,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
     }
   }
   if (this->AmbientWeyl.WeylLetter=='C')
-  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords, theGlobalVariables);
+  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2, 1, 0);
     for (int i=0; i<epsCoords.size; i++)
     { bool isLong=false;
@@ -2192,18 +2192,18 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       int secondIndex=-1;
       bool firstSignIsPositive=true;
       bool secondSignIsPositive=true;
-      Vector<Rational>& currentRoot=epsCoords.TheObjects[i];
+      Vector<Rational>& currentRoot=epsCoords[i];
       for (int j=0; j<theDimension; j++)
-      { if (currentRoot.TheObjects[j]!=0)
+      { if (currentRoot[j]!=0)
         { isLong=!isLong;
           if(isLong)
-          { if (currentRoot.TheObjects[j].IsPositive())
+          { if (currentRoot[j].IsPositive())
               firstSignIsPositive=true;
             else
               firstSignIsPositive=false;
             firstIndex=j;
           } else
-          { if (currentRoot.TheObjects[j].IsPositive())
+          { if (currentRoot[j].IsPositive())
               secondSignIsPositive=true;
             else
               secondSignIsPositive=false;

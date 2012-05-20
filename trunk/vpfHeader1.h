@@ -499,7 +499,8 @@ public:
   void operator=(const MemorySaving<Object>& other)
   { if (!other.IsZeroPointer())
       (this->GetElement()).operator=(other.GetElementConst());
-    else this->FreeMemory();
+    else
+      this->FreeMemory();
   }
   const Object& GetElementConst()const;
   Object& GetElement();
@@ -3160,9 +3161,9 @@ public:
     out << ")";
     return out.str();
   }
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar=false);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex=false, bool DontIncludeLastVar=false);
   std::string ElementToStringLetterFormat
-  (const FormatExpressions& theFormat, bool useLatex, bool DontIncludeLastVar)const;
+  (const FormatExpressions& theFormat, bool useLatex=false, bool DontIncludeLastVar=false)const;
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml)
   { return this->ElementToStringLetterFormat("\\varepsilon", useLatex, false);
   }
@@ -6805,12 +6806,9 @@ public:
   MemorySaving<Matrix<Rational> > matOneColumn;
   MemorySaving<Matrix<Rational> > matReduceMonomialByMonomial2;
   MemorySaving<Matrix<Rational> > matReduceMonomialByMonomial;
-  MemorySaving<Matrix<Rational> > matGetEpsilonCoords;
   MemorySaving<Matrix<Rational> > matConeCondition1;
   MemorySaving<Matrix<Rational> > matConeCondition2;
   MemorySaving<Matrix<Rational> > matConeCondition3;
-  MemorySaving<Matrix<Rational> > matGetEpsilonCoords2;
-  MemorySaving<Matrix<Rational> > matGetEpsilonCoords3;
   MemorySaving<Matrix<Rational> > matComputeEpsCoordsWRTk;
   MemorySaving<Matrix<Rational> > matSimplexAlgorithm1;
   MemorySaving<Matrix<Rational> > matSimplexAlgorithm2;
@@ -6842,8 +6840,6 @@ public:
 
   MemorySaving<DynkinDiagramRootSubalgebra > dynAttemptTheTripleTrick;
 
-  MemorySaving<Vectors<Rational> > rootsGetEpsCoords2;
-  MemorySaving<Vectors<Rational> > rootsGetEpsCoords3;
   MemorySaving<Vectors<Rational> > rootsNilradicalRoots;
   MemorySaving<Vectors<Rational> > rootsConeConditionHolds2;
   MemorySaving<Vectors<Rational> > rootsAttemptTheTripleTrick;

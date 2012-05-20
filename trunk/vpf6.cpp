@@ -2940,11 +2940,11 @@ bool CommandList::StandardDivide
     return false;
   Expression& leftE= theExpression.children[0];
   Expression& rightE= theExpression.children[1];
-  if (rightE.EvaluatesToRational() && !leftE.EvaluatesToRational())
-  { Data tempData(1, theCommands);
-    tempData/=rightE.GetAtomicValue();
-    rightE=leftE;
-    leftE.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  if (rightE.EvaluatesToRational())
+  { Rational tempRat=rightE.GetAtomicValue().GetValuE<Rational>();
+    tempRat.Invert();
+    theExpression.theOperation=theCommands.opTimes();
+    rightE.MakeAtom(tempRat, theCommands, inputIndexBoundVars);
     return true;
   }
   if (!leftE.EvaluatesToAtom() || !rightE.EvaluatesToAtom())

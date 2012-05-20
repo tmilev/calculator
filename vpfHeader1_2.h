@@ -754,15 +754,21 @@ public:
 
 class WeylGroup: public HashedList<ElementWeylGroup>
 {
-  Matrix<int> CartanSymmetricIntBuffer;
-  void UpdateIntBuffer()
-  { this->CartanSymmetricIntBuffer.init(this->CartanSymmetric.NumRows, this->CartanSymmetric.NumCols);
-    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-      for (int j=0; j<this->CartanSymmetric.NumCols; j++)
-        this->CartanSymmetricIntBuffer.elements[i][j]=this->CartanSymmetric.elements[i][j].NumShort;
-  }
-  Matrix<Rational>  FundamentalToSimpleCoords;
-  Matrix<Rational>  SimpleToFundamentalCoords;
+//  Matrix<int> CartanSymmetricIntBuffer;
+//  void UpdateIntBuffer()
+//  { this->CartanSymmetricIntBuffer.init(this->CartanSymmetric.NumRows, this->CartanSymmetric.NumCols);
+//    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
+//      for (int j=0; j<this->CartanSymmetric.NumCols; j++)
+//        this->CartanSymmetricIntBuffer.elements[i][j]=this->CartanSymmetric.elements[i][j].NumShort;
+//  }
+  Matrix<Rational> FundamentalToSimpleCoords;
+  Matrix<Rational> SimpleToFundamentalCoords;
+  MemorySaving<Matrix<Rational> > MatrixSendsSimpleVectorsToEpsilonVectors;
+  MemorySaving<Matrix<Rational> > buffer1NotCopied;
+  MemorySaving<Matrix<Rational> > buffer2NotCopied;
+  MemorySaving<DynkinDiagramRootSubalgebra> bufferDynNotCopied;
+  MemorySaving<Vectors<Rational> > buffer1VectorsNotCopied;
+  MemorySaving<Vectors<Rational> > buffer2VectorsNotCopied;
   bool flagFundamentalToSimpleMatricesAreComputed;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
@@ -882,18 +888,18 @@ public:
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
   static void TransformToAdmissibleDynkinType(char inputLetter, int& outputRank);
-  void GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoords(const Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
-  Vector<Rational> GetEpsilonCoords(const Vector<Rational> & input, GlobalVariables& theGlobalVariables)
+  void GetEpsilonCoords(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational> & input, Vector<Rational> & output);
+  void GetEpsilonCoords(const Vector<Rational> & input, Vector<Rational> & output);
+  void GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output);
+  Vector<Rational> GetEpsilonCoords(const Vector<Rational>& input)
   { Vector<Rational> tempRoot;
-    this->GetEpsilonCoords(input, tempRoot, theGlobalVariables);
+    this->GetEpsilonCoords(input, tempRoot);
     return tempRoot;
   }
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
-  void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
-  void GetEpsilonMatrix(char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables, Matrix<Rational> & output);
+  void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
+  void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
   void ComputeWeylGroup();
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(Vector<Rational> & reflectionRoot, Matrix<Rational> & output);
@@ -7595,110 +7601,6 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
     *Report=out.str();
   }
   return true;
-}
-
-template<class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
-  (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
-   const CoefficientType& theRingZero)
-{ if (this->theChaR.size!=1)
-  { if (Report!=0)
-      *Report="I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
-    return;
-  }
-  ReflectionSubgroupWeylGroup subWeyl;
-  charSSAlgMod<CoefficientType> charWRTsubalgebra;
-  this->theChaR.SplitCharOverLevi
-  (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
-   subWeyl, theGlobalVariables);
-  Vector<Rational> theHWsimpleCoords, theHWfundCoords;
-  std::stringstream out;
-  if(Report!=0)
-    out << *Report;
-  Selection splittingParSelectedInLevi;
-  splittingParSelectedInLevi=splittingParSel;
-  splittingParSelectedInLevi.InvertSelection();
-  if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
-  { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
-    << " The parabolic has Vectors<Rational> of Levi given by " << splittingParSel.ToString()
-    <<" while the ambient parabolic subalgebra has Vectors<Rational> of Levi given by "
-    << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
-    if (Report!=0)
-      *Report=out.str();
-    return;
-  }
-  out << "<br>Parabolic selection: " << splittingParSel.ToString();
-  List<List<List<CoefficientType> > > eigenSpacesPerSimpleGenerator;
- // if (false)
-  eigenSpacesPerSimpleGenerator.SetSize(splittingParSelectedInLevi.CardinalitySelection);
-  Vectors<CoefficientType> theFinalEigenSpace, tempSpace1, tempSpace2;
-//  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
-  for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
-  { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank();
-    Matrix<CoefficientType>& currentOp=this->actionsSimpleGensMatrixForM[theGenIndex];
-    currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
-    if (i==0)
-      theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-    else
-    { tempSpace1=theFinalEigenSpace;
-      tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
-    }
-  }
-  out << "<br>Eigenvectors:<table> ";
-//  Vector<Rational> zeroRoot;
-//  zeroRoot.MakeZero(this->theAlgebra->GetRank());
-  std::stringstream readyForLatexComsumption;
-  readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
-  std::stringstream extraHWAddition;
-  for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
-    extraHWAddition << "x_{" << this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]+1
-    << "}\\omega_{" << this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]+1 << "}+";
-  readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $" << extraHWAddition.str();
-  readyForLatexComsumption
-  << this->GetOwner().theWeyl.GetEpsilonCoords(this->theHWSimpleCoordS, theGlobalVariables)
-  .ElementToStringEpsilonForm(true, false)
-  << "$}\\\\\n<br>";
-  readyForLatexComsumption << "weight fund. coord.& weight& singular vector \\\\\\hline\n<br>";
-  for (int j=0; j<theFinalEigenSpace.size; j++)
-  { out << "<tr><td>";
-    ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
-    currentElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
-    Vector<CoefficientType>& currentVect= theFinalEigenSpace[j];
-    int lastNonZeroIndex=-1;
-    for (int i=0; i<currentVect.size; i++)
-      if (!(currentVect[i].IsEqualToZero()))
-      { tempElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
-        tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
-        tempElt*=currentVect[i];
-        currentElt+=tempElt;
-        lastNonZeroIndex=i;
-      }
-    Vector<Rational>& currentWeight=this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex];
-    readyForLatexComsumption << "$" << extraHWAddition.str()
-    << this->GetOwner().theWeyl.GetFundamentalCoordinatesFromSimple(currentWeight)
-    .ElementToStringLetterFormat("\\omega", false, false)
-    << "$&$" << extraHWAddition.str()
-    << this->GetOwner().theWeyl.GetEpsilonCoords(currentWeight, theGlobalVariables)
-    .Vector<Rational>::ElementToStringEpsilonForm(true, false)
-    << "$&$" << currentVect.ElementToStringLetterFormat("m", true, false) << "$";
-
-    if (currentElt.size>1)
-      out << "(";
-    out << currentElt.ToString(&theGlobalVariables.theDefaultLieFormat);
-    if (currentElt.size>1)
-      out << ")";
-    out << " v(" << this->theHWFundamentalCoordS.ToString() << "," << ((Vector<Rational>)this->parabolicSelectionNonSelectedAreElementsLevi).ToString() << ")" ;
-    out << "</td><td>(weight: "
-    << currentWeight.ToString() << ")</td></tr>";
-    readyForLatexComsumption << "\\\\\n<br>";
-  }
-  out << "</table>";
-  readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
-  out << "<br>Your ready for LaTeX consumption text follows.<br>";
-  out << readyForLatexComsumption.str();
-  if (Report!=0)
-    *Report=out.str();
 }
 
 template <class CoefficientType>

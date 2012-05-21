@@ -614,9 +614,9 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   out << theBuffer.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
-  out << "Littelmann paths (" << theOrbit.size << " total):<br>";
+  out << "Littelmann paths in simple coordinates given in the order in which they are generated (" << theOrbit.size << " total):<br>";
   for (int i=0; i<theOrbit.size; i++)
-    out << theOrbit[i].ToString() << "<br>";
+    out << theOrbit[i].ToString() << "&nbsp&nbsp" << this->ElementToStringOperatorSequenceStartingOnMe(theGens [i]) << "<br>";
   return out.str();
 }
 
@@ -1353,6 +1353,30 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   out << readyForLatexComsumption.str();
   if (Report!=0)
     *Report=out.str();
+}
+
+bool CommandList::fSplitFDpartOverG2
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
+    return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
+  Vector<RationalFunction> theWeightFundCoords;
+/*  Context theContext;
+  if (!theExpression.GetVector<RationalFunction>(theWeightFundCoords, theContext, 3, theCommands.fPolynomial, comments))
+  { std::stringstream errorStream;
+    errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
+    return theExpression.SetError(errorStream.str());
+  }
+  ModuleSSalgebraNew<RationalFunction> theMod;
+  Selection selInducing;
+  selInducing.init(3);
+  for (int i=0; i<theWeightFundCoords.size; i++)
+    if (!theWeightFundCoords[i].IsSmallInteger())
+      selInducing.AddSelectionAppendNewIndex(i);
+  theMod.MakeFromHW
+  (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
+  std::string report;
+  theMod.SplitOverLevi(& report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0);
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, report, finalContext);*/
 }
 
 class DoxygenInstance

@@ -1011,6 +1011,9 @@ static bool EvaluateDereferenceOneArgument
   static bool fSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSplitFDpartOverG2
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fDrawWeightSupportWithMults
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

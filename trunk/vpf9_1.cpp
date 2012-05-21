@@ -2487,7 +2487,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
     for(int j=i; j<this->theWeyl.RootSystem.size; j++)
     { tempRoot=this->theWeyl.RootSystem.TheObjects[i]+this->theWeyl.RootSystem.TheObjects[j];
       if(!tempRoot.IsEqualToZero())
-        if( !this->theWeyl.IsARoot(tempRoot))
+        if(!this->theWeyl.IsARoot(tempRoot))
         { this->Computed.elements[i][j]=true;
           this->ChevalleyConstants.elements[i][j].MakeZero();
           this->Computed.elements[j][i]=true;
@@ -2676,9 +2676,11 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
 { Vector<Rational>& rootI= this->theWeyl.RootSystem.TheObjects[i];
   Vector<Rational>& rootK= this->theWeyl.RootSystem.TheObjects[k];
   Vector<Rational>& rootJ= this->theWeyl.RootSystem.TheObjects[j];
+  //the following three checks can be commented out to increase speed. They have never failed so far.
   assert((rootI+rootK+rootJ).IsEqualToZero());
   assert(!(rootI+rootJ).IsEqualToZero() && !(rootK+rootK).IsEqualToZero() && !(rootJ+rootI).IsEqualToZero());
   assert(this->Computed.elements[i][j]);
+  /////////////////////////////////////////////////////////////////
   Rational& tempRat= this->ChevalleyConstants.elements[i][j];
   Rational tempRat2= this->theWeyl.RootScalarCartanRoot(rootK, rootK);
   this->ChevalleyConstants.elements[j][k]=(tempRat*this->theWeyl.RootScalarCartanRoot(rootI, rootI))/tempRat2;

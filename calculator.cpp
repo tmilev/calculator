@@ -329,6 +329,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="1";
 //civilizedInput="g:=SemisimpleLieAlgebra{}A_1;";
 //civilizedInput="Polynomial{}(x(x+y)^2)";
+//civilizedInput="g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(c);";
+//civilizedInput="g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ";
 
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);

@@ -434,6 +434,80 @@ bool CommandList::fCasimir
   return true;
 }
 
+bool CommandList::fDrawWeightSupportWithMults
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  if (theExpression.children.size!=2)
+  { std::stringstream errorStream;
+    errorStream << "Error: the function for drawing weight support takes two arguments (type and highest weight)"
+    << ", but you gave " << theExpression.children.size << " arguments instead. ";
+    return theExpression.SetError(errorStream.str());
+  }
+  Expression& typeNode=theExpression.children[0];
+  Expression& hwNode=theExpression.children[1];
+  if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, typeNode, comments))
+    return false;
+  if (typeNode.errorString!="")
+    return theExpression.SetError(typeNode.errorString);
+  SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
+  Vector<Rational> highestWeightFundCoords;
+  Context tempContext;
+  if (!hwNode.GetVector<Rational>(highestWeightFundCoords, tempContext, theAlg.GetRank(), 0, comments))
+    return false;
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroup& theWeyl=theAlg.theWeyl;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //Vectors<Rational> theWeightsToBeDrawn;
+  std::stringstream out;
+  charSSAlgMod<Rational> theChar;
+  theChar.MakeFromWeight
+  (highestWeightSimpleCoords, theCommands.theObjectContainer.theLieAlgebras, theAlg.indexInOwner);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.DrawMeWithMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), tempContext);
+  return true;
+}
+
+bool CommandList::fDrawWeightSupport
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  if (theExpression.children.size!=2)
+  { std::stringstream errorStream;
+    errorStream << "Error: the function for drawing weight support takes two arguments (type and highest weight)"
+    << ", but you gave " << theExpression.children.size << " arguments instead. ";
+    return theExpression.SetError(errorStream.str());
+  }
+  Expression& typeNode=theExpression.children[0];
+  Expression& hwNode=theExpression.children[1];
+  if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, typeNode, comments))
+    return false;
+  if (typeNode.errorString!="")
+    return theExpression.SetError(typeNode.errorString);
+  SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
+  Vector<Rational> highestWeightFundCoords;
+  Context tempContext;
+  if (!hwNode.GetVector<Rational>(highestWeightFundCoords, tempContext, theAlg.GetRank(), 0, comments))
+    return false;
+  Vector<Rational> highestWeightSimpleCoords;
+  WeylGroup& theWeyl=theAlg.theWeyl;
+  highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
+  //Vectors<Rational> theWeightsToBeDrawn;
+  std::stringstream out;
+  charSSAlgMod<Rational> theChar;
+  theChar.MakeFromWeight
+  (highestWeightSimpleCoords, theCommands.theObjectContainer.theLieAlgebras, theAlg.indexInOwner);
+  DrawingVariables theDV;
+  std::string report;
+  theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
+  out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), tempContext);
+  return true;
+}
+
 bool CommandList::fEmbedG2inB3
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { theCommands.fElementUniversalEnvelopingAlgebra(theCommands, inputIndexBoundVars, theExpression, comments);
@@ -472,10 +546,10 @@ bool CommandList::fEmbedG2inB3
 //  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
 //  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
   theHmm.imagesSimpleChevalleyGenerators.SetSize(4);
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_2;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_1plusg_3;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m2;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m1plusg_m3;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_2;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_1plusg_3;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m2;
+  theHmm.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m1plusg_m3;
   theHmm.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*theCommands.theGlobalVariableS);
   theHmm.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(theHmm.RestrictedRootSystem, *theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetAtomicValue().GetUE();
@@ -966,7 +1040,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";
   if (this->theFrames.size>1)
     out <<"window.setTimeout(\"incrementGlobalFrameCounter" << timesCalled << "()\"," << frameDelay << ");\n";
-  out << " }}\n";
+  out << " }\n";
   out << "var selectedBasisIndexCone" << timesCalled << "=-1;\n"
   << "var clickTolerance=5;\n"
   << "function ptsWithinClickToleranceCone" << timesCalled << "(x1, y1, x2, y2)\n"

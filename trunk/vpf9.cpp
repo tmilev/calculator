@@ -522,28 +522,13 @@ int MathRoutines::BinomialCoefficientMultivariate(int N, List<int>& theChoices)
 }
 
 void Selection::init(int maxNumElements)
-{ if (maxNumElements<=0)
-  { this->MaxSize=0;
-    maxNumElements=0;
-  }
-  if (maxNumElements>0 && maxNumElements!=this->MaxSize)
-  { delete [] this->selected;
-    delete [] this->elements;
-    //delete [] elementsInverseSelection;
-    this->selected = new bool[maxNumElements];
-    this->elements = new int[maxNumElements];
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter+=(maxNumElements-this->MaxSize)*2;
-  ParallelComputing::CheckPointerCounters();
-#endif
-    this->MaxSize =maxNumElements;
-  }
+{ this->selected.SetSize(maxNumElements);
+  this->elements.SetSize(maxNumElements);
+  this->MaxSize=maxNumElements;
   for (int i=0; i<this->MaxSize; i++)
     this->selected[i]=false;
   this->CardinalitySelection=0;
 }
-
-
 
 void Selection::AddSelectionAppendNewIndex(int index)
 { if (index>=this->MaxSize || index<0)
@@ -576,19 +561,6 @@ void Selection::RemoveLastSelection()
     return;
   this->selected[this->elements[this->CardinalitySelection-1]]=false;
   this->CardinalitySelection--;
-}
-
-Selection::~Selection()
-{ delete [] this->selected;
-  delete [] this->elements;
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter-=this->MaxSize;
-  ParallelComputing::CheckPointerCounters();
-#endif
-  //  delete [] elementsInverseSelection;
-  this->MaxSize=0;
-  this->selected=0;
-  this->elements=0;
 }
 
 int Selection::SelectionToIndex()
@@ -754,7 +726,7 @@ unsigned int Selection::HashFunction() const
   return result;
 }
 
-inline bool Rational::IsEqualTo(const Rational& b) const
+bool Rational::IsEqualTo(const Rational& b) const
 { if (this->Extended==0 && b.Extended==0)
     return (this->NumShort*b.DenShort==b.NumShort*this->DenShort);
   Rational tempRat;
@@ -763,7 +735,7 @@ inline bool Rational::IsEqualTo(const Rational& b) const
   return tempRat.IsEqualToZero();
 }
 
-inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
+bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
 { if (this->Extended==0 && right.Extended==0)
     return (this->NumShort*right.DenShort>=right.NumShort*this->DenShort);
   Rational tempRat;
@@ -772,7 +744,7 @@ inline bool Rational::IsGreaterThanOrEqualTo(const Rational& right)const
   return tempRat.IsPositiveOrZero();
 }
 
-inline std::string Rational::ToString(FormatExpressions* notUsed)const
+std::string Rational::ToString(FormatExpressions* notUsed)const
 { std::stringstream out;
   if (this->Extended==0)
   { out << this->NumShort;

@@ -462,7 +462,9 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 void LittelmannPath::ActByEalpha(int indexAlpha)
 { Rational theMin=0;
   int minIndex=-1;
+  assert (this->owner!=0);
   WeylGroup& theWeyl=*this->owner;
+  theWeyl.ComputeRho(true);
   Vector<Rational>& alpha=theWeyl.RootsOfBorel[indexAlpha];
   Rational LengthAlpha=theWeyl.RootScalarCartanRoot(alpha, alpha);
   Vector<Rational> alphaScaled=alpha*2/LengthAlpha;
@@ -772,6 +774,7 @@ bool LittelmannPath::GenerateOrbit
   }
   else
     parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
+  std::cout << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
   for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
     if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
     { result=false;
@@ -1036,18 +1039,20 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->theHWSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordS);
   this->theHWDualCoordS= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFundamentalCoordS);
   this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
-
-/*  std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
-  std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ElementToStringGeneric();
-  std::cout << "<br>dual coords: " << this->theHWDualCoordsBaseField.ElementToStringGeneric();
-  std::cout << "<br>fund coords no base field: " << this->theHWFundamentalCoordS.ToString();
-  std::cout << "<br>fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
-  std::cout << "<br>simple coords no base field: " << this->theHWSimpleCoordS.ToString();
-*/
   this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
+
+ // std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
+ // std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
+ // std::cout << "<br>dual coords: " << this->theHWDualCoordsBaseField.ToString();
+ // std::cout << "<br>fund coords no base field: " << this->theHWFundamentalCoordS.ToString();
+ // std::cout << "<br>fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
+ // std::cout << "<br>simple coords no base field: " << this->theHWSimpleCoordS.ToString();
+ // std::cout << "<br>parabolicSelectionNonSelectedAreElementsLevi: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+ // std::cout << "<br>parabolicSelectionSelectedAreElementsLevi: " << this->parabolicSelectionSelectedAreElementsLevi.ToString();
 
   LittelmannPath startingPath;
   startingPath.MakeFromWeightInSimpleCoords(this->theHWSimpleCoordS, theWeyl);
+//  std::cout << "<br>starting littelmann path: " << startingPath.ToString() << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   List<LittelmannPath> thePaths;
   List<List<int> > generatorsIndices;
   if (!startingPath.GenerateOrbit
@@ -1064,10 +1069,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     tempCharMon.weightFundamentalCoords= theWeyl.GetFundamentalCoordinatesFromSimple(*thePaths[i].Waypoints.LastObject());
     this->theCharOverH.AddMonomial(tempCharMon,1);
   }
+//  std::cout << "<br>character over h (i.e. the set of weights with mults): " << this->theCharOverH.ToString();
+//  std::cout << "<br>character: " << this->theChaR.ToString();
   this->theModuleWeightsSimpleCoords.QuickSortAscending();
   std::stringstream out2, monomialDetailStream;
   if (outputReport!=0)
-  { monomialDetailStream << "Number of Littelmann paths: " << thePaths.size;
+  { monomialDetailStream << "<br>Number of Littelmann paths: " << thePaths.size;
     monomialDetailStream << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
     << this->theHWSimpleCoordS.ToString();
     std::string tempS;
@@ -1095,7 +1102,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     Vector<Rational>& hwCurrent=*thePaths[i].Waypoints.LastObject();
     int theIndex=this->theModuleWeightsSimpleCoords.GetIndex(hwCurrent);
     if (theIndex==-1)
-    { std::cout << "couldn't find weight : " << hwCurrent.ToString() << " in " << this->theModuleWeightsSimpleCoords.ToString();
+    { //std::cout << "couldn't find weight : " << hwCurrent.ToString() << " in " << this->theModuleWeightsSimpleCoords.ToString();
       out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
       << " # of weights is 10000";
       if (outputReport!=0)
@@ -2084,8 +2091,14 @@ template <class CoefficientType>
 std::string ModuleSSalgebraNew<CoefficientType>::ToString()const
 { std::stringstream out;
   GlobalVariables theGlobalVariables; FormatExpressions theformat;
-  out << "<br><b>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString() << "</b>";
+  out << "<br>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
+  out << "<br>in simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
+  out << "<br>Rational part highest weight fund. coords:" << this->theHWDualCoordS.ToString();
+  out << "<br>Rational part highest weight simple coords: " << this->theHWSimpleCoordS.ToString();
+  out << "<br>Type semisimple Lie algebra: " << this->theAlgebras->TheObjects[this->indexAlgebra].GetLieAlgebraName();
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+  out << "<br>Character over H: " << this->theCharOverH.ToString();
+  out << "<br>Character: " << this->theChaR.ToString();
   out << "<br>Actions generators matrix form (" << this->actionsGeneratorsMaT.size << "): ";
   for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
     out << this->actionsGeneratorsMaT[i].ToString(true, false) << "";
@@ -2095,25 +2108,19 @@ std::string ModuleSSalgebraNew<CoefficientType>::ToString()const
   for (int i=0; i<this->theGeneratingWordsNonReduced.size; i++)
   { out << this->theGeneratingWordsNonReduced[i].ToString(&theformat) << ", ";
   }
-/*out <<     this->theAlgebra=other.theAlgebra;
-out <<     this->theGeneratingWordsGrouppedByWeight= other.theGeneratingWordsGrouppedByWeight;
-out <<     this->theSimpleGens=other.theSimpleGens;
-out <<     this->actionsSimpleGens=other.actionsSimpleGens;
-out <<     this->actionsSimpleGensMatrixForM= other.actionsSimpleGensMatrixForM;
-    this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
-    this->theBilinearFormsInverted=other.theBilinearFormsInverted;
-    this->weightsSimpleGens=other.weightsSimpleGens;
-    this->theHWDualCoordsBaseField=other.theHWDualCoordsBaseField;
-    this->theHWDualCoordS = other.theHWDualCoordS;
-    this->theHWSimpleCoordS=other.theHWSimpleCoordS;
-    this->theHWFundamentalCoordS=other.theHWFundamentalCoordS;
-    this->theHWFundamentalCoordsBaseField= other.theHWFundamentalCoordsBaseField;
-    this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
-    this->theCharOverH=other.theCharOverH;
-    this->theChaR=other.theChaR;
-    this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
-    this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
-    this->flagIsInitialized=other.flagIsInitialized;*/
+  /*out << this->theGeneratingWordsGrouppedByWeight;
+  out << this->theSimpleGens;
+  out << this->actionsSimpleGens;
+  out << this->actionsSimpleGensMatrixForM;
+  this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
+  this->theBilinearFormsInverted=other.theBilinearFormsInverted;
+  this->weightsSimpleGens=other.weightsSimpleGens;
+  this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
+  this->theCharOverH=other.theCharOverH;
+  this->theChaR=other.theChaR;
+  this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
+  this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
+  this->flagIsInitialized=other.flagIsInitialized;*/
   return out.str();
 }
 

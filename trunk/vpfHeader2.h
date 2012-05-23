@@ -1005,13 +1005,16 @@ static bool EvaluateDereferenceOneArgument
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fSplitFDpartB3overG2CharsOnly
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
-  static bool fSplitFDpartOverG2
+  static bool fSplitFDpartB3overG2
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fDrawWeightSupportWithMults

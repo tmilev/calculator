@@ -4036,8 +4036,8 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>
     output.elements[0][0]=1;
     output.elements[1][0]=-1;
     //image of second simple root (long one):
-    output.elements[1][1]=-1;
-    output.elements[2][1]=1;
+    output.elements[1][1]=1;
+    output.elements[2][1]=-1;
     //image of third simple root (short one)
     output.elements[3][2]=1;
     //image of fourth simple root (short one)

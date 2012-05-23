@@ -1374,7 +1374,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
         out << this->SetComponent("A'", numLength1, indexComponent);
     }
     else
-    {//the longer Vector<Rational> should have smaller index
+    {//the longer root should have smaller index
       Rational greaterlength, tempRat;
       int numGreaterLength=numLength2;
       int numSmallerLength=numLength1;
@@ -1394,7 +1394,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
           assert(numLength1==2);
         } else
         { if (length1.NumShort==6 || length2.NumShort==6)
-            out << this->SetComponent("G", 2, indexComponent);
+          { out << this->SetComponent("G", 2, indexComponent);
+            currentEnds.SwapTwoIndices(0,1);//<- in G_2, the longer root comes second.
+          }
           else
             out << this->SetComponent("B", 2, indexComponent);
         }
@@ -4704,7 +4706,7 @@ bool ConeComplex::ReadFromFile
 }
 
 void WeylGroup::GetFundamentalWeightsInSimpleCoordinates(Vectors<Rational>& output)
-{ Matrix<Rational>  tempMat;
+{ Matrix<Rational> tempMat;
   tempMat=this->CartanSymmetric;
   Rational tempRat;
   for (int i=0; i<this->GetDim(); i++)

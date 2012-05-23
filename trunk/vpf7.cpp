@@ -993,7 +993,7 @@ void ModuleSSalgebraNew<CoefficientType>::GetAdActionHomogenousElT
       { theElt=inputHomogeneous;
         theElt.MultiplyBy(currentWordList[j], theRingUnit);
         this->ExpressAsLinearCombinationHomogenousElement
-        (theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseField, theGlobalVariables, theRingUnit, theRingZero);
+        (theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
       }
     }
   }
@@ -1018,7 +1018,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->parabolicSelectionSelectedAreElementsLevi.InvertSelection();
 
   this->theHWFundamentalCoordsBaseField=HWFundCoords;
-  this->theHWDualCoordsBaseField.SetSize(theRank);
+  this->theHWDualCoordsBaseFielD.SetSize(theRank);
   this->theHWFundamentalCoordS.SetSize(theRank);
 
   for (int i=0; i<theRank; i++)
@@ -1032,12 +1032,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
       this->theHWFundamentalCoordS[i]=theCoord;
     }
-    this->theHWDualCoordsBaseField[i]=this->theHWFundamentalCoordsBaseField[i];
-    this->theHWDualCoordsBaseField[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
+    this->theHWDualCoordsBaseFielD[i]=this->theHWFundamentalCoordsBaseField[i];
+    this->theHWDualCoordsBaseFielD[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
   }
 
   this->theHWSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordS);
-  this->theHWDualCoordS= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFundamentalCoordS);
+  this->theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFundamentalCoordS);
   this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
   this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
 
@@ -1133,7 +1133,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
     }
   }
-  this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseField, theGlobalVariables, theRingUnit, theRingZero);
+  this->IntermediateStepForMakeFromHW(this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
   if (outputReport!=0)
     for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)

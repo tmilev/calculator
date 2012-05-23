@@ -812,7 +812,7 @@ public:
   void MakeF4();
   void MakeG2();
   WeylGroup(){this->flagFundamentalToSimpleMatricesAreComputed=false;}
-  Matrix<Rational> * GetMatrixFundamentalToSimpleCoords()
+  Matrix<Rational>* GetMatrixFundamentalToSimpleCoords()
   { this->ComputeFundamentalToSimpleMatrices();
     return &this->FundamentalToSimpleCoords;
   }
@@ -3019,10 +3019,10 @@ public:
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
   Vectors<Rational> weightsSimpleGens;
 
-  Vector<CoefficientType> theHWDualCoordsBaseField;
+  Vector<CoefficientType> theHWDualCoordsBaseFielD;
   Vector<CoefficientType> theHWSimpleCoordSBaseField;
 
-  Vector<Rational> theHWDualCoordS;
+  Vector<Rational> theHWDualCoords;
   Vector<Rational> theHWSimpleCoordS;
   Vector<Rational> theHWFundamentalCoordS;
   Vector<CoefficientType> theHWFundamentalCoordsBaseField;
@@ -3057,8 +3057,8 @@ public:
     this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
     this->theBilinearFormsInverted=other.theBilinearFormsInverted;
     this->weightsSimpleGens=other.weightsSimpleGens;
-    this->theHWDualCoordsBaseField=other.theHWDualCoordsBaseField;
-    this->theHWDualCoordS = other.theHWDualCoordS;
+    this->theHWDualCoordsBaseFielD=other.theHWDualCoordsBaseFielD;
+    this->theHWDualCoords = other.theHWDualCoords;
     this->theHWSimpleCoordS=other.theHWSimpleCoordS;
     this->theHWSimpleCoordSBaseField=other.theHWSimpleCoordSBaseField;
     this->theHWFundamentalCoordS=other.theHWFundamentalCoordS;
@@ -5576,9 +5576,10 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
   { this->theBilinearFormsAtEachWeightLevel[i].SetNumVariables(GoalNumVars);
     this->theBilinearFormsInverted[i].SetNumVariables(GoalNumVars);
   }
-  for (int i=0; i<this->theHWDualCoordsBaseField.size; i++)
-  { this->theHWDualCoordsBaseField[i].SetNumVariables(GoalNumVars);
+  for (int i=0; i<this->theHWDualCoordsBaseFielD.size; i++)
+  { this->theHWDualCoordsBaseFielD[i].SetNumVariables(GoalNumVars);
     this->theHWFundamentalCoordsBaseField[i].SetNumVariables(GoalNumVars);
+    this->theHWSimpleCoordSBaseField[i].SetNumVariables(GoalNumVars);
   }
 }
 
@@ -5621,8 +5622,8 @@ void ModuleSSalgebraNew<CoefficientType>::Substitution
   { this->theBilinearFormsAtEachWeightLevel[i].Substitution(theSub);
     this->theBilinearFormsInverted[i].Substitution(theSub);
   }
-  for (int i=0; i<this->theHWDualCoordsBaseField.size; i++)
-  { this->theHWDualCoordsBaseField[i].Substitution(theSub);
+  for (int i=0; i<this->theHWDualCoordsBaseFielD.size; i++)
+  { this->theHWDualCoordsBaseFielD[i].Substitution(theSub);
     this->theHWFundamentalCoordsBaseField[i].Substitution(theSub);
     this->theHWSimpleCoordSBaseField[i].Substitution(theSub);
   }

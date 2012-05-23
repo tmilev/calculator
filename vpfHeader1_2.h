@@ -825,6 +825,10 @@ public:
   (const Vector<CoefficientType>& inputInFundamentalCoords)
   ;
   template<class CoefficientType>
+  Vectors<CoefficientType> GetSimpleCoordinatesFromFundamental
+  (const Vectors<CoefficientType>& inputInFundamentalCoords)
+  ;
+  template<class CoefficientType>
   Vector<CoefficientType> GetFundamentalCoordinatesFromSimple
   (const Vector<CoefficientType>& inputInSimpleCoords)
   ;
@@ -3127,7 +3131,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   }
   void SplitOverLevi
   (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
-   const CoefficientType& theRingZero)
+   const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
+   Vectors<CoefficientType>* outputWeightsFundCoords=0)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
    {}
@@ -7030,6 +7035,17 @@ Vector<CoefficientType> WeylGroup::GetSimpleCoordinatesFromFundamental
   result=inputInFundamentalCoords;
 //  std::cout << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
   tempMat.ActOnVectorColumn(result, result[0].GetZero());
+  return result;
+}
+
+template<class CoefficientType>
+Vectors<CoefficientType> WeylGroup::GetSimpleCoordinatesFromFundamental
+(const Vectors<CoefficientType>& inputInFundamentalCoords)
+{ Matrix<Rational>& tempMat=*this->GetMatrixFundamentalToSimpleCoords();
+  Vectors<CoefficientType> result;
+  result=inputInFundamentalCoords;
+//  std::cout << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
+  tempMat.ActOnVectorsColumn(result);
   return result;
 }
 

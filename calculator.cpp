@@ -331,7 +331,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="Polynomial{}(x(x+y)^2)";
 //civilizedInput="g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(c);";
 //civilizedInput="g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ";
-
+//civilizedInput="fSplitFDpartB3overG2{}(x_1,2,0) ";
+//civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0) ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -20,6 +20,7 @@
 
 #ifndef WIN32
 #include <pthread.h>
+//#include <execinfo.h>
 #else
  #include<windows.h>
 // #include <unistd.h>
@@ -34,6 +35,8 @@
 #pragma warning(disable:4189)//warning 4189: variable initialized but never used
 #endif
 
+
+//routines for debugging, timing, emergency crashing:
 #define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
 
 const int SomeRandomPrimesSize= 25;
@@ -808,7 +811,17 @@ public:
   { if (i>=this->size || i<0)
     { std::cout << "Programming error: attempting to access the entry of index " << i << " in an array of "
       << this->size << " elements. ";
-//      StackRoutines::PrintStack(std::cout);
+//    #ifndef WIN32
+//    void **buffer= new void*[1000];
+//    backtrace(buffer, 1000);
+//    char ** theTrace=backtrace_symbols(buffer, 1000);
+//      for (int i=0; i<1000; i++)
+//      { if (theTrace[i]==0)
+//          break;
+//        std::cout << "<br>" << theTrace[i];
+//      }
+//      //memory leak - variable buffer not freed - no need to worry - we are crashing on the next line!
+//      #endif
       assert(false);
     }
     return this->TheObjects[i];
@@ -1383,7 +1396,11 @@ public:
   template <class otherType>
   void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& TheRingZero=0)const
   { assert(&input!=&output);
-    assert(this->NumCols==input.size);
+    if (this->NumCols!=input.size)
+    { std::cout << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
+      << " dimension " << input.size << ". " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     output.MakeZero(this->NumRows, TheRingZero);
     otherType tempElt;
     for (int i=0; i<this->NumRows; i++)
@@ -1413,7 +1430,11 @@ public:
     this->ActOnVectorColumn(inputOutput, buffer, TheRingZero);
     inputOutput=buffer;
   }
-  void ActOnVectorsColumn(Vectors<Element>& inputOutput, const Element& TheRingZero=(Element) 0)const{ Vectors<Element> buffer; this->ActOnVectorsColumn(inputOutput, buffer, TheRingZero); inputOutput=buffer;}
+  template <class otherType>
+  void ActOnVectorsColumn(Vectors<otherType>& inputOutput, const otherType& TheRingZero=(otherType) 0)const
+  { for (int i=0; i<inputOutput.size; i++)
+      this->ActOnVectorColumn(inputOutput[i], TheRingZero);
+  }
   std::string ToString(bool useHtml=true, bool useLatex=false)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const Element& theRingUnit=1, const Element& theRingZero=0)
@@ -1850,9 +1871,8 @@ class Selection
 {
 public:
   inline static std::string GetXMLClassName(){ return "Selection";}
-  int* elements;
-//  int* elementsInverseSelection;
-  bool* selected;
+  List<int> elements;
+  List<bool> selected;
   int MaxSize;
   int CardinalitySelection;
   void AddSelectionAppendNewIndex(int index);
@@ -1924,9 +1944,10 @@ public:
   }
   Selection();
   Selection(int m);
-  Selection(const Vector<Rational> & other) :elements(0), selected(0), MaxSize(0), CardinalitySelection(0){ this->operator=(other);}
-  Selection(const Selection& other){this->Assign(other);}
-  ~Selection();
+  Selection(const Vector<Rational>& other) { this->operator=(other);}
+  Selection(const Selection& other)
+  { this->Assign(other);
+  }
 };
 
 class SelectionWithMultiplicities

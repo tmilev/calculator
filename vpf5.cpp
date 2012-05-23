@@ -268,7 +268,7 @@ bool CommandList::fRootSAsAndSltwos
     theCommands.SystemCommands.AddOnTop(outMkDirCommand2.str());
     if (comments!=0)
     { *comments << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection."
-      <<  " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
+      << " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
       << "(Apache server configuration) problem.</b><br><br>"
       << "<META http-equiv=\"refresh\" content=\"3; url="
       << theCommands.DisplayNameCalculator << "?"
@@ -334,7 +334,6 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 { IncrementRecursion recursionCounter(&theCommands);
   if (theExpression.children.size!=4)
     return theExpression.SetError("The function expects 4 arguments.");
-
   Expression& typeNode=theExpression.children[0];
   Expression& weightNode=theExpression.children[1];
   Expression& inducingParNode=theExpression.children[2];
@@ -342,7 +341,6 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   bool success=theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, typeNode, comments);
   if (!success || typeNode.errorString!="")
     return theExpression.SetError("Failed to construct semisimple Lie algebra from the first argument. See comments.");
-
   Vector<RationalFunction> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
@@ -1030,8 +1028,9 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
 //  << " dojo.require(\"dojox.gfx\", function(){"
   << "if (dojox.gfx!=undefined)\n"
+  << "{ dojo.require(\"dojox.gfx\"); "
   << theSurfaceName << "  = dojox.gfx.createSurface(node,"
-  << boss->DefaultHtmlWidth << "," << boss->DefaultHtmlHeight << ");\n"
+  << boss->DefaultHtmlWidth << "," << boss->DefaultHtmlHeight << ");}\n"
   << " else return;\n "
 //  << "});\n"
   << "  ComputeProjections" << timesCalled << "();\n"
@@ -1190,7 +1189,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
     << "    { vOrthogonal=dojo.clone(" << eiBasis <<  "[2]);\n"
     << "    }\n";
   }
-out
+  out
   << "    if (getScalarProduct" << timesCalled << "(vOrthogonal, vOrthogonal)>epsilon || getScalarProduct" << timesCalled
   << "(vOrthogonal, vOrthogonal)<-epsilon)\n"
   << "    { if (oldRatioProjectionOverHeightSquared==0)\n"
@@ -1245,14 +1244,14 @@ out
   << "dojo.require(\"dojox.gfx\");\n"
   << "dojo.addOnLoad(" << theInitFunctionName << ");\n"
   << "dojo.addOnLoad(" << theDrawFunctionName << ");\n"
-<< "function dojoOnLoadDoesntWork" << timesCalled << " (){\n"
-<< "  if (" << theSurfaceName << "==0){\n  "
-<< theInitFunctionName << "();\n"
-<< "  window.setTimeout(function(){dojoOnLoadDoesntWork" << timesCalled << "();}, 1000);\n"
-<< "  }\n"
-<< "}"
-<< "dojoOnLoadDoesntWork" << timesCalled << "();\n"
-<< "</script>\n"
+  << "function dojoOnLoadDoesntWork" << timesCalled << " (){\n"
+  << "  if (" << theSurfaceName << "==0){\n  "
+  << theInitFunctionName << "();\n"
+  << "  window.setTimeout(function(){dojoOnLoadDoesntWork" << timesCalled << "();}, 1000);\n"
+  << "  }\n"
+  << "}"
+  << "dojoOnLoadDoesntWork" << timesCalled << "();\n"
+  << "</script>\n"
   ;
   return out.str();
 }
@@ -1260,10 +1259,15 @@ out
 template<class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
-   const CoefficientType& theRingZero)
+   const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
+   Vectors<CoefficientType>* outputWeightsFundCoords)
 { if (this->theChaR.size!=1)
   { if (Report!=0)
-      *Report="I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
+    { std::stringstream out;
+      out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
+      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size << " monomials)";
+      *Report=out.str();
+    }
     return;
   }
   ReflectionSubgroupWeylGroup subWeyl;
@@ -1318,9 +1322,9 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   Vector<CoefficientType> hwFundCoordsNilPart;
   hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart-=this->theHWFundamentalCoordS;
+  ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
-    ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
     currentElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
     Vector<CoefficientType>& currentVect= theFinalEigenSpace[j];
     int lastNonZeroIndex=-1;
@@ -1339,6 +1343,10 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
     << "$&$" << currentVect.ElementToStringLetterFormat("m", true, false) << "$";
     if (currentElt.size>1)
       out << "(";
+    if (outputEigenVectors!=0)
+      outputEigenVectors->AddOnTop(currentElt);
+    if (outputWeightsFundCoords!=0)
+      outputWeightsFundCoords->AddOnTop(currentWeight);
     out << currentElt.ToString(&theGlobalVariables.theDefaultLieFormat);
     if (currentElt.size>1)
       out << ")";
@@ -1355,12 +1363,12 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
     *Report=out.str();
 }
 
-bool CommandList::fSplitFDpartOverG2
+bool CommandList::fSplitFDpartB3overG2CharsOnly
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
     return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
   Vector<RationalFunction> theWeightFundCoords;
-/*  Context theContext;
+  Context theContext;
   if (!theExpression.GetVector<RationalFunction>(theWeightFundCoords, theContext, 3, theCommands.fPolynomial, comments))
   { std::stringstream errorStream;
     errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
@@ -1372,11 +1380,119 @@ bool CommandList::fSplitFDpartOverG2
   for (int i=0; i<theWeightFundCoords.size; i++)
     if (!theWeightFundCoords[i].IsSmallInteger())
       selInducing.AddSelectionAppendNewIndex(i);
+  Data tempData;
+  tempData.MakeSSAlgebra(theCommands, 'B', 3);
+  SemisimpleLieAlgebra& ownerSS=tempData.GetAmbientSSAlgebra();
+
+  std::stringstream out;
+//  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   theMod.MakeFromHW
   (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
   std::string report;
-  theMod.SplitOverLevi(& report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0);
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, report, finalContext);*/
+  Selection SelSplittingParSel=selInducing;
+  if (SelSplittingParSel.selected[0]!=SelSplittingParSel.selected[2])
+  { SelSplittingParSel.AddSelectionAppendNewIndex(0);
+    SelSplittingParSel.AddSelectionAppendNewIndex(2);
+  }
+  out << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString()
+  << " common Levi part of G_2 and B_3: " << SelSplittingParSel.ToString() << "<br>";
+  Vector<Rational> splittingParSel;
+  splittingParSel=SelSplittingParSel;
+  theMod.SplitOverLevi(&report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0);
+  out << report;
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
+  return true;
+}
+
+bool CommandList::fSplitFDpartB3overG2
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
+    return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
+  Vector<RationalFunction> theWeightFundCoords;
+  Context theContext;
+  if (!theExpression.GetVector<RationalFunction>(theWeightFundCoords, theContext, 3, theCommands.fPolynomial, comments))
+  { std::stringstream errorStream;
+    errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
+    return theExpression.SetError(errorStream.str());
+  }
+  ModuleSSalgebraNew<RationalFunction> theMod;
+  Selection selInducing;
+  selInducing.init(3);
+  for (int i=0; i<theWeightFundCoords.size; i++)
+    if (!theWeightFundCoords[i].IsSmallInteger())
+      selInducing.AddSelectionAppendNewIndex(i);
+  Data tempDataB3, tempDataG2;
+  tempDataB3.MakeSSAlgebra(theCommands, 'B', 3);
+  tempDataG2.MakeSSAlgebra(theCommands, 'G', 2);
+  SemisimpleLieAlgebra& ownerSSB3=tempDataB3.GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSSG2=tempDataG2.GetAmbientSSAlgebra();
+  std::stringstream out;
+//  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
+  theMod.MakeFromHW
+  (*ownerSSB3.owner, ownerSSB3.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
+  std::string report;
+  Selection SelSplittingParSel=selInducing;
+  if (SelSplittingParSel.selected[0]!=SelSplittingParSel.selected[2])
+  { SelSplittingParSel.AddSelectionAppendNewIndex(0);
+    SelSplittingParSel.AddSelectionAppendNewIndex(2);
+  }
+  out << "<br>Highest weight: " << theWeightFundCoords.ToString() << "<br>Parabolic selection: " << selInducing.ToString()
+  << "<br>common Levi part of G_2 and B_3: " << SelSplittingParSel.ToString();
+  Vector<Rational> splittingParSel;
+  splittingParSel=SelSplittingParSel;
+  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
+  Vectors<RationalFunction> outputWeightsFundCoordS;
+  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  theMod.SplitOverLevi(&report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0, &outputEigenWords, &outputWeightsFundCoordS);
+  //out << report;
+  int numVars=theWeightFundCoords[0].NumVars;
+  Vector<RationalFunction> ih1, ih2;
+  ih1="(1,0,2)";
+  ih2="(0,3,0)";
+  Vectors<RationalFunction> g2Weights, g2DualWeights;
+  g2Weights.SetSize(outputWeightsFundCoordS.size);
+  g2DualWeights.SetSize(outputWeightsFundCoordS.size);
+  Matrix<Rational> invertedG2cartanMat;
+  invertedG2cartanMat=ownerSSG2.theWeyl.CartanSymmetric;
+  invertedG2cartanMat.Invert();
+  outputWeightsSimpleCoords=ownerSSB3.theWeyl.GetSimpleCoordinatesFromFundamental(outputWeightsFundCoordS);
+
+  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
+  { Vector<RationalFunction>& currentWeight=outputWeightsSimpleCoords[i];
+    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
+    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
+    currentG2DualWeight.SetSize(2);
+    currentG2DualWeight[0]=ownerSSB3.theWeyl.RootScalarCartanRoot(ih1, currentWeight);//<-initialize with scalar products
+    currentG2DualWeight[1]=ownerSSB3.theWeyl.RootScalarCartanRoot(ih2, currentWeight);//<-initialize with scalar products
+    invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
+  }
+  ElementUniversalEnveloping<RationalFunction> theG2Casimir;
+  theG2Casimir.MakeCasimir(ownerSSG2, *theCommands.theGlobalVariableS, 1, 0);
+  Vector<RationalFunction> highestWeightG2dualCoords=*g2DualWeights.LastObject();
+  RationalFunction baseChar;
+  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
+  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
+  if (!theG2Casimir.IsEqualToZero())
+    baseChar=theG2Casimir.theCoeffs[0];
+  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
+//  highestWeightG2
+  out
+  << "<table><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
+  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td></tr>";
+  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
+  { Vector<RationalFunction>& currentWeightSimpleB3coords=outputWeightsSimpleCoords[i];
+    Vector<RationalFunction>& currentWeightFundB3coords=outputWeightsFundCoordS[i];
+    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
+    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
+    out << "<tr><td>" << outputEigenWords[i].ToString() << "</td><td> "
+    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
+    << "</td><td>" << currentG2Weight.ToString() << "</td><td> "
+    << ownerSSG2.theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
+    << "</td><td> " << currentG2DualWeight.ToString() << "</td></tr>";
+  }
+  out << "</table>";
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
+  return true;
 }
 
 class DoxygenInstance

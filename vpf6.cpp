@@ -757,6 +757,8 @@ void Data::MakeSSAlgebra
   this->theContextIndex= theBoss.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(newContext);
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].indexInOwner=this->theIndex;
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].owner=& theBoss.theObjectContainer.theLieAlgebras;
+  SemisimpleLieAlgebra& realSS= theBoss.theObjectContainer.theLieAlgebras[this->theIndex];
+  realSS.ComputeChevalleyConstantS(*theBoss.theGlobalVariableS);
 }
 
 std::string Data::ElementToStringDataType() const
@@ -2176,11 +2178,22 @@ void CommandList::initPredefinedVars()
    is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
    "drawWeightSupportWithMults{}(B_3,(0,1,1)); drawWeightSupportWithMults{}(G_2,(1,0))");
   this->AddNonBoundVarMustBeNew
-  ("drawWeightSupport", & this->fDrawWeightSupport, "",
+  ("drawWeightSupport", &this->fDrawWeightSupport, "",
    "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
-
+  this->AddNonBoundVarMustBeNew
+  ("fSplitFDpartB3overG2CommonLeviAndCharsOnly", & this->fSplitFDpartB3overG2CharsOnly, "",
+   "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
+   The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
+   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
+   "fSplitFDpartB3overG2CommonLeviAndCharsOnly{}(x_1,2,0) ");
+  this->AddNonBoundVarMustBeNew
+  ("fSplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
+   "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
+   The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
+   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
+   "fSplitFDpartB3overG2{}(x_1,2,0) ");
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -2595,7 +2608,7 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
     return false;
 //  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
   if (!theGhostHasAppeared)
-  { std::cout << "Ere I am J.H. ... The ghost in the machine...";
+  { std::cout << "Ere I am J.H. ... The ghost in the machine...<br>";
     theGhostHasAppeared=true;
   }
   RationalFunction RFOne, RFZero;

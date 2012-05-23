@@ -6203,9 +6203,10 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   out << "}\n"
   << "function " << theInitFunctionName << "(){\n"
   << "node = dojo.byId(\"" << theCanvasId << "\");\n"
-  << "if (dojox.gfx!=undefined)\n"
+  << "if (dojox.gfx!=undefined){\n"
+  << " dojo.require(\"dojox.gfx\");"
   << theSurfaceName << "  = dojox.gfx.createSurface(node,"
-  << this->DefaultHtmlWidth << "," << this->DefaultHtmlHeight << ");\n"
+  << this->DefaultHtmlWidth << "," << this->DefaultHtmlHeight << ");}\n"
   << " else return;\n "  << theDrawFunctionName << "();\n";
   if (this->theBuffer.BasisProjectionPlane.size>2)
     out << "window.setTimeout(\"changeProjectionPlaneOnTimer" << timesCalled << "()\",100);\n";

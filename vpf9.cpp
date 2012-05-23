@@ -4026,25 +4026,23 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>
   }
   if (WeylLetter=='F')
   { //convention different from Humpreys, Introduction to Lie algebras and representation theory, page 65
-    //rather using current version of Wikipedia, 20 May 2012,
-    //http://en.wikipedia.org/wiki/Root_system#F4
-    //Wikipedia gives the following advice: the first three roots are the same as the root system of B_3
-    //the last one is the -1/2(e_1+e_2+e_3+e_4)
+    //rather using our own version
     output.init(4, 4);
     output.NullifyAll();
+
     //image of first simple root (long one):
-    output.elements[0][0]=1;
-    output.elements[1][0]=-1;
-    //image of second simple root (long one):
-    output.elements[1][1]=1;
-    output.elements[2][1]=-1;
-    //image of third simple root (short one)
-    output.elements[3][2]=1;
+    output.elements[0][0]=2;
+    //image of second simple root (long one)
+    output.elements[0][1]=-1;
+    output.elements[1][1]=-1;
+    output.elements[2][1]=1;
+    output.elements[3][1]=1;
+    //image of third simple root (short one):
+    output.elements[1][2]=1;
+    output.elements[2][2]=-1;
     //image of fourth simple root (short one)
-    output.elements[0][3]=RMHalf;
-    output.elements[1][3]=RMHalf;
-    output.elements[2][3]=RMHalf;
-    output.elements[3][3]=RMHalf;
+    output.elements[2][3]=1;
+    output.elements[3][3]=-1;
     //eps_2:
     //eps_4:
   }

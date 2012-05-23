@@ -1967,6 +1967,13 @@ bool CommandList::fSSAlgebra
         << "</td></tr>";
       }
       out << "</table>";
+      out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
+      << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
+      << " <br> For F_4, we follow "
+      << " our own convention.  Motivation: in our convention, 1) both the symmetric Cartan matrix and the standard Cartan matrix are <br> "
+      << " integral; 2) the long roots come first. 1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+      << "<br>Clearly, having an integral symmetric Cartan matrix should be beneficial for the speed of computations.";
+
       out
       << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
       << " with the j^th simple root times 2 divided by the root length squared,<br> "
@@ -1991,12 +1998,6 @@ bool CommandList::fSSAlgebra
         << "</td></tr>";
       }
       out << "</table>";
-      out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
-      << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
-      << " <br> For F_4, we follow the "
-      << " convention described in the 20 May 2012 version of Wikipedia, <a href=\"http://en.wikipedia.org/wiki/Root_system#F4\">here</a>. <br> "
-      << " The convention is summarized as follows. <br>Choose the first three simple roots of F_4 to be the ones appearing in the root system of B_3.<br> "
-      << " Choose the last simple root of F_4 to be the root -1/2(e_1+e_2+e_3+e_4).";
       DrawingVariables theDV;
       theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
       out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "

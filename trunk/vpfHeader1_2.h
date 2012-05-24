@@ -5852,7 +5852,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
 //this code is to check a math formula:
 //  ElementUniversalEnveloping checkElement;
 //  checkElement.MakeZero(theOwner);
-  Matrix<Rational>  invertedSymCartan;
+  Matrix<Rational> invertedSymCartan;
   invertedSymCartan=theWeyl.CartanSymmetric;
   invertedSymCartan.Invert();
 ////////////////////////////////////////////////////////////////////////
@@ -5928,6 +5928,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
 //      }
 //    }
 //  }
+  this->Simplify(theGlobalVariables, theRingUnit, theRingZero);
 }
 
 template <class CoefficientType>

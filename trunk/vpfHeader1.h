@@ -950,6 +950,7 @@ public:
     output << "</script>";
     return output.str();
   }
+  static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& input);
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
   static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
   static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
@@ -964,6 +965,9 @@ public:
   static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
   { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
   }
+  static std::string GetHtmlMathSpanNoButtonAddBeginArrayRCL
+  (const std::string& input)
+;
   static std::string GetHtmlMathFromLatexFormulA
   (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)
 ;
@@ -5189,6 +5193,9 @@ public:
 //    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
 //    (*this)+=tempRF;
 //  }
+  bool operator<(const RationalFunction& other)const
+  { return other>*this;
+  }
   bool operator>(const RationalFunction& other)const
   { if (this->expressionType<other.expressionType)
       return false;

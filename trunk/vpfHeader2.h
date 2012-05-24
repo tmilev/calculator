@@ -289,7 +289,8 @@ void MakeVariableNonBounD
   (CommandList& owner, int inputIndexBoundVars, int theOp, const Expression& left, const Expression& right)
   ;
   std::string ToString
-  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true)const;
+  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true,
+   Expression* startingExpression=0)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
@@ -769,6 +770,7 @@ public:
   bool ReplaceVbyE();
   bool ReplaceIntIntBy10IntPlusInt()
   ;
+  void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
   bool CreateNewExpressionContext();
   bool RegisterBoundVariable();
   int GetOperationIndexFromControlIndex(int controlIndex);

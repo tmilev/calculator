@@ -3648,17 +3648,17 @@ void HomomorphismSemisimpleLieAlgebra::ToString
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->imagesSimpleChevalleyGenerators.size; i++)
-  { out <<  this->imagesSimpleChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat) << "\n\n";
+  { out <<  this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat) << "\n\n";
     if (useHtml)
       out << "<br>";
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i=0; i<this->domainAllChevalleyGenerators.size; i++)
-  { out << this->imagesAllChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat)
-    << " \\mapsto " << this->domainAllChevalleyGenerators.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat)
-    << "\n\n";
-    if  (useHtml)
-      out << "<br>";
+  { out << "<br>"
+    << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat)
+    << " \\mapsto "
+    << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat)
+    ;
   }
   output=out.str();
 }

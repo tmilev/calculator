@@ -420,6 +420,7 @@ bool CommandList::fCasimir
   rfZero.MakeZero(0, theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunction> theCasimir;
   theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
+//  theCasimir.Simplify(*theCommands.theGlobalVariableS);
   if (comments!=0)
   { *comments << "Context Lie algebra: " << theSSowner.GetLieAlgebraName
     (theSSowner.theWeyl.WeylLetter, theSSowner.GetRank());
@@ -518,42 +519,14 @@ bool CommandList::fEmbedG2inB3
   b3Data.MakeSSAlgebra(theCommands, 'B', 3);
   g2Data.MakeSSAlgebra(theCommands, 'G', 2);
   HomomorphismSemisimpleLieAlgebra theHmm;
-  theHmm.owners=&theCommands.theObjectContainer.theLieAlgebras;
-  theHmm.indexRange=b3Data.theIndex;
-  theHmm.indexDomain=g2Data.theIndex;
-  theHmm.theRange().ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
-  theHmm.theDomain().ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
-  ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
-  g_2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (13, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  g_m2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (7, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  g_1plusg_3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (12, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (14, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  g_1plusg_3+=tempElt;
-  g_m1plusg_m3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (6, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-  (8, theCommands.theObjectContainer.theLieAlgebras, b3Data.theIndex);
-  g_m1plusg_m3+=tempElt;
+  theCommands.MakeHmmG2InB3(theHmm);
 
-//  std::cout << "<hr>g_2: " << g_2.ToString();
-//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
-//  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
-//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
-  theHmm.imagesSimpleChevalleyGenerators.SetSize(4);
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[1]=g_2;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[0]=g_1plusg_3;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m2;
-  theHmm.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m1plusg_m3;
-  theHmm.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*theCommands.theGlobalVariableS);
-  theHmm.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(theHmm.RestrictedRootSystem, *theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetAtomicValue().GetUE();
   ElementUniversalEnveloping<RationalFunction> output;
   if(!theHmm.ApplyHomomorphism(argument, output, *theCommands.theGlobalVariableS))
     return theExpression.SetError("Failed to apply homomorphism for unspecified reason");
+//  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
+  output.Simplify(*theCommands.theGlobalVariableS, 1, 0);
   Data tempData;
   tempData.MakeUE(theCommands, output, b3Data.theContextIndex);
   theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
@@ -562,7 +535,7 @@ bool CommandList::fEmbedG2inB3
 
 std::string CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
 { std::stringstream out;
-  out<< "<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script>";
+  out << "<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js\" type=\"text/javascript\"></script>";
   return out.str();
 }
 
@@ -1404,6 +1377,44 @@ bool CommandList::fSplitFDpartB3overG2CharsOnly
   return true;
 }
 
+void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
+{ Data tempDataB3, tempDataG2;
+  tempDataB3.MakeSSAlgebra(*this, 'B', 3);
+  tempDataG2.MakeSSAlgebra(*this, 'G', 2);
+  output.owners=&this->theObjectContainer.theLieAlgebras;
+  output.indexRange=tempDataB3.theIndex;
+  output.indexDomain=tempDataG2.theIndex;
+  output.theRange().ComputeChevalleyConstantS(*this->theGlobalVariableS);
+  output.theDomain().ComputeChevalleyConstantS(*this->theGlobalVariableS);
+  ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
+  g_2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (13, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  g_m2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (7, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  g_1plusg_3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (12, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (14, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  g_1plusg_3+=tempElt;
+  g_m1plusg_m3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (6, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  (8, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  g_m1plusg_m3+=tempElt;
+
+//  std::cout << "<hr>g_2: " << g_2.ToString();
+//  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
+//  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
+//  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
+  output.imagesSimpleChevalleyGenerators.SetSize(4);
+  output.imagesSimpleChevalleyGenerators.TheObjects[1]=g_2;
+  output.imagesSimpleChevalleyGenerators.TheObjects[0]=g_1plusg_3;
+  output.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m2;
+  output.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m1plusg_m3;
+  output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*this->theGlobalVariableS);
+  output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
+}
+
 bool CommandList::fSplitFDpartB3overG2
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
@@ -1415,21 +1426,19 @@ bool CommandList::fSplitFDpartB3overG2
     errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
     return theExpression.SetError(errorStream.str());
   }
-  ModuleSSalgebraNew<RationalFunction> theMod;
+  ModuleSSalgebraNew<RationalFunction> theModCopy;
   Selection selInducing;
   selInducing.init(3);
   for (int i=0; i<theWeightFundCoords.size; i++)
     if (!theWeightFundCoords[i].IsSmallInteger())
       selInducing.AddSelectionAppendNewIndex(i);
-  Data tempDataB3, tempDataG2;
-  tempDataB3.MakeSSAlgebra(theCommands, 'B', 3);
-  tempDataG2.MakeSSAlgebra(theCommands, 'G', 2);
-  SemisimpleLieAlgebra& ownerSSB3=tempDataB3.GetAmbientSSAlgebra();
-  SemisimpleLieAlgebra& ownerSSG2=tempDataG2.GetAmbientSSAlgebra();
+  HomomorphismSemisimpleLieAlgebra theHmm;
+  theCommands.MakeHmmG2InB3(theHmm);
+
   std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
-  theMod.MakeFromHW
-  (*ownerSSB3.owner, ownerSSB3.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
+  theModCopy.MakeFromHW
+  (theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
   std::string report;
   Selection SelSplittingParSel=selInducing;
   if (SelSplittingParSel.selected[0]!=SelSplittingParSel.selected[2])
@@ -1443,9 +1452,13 @@ bool CommandList::fSplitFDpartB3overG2
   List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   Vectors<RationalFunction> outputWeightsFundCoordS;
   Vectors<RationalFunction> outputWeightsSimpleCoords;
+  theCommands.theObjectContainer.theCategoryOmodules.AddOnTopNoRepetition(theModCopy);
+  int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
+  ModuleSSalgebraNew<RationalFunction>& theMod=
+  theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   theMod.SplitOverLevi(&report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0, &outputEigenWords, &outputWeightsFundCoordS);
   //out << report;
-  int numVars=theWeightFundCoords[0].NumVars;
+//  int numVars=theWeightFundCoords[0].NumVars;
   Vector<RationalFunction> ih1, ih2;
   ih1="(1,0,2)";
   ih2="(0,3,0)";
@@ -1453,32 +1466,33 @@ bool CommandList::fSplitFDpartB3overG2
   g2Weights.SetSize(outputWeightsFundCoordS.size);
   g2DualWeights.SetSize(outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat=ownerSSG2.theWeyl.CartanSymmetric;
+  invertedG2cartanMat=theHmm.theDomain().theWeyl.CartanSymmetric;
   invertedG2cartanMat.Invert();
-  outputWeightsSimpleCoords=ownerSSB3.theWeyl.GetSimpleCoordinatesFromFundamental(outputWeightsFundCoordS);
-
+  outputWeightsSimpleCoords=theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(outputWeightsFundCoordS);
   for (int i=0; i< outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunction>& currentWeight=outputWeightsSimpleCoords[i];
     Vector<RationalFunction>& currentG2Weight=g2Weights[i];
     Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
     currentG2DualWeight.SetSize(2);
-    currentG2DualWeight[0]=ownerSSB3.theWeyl.RootScalarCartanRoot(ih1, currentWeight);//<-initialize with scalar products
-    currentG2DualWeight[1]=ownerSSB3.theWeyl.RootScalarCartanRoot(ih2, currentWeight);//<-initialize with scalar products
+    currentG2DualWeight[0]=theHmm.theRange().theWeyl.RootScalarCartanRoot(ih1, currentWeight);//<-initialize with scalar products
+    currentG2DualWeight[1]=theHmm.theRange().theWeyl.RootScalarCartanRoot(ih2, currentWeight);//<-initialize with scalar products
     invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
   }
-  ElementUniversalEnveloping<RationalFunction> theG2Casimir;
-  theG2Casimir.MakeCasimir(ownerSSG2, *theCommands.theGlobalVariableS, 1, 0);
+  ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
+  theG2Casimir.MakeCasimir(theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
   Vector<RationalFunction> highestWeightG2dualCoords=*g2DualWeights.LastObject();
-  RationalFunction baseChar;
-  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
-  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
-  if (!theG2Casimir.IsEqualToZero())
-    baseChar=theG2Casimir.theCoeffs[0];
-  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
+  List<RationalFunction> theChars;
+  theChars.SetSize(outputWeightsFundCoordS.size);
+//  RationalFunction& baseChar=*theChars.LastObject();
+//  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
+//  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
+//  if (!theG2Casimir.IsEqualToZero())
+//    baseChar=theG2Casimir.theCoeffs[0];
+//  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
 //  highestWeightG2
   out
   << "<table><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
-  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td></tr>";
+  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
   for (int i=0; i< outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunction>& currentWeightSimpleB3coords=outputWeightsSimpleCoords[i];
     Vector<RationalFunction>& currentWeightFundB3coords=outputWeightsFundCoordS[i];
@@ -1487,8 +1501,45 @@ bool CommandList::fSplitFDpartB3overG2
     out << "<tr><td>" << outputEigenWords[i].ToString() << "</td><td> "
     << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
     << "</td><td>" << currentG2Weight.ToString() << "</td><td> "
-    << ownerSSG2.theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
-    << "</td><td> " << currentG2DualWeight.ToString() << "</td></tr>";
+    << theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
+    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
+    theG2CasimirCopy=theG2Casimir;
+    theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
+    theChars[i]=theG2CasimirCopy.theCoeffs[0];
+    out << "<td>" << theChars[i].ToString() << "</td>";
+    out << "</tr>";
+  }
+  out << "</table>";
+  out << "<br>";
+  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
+  out << "<table><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
+  List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
+  ElementTensorsGeneralizedVermas<RationalFunction> intermediateElt;
+  theEigenVectors.SetSize(g2Weights.size);
+  theEigenVectors.LastObject()->MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
+  Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
+  theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
+  for (int k=0; k<g2Weights.size; k++)
+  { out << "<tr><td>" << g2Weights[k].ToString() << "</td><td>";
+    ElementTensorsGeneralizedVermas<RationalFunction>& currentTensorElt=theEigenVectors[k];
+    intermediateElt=*theEigenVectors.LastObject();
+    intermediateElt.MultiplyOnTheLeft(outputEigenWords[k], currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
+    theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
+    intermediateElt=currentTensorElt;
+    for (int j=0; j<g2Weights.size; j++)
+    { weightDifference=g2Weights[j] - g2Weights[k];
+      if (weightDifference.IsPositive())
+      { out << "(i(\\bar c) - " << theChars[j].ToString() <<  ")";
+        theG2CasimirCopy=imageCasimirInB3;
+        tempElt.MakeConst(theChars[j], theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
+        theG2CasimirCopy-=tempElt;
+        intermediateElt.MultiplyOnTheLeft
+        (theG2CasimirCopy, currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
+         theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
+        intermediateElt=currentTensorElt;
+      }
+    }
+    out << "v_\\lambda</td><td>" << currentTensorElt.ToString() << "</td></tr>";
   }
   out << "</table>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);

@@ -774,7 +774,7 @@ bool LittelmannPath::GenerateOrbit
   }
   else
     parabolicSelectionSelectedAreInLeviPart.MakeFullSelection();
-  std::cout << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
+  //std::cout << "<br>parabolicSelectionSelectedAreInLeviPart = " << parabolicSelectionSelectedAreInLeviPart.ToString();
   for (int lowestNonExplored=0; lowestNonExplored<hashedOutput.size; lowestNonExplored++)
     if (UpperBoundNumElts>0 && UpperBoundNumElts< hashedOutput.size)
     { result=false;
@@ -2358,7 +2358,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
   (leftGeneratorIndex, *this->owners, this->indexInOwners);
   rightGeneratorElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
   (rightGeneratorIndex, *this->owners, this->indexInOwners);
-  std::cout << this->ToString() << "=";
+//  std::cout << this->ToString() << "=";
   //Formula realized:
   //a b^n  &=&\sum_{i=0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
@@ -2375,7 +2375,7 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
       for (int i=theIndeX+2; i<this->generatorsIndices.size; i++)
         tempMon.MultiplyByGeneratorPowerOnTheRight(this->generatorsIndices[i], this->Powers[i]);
       output.AddMonomial(tempMon, incomingAcquiredCoefficient);
-      std::cout << "+(" << incomingAcquiredCoefficient.ToString() << ")" << tempMon.ToString();
+//      std::cout << "+(" << incomingAcquiredCoefficient.ToString() << ")" << tempMon.ToString();
     }
     acquiredCoefficient*=(theRightPower);
     theRightPower-=1;
@@ -2424,5 +2424,29 @@ std::string ProjectInformation::ToString()
   << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp.";
   out <<	"</div>";
 
+  return out.str();
+}
+
+std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& input)
+{ std::stringstream out;
+  out << "\\url{http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?";
+  for (unsigned i=0; i<input.size(); i++)
+  { //if (input[i]=='&')
+     // out << "\\&";
+    //else
+    if (input[i]=='%')
+      out << "\\%";
+    else if (input[i]=='_')
+      out << "\\_";
+    else
+      out << input[i];
+  }
+  out << "}";
+  return out.str();
+}
+
+std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(const std::string& input)
+{ std::stringstream out;
+  out << "<span class=\"math\">\\begin{array}{rcl}&&" << input << "\\end{array} </span>";
   return out.str();
 }

@@ -353,6 +353,7 @@ g_{-2} v_\\lambda\
   if (civilizedInput!="")
     std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << theParser.inputStringRawestOfTheRaw
     << "\">Link to your input.</a><br>";
+//  std::cout << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw);
   std::cout << "\n</FORM>";
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   theParser.init(theGlobalVariables);

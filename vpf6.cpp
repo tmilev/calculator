@@ -1531,7 +1531,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
-    return this->ReplaceXEXByE(Expression::formatNoBracketsForFunctionArgument);
+    return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (lastS=="Expression" && secondToLastS=="~" && thirdToLastS=="Expression" )
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheRightGeneral(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
@@ -1970,9 +1970,9 @@ bool CommandList::fSSAlgebra
       out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
       << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
       << " <br> For F_4, we follow "
-      << " our own convention.  Motivation: in our convention, 1) both the symmetric Cartan matrix and the standard Cartan matrix are <br> "
-      << " integral; 2) the long roots come first. 1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-      << "<br>Clearly, having an integral symmetric Cartan matrix should be beneficial for the speed of computations.";
+      << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
+      << " integral; 2) the long roots come first. <br>Point (1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+      << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed of computations, <br>and for reducing sizes of the printouts.";
 
       out
       << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
@@ -1988,7 +1988,7 @@ bool CommandList::fSSAlgebra
         << "</td></tr>";
       }
       out << "</table>";
-      out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see below)</td></tr> ";
+      out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
       Vectors<Rational> rootSystemEpsCoords;
       theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
       for (int i=0; i<theWeyl.RootSystem.size; i++)
@@ -3618,7 +3618,7 @@ void CommandList::EvaluateCommands()
     out << this->syntaxErrors;
     out << "<hr>";
   }
-  std::string startingExpressionString=this->theCommands.ToString(0,10000);
+  Expression StartingExpression=this->theCommands;
   this->RecursionDeptH=0;
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, thePairs, &comments);
@@ -3629,8 +3629,8 @@ void CommandList::EvaluateCommands()
   }
   FormatExpressions theFormat;
   theFormat.flagMakingExpressionTableWithLatex=true;
-  theFormat.flagUseLatex=false;
-  out << this->theCommands.ToString(&theFormat, false, false, &comments); //<< "</td></tr>";
+  theFormat.flagUseLatex=true;
+  out << this->theCommands.ToString(&theFormat, false, false, &comments, true, &StartingExpression); //<< "</td></tr>";
   this->outputString=out.str();
   if (comments.str()!="")
   { std::stringstream commentsStream;
@@ -3694,17 +3694,11 @@ int Expression::GetNumCols()const
 }
 
 std::string Expression::ToString
-(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces, std::stringstream* outComments, bool isFinal)const
+(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces, std::stringstream* outComments, bool isFinal, Expression* startingExpression)const
 { IncrementRecursion theRecursionCounter(this->theBoss);
-  bool MakingExpressionTableWithLatex=false;
   if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
       return "(...)";
-    if (theFormat!=0)
-    { if (this->theBoss->RecursionDeptH>theFormat->MaxRecursionDepthPerExpression)
-        return "(...)";
-      MakingExpressionTableWithLatex=(theFormat->flagMakingExpressionTableWithLatex && (this->theBoss->RecursionDeptH==1));
-    }
   } else
     return "(ProgrammingErrorNoBoss)";
   assert((int)(this->theBoss)!=-1);
@@ -3763,8 +3757,11 @@ std::string Expression::ToString
     << "^{" << this->children[1].ToString(theFormat, false, false, outComments) << "}";
   else if (this->theOperation==this->theBoss->opPlus() )
   { assert(this->children.size>=2);
-    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments);
+    std::string tempS2= this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments);
     std::string tempS=this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
+    out << tempS2;
+    if (tempS2.size()% 200>100)
+      out << "\\\\&&\n";
     if (tempS.size()>0)
       if (tempS[0]!='-')
         out << "+";
@@ -3861,24 +3858,20 @@ std::string Expression::ToString
     << "\\sqcup " << this->children[1].ToString(theFormat, false, false, outComments)
     ;
   else if (this->theOperation==this->theBoss->opEndStatement())
-  { if (!MakingExpressionTableWithLatex)
+  { if (startingExpression==0)
       out << "<table>";
-    else
-      out << "<table><tr><th>Result</th><th>Result in LaTeX</th></tr>";
     for (int i=0; i<this->children.size; i++)
     { out << "<tr><td valign=\"top\">";
-      if (MakingExpressionTableWithLatex)
-      { out << "<hr>" << this->children[i].ToString(theFormat, false, false, outComments);
+      bool createTable=(startingExpression!=0);
+      if (createTable)
+        createTable=(startingExpression->theOperation==this->theBoss->opEndStatement() && startingExpression->children.size==this->children.size);
+      if (createTable)
+      { out << "<hr> "
+        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL( startingExpression->children[i].ToString(theFormat, false, false, 0));
         if (i!=this->children.size-1)
           out << ";";
-        bool oldLatexFormat=false;
-        if (theFormat!=0)
-        { oldLatexFormat=theFormat->flagUseLatex;
-          theFormat->flagUseLatex=true;
-        }
-        out << "</td><td valign=\"top\"><hr>" << CGI::GetHtmlMathSpanFromLatexFormula(this->children[i].ToString(theFormat, false, false, outComments));
-        if (theFormat!=0)
-          theFormat->flagUseLatex=oldLatexFormat;
+        out << "</td><td valign=\"top\"><hr>"
+        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(this->children[i].ToString(theFormat, false, false, outComments));
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -3890,7 +3883,8 @@ std::string Expression::ToString
 //      out << "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp Context index: " << this->IndexBoundVars;
       out << "</td></tr>";
     }
-    out << "</table>";
+    if (startingExpression==0)
+      out << "</table>";
   }
   else
     out << "(ProgrammingError:NotDocumented)" ;
@@ -3903,6 +3897,20 @@ std::string Expression::ToString
   if (outComments!=0)
     if (additionalDataComments!="")
       *outComments << "Comments to expression " << out.str() << ":<br>";
+  if (startingExpression!=0)
+  { std::stringstream outTrue;
+    outTrue << "<table>";
+    outTrue << "<hr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
+    outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
+    << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
+    if (this->theOperation==this->theBoss->opEndStatement())
+      outTrue << out.str();
+    else
+      outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(startingExpression->ToString(theFormat))
+      << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(out.str()) << "</td></tr>";
+    outTrue << "</table>";
+    return outTrue.str();
+  }
 //  if (useLatex && recursionDepth==0 && this->theOperation!=theBoss->opEndStatement())
 //    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
   return out.str();

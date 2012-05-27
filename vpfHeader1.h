@@ -1119,7 +1119,10 @@ public:
           assert(false);
         }
         if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
-        { std::cout << "<hr> Hash size is " << this->HashSize;
+        { std::cout << "<hr>This is a programming error: the hashed element in position " << theIndex
+          << " is recorded in hash array of index " << i << ", however its hash value is instead "
+          << this->GetHash(this->TheObjects[theIndex]) << ". ";
+          std::cout << " The hash size is " << this->HashSize;
           std::cout << "<br>hashes of objects: ";
           for (int l=0; l<this->size; l++)
             std::cout << this->GetHash(this->TheObjects[l]) << "= " << this->GetHash(this->TheObjects[l])%this->HashSize << ", ";
@@ -1127,11 +1130,7 @@ public:
           for (unsigned int l=0; l<this->HashSize; l++)
             for (int k=0; k<this->TheHashedArrays[l].size; k++)
               std::cout << this->TheHashedArrays[l][k] << ", ";
-
-          std::cout << "This is a programming error: "
-          << " object at index  " << theIndex << " is recorded as having modded hash " << i
-          << " but the GetHash function returns " << this->GetHash(this->TheObjects[theIndex]) << ". "
-          << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+          std::cout << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
           assert(false);
         }
       }

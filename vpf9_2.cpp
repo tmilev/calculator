@@ -4330,7 +4330,7 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other)
 }
 
 void RationalFunction::operator*=(const Rational& other)
-{ assert(this->checkConsistency());
+{ //assert(this->checkConsistency());
   if (other.IsEqualToZero())
   { this->MakeZero(this->NumVars, this->context);
     return;
@@ -4346,9 +4346,9 @@ void RationalFunction::operator*=(const Rational& other)
 }
 
 void RationalFunction::operator*=(const RationalFunction& other)
-{ int commentChecksWhenDoneDebugging=-1;
-  this->checkConsistency();
-  other.checkConsistency();
+{// int commentChecksWhenDoneDebugging=-1;
+  //this->checkConsistency();
+  //other.checkConsistency();
 
   if (this->NumVars!=other.NumVars || this==&other)
   { RationalFunction tempRF;
@@ -4437,8 +4437,8 @@ void RationalFunction::Simplify()
     }
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
-  int commentMeWhendone;
-  assert(this->checkConsistency());
+//  int commentMeWhendone;
+//  assert(this->checkConsistency());
 }
 
 void RationalFunction::SimplifyLeadingCoefficientOnly()

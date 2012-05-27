@@ -11,17 +11,26 @@
 //C++, javascript: Todor Milev
 //svn repository and help with C++ templates: Thomas Bliem
 //javascript autocomplete code: Madan Chaudhary
+//servers: Steven Jackson @ UMass, the Jacobs University IT staff.
+//
+//We want to thank the following projects and tools:
+//user interface: jsmath, dojo, LaTeX, javascript, google chrome browser/firefox;
+//server: apache web server, linux (ubuntu & openSUSE);
+//development: sourceforge, C++, gcc, code::blocks, svn.
 //
 //This is free software. You are welcome to use, modify and redistribute this code
 //and the resulting program any way you wish, as long as you provide the same rights
 //as those given to you to any future recipients of your modifications (in case you
 //decide to pass on those modifications).
-//The code is licensed under the Library General Public License version 3.0
+//This code is licensed under the
+//
+//Library General Public License version 3.0
+//
 //or a later version of the License at your choice
 //(the license terms of the LGPL were briefly summarized in the preceding sentence).
-//You should have received a copy of the GNU Library General Public License
-//along with this program.
-//If not, see <http://www.gnu.org/licenses/>.
+//The text of the GNU Library General Public License
+//can be found at <http://www.gnu.org/licenses/>, and is also available at the source repository
+//http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/  .
 //
 //Todor Milev would like to thank http://www.cplusplus.com/forum/ for the valuable
 //advice and help with C++. Many thanks to helios, Disch, Grey Wolf, jsmith,

@@ -326,6 +326,7 @@ void MakeVariableNonBounD
   bool HasBoundVariables();
 //  bool IsRationalAtom()const;
   bool EvaluatesToRational()const;
+  bool IsString()const;
   bool IsElementUE()const;
   bool IsInteger()const;
   bool EvaluatesToSmallInteger(int& whichInteger)const;

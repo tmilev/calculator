@@ -30,7 +30,7 @@
 #include <wx/dcmemory.h>
 #include "wx/stdpaths.h"
 #include <wx/image.h>
-#include "polyhedra.h"
+#include "vpf.h"
 
 
 
@@ -72,6 +72,7 @@ class wxParserFrame: public wxFrame
         void UpdateChoices();
         friend class AnimationBuffer;
         friend class wxDrawPanel;
+        CommandList theCommandList;
     private:
 
         //(*Handlers(wxParserFrame)

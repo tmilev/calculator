@@ -22,12 +22,19 @@
 		</Compiler>
 		<Linker>
 			<Add option="`wx-config --libs`" />
-			<Add library="GL" />
-			<Add library="X11" />
 		</Linker>
-		<Unit filename="custom_code_here.cpp" />
-		<Unit filename="polyhedra.cpp" />
-		<Unit filename="polyhedra.h" />
+		<Unit filename="vpf.h" />
+		<Unit filename="vpf5.cpp" />
+		<Unit filename="vpf6.cpp" />
+		<Unit filename="vpf7.cpp" />
+		<Unit filename="vpf8.cpp" />
+		<Unit filename="vpf9.cpp" />
+		<Unit filename="vpf9_1.cpp" />
+		<Unit filename="vpf9_2.cpp" />
+		<Unit filename="vpfHeader1.h" />
+		<Unit filename="vpfHeader1_2" />
+		<Unit filename="vpfHeader1_2.h" />
+		<Unit filename="vpfHeader2.h" />
 		<Unit filename="wxDrawPanel.cpp" />
 		<Unit filename="wxDrawPanel.h" />
 		<Unit filename="wxPNGdisplay.cpp" />

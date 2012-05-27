@@ -194,6 +194,10 @@ public:
   bool IsIrrelevant;
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
+  friend std::ostream& operator << (std::ostream& output, const partFraction& input)
+  { output << " Not implemented, please fix at file " << __FILE__ << " line " << __LINE__;
+    return output;
+  }
   bool RemoveRedundantShortRootsClassicalRootSystem
 (partFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
@@ -2267,6 +2271,10 @@ public:
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
   List<int> generatorsIndices;
   List<CoefficientType> Powers;
+  friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<CoefficientType>& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2910,6 +2918,10 @@ class MonomialChar
 {
 public:
   Vector<CoefficientType> weightFundamentalCoords;
+  friend std::ostream& operator << (std::ostream& output, const MonomialChar<CoefficientType>& input)
+  { output << input.ToString();
+    return output;
+  }
   void AccountSingleWeight
 (Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords, WeylGroup& theWeyl,
  Rational& theMult, CoefficientType& theCoeff, charSSAlgMod<CoefficientType>& outputAccum, Rational& finalCoeff
@@ -2920,7 +2932,7 @@ public:
  GlobalVariables& theGlobalVariables)
    ;
   std::string ToString
-  (FormatExpressions* theFormat=0)
+  (FormatExpressions* theFormat=0)const
   ;
   inline unsigned int HashFunction()const
   { return weightFundamentalCoords.HashFunction();
@@ -3147,6 +3159,10 @@ class MonomialGeneralizedVerma
   MonomialUniversalEnveloping<CoefficientType> theMonCoeffOne;
   int indexFDVector;
   MonomialGeneralizedVerma(): owneR(0), indexInOwner(-1), indexFDVector(-1) { }
+  friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<CoefficientType>& theGen)
+  { output << theGen.ToString();
+    return output;
+  }
   void MultiplyMeByUEEltOnTheLefT
   (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& output,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -3249,6 +3265,10 @@ public:
   void SimplifyNormalizeCoeffs
   ()
   ;
+  friend std::ostream& operator << (std::ostream& output, const MonomialTensorGeneralizedVermas<CoefficientType>& input)
+  { output << input.ToString();
+    return output;
+  }
   void MakeZero( const CoefficientType& theRingZero)
   { this->Coefficient=theRingZero;
     this->theMons.SetSize(0);
@@ -6726,6 +6746,14 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
       output=tempOutput;
       return true;
     }
+//    int commentmewhendone;
+//    theUE.theCoeffs[i].checkConsistency();
+//    buffer.GrandMasterConsistencyCheck();
+//    buffer.checkConsistency();
+    for (int k=0; k<buffer.theCoeffs.size; k++)
+    { std::string debugString=buffer.theCoeffs[k].ToString();
+//      buffer.theCoeffs[k].checkConsistency();
+    }
     buffer*=theUE.theCoeffs[i];
 //    std::cout << "<br>and your beloved buffer, after being multiplied by " << theUE.theCoeffs[i].ToString() << " equals " << buffer.ToString();
     output+=buffer;
@@ -6743,7 +6771,19 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
  List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
  GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { assert(&output!=this);
+//  int commentmewhendone;
+//  static int problemCounter=0;
+//  problemCounter++;
+//  output.checkConsistency();
+//  std::string debugString;
+//  if (problemCounter==44)
+//  { debugString=this->ToString();
+//  }
+//  this->checkConsistency();
+////
   output=*this;
+////
+//  output.checkConsistency();
   ElementTensorsGeneralizedVermas<CoefficientType> buffer;
   for(int i=theUE.Powers.size-1; i>=0; i--)
   { int thePower;
@@ -6753,10 +6793,15 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
     for (int j=0; j<thePower; j++)
     { //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
       output.MultiplyByElementLieAlg(buffer, theOwner, ownerAlgebra, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+//      buffer.checkConsistency();
       output=buffer;
+//  int commentmewhendone4;
+//  output.checkConsistency();
       //std::cout << "<br>to get: " << output.ToString();
     }
   }
+//  int commentmewhendone2;
+//  output.checkConsistency();
   return true;
 }
 
@@ -6765,9 +6810,11 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<CoefficientType>& output,
    List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
-{ if (theOwner.size<=0 || this->size<0)
+{ output.MakeZero();
+  if (theOwner.size<=0 || this->size<0)
+  { assert(false);
     return;
-  output.MakeZero();
+  }
   MonomialTensorGeneralizedVermas<CoefficientType> accumMon, monActedOn;
   ElementSumGeneralizedVermas<CoefficientType> tempElt;
   ElementUniversalEnveloping<CoefficientType> theGenerator;
@@ -7253,7 +7300,7 @@ void WeylGroup::ReflectBetaWRTAlpha(Vector<Rational>& alpha, Vector<CoefficientT
 
 template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::ToString
-  (FormatExpressions* theFormat)
+  (FormatExpressions* theFormat)const
 { std::stringstream out;
   bool useBrackets=false;
   if (useBrackets)

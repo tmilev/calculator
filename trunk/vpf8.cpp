@@ -1746,16 +1746,16 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
   std::stringstream out;
   out << "Input data: normal: " << theNEq.ToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
-  << "; cone: " << currentCone.ToString(false, true, false, true, theGlobalVariables.theDefaultPolyFormat);
+  << "; cone: " << currentCone.ToString(false, true, false, true, theGlobalVariables.theDefaultFormat);
   std::cout << "Input data: normal: " << theNEq.ToString()
 //  << "; numNonParams: " << numNonParams << "; numParams: " << numParams
-  << "; cone: " << currentCone.ToString(false, true, false, true, theGlobalVariables.theDefaultPolyFormat);
+  << "; cone: " << currentCone.ToString(false, true, false, true, theGlobalVariables.theDefaultFormat);
   ConeLatticeAndShiftMaxComputation theComputation;
   theComputation.init(theNEq, currentCone, currentLattice, theShift);
   Controller pauseController;
   theComputation.numNonParaM=numNonParam;
   theComputation.FindExtremaParametricStep1(pauseController, false, theGlobalVariables);
-  out << "<hr><hr><hr>" << theComputation.ToString(&theGlobalVariables.theDefaultPolyFormat);
+  out << "<hr><hr><hr>" << theComputation.ToString(&theGlobalVariables.theDefaultFormat);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -5338,7 +5338,7 @@ int ParserNode::EvaluateInvariantsSl2DegreeM
   std::stringstream out;
   out << "A basis for the invariants of degree " << theDegree << " is given by (number of elements: " << outputList.size << ")";
   for (int i=0; i<outputList.size; i++)
-  { out << "<br>" << outputList.TheObjects[i].ToString(&theGlobalVariables.theDefaultPolyFormat) << ", ";
+  { out << "<br>" << outputList.TheObjects[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
   }
   theNode.outputString=out.str();
   return theNode.errorNoError;
@@ -5356,7 +5356,7 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
       tempS=tempStream.str();
       int numZeroesToPad=9-tempS.length();
       for (int j=0; j<numZeroesToPad; j++)
-          out << "0";
+        out << "0";
       out << tempS;
     }
     output= out.str();
@@ -5392,13 +5392,13 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
       unsigned int theDigit=0;
       while (Remainder.IsGEQ(currentPower))
       { theDigit++;
-        currentPower+=bufferPowersOfBase.TheObjects[highestBufferIndex];
+        currentPower+=bufferPowersOfBase[highestBufferIndex];
       }
       out << theDigit;
       numRemainingDigits--;
       if (theDigit!=1)
-        bufferPowersOfBase.TheObjects[highestBufferIndex]*=theDigit;
-      Remainder.SubtractSmallerPositive(bufferPowersOfBase.TheObjects[highestBufferIndex]);
+        bufferPowersOfBase[highestBufferIndex]*=theDigit;
+      Remainder.SubtractSmallerPositive(bufferPowersOfBase[highestBufferIndex]);
       highestBufferIndex--;
       if (highestBufferIndex==-1)
       { highestBufferIndex=sizeBufferPowersOfBase-1;
@@ -5415,7 +5415,7 @@ void LargeIntUnsigned::ElementToStringLargeElementDecimal(std::string& output)co
 int ParserNode::EvaluateFactorial
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Rational tempRat;
-  int theArgument=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
+  int theArgument=theNode.owner->TheObjects[theArgumentList[0]].intValue;
   if (theArgument<0)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   if (theArgument>5000)
@@ -5432,7 +5432,7 @@ int ParserNode::EvaluateFactorial
 int ParserNode::EvaluatePrintAllPrimesEratosthenes
     (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Rational tempRat;
-  int theArgument=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].intValue;
+  int theArgument=theNode.owner->TheObjects[theArgumentList[0]].intValue;
   if (theArgument<0)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   if (theArgument>20000)
@@ -8389,8 +8389,12 @@ void RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theS
     return;
 //  FormatExpressions tempFormat;
   Rational rationalOne=1;
+//  int commentMEWhenDone;
   switch(this->expressionType)
-  { case RationalFunction::typeRational: return;
+  { case RationalFunction::typeRational:
+      this->SetNumVariables(theSub[0].NumVars);
+//      assert(this->checkConsistency());
+      return;
     case RationalFunction::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
@@ -8398,11 +8402,13 @@ void RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theS
 //      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
+//      assert(this->checkConsistency());
       return;
     case RationalFunction::typeRationalFunction:
       this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
       this->Denominator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
       this->Simplify();
+//      assert(this->checkConsistency());
       return;
     default: assert(false); break;
   }
@@ -8416,7 +8422,7 @@ int ParserNode::EvaluateModVermaRelations
   std::stringstream out;
   out << "The element you wanted to be modded out, before simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  ( theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultLieFormat))
+  ( theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultFormat))
 ;
   Polynomial<Rational>  polyOne, polyZero;
   polyOne.MakeConst(theNode.impliedNumVars, 1);
@@ -8424,7 +8430,7 @@ int ParserNode::EvaluateModVermaRelations
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginARCL
-  (theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultLieFormat))
+  (theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultFormat))
   ;
   assert(false);
 

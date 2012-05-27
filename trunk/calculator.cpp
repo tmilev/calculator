@@ -334,7 +334,7 @@ g_{-2} v_\\lambda\
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,2,0) ";
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0) ";
 //civilizedInput="g:=SemisimpleLieAlgebra{}A_2;\nv_\\lambda:=hwv{}(A_2, (a, b),(1,1));\nv_\\lambda";
-//civilizedInput="fSplitFDpartB3overG2{}(x_1,2,0)";
+//civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

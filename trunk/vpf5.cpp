@@ -1491,7 +1491,7 @@ bool CommandList::fSplitFDpartB3overG2
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
 //  highestWeightG2
   bool useLatex=theCommands.theGlobalVariableS->theDefaultFormat.flagUseLatex;
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=100000;
+  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=400;
   out
   << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
   << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
@@ -1535,8 +1535,6 @@ bool CommandList::fSplitFDpartB3overG2
     { weightDifference=g2Weights[j] - g2Weights[k];
       if (weightDifference.IsPositive())
       { formulaStream1 << "(i(\\bar c) - " << theChars[j].ToString() <<  ")";
-        for (int l=0; l<imageCasimirInB3.size; l++)
-          std::cout << "<br>hash " << l << ": " << imageCasimirInB3.GetHash(imageCasimirInB3[l]);
         theG2CasimirCopy=imageCasimirInB3;
         tempElt.MakeConst(theChars[j], theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
         theG2CasimirCopy-=tempElt;

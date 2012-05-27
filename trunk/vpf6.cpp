@@ -4123,13 +4123,13 @@ std::string CommandList::ToString()
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
-  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (=# successful calls Rational::TryToAddQuickly)";
-  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (=# successful calls Rational::TryToMultiplyQuickly)";
-  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (=# calls of Rational::gcd)";
+  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (# successful calls Rational::TryToAddQuickly)";
+  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (# successful calls Rational::TryToMultiplyQuickly)";
+  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (# calls of Rational::gcd)";
 
-  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (=# calls LargeIntUnsigned::AddNoFitSize)";
-  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (=# calls LargeIntUnsigned::MultiplyBy)";
-  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (=# calls LargeIntUnsigned::gcd)";
+  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (# calls LargeIntUnsigned::AddNoFitSize)";
+  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (# calls LargeIntUnsigned::MultiplyBy)";
+  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
   #endif
   out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>."

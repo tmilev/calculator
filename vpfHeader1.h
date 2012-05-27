@@ -11,6 +11,16 @@
 #define CGIversionLimitRAMuse
 #endif
 
+//the following option turns on counters for a number of mathematical operations.
+//In general, it should not yield an essential slow-down.
+//If you do not want to use these counters, turn them off by commenting the first definition and uncommenting
+//the second, and vice versus.
+#ifndef MacroIncrementCounter
+#define MacroIncrementCounter(x) x++
+//#define MacroIncrementCounter(x)
+#endif
+
+
 #include <assert.h>
 #include <sstream>
 #include <cstdlib>
@@ -252,6 +262,10 @@ class ControllerStartsRunning: public Controller
     ControllerStartsRunning()
     { this->InitComputation();
     }
+};
+
+class RegisterFunctionCall
+{
 };
 
 class ParallelComputing
@@ -832,7 +846,7 @@ public:
   void ShiftUpExpandOnTop(int StartingIndex);
   List(int StartingSize);
   List(int StartingSize, const Object& fillInValue);
-  List();
+  List();//<-newly constructed lists start with size=0; This default is used in critical places in HashedList and other classes, do not change!
   ~List();
   void AssignListList(const List<List<Object> >& input)
   { int count=0;
@@ -1045,17 +1059,7 @@ private:
   void ShiftUpExpandOnTop(int StartingIndex);
   void PopLastObject();
 protected:
-  void ClearHashes()
-  { if (this->size<this->HashSize)
-      for (int i=0; i<this->size; i++)
-      { int hashIndex=this->GetHash(this->TheObjects[i]);
-        this->TheHashedArrays[hashIndex].size=0;
-      }
-    else
-      for (int i=0; i<this->HashSize; i++)
-        this->TheHashedArrays[i].size=0;
-  }
-  List<int>* TheHashedArrays;
+  List<List<int> > TheHashedArrays;
 public:
   inline static std::string GetXMLClassName()
   { std::string result="HashedList_";
@@ -1063,25 +1067,38 @@ public:
     return result;
   }
   static int PreferredHashSize;
-  int HashSize;
+  unsigned int HashSize; // <-must be equal to this->TheHashedArrays.size. Left for legacy purposes, might be deleted.
   void initHash()
   { this->size=0;
-    for (int i=0; i<this->HashSize; i++)
+    for (int i=0; i<(signed) this->HashSize; i++)
       this->TheHashedArrays[i].size=0;
   }
-  inline int GetHash(const Object& input)const
-  { int result=hashFunction(input);
+  inline unsigned int GetHash(const Object& input)const
+  { unsigned int result=hashFunction(input);
     result%=this->HashSize;
     if (result<0)
       result+=this->HashSize;
     return result;
   }
   void Clear()
-  { this->ClearHashes();
+  { //if the hashed list is somewhat sparce (1/5), and the index is somewhat large,
+    //(above 20 entries), we clear the hash by finding the occupied hashes and nullifying them one by one.
+    //else, we simply go through the entire hash index and nullify everything.
+    //Note: for better performance, 20 entries should probably be changed to 100+,
+    //however the smaller number is a good consistency test (it would make it easier to detect a faulty hash).
+    //If this program ever gets to do some hard-core number crunching, the 20 entries should be increased.
+    if (this->size<(signed)this->HashSize/5 && this->HashSize>20)
+      for (int i=0; i<this->size; i++)
+      { int hashIndex=this->GetHash(this->TheObjects[i]);
+        this->TheHashedArrays[hashIndex].size=0;
+      }
+    else
+      for (int i=0; i<(signed) this->HashSize; i++)
+        this->TheHashedArrays[i].size=0;
     this->size=0;
   }
   void AddOnTop(const Object& o)
-  { int hashIndex =this->GetHash(o);
+  { unsigned int hashIndex =this->GetHash(o);
     this->TheHashedArrays[hashIndex].AddOnTop(this->size);
     this->::List<Object>::AddOnTop(o);
   }
@@ -1089,6 +1106,36 @@ public:
   { this->Reserve(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTop(theList[i]);
+  }
+  void GrandMasterConsistencyCheck()const
+  { for (unsigned int i=0; i<this->HashSize; i++)
+    { List<int>& current=this->TheHashedArrays[i];
+      for (int j=0; j<current.size; j++)
+      { int theIndex=current[j];
+        if (theIndex>=this->size)
+        { std::cout << "This is a programming error: "
+          << " hash lookup array of index " << i << ", entry of index " << j << " reports index "
+          << theIndex << " but I have only " << this->size << " entries. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+          assert(false);
+        }
+        if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
+        { std::cout << "<hr> Hash size is " << this->HashSize;
+          std::cout << "<br>hashes of objects: ";
+          for (int l=0; l<this->size; l++)
+            std::cout << this->GetHash(this->TheObjects[l]) << "= " << this->GetHash(this->TheObjects[l])%this->HashSize << ", ";
+          std::cout << "<br>hashes recorded: ";
+          for (unsigned int l=0; l<this->HashSize; l++)
+            for (int k=0; k<this->TheHashedArrays[l].size; k++)
+              std::cout << this->TheHashedArrays[l][k] << ", ";
+
+          std::cout << "This is a programming error: "
+          << " object at index  " << theIndex << " is recorded as having modded hash " << i
+          << " but the GetHash function returns " << this->GetHash(this->TheObjects[theIndex]) << ". "
+          << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+          assert(false);
+        }
+      }
+    }
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o)
   { int result= this->GetIndex(o);
@@ -1158,9 +1205,15 @@ public:
     return true;
   }
   int GetIndex(const Object& o) const
-  { int hashIndex = this->GetHash(o);
+  { unsigned int hashIndex = this->GetHash(o);
     for (int i=0; i<this->TheHashedArrays[hashIndex].size; i++)
     { int j=this->TheHashedArrays[hashIndex].TheObjects[i];
+      if (j>=this->size)
+      { std::cout << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex
+        << " I get instructed to look up index " << j << " but I have only " << this->size << "elements. "
+        << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+        assert(false);
+      }
       if(this->TheObjects[j]==o)
         return j;
     }
@@ -1183,28 +1236,24 @@ public:
     this->Reserve(expectedSize);
     this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*5));
   }
-  void SetHashSizE(int HS)
+  void SetHashSizE(unsigned int HS)
   { if (HS==this->HashSize)
       return;
-    delete [] this->TheHashedArrays;
-#ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter+=HS-this->HashSize;
-    ParallelComputing::CheckPointerCounters();
-#endif
-  this->TheHashedArrays= new List<int>[HS];
-  this->HashSize=HS;
-  if (this->size>0)
-    for (int i=0; i<this->size; i++)
-    { int theIndex=this->GetHash(this->TheObjects[i]);
-      this->TheHashedArrays[theIndex].AddOnTop(i);
-    }
+    List<int> emptyList; //<-empty list has size 0
+    this->TheHashedArrays.initFillInObject(HS, emptyList);
+    this->HashSize=HS;
+    if (this->size>0)
+      for (int i=0; i<this->size; i++)
+      { int theIndex=this->GetHash(this->TheObjects[i]);
+        this->TheHashedArrays[theIndex].AddOnTop(i);
+      }
   }
   int SizeWithoutObjects()
   { int Accum=0;
     Accum+=this->List<Object>::SizeWithoutObjects();
     Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
     Accum+=sizeof(this->HashSize);
-    for (int i=0; i<this->HashSize; i++)
+    for (int i=0; i<(signed) this->HashSize; i++)
       Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
     return Accum;
   }
@@ -1221,15 +1270,6 @@ public:
     this->SetHashSizE(HashedListB<Object, hashFunction>::PreferredHashSize);
     this->initHash();
   }
-  ~HashedListB()
-  { delete [] this->TheHashedArrays;
-  #ifdef CGIversionLimitRAMuse
-  ParallelComputing::GlobalPointerCounter-=this->HashSize;
-    ParallelComputing::CheckPointerCounters();
-  #endif
-    this->HashSize=0;
-    this->TheHashedArrays=0;
-  }
   std::string ToString()const
   { std::stringstream out;
     out << this->size << " hashed objects:";
@@ -1243,17 +1283,26 @@ public:
   void operator=(const HashedListB<Object, hashFunction>& From)
   { if (&From==this)
       return;
-    this->ClearHashes();
+//      int commentwhendone2;
+//      From.GrandMasterConsistencyCheck();
+    this->Clear();
     this->SetHashSizE(From.HashSize);
+//      this->GrandMasterConsistencyCheck();
     this->::List<Object>::CopyFromBase(From);
-    if (this->size<this->HashSize)
-      for (int i=0; i<this->size; i++)
-      { int hashIndex=this->GetHash(this->TheObjects[i]);
+    if ((unsigned) this->size<this->HashSize)
+    { for (int i=0; i<this->size; i++)
+      { unsigned int hashIndex=this->GetHash(this->TheObjects[i]);
         this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
       }
+//      int commentmewhendone;
+//      this->GrandMasterConsistencyCheck();
+    }
     else
-      for (int i=0; i<this->HashSize; i++)
+    { for (int i=0; i<(signed) this->HashSize; i++)
         this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
+//      int commentmewhendone;
+//      this->GrandMasterConsistencyCheck();
+    }
   }
   void operator=(const List<Object>& other)
   { if (this==&other)
@@ -1262,6 +1311,8 @@ public:
     this->SetExpectedSize(other.size);
     for (int i=0; i<other.size; i++)
       this->AddOnTop(other.TheObjects[i]);
+//    int commentmewhendone;
+//    this->GrandMasterConsistencyCheck();
   }
 };
 
@@ -1287,7 +1338,7 @@ public:
 //As a (benign) workaround we redefine the methods of HashedListB here.
   inline static std::string GetXMLClassName(){ return HashedListB<Object, Object::HashFunction>::GetXMLClassName();}
   inline void initHash(){ this->HashedListB<Object, Object::HashFunction>::initHash();}
-  inline int GetHash(const Object& input)const{ return this->HashedListB<Object, Object::HashFunction>::GetHash(input);}
+//  inline int GetHash(const Object& input)const{ return this->HashedListB<Object, Object::HashFunction>::GetHash(input);}
   inline void Clear(){ this->HashedListB<Object, Object::HashFunction>::Clear();}
   inline void AddOnTop(const Object& o){ this->HashedListB<Object, Object::HashFunction>::AddOnTop(o);}
   inline void AddOnTop(const List<Object>& theList){ return this->HashedListB<Object, Object::HashFunction>::AddOnTop(theList);}
@@ -2542,6 +2593,7 @@ public:
   void WriteToFile(std::fstream& output);
   void AssignString(const std::string& input);
   void ReadFromFile(std::fstream& input);
+  void checkConsistency(){}
   void MakeZero();
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
   void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
@@ -2634,13 +2686,15 @@ class Rational
       thisNumAbs=-this->NumShort;
     else
       thisNumAbs=this->NumShort;
-    if (!this->flagMinorRoutinesOnDontUseFullPrecision && (this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)  )
+    if (////!this->flagMinorRoutinesOnDontUseFullPrecision &&
+        (this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound  || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen>=LargeIntUnsigned::SquareRootOfCarryOverBound)  )
       return false;
     register int N= this->NumShort*OtherDen+this->DenShort*OtherNum;
     register int D= this->DenShort*OtherDen;
     if (N==0)
     { this->NumShort=0;
       this->DenShort=1;
+      MacroIncrementCounter(Rational::TotalSmallAdditions);
       return true;
     }
     register int tempGCD;
@@ -2650,6 +2704,7 @@ class Rational
       tempGCD= Rational::gcd(-N, D);
     this->NumShort=(N/tempGCD);
     this->DenShort= (D/tempGCD);
+    MacroIncrementCounter(Rational::TotalSmallAdditions);
     return true;
   }
   inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen)
@@ -2663,7 +2718,8 @@ class Rational
       thisNumAbs=-this->NumShort;
     else
       thisNumAbs=this->NumShort;
-    if (!this->flagMinorRoutinesOnDontUseFullPrecision &&(this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)  )
+    if (////!this->flagMinorRoutinesOnDontUseFullPrecision &&
+        (this->Extended!=0 || thisNumAbs>= LargeIntUnsigned::SquareRootOfCarryOverBound || this->DenShort>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherNumAbs>=LargeIntUnsigned::SquareRootOfCarryOverBound || OtherDen   >=LargeIntUnsigned::SquareRootOfCarryOverBound)  )
       return false;
     register int N = this->NumShort*OtherNum;
     register int D = this->DenShort*OtherDen;
@@ -2680,6 +2736,7 @@ class Rational
       this->NumShort= (N/((signed int)tempGCD));
       this->DenShort= (D/tempGCD);
     }
+    MacroIncrementCounter(Rational::TotalSmallMultiplications);
     return true;
   }
   void AllocateExtended()
@@ -2732,6 +2789,12 @@ public:
   //changed it back to int. Grrrrr.
   int DenShort;
   LargeRationalExtended *Extended;
+  static unsigned TotalSmallAdditions;
+  static unsigned TotalLargeAdditions;
+  static unsigned TotalSmallMultiplications;
+  static unsigned TotalLargeMultiplications;
+  static unsigned TotalSmallGCDcalls;
+  static unsigned TotalLargeGCDcalls;
   void GetDen(Rational& output)
   { LargeIntUnsigned tempInt;
     this->GetDen(tempInt);
@@ -2778,7 +2841,7 @@ public:
   }
 //  inline int GetNumValueTruncated(){return this->NumShort; };
 //  inline int GetDenValueTruncated(){return this->denShort; };
-  static bool flagMinorRoutinesOnDontUseFullPrecision;
+//  static bool flagMinorRoutinesOnDontUseFullPrecision;
   static bool flagAnErrorHasOccurredTimeToPanic;
   void Subtract(const Rational& r);
   void AdD(const Rational& r){this->operator+=(r);}
@@ -2950,7 +3013,8 @@ ParallelComputing::GlobalPointerCounter++;
   ~Rational(){this->FreeExtended();}
   //the below must be called only with positive arguments!
   static int gcd(int a, int b)
-  { int temp;
+  { MacroIncrementCounter(Rational::TotalSmallGCDcalls);
+    int temp;
     while(b>0)
     { temp= a % b;
       a=b;
@@ -2978,6 +3042,7 @@ ParallelComputing::GlobalPointerCounter++;
     { this->MultiplyByInt(2);
       return;
     }
+    MacroIncrementCounter(Rational::TotalLargeAdditions);
     this->InitExtendedFromShortIfNeeded();
     Rational tempRat;
     tempRat.Assign(r);
@@ -3186,7 +3251,7 @@ public:
     out << ")";
     return out.str();
   }
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex=false, bool DontIncludeLastVar=false);
+  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex=false, bool DontIncludeLastVar=false)const;
   std::string ElementToStringLetterFormat
   (const FormatExpressions& theFormat, bool useLatex=false, bool DontIncludeLastVar=false)const;
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml)
@@ -4208,6 +4273,10 @@ public:
   int indexOfOwnerAlgebra;
   int theGeneratorIndex;
   ChevalleyGenerator(): ownerArray(0), indexOfOwnerAlgebra(-1), theGeneratorIndex(-1){}
+  friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen)
+  { output << theGen.ToString();
+    return output;
+  }
   static unsigned int HashFunction(const ChevalleyGenerator& input)
   { return input.theGeneratorIndex+input.indexOfOwnerAlgebra*SomeRandomPrimes[0];
   }
@@ -4224,7 +4293,7 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
-  std::string ToString(FormatExpressions* inputFormat)const;
+  std::string ToString(FormatExpressions* inputFormat=0)const;
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
@@ -4240,6 +4309,10 @@ class MonomialP: public Vector<Rational>
 {
 private:
 public:
+  friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
   inline static std::string GetXMLClassName(){ return "MonomialP"; }
   unsigned  int HashFunction() const
   { return this->Vector<Rational>::HashFunction();
@@ -4341,14 +4414,15 @@ class MonomialCollection : public HashedList<TemplateMonomial>
 {
 private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
+  void Clear();//<-to guard the now unsafe base class method
 public:
   MonomialCollection(){};
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
   List<CoefficientType> theCoeffs;
   bool NeedsBrackets()const{return this->size>1;}
   std::string ToString(FormatExpressions* theFormat=0)const;
-  static int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
-  { int result=0;
+  static unsigned int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
+  { unsigned int result=0;
     for (int i=0; i<input.size; i++)
       result+= input.theCoeffs[i].HashFunction()*input[i].HashFunction();
     return result;
@@ -4365,6 +4439,12 @@ public:
   void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   int TotalDegree();
+  void checkConsistency()const
+  { this->GrandMasterConsistencyCheck();
+    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+    for (int i =0; i<this->size; i++)
+      this->theCoeffs[i].checkConsistency();
+  }
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->size)
     { std::cout << "This is a programming error: a monomial collection has " << this->size << " monomials but "
@@ -4375,7 +4455,7 @@ public:
   }
   bool IsEqualToZero()const;
   int FindMaxPowerOfVariableIndex(int VariableIndex);
-  void MakeZero(){this->Clear(); this->theCoeffs.size=0;}
+  void MakeZero(){this->::HashedList<TemplateMonomial>::Clear(); this->theCoeffs.size=0;}
 //  void MakeOne();
 //  void MakeConst(const CoefficientType& coeff)
 //  { TemplateMonomial tempMon;
@@ -4456,14 +4536,27 @@ public:
   }
   template <class otherType>
   inline void operator*=(const otherType& other)
-  { for (int i=0; i<this->theCoeffs.size; i++)
-    { this->theCoeffs[i]*=other;
+  { //int commentmewhendone;
+    //this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+    for (int i=0; i<this->theCoeffs.size; i++)
+    { //int commentmewhendone;
+      //this->theCoeffs[i].checkConsistency();
+      ////
+      this->theCoeffs[i]*=other;
+      ////
+      //this->theCoeffs[i].checkConsistency();
       if (i==0)
         if (this->theCoeffs[i].IsEqualToZero())//<- to avoid implicit conversion problems, we make the zero check at the first cycle
         { this->MakeZero();
           return;
         }
     }
+  }
+  void operator=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+  { this->theCoeffs=other.theCoeffs;
+    this->::HashedList<TemplateMonomial>::operator=(other);
+//    int commentwhendone;
+ //   this->checkConsistency();
   }
 };
 
@@ -4571,10 +4664,14 @@ public:
   { this->MakeConst(0, theConst);
   }
   void MakeConst(int inputNumVars, const CoefficientType& theConst)
-  { this->MakeZero(inputNumVars);
+  {// int commentGrandMasterChecksWhenDone=-1;
+    //this->GrandMasterConsistencyCheck();
+    this->MakeZero(inputNumVars);
+    //this->GrandMasterConsistencyCheck();
     MonomialP theZeroMon;
     theZeroMon.MakeZero(inputNumVars);
     this->AddMonomial(theZeroMon, theConst);
+    //this->GrandMasterConsistencyCheck();
   }
   void MakeOne(int inputNumVars);
   void MakeZero(int inputNumVars)
@@ -4942,6 +5039,8 @@ private:
           this->ratValue=this->Numerator.GetElement().theCoeffs[0];
         this->Numerator.FreeMemory();
       }
+//    int commentMEWhenDone;
+//    assert(this->checkConsistency());
   }
   bool ConvertToType(int theType)
   { if (theType<this->expressionType)
@@ -5056,7 +5155,10 @@ public:
   inline void operator=(const Rational& other){this->MakeConst(0, other, 0);}
   inline void operator=(const RationalFunction& other){this->Assign(other);}
   void Assign(const RationalFunction& other)
-  { this->expressionType=other.expressionType;
+  {// int commentmewhendone2;
+    //other.checkConsistency();
+    //this->checkConsistency();
+    this->expressionType=other.expressionType;
     this->NumVars=other.NumVars;
     if (other.context!=0)
       this->context=other.context;
@@ -5080,6 +5182,9 @@ public:
         break;
       default: break;
     }
+//    int commentmewhendone;
+//    other.checkConsistency();
+//    this->checkConsistency();
   }
   bool checkConsistency()const
   { if (this->expressionType==this->typePoly)
@@ -5091,6 +5196,8 @@ public:
       { assert(false);
         return false;
       }
+//      int commentMeOutWhenDoneDebugging=-1;
+//      this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
     }
     if (this->expressionType==this->typeRationalFunction)
     { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
@@ -5117,7 +5224,7 @@ public:
     this->NumVars=newNumVars;
     if (mustSimplify)
       this->Simplify();
-    assert(this->checkConsistency());
+//    assert(this->checkConsistency());
   }
   void MakeOneLetterMon(int inputNumVars, int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables)
   { this->expressionType=this->typePoly;
@@ -5784,17 +5891,39 @@ void Polynomial<Element>::TimesInteger(int a)
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
-{ //this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+{ ///
+  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+  ///
   if (inputCoeff.IsEqualToZero())
-  { //assert(inputCoeff.ToString()=="0");
+  { assert(inputCoeff.ToString()=="0");
     return;
   }
   int j= this->GetIndex(inputMon);
+  if (j>=this->size)
+  { std::stringstream tempStream;
+    tempStream << "This is a programming error: function GetIndex "
+    << " evaluated on " << inputMon << " with hash function " << inputMon.HashFunction()
+    << " returns index " << j
+    << " but I have only " << this->size << " elements ";
+    j=this->GetIndex(inputMon);
+    std::string debugString=tempStream.str();
+    std::cout << debugString;
+    assert(false);
+  }
   if (j==-1)
   { this->::HashedList<TemplateMonomial>::AddOnTop(inputMon);
     this->theCoeffs.AddOnTop(inputCoeff);
   } else
-  { this->theCoeffs[j]+=inputCoeff;
+  { ///
+    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+    if (j>=this->theCoeffs.size)
+    { std::cout << "This is a programming error. "
+      << " Looking for coefficient index " << j << " when number of coefficients is "
+      << this->theCoeffs.size <<  ". ";
+      assert(false);
+    }
+    ///
+    this->theCoeffs[j]+=inputCoeff;
     if (this->theCoeffs[j].IsEqualToZero())
     { this->PopIndexSwapWithLast(j);
       this->theCoeffs.PopIndexSwapWithLast(j);
@@ -5866,8 +5995,9 @@ void Polynomial<CoefficientType>::Substitution
     assert(false);
   }
   Polynomial<CoefficientType> Accum, TempPoly;
-  Accum.Clear();
-  Accum.NumVars=TheSubstitution[0].NumVars;
+  Accum.MakeZero(TheSubstitution[0].NumVars);
+//  int commentGrandMasterCheckWhenDone;
+//  this->GrandMasterConsistencyCheck();
   for(int i=0; i<this->size; i++)
   { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, theRingUnit);
     TempPoly*=this->theCoeffs[i];
@@ -5875,6 +6005,7 @@ void Polynomial<CoefficientType>::Substitution
     //std::cout << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
   }
   *this=(Accum);
+//  this->GrandMasterConsistencyCheck();
   //std::cout << "<hr>to finally get<br>" << output.ToString(theFormat);
 }
 
@@ -6807,8 +6938,7 @@ private:
 public:
   int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
-  FormatExpressions theDefaultPolyFormat;
-  FormatExpressions theDefaultLieFormat;
+  FormatExpressions theDefaultFormat;
 
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
@@ -7200,6 +7330,11 @@ public:
   }
   static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input)
   { return input.HashFunction();
+  }
+  void operator=(const ElementSemisimpleLieAlgebra& other)
+  { this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
+    this->ownerArray=other.ownerArray;
+    this->::MonomialCollection<ChevalleyGenerator, Rational>::operator=(other);
   }
 };
 

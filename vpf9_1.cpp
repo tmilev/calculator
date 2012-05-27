@@ -2732,7 +2732,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
-  FormatExpressions& theFormat=theGlobalVariables.theDefaultLieFormat;
+  FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat;
   ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
@@ -2851,12 +2851,25 @@ void SemisimpleLieAlgebra::LieBracket
 { if (&output==&g1 || &output==&g2)
   { ElementSemisimpleLieAlgebra outputNew;
     this->LieBracket(g1, g2, outputNew);
+//    outputNew.checkConsistency();
+//    static int problemcounter=0;
+//    problemcounter++;
+//    std::string debugString;
+//    if (problemcounter==9633)
+//    { debugString=outputNew.ToString();
+//    }
+//    outputNew.checkConsistency();
     output=outputNew;
+//    int commentwhendone;
+//    output.checkConsistency();
     return;
   }
   output.MakeZero(*this->owner, this->indexInOwner);
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
+  { //int commentwhendone2;
+    //output.checkConsistency();
     return;
+  }
   int maxNumMonsFinal=g1.size*g2.size;
   output.SetExpectedSize(maxNumMonsFinal);
   Rational theCoeff;
@@ -2866,7 +2879,15 @@ void SemisimpleLieAlgebra::LieBracket
     { buffer=this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
       buffer*=g1.theCoeffs[i]*g2.theCoeffs[j];
       output+=buffer;
+//      int commentwhendone3;
+//      buffer.checkConsistency();
+//      output.checkConsistency();
+//      this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex].checkConsistency();
     }
+//    int commentmewhendone;
+//  output.checkConsistency();
+//  g1.checkConsistency();
+//  g2.checkConsistency();
 }
 
 bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)

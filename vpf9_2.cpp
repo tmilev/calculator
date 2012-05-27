@@ -1303,7 +1303,7 @@ void SltwoSubalgebras::ElementToHtml
   fileName= physicalPath;
   fileName.append("StructureConstants.html");
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  this->owner[0].ToString(&theGlobalVariables.theDefaultLieFormat);
+  this->owner[0].ToString(&theGlobalVariables.theDefaultFormat);
   theFile << tempS;
   theFile.close();
   if (usePNG)
@@ -3648,16 +3648,16 @@ void HomomorphismSemisimpleLieAlgebra::ToString
   if (useHtml)
     out << "<br>";
   for (int i=0; i<this->imagesSimpleChevalleyGenerators.size; i++)
-  { out <<  this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat) << "\n\n";
+  { out <<  this->imagesSimpleChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat) << "\n\n";
     if (useHtml)
       out << "<br>";
   }
   out << "Maps of Chevalley generators:\n\n";
   for (int i=0; i<this->domainAllChevalleyGenerators.size; i++)
   { out << "<br>"
-    << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat)
+    << this->domainAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat)
     << " \\mapsto "
-    << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultLieFormat)
+    << this->imagesAllChevalleyGenerators[i].ToString(&theGlobalVariables.theDefaultFormat)
     ;
   }
   output=out.str();
@@ -3665,7 +3665,7 @@ void HomomorphismSemisimpleLieAlgebra::ToString
 
 void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
 { if (this->intValue<this->owner->theFunctionList.size && this->intValue>=0)
-    this->owner->theFunctionList.TheObjects[this->intValue].CallMe(*this, theGlobalVariables);
+    this->owner->theFunctionList[this->intValue].CallMe(*this, theGlobalVariables);
   else
     this->SetError(this->errorUnknownOperation);
 }
@@ -3675,7 +3675,7 @@ void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorBadOrNoArgument);
     return;
   }
-  ParserNode& theArgument=this->owner->TheObjects[this->children.TheObjects[0]];
+  ParserNode& theArgument=this->owner->TheObjects[this->children[0]];
   this->impliedNumVars=theArgument.impliedNumVars;
   if (!theArgument.ConvertToType(this->typeUEElementOrdered, this->impliedNumVars, theGlobalVariables))
   { this->SetError(this->errorConversionError);
@@ -4184,10 +4184,10 @@ void RationalFunction::ReduceGroebnerBasis
 (List<Polynomial<Rational> >& theBasis, Polynomial<Rational> & buffer1,
  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
  )
-{ Polynomial<Rational> & LeadingCoeffs=buffer1;
+{ Polynomial<Rational>& LeadingCoeffs=buffer1;
   LeadingCoeffs.Reserve(theBasis.size);
-  LeadingCoeffs.Clear();
-  List<MonomialP > tempList;
+  LeadingCoeffs.MakeZero(theBasis[0].NumVars);
+  List<MonomialP> tempList;
 //  std::cout << "<br> ... and the leading coefficients are: <br>";
   for (int i=0; i<theBasis.size; i++)
   { Polynomial<Rational> & current=theBasis.TheObjects[i];
@@ -4295,8 +4295,8 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other)
   Polynomial<Rational> theGCD, theResult, tempP;
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultPolyFormat) << " by "
-    << other.ToString(&this->context->theDefaultPolyFormat);
+    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
+    << other.ToString(&this->context->theDefaultFormat);
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
     this->context->MakeReport();
@@ -4319,8 +4319,8 @@ void RationalFunction::operator*=(const Polynomial<Rational>& other)
   this->SimplifyLeadingCoefficientOnly();
   if (this->context!=0)
   { std::stringstream out;
-    out << "Multiplying " << this->ToString(&this->context->theDefaultPolyFormat) << " by "
-    << other.ToString(&this->context->theDefaultPolyFormat);
+    out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
+    << other.ToString(&this->context->theDefaultFormat);
     out << " and the result is:\n" << this->ToString();
     this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
     this->context->theIndicatorVariables.StatusString1=out.str();
@@ -4346,7 +4346,11 @@ void RationalFunction::operator*=(const Rational& other)
 }
 
 void RationalFunction::operator*=(const RationalFunction& other)
-{ if (this->NumVars!=other.NumVars || this==&other)
+{ int commentChecksWhenDoneDebugging=-1;
+  this->checkConsistency();
+  other.checkConsistency();
+
+  if (this->NumVars!=other.NumVars || this==&other)
   { RationalFunction tempRF;
     tempRF=other;
     int maxNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
@@ -4433,6 +4437,8 @@ void RationalFunction::Simplify()
     }
   this->ReduceMemory();
   this->SimplifyLeadingCoefficientOnly();
+  int commentMeWhendone;
+  assert(this->checkConsistency());
 }
 
 void RationalFunction::SimplifyLeadingCoefficientOnly()
@@ -4600,9 +4606,9 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators.TheObjects[j].ToString(&theGlobalVariables.theDefaultLieFormat) << "," << Accum.ToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
+      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultFormat) << "," << Accum.ToString(&theGlobalVariables.theDefaultFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ToString(&theGlobalVariables.theDefaultLieFormat);
+      out << currentOutput.ToString(&theGlobalVariables.theDefaultFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -4615,7 +4621,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis.TheObjects[i].ToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
+    out << theMonBasis.TheObjects[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
@@ -4625,7 +4631,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       for (int j=0; j<currentRoot.size; j++)
         theSystem.elements[currentRoot.size*k+j][i]=currentRoot.TheObjects[j];
     }
-  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ToString(false, true) << "</div>";
+  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString(false, true) << "</div>";
   List<List<RationalFunction> > theEigenVectors;
   Polynomial<Rational> ::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
@@ -4641,7 +4647,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   { List<RationalFunction>& currentEigen=theEigenVectors.TheObjects[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultLieFormat);
+    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultFormat);
   }
 }
 
@@ -4758,10 +4764,10 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
       theBracketsOfTheElements.AddOnTop(currentOutput);
       out << "<br>";
       //out << "<div class=\"math\">";
-      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultLieFormat) << ","
-      << Accum.ToString(&theGlobalVariables.theDefaultLieFormat) << "]=";
+      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultFormat) << ","
+      << Accum.ToString(&theGlobalVariables.theDefaultFormat) << "]=";
       //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ToString(&theGlobalVariables.theDefaultLieFormat);
+      out << currentOutput.ToString(&theGlobalVariables.theDefaultFormat);
       //out << "  (mod Verma relations)";
       //out << "\\end{eqnarray*}</div>";
     }
@@ -4773,7 +4779,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultLieFormat) << ", ";
+    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
   Matrix<RationalFunction> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
@@ -4797,7 +4803,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   { List<RationalFunction>& currentEigen=theEigenVectors[i];
     RationalFunction::ScaleClearDenominator(currentEigen, tempProot);
     tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultLieFormat);
+    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultFormat);
   }
 }
 
@@ -5252,7 +5258,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
       if (found)
         report << ",";
       found=true;
-      report << tempP.ToString(&theGlobalVariables.theDefaultPolyFormat) << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultPolyFormat);
+      report << tempP.ToString(&theGlobalVariables.theDefaultFormat) << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultFormat);
       if (i<NumVarsDoubled/2)
         numImpliedXsubs++;
       else
@@ -5276,7 +5282,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ToString();
   ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
   if (lastNode.ExpressionType==this->typePoly)
-    out << lastNode.polyValue.GetElement().ToString(&theGlobalVariables.theDefaultPolyFormat) << ")";
+    out << lastNode.polyValue.GetElement().ToString(&theGlobalVariables.theDefaultFormat) << ")";
   else
     out << " ... )";
   if (found)

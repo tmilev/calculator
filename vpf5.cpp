@@ -1320,7 +1320,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
       outputEigenVectors->AddOnTop(currentElt);
     if (outputWeightsFundCoords!=0)
       outputWeightsFundCoords->AddOnTop(currentWeight);
-    out << currentElt.ToString(&theGlobalVariables.theDefaultLieFormat);
+    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
     if (currentElt.size>1)
       out << ")";
     out << " v_\\lambda";
@@ -1490,8 +1490,10 @@ bool CommandList::fSplitFDpartB3overG2
 //    baseChar=theG2Casimir.theCoeffs[0];
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
 //  highestWeightG2
+  bool useLatex=theCommands.theGlobalVariableS->theDefaultFormat.flagUseLatex;
+  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=100000;
   out
-  << "<table><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
+  << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
   << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
   for (int i=0; i< outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunction>& currentWeightSimpleB3coords=outputWeightsSimpleCoords[i];
@@ -1506,19 +1508,21 @@ bool CommandList::fSplitFDpartB3overG2
     theG2CasimirCopy=theG2Casimir;
     theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
     theChars[i]=theG2CasimirCopy.theCoeffs[0];
-    out << "<td>" << theChars[i].ToString() << "</td>";
+    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(theChars[i].ToString()) << "</td>";
     out << "</tr>";
   }
   out << "</table>";
   out << "<br>";
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
-  out << "<table><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
+//  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
+  out << "<table border=\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
   List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
   ElementTensorsGeneralizedVermas<RationalFunction> intermediateElt;
   theEigenVectors.SetSize(g2Weights.size);
   theEigenVectors.LastObject()->MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
   Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
   theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
+  theG2Casimir.checkConsistency();
+  imageCasimirInB3.checkConsistency();
   for (int k=0; k<g2Weights.size; k++)
   { out << "<tr><td>" << g2Weights[k].ToString() << "</td><td>";
     ElementTensorsGeneralizedVermas<RationalFunction>& currentTensorElt=theEigenVectors[k];
@@ -1526,10 +1530,13 @@ bool CommandList::fSplitFDpartB3overG2
     intermediateElt.MultiplyOnTheLeft(outputEigenWords[k], currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
     theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
     intermediateElt=currentTensorElt;
+    std::stringstream formulaStream1;
     for (int j=0; j<g2Weights.size; j++)
     { weightDifference=g2Weights[j] - g2Weights[k];
       if (weightDifference.IsPositive())
-      { out << "(i(\\bar c) - " << theChars[j].ToString() <<  ")";
+      { formulaStream1 << "(i(\\bar c) - " << theChars[j].ToString() <<  ")";
+        for (int l=0; l<imageCasimirInB3.size; l++)
+          std::cout << "<br>hash " << l << ": " << imageCasimirInB3.GetHash(imageCasimirInB3[l]);
         theG2CasimirCopy=imageCasimirInB3;
         tempElt.MakeConst(theChars[j], theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
         theG2CasimirCopy-=tempElt;
@@ -1539,7 +1546,9 @@ bool CommandList::fSplitFDpartB3overG2
         intermediateElt=currentTensorElt;
       }
     }
-    out << "v_\\lambda</td><td>" << currentTensorElt.ToString() << "</td></tr>";
+    formulaStream1 << "v_\\lambda";
+    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(formulaStream1.str())
+    << "</td><td>" <<  CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(currentTensorElt.ToString()) << "</td></tr>";
   }
   out << "</table>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);

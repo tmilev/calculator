@@ -190,6 +190,8 @@ bool Data::ConvertToTypE<Polynomial<Rational> >()
 { if (this->theContextIndex==-1)
     return false;
   Polynomial<Rational> output;
+  MemorySaving<Expression> tempExp;
+  MemorySaving<Data> tempData;
   switch (this->type)
   { case Data::typeRational:
       output.MakeConst(this->GetContext().VariableImages.size, this->GetValuE<Rational>());
@@ -197,6 +199,12 @@ bool Data::ConvertToTypE<Polynomial<Rational> >()
       return true;
     case Data::typePoly:
       return true;
+/*    case Data::typeVariableNonBound:
+    assert(false);
+      tempData.GetElement()=*this;
+      tempData.GetElement().theContextIndex=-1;
+      tempExp.GetElement().MakeAtom(tempData.GetElement(), *this->owner, -1);
+      return true;*/
     default:
 //      std::cout << " No conversion found.";
       return false;
@@ -208,6 +216,9 @@ bool Data::ConvertToTypE<RationalFunction>()
 { if (this->theContextIndex==-1)
     return false;
   MemorySaving<RationalFunction> output;
+  MemorySaving<Expression> tempExp;
+  MemorySaving<Data> tempData;
+  int tempIndex;
   switch (this->type)
   { case Data::typeRational:
       output.GetElement().MakeConst(this->GetContext().VariableImages.size, this->GetValuE<Rational>(), this->owner->theGlobalVariableS);
@@ -218,6 +229,16 @@ bool Data::ConvertToTypE<RationalFunction>()
       this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
     case Data::typeRationalFunction:
+      return true;
+    case Data::typeVariableNonBound:
+      tempData.GetElement()=*this;
+      tempData.GetElement().theContextIndex=-1;
+      tempExp.GetElement().MakeAtom(tempData.GetElement(), *this->owner, -1);
+      tempIndex=this->GetContext().VariableImages.GetIndex(tempExp.GetElement());
+      if (tempIndex==-1)
+        return false;
+      output.GetElement().MakeOneLetterMon(this->GetContext().VariableImages.size, tempIndex, 1, *this->owner->theGlobalVariableS);
+      this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
     default:
 //      std::cout << " No conversion found.";
@@ -725,8 +746,13 @@ void Data::MakeUE
 void Data::MakeVariableNonBound(CommandList& theBoss, const VariableNonBound& input)
 { this->theIndex= theBoss.theObjectContainer.theNonBoundVars.AddNoRepetitionOrReturnIndexFirst(input);
   this->type=this->typeVariableNonBound;
+  Expression tempExp;
   this->theContextIndex=-1;
   this->owner=&theBoss;
+  tempExp.MakeAtom(*this, theBoss, -1);
+  Context tempContext;
+  tempContext.VariableImages.AddOnTop(tempExp);
+  this->theContextIndex=theBoss.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(tempContext);
 }
 
 void Data::MakeString
@@ -1916,7 +1942,7 @@ bool CommandList::fSSAlgebra
       out
       << "Lie algebra of type " << tempData.GetAmbientSSAlgebra().GetLieAlgebraName()
       << " generated. The resulting Lie bracket pairing table is "
-      << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultLieFormat);
+      << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
       << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
@@ -2188,13 +2214,13 @@ void CommandList::initPredefinedVars()
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
-   "fSplitFDpartB3overG2CommonLeviAndCharsOnly{}(x_1,2,0) ");
+   "fSplitFDpartB3overG2CommonLeviAndCharsOnly{}(x_1,2,0)");
   this->AddNonBoundVarMustBeNew
   ("fSplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
-   "fSplitFDpartB3overG2{}(x_1,2,0) ");
+   "fSplitFDpartB3overG2{}(x_1,1,0)");
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -3023,6 +3049,12 @@ bool Expression::IsElementUE()const
   return this->GetAtomicValue().type==Data::typeElementUE;
 }
 
+bool Expression::IsString()const
+{ if (!this->EvaluatesToAtom())
+    return false;
+  return this->GetAtomicValue().type==Data::typeString;
+}
+
 bool Expression::EvaluatesToSmallInteger(int& whichInteger)const
 { if (!this->EvaluatesToAtom())
     return false;
@@ -3627,10 +3659,9 @@ void CommandList::EvaluateCommands()
     << this->RecursionDeptH << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
     assert(false);
   }
-  FormatExpressions theFormat;
-  theFormat.flagMakingExpressionTableWithLatex=true;
-  theFormat.flagUseLatex=true;
-  out << this->theCommands.ToString(&theFormat, false, false, &comments, true, &StartingExpression); //<< "</td></tr>";
+  this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;
+  this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
+  out << this->theCommands.ToString(&this->theGlobalVariableS->theDefaultFormat, false, false, &comments, true, &StartingExpression); //<< "</td></tr>";
   this->outputString=out.str();
   if (comments.str()!="")
   { std::stringstream commentsStream;
@@ -3721,13 +3752,10 @@ std::string Expression::ToString
   if (AddCurlyBraces)
     out << "{";
   if (this->EvaluatesToAtom())
-  { bool useLatex=false;
-    if (theFormat!=0)
-      useLatex=theFormat->flagUseLatex;
-    std::stringstream dataComments;
-    out << this->GetAtomicValue().ToString(&dataComments, isFinal && !useLatex, theFormat);
+  { std::stringstream dataComments;
+    out << this->GetAtomicValue().ToString(&dataComments, isFinal, theFormat);
     additionalDataComments=dataComments.str();
-  }else if (this->theOperation==this->theBoss->opDefine())
+  } else if (this->theOperation==this->theBoss->opDefine())
     out << this->children[0].ToString(theFormat, false, false, outComments)
     << ":=" << this->children[1].ToString(theFormat, false, false, outComments);
   else if (this->theOperation==this->theBoss->opDefineConditional())
@@ -3765,7 +3793,7 @@ std::string Expression::ToString
     if (tempS.size()>0)
       if (tempS[0]!='-')
         out << "+";
-    out << tempS;
+    out  << tempS;
   }
   else if (this->theOperation==this->theBoss->opMinus())
   { if ( this->children.size==1)
@@ -3774,7 +3802,7 @@ std::string Expression::ToString
     else
     { assert(children.size==2);
       out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments)
-      << "-" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
+      << "-" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
     }
   }
   else if (this->theOperation==this->theBoss->opVariableBound())
@@ -3870,8 +3898,11 @@ std::string Expression::ToString
         << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL( startingExpression->children[i].ToString(theFormat, false, false, 0));
         if (i!=this->children.size-1)
           out << ";";
-        out << "</td><td valign=\"top\"><hr>"
-        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(this->children[i].ToString(theFormat, false, false, outComments));
+        out << "</td><td valign=\"top\"><hr>";
+        if (!this->children[i].IsString() || !isFinal)
+          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(this->children[i].ToString(theFormat, false, false, outComments));
+        else
+          out << this->children[i].GetAtomicValue().GetValuE<std::string>();
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -3906,8 +3937,12 @@ std::string Expression::ToString
     if (this->theOperation==this->theBoss->opEndStatement())
       outTrue << out.str();
     else
-      outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(startingExpression->ToString(theFormat))
-      << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(out.str()) << "</td></tr>";
+    { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(startingExpression->ToString(theFormat));
+      if (this->IsString() && isFinal)
+        outTrue << "</td><td>" << out.str() << "</td></tr>";
+      else
+        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(out.str()) << "</td></tr>";
+    }
     outTrue << "</table>";
     return outTrue.str();
   }
@@ -4087,7 +4122,15 @@ std::string CommandList::ToString()
   << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
+  #ifdef MacroIncrementCounter
+  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (=# successful calls Rational::TryToAddQuickly)";
+  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (=# successful calls Rational::TryToMultiplyQuickly)";
+  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (=# calls of Rational::gcd)";
 
+  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (=# calls LargeIntUnsigned::AddNoFitSize)";
+  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (=# calls LargeIntUnsigned::MultiplyBy)";
+  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (=# calls LargeIntUnsigned::gcd)";
+  #endif
   out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>."
   << "The object container is the data structure storing all c++ built-in data types requested by the user<br> "
@@ -4170,7 +4213,11 @@ bool Expression::NeedBracketsForMultiplication()const
 }
 
 bool Expression::NeedBracketsForAddition()const
-{ return
+{ if (this->theOperation==this->theBoss->opTimes())
+    if (this->children[0].IsInteger())
+      if (this->children[0].GetAtomicValue().GetValuE<Rational>()==(-1))
+        return true;
+  return
   false
   ;
 }

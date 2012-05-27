@@ -153,7 +153,7 @@ int partFractions::flagMaxNumStringOutputLines=500;
 //int partFraction::lastApplicationOfSVformulaNumNewGenerators=0;
 //int partFraction::lastApplicationOfSVformulaNumNewMonomials=0;
 bool Rational::flagAnErrorHasOccurredTimeToPanic=false;
-bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
+//bool Rational::flagMinorRoutinesOnDontUseFullPrecision=false;
 bool partFractions::flagMakingProgressReport=true;
 bool WeylGroup::flagAnErrorHasOcurredTimeToPanic=false;
 //FacetPointers TheBigFacetOutput;
@@ -162,6 +162,12 @@ template< >
 bool Matrix<Rational> ::flagAnErrorHasOccurredTimeToPanic=false;
 int rootSubalgebras::ProblemCounter=0;
 
+unsigned int Rational::TotalLargeAdditions=0;
+unsigned int Rational::TotalLargeGCDcalls=0;
+unsigned int Rational::TotalLargeMultiplications=0;
+unsigned int Rational::TotalSmallAdditions=0;
+unsigned int Rational::TotalSmallGCDcalls=0;
+unsigned int Rational::TotalSmallMultiplications=0;
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
 { static const int NumColorsBase=3;
@@ -1115,7 +1121,8 @@ inline void LargeIntUnsigned::AssignShiftedUInt(unsigned int x, int shift)
 }
 
 inline void LargeIntUnsigned::AddNoFitSize(const LargeIntUnsigned& x)
-{ int oldsize= this->size;
+{ MacroIncrementCounter(Rational::TotalLargeAdditions);
+  int oldsize= this->size;
   this->SetSize(MathRoutines::Maximum(this->size, x.size)+1);
   for (int i=oldsize; i<this->size; i++)
     this->TheObjects[i]=0;
@@ -1172,6 +1179,7 @@ void LargeIntUnsigned::SubtractSmallerPositive(const LargeIntUnsigned& x)
 
 void LargeIntUnsigned::MultiplyBy(const LargeIntUnsigned& x, LargeIntUnsigned& output)const
 { assert(this!=&output && &x!=&output);
+  MacroIncrementCounter(Rational::TotalLargeMultiplications);
   output.SetSize(x.size+output.size);
   for(int i=0; i<output.size; i++)
     output.TheObjects[i]=0;
@@ -1339,7 +1347,8 @@ double LargeIntUnsigned::GetDoubleValue()
 }
 
 void LargeIntUnsigned::gcd(const LargeIntUnsigned& a, const LargeIntUnsigned& b, LargeIntUnsigned& output)
-{ LargeIntUnsigned p, q, r, temp;
+{ MacroIncrementCounter(Rational::TotalLargeGCDcalls);
+  LargeIntUnsigned p, q, r, temp;
 //  std::string tempSP, tempSQ, tempSR, tempS;
   p.Assign(a);
   q.Assign(b);
@@ -2244,10 +2253,10 @@ void partFractions::PrepareCheckSums(GlobalVariables& theGlobalVariables)
 }
 
 void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVariables& theGlobalVariables)
-{ this->startingVectors=input.startingVectors;
+{ this->MakeZero();
+  this->startingVectors=input.startingVectors;
   this->IndexLowestNonProcessed=0;
   this->IndexCurrentlyProcessed=0;
-  this->ClearHashes();
   this->AmbientDimension= input.AmbientDimension;
 }
 
@@ -2873,7 +2882,7 @@ void partFractions::operator=(const partFractions& other)
 }
 
 void partFractions::initCommon()
-{ this->Clear();
+{ this->MakeZero();
   this->startingVectors.Clear();
   this->flagInitialized=false;
   this->SplitStepsCounter=1;

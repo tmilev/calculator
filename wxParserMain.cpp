@@ -69,28 +69,15 @@ public:
 
 wxParserFrame* theMainWindow;
 WorkThreadClass theComputationalThread;
-Parser theParser;
 GlobalVariables theGlobalVariables;
 extern GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
-void EnsureBitmapsSuffice()
-{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  int oldSize=theMainWindow->theBitmapList.size;
-  int currentPhysicalFrame=theOps.GetNumPhysicalFramesNoStillFrame();
-  if (oldSize<=currentPhysicalFrame)
-  { theMainWindow->theBitmapList.SetSize(currentPhysicalFrame+50);
-    for (int i=oldSize; i<theMainWindow->theBitmapList.size; i++)
-      theMainWindow->theBitmapList[i]=new wxBitmap(theMainWindow->bitmapW, theMainWindow->bitmapW);
-  }
-}
-
-
 void drawtext(double X1, double Y1, const char* theText, int length, int ColorIndex, int fontSize)
-{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  EnsureBitmapsSuffice();
+{ //AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+  //EnsureBitmapsSuffice();
 //  if (!theMainWindow->flagUseBitmapBufferForDrawing)
   { wxMemoryDC dc;
-    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+//    dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
 #ifndef WIN32
 //wtf???? I thought wxWidgets was cross-platform???????? why the f it says "error C2039: 'DrawTextA': Ist kein Element von 'wxMemoryDC'"?
     dc.DrawText(wxString(theText, wxConvUTF8), X1, Y1);
@@ -112,8 +99,7 @@ void drawtext(double X1, double Y1, const char* theText, int length, int ColorIn
 
 void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
-  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  EnsureBitmapsSuffice();
+//  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -130,7 +116,7 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
   wxMemoryDC dc;
-  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+//  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
   dc.SetPen(tempPen);
   dc.DrawCircle((int)X1, (int)Y1, radius);
   dc.SelectObject(wxNullBitmap);
@@ -138,8 +124,7 @@ void drawCircle(double X1, double Y1, double radius, unsigned long thePenStyle, 
 
 void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenStyle, int ColorIndex)
 { //wxWindowDC dc(theMainWindow->theDrawPanel);//->Panel1);
-  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  EnsureBitmapsSuffice();
+//  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   wxPen tempPen;
   switch (thePenStyle)
   { case DrawingVariables::PenStyleNormal:
@@ -155,18 +140,17 @@ void drawline(double X1, double Y1, double X2, double Y2, unsigned long thePenSt
       return;
   }
   tempPen.SetColour((ColorIndex/(256*256))%256, (ColorIndex/256)%256, ColorIndex%256);
-  wxMemoryDC dc(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
-  dc.SetPen(tempPen);
-  dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
-  dc.SelectObject(wxNullBitmap);
+//  wxMemoryDC dc(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+//  dc.SetPen(tempPen);
+//  dc.DrawLine((int)X1, (int)Y1, (int) X2, (int) Y2);
+//  dc.SelectObject(wxNullBitmap);
 }
 
 void drawClearScreen()
-{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  EnsureBitmapsSuffice();
+{ //AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   wxMemoryDC dc;
   dc.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
+//  dc.SelectObject(*theMainWindow->theBitmapList[theOps.GetIndexCurrentPhysicalFrame()]);
   dc.Clear();
   dc.SelectObject(wxNullBitmap);
 #ifdef WIN32
@@ -189,109 +173,112 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
 }
 
 wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
-{
-    //(*Initialize(wxParserFrame)
-    wxBoxSizer* BoxSizer2;
-    wxBoxSizer* BoxSizer1;
-    wxBoxSizer* BoxSizer3;
+{ //(*Initialize(wxParserFrame)
+  wxBoxSizer* BoxSizer2;
+  wxBoxSizer* BoxSizer1;
+  wxBoxSizer* BoxSizer3;
 
-    Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
-    SetClientSize(wxSize(322,151));
-    this->TimerReady=false;
-    BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-    BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-    Choice1 = new wxChoice(this, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
-    Choice1->Append(_("A"));
-    Choice1->SetSelection( Choice1->Append(_("B")) );
-    Choice1->Append(_("C"));
-    Choice1->Append(_("D"));
-    Choice1->Append(_("E"));
-    Choice1->Append(_("F"));
-    Choice1->Append(_("G"));
-    BoxSizer3->Add(Choice1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("3"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 3, _T("ID_SPINCTRL1"));
-    SpinCtrl1->SetValue(_T("3"));
-    BoxSizer3->Add(SpinCtrl1, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("frame:"), wxDefaultPosition, wxSize(42,17), 0, _T("ID_STATICTEXT1"));
-    BoxSizer3->Add(StaticText1, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    SpinCtrl2 = new wxSpinCtrl(this, ID_SPINCTRL2, _T("0"), wxDefaultPosition, wxSize(54,27), 0, 0, 5000, 0, _T("ID_SPINCTRL2"));
-    SpinCtrl2->SetValue(_T("0"));
-    BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("animateFlyThroughRootSAs"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
-    TextCtrl1->SetMinSize(wxSize(100,20));
-    BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
-    BoxSizer2->Add(Button1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    Button2 = new wxButton(this, ID_BUTTON2, _("Pause Animation"), wxDefaultPosition, wxSize(155,29), 0, wxDefaultValidator, _T("ID_BUTTON2"));
-    BoxSizer2->Add(Button2, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    SetSizer(BoxSizer1);
-    Timer1.SetOwner(this, ID_TIMER1);
-    Timer1.Start(100, false);
-    BoxSizer1->SetSizeHints(this);
+  Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+  SetClientSize(wxSize(322,151));
+  this->TimerReady=false;
+  BoxSizer1 = new wxBoxSizer(wxVERTICAL);
+  BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+  Choice1 = new wxChoice(this, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
+  Choice1->Append(_("A"));
+  Choice1->SetSelection( Choice1->Append(_("B")) );
+  Choice1->Append(_("C"));
+  Choice1->Append(_("D"));
+  Choice1->Append(_("E"));
+  Choice1->Append(_("F"));
+  Choice1->Append(_("G"));
+  Choice1->Disable();
+  BoxSizer3->Add(Choice1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+  SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("3"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 3, _T("ID_SPINCTRL1"));
+  SpinCtrl1->SetValue(_T("3"));
+  SpinCtrl1->Disable();
+  BoxSizer3->Add(SpinCtrl1, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+  StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("frame:"), wxDefaultPosition, wxSize(42,17), 0, _T("ID_STATICTEXT1"));
+  StaticText1->Disable();
+  BoxSizer3->Add(StaticText1, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+  SpinCtrl2 = new wxSpinCtrl(this, ID_SPINCTRL2, _T("0"), wxDefaultPosition, wxSize(54,27), 0, 0, 5000, 0, _T("ID_SPINCTRL2"));
+  SpinCtrl2->SetValue(_T("0"));
+  SpinCtrl2->Disable();
+  BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+  BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
+  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("fSplitFDpartB3overG2{}(x_1,2,0)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+  TextCtrl1->SetMinSize(wxSize(100,20));
+  BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+  BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+  Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
+  BoxSizer2->Add(Button1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+  Button2 = new wxButton(this, ID_BUTTON2, _("Pause Animation"), wxDefaultPosition, wxSize(155,29), 0, wxDefaultValidator, _T("ID_BUTTON2"));
+  BoxSizer2->Add(Button2, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+  BoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+  SetSizer(BoxSizer1);
+  Timer1.SetOwner(this, ID_TIMER1);
+  Timer1.Start(100, false);
+  BoxSizer1->SetSizeHints(this);
 
-    Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
-    Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
-    Connect(ID_SPINCTRL2,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl2Change);
-    Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_ENTER,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
-    Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
-    Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton2Click);
-    Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&wxParserFrame::OnTimer1Trigger);
-    Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&wxParserFrame::OnClose);
-    //*)
-    this->theDrawPanel= new wxDrawPanel(this);
-    this->theParserOutput= new wxParserOutput(this);
-    this->theStatus= new wxStatus(this);
-    this->thePNGdisplay= new wxPNGdisplay(this);
-//    this->theOpenGLXP=new openglXP(this);
-    this->Timer1.Stop();
-    this->TimerReady=true;
-
-    this->Connect(id, wxEVT_ComputationOverMakeReport, (wxObjectEventFunction)&wxParserFrame::OnComputationOver);
-    this->Connect(id, wxEVT_ComputationProgressReport, (wxObjectEventFunction)&wxParserFrame::OnProgressReport);
-    this->eventComputationOver.SetId(this->GetId());
-    this->eventComputationOver.SetEventObject(this);
-    this->eventComputationOver.SetEventType(wxEVT_ComputationOverMakeReport);
-    this->eventProgressReport.SetId(this->GetId());
-    this->eventProgressReport.SetEventObject(this);
-    this->eventProgressReport.SetEventType(wxEVT_ComputationProgressReport);
-    theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
-    theGlobalVariables.theDrawingVariables.SetDrawLineFunction(&drawline);
-    theGlobalVariables.theDrawingVariables.SetDrawCircleFunction(&drawCircle);
-    theGlobalVariables.theDrawingVariables.SetDrawClearFunction(&drawClearScreen);
-    theGlobalVariables.theDrawingVariables.SetDrawTextFunction(&drawtext);
-    this->thePath=std::string(wxStandardPaths::Get().GetExecutablePath().mb_str());
-    for (unsigned i=this->thePath.size()-1; i>=0; i--)
-    { if (this->thePath[i]=='/' || this->thePath[i]=='\\')
-        break;
-      this->thePath.resize(this->thePath.size()-1);
-    }
-    this->theSettingsFileName=this->thePath+"Settings.txt";
-    this->ReadSettings();
-    this->scalePNG=1;
-    theMainWindow=this;
-    this->theStatus->Show();
-    this->theParserOutput->Show();
-    this->theDrawPanel->Show();
-    this->thePNGdisplay->Show();
-    this->thePNGdisplay->Refresh();
-//    this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
-    this->indexCurrentPng=-1;
-    this->bitmapH=600;
-    this->bitmapW=600;
-    this->theBitmapList.SetSize(1);
-    this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
-    theParser.DefaultWeylRank=3;
-    theParser.DefaultWeylLetter='B';
-    this->UpdateChoices();
-    wxMemoryDC tmpDC;
-    tmpDC.SelectObject(*this->theBitmapList[0]);
-    tmpDC.SetBackground(wxBrush (wxColour(255,255,255),wxSOLID));
-    tmpDC.Clear();
-    tmpDC.SelectObject(wxNullBitmap);
-    this->Quitting=false;
+  Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
+  Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
+  Connect(ID_SPINCTRL2,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl2Change);
+  Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_ENTER,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
+  Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
+  Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton2Click);
+  Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&wxParserFrame::OnTimer1Trigger);
+  Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&wxParserFrame::OnClose);
+  //*)
+  this->theDrawPanel= new wxDrawPanel(this);
+  this->theParserOutput= new wxParserOutput(this);
+  this->theStatus= new wxStatus(this);
+  this->thePNGdisplay= new wxPNGdisplay(this);
+  //this->theOpenGLXP=new openglXP(this);
+  this->Timer1.Stop();
+  this->TimerReady=true;
+  this->Connect(id, wxEVT_ComputationOverMakeReport, (wxObjectEventFunction)&wxParserFrame::OnComputationOver);
+  this->Connect(id, wxEVT_ComputationProgressReport, (wxObjectEventFunction)&wxParserFrame::OnProgressReport);
+  this->eventComputationOver.SetId(this->GetId());
+  this->eventComputationOver.SetEventObject(this);
+  this->eventComputationOver.SetEventType(wxEVT_ComputationOverMakeReport);
+  this->eventProgressReport.SetId(this->GetId());
+  this->eventProgressReport.SetEventObject(this);
+  this->eventProgressReport.SetEventType(wxEVT_ComputationProgressReport);
+  theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&FeedDataToIndicatorWindowWX);
+  theGlobalVariables.theDrawingVariables.SetDrawLineFunction(&drawline);
+  theGlobalVariables.theDrawingVariables.SetDrawCircleFunction(&drawCircle);
+  theGlobalVariables.theDrawingVariables.SetDrawClearFunction(&drawClearScreen);
+  theGlobalVariables.theDrawingVariables.SetDrawTextFunction(&drawtext);
+  this->thePath=std::string(wxStandardPaths::Get().GetExecutablePath().mb_str());
+  for (unsigned i=this->thePath.size()-1; i>=0; i--)
+  { if (this->thePath[i]=='/' || this->thePath[i]=='\\')
+      break;
+    this->thePath.resize(this->thePath.size()-1);
+  }
+  this->theSettingsFileName=this->thePath+"Settings.txt";
+  this->ReadSettings();
+  this->scalePNG=1;
+  theMainWindow=this;
+  this->theStatus->Show();
+  this->theParserOutput->Show();
+  this->theDrawPanel->Show();
+  this->thePNGdisplay->Show();
+  this->thePNGdisplay->Refresh();
+  //this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
+  theGlobalVariables.theDefaultFormat.flagUseLatex=true;
+  theGlobalVariables.theDefaultFormat.flagUseHTML=false;
+  this->theCommandList.init(theGlobalVariables);
+  this->indexCurrentPng=-1;
+  this->bitmapH=600;
+  this->bitmapW=600;
+  this->theBitmapList.SetSize(1);
+  this->theBitmapList[0]= new wxBitmap(this->bitmapW, this->bitmapH);
+  this->UpdateChoices();
+  wxMemoryDC tmpDC;
+  tmpDC.SelectObject(*this->theBitmapList[0]);
+  tmpDC.SetBackground(wxBrush (wxColour(255,255,255), wxSOLID));
+  tmpDC.Clear();
+  tmpDC.SelectObject(wxNullBitmap);
+  this->Quitting=false;
 }
 
 wxParserFrame::~wxParserFrame()
@@ -317,22 +304,21 @@ void wxDrawPanel::OnPaint(wxPaintEvent& event)
   if (theMainWindow->Quitting)
     return;
   theMainWindow->mutexRuN.LockMe();
-  EnsureBitmapsSuffice();
-  AnimationBuffer& theOps= theParser.theValue.theAnimation.GetElement();
-  int theIndex=theOps.GetIndexCurrentPhysicalFrame();
-  assert(theIndex>=0 && theIndex<theMainWindow->theBitmapList.size);
-  wxBitmap& theBM=*theMainWindow->theBitmapList[theIndex];
-  dc.DrawBitmap(theBM, 0, 0);
+//  AnimationBuffer& theOps= theParser.theValue.theAnimation.GetElement();
+//  int theIndex=theOps.GetIndexCurrentPhysicalFrame();
+//  assert(theIndex>=0 && theIndex<theMainWindow->theBitmapList.size);
+//  wxBitmap& theBM=*theMainWindow->theBitmapList[theIndex];
+//  dc.DrawBitmap(theBM, 0, 0);
   theMainWindow->mutexRuN.UnlockMe();
 }
 
 void wxDrawPanel::OnPanel1LeftDown(wxMouseEvent& event)
-{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
+{ //DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
   if (theMainWindow->GetTimer().IsRunning())
   { theMainWindow->GetTimer().Stop();
     theMainWindow->Button2->SetLabel(wxT("Continue animation"));
   }
-  theOps.click(event.GetX(), event.GetY());
+//  theOps.click(event.GetX(), event.GetY());
 }
 
 void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
@@ -341,11 +327,11 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
     return;
   int rot = event.GetWheelRotation()/event.GetWheelDelta();
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
-  AnimationBuffer& theAniBuffer=theParser.theValue.theAnimation.GetElement();
-  DrawOperations& theOps=theAniBuffer.GetCurrentDrawOps();
+//  AnimationBuffer& theAniBuffer=theParser.theValue.theAnimation.GetElement();
+//  DrawOperations& theOps=theAniBuffer.GetCurrentDrawOps();
 
-  theOps.GraphicsUnit[theOps.SelectedPlane]+=rot*5;
-  theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
+//  theOps.GraphicsUnit[theOps.SelectedPlane]+=rot*5;
+ // theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
 //  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
 //#ifdef win32
   wxClientDC
@@ -353,7 +339,7 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
 //  wxPaintDC
 //#endif
   otherDC(theMainWindow->theDrawPanel);
-  otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
+//  otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.UnlockMe();
   //wxPaintDC dc(this);
   //dc.SetBackground(theMainWindow->GetBackgroundColour());
@@ -363,16 +349,16 @@ void wxDrawPanel::OnPanel1MouseWheel(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
-{ AnimationBuffer& theAniBuffer=theParser.theValue.theAnimation.GetElement();
-  DrawOperations& theOps= theAniBuffer.GetCurrentDrawOps();
-  if (theOps.SelectedCircleMinus2noneMinus1Center==-2)
-    return;
+{// AnimationBuffer& theAniBuffer=theParser.theValue.theAnimation.GetElement();
+//  DrawOperations& theOps= theAniBuffer.GetCurrentDrawOps();
+//  if (theOps.SelectedCircleMinus2noneMinus1Center==-2)
+//    return;
 //  theMainWindow->flagUseBitmapBufferForDrawing=true;
 //  theGlobalVariables.theDrawingVariables.LockedWhileDrawing.LockMe();
 //  theMainWindow->flagUseBitmapBufferForDrawing=false;
-  if (theOps.mouseMoveRedraw(event.GetX(), event.GetY(), theGlobalVariables))
-  { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
-  }
+//  if (theOps.mouseMoveRedraw(event.GetX(), event.GetY(), theGlobalVariables))
+//  { theGlobalVariables.theDrawingVariables.drawBufferNoIniT(theOps);
+//  }
 //  wxMemoryDC dc(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()]);
 //#ifdef win32
   wxClientDC
@@ -380,7 +366,7 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
 //  wxPaintDC
 //#endif
   otherDC(theMainWindow->theDrawPanel);
-  otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
+//  otherDC.DrawBitmap(*theMainWindow->theBitmapList[theAniBuffer.GetIndexCurrentPhysicalFrame()],0,0);
   //theMainWindow->theDrawPanel->Refresh();
 //  dc.Blit(0,0, theMainWindow->bitmapW, theMainWindow->bitmapH, &otherDC,0,0 );
 //  theMainWindow->flagUseBitmapBufferForDrawing=false;
@@ -391,8 +377,8 @@ void wxDrawPanel::OnPanel1MouseMove(wxMouseEvent& event)
 }
 
 void wxDrawPanel::OnPanel1LeftUp(wxMouseEvent& event)
-{ DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
-  theOps.SelectedCircleMinus2noneMinus1Center=-2;
+{// DrawOperations& theOps= theParser.theValue.theAnimation.GetElement().GetCurrentDrawOps();
+  //theOps.SelectedCircleMinus2noneMinus1Center=-2;
 }
 
 void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
@@ -406,19 +392,19 @@ void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
 }
 
 void wxParserFrame::OnComputationOver(wxCommandEvent& ev)
-{ this->theParserOutput->TextCtrl1->SetValue(wxString(theParser.DebugString.c_str(), wxConvUTF8));
+{ this->theParserOutput->TextCtrl1->SetValue(wxString(theCommandList.outputString.c_str(), wxConvUTF8));
   this->GetButton1()->SetLabel(wxT("Go"));
-  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  if (theParser.theValue.ExpressionType==ParserNode::typeAnimation)
-  { theOps.flagAnimating=true;
-
-    theOps.DrawNoInit(theGlobalVariables.theDrawingVariables, theGlobalVariables);
-    theMainWindow->Button2->SetLabel(wxT("Pause animation"));
+//  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+//  if (theParser.theValue.ExpressionType==ParserNode::typeAnimation)
+//  { theOps.flagAnimating=true;
+//
+ //   theOps.DrawNoInit(theGlobalVariables.theDrawingVariables, theGlobalVariables);
+  //  theMainWindow->Button2->SetLabel(wxT("Pause animation"));
 
 //    this->theStatus->TextCtrlStatusString->SetValue(wxString(theOps.ElementToString().c_str() , wxConvUTF8));
-    theMainWindow->StartTimer();
-  } else
-    theOps.flagAnimating=false;
+//    theMainWindow->StartTimer();
+//  } else
+//    theOps.flagAnimating=false;
   theMainWindow->theDrawPanel->Refresh();
 }
 
@@ -459,7 +445,7 @@ void wxParserFrame::ReadSettings()
   this->thePNGdisplay->SetSize(tempRect);
   std::string newFileName, oldfileName;
   //int framecount=0, tempInt;
-  this->theSlides.MakeActualSizeAtLeastExpandOnTop(100);
+  this->theSlides.Reserve(100);
   List<std::string>& slides=this->theSlidesFileNames;
   List<int>& ind=this->theSlideFrameIndices;
   int s=0;
@@ -525,12 +511,10 @@ void RunComputationalThread()
 void* RunComputationalThread(void*ptr)
 #endif
 { theGlobalVariables.theLocalPauseController.InitComputation();
-  PolynomialOutputFormat tempFormat;
-  theParser.DebugString= theParser.ParseEvaluateAndSimplify(theParser.StringBeingParsed, false, theGlobalVariables, tempFormat);
+  FormatExpressions tempFormat;
+  theMainWindow->theCommandList.Evaluate(theMainWindow->theCommandList.inputString);
   theGlobalVariables.theLocalPauseController.ExitComputation();
-  wxPostEvent(theMainWindow->GetEventHandler(),
-             theMainWindow->eventComputationOver
-              );
+  wxPostEvent(theMainWindow->GetEventHandler(), theMainWindow->eventComputationOver);
   //theMainWindow->frameInput->Refresh();
 #ifndef WIN32
   pthread_exit(NULL);
@@ -542,9 +526,10 @@ void wxParserFrame::RunTheComputation()
   if (!theGlobalVariables.theLocalPauseController.GetFlagIsRunningUnsafeUseWithMutexHoldMe())
   { theGlobalVariables.theLocalPauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
     this->GetButton1()->SetLabel(wxT("Pause computation"));
-    theParser.StringBeingParsed= std::string(this->TextCtrl1->GetValue().mb_str());
+    theMainWindow->theCommandList.inputString= std::string(this->TextCtrl1->GetValue().mb_str());
 #ifdef WIN32
-    theComputationalThread.ComputationalThread=CreateThread(0,0, (LPTHREAD_START_ROUTINE)RunComputationalThread,0,0,0);
+    theComputationalThread.ComputationalThread=
+    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)RunComputationalThread, 0, 0, 0);
 #else
     pthread_create(&theComputationalThread.ComputationalThreadLinux, NULL, RunComputationalThread, 0);
 #endif
@@ -553,8 +538,7 @@ void wxParserFrame::RunTheComputation()
     { this->Button1->SetLabel(wxT("Pause computation"));
       theGlobalVariables.theLocalPauseController.UnlockSafePoint();
       theGlobalVariables.theLocalPauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
-    }
-    else
+    } else
     { theGlobalVariables.theLocalPauseController.mutexHoldMeWhenReadingOrWritingInternalFlags.UnlockMe();
       theGlobalVariables.theLocalPauseController.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
       theGlobalVariables.theLocalPauseController.GetFlagIsPausedWhileRunningUnsafeUseWithMutexHoldMe()=true;
@@ -564,18 +548,18 @@ void wxParserFrame::RunTheComputation()
 }
 
 void wxParserFrame::OnButton2Click(wxCommandEvent& event)
-{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  if (theOps.flagAnimating)
-  { if (theMainWindow->GetTimer().IsRunning())
-    { theMainWindow->GetTimer().Stop();
-      theMainWindow->Button2->SetLabel(wxT("Continue animation"));
-      theOps.flagIsPausedWhileAnimating=true;
-    } else
-    { theOps.flagIsPausedWhileAnimating=false;
-      theMainWindow->GetTimer().Start();
-      theMainWindow->Button2->SetLabel(wxT("Pause animation"));
-    }
-  }
+{ //AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+//  if (theOps.flagAnimating)
+//  { if (theMainWindow->GetTimer().IsRunning())
+//    { theMainWindow->GetTimer().Stop();
+//      theMainWindow->Button2->SetLabel(wxT("Continue animation"));
+//      theOps.flagIsPausedWhileAnimating=true;
+//    } else
+//    { theOps.flagIsPausedWhileAnimating=false;
+//      theMainWindow->GetTimer().Start();
+//      theMainWindow->Button2->SetLabel(wxT("Pause animation"));
+//    }
+ // }
   return;
   Controller& theController=  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.thePauseControlleR;
   theController.mutexHoldMeWhenReadingOrWritingInternalFlags.LockMe();
@@ -599,7 +583,7 @@ void wxParserFrame::OnButton1Click(wxCommandEvent& event)
 void wxParserFrame::OnTimer1Trigger(wxTimerEvent& event)
 { if (!this->TimerReady)
     return;
-  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+/*  AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   bool needRedraw=theOps.IncrementOpReturnNeedsRedraw();
   this->SpinCtrl2->SetValue(theOps.indexVirtualOp);
   int candidateIndex=theMainWindow->theSlideFrameIndices.IndexOfObject(theOps.indexVirtualOp);
@@ -609,16 +593,16 @@ void wxParserFrame::OnTimer1Trigger(wxTimerEvent& event)
     theMainWindow->thePNGdisplay->Refresh();
   }
   if (needRedraw)
-    this->theDrawPanel->Refresh();
+    this->theDrawPanel->Refresh();*/
 }
 
 void wxParserFrame::UpdateChoices()
-{ theMainWindow->SpinCtrl1->SetValue(theParser.DefaultWeylRank);
-  theMainWindow->Choice1->SetSelection(theParser.DefaultWeylLetter- 'A');
+{// theMainWindow->SpinCtrl1->SetValue(theParser.DefaultWeylRank);
+ // theMainWindow->Choice1->SetSelection(theParser.DefaultWeylLetter- 'A');
 }
 
 void wxParserFrame::OnChoice1Select(wxCommandEvent& event)
-{ switch(this->Choice1->GetSelection())
+{ /*switch(this->Choice1->GetSelection())
   { case 0: theParser.DefaultWeylLetter='A'; break;
     case 1: theParser.DefaultWeylLetter='B'; break;
     case 2: theParser.DefaultWeylLetter='C'; break;
@@ -632,16 +616,16 @@ void wxParserFrame::OnChoice1Select(wxCommandEvent& event)
   int oldRank = theParser.DefaultWeylRank;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
-    this->UpdateChoices();
+    this->UpdateChoices();*/
 }
 
 void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
-{ theParser.DefaultWeylRank=this->SpinCtrl1->GetValue();
+{/* theParser.DefaultWeylRank=this->SpinCtrl1->GetValue();
   char oldLetter=theParser.DefaultWeylLetter;
   int oldRank = theParser.DefaultWeylRank;
   CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
   if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
-    this->UpdateChoices();
+    this->UpdateChoices();*/
 }
 
 void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
@@ -711,7 +695,7 @@ void AnimationBuffer::AddCloneLastFrameAppendOperations
 
 
 void wxParserFrame::OnSpinCtrl2Change(wxSpinEvent& event)
-{ AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
+{ /*AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
   int candidate= this->SpinCtrl2->GetValue();
   if (candidate<theOps.theVirtualOpS.size && candidate>=0 && this->theSlideFrameIndices.size>0)
   { theOps.indexVirtualOp=candidate;
@@ -735,5 +719,5 @@ void wxParserFrame::OnSpinCtrl2Change(wxSpinEvent& event)
   if (candidate>=theOps.theVirtualOpS.size)
   { this->SpinCtrl2->SetRange(0, theOps.theVirtualOpS.size-1);
     this->SpinCtrl2->SetValue(theOps.theVirtualOpS.size-1);
-  }
+  }*/
 }

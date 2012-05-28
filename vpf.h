@@ -60,6 +60,6 @@
 #include "vpfHeader2.h"
 #ifndef ProjectInfoVpfHalreadyDefined
 #define ProjectInfoVpfHalreadyDefined
-static ProjectInformationInstance ProjectInfoVpfH("vpf.h", "Wrapper header file (includes everything).");
+static ProjectInformationInstance ProjectInfoVpfH(__FILE__, "Wrapper header file (includes everything).");
 #endif
 #endif

@@ -1114,7 +1114,7 @@ public:
 (WeylGroup& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 ;
   bool GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
-  (Vector<Rational> & highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
+  (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
  ;
   template <class CoefficientType>
@@ -1139,7 +1139,9 @@ public:
   void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
   template <class CoefficientType>
   bool GenerateOrbitReturnFalseIfTruncated(const Vector<CoefficientType>& input, Vectors<CoefficientType>& outputOrbit, int UpperLimitNumElements);
-  void ComputeSubGroupFromGeneratingReflections(Vectors<Rational>& inputGenerators, List<Vectors<Rational> > & inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements, bool recomputeAmbientRho);
+  void ComputeSubGroupFromGeneratingReflections
+  (Vectors<Rational>& inputGenerators, List<Vectors<Rational> > & inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
+   bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   void ActByElement(int index, Vector<Rational> & theRoot);
   void ActByElement(int index, Vector<Rational> & input, Vector<Rational> & output){this->ActByElement(this->TheObjects[index], input, output);}
@@ -2973,6 +2975,11 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 (const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
  int inputIndexInOwner)
    ;
+  bool SplitCharOverRedSubalg
+(std::string* Report, charSSAlgMod& output,
+ Vectors<Rational>& embeddingsSimpleEiGoesTo,
+ ReflectionSubgroupWeylGroup& outputSubGroup, GlobalVariables& theGlobalVariables)
+  ;
   bool GetDominantCharacterWRTsubalgebra
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
   GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
@@ -3144,7 +3151,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   void SplitOverLevi
   (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
-   Vectors<CoefficientType>* outputWeightsFundCoords=0)
+   Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
    {}

@@ -554,11 +554,13 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
     case Data::typeRational:
       return this->GetValuE<Rational>().ToString();
     case Data::typePoly:
-      if (theFormat.flagUseLatex)
-        out << "\\begin{array}{rcl}&& ";
-      out << "Polynomial{}(" << this->owner->theObjectContainer.thePolys[this->theIndex].ToString(&theFormat) << ")";
-      if (theFormat.flagUseLatex)
-        out << "\\end{array}";
+      //if (theFormat.flagUseLatex)
+      //  out << "\\begin{array}{rcl}&& ";
+      //out << "Polynomial{}(";
+      out << "(" << this->owner->theObjectContainer.thePolys[this->theIndex].ToString(&theFormat) << ")";
+      //out  << ")";
+      //if (theFormat.flagUseLatex)
+      //  out << "\\end{array}";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
       if (theFormat.flagUseLatex)
@@ -2749,6 +2751,11 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   { MathRoutines::swap(leftE, rightE);
     result=true;
   }
+  //handle (non-atom)*Atom
+  if (rightE.EvaluatesToAtom() && !leftE.EvaluatesToAtom())
+  { MathRoutines::swap(leftE, rightE);
+    result=true;
+  }
   if (rightE.theOperation==theCommands.opTimes())
   { assert(rightE.children.size==2);
     Expression& rightLeftE=rightE.children[0];
@@ -2762,7 +2769,16 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     { leftE.MakeAtom(leftE.GetRationalValue()*rightLeftE.GetRationalValue(), theCommands, inputIndexBoundVars);
       rightE.AssignChild(1);
       result=true;
+    } else if (leftE.EvaluatesToAtom() && rightLeftE.EvaluatesToAtom()) //<- handle atom*(atom*anything)
+    { Expression tempExp;
+      tempExp.MakeProducT(theCommands, inputIndexBoundVars, leftE, rightLeftE);
+      if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, tempExp, 0))
+      { Expression tempExp2=rightE.children[1];
+        theExpression.MakeProducT(theCommands, inputIndexBoundVars, tempExp, tempExp2);
+        return true;
+      }
     }
+
   }
   //handle 0*Anything:=0
   if (leftE.EvaluatesToRational())

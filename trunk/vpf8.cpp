@@ -8274,6 +8274,10 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());
   }
   out << "<br>Half sum of the positive Vectors<Rational>: " << this->GetRho().ToString();
+  out << "<br>Roots of Borel (" << this->RootsOfBorel.size << " total): ";
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+  { out << this->RootsOfBorel[i].ToString();
+  }
   if (displayElements)
   { std::stringstream body;
     out << "<br>The elements of the weyl group of the subgroup written with minimal # of generators:<br>";

@@ -4143,6 +4143,7 @@ void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& othe
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 { this->RootSubsystem.Clear();
   this->RootSubsystem.AddOnTop(this->simpleGenerators);
+  this->RootSubsystem.SetExpectedSize(100);
   Vector<Rational> currentRoot;
   for (int i=0; i<this->RootSubsystem.size; i++)
     for (int j=0; j<this->simpleGenerators.size; j++)

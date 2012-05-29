@@ -2976,9 +2976,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
  int inputIndexInOwner)
    ;
   bool SplitCharOverRedSubalg
-(std::string* Report, charSSAlgMod& output,
- Vectors<Rational>& embeddingsSimpleEiGoesTo,
- ReflectionSubgroupWeylGroup& outputSubGroup, GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, Selection& parSelAmbient,
+ Vectors<Rational>& embeddingsSimpleEiGoesTo, List<SemisimpleLieAlgebra>& theSScontainer, int indexSmallAlgebra,
+ ReflectionSubgroupWeylGroup& outputSubInLarge, ReflectionSubgroupWeylGroup& outputSubInSmall, GlobalVariables& theGlobalVariables)
   ;
   bool GetDominantCharacterWRTsubalgebra
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
@@ -7440,8 +7440,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
   }
   hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
   hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
-//  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
-//  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
+  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
+  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
   ///////////////////////////
   HashedList<Vector<CoefficientType> > outputDomWeightsSimpleCoordsLeviPart;
 

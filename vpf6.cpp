@@ -2212,11 +2212,11 @@ void CommandList::initPredefinedVars()
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
   this->AddNonBoundVarMustBeNew
-  ("fSplitFDpartB3overG2CommonLeviAndCharsOnly", & this->fSplitFDpartB3overG2CharsOnly, "",
+  ("fSplitFDpartB3overG2CharsOnly", & this->fSplitFDpartB3overG2CharsOnly, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
-   "fSplitFDpartB3overG2CommonLeviAndCharsOnly{}(x_1,2,0)");
+   "fSplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
   this->AddNonBoundVarMustBeNew
   ("fSplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \

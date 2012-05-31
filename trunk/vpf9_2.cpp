@@ -3828,7 +3828,7 @@ bool Parser::LookUpInDictionaryAndAdd(std::string& input)
 void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmallerCartanSA
 (Vectors<Rational>& output, GlobalVariables& theGlobalVariables)
 { List<Vector<Rational> >& theRootSystem= this->theRange().theWeyl.RootSystem;
-  int rankSA=this->theDomain().theWeyl.CartanSymmetric.NumRows;
+  int rankSA=this->theDomain().theWeyl.GetDim();
   Matrix<Rational>  tempMat;
   tempMat=(this->theDomain().theWeyl.CartanSymmetric);
   tempMat.Invert(theGlobalVariables);
@@ -3846,6 +3846,9 @@ void HomomorphismSemisimpleLieAlgebra::GetRestrictionAmbientRootSystemToTheSmall
     }
     tempMat.ActOnVectorColumn(theScalarProducts, output[i]);
   }
+  this->ImagesCartanDomain.SetSize(rankSA);
+  for (int i=0; i<rankSA; i++)
+    this->ImagesCartanDomain[i]=this->imagesAllChevalleyGenerators[i+numPosRootsDomain].GetCartanPart();
 }
 
 bool HomomorphismSemisimpleLieAlgebra::CheckClosednessLieBracket(GlobalVariables& theGlobalVariables)
@@ -5922,7 +5925,7 @@ void slTwoInSlN::ExtractHighestWeightVectorsFromVector
     component/=(theCoeff);
     outputDecompositionOfInput.AddOnTop(component);
     //std::cout << "<br>component:<div class=\"math\">" << component.ToString(false, true) << "</div><br><br><br><br>";
-    remainder.Subtract(component);
+    remainder-=(component);
   }
   //remainder.NullifyAll();
 //  for (int i=0; i<outputVectors.size; i++)

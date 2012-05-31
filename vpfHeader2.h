@@ -1017,6 +1017,12 @@ static bool EvaluateDereferenceOneArgument
   static bool fSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSplitFDpartB3overG2CharsOutput
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ HomomorphismSemisimpleLieAlgebra& outputHmm, Vector<RationalFunction>& outputTheWeightFundCoords, Selection& outputSelInducing,
+ Selection& outputSmallParSel
+ )
+;
   static bool fSplitFDpartB3overG2
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

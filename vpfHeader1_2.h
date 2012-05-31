@@ -1891,6 +1891,7 @@ public:
   List<ElementSemisimpleLieAlgebra> domainAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra> GmodK;
   Vectors<Rational> RestrictedRootSystem;
+  Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain()
   { return owners->TheObjects[this->indexDomain];
   }
@@ -2978,8 +2979,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   bool SplitCharOverRedSubalg
 (std::string* Report, charSSAlgMod& output, Selection& parSelAmbient,
  Vectors<Rational>& embeddingsSimpleEiGoesTo, List<SemisimpleLieAlgebra>& theSScontainer, int indexSmallAlgebra,
+ Selection& ouputSmallParabolic,
  ReflectionSubgroupWeylGroup& outputSubInLarge, ReflectionSubgroupWeylGroup& outputSubInSmall, GlobalVariables& theGlobalVariables)
-  ;
+   ;
   bool GetDominantCharacterWRTsubalgebra
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
   GlobalVariables& theGlobalVariables, int upperBoundNumDominantWeights)
@@ -3152,6 +3154,13 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
    Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0)
+   ;
+  void SplitFDpartOverFKLeviRedSubalg
+  (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
+   GlobalVariables& theGlobalVariables, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
+   Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0,
+   std::stringstream* comments=0, const CoefficientType& theRingUnit=1,
+   const CoefficientType& theRingZero=0)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
    {}
@@ -7001,7 +7010,7 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
     if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
     { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
       { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
-//        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
         return this->actionsGeneratorsMaT[generatorIndex];
       } else
       { this->actionsGeneratorsMaT[generatorIndex].init
@@ -7440,8 +7449,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
   }
   hwSimpleCoordsLeviPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsLeviPart);
   hwSimpleCoordsNilPart=this->AmbientWeyl.GetSimpleCoordinatesFromFundamental(hwSimpleCoordsNilPart);
-  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
-  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
+//  std::cout << "highest weight levi part simple coords: " << hwSimpleCoordsLeviPart.ToString();
+//  std::cout << "highest weight nil part siple coords: " << hwSimpleCoordsNilPart.ToString();
   ///////////////////////////
   HashedList<Vector<CoefficientType> > outputDomWeightsSimpleCoordsLeviPart;
 

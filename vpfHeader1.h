@@ -1667,27 +1667,34 @@ void NonPivotPointsToEigenVector
     Matrix<Element> tempMat;
     tempMat=*this;
     tempMat*=outputTimesMeEqualsInput;
-    tempMat.Subtract(input);
+    tempMat-=(input);
     return tempMat.IsEqualToZero();
   }
   //returns true if the system has a solution, false otherwise
   bool RowEchelonFormToLinearSystemSolution(Selection& inputPivotPoints, Matrix<Element>& inputRightHandSide, Matrix<Element>& outputSolution);
-  void Add(const Matrix<Element>& right)
-  { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
+  void operator+=(const Matrix<Element>& right)
+  { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
+    { std::cout << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and "
+      << this->NumCols << " columns " << " to a matrix with " << right.NumRows << " rows and " << right.NumCols
+      << " columns. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j]+=(right.elements[i][j]);
   }
   LargeIntUnsigned FindPositiveLCMCoefficientDenominators();
 
-  void Subtract(const Matrix<Element>& right)
-  { assert(this->NumRows==right.NumRows && this->NumCols==right.NumCols);
+  void operator-=(const Matrix<Element>& right)
+  { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
+    { std::cout << "This is a programming error: attempting to subtract fromm matrix with " << this->NumRows << " rows and "
+      << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols
+      << " columns. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     for (int i=0; i< this->NumRows; i++)
       for (int j=0; j<this->NumCols; j++)
         this->elements[i][j].Subtract(right.elements[i][j]);
-  }
-  inline void operator-=(const Matrix<Element>& other)
-  { this->Subtract(other);
   }
   void WriteToFile(std::fstream& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output);}
@@ -1715,7 +1722,7 @@ void NonPivotPointsToEigenVector
     tempPlus.MultiplyOnTheLeft(left);
     tempMinus=(left);
     tempMinus.MultiplyOnTheLeft(right);
-    tempPlus.Subtract(tempMinus);
+    tempPlus-=(tempMinus);
     output=tempPlus;
   }
   //The Gaussian elimination below brings the matrix to a row-echelon form, that is, makes the matrix be something like (example is 4x5):

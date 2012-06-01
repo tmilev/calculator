@@ -71,7 +71,7 @@ double GetElapsedTimeInSeconds()
 
 void* RunTimer(void* ptr)
 { for (; GetElapsedTimeInSeconds()<theGlobalVariables.MaxAllowedComputationTimeInSeconds || theGlobalVariables.MaxAllowedComputationTimeInSeconds<=0;)
-  { usleep(10);
+  { usleep(100);
     if (ComputationComplete)
       break;
   }
@@ -152,6 +152,7 @@ std::string GetSelectHTMLStringTEmp
   out << "<span name=\"textPreamble\" id=\"textPreamble\"> </span>";
   return out.str();
 }
+
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -337,6 +338,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
 //  civilizedInput="fSplitFDpartB3overG2CharsOnly{}(0,1,0)";
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
+  //civilizedInput="{{a}}:if (a-1)==x:=6;\nx+1-1";
+//  civilizedInput="fSplitFDpartB3overG2{}(0,0,1)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

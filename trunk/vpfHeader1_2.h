@@ -5718,6 +5718,9 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
   sortedMons.QuickSortDescending();
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;
+  bool useCustomPlus=false;
+  if (theFormat!=0)
+    useCustomPlus=(theFormat->CustomPlusSign!="");
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
@@ -5733,22 +5736,25 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
     if(tempS2!="1")
       tempS1+=tempS2;
     if (i>0)
-    { if (tempS1.size()>0)
-      { if (tempS1[0]!='-')
+    { if (!useCustomPlus)
+      { if (tempS1.size()>0)
+        { if (tempS1[0]!='-')
+          { out << "+";
+            cutOffCounter+=1;
+          }
+        } else
         { out << "+";
           cutOffCounter+=1;
         }
       } else
-      { out << "+";
-        cutOffCounter+=1;
-      }
+        out << theFormat->CustomPlusSign;
     }
     out << tempS1;
     cutOffCounter+=tempS1.size();
     if (theFormat!=0)
       if (cutOffCounter>theFormat->MaxLineLength)
       { cutOffCounter=0;
-        if (theFormat->flagUseLatex)
+        if (theFormat->flagUseLatex && i!=sortedMons.size-1)
           out << " \\\\&& ";
         if (theFormat->flagUseHTML && !theFormat->flagUseLatex)
           out << " <br>";
@@ -7010,7 +7016,7 @@ Matrix<CoefficientType>& ModuleSSalgebraNew<CoefficientType>::GetActionGenerator
     if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
     { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
       { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
-        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+//        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
         return this->actionsGeneratorsMaT[generatorIndex];
       } else
       { this->actionsGeneratorsMaT[generatorIndex].init
@@ -7318,11 +7324,13 @@ template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::ToString
   (FormatExpressions* theFormat)const
 { std::stringstream out;
-  bool useBrackets=false;
-  if (useBrackets)
-    out << "char{}(" << this->weightFundamentalCoords.ElementToStringLetterFormat("\\omega", false) << ")";
-  else
+  bool useOmega=true;
+  if (theFormat!=0)
+    useOmega=(theFormat->fundamentalWeightLetter=="");
+  if (useOmega)
     out << "V_{" << weightFundamentalCoords.ElementToStringLetterFormat("\\omega", false) << "}";
+  else
+    out << "V_{" << weightFundamentalCoords.ElementToStringLetterFormat(theFormat->fundamentalWeightLetter, false) << "}";
   return out.str();
 }
 

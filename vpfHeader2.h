@@ -133,6 +133,8 @@ public:
   bool OperatorDereference
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
+  static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyEltTensorByCoeff(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
   { if (right.type==Data::typeRational || right.type==Data::typePoly || right.type==Data::typeRationalFunction)
@@ -148,7 +150,7 @@ public:
   static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool AddRatOrPolyOrRFToRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   Data operator/(const Data& right)const;
   Data operator*(const Data& right)const;
 };
@@ -329,6 +331,7 @@ void MakeVariableNonBounD
   bool IsString()const;
   bool IsElementUE()const;
   bool IsInteger()const;
+  bool IsSmallInteger(int* whichinteger)const;
   bool EvaluatesToSmallInteger(int& whichInteger)const;
   bool EvaluatesToSmallInteger()const{int tempI; return this->EvaluatesToSmallInteger(tempI);}
   bool AreEqualExcludingChildren(const Expression& other) const
@@ -1002,6 +1005,12 @@ static bool EvaluateDereferenceOneArgument
   static bool fIsInteger
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fPrintB3G2branchingTableCharsOnly
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fPrintB3G2branchingTable
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fPolynomial
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1026,6 +1035,11 @@ static bool EvaluateDereferenceOneArgument
   static bool fSplitFDpartB3overG2
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSplitFDpartB3overG2inner
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+  HomomorphismSemisimpleLieAlgebra& theHmm, Vector<RationalFunction>& theWeightFundCoords,
+  Selection& selInducing, Selection& selSmallParSel)
+;
   static bool fDrawWeightSupportWithMults
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
@@ -1043,6 +1057,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fAnimateLittelmannPaths
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fJacobiSymbol
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fHWV

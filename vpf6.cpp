@@ -550,17 +550,18 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
         out << "\\end{array}";
       return out.str();
     case Data::typeRationalFunction:
-      return this->GetValuE<RationalFunction>().ToString(&theFormat);
+      out << "RF{}(" << this->GetValuE<RationalFunction>().ToString(&theFormat) << ")";
+      return out.str();
     case Data::typeRational:
       return this->GetValuE<Rational>().ToString();
     case Data::typePoly:
-      //if (theFormat.flagUseLatex)
-      //  out << "\\begin{array}{rcl}&& ";
-      //out << "Polynomial{}(";
+      if (theFormat.flagUseLatex)
+        out << "\\begin{array}{rcl}&& ";
+      out << "Polynomial{}(";
       out << "(" << this->owner->theObjectContainer.thePolys[this->theIndex].ToString(&theFormat) << ")";
-      //out  << ")";
-      //if (theFormat.flagUseLatex)
-      //  out << "\\end{array}";
+      out  << ")";
+      if (theFormat.flagUseLatex)
+        out << "\\end{array}";
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
       if (theFormat.flagUseLatex)
@@ -1454,6 +1455,7 @@ bool CommandList::LookAheadAllowsTimes(const std::string& lookAhead)
     lookAhead=="*" || lookAhead=="/" ||
     lookAhead=="Expression" || lookAhead==")" ||
     lookAhead=="(" || lookAhead=="[" ||
+    lookAhead=="=" ||
 //    lookAhead=="{" ||
     lookAhead=="Variable" || lookAhead=="," ||
     lookAhead==";" || lookAhead=="]" ||
@@ -1464,7 +1466,7 @@ bool CommandList::LookAheadAllowsTimes(const std::string& lookAhead)
 bool CommandList::LookAheadAllowsPlus(const std::string& lookAhead)
 { return
     lookAhead=="+" || lookAhead=="-" ||
-    lookAhead=="," ||
+    lookAhead=="," || lookAhead=="=" ||
     lookAhead==")" || lookAhead==";" ||
     lookAhead=="]" || lookAhead=="}" ||
     lookAhead==":"
@@ -2105,6 +2107,12 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeElementUE, Data::MultiplyAnyByUE);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeElementUE, Data::MultiplyAnyByUE);
 
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRational, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
+
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::MultiplyRatOrPolyByRatOrPoly);
@@ -2114,6 +2122,12 @@ void CommandList::initCrunchers()
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::AddUEToAny);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::AddUEToAny);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeElementUE, Data::AddUEToAny);
+
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
+  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typeRational, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
 
   this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::AddRatOrPolyToRatOrPoly);
   this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::AddRatOrPolyToRatOrPoly);
@@ -2160,7 +2174,7 @@ void CommandList::initPredefinedVars()
    The third argument parametrizes the parabolic subalgebra, e.g. (1,0,0) stands for a \
    parabolic subalgebra with first simple Vector<Rational> crossed-out. The second argument is allowed to have \
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
-   "g:=SemisimpleLieAlgebra{} B_3;\nv:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v");
+   "g:=SemisimpleLieAlgebra{} B_3;\nv_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v_\\lambda");
   this->AddNonBoundVarMustBeNew
   ("hwTAAbf", & this->fHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
@@ -2223,6 +2237,21 @@ void CommandList::initPredefinedVars()
    The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
    "fSplitFDpartB3overG2{}(x_1,1,0)");
+  this->AddNonBoundVarMustBeNew
+  ("fPrintB3G2branchingTableCharsOnly", &this->fPrintB3G2branchingTableCharsOnly, "",
+   "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the function gives the maximum height \
+   of the B_3-weight. Using a number higher than 5 is highly likely to pop the server time limits.",
+   "fPrintB3G2branchingTableCharsOnly{}(2)");
+  this->AddNonBoundVarMustBeNew
+  ("fPrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
+   "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the function gives the maximum height \
+   of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
+   "fPrintB3G2branchingTable{}(1)");
+/*  this->AddNonBoundVarMustBeNew
+  ("JacobiSymbol", &this->fJacobiSymbol, "",
+   "Jacobi symbol as implemented by user Numeri @ www.cplusplus.com.",
+   "AllJacobiSymbols{}({{a}}, {{b}}):if b-1==a:=List{}((a,JacobiSymbol{}(a-1, b)));\nAllJacobiSymbols{}({{a}}, {{b}}):=List{}((a,JacobiSymbol{}(a,b)))\\cup AllJacobiSymbols{}(a+1, b);\nAllJacobiSymbols{}(0,31)");
+*/
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -2590,6 +2619,22 @@ bool Data::Exponentiate(const Data& right, Data& output)const
   return true;
 }
 
+bool Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+    return false;
+  if (!rightCopy.ConvertToTypE<RationalFunction>())
+    return false;
+  if(!output.ConvertToTypE<RationalFunction>())
+    return false;
+  RationalFunction result;
+  result=output.GetValuE<RationalFunction>();
+  result*=rightCopy.GetValuE<RationalFunction>();
+  output.MakeRF(*output.owner, result, output.theContextIndex);
+  return true;
+}
+
 bool Data::MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
 { output=left;
   Data rightCopy=right;
@@ -2683,6 +2728,21 @@ bool Data::AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& ou
   Polynomial<Rational> resultpoly=output.GetValuE<Polynomial<Rational> >();
   resultpoly+=rightCopy.GetValuE<Polynomial<Rational> >();
   output.MakePoly(*output.owner, resultpoly, output.theContextIndex);
+  return true;
+}
+
+bool Data::AddRatOrPolyOrRFToRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+    return false;
+  if (!output.ConvertToTypE<RationalFunction>())
+    return false;
+  if (!rightCopy.ConvertToTypE<RationalFunction>())
+    return false;
+  RationalFunction resultpoly=output.GetValuE<RationalFunction>();
+  resultpoly+=rightCopy.GetValuE<RationalFunction>();
+  output.MakeRF(*output.owner, resultpoly, output.theContextIndex);
   return true;
 }
 
@@ -3053,6 +3113,17 @@ bool CommandList::StandardLieBracket
   return true;
 }
 
+bool Expression::IsSmallInteger(int* whichInteger)const
+{ if (!this->EvaluatesToAtom())
+    return false;
+  if (whichInteger!=0)
+    return this->GetAtomicValue().IsSmallInteger(*whichInteger);
+  else
+  { int tempInt;
+    return this->GetAtomicValue().IsSmallInteger(tempInt);
+  }
+}
+
 bool Expression::IsInteger()const
 { if (!this->EvaluatesToAtom())
     return false;
@@ -3420,7 +3491,6 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 //  currentExpressionTransformations.AddOnTop(theExpression);
 
   bool NonReduced=true;
-  int counter=-1;
   int indexInCache=-1;
   if (theExpression.IndexBoundVars!=-1)
   { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
@@ -3434,6 +3504,8 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     }
   }
   //reduction phase:
+static int problemcounter=0;
+  problemcounter++;
   bool resultExpressionIsFree=true;
   while (NonReduced)
   { if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
@@ -3445,10 +3517,15 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
         this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
         return true;
       }
+    //the following two lines of code must be fixed!
+    int counter=-1;
     counter++;
     NonReduced=false;
     for (int i=0; i<theExpression.children.size; i++)
-    { if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, comments))
+    { //if (problemcounter>=13)
+      //{ //std::cout << "<br>evaluating: " << theExpression.children[i].ToString();
+     // }
+      if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, comments))
         resultExpressionIsFree=false;
       if (theExpression.children[i].errorString!="")
       { this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
@@ -3457,6 +3534,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
         return true;
       }
     }
+    //the following code never gets executed at the moment: counter must be fixed!
     if (counter>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;

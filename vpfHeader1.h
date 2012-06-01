@@ -5,7 +5,7 @@
 
 //the following option turns on a RAM memory limit safeguard, as well as
 // very limited memory allocation statistics. See
-//ParallelComputing::CheckPointerCounters. The 3 main files should compile and link just fine with the following 3 lines commented out.
+//ParallelComputing::CheckPointerCounters. The project should compile and link just fine with the following 3 lines commented out.
 //If not, it's a bug.
 #ifndef CGIversionLimitRAMuse
 #define CGIversionLimitRAMuse
@@ -90,7 +90,6 @@ template<class CoefficientType>
 class MonomialTensorGeneralizedVermas;
 template<class CoefficientType>
 class ElementTensorsGeneralizedVermas;
-
 
 //classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
 class Cone;
@@ -4226,6 +4225,7 @@ public:
   //alphabetBases must contain at least two elements
   std::string chevalleyGgeneratorLetter;
   std::string chevalleyHgeneratorLetter;
+  std::string fundamentalWeightLetter;
   std::string polyDefaultLetter;
   List<std::string> polyAlphabeT;
   std::string GetPolyLetter(int index)const;
@@ -4240,6 +4240,7 @@ public:
   bool flagUseLatex;
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
+  std::string CustomPlusSign;
 };
 
 template <class CoefficientType>
@@ -6749,7 +6750,6 @@ void Vectors<CoefficientType>::GaussianEliminationForNormalComputation(Matrix<Co
       inputMatrix.elements[i][j].Assign(this->TheObjects[i].TheObjects[j]);
   Matrix<CoefficientType>::GaussianEliminationByRows(inputMatrix, matOutputEmpty, outputNonPivotPoints);
 }
-
 
 template <class CoefficientType>
 std::string Vectors<CoefficientType>::ElementsToInequalitiesString

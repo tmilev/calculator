@@ -1015,7 +1015,7 @@ template <class CoefficientType>
       << "vectors of different dimension or of dimension different from that of the ambient Lie algebra. "
       << "The two input vectors were " << r1.ToString() << " and " << r2.ToString()
       << " and the rank of the Weyl group is " << this->GetDim() << ". "
-      << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     double result=0;
@@ -4650,7 +4650,8 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o)
 
 template <class Object>
 inline Object* List<Object>::LastObject()
-{ return &this->TheObjects[this->size-1];
+{ // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  return &this->TheObjects[this->size-1];
 }
 
 template <class Object>
@@ -4680,7 +4681,8 @@ void List<Object>::CopyFromBase(const List<Object>& From)
 
 template <class Object>
 void List<Object>::Reserve(int theSize)
-{ if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
+{ // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  if (!(this->ActualSize>= this->IndexOfVirtualZero+theSize))
   { ParallelComputing::SafePointDontCallMeFromDestructors();
     this->ExpandArrayOnTop(this->IndexOfVirtualZero+theSize- this->ActualSize);
   }
@@ -4697,7 +4699,8 @@ void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o)
 
 template <class Object>
 void List<Object>::SetSize(int theSize)
-{ if (theSize<0)
+{// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  if (theSize<0)
     theSize=0;
   this->Reserve(theSize);
   this->size=theSize;
@@ -4815,7 +4818,8 @@ ParallelComputing::GlobalPointerCounter-=this->ActualSize;
 
 template <class Object>
 void List<Object>::ExpandArrayOnTop(int increase)
-{ if (increase<=0)
+{// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  if (increase<=0)
     return;
   Object* newArray = new Object[this->ActualSize+increase];
 #ifdef CGIversionLimitRAMuse
@@ -4853,7 +4857,8 @@ void List<Object>::AddObjectOnBottom(const Object& o)
 
 template <class Object>
 void List<Object>::AddOnTop(const Object& o)
-{ if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
+{// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
     this->ExpandArrayOnTop(List<Object>::ListActualSizeIncrement);
   this->TheObjects[size]=o;
   this->size++;

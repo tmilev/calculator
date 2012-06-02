@@ -327,7 +327,7 @@ bool Data::SetContextResizesContextArray
       return true;
     default:
       std::cout << "This is a programing error: Data::SetContextResizesContextArray does not cover the case of data of type "
-      << this->ElementToStringDataType() << ". " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__ );
+      << this->ElementToStringDataType() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
       assert(false);
       return false;
   }
@@ -690,7 +690,7 @@ void Expression::operator=(const Expression& other)
   { if (this->theBoss==0)
     { std::cout << "This is a programming error: expressions that do not have initialized boss are not allowed to have children. "
       << "The error was noticed while trying to copy such an expression (I am not displaying the expression as its ToString() method"
-      << " cannot be computed correctly if it doesn't have a boss). " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << " cannot be computed correctly if it doesn't have a boss). " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     IncrementRecursion recursionCounter(this->theBoss);
@@ -708,7 +708,7 @@ const Data& Expression::GetAtomicValue()const
   { std::cout << "This is a programming error. The unsafe method Expression::GetData is called on an object that does not have atomic value. "
     << "The lazy programmer has forgotten to check whether Expression::EvaluatesToAtom() is true. That same lazy programmer might want to  "
     << " consider using CommandList::fAtomicValue (the same function that is available directly from the calculator). "
-    << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return this->theBoss->theData[this->theDatA];
@@ -969,6 +969,12 @@ void Expression::MakeStringAtom
 { Data tempData;
   tempData.MakeString(newBoss, theString, inputContext);
   this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+}
+
+void Expression::MakeStringAtom
+(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString)
+{ Context tempContext;
+  this->MakeStringAtom(newBoss, inputIndexBoundVars, theString, tempContext);
 }
 
 void Expression::MakeRFAtom
@@ -1505,7 +1511,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     std::cout << "<hr>" << this->ElementToStringSyntacticStack();
   if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression while reducing " << this->ElementToStringSyntacticStack()
-    << " does not have properly initialized context. " << CGI::GetPleaseDebugFileMessage(__FILE__,  __LINE__);
+    << " does not have properly initialized context. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
     assert(false);
   }
   if (secondToLastS==":" && lastS=="=")
@@ -3002,7 +3008,8 @@ bool CommandList::EvaluateDereferenceOneArgument
 
 bool CommandList::StandardFunction
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.theOperation!=theCommands.opApplyFunction())
+{ MacroRegisterFunctionWithName("CommandList::StandardFunction");
+  if (theExpression.theOperation!=theCommands.opApplyFunction())
     return false;
   if (theExpression.children.size==0)
   { theExpression.errorString=
@@ -3459,6 +3466,7 @@ bool CommandList::ExpressionMatchesPattern
 bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 (Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments)
 { IncrementRecursion recursionCounter(this);
+  MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
@@ -3733,7 +3741,8 @@ bool CommandList::ExtractExpressions
 }
 
 void CommandList::EvaluateCommands()
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("CommandList::EvaluateCommands");
+  std::stringstream out;
   ExpressionPairs thePairs;
 
 //  this->theLogs.resize(this->theCommands.size());
@@ -3796,7 +3805,7 @@ Function& Expression::GetFunctionFromVarNamE()
   if (!this->EvaluatesToVariableNonBound())
   { std::cout << "This is a programming error. Attempting to extract a built-in Function name from expression "
     << this->ToString() << " which is not a non-bound variable. "
-    << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return this->theBoss->theFunctions[this->GetAtomicValue().GetValuE<VariableNonBound>().HandlerFunctionIndex];

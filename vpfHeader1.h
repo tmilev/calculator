@@ -20,6 +20,17 @@
 //#define MacroIncrementCounter(x)
 #endif
 
+//the following option turns on a custom 100% portable by-hand stack tracer.
+//The tracer does yield a slow-down, use with caution: it pushes two strings and an int on the stack (memory allocation is not an issue)
+//If you want not to use the tracer, substitute use the commented lines to substitute the non-commented lines.
+#ifndef MacroRegisterFunctionWithName
+#define MacroRegisterFunctionWithName(FunctionName) RegisterFunctionCall theFunctionCallRegistration(__FILE__, __LINE__, FunctionName)
+//#define MacroRegisterFunctionWithName(x)
+#endif
+#ifndef MacroRegisterFunction
+#define MacroRegisterFunction RegisterFunctionCall theFunctionCallRegistration(__FILE__, __LINE__)
+//#define MacroRegisterFunction
+#endif
 
 #include <assert.h>
 #include <sstream>
@@ -204,6 +215,14 @@ public:
   }
 };
 
+//this class is used as a custom completely portable
+//stack trace log.
+class RegisterFunctionCall
+{ public:
+  RegisterFunctionCall(const char* fileName, int line, const std::string& functionName="");
+  ~RegisterFunctionCall();
+};
+
 class Controller
 {
   MutexWrapper mutexLockMeToPauseCallersOfSafePoint;
@@ -261,10 +280,6 @@ class ControllerStartsRunning: public Controller
     ControllerStartsRunning()
     { this->InitComputation();
     }
-};
-
-class RegisterFunctionCall
-{
 };
 
 class ParallelComputing
@@ -420,6 +435,13 @@ public:
       result+=x[i]*SomeRandomPrimes[i];
     return result;
   }
+  //this function is just redirects to the class CGI function with the same name.
+  //the stupid c++ does not allow me to use an incomplete CGI type.
+  //They give a million bullshit reasons why this is a feature of c++, but
+  // the only true reason is they are too lazy to sort the call graph topologically
+  //(i.e. so to rearrange the call graph on the real line so that all edges point from left to right).
+  //That is why we have to do it for them. In case you wondered, them = the c++ committee.
+  static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
 };
 
 class XMLRoutines
@@ -689,6 +711,7 @@ std::iostream& operator<<(std::iostream& output, const List<Object>& theList);
 template <class Object>
 std::iostream& operator>>(std::iostream& input, List<Object>& theList);
 
+
 //List serves the same purpose as std::vector
 template <class Object>
 class List
@@ -733,7 +756,7 @@ public:
 //  void AddOnTop(Object o);
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease){ int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
-  void SetSize(int theSize);
+  void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SetSizeMakeMatrix(int numRows, int numCols)
   { this->SetSize(numRows);
     for (int i=0; i<numRows; i++)
@@ -741,7 +764,7 @@ public:
   }
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
-  void Reserve(int theSize);
+  void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void AddObjectOnBottom(const Object& o);
   void AddOnBottomNoRepetition(const Object& o) {if (!this->ContainsObject(o)) this->AddObjectOnBottom(o);}
   void AddOnTop(const Object& o);
@@ -795,7 +818,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
-  inline Object* LastObject();
+  inline Object* LastObject();// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
   int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
@@ -823,18 +846,7 @@ public:
   inline Object& operator[](int i)const
   { if (i>=this->size || i<0)
     { std::cout << "Programming error: attempting to access the entry of index " << i << " in an array of "
-      << this->size << " elements. ";
-//    #ifndef WIN32
-//    void **buffer= new void*[1000];
-//    backtrace(buffer, 1000);
-//    char ** theTrace=backtrace_symbols(buffer, 1000);
-//      for (int i=0; i<1000; i++)
-//      { if (theTrace[i]==0)
-//          break;
-//        std::cout << "<br>" << theTrace[i];
-//      }
-//      //memory leak - variable buffer not freed - no need to worry - we are crashing on the next line!
-//      #endif
+      << this->size << " elements. " << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return this->TheObjects[i];
@@ -859,6 +871,19 @@ public:
   }
 };
 
+struct stackInfo
+{
+public:
+  std::string fileName;
+  int line;
+  std::string functionName;
+  void operator=(const stackInfo& other)
+  { this->fileName=other.fileName;
+    this->line=other.line;
+    this->functionName=other.functionName;
+  }
+};
+
 class ProjectInformation
 {
   public:
@@ -869,11 +894,13 @@ class ProjectInformation
     static ProjectInformation MainProjectInfo;
     return MainProjectInfo;
   }
+  List<stackInfo> CustomStackTrace;
   List<std::string> FileNames;
   List<std::string> FileDescriptions;
   std::string ToString();
   MutexWrapper infoIsInitialized;
   void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
+  std::string GetStackTraceReport();
 };
 
 class ProjectInformationInstance
@@ -944,11 +971,7 @@ public:
   static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
-  static std::string GetPleaseDebugFileMessage(const std::string& file, int line)
-  { std::stringstream out;
-    out << "Please debug file " << CGI::GetHtmlLinkFromFileName(file) << " line " << line << ".";
-    return out.str();
-  }
+  static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags()
   { std::stringstream output;
     output << "<script src=\"/vpf/jsmath/easy/load.js\"></script> ";
@@ -1114,7 +1137,7 @@ public:
         if (theIndex>=this->size)
         { std::cout << "This is a programming error: "
           << " hash lookup array of index " << i << ", entry of index " << j << " reports index "
-          << theIndex << " but I have only " << this->size << " entries. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+          << theIndex << " but I have only " << this->size << " entries. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
         if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
@@ -1129,7 +1152,7 @@ public:
           for (unsigned int l=0; l<this->HashSize; l++)
             for (int k=0; k<this->TheHashedArrays[l].size; k++)
               std::cout << this->TheHashedArrays[l][k] << ", ";
-          std::cout << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+          std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
       }
@@ -1209,7 +1232,7 @@ public:
       if (j>=this->size)
       { std::cout << "This is a programming error: corrupt hash table: at hashindex= " << hashIndex
         << " I get instructed to look up index " << j << " but I have only " << this->size << "elements. "
-        << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
       if(this->TheObjects[j]==o)
@@ -1223,7 +1246,7 @@ public:
     { std::cout << "This is a programming error: the programmer has requested the index of object "
       << o << " with a function that does not allow failure. "
       << " However, the container array does not contain his object. "
-      << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return result;
@@ -1451,7 +1474,7 @@ public:
   { assert(&input!=&output);
     if (this->NumCols!=input.size)
     { std::cout << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
-      << " dimension " << input.size << ". " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << " dimension " << input.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     output.MakeZero(this->NumRows, TheRingZero);
@@ -1675,7 +1698,7 @@ void NonPivotPointsToEigenVector
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
     { std::cout << "This is a programming error: attempting to add matrix with " << this->NumRows << " rows and "
       << this->NumCols << " columns " << " to a matrix with " << right.NumRows << " rows and " << right.NumCols
-      << " columns. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     for (int i=0; i< this->NumRows; i++)
@@ -1688,7 +1711,7 @@ void NonPivotPointsToEigenVector
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
     { std::cout << "This is a programming error: attempting to subtract fromm matrix with " << this->NumRows << " rows and "
       << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols
-      << " columns. " << CGI::GetPleaseDebugFileMessage(__FILE__, __LINE__);
+      << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     for (int i=0; i< this->NumRows; i++)

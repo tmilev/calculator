@@ -264,6 +264,9 @@ class Expression
   void MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
 ;
+  void MakeStringAtom
+(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString)
+;
   void MakeInt(int theInt, CommandList& newBoss, int inputIndexBoundVars)
   ;
 void MakeVariableNonBounD
@@ -549,6 +552,7 @@ struct branchingData
   List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   List<RationalFunction> theChars;
   List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
+  void resetOutputData();
 };
 
 class CommandList
@@ -1125,7 +1129,8 @@ static bool EvaluateDereferenceOneArgument
 (Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments=0)
  ;
   void Evaluate(const std::string& theInput)
-  { if (this->theGlobalVariableS==0)
+  { MacroRegisterFunctionWithName("CommandList::Evaluate");
+    if (this->theGlobalVariableS==0)
     { this->outputString= "This is a programming error: commandList not initialized properly. Please report this bug. ";
       return;
     }

@@ -1265,6 +1265,7 @@ void ModuleSSalgebraNew<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   Vectors<CoefficientType> tempSpace1, tempSpace2;
   MemorySaving<Vectors<CoefficientType> > tempEigenVects;
   Vectors<CoefficientType>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
+  theFinalEigenSpace.SetSize(0);
 //  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
   for (int i=0; i<InvertedLeviInSmall.CardinalitySelection; i++)
   { ElementSemisimpleLieAlgebra& currentElt=theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
@@ -1300,6 +1301,8 @@ void ModuleSSalgebraNew<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
   hwFundCoordsNilPart-=this->theHWFundamentalCoordS;
   ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
+  if (outputEigenVectors!=0)
+    outputEigenVectors->SetSize(0);
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
     currentElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
@@ -1336,6 +1339,9 @@ void ModuleSSalgebraNew<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
   out << "<br>Your ready for LaTeX consumption text follows.<br>";
   out << readyForLatexComsumption.str();
+//  if (outputEigenSpace!=0)
+//  { std::cout << "<br> outputEigenSpace->size=" << outputEigenSpace->size << "; outputEigenVectors->size=" << outputEigenVectors->size;
+//  }
   if (comments!=0)
     *comments << out.str();
 }
@@ -1538,31 +1544,28 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 
 bool CommandList::fPrintB3G2branchingTable
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTable");
+  std::stringstream out, timeReport;
   int desiredHeight=0;
   if (!theExpression.IsSmallInteger(&desiredHeight))
     return false;
   if (desiredHeight<0)
     desiredHeight=0;
   charSSAlgMod<Rational> theCharacter, outputChar;
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  theCommands.MakeHmmG2InB3(theHmm);
   Vector<Rational> theHW;
-  Selection fullParSel, tempSel;
   ReflectionSubgroupWeylGroup tempG1, tempG2;
-  fullParSel.init(3);
   std::stringstream latexTable;
-  out << "<table><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td></tr>";
+  out << "<table border=\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td></tr>";
   latexTable << "\\begin{longtable}{|rl|} \\caption{\\label{tableB3fdsOverG2charsonly} Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
   << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
   FormatExpressions theFormat;
-  theFormat.CustomPlusSign="\\oplus ";
   theFormat.flagUseLatex=true;
   SelectionWithMaxMultiplicity theHWenumerator;
-  ////input for actual splitting:
+
   Expression tempExpression;
   branchingData theG2B3Data;
-  //
+  theG2B3Data.selInducing.init(3);
+  theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
 
   for (int j=0; j<=desiredHeight; j++)
   { theHWenumerator.initMaxMultiplicity(3, 5);
@@ -1572,19 +1575,27 @@ bool CommandList::fPrintB3G2branchingTable
     { theHW=theHWenumerator;
       theG2B3Data.theWeightFundCoords=theHW;
       theCharacter.MakeFromWeight
-      (theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHW),
-       theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
+      (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHW),
+       theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange);
       theCharacter.SplitCharOverRedSubalg
-      (0, outputChar, fullParSel, theHmm.ImagesCartanDomain, theCommands.theObjectContainer.theLieAlgebras,
-      theHmm.indexDomain, tempSel, tempG1, tempG2, *theCommands.theGlobalVariableS);
+      (0, outputChar, theG2B3Data.selInducing, theG2B3Data.theHmm.ImagesCartanDomain, theCommands.theObjectContainer.theLieAlgebras,
+      theG2B3Data.theHmm.indexDomain, theG2B3Data.selSmallParSel, tempG1, tempG2, *theCommands.theGlobalVariableS);
       theCommands.fSplitFDpartB3overG2inner
       (theCommands, inputIndexBoundVars, tempExpression, comments, theG2B3Data);
+      timeReport << tempExpression.GetAtomicValue().GetValuE<std::string>();
+      theFormat.CustomPlusSign="\\oplus ";
       theFormat.fundamentalWeightLetter= "\\omega";
       out << "<tr><td> " << theCharacter.ToString(&theFormat) << "</td> ";
       latexTable << " $ " << theCharacter.ToString(&theFormat) << " $ & $\\begin{array}{lll}&& ";
       theFormat.fundamentalWeightLetter= "\\psi";
-      out << "<td>" << tempExpression.GetAtomicValue().GetValuE<std::string>() << "</td>";
-      out << "<td>" << outputChar.ToString(&theFormat) << "</td></tr>";
+      out << "<td>" << outputChar.ToString(&theFormat) << "</td><td>";
+      theFormat.fundamentalWeightLetter= "\\omega";
+      theFormat.CustomPlusSign="";
+      for (int k=0; k<theG2B3Data.theEigenVectors.size; k++)
+      { out << CGI::GetHtmlMathSpanFromLatexFormula(theG2B3Data.theEigenVectors[k].ToString(&theFormat))
+        << "<br>";
+      }
+      out << "</td></tr>";
       latexTable << outputChar.ToString(&theFormat) << "\\end{array} $ \\\\\n";
       latexTable << " <br>\n";
       if (j!=numCycles-1)
@@ -1597,6 +1608,7 @@ bool CommandList::fPrintB3G2branchingTable
   }
   out << "</table>";
   latexTable << "\\end{longtable}";
+  out << timeReport.str();
   out << latexTable.str();
   Context theContext;
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
@@ -1724,10 +1736,17 @@ bool CommandList::fSplitFDpartB3overG2
   return true;
 }
 
+void branchingData::resetOutputData()
+{ this->theEigenVectors.SetSize(0);
+  this->outputEigenWords.SetSize(0);
+  this->g2Weights.SetSize(0);
+  this->outputWeightsFundCoordS.SetSize(0);
+}
+
 bool CommandList::fSplitFDpartB3overG2inner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
   branchingData& theG2B3Data)
-{
+{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebraNew<RationalFunction> theModCopy;
@@ -1747,14 +1766,18 @@ bool CommandList::fSplitFDpartB3overG2inner
   int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
   ModuleSSalgebraNew<RationalFunction>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
-  std::cout << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  std::stringstream out;
+  out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
+  theG2B3Data.resetOutputData();
   theMod.SplitFDpartOverFKLeviRedSubalg
   (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
    &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, comments);
-  std::cout << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+   out << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds()-timeAtStart;
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
+//  std::cout << "theG2B3Data.outputWeightsFundCoordS: " << theG2B3Data.outputWeightsFundCoordS.ToString() << "<br>";
   theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
   invertedG2cartanMat=theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
@@ -1826,6 +1849,7 @@ bool CommandList::fSplitFDpartB3overG2inner
       }
     }
   }
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
 

@@ -340,6 +340,7 @@ g_{-2} v_\\lambda\
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
   //civilizedInput="{{a}}:if (a-1)==x:=6;\nx+1-1";
 //  civilizedInput="fSplitFDpartB3overG2{}(0,0,1)";
+//civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

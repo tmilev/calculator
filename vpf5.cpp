@@ -1452,35 +1452,31 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
 bool CommandList::fSplitFDpartB3overG2CharsOnly
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments
  )
-{ HomomorphismSemisimpleLieAlgebra theHmm;
-  Vector<RationalFunction> theWeightFundCoords;
-  Selection selInducing, smallParSel;
+{ branchingData theG2B3Data;
   return theCommands.fSplitFDpartB3overG2CharsOutput
-  (theCommands, inputIndexBoundVars, theExpression, comments, theHmm, theWeightFundCoords, selInducing, smallParSel);
+  (theCommands, inputIndexBoundVars, theExpression, comments, theG2B3Data);
 }
 
 bool CommandList::fSplitFDpartB3overG2CharsOutput
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- HomomorphismSemisimpleLieAlgebra& outputHmm, Vector<RationalFunction>& outputTheWeightFundCoords, Selection& outputSelInducing,
- Selection& outputSmallParSel
+ branchingData& theG2B3Data
  )
 { if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
     return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
   Context theContext;
-  if (!theExpression.GetVector<RationalFunction>(outputTheWeightFundCoords, theContext, 3, theCommands.fPolynomial, comments))
+  if (!theExpression.GetVector<RationalFunction>(theG2B3Data.theWeightFundCoords, theContext, 3, theCommands.fPolynomial, comments))
   { std::stringstream errorStream;
     errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
     return theExpression.SetError(errorStream.str());
   }
-  outputSelInducing.init(3);
-  for (int i=0; i<outputTheWeightFundCoords.size; i++)
-    if (!outputTheWeightFundCoords[i].IsSmallInteger())
-      outputSelInducing.AddSelectionAppendNewIndex(i);
-  theCommands.MakeHmmG2InB3(outputHmm);
+  theG2B3Data.selInducing.init(3);
+  for (int i=0; i<theG2B3Data.theWeightFundCoords.size; i++)
+    if (!theG2B3Data.theWeightFundCoords[i].IsSmallInteger())
+      theG2B3Data.selInducing.AddSelectionAppendNewIndex(i);
+  theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   std::stringstream out;
-  out << "<br>Highest weight: " << outputTheWeightFundCoords.ToString() << "<br>Parabolic selection: " << outputSelInducing.ToString();
+  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: " << theG2B3Data.selInducing.ToString();
   std::string report;
-  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   Vectors<RationalFunction> outputWeightsFundCoordS;
   Vectors<RationalFunction> outputWeightsSimpleCoords;
   Vectors<RationalFunction> leviEigenSpace;
@@ -1489,86 +1485,15 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
   charSSAlgMod<RationalFunction> tempChar;
   charSSAlgMod<RationalFunction> startingChar;
   startingChar.MakeFromWeight
-  (outputHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(outputTheWeightFundCoords),
-   theCommands.theObjectContainer.theLieAlgebras, outputHmm.indexRange);
+  (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
+   (theG2B3Data.theWeightFundCoords),
+   theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange);
   startingChar.SplitCharOverRedSubalg
-  (&report, tempChar, outputSelInducing, outputHmm.ImagesCartanDomain, theCommands.theObjectContainer.theLieAlgebras,
-   outputHmm.indexDomain, outputSmallParSel, subGroupLarge, subGroupSmall, *theCommands.theGlobalVariableS);
+  (&report, tempChar, theG2B3Data.selInducing, theG2B3Data.theHmm.ImagesCartanDomain,
+   theCommands.theObjectContainer.theLieAlgebras,
+   theG2B3Data.theHmm.indexDomain, theG2B3Data.selSmallParSel, subGroupLarge, subGroupSmall,
+   *theCommands.theGlobalVariableS);
   out << report;
-
-//  theMod.SplitOverLevi(&report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0, &outputEigenWords, &outputWeightsFundCoordS, &leviEigenSpace);
-//  out << report;
-//  int numVars=theWeightFundCoords[0].NumVars;
-
-/*  Vectors<RationalFunction> g2Weights, g2DualWeights;
-  g2Weights.SetSize(outputWeightsFundCoordS.size);
-  g2DualWeights.SetSize(outputWeightsFundCoordS.size);
-  Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat=theHmm.theDomain().theWeyl.CartanSymmetric;
-  invertedG2cartanMat.Invert();
-  outputWeightsSimpleCoords=theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(outputWeightsFundCoordS);
-  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeight=outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
-    currentG2DualWeight.SetSize(2);
-    currentG2DualWeight[0]=theHmm.theRange().theWeyl.RootScalarCartanRoot(ih1, currentWeight);//<-initialize with scalar products
-    currentG2DualWeight[1]=theHmm.theRange().theWeyl.RootScalarCartanRoot(ih2, currentWeight);//<-initialize with scalar products
-    invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
-  }
-  ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
-  theG2Casimir.MakeCasimir(theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
-  Vector<RationalFunction> highestWeightG2dualCoords=*g2DualWeights.LastObject();
-  List<RationalFunction> theChars;
-  theChars.SetSize(outputWeightsFundCoordS.size);
-//  RationalFunction& baseChar=*theChars.LastObject();
-//  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
-//  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
-//  if (!theG2Casimir.IsEqualToZero())
-//    baseChar=theG2Casimir.theCoeffs[0];
-//  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=400;
-  std::stringstream readyForLatexConsumptionTable1, readyForLatexConsumptionTable2;
-  out
-  << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
-  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
-  readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  << outputWeightsFundCoordS.LastObject()->ElementToStringLetterFormat("\\omega")
-  << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
-  readyForLatexConsumptionTable2
-  << "<br> \\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  << outputWeightsFundCoordS.LastObject()->ElementToStringLetterFormat("\\omega")
-  <<  " $}\\\\\n" << "highest weight & projection $\\mu$ onto $\\bar h^*$ &$y(\\mu)$\\\\ \\hline<br>";
-
-  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeightSimpleB3coords=outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentWeightFundB3coords=outputWeightsFundCoordS[i];
-    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
-    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ElementToStringLetterFormat("\\omega")
-    << " $ & $" << leviEigenSpace[i].ElementToStringLetterFormat("m") << " $ & $ " << currentG2Weight.ElementToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
-    out << "<tr><td>" << outputEigenWords[i].ToString() << "</td><td> "
-    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
-    << "</td><td>" << currentG2Weight.ElementToStringLetterFormat("\\alpha") << "</td><td> "
-    << theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
-    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
-    theG2CasimirCopy=theG2Casimir;
-    theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
-    theChars[i]=theG2CasimirCopy.theCoeffs[0];
-    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(theChars[i].ToString()) << "</td>";
-    out << "</tr>";
-    readyForLatexConsumptionTable2
-    << "$" << currentWeightFundB3coords.ElementToStringLetterFormat("\\omega")
-    << " $ & $ " << currentG2Weight.ElementToStringLetterFormat("\\alpha") << " $ & $ " << theChars[i].ToString() << " $\\\\\n<br>";
-  }
-  readyForLatexConsumptionTable1 <<"\\hline \n";
-  readyForLatexConsumptionTable2 <<"\\hline \n";
-
-  out << "</table>";
-  out << "<br>Ready for LaTeX consumption: ";
-  out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
-  out << "<br>" << readyForLatexConsumptionTable2.str();
-//  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;*/
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
   return true;
 }
@@ -1636,10 +1561,7 @@ bool CommandList::fPrintB3G2branchingTable
   SelectionWithMaxMultiplicity theHWenumerator;
   ////input for actual splitting:
   Expression tempExpression;
-  Vector<RationalFunction> theHWRF;
-  Selection selInducingParabolic, selSmallParabolic;
-  selInducingParabolic.init(3);
-  selSmallParabolic.init(2);
+  branchingData theG2B3Data;
   //
 
   for (int j=0; j<=desiredHeight; j++)
@@ -1648,7 +1570,7 @@ bool CommandList::fPrintB3G2branchingTable
     int numCycles=theHWenumerator.NumCombinationsOfCardinality(j);
     for (int i=0; i<numCycles; i++, theHWenumerator.IncrementSubsetFixedCardinality(j))
     { theHW=theHWenumerator;
-      theHWRF=theHW;
+      theG2B3Data.theWeightFundCoords=theHW;
       theCharacter.MakeFromWeight
       (theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHW),
        theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
@@ -1656,7 +1578,7 @@ bool CommandList::fPrintB3G2branchingTable
       (0, outputChar, fullParSel, theHmm.ImagesCartanDomain, theCommands.theObjectContainer.theLieAlgebras,
       theHmm.indexDomain, tempSel, tempG1, tempG2, *theCommands.theGlobalVariableS);
       theCommands.fSplitFDpartB3overG2inner
-      (theCommands, inputIndexBoundVars, tempExpression, comments, theHmm, theHWRF, selInducingParabolic, selSmallParabolic);
+      (theCommands, inputIndexBoundVars, tempExpression, comments, theG2B3Data);
       theFormat.fundamentalWeightLetter= "\\omega";
       out << "<tr><td> " << theCharacter.ToString(&theFormat) << "</td> ";
       latexTable << " $ " << theCharacter.ToString(&theFormat) << " $ & $\\begin{array}{lll}&& ";
@@ -1740,75 +1662,122 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
 
 bool CommandList::fSplitFDpartB3overG2
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{HomomorphismSemisimpleLieAlgebra theHmm;
-  Vector<RationalFunction> theWeightFundCoords;
-  Selection selInducing, selSmallParSel;
+{ branchingData theG2B3Data;
   theCommands.fSplitFDpartB3overG2CharsOutput
-  (theCommands, inputIndexBoundVars, theExpression, comments, theHmm, theWeightFundCoords, selInducing, selSmallParSel);
+  (theCommands, inputIndexBoundVars, theExpression, comments, theG2B3Data);
   if (theExpression.errorString!="")
     return true;
-  return theCommands.fSplitFDpartB3overG2inner
-  (theCommands, inputIndexBoundVars, theExpression, comments, theHmm, theWeightFundCoords, selInducing, selSmallParSel);
+  std::stringstream out;
+
+  theCommands.fSplitFDpartB3overG2inner
+  (theCommands, inputIndexBoundVars, theExpression, comments, theG2B3Data);
+  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
+  << theG2B3Data.selInducing.ToString() << "<br>common Levi part of G_2 and B_3: "
+  << theG2B3Data.selSmallParSel.ToString();
+
+    out
+  << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
+  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
+    std::stringstream readyForLatexConsumptionTable1, readyForLatexConsumptionTable2;
+
+  readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
+  <<  theG2B3Data.theWeightFundCoords.ElementToStringLetterFormat("\\omega")
+  << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
+  for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
+  { Vector<RationalFunction>& currentWeightSimpleB3coords=theG2B3Data.outputWeightsSimpleCoords[i];
+    Vector<RationalFunction>& currentWeightFundB3coords=theG2B3Data.outputWeightsFundCoordS[i];
+    Vector<RationalFunction>& currentG2Weight=theG2B3Data.g2Weights[i];
+    Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
+    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ElementToStringLetterFormat("\\omega")
+    << " $ & $" << theG2B3Data.leviEigenSpace[i].ElementToStringLetterFormat("m") << " $ & $ " << currentG2Weight.ElementToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
+    out << "<tr><td>" << theG2B3Data.outputEigenWords[i].ToString() << "</td><td> "
+    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
+    << "</td><td>" << currentG2Weight.ElementToStringLetterFormat("\\alpha") << "</td><td> "
+    << theG2B3Data.theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
+    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
+    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(theG2B3Data.theChars[i].ToString()) << "</td>";
+    out << "</tr>";
+  }
+  readyForLatexConsumptionTable1 <<"\\hline \n";
+  out << "</table>";
+  out << "<br>Ready for LaTeX consumption: ";
+  out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
+  out << "<table border=\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
+  Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
+  std::stringstream formulaStream1;
+  for (int k=0; k<theG2B3Data.g2Weights.size; k++)
+  { out << "<tr><td>" << theG2B3Data.g2Weights[k].ToString() << "</td><td>";
+    for (int j=0; j<theG2B3Data.g2Weights.size; j++)
+    { weightDifference=theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
+      if (weightDifference.IsPositive())
+        formulaStream1 << "(12(i(\\bar c) - " << theG2B3Data.theChars[j].ToString() <<  "))";
+    }
+    formulaStream1 << "v_\\lambda";
+    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(formulaStream1.str()) << "</td><td>"
+    <<  CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(theG2B3Data.theEigenVectors[k].ToString())
+    << "</td></tr>";
+  }
+  out << "</table>";
+  out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  Context theContext;
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
+  return true;
 }
 
 bool CommandList::fSplitFDpartB3overG2inner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  HomomorphismSemisimpleLieAlgebra& theHmm, Vector<RationalFunction>& theWeightFundCoords,
-  Selection& selInducing, Selection& selSmallParSel)
+  branchingData& theG2B3Data)
 {
-  std::stringstream out;
+//  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
   ModuleSSalgebraNew<RationalFunction> theModCopy;
   theModCopy.MakeFromHW
-  (theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
+  (theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange,
+   theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0);
   std::string report;
-  Selection SelSplittingParSel=selInducing;
-  if (SelSplittingParSel.selected[0]!=SelSplittingParSel.selected[2])
-  { SelSplittingParSel.AddSelectionAppendNewIndex(0);
-    SelSplittingParSel.AddSelectionAppendNewIndex(2);
+  theG2B3Data.SelSplittingParSel=theG2B3Data.selInducing;
+  if (theG2B3Data.SelSplittingParSel.selected[0]!=theG2B3Data.SelSplittingParSel.selected[2])
+  { theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
+    theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(2);
   }
-  out << "<br>Highest weight: " << theWeightFundCoords.ToString() << "<br>Parabolic selection: " << selInducing.ToString()
-  << "<br>common Levi part of G_2 and B_3: " << SelSplittingParSel.ToString();
   Vector<Rational> splittingParSel;
-  splittingParSel=SelSplittingParSel;
-  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
-  Vectors<RationalFunction> outputWeightsFundCoordS;
-  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  splittingParSel=theG2B3Data.SelSplittingParSel;
+
   theCommands.theObjectContainer.theCategoryOmodules.AddOnTopNoRepetition(theModCopy);
   int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
   ModuleSSalgebraNew<RationalFunction>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
-  Vectors<RationalFunction> leviEigenSpace;
-  out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  std::cout << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg
-  (theHmm, selSmallParSel, *theCommands.theGlobalVariableS, &outputEigenWords, &outputWeightsFundCoordS,
-   &leviEigenSpace, &out);
-  out << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
+   &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, comments);
+  std::cout << "<br>Time needed to make B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
-  Vectors<RationalFunction> g2Weights, g2DualWeights;
-  g2Weights.SetSize(outputWeightsFundCoordS.size);
-  g2DualWeights.SetSize(outputWeightsFundCoordS.size);
+  theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
+  theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
-  invertedG2cartanMat=theHmm.theDomain().theWeyl.CartanSymmetric;
+  invertedG2cartanMat=theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
   invertedG2cartanMat.Invert();
-  outputWeightsSimpleCoords=theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(outputWeightsFundCoordS);
-  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeight=outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
+  theG2B3Data.outputWeightsSimpleCoords=
+  theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
+  (theG2B3Data.outputWeightsFundCoordS);
+  for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
+  { Vector<RationalFunction>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
+    Vector<RationalFunction>& currentG2Weight=theG2B3Data.g2Weights[i];
+    Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.SetSize(2);
-    currentG2DualWeight[0]=theHmm.theRange().theWeyl.RootScalarCartanRoot
-    (currentWeight, theHmm.ImagesCartanDomain[0]);//<-note: implicit type conversion: the return type is the left coefficient type.
-    currentG2DualWeight[1]=theHmm.theRange().theWeyl.RootScalarCartanRoot
-    (currentWeight, theHmm.ImagesCartanDomain[1]);//<-note: implicit type conversion: the return type is the left coefficient type.
+    currentG2DualWeight[0]=theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot
+    (currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]);//<-note: implicit type conversion: the return type is the left coefficient type.
+    currentG2DualWeight[1]=theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot
+    (currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]);//<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
   }
   ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
-  theG2Casimir.MakeCasimir(theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
-  Vector<RationalFunction> highestWeightG2dualCoords=*g2DualWeights.LastObject();
-  List<RationalFunction> theChars;
-  theChars.SetSize(outputWeightsFundCoordS.size);
+  theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
+  Vector<RationalFunction> highestWeightG2dualCoords=*theG2B3Data.g2DualWeights.LastObject();
+
+  theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
 //  RationalFunction& baseChar=*theChars.LastObject();
 //  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
 //  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
@@ -1816,79 +1785,47 @@ bool CommandList::fSplitFDpartB3overG2inner
 //    baseChar=theG2Casimir.theCoeffs[0];
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=400;
-  std::stringstream readyForLatexConsumptionTable1, readyForLatexConsumptionTable2;
-  out
-  << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
-  << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
-  readyForLatexConsumptionTable1 << "\\hline\\multicolumn{3}{|c|}{Highest weight $ "
-  << outputWeightsFundCoordS.LastObject()->ElementToStringLetterFormat("\\omega")
-  << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
-  for (int i=0; i< outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeightSimpleB3coords=outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentWeightFundB3coords=outputWeightsFundCoordS[i];
-    Vector<RationalFunction>& currentG2Weight=g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=g2DualWeights[i];
-    readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ElementToStringLetterFormat("\\omega")
-    << " $ & $" << leviEigenSpace[i].ElementToStringLetterFormat("m") << " $ & $ " << currentG2Weight.ElementToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
-    out << "<tr><td>" << outputEigenWords[i].ToString() << "</td><td> "
-    << currentWeightSimpleB3coords.ToString() << "</td><td> " << currentWeightFundB3coords.ToString()
-    << "</td><td>" << currentG2Weight.ElementToStringLetterFormat("\\alpha") << "</td><td> "
-    << theHmm.theDomain().theWeyl.GetFundamentalCoordinatesFromSimple(currentG2Weight).ToString()
-    << "</td><td> " << currentG2DualWeight.ToString() << "</td>";
+  for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
+  { Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy=theG2Casimir;
     theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
     if (theG2CasimirCopy.IsEqualToZero())
-      theChars[i]=0;
+      theG2B3Data.theChars[i]=0;
     else
-      theChars[i]=theG2CasimirCopy.theCoeffs[0];
-    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(theChars[i].ToString()) << "</td>";
-    out << "</tr>";
+      theG2B3Data.theChars[i]=theG2CasimirCopy.theCoeffs[0];
   }
-  readyForLatexConsumptionTable1 <<"\\hline \n";
-  out << "</table>";
-  out << "<br>Ready for LaTeX consumption: ";
-  out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
 //  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
-  List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
+
   ElementTensorsGeneralizedVermas<RationalFunction> intermediateElt;
-  theEigenVectors.SetSize(g2Weights.size);
-  theEigenVectors.LastObject()->MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
-  out << "<table border=\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
+  theG2B3Data.theEigenVectors.SetSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theEigenVectors.LastObject()->MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
   Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
-  theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
+  theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
-  for (int k=0; k<g2Weights.size; k++)
-  { out << "<tr><td>" << g2Weights[k].ToString() << "</td><td>";
-    ElementTensorsGeneralizedVermas<RationalFunction>& currentTensorElt=theEigenVectors[k];
-    intermediateElt=*theEigenVectors.LastObject();
+  for (int k=0; k<theG2B3Data.g2Weights.size; k++)
+  { ElementTensorsGeneralizedVermas<RationalFunction>& currentTensorElt=theG2B3Data.theEigenVectors[k];
+    intermediateElt=*theG2B3Data.theEigenVectors.LastObject();
 //    std::cout << "<br>multiplying" << intermediateElt.ToString() << " by " << outputEigenWords[k].ToString();
-    intermediateElt.MultiplyOnTheLeft(outputEigenWords[k], currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
-    theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
+    intermediateElt.MultiplyOnTheLeft
+    (theG2B3Data.outputEigenWords[k], currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
+    theG2B3Data.theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
     intermediateElt=currentTensorElt;
-    std::stringstream formulaStream1;
-    for (int j=0; j<g2Weights.size; j++)
-    { weightDifference=g2Weights[j] - g2Weights[k];
+    for (int j=0; j<theG2B3Data.g2Weights.size; j++)
+    { weightDifference=theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
       if (weightDifference.IsPositive())
-      { formulaStream1 << "(12(i(\\bar c) - " << theChars[j].ToString() <<  "))";
-        theG2CasimirCopy=imageCasimirInB3;
-        tempElt.MakeConst(theChars[j], theCommands.theObjectContainer.theLieAlgebras, theHmm.indexRange);
+      { theG2CasimirCopy=imageCasimirInB3;
+        tempElt.MakeConst
+        (theG2B3Data.theChars[j], theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange);
         theG2CasimirCopy-=tempElt;
         theG2CasimirCopy*=12;
         intermediateElt.MultiplyOnTheLeft
         (theG2CasimirCopy, currentTensorElt, theCommands.theObjectContainer.theCategoryOmodules,
-         theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
+         theG2B3Data.theHmm.theRange(), *theCommands.theGlobalVariableS, 1, 0);
         intermediateElt=currentTensorElt;
       }
     }
-    formulaStream1 << "v_\\lambda";
-    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(formulaStream1.str())
-    << "</td><td>" <<  CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(currentTensorElt.ToString()) << "</td></tr>";
   }
-  out << "</table>";
-  out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
-  Context theContext;
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
   return true;
 }
 

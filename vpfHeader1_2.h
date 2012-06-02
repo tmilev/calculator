@@ -3112,9 +3112,6 @@ public:
   int GetDim()
   { return this->theGeneratingWordsNonReduced.size;
   }
-  void MakeFundamentalRep
-(char WeylLetter, int theRank, GlobalVariables& theGlobalVariables)
-  ;
   void IntermediateStepForMakeFromHW
 ( Vector<CoefficientType>& HWDualCoordS, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
   const CoefficientType& theRingZero)

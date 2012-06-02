@@ -533,6 +533,24 @@ public:
   }
 };
 
+//the following data is isolated in a struct because it is
+//way too large a lump to pass separately
+struct branchingData
+{ HomomorphismSemisimpleLieAlgebra theHmm;
+  Vector<RationalFunction> theWeightFundCoords;
+  Selection selInducing;
+  Selection selSmallParSel;
+  Selection SelSplittingParSel;
+  Vectors<RationalFunction> outputWeightsFundCoordS;
+  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  Vectors<RationalFunction> g2Weights;
+  Vectors<RationalFunction> g2DualWeights;
+  Vectors<RationalFunction> leviEigenSpace;
+  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
+  List<RationalFunction> theChars;
+  List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
+};
+
 class CommandList
 { template <class dataType>
   bool EvaluatePMTDtreeFromContextRecursive
@@ -1028,8 +1046,7 @@ static bool EvaluateDereferenceOneArgument
 ;
   static bool fSplitFDpartB3overG2CharsOutput
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- HomomorphismSemisimpleLieAlgebra& outputHmm, Vector<RationalFunction>& outputTheWeightFundCoords, Selection& outputSelInducing,
- Selection& outputSmallParSel
+ branchingData& theG2B3Data
  )
 ;
   static bool fSplitFDpartB3overG2
@@ -1037,8 +1054,7 @@ static bool EvaluateDereferenceOneArgument
 ;
   static bool fSplitFDpartB3overG2inner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  HomomorphismSemisimpleLieAlgebra& theHmm, Vector<RationalFunction>& theWeightFundCoords,
-  Selection& selInducing, Selection& selSmallParSel)
+  branchingData& theG2B3Data)
 ;
   static bool fDrawWeightSupportWithMults
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)

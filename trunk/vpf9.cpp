@@ -13,13 +13,6 @@ int ParallelComputing::cgiLimitRAMuseNumPointersInList=2000000000;
 ControllerStartsRunning ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly;
 bool ParallelComputing::flagUngracefulExitInitiated=false;
 
-GlobalVariables::GlobalVariables()
-{ this->FeedDataToIndicatorWindowDefault=0;
-  this->ProgressReportDepth=-1;
-  this->MaxAllowedComputationTimeInSeconds=1000000;
-  this->callSystem=0;
-}
-
 int ParallelComputing::GlobalPointerCounter=0;
 int ParallelComputing::PointerCounterPeakRamUse=0;
 
@@ -126,6 +119,7 @@ template < > int List<Expression>::ListActualSizeIncrement=50;
 template < > int List<Polynomial<LargeInt> >::ListActualSizeIncrement=50;
 template < > int List<ChevalleyGenerator >::ListActualSizeIncrement=10;
 template < > int List<LargeInt >::ListActualSizeIncrement=50;
+template < > int List<stackInfo>::ListActualSizeIncrement=100;
 
 template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
@@ -165,6 +159,55 @@ unsigned int Rational::TotalLargeMultiplications=0;
 unsigned int Rational::TotalSmallAdditions=0;
 unsigned int Rational::TotalSmallGCDcalls=0;
 unsigned int Rational::TotalSmallMultiplications=0;
+
+GlobalVariables::GlobalVariables()
+{ this->FeedDataToIndicatorWindowDefault=0;
+  this->ProgressReportDepth=-1;
+  this->MaxAllowedComputationTimeInSeconds=1000000;
+  this->callSystem=0;
+}
+
+RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
+{ List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
+  static MutexWrapper inCaseOfMultithreading;
+  static stackInfo tempNfo;
+  inCaseOfMultithreading.LockMe();
+  theStack.AddOnTop(tempNfo);
+  stackInfo& stackTop=*theStack.LastObject();
+  stackTop.fileName=fileName;
+  stackTop.line=line;
+  stackTop.functionName=functionName;
+  inCaseOfMultithreading.UnlockMe();
+}
+
+RegisterFunctionCall::~RegisterFunctionCall()
+{ List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
+  theStack.size--;
+}
+
+std::string ProjectInformation::GetStackTraceReport()
+{ std::stringstream out;
+  for (int i=this->CustomStackTrace.size-1; i>=0; i--)
+  { out << "<tr><td>" << CGI::GetHtmlLinkFromFileName(this->CustomStackTrace[i].fileName) << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
+    if (this->CustomStackTrace[i].functionName!="")
+      out << "<td>" << this->CustomStackTrace[i].functionName << "</td>";
+    out << "</tr>";
+  }
+  return out.str();
+}
+
+std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
+{ std::stringstream out;
+  out << "<br>A partial stack trace follows (function calls not explicitly logged not included). <br>The first two stack trace lines may belong to the same function.";
+  out << "<table><tr><td>file</td><td>line</td><td>function name(if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
+  out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
+  out  << "</table>";
+  return out.str();
+}
+
+std::string MathRoutines::GetStackTraceEtcErrorMessage(const std::string& file, int line)
+{ return CGI::GetStackTraceEtcErrorMessage(file, line);
+}
 
 int DrawingVariables::GetColorFromChamberIndex(int index, std::fstream* LaTexOutput)
 { static const int NumColorsBase=3;

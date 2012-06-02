@@ -161,6 +161,8 @@ int main(int argc, char **argv)
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
+  theParser.init(theGlobalVariables);
+  MacroRegisterFunctionWithName("main");
 
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
@@ -341,6 +343,7 @@ g_{-2} v_\\lambda\
   //civilizedInput="{{a}}:if (a-1)==x:=6;\nx+1-1";
 //  civilizedInput="fSplitFDpartB3overG2{}(0,0,1)";
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
+//civilizedInput="fPrintB3G2branchingTable{}(1)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -364,7 +367,6 @@ g_{-2} v_\\lambda\
 //  std::cout << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw);
   std::cout << "\n</FORM>";
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
-  theParser.init(theGlobalVariables);
   if (civilizedInput!="")
   { if (inputStringNames.ContainsObject("checkUsePreamble"))
     { std::stringstream tempStream;

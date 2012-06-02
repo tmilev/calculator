@@ -1005,12 +1005,21 @@ bool ModuleSSalgebraNew<CoefficientType>::MakeFromHW
  const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport)
-{ this->theAlgebras=&inputAlgebras;
+{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::MakeFromHW");
+
+  this->theAlgebras=&inputAlgebras;
   this->indexAlgebra=inputIndexAlgebra;
   SemisimpleLieAlgebra& theAlgebrA=inputAlgebras[this->indexAlgebra];
 
   int theRank=theAlgebrA.GetRank();
-  assert(HWFundCoords.size==theRank && selNonSelectedAreElementsLevi.MaxSize==theRank);
+  if (HWFundCoords.size!=theRank || selNonSelectedAreElementsLevi.MaxSize!=theRank)
+  { std::cout << "This is a programming error. I am asked to create a generalized Verma module "
+    << " with a semisimple Lie algebra of rank " << theRank << " but the input highest weight, "
+    << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
+    << " the parabolic section indicates rank of " << selNonSelectedAreElementsLevi.MaxSize
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   WeylGroup& theWeyl=theAlgebrA.theWeyl;
 
   this->parabolicSelectionNonSelectedAreElementsLevi=selNonSelectedAreElementsLevi;

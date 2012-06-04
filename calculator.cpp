@@ -344,6 +344,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="fSplitFDpartB3overG2{}(0,0,1)";
 //civilizedInput="fSplitFDpartB3overG2{}(x_1,1,0)";
 //civilizedInput="fPrintB3G2branchingTable{}(1)";
+//  civilizedInput="fPrintB3G2branchingTableCharsOnly{}(2)";
+//civilizedInput= "fSplitFDpartB3overG2{}(0,1,0)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

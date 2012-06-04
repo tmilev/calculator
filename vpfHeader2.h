@@ -536,25 +536,6 @@ public:
   }
 };
 
-//the following data is isolated in a struct because it is
-//way too large a lump to pass separately
-struct branchingData
-{ HomomorphismSemisimpleLieAlgebra theHmm;
-  Vector<RationalFunction> theWeightFundCoords;
-  Selection selInducing;
-  Selection selSmallParSel;
-  Selection SelSplittingParSel;
-  Vectors<RationalFunction> outputWeightsFundCoordS;
-  Vectors<RationalFunction> outputWeightsSimpleCoords;
-  Vectors<RationalFunction> g2Weights;
-  Vectors<RationalFunction> g2DualWeights;
-  Vectors<RationalFunction> leviEigenSpace;
-  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
-  List<RationalFunction> theChars;
-  List<ElementTensorsGeneralizedVermas<RationalFunction> > theEigenVectors;
-  void resetOutputData();
-};
-
 class CommandList
 { template <class dataType>
   bool EvaluatePMTDtreeFromContextRecursive
@@ -1030,6 +1011,11 @@ static bool EvaluateDereferenceOneArgument
   static bool fPrintB3G2branchingTableCharsOnly
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  bool fPrintB3G2branchingIntermediate
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data
+ )
+ ;
   static bool fPrintB3G2branchingTable
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1039,6 +1025,11 @@ static bool EvaluateDereferenceOneArgument
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  bool fSplitFDpartB3overG2Init
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ branchingData& theG2B3Data
+ )
+ ;
   static bool fSplitFDpartB3overG2CharsOnly
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1052,6 +1043,9 @@ static bool EvaluateDereferenceOneArgument
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
  branchingData& theG2B3Data
  )
+;
+  static bool fSplitFDpartB3overG2old
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSplitFDpartB3overG2
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)

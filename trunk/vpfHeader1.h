@@ -754,6 +754,9 @@ public:
   Object* TheObjects;
   int size;
 //  void AddOnTop(Object o);
+  int GetResizeStretch()
+  {return MathRoutines::Maximum(List<Object>::ListActualSizeIncrement, this->ActualSize*3/2);
+  }
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease){ int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
   void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.

@@ -2194,7 +2194,7 @@ void CommandList::initPredefinedVars()
   ("WeylDimFormula", & this->fWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
-   "WeylDimFormula{}(G_2, (1,0));\nWeylDimFormula{}(E_6, (2,0,0,0,0,0));");
+   "WeylDimFormula{}(G_2, (123,0));\nWeylDimFormula{}(B_3, (123,0,0));");
   this->AddNonBoundVarMustBeNew
   ("animateLittelmannPaths", & this->fAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. Presented first on the seminar in Charles University Prague. \

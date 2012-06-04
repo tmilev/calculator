@@ -1135,6 +1135,10 @@ public:
   template <class CoefficientType>
   bool IsDominantWRTgenerator(const Vector<CoefficientType> & theWeight, int generatorIndex)
   ;
+  template <class CoefficientType>
+  CoefficientType WeylDimFormulaSimpleCoords
+  (const Vector<CoefficientType>& theWeightInSimpleCoords, const CoefficientType& theRingUnit=1)
+  ;
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
   template <class CoefficientType>
@@ -2951,6 +2955,28 @@ public:
   }
 };
 
+//the following data is isolated in a struct because it is
+//way too large a lump to pass separately
+struct branchingData
+{ HomomorphismSemisimpleLieAlgebra theHmm;
+  Vector<RationalFunction> theWeightFundCoords;
+  Selection selInducing;
+  Selection selSmallParSel;
+  Selection SelSplittingParSel;
+  Vectors<RationalFunction> outputWeightsFundCoordS;
+  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  Vectors<RationalFunction> g2Weights;
+  Vectors<RationalFunction> g2DualWeights;
+  Vectors<RationalFunction> leviEigenSpace;
+  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
+  List<RationalFunction> theChars;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectors;
+  ReflectionSubgroupWeylGroup WeylFD;
+  ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
+  ReflectionSubgroupWeylGroup WeylFDSmall;
+  void resetOutputData();
+};
+
 template <class CoefficientType>
 class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>
 {
@@ -2977,10 +3003,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
  int inputIndexInOwner)
    ;
   bool SplitCharOverRedSubalg
-(std::string* Report, charSSAlgMod& output, Selection& parSelAmbient,
- Vectors<Rational>& embeddingsSimpleEiGoesTo, List<SemisimpleLieAlgebra>& theSScontainer, int indexSmallAlgebra,
- Selection& ouputSmallParabolic,
- ReflectionSubgroupWeylGroup& outputSubInLarge, ReflectionSubgroupWeylGroup& outputSubInSmall, GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, branchingData& inputData,GlobalVariables& theGlobalVariables)
    ;
   bool GetDominantCharacterWRTsubalgebra
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
@@ -3033,12 +3056,12 @@ public:
   Vectors<Rational> theGeneratingWordsNonReducedWeights;
 
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
-  List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
-  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
-  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForM;
+//  List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
+//  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
+//  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForM;
   List<Matrix<CoefficientType> > theBilinearFormsAtEachWeightLevel;
   List<Matrix<CoefficientType> > theBilinearFormsInverted;
-  Vectors<Rational> weightsSimpleGens;
+//  Vectors<Rational> weightsSimpleGens;
 
   Vector<CoefficientType> theHWDualCoordsBaseFielD;
   Vector<CoefficientType> theHWSimpleCoordSBaseField;
@@ -3072,12 +3095,10 @@ public:
     this->theGeneratingWordsNonReduced= other.theGeneratingWordsNonReduced;
     this->theGeneratingWordsNonReducedWeights=other.theGeneratingWordsNonReducedWeights;
     this->theGeneratingWordsGrouppedByWeight= other.theGeneratingWordsGrouppedByWeight;
-    this->theSimpleGens=other.theSimpleGens;
-    this->actionsSimpleGens=other.actionsSimpleGens;
-    this->actionsSimpleGensMatrixForM= other.actionsSimpleGensMatrixForM;
+//    this->theSimpleGens=other.theSimpleGens;
     this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
     this->theBilinearFormsInverted=other.theBilinearFormsInverted;
-    this->weightsSimpleGens=other.weightsSimpleGens;
+//    this->weightsSimpleGens=other.weightsSimpleGens;
     this->theHWDualCoordsBaseFielD=other.theHWDualCoordsBaseFielD;
     this->theHWDualCoords = other.theHWDualCoords;
     this->theHWSimpleCoordS=other.theHWSimpleCoordS;
@@ -3120,7 +3141,7 @@ public:
 (List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
  const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
- std::string* outputReport)
+ std::string* outputReport, bool computeSimpleGens=true)
   ;
   SemisimpleLieAlgebra& GetOwner()const{return this->theAlgebras->TheObjects[this->indexAlgebra];}
   void GetAdActionHomogenousElT
@@ -3221,8 +3242,11 @@ class MonomialGeneralizedVerma
 (ElementSumGeneralizedVermas<CoefficientType>& output, GlobalVariables& theGlobalVariables,
   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
    ;
-  void MakeConst(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-  { this->theMonCoeffOne.MakeConst(inputOwners, inputIndexInOwners);
+  void MakeConst(List<ModuleSSalgebraNew<CoefficientType> >& inputOwners, int inputIndexInOwner)
+  { this->owneR=&inputOwners;
+    this->indexInOwner=inputIndexInOwner;
+    ModuleSSalgebraNew<CoefficientType>& bossMod=inputOwners[inputIndexInOwner];
+    this->theMonCoeffOne.MakeConst(*bossMod.theAlgebras, bossMod.indexAlgebra);
   }
   ModuleSSalgebraNew<CoefficientType>& GetOwner()const
   { return this->owneR->TheObjects[this->indexInOwner];
@@ -4848,7 +4872,7 @@ void List<Object>::ReverseOrderElements()
 template <class Object>
 void List<Object>::AddObjectOnBottom(const Object& o)
 { if (this->IndexOfVirtualZero==0)
-    this->ExpandArrayOnBottom(List<Object>::ListActualSizeIncrement);
+    this->ExpandArrayOnBottom(this->GetResizeStretch());
   this->IndexOfVirtualZero--;
   this->TheObjects--;
   this->TheObjects[0]=o;
@@ -4859,7 +4883,7 @@ template <class Object>
 void List<Object>::AddOnTop(const Object& o)
 {// <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->IndexOfVirtualZero+this->size>=this->ActualSize)
-    this->ExpandArrayOnTop(List<Object>::ListActualSizeIncrement);
+    this->ExpandArrayOnTop(this->GetResizeStretch());
   this->TheObjects[size]=o;
   this->size++;
 }
@@ -5601,15 +5625,6 @@ void ModuleSSalgebraNew<CoefficientType>::SetNumVariables
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
       this->theGeneratingWordsGrouppedByWeight[i][j].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->theSimpleGens.size; i++)
-    this->theSimpleGens[i].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->actionsSimpleGens.size; i++)
-    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
-      for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
-        this->actionsSimpleGens[i][j][k].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->actionsSimpleGensMatrixForM.size; i++)
-  { this->actionsSimpleGensMatrixForM[i].SetNumVariables(GoalNumVars);
-  }
   for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
   { this->theBilinearFormsAtEachWeightLevel[i].SetNumVariables(GoalNumVars);
     this->theBilinearFormsInverted[i].SetNumVariables(GoalNumVars);
@@ -5647,15 +5662,6 @@ void ModuleSSalgebraNew<CoefficientType>::Substitution
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
     for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
       this->theGeneratingWordsGrouppedByWeight[i][j].Substitution(theSub);
-  for (int i=0; i<this->theSimpleGens.size; i++)
-    this->theSimpleGens[i].Substitution(theSub);
-  for (int i=0; i<this->actionsSimpleGens.size; i++)
-    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
-      for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
-        this->actionsSimpleGens[i][j][k].Substitution(theSub);
-  for (int i=0; i<this->actionsSimpleGensMatrixForM.size; i++)
-  { this->actionsSimpleGensMatrixForM[i].Substitution(theSub);
-  }
   for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
   { this->theBilinearFormsAtEachWeightLevel[i].Substitution(theSub);
     this->theBilinearFormsInverted[i].Substitution(theSub);
@@ -5686,7 +5692,12 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ToString
 template <class CoefficientType>
 std::string MonomialGeneralizedVerma<CoefficientType>::ToString
   (FormatExpressions* theFormat, bool includeV)const
-{ ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
+{ if (this->owneR==0)
+  { std::cout << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   std::string tempS;
   if (tempS=="1")
     tempS="";
@@ -5702,6 +5713,8 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ToString
   tempS= theMod.theGeneratingWordsNonReduced[this->indexFDVector].ToString(theFormat);
   if (tempS!="1")
     out << tempS;
+  if (tempS!="1" && tempS!="-")
+    out << "\\cdot ";
   if (includeV)
     out << theMod.ElementToStringHWV(theFormat);
 //  std::cout << "<br>MonomialP " << out.str() << " has indexInOwner " << this->indexInOwner;
@@ -6894,7 +6907,12 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
     currentMon.indexInOwner=this->indexInOwner;
 //    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
 //    << " times " << theUE[j].ToString() << " on " << this->ToString();
+    std::stringstream reportStream;
+    reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
+    theGlobalVariables.MakeProgressReport(reportStream.str(), 2 );
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
+    reportStream << "done.";
+    theGlobalVariables.MakeProgressReport(reportStream.str(), 2 );
 //    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
@@ -6929,6 +6947,17 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { //std::cout << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
+  output.MakeZero(*this->owneR);
+  int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(this->theMonCoeffOne);
+  if (indexCheck!=-1)
+  { MonomialGeneralizedVerma<CoefficientType> basisMon;
+    basisMon.MakeConst(*this->owneR, this->indexInOwner);
+    basisMon.indexFDVector=indexCheck;
+    output.AddMonomial(basisMon, theRingUnit);
+    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
+    return;
+  }
+  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
   //std::cout << "<br>";
   //for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)
@@ -6947,14 +6976,18 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 //  std::cout << theMod.ToString();
   //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
-  output.MakeZero(*this->owneR);
+
   CoefficientType theCF;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
     //std::cout << "<br> Processing monomial " << currentMon.ToString();
     tempMat1.MakeIdMatrix(theMod.theGeneratingWordsNonReduced.size, theRingUnit, theRingZero);
     for (int k=currentMon.Powers.size-1; k>=0; k--)
-    { int thePower;
+    { std::stringstream reportStream;
+      reportStream << "accounting monomial " << currentMon.ToString() << " of index " << l+1 << " out of "
+      << theUEelt.size << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
+      theGlobalVariables.MakeProgressReport(reportStream.str(), 3);
+      int thePower;
       if (!currentMon.Powers[k].IsSmallInteger(thePower))
         break;
       int theIndex=currentMon.generatorsIndices[k];
@@ -6971,6 +7004,8 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         tempMat1.MultiplyOnTheLeft(tempMat2, theRingZero);
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
+      reportStream << "done!";
+      theGlobalVariables.MakeProgressReport(reportStream.str(), 3);
     }
 //    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
@@ -7085,6 +7120,29 @@ CoefficientType WeylGroup::WeylDimFormulaSimpleCoords(Vector<CoefficientType>& t
     sumWithRho=rhoOverNewRing+theWeightInSimpleCoords;
     buffer=(this->RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
     buffer/=this->RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
+//    std::cout << "(" << buffer.ToString() << ")";
+    Result*=buffer;
+  }
+  return Result;
+}
+
+template<class CoefficientType>
+CoefficientType ReflectionSubgroupWeylGroup::WeylDimFormulaSimpleCoords(const Vector<CoefficientType>& theWeightInSimpleCoords, const CoefficientType& theRingUnit)
+{ CoefficientType Result, buffer;
+  Vector<CoefficientType> rhoOverNewRing, rootOfBorelNewRing, sumWithRho;//<-to facilitate type conversion!
+  Vector<Rational> rho;
+  this->RootsOfBorel.sum(rho, this->AmbientWeyl.GetDim());
+  rho/=2;
+  rhoOverNewRing=rho;//<-type conversion here!
+  Result=theRingUnit;
+//  std::cout << "<br>doing the weyl dim formula with: " << theWeightInSimpleCoords.ToString();
+//  std::cout << "<br>rho is:" << rhoOverNewRing.ToString();
+//  std::cout << "<br>we get: ";
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+  { rootOfBorelNewRing=this->RootsOfBorel[i]; //<-type conversion here!
+    sumWithRho=rhoOverNewRing+theWeightInSimpleCoords;
+    buffer=(this->AmbientWeyl.RootScalarCartanRoot(sumWithRho, rootOfBorelNewRing));
+    buffer/=this->AmbientWeyl.RootScalarCartanRoot(rhoOverNewRing, rootOfBorelNewRing);
 //    std::cout << "(" << buffer.ToString() << ")";
     Result*=buffer;
   }
@@ -7960,6 +8018,20 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   outputDetails=out.str();
   //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
   return (numTotalWeightsFound<=upperBoundDominantWeights);
+}
+
+template <class CoefficientType>
+void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
+  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+{ this->MakeZero(theOwner);
+  MonomialGeneralizedVerma<CoefficientType> theMon;
+  theMon.indexInOwner=TheIndexInOwner;
+  ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[TheIndexInOwner];
+  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
+  theMon.theMonCoeffOne.MakeConst(*theMod.theAlgebras, theMod.indexAlgebra);
+  theMon.owneR=&theOwner;
+  assert(TheIndexInOwner<theOwner.size);
+  this->AddMonomial(theMon, theRingUnit);
 }
 
 #endif

@@ -1870,7 +1870,7 @@ bool CommandList::fSplitFDpartB3overG2inner
    theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
   std::string report;
   theG2B3Data.resetOutputData();
-  theG2B3Data.initAssumingParSelAndHmmInitted();
+  theG2B3Data.initAssumingParSelAndHmmInitted(*theCommands.theGlobalVariableS);
   theG2B3Data.SelSplittingParSel=theG2B3Data.selInducing;
   if (theG2B3Data.SelSplittingParSel.selected[0]!=theG2B3Data.SelSplittingParSel.selected[2])
   { theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
@@ -1984,33 +1984,12 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
   WeylGroup& theWeyL=this->GetOwner().theWeyl;
   std::stringstream out;
   std::string tempS;
-
-  inputData.initAssumingParSelAndHmmInitted();
-
+  inputData.initAssumingParSelAndHmmInitted(theGlobalVariables);
   ReflectionSubgroupWeylGroup& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup& WeylFDSmall=inputData.WeylFDSmall;
-  Vectors<Rational>& generatorsSmallSub=inputData.generatorsSmallSub;
-  Selection& ouputSmallParabolic=inputData.selSmallParSel;
-  Selection& parSelAmbient=inputData.selInducing;
   List<SemisimpleLieAlgebra>& theSScontainer=*inputData.theHmm.owners;
   int indexSmallAlgebra= inputData.theHmm.indexDomain;
   Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
-
-  List<Vectors<Rational> > emptyList;
-
-
-  WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
-  (generatorsSmallSub, emptyList, theGlobalVariables, 1000, true);
-  WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
-  (WeylFDSmall.AmbientWeyl, ouputSmallParabolic, theGlobalVariables, 1000);
-  inputData.WeylFD.MakeParabolicFromSelectionSimpleRoots
-  (theWeyL, parSelAmbient, theGlobalVariables, 1000);
-
-//  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
-  //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
-  inputData.WeylFD.ComputeRootSubsystem();
-  WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
-  WeylFDSmall.ComputeRootSubsystem();
 
 //  std::cout << "the ambient Weyl of levi of parabolic: <br>" << inputData.WeylFD.ToString();
 //  std::cout << "the small subgroup embedded: <br>" << WeylFDSmallAsSubInLarge.ToString();

@@ -2448,7 +2448,7 @@ std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(const std::string& inpu
   return out.str();
 }
 
-void branchingData::initAssumingParSelAndHmmInitted()
+void branchingData::initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
 { this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl=this->theHmm.theRange().theWeyl;
@@ -2463,4 +2463,17 @@ void branchingData::initAssumingParSelAndHmmInitted()
         break;
       }
   }
+  List<Vectors<Rational> > emptyList;
+  this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
+  (this->generatorsSmallSub, emptyList, theGlobalVariables, 1000, true);
+  this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
+  (this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
+  this->WeylFD.MakeParabolicFromSelectionSimpleRoots
+  (this->theHmm.theRange().theWeyl, this->selInducing, theGlobalVariables, 1000);
+
+  //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
+  //outputWeylSub.outputFDactingWeyl(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
+  this->WeylFD.ComputeRootSubsystem();
+  this->WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
+  this->WeylFDSmall.ComputeRootSubsystem();
 }

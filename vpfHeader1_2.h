@@ -3045,7 +3045,7 @@ struct branchingData
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup WeylFDSmall;
   void resetOutputData();
-  void initAssumingParSelAndHmmInitted()
+  void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
   ;
 };
 

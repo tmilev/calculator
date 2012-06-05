@@ -165,7 +165,13 @@ void charSSAlgMod<CoefficientType>::MakeFromWeight
 (const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
  int inputIndexInOwner)
 { this->MakeZero(inputOwners, inputIndexInOwner);
-  assert(inputWeightSimpleCoords.size==this->listOwners->TheObjects[this->indexInOwners].GetRank());
+  if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
+  { std::cout << "This is a programming error: attempting to create a character from highest weight in simple coords "
+    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
+    << " Lie algebra is of rank " << this->GetOwner().GetRank()
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   MonomialChar<CoefficientType> theMon;
   theMon.weightFundamentalCoords=
   this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
@@ -2440,4 +2446,21 @@ std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(const std::string& inpu
 { std::stringstream out;
   out << "<span class=\"math\">\\begin{array}{rcl}&&" << input << "\\end{array} </span>";
   return out.str();
+}
+
+void branchingData::initAssumingParSelAndHmmInitted()
+{ this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
+  this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
+  this->WeylFD.AmbientWeyl=this->theHmm.theRange().theWeyl;
+  this->selSmallParSel.init(WeylFDSmall.AmbientWeyl.GetDim());
+  for (int i=0; i<this->theHmm.ImagesCartanDomain.size; i++)
+  { Vector<Rational>& currentV=this->theHmm.ImagesCartanDomain[i];
+    this->generatorsSmallSub.AddOnTop(currentV);
+    for (int j=0; j<currentV.size; j++)
+      if (!currentV[j].IsEqualToZero() && this->selInducing.selected[j])
+      { this->generatorsSmallSub.PopLastObject();
+        this->selSmallParSel.AddSelectionAppendNewIndex(i);
+        break;
+      }
+  }
 }

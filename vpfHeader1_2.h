@@ -2955,28 +2955,6 @@ public:
   }
 };
 
-//the following data is isolated in a struct because it is
-//way too large a lump to pass separately
-struct branchingData
-{ HomomorphismSemisimpleLieAlgebra theHmm;
-  Vector<RationalFunction> theWeightFundCoords;
-  Selection selInducing;
-  Selection selSmallParSel;
-  Selection SelSplittingParSel;
-  Vectors<RationalFunction> outputWeightsFundCoordS;
-  Vectors<RationalFunction> outputWeightsSimpleCoords;
-  Vectors<RationalFunction> g2Weights;
-  Vectors<RationalFunction> g2DualWeights;
-  Vectors<RationalFunction> leviEigenSpace;
-  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
-  List<RationalFunction> theChars;
-  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectors;
-  ReflectionSubgroupWeylGroup WeylFD;
-  ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
-  ReflectionSubgroupWeylGroup WeylFDSmall;
-  void resetOutputData();
-};
-
 template <class CoefficientType>
 class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>
 {
@@ -3042,6 +3020,33 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const MonomialChar<Rational>& other);
+};
+
+//the following data is isolated in a struct because it is
+//way too large a lump to pass separately
+struct branchingData
+{ HomomorphismSemisimpleLieAlgebra theHmm;
+  Vector<RationalFunction> theWeightFundCoords;
+  charSSAlgMod<RationalFunction> theAmbientChar;
+  charSSAlgMod<RationalFunction> theSmallCharFDpart;
+  Selection selInducing;
+  Selection selSmallParSel;
+  Selection SelSplittingParSel;
+  Vectors<RationalFunction> outputWeightsFundCoordS;
+  Vectors<RationalFunction> outputWeightsSimpleCoords;
+  Vectors<RationalFunction> g2Weights;
+  Vectors<RationalFunction> g2DualWeights;
+  Vectors<RationalFunction> leviEigenSpace;
+  Vectors<Rational> generatorsSmallSub;
+  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
+  List<RationalFunction> theChars;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectors;
+  ReflectionSubgroupWeylGroup WeylFD;
+  ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
+  ReflectionSubgroupWeylGroup WeylFDSmall;
+  void resetOutputData();
+  void initAssumingParSelAndHmmInitted()
+  ;
 };
 
 template <class CoefficientType>
@@ -4675,6 +4680,11 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o)
 template <class Object>
 inline Object* List<Object>::LastObject()
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
+  if (this->size<=0)
+  { std::cout << "This is a programming error: trying to fetch the last object of an array with "
+    << this->size << " elements. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   return &this->TheObjects[this->size-1];
 }
 

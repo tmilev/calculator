@@ -101,6 +101,7 @@ template<class CoefficientType>
 class MonomialTensorGeneralizedVermas;
 template<class CoefficientType>
 class ElementTensorsGeneralizedVermas;
+struct branchingData;
 
 //classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
 class Cone;

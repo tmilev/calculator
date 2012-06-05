@@ -1573,7 +1573,6 @@ bool CommandList::fPrintB3G2branchingIntermediate
  )
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
-  charSSAlgMod<RationalFunction> theCharacter, outputChar;
   std::stringstream latexTable;
   out << "<table border=\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td>"
   << "<td>G_2\\cap \\mathfrak b-eigenvectors </td></tr>";
@@ -1590,39 +1589,33 @@ bool CommandList::fPrintB3G2branchingIntermediate
   rfOne.MakeOne(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
   for (int i=0; i<theHWs.size; i++)
   { theG2B3Data.theWeightFundCoords=theHWs[i];
-    theCharacter.MakeFromWeight
-    (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
-    (theG2B3Data.theWeightFundCoords),
-    theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange);
-    theCharacter.SplitCharOverRedSubalg
-    (0, outputChar, theG2B3Data, *theCommands.theGlobalVariableS);
     theCommands.fSplitFDpartB3overG2inner
     (theCommands, inputIndexBoundVars, tempExpression, comments, theG2B3Data);
     timeReport << tempExpression.GetAtomicValue().GetValuE<std::string>();
     RationalFunction numEigenVectors;
     numEigenVectors=rfZero;
-    for (int j=0; j<outputChar.size; j++)
-      numEigenVectors+=outputChar.theCoeffs[j];
+    for (int j=0; j<theG2B3Data.theSmallCharFDpart.size; j++)
+      numEigenVectors+=theG2B3Data.theSmallCharFDpart.theCoeffs[j];
     theFormat.CustomPlusSign="";
     int eigenIndexcounter=0;
-    for (int k=0; k<outputChar.size; k++ )
+    for (int k=0; k<theG2B3Data.theSmallCharFDpart.size; k++ )
     { charSSAlgMod<RationalFunction> tempChar;
-      tempChar.AddMonomial(outputChar[k], outputChar.theCoeffs[k]);
+      tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
       int multiplicity=0;
-      outputChar.theCoeffs[k].IsSmallInteger(multiplicity);
+      theG2B3Data.theSmallCharFDpart.theCoeffs[k].IsSmallInteger(multiplicity);
       for (int counter=0; counter<multiplicity; counter++, eigenIndexcounter++)
       { out << "<tr>";
         if (k==0 && counter==0)
         { theFormat.CustomPlusSign="\\oplus ";
           theFormat.fundamentalWeightLetter= "\\omega";
           out << "<td rowspan=\"" << numEigenVectors.ToString() << "\">"
-          << theCharacter.ToString(&theFormat) << "</td> ";
+          << theG2B3Data.theAmbientChar.ToString(&theFormat) << "</td> ";
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectors.size  << "}{*}{$"
-          << theCharacter.ToString(&theFormat) << "$}";
+          << theG2B3Data.theAmbientChar.ToString(&theFormat) << "$}";
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectors.size  << "}{*}{$"
           << theG2B3Data.WeylFD.WeylDimFormulaSimpleCoords
           (theG2B3Data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental
-           (theCharacter[0].weightFundamentalCoords)).ToString()
+           (theG2B3Data.theAmbientChar[0].weightFundamentalCoords)).ToString()
           << "$}";
         } else
           latexTable << "&";
@@ -1657,7 +1650,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
           latexTable << "\\cline{5-5}";
         out << "</tr>";
       }
-      if (k!=outputChar.size-1)
+      if (k!=theG2B3Data.theSmallCharFDpart.size-1)
         latexTable << "\\cline{3-5}";
     }
 //    if (i!=theHWs.size-1)
@@ -1876,6 +1869,8 @@ bool CommandList::fSplitFDpartB3overG2inner
   (theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange,
    theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
   std::string report;
+  theG2B3Data.resetOutputData();
+  theG2B3Data.initAssumingParSelAndHmmInitted();
   theG2B3Data.SelSplittingParSel=theG2B3Data.selInducing;
   if (theG2B3Data.SelSplittingParSel.selected[0]!=theG2B3Data.SelSplittingParSel.selected[2])
   { theG2B3Data.SelSplittingParSel.AddSelectionAppendNewIndex(0);
@@ -1891,7 +1886,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   std::stringstream out;
   out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
   double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
-  theG2B3Data.resetOutputData();
+
   theMod.SplitFDpartOverFKLeviRedSubalg
   (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
    &theG2B3Data.outputWeightsFundCoordS, &theG2B3Data.leviEigenSpace, comments);
@@ -1899,7 +1894,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   //out << report;
 //  int numVars=theWeightFundCoords[0].NumVars;
   theG2B3Data.g2Weights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
-//  std::cout << "theG2B3Data.outputWeightsFundCoordS: " << theG2B3Data.outputWeightsFundCoordS.ToString() << "<br>";
+  //std::cout << "theG2B3Data.outputWeightsFundCoordS: " << theG2B3Data.outputWeightsFundCoordS.ToString() << "<br>";
   theG2B3Data.g2DualWeights.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
   Matrix<Rational> invertedG2cartanMat;
   invertedG2cartanMat=theG2B3Data.theHmm.theDomain().theWeyl.CartanSymmetric;
@@ -1907,6 +1902,11 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.outputWeightsSimpleCoords=
   theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
   (theG2B3Data.outputWeightsFundCoordS);
+  theG2B3Data.theAmbientChar.MakeFromWeight
+  (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords),
+   *theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexRange);
+  theG2B3Data.theSmallCharFDpart.MakeZero(*theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
+  charSSAlgMod<RationalFunction> tempMon;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunction>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
     Vector<RationalFunction>& currentG2Weight=theG2B3Data.g2Weights[i];
@@ -1917,6 +1917,8 @@ bool CommandList::fSplitFDpartB3overG2inner
     currentG2DualWeight[1]=theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot
     (currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[1]);//<-note: implicit type conversion: the return type is the left coefficient type.
     invertedG2cartanMat.ActOnVectorColumn(currentG2DualWeight, currentG2Weight);//<-g2weight is now computed;
+    tempMon.MakeFromWeight(currentG2Weight, *theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
+    theG2B3Data.theSmallCharFDpart+=tempMon;
   }
   ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
   theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
@@ -1982,28 +1984,21 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
   WeylGroup& theWeyL=this->GetOwner().theWeyl;
   std::stringstream out;
   std::string tempS;
-  Selection& parSelAmbient=inputData.selInducing;
-  Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
-  List<SemisimpleLieAlgebra>& theSScontainer=*inputData.theHmm.owners;
-  int indexSmallAlgebra= inputData.theHmm.indexDomain;
-  Selection& ouputSmallParabolic=inputData.selSmallParSel;
+
+  inputData.initAssumingParSelAndHmmInitted();
+
   ReflectionSubgroupWeylGroup& WeylFDSmallAsSubInLarge=inputData.WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup& WeylFDSmall=inputData.WeylFDSmall;
+  Vectors<Rational>& generatorsSmallSub=inputData.generatorsSmallSub;
+  Selection& ouputSmallParabolic=inputData.selSmallParSel;
+  Selection& parSelAmbient=inputData.selInducing;
+  List<SemisimpleLieAlgebra>& theSScontainer=*inputData.theHmm.owners;
+  int indexSmallAlgebra= inputData.theHmm.indexDomain;
+  Vectors<Rational>& embeddingsSimpleEiGoesTo=inputData.theHmm.ImagesCartanDomain;
+
   List<Vectors<Rational> > emptyList;
-  WeylFDSmallAsSubInLarge.AmbientWeyl=theWeyL;
-  WeylFDSmall.AmbientWeyl=theSScontainer[indexSmallAlgebra].theWeyl;
-  Vectors<Rational> generatorsSmallSub;
-  ouputSmallParabolic.init(WeylFDSmall.AmbientWeyl.GetDim());
-  for (int i=0; i<embeddingsSimpleEiGoesTo.size; i++)
-  { Vector<Rational>& currentV=embeddingsSimpleEiGoesTo[i];
-    generatorsSmallSub.AddOnTop(currentV);
-    for (int j=0; j<currentV.size; j++)
-      if (!currentV[j].IsEqualToZero() && parSelAmbient.selected[j])
-      { generatorsSmallSub.PopLastObject();
-        ouputSmallParabolic.AddSelectionAppendNewIndex(i);
-        break;
-      }
-  }
+
+
   WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
   (generatorsSmallSub, emptyList, theGlobalVariables, 1000, true);
   WeylFDSmall.MakeParabolicFromSelectionSimpleRoots

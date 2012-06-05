@@ -199,7 +199,7 @@ std::string ProjectInformation::GetStackTraceReport()
 std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
 { std::stringstream out;
   out << "<br>A partial stack trace follows (function calls not explicitly logged not included). <br>The first two stack trace lines may belong to the same function.";
-  out << "<table><tr><td>file</td><td>line</td><td>function name(if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
+  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
   out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
   out  << "</table>";
   return out.str();

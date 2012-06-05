@@ -6948,16 +6948,22 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 { //std::cout << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebraNew<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   output.MakeZero(*this->owneR);
-  int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(this->theMonCoeffOne);
+  MonomialUniversalEnveloping<CoefficientType> tempMon;
+  tempMon=this->theMonCoeffOne;
+  tempMon*=theMod.theGeneratingWordsNonReduced[this->indexFDVector];
+  int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
   if (indexCheck!=-1)
   { MonomialGeneralizedVerma<CoefficientType> basisMon;
     basisMon.MakeConst(*this->owneR, this->indexInOwner);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, theRingUnit);
-    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
+//    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
+//    std::cout << "<br> index check is " << indexCheck << " corresponding to " << theMod.theGeneratingWordsNonReduced[indexCheck].ToString();
+//    theGlobalVariables.MakeProgressReport("Monomial basis of fd part. ", 2);
     return;
   }
-  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
+//  std::cout << "<br>Not a monomial basis of fd part";
+//  theGlobalVariables.MakeProgressReport("Monomial not basis of fd part. ", 2);
   theMod.GetOwner().OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
   //std::cout << "<br>";
   //for (int i=0; i<theMod.GetOwner().UEGeneratorOrderIncludingCartanElts.size; i++)

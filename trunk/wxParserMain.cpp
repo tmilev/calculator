@@ -178,7 +178,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   wxBoxSizer* BoxSizer1;
   wxBoxSizer* BoxSizer3;
 
-  Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+  Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
   SetClientSize(wxSize(322,151));
   this->TimerReady=false;
   BoxSizer1 = new wxBoxSizer(wxVERTICAL);
@@ -205,7 +205,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   SpinCtrl2->Disable();
   BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("fSplitFDpartB3overG2{}(0,2,0)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("fPrintB3G2branchingTable{}(1)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
   TextCtrl1->SetMinSize(wxSize(100,20));
   BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);

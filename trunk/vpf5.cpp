@@ -1579,8 +1579,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
   << "<td>G_2\\cap \\mathfrak b-eigenvectors </td></tr>";
   latexTable << "\\begin{longtable}{|ccccl|} \\caption{\\label{tableB3fdsOverG2charsAndHWV} "
   << " Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
-  << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors"
-  << "\\endhead \\hline\n<br>";
+  << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
+  << "\\endhead \n<br>";
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   Expression tempExpression;
@@ -1650,16 +1650,21 @@ bool CommandList::fPrintB3G2branchingIntermediate
         << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL
         (theG2B3Data.theEigenVectors[eigenIndexcounter].ToString(&theFormat))
         << "</td>";
-        latexTable << "$"
-        << theG2B3Data.theEigenVectors[eigenIndexcounter].ToString(&theFormat) << "$ \\\\\n<br>\n";
+        theFormat.MaxLineLength=20;
+        latexTable << "$\\begin{array}{rcl}&&"
+        << theG2B3Data.theEigenVectors[eigenIndexcounter].ToString(&theFormat) << "\\end{array}$ \\\\ \n <br>\n";
+        if (counter!=multiplicity-1)
+          latexTable << "\\cline{5-5}";
         out << "</tr>";
       }
+      if (k!=outputChar.size-1)
+        latexTable << "\\cline{3-5}";
     }
-    if (i!=theHWs.size-1)
-      latexTable << "\\arrayrulecolor{gray} ";
+//    if (i!=theHWs.size-1)
+//      latexTable << "\\arrayrulecolor{gray} ";
     latexTable << "\\hline";
-    if (i!=theHWs.size-1)
-      latexTable << "\\arrayrulecolor{black} ";
+//    if (i!=theHWs.size-1)
+//      latexTable << "\\arrayrulecolor{black} ";
   }
   latexTable << "\\hline";
   out << "</table>";
@@ -1938,6 +1943,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.theEigenVectors.SetSize(theG2B3Data.g2Weights.size);
   ElementSumGeneralizedVermas<RationalFunction>& theHWV=*theG2B3Data.theEigenVectors.LastObject();
   theHWV.MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
+  theHWV*=-1;
   Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
   theG2Casimir.checkConsistency();
@@ -1945,8 +1951,9 @@ bool CommandList::fSplitFDpartB3overG2inner
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
   { ElementSumGeneralizedVermas<RationalFunction>& currentTensorElt=theG2B3Data.theEigenVectors[k];
     currentTensorElt=theHWV;
-//    std::cout << "<br>multiplying" << intermediateElt.ToString() << " by " << outputEigenWords[k].ToString();
+    //std::cout << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
     currentTensorElt.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS, 1, 0);
+    //std::cout << "<br> to obtain " << currentTensorElt.ToString();
     if (theG2B3Data.selInducing.CardinalitySelection>0)
       for (int j=0; j<theG2B3Data.g2Weights.size; j++)
       { weightDifference=theG2B3Data.g2Weights[j] - theG2B3Data.g2Weights[k];
@@ -1956,8 +1963,10 @@ bool CommandList::fSplitFDpartB3overG2inner
           (theG2B3Data.theChars[j], theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange);
           theG2CasimirCopy-=tempElt;
           theG2CasimirCopy*=12;
+          //std::cout << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
           currentTensorElt.MultiplyMeByUEEltOnTheLeft
           (theG2CasimirCopy, *theCommands.theGlobalVariableS, 1, 0);
+          //std::cout << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
         }
       }
   }

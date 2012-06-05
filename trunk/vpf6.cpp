@@ -2682,10 +2682,14 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
   Data leftCopy=left;
 //  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
+  { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
     return false;
+  }
 //  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!leftCopy.ConvertToTypE<ElementUniversalEnveloping<RationalFunction> > ())
+  { //std::cout << "<br>failed converting to ue of " << leftCopy.ToString();
     return false;
+  }
 //  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
   if (!theGhostHasAppeared)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...<br>";
@@ -2700,7 +2704,9 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().MultiplyOnTheLeft
         (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, leftCopy.GetAmbientSSAlgebra(),
          *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
+  { //std::cout << "<br>failed to multiply on the left";
     return false;
+  }
   output.MakeElementTensorGeneralizedVermas(*leftCopy.owner, outputElt, output.theContextIndex);
   return true;
 }

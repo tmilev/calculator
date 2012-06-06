@@ -688,7 +688,6 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is (but generators still have to be found)
     //this is done in the below code.
-    theRootsWithZeroCharacteristic.ComputeDebugString();
     if (theDynkinEpsilon==0)
     { Vector<Rational> tempRoot, tempRoot2;
       tempRoot.MakeZero(theRelativeDimension);

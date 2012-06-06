@@ -632,10 +632,6 @@ void Selection::ExpandMaxSize()
   this->CardinalitySelection++;
 }
 
-void Selection::ComputeDebugString()
-{ this->ToString(this->DebugString);
-}
-
 void Selection::WriteToFile(std::fstream& output)
 { output << "Sel_max_size: " << this->MaxSize << " cardinality: " << this->CardinalitySelection << " ";
   for (int i=0; i<this->CardinalitySelection; i++)
@@ -656,7 +652,7 @@ void Selection::ReadFromFile(std::fstream& input)
 
 void Selection::ToString(std::string& output)const
 { std::stringstream out;
-  out << "Cardinality: " << this->CardinalitySelection << "\n";
+  //out << "Cardinality: " << this->CardinalitySelection << "\n";
   Vector<Rational> tempRoot;
   tempRoot=*this;
   out << tempRoot.ToString();
@@ -817,6 +813,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseHTML=true;
   this->flagUseLatex=false;
   this->MaxLinesPerPage=40;
+  this->NumAmpersandsPerNewLineForLaTeX=0;
   this->flagMakingExpressionTableWithLatex=false;
   this->MaxRecursionDepthPerExpression=500;
 }

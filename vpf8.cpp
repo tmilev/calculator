@@ -320,8 +320,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->preferredBasisChangE.ActOnVectorColumn(tempRoot);
   tempRoot.Minus();
   this->log << "\n\nIn $so(7)$-simple basis coordinates, $\\rho_{\\mathfrak l}=" <<
-  theSubgroup.GetRho().ElementToStringLetterFormat("\\eta", true)
-  << "$; $\\pr(\\rho)=" << tempRoot.ElementToStringLetterFormat("\\alpha", true) << "$."
+  theSubgroup.GetRho().ToStringLetterFormat("\\eta")
+  << "$; $\\pr(\\rho)=" << tempRoot.ToStringLetterFormat("\\alpha") << "$."
   ;
   this->log << "\n\n\\begin{longtable}{r|l}$w$ & \\begin{tabular}{c}Argument of the vector partition function in (\\ref{eqMultG2inB3General}) =\\\\ $u_w\\circ"
   << tempVect.ToString(&theFormat) << "-\\tau_w$ \\end{tabular}  \\\\ \\hline \\endhead";
@@ -955,7 +955,7 @@ std::string PiecewiseQuasipolynomial::ToString(bool useLatex, bool useHtml)
       out << "<br>";
     out << "quasipolynomial: ";
     if (useLatex& useHtml)
-      out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(currentQP.ToString(useHtml, useLatex));
+      out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(currentQP.ToString(useHtml, useLatex));
     else
     { out << currentQP.ToString(useHtml, useLatex);
     }
@@ -2741,11 +2741,11 @@ int ParserNode::EvaluateGroebner
   FormatExpressions theFormat;
   for(int i=0; i<inputBasis.size; i++)
     out1 << inputBasis.TheObjects[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out1.str());
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
   out << "<br>Reduced Groebner basis:";
   for(int i=0; i<outputGroebner.size; i++)
     out2 << outputGroebner.TheObjects[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginARCL(out2.str());
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
   theNode.ExpressionType=theNode.typeString;
   theNode.outputString= out.str();
   return theNode.errorNoError;
@@ -5800,6 +5800,9 @@ std::string ElementSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)c
 { std::stringstream out; std::string tempS;
   if (this->IsEqualToZero())
     out << "0";
+  MemorySaving<FormatExpressions> tempFormat;
+  if (theFormat==0)
+    theFormat=&tempFormat.GetElement();
   bool found=false;
   for (int i=0; i<this->size; i++)
     if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))
@@ -5820,7 +5823,7 @@ std::string ElementSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)c
     }
   Vector<Rational> hComponent=this->GetCartanPart();
   if (!hComponent.IsEqualToZero())
-  { std::string tempS=hComponent.ElementToStringLetterFormat("h", false);
+  { std::string tempS=hComponent.ToStringLetterFormat(theFormat->chevalleyHgeneratorLetter);
     if (tempS[0]!='-' && found)
       out << "+";
     out << tempS;
@@ -6682,7 +6685,7 @@ std::string CGI::GetHtmlMathFromLatexFormulA
     out << "<span";
   out << " id=\"theResult" << CGI::GlobalFormulaIdentifier << "\" class=\"math\" scale=\"50\">";
   if (useBeginArrayRCL)
-    out << "\\begin{array}{rcl}&&\n";
+    out << "\\begin{array}{l}\n";
   out << input;
   if (useBeginArrayRCL)
     out << "\n\\end{array}";
@@ -6692,7 +6695,7 @@ std::string CGI::GetHtmlMathFromLatexFormulA
     out << "</span>";
   out << "<textarea id=\"theResultLatex" << CGI::GlobalFormulaIdentifier << "\" style=\"display: none\">";
   if (useBeginArrayRCL)
-    out << "\\begin{array}{rcl}&&\n";
+    out << "\\begin{array}{l}\n";
   out << input ;
   if (useBeginArrayRCL)
     out << "\n\\end{array}";
@@ -7121,7 +7124,7 @@ void WeylGroup::DrawRootSystem
     if (LabelDynkinDiagramVertices)
     { Vector<Rational>& current=epsNotationSimpleBasis[i];
       output.drawTextAtVectorBuffer
-      (tempRootRat, current.ElementToStringLetterFormat("e", false, false),0, 10, DrawingVariables::TextStyleNormal);
+      (tempRootRat, current.ToStringLetterFormat("e"),0, 10, DrawingVariables::TextStyleNormal);
     }
   }
   std::stringstream tempStream;
@@ -8437,7 +8440,7 @@ int ParserNode::EvaluateModVermaRelations
   theNode.UEElement.GetElement()=theArgument.UEElement.GetElement();
   std::stringstream out;
   out << "The element you wanted to be modded out, before simplification: "
-  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   ( theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultFormat))
 ;
   Polynomial<Rational>  polyOne, polyZero;
@@ -8445,7 +8448,7 @@ int ParserNode::EvaluateModVermaRelations
   polyZero.MakeZero(theNode.impliedNumVars);
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
-  << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   (theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultFormat))
   ;
   assert(false);

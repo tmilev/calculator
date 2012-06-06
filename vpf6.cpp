@@ -516,6 +516,12 @@ const Context& Data::GetContext()const
   return this->owner->theObjectContainer.theContexts[this->theContextIndex];
 }
 
+void Context::GetFormatExpressions(FormatExpressions& output)const
+{ output.polyAlphabeT.SetSize(this->VariableImages.size);
+  for (int i=0; i<this->VariableImages.size; i++)
+    output.polyAlphabeT[i]=this->VariableImages[i].ToString();
+}
+
 std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpressions* inputFormat)const
 { std::stringstream out;
   if (this->owner==0)
@@ -524,10 +530,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
   if (inputFormat!=0)
     theFormat.flagUseLatex=inputFormat->flagUseLatex;
   if (this->theContextIndex!=-1)
-  { theFormat.polyAlphabeT.SetSize(this->GetContext().VariableImages.size);
-    for (int i=0; i<this->GetContext().VariableImages.size; i++)
-      theFormat.polyAlphabeT[i]=this->GetContext().VariableImages[i].ToString();
-  }
+    this->GetContext().GetFormatExpressions(theFormat);
   switch(this->type)
   { case Data::typeSSalgebra:
       out << "SemisimpleLieAlgebra{}("
@@ -1956,7 +1959,7 @@ bool CommandList::fSSAlgebra
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
       << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
-      << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(theWeyl.CartanSymmetric.ToString(false, true) );
+      << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theWeyl.CartanSymmetric.ToString(false, true) );
       Rational tempRat;
       Matrix<Rational> tempMat;
       tempMat = theWeyl.CartanSymmetric;
@@ -2030,7 +2033,7 @@ bool CommandList::fSSAlgebra
       for (int i=0; i<theWeyl.RootSystem.size; i++)
       { Vector<Rational>& current=theWeyl.RootSystem[i];
         out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
-        << rootSystemEpsCoords[i].ElementToStringLetterFormat("e", false)
+        << rootSystemEpsCoords[i].ToStringLetterFormat("e")
         << "</td></tr>";
       }
       out << "</table>";
@@ -2194,7 +2197,7 @@ void CommandList::initPredefinedVars()
   ("WeylDimFormula", & this->fWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
-   "WeylDimFormula{}(G_2, (123,0));\nWeylDimFormula{}(B_3, (123,0,0));");
+   "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
   this->AddNonBoundVarMustBeNew
   ("animateLittelmannPaths", & this->fAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. Presented first on the seminar in Charles University Prague. \
@@ -2246,13 +2249,16 @@ void CommandList::initPredefinedVars()
   this->AddNonBoundVarMustBeNew
   ("fPrintB3G2branchingTableCharsOnly", &this->fPrintB3G2branchingTableCharsOnly, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the function gives the maximum height \
-   of the B_3-weight. Using a number higher than 5 is highly likely to pop the server time limits.",
-   "fPrintB3G2branchingTableCharsOnly{}(2)");
+   of the B_3-weight. The second argument indicates the parabolic subalgebra of B_3- zero entry stands for the corresponding root space lying \
+   in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is not in the parabolic. The expression given \
+   in that coordinate is used as the corresponding highest weight. ",
+   "fPrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); fPrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
   ("fPrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
-   "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the function gives the maximum height \
+   "Creates a table of branching of finite dimensional B_3-modules over G_2. \
+    The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
-   "fPrintB3G2branchingTable{}(1)");
+   "fPrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))");
 /*  this->AddNonBoundVarMustBeNew
   ("JacobiSymbol", &this->fJacobiSymbol, "",
    "Jacobi symbol as implemented by user Numeri @ www.cplusplus.com.",
@@ -4004,12 +4010,12 @@ std::string Expression::ToString
         createTable=(startingExpression->theOperation==this->theBoss->opEndStatement() && startingExpression->children.size==this->children.size);
       if (createTable)
       { out << "<hr> "
-        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL( startingExpression->children[i].ToString(theFormat, false, false, 0));
+        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( startingExpression->children[i].ToString(theFormat, false, false, 0));
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
         if (!this->children[i].IsString() || !isFinal)
-          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(this->children[i].ToString(theFormat, false, false, outComments));
+          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(this->children[i].ToString(theFormat, false, false, outComments));
         else
           out << this->children[i].GetAtomicValue().GetValuE<std::string>();
         if (i!=this->children.size-1)
@@ -4046,11 +4052,11 @@ std::string Expression::ToString
     if (this->theOperation==this->theBoss->opEndStatement())
       outTrue << out.str();
     else
-    { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(startingExpression->ToString(theFormat));
+    { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
       if (this->IsString() && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
-        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(out.str()) << "</td></tr>";
+        outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";
     }
     outTrue << "</table>";
     return outTrue.str();

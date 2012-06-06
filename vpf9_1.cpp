@@ -849,9 +849,9 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
       //<< this->AmbientWeyl.GetFundamentalCoordinatesFromSimple
       //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
       tempStream2
-      << this->kModulesgEpsCoords[i][0].ElementToStringLetterFormat("\\epsilon", true, false);
+      << this->kModulesgEpsCoords[i][0].ToStringLetterFormat("\\epsilon");
       tempStream3
-      << this->HighestWeightsGmodK[i].ElementToStringLetterFormat("\\alpha", true, false);
+      << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
       //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
       tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
       tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";

@@ -996,16 +996,19 @@ public:
   static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)
   { return CGI::GetHtmlMathFromLatexFormulA(input, "", "", true, false);
   }
-  static std::string GetHtmlMathDivFromLatexAddBeginARCL(const std::string& input)
+  static std::string GetHtmlMathDivFromLatexAddBeginArrayL(const std::string& input)
   { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", true, true);
   }
-  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(const std::string& input)
+  static std::string GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(const std::string& input)
   { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, true);
   }
   static std::string GetHtmlMathSpanFromLatexFormula(const std::string& input)
   { return  CGI:: GetHtmlMathFromLatexFormulA(input, "", "", false, false);
   }
-  static std::string GetHtmlMathSpanNoButtonAddBeginArrayRCL
+  static std::string GetHtmlMathSpanNoButtonAddBeginArrayL
+  (const std::string& input)
+;
+  static std::string GetHtmlMathSpanPure
   (const std::string& input)
 ;
   static std::string GetHtmlMathFromLatexFormulA
@@ -1994,8 +1997,6 @@ public:
   static inline unsigned int HashFunction(const Selection& input)
   { return input.HashFunction();
   }
-  std::string DebugString;
-  void ComputeDebugString();
   std::string ToString()const {std::string tempS; this->ToString(tempS); return tempS;}
   void ToString(std::string& output)const;
   void incrementSelection();
@@ -2032,7 +2033,7 @@ public:
   Selection();
   Selection(int m);
   Selection(const Vector<Rational>& other) { this->operator=(other);}
-  Selection(const Selection& other)
+  Selection(const Selection& other):MaxSize(0), CardinalitySelection(0)
   { this->Assign(other);
   }
 };
@@ -3283,11 +3284,13 @@ public:
     out << ")";
     return out.str();
   }
-  std::string ElementToStringLetterFormat(const std::string& inputLetter, bool useLatex=false, bool DontIncludeLastVar=false)const;
+  std::string ToStringLetterFormat
+  (const std::string& inputLetter, FormatExpressions* theFormat=0, bool DontIncludeLastVar=false)const
+  ;
   std::string ElementToStringLetterFormat
   (const FormatExpressions& theFormat, bool useLatex=false, bool DontIncludeLastVar=false)const;
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml)
-  { return this->ElementToStringLetterFormat("\\varepsilon", useLatex, false);
+  { return this->ToStringLetterFormat("\\varepsilon");
   }
   inline CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero=0)const
   { CoefficientType output;
@@ -4260,6 +4263,7 @@ public:
   std::string GetChevalleyGletter(int index)const;
   FormatExpressions();
   int ExtraLinesCounterLatex;
+  int NumAmpersandsPerNewLineForLaTeX;
   int MaxRecursionDepthPerExpression;
   int MaxLineLength;
   int MaxLinesPerPage;
@@ -5324,7 +5328,11 @@ public:
   inline bool operator==(const RationalFunction& other){return this->IsEqualTo(other);}
   void Simplify();
   void SimplifyLeadingCoefficientOnly();
-  void operator+=(int theConstant){RationalFunction tempRF; tempRF.MakeConst(this->NumVars, (Rational) theConstant, this->context); (*this)+=tempRF;}
+  void operator+=(int theConstant)
+  { RationalFunction tempRF;
+    tempRF.MakeConst(this->NumVars, (Rational) theConstant, this->context);
+    (*this)+=tempRF;
+  }
   void operator*=(const RationalFunction& other);
   void operator*=(const Polynomial<Rational> & other);
   void operator*=(const Rational& other);

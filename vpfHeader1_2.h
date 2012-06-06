@@ -3026,6 +3026,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 //way too large a lump to pass separately
 struct branchingData
 { HomomorphismSemisimpleLieAlgebra theHmm;
+  FormatExpressions theFormat;
   Vector<RationalFunction> theWeightFundCoords;
   charSSAlgMod<RationalFunction> theAmbientChar;
   charSSAlgMod<RationalFunction> theSmallCharFDpart;
@@ -3040,13 +3041,21 @@ struct branchingData
   Vectors<Rational> generatorsSmallSub;
   List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   List<RationalFunction> theChars;
-  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectors;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorS;
+  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorsLevi;
   ReflectionSubgroupWeylGroup WeylFD;
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup WeylFDSmall;
+  std::string GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple);
   void resetOutputData();
-  void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
+  void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
   ;
+  void initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
+  ;
+  void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
+  { this->initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
+    this->initAssumingParSelAndHmmInittedPart2Subgroups(theGlobalVariables);
+  }
 };
 
 template <class CoefficientType>
@@ -5780,7 +5789,11 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
       if (cutOffCounter>theFormat->MaxLineLength)
       { cutOffCounter=0;
         if (theFormat->flagUseLatex && i!=sortedMons.size-1)
-          out << " \\\\&& ";
+        { out << " \\\\";
+          for (int k=0; k<theFormat->NumAmpersandsPerNewLineForLaTeX; k++)
+            out << "&";
+          out << " ";
+        }
         if (theFormat->flagUseHTML && !theFormat->flagUseLatex)
           out << " <br>";
       }
@@ -7401,12 +7414,18 @@ std::string MonomialChar<CoefficientType>::ToString
   (FormatExpressions* theFormat)const
 { std::stringstream out;
   bool useOmega=true;
+  std::string oldCustomPlus;
   if (theFormat!=0)
-    useOmega=(theFormat->fundamentalWeightLetter=="");
+  { useOmega=(theFormat->fundamentalWeightLetter=="");
+    oldCustomPlus=theFormat->CustomPlusSign;
+    theFormat->CustomPlusSign="";
+  }
   if (useOmega)
-    out << "V_{" << weightFundamentalCoords.ElementToStringLetterFormat("\\omega", false) << "}";
+    out << "V_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
   else
-    out << "V_{" << weightFundamentalCoords.ElementToStringLetterFormat(theFormat->fundamentalWeightLetter, false) << "}";
+    out << "V_{" << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+  if (theFormat!=0)
+    theFormat->CustomPlusSign=oldCustomPlus;
   return out.str();
 }
 
@@ -7708,9 +7727,9 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
       }
   }
   output.Reset();
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   (remainingCharDominantLevi.ToString());
-//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+//  std::cout << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
 // (remainingCharDominantLevi.ToString());
 
   Vector<CoefficientType> simpleGeneratorBaseField;
@@ -7749,7 +7768,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
     }
 //    std::cout << "<br>remaining character after accounting:<br>" << remainingCharDominantLevi.ToString();
   }
-  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginARCL
+  out << "<br>Character w.r.t Levi part: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
   (output.ToString())
   ;
 

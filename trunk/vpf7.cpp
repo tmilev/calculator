@@ -260,8 +260,8 @@ void MonomialChar<CoefficientType>::AccountSingleWeight
 }
 
 template <class CoefficientType>
-std::string Vector<CoefficientType>::ElementToStringLetterFormat
-(const std::string& inputLetter, bool useLatex, bool DontIncludeLastVar)const
+std::string Vector<CoefficientType>::ToStringLetterFormat
+(const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
 { if (this->IsEqualToZero())
     return "0";
   std::stringstream out;
@@ -270,7 +270,7 @@ std::string Vector<CoefficientType>::ElementToStringLetterFormat
   int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
   for(int i=0; i<NumVars; i++)
     if (!this->TheObjects[i].IsEqualToZero())
-    { tempS=this->TheObjects[i].ToString();
+    { tempS=this->TheObjects[i].ToString(theFormat);
       if (tempS=="1")
         tempS="";
       if (tempS=="-1")
@@ -333,7 +333,7 @@ std::string charSSAlgMod<CoefficientType>::ElementToStringCharacter
     this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(theWeights[i]);
     theMod.AddMonomial(currentSummand, theMults[i]);
   }
-  out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(theMod.ToString());
+  out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theMod.ToString());
   return out.str();
 }
 
@@ -345,7 +345,7 @@ int ParserNode::EvaluateFreudenthal(ParserNode& theNode, List<int>& theArgumentL
   std::string localDetailsString;
   if (ch.FreudenthalEvalMe(finalChar, localDetailsString, theGlobalVariables, 1000000))
   { out << "resulting character in fundamental coordinates: <br>";
-    out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayRCL(finalChar.ToString());
+    out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(finalChar.ToString());
   }
   out << "<br>" << localDetailsString;
   theNode.outputString=out.str();
@@ -1220,7 +1220,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     latexTableStream << "} \n\\hline\\hline \\multicolumn{"
     << this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection+3
     << "}{|c|}{ Highest weight $\\lambda="
-    << this->theHWFundamentalCoordsBaseField.ElementToStringLetterFormat("\\omega", false, false)
+    << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega")
     << "$}\\\\\\hline Element& weight & monomial expression";
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
     { int theIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[i]
@@ -1235,7 +1235,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       { monCounter++;
         latexTableStream << "$m_{" << monCounter << "}$&";
         currentWeightFundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
-        latexTableStream << "\n$" << (this->theHWFundamentalCoordsBaseField+currentWeightFundCoords-hwFundCoordsTrimmedBaseField).ElementToStringLetterFormat("\\omega", false, false);
+        latexTableStream << "\n$"
+        << (this->theHWFundamentalCoordsBaseField
+        +currentWeightFundCoords-hwFundCoordsTrimmedBaseField).ToStringLetterFormat("\\omega");
         std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ToString(&theGlobalVariables.theDefaultFormat);
         if (theMonString=="1")
           theMonString="";
@@ -2442,13 +2444,20 @@ std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& in
   return out.str();
 }
 
-std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayRCL(const std::string& input)
+std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input)
 { std::stringstream out;
-  out << "<span class=\"math\">\\begin{array}{rcl}&&" << input << "\\end{array} </span>";
+  out << "<span class=\"math\">\\begin{array}{l}" << input << "\\end{array} </span>";
   return out.str();
 }
 
-void branchingData::initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
+std::string CGI::GetHtmlMathSpanPure(const std::string& input)
+{ std::stringstream out;
+  out << "<span class=\"math\">" << input << "</span>";
+  return out.str();
+}
+
+
+void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
 { this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl=this->theHmm.theRange().theWeyl;
@@ -2463,7 +2472,10 @@ void branchingData::initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVa
         break;
       }
   }
-  List<Vectors<Rational> > emptyList;
+}
+
+void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
+{ List<Vectors<Rational> > emptyList;
   this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
   (this->generatorsSmallSub, emptyList, theGlobalVariables, 1000, true);
   this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
@@ -2476,4 +2488,25 @@ void branchingData::initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVa
   this->WeylFD.ComputeRootSubsystem();
   this->WeylFDSmallAsSubInLarge.ComputeRootSubsystem();
   this->WeylFDSmall.ComputeRootSubsystem();
+}
+
+std::string branchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple)
+{ Vector<RationalFunction> weightDifference;
+  std::stringstream formulaStream1;
+  HashedList<Vector<RationalFunction> > accountedDiffs;
+  accountedDiffs.SetExpectedSize(this->g2Weights.size);
+  bool found=false;
+  for (int i=0; i<this->g2Weights.size; i++)
+  { weightDifference= this->g2Weights[i]-this->g2Weights[theIndex];
+    if (weightDifference.IsPositive() && !accountedDiffs.Contains(weightDifference))
+    { accountedDiffs.AddOnTop(weightDifference);
+      if (additionalMultiple!=1)
+        formulaStream1 << additionalMultiple.ToString(&this->theFormat);
+      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].ToString(&this->theFormat) <<  "))";
+      found=true;
+    }
+  }
+  if (!found)
+    formulaStream1 << "id";
+  return formulaStream1.str();
 }

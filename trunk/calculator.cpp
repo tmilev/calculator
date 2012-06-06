@@ -347,6 +347,9 @@ g_{-2} v_\\lambda\
 //  civilizedInput="fPrintB3G2branchingTableCharsOnly{}(2)";
 //civilizedInput= "fSplitFDpartB3overG2{}(0,1,0)";
 //civilizedInput="fPrintB3G2branchingTable{}(1)";
+//civilizedInput="fPrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))";
+//civilizedInput="fPrintB3G2branchingTable{}(2, (0,x,0)); ";
+//civilizedInput="fPrintB3G2branchingTable{}(2, (x_1,x_2,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -369,6 +372,7 @@ g_{-2} v_\\lambda\
     << "\">Link to your input.</a><br>";
 //  std::cout << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw);
   std::cout << "\n</FORM>";
+  std::cout.flush();
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   if (civilizedInput!="")
   { if (inputStringNames.ContainsObject("checkUsePreamble"))

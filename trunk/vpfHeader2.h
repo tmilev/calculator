@@ -468,6 +468,7 @@ class Context
   CommandList* theOwner;
   Context(CommandList& inputOwner):indexAmbientSSalgebra(-1){this->theOwner=&inputOwner;}
   Context():indexAmbientSSalgebra(-1),theOwner(0){}
+  void GetFormatExpressions(FormatExpressions& output)const;
   void operator=(const Context& other);
   bool operator==(const Context& other)
   { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
@@ -1013,11 +1014,20 @@ static bool EvaluateDereferenceOneArgument
   ;
   bool fPrintB3G2branchingIntermediate
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data
+ Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data, Context& theContext
  )
  ;
+  static bool fPrintB3G2branchingTableInit
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+   branchingData& theG2B3data, int& desiredHeight, Context& outputContext)
+  ;
   static bool fPrintB3G2branchingTable
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fPrintB3G2branchingTableCommon
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+  Vectors<RationalFunction>& outputHWs, branchingData& theG2B3Data, Context& theContext
+  )
   ;
   static bool fPolynomial
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
@@ -1027,7 +1037,7 @@ static bool EvaluateDereferenceOneArgument
   ;
   bool fSplitFDpartB3overG2Init
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- branchingData& theG2B3Data
+ branchingData& theG2B3Data, Context& outputContext
  )
  ;
   static bool fSplitFDpartB3overG2CharsOnly

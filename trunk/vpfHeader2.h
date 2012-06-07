@@ -133,6 +133,8 @@ public:
   bool OperatorDereference
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
+  static bool DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+
   static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
@@ -599,6 +601,7 @@ public:
   HashedList<Data> theData;
   HashedList<DataCruncher> theMultiplicativeDataCrunchers;
   HashedList<DataCruncher> theAdditiveDataCrunchers;
+  HashedList<DataCruncher> theDivDataCrunchers;
   ObjectContainer theObjectContainer;
   double StartTimeEvaluationInSecondS;
 
@@ -652,6 +655,16 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
+  void RegisterDivCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
+    if (this->theDivDataCrunchers.Contains(d))
+    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
+      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      assert(false);
+    }
+    this->theDivDataCrunchers.AddOnTop(d);
+  }
+
   void RegisterMultiplicativeDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
   { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
     if (this->theMultiplicativeDataCrunchers.Contains(d))
@@ -667,6 +680,13 @@ public:
     if (theIndex==-1)
       return 0;
     return this->theMultiplicativeDataCrunchers[theIndex].theCruncher;
+  }
+  DataCruncher::CruncherDataTypes GetDivCruncher(int inputLeftType, int inputRightType)
+  { DataCruncher d(inputLeftType, inputRightType, 0);
+    int theIndex=this->theDivDataCrunchers.GetIndex(d);
+    if (theIndex==-1)
+      return 0;
+    return this->theDivDataCrunchers[theIndex].theCruncher;
   }
   void RegisterAdditiveDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
   { DataCruncher d(inputLeftType, inputRightType, inputCruncher);

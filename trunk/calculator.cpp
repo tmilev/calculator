@@ -350,6 +350,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="fPrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))";
 //civilizedInput="fPrintB3G2branchingTable{}(2, (0,x,0)); ";
 //civilizedInput="fPrintB3G2branchingTable{}(2, (x_1,x_2,0))";
+//  civilizedInput="1/0";
+//  civilizedInput="x_1:=Polynomial{}(x_{{1}});x_2:=Polynomial{}(x_{{2}});x_1/x_2+x_1/(x_1+x_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

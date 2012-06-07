@@ -2742,7 +2742,14 @@ class Rational
   }
   inline bool TryToMultiplyQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
-    assert(this->DenShort>0 && OtherDen>0);
+    if (this->DenShort<=0 || OtherDen<=0)
+    { if (DenShort==0 || OtherDen==0)
+        std::cout << "This is a programming error: division by zero. ";
+      else
+        std::cout << "This is a programming error: corrupt rational number denominator. ";
+      std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     if (OtherNum<0)
       OtherNumAbs=-OtherNum;
     else
@@ -5131,7 +5138,7 @@ public:
 
   int GetNumVars() {return this->NumVars;}
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  RationalFunction(const RationalFunction& other)
+  RationalFunction(const RationalFunction& other): context(0), NumVars(0), expressionType(RationalFunction::typeRational)
   { this->Assign(other);
   }
   RationalFunction()
@@ -5312,8 +5319,8 @@ public:
       return;
     }
     if (this->expressionType==other.expressionType)
-    { std::string tempS;
-      tempS=other.ToString();
+    { //std::string tempS;
+      //tempS=other.ToString();
       this->AddSameTypes(other);
       assert(this->checkConsistency());
       return;
@@ -5364,7 +5371,8 @@ public:
   }
   inline void TimesConstant(const Rational& theConst){ this->operator*=(theConst);}
   void Invert()
-  { assert(this->checkConsistency());
+  { //std::cout << "inverting " << this->ToString();
+    assert(this->checkConsistency());
     if (this->expressionType==this->typeRational)
     { assert(!this->ratValue.IsEqualToZero());
       this->ratValue.Invert();
@@ -5377,6 +5385,7 @@ public:
     this->ReduceMemory();
     this->SimplifyLeadingCoefficientOnly();
     assert(this->checkConsistency());
+    //std::cout << " to get: " << this->ToString();
   }
   void MakeOne(int theNumVars, GlobalVariables* theContext)
   { this->MakeConst(theNumVars, 1, theContext);
@@ -5871,7 +5880,8 @@ bool Polynomial<Element>::IsProportionalTo(const Polynomial<Element>& other, Ele
 template <class Element>
 void Polynomial<Element>::DivideBy
 (const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
-{ assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
+{ MacroRegisterFunctionWithName("Polynomial<Element>::DivideBy");
+  assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
   outputRemainder=(*this);
   MonomialP scaleRemainder;
   MonomialP scaleInput;
@@ -5894,12 +5904,19 @@ void Polynomial<Element>::DivideBy
    // tempInput.ComputeDebugString();
   //}
   assert(remainderMaxMonomial<outputRemainder.size);
-  assert(inputMaxMonomial<tempInput.size);
-  while (outputRemainder.TheObjects[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput.TheObjects[inputMaxMonomial]))
+  if (inputMaxMonomial>=tempInput.size || inputMaxMonomial<0)
+  { std::cout << "This is a programming error: the index of the maximal input monomial is "
+    << inputMaxMonomial << " while the polynomial has " << tempInput.size << "  monomials. I am attempting to divide "
+    << this->ToString() << " by " << inputDivisor.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+//  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
+//  << " and " << tempInput[inputMaxMonomial].ToString();
+  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
   { assert(remainderMaxMonomial<outputRemainder.size);
     tempMon=outputRemainder[remainderMaxMonomial];
     tempMon-=tempInput[inputMaxMonomial];
-    if (!tempMon.IsPositive())
+    if (!tempMon.IsPositiveOrZero())
       break;
     Element tempCoeff=outputRemainder.theCoeffs[remainderMaxMonomial]/tempInput.theCoeffs[inputMaxMonomial] ;
     outputQuotient.AddMonomial(tempMon, tempCoeff);
@@ -5915,6 +5932,9 @@ void Polynomial<Element>::DivideBy
   outputQuotient.MultiplyBy(scaleInput,1);
   outputQuotient.MultiplyBy(scaleRemainder,1);
   outputRemainder.MultiplyBy(scaleRemainder,1);
+//  std::cout << "<br> " << this->ToString() << " divided by " << inputDivisor.ToString() << " yields " << outputQuotient.ToString()
+//  << " with remainder " << outputRemainder.ToString();
+
 }
 
 template <class Element>
@@ -6476,7 +6496,7 @@ public:
     this->ComputeProjectionsEiVectors();
   }
   void initDimensions
-  (Matrix<Rational> & bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
+  (Matrix<Rational>& bilinearForm, Vectors<double>& draggableBasis, Vectors<double>& startingPlane, int NumAnimationFrames)
   { Matrix<double> tempMat;
     tempMat.init(bilinearForm.NumRows, bilinearForm.NumCols);
     for (int i=0; i<bilinearForm.NumRows; i++)

@@ -4056,7 +4056,7 @@ std::string RationalFunction::ToString(FormatExpressions* theFormat)const
   if (hasDenominator)
   { //if (useLatex)
     //  out << "}{";
-    out << this->Denominator.GetElementConst().ToString(theFormat);
+    out << "/(" << this->Denominator.GetElementConst().ToString(theFormat) << ")";
     //if (useLatex)
     //  out << "}";
   }
@@ -4219,21 +4219,26 @@ void RationalFunction::ReduceGroebnerBasis
   }
 }
 
-void RationalFunction::gcd(const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, Polynomial<Rational> & buffer5, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
-{ RationalFunction::lcm(left, right, buffer4, buffer1, buffer2, buffer3, buffer5, bufferMon1, bufferMon2, bufferList);
+void RationalFunction::gcd
+(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output,
+ Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3,
+ Polynomial<Rational>& buffer4, Polynomial<Rational>& buffer5, MonomialP& bufferMon1,
+ MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
+{ RationalFunction::lcm(left, right, buffer1, buffer2, buffer3, buffer4, buffer5, bufferMon1, bufferMon2, bufferList);
   buffer2=left;
   buffer2*=right;
-//  std::cout << "<br>the product: " << buffer2.DebugString << " and the gcd: " << buffer4.DebugString << "<br>";
-  buffer2.DivideBy(buffer4, output, buffer3);
+//  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
+  buffer2.DivideBy(buffer1, output, buffer3);
+//  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
 void RationalFunction::lcm
-(const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output,
- Polynomial<Rational> & buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3,
- Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
-{ Polynomial<Rational> & leftTemp=buffer1;
-  Polynomial<Rational> & rightTemp=buffer2;
-  Polynomial<Rational> & tempP=buffer3;
+(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output,
+ Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational>& buffer3,
+ Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
+{ Polynomial<Rational>& leftTemp=buffer1;
+  Polynomial<Rational>& rightTemp=buffer2;
+  Polynomial<Rational>& tempP=buffer3;
   List<Polynomial<Rational> >& tempList=bufferList;
   leftTemp=(left);
   rightTemp=(right);
@@ -4428,10 +4433,22 @@ void RationalFunction::operator*=(const RationalFunction& other)
 }
 
 void RationalFunction::Simplify()
-{ if (this->expressionType==this->typeRationalFunction)
+{ MacroRegisterFunctionWithName("RationalFunction::Simplify");
+  if (this->expressionType==this->typeRationalFunction)
     if(!this->Numerator.GetElement().IsEqualToZero())
-    { Polynomial<Rational>  theGCD, tempP, tempP2;
+    { Polynomial<Rational> theGCD, tempP, tempP2;
+//      std::cout << "<br>fetching gcd of " << this->Numerator.GetElement().ToString() << " and "
+//      << this->Denominator.GetElement().ToString() << "<br>";
       this->gcd(this->Numerator.GetElement(), this->Denominator.GetElement(), theGCD, this->context);
+      if (theGCD.IsEqualToZero())
+      { std::cout << "This is a programing error: "
+        << " while fetching the gcd of " << this->Numerator.GetElement().ToString() << " and "
+        << this->Denominator.GetElement().ToString() << " I got 0, which is impossible. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+//      std::cout << "to get " << theGCD.ToString();
+//      std::cout << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement()=(tempP);
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
@@ -6136,9 +6153,10 @@ int ParserNode::EvaluateSlTwoInSlN
 }
 
 void RationalFunction::AddHonestRF(const RationalFunction& other)
-{ Rational tempRat;
+{ MacroRegisterFunctionWithName("RationalFunction::AddHonestRF");
+  Rational tempRat;
   if (!this->Denominator.GetElement().IsProportionalTo(other.Denominator.GetElementConst(), tempRat, (Rational) 1))
-  { Polynomial<Rational>  buffer;
+  { Polynomial<Rational> buffer;
 //    RationalFunction debugger;
 //    debugger=other;
 //    debugger.ComputeDebugString();
@@ -6148,6 +6166,7 @@ void RationalFunction::AddHonestRF(const RationalFunction& other)
     buffer*=(other.Numerator.GetElementConst());
     this->Numerator.GetElement()+=(buffer);
     this->Denominator.GetElement()*=(other.Denominator.GetElementConst());
+    assert(!this->Denominator.GetElement().IsEqualToZero());
     this->Simplify();
 //    this->ComputeDebugString();
   } else

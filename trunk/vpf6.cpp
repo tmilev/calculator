@@ -547,7 +547,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
         return "(string not shown to avoid javascript problems)";
     case Data::typeElementUE:
       if (theFormat.flagUseLatex)
-        out << "\\begin{array}{rcl}&&";
+        out << "\\begin{array}{l}";
       out << "UE{}(" << this->owner->theObjectContainer.theUEs[this->theIndex].ToString(&theFormat) << ")";
       if (theFormat.flagUseLatex)
         out << "\\end{array}";
@@ -559,7 +559,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
       return this->GetValuE<Rational>().ToString();
     case Data::typePoly:
       if (theFormat.flagUseLatex)
-        out << "\\begin{array}{rcl}&& ";
+        out << "\\begin{array}{l} ";
       out << "Polynomial{}(";
       out << "(" << this->owner->theObjectContainer.thePolys[this->theIndex].ToString(&theFormat) << ")";
       out  << ")";
@@ -568,7 +568,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
       return out.str();
     case Data::typeEltTensorGenVermasOverRF:
       if (theFormat.flagUseLatex)
-        out << "\\begin{array}{rcl}&& ";
+        out << "\\begin{array}{l} ";
       out << "EltTensor{}(" << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().ToString(&theFormat) << ")";
       if (theFormat.flagUseLatex)
         out <<"\\end{array}";
@@ -645,7 +645,8 @@ const RationalFunction& Data::GetRF()const
 }
 
 Data Data::operator*(const Data& right)const
-{ Data result(*this);
+{ MacroRegisterFunctionWithName("Data::operator*");
+  Data result(*this);
   if (this->type!=this->typeRational || right.type!=this->typeRational)
   { std::cout << "I cannot divide expression of type " << this->type << " by expression of type " << right.type;
     assert(false);
@@ -1852,7 +1853,11 @@ bool CommandList::fMatrix
 
 bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ Polynomial<Rational> outputPoly;
+{ MacroRegisterFunctionWithName("CommandList::fPolynomial");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theCommands.ExpressionHasBoundVars(theExpression))
+    return false;
+  Polynomial<Rational> outputPoly;
   Context finalContext(theCommands);
   if (!theCommands.EvaluatePMTDtree<Polynomial<Rational> >(outputPoly, finalContext, theExpression, comments))
   { theExpression.SetError("Failed to convert to polynomial: see comments. ");
@@ -1865,7 +1870,11 @@ bool CommandList::fPolynomial
 
 bool CommandList::fElementUniversalEnvelopingAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ ElementUniversalEnveloping<RationalFunction> outputUE;
+{ MacroRegisterFunctionWithName("CommandList::fElementUniversalEnvelopingAlgebra");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theCommands.ExpressionHasBoundVars(theExpression))
+    return false;
+  ElementUniversalEnveloping<RationalFunction> outputUE;
   HashedList<Expression> varImagesBuffer;
   Context finalContext(theCommands);
   if (!theCommands.ExtractPMTDtreeContext<ElementUniversalEnveloping<RationalFunction> >
@@ -2115,6 +2124,11 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeElementUE, Data::MultiplyAnyByUE);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeElementUE, Data::MultiplyAnyByUE);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeElementUE, Data::MultiplyAnyByUE);
+
+  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::DivideRFOrPolyByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::DivideRFOrPolyByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::DivideRFOrPolyByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typePoly, Data::DivideRFOrPolyByRFOrPoly);
 
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
@@ -2647,6 +2661,28 @@ bool Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& ri
   return true;
 }
 
+bool Data::DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+    return false;
+  if (!rightCopy.ConvertToTypE<RationalFunction>())
+    return false;
+  if(!output.ConvertToTypE<RationalFunction>())
+    return false;
+  RationalFunction result;
+  result=output.GetValuE<RationalFunction>();
+  if (rightCopy.IsEqualToZero())
+  { output.SetError("Error:division by zero");
+    return true;
+  }
+//  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunction>().ToString();
+  result/=rightCopy.GetValuE<RationalFunction>();
+//  std::cout << " to get " << result.ToString();
+  output.MakeRF(*output.owner, result, output.theContextIndex);
+  return true;
+}
+
 bool Data::MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
 { output=left;
   Data rightCopy=right;
@@ -2750,7 +2786,8 @@ bool Data::AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& ou
 }
 
 bool Data::AddRatOrPolyOrRFToRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments)
-{ output=left;
+{ MacroRegisterFunctionWithName("Data::AddRatOrPolyOrRFToRatOrPolyOrRF");
+  output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))
     return false;
@@ -2791,6 +2828,8 @@ bool CommandList::StandardPower
 bool CommandList::StandardTimes
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  MacroRegisterFunctionWithName("CommandList::StandardTimes");
   if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
     return true;
   if (theCommands.EvaluateDoDistribute
@@ -2810,7 +2849,9 @@ bool CommandList::StandardTimes
 
 bool CommandList::EvaluateDoExtractBaseMultiplication
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.children.size!=2 || theExpression.theOperation!=theCommands.opTimes())
+{ IncrementRecursion theRecursionIncrementer(&theCommands);
+  MacroRegisterFunctionWithName("CommandList::EvaluateDoExtractBaseMultiplication");
+  if (theExpression.children.size!=2 || theExpression.theOperation!=theCommands.opTimes())
     return false;
   bool result=false;
   Expression& leftE=theExpression.children[0];
@@ -2948,7 +2989,8 @@ bool CommandList::EvaluateDoRightDistributeBracketIsOnTheRight
 
 bool CommandList::StandardPlus
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.children.size==2)
+{ MacroRegisterFunctionWithName("CommandList::StandardPlus");
+  if (theExpression.children.size==2)
   { Expression& leftE=theExpression.children[0];
     Expression& rightE=theExpression.children[1];
     if (leftE.EvaluatesToAtom() && rightE.EvaluatesToAtom())
@@ -3217,6 +3259,8 @@ bool CommandList::StandardDivide
   Expression& rightE= theExpression.children[1];
   if (rightE.EvaluatesToRational())
   { Rational tempRat=rightE.GetAtomicValue().GetValuE<Rational>();
+    if (tempRat.IsEqualToZero())
+      return theExpression.SetError("Error: division by zero.");
     tempRat.Invert();
     theExpression.theOperation=theCommands.opTimes();
     rightE.MakeAtom(tempRat, theCommands, inputIndexBoundVars);
@@ -3224,18 +3268,17 @@ bool CommandList::StandardDivide
   }
   if (!leftE.EvaluatesToAtom() || !rightE.EvaluatesToAtom())
     return false;
-  const Data& leftData=leftE.GetAtomicValue();
-  const Data& rightData=rightE.GetAtomicValue();
-  if (leftData.type!=leftData.typeRational || rightData.type!=rightData.typeRational)
+  const Data& LeftD=leftE.GetAtomicValue();
+  const Data& RightD=rightE.GetAtomicValue();
+  Data outputD;
+//  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ToString() << " and " << LeftD.ToString();
+  DataCruncher::CruncherDataTypes theCruncher= theCommands.GetDivCruncher(LeftD.type, RightD.type);
+  if (theCruncher==0)
     return false;
-  if (rightData.GetValuE<Rational>().IsEqualToZero())
-  { if (comments!=0)
-      *comments << "Error: attempt to divide " << leftData.ToString() << " by 0.";
-    theExpression.SetError("Error:DivByZero");
-    return true;
-  }
-  Data resultData=leftData/rightData;
-  theExpression.MakeAtom(resultData, theCommands, inputIndexBoundVars);
+  if (!theCruncher(LeftD, RightD, outputD, comments))
+    return false;
+//  std::cout << "<br> multiplication successful, result: " << outputD.ToString();
+  theExpression.MakeAtom(outputD, theCommands, inputIndexBoundVars);
   return true;
 }
 
@@ -3593,7 +3636,9 @@ static int problemcounter=0;
     { this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
       if (NonReduced)
       { if (currentExpressionTransformations.Contains(theExpression))
-        { std::stringstream errorStream;
+        { if (theExpression.errorString!="")
+            break;
+          std::stringstream errorStream;
           errorStream << "I think I detected a substitution cycle, " << theExpression.ToString()
           << " appears twice in the reduction cycle";
           theExpression.SetError(errorStream.str());
@@ -3904,7 +3949,7 @@ std::string Expression::ToString
     std::string tempS=this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
     out << tempS2;
     if (tempS2.size()% 200>100)
-      out << "\\\\&&\n";
+      out << "\\\\\n";
     if (tempS.size()>0)
       if (tempS[0]!='-')
         out << "+";

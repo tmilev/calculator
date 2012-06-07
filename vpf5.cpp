@@ -1581,7 +1581,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
   std::stringstream latexTable;
   bool isFD=(theG2B3Data.selInducing.CardinalitySelection==0);
   if (isFD)
-  { out << "<table border=\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td><td>$G_2\\cap b$-eigenvectors </td></tr>";
+  { out << "<table border=\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td>"
+    <<  "<td>$G_2\\cap b$-eigenvectors </td></tr>";
     latexTable << "\\begin{longtable}{|ccccl|} \\caption{\\label{tableB3fdsOverG2charsAndHWV} "
     << " Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline so(7)& dim. &$G_2$&dim.& $\\mathfrak b \\cap G_2$-singular vectors\\\\ \\hline"
@@ -1593,6 +1594,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
     << ". Then  " << CGI::GetHtmlMathSpanPure("{p}'") << " is the "
     << theG2B3Data.selSmallParSel.ToString() << "- parabolic subalgebra of G_2"
     << "<br> <table border=\"1\"><tr><td>$so(7)$-highest weight</td>"
+    << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
     << CGI::GetHtmlMathSpanPure("p'")
     << "</td><td>" << CGI::GetHtmlMathSpanPure("p'\\cap b") << "-eigenvectors</td><td>Casimir projector</td><td>corresponding "
@@ -1636,6 +1638,19 @@ bool CommandList::fPrintB3G2branchingIntermediate
           theG2B3Data.theFormat.fundamentalWeightLetter= "\\omega";
           out << "<td rowspan=\"" << numEigenVectors.ToString() << "\">"
           << theG2B3Data.theAmbientChar.ToString(&theG2B3Data.theFormat) << "</td> ";
+          if (!isFD)
+          { out << "<td rowspan=\"" << numEigenVectors.ToString() << "\">";
+            for (int charcounter1=0; charcounter1<theG2B3Data.theCharacterDifferences.size; charcounter1++)
+            { std::string tempS=theG2B3Data.theFormat.CustomPlusSign;
+              theG2B3Data.theFormat.CustomPlusSign="";
+              out << "A_{" << charcounter1 << "}:=" << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat)
+              << ";";
+              if (charcounter1!=theG2B3Data.theCharacterDifferences.size-1)
+                out << "<br>";
+              theG2B3Data.theFormat.CustomPlusSign=tempS;
+            }
+            out << "</td> ";
+          }
           latexTable << "\\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
           << theG2B3Data.theAmbientChar.ToString(&theG2B3Data.theFormat) << "$}";
           latexTable << "& \\multirow{" << theG2B3Data.theEigenVectorS.size  << "}{*}{$"
@@ -1945,6 +1960,7 @@ void branchingData::resetOutputData()
   this->outputEigenWords.SetSize(0);
   this->g2Weights.SetSize(0);
   this->outputWeightsFundCoordS.SetSize(0);
+  this->theCharacterDifferences.Clear();
 }
 
 bool CommandList::fSplitFDpartB3overG2inner
@@ -2040,6 +2056,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
+  RationalFunction charDiff;
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
   { ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltLevi=theG2B3Data.theEigenVectorsLevi[k];
     ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
@@ -2060,6 +2077,9 @@ bool CommandList::fSplitFDpartB3overG2inner
           //std::cout << "<hr>Multiplying " << theG2CasimirCopy.ToString() << " and " << currentTensorElt.ToString();
           currentTensorEltEigen.MultiplyMeByUEEltOnTheLeft
           (theG2CasimirCopy, *theCommands.theGlobalVariableS, 1, 0);
+          charDiff=theG2B3Data.theChars[j];
+          charDiff-=*theG2B3Data.theChars.LastObject();
+          theG2B3Data.theCharacterDifferences.AddNoRepetition(charDiff);
           //std::cout << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
         }
       }

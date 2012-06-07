@@ -3039,6 +3039,7 @@ struct branchingData
   Vectors<RationalFunction> g2DualWeights;
   Vectors<RationalFunction> leviEigenSpace;
   Vectors<Rational> generatorsSmallSub;
+  HashedList<RationalFunction> theCharacterDifferences;
   List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   List<RationalFunction> theChars;
   List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorS;

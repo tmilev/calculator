@@ -2473,12 +2473,14 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
         break;
       }
   }
-  this->nMonN.SetSize(0);
+  this->NilModPreNil.SetSize(0);
   this->nilradicalSmall.SetSize(0);
   this->nilradicalLarge.SetSize(0);
   this->weightsNilradicalLarge.SetSize(0);
   this->weightsNilradicalSmall.SetSize(0);
-  this->weightSnModN.SetSize(0);
+  this->weightsNilModPreNil.SetSize(0);
+  this->indicesNilradicalLarge.SetSize(0);
+  this->indicesNilradicalSmall.SetSize(0);
   ElementSemisimpleLieAlgebra tempElt;
   WeylGroup& theLargeWeyl=this->theHmm.theRange().theWeyl;
   WeylGroup& theSmallWeyl=this->theHmm.theDomain().theWeyl;
@@ -2497,6 +2499,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i, *this->theHmm.owners, this->theHmm.indexRange);
       this->nilradicalLarge.AddOnTop(tempElt);
+      this->indicesNilradicalLarge.AddOnTop(i);
     }
   }
   for (int i=0; i<numG2NegGenerators; i++)
@@ -2512,13 +2515,46 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (i, *this->theHmm.owners, this->theHmm.indexDomain);
       this->nilradicalSmall.AddOnTop(tempElt);
+      this->indicesNilradicalSmall.AddOnTop(i);
     }
   }
 //  std::cout << "<br>call stack look who is callng me: " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  this->NilModPreNil=this->nilradicalLarge;
+  this->weightsNilModPreNil=this->weightsNilradicalLarge;
+  Vector<Rational> proj;
+  for (int i=0; i<this->nilradicalSmall.size; i++)
+  { ElementSemisimpleLieAlgebra& eltImage=
+    this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
+    int theIndex=this->NilModPreNil.IndexOfObject(eltImage);
+    if (theIndex!=-1)
+    { this->NilModPreNil.PopIndexSwapWithLast(theIndex);
+      this->weightsNilModPreNil.PopIndexSwapWithLast(theIndex);
+      continue;
+    }
+    bool isGood=false;
+    for (int j=0; j<this->weightsNilModPreNil.size; j++)
+    { proj=this->ProjectWeight(this->weightsNilModPreNil[j]);
+      if (proj==this->weightsNilradicalSmall[i])
+      { isGood=true;
+        this->NilModPreNil.PopIndexSwapWithLast(j);
+        this->weightsNilModPreNil.PopIndexSwapWithLast(j);
+        break;
+      }
+    }
+    if (!isGood)
+    { std::cout << "This is either or a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+      << " is wrong. The question is, which is the more desirable case... The bad apple is element "
+      << this->nilradicalSmall[i].ToString() << " of weight " << this->weightsNilradicalSmall[i].ToString()
+      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
   std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
   std::cout  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
   std::cout << "<br>small nilradical: " << this->nilradicalSmall.ToString();
   std::cout  << "<br>small nilradical weights: " << this->weightsNilradicalSmall.ToString();
+  std::cout << "<br>Nil mod pre-nil (Lemma 3.3): " << this->NilModPreNil.ToString();
+  std::cout  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
@@ -2556,16 +2592,4 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   if (!found)
     formulaStream1 << "id";
   return formulaStream1.str();
-}
-
-Vector<RationalFunction> branchingData::ProjectWeight(Vector<RationalFunction>& input)
-{ Vector<RationalFunction> result;
-  Vector<RationalFunction> fundCoordsSmaller;
-  fundCoordsSmaller.MakeZero(this->theHmm.theDomain().GetRank());
-  for (int j=0; j<this->theHmm.theDomain().GetRank(); j++)
-  { fundCoordsSmaller[j]=this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
-    fundCoordsSmaller[j]/=this->theHmm.theDomain().theWeyl.CartanSymmetric.elements[j][j]/2;
-  }
-  result=this->theHmm.theDomain().theWeyl.GetSimpleCoordinatesFromFundamental(fundCoordsSmaller);
-  return result;
 }

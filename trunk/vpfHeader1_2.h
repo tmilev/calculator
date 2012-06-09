@@ -3035,10 +3035,12 @@ struct branchingData
   Selection SelSplittingParSel;
   Vectors<Rational> weightsNilradicalLarge;
   Vectors<Rational> weightsNilradicalSmall;
-  Vectors<Rational> weightSnModN;
+  Vectors<Rational> weightsNilModPreNil;
+  List<int> indicesNilradicalSmall;
+  List<int> indicesNilradicalLarge;
   List<ElementSemisimpleLieAlgebra> nilradicalLarge;
   List<ElementSemisimpleLieAlgebra> nilradicalSmall;
-  List<ElementSemisimpleLieAlgebra> nMonN;
+  List<ElementSemisimpleLieAlgebra> NilModPreNil;
   Vectors<RationalFunction> outputWeightsFundCoordS;
   Vectors<RationalFunction> outputWeightsSimpleCoords;
   Vectors<RationalFunction> g2Weights;
@@ -3054,7 +3056,8 @@ struct branchingData
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup WeylFDSmall;
   std::string GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple);
-  Vector<RationalFunction> ProjectWeight(Vector<RationalFunction>& input);
+  template <class CoefficientType>
+  Vector<CoefficientType> ProjectWeight(Vector<CoefficientType>& input);
   void resetOutputData();
   void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
   ;
@@ -3066,6 +3069,19 @@ struct branchingData
     this->initAssumingParSelAndHmmInittedPart2Subgroups(theGlobalVariables);
   }
 };
+
+template <class CoefficientType>
+Vector<CoefficientType> branchingData::ProjectWeight(Vector<CoefficientType>& input)
+{ Vector<CoefficientType> result;
+  Vector<CoefficientType> fundCoordsSmaller;
+  fundCoordsSmaller.MakeZero(this->theHmm.theDomain().GetRank());
+  for (int j=0; j<this->theHmm.theDomain().GetRank(); j++)
+  { fundCoordsSmaller[j]=this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
+    fundCoordsSmaller[j]/=this->theHmm.theDomain().theWeyl.CartanSymmetric.elements[j][j]/2;
+  }
+  result=this->theHmm.theDomain().theWeyl.GetSimpleCoordinatesFromFundamental(fundCoordsSmaller);
+  return result;
+}
 
 template <class CoefficientType>
 class ModuleSSalgebraNew

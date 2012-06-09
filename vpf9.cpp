@@ -167,6 +167,10 @@ GlobalVariables::GlobalVariables()
   this->callSystem=0;
 }
 
+ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)
+{ ProjectInformation::GetMainProjectInfo().AddProjectInfo(fileName, fileDescription);
+}
+
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   static MutexWrapper inCaseOfMultithreading;

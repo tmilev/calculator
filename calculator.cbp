@@ -40,6 +40,7 @@
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

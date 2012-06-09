@@ -3033,6 +3033,12 @@ struct branchingData
   Selection selInducing;
   Selection selSmallParSel;
   Selection SelSplittingParSel;
+  Vectors<Rational> weightsNilradicalLarge;
+  Vectors<Rational> weightsNilradicalSmall;
+  Vectors<Rational> weightSnModN;
+  List<ElementSemisimpleLieAlgebra> nilradicalLarge;
+  List<ElementSemisimpleLieAlgebra> nilradicalSmall;
+  List<ElementSemisimpleLieAlgebra> nMonN;
   Vectors<RationalFunction> outputWeightsFundCoordS;
   Vectors<RationalFunction> outputWeightsSimpleCoords;
   Vectors<RationalFunction> g2Weights;
@@ -3048,13 +3054,15 @@ struct branchingData
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup WeylFDSmall;
   std::string GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple);
+  Vector<RationalFunction> ProjectWeight(Vector<RationalFunction>& input);
   void resetOutputData();
   void initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
   ;
   void initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
   ;
   void initAssumingParSelAndHmmInitted(GlobalVariables& theGlobalVariables)
-  { this->initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
+  { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInitted");
+    this->initAssumingParSelAndHmmInittedPart1NoSubgroups(theGlobalVariables);
     this->initAssumingParSelAndHmmInittedPart2Subgroups(theGlobalVariables);
   }
 };

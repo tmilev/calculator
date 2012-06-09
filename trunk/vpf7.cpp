@@ -2458,7 +2458,8 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input)
 
 
 void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
-{ this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
+{ MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
+  this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
   this->WeylFD.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->selSmallParSel.init(WeylFDSmall.AmbientWeyl.GetDim());
@@ -2472,6 +2473,52 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
         break;
       }
   }
+  this->nMonN.SetSize(0);
+  this->nilradicalSmall.SetSize(0);
+  this->nilradicalLarge.SetSize(0);
+  this->weightsNilradicalLarge.SetSize(0);
+  this->weightsNilradicalSmall.SetSize(0);
+  this->weightSnModN.SetSize(0);
+  ElementSemisimpleLieAlgebra tempElt;
+  WeylGroup& theLargeWeyl=this->theHmm.theRange().theWeyl;
+  WeylGroup& theSmallWeyl=this->theHmm.theDomain().theWeyl;
+  int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
+  int numG2NegGenerators=this->theHmm.theDomain().GetNumPosRoots();
+  for (int i=0; i<numB3NegGenerators; i++)
+  { Vector<Rational>& currentWeight=theLargeWeyl.RootSystem[i];
+    bool isInNilradical=false;
+    for (int k=0; k<this->selInducing.CardinalitySelection; k++)
+      if (!currentWeight[this->selInducing.elements[k]].IsEqualToZero())
+      { isInNilradical=true;
+        break;
+      }
+    if (isInNilradical)
+    { this->weightsNilradicalLarge.AddOnTop(currentWeight);
+      tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (i, *this->theHmm.owners, this->theHmm.indexRange);
+      this->nilradicalLarge.AddOnTop(tempElt);
+    }
+  }
+  for (int i=0; i<numG2NegGenerators; i++)
+  { Vector<Rational>& currentWeight=theSmallWeyl.RootSystem[i];
+    bool isInNilradical=false;
+    for (int k=0; k<this->selSmallParSel.CardinalitySelection; k++)
+      if (!currentWeight[this->selSmallParSel.elements[k]].IsEqualToZero())
+      { isInNilradical=true;
+        break;
+      }
+    if (isInNilradical)
+    { this->weightsNilradicalSmall.AddOnTop(currentWeight);
+      tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (i, *this->theHmm.owners, this->theHmm.indexDomain);
+      this->nilradicalSmall.AddOnTop(tempElt);
+    }
+  }
+//  std::cout << "<br>call stack look who is callng me: " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
+  std::cout  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
+  std::cout << "<br>small nilradical: " << this->nilradicalSmall.ToString();
+  std::cout  << "<br>small nilradical weights: " << this->weightsNilradicalSmall.ToString();
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
@@ -2509,4 +2556,16 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   if (!found)
     formulaStream1 << "id";
   return formulaStream1.str();
+}
+
+Vector<RationalFunction> branchingData::ProjectWeight(Vector<RationalFunction>& input)
+{ Vector<RationalFunction> result;
+  Vector<RationalFunction> fundCoordsSmaller;
+  fundCoordsSmaller.MakeZero(this->theHmm.theDomain().GetRank());
+  for (int j=0; j<this->theHmm.theDomain().GetRank(); j++)
+  { fundCoordsSmaller[j]=this->theHmm.theRange().theWeyl.RootScalarCartanRoot(input, theHmm.ImagesCartanDomain[j]);
+    fundCoordsSmaller[j]/=this->theHmm.theDomain().theWeyl.CartanSymmetric.elements[j][j]/2;
+  }
+  result=this->theHmm.theDomain().theWeyl.GetSimpleCoordinatesFromFundamental(fundCoordsSmaller);
+  return result;
 }

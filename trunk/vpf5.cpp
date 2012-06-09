@@ -1891,7 +1891,8 @@ bool CommandList::fSplitFDpartB3overG2
 
 bool CommandList::fSplitFDpartB3overG2old
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ branchingData theG2B3Data;
+{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2old");
+  branchingData theG2B3Data;
   theCommands.fSplitFDpartB3overG2CharsOutput
   (theCommands, inputIndexBoundVars, theExpression, comments, theG2B3Data);
   if (theExpression.errorString!="")

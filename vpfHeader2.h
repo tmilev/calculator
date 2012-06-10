@@ -153,6 +153,8 @@ public:
   static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddRatOrPolyOrRFToRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool TensorAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+
   Data operator/(const Data& right)const;
   Data operator*(const Data& right)const;
 };
@@ -518,24 +520,28 @@ class DataCruncher
 {
 public:
   typedef  bool (*CruncherDataTypes)(const Data& left, const Data& right, Data& output, std::stringstream* comments);
-  int leftType; int RightType;
+  int leftType;
+  int RightType;
+  int theOperation;
   CruncherDataTypes theCruncher;
-  DataCruncher():leftType(-1), RightType(-1), theCruncher(0){}
-  DataCruncher(int inputLeftType, int inputRightType, CruncherDataTypes inputCruncher)
+  DataCruncher():leftType(-1), RightType(-1), theOperation(-1), theCruncher(0){}
+  DataCruncher(int inputOp, int inputLeftType, int inputRightType, CruncherDataTypes inputCruncher)
   { this->leftType=inputLeftType;
     this->RightType=inputRightType;
     this->theCruncher=inputCruncher;
+    this->theOperation=inputOp;
   }
   bool operator==(const DataCruncher& other)
-  { return this->leftType==other.leftType && this->RightType==other.RightType;
+  { return this->leftType==other.leftType && this->RightType==other.RightType && this->theOperation==other.theOperation;
   }
   void operator=(const DataCruncher& other)
   { this->leftType=other.leftType;
     this->RightType=other.RightType;
     this->theCruncher=other.theCruncher;
+    this->theOperation=other.theOperation;
   }
   static unsigned int HashFunction(const DataCruncher& input)
-  { return input.leftType*SomeRandomPrimes[0]+input.RightType*SomeRandomPrimes[1];
+  { return input.leftType*SomeRandomPrimes[0]+input.RightType*SomeRandomPrimes[1]+input.theOperation*SomeRandomPrimes[2];
   }
 };
 
@@ -599,9 +605,7 @@ public:
   std::string DisplayNameCalculator;
   GlobalVariables* theGlobalVariableS;
   HashedList<Data> theData;
-  HashedList<DataCruncher> theMultiplicativeDataCrunchers;
-  HashedList<DataCruncher> theAdditiveDataCrunchers;
-  HashedList<DataCruncher> theDivDataCrunchers;
+  HashedList<DataCruncher> theDataCrunchers;
   ObjectContainer theObjectContainer;
   double StartTimeEvaluationInSecondS;
 
@@ -655,54 +659,39 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
+  void RegisterCruncherNoFail(int theOp, int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  { DataCruncher d(theOp, inputLeftType, inputRightType, inputCruncher);
+    if (this->theDataCrunchers.Contains(d))
+    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
+      << "pair of data types. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->theDataCrunchers.AddOnTop(d);
+  }
   void RegisterDivCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
-  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
-    if (this->theDivDataCrunchers.Contains(d))
-    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
-      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
-      assert(false);
-    }
-    this->theDivDataCrunchers.AddOnTop(d);
+  { this->RegisterCruncherNoFail(this->opDivide(), inputLeftType, inputRightType, inputCruncher);
   }
-
   void RegisterMultiplicativeDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
-  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
-    if (this->theMultiplicativeDataCrunchers.Contains(d))
-    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
-      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
-      assert(false);
-    }
-    this->theMultiplicativeDataCrunchers.AddOnTop(d);
-  }
-  DataCruncher::CruncherDataTypes GetMultiplicativeCruncher(int inputLeftType, int inputRightType)
-  { DataCruncher d(inputLeftType, inputRightType, 0);
-    int theIndex=this->theMultiplicativeDataCrunchers.GetIndex(d);
-    if (theIndex==-1)
-      return 0;
-    return this->theMultiplicativeDataCrunchers[theIndex].theCruncher;
-  }
-  DataCruncher::CruncherDataTypes GetDivCruncher(int inputLeftType, int inputRightType)
-  { DataCruncher d(inputLeftType, inputRightType, 0);
-    int theIndex=this->theDivDataCrunchers.GetIndex(d);
-    if (theIndex==-1)
-      return 0;
-    return this->theDivDataCrunchers[theIndex].theCruncher;
+  { this->RegisterCruncherNoFail(this->opTimes(), inputLeftType, inputRightType, inputCruncher);
   }
   void RegisterAdditiveDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
-  { DataCruncher d(inputLeftType, inputRightType, inputCruncher);
-    if (this->theAdditiveDataCrunchers.Contains(d))
-    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
-      << "pair of data types. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
-      assert(false);
-    }
-    this->theAdditiveDataCrunchers.AddOnTop(d);
+  { this->RegisterCruncherNoFail(this->opPlus(), inputLeftType, inputRightType, inputCruncher);
+  }
+  DataCruncher::CruncherDataTypes GetMultiplicativeCruncher(int inputLeftType, int inputRightType)
+  { return this->GetOpCruncher(this->opTimes(), inputLeftType, inputRightType);
+  }
+  DataCruncher::CruncherDataTypes GetDivCruncher(int inputLeftType, int inputRightType)
+  { return this->GetOpCruncher(this->opDivide(), inputLeftType, inputRightType);
   }
   DataCruncher::CruncherDataTypes GetAdditiveCruncher(int inputLeftType, int inputRightType)
-  { DataCruncher d(inputLeftType, inputRightType, 0);
-    int theIndex=this->theAdditiveDataCrunchers.GetIndex(d);
+  { return this->GetOpCruncher(this->opPlus(), inputLeftType, inputRightType);
+  }
+  DataCruncher::CruncherDataTypes GetOpCruncher(int theOp, int inputLeftType, int inputRightType)
+  { DataCruncher d(theOp, inputLeftType, inputRightType, 0);
+    int theIndex=this->theDataCrunchers.GetIndex(d);
     if (theIndex==-1)
       return 0;
-    return this->theAdditiveDataCrunchers[theIndex].theCruncher;
+    return this->theDataCrunchers[theIndex].theCruncher;
   }
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
@@ -715,6 +704,7 @@ public:
   bool LookAheadAllowsPlus(const std::string& lookAhead)
   ;
   bool LookAheadAllowsTimes(const std::string& lookAhead);
+  bool LookAheadAllowsTensor(const std::string& lookAhead);
   bool LookAheadAllowsDivide(const std::string& lookAhead);
   bool ReplaceEXXEXEByEusingO(int theOp);
   bool ReplaceEEByEusingO(int theControlIndex);
@@ -911,6 +901,9 @@ public:
   int opTimes()
   { return this->operations.GetIndexIMustContainTheObject("*");
   }
+  int opTensor()
+  { return this->operations.GetIndexIMustContainTheObject("\\otimes");
+  }
   int opLieBracket()
   { return this->operations.GetIndexIMustContainTheObject("[]");
   }
@@ -984,6 +977,9 @@ static bool EvaluateDereferenceOneArgument
   static bool StandardTimes
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool StandardTensor
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool StandardDivide
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1008,11 +1004,11 @@ static bool EvaluateDereferenceOneArgument
   static bool EvaluateDoDistribute
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
   ;
-  static bool DoThePowerIfPossible
+  static bool DoThePower
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool DoMultiplyIfPossible
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  static bool DoTheOperation
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theOperation)
   ;
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)

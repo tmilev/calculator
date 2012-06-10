@@ -3203,7 +3203,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   ;
   std::string ToString()const;
   std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
-  { return "v_\\lambda";
+  { std::stringstream out;
+    out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
+    << ", " << this->parabolicSelectionSelectedAreElementsLevi.ToString() << "}";
+    return out.str();
 //    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
@@ -3356,10 +3359,10 @@ public:
   { if (this==&other)
     { MonomialTensorGeneralizedVermas<CoefficientType> tempMon1;
       tempMon1=other;
-      this->MultiplyBy(tempMon1);
+      *this*=tempMon1;
       return;
     }
-    this->AddListOnTop(other.theMons);
+    this->theMons.AddListOnTop(other.theMons);
   }
   void operator*=(const MonomialGeneralizedVerma<CoefficientType>& other)
   { this->theMons.AddOnTop(other);
@@ -3444,6 +3447,11 @@ public:
    List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
+  void TensorOnTheRight
+  (const ElementTensorsGeneralizedVermas<CoefficientType>& right, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0
+   )
+   ;
   void MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<CoefficientType>& output,
    List<ModuleSSalgebraNew<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,  int indexGenerator, GlobalVariables& theGlobalVariables,
@@ -5724,7 +5732,10 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ToString
   std::string tempS;
   if (this->theMons.size>1)
     for (int i=0; i<this->theMons.size; i++)
-      out << "(" << this->theMons[i].ToString(theFormat, includeV) << ")";
+    { out << "(" << this->theMons[i].ToString(theFormat, includeV) << ")";
+      if (i!=this->theMons.size-1)
+        out << "\\otimes";
+    }
   else
     out << this->theMons[0].ToString(theFormat, includeV);
 //  std::cout << "<br>" << out.str() << " has " << this->theMons.size << " multiplicands with hash functions: ";

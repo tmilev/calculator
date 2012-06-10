@@ -642,8 +642,11 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   std::string shiftY=tempStream8.str();
   tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName=tempStream9.str();
-  out << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js\""
+  out << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
   << " djConfig = \"parseOnLoad: true\"></script>";
+  out << "<button" << CGI::GetStyleButtonLikeHtml()
+  << "onclick=\"dojoOnLoadDoesntWork" << timesCalled << "();\" >"
+  << "click if graphics doesn't show</button>";
   out << "<div style=\"width:" << boss->DefaultHtmlWidth << ";height:" << boss->DefaultHtmlHeight << ";border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "

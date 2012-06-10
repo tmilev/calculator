@@ -5903,8 +5903,11 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   std::string shiftY=tempStream8.str();
   tempStream9 << "convXY" << timesCalled;
   std::string functionConvertToXYName=tempStream9.str();
-  out << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js\""
+  out << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
   << " djConfig = \"parseOnLoad: true\"></script>";
+  out << "<button" << CGI::GetStyleButtonLikeHtml()
+  << "onclick=\"dojoOnLoadDoesntWork" << timesCalled << "();\" >"
+  << "click if graphics doesn't show</button>";
   out << "<div style=\"width:" << this->DefaultHtmlWidth << ";height:" << this->DefaultHtmlHeight << ";border:solid 1px\" id=\"" << theCanvasId
   << "\" onmousedown=\"clickCanvasCone" << timesCalled << "(event.clientX, event.clientY);\" onmouseup=\"selectedBasisIndexCone" << timesCalled
   << "=-1;\" onmousemove=\"mouseMoveRedrawCone" <<  timesCalled << "(event.clientX, event.clientY);\" "
@@ -6424,13 +6427,18 @@ out
   << "function dojoOnLoadDoesntWork" << timesCalled << " (){\n"
   << "  if (" << theSurfaceName << "==0){\n  "
   << theInitFunctionName << "();\n"
-  << "  window.setTimeout(function(){dojoOnLoadDoesntWork" << timesCalled << "();}, 2000);\n"
+  << "  window.setTimeout(function(){dojoOnLoadDoesntWork" << timesCalled << "();}, 1000);\n"
   << "  }\n"
   << "}"
   << "dojo.require(\"dojox.gfx\");\n"
   << "dojo.addOnLoad(" << theInitFunctionName << ");\n"
   << "dojo.addOnLoad(" << theDrawFunctionName << ");\n"
-  << "dojoOnLoadDoesntWork" << timesCalled << "();\n"
+/*  << "dojoOnLoadDoesntWork" << timesCalled << "();\n"
+  << "  require([\"dojo/ready\", \"dojo/parser\", \"dijit/registry\", \"dijit/Dialog\"], function(ready, parser, registry){\n"
+  << "     ready(function(){\n"
+  << "           dojoOnLoadDoesntWork" << timesCalled << "();\n"
+  << "     });\n"
+  << "});\n"*/
   << "</script>\n"
   ;
   return out.str();

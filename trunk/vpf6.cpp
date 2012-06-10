@@ -279,6 +279,17 @@ bool Data::ConvertToTypE<ElementUniversalEnveloping<RationalFunction> >()
   }
 }
 
+template <>
+bool Data::ConvertToTypE<ElementTensorsGeneralizedVermas<RationalFunction> >()
+{ switch (this->type)
+  { case Data::typeEltTensorGenVermasOverRF:
+      return true;
+    default:
+//      std::cout << " No conversion found.";
+      return false;
+  }
+}
+
 bool Data::SetContextResizesContextArray
 (const Context& desiredNewContext)
 { if (this->theContextIndex==-1)
@@ -1150,6 +1161,7 @@ bool CommandList::isRightSeparator(char c)
     case '`':
     case '[':
     case '&':
+    case '\\':
     case '}':
     case '{':
     case '~':
@@ -1459,6 +1471,20 @@ bool CommandList::isSeparatorFromTheRightForStatement(const std::string& input)
 { return input=="}" || input==")" || input==";";
 }
 
+bool CommandList::LookAheadAllowsTensor(const std::string& lookAhead)
+{ return
+    lookAhead=="+" || lookAhead=="-" ||
+    lookAhead=="*" || lookAhead=="/" ||
+    lookAhead=="Expression" || lookAhead==")" ||
+    lookAhead=="(" || lookAhead=="[" ||
+    lookAhead=="=" || lookAhead=="\\otimes" ||
+//    lookAhead=="{" ||
+    lookAhead=="Variable" || lookAhead=="," ||
+    lookAhead==";" || lookAhead=="]" ||
+    lookAhead=="}" || lookAhead==":"
+    ;
+}
+
 bool CommandList::LookAheadAllowsTimes(const std::string& lookAhead)
 { return
     lookAhead=="+" || lookAhead=="-" ||
@@ -1560,6 +1586,8 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="-" && this->LookAheadAllowsPlus(lookAhead) )
     return this->ReplaceOEByE();
+  if (lastS=="Expression" && secondToLastS=="\\otimes" && thirdToLastS=="Expression" && this->LookAheadAllowsTensor(lookAhead))
+    return this->ReplaceEOEByE();
   if (lastS=="Expression" && secondToLastS=="*" && thirdToLastS=="Expression" && this->LookAheadAllowsTimes(lookAhead) )
     return this->ReplaceEOEByE(Expression::formatTimesDenotedByStar);
   if (lastS=="Expression" && secondToLastS=="/" && thirdToLastS=="Expression" && this->LookAheadAllowsDivide(lookAhead) )
@@ -2108,7 +2136,9 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::initCrunchers()
-{ this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+{ this->RegisterCruncherNoFail(this->opTensor(), Data::typeEltTensorGenVermasOverRF, Data::typeEltTensorGenVermasOverRF, Data::TensorAnyByEltTensor);
+
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
@@ -2338,6 +2368,12 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    4.2) If the expression is of the form a*(b*c) and  a and b are rational, substitutes a*(b*c) by (a*b)*c. <br>\
    4.3) If the expression is of the form a*(b*c) and b is rational but a is not, substitutes the expression by b*(a*c).",
    "2*c_1*d*3", false);
+    this->AddOperationNoFail
+  ("\\otimes", this->StandardTensor, "",
+   "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
+   generalized Verma modules. ",
+   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
+   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", false);
   this->AddOperationNoFail
   ("[]", this->StandardLieBracket, "",
    "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
@@ -2549,7 +2585,7 @@ bool CommandList::CollectSummands
   return true;
 }
 
-bool CommandList::DoThePowerIfPossible
+bool CommandList::DoThePower
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.theOperation!=theCommands.opThePower() )
     return false;
@@ -2578,9 +2614,9 @@ bool CommandList::DoThePowerIfPossible
   return true;
 }
 
-bool CommandList::DoMultiplyIfPossible
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.theOperation!=theCommands.opTimes() )
+bool CommandList::DoTheOperation
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theOperation)
+{ if (theExpression.theOperation!=theOperation )
     return false;
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
@@ -2591,7 +2627,7 @@ bool CommandList::DoMultiplyIfPossible
   const Data& RightD=rightE.GetAtomicValue();
   Data outputD;
 //  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ToString() << " and " << LeftD.ToString();
-  DataCruncher::CruncherDataTypes theCruncher= theCommands.GetMultiplicativeCruncher(LeftD.type, RightD.type);
+  DataCruncher::CruncherDataTypes theCruncher= theCommands.GetOpCruncher(theOperation, LeftD.type, RightD.type);
   if (theCruncher==0)
     return false;
   if (!theCruncher(LeftD, RightD, outputD, comments))
@@ -2771,7 +2807,8 @@ bool Data::AddEltTensorToEltTensor(const Data& left, const Data& right, Data& ou
 }
 
 bool Data::AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
-{ output=left;
+{ MacroRegisterFunctionWithName("Data::AddRatOrPolyToRatOrPoly");
+  output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))
     return false;
@@ -2782,6 +2819,52 @@ bool Data::AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& ou
   Polynomial<Rational> resultpoly=output.GetValuE<Polynomial<Rational> >();
   resultpoly+=rightCopy.GetValuE<Polynomial<Rational> >();
   output.MakePoly(*output.owner, resultpoly, output.theContextIndex);
+  return true;
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::TensorOnTheRight
+  (const ElementTensorsGeneralizedVermas<CoefficientType>& right, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+{ MacroRegisterFunctionWithName("ElementTensorsGeneralizedVermas<CoefficientType>::TensorOnTheRight");
+  if (right.IsEqualToZero())
+  { this->MakeZero();
+    return;
+  }
+  int maxNumMonsFinal=this->size*right.size;
+  ElementTensorsGeneralizedVermas<CoefficientType> output;
+  MonomialTensorGeneralizedVermas<CoefficientType> bufferMon;
+  output.MakeZero();
+  output.SetExpectedSize(maxNumMonsFinal);
+  CoefficientType theCoeff;
+  for (int i=0; i<right.size; i++)
+    for (int j=0; j<this->size; j++)
+    { bufferMon=this->TheObjects[j];
+      bufferMon*=(right[i]);
+      theCoeff=this->theCoeffs[j];
+      theCoeff*=right.theCoeffs[i];
+      output.AddMonomial(bufferMon, theCoeff);
+      ParallelComputing::SafePointDontCallMeFromDestructors();
+    }
+  *this=output;
+}
+
+bool Data::TensorAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Data::TensorAnyByEltTensor");
+  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  output=left;
+  Data rightCopy=right;
+  if (!output.MergeContexts(rightCopy, output))
+    return false;
+  if (!output.ConvertToTypE<ElementTensorsGeneralizedVermas<RationalFunction> >())
+    return false;
+  if (!rightCopy.ConvertToTypE<ElementTensorsGeneralizedVermas<RationalFunction> >())
+    return false;
+  ElementTensorsGeneralizedVermas<RationalFunction> resultTensor=output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  resultTensor.TensorOnTheRight
+  (rightCopy.GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >(), *output.owner->theGlobalVariableS);
+  output.MakeElementTensorGeneralizedVermas(*output.owner, resultTensor, output.theContextIndex);
   return true;
 }
 
@@ -2819,8 +2902,30 @@ bool Data::MultiplyUEByAny(const Data& left, const Data& right, Data& output, st
 bool CommandList::StandardPower
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
-  if (theCommands.DoThePowerIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
+  if (theCommands.DoThePower(theCommands, inputIndexBoundVars, theExpression, comments))
     return true;
+  //std::cout << "<br>After do associate: " << theExpression.ToString();
+  return false;
+}
+
+bool CommandList::StandardTensor
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  MacroRegisterFunctionWithName("CommandList::StandardTensor");
+  if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTensor()))
+    return true;
+  if (theCommands.EvaluateDoDistribute
+      (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTensor(), theCommands.opPlus()))
+    return true;
+  //std::cout << "<br>After distribute: " << theExpression.ToString();
+  if (theCommands.EvaluateDoAssociatE
+      (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTensor()))
+    return true;
+//  if (theCommands.EvaluateDoExtractBaseMultiplication(theCommands, inputIndexBoundVars, theExpression, comments))
+//    return true;
+//  if (theExpression.children.size!=2)
+//    return false;
   //std::cout << "<br>After do associate: " << theExpression.ToString();
   return false;
 }
@@ -2830,7 +2935,7 @@ bool CommandList::StandardTimes
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   IncrementRecursion theRecursionIncrementer(&theCommands);
   MacroRegisterFunctionWithName("CommandList::StandardTimes");
-  if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, theExpression, comments))
+  if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes()))
     return true;
   if (theCommands.EvaluateDoDistribute
       (theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes(), theCommands.opPlus()))
@@ -2891,7 +2996,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     } else if (leftE.EvaluatesToAtom() && rightLeftE.EvaluatesToAtom()) //<- handle atom*(atom*anything)
     { Expression tempExp;
       tempExp.MakeProducT(theCommands, inputIndexBoundVars, leftE, rightLeftE);
-      if (theCommands.DoMultiplyIfPossible(theCommands, inputIndexBoundVars, tempExp, 0))
+      if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, tempExp, 0, theCommands.opTimes()))
       { Expression tempExp2=rightE.children[1];
         theExpression.MakeProducT(theCommands, inputIndexBoundVars, tempExp, tempExp2);
         return true;
@@ -3925,7 +4030,10 @@ std::string Expression::ToString
   else if (this->theOperation==this->theBoss->opDivide() )
     out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
     << "/" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
-  else if (this->theOperation==this->theBoss->opTimes() )
+  else if (this->theOperation==this->theBoss->opTensor() )
+  { out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
+    << "\\otimes " << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+  } else if (this->theOperation==this->theBoss->opTimes() )
   { std::string tempS=this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
     //if (false)
    // {
@@ -3939,8 +4047,7 @@ std::string Expression::ToString
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
     out << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
-  }
-  else if (this->theOperation==this->theBoss->opThePower())
+  } else if (this->theOperation==this->theBoss->opThePower())
     out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForThePower(), false, outComments)
     << "^{" << this->children[1].ToString(theFormat, false, false, outComments) << "}";
   else if (this->theOperation==this->theBoss->opPlus() )

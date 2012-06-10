@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 #endif
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
@@ -199,6 +199,10 @@ int main(int argc, char **argv)
   << "Root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
+  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
+  << "></script>";
+//  << " djConfig = \"parseOnLoad: true\"></script>";
+
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n"
 //  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()

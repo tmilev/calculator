@@ -3275,8 +3275,8 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
       if (!leftNode.rationalValue.IsInteger() && !rightNode.rationalValue.IsInteger())
         this->SetError(this->errorDunnoHowToDoOperation);
       else
-      { leftNode.rationalValue.GetNumUnsigned(tempUI1);
-        rightNode.rationalValue.GetNumUnsigned(tempUI2);
+      { leftNode.rationalValue.GetNumerator(tempUI1);
+        rightNode.rationalValue.GetNumerator(tempUI2);
         if (theFunction==Parser::functionGCD)
           LargeIntUnsigned::gcd(tempUI1, tempUI2, tempUI3);
         else
@@ -5775,7 +5775,7 @@ void RationalFunction::ClearDenominators
   Rational tempRat;
   switch(this->expressionType)
   { case RationalFunction::typeRational:
-      this->ratValue.GetDen(tempRat);
+      this->ratValue.GetDenominator(tempRat);
       outputWasMultipliedBy.MakeConst(this->NumVars, tempRat, this->context);
       this->ratValue*=tempRat;
     break;

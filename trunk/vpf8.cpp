@@ -7600,7 +7600,7 @@ int ParserNode::EvaluateAnimationDots
     return theNode.SetError(errorDimensionProblem);
   LargeIntUnsigned tempInt;
   Rational tempRat=theNode.owner->TheObjects[theArgumentList[2]].rationalValue;
-  tempRat.GetNumUnsigned(tempInt);
+  tempRat.GetNumerator(tempInt);
   int theColor=tempInt.TheObjects[0];
 //  for(int i=0; i<theArgumentList.size-3; i++)
 //    extraDot[i]= theNode.owner->TheObjects[theArgumentList[i+3]].rationalValue;

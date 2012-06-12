@@ -2299,22 +2299,10 @@ bool CommandList::fJacobiSymbol
   return true;
 }
 
-int RaiseToPower(int input, unsigned int thePower, int theModulus)
-{ if (thePower==0)
-    return 1;
-  int squares=input%theModulus;
-  input=1;
-  while (thePower>0)
-  { if (thePower%2==1)
-      input=(squares*input)%theModulus;
-    squares=(squares*squares)%theModulus;
-    thePower/=2;
-  }
-  return input;
-}
-
 class DoxygenInstance
 {
   public:
   ElementTensorsGeneralizedVermas<RationalFunction> doXyCanYouParseME;
 };
+
+

@@ -2769,16 +2769,25 @@ public:
   static unsigned TotalLargeMultiplications;
   static unsigned TotalSmallGCDcalls;
   static unsigned TotalLargeGCDcalls;
-  void GetDen(Rational& output)
+  void GetDenominator(Rational& output)
   { LargeIntUnsigned tempInt;
-    this->GetDen(tempInt);
+    this->GetDenominator(tempInt);
     output.AssignLargeIntUnsigned(tempInt);
   }
   bool NeedsBrackets()const
   { return false;
     //return this->IsNegative();
   }
-  inline void GetDen(LargeIntUnsigned& output)
+
+  Rational GetLCMNumeratorRationalDenominators()
+  { Rational result;
+    this->GetDenominator(result);
+    return result;
+  }
+  Rational GetGCDNumeratorsRationalCoeffs()
+  { return this->GetNum();
+  }
+  inline void GetDenominator(LargeIntUnsigned& output)
   { if (this->Extended==0)
     { unsigned int tempI= (unsigned int) this->DenShort;
       output.AssignShiftedUInt(tempI, 0);
@@ -2794,13 +2803,13 @@ public:
     return result;
   }
   inline void GetNum(LargeInt& output)
-  { this->GetNumUnsigned(output.value);
+  { this->GetNumerator(output.value);
     output.sign=1;
     if (this->IsNegative())
       output.sign=-1;
   }
   inline void SetDynamicSubtype(int dummyParameter){}
-  inline void GetNumUnsigned(LargeIntUnsigned& output)
+  inline void GetNumerator(LargeIntUnsigned& output)
   { if (this->Extended==0)
     { if (this->NumShort<0)
         output.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
@@ -3710,14 +3719,14 @@ void Vector<CoefficientType>::ScaleByPositiveRationalToIntegralMinHeight()
     if (!this->TheObjects[i].IsEqualToZero())
     { if (foundNonZero)
       { if(!numGCD.IsEqualToOne())
-        { this->TheObjects[i].GetNumUnsigned(tempUI);
+        { this->TheObjects[i].GetNumerator(tempUI);
           LargeIntUnsigned::gcd(numGCD, tempUI, numGCD);
         }
       } else
-      { this->TheObjects[i].GetNumUnsigned(numGCD);
+      { this->TheObjects[i].GetNumerator(numGCD);
         foundNonZero=true;
       }
-      this->TheObjects[i].GetDen(tempUI);
+      this->TheObjects[i].GetDenominator(tempUI);
       if (!tempUI.IsEqualToOne())
         *this*= tempUI;
     }
@@ -3768,7 +3777,7 @@ void Vector<CoefficientType>::FindLCMDenominators(LargeIntUnsigned& output)
 { LargeIntUnsigned tempI, tempI2;
   output.MakeOne();
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].GetDen(tempI2);
+  { this->TheObjects[i].GetDenominator(tempI2);
     LargeIntUnsigned::gcd(output, tempI2, tempI);
     output.MultiplyBy(tempI2);
     output.DivPositive(tempI, output, tempI2);
@@ -4424,6 +4433,60 @@ public:
     for (int i =0; i<this->size; i++)
       this->theCoeffs[i].checkConsistency();
   }
+  template <class baseRing>
+  baseRing FindGCDCoefficientNumerators()
+  { if (this->size==0)
+      return 1;
+    baseRing result, tempCF;
+    this->theCoeffs[0].GetNumerator(result);
+    for (int i=1; i<this->size; i++)
+    { this->theCoeffs[i].GetNumerator(tempCF);
+      CoefficientType::gcd(result, tempCF, result);
+    }
+    return result;
+  }
+
+  Rational FindGCDCoefficientNumeratorsOverRationals()
+  { if (this->size==0)
+      return 1;
+    LargeIntUnsigned result, tempUI;
+    this->theCoeffs[0].GetNumerator(result);
+    for (int i=1; i<this->size; i++)
+    { this->theCoeffs[i].GetNumerator(tempUI);
+      LargeIntUnsigned::gcd(result, tempUI, result);
+    }
+    return result;
+  }
+  Rational FindLCMCoefficientDenominatorsOverRationals()
+  { LargeIntUnsigned result, tempUI, tempRat;
+    result=1;
+    for (int i=0; i<this->size; i++)
+    { this->theCoeffs[i].GetDenominator(tempUI);
+      LargeIntUnsigned::lcm(result, tempUI, result);
+    }
+    return result;
+  }
+  Rational ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy()
+  { if (this->size==0)
+      return 1;
+    Rational result=1;
+    Rational tempRat;
+    for (int i=0; i<this->size; i++)
+    { tempRat=this->theCoeffs[i].GetLCMNumeratorRationalDenominators();
+      *this*=tempRat;
+      result*=tempRat;
+    }
+    LargeIntUnsigned theGCD, tempUI;
+    this->theCoeffs[0].GetGCDNumeratorsRationalCoeffs().GetNumerator(theGCD);
+    for (int i=0; i<this->size; i++)
+    { this->theCoeffs[i].GetGCDNumeratorsRationalCoeffs().GetNumerator(tempUI);
+      LargeIntUnsigned::gcd(theGCD, tempUI, theGCD);
+    }
+    tempRat=theGCD;
+    *this/=tempRat;
+    result/=tempRat;
+    return result;
+  }
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->size)
     { std::cout << "This is a programming error: a monomial collection has " << this->size << " monomials but "
@@ -4462,13 +4525,14 @@ public:
     Rational tempRat;
     for (int i=0; i<this->size; i++)
       if (!this->theCoeffs[i].IsInteger())
-      { this->theCoeffs[i].GetDen(tempRat);
+      { this->theCoeffs[i].GetDenominator(tempRat);
         *this*=tempRat;
         output*=tempRat;
       }
   }
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   bool operator== (const MonomialCollection<TemplateMonomial, CoefficientType>& other)const;
+  bool operator== (int x)const;
   inline void operator+=(const MonomialCollection<TemplateMonomial, CoefficientType>& other);
   MonomialCollection<TemplateMonomial, CoefficientType> operator*(const CoefficientType& other)const
   { MonomialCollection<TemplateMonomial, CoefficientType> result=*this;
@@ -4511,7 +4575,7 @@ public:
       return;
     }
     for (int i=0; i<this->theCoeffs.size; i++)
-      this->theCoeffs[i]/=(otherType)other;
+      this->theCoeffs[i]/=other;
   }
   template <class otherType>
   inline void operator*=(const otherType& other)
@@ -4580,6 +4644,7 @@ class Polynomial: public ElementCommutativeAlgebra<MonomialP, CoefficientType>
 public:
   friend std::iostream& operator << <CoefficientType>(std::iostream& output, const Polynomial<CoefficientType>& input);
   int NumVars;
+  Polynomial(int x):NumVars(0){this->MakeConst(0, x);}
   Polynomial():NumVars(0){}
   Polynomial(const Polynomial<CoefficientType>& other)
   { this->operator=(other);
@@ -4656,37 +4721,6 @@ public:
   void MakeZero(int inputNumVars)
   { this->::ElementCommutativeAlgebra<MonomialP, CoefficientType>::MakeZero();
     this->NumVars=inputNumVars;
-  }
-  Rational FindGCDCoefficientNumerators()
-  { if (this->size==0)
-      return 1;
-    Rational result;
-    LargeIntUnsigned Accum, tempUI;
-    this->theCoeffs[0].GetNumUnsigned(Accum);
-    for (int i=1; i<this->size; i++)
-    { this->theCoeffs[i].GetNumUnsigned(tempUI);
-      LargeIntUnsigned::gcd(Accum, tempUI, Accum);
-    }
-    LargeInt tempInt;
-    tempInt.AssignLargeIntUnsigned(Accum);
-    result.AssignLargeInteger(tempInt);
-    if (this->size>0)
-    { if (this->theCoeffs[0].IsNegative())
-        result.Minus();
-    }
-    return result;
-  }
-  Rational FindGCDCoefficientDenominators()
-  { if (this->size==0)
-      return (Rational) 1;
-    Rational result; LargeIntUnsigned Accum, tempUI;
-    this->theCoeffs[0].GetDen(Accum);
-    for (int i=1; i<this->size; i++)
-    { this->theCoeffs[i].GetDen(tempUI);
-      LargeIntUnsigned::gcd(Accum, tempUI, Accum);
-    }
-    result=Accum;
-    return result;
   }
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
@@ -4793,12 +4827,17 @@ public:
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
+  void operator-=(int x)
+  { MonomialP tempMon;
+    tempMon.MakeZero(this->NumVars);
+    this->SubtractMonomial(tempMon, x);
+  }
   void operator-=(const CoefficientType& other)
   { MonomialP tempMon;
     tempMon.MakeZero(this->NumVars);
     this->SubtractMonomial(tempMon, other);
   }
-  void operator-=(const Polynomial& other)
+  void operator-=(const Polynomial<CoefficientType>& other)
   { if (other.NumVars!=this->NumVars || this==&other)
     { int newNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
       Polynomial<CoefficientType> otherNew=other;
@@ -4819,6 +4858,11 @@ public:
   template <class otherType>
   inline void operator*=(const otherType& other)
   { this->::MonomialCollection<MonomialP, CoefficientType>::operator*= (other);
+  }
+  void operator+=(int other)
+  { MonomialP tempMon;
+    tempMon.MakeZero(this->NumVars);
+    this->AddMonomial(tempMon, other);
   }
   void operator+=(const CoefficientType& other)
   { MonomialP tempMon;
@@ -5058,6 +5102,16 @@ public:
       case RationalFunction::typeRationalFunction: return false;
     }
     return false;
+  }
+  Rational GetLCMNumeratorRationalDenominators()
+  { Polynomial<Rational> Num;
+    this->GetNumerator(Num);
+    return Num.FindLCMCoefficientDenominatorsOverRationals();
+  }
+  Rational GetGCDNumeratorsRationalCoeffs()
+  { Polynomial<Rational> Num;
+    this->GetNumerator(Num);
+    return Num.FindGCDCoefficientNumeratorsOverRationals();
   }
   RationalFunction GetOne()const
   { RationalFunction tempRat;
@@ -5396,7 +5450,7 @@ public:
   (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
   ;
   static void gcd
-  (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, GlobalVariables* theContext)
+  (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, GlobalVariables* theContext=0)
   ;
   static void ScaleClearDenominator
   (List<RationalFunction>& input, Vector<Polynomial<Rational> >& output)
@@ -5427,6 +5481,18 @@ public:
     tempRF=other;
     tempRF.Minus();
     this->operator+=(tempRF);
+    assert(this->checkConsistency());
+  }
+  inline void operator/=(int other)
+  { RationalFunction tempRF;
+    tempRF.MakeConst(this->NumVars, other, this->context);
+    *this/=tempRF;
+  }
+  inline void operator/=(const Polynomial<Rational>& other)
+  { RationalFunction tempRF;
+    tempRF=other;
+    tempRF.Invert();
+    *this*=(tempRF);
     assert(this->checkConsistency());
   }
   inline void operator/=(const RationalFunction& other)
@@ -5513,6 +5579,17 @@ void Polynomial<Element>::AddConstant(const Element& theConst)
 { MonomialP tempMon;
   tempMon.MakeZero(this->NumVars);
   this->AddMonomial(tempMon, theConst);
+}
+
+template <class TemplateMonomial, class CoefficientType>
+inline bool MonomialCollection<TemplateMonomial, CoefficientType>::operator==
+(int x)const
+{ if (x==0)
+    return this->size==0;
+  std::cout << "This is either a programming error, or an unforeseen use of operator==. If the second is the case, "
+  << "an audit/careful proofreading of the code calling this function is needed; I am crashing just in case. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  return false;
 }
 
 template <class TemplateMonomial, class CoefficientType>
@@ -7385,7 +7462,7 @@ LargeIntUnsigned Matrix<Element>::FindPositiveLCMCoefficientDenominators()
   LargeIntUnsigned tempI;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
-    { this->elements[i][j].GetDen(tempI);
+    { this->elements[i][j].GetDenominator(tempI);
       result=LargeIntUnsigned::lcm(result, tempI);
     }
   return result;
@@ -7401,7 +7478,7 @@ void Matrix<Element>::GetMatrixIntWithDen
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)
     { tempRat=this->elements[i][j]*outputDen;
-      tempRat.GetDen(tempI);
+      tempRat.GetDenominator(tempI);
       outputMat.elements[i][j]=tempI;
     }
 }
@@ -7919,13 +7996,13 @@ void Polynomial<CoefficientType>::ScaleToIntegralNoGCDCoeffs()
   int indexHighestMon=0;
   LargeIntUnsigned tempInt1, tempInt2, accumNum, accumDen;
   accumDen.MakeOne();
-  this->theCoeffs[0].GetNumUnsigned(accumNum);
+  this->theCoeffs[0].GetNumerator(accumNum);
   for (int i=0; i<this->size; i++)
   { if (this->TheObjects[i].IsGEQLexicographicLastVariableStrongest(this->TheObjects[indexHighestMon]))
       indexHighestMon=i;
     Rational& tempRat=this->theCoeffs[i];
-    tempRat.GetDen(tempInt1);
-    tempRat.GetNumUnsigned(tempInt2);
+    tempRat.GetDenominator(tempInt1);
+    tempRat.GetNumerator(tempInt2);
     LargeIntUnsigned::lcm(tempInt1, accumDen, accumDen);
     LargeIntUnsigned::gcd(tempInt2, accumNum, accumNum);
   }

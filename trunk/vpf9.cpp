@@ -843,11 +843,11 @@ inline void Rational::RaiseToPower(int x)
     this->Invert();
   }
   LargeIntUnsigned tempNum, tempDen;
-  this->GetNumUnsigned(tempNum);
+  this->GetNumerator(tempNum);
   LargeIntUnsigned oneLI;
   oneLI.MakeOne();
   MathRoutines::RaiseToPower(tempNum, x, oneLI);
-  this->GetDen(tempDen);
+  this->GetDenominator(tempDen);
   MathRoutines::RaiseToPower(tempDen, x, oneLI);
   int theSign= (this->IsPositive() || x%2==0) ? 1 :-1;
   this->AllocateExtended();

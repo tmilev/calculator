@@ -199,8 +199,8 @@ int main(int argc, char **argv)
   << "Root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
-  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
-  << "></script>";
+//  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
+//  << "></script>";
 //  << " djConfig = \"parseOnLoad: true\"></script>";
 
   std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
@@ -356,6 +356,7 @@ g_{-2} v_\\lambda\
 //civilizedInput="fPrintB3G2branchingTable{}(2, (x_1,x_2,0))";
 //  civilizedInput="1/0";
 //  civilizedInput="x_1:=Polynomial{}(x_{{1}});x_2:=Polynomial{}(x_{{2}});x_1/x_2+x_1/(x_1+x_2)";
+//civilizedInput="SplitGenericGenVermaTensorFD{}(G_2,(x_1,x_2), (1,0)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

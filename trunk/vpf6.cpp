@@ -1548,6 +1548,8 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   { this->theExpressionContext.LastObject()->flagOpDefineEncountered=true;
     return this->ReplaceXXByCon(this->conDefine());
   }
+  if (secondToLastS==":=" && lastS==":")
+    return this->ReplaceXXByCon(this->conIsDenotedBy());
   if (secondToLastS=="{" && lastS=="}")
     return this->ReplaceXXByCon(this->conApplyFunction(), Expression::formatDefault);
   if (lastS=="\\cdot")
@@ -1605,6 +1607,8 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (this->isSeparatorFromTheRightGeneral(lookAhead) && lastS=="Expression" && secondToLastS=="==" && thirdToLastS=="Expression")
     return this->ReplaceEOEByE();
   if (this->isSeparatorFromTheLeftForDefinition(fourthToLastS) && thirdToLastS=="Expression" && secondToLastS==":=" && lastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lookAhead))
+    return this->ReplaceEOEByE();
+  if (this->isSeparatorFromTheLeftForDefinition(fourthToLastS) && thirdToLastS=="Expression" && secondToLastS==":=:" && lastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lookAhead))
     return this->ReplaceEOEByE();
   if (thirdToLastS=="Expression" && secondToLastS=="\\cup" && lastS== "Expression" && this->isSeparatorFromTheRightGeneral(lookAhead))
     return this->ReplaceEOEByE();
@@ -1727,7 +1731,7 @@ bool CommandList::fHWTAABF
 
 bool CommandList::fHWV
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.children.size!=3)
+{if (theExpression.children.size!=3)
   { if (comments!=0)
       *comments << "Function HWV is expected to have three arguments: SS algebra type, List{}, List{}. ";
     return false;
@@ -1786,7 +1790,20 @@ bool CommandList::fHWV
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
     return false;
   }
-//  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
+  Selection selectionParSel;
+  selectionParSel=parabolicSel;
+  return theCommands.fHWVinner
+  (theCommands, inputIndexBoundVars, theExpression, comments,
+  highestWeightFundCoords, selectionParSel, hwContext, indexOfAlgebra);
+}
+
+bool CommandList::fHWVinner
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Vector<RationalFunction>& highestWeightFundCoords,
+ Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
+{ MacroRegisterFunctionWithName("CommandList::fHWVinner");
+  IncrementRecursion therecursionIncrementer(&theCommands);
+  //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
   int theNumVars=hwContext.VariableImages.size;
@@ -1798,8 +1815,7 @@ bool CommandList::fHWV
   //=theElementData.theElementTensorGenVermas.GetElement();
   List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule=-1;
-  Selection selectionParSel;
-  selectionParSel=parabolicSel;
+
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
     if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField &&
@@ -1814,7 +1830,12 @@ bool CommandList::fHWV
   }
   ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { assert(highestWeightFundCoords[0].NumVars==RFOne.NumVars);
+  { if (highestWeightFundCoords[0].NumVars!=RFOne.NumVars)
+    { std::cout << "This is a programming error: the highest weight I was given has " << highestWeightFundCoords[0].NumVars
+      << " variables but the context I was given indicates  " << RFOne.NumVars << " variables. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     bool isGood=theMod.MakeFromHW
     (theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, highestWeightFundCoords, selectionParSel,
      *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
@@ -1832,6 +1853,212 @@ bool CommandList::fHWV
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
   theExpression.MakeAtom(outputData, theCommands, inputIndexBoundVars);
 //  std::cout << "<hr>" << outputData.ToString();
+  return true;
+}
+
+bool CommandList::fSplitGenericGenVermaTensorFD
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fSplitGenericGenVermaTensorFD");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theExpression.children.size!=3)
+  { if (comments!=0)
+      *comments << "Function fSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, List{}, List{}. ";
+    return false;
+  }
+  Expression& leftE=theExpression.children[0];
+  Expression& genVemaWeightNode=theExpression.children[2];
+  Expression& fdWeightNode=theExpression.children[1];
+  Expression resultSSalgebraE;
+  resultSSalgebraE=leftE;
+  if (!CommandList::fSSAlgebra(theCommands, inputIndexBoundVars, resultSSalgebraE, comments))
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  } else if (!resultSSalgebraE.EvaluatesToAtom())
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if  (resultSSalgebraE.errorString!="")
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if (!resultSSalgebraE.EvaluatesToAtom())
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  const Data& theSSdata=resultSSalgebraE.GetAtomicValue();
+  if (theSSdata.type!=Data::typeSSalgebra)
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
+  { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
+    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
+    assert(false);
+  }
+  int indexOfAlgebra=theSSdata.theIndex;
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
+  int theRank=theSSalgebra.GetRank();
+  Vector<RationalFunction> highestWeightFundCoords;
+  Context hwContext(theCommands), emptyContext(theCommands);
+  if (!genVemaWeightNode.GetVector<RationalFunction>
+      (highestWeightFundCoords, hwContext, theRank, &CommandList::fPolynomial, comments))
+  { if(comments!=0)
+      *comments << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of " << theRank
+      << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
+    return false;
+  }
+  Vector<Rational> theFDhw;
+  if (!fdWeightNode.GetVector<Rational>(theFDhw, emptyContext, theRank, 0, comments))
+  { if(comments!=0)
+      *comments << "Failed to convert the second argument of fSplitGenericGenVermaTensorFD to a list of " << theRank
+      << " rationals. The second argument you gave is " << fdWeightNode.ToString() << ".";
+    return false;
+  }
+//  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
+//  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
+  hwContext.indexAmbientSSalgebra=indexOfAlgebra;
+  int theNumVars=hwContext.VariableImages.size;
+  RationalFunction RFOne, RFZero;
+  RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
+  RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
+  std::string report;
+  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
+  //=theElementData.theElementTensorGenVermas.GetElement();
+  Selection selParSel1, selFD;
+  Expression hwvGenVerma, hwvFD;
+  selParSel1.MakeFullSelection(theRank);
+  selFD.init(theRank);
+  int theCoeff;
+  for (int i=0; i<theRank; i++)
+  { if (highestWeightFundCoords[i].IsSmallInteger(theCoeff))
+      if (theCoeff>=0)
+        selParSel1.RemoveSelection(i);
+    bool isGood=false;
+    if (theFDhw[i].IsSmallInteger(theCoeff))
+      if (theCoeff>=0)
+        isGood=true;
+    if (!isGood)
+      return theExpression.SetError("Error: the third argument of fSplitGenericGenVermaTensorFD must be a list of small non-negative integers.");
+  }
+  theCommands.fHWVinner
+  (theCommands, inputIndexBoundVars, hwvGenVerma, comments,
+  highestWeightFundCoords, selParSel1, hwContext, indexOfAlgebra);
+  if (hwvGenVerma.errorString!="")
+    return theExpression.SetError(hwvGenVerma.errorString);
+  Vector<RationalFunction> theFDhwRF;
+  theFDhwRF=theFDhw;
+  for (int i=0; i<theRank; i++)
+    theFDhwRF[i].SetNumVariables(theNumVars);
+  theCommands.fHWVinner
+  (theCommands, inputIndexBoundVars, hwvFD, comments,
+  theFDhwRF, selFD, hwContext, indexOfAlgebra);
+  if (hwvFD.errorString!="")
+    return theExpression.SetError(hwvFD.errorString);
+  std::stringstream out, latexConsumption1;
+  out << "hwv par sel: " << hwvGenVerma.ToString();
+  out << "hwv fd: " << hwvFD.ToString();
+  const ElementTensorsGeneralizedVermas<RationalFunction>& theHWgenVerma=
+  hwvGenVerma.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+  const ElementTensorsGeneralizedVermas<RationalFunction>& theHWfd=
+  hwvFD.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
+
+  ModuleSSalgebraNew<RationalFunction>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
+  int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
+  ModuleSSalgebraNew<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
+  int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
+  ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
+  List<ElementUniversalEnveloping<RationalFunction> > theChars;
+  theCasimir.MakeCasimir(theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
+  theChars.SetSize(theFDMod.theModuleWeightsSimpleCoords.size);
+  Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords, currentWeightDiff;
+  out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
+  FormatExpressions tempFormat;
+  tempFormat.MaxLineLength=60;
+  tempFormat.flagUseLatex=true;
+  for (int i=0; i<theChars.size; i++)
+  { currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
+    currentHWsimplecoords+=theFDMod.theModuleWeightsSimpleCoords[i];
+    currentHWdualcoords=theSSalgebra.theWeyl.GetDualCoordinatesFromSimple(currentHWsimplecoords);
+    ElementUniversalEnveloping<RationalFunction>& currentChar=theChars[i];
+    currentChar=theCasimir;
+    currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
+    out << "<tr><td>"
+    << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "</td><td>" << currentChar.ToString() << "</td></tr>";
+  }
+  out << "</table>";
+  ElementTensorsGeneralizedVermas<RationalFunction> tempElt, tempElt2;
+  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
+  theFDMod.highestWeightVectorNotation="v";
+  theGenMod.highestWeightVectorNotation="w";
+  out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
+  out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td><td>Additional multiplier</td>";
+  if (theNumVars==1)
+    out << "<td>gcd polynomial coeffs</td>";
+  out << "<td>the hwv</td>";
+  if (theNumVars==1)
+    out << "<td>gcd divided out</td>";
+  out << "</tr>";
+  //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
+  for (int i=0; i<theChars.size; i++)
+    for (int k=0; k<theFDMod.theGeneratingWordsGrouppedByWeight[i].size; k++)
+    { Vector<Rational>& currentWeight=theFDMod.theModuleWeightsSimpleCoords[i];
+      tempElt.MakeHWV(theMods, indexFDMod, RFOne);
+      tempElt.MultiplyOnTheLeft
+      (theFDMod.theGeneratingWordsGrouppedByWeight[i][k], theElt, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+       RFOne, RFZero);
+      tempElt.MakeHWV(theMods, indexGenMod, RFOne);
+//      tempElt.MultiplyOnTheLeft
+//      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+//       RFOne, RFZero);
+      theElt.TensorOnTheRight(tempElt, *theCommands.theGlobalVariableS, RFOne, RFZero);
+
+      std::string startingEltString=theElt.ToString(&tempFormat);
+      std::stringstream tempStream;
+      tempStream << "\\begin{array}{l}";
+      for (int j=0; j<theChars.size; j++)
+      { Vector<Rational>& otherWeight=theFDMod.theModuleWeightsSimpleCoords[j];
+        if ((otherWeight-currentWeight).IsPositive())
+        { theCasimirMinusChar=theCasimir;
+          theCasimirMinusChar-=theChars[j];
+          theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+          RFOne, RFZero);
+          theElt=tempElt2;
+          tempStream << "(i(\\bar c)- (" << theChars[j].ToString() << ") )\\\\";
+        }
+      }
+      tempStream << "(" << startingEltString << ")";
+      tempStream << "\\end{array}";
+//      std::cout << "<hr><hr>(" << theElt.ToString();
+      Rational tempRat= theElt.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+      currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
+      currentHWsimplecoords+=theFDMod.theModuleWeightsSimpleCoords[i];
+//      std::cout << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
+      out << "<tr><td>"
+      << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+      << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str())
+      << "</td><td>" << tempRat.ToString() << "</td>";
+      Polynomial<Rational> tmpGCD, tmpRF;
+      if (theNumVars==1)
+      { tmpGCD= theElt.FindGCDCoefficientNumerators<Polynomial<Rational> >();
+        tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+tmpGCD.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      }
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      if (theNumVars==1)
+      { tmpRF=tmpGCD;
+        theElt/=tmpRF;
+        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      }
+      out << "</tr>";
+    }
+  out << "</table>";
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
 
@@ -2303,6 +2530,10 @@ void CommandList::initPredefinedVars()
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
    "fPrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))");
+  this->AddNonBoundVarMustBeNew
+  ("SplitFDTensorGenericGeneralizedVerma", &this->fSplitGenericGenVermaTensorFD, "",
+   "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
+   "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
 /*  this->AddNonBoundVarMustBeNew
   ("JacobiSymbol", &this->fJacobiSymbol, "",
    "Jacobi symbol as implemented by user Numeri @ www.cplusplus.com.",
@@ -2378,6 +2609,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   ("[]", this->StandardLieBracket, "",
    "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
   this->AddOperationNoFail(":=", 0, "", "", "", false);
+  this->AddOperationNoFail
+  (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. The expression a:=:b always reduces to \
+   a:=b. In addition to the transformation, the pair of expressions a,b is registered in a special global \"registry\". This has the following effect. Every time \
+   the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated\
+   by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", false);
   this->AddOperationNoFail("if:=", 0, "", "", "", false);
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
   moreInfoOnIntegers
@@ -3031,6 +3267,31 @@ bool CommandList::EvaluateDoAssociatE
   }
   *currentExpression=*opands.LastObject();
   //std::cout << "<br>At end do associate: " << theExpression.ToString();
+  return true;
+}
+
+bool CommandList::StandardIsDenotedBy
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::StandardIsDenotedBy");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theExpression.children.size!=2)
+  { std::cout << "This is a programming error: operators isDenotedBy takes exactly two arguments, but I am getting "
+    << theExpression.children.size << " arguments instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Expression& withNotation=theExpression.children[1];
+  Expression& theNotation=theExpression.children[0];
+  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation);
+  theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
+  if (comments!=0)
+    *comments << "<br>Registered notation: globally, " << withNotation.ToString() << " is denoted by "
+    << theNotation.ToString();
+  if (withNotation.EvaluatesToAtom())
+    if (withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV())
+    { MonomialGeneralizedVerma<RationalFunction>& theElt=withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
+      theElt.GetOwner().highestWeightVectorNotation=theNotation.ToString();
+    }
+  theExpression.theOperation=theCommands.opDefine();
   return true;
 }
 
@@ -3997,6 +4258,9 @@ std::string Expression::ToString
       return "(...)";
   } else
     return "(ProgrammingErrorNoBoss)";
+  int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
+  if (notationIndex!=-1)
+    return theBoss->theObjectContainer.ExpressionNotation[notationIndex].ToString();
   assert((int)(this->theBoss)!=-1);
   std::stringstream out;
 //  if (this->theBoss->flagLogSyntaxRules && recursionDepth<=1)
@@ -4023,6 +4287,9 @@ std::string Expression::ToString
   } else if (this->theOperation==this->theBoss->opDefine())
     out << this->children[0].ToString(theFormat, false, false, outComments)
     << ":=" << this->children[1].ToString(theFormat, false, false, outComments);
+  else if (this->theOperation==this->theBoss->opIsDenotedBy())
+    out << this->children[0].ToString(theFormat, false, false, outComments)
+    << ":=:" << this->children[1].ToString(theFormat, false, false, outComments);
   else if (this->theOperation==this->theBoss->opDefineConditional())
     out <<  this->children[0].ToString(theFormat, false, false, outComments) << " :if "
     << this->children[1].ToString(theFormat, true, false, outComments)

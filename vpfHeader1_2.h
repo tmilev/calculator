@@ -836,8 +836,9 @@ public:
   Vector<CoefficientType> GetFundamentalCoordinatesFromSimple
   (const Vector<CoefficientType>& inputInSimpleCoords)
   ;
-  Vector<Rational> GetDualCoordinatesFromSimple
-  (const Vector<Rational> & inputInSimpleCoords)
+  template<class CoefficientType>
+  Vector<CoefficientType> GetDualCoordinatesFromSimple
+  (const Vector<CoefficientType>& inputInSimpleCoords)
   { return this->GetDualCoordinatesFromFundamental(this->GetFundamentalCoordinatesFromSimple(inputInSimpleCoords));
   }
   template <class CoefficientType>
@@ -2285,8 +2286,8 @@ public:
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
-  bool IsEqualToZero()const
-  { return this->Coefficient.IsEqualToZero();
+  bool IsEqualToOne()const
+  { return this->generatorsIndices.size==0;
   }
   template<class otherType>
   void Assign(const MonomialUniversalEnveloping<otherType>& other)
@@ -3116,6 +3117,7 @@ public:
   charSSAlgMod<CoefficientType> theChaR;
   Selection parabolicSelectionNonSelectedAreElementsLevi;
   Selection parabolicSelectionSelectedAreElementsLevi;
+  std::string highestWeightVectorNotation;
   bool flagIsInitialized;
   bool operator==(const ModuleSSalgebraNew<CoefficientType>& other)
   { return
@@ -3150,6 +3152,7 @@ public:
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
     this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
     this->flagIsInitialized=other.flagIsInitialized;
+    this->highestWeightVectorNotation=other.highestWeightVectorNotation;
 //    std::cout << "<hr><hr><b>Copying from:</b> " << other.ToString()
 //    << "<b>Copy result:</b>" << this->ToString() << "<br><b>End of copy</b><hr><hr>";
 
@@ -3203,9 +3206,11 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   ;
   std::string ToString()const;
   std::string ElementToStringHWV(FormatExpressions* theFormat=0)const
-  { std::stringstream out;
+  { if (this->highestWeightVectorNotation!="")
+      return this->highestWeightVectorNotation;
+    std::stringstream out;
     out << "v_{" << this->theHWFundamentalCoordsBaseField.ToString(theFormat)
-    << ", " << this->parabolicSelectionSelectedAreElementsLevi.ToString() << "}";
+    << ", " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString() << "}";
     return out.str();
 //    return "hwv{}("+ this->GetOwner().GetLieAlgebraName(false)+ "," + this->theHWFundamentalCoordsBaseField.ToString(theFormat) + ","
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
@@ -3284,6 +3289,13 @@ class MonomialGeneralizedVerma
 (ElementSumGeneralizedVermas<CoefficientType>& output, GlobalVariables& theGlobalVariables,
   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
    ;
+  bool IsHWV()const
+  { if (!this->theMonCoeffOne.IsEqualToOne())
+      return false;
+//    std::cout << "<br>hi, my name is: " << this->ToString() << " and my index is: " << this->indexFDVector
+//    << " and this->GetOwner().GetDim()-1 is " << this->GetOwner().GetDim()-1;
+    return this->GetOwner().GetDim()-1==this->indexFDVector;
+  }
   void MakeConst(List<ModuleSSalgebraNew<CoefficientType> >& inputOwners, int inputIndexInOwner)
   { this->owneR=&inputOwners;
     this->indexInOwner=inputIndexInOwner;
@@ -3401,6 +3413,11 @@ public:
         return false;
     return true;
   }
+  bool IsHWV()const
+  { if (this->theMons.size!=1)
+      return false;
+    return this->theMons[0].IsHWV();
+  }
   bool operator>(const MonomialTensorGeneralizedVermas<CoefficientType>& other)const
   { if (this->theMons.size>other.theMons.size)
       return true;
@@ -3461,6 +3478,15 @@ public:
   (const ElementTensorsGeneralizedVermas<CoefficientType>& standsOnTheRight,
    GlobalVariables& theGlobalVariables)
    ;
+  bool IsHWV
+  ()const
+  { if (this->theCoeffs.size!=1)
+      return false;
+    if (!this->theCoeffs[0].IsEqualToOne())
+      return false;
+    return this->TheObjects[0].IsHWV();
+  }
+
   void MakeHWV
   (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
   ;
@@ -5732,9 +5758,14 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ToString
   std::string tempS;
   if (this->theMons.size>1)
     for (int i=0; i<this->theMons.size; i++)
-    { out << "(" << this->theMons[i].ToString(theFormat, includeV) << ")";
+    { bool ishwv=this->theMons[i].IsHWV();
+      if (!ishwv)
+        out << "(";
+      out << this->theMons[i].ToString(theFormat, includeV);
+      if (!ishwv)
+        out  << ")";
       if (i!=this->theMons.size-1)
-        out << "\\otimes";
+        out << "\\otimes ";
     }
   else
     out << this->theMons[0].ToString(theFormat, includeV);
@@ -5763,12 +5794,14 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ToString
     tempS="";
   if (tempS=="-1")
     tempS="-";
+  bool needsCdot=(tempS!="1" && tempS!="-" && tempS!="");
   std::stringstream out;
   out << tempS;
   tempS= theMod.theGeneratingWordsNonReduced[this->indexFDVector].ToString(theFormat);
   if (tempS!="1")
     out << tempS;
-  if (tempS!="1" && tempS!="-")
+  needsCdot=needsCdot || (tempS!="1" && tempS!="-");
+  if (needsCdot)
     out << "\\cdot ";
   if (includeV)
     out << theMod.ElementToStringHWV(theFormat);

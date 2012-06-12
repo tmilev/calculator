@@ -2549,12 +2549,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       assert(false);
     }
   }
-  std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
+/*  std::cout << "<br>large nilradical: " << this->nilradicalLarge.ToString();
   std::cout  << "<br>large nilradical weights: " << this->weightsNilradicalLarge.ToString();
   std::cout << "<br>small nilradical: " << this->nilradicalSmall.ToString();
   std::cout  << "<br>small nilradical weights: " << this->weightsNilradicalSmall.ToString();
   std::cout << "<br>Nil mod pre-nil (Lemma 3.3): " << this->NilModPreNil.ToString();
-  std::cout  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();
+  std::cout  << "<br>Nil mod pre-nil weights: " << this->weightsNilModPreNil.ToString();*/
 }
 
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)

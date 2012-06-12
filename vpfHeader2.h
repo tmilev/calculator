@@ -511,7 +511,8 @@ public:
   HashedList<Context> theContexts;
   HashedListB<std::string, MathRoutines::hashString> theStrings;
   HashedList<VariableNonBound> theNonBoundVars;
-
+  HashedList<Expression> ExpressionNotation;
+  HashedList<Expression> ExpressionWithNotation;
   void reset();
   std::string ToString();
 };
@@ -832,6 +833,9 @@ public:
   int conDefine()
   { return this->controlSequences.GetIndexIMustContainTheObject(":=");
   }
+  int conIsDenotedBy()
+  { return this->controlSequences.GetIndexIMustContainTheObject(":=:");
+  }
   int conList()
   { return this->controlSequences.GetIndexIMustContainTheObject("OperationList");
   }
@@ -861,6 +865,9 @@ public:
   }
   int opApplyFunction()
   { return this->operations.GetIndexIMustContainTheObject("{}");
+  }
+  int opIsDenotedBy()
+  { return this->operations.GetIndexIMustContainTheObject(":=:");
   }
   int opDefine()
   { return this->operations.GetIndexIMustContainTheObject(":=");
@@ -983,6 +990,9 @@ static bool EvaluateDereferenceOneArgument
   static bool StandardDivide
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool StandardIsDenotedBy
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool StandardLieBracket
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1076,6 +1086,9 @@ static bool EvaluateDereferenceOneArgument
   static bool fSplitFDpartB3overG2
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSplitGenericGenVermaTensorFD
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fSplitFDpartB3overG2inner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
   branchingData& theG2B3Data)
@@ -1102,6 +1115,11 @@ static bool EvaluateDereferenceOneArgument
   static bool fJacobiSymbol
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fHWVinner
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Vector<RationalFunction>& highestWeightFundCoords,
+ Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
+ ;
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

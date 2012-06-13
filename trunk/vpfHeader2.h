@@ -7,10 +7,7 @@
 //The calculator uses relatively few functions, nevertheless the include is needed.
 #include "vpfHeader1.h"
 #include "vpfHeader1_2.h"
-#ifndef ProjectInfoVpfHeader2AlreadyDefined
-#define ProjectInfoVpfHeader2AlreadyDefined
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
-#endif
 class Context;
 
 class Data

@@ -4,10 +4,7 @@
 #define vpfHeader1_2_h_already_included
 
 #include "vpfHeader1.h"
-#ifndef ProjectInfoVpfHeader1_2AlreadyDefined
-#define ProjectInfoVpfHeader1_2AlreadyDefined
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header file containing c++ math routines. ");
-#endif
 
 class Lattice
 {
@@ -3013,8 +3010,8 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 (std::string& outputDetails, GlobalVariables& theGlobalVariables,
  DrawingVariables& theDrawingVars, int upperBoundWeights, bool useMults)
   ;
-  bool SplitCharOverLevi
-(std::string* Report, charSSAlgMod& output, Vector<Rational> & splittingParSel, const Vector<Rational> & ParSelFDInducingPart,
+  bool SplitOverLeviMonsEncodeHIGHESTWeight
+(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
      ;
   void MakeTrivial(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
@@ -3157,6 +3154,7 @@ public:
 //    << "<b>Copy result:</b>" << this->ToString() << "<br><b>End of copy</b><hr><hr>";
 
   }
+  void GetFDchar(charSSAlgMod<CoefficientType>& output);
   void SetNumVariables(int GoalNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
@@ -7352,7 +7350,8 @@ template <class CoefficientType>
 bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
 (Vector<CoefficientType>& highestWeightSimpleCoords, HashedList<Vector<CoefficientType> >& outputWeightsSimpleCoords,
  int upperBoundDominantWeights, std::string& outputDetails, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM");
+  std::stringstream out;
   this->ComputeRootSubsystem();
 //  double startTime=theGlobalVariables.GetElapsedSeconds();
 //  std::cout << "<br>time elapsed: " << theGlobalVariables.GetElapsedSeconds()-startTime;
@@ -7423,7 +7422,8 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
 
 template <class CoefficientType>
 void ReflectionSubgroupWeylGroup::RaiseToDominantWeight(Vector<CoefficientType>& theWeight, int* sign, bool* stabilizerFound)
-{ if (sign!=0)
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::RaiseToDominantWeight");
+  if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
     *stabilizerFound=false;
@@ -7602,7 +7602,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 (Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoordS,
  List<CoefficientType>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
-{ //double startTimer=theGlobalVariables.GetElapsedSeconds();
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart");
+  //double startTimer=theGlobalVariables.GetElapsedSeconds();
   this->ComputeRootSubsystem();
   Vector<Rational> EiVect;
   List<bool> Explored;
@@ -7720,10 +7721,11 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 }
 
 template <class CoefficientType>
-bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
-(std::string* Report, charSSAlgMod& output, Vector<Rational>& splittingParSel, const Vector<Rational>& ParSelFDInducingPart,
+bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
+(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight");
+  std::stringstream out;
   std::string tempS;
 //  std::cout << "Splitting parabolic selection: " << splittingParSel.ToString();
   outputWeylSub.MakeParabolicFromSelectionSimpleRoots(this->GetOwner().theWeyl, splittingParSel, theGlobalVariables,1);
@@ -7748,6 +7750,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
   WeylGroup& theWeyL=this->GetOwner().theWeyl;
   charAmbientFDWeyl.Reset();
   CoefficientType bufferCoeff, highestCoeff;
+  out << "Starting character: " << this->ToString();
   for (int i=0; i<this->size; i++)
   { MonomialChar<CoefficientType>& currentMon=this->TheObjects[i];
     if (!theFDWeyl.FreudenthalEvalIrrepIsWRTLeviPart
@@ -7766,7 +7769,7 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
     }
   }
 //  std::cout << "<hr>" << tempS;
-//  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
+  std::cout << "<hr>Freudenthal eval ends up being: " << charAmbientFDWeyl.ToString();
 
   remainingCharDominantLevi.Reset();
   Vectors<CoefficientType> orbitDom;
@@ -7861,6 +7864,116 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverLevi
     *Report=out.str();
   }
   return true;
+}
+
+template<class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
+  (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+   const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
+   Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace)
+{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::SplitOverLevi");
+  if (this->theChaR.size!=1)
+  { if (Report!=0)
+    { std::stringstream out;
+      out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
+      out << " Instead I got the character " << this->theChaR.ToString() << " (" << this->theChaR.size << " monomials)";
+      *Report=out.str();
+    }
+    return;
+  }
+  ReflectionSubgroupWeylGroup subWeyl;
+  charSSAlgMod<CoefficientType> charWRTsubalgebra;
+  this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight
+  (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
+   subWeyl, theGlobalVariables);
+  Vector<Rational> theHWsimpleCoords, theHWfundCoords;
+  std::stringstream out;
+  if(Report!=0)
+    out << *Report;
+  Selection splittingParSelectedInLevi;
+  splittingParSelectedInLevi=splittingParSel;
+  splittingParSelectedInLevi.InvertSelection();
+  if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
+  { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
+    << " The parabolic has Vectors<Rational> of Levi given by " << splittingParSel.ToString()
+    <<" while the ambient parabolic subalgebra has Vectors<Rational> of Levi given by "
+    << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+    if (Report!=0)
+      *Report=out.str();
+    return;
+  }
+  out << "<br>Parabolic selection: " << splittingParSel.ToString();
+  List<List<List<CoefficientType> > > eigenSpacesPerSimpleGenerator;
+ // if (false)
+  eigenSpacesPerSimpleGenerator.SetSize(splittingParSelectedInLevi.CardinalitySelection);
+  Vectors<CoefficientType> tempSpace1, tempSpace2;
+  MemorySaving<Vectors<CoefficientType> > tempEigenVects;
+  Vectors<CoefficientType>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
+//  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
+  for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
+  { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
+    Matrix<CoefficientType>& currentOp=this->GetActionGeneratorIndex(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
+    currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    if (i==0)
+      theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
+    else
+    { tempSpace1=theFinalEigenSpace;
+      tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
+      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
+    }
+  }
+  out << "<br>Eigenvectors:<table> ";
+//  Vector<Rational> zeroRoot;
+//  zeroRoot.MakeZero(this->theAlgebra->GetRank());
+  std::stringstream readyForLatexComsumption;
+  readyForLatexComsumption << "\\begin{tabular}{|lll|}\n <br>";
+
+  readyForLatexComsumption << "\\hline\\multicolumn{3}{|c|}{Highest weight $"
+  << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega") << "$}\\\\\n<br>";
+  readyForLatexComsumption << "weight fund. coord.& singular vector \\\\\\hline\n<br>";
+  Vector<CoefficientType> currentWeight;
+  Vector<CoefficientType> hwFundCoordsNilPart;
+  hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
+  hwFundCoordsNilPart-=this->theHWFundamentalCoordS;
+  ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
+  for (int j=0; j<theFinalEigenSpace.size; j++)
+  { out << "<tr><td>";
+    currentElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
+    Vector<CoefficientType>& currentVect= theFinalEigenSpace[j];
+    int lastNonZeroIndex=-1;
+    for (int i=0; i<currentVect.size; i++)
+      if (!(currentVect[i].IsEqualToZero()))
+      { tempElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
+        tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
+        tempElt*=currentVect[i];
+        currentElt+=tempElt;
+        lastNonZeroIndex=i;
+      }
+    currentWeight=subWeyl.AmbientWeyl.GetFundamentalCoordinatesFromSimple
+    (this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex]);//<-implicitTypeConversionHere
+    currentWeight+=hwFundCoordsNilPart;
+    readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
+    << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
+    if (currentElt.size>1)
+      out << "(";
+    if (outputEigenVectors!=0)
+      outputEigenVectors->AddOnTop(currentElt);
+    if (outputWeightsFundCoords!=0)
+      outputWeightsFundCoords->AddOnTop(currentWeight);
+    out << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+    if (currentElt.size>1)
+      out << ")";
+    out << " v_\\lambda";
+    out << "</td><td>(weight: "
+    << currentWeight.ToStringLetterFormat("\\omega") << ")</td></tr>";
+    readyForLatexComsumption << "\\\\\n<br>";
+  }
+  out << "</table>";
+  readyForLatexComsumption << "\\hline \n<br> \\end{tabular}";
+  out << "<br>Your ready for LaTeX consumption text follows.<br>";
+  out << readyForLatexComsumption.str();
+  if (Report!=0)
+    *Report=out.str();
 }
 
 template <class CoefficientType>

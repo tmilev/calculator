@@ -1901,7 +1901,7 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   ReflectionSubgroupWeylGroup subWeyl;
   Vector<Rational> emptySel;
   emptySel.MakeZero(theDim);
-  theChar.SplitCharOverLevi(&report,  tempChar, parSel, emptySel, subWeyl, theGlobalVariables);
+  theChar.SplitOverLeviMonsEncodeHIGHESTWeight(&report,  tempChar, parSel, emptySel, subWeyl, theGlobalVariables);
   out << report;
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;

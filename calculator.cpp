@@ -357,6 +357,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="1/0";
 //  civilizedInput="x_1:=Polynomial{}(x_{{1}});x_2:=Polynomial{}(x_{{2}});x_1/x_2+x_1/(x_1+x_2)";
 //civilizedInput="SplitGenericGenVermaTensorFD{}(G_2,(x_1,x_2), (1,0)); ";
+//civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
+civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (0, x_1)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

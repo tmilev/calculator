@@ -1856,6 +1856,19 @@ bool CommandList::fHWVinner
   return true;
 }
 
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
+{ output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  if (this->theHWFundamentalCoordsBaseField.size<=0)
+    return;
+  MonomialChar<CoefficientType> tempMon;
+  WeylGroup& theWeyl=this->GetOwner().theWeyl;
+  for (int i =0; i<this->theModuleWeightsSimpleCoords.size; i++)
+  { tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+    output.AddMonomial(tempMon, this->theGeneratingWordsGrouppedByWeight[i].size);
+  }
+}
+
 bool CommandList::fSplitGenericGenVermaTensorFD
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fSplitGenericGenVermaTensorFD");
@@ -1972,23 +1985,38 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   ModuleSSalgebraNew<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
   int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
-  List<ElementUniversalEnveloping<RationalFunction> > theChars;
+  charSSAlgMod<RationalFunction> theHWchar, theFDChaR, theFDLeviSplit, theFDLeviSplitShifted;
+  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+  ReflectionSubgroupWeylGroup tempSG;
+  if (!theHWchar.SplitOverLeviMonsEncodeHIGHESTWeight
+    (&report, theFDLeviSplit, theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
+     theFDMod.parabolicSelectionNonSelectedAreElementsLevi, tempSG, *theCommands.theGlobalVariableS) )
+    return theExpression.SetError("Failed to split weight character over levi: error message: "+ report);
+  theFDMod.GetFDchar(theFDChaR);
+  List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
   theCasimir.MakeCasimir(theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
-  theChars.SetSize(theFDMod.theModuleWeightsSimpleCoords.size);
   Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords, currentWeightDiff;
+  out << "<br>Character of finite dimensional module:" << CGI::GetHtmlMathSpanPure(theFDChaR.ToString());
+  out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanPure(theFDLeviSplit.ToString());
+  out << "<br> Splitting report: " << report;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength=60;
   tempFormat.flagUseLatex=true;
-  for (int i=0; i<theChars.size; i++)
-  { currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
-    currentHWsimplecoords+=theFDMod.theModuleWeightsSimpleCoords[i];
-    currentHWdualcoords=theSSalgebra.theWeyl.GetDualCoordinatesFromSimple(currentHWsimplecoords);
-    ElementUniversalEnveloping<RationalFunction>& currentChar=theChars[i];
+
+  theFDLeviSplitShifted.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+  MonomialChar<RationalFunction> tempMon;
+  theCentralCharacters.SetSize(theFDLeviSplit.size);
+  for (int i=0; i<theCentralCharacters.size; i++)
+  { tempMon=theFDLeviSplit[i];
+    tempMon.weightFundamentalCoords+=theGenMod.theHWFundamentalCoordsBaseField;
+    theFDLeviSplitShifted.AddMonomial(tempMon, theFDLeviSplit.theCoeffs[i]);
+    currentHWdualcoords=theSSalgebra.theWeyl.GetDualCoordinatesFromFundamental(theFDLeviSplitShifted[i].weightFundamentalCoords);
+    ElementUniversalEnveloping<RationalFunction>& currentChar=theCentralCharacters[i];
     currentChar=theCasimir;
     currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
     out << "<tr><td>"
-    << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << theFDLeviSplitShifted[i].weightFundamentalCoords.ToStringLetterFormat("\\psi")
     << "</td><td>" << currentChar.ToString() << "</td></tr>";
   }
   out << "</table>";
@@ -2005,9 +2033,10 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     out << "<td>gcd divided out</td>";
   out << "</tr>";
   //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
-  for (int i=0; i<theChars.size; i++)
+  for (int i=0; i<theCentralCharacters.size; i++)
     for (int k=0; k<theFDMod.theGeneratingWordsGrouppedByWeight[i].size; k++)
-    { Vector<Rational>& currentWeight=theFDMod.theModuleWeightsSimpleCoords[i];
+    { Vector<RationalFunction> currentWeightSimpleCoords=
+      theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theFDLeviSplit[i].weightFundamentalCoords);
       tempElt.MakeHWV(theMods, indexFDMod, RFOne);
       tempElt.MultiplyOnTheLeft
       (theFDMod.theGeneratingWordsGrouppedByWeight[i][k], theElt, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
@@ -2021,15 +2050,16 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       std::string startingEltString=theElt.ToString(&tempFormat);
       std::stringstream tempStream;
       tempStream << "\\begin{array}{l}";
-      for (int j=0; j<theChars.size; j++)
-      { Vector<Rational>& otherWeight=theFDMod.theModuleWeightsSimpleCoords[j];
-        if ((otherWeight-currentWeight).IsPositive())
+      for (int j=0; j<theCentralCharacters.size; j++)
+      { Vector<RationalFunction> otherWeightSimpleCoords=
+        theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theFDLeviSplit[j].weightFundamentalCoords);
+        if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
         { theCasimirMinusChar=theCasimir;
-          theCasimirMinusChar-=theChars[j];
+          theCasimirMinusChar-=theCentralCharacters[j];
           theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
           RFOne, RFZero);
           theElt=tempElt2;
-          tempStream << "(i(\\bar c)- (" << theChars[j].ToString() << ") )\\\\";
+          tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
         }
       }
       tempStream << "(" << startingEltString << ")";
@@ -5150,5 +5180,3 @@ void CommandList::AddNonBoundVarMustBeNew
   theV.theName=theName;
   this->theObjectContainer.theNonBoundVars.AddNoRepetition(theV);
 }
-
-

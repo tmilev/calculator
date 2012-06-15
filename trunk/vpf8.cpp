@@ -5694,105 +5694,59 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot;
-  std::string beginMath;
-  std::string endMath;
-  bool usePNG=false;
-  bool useRootNotation=false;
   bool useHtml=true;
-
-  if (!usePNG)
-  { beginMath="<DIV class=\"math\" scale=\"50\">\\begin{array}{";
-    endMath="\\end{array}</DIV>";
-  } else
-  { beginMath="\\begin{tabular}{";
-    endMath="\\end{tabular}";
-  }
   int numRoots=this->theWeyl.RootSystem.size;
-  int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   ElementSemisimpleLieAlgebra tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
-  if (usePNG)
-  { out << "\\begin{tabular}{cc}";
-    out << "\\hline generator &corresponding Vector<Rational> space\\\\\\hline";
-    for (int i=0; i<numRoots+theDimension; i++)
-    { if (i==numPosRoots)
-      { if (useRootNotation)
-          out << "\\hline\\begin{tabular}{c}$"
-          << theFormat->chevalleyHgeneratorLetter << "_\\alpha$:=$\\frac{\\langle\\alpha,\\alpha\\rangle}{2}["
-          << theFormat->chevalleyGgeneratorLetter << "_{\\alpha},"
-          << theFormat->chevalleyGgeneratorLetter << "_{-\\alpha}]$\\\\$"
-          << theFormat->chevalleyHgeneratorLetter << "_\\alpha$ is dual to the Vector<Rational> $\\alpha$\\end{tabular} & 0 \\\\\\hline";
-        else
-          out << "\\hline\\begin{tabular}{c}$"
-          << theFormat->chevalleyHgeneratorLetter << "_i$:=$\\frac{\\langle\\alpha_i,\\alpha_i\\rangle}{2}["
-          << theFormat->chevalleyGgeneratorLetter << "_{i},"
-          << theFormat->chevalleyGgeneratorLetter << "_{-i}]$\\\\$"
-          << theFormat->chevalleyHgeneratorLetter << "_i$ is dual to the Vector<Rational> $\\alpha_i$\\end{tabular} & 0 \\\\\\hline";
-//        out << "  \\\\\\hline";
-        //out << "\\hline generator & corresponding Vector<Rational> space\\\\\\hline";
-        i+=theDimension;
-      }
-      out << "$" << this->GetStringFromChevalleyGenerator(i, theFormat);
-      int rootIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
-      out << "$&";
-      out << this->theWeyl.RootSystem[rootIndex].ToString() << "\\\\";
-    }
-    out << "\\end{tabular}";
+  std::string hLetter="h";
+  std::string gLetter="g";
+  if (theFormat!=0)
+  { hLetter=theFormat->chevalleyHgeneratorLetter;
+    gLetter=theFormat->chevalleyGgeneratorLetter;
   }
-  if (numRoots+theDimension<100)
-  { for (int i=0; i<numRoots+theDimension+1; i++)
-      beginMath+="c";
-    beginMath+="}\n";
-    out << beginMath;
-    std::string tempHeader=out.str();
-    if(usePNG)
-      out << "$";
-    out << "[\\bullet, \\bullet]\n";
-    if(usePNG)
-      out << "$";
-    for (int i=0; i<numRoots+theDimension; i++)
-    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-      (i, *this->owner, this->indexInOwner);
-      tempS=tempElt1.ToString(theFormat);
-      out << " & ";
-      if(usePNG)
-        out << "$";
+  out << "The letter " << CGI::GetHtmlMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
+  << " the letter " <<  CGI::GetHtmlMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " The generator " << CGI::GetHtmlMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
+  << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" +hLetter+"_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
+  << ", <br> where g is a Chevalley generator, " << CGI::GetHtmlMathSpanPure("\\gamma") << " is its weight, and <br>"
+  << CGI::GetHtmlMathSpanPure("\\alpha_i") << " is the i^th simple root. "
+  << " <DIV class=\"math\" scale=\"50\">\\begin{array}{cc|";
+  for (int i=0; i<this->GetNumGenerators()+1; i++)
+    out << "c";
+  out << "}\n";
+  out << "\\mathrm{roots~simple~coords}&\\varepsilon\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
+  for (int i=0; i<numRoots+theDimension; i++)
+  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i, *this->owner, this->indexInOwner);
+    tempS=tempElt1.ToString(theFormat);
+    out << " & ";
+    out << tempS;
+  }
+  out << "\\\\\n";
+  if (useHtml)
+    out << "<hr>";
+  Rational tempRat;
+  //int lineCounter=0;
+  for (int i=0; i<theDimension+numRoots; i++)
+  { tempRoot=this->GetWeightOfGenerator(i);
+    out << tempRoot.ToString() << "&";
+    out << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
+    tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    (i,*this->owner, this->indexInOwner);
+    tempS=tempElt1.ToString(theFormat);
+    out << tempS;
+    for (int j=0; j<numRoots+theDimension; j++)
+    { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      (j, *this->owner, this->indexInOwner);
+      this->LieBracket(tempElt1, tempElt2, tempElt3);
+      tempS=tempElt3.ToString(theFormat);
+      out << "& ";
       out << tempS;
-      if(usePNG)
-        out << "$";
     }
     out << "\\\\\n";
-    if (useHtml)
-      out << "<hr>";
-    Rational tempRat;
-    //int lineCounter=0;
-    for (int i=0; i<theDimension+numRoots; i++)
-    { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-      (i,*this->owner, this->indexInOwner);
-      tempS=tempElt1.ToString(theFormat);
-      if(usePNG)
-        out << "$";
-      out << tempS;
-      if(usePNG)
-        out << "$";
-      for (int j=0; j<numRoots+theDimension; j++)
-      { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-        (j, *this->owner, this->indexInOwner);
-        this->LieBracket(tempElt1, tempElt2, tempElt3);
-        tempS=tempElt3.ToString(theFormat);
-        out << "& ";
-        if(usePNG)
-          out << "$";
-        out << tempS;
-        if(usePNG)
-          out << "$";
-      }
-      out << "\\\\\n";
-    }
-    out << endMath;
-  } else
-    out << "\\begin{tabular}{c} table trimmed to avoid LaTeX/browser memory issues.\\end{tabular}";
+  }
+  out << "\\end{array}</DIV>";
   return out.str();
 }
 

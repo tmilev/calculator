@@ -3214,7 +3214,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 //    + Vector<Rational> (this->parabolicSelectionNonSelectedAreElementsLevi).ToString(theFormat) + ")";
   }
   void SplitOverLevi
-  (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
    Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0)
    ;
@@ -7868,7 +7868,7 @@ bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
 
 template<class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
-  (std::string* Report, Vector<Rational>& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
+  (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
    Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace)
 { MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::SplitOverLevi");
@@ -7910,17 +7910,14 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   MemorySaving<Vectors<CoefficientType> > tempEigenVects;
   Vectors<CoefficientType>& theFinalEigenSpace= (outputEigenSpace==0) ? tempEigenVects.GetElement() : *outputEigenSpace;
 //  WeylGroup& theWeyL=this->theAlgebra.theWeyl;
+  theFinalEigenSpace.MakeEiBasis(this->GetDim(), theRingUnit, theRingZero);
   for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
   { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
     Matrix<CoefficientType>& currentOp=this->GetActionGeneratorIndex(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
     currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
-    if (i==0)
-      theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-    else
-    { tempSpace1=theFinalEigenSpace;
-      tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
-    }
+    tempSpace1=theFinalEigenSpace;
+    tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
+    theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
   }
   out << "<br>Eigenvectors:<table> ";
 //  Vector<Rational> zeroRoot;

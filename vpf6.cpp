@@ -1830,12 +1830,14 @@ bool CommandList::fHWVinner
   }
   ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { if (highestWeightFundCoords[0].NumVars!=RFOne.NumVars)
-    { std::cout << "This is a programming error: the highest weight I was given has " << highestWeightFundCoords[0].NumVars
-      << " variables but the context I was given indicates  " << RFOne.NumVars << " variables. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
+  { for (int i=0; i<highestWeightFundCoords.size; i++)
+      if (highestWeightFundCoords[i].NumVars>RFOne.NumVars)
+      { std::cout << "This is a programming error: the highest weight I was given has " << highestWeightFundCoords[i].NumVars
+        << " variables but the context I was given indicates  " << RFOne.NumVars << " variables. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      } else
+        highestWeightFundCoords[i].SetNumVariables(RFOne.NumVars);
     bool isGood=theMod.MakeFromHW
     (theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, highestWeightFundCoords, selectionParSel,
      *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
@@ -1972,7 +1974,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   theFDhwRF, selFD, hwContext, indexOfAlgebra);
   if (hwvFD.errorString!="")
     return theExpression.SetError(hwvFD.errorString);
-  std::stringstream out, latexConsumption1;
+  std::stringstream out;
   out << "hwv par sel: " << hwvGenVerma.ToString();
   out << "hwv fd: " << hwvFD.ToString();
   const ElementTensorsGeneralizedVermas<RationalFunction>& theHWgenVerma=
@@ -1985,41 +1987,53 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   ModuleSSalgebraNew<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
   int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
-  charSSAlgMod<RationalFunction> theHWchar, theFDChaR, theFDLeviSplit, theFDLeviSplitShifted;
+  charSSAlgMod<RationalFunction> theHWchar, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
   ReflectionSubgroupWeylGroup tempSG;
-  if (!theHWchar.SplitOverLeviMonsEncodeHIGHESTWeight
-    (&report, theFDLeviSplit, theGenMod.parabolicSelectionNonSelectedAreElementsLevi,
-     theFDMod.parabolicSelectionNonSelectedAreElementsLevi, tempSG, *theCommands.theGlobalVariableS) )
-    return theExpression.SetError("Failed to split weight character over levi: error message: "+ report);
+  List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
+  Vectors<RationalFunction> theEigenVectorWeightsFund;
+  theFDMod.SplitOverLevi
+  (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
+   &theLeviEigenVectors, &theEigenVectorWeightsFund)
+  ;
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
   theCasimir.MakeCasimir(theSSalgebra, *theCommands.theGlobalVariableS, RFOne, RFZero);
   Vector<RationalFunction> currentHWsimplecoords, currentHWdualcoords, currentWeightDiff;
-  out << "<br>Character of finite dimensional module:" << CGI::GetHtmlMathSpanPure(theFDChaR.ToString());
-  out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanPure(theFDLeviSplit.ToString());
-  out << "<br> Splitting report: " << report;
-  out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
   FormatExpressions tempFormat;
   tempFormat.MaxLineLength=60;
   tempFormat.flagUseLatex=true;
-
-  theFDLeviSplitShifted.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+  tempFormat.fundamentalWeightLetter="\\psi";
+  tempFormat.CustomPlusSign="\\oplus ";
+  hwContext.GetFormatExpressions(tempFormat);
+  out << "<br>Character of finite dimensional module:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDChaR.ToString());
+//  out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDLeviSplit.ToString(&tempFormat));
+  //out << "<br> Splitting report: " << report;
+  std::stringstream latexReport1;
+  out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
+  latexReport1 << " \\begin{longtable}{rl}\\caption{$" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\lambda(\\mathfrak p)+\\psi$ & Action of $\\bar c$\\\\\\hline";
+  tempFormat.CustomPlusSign="";
+  theFDLeviSplitShifteD.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
   MonomialChar<RationalFunction> tempMon;
-  theCentralCharacters.SetSize(theFDLeviSplit.size);
-  for (int i=0; i<theCentralCharacters.size; i++)
-  { tempMon=theFDLeviSplit[i];
+  ElementUniversalEnveloping<RationalFunction> currentChar;
+  for (int i=0; i<theLeviEigenVectors.size; i++)
+  { tempMon.weightFundamentalCoords=theEigenVectorWeightsFund[i];
     tempMon.weightFundamentalCoords+=theGenMod.theHWFundamentalCoordsBaseField;
-    theFDLeviSplitShifted.AddMonomial(tempMon, theFDLeviSplit.theCoeffs[i]);
-    currentHWdualcoords=theSSalgebra.theWeyl.GetDualCoordinatesFromFundamental(theFDLeviSplitShifted[i].weightFundamentalCoords);
-    ElementUniversalEnveloping<RationalFunction>& currentChar=theCentralCharacters[i];
+    theFDLeviSplitShifteD.AddMonomial(tempMon, RFOne);
+    currentHWdualcoords=theSSalgebra.theWeyl.GetDualCoordinatesFromFundamental(tempMon.weightFundamentalCoords);
     currentChar=theCasimir;
     currentChar.ModOutVermaRelations(theCommands.theGlobalVariableS, & currentHWdualcoords, RFOne, RFZero);
+    theCentralCharacters.AddOnTop(currentChar);
     out << "<tr><td>"
-    << theFDLeviSplitShifted[i].weightFundamentalCoords.ToStringLetterFormat("\\psi")
-    << "</td><td>" << currentChar.ToString() << "</td></tr>";
+    << theFDLeviSplitShifteD[i].weightFundamentalCoords.ToStringLetterFormat("\\psi")
+    << "</td><td>" << currentChar.ToString(&tempFormat) << "</td></tr>";
+    latexReport1 << " $"
+    << theFDLeviSplitShifteD[i].weightFundamentalCoords.ToStringLetterFormat("\\psi", &tempFormat) << "$"
+    << "&$p_{" << i+1 <<"}:=$ $" << currentChar.ToString(&tempFormat) << "$\\\\<br>";
   }
   out << "</table>";
+  latexReport1 << "\\end{longtable}<br>";
   ElementTensorsGeneralizedVermas<RationalFunction> tempElt, tempElt2;
   List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   theFDMod.highestWeightVectorNotation="v";
@@ -2032,62 +2046,84 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   if (theNumVars==1)
     out << "<td>gcd divided out</td>";
   out << "</tr>";
+  std::stringstream latexReport2;
+  latexReport2 << "\\begin{longtable}{rrp{1.5cm}l}\\caption{Decomposition for the $"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Casimir applied to &"
+  << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
   for (int i=0; i<theCentralCharacters.size; i++)
-    for (int k=0; k<theFDMod.theGeneratingWordsGrouppedByWeight[i].size; k++)
-    { Vector<RationalFunction> currentWeightSimpleCoords=
-      theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theFDLeviSplit[i].weightFundamentalCoords);
-      tempElt.MakeHWV(theMods, indexFDMod, RFOne);
-      tempElt.MultiplyOnTheLeft
-      (theFDMod.theGeneratingWordsGrouppedByWeight[i][k], theElt, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
-       RFOne, RFZero);
-      tempElt.MakeHWV(theMods, indexGenMod, RFOne);
+  { Vector<RationalFunction> currentWeightSimpleCoords=
+    theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
+    tempElt.MakeHWV(theMods, indexFDMod, RFOne);
+    tempElt.MultiplyOnTheLeft
+    (theLeviEigenVectors[i], theElt, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+     RFOne, RFZero);
+    tempElt.MakeHWV(theMods, indexGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
 //      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
 //       RFOne, RFZero);
-      theElt.TensorOnTheRight(tempElt, *theCommands.theGlobalVariableS, RFOne, RFZero);
-
-      std::string startingEltString=theElt.ToString(&tempFormat);
-      std::stringstream tempStream;
-      tempStream << "\\begin{array}{l}";
-      for (int j=0; j<theCentralCharacters.size; j++)
-      { Vector<RationalFunction> otherWeightSimpleCoords=
-        theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theFDLeviSplit[j].weightFundamentalCoords);
-        if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
-        { theCasimirMinusChar=theCasimir;
-          theCasimirMinusChar-=theCentralCharacters[j];
-          theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
-          RFOne, RFZero);
-          theElt=tempElt2;
-          tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
-        }
+    theElt.TensorOnTheRight(tempElt, *theCommands.theGlobalVariableS, RFOne, RFZero);
+    theElt*=-1;
+    std::string startingEltString=theElt.ToString(&tempFormat);
+    std::stringstream tempStream, tempStream2;
+    tempStream2 << "$\\begin{array}{r}";
+    tempStream << "\\begin{array}{l}";
+    bool found=false;
+    for (int j=0; j<theCentralCharacters.size; j++)
+    { Vector<RationalFunction> otherWeightSimpleCoords=
+      theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[j]);
+      if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
+      { theCasimirMinusChar=theCasimir;
+        theCasimirMinusChar-=theCentralCharacters[j];
+        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+        RFOne, RFZero);
+        theElt=tempElt2;
+        tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
+        tempStream2 << "(\\bar c-p_" << j+1 << ")";
+        if (j!=0 && j%2==0)
+          tempStream2 << "\\\\";
+        found=true;
       }
-      tempStream << "(" << startingEltString << ")";
-      tempStream << "\\end{array}";
-//      std::cout << "<hr><hr>(" << theElt.ToString();
-      Rational tempRat= theElt.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-      currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
-      currentHWsimplecoords+=theFDMod.theModuleWeightsSimpleCoords[i];
-//      std::cout << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
-      out << "<tr><td>"
-      << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
-      << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str())
-      << "</td><td>" << tempRat.ToString() << "</td>";
-      Polynomial<Rational> tmpGCD, tmpRF;
-      if (theNumVars==1)
-      { tmpGCD= theElt.FindGCDCoefficientNumerators<Polynomial<Rational> >();
-        tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+tmpGCD.ToString(&tempFormat)+"\\end{array}") << "</td>";
-      }
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
-      if (theNumVars==1)
-      { tmpRF=tmpGCD;
-        theElt/=tmpRF;
-        out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
-      }
-      out << "</tr>";
     }
+    if (found)
+    { tempStream << "\\cdot";
+      tempStream2 << "\\cdot";
+    }
+    tempStream << "(" << startingEltString << ")";
+    tempStream << "\\end{array}";
+    tempStream2 << "(" << startingEltString << ")";
+    tempStream2 << "\\end{array}$";
+//      std::cout << "<hr><hr>(" << theElt.ToString();
+    Rational tempRat= theElt.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
+    currentHWsimplecoords+=theFDMod.theModuleWeightsSimpleCoords[i];
+//      std::cout << ") * " << tempRat.ToString()  << "<hr>=" << theElt.ToString() << "<hr><hr>";
+    out << "<tr><td>"
+    << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "</td><td>" << CGI::GetHtmlMathSpanPure(tempStream.str())
+    << "</td><td>" << tempRat.ToString() << "</td>";
+    latexReport2
+    << "$" << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
+    << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
+    Polynomial<Rational> tmpGCD, tmpRF;
+    if (theNumVars==1)
+    { tmpGCD= theElt.FindGCDCoefficientNumerators<Polynomial<Rational> >();
+      tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+      out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tmpGCD.ToString(&tempFormat)) << "</td>";
+    }
+    out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theElt.ToString(&tempFormat)) << "</td>";
+    latexReport2 << "&$\\begin{array}{l}" << theElt.ToString(&tempFormat) << "\\end{array}$\\\\<br>";
+    if (theNumVars==1)
+    { tmpRF=tmpGCD;
+      theElt/=tmpRF;
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+    }
+    out << "</tr>";
+  }
   out << "</table>";
+  latexReport2 << "\\end{longtable}";
+  out << "<br>Ready LaTeX (table 1 and 2): <br><br><br>" << latexReport1.str();
+  out << "<br><br><br>" << latexReport2.str() << "<br>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
@@ -2193,7 +2229,7 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
 }
 
 bool CommandList::fSSAlgebra
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
 { IncrementRecursion recursionCounter(&theCommands);
   std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
@@ -2246,10 +2282,31 @@ bool CommandList::fSSAlgebra
   if (oldSize<theCommands.theObjectContainer.theLieAlgebras.size)
     if (comments!=0)
     { std::stringstream out;
+      FormatExpressions theFormat;
+//      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
+//      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
       out
       << "Lie algebra of type " << tempData.GetAmbientSSAlgebra().GetLieAlgebraName()
-      << " generated. The resulting Lie bracket pairing table is "
-      << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
+      << " generated.";
+      if (Verbose)
+      { out
+        << " The resulting Lie bracket pairing table follows. <hr> "
+        << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
+        out << "Ready for LaTeX consumption version of the first three columns: ";
+        out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>Add to body: <br>"
+        << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
+        Vector<Rational> tempRoot;
+        ElementSemisimpleLieAlgebra tempElt1;
+        for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
+        { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+          (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
+          tempRoot=theSSalgebra.GetWeightOfGenerator(i);
+          out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
+          out << "&$" << theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "$";
+          out << "\\\\\n";
+        }
+        out << "\\end{longtable}";
+      }
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
       << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
@@ -2288,56 +2345,60 @@ bool CommandList::fSSAlgebra
       out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ElementToStringEpsilonForm(true, false));
       out << "<hr>Size of Weyl group according to formula: " <<
       theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
-      out << "<hr>Simple basis in epsilon coordinates: <table>";
-      simpleBasis.MakeEiBasis(theWeyl.GetDim());
-      theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
-      for (int i=0; i< simplebasisEpsCoords.size; i++)
-      { out << "<tr><td>"
-        << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
-        << CGI::
-        GetHtmlMathFromLatexFormulA
-        (simplebasisEpsCoords[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
-        << "</td></tr>";
-      }
-      out << "</table>";
-      out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
-      << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
-      << " <br> For F_4, we follow "
-      << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
-      << " integral; 2) the long roots come first. <br>Point (1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-      << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed of computations, <br>and for reducing sizes of the printouts.";
+      if (Verbose)
+      { out << "<hr>Simple basis in epsilon coordinates: <table>";
+        simpleBasis.MakeEiBasis(theWeyl.GetDim());
+        theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
+        for (int i=0; i< simplebasisEpsCoords.size; i++)
+        { out << "<tr><td>"
+          << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
+          << CGI::
+          GetHtmlMathFromLatexFormulA
+          (simplebasisEpsCoords[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
+          << "</td></tr>";
+        }
+        out << "</table>";
+        out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
+        << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
+        << " <br> For F_4, we follow "
+        << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
+        << " integral; 2) the long roots come first. <br>Point (1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+        << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed of computations, <br>and for reducing sizes of the printouts.";
 
-      out
-      << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
-      << " with the j^th simple root times 2 divided by the root length squared,<br> "
-      << " and 0 with the remaining simple roots): ";
-      theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
-      out << "<table>";
-      for (int i=0; i< fundamentalWeights.size; i++)
-      { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
-        << CGI::
-        GetHtmlMathFromLatexFormulA
-        (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
-        << "</td></tr>";
+        out
+        << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
+        << " with the j^th simple root times 2 divided by the root length squared,<br> "
+        << " and 0 with the remaining simple roots): ";
+        theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
+        out << "<table>";
+        for (int i=0; i< fundamentalWeights.size; i++)
+        { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
+          << CGI::
+          GetHtmlMathFromLatexFormulA
+          (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
+          << "</td></tr>";
+        }
+        out << "</table>";
+        out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
+        Vectors<Rational> rootSystemEpsCoords;
+        theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
+        for (int i=0; i<theWeyl.RootSystem.size; i++)
+        { Vector<Rational>& current=theWeyl.RootSystem[i];
+          out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
+          << rootSystemEpsCoords[i].ToStringLetterFormat("e")
+          << "</td></tr>";
+        }
+        out << "</table>";
+        DrawingVariables theDV;
+        theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
+        out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
+        << "(computed as explained on John Stembridge's website). "
+        << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
+        << "<br>The grey lines are the edges of the Weyl chamber."
+        << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+      } else
+      { out << "<hr>If you want extra details (root system info, etc.), the function SemisimpleLieAlgebraVerbose{} instead. ";
       }
-      out << "</table>";
-      out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
-      Vectors<Rational> rootSystemEpsCoords;
-      theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
-      for (int i=0; i<theWeyl.RootSystem.size; i++)
-      { Vector<Rational>& current=theWeyl.RootSystem[i];
-        out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
-        << rootSystemEpsCoords[i].ToStringLetterFormat("e")
-        << "</td></tr>";
-      }
-      out << "</table>";
-      DrawingVariables theDV;
-      theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
-      out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
-      << "(computed as explained on John Stembridge's website). "
-      << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
-      << "<br>The grey lines are the edges of the Weyl chamber."
-      << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
       *comments << out.str();
     }
   theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
@@ -2449,12 +2510,20 @@ void CommandList::initPredefinedVars()
 ("IsInteger", &this->fIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ", "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddNonBoundVarMustBeNew
-  ("SemisimpleLieAlgebra", & this->fSSAlgebra, "",
+  ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
    "Creates a simple Lie algebra. Will be changed to creating a semisimple Lie algebra in the foreseeable future. \
    Creates a function that returns the elements of a simple Lie algebra with Weyl type and rank \
    given in the format WeylLetter_Rank.  \
    Elements of the cartan are addressed as arguments of the form (0,s), Vector<Rational> system generators are addressed \
    with one index only. ", "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
+  this->AddNonBoundVarMustBeNew
+  ("SemisimpleLieAlgebraVerbose", & this->fSSAlgebraVerbose, "",
+   "Same as SemisimpleLieAlgebra but creates in addition a (quite detailed) printout with information about \
+   the semisimple Lie algebra, including the Lie bracket pairing table. \
+   In addition, this function creates a graphics of the root system. The printout is shown in the \"comments\" column to the \
+   right of the calculator input. <b>Warning</b> the verbose printout is quite heavy: \
+   for E_8 it puts the netbook on which the calculator is developed to sleep.",
+   "g:=SemisimpleLieAlgebraVerbose{}F_4;");
   this->AddNonBoundVarMustBeNew
   ("Polynomial", & this->fPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",

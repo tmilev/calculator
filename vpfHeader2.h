@@ -1069,8 +1069,16 @@ static bool EvaluateDereferenceOneArgument
   static bool fElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool fSSAlgebra
+  static bool fSSAlgebraShort
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, false);
+}
+  static bool fSSAlgebraVerbose
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
+}
+  static bool fSSAlgebra
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose=false)
 ;
   static bool fSplitFDpartB3overG2CharsOutput
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,

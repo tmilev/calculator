@@ -363,10 +363,11 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   }
   ModuleSSalgebraNew<RationalFunction> theMod;
   Selection selInducing= inducingParSel;
+  Selection selSplittingParSel=splittingParSel;
   theMod.MakeFromHW
   (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
   std::string report;
-  theMod.SplitOverLevi(& report, splittingParSel, *theCommands.theGlobalVariableS, 1, 0);
+  theMod.SplitOverLevi(& report, selSplittingParSel, *theCommands.theGlobalVariableS, 1, 0);
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, report, finalContext);
   return true;
 }
@@ -392,12 +393,13 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   out << ".<br>Your parabolic subalgebra selection: " << parSel.ToString() << ".";
   ModuleSSalgebraNew<Rational> theMod;
 
-  Selection emptySel;
+  Selection emptySel, selParSel;
   emptySel.init(theDim);
   theMod.MakeFromHW
   (theNode.owner->theAlgebras, 0, theWeightFundCoords, emptySel, theGlobalVariables, 1, 0, 0, false);
   std::string report;
-  theMod.SplitOverLevi(& report, parSel, theGlobalVariables, 1, 0);
+  selParSel=parSel;
+  theMod.SplitOverLevi(& report, selParSel, theGlobalVariables, 1, 0);
   out << "<br>" << report;
 
   theNode.ExpressionType=theNode.typeString;

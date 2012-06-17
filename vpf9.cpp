@@ -114,8 +114,6 @@ template < > int List<MonomialUniversalEnveloping<RationalFunction> >::ListActua
 template < > int List<MonomialGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialTensorGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<bool ((*)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression))>::ListActualSizeIncrement=50;
-template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
-template < > int List<Expression>::ListActualSizeIncrement=50;
 template < > int List<Polynomial<LargeInt> >::ListActualSizeIncrement=50;
 template < > int List<ChevalleyGenerator >::ListActualSizeIncrement=10;
 template < > int List<LargeInt >::ListActualSizeIncrement=50;

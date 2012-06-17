@@ -6425,6 +6425,10 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   { out << "\n";
     return true;
   }
+  if (readAhead=="%25")
+  { out << "%";
+    return true;
+  }
   return false;
 }
 

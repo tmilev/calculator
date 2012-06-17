@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 #endif
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=200;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=500;
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
@@ -359,6 +359,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="SplitGenericGenVermaTensorFD{}(G_2,(x_1,x_2), (1,0)); ";
 //civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ";
 //civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (0, x_1)); ";
+//  civilizedInput=" \\\\";
+  //theParser.flagLogSyntaxRules=true;
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -392,6 +394,10 @@ g_{-2} v_\\lambda\
     theParser.Evaluate(civilizedInput);
 //    std::cout << "<hr>";
     std::cout << theParser.outputString;
+    if (theParser.parsingLog!="")
+      std::cout << "<b> As requested, here is a calculator parsing log</b><br>"
+      << theParser.parsingLog;
+
   }
 //  theComputation.flagLogSyntaxRules=inputRankString=="2";
   std::cout << "</td>";

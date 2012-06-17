@@ -393,7 +393,7 @@ class SyntacticElement
     this->IndexFirstChar=other.IndexFirstChar;
     this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
   }
-  std::string ToString(CommandList& theBoss);
+  std::string ToString(CommandList& theBoss)const;
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
     this->ErrorString="";
@@ -570,6 +570,7 @@ public:
   int DepthRecursionReached;
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
+  int MaxNumCachedExpressionPerContext;
   ///////////////////////////////////////////////////////////////////////////
   bool flagTimeLimitErrorDetected;
   bool flagFirstErrorEncountered;
@@ -584,6 +585,8 @@ public:
   int numEmptyTokensStart;
   Expression theCommands;
 //  std::vector<std::stringstream> theLogs;
+  int registerNumNonClosedBeginArray;
+  int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
   List<SyntacticElement> syntacticStacK;
 
@@ -601,6 +604,7 @@ public:
   std::string outputString;
   std::string outputCommentsString;
   std::string DisplayNameCalculator;
+  std::string parsingLog;
   GlobalVariables* theGlobalVariableS;
   HashedList<Data> theData;
   HashedList<DataCruncher> theDataCrunchers;
@@ -644,6 +648,7 @@ public:
   std::string ElementToStringSyntacticStack();
   std::string ElementToStringSyntactic(bool usePolishForm=false)
   ;
+  std::string GetCalculatorLink(const std::string& input);
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
   bool isSeparatorFromTheLeftForStatement(const std::string& input);
@@ -704,6 +709,10 @@ public:
   bool LookAheadAllowsTimes(const std::string& lookAhead);
   bool LookAheadAllowsTensor(const std::string& lookAhead);
   bool LookAheadAllowsDivide(const std::string& lookAhead);
+  bool PopTopSyntacticStack()
+  { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
+    return true;
+  }
   bool ReplaceEXXEXEByEusingO(int theOp);
   bool ReplaceEEByEusingO(int theControlIndex);
   bool ReplaceEEndCommandEbyE();
@@ -782,8 +791,9 @@ public:
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
-  bool ReplaceVXbyEX();
-  bool ReplaceVbyE();
+  bool ReplaceVXdotsXbyEXdotsX(int numXs);
+  bool ReplaceVXbyEX(){return this->ReplaceVXdotsXbyEXdotsX(1);}
+  bool ReplaceVbyE(){return this->ReplaceVXdotsXbyEXdotsX(0);}
   bool ReplaceIntIntBy10IntPlusInt()
   ;
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);

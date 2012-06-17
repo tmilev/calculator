@@ -30,6 +30,8 @@ template < > int List<Context>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialChar<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<DataCruncher>::ListActualSizeIncrement=50;
+template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
+template < > int List<Expression>::ListActualSizeIncrement=1;
 
 //If you get a specialization after instantiation error:
 //due to the messed up C++ templates, the following template specialization funcitons must appear
@@ -152,9 +154,9 @@ const  Polynomial<Rational>& Data::GetValuE()const
 template < >
 const ElementTensorsGeneralizedVermas<RationalFunction>& Data::GetValuE()const
 { if (this->type!=this->typeEltTensorGenVermasOverRF)
-  { std::cout << "This is a programming error. ElementTensorsGeneralizedVermas_RationalFunction Data::GetValuE  is called on Data of type "
-    << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+  { std::cout << "This is a programming error. ElementTensorsGeneralizedVermas_RationalFunction Data::GetValuE is called on Data of type "
+    << this->ElementToStringDataType() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theTensorElts.size || theIndex<0)
@@ -162,7 +164,8 @@ const ElementTensorsGeneralizedVermas<RationalFunction>& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theTensorElts.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ".  "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return this->owner->theObjectContainer.theTensorElts[this->theIndex];
@@ -350,6 +353,11 @@ bool Data::ConvertToTypeResizesContextArrays
 { if (!this->SetContextResizesContextArray(desiredNewContext))
     return false;
   return this->ConvertToTypE<dataType>();
+}
+
+template < >
+bool Data::IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()const
+{ return this->type==this->typeEltTensorGenVermasOverRF;
 }
 
 template < >
@@ -1156,6 +1164,7 @@ bool CommandList::isRightSeparator(char c)
     case '^':
     case '=':
     case '_':
+    case '%':
     case '/':
     case '-':
     case '`':
@@ -1192,6 +1201,7 @@ bool CommandList::isLeftSeparator(char c)
     case '-':
     case '`':
     case '[':
+    case '%':
     case '}':
     case '{':
     case '~':
@@ -1515,12 +1525,13 @@ bool CommandList::LookAheadAllowsDivide(const std::string& lookAhead)
 
 bool CommandList::ApplyOneRule(const std::string& lookAhead)
 { //return false;
+  MacroRegisterFunctionWithName("CommandList::ApplyOneRule");
+  if (this->CurrentSyntacticStacK->size<=this->numEmptyTokensStart)
+    return false;
   const SyntacticElement& lastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   const std::string& lastS=this->controlSequences[lastE.controlIndex];
-  if (lastS==" " && signed ((*this->CurrentSyntacticStacK).size)>this->numEmptyTokensStart)
-  { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
-    return false;
-  }
+  if (lastS==" ")
+    return  this->PopTopSyntacticStack();
   const SyntacticElement& secondToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   const std::string& secondToLastS=this->controlSequences[secondToLastE.controlIndex];
   const SyntacticElement& thirdToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
@@ -1538,9 +1549,28 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //  const SyntacticElement& ninthToLastE=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-9];
 //  const std::string& ninthToLastS=this->theBoss->controlSequences[ninthToLastE.controlIndex];
   if (this->flagLogSyntaxRules)
-    std::cout << "<hr>" << this->ElementToStringSyntacticStack();
+    this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
+  if (secondToLastS=="%" && lastS=="LogParsing")
+  { this->parsingLog+= "<hr>" + this->ElementToStringSyntacticStack();
+    this->flagLogSyntaxRules=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+////add here rules that change this->counterInSyntacticSoup.
+////In general, this should be avoided, but I couldn't figure out another sane solution for the following parsing problem
+////The problem: parse {{a}+b}; {{{a} }+b;
+  if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!=" " && lastS!="}")
+  { this->ReplaceVXdotsXbyEXdotsX(2);
+    this->PopTopSyntacticStack();
+    if (this->flagLogSyntaxRules)
+      this->parsingLog+= "<b> Special rule: changing Variable to expression and pushing back the last token, token " + lastS
+       +  ".</b>";
+    this->counterInSyntacticSoup--;
+    return true;
+  }
+////end of rules that change this->counterInSyntacticSoup
   if (lastE.theData.IndexBoundVars==-1)
-  { std::cout << "<hr>The last expression while reducing " << this->ElementToStringSyntacticStack()
+  { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing " << this->ElementToStringSyntacticStack()
     << " does not have properly initialized context. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
     assert(false);
   }
@@ -1558,7 +1588,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //    return this->ReplaceXXXByCon(this->conBindVariable());
   if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
     return this->RegisterBoundVariable();
-  if (lastS=="Variable" && (lookAhead!="}" || secondToLastS!="{"|| thirdToLastS!="{"))
+  if (lastS=="Variable" && (lookAhead!="}" || secondToLastS!="{" || thirdToLastS!="{"))
     return this->ReplaceVbyE();
   if (lastS=="=" && secondToLastS=="=")
     return this->ReplaceXXByCon(this->conEqualEqual());
@@ -1621,12 +1651,22 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (this->isSeparatorFromTheLeftForList(thirdToLastS) && secondToLastS=="OperationList" && this->isSeparatorFromTheRightForList(lastS))
     return this->ReplaceOXbyEXusingO(this->conList(), Expression::formatDefault);
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
+  { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
+  }
   if (fourthToLastS=="\\end" && thirdToLastS=="{" && secondToLastS=="array" && lastS=="}" )
+  { this->registerNumNonClosedBeginArray--;
     return this->ReplaceXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
+  }
+  if (lastS=="\\" && secondToLastS== "\\")
+    return this->ReplaceXXByCon(this->controlSequences.GetIndexIMustContainTheObject("\\\\"));
   if (lastS=="\\\\")
-    return this->ReplaceXByCon(this->conMatrixRowSeparator(), Expression::formatMatrixRow);
- if (secondToLastS=="Expression" && lastS=="&")
+  { if (this->registerNumNonClosedBeginArray>0)
+      return this->ReplaceXByCon(this->conMatrixRowSeparator(), Expression::formatMatrixRow);
+    else
+      return this->PopTopSyntacticStack();
+  }
+  if (secondToLastS=="Expression" && lastS=="&")
     return this->ReplaceYXByListYX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (thirdToLastS=="MatrixRow" && secondToLastS=="&"  && lastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lookAhead))
     return this->ReplaceListXEByList(this->conMatrixRow(), Expression::formatMatrixRow);
@@ -2047,7 +2087,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     out << "<td>gcd divided out</td>";
   out << "</tr>";
   std::stringstream latexReport2;
-  latexReport2 << "\\begin{longtable}{rrp{1.5cm}l}\\caption{Decomposition for the $"
+  latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{Decomposition for the $"
   << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Casimir applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
@@ -2066,7 +2106,6 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     theElt*=-1;
     std::string startingEltString=theElt.ToString(&tempFormat);
     std::stringstream tempStream, tempStream2;
-    tempStream2 << "$\\begin{array}{r}";
     tempStream << "\\begin{array}{l}";
     bool found=false;
     for (int j=0; j<theCentralCharacters.size; j++)
@@ -2079,20 +2118,17 @@ bool CommandList::fSplitGenericGenVermaTensorFD
         RFOne, RFZero);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
-        tempStream2 << "(\\bar c-p_" << j+1 << ")";
-        if (j!=0 && j%2==0)
-          tempStream2 << "\\\\";
+        tempStream2 << " $(\\bar c-p_" << j+1 << ") $ ";
         found=true;
       }
     }
     if (found)
     { tempStream << "\\cdot";
-      tempStream2 << "\\cdot";
+      tempStream2 << " $\\cdot$ ";
     }
     tempStream << "(" << startingEltString << ")";
     tempStream << "\\end{array}";
-    tempStream2 << "(" << startingEltString << ")";
-    tempStream2 << "\\end{array}$";
+    tempStream2 << " $(" << startingEltString << ")$ ";
 //      std::cout << "<hr><hr>(" << theElt.ToString();
     Rational tempRat= theElt.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
     currentHWsimplecoords=theGenMod.theHWSimpleCoordSBaseField;
@@ -2106,6 +2142,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     << "$" << theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(currentHWsimplecoords).ToStringLetterFormat("\\psi")
     << "$ &  " << tempStream2.str() << " &" << tempRat.ToString();
     Polynomial<Rational> tmpGCD, tmpRF;
+    tempFormat.MaxLineLength=80;
     if (theNumVars==1)
     { tmpGCD= theElt.FindGCDCoefficientNumerators<Polynomial<Rational> >();
       tmpGCD.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
@@ -2226,6 +2263,13 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   outputData.MakeUE(theCommands, outputUE, finalContextIndex);
   theExpression.MakeAtom(outputData, theCommands, inputIndexBoundVars);
   return true;
+}
+
+std::string CommandList::GetCalculatorLink(const std::string& input)
+{ std::stringstream out;
+  out << "<a href=\"" << this->DisplayPathServerBase << "cgi-bin/calculator?textInput=" << CGI::UnCivilizeStringCGI(input) << "\"> "
+  << input << "</a>";
+  return out.str();
 }
 
 bool CommandList::fSSAlgebra
@@ -2397,7 +2441,12 @@ bool CommandList::fSSAlgebra
         << "<br>The grey lines are the edges of the Weyl chamber."
         << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
       } else
-      { out << "<hr>If you want extra details (root system info, etc.), the function SemisimpleLieAlgebraVerbose{} instead. ";
+      { out << "<hr>If you want extra details (root system info, interactive picture in the Coxeter plane of the root system, "
+        << " with the Weyl chamber drawn, etc.), use the function";
+        std::stringstream tempStream;
+        tempStream << "SemisimpleLieAlgebraVerbose{}" << theSSalgebra.theWeyl.WeylLetter << "_" << theSSalgebra.GetRank();
+        out << theCommands.GetCalculatorLink(tempStream.str());
+        out  << " instead. ";
       }
       *comments << out.str();
     }
@@ -2460,6 +2509,9 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+
+  this->RegisterCruncherNoFail(this->opApplyFunction(), Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
+
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRational, Data::MultiplyEltTensorByCoeff);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typePoly, Data::MultiplyEltTensorByCoeff);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRationalFunction, Data::MultiplyEltTensorByCoeff);
@@ -2634,11 +2686,6 @@ void CommandList::initPredefinedVars()
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
 /*  this->AddNonBoundVarMustBeNew
-  ("JacobiSymbol", &this->fJacobiSymbol, "",
-   "Jacobi symbol as implemented by user Numeri @ www.cplusplus.com.",
-   "AllJacobiSymbols{}({{a}}, {{b}}):if b-1==a:=List{}((a,JacobiSymbol{}(a-1, b)));\nAllJacobiSymbols{}({{a}}, {{b}}):=List{}((a,JacobiSymbol{}(a,b)))\\cup AllJacobiSymbols{}(a+1, b);\nAllJacobiSymbols{}(0,31)");
-*/
-/*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
@@ -2658,6 +2705,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagNewContextNeeded=true;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
+  this->MaxNumCachedExpressionPerContext=1000;
   this->controlSequences.Clear();
   this->operations.Clear();
   this->syntacticSouP.SetSize(0);
@@ -2808,7 +2856,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("array");
   this->controlSequences.AddOnTop("\\end");
   this->controlSequences.AddOnTop("\\\\");
+  this->controlSequences.AddOnTop("\\");
   this->controlSequences.AddOnTop("&");
+  this->controlSequences.AddOnTop("%");
+  this->controlSequences.AddOnTop("LogParsing");
 //  this->controlSequences.AddOnTop("c...c");
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
@@ -3386,10 +3437,11 @@ bool CommandList::StandardIsDenotedBy
     *comments << "<br>Registered notation: globally, " << withNotation.ToString() << " is denoted by "
     << theNotation.ToString();
   if (withNotation.EvaluatesToAtom())
-    if (withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV())
-    { MonomialGeneralizedVerma<RationalFunction>& theElt=withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
-      theElt.GetOwner().highestWeightVectorNotation=theNotation.ToString();
-    }
+    if (withNotation.GetAtomicValue().IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >())
+      if (withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV())
+      { MonomialGeneralizedVerma<RationalFunction>& theElt=withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >()[0].theMons[0];
+        theElt.GetOwner().highestWeightVectorNotation=theNotation.ToString();
+      }
   theExpression.theOperation=theCommands.opDefine();
   return true;
 }
@@ -3561,6 +3613,8 @@ bool CommandList::StandardFunction
         theExpression.AssignChild(0);
         return true;
       }
+  if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opApplyFunction()))
+    return true;
   if (!functionNameNode.EvaluatesToVariableNonBound())
     return false;
   Function::FunctionAddress theFun;
@@ -4026,10 +4080,11 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     { theExpression=
       this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache];
     } else
-    { this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.AddOnTop(theExpression);
-      this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions.AddOnTop(theExpression);
-      indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size-1;
-    }
+      if (this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
+      { this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.AddOnTop(theExpression);
+        this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions.AddOnTop(theExpression);
+        indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size-1;
+      }
   }
   //reduction phase:
 static int problemcounter=0;
@@ -4097,7 +4152,7 @@ static int problemcounter=0;
             }
           }
       }
-    if (theExpression.IndexBoundVars!=-1)
+    if (indexInCache!=-1)
     { this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
       if (NonReduced)
       { if (currentExpressionTransformations.Contains(theExpression))
@@ -4224,15 +4279,17 @@ bool CommandList::ExtractExpressions
   std::stringstream errorLog;
   (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
+  this->registerNumNonClosedBeginArray=0;
   for (int i=0; i<this->numEmptyTokensStart; i++)
     (*this->CurrentSyntacticStacK)[i]=this->GetEmptySyntacticElement();
   this->CreateNewExpressionContext();
-  for (int i=0; i<(*this->CurrrentSyntacticSouP).size; i++)
-  { if (i+1<(*this->CurrrentSyntacticSouP).size)
-      lookAheadToken=this->controlSequences[(*this->CurrrentSyntacticSouP)[i+1].controlIndex];
+  this->parsingLog="";
+  for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
+  { if (this->counterInSyntacticSoup+1<(*this->CurrrentSyntacticSouP).size)
+      lookAheadToken=this->controlSequences[(*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup+1].controlIndex];
     else
       lookAheadToken=";";
-    (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[i]);
+    (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
     if ((*this->CurrentSyntacticStacK).LastObject()->controlIndex==this->conEndStatement())
       this->CreateNewExpressionContext();
     Expression& currentExpression=(*this->CurrentSyntacticStacK).LastObject()->theData;
@@ -4295,7 +4352,7 @@ void CommandList::EvaluateCommands()
   }
 }
 
-std::string SyntacticElement::ToString(CommandList& theBoss)
+std::string SyntacticElement::ToString(CommandList& theBoss)const
 { std::stringstream out;
   bool makeTable=this->controlIndex==theBoss.conExpression() || this->controlIndex==theBoss.conError()
   || this->controlIndex==theBoss.conList() ;
@@ -5155,23 +5212,8 @@ bool CommandList::RegisterBoundVariable()
   return true;
 }
 
-bool CommandList::ReplaceVbyE()
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  const std::string& theVarString=theElt.theData.GetAtomicValue().GetValuE<std::string>();
-  int indexBoundVar=this->GetCurrentContextBoundVars().GetIndex(theVarString);
-  if (indexBoundVar!=- 1)
-  { theElt.theData.theOperation=this->opVariableBound();
-    theElt.theData.theDatA=indexBoundVar;
-  } else
-    theElt.theData.MakeVariableNonBounD(*this, -1, theVarString);
-  theElt.controlIndex=this->conExpression();
-  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
-//  std::cout << "now i'm here!";
-  return true;
-}
-
-bool CommandList::ReplaceVXbyEX()
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+bool CommandList::ReplaceVXdotsXbyEXdotsX(int numXs)
+{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
   const std::string& theVarString=theElt.theData.GetAtomicValue().GetValuE<std::string>();
   int indexBoundVar=this->GetCurrentContextBoundVars().GetIndex(theVarString);
   if (indexBoundVar!=- 1)

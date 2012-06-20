@@ -4207,6 +4207,8 @@ public:
   std::string chevalleyHgeneratorLetter;
   std::string fundamentalWeightLetter;
   std::string polyDefaultLetter;
+  std::string CustomPlusSign;
+  std::string FDrepLetter;
   List<std::string> polyAlphabeT;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
@@ -4221,7 +4223,6 @@ public:
   bool flagUseLatex;
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
-  std::string CustomPlusSign;
 };
 
 template <class CoefficientType>

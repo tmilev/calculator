@@ -3216,7 +3216,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   void SplitOverLevi
   (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors=0,
-   Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0)
+   Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0, charSSAlgMod<CoefficientType>* outputChar=0)
    ;
   void SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall,
@@ -7484,10 +7484,12 @@ std::string MonomialChar<CoefficientType>::ToString
 { std::stringstream out;
   bool useOmega=true;
   std::string oldCustomPlus;
+  std::string VectorSpaceLetter="V";
   if (theFormat!=0)
   { useOmega=(theFormat->fundamentalWeightLetter=="");
     oldCustomPlus=theFormat->CustomPlusSign;
     theFormat->CustomPlusSign="";
+    VectorSpaceLetter=theFormat->FDrepLetter;
   }
   if (useOmega)
     out << "V_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
@@ -7870,7 +7872,7 @@ template<class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
   (std::string* Report, Selection& splittingParSel, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
    const CoefficientType& theRingZero, List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
-   Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace)
+   Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace, charSSAlgMod<CoefficientType>* outputChar)
 { MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::SplitOverLevi");
   if (this->theChaR.size!=1)
   { if (Report!=0)
@@ -7882,7 +7884,8 @@ void ModuleSSalgebraNew<CoefficientType>::SplitOverLevi
     return;
   }
   ReflectionSubgroupWeylGroup subWeyl;
-  charSSAlgMod<CoefficientType> charWRTsubalgebra;
+  MemorySaving<charSSAlgMod<CoefficientType> > buffer;
+  charSSAlgMod<CoefficientType>& charWRTsubalgebra= (outputChar==0) ? buffer.GetElement() : *outputChar;
   this->theChaR.SplitOverLeviMonsEncodeHIGHESTWeight
   (Report, charWRTsubalgebra, splittingParSel, this->parabolicSelectionNonSelectedAreElementsLevi,
    subWeyl, theGlobalVariables);

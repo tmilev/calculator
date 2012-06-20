@@ -2027,14 +2027,14 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   ModuleSSalgebraNew<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
   int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
-  charSSAlgMod<RationalFunction> theHWchar, theFDChaR, theFDLeviSplitShifteD;
+  charSSAlgMod<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
   theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
   ReflectionSubgroupWeylGroup tempSG;
   List<ElementUniversalEnveloping<RationalFunction> > theLeviEigenVectors;
   Vectors<RationalFunction> theEigenVectorWeightsFund;
   theFDMod.SplitOverLevi
   (&report, theGenMod.parabolicSelectionNonSelectedAreElementsLevi, *theCommands.theGlobalVariableS, RFOne, RFZero,
-   &theLeviEigenVectors, &theEigenVectorWeightsFund)
+   &theLeviEigenVectors, &theEigenVectorWeightsFund, 0, &theFDLeviSplit)
   ;
   theFDMod.GetFDchar(theFDChaR);
   List<ElementUniversalEnveloping<RationalFunction> > theCentralCharacters;
@@ -2047,12 +2047,13 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   tempFormat.CustomPlusSign="\\oplus ";
   hwContext.GetFormatExpressions(tempFormat);
   out << "<br>Character of finite dimensional module:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDChaR.ToString());
-//  out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDLeviSplit.ToString(&tempFormat));
+  if (theGenMod.parabolicSelectionSelectedAreElementsLevi.CardinalitySelection>0)
+    out << "<br>theFDChar split over levi:" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theFDLeviSplit.ToString(&tempFormat));
   //out << "<br> Splitting report: " << report;
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
   latexReport1 << " \\begin{longtable}{rl}\\caption{$" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
-  << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\lambda(\\mathfrak p)+\\psi$ & Action of $\\bar c$\\\\\\hline";
+  << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.CustomPlusSign="";
   theFDLeviSplitShifteD.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
   MonomialChar<RationalFunction> tempMon;

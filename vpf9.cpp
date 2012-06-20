@@ -811,6 +811,7 @@ FormatExpressions::FormatExpressions()
   this->chevalleyGgeneratorLetter="g";
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
+  this->FDrepLetter="V";
   this->MaxLineLength=100;
   this->flagUseHTML=true;
   this->flagUseLatex=false;

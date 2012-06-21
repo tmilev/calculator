@@ -10,7 +10,6 @@ ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for
 //  to the *beginning* (!) of .cpp files.
 //- Try moving template generics into .h files.
 //- Write at least one angry email to the highest C++ authority you can get an email hold of.
-//  They have to be aware of the great anger and pain they are causing to people smarter than them.
 
 template <>
 bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunction>(const Vector<RationalFunction>& theWeight, int generatorIndex)
@@ -1706,7 +1705,8 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
   std::stringstream latexTable;
   bool isFD=(theg2b3data.selInducing.CardinalitySelection==0);
   if (isFD)
-  { out << "<table><tr><td>$so(7)$-highest weight</td><td>Dimension</td><td>Decomposition over $G_2$</td><td>Dimensions</td></tr>";
+  { out << "<table><tr><td>$so(7)$-highest weight</td><td>Dimension</td><td>Decomposition over $G_2$</td><td>Dimensions</td>"
+    << "</tr>";
     latexTable << "\\begin{longtable}{|rl|} \\caption{\\label{tableB3fdsOverG2charsonly} "
     << "Decompositions of finite dimensional $so(7)$-modules over $G_2$}\\\\"
     << "\\hline$so(7)$-module & ~~~~~~ decomposition over $G_2$\\endhead \\hline\n<br>";
@@ -1721,14 +1721,22 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << CGI::GetHtmlMathSpanPure(" p")
     << "-module</td><td>Decomposition of inducing module over "
     << CGI::GetHtmlMathSpanPure("p'")
-    << "</td><td>Dimensions</td></tr>";
-    latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly" << theg2b3data.selInducing.ToString() << "} "
-    << "Decompositions of inducing $\\mathfrak p$-modules over $\\mathfrak p'$}\\\\"
-    << "\\hline $\\mathfrak p$ = " << theg2b3data.selInducing.ToString() << "-par. module& ~~~~decomp. over $\\mathfrak p'$ = " << theg2b3data.selSmallParSel.ToString() << "-parabolic"
+    << "</td><td>Dimensions</td>"
+    << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
+    << "</tr>";
+    latexTable << "\\begin{longtable}{|p{2cm}lp{5cm}|} \\caption{\\label{tableB3fdsOverG2charsonly" << theg2b3data.selInducing.ToString() << "} "
+    << "Decompositions of inducing $\\mathfrak p$-modules over $\\bar{ \\mathfrak {p}}$}\\\\"
+    << "\\hline $\\mathfrak p$ = " << theg2b3data.selInducing.ToString() << "-par. module& decomp. over Levi part of $\\bar {\\mathfrak {p}}$ = "
+    << theg2b3data.selSmallParSel.ToString() << "-parabolic & Sufficiently generic conditions"
     << "\\endhead \\hline\n<br>";
   }
-  theg2b3data.theFormat.CustomPlusSign="\\oplus ";
   theg2b3data.theFormat.flagUseLatex=true;
+  ElementUniversalEnveloping<RationalFunction> theCasimir, theCentralCharacter, resultChar;
+  HashedList<ElementUniversalEnveloping<RationalFunction> > theCentralChars;
+
+  theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain(), *theCommands.theGlobalVariableS);
+  WeylGroup& smallWeyl=theg2b3data.theHmm.theDomain().theWeyl;
+//  WeylGroup& largeWeyl=theg2b3data.theHmm.theRange().theWeyl;
   for (int k=0; k<theHWs.size; k++)
   { theCharacter.MakeFromWeight
     (theg2b3data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theHWs[k]),
@@ -1740,10 +1748,13 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << theg2b3data.WeylFD.WeylDimFormulaSimpleCoords
     (theg2b3data.WeylFD.AmbientWeyl.GetSimpleCoordinatesFromFundamental
     (theCharacter[0].weightFundamentalCoords)).ToString() << "</td>";
-    latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ & $\\begin{array}{lll}&& ";
+    latexTable << " $ " << theCharacter.ToString(&theg2b3data.theFormat) << " $ ";
     theg2b3data.theFormat.fundamentalWeightLetter= "\\psi";
     out << "<td>" << outputChar.ToString(&theg2b3data.theFormat) << "</td>";
     out << "<td>";
+    theg2b3data.theFormat.CustomPlusSign="\\oplus ";
+    Vector<RationalFunction> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
+    theCentralChars.Clear();
     for (int i=0; i<outputChar.size; i++)
     { if (!outputChar.theCoeffs[i].IsEqualToOne())
         out << outputChar.theCoeffs[i].ToString()  << " x ";
@@ -1752,10 +1763,40 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
       (outputChar[i].weightFundamentalCoords));
       if (i!=outputChar.size-1)
         out << "+";
+      leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoords);
+      leftWeightDual=smallWeyl.GetDualCoordinatesFromSimple(leftWeightSimple);
+      for (int j=0; j<outputChar.size; j++)
+      { rightWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoords);
+        if ((rightWeightSimple-leftWeightSimple).IsPositive())
+        { rightWeightDual=smallWeyl.GetDualCoordinatesFromSimple(outputChar[j].weightFundamentalCoords);
+          resultChar=theCasimir;
+          theCentralCharacter=theCasimir;
+          resultChar.ModOutVermaRelations(theCommands.theGlobalVariableS, &rightWeightDual);
+          theCentralCharacter.ModOutVermaRelations(theCommands.theGlobalVariableS, &leftWeightDual);
+          resultChar-=theCentralCharacter;
+          resultChar.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+          resultChar*=-1;
+          theCentralChars.AddNoRepetition(resultChar);
+        }
+      }
     }
-    out << "</td></tr>";
-    latexTable << outputChar.ToString(&theg2b3data.theFormat) << "\\end{array} $ \\\\\n";
-    latexTable << " <br>\n";
+    out << "</td>";
+    theg2b3data.theFormat.MaxLineLength=60;
+    latexTable << "& $\\begin{array}{l} " << outputChar.ToString(&theg2b3data.theFormat) << "\\end{array} $ ";
+    theg2b3data.theFormat.CustomPlusSign="";
+    if (!isFD)
+    { out << "<td>";
+      latexTable << " & ";
+      for (int l=0; l<theCentralChars.size; l++)
+      { out << theCentralChars[l].ToString(&theg2b3data.theFormat) << "<br> ";
+        latexTable << "$" << theCentralChars[l].ToString(&theg2b3data.theFormat) << "\\neq 0$";
+        if (l!=theCentralChars.size-1)
+          latexTable << ", ";
+      }
+      out << " </td>";
+    }
+    out  << "</tr>";
+    latexTable << "\\\\\n <br>\n";
     latexTable << "\\hline";
   }
   out << "</table>";

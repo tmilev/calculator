@@ -2635,7 +2635,7 @@ void ConeComplex::initFromCones
 { Cone tempCone;
   this->Clear();
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.StatusString1=NormalsOfCones.ElementToStringGeneric();
+  theGlobalVariables.theIndicatorVariables.StatusString1=NormalsOfCones.ToString();
   theGlobalVariables.MakeReport();
   theGlobalVariables.MakeReport();
 //  for (int i=0; i<10000000; i++){int j=i*i*i;}
@@ -2705,7 +2705,7 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
   out << "Normals of walls to refine by: ";
   Vectors<Rational> tempRoots;
   tempRoots.CopyFromBase(this->splittingNormals);
-  out << tempRoots.ToString(useLatex, useHtml, false);
+  out << tempRoots.ToString(&theFormat);
   if (this->slicingDirections.size>0)
   { if (useHtml)
       out << "<br>\n";

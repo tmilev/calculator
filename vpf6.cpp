@@ -1837,6 +1837,115 @@ bool CommandList::fHWV
   highestWeightFundCoords, selectionParSel, hwContext, indexOfAlgebra);
 }
 
+bool CommandList::fWriteGenVermaModAsDiffOperator
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperator");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theExpression.children.size!=3)
+  { if (comments!=0)
+      *comments << "Function fSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ";
+    return false;
+  }
+  Expression& leftE=theExpression.children[0];
+  Expression& genVemaWeightNode=theExpression.children[2];
+  Expression& levelNode=theExpression.children[1];
+  Expression resultSSalgebraE;
+  resultSSalgebraE=leftE;
+  if (!CommandList::fSSAlgebra(theCommands, inputIndexBoundVars, resultSSalgebraE, comments))
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  } else if (!resultSSalgebraE.EvaluatesToAtom())
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if  (resultSSalgebraE.errorString!="")
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if (!resultSSalgebraE.EvaluatesToAtom())
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  const Data& theSSdata=resultSSalgebraE.GetAtomicValue();
+  if (theSSdata.type!=Data::typeSSalgebra)
+  { if(comments!=0)
+      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return false;
+  }
+  if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
+  { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
+    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
+    assert(false);
+  }
+  int indexOfAlgebra=theSSdata.theIndex;
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
+  int theRank=theSSalgebra.GetRank();
+  Vector<RationalFunction> highestWeightFundCoords;
+  Context hwContext(theCommands), emptyContext(theCommands);
+  if (!genVemaWeightNode.GetVector<RationalFunction>
+      (highestWeightFundCoords, hwContext, theRank, &CommandList::fPolynomial, comments))
+  { if(comments!=0)
+      *comments << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of " << theRank
+      << " polynomials. The second argument you gave is " << genVemaWeightNode.ToString() << ".";
+    return false;
+  }
+  int desiredHeight;
+  if (!levelNode.IsSmallInteger(&desiredHeight))
+    return theExpression.SetError("second argument of " +theExpression.ToString()+ " must be a small integer");
+
+//  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
+//  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
+  hwContext.indexAmbientSSalgebra=indexOfAlgebra;
+  int theNumVars=hwContext.VariableImages.size;
+  RationalFunction RFOne, RFZero;
+  RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
+  RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
+  std::string report;
+  ElementTensorsGeneralizedVermas<RationalFunction> theElt;
+  //=theElementData.theElementTensorGenVermas.GetElement();
+  Selection selParSel1;
+  Expression hwvGenVerma, hwvFD;
+  selParSel1.MakeFullSelection(theRank);
+  int theCoeff;
+  for (int i=0; i<theRank; i++)
+    if (highestWeightFundCoords[i].IsSmallInteger(theCoeff))
+      if (theCoeff==0)
+        selParSel1.RemoveSelection(i);
+  std::cout << "Your input so far: " << theSSalgebra.GetLieAlgebraName() << " with hw: " << highestWeightFundCoords.ToString()
+  << " parabolic selection: " << selParSel1.ToString() << " degree: " << desiredHeight;
+  Vectors<RationalFunction> theHws;
+  Selection invertedSelInducing=selParSel1;
+  invertedSelInducing.InvertSelection();
+  theHws.SetSize(0);
+  SelectionWithMaxMultiplicity theHWenumerator;
+  Vector<RationalFunction> theHWrf;
+  for (int j=0; j<=desiredHeight; j++)
+  { theHWenumerator.initMaxMultiplicity(theRank-selParSel1.CardinalitySelection, j);
+    theHWenumerator.IncrementSubsetFixedCardinality(j);
+    int numCycles=theHWenumerator.NumCombinationsOfCardinality(j);
+    for (int i=0; i<numCycles; i++, theHWenumerator.IncrementSubsetFixedCardinality(j))
+    { theHWrf=highestWeightFundCoords;
+      for (int k=0; k<invertedSelInducing.CardinalitySelection; k++)
+        theHWrf[invertedSelInducing.elements[k]]+=theHWenumerator.Multiplicities[k];
+      theHws.AddOnTop(theHWrf);
+    }
+  }
+  FormatExpressions theFormat;
+  hwContext.GetFormatExpressions(theFormat);
+  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
+  /////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////
+  Expression tempExp;
+  for (int i=0; i<theHws.size; i++)
+  { theCommands.fHWVinner(theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selParSel1, hwContext, indexOfAlgebra);
+  }
+  return false;
+}
+
 bool CommandList::fHWVinner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
  Vector<RationalFunction>& highestWeightFundCoords,
@@ -2052,9 +2161,14 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   //out << "<br> Splitting report: " << report;
   std::stringstream latexReport1;
   out << "<br><table><tr><td>weight in fundamental coords</td><td>Character</td></tr>";
-  latexReport1 << " \\begin{longtable}{rl}\\caption{$" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  latexReport1 << " \\begin{longtable}{rl}\\caption{\\label{table"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  << "GenVermatimes7DimCentralCharacters"
+  << "} $" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
   << "$- parabolic $\\bar{\\mathfrak{p}}$} \\\\ $\\mu+\\gamma$ & Action of $\\bar c$\\\\\\hline";
   tempFormat.CustomPlusSign="";
+  tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
+  tempFormat.chevalleyHgeneratorLetter="\\bar{h}";
   theFDLeviSplitShifteD.MakeZero(theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
   MonomialChar<RationalFunction> tempMon;
   ElementUniversalEnveloping<RationalFunction> currentChar;
@@ -2088,8 +2202,10 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     out << "<td>gcd divided out</td>";
   out << "</tr>";
   std::stringstream latexReport2;
-  latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{Decomposition for the $"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Casimir applied to &"
+  latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{"
+  << "\\label{tableDecompo" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "times7dim}"
+  << "Decomposition for the $"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
   for (int i=0; i<theCentralCharacters.size; i++)
@@ -2686,6 +2802,12 @@ void CommandList::initPredefinedVars()
   ("SplitFDTensorGenericGeneralizedVerma", &this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
+  this->AddNonBoundVarMustBeNew
+  ("WriteGenVermaAsDiffOperators", &this->fWriteGenVermaModAsDiffOperator, "",
+   "Experimental, please don't use. Writes the generalized Verma module as differential operators. The third argument gives the highest weight. \
+   The non-zero entries of the highest weight give the\
+   root spaces outside of the Levi part of the parabolic. The second argument gives the weight level to which the computation should be carried out",
+   "WriteGenVermaAsDiffOperators{}(B_3, 1, (0, 0, y)); ");
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -4312,7 +4434,7 @@ bool CommandList::ExtractExpressions
       errorLog << "It simplifies to:<br> " << this->ElementToStringSyntacticStack();
     }
   } else
-  { errorLog << "Syntax error: your command does not simplify to a syntactic element. <br>";
+  { errorLog << "Syntax error: your command does not simplify to a single syntactic element. <br>";
     errorLog << "Instead it simplifies to:<br> " << this->ElementToStringSyntacticStack();
   }
   if (outputErrors!=0)

@@ -475,7 +475,7 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
 void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal)
 { std::stringstream out;  std::string tempS;
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  this->hCharacteristic.ToString() << "</a>";
-  tempS=this->preferredAmbientSimpleBasis.ToString(false, false, false);
+  tempS=this->preferredAmbientSimpleBasis.ToString();
   if (physicalPath==0 || htmlPathServer==0)
   { usePNG=false;
     useHtml=false;
@@ -484,7 +484,7 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
     out << "<br>";
   out << "\nSimple basis ambient algebra w.r.t defining h: " << tempS;
   Vectors<Rational> tempRoots;
-  Matrix<Rational>  tempMat;
+  Matrix<Rational> tempMat;
   if (useHtml)
     out << "<br>";
   if (this->IndicesContainingRootSAs.size>1)
@@ -504,7 +504,7 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
     out << tempS;
     if(useHtml)
       out << "</a>";
-    tempS = tempRoots.ToString(useLatex, useHtml, false);
+    tempS = tempRoots.ToString();
     if (useHtml)
       out << "<br>";
     out << "\nSimple basis subalgebra: " << tempS;
@@ -4476,9 +4476,8 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
 }
 
 std::string SemisimpleSubalgebras::ToString()
-{ std::stringstream out; std::string tempS;
-  this->theHcandidates.ElementToStringGeneric(tempS);
-  out << tempS;
+{ std::stringstream out;
+  out << this->theHcandidates.ToString();
   return out.str();
 }
 

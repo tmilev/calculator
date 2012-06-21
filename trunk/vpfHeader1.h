@@ -750,15 +750,11 @@ public:
   void RemoveFirstOccurenceSwapWithLast(const Object& o);
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
-  std::string ElementToStringGeneric()const{ std::string tempS; this->ElementToStringGeneric(tempS); return tempS;}
-  std::string ToString()const
-  { return this->ElementToStringGeneric();
+  std::string ToString(FormatExpressions* theFormat)const;
+  std::string ToString()const;
+  void ToString(std::string& output, FormatExpressions* theFormat=0)const
+  { output= this->ToString(theFormat);
   }
-  void ToString(std::string& output)const
-  { output=this->ElementToStringGeneric();
-  }
-  void ElementToStringGeneric(std::string& output)const;
-  void ElementToStringGeneric(std::string& output, int NumElementsToPrint)const;
   int IndexOfObject(const Object& o) const;
   bool ContainsObject(const Object& o){ return this->IndexOfObject(o)!=-1; }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
@@ -1232,15 +1228,11 @@ public:
     this->SetHashSizE(HashedListB<Object, hashFunction>::PreferredHashSize);
     this->initHash();
   }
+  std::string ToString(FormatExpressions* theFormat)const
+  { return this->List<Object>::ToString(theFormat);
+  }
   std::string ToString()const
-  { std::stringstream out;
-    out << this->size << " hashed objects:";
-    for (int i=0; i<this->size; i++)
-    { out << this->TheObjects[i].ToString();
-      if (i!=this->size-1)
-        out << ", ";
-    }
-    return out.str();
+  { return this->List<Object>::ToString();
   }
   void operator=(const HashedListB<Object, hashFunction>& From)
   { if (&From==this)
@@ -1321,6 +1313,7 @@ public:
   inline void QuickSortAscending(){ this->HashedListB<Object, Object::HashFunction>::QuickSortAscending();}
   inline void QuickSortDescending(){this->HashedListB<Object, Object::HashFunction>::QuickSortDescending();}
   inline std::string ToString()const {return this->HashedListB<Object, Object::HashFunction>::ToString();}
+  inline std::string ToString(FormatExpressions* theFormat)const {return this->HashedListB<Object, Object::HashFunction>::ToString(theFormat);}
   void operator=(const HashedListB<Object, Object::HashFunction>& other)
   { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
   }
@@ -3798,7 +3791,6 @@ template <class CoefficientType>
 class Vectors: public List<Vector<CoefficientType> >
 {
   public:
-  std::string ToString()const{return this->ToString(false, false, false);}
   std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml, bool makeTable)
   { std::string tempS; std::stringstream out;
     if (useLatex)
@@ -3836,33 +3828,7 @@ class Vectors: public List<Vector<CoefficientType> >
   std::string ElementsToInequalitiesString
 (bool useLatex, bool useHtml, bool LastVarIsConstant, FormatExpressions& theFormat)
 ;
-  std::string ToString(bool useLaTeX, bool useHtml, bool makeTable)const
-  { std::stringstream out;
-    std::string tempS;
-    if (!useLaTeX && !useHtml)
-      out << "Num Vectors<Rational>: " << this->size << "\n";
-    if (useLaTeX && makeTable)
-      out << "\\begin{tabular}{c}";
-    if (useHtml && makeTable)
-      out << "<table>";
-    for (int i=0; i<this->size; i++)
-    { tempS=this->TheObjects[i].ToString();
-      if (useHtml && makeTable)
-        out << "<tr><td>";
-      out << tempS;
-      if (!makeTable && i!=this->size-1)
-        out << ", ";
-      if (useLaTeX && makeTable)
-        out << "\\\\\n";
-      if (useHtml && makeTable)
-        out << "</td></tr>";
-    }
-    if (useHtml && makeTable)
-      out << "</table>";
-    if (useLaTeX && makeTable)
-      out << "\\end{tabular}";
-    return out.str();
-  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
   bool LinearAlgebraForVertexComputation(Selection& theSelection, Vector<CoefficientType>& output, Matrix<CoefficientType>& buffer, Selection& NonPivotPointsBuffer)
   { if (this->size==0)
       return false;
@@ -8057,6 +8023,43 @@ void Matrix<Element>::FindZeroEigenSpaceOneOneForEachNonPivot(Vectors<Element>& 
         rowCounter++;
       }
   }
+}
+
+template <class CoefficientType>
+std::string Vectors<CoefficientType>::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  std::string tempS;
+  bool useLaTeX=false;
+  bool useHtml=false;
+  bool makeTable=false;
+  if (theFormat!=0)
+  { useLaTeX=theFormat->flagUseLatex;
+    useHtml=theFormat->flagUseHTML;
+//    makeTable=theFormat->flagma
+  }
+  if (!useLaTeX && !useHtml)
+    out << "Num Vectors<Rational>: " << this->size << "\n";
+  if (useLaTeX && makeTable)
+    out << "\\begin{tabular}{c}";
+  if (useHtml && makeTable)
+    out << "<table>";
+  for (int i=0; i<this->size; i++)
+  { tempS=this->TheObjects[i].ToString(theFormat);
+    if (useHtml && makeTable)
+      out << "<tr><td>";
+    out << tempS;
+    if (!makeTable && i!=this->size-1)
+      out << ", ";
+    if (useLaTeX && makeTable)
+      out << "\\\\\n";
+    if (useHtml && makeTable)
+      out << "</td></tr>";
+  }
+  if (useHtml && makeTable)
+    out << "</table>";
+  if (useLaTeX && makeTable)
+    out << "\\end{tabular}";
+  return out.str();
 }
 
 template <class Object>

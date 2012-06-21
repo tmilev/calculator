@@ -3716,18 +3716,14 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
 }
 
 std::string WeylGroup::ToString()
-{ std::string tempS;
-  std::stringstream out;
+{ std::stringstream out;
   out << "Size: " << this->size << "\n";
 //  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
   out << "rho:" << this->rho.ToString() << "\n";
-  this->RootSystem.ElementToStringGeneric(tempS);
-  out << "Root system(" << this->RootSystem.size << " elements):\n" << tempS << "\n";
+  out << "Root system(" << this->RootSystem.size << " elements):\n" << this->RootSystem.ToString() << "\n";
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ToString(tempS);
-    out << i << ". " << tempS << "\n";
-  }
+    out << i << ". " << this->TheObjects[i].ToString() << "\n";
   return out.str();
 }
 
@@ -4344,7 +4340,7 @@ void VermaModulesWithMultiplicities::ToString(std::string& output)
 }
 
 void VermaModulesWithMultiplicities::ComputeDebugString()
-{ this->ElementToStringGeneric(this->DebugString);
+{ this->ToString(this->DebugString);
 }
 
 void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()

@@ -2512,7 +2512,7 @@ public:
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero);
   void ModOutVermaRelations
   (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   static void GetCoordinateFormOfSpanOfElements
   (int numVars, List<ElementUniversalEnveloping<CoefficientType> >& theElements,
@@ -2567,7 +2567,7 @@ static bool GetBasisFromSpanOfElements
   ;
   void MakeCasimir
 (SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   void LieBracketOnTheRight(const ElementUniversalEnveloping<CoefficientType>& right, ElementUniversalEnveloping<CoefficientType>& output)const;
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra& left);
@@ -3502,6 +3502,23 @@ public:
         return theMon.theMons[0].owneR->TheObjects[theMon.theMons[0].indexInOwner].indexAlgebra;
     }
     return -1;
+  }
+  ModuleSSalgebraNew<CoefficientType>& GetOwnerModule()const
+  { if (this->size <=0)
+    { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has no monomials."
+      << " This is not allowed as the index of the owner modules are stored in the monomials. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    MonomialTensorGeneralizedVermas<CoefficientType>& theMon=this->TheObjects[0];
+    if (theMon.theMons.size<=0)
+    { std::cout << "This is a programming error: calling GetOwnerModule() on a tensor element which has a constant monomial."
+      << " This is not allowed: constant monomials do not have owners. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    MonomialGeneralizedVerma<CoefficientType>& theGmon=theMon.theMons[0];
+    return theGmon.owneR->TheObjects[theGmon.indexInOwner];
   }
   int GetIndexOwnerModule()const
   { for (int i=0; i<this->size; i++)
@@ -4807,17 +4824,19 @@ void List<Object>::SetSize(int theSize)
 }
 
 template <class Object>
-inline void List<Object>::ElementToStringGeneric(std::string& output)const
-{ this->ElementToStringGeneric(output, this->size);
+inline std::string List<Object>::ToString()const
+{ std::stringstream out;
+  for (int i=0; i<this->size; i++)
+    out << this->TheObjects[i].ToString() << "\n";
+  return out.str();
 }
 
 template <class Object>
-inline void List<Object>::ElementToStringGeneric(std::string& output, int NumElementsToPrint)const
+inline std::string List<Object>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  int Upper=MathRoutines::Minimum(NumElementsToPrint, this->size);
-  for (int i=0; i<Upper; i++)
+  for (int i=0; i<this->size; i++)
     out << this->TheObjects[i].ToString() << "\n";
-  output= out.str();
+  return out.str();
 }
 
 template <class Object>

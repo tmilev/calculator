@@ -763,7 +763,7 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
     if (useHtml)
       out << "<br> <a href=\"./rootHtml.html\">Back to Vector<Rational> subsystem table </a> ";
   }
-  tempS=this->SimpleBasisK.ToString(useLatex, useHtml, false);
+  tempS=this->SimpleBasisK.ToString();
   if (useHtml)
     out << "\n<br>\n";
   if (useLatex)
@@ -800,7 +800,7 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
     out << "<br>\n simple basis centralizer: ";
   if (useLatex)
     out << "; simple basis centralizer: ";
-  tempS=this->SimpleBasisCentralizerRoots.ToString(true, true, false);
+  tempS=this->SimpleBasisCentralizerRoots.ToString();
   out << tempS;
   if (sl2s!=0)
   { if (useHtml)
@@ -902,7 +902,7 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
       out << "</td><td>";
     if (useLatex)
       out << " & \n";
-    out << this->kModules[i].ToString(useLatex, useHtml, true);
+    out << this->kModules[i].ToString();
     if (useHtml)
       out << "</td><td>";
     if (i>=this->kModulesgEpsCoords.size)

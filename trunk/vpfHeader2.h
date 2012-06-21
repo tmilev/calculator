@@ -1138,6 +1138,9 @@ static bool EvaluateDereferenceOneArgument
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fWriteGenVermaModAsDiffOperator
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fEmbedG2inB3
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

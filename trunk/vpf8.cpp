@@ -5238,7 +5238,7 @@ std::string GeneralizedVermaModuleCharacters::PrepareReportOneCone
     normalNoConstant.SetSize(dimSmallerAlgebra+dimLargerAlgebra);
     theConst=-(*currentNormal.LastObject());
     if(!normalNoConstant.IsEqualToZero())
-      out1 << "$" << normalNoConstant.ElementToStringLetterFormat(theFormat, true, false) << "$ & $\\geq$ & $"
+      out1 << "$" << normalNoConstant.ToStringLetterFormat("x", &theFormat) << "$ & $\\geq$ & $"
       << theConst.ToString() << "$ \\\\";
   }
   out1 << "\\end{tabular}";
@@ -5715,7 +5715,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   for (int i=0; i<this->GetNumGenerators()+1; i++)
     out << "c";
   out << "}\n";
-  out << "\\mathrm{roots~simple~coords}&\\varepsilon\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
+  out << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i=0; i<numRoots+theDimension; i++)
   { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
     (i, *this->owner, this->indexInOwner);

@@ -56,6 +56,7 @@ template < > int HashedListB<MonomialTensorGeneralizedVermas<RationalFunction>, 
 template < > int HashedListB<std::string, MathRoutines::hashString>::PreferredHashSize=50;
 template < > int HashedListB<ElementTensorsGeneralizedVermas<RationalFunction>, ElementTensorsGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=50;
 template < > int HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=10;
+template < > int HashedListB<Vector<Polynomial<Rational> >, Vector<Polynomial<Rational> >::HashFunction>::PreferredHashSize=100;
 
 template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
 template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
@@ -118,6 +119,7 @@ template < > int List<Polynomial<LargeInt> >::ListActualSizeIncrement=50;
 template < > int List<ChevalleyGenerator >::ListActualSizeIncrement=10;
 template < > int List<LargeInt >::ListActualSizeIncrement=50;
 template < > int List<stackInfo>::ListActualSizeIncrement=100;
+template < > int List<Vector<Polynomial<Rational> > >::ListActualSizeIncrement=100;
 
 template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
@@ -807,17 +809,19 @@ std::string Rational::ToString(FormatExpressions* notUsed)const
 
 FormatExpressions::FormatExpressions()
 { this->ExtraLinesCounterLatex=0;
-  this->flagUseCalculatorFormatForUEOrdered=true;
   this->chevalleyGgeneratorLetter="g";
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
   this->FDrepLetter="V";
   this->MaxLineLength=100;
+  this->flagPassCustomCoeffMonSeparatorToCoeffs=false;
+  this->flagUseCalculatorFormatForUEOrdered=true;
   this->flagUseHTML=true;
   this->flagUseLatex=false;
+  this->flagQuasiDiffOpCombineWeylPart=true;
+  this->flagMakingExpressionTableWithLatex=false;
   this->MaxLinesPerPage=40;
   this->NumAmpersandsPerNewLineForLaTeX=0;
-  this->flagMakingExpressionTableWithLatex=false;
   this->MaxRecursionDepthPerExpression=500;
 }
 

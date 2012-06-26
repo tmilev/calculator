@@ -356,6 +356,16 @@ bool Data::ConvertToTypeResizesContextArrays
 }
 
 template < >
+bool Data::IsOfType<RationalFunction>()const
+{ return this->type==this->typeRationalFunction;
+}
+
+template < >
+bool Data::IsOfType<Polynomial<Rational> >()const
+{ return this->type==this->typePoly;
+}
+
+template < >
 bool Data::IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >()const
 { return this->type==this->typeEltTensorGenVermasOverRF;
 }
@@ -1018,7 +1028,7 @@ bool Expression::GetVector
     if (!this->EvaluatesToAtom())
     { Expression tempExpression=*this;
       if (conversionFunction!=0)
-        if (!conversionFunction(*this->theBoss, this->IndexBoundVars, tempExpression, comments))
+        if (!this->theBoss->CallCalculatorFunction(conversionFunction, this->IndexBoundVars, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1039,10 +1049,14 @@ bool Expression::GetVector
   outputData.SetSize(this->children.size);
   for (int i=0; i<this->children.size; i++)
   { Expression& currentE=this->children[i];
-    if (!currentE.EvaluatesToAtom())
+    bool needsConversion=true;
+    if (currentE.EvaluatesToAtom())
+      if (currentE.GetAtomicValue().IsOfType<theType>())
+        needsConversion=false;
+    if (needsConversion)
     { Expression tempExpression=currentE;
       if (conversionFunction!=0)
-        if (!conversionFunction(*this->theBoss, this->IndexBoundVars, tempExpression, 0))
+        if (!this->theBoss->CallCalculatorFunction(conversionFunction, this->IndexBoundVars, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1907,24 +1921,24 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
-  Selection selParSel1;
+  Selection selInducing;
   Expression hwvGenVerma, hwvFD;
-  selParSel1.MakeFullSelection(theRank);
+  selInducing.MakeFullSelection(theRank);
   int theCoeff;
   for (int i=0; i<theRank; i++)
     if (highestWeightFundCoords[i].IsSmallInteger(theCoeff))
       if (theCoeff==0)
-        selParSel1.RemoveSelection(i);
-  std::cout << "Your input so far: " << theSSalgebra.GetLieAlgebraName() << " with hw: " << highestWeightFundCoords.ToString()
-  << " parabolic selection: " << selParSel1.ToString() << " degree: " << desiredHeight;
+        selInducing.RemoveSelection(i);
+//  std::cout << "Your input so far: " << theSSalgebra.GetLieAlgebraName() << " with hw: " << highestWeightFundCoords.ToString()
+//  << " parabolic selection: " << selInducing.ToString() << " degree: " << desiredHeight;
   Vectors<RationalFunction> theHws;
-  Selection invertedSelInducing=selParSel1;
+  Selection invertedSelInducing=selInducing;
   invertedSelInducing.InvertSelection();
   theHws.SetSize(0);
   SelectionWithMaxMultiplicity theHWenumerator;
   Vector<RationalFunction> theHWrf;
   for (int j=0; j<=desiredHeight; j++)
-  { theHWenumerator.initMaxMultiplicity(theRank-selParSel1.CardinalitySelection, j);
+  { theHWenumerator.initMaxMultiplicity(theRank-selInducing.CardinalitySelection, j);
     theHWenumerator.IncrementSubsetFixedCardinality(j);
     int numCycles=theHWenumerator.NumCombinationsOfCardinality(j);
     for (int i=0; i<numCycles; i++, theHWenumerator.IncrementSubsetFixedCardinality(j))
@@ -1936,14 +1950,463 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
   }
   FormatExpressions theFormat;
   hwContext.GetFormatExpressions(theFormat);
-  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  /////////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////////
-  Expression tempExp;
-  for (int i=0; i<theHws.size; i++)
-  { theCommands.fHWVinner(theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selParSel1, hwContext, indexOfAlgebra);
-  }
+//  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
+  return theCommands.fWriteGenVermaModAsDiffOperatorInner(theCommands, inputIndexBoundVars, theExpression, comments, theHws, hwContext, selInducing, indexOfAlgebra);
+}
+
+template <class CoefficientType>
+bool ModuleSSalgebraNew<CoefficientType>::IsNotInLevi
+(int theGeneratorIndex)
+{ Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
+    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
+      return true;
   return false;
+}
+
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::GetElementsNilradical
+(List<ElementUniversalEnveloping<CoefficientType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators)
+{ SemisimpleLieAlgebra& ownerSS=this->GetOwner();
+  ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
+  ElementUniversalEnveloping<CoefficientType> theElt;
+  output.SetSize(0);
+  output.Reserve(ownerSS.GetNumPosRoots());
+
+  int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
+  MemorySaving<List<int> > tempList;
+  if (listOfGenerators==0)
+    listOfGenerators=&tempList.GetElement();
+  listOfGenerators->SetSize(0);
+  listOfGenerators->Reserve(ownerSS.GetNumPosRoots());
+  for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
+    if (this->IsNotInLevi(i))
+      listOfGenerators->AddOnTop(i);
+  //bubble sort:
+  for (int i=0; i<listOfGenerators->size; i++)
+    for (int j=i+1; j<listOfGenerators->size; j++)
+      if (ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[i]]>
+          ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[j]])
+        listOfGenerators->SwapTwoIndices(i, j);
+  for (int i=0; i<listOfGenerators->size; i++)
+  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->theAlgebras, this->indexAlgebra);
+    output.AddOnTop(theElt);
+  }
+}
+
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
+   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+{ List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+  this->GetElementsNilradical(eltsNilrad, true);
+  RationalFunction tempRF;
+  output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  MonomialUniversalEnveloping<RationalFunction> tempMon;
+  tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
+  int varShift=0;
+  if (shiftPowersByNumVarsBaseField)
+    varShift=this->GetNumVars();
+  int numVars=varShift+eltsNilrad.size;
+  for (int i=0; i<eltsNilrad.size; i++)
+  { tempRF.MakeOneLetterMon(numVars, i+varShift, 1, theGlobalVariables);
+    tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+  }
+  tempRF.MakeOne(numVars, &theGlobalVariables);
+  output.AddMonomial(tempMon, tempRF);
+}
+
+class MonMatrixTensor
+{
+  friend std::ostream& operator << (std::ostream& output, const MonMatrixTensor& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  int vIndex;
+  int dualIndex;
+  bool IsId;
+  void operator=(const MonMatrixTensor& other)
+  { this->vIndex=other.vIndex;
+    this->dualIndex=other.dualIndex;
+    this->IsId=other.IsId;
+  }
+  bool operator==(const MonMatrixTensor& other)const
+  { return this->vIndex==other.vIndex && this->dualIndex==other.dualIndex && this->IsId==other.IsId;
+  }
+  static unsigned int HashFunction(const MonMatrixTensor& input)
+  { return input.vIndex*SomeRandomPrimes[0]+input.dualIndex*SomeRandomPrimes[1]+input.IsId;
+  }
+  inline unsigned int HashFunction()const
+  { return HashFunction(*this);
+  }
+  bool operator>(const MonMatrixTensor& other)const
+  { if (this->IsId!=other.IsId)
+      return this->IsId>other.IsId;
+    if (this->vIndex==other.vIndex)
+      return this->dualIndex>other.dualIndex;
+    return this->vIndex>other.vIndex;
+  }
+  void MakeIdSpecial()
+  { this->vIndex=-1;
+    this->dualIndex=-1;
+    this->IsId=true;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const
+  { std::stringstream out;
+    if (!this->IsId)
+      out << "m_{" << this->vIndex+1 << "}\\otimes " << "m^*_{" << this->dualIndex+1 << "}";
+    else
+      out << "id";
+    return out.str();
+  }
+};
+
+template <class CoefficientType>
+class MatrixTensor: public MonomialCollection<MonMatrixTensor, CoefficientType >
+{
+public:
+  void MakeId(int numVars)
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    for (int i=0; i<numVars; i++)
+    { theMon.dualIndex=i;
+      theMon.vIndex=i;
+      this->AddMonomial(theMon, 1);
+    }
+  }
+  void operator=(Matrix<CoefficientType>& other)
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    for (int i=0; i<other.NumRows; i++)
+      for (int j=0; j<other.NumCols; j++)
+        if (!other.elements[i][j].IsEqualToZero())
+        { theMon.dualIndex=j;
+          theMon.vIndex=i;
+          this->AddMonomial(theMon, other.elements[i][j]);
+        }
+  }
+};
+
+class quasiDiffMon
+{
+  friend std::ostream& operator << (std::ostream& output, const quasiDiffMon& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  MonomialP theWeylMon;
+  MonMatrixTensor theMatMon;
+  static unsigned int HashFunction(const quasiDiffMon& input)
+  { return input.theWeylMon.HashFunction()*SomeRandomPrimes[0]+input.theMatMon.HashFunction()*SomeRandomPrimes[1];
+  }
+  unsigned int HashFunction()const
+  { return HashFunction(*this);
+  }
+  bool operator==(const quasiDiffMon& other)const
+  { return this->theWeylMon==other.theWeylMon && this->theMatMon==other.theMatMon;
+  }
+  void operator=(const quasiDiffMon& other)
+  { this->theWeylMon=other.theWeylMon;
+    this->theMatMon=other.theMatMon;
+  }
+  bool operator>(const quasiDiffMon& other)const
+  { if (this->theMatMon==other.theMatMon)
+      return this->theWeylMon>other.theWeylMon;
+    return this->theMatMon>other.theMatMon;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const;
+};
+
+std::string quasiDiffMon::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  out << this->theWeylMon.ToString(theFormat) << "\\otimes ";
+  out << this->theMatMon.ToString(theFormat);
+  return out.str();
+}
+
+template <class CoefficientType>
+class quasiDiffOp : public MonomialCollection<quasiDiffMon, CoefficientType>
+{
+public:
+  static void prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output);
+  std::string ToString(FormatExpressions* theFormat=0)const
+  ;
+};
+
+template <class CoefficientType>
+std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)const
+{ bool combineWeylPart=true;
+  if (theFormat!=0)
+    combineWeylPart=theFormat->flagQuasiDiffOpCombineWeylPart;
+  if (!combineWeylPart)
+    return this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat);
+  MatrixTensor<CoefficientType> reordered;
+  reordered.MakeZero();
+  CoefficientType theCF;
+  for (int i=0; i<this->size; i++)
+  { theCF=this->theCoeffs[i];
+    quasiDiffMon& currentMon=(*this)[i];
+    theCF*=currentMon.theWeylMon;
+    reordered.AddMonomial(currentMon.theMatMon, theCF);
+  }
+  return reordered.ToString(theFormat);
+}
+
+template <class CoefficientType>
+void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output)
+{ output.polyAlphabeT.SetSize((inputNumWeylVars+theShift)*2);
+  for (int i=0; i<inputNumWeylVars; i++)
+  { std::stringstream tempStream, tempStream2;
+    tempStream2 << "\\xi_{" << i+1 << "}";
+    output.polyAlphabeT[theShift+i]=tempStream2.str();
+    tempStream << "\\partial" << "_{" << i+1 << "}";
+    output.polyAlphabeT[2*theShift+i+inputNumWeylVars]=tempStream.str();
+  }
+}
+//template<class CoefficientType>
+//std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)const
+//{
+//}
+
+template <> int HashedListB<MonMatrixTensor, MonMatrixTensor::HashFunction>::PreferredHashSize=10;
+template <> int List<MonMatrixTensor>::ListActualSizeIncrement=10;
+template <> int HashedListB<quasiDiffMon, quasiDiffMon::HashFunction>::PreferredHashSize=20;
+template <> int List<quasiDiffMon>::ListActualSizeIncrement=20;
+
+void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+(int inputPower, int numVars, int indexVar, RationalFunction& output, GlobalVariables& theGlobalVariables)
+{ if (inputPower>0)
+  { output.MakeOneLetterMon(numVars*2, indexVar, 1, theGlobalVariables);
+    output.RaiseToPower(inputPower);
+    return;
+  }
+  inputPower*=-1;
+  output.MakeOneLetterMon(numVars*2, indexVar+numVars, 1, theGlobalVariables);
+  output.RaiseToPower(inputPower);
+  Polynomial<Rational> newMult;
+  newMult.MakeDegreeOne(numVars*2, indexVar, 1);
+  for (int i=0; i<inputPower; i++)
+  { output/=newMult;
+    newMult-=1;
+  }
+//  output/=den;
+}
+
+template <class CoefficientType>
+bool ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
+(ElementUniversalEnveloping<RationalFunction>& inputElt, quasiDiffOp<RationalFunction>& output,
+  GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
+  List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+  List<int> indicesNilrad;
+  this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
+  ElementUniversalEnveloping<RationalFunction> theGenElt, result;
+  int VarIndexShift=this->GetNumVars();
+  this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables);
+  result=inputElt;
+  int numVars=theGenElt.GetNumVars();
+  result.SetNumVariables(numVars);
+  theGenElt.SetNumVariables(numVars);
+  std::stringstream out;
+//  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+  theGenElt.Simplify(theGlobalVariables);
+//  std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+
+//  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
+  result.MultiplyBy(theGenElt);
+  result.Simplify(theGlobalVariables);
+//  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString(&tempFormat));
+
+
+  Polynomial<Rational> tempP;
+  MonomialP monUEpart, monTotal;
+  RationalFunction difference, newContrib;
+
+  RationalFunction theWeylEltRatForm, finalCoeff;
+  Matrix<RationalFunction> tempMat, outputOp;
+//  theWeylElt.MakeZero(numVars*2);
+  Vector<Rational> theWeight;
+  MatrixTensor<RationalFunction> endoPart;
+  output.MakeZero();
+  quasiDiffMon tempMon;
+  for (int i=0; i<result.size; i++)
+  { MonomialUniversalEnveloping<RationalFunction>& currentMon=result[i];
+    outputOp.MakeIdMatrix(this->GetDim());
+    theWeylEltRatForm=result.theCoeffs[i];
+    theWeylEltRatForm.SetNumVariables(numVars*2);
+//    std::cout << "<br>Processing: " << result[i].ToString();
+    bool MayBeNotId=false;
+    for (int k=0; k<currentMon.generatorsIndices.size; k++)
+    { int currentIndex=currentMon.generatorsIndices[k];
+      int indexInNilrad=indicesNilrad.IndexOfObject(currentIndex);
+      if (indexInNilrad!=-1)
+      { difference.MakeOneLetterMon(numVars, indexInNilrad+VarIndexShift, 1, theGlobalVariables);
+        difference-=currentMon.Powers[k];
+        difference*=-1;
+        int diffInt;
+        if (!difference.IsSmallInteger(diffInt))
+        { std::cout << "<br>This is s a programming error. indexInNilrad=" << indexInNilrad+VarIndexShift
+          << " The difference must be a small int, instead it is: "
+          << difference.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
+        ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+        (diffInt, numVars, indexInNilrad+VarIndexShift, newContrib, theGlobalVariables);
+//        std::cout << "<br> multiplying " << theWeylEltRatForm.ToString() << " by " << newContrib.ToString();
+        theWeylEltRatForm*=newContrib;
+      } else
+      { tempMat=this->GetActionGeneratorIndex(currentMon.generatorsIndices[k], theGlobalVariables);
+        outputOp.MultiplyOnTheRight(tempMat);
+        MayBeNotId=true;
+      }
+    }
+    if (theWeylEltRatForm.expressionType==theWeylEltRatForm.typeRationalFunction)
+    { std::cout << "Something unexpected has happened, possibly a mathematical mistake. "
+      << "The rational function corresponding to the weyl element in the conversion to differential operator "
+      << " is instead an honest rational function. This is either a programming error, or in the worse case a "
+      << " mathematical one (in particular, this would mean this function should not exist at all). "
+      << " The bad monomial was: " << currentMon.ToString() << " and the bad weyl elt: "
+      << theWeylEltRatForm.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    theWeylEltRatForm.GetNumerator(tempP);
+    //tempP.SetNumVariables(numVars);
+    if (MayBeNotId)
+      endoPart=outputOp;
+    for (int l=0; l<tempP.size; l++)
+      if (MayBeNotId)
+      { if (this->GetDim()==1)
+        { tempMon.theMatMon.MakeIdSpecial();
+          tempMon.theWeylMon=tempP[l];
+          finalCoeff=outputOp.elements[0][0];
+          finalCoeff*=tempP.theCoeffs[l];
+          output.AddMonomial(tempMon, finalCoeff);
+        }
+        else
+          for (int j=0; j<endoPart.size; j++)
+          { tempMon.theMatMon=endoPart[j];
+            tempMon.theWeylMon=tempP[l];
+            finalCoeff=endoPart.theCoeffs[j];
+            finalCoeff.SetNumVariables(numVars);
+            finalCoeff*=tempP.theCoeffs[l];
+            output.AddMonomial(tempMon, finalCoeff);
+          }
+      }
+      else
+      { tempMon.theMatMon.MakeIdSpecial();
+        tempMon.theWeylMon=tempP[l];
+        output.AddMonomial(tempMon, tempP.theCoeffs[l]);
+      }
+
+//    std::cout << "<br>the weyl elt corresponding to " << CGI::GetHtmlMathSpanPure(currentMon.ToString()) << ": "
+//    << CGI::GetHtmlMathSpanPure(currentWeylElt.ToString()) << CGI::GetHtmlMathSpanPure("\\otimes "+ currentVectPart.ToString());
+  }
+//  std::cout << "<br>The  output: " << CGI::GetHtmlMathSpanPure(output.ToString());
+  return false;
+}
+
+bool CommandList::fWriteGenVermaModAsDiffOperatorInner
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+  Vectors<RationalFunction>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorInner");
+   /////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////
+  if (theHws.size==0)
+    return false;
+  Expression tempExp;
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
+  List<ElementUniversalEnveloping<RationalFunction> > elementsNegativeNilrad;
+  ElementUniversalEnveloping<RationalFunction> genericElt, theGenerator;
+  List<ElementWeylAlgebra> actionNilrad;
+  List<int> vectorIndices, dualIndices;
+  List<ElementUniversalEnveloping<RationalFunction> > theNilradBasis;
+  quasiDiffOp<RationalFunction> tempQDO;
+  FormatExpressions theWeylFormat, theUEformat;
+  std::stringstream out, latexReport;
+  theWeylFormat.MaxLineLength=40;
+  theWeylFormat.flagUseLatex=true;
+  theUEformat.MaxLineLength=20;
+  theUEformat.flagUseLatex=true;
+  theUEformat.chevalleyGgeneratorLetter="g";
+  theUEformat.chevalleyHgeneratorLetter="h";
+  theUEformat.polyDefaultLetter="n";
+  hwContext.GetFormatExpressions(theWeylFormat);
+  hwContext.GetFormatExpressions(theUEformat);
+  List<ElementUniversalEnveloping<RationalFunction> > theGeneratorsItry;
+  for (int j=0; j<theSSalgebra.GetRank(); j++)
+  { Vector<Rational> ei;
+    ei.MakeEi(theSSalgebra.GetRank(), j);
+    theGenerator.MakeOneGeneratorCoeffOne(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGeneratorsItry.AddOnTop(theGenerator);
+  }
+  if (false)
+    if (theSSalgebra.GetRank()==3 && theSSalgebra.theWeyl.WeylLetter=='B')
+    { theGenerator=theGeneratorsItry[0];
+      theGenerator+=theGeneratorsItry[2];
+      theGeneratorsItry.AddOnTop(theGenerator);
+    }
+  out << "<table border=\"1\">";
+  latexReport << "\\begin{longtable}{r";
+  for (int i =0; i<theGeneratorsItry.size; i++)
+    latexReport << "l";
+  latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
+  << "} Differential operators corresponding to actions of simple positive generators for the "
+  << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
+  for (int i=0; i<theHws.size; i++)
+  { theCommands.fHWVinner(theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selInducing, hwContext, indexOfAlgebra);
+    ModuleSSalgebraNew<RationalFunction>& theMod=
+    tempExp.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerModule();
+    if (i==0)
+    { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
+      theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
+      quasiDiffOp<RationalFunction>::prepareFormatFromShiftAndNumWeylVars
+      (hwContext.VariableImages.size, elementsNegativeNilrad.size, theWeylFormat);
+      out << "<tr><td>Generic element U(n_-):</td><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString()) << "</td> </tr>";
+      latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
+      latexReport << "Action on ";
+      out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
+      out <<"<tr><td>Action on</td>";
+      for (int j=0; j<theGeneratorsItry.size; j++)
+      { out << "<td>" << theGeneratorsItry[j].ToString() << "</td>";
+        latexReport << "& $" << theGeneratorsItry[j].ToString(&theUEformat)  << "$";
+      }
+      latexReport << "\\endhead \\hline<br>";
+      out << "</tr>";
+      out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString()) << "</td>";
+      latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
+      for (int j=0; j<theGeneratorsItry.size; j++)
+      { theGenerator=theGeneratorsItry[j];
+        theGenerator.MultiplyBy(genericElt);
+        theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
+        theGenerator.Simplify(*theCommands.theGlobalVariableS);
+        out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theGenerator.ToString(&theUEformat)) << "</td>";
+        latexReport << "& $\\begin{array}{l} " << theGenerator.ToString(&theUEformat) << "\\end{array}$ ";
+      }
+      latexReport << "\\\\ \\hline\\hline<br>";
+      out << "</tr>";
+    }
+    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << "</td>";
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
+    //std::cout << "<hr>hw: " << theMod.theHWFundamentalCoordsBaseField.ToString() << " nilrad elts: " << elementsNegativeNilrad.ToString();
+    //std::cout << "<br>generic element: " << genericElt.ToString();
+    for (int j=0; j<theGeneratorsItry.size; j++)
+    { theGenerator=theGeneratorsItry[j];
+      theMod.GetActionGenVermaModuleAsDiffOperator
+      (theGenerator, tempQDO, *theCommands.theGlobalVariableS)
+      ;
+      theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
+      out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempQDO.ToString(&theWeylFormat)) << "</td>";
+      latexReport << " & $\\begin{array}{l}" << tempQDO.ToString(&theWeylFormat) << "\\end{array}$";
+      theWeylFormat.CustomCoeffMonSeparator="";
+    }
+    latexReport << "\\\\\\hline<br>";
+    out << "</tr>";
+  }
+  latexReport << "\\end{longtable}";
+  out << "</table>";
+  out << "<br>" << latexReport.str();
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
 }
 
 bool CommandList::fHWVinner
@@ -2389,6 +2852,51 @@ std::string CommandList::GetCalculatorLink(const std::string& input)
   return out.str();
 }
 
+bool CommandList::fWeylOrbit
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool useFundCoords, bool useRho)
+{ if (theExpression.children.size!=2)
+    return theExpression.SetError("fWeylOrbit takes two arguments");
+  Expression& theSSalgebraNode=theExpression.children[0];
+  Expression& vectorNode=theExpression.children[1];
+  if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theSSalgebraNode, comments))
+    return theExpression.SetError("Failed to created Lie algebra");
+  if (theSSalgebraNode.errorString!="")
+  { theExpression.AssignChild(0);
+    return true;
+  }
+  SemisimpleLieAlgebra& theSSalgebra= theSSalgebraNode.GetAtomicValue().GetAmbientSSAlgebra();
+  Vector <Polynomial<Rational> > theHW;
+  Context theContext;
+  if (!vectorNode.GetVector<Polynomial<Rational> >(theHW, theContext, theSSalgebra.GetRank(), theCommands.fPolynomial, comments))
+    return theExpression.SetError("Failed to extract highest weight");
+  std::stringstream out;
+  Vectors<Polynomial<Rational> > theHWs;
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+  if (!useFundCoords)
+    theHWs.AddOnTop(theHW);
+  else
+    theHWs.AddOnTop(theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHW));
+  HashedList<Vector<Polynomial<Rational> > > outputOrbit;
+  WeylGroup orbitGeneratingSet;
+  if (!theSSalgebra.theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1000, &orbitGeneratingSet, 1000))
+    out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
+    << " elements only.";
+  else
+    out << "The orbit has " << outputOrbit.size << " elements.";
+  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td></tr>";
+  for (int i=0; i<outputOrbit.size; i++)
+  { out << "<tr>" << "<td>" << CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) << "</td><td>"
+    << CGI::GetHtmlMathSpanPure(outputOrbit[i].ToString(&theFormat)) << "</td><td>"
+    << CGI::GetHtmlMathSpanPure(theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\omega", &theFormat))
+    << "</td></tr>";
+  }
+  out << "</table>";
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
 { IncrementRecursion recursionCounter(&theCommands);
@@ -2503,7 +3011,7 @@ bool CommandList::fSSAlgebra
       out << "<hr> Half sum of positive Vectors<Rational>: " << theWeyl.rho.ToString();
       Vector<Rational> tempRoot;
       theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
-      out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ElementToStringEpsilonForm(true, false));
+      out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ToStringLetterFormat("\\varepsilon"));
       out << "<hr>Size of Weyl group according to formula: " <<
       theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
       if (Verbose)
@@ -2515,7 +3023,7 @@ bool CommandList::fSSAlgebra
           << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
           << CGI::
           GetHtmlMathFromLatexFormulA
-          (simplebasisEpsCoords[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
+          (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
           << "</td></tr>";
         }
         out << "</table>";
@@ -2536,7 +3044,7 @@ bool CommandList::fSSAlgebra
         { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
           << CGI::
           GetHtmlMathFromLatexFormulA
-          (fundamentalWeightsEpsForm[i].ElementToStringEpsilonForm(true, false), "", "</td><td>", false, false)
+          (fundamentalWeightsEpsForm[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
           << "</td></tr>";
         }
         out << "</table>";
@@ -2804,10 +3312,28 @@ void CommandList::initPredefinedVars()
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
   this->AddNonBoundVarMustBeNew
   ("WriteGenVermaAsDiffOperators", &this->fWriteGenVermaModAsDiffOperator, "",
-   "Experimental, please don't use. Writes the generalized Verma module as differential operators. The third argument gives the highest weight. \
+   "Experimental, please don't use. Writes the action of the positive Chevalley generators on the generalized Verma module as differential operators.\
+    The third argument gives the highest weight. \
    The non-zero entries of the highest weight give the\
    root spaces outside of the Levi part of the parabolic. The second argument gives the weight level to which the computation should be carried out",
-   "WriteGenVermaAsDiffOperators{}(B_3, 1, (0, 0, y)); ");
+   "WriteGenVermaAsDiffOperators{}(B_3, 1, (0, 0, x_3)); ");
+  this->AddNonBoundVarMustBeNew
+  ("WeylOrbitSimpleCoords", &this->fWeylOrbitSimple, "",
+   "Generates a Weyl orbit printout from simple coords.\
+    First argument = type. Second argument = weight in simple coords. ",
+   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+  this->AddNonBoundVarMustBeNew
+  ("WeylOrbitFundCoords", &this->fWeylOrbitFund, "",
+   "Generates a Weyl orbit printout from fundamental coords.\
+    First argument = type. Second argument = weight in fundamental coords. ",
+   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+  this->AddNonBoundVarMustBeNew
+  ("WeylOrbitFundRho", &this->fWeylOrbitFundRho, "",
+   "Generates a Weyl orbit printout from fundamental coords.\
+    First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
+   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+
+
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \

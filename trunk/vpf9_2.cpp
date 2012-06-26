@@ -148,25 +148,13 @@ void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right,
 }
 
 void ElementWeylAlgebra::LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report)
-{ std::stringstream out;
-  this->ComputeDebugString(false, false);
-  standsOnTheLeft.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&& ["<< standsOnTheLeft.DebugString<<" , "<< this->DebugString<< " ]= ";
-  this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
-  this->ComputeDebugString(false, false);
-  out << this->DebugString<<"\\end{eqnarray*}\n";
-  report=out.str();
+{ this->LieBracketOnTheLeft(standsOnTheLeft, theGlobalVariables);
+  report=this->ToString();
 }
 
 void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report)
-{ std::stringstream out;
-  this->ComputeDebugString(false, false);
-  standsOnTheRight.ComputeDebugString(false, false);
-  out << "\\begin{eqnarray*}&& ["<< this->DebugString<< " , "<<standsOnTheRight.DebugString<<" ]= ";
-  this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
-  this->ComputeDebugString(false, false);
-  out << this->DebugString<<"\\end{eqnarray*}\n";
-  report=out.str();
+{ this->LieBracketOnTheRight(standsOnTheRight, theGlobalVariables);
+  report=this->ToString();
 }
 
 void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
@@ -228,69 +216,28 @@ void ElementWeylAlgebra::MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTh
   this->StandardOrder=Accum;
 }
 
-void ElementWeylAlgebra::ToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray)
-{ std::stringstream out;
-  std::string tempS;
-  int numLettersSinceLastNewLine=0;
-  if (useLatex && useBeginEqnArray)
-    out << "\\begin{eqnarray*}&& ";
-  if (this->StandardOrder.IsEqualToZero())
-    out << 0;
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { tempS=this->StandardOrder.theCoeffs[i].ToString();
-    bool hasMinus=(tempS[0]=='-');
-    if (this->StandardOrder[i].TotalDegree()!=0)
-    { if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
+std::string ElementWeylAlgebra::ToString(FormatExpressions* theFormat)
+{ if (this->NumVariables>100)
+    return this->StandardOrder.ToString();
+  FormatExpressions tempFormat;
+  tempFormat.polyAlphabeT.SetSize(this->NumVariables*2);
+  for (int i=0; i<this->NumVariables; i++)
+  { std::stringstream tempStream;
+    if (theFormat!=0)
+      tempFormat.polyAlphabeT[i]=theFormat->GetPolyLetter(i);
+    else
+    { std::stringstream tempStream2;
+      tempStream2 << "x_{" << i+1 << "}";
+      tempFormat.polyAlphabeT[i]=tempStream2.str();
     }
-    if (!hasMinus && i!=0)
-      out << '+';
-    out << tempS;
-    for (int k=0; k<this->NumVariables; k++)
-      if (this->StandardOrder[i][k]!=0)
-      { out << "{" << alphabet.TheObjects[k] << "}";
-        Rational tempR= this->StandardOrder[i][k];
-        if (tempR!=1)
-          out << "^{" << tempR << "}";
-      }
-    for (int k=0; k<this->NumVariables; k++)
-      if (this->StandardOrder.TheObjects[i][this->NumVariables+ k]!=0)
-      { out << "\\partial_{" << alphabet.TheObjects[k] << "}";
-        numLettersSinceLastNewLine++;
-        Rational tempR=this->StandardOrder.TheObjects[i][this->NumVariables+k];
-        if (tempR!=1)
-          out << "^{" << tempR << "}";
-      }
-    if (numLettersSinceLastNewLine>12 && i!= this->StandardOrder.size-1 && useLatex)
-    { numLettersSinceLastNewLine=0;
-      out << "\\\\&&\n";
-    }
+    tempStream << "\\partial";
+    if (tempFormat.polyAlphabeT[i][0]!='x')
+      tempStream << "_{" << tempFormat.polyAlphabeT[i] << "}";
+    else
+      tempStream << "_{" << i+1 << "}";
+    tempFormat.polyAlphabeT[i+NumVariables]=tempStream.str();
   }
-  if (useLatex && useBeginEqnArray)
-    out << "\\end{eqnarray*}";
-  output=out.str();
-}
-
-void ElementWeylAlgebra::ToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray)
-{ List<std::string> alphabet;
-  alphabet.SetSize(this->NumVariables);
-  int numCycles=this->NumVariables;
-  if (useXYs)
-  { assert(this->NumVariables%2==0);
-    numCycles= this->NumVariables/2;
-  }
-  for (int i=0; i<numCycles; i++)
-  { std::stringstream out, out2;
-    out << "x_{" << i+1 << "}";
-    alphabet.TheObjects[i]= out.str();
-    if (useXYs)
-    { out2 << "y_{" << i+1 << "}";
-      alphabet.TheObjects[i+numCycles]= out2.str();
-    }
-  }
-  this->ToString(output, alphabet, useLatex, useBeginEqnArray);
+  return this->StandardOrder.ToString(&tempFormat);
 }
 
 void ElementWeylAlgebra::SetNumVariables(int newNumVars)
@@ -2248,7 +2195,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   int numNilradicalRootSpaces=0;
   for (int i=0; i<epsCoords.size; i++)
   { Vector<Rational>& currentRoot=epsCoords.TheObjects[i];
-    tempS=currentRoot.ElementToStringEpsilonForm(true, false);
+    tempS=currentRoot.ToStringEpsilonFormat();
     if (!epsCoords.ContainsObject(-currentRoot))
     { out << tempS << ", ";
       numNilradicalRootSpaces++;
@@ -4279,6 +4226,13 @@ void RationalFunction::lcm
   output.MakeZero(theNumVars);
 }
 
+void RationalFunction::operator*=(const MonomialP& other)
+{ Polynomial<Rational> otherP;
+  otherP.MakeZero(other.size);
+  otherP.AddMonomial(other, 1);
+  (*this)*=otherP;
+}
+
 void RationalFunction::operator*=(const Polynomial<Rational>& other)
 { if (this->NumVars!=other.NumVars)
   { int NewNumVars=MathRoutines::Maximum(other.NumVars, this->NumVars);
@@ -5104,7 +5058,7 @@ std::string ParserNode::ElementToStringValueOnlY
       break;
     case ParserNode::typeWeylAlgebraElement:
       LatexOutput << "\\begin{array}{rcl}&&\n"
-      << this->WeylAlgebraElement.GetElement().ToString(true)
+      << this->WeylAlgebraElement.GetElement().ToString()
       << "\n\\end{array}";
       break;
     case ParserNode::typeCharSSFDMod:
@@ -5733,11 +5687,21 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
 }
 
 void RationalFunction::RaiseToPower(int thePower)
-{ Polynomial<Rational>  theNum, theDen;
+{ MacroRegisterFunctionWithName("RationalFunction::RaiseToPower");
+  Polynomial<Rational>  theNum, theDen;
   this->checkConsistency();
   if (thePower<0)
   { this->Invert();
     thePower=-thePower;
+  }
+  if (thePower==0)
+  { if (this->IsEqualToZero())
+    { std::cout << "This is a programming error: attempting to raise 0 to the 0th power, which is undefined. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->MakeOne(this->NumVars, this->context);
+    return;
   }
   switch (this->expressionType)
   { case RationalFunction::typeRational:

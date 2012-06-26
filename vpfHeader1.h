@@ -49,6 +49,8 @@ class MonomialTensorGeneralizedVermas;
 template<class CoefficientType>
 class ElementTensorsGeneralizedVermas;
 struct branchingData;
+template<class CoefficientType>
+class quasiDiffOp;
 
 //classes related to linear integral programming (polyhedra, lattices, quasipolynomials)
 class Cone;
@@ -1040,7 +1042,7 @@ public:
     return result;
   }
   void Clear()
-  { //if the hashed list is somewhat sparce (1/5), and the index is somewhat large,
+  { //if the hashed list is somewhat sparse (1/5), and the index is somewhat large,
     //(above 20 entries), we clear the hash by finding the occupied hashes and nullifying them one by one.
     //else, we simply go through the entire hash index and nullify everything.
     //Note: for better performance, 20 entries should probably be changed to 100+,
@@ -1361,7 +1363,7 @@ public:
     return result;
   }
   Matrix():NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0){}
-  Matrix(const Matrix<Element>& other)
+  Matrix(const Matrix<Element>& other):NumRows(0), ActualNumRows(0), NumCols(0), ActualNumCols(0), elements(0)
   { *this=other;
   }
   ~Matrix()
@@ -1537,8 +1539,13 @@ public:
     if (theCarbonCopy!=0)
       theCarbonCopy->SubtractRows(indexRowWeSubtractFrom, indexSubtracted, StartColIndex, scalar);
   }
-  void MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output, const Element& theRingZero=0);
-  void MultiplyOnTheLeft(const Matrix<Element>& input, const Element& theRingZero=0);
+  void MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero=0);
+  void MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, const Element& theRingZero=0);
+  void MultiplyOnTheRight(const Matrix<Element>& standsOnTheRight, const Element& theRingZero=0)
+  { Matrix<Element> temp=*this;
+    *this=standsOnTheRight;
+    this->MultiplyOnTheLeft(temp);
+  }
   void NonPivotPointsToEigenVectorMatrixForm
   (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 ;
@@ -2072,23 +2079,23 @@ bool Matrix<Element>::Invert(const Element& theRingUnit, const Element& theRingZ
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, const Element& theRingZero)
+void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, const Element& theRingZero)
 { Matrix<Element> tempMat;
-  this->MultiplyOnTheLeft(input, tempMat, theRingZero);
+  this->MultiplyOnTheLeft(standsOnTheLeft, tempMat, theRingZero);
   this->operator=(tempMat);
 }
 
 template <typename Element>
-void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& input, Matrix<Element>& output, const Element& theRingZero)
-{ assert(&output!=this && &output!=&input);
-  assert(this->NumRows==input.NumCols);
+void Matrix<Element>::MultiplyOnTheLeft(const Matrix<Element>& standsOnTheLeft, Matrix<Element>& output, const Element& theRingZero)
+{ assert(&output!=this && &output!=&standsOnTheLeft);
+  assert(this->NumRows==standsOnTheLeft.NumCols);
   Element tempEl;
-  output.init(input.NumRows, this->NumCols);
-  for (int i=0; i< input.NumRows; i++)
-    for( int j=0; j< this->NumCols; j++)
+  output.init(standsOnTheLeft.NumRows, this->NumCols);
+  for (int i=0; i< standsOnTheLeft.NumRows; i++)
+    for(int j=0; j< this->NumCols; j++)
     { output.elements[i][j]=theRingZero;
       for (int k=0; k<this->NumRows; k++)
-      { tempEl.Assign(input.elements[i][k]);
+      { tempEl.Assign(standsOnTheLeft.elements[i][k]);
         tempEl*=(this->elements[k][j]);
         output.elements[i][j]+=(tempEl);
       }
@@ -3230,9 +3237,7 @@ public:
   std::string ToStringLetterFormat
   (const std::string& inputLetter, FormatExpressions* theFormat=0, bool DontIncludeLastVar=false)const
   ;
-  std::string ElementToStringLetterFormat
-  (const FormatExpressions& theFormat, bool useLatex=false, bool DontIncludeLastVar=false)const;
-  std::string ElementToStringEpsilonForm(bool useLatex, bool useHtml)
+  std::string ToStringEpsilonFormat()const
   { return this->ToStringLetterFormat("\\varepsilon");
   }
   inline CoefficientType ScalarEuclidean(const Vector<CoefficientType>& other, const CoefficientType& theRingZero=0)const
@@ -3363,7 +3368,7 @@ static void ProjectOntoHyperPlane
   (int DesiredDimension, int NonZeroIndex,
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeZero(DesiredDimension, theRingZero);
-    this->TheObjects[NonZeroIndex]=theRingUnit;
+    (*this)[NonZeroIndex]=theRingUnit;
   }
   inline static unsigned int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
 
@@ -3800,7 +3805,7 @@ class Vectors: public List<Vector<CoefficientType> >
     if (useLatex && makeTable)
       out << "\\begin{array}{l}";
     for (int i=0; i<this->size; i++)
-    { tempS=this->TheObjects[i].ElementToStringEpsilonForm(useLatex, useHtml);
+    { tempS=this->TheObjects[i].ToStringEpsilonFormat();
       if (useHtml && makeTable)
         out << "<tr><td>";
       if (!useLatex && useHtml)
@@ -4174,52 +4179,25 @@ public:
   std::string fundamentalWeightLetter;
   std::string polyDefaultLetter;
   std::string CustomPlusSign;
+  std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   List<std::string> polyAlphabeT;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
   std::string GetChevalleyGletter(int index)const;
-  FormatExpressions();
   int ExtraLinesCounterLatex;
   int NumAmpersandsPerNewLineForLaTeX;
   int MaxRecursionDepthPerExpression;
   int MaxLineLength;
   int MaxLinesPerPage;
+  bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
+  bool flagQuasiDiffOpCombineWeylPart;
+  FormatExpressions();
 };
-
-template <class CoefficientType>
-std::string Vector<CoefficientType>::ElementToStringLetterFormat
-(const FormatExpressions& theFormat, bool useLatex, bool DontIncludeLastVar)const
-{ if (this->IsEqualToZero())
-    return "0";
-  std::stringstream out;
-  std::string tempS;
-  bool found=false;
-  int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
-  for(int i=0; i<NumVars; i++)
-    if (!this->TheObjects[i].IsEqualToZero())
-    { tempS=this->TheObjects[i].ToString();
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (found)
-      { if (tempS.size()>0)
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      found=true;
-      out << tempS;
-      out << theFormat.GetPolyLetter(i);
-    }
-  return out.str();
-}
 
 class ChevalleyGenerator
 {
@@ -4817,9 +4795,16 @@ public:
   }
   void operator*=(const Polynomial<CoefficientType>& other)
   { if (this->NumVars!=other.NumVars)
-    { std::cout << "This is not supposed to happen, or is it?";
-      assert(false);
+    { int newNumVars= MathRoutines::Maximum(this->NumVars, other.NumVars);
+      Polynomial<CoefficientType> otherCopy=other;
+      this->SetNumVariables(newNumVars);
+      otherCopy.SetNumVariables(newNumVars);
+      *this*=otherCopy;
+      return;
     }
+    //{ std::cout << "This is not supposed to happen, or is it?";
+    //  assert(false);
+   // }
     this->::ElementCommutativeAlgebra<MonomialP, CoefficientType>::operator*=((ElementCommutativeAlgebra<MonomialP, CoefficientType>) other);
   }
   template <class otherType>
@@ -5189,11 +5174,17 @@ public:
   bool checkConsistency()const
   { if (this->expressionType==this->typePoly)
     { if (this->Numerator.IsZeroPointer())
-      { assert(false);
+      { std::cout << "This is a programming error: "
+        << "  a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
         return false;
       }
       if (this->Numerator.GetElementConst().IsAConstant())
-      { assert(false);
+      { std::cout << "This is a programming error: "
+        << " a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
         return false;
       }
 //      int commentMeOutWhenDoneDebugging=-1;
@@ -5201,11 +5192,17 @@ public:
     }
     if (this->expressionType==this->typeRationalFunction)
     { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
-      { assert(false);
+      { std::cout << "This is a programming error: "
+        << "  a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
         return false;
       }
       if (this->Denominator.GetElementConst().IsAConstant())
-      { assert(false);
+      { std::cout << "This is a programming error: "
+        << "  a rational function is flagged as having non-constant denominator, but the denominator is constant. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
         return false;
       }
     }
@@ -5227,7 +5224,13 @@ public:
 //    assert(this->checkConsistency());
   }
   void MakeOneLetterMon(int inputNumVars, int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables)
-  { this->expressionType=this->typePoly;
+  { if (theIndex>=inputNumVars || theIndex<0)
+    { std::cout << "This is a programming error: I am asked to create Monomial with  "
+      << inputNumVars << " variables which has a variable of index " << theIndex
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->expressionType=this->typePoly;
     this->NumVars=inputNumVars;
     this->Numerator.GetElement().MakeDegreeOne(this->NumVars, theIndex, theCoeff);
     this->context=&theGlobalVariables;
@@ -5296,7 +5299,8 @@ public:
     (*this)+=tempRF;
   }
   void operator*=(const RationalFunction& other);
-  void operator*=(const Polynomial<Rational> & other);
+  void operator*=(const Polynomial<Rational>& other);
+  void operator*=(const MonomialP& other);
   void operator*=(const Rational& other);
   void operator*=(int other){*this*=(Rational)other;}
 //  void operator-=(const Rational& theConstant)
@@ -6794,7 +6798,7 @@ std::string Vectors<CoefficientType>::ElementsToInequalitiesString
     out << "\\begin{array}{l}";
   for (int i=0; i<this->size; i++)
   { Vector<Rational>& current=this->TheObjects[i];
-    tempS= current.ElementToStringLetterFormat(theFormat, useLatex, LastVarIsConstant);
+    tempS= current.ToStringLetterFormat(theFormat.polyDefaultLetter, &theFormat, LastVarIsConstant);
     if (tempS=="")
       out << "(0";
     out << tempS;
@@ -8076,5 +8080,38 @@ void List<Object>::IntersectWith(const List<Object>& other, List<Object>& output
   for (int i=0; i<other.size; i++)
     if (tempList.Contains(other[i]))
       output.AddOnTop(other[i]);
+}
+
+template <class CoefficientType>
+std::string Vector<CoefficientType>::ToStringLetterFormat
+(const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
+{ if (this->IsEqualToZero())
+    return "0";
+  std::stringstream out;
+  std::string tempS;
+  bool found=false;
+  int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
+  for(int i=0; i<NumVars; i++)
+    if (!this->TheObjects[i].IsEqualToZero())
+    { tempS=this->TheObjects[i].ToString(theFormat);
+      if (tempS=="1")
+        tempS="";
+      if (tempS=="-1")
+        tempS="-";
+      if (found)
+      { if (tempS.size()>0)
+        { if (tempS[0]!='-')
+            out << "+";
+        } else
+          out << "+";
+      }
+      found=true;
+      if (this->TheObjects[i].NeedsBrackets())
+        out << "(" << tempS << ")";
+      else
+        out << tempS;
+      out << inputLetter << "_{" << i+1<< "}";
+    }
+  return out.str();
 }
 #endif

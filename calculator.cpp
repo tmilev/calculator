@@ -17,9 +17,6 @@
 #endif
 ProjectInformationInstance projectInfoInstanceCalculatorCpp(__FILE__, "Calculator web interface.");
 
-//#undef ANNOYINGSTATISTICS
-//#define ANNOYINGSTATISTICS std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
-
 void getPath(char* path, std::string& output)
 { if (path==0) return;
   int length=0;
@@ -361,6 +358,9 @@ g_{-2} v_\\lambda\
 //civilizedInput="SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (0, x_1)); ";
 //  civilizedInput=" \\\\";
   //theParser.flagLogSyntaxRules=true;
+//  civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 1, (0, 0, y)); ";
+//civilizedInput="WeylOrbitSimpleCoords{}(B_2, (y, y));";
+//  civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x_1, x_2, 0)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

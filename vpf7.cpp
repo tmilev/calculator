@@ -260,39 +260,6 @@ void MonomialChar<CoefficientType>::AccountSingleWeight
 }
 
 template <class CoefficientType>
-std::string Vector<CoefficientType>::ToStringLetterFormat
-(const std::string& inputLetter, FormatExpressions* theFormat, bool DontIncludeLastVar)const
-{ if (this->IsEqualToZero())
-    return "0";
-  std::stringstream out;
-  std::string tempS;
-  bool found=false;
-  int NumVars= DontIncludeLastVar ? this->size-1 : this->size;
-  for(int i=0; i<NumVars; i++)
-    if (!this->TheObjects[i].IsEqualToZero())
-    { tempS=this->TheObjects[i].ToString(theFormat);
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (found)
-      { if (tempS.size()>0)
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      found=true;
-      if (this->TheObjects[i].NeedsBrackets())
-        out << "(" << tempS << ")";
-      else
-        out << tempS;
-      out << inputLetter << "_{" << i+1<< "}";
-    }
-  return out.str();
-}
-
-template <class CoefficientType>
 std::string charSSAlgMod<CoefficientType>::operator*=(const charSSAlgMod& other)
 { GlobalVariables theGlobalVariables;
   return this->MultiplyBy(other, theGlobalVariables);
@@ -2455,7 +2422,6 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input)
   out << "<span class=\"math\">" << input << "</span>";
   return out.str();
 }
-
 
 void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");

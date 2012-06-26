@@ -1052,7 +1052,7 @@ void WeylGroup::SimpleReflection
 { Element alphaShift, tempRat;
   alphaShift=theRingZero;
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat.Assign(theVector.TheObjects[i]);
+  { tempRat=(theVector[i]);
     tempRat*=(this->CartanSymmetric.elements[index][i]*(-2));
     alphaShift+=(tempRat);
   }
@@ -1768,12 +1768,11 @@ public:
   int RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(int theIndex)const;
   int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const;
   void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart)
-  { for (int i=0; i<this->GetNumPosRoots(); i++)
-    { int translationCoeff=0;
-      for (int j=0; j<this->GetRank(); j++)
-        if (parSelZeroMeansLeviPart.selected[j])
-          translationCoeff+=this->theWeyl.RootSystem[i][j].NumShort*this->GetNumPosRoots();
-      this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff;
+  { Vector<Rational> tempVect;
+    tempVect=parSelZeroMeansLeviPart;
+    for (int i=0; i<this->GetNumGenerators(); i++)
+    { Rational translationCoeff=this->GetWeightOfGenerator(i).ScalarEuclidean(tempVect)* this->GetNumPosRoots();
+      this->UEGeneratorOrderIncludingCartanElts[i]=i+translationCoeff.NumShort;
     }
   }
   void OrderSSalgebraForHWbfComputation()
@@ -2470,14 +2469,14 @@ public:
   ;
   void MakeOneGeneratorCoeffOne
 (int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
  ;
   void MakeOneGeneratorCoeffOne
   (int theIndex, int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 ;
   void MakeOneGeneratorCoeffOne
   (const Vector<Rational> & rootSpace, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
-  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeOneGeneratorCoeffOne
     (inputOwners[inputIndexInOwners].RootToIndexInUE(rootSpace), inputOwners, inputIndexInOwners,
      theRingUnit, theRingZero);
@@ -2695,13 +2694,9 @@ private:
   //the standard order is as follows. First come the variables, then the differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
   Polynomial<Rational> StandardOrder;
 public:
-  std::string DebugString;
-  void ComputeDebugString(bool useBeginEqnArray, bool useXYs){this->ToString(this->DebugString, useXYs, true, useBeginEqnArray); }
-  void ToString(std::string& output, List<std::string>& alphabet, bool useLatex, bool useBeginEqnArray);
-  void ToString(std::string& output, bool useXYs, bool useLatex, bool useBeginEqnArray);
-  std::string ToString(bool useLatex){std::string tempS; this->ToString(tempS, false, useLatex, false); return tempS;}
   //NumVariables must equal 2*StandardOrder.NumVars
   int NumVariables;
+  std::string ToString(FormatExpressions* theFormat=0);
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
@@ -2711,6 +2706,8 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   void MakeZero(int NumVars);
+  static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+  (int inputPower, int numVars, int indexVar, RationalFunction& output, GlobalVariables& theGlobalVariables);
   bool ActOnPolynomial(Polynomial<Rational> & thePoly);
   void GetStandardOrder(Polynomial<Rational> & output){output=this->StandardOrder;}
   void SetNumVariables(int newNumVars);
@@ -2724,6 +2721,10 @@ public:
   void Assign(const ElementWeylAlgebra& other)
   { this->StandardOrder=(other.StandardOrder);
     this->NumVariables=other.NumVariables;
+  }
+  void AssignStandardOrder(const Polynomial<Rational>& inputStandardOrder)
+  { this->StandardOrder=inputStandardOrder;
+    this->NumVariables=inputStandardOrder.NumVars/2;
   }
   void AssignPolynomial(const Polynomial<Rational>& thePoly)
   { this->StandardOrder=thePoly;
@@ -3163,7 +3164,7 @@ public:
 //  List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
   Matrix<CoefficientType>& GetActionGeneratorIndex
   (int generatorIndex, GlobalVariables& theGlobalVariables,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
  ;
   int GetNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
@@ -3224,6 +3225,19 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    Vectors<CoefficientType>* outputWeightsFundCoords=0, Vectors<CoefficientType>* outputEigenSpace=0,
    std::stringstream* comments=0, const CoefficientType& theRingUnit=1,
    const CoefficientType& theRingZero=0)
+   ;
+   void GetElementsNilradical
+(List<ElementUniversalEnveloping<CoefficientType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators=0)
+   ;
+   bool IsNotInLevi
+(int theGeneratorIndex)
+   ;
+   void GetGenericUnMinusElt
+   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+   ;
+   bool GetActionGenVermaModuleAsDiffOperator
+(ElementUniversalEnveloping<RationalFunction>& inputElt, quasiDiffOp<RationalFunction>& output,
+  GlobalVariables& theGlobalVariables)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
    {}
@@ -5839,8 +5853,16 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;
   bool useCustomPlus=false;
+  bool useCustomTimes=false;
+  std::string oldCustomTimes="";
   if (theFormat!=0)
-    useCustomPlus=(theFormat->CustomPlusSign!="");
+  { useCustomPlus=(theFormat->CustomPlusSign!="");
+    useCustomTimes=(theFormat->CustomCoeffMonSeparator!="");
+    if (theFormat->flagPassCustomCoeffMonSeparatorToCoeffs==false)
+    { oldCustomTimes=theFormat->CustomCoeffMonSeparator;
+      theFormat->CustomCoeffMonSeparator="";
+    }
+  }
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
     Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
@@ -5849,12 +5871,17 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
     else
       tempS1=currentCoeff.ToString(theFormat);
     tempS2=currentMon.ToString(theFormat);
-    if (tempS1=="1" && tempS2!="1")
-      tempS1="";
-    if (tempS1=="-1"&& tempS2!="1")
-      tempS1="-";
-    if(tempS2!="1")
+    if (!useCustomTimes)
+    { if (tempS1=="1" && tempS2!="1")
+        tempS1="";
+      if (tempS1=="-1"&& tempS2!="1")
+        tempS1="-";
+      if(tempS2!="1")
+        tempS1+=tempS2;
+    } else
+    { tempS1+=oldCustomTimes;
       tempS1+=tempS2;
+    }
     if (i>0)
     { if (!useCustomPlus)
       { if (tempS1.size()>0)
@@ -5884,6 +5911,8 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
           out << " <br>";
       }
   }
+  if (theFormat!=0)
+    theFormat->CustomCoeffMonSeparator=oldCustomTimes;
   return out.str();
 }
 

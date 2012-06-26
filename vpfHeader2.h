@@ -959,6 +959,11 @@ public:
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   bool CollectSummands(int inputIndexBoundVars, Expression& theExpression);
+  bool CallCalculatorFunction(Function::FunctionAddress theFun,  int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments=0)
+  { if (!theFun(*this, inputIndexBoundVars, theExpression, comments))
+      return false;
+    return theExpression.errorString=="";
+  }
 bool CollectSummands
 (List<Expression>& summands, bool needSimplification, int inputIndexBoundVars, Expression& theExpression)
 ;
@@ -1087,6 +1092,26 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
 }
+  static bool fWeylOrbit
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool useFundCoords, bool useRho)
+ ;
+  static bool fWeylOrbitFund
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, true, false);
+}
+  static bool fWeylOrbitSimple
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, false, false);
+}
+  static bool fWeylOrbitFundRho
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, true, true);
+}
+
   static bool fSSAlgebra
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose=false)
 ;
@@ -1135,6 +1160,10 @@ static bool EvaluateDereferenceOneArgument
  Vector<RationalFunction>& highestWeightFundCoords,
  Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
  ;
+ bool fWriteGenVermaModAsDiffOperatorInner
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+  Vectors<RationalFunction>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+  ;
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

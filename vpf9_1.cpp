@@ -1728,7 +1728,7 @@ void coneRelation::RelationOneSideToStringCoordForm(std::string& output, List<Ra
     if (!EpsilonForm)
       tempS=theRoots[i].ToString();
     else
-      tempS=theRoots[i].ElementToStringEpsilonForm(true, false);
+      tempS=theRoots[i].ToStringEpsilonFormat();
     out << "(" << tempS << ")";
     if (i!=theRoots.size-1)
       out << " + ";

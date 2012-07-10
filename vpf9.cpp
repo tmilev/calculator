@@ -1076,11 +1076,20 @@ Rational Rational::NtoTheKth(int n, int k)
   return result;
 }
 
-bool Rational::IsInteger()const
-{ if (this->Extended==0)
-    return this->DenShort==1;
+bool Rational::IsInteger(LargeInt* whichInteger)const
+{ bool result=false;
+  if (this->Extended==0)
+  { result=(this->DenShort==1);
+    if (whichInteger!=0)
+      *whichInteger=this->NumShort;
+  }
   else
-    return this->Extended->den.IsEqualToOne();
+    if (this->Extended->den.IsEqualToOne())
+    { result=true;
+      if (whichInteger!=0)
+        *whichInteger=this->Extended->num;
+    }
+  return result;
 }
 
 double Rational::DoubleValue()const
@@ -4226,7 +4235,7 @@ unsigned int ElementWeylGroup::HashFunction() const
   return result;
 }
 
-void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex)
+void KLpolys::WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex)
 { output.clear();
   output << "Top_index: " << TopIndex << "\n";
   std::string tempS;
@@ -4234,7 +4243,7 @@ void VermaModulesWithMultiplicities::WriteKLCoeffsToFile(std::fstream& output, L
   output << tempS;
 }
 
-int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
+int KLpolys::ReadKLCoeffsFromFile(std::fstream& input, List<int>& output)
 { std::string tempS;
   int TopIndex;
   input >> tempS >> TopIndex;
@@ -4244,14 +4253,14 @@ int VermaModulesWithMultiplicities::ReadKLCoeffsFromFile(std::fstream& input, Li
   return TopIndex;
 }
 
-void VermaModulesWithMultiplicities::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
+void KLpolys::KLcoeffsToString(List<int>& theKLCoeffs, std::string& output)
 { std::stringstream out;
   for (int i=0; i<theKLCoeffs.size; i++)
     out << i << ".  " << theKLCoeffs.TheObjects[i] << "\n";
   output=out.str();
 }
 
-void VermaModulesWithMultiplicities::initTheMults()
+void KLpolys::initTheMults()
 { this->TheMultiplicities.SetSize(this->size);
   this->Explored.SetSize(this->size);
   for (int i=0; i<this->size; i++)
@@ -4262,7 +4271,7 @@ void VermaModulesWithMultiplicities::initTheMults()
   this->LowestNonExplored=0;
 }
 
-void VermaModulesWithMultiplicities::Check()
+void KLpolys::Check()
 { for (int i=0; i<this->size; i++)
   { this->Compute(i);
 //    bool found=false;
@@ -4274,7 +4283,7 @@ void VermaModulesWithMultiplicities::Check()
   }
 }
 
-void VermaModulesWithMultiplicities::Compute(int x)
+void KLpolys::Compute(int x)
 { this->initTheMults();
   this->TheMultiplicities.TheObjects[x]=1;
   this->ComputeDebugString();
@@ -4289,7 +4298,7 @@ void VermaModulesWithMultiplicities::Compute(int x)
   }
 }
 
-void VermaModulesWithMultiplicities::FindNextToExplore()
+void KLpolys::FindNextToExplore()
 { bool foundNonExplored=false;
   for (int i=this->LowestNonExplored; i<this->size; i++)
     if (!this->Explored.TheObjects[i])
@@ -4305,7 +4314,7 @@ void VermaModulesWithMultiplicities::FindNextToExplore()
   this->NextToExplore=-1;
 }
 
-bool VermaModulesWithMultiplicities::IsMaxNonEplored(int index)
+bool KLpolys::IsMaxNonEplored(int index)
 { for (int i=this->LowestNonExplored; i<this->size; i++)
     if (!this->Explored.TheObjects[i]&& i!=index)
     { Vector<Rational> tempRoot;
@@ -4317,37 +4326,33 @@ bool VermaModulesWithMultiplicities::IsMaxNonEplored(int index)
   return true;
 }
 
-void VermaModulesWithMultiplicities::ToString(std::string& output)
-{ std::string tempS;
-  std::stringstream out;
-  out << "Next to explore: " << this->NextToExplore << "\n Orbit of rho:\n";
+std::string KLpolys::ToString(FormatExpressions* theFormat)
+{ std::stringstream out;
+  out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
   for (int i=0; i<this->size; i++)
-  { tempS=this->TheObjects[i].ToString();
-    out << tempS << "   :  " << this->TheMultiplicities[i];
+  { out << this->TheObjects[i].ToString() << "   :  " << this->TheMultiplicities[i];
     if (this->Explored[i])
-      out << " Explored\n";
+      out << " Explored<br>\n";
     else
-      out << " not Explored\n";
+      out << " not Explored<br>\n";
   }
-  out << "Bruhat order:\n";
+  out << "Bruhat order:<br>\n";
   for (int i=0; i<this->size; i++)
   { out << i << ".   ";
     for(int j=0; j<this->BruhatOrder[i].size; j++)
       out << this->BruhatOrder[i][j] << ", ";
-    out << "\n";
+    out << "<br>\n";
   }
-  this->RPolysToString(tempS);
-  out << "R Polynomials:\n" << tempS;
-  this->KLPolysToString(tempS);
-  out << "Kazhdan-Lusztig Polynomials:\n" << tempS;
-  output= out.str();
+  out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
+  out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
+  return out.str();
 }
 
-void VermaModulesWithMultiplicities::ComputeDebugString()
-{ this->ToString(this->DebugString);
+void KLpolys::ComputeDebugString()
+{ this->DebugString=this->ToString();
 }
 
-void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
+void KLpolys::GeneratePartialBruhatOrder()
 { int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
   Vector<Rational> ZeroRoot; ZeroRoot.MakeZero(theDimension);
   this->BruhatOrder.SetSize(this->size);
@@ -4373,7 +4378,7 @@ void VermaModulesWithMultiplicities::GeneratePartialBruhatOrder()
   this->ComputeDebugString();
 }
 
-void VermaModulesWithMultiplicities::ExtendOrder()
+void KLpolys::ExtendOrder()
 { this->initTheMults();
   int x=this->FindLowestBruhatNonExplored();
   while (x!=-1)
@@ -4387,7 +4392,7 @@ void VermaModulesWithMultiplicities::ExtendOrder()
   }
 }
 
-int VermaModulesWithMultiplicities::FindLowestBruhatNonExplored()
+int KLpolys::FindLowestBruhatNonExplored()
 { for (int i=this->size-1; i>=0; i--)
     if (!this->Explored.TheObjects[i])
     { bool isGood=true;
@@ -4404,7 +4409,7 @@ int VermaModulesWithMultiplicities::FindLowestBruhatNonExplored()
   return -1;
 }
 
-int VermaModulesWithMultiplicities::FindHighestBruhatNonExplored(List<bool>& theExplored)
+int KLpolys::FindHighestBruhatNonExplored(List<bool>& theExplored)
 { for (int i=0; i<this->size; i++)
     if (!theExplored.TheObjects[i])
     { bool isGood=true;
@@ -4421,7 +4426,7 @@ int VermaModulesWithMultiplicities::FindHighestBruhatNonExplored(List<bool>& the
   return -1;
 }
 
-void VermaModulesWithMultiplicities::MergeBruhatLists(int fromList, int toList)
+void KLpolys::MergeBruhatLists(int fromList, int toList)
 { for (int i=0; i<this->BruhatOrder.TheObjects[fromList].size; i++)
   { bool found=false;
     for (int j=0; j<this->BruhatOrder.TheObjects[toList].size; j++)
@@ -4434,17 +4439,17 @@ void VermaModulesWithMultiplicities::MergeBruhatLists(int fromList, int toList)
   }
 }
 
-void VermaModulesWithMultiplicities::ComputeFullBruhatOrder()
+void KLpolys::ComputeFullBruhatOrder()
 { this->initTheMults();
   this->GeneratePartialBruhatOrder();
   this->ExtendOrder();
 }
 
-void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromChamberIndicator(Vector<Rational>& ChamberIndicator, List<int>& output)
+void KLpolys::ComputeKLcoefficientsFromChamberIndicator(Vector<Rational>& ChamberIndicator, List<int>& output)
 { this->ComputeKLcoefficientsFromIndex(this->ChamberIndicatorToIndex(ChamberIndicator), output);
 }
 
-int VermaModulesWithMultiplicities::ChamberIndicatorToIndex(Vector<Rational> &ChamberIndicator)
+int KLpolys::ChamberIndicatorToIndex(Vector<Rational> &ChamberIndicator)
 { int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
   Vector<Rational> tempRoot; tempRoot.SetSize(theDimension);
   Vector<Rational> ChamberIndicatorPlusRho;
@@ -4474,7 +4479,7 @@ int VermaModulesWithMultiplicities::ChamberIndicatorToIndex(Vector<Rational> &Ch
   return -1;
 }
 
-void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output)
+void KLpolys::ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output)
 { output.SetSize(this->size);
   this->ComputeKLPolys(this->TheWeylGroup, ChamberIndex);
   for (int i=0; i<this->KLPolys.TheObjects[ChamberIndex].size; i++ )
@@ -4484,7 +4489,7 @@ void VermaModulesWithMultiplicities::ComputeKLcoefficientsFromIndex(int ChamberI
   }
 }
 
-void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
+void KLpolys::initFromWeyl(WeylGroup* theWeylGroup)
 { this->TheWeylGroup= theWeylGroup;
   Vectors<Rational> tempRoots;
   tempRoots.AddOnTop(this->TheWeylGroup->rho);
@@ -4492,8 +4497,10 @@ void VermaModulesWithMultiplicities::initFromWeyl(WeylGroup* theWeylGroup)
   this->initTheMults();
 }
 
-void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
-{ this->GeneratePartialBruhatOrder();
+void KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
+{ theWeylGroup->ComputeWeylGroup(-1);
+  this->initFromWeyl(theWeylGroup);
+  this->GeneratePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
   PolyFormatLocal.polyDefaultLetter="q";
   this->ComputeRPolys();
@@ -4510,7 +4517,7 @@ void VermaModulesWithMultiplicities::ComputeKLPolys(WeylGroup* theWeylGroup, int
   }
 }
 
-void VermaModulesWithMultiplicities::ComputeRPolys()
+void KLpolys::ComputeRPolys()
 { int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
   this->RPolys.SetSize(this->size);
   for (int i=0; i<this->size; i++)
@@ -4543,27 +4550,27 @@ void VermaModulesWithMultiplicities::ComputeRPolys()
   //this->ComputeDebugString();
 }
 
-bool VermaModulesWithMultiplicities::IndexGEQIndex(int a, int b)
+bool KLpolys::IndexGEQIndex(int a, int b)
 { Vector<Rational> tempRoot;
   tempRoot=(this->TheObjects[a]);
   tempRoot-=(this->TheObjects[b]);
   return tempRoot.IsPositiveOrZero();
 }
 
-bool VermaModulesWithMultiplicities::IndexGreaterThanIndex(int a, int b)
+bool KLpolys::IndexGreaterThanIndex(int a, int b)
 { if (a==b)
     return false;
   return this->IndexGEQIndex(a, b);
 }
 
-int VermaModulesWithMultiplicities::ComputeProductfromSimpleReflectionsActionList(int x, int y)
+int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 { int start = y;
   for (int i=0; i<this->TheWeylGroup->TheObjects[x].size; i++)
     start=this->SimpleReflectionsActionList.TheObjects[start].TheObjects[this->TheWeylGroup->TheObjects[x].TheObjects[i]];
   return start;
 }
 
-void VermaModulesWithMultiplicities::ComputeKLxy(int w, int x)
+void KLpolys::ComputeKLxy(int w, int x)
 { OneVarIntPolynomial Accum, tempP1, tempP2;
   if (x==w)
   { this->KLPolys.TheObjects[w].TheObjects[x].MakeConst(1);
@@ -4603,7 +4610,7 @@ void VermaModulesWithMultiplicities::ComputeKLxy(int w, int x)
 //  this->KLPolys.TheObjects[x].TheObjects[w].ComputeDebugString();
 }
 
-bool VermaModulesWithMultiplicities::ComputeRxy(int x, int y, int SimpleReflectionIndex)
+bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
 { if (this->IndexGreaterThanIndex(y, x))
   { this->RPolys.TheObjects[x].TheObjects[y].MakeZero();
     return true;
@@ -4636,24 +4643,24 @@ bool VermaModulesWithMultiplicities::ComputeRxy(int x, int y, int SimpleReflecti
   return false;
 }
 
-void VermaModulesWithMultiplicities::KLPolysToString(std::string &output)
+std::string KLpolys::KLPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<this->KLPolys.size; i++)
   { this->KLPolys.TheObjects[i].ToString(tempS, i);
-    out << tempS << "\n";
+    out << tempS << "<br>\n";
   }
-  output = out.str();
+  return out.str();
 }
 
-void VermaModulesWithMultiplicities::RPolysToString(std::string &output)
+std::string KLpolys::RPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   for (int i=0; i<this->RPolys.size; i++)
   { this->RPolys.TheObjects[i].ToString(tempS, i);
-    out << tempS << "\n";
+    out << tempS << "<br>\n";
   }
-  output = out.str();
+  return out.str();
 }
 
 void OneVarIntPolynomial::AddMonomial(int coeff, int power)
@@ -5045,17 +5052,13 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
   { reductionOccured= false;
     for (int i=0; i<theGens.size; i++)
       for (int j=i+1; j<theGens.size; j++)
-      {// if (this->flagAnErrorHasOccuredTimeToPanic)
-        //  theGens.ComputeDebugString();
-        tempRoot=(theGens.TheObjects[i]);
+      { tempRoot=(theGens.TheObjects[i]);
         tempRoot-=(theGens.TheObjects[j]);
-        //if (this->flagAnErrorHasOccuredTimeToPanic)
-          //tempRoot.ComputeDebugString();
         if (tempRoot.IsEqualToZero())
         { theGens.PopIndexSwapWithLast(j);
           reductionOccured=true;
         }
-        if (this->RootSystem.GetIndex(tempRoot)!=-1)
+        if (this->RootSystem.Contains(tempRoot))
         { if (!tempRoot.IsPositiveOrZero())
           { tempRoot.Minus();
             theGens[j]=(tempRoot);

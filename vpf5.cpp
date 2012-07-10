@@ -1524,7 +1524,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
     { charSSAlgMod<RationalFunction> tempChar;
       tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
       int multiplicity=0;
-      theG2B3Data.theSmallCharFDpart.theCoeffs[k].IsSmallInteger(multiplicity);
+      theG2B3Data.theSmallCharFDpart.theCoeffs[k].IsSmallInteger(&multiplicity);
       for (int counter=0; counter<multiplicity; counter++, eigenIndexcounter++)
       { out << "<tr>";
         if (k==0 && counter==0)

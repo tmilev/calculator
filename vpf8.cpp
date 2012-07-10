@@ -8444,7 +8444,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int nextCycleSize;
-    if (!this->Powers[i].IsSmallInteger(nextCycleSize))
+    if (!this->Powers[i].IsSmallInteger(&nextCycleSize))
       return false;
     for (int j=0; j<nextCycleSize; j++)
     { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE

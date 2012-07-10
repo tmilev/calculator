@@ -1007,7 +1007,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   { this->theHWFundamentalCoordS[i]=0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i])
     { int theCoord;
-      if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(theCoord))
+      if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(&theCoord))
       { if (outputReport!=0)
           *outputReport="The given module over the Levi part is not finite dimensional";
         return false;
@@ -1449,7 +1449,7 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
         return;
       }
       int theDegree;
-      if (!this->Powers[i].IsSmallInteger(theDegree))
+      if (!this->Powers[i].IsSmallInteger(&theDegree))
         return;
       int hIndex=IndexCurrentGenerator-numPosRoots;
       CoefficientType theSubbedH;
@@ -1503,7 +1503,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyMinusTransposeAutoOnMe()
     for (int j=0; j<currentMon.Powers.size; j++)
  //   for (int j=currentMon.Powers.size-1; j>=0; j--)
     { int thePower;
-      if (!currentMon.Powers[j].IsSmallInteger(thePower))
+      if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
       int theGenerator=currentMon.generatorsIndices[j];
       if (theGenerator<numPosRoots)
@@ -1540,7 +1540,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyTransposeAntiAutoOnMe()
 //    for (int j=0; j<currentMon.Powers.size; j++)
     for (int j=currentMon.Powers.size-1; j>=0; j--)
     { int thePower;
-      if (!currentMon.Powers[j].IsSmallInteger(thePower))
+      if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
       int theGenerator=currentMon.generatorsIndices[j];
       if (theGenerator<numPosRoots)
@@ -1658,7 +1658,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
     CoefficientType& rightMonCoeff=MTright.theCoeffs[j];
     int thePower;
     for (int i=rightMon.Powers.size-1; i>=0; i--)
-      if (rightMon.Powers[i].IsSmallInteger(thePower))
+      if (rightMon.Powers[i].IsSmallInteger(&thePower))
         for (int k=0; k<thePower; k++)
         { tempElt.MakeOneGenerator(rightMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
@@ -1752,7 +1752,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
     leftMonCoeff=TAleft.theCoeffs[j];
     int thePower;
     for (int i=leftMon.Powers.size-1; i>=0; i--)
-      if (leftMon.Powers[i].IsSmallInteger(thePower))
+      if (leftMon.Powers[i].IsSmallInteger(&thePower))
         for (int k=0; k<thePower; k++)
         { tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);

@@ -1126,7 +1126,7 @@ public:
   void PopIndexSwapWithLast(int index)
   { if (index<0 || index>=this->size)
     { std::cout << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
-      << " of size " << this->size << ". The error occurred first int file " << __FILE__ << " line " << __LINE__ << ".";
+      << " of size " << this->size << ". "<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     Object* oPop= &this->TheObjects[index];
@@ -2875,14 +2875,14 @@ ParallelComputing::GlobalPointerCounter++;
   void MultiplyByLargeIntUnsigned(LargeIntUnsigned& x);
   void Assign(const Rational& r);
   void AssignInteger(int x);
-  bool IsInteger()const;
-  bool IsSmallInteger()const{return (this->Extended==0)&& this->DenShort==1; }
-  bool IsSmallInteger(int& whichInteger)const
+  bool IsInteger(LargeInt* whichInteger=0)const;
+  bool IsSmallInteger(int* whichInteger=0)const
   { if (this->Extended!=0)
       return false;
     if (this->DenShort!=1)
       return false;
-    whichInteger=this->NumShort;
+    if(whichInteger!=0)
+      *whichInteger=this->NumShort;
     return true;
   }
   bool IsGreaterThan(const Rational& r) const;
@@ -4449,11 +4449,8 @@ public:
 //    tempMon.MakeZero();
 //
 //  }
-  bool IsSmallInteger(int& whichInteger)const;
-  bool IsSmallInteger()const
-  { int tempI;
-    return this->IsSmallInteger(tempI);
-  }
+  bool IsSmallInteger(int* whichInteger=0)const;
+  bool IsInteger(LargeInt* whichInteger=0)const;
   void SetExpectedSize(int theSize)
   { this->::HashedList<TemplateMonomial>::SetExpectedSize(theSize);
     this->theCoeffs.Reserve(theSize);
@@ -5364,11 +5361,10 @@ public:
     this->ratValue=theCoeff;
   }
   bool IsInteger()const {return this->expressionType==this->typeRational && this->ratValue.IsInteger();}
-  bool IsSmallInteger()const
-  { int tempInt;
-    return this->IsSmallInteger(tempInt);
+  bool IsSmallInteger(int* whichInteger=0)const
+  { return this->expressionType==this->typeRational &&
+    this->ratValue.IsSmallInteger(whichInteger);
   }
-  bool IsSmallInteger(int& theInteger)const {theInteger=this->ratValue.NumShort; return this->expressionType==this->typeRational && this->ratValue.IsSmallInteger();}
   bool IsEqualToZero()const{return this->expressionType==this->typeRational && this->ratValue.IsEqualToZero();}
   bool IsEqualToOne()const{return this->expressionType==this->typeRational && this->ratValue.IsEqualToOne();}
   bool IsEqualTo(const RationalFunction& other)const
@@ -5724,12 +5720,33 @@ bool MonomialCollection<TemplateMonomial, Element>::IsEqualToZero()const
 }
 
 template <class TemplateMonomial, class Element>
-bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int& whichInteger)const
+bool MonomialCollection<TemplateMonomial, Element>::IsInteger(LargeInt* whichInteger)const
 { if (this->size>1)
     return false;
   if(this->size==0)
+  { if (whichInteger!=0)
+      *whichInteger=0;
     return true;
-  return this->TheObjects[0].IsEqualToZero();
+  }
+  bool result= this->TheObjects[0].IsEqualToZero();
+  if (result)
+    result=this->theCoeffs[0].IsInteger(whichInteger);
+  return result;
+}
+
+template <class TemplateMonomial, class Element>
+bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int* whichInteger)const
+{ if (this->size>1)
+    return false;
+  if(this->size==0)
+  { if (whichInteger!=0)
+      *whichInteger=0;
+    return true;
+  }
+  bool result= this->TheObjects[0].IsEqualToZero();
+  if (result)
+    result=this->theCoeffs[0].IsSmallInteger(whichInteger);
+  return result;
 }
 
 template <class Element>
@@ -8094,6 +8111,8 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
   for(int i=0; i<NumVars; i++)
     if (!this->TheObjects[i].IsEqualToZero())
     { tempS=this->TheObjects[i].ToString(theFormat);
+      if (this->TheObjects[i].NeedsBrackets())
+        tempS="("+tempS+")";
       if (tempS=="1")
         tempS="";
       if (tempS=="-1")
@@ -8106,10 +8125,7 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
           out << "+";
       }
       found=true;
-      if (this->TheObjects[i].NeedsBrackets())
-        out << "(" << tempS << ")";
-      else
-        out << tempS;
+      out << tempS;
       out << inputLetter << "_{" << i+1<< "}";
     }
   return out.str();

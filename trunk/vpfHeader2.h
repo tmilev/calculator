@@ -104,7 +104,7 @@ public:
   template<class theType>
   const theType& GetValuE()const;
   bool IsEqualToZero()const;
-  bool IsSmallInteger(int & whichInteger)const
+  bool IsSmallInteger(int* whichInteger=0)const
   ;
   bool Add(const Data& right, Data& output)const
   ;
@@ -262,10 +262,10 @@ class Expression
   }
   void MakeAtom(const VariableNonBound& input, CommandList& newBoss, int inputIndexBoundVars)
   ;
-  void MakeStringAtom
+  bool MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
 ;
-  void MakeStringAtom
+  bool MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString)
 ;
   void MakeInt(int theInt, CommandList& newBoss, int inputIndexBoundVars)
@@ -336,8 +336,7 @@ void MakeVariableNonBounD
   bool IsElementUE()const;
   bool IsInteger()const;
   bool IsSmallInteger(int* whichinteger)const;
-  bool EvaluatesToSmallInteger(int& whichInteger)const;
-  bool EvaluatesToSmallInteger()const{int tempI; return this->EvaluatesToSmallInteger(tempI);}
+  bool EvaluatesToSmallInteger(int* whichInteger=0)const;
   bool AreEqualExcludingChildren(const Expression& other) const
   { return
     this->theBoss==other.theBoss &&
@@ -1092,6 +1091,10 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
 }
+  static bool fKLcoeffs
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ ;
   static bool fWeylOrbit
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useFundCoords, bool useRho)
@@ -1111,9 +1114,12 @@ static bool EvaluateDereferenceOneArgument
  std::stringstream* comments)
 { return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, true, true);
 }
-
   static bool fSSAlgebra
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose=false)
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  }
+  static bool fSSAlgebra
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
 ;
   static bool fSplitFDpartB3overG2CharsOutput
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,

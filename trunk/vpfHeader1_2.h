@@ -853,7 +853,7 @@ public:
     return result;
   }
   template <class CoefficientType>
-  CoefficientType GetScalarProdSimpleRoot(const Vector<CoefficientType> & input, int indexSimpleRoot)
+  CoefficientType GetScalarProdSimpleRoot(const Vector<CoefficientType>& input, int indexSimpleRoot)
   { CoefficientType result, buffer;
     result=input[0].GetZero();//<-the value of zero is not known at compile time (example: multivariate polynomials have unknown #variables)
     Rational* currentRow=this->CartanSymmetric.elements[indexSimpleRoot];
@@ -2308,6 +2308,9 @@ public:
     this->SimplifyEqualConsecutiveGenerators(0);
   }
   void MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, const CoefficientType& thePower);
+  void MultiplyByGeneratorPowerOnTheLeft
+  (int theGeneratorIndexStandsToTheLeft, const CoefficientType& thePower)
+  ;
   void MultiplyByNoSimplify(const MonomialUniversalEnveloping& standsOnTheRight);
   void MakeZero
 (int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
@@ -5066,7 +5069,7 @@ bool HashedListReferences<Object>::AddOnTop(const Object& o)
   return false;
 }
 
-class VermaModulesWithMultiplicities: public HashedList<Vector<Rational> >
+class KLpolys: public HashedList<Vector<Rational> >
 {
 public:
   WeylGroup* TheWeylGroup;
@@ -5100,20 +5103,20 @@ public:
   bool IndexGEQIndex(int a, int b);
   bool IndexGreaterThanIndex(int a, int b);
   void ComputeDebugString();
-  void ToString(std::string& output);
+  std::string ToString(FormatExpressions* theFormat=0);
   void MergeBruhatLists(int fromList, int toList);
-  void KLPolysToString(std::string& output);
+  std::string KLPolysToString(FormatExpressions* theFormat=0);
   void ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output);
-  void ComputeKLcoefficientsFromChamberIndicator(Vector<Rational> & ChamberIndicator, List<int>& output);
-  int ChamberIndicatorToIndex(Vector<Rational> & ChamberIndicator);
-  void RPolysToString(std::string& output);
+  void ComputeKLcoefficientsFromChamberIndicator(Vector<Rational>& ChamberIndicator, List<int>& output);
+  int ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
+  std::string RPolysToString(FormatExpressions* theFormat=0);
   void ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex);
   void ComputeRPolys();
   int ComputeProductfromSimpleReflectionsActionList(int x, int y);
   void WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex);
   //returns the TopIndex of the KL coefficients
   int ReadKLCoeffsFromFile(std::fstream& input, List<int>& output);
-  VermaModulesWithMultiplicities(){this->TheWeylGroup=0; }
+  KLpolys(){this->TheWeylGroup=0; }
   void GeneratePartialBruhatOrder();
   void ExtendOrder();
   void ComputeFullBruhatOrder();
@@ -5660,8 +5663,8 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::CommuteConsecutiveIndi
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::CommutingLeftIndexAroundRightIndexAllowed(CoefficientType& theLeftPower, int leftGeneratorIndex, CoefficientType& theRightPower, int rightGeneratorIndex)
 { int tempInt;
-  if (theLeftPower.IsSmallInteger(tempInt))
-  { if(theRightPower.IsSmallInteger(tempInt))
+  if (theLeftPower.IsSmallInteger(&tempInt))
+  { if(theRightPower.IsSmallInteger(&tempInt))
       return true;
     int numPosRoots=this->owner->theOwner.theWeyl.RootsOfBorel.size;
     int theDimension= this->owner->theOwner.theWeyl.CartanSymmetric.NumRows;
@@ -6169,6 +6172,18 @@ void ElementUniversalEnveloping<CoefficientType>::CleanUpZeroCoeff()
 }
 
 template <class CoefficientType>
+void MonomialUniversalEnveloping<CoefficientType>::MultiplyByGeneratorPowerOnTheLeft
+(int theGeneratorIndexStandsOnTheLeft, const CoefficientType& thePower)
+{ if (thePower.IsEqualToZero())
+    return;
+  MonomialUniversalEnveloping<CoefficientType> result;
+  result.MakeConst(*this->owners, this->indexInOwners);
+  result.MultiplyByGeneratorPowerOnTheRight(theGeneratorIndexStandsOnTheLeft, thePower);
+  result*=(*this);
+  *this=result;
+}
+
+template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MultiplyByGeneratorPowerOnTheRight
 (int theGeneratorIndex, const CoefficientType& thePower)
 { if (thePower.IsEqualToZero())
@@ -6348,7 +6363,7 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::GetElementUniversalEnv
   int theDegree;
   Accum.MakeConst(this->Coefficient, *owner.owner, owner.indexInOwner);
   for (int i=0; i<this->generatorsIndices.size; i++)
-    if (this->Powers[i].IsSmallInteger(theDegree))
+    if (this->Powers[i].IsSmallInteger(&theDegree))
     { tempMon.AssignElementLieAlgebra
       (this->owner->theOrder[this->generatorsIndices[i]], *owner.owner, owner.indexInOwner,
         this->Coefficient.GetOne(), this->Coefficient.GetZero());
@@ -6703,7 +6718,7 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::AssignMonomialUniversal
   //std::cout << "<br>after initialization with constant I am " << this->ToString();
   for (int i=0; i<input.generatorsIndices.size; i++)
   { int thePower;
-    bool isASmallInt=input.Powers.TheObjects[i].IsSmallInteger(thePower);
+    bool isASmallInt=input.Powers.TheObjects[i].IsSmallInteger(&thePower);
     if (isASmallInt)
     { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
       (input.generatorsIndices.TheObjects[i], *input.owners, input.indexInOwners);
@@ -6962,7 +6977,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
   ElementTensorsGeneralizedVermas<CoefficientType> buffer;
   for(int i=theUE.Powers.size-1; i>=0; i--)
   { int thePower;
-    if (!theUE.Powers[i].IsSmallInteger(thePower))
+    if (!theUE.Powers[i].IsSmallInteger(&thePower))
       return false;
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
@@ -7132,7 +7147,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       << theUEelt.size << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
       theGlobalVariables.MakeProgressReport(reportStream.str(), 3);
       int thePower;
-      if (!currentMon.Powers[k].IsSmallInteger(thePower))
+      if (!currentMon.Powers[k].IsSmallInteger(&thePower))
         break;
       int theIndex=currentMon.generatorsIndices[k];
       tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
@@ -7578,7 +7593,7 @@ bool charSSAlgMod<CoefficientType>::DrawMe
     }
     for (int j=0; j<finalWeights.size; j++)
     { convertor=finalWeights[j].GetVectorRational();
-      theDrawingVars.drawCircleAtVectorBuffer(convertor, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
+      theDrawingVars.drawCircleAtVectorBuffer(convertor, 3, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(0,0,0));
       if (useMults)
         theDrawingVars.drawTextAtVectorBuffer
           (convertor, CharCartan.theCoeffs[i].ToString(), CGI::RedGreenBlue(0,0,0), theDrawingVars.PenStyleNormal, 0);

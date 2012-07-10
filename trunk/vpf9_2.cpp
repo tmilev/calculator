@@ -3523,7 +3523,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
      *this->owners, this->indexRange, polyOne, polyOne.GetZero());
     RationalFunction& thePower=input.Powers[i];
     int theIntegralPower;
-    if (!thePower.IsSmallInteger(theIntegralPower))
+    if (!thePower.IsSmallInteger(&theIntegralPower))
       return false;
     for (int j=0; j<theIntegralPower; j++)
       output*=tempElt;

@@ -521,7 +521,7 @@ Data::Data(const Rational& x, CommandList& inputOwner)
   this->theContextIndex=-1;
 }
 
-bool Data::IsSmallInteger(int & whichInteger)const
+bool Data::IsSmallInteger(int* whichInteger)const
 { switch (this->type)
   { case Data::typeRational:
       return this->GetValuE<Rational>().IsSmallInteger(whichInteger);
@@ -934,7 +934,7 @@ bool Data::OperatorDereference
 { int whichInteger1, whichInteger2;
   switch(this->type)
   { case Data::typeSSalgebra:
-      if (!argument1.IsSmallInteger(whichInteger1) ||!argument2.IsSmallInteger(whichInteger2) )
+      if (!argument1.IsSmallInteger(&whichInteger1) ||!argument2.IsSmallInteger(&whichInteger2) )
       { if (comments!=0)
         *comments << "You requested element of a semisimple Lie algebra labeled by ("
         << argument1.ToString() << ", " << argument2.ToString()
@@ -953,7 +953,7 @@ bool Data::OperatorDereference(const Data& argument, Data& output, std::stringst
 { int whichInteger;
   switch(this->type)
   { case Data::typeSSalgebra:
-      if (!argument.IsSmallInteger(whichInteger))
+      if (!argument.IsSmallInteger(&whichInteger))
       { if (comments!=0)
         *comments << "You requested element of a semisimple Lie algebra labeled by "
         << argument.ToString() << " which is not a small integer. ";
@@ -997,17 +997,18 @@ void Expression::MakePolyAtom
   this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
 }
 
-void Expression::MakeStringAtom
+bool Expression::MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
 { Data tempData;
   tempData.MakeString(newBoss, theString, inputContext);
   this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+  return true;
 }
 
-void Expression::MakeStringAtom
+bool Expression::MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString)
 { Context tempContext;
-  this->MakeStringAtom(newBoss, inputIndexBoundVars, theString, tempContext);
+  return this->MakeStringAtom(newBoss, inputIndexBoundVars, theString, tempContext);
 }
 
 void Expression::MakeRFAtom
@@ -1926,7 +1927,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
   selInducing.MakeFullSelection(theRank);
   int theCoeff;
   for (int i=0; i<theRank; i++)
-    if (highestWeightFundCoords[i].IsSmallInteger(theCoeff))
+    if (highestWeightFundCoords[i].IsSmallInteger(&theCoeff))
       if (theCoeff==0)
         selInducing.RemoveSelection(i);
 //  std::cout << "Your input so far: " << theSSalgebra.GetLieAlgebraName() << " with hw: " << highestWeightFundCoords.ToString()
@@ -2244,7 +2245,7 @@ bool ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
         difference-=currentMon.Powers[k];
         difference*=-1;
         int diffInt;
-        if (!difference.IsSmallInteger(diffInt))
+        if (!difference.IsSmallInteger(&diffInt))
         { std::cout << "<br>This is s a programming error. indexInNilrad=" << indexInNilrad+VarIndexShift
           << " The difference must be a small int, instead it is: "
           << difference.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -2562,11 +2563,11 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   selFD.init(theRank);
   int theCoeff;
   for (int i=0; i<theRank; i++)
-  { if (highestWeightFundCoords[i].IsSmallInteger(theCoeff))
+  { if (highestWeightFundCoords[i].IsSmallInteger(&theCoeff))
       if (theCoeff>=0)
         selParSel1.RemoveSelection(i);
     bool isGood=false;
-    if (theFDhw[i].IsSmallInteger(theCoeff))
+    if (theFDhw[i].IsSmallInteger(&theCoeff))
       if (theCoeff>=0)
         isGood=true;
     if (!isGood)
@@ -2753,7 +2754,7 @@ bool CommandList::fMatrix
   Expression& middleE=theExpression.children[1];
   Expression& rightE=theExpression.children[2];
   int numRows, numCols;
-  if (!middleE.EvaluatesToSmallInteger(numRows) || !rightE.EvaluatesToSmallInteger(numCols))
+  if (!middleE.EvaluatesToSmallInteger(&numRows) || !rightE.EvaluatesToSmallInteger(&numCols))
     return false;
   if (numRows<=0 || numCols<=0)
     return false;
@@ -2852,6 +2853,42 @@ std::string CommandList::GetCalculatorLink(const std::string& input)
   return out.str();
 }
 
+bool CommandList::fKLcoeffs
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theExpression.children.size!=2)
+    return theExpression.SetError("fKLcoeffs takes two arguments");
+  Expression& theSSalgebraNode=theExpression.children[0];
+  Expression& vectorNode=theExpression.children[1];
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theSSalgebraNode, comments))
+    return theExpression.SetError("Failed to created Lie algebra");
+  SemisimpleLieAlgebra& theSSalgebra= theSSalgebraNode.GetAtomicValue().GetAmbientSSAlgebra();
+  Vector <Rational> theHWfundCoords, theHWsimpleCoords;
+  Context theContext;
+  if (!vectorNode.GetVector<Rational>(theHWfundCoords, theContext, theSSalgebra.GetRank(), 0, comments))
+    return theExpression.SetError("Failed to extract highest weight");
+  std::stringstream out;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  if (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim())>500)
+  { out << "I have been instructed to run only for Weyl groups that have at most 500 elements. "
+    << theSSalgebra.GetLieAlgebraName() << " has "
+    << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString() << ".";
+    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+    return true;
+  }
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+  out << "Extracted highest weight: " << theHWfundCoords.ToString(&theFormat);
+  out << " The algebra: " << theSSalgebra.GetLieAlgebraName();
+  KLpolys theKLpolys;
+  theKLpolys.ComputeKLPolys(&theWeyl, 0);
+  out << theKLpolys.ToString(&theFormat);
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 bool CommandList::fWeylOrbit
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useFundCoords, bool useRho)
@@ -2866,31 +2903,70 @@ bool CommandList::fWeylOrbit
     return true;
   }
   SemisimpleLieAlgebra& theSSalgebra= theSSalgebraNode.GetAtomicValue().GetAmbientSSAlgebra();
-  Vector <Polynomial<Rational> > theHW;
+  Vector <Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Context theContext;
-  if (!vectorNode.GetVector<Polynomial<Rational> >(theHW, theContext, theSSalgebra.GetRank(), theCommands.fPolynomial, comments))
+  if (!vectorNode.GetVector<Polynomial<Rational> >(theHWfundCoords, theContext, theSSalgebra.GetRank(), theCommands.fPolynomial, comments))
     return theExpression.SetError("Failed to extract highest weight");
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  if (!useFundCoords)
+  { theHWsimpleCoords=theHWfundCoords;
+    theHWfundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
+  } else
+    theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundCoords);
   std::stringstream out;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
-  if (!useFundCoords)
-    theHWs.AddOnTop(theHW);
-  else
-    theHWs.AddOnTop(theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHW));
+  theHWs.AddOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroup orbitGeneratingSet;
+  Polynomial<Rational> theExp;
   if (!theSSalgebra.theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1000, &orbitGeneratingSet, 1000))
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
     << " elements only.";
   else
     out << "The orbit has " << outputOrbit.size << " elements.";
-  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td></tr>";
+  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td>";
+  if (useRho)
+    out << "<td>Corresponding b-singular vector candidate</td>";
+  out << "</tr>";
+  MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
+  LargeInt tempInt;
   for (int i=0; i<outputOrbit.size; i++)
   { out << "<tr>" << "<td>" << CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) << "</td><td>"
     << CGI::GetHtmlMathSpanPure(outputOrbit[i].ToString(&theFormat)) << "</td><td>"
-    << CGI::GetHtmlMathSpanPure(theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat("\\omega", &theFormat))
-    << "</td></tr>";
+    << CGI::GetHtmlMathSpanPure
+    (theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
+    ("\\omega", &theFormat))
+    << "</td>";
+    if (useRho)
+    { currentWeight=theHWsimpleCoords;
+      standardElt.MakeConst(*theSSalgebra.owner, theSSalgebra.indexInOwner);
+      bool isGood=true;
+      for (int j=0; j<orbitGeneratingSet[i].size; j++)
+      { int simpleIndex=orbitGeneratingSet[i][j];
+        theExp=theSSalgebra.theWeyl.GetScalarProdSimpleRoot(currentWeight, simpleIndex);
+        theSSalgebra.theWeyl.SimpleReflection(simpleIndex, currentWeight, useRho, false);
+        theExp*=2;
+        theExp/=theSSalgebra.theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex];
+        if (useRho)
+          theExp+=1;
+        if (theExp.IsInteger(&tempInt))
+          if (tempInt<0)
+          { isGood=false;
+            break;
+          }
+        standardElt.MultiplyByGeneratorPowerOnTheLeft
+        (theSSalgebra.GetNumPosRoots() -simpleIndex-1, theExp);
+      }
+      out << "<td>";
+      if (isGood)
+        out << CGI::GetHtmlMathSpanPure(standardElt.ToString(&theFormat));
+      else
+        out << "-";
+      out << "</td>";
+    }
+    out << "</tr>";
   }
   out << "</table>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
@@ -2917,7 +2993,7 @@ bool CommandList::fSSAlgebra
     return theExpression.SetError(errorStream.str());
   }
   int theRank=1;
-  if (!rankE.GetAtomicValue().IsSmallInteger(theRank))
+  if (!rankE.GetAtomicValue().IsSmallInteger(&theRank))
   { errorStream << "The rank of a Lie algebra must be a small integer.";
     return theExpression.SetError(errorStream.str());
   }
@@ -2979,7 +3055,7 @@ bool CommandList::fSSAlgebra
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
       << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
-      << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theWeyl.CartanSymmetric.ToString(false, true) );
+      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(false, true) );
       Rational tempRat;
       Matrix<Rational> tempMat;
       tempMat = theWeyl.CartanSymmetric;
@@ -3011,9 +3087,21 @@ bool CommandList::fSSAlgebra
       out << "<hr> Half sum of positive Vectors<Rational>: " << theWeyl.rho.ToString();
       Vector<Rational> tempRoot;
       theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
-      out << "= " << CGI::GetHtmlMathSpanFromLatexFormula(tempRoot.ToStringLetterFormat("\\varepsilon"));
+      out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
       out << "<hr>Size of Weyl group according to formula: " <<
       theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
+      out
+      << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
+      << " with the j^th simple root times 2 divided by the root length squared,<br> "
+      << " and 0 with the remaining simple roots): ";
+      theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
+      out << "<table>";
+      for (int i=0; i< fundamentalWeights.size; i++)
+      { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
+        << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+        << "</td></tr>";
+      }
+      out << "</table>";
       if (Verbose)
       { out << "<hr>Simple basis in epsilon coordinates: <table>";
         simpleBasis.MakeEiBasis(theWeyl.GetDim());
@@ -3033,21 +3121,6 @@ bool CommandList::fSSAlgebra
         << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
         << " integral; 2) the long roots come first. <br>Point (1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
         << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed of computations, <br>and for reducing sizes of the printouts.";
-
-        out
-        << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
-        << " with the j^th simple root times 2 divided by the root length squared,<br> "
-        << " and 0 with the remaining simple roots): ";
-        theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
-        out << "<table>";
-        for (int i=0; i< fundamentalWeights.size; i++)
-        { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
-          << CGI::
-          GetHtmlMathFromLatexFormulA
-          (fundamentalWeightsEpsForm[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
-          << "</td></tr>";
-        }
-        out << "</table>";
         out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
         Vectors<Rational> rootSystemEpsCoords;
         theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
@@ -3213,7 +3286,7 @@ void CommandList::initPredefinedVars()
   ("FunctionToMatrix", & this->fMatrix, "",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
    the third- the number of columns.\
-   ", "X:=FunctionToMatrix{}(A,5,6); A{}({{a}},{{b}}):=a+b; X;");
+   ", "X:=FunctionToMatrix{}(A,5,6);\n A{}({{a}},{{b}}):=a+b;\n X;");
   this->AddNonBoundVarMustBeNew
   ("Union", & this->StandardUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
@@ -3265,7 +3338,7 @@ void CommandList::initPredefinedVars()
   this->AddNonBoundVarMustBeNew
   ("hmmG2inB3", & this->fEmbedG2inB3, "",
    "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
-   "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);hmmG2inB3{}(g_2) ");
+   "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddNonBoundVarMustBeNew
   ("drawWeightSupportWithMults", & this->fDrawWeightSupportWithMults, "",
    "Draws the weight support of an irreducible finite-dimensional highest weight module. \
@@ -3275,7 +3348,7 @@ void CommandList::initPredefinedVars()
    the number of weights in the weight support exceeds this number, only the first 10 000 weights will be drawn. \
    <b> Warning. Drawing text (i.e. multiplicities) \
    is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
-   "drawWeightSupportWithMults{}(B_3,(0,1,1)); drawWeightSupportWithMults{}(G_2,(1,0))");
+   "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
   this->AddNonBoundVarMustBeNew
   ("drawWeightSupport", &this->fDrawWeightSupport, "",
    "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
@@ -3321,17 +3394,21 @@ void CommandList::initPredefinedVars()
   ("WeylOrbitSimpleCoords", &this->fWeylOrbitSimple, "",
    "Generates a Weyl orbit printout from simple coords.\
     First argument = type. Second argument = weight in simple coords. ",
-   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+   "WeylOrbitSimpleCoords{}(B_2, (y, y));");
   this->AddNonBoundVarMustBeNew
   ("WeylOrbitFundCoords", &this->fWeylOrbitFund, "",
    "Generates a Weyl orbit printout from fundamental coords.\
     First argument = type. Second argument = weight in fundamental coords. ",
-   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+   "WeylOrbitFundCoords{}(B_2, (y, 0));");
   this->AddNonBoundVarMustBeNew
   ("WeylOrbitFundRho", &this->fWeylOrbitFundRho, "",
    "Generates a Weyl orbit printout from fundamental coords.\
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
-   "WeylOrbitSimpleCoords{}(B_2, (y, y));\nWeylOrbitFundCoords{}(B_2, (y, 0));  WeylOrbitFundRho{}(B_2, (y, 0) )");
+   "WeylOrbitFundRho{}(B_2, (y, 0) )");
+  this->AddNonBoundVarMustBeNew
+  ("KLcoeffs", &this->fKLcoeffs, "",
+   "Experimental please don't use.",
+   "KLcoeffs{}(B_3, (1,0,0))");
 
 
 /*  this->AddNonBoundVarMustBeNew
@@ -3388,7 +3465,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
      <br>2)If b is rational computes (anything)/b with anything* (1/b). This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", false);
   this->AddOperationNoFail
   ("*", this->StandardTimes, "",
-   "<br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, substitutes a*b by the result of the built-in handler.<br>\n \
+   "<br>The following description is out of date. Must be updated.\
+   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, substitutes a*b by the result of the built-in handler.<br>\n \
    2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
    3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
    4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
@@ -3679,7 +3757,7 @@ bool Data::Exponentiate(const Data& right, Data& output)const
 
   if (right.type==Data::typeRational)
   { int thePower;
-    if (right.IsSmallInteger(thePower))
+    if (right.IsSmallInteger(&thePower))
       switch (this->type)
       { case Data::typeRational:
           resultRat=this->owner->theObjectContainer.theRationals[this->theIndex];
@@ -3996,6 +4074,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   bool result=false;
   Expression& leftE=theExpression.children[0];
   Expression& rightE=theExpression.children[1];
+  //std::cout << "<br>handling base extraction of: " << theExpression.ToString();
   //handle Rational*Rational:
   if (leftE.EvaluatesToAtom() && rightE.EvaluatesToAtom())
   { const Data& leftD=leftE.GetAtomicValue();
@@ -4009,12 +4088,14 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   if (rightE.EvaluatesToRational())
   { MathRoutines::swap(leftE, rightE);
     result=true;
+//    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
   //handle (non-atom)*Atom
   if (rightE.EvaluatesToAtom() && !leftE.EvaluatesToAtom())
-  { MathRoutines::swap(leftE, rightE);
-    result=true;
-  }
+    if (!rightE.EvaluatesToVariableNonBound())
+    { MathRoutines::swap(leftE, rightE);
+      result=true;
+    }
   if (rightE.theOperation==theCommands.opTimes())
   { assert(rightE.children.size==2);
     Expression& rightLeftE=rightE.children[0];
@@ -4022,6 +4103,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     if (rightLeftE.EvaluatesToRational())
     { MathRoutines::swap(rightLeftE, leftE);
       result=true;
+//      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
     }
     //handle Rational1*(Rational2*Anything):=(Rational1*Rational2)*Anything
     if (leftE.EvaluatesToRational() && rightLeftE.EvaluatesToRational())
@@ -4037,7 +4119,6 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
         return true;
       }
     }
-
   }
   //handle 0*Anything:=0
   if (leftE.EvaluatesToRational())
@@ -4256,7 +4337,7 @@ bool CommandList::StandardFunction
   assert(theExpression.children.size==2);
   int theIndex;
   if (functionNameNode.theOperation==theCommands.opList())
-    if (theExpression.children[1].EvaluatesToSmallInteger(theIndex))
+    if (theExpression.children[1].EvaluatesToSmallInteger(&theIndex))
       if (theIndex<=functionNameNode.children.size && theIndex>0)
       { functionNameNode.AssignChild(theIndex-1);
         theExpression.AssignChild(0);
@@ -4345,12 +4426,7 @@ bool CommandList::StandardLieBracket
 bool Expression::IsSmallInteger(int* whichInteger)const
 { if (!this->EvaluatesToAtom())
     return false;
-  if (whichInteger!=0)
-    return this->GetAtomicValue().IsSmallInteger(*whichInteger);
-  else
-  { int tempInt;
-    return this->GetAtomicValue().IsSmallInteger(tempInt);
-  }
+  return this->GetAtomicValue().IsSmallInteger(whichInteger);
 }
 
 bool Expression::IsInteger()const
@@ -4371,7 +4447,7 @@ bool Expression::IsString()const
   return this->GetAtomicValue().type==Data::typeString;
 }
 
-bool Expression::EvaluatesToSmallInteger(int& whichInteger)const
+bool Expression::EvaluatesToSmallInteger(int* whichInteger)const
 { if (!this->EvaluatesToAtom())
     return false;
   return this->GetAtomicValue().IsSmallInteger(whichInteger);
@@ -4453,21 +4529,18 @@ bool CommandList::StandardDivide
 bool CommandList::StandardMinus
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=1&& theExpression.children.size!=2)
-  { theExpression.errorString="Programming error: operation - takes one or two arguments.";
-    return false;
-  }
+    return theExpression.SetError("Programming error: operation - takes one or two arguments.");
   Expression* toBeTransformed=0;
   if (theExpression.children.size==1)
   { theExpression.AssignChild(0);
     toBeTransformed=&theExpression;
-  }
-  else
+  } else
   { toBeTransformed=& theExpression.children[1];
     theExpression.theOperation=theCommands.opPlus();
   }
   Expression result, minusOne;
   minusOne.MakeInt(-1, theCommands, inputIndexBoundVars);
-  result.MakeProducT(theCommands, inputIndexBoundVars, *toBeTransformed, minusOne);
+  result.MakeProducT(theCommands, inputIndexBoundVars, minusOne, *toBeTransformed);
   *toBeTransformed=result;
   //std::cout << toBeTransformed->ToString();
   return true;
@@ -4498,7 +4571,7 @@ bool CommandList::ExtractPMTDtreeContext
   int tempI;
   if (theInput.theOperation==this->opThePower())
     if (theInput.children[1].EvaluatesToRational())
-      if (theInput.children[1].GetAtomicValue().IsSmallInteger(tempI))
+      if (theInput.children[1].GetAtomicValue().IsSmallInteger(&tempI))
         return this->ExtractPMTDtreeContext<dataType>(outputContext, theInput.children[0], errorLog);
   if (theInput.EvaluatesToAtom() && !theInput.EvaluatesToVariableNonBound())
   { if (theInput.GetAtomicValue().theContextIndex!=-1)
@@ -4584,8 +4657,8 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
   { assert(theInput.children.size==2);
     Expression& right= theInput.children[1];
     if (right.EvaluatesToAtom())
-    { int  thePower=0;
-      if (right.GetAtomicValue().IsSmallInteger(thePower))
+    { int thePower=0;
+      if (right.GetAtomicValue().IsSmallInteger(&thePower))
       { if(!this->EvaluatePMTDtreeFromContextRecursive(output, inputContext, theInput.children[0], errorLog))
           return false;
         output.RaiseToPower(thePower);
@@ -4710,18 +4783,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     theExpression.SetError(errorStream.str());
     return true;
   }
-  static int errorCounter=0;
-  errorCounter++;
-//  std::string debugString="non-initialized";
-//  std::string debugStringIntermediate="non-initialized";
-
-//  debugString=theExpression.ToString();
-  //std::cout << "<hr> At error counter " << errorCounter << " expression is: " << debugString;
   this->ExpressionStack.AddOnTop(theExpression);
-  HashedList<Expression> currentExpressionTransformations;
-//  currentExpressionTransformations.AddOnTop(theExpression);
-
-  bool NonReduced=true;
   int indexInCache=-1;
   if (theExpression.IndexBoundVars!=-1)
   { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
@@ -4731,42 +4793,28 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     } else
       if (this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
       { this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.AddOnTop(theExpression);
-        this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions.AddOnTop(theExpression);
         indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size-1;
+        this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions.SetSize(indexInCache+1);
       }
   }
   //reduction phase:
-static int problemcounter=0;
-  problemcounter++;
   bool resultExpressionIsFree=true;
-  while (NonReduced)
-  { if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
+  bool ReductionOcurred=true;
+  int counter=0;
+  while (ReductionOcurred)
+  { ReductionOcurred=false;
+    counter++;
+    if (indexInCache!=-1)
+      this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
+//////------Handling naughty expressions------
+    if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2)
       { if (!this->flagTimeLimitErrorDetected)
           std::cout << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2 << ";  so far, "
           << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS  << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
-        this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
-        return true;
+        break;
       }
-    //the following two lines of code must be fixed!
-    int counter=-1;
-    counter++;
-    NonReduced=false;
-    for (int i=0; i<theExpression.children.size; i++)
-    { //if (problemcounter>=13)
-      //{ //std::cout << "<br>evaluating: " << theExpression.children[i].ToString();
-     // }
-      if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, comments))
-        resultExpressionIsFree=false;
-      if (theExpression.children[i].errorString!="")
-      { this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
-        theExpression.errorString=theExpression.errorString;
-        theExpression.SetError(theExpression.children[i].errorString);
-        return true;
-      }
-    }
-    //the following code never gets executed at the moment: counter must be fixed!
     if (counter>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
@@ -4774,19 +4822,31 @@ static int problemcounter=0;
         << " while simplifying " << theExpression.ToString();
         theExpression.errorString=out.str();
       }
-      this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
-      return true;
+      break;
     }
+//////------Handling naughty expressions end------
+/////-------Evaluating children -------
+    bool foundError=false;
+    for (int i=0; i<theExpression.children.size; i++)
+    { if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, comments))
+        resultExpressionIsFree=false;
+      if (theExpression.children[i].errorString!="")
+      { foundError=true;
+        break;
+      }
+    }
+    //->/////-------Default operation handling-------
     Function::FunctionAddress theFun=this->operations[theExpression.theOperation].GetFunction(*this);
     if (theFun!=0)
       if (theFun(*this, theExpression.IndexBoundVars, theExpression, comments))
-        NonReduced=true;
-//    std::cout << "<br>after standard eval: " << theExpression.ToString();
-//    for (unsigned i=0; i<this->targetProperties.size(); i++)
-//      if (theExpression.GetPropertyValue(this->targetProperties[i])!=1)
-//        if (this->theNonBoundVars[this->targetProperties[i]].theHandler!=0)
-//          if (this->theNonBoundVars[this->targetProperties[i]].theHandler(*this, inputIndexBoundVars, theExpression))
-//            NonReduced=true;
+      { ReductionOcurred=true;
+        continue;
+      }
+    //->/////-------Default operation handling end-------
+    if (foundError || !resultExpressionIsFree)
+      break;
+/////-------Evaluating children end-------
+/////-------User-defined pattern matching------
     for (int i=0; i<theExpression.IndexBoundVars; i++)
       if (this->theCommands.children[i].errorString=="")
       { Expression& currentPattern=this->theCommands.children[i];
@@ -4796,26 +4856,14 @@ static int problemcounter=0;
             bufferPairs.reset();
             if(this->ProcessOneExpressionOnePatternOneSub
             (theExpression.IndexBoundVars, currentPattern, theExpression, bufferPairs, comments))
-            { NonReduced=true;
+            { ReductionOcurred=true;
               break;
             }
           }
       }
-    if (indexInCache!=-1)
-    { this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
-      if (NonReduced)
-      { if (currentExpressionTransformations.Contains(theExpression))
-        { if (theExpression.errorString!="")
-            break;
-          std::stringstream errorStream;
-          errorStream << "I think I detected a substitution cycle, " << theExpression.ToString()
-          << " appears twice in the reduction cycle";
-          theExpression.SetError(errorStream.str());
-          break;
-        } else
-          currentExpressionTransformations.AddOnTop(theExpression);
-      }
-    }
+    if (ReductionOcurred)
+      continue;
+/////-------User-defined pattern matching end------
   }
   this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
   if (theExpression.theOperation==this->opVariableBound())
@@ -5068,6 +5116,7 @@ std::string Expression::ToString
     return theBoss->theObjectContainer.ExpressionNotation[notationIndex].ToString();
   assert((int)(this->theBoss)!=-1);
   std::stringstream out;
+//  AddBrackets=true;
 //  if (this->theBoss->flagLogSyntaxRules && recursionDepth<=1)
 //  { out << "(ContextIndex=" << this->IndexBoundVars << ")";
 //  }

@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 #endif
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=20000;
+  theGlobalVariables.MaxAllowedComputationTimeInSeconds=300;
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
@@ -364,6 +364,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="WeylOrbitFundRho{}(B_3, (1, 0,0) )";
 //civilizedInput="1+a";
 //  civilizedInput="KLcoeffs{}(B_3, (1,0,0))";
+//  civilizedInput="KLcoeffs{}(A_3)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

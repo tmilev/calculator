@@ -2225,14 +2225,6 @@ partFraction::partFraction()
   this->FileStoragePosition=-1;
   this->LastDistinguishedIndex=-1;
   this->RelevanceIsComputed=false;
-/*  if (partFraction::UseGlobalCollector)
-  { partFraction::GlobalCollectorPartFraction.AddObject(this);
-    this->indexInGlobalCollectorPartFraction=
-      partFraction::GlobalCollectorPartFraction.size-1;
-    if (this->indexInGlobalCollectorPartFraction==102)
-    { Stop();
-    }
-  }*/
 }
 
 void partFraction::init(int numRoots)
@@ -4169,10 +4161,6 @@ void WeylGroup::ComputeWeylGroup(int UpperLimitNumElements)
   this->GenerateOrbit<Rational>(tempRoots, false, tempRoots2, true, -1, this, UpperLimitNumElements);
 }
 
-int WeylGroup::length(int index)
-{ return this->TheObjects[this->size-1].size-this->TheObjects[index].size;
-}
-
 void WeylGroup::ComputeRho(bool Recompute)
 { if (this->RootSystem.size==0 || Recompute)
     this->GenerateRootSystemFromKillingFormMatrix();
@@ -4327,24 +4315,51 @@ bool KLpolys::IsMaxNonEplored(int index)
 }
 
 std::string KLpolys::ToString(FormatExpressions* theFormat)
-{ std::stringstream out;
-  out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
-  for (int i=0; i<this->size; i++)
-  { out << this->TheObjects[i].ToString() << "   :  " << this->TheMultiplicities[i];
-    if (this->Explored[i])
-      out << " Explored<br>\n";
-    else
-      out << " not Explored<br>\n";
-  }
-  out << "Bruhat order:<br>\n";
-  for (int i=0; i<this->size; i++)
-  { out << i << ".   ";
-    for(int j=0; j<this->BruhatOrder[i].size; j++)
-      out << this->BruhatOrder[i][j] << ", ";
-    out << "<br>\n";
+{ MacroRegisterFunctionWithName("KLpolys::ToString");
+  std::stringstream out;
+  bool useHtml=false;
+  if (theFormat!=0)
+    useHtml=theFormat->flagUseHTML;
+  if (!useHtml)
+  { out << "Next to explore: " << this->NextToExplore << "<br>\n Orbit of rho:<br>\n";
+    for (int i=0; i<this->size; i++)
+    { out << this->TheObjects[i].ToString() << "   :  " << this->TheMultiplicities[i];
+      if (this->Explored[i])
+        out << " Explored<br>\n";
+      else
+        out << " not Explored<br>\n";
+    }
+    out << "Bruhat order:<br>\n";
+    for (int i=0; i<this->size; i++)
+    { out << i << ".   ";
+      for(int j=0; j<this->BruhatOrder[i].size; j++)
+        out << this->BruhatOrder[i][j] << ", ";
+      out << "<br>\n";
+    }
   }
   out << "R Polynomials:<br>" << this->RPolysToString(theFormat);
-  out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
+  if (this->theKLcoeffs.size==this->TheWeylGroup->size)
+  { out << "Kazhdan-Lusztig Polynomials:<br>" << this->KLPolysToString(theFormat);
+    out << "Kazhdan-Lusztig coefficients; the (w_1,w_2)  coefficient is defined as the multiplicity of "
+    << CGI::GetHtmlMathSpanPure("L_{w_2 \\cdot \\lambda}")
+    << " in " <<  CGI::GetHtmlMathSpanPure(" M_{w_1\\cdot \\lambda }  ")
+    << " where \\cdot stands for the \\rho-modified action"
+    << " of the Weyl group, \\lambda is a dominant integral weight, M_{\\lambda} stands for Verma module "
+    << "of highest weight \\lambda, L_\\lambda stands for irreducible highest weight of highest weight \\lambda: "
+    << "<br><table border=\"1\"><tr><td>Weyl elt.</td>";
+    for (int i=0; i<this->TheWeylGroup->size; i++)
+      out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+    out << "</tr>";
+    for (int i=0; i<this->TheWeylGroup->size; i++)
+      if (this->theKLPolys[i].size>0)
+      { out << "<tr>" << "<td>" << (*this->TheWeylGroup)[i].ToString()  << "</td>";
+        for (int j=0; j<this->theKLcoeffs[i].size; j++)
+          out << "<td>" << theKLcoeffs[i][j].ToString() << "</td>";
+        out << "</tr>";
+      }
+    out << "</table>";
+  } else
+    out << "KL polys not computed";
   return out.str();
 }
 
@@ -4353,7 +4368,8 @@ void KLpolys::ComputeDebugString()
 }
 
 void KLpolys::GeneratePartialBruhatOrder()
-{ int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
+{ MacroRegisterFunctionWithName("KLpolys::GeneratePartialBruhatOrder");
+  int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
   Vector<Rational> ZeroRoot; ZeroRoot.MakeZero(theDimension);
   this->BruhatOrder.SetSize(this->size);
   this->InverseBruhatOrder.SetSize(this->size);
@@ -4378,52 +4394,30 @@ void KLpolys::GeneratePartialBruhatOrder()
   this->ComputeDebugString();
 }
 
-void KLpolys::ExtendOrder()
-{ this->initTheMults();
-  int x=this->FindLowestBruhatNonExplored();
-  while (x!=-1)
-  { for (int j=0; j<this->BruhatOrder.TheObjects[x].size; j++)
-    { int a= this->BruhatOrder.TheObjects[x].TheObjects[j];
-      this->MergeBruhatLists(a, x);
+int KLpolys::FindMinimalBruhatNonExplored(List<bool>& theExplored)
+{ int lowestIndex=-1;
+  for (int i=0; i<this->size; i++)
+    if (!theExplored[i])
+    { if (lowestIndex==-1)
+        lowestIndex=i;
+      else
+        if (this->IndexGreaterThanIndex(lowestIndex, i))
+          lowestIndex=i;
     }
-    this->Explored.TheObjects[x]=true;
-    x=this->FindLowestBruhatNonExplored();
-    this->ComputeDebugString();
-  }
+  return lowestIndex;
 }
 
-int KLpolys::FindLowestBruhatNonExplored()
-{ for (int i=this->size-1; i>=0; i--)
-    if (!this->Explored.TheObjects[i])
-    { bool isGood=true;
-      for (int j=0; j<this->BruhatOrder.TheObjects[i].size; j++)
-      { int a= this->BruhatOrder.TheObjects[i].TheObjects[j];
-        if (!this->Explored.TheObjects[a])
-        { isGood=false;
-          break;
-        }
-      }
-      if (isGood )
-        return i;
+int KLpolys::FindMaximalBruhatNonExplored(List<bool>& theExplored)
+{ int highestIndex=-1;
+  for (int i=0; i<this->size; i++)
+    if (!theExplored[i])
+    { if (highestIndex==-1)
+        highestIndex=i;
+      else
+        if (this->IndexGreaterThanIndex(i, highestIndex))
+          highestIndex=i;
     }
-  return -1;
-}
-
-int KLpolys::FindHighestBruhatNonExplored(List<bool>& theExplored)
-{ for (int i=0; i<this->size; i++)
-    if (!theExplored.TheObjects[i])
-    { bool isGood=true;
-      for (int j=0; j<this->InverseBruhatOrder.TheObjects[i].size-1; j++)
-      { int a= this->InverseBruhatOrder.TheObjects[i].TheObjects[j];
-        if (!theExplored.TheObjects[a])
-        { isGood=false;
-          break;
-        }
-      }
-      if (isGood)
-        return i;
-    }
-  return -1;
+  return highestIndex;
 }
 
 void KLpolys::MergeBruhatLists(int fromList, int toList)
@@ -4439,17 +4433,7 @@ void KLpolys::MergeBruhatLists(int fromList, int toList)
   }
 }
 
-void KLpolys::ComputeFullBruhatOrder()
-{ this->initTheMults();
-  this->GeneratePartialBruhatOrder();
-  this->ExtendOrder();
-}
-
-void KLpolys::ComputeKLcoefficientsFromChamberIndicator(Vector<Rational>& ChamberIndicator, List<int>& output)
-{ this->ComputeKLcoefficientsFromIndex(this->ChamberIndicatorToIndex(ChamberIndicator), output);
-}
-
-int KLpolys::ChamberIndicatorToIndex(Vector<Rational> &ChamberIndicator)
+int KLpolys::ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator)
 { int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
   Vector<Rational> tempRoot; tempRoot.SetSize(theDimension);
   Vector<Rational> ChamberIndicatorPlusRho;
@@ -4479,13 +4463,18 @@ int KLpolys::ChamberIndicatorToIndex(Vector<Rational> &ChamberIndicator)
   return -1;
 }
 
-void KLpolys::ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output)
-{ output.SetSize(this->size);
-  this->ComputeKLPolys(this->TheWeylGroup, ChamberIndex);
-  for (int i=0; i<this->KLPolys.TheObjects[ChamberIndex].size; i++ )
-  { output.TheObjects[i]=this->KLPolys.TheObjects[ChamberIndex].TheObjects[i].Substitution(1);
-    if((this->TheWeylGroup->length(i)+this->TheWeylGroup->length(ChamberIndex))%2!=0)
-      output.TheObjects[i]*=-1;
+void KLpolys::ComputeKLcoefficients()
+{ MacroRegisterFunctionWithName("KLpolys::ComputeKLcoefficients");
+  this->theKLcoeffs.SetSize(this->theKLPolys.size);
+  for (int i=0; i<this->theKLPolys.size; i++ )
+  { this->theKLcoeffs[i].SetSize(this->theKLPolys[i].size);
+    for (int j=0; j<this->theKLcoeffs[i].size; j++)
+    { Polynomial<Rational>& currentPoly=this->theKLPolys[i][j];
+      this->theKLcoeffs[i][j]=0;
+      if (this->IndexGEQIndex(j,i))
+        for (int k=0; k<currentPoly.size; k++)
+          this->theKLcoeffs[i][j]+=currentPoly.theCoeffs[k];
+    }
   }
 }
 
@@ -4497,64 +4486,81 @@ void KLpolys::initFromWeyl(WeylGroup* theWeylGroup)
   this->initTheMults();
 }
 
-void KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex)
-{ theWeylGroup->ComputeWeylGroup(-1);
+void KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup)
+{ MacroRegisterFunctionWithName("KLpolys::ComputeKLPolys");
+  theWeylGroup->ComputeWeylGroup(-1);
   this->initFromWeyl(theWeylGroup);
   this->GeneratePartialBruhatOrder();
   FormatExpressions PolyFormatLocal;
   PolyFormatLocal.polyDefaultLetter="q";
   this->ComputeRPolys();
-//  this->ComputeDebugString();
-  this->KLPolys.SetSize(this->size);
-  for (int i=0; i<this->size; i++)
-    this->Explored.TheObjects[i]=false;
-  this->KLPolys.TheObjects[TopChamberIndex].SetSize(this->size);
-  int highestNonExplored = this->FindHighestBruhatNonExplored(this->Explored);
-  while(highestNonExplored!=-1)
-  { this->ComputeKLxy(TopChamberIndex, highestNonExplored);
-    this->Explored.TheObjects[highestNonExplored]=true;
-    highestNonExplored= this->FindHighestBruhatNonExplored(this->Explored);
+  this->theKLPolys.SetSize(this->size);
+  this->theKLcoeffs.SetSize(this->size);
+  this->Explored.initFillInObject(this->size, false);
+  for (int i=0; i<this->theKLPolys.size; i++)
+  { this->theKLPolys[i].SetSize(this->size);
+    this->theKLcoeffs[i].SetSize(this->size);
   }
+  for (int i=0; i<this->size; i++)
+  { this->Explored.initFillInObject(this->size, false);
+    int highestNonExplored= this->FindMaximalBruhatNonExplored(this->Explored);
+    while(highestNonExplored!=-1)
+    { this->ComputeKLxy(highestNonExplored, i);
+      this->Explored[highestNonExplored]=true;
+      highestNonExplored= this->FindMaximalBruhatNonExplored(this->Explored);
+    }
+  }
+  this->ComputeKLcoefficients();
 }
 
 void KLpolys::ComputeRPolys()
-{ int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
-  this->RPolys.SetSize(this->size);
+{ MacroRegisterFunctionWithName("KLpolys::ComputeRPolys");
+  int theDimension= this->TheWeylGroup->GetDim();
+  this->theRPolys.SetSize(this->size);
   for (int i=0; i<this->size; i++)
-  { this->Explored.TheObjects[i]=false;
-    this->RPolys.TheObjects[i].SetSize(this->size);
+  { this->Explored[i]=false;
+    this->theRPolys[i].SetSize(this->size);
   }
-  this->LowestNonExplored=this->FindLowestBruhatNonExplored();
+  this->LowestNonExplored=this->FindMinimalBruhatNonExplored(this->Explored);
   List<bool> ExploredFromTop;
   ExploredFromTop.SetSize(this->size);
   while(this->LowestNonExplored!=-1)
   { for (int i=0; i<this->size; i++)
-      ExploredFromTop.TheObjects[i]=false;
-    int a= this->FindHighestBruhatNonExplored(ExploredFromTop);
+      ExploredFromTop[i]=false;
+    int a= this->FindMaximalBruhatNonExplored(ExploredFromTop);
     while (a!=-1)
     { bool tempBool = false;
       for (int j=0; j<theDimension; j++)
-        if (this->ComputeRxy(this->LowestNonExplored, a, j))
+        if (this->ComputeRxy(a, this->LowestNonExplored, j))
         { tempBool =true;
           break;
         }
-      assert (tempBool);
-      ExploredFromTop.TheObjects[a]=true;
-      a= this->FindHighestBruhatNonExplored(ExploredFromTop);
+      if (!tempBool)
+      { std::cout << "This is a programming error: an algorithmic check failed while computing R-polynomials. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      ExploredFromTop[a]=true;
+      a= this->FindMaximalBruhatNonExplored(ExploredFromTop);
     }
-    this->Explored.TheObjects[this->LowestNonExplored]=true;
-    this->LowestNonExplored= this->FindLowestBruhatNonExplored();
-//    std::string tempS;
-//    this->RPolysToString(tempS);
+    this->Explored[this->LowestNonExplored]=true;
+    this->LowestNonExplored= this->FindMinimalBruhatNonExplored(this->Explored);
   }
   //this->ComputeDebugString();
 }
 
 bool KLpolys::IndexGEQIndex(int a, int b)
-{ Vector<Rational> tempRoot;
-  tempRoot=(this->TheObjects[a]);
-  tempRoot-=(this->TheObjects[b]);
-  return tempRoot.IsPositiveOrZero();
+{ /*ElementWeylGroup& eltA= (*this->TheWeylGroup)[a];
+  ElementWeylGroup& eltB= (*this->TheWeylGroup)[b];
+  int currentPointerInB=0;
+  for (int currentPointerInA=0; currentPointerInA<eltA.size && currentPointerInB<eltB.size; currentPointerInA++)
+    if (eltA[currentPointerInA]==eltB[currentPointerInB])
+      currentPointerInB++;
+  return currentPointerInB==eltB.size;*/
+  Vector<Rational> tempV;
+  tempV=(*this)[a];
+  tempV-=(*this)[b];
+  return tempV.IsNegativeOrZero();
 }
 
 bool KLpolys::IndexGreaterThanIndex(int a, int b)
@@ -4570,74 +4576,94 @@ int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
   return start;
 }
 
-void KLpolys::ComputeKLxy(int w, int x)
-{ OneVarIntPolynomial Accum, tempP1, tempP2;
-  if (x==w)
-  { this->KLPolys.TheObjects[w].TheObjects[x].MakeConst(1);
+void KLpolys::ComputeKLxy(int x, int y)
+{ Polynomial<Rational> Accum, tempP1, tempP2;
+  if (x==y)
+  { this->theKLPolys[x][y].MakeConst(1, 1);
     return;
   }
-  if (!this->IndexGEQIndex(w, x))
-  { this->KLPolys.TheObjects[w].TheObjects[x].MakeZero();
+  if (!this->IndexGEQIndex(y, x))
+  { this->theKLPolys[x][y].MakeZero(1);
     return;
   }
-  Accum.MakeZero();
-  this->KLPolys.TheObjects[w].TheObjects[x].MakeZero();
+//  std::cout << " <br>Computing KL " << x << ", " << y << "; ";
+  Accum.MakeZero(1);
+  MonomialP tempM;
   for (int i=0; i<this->size; i++)
-  { if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(w, i))
-    { int tempI;
-      if ((this->TheWeylGroup->length(x)+this->TheWeylGroup->length(i))%2==0)
+    if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(y, i))
+    { tempP1.MakeZero(1);
+      for (int j=0; j<this->theRPolys[x][i].size; j++)
+      { tempM=this->theRPolys[x][i][j];
+        tempM.Minus();
+        tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
+      }
+      int tempI;
+      if (((*this->TheWeylGroup)[x].size+(*this->TheWeylGroup)[i].size)%2==0)
         tempI=1;
       else
         tempI=-1;
-      int powerQ= -this->TheWeylGroup->length(x)+2*this->TheWeylGroup->length(i) -this->TheWeylGroup->length(w);
-//      this->RPolys.TheObjects[i].TheObjects[x].ComputeDebugString();
-      tempP1.Assign(this->RPolys.TheObjects[i].TheObjects[x]);
-//      tempP1.ComputeDebugString();
-      tempP1.SubstitutionOneOverX();
-//      tempP1.ComputeDebugString();
-      tempP2.MakeMonomial(tempI, powerQ);
-      tempP1.MultiplyBy(tempP2);
-      tempP1.MultiplyBy(this->KLPolys.TheObjects[w].TheObjects[i]);
-//      tempP1.ComputeDebugString();
-      Accum.AddPolynomial(tempP1);
-//      Accum.ComputeDebugString();
+      Rational powerQ= -(*this->TheWeylGroup)[x].size+2*(*this->TheWeylGroup)[i].size -(*this->TheWeylGroup)[y].size;
+      powerQ/=2;
+      tempP2.MakeMonomial(1, 0, powerQ, tempI);
+      tempP1*=tempP2;
+      tempP1*=(this->theKLPolys[i][y]);
+      if (!this->Explored[i])
+      { std::cout << "This is a programming error: an internal check during the Kazhdan-Lusztig polynomial "
+        << " computation fails. More precisely, while computing KL poly of indices "
+        << x << ", " << y << " I am using KL poly with indices "
+        << i << ", " << y << " which hasn't been computed yet. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      Accum+=tempP1;
     }
-  }
-//  Accum.ComputeDebugString();
-  int lengthDiff= this->TheWeylGroup->length(w)-this->TheWeylGroup->length(x);
-  for (int i=0; i<Accum.RationalPart.size; i++)
-    this->KLPolys.TheObjects[w].TheObjects[x].AddMonomial(-Accum.RationalPart.TheObjects[i], -i-1+lengthDiff);
-//  this->KLPolys.TheObjects[x].TheObjects[w].ComputeDebugString();
+  this->theKLPolys[x][y].MakeZero(1);
+  Rational lengthDiff= (*this->TheWeylGroup)[y].size-(*this->TheWeylGroup)[x].size;
+  lengthDiff/=2;
+//  std::cout << "Accum: " << Accum.ToString();
+  for (int i=0; i<Accum.size; i++)
+    if(Accum[i].IsPositiveOrZero())
+    { tempM=Accum[i];
+      tempM[0].Minus();
+      tempM[0]+=lengthDiff;
+      this->theKLPolys[x][y].AddMonomial(tempM, Accum.theCoeffs[i]);
+    }
+
+//  this->theKLPolys.TheObjects[x].TheObjects[w].ComputeDebugString();
 }
 
 bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
-{ if (this->IndexGreaterThanIndex(y, x))
-  { this->RPolys.TheObjects[x].TheObjects[y].MakeZero();
-    return true;
-  }
+{ MacroRegisterFunctionWithName("KLpolys::ComputeRxy");
   if (x==y)
-  { this->RPolys.TheObjects[x].TheObjects[y].MakeMonomial(1, 0);
+  { this->theRPolys[x][y].MakeOne(1);
     return true;
   }
-  int sx= this->SimpleReflectionsActionList.TheObjects[x].TheObjects[SimpleReflectionIndex];
-  int sy= this->SimpleReflectionsActionList.TheObjects[y].TheObjects[SimpleReflectionIndex];
+  if (this->IndexGreaterThanIndex(x, y))
+  { this->theRPolys[x][y].MakeZero(1);
+    return true;
+  }
+  int sx= this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
+  int sy= this->SimpleReflectionsActionList[y][SimpleReflectionIndex];
   bool boolX, boolY;
   boolX=this->IndexGreaterThanIndex(x, sx);
   boolY=this->IndexGreaterThanIndex(y, sy);
   if (boolX && boolY)
-  { this->RPolys.TheObjects[x].TheObjects[y].Assign(this->RPolys.TheObjects[sx].TheObjects[sy]);
+  { if (!this->Explored[sy])
+    { std::cout << "This is a programming error: the computaion of R-polynomials is attempting to use "
+      << "a non-computed R-polynomial. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->theRPolys[x][y]=this->theRPolys[sx][sy];
     return true;
   }
-  if (boolX && !boolY)
-  { OneVarIntPolynomial q2Minus1, Accum;
-    q2Minus1.MakeQuadratic(1, 0, -1);
-    Accum.MakeQuadratic(1, 0, 0);
-//    this->RPolys.TheObjects[sx].TheObjects[y].ComputeDebugString();
-    q2Minus1.MultiplyBy(this->RPolys.TheObjects[x].TheObjects[sy]);
-//    this->RPolys.TheObjects[sx].TheObjects[sy].ComputeDebugString();
-    Accum.MultiplyBy(this->RPolys.TheObjects[sx].TheObjects[sy]);
-    Accum.AddPolynomial(q2Minus1);
-    this->RPolys.TheObjects[x].TheObjects[y].Assign(Accum);
+  if (!boolX && boolY)
+  { Polynomial<Rational> qMinus1;
+    qMinus1.MakeMonomial(1, 0, 1, 1);
+    this->theRPolys[x][y]=qMinus1;
+    this->theRPolys[x][y]*=(this->theRPolys[sx][sy]);
+    qMinus1-=1;
+    qMinus1*=(this->theRPolys[sx][y]);
+    this->theRPolys[x][y]+=qMinus1;
     return true;
   }
   return false;
@@ -4645,237 +4671,36 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
 
 std::string KLpolys::KLPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
-  std::string tempS;
-  for (int i=0; i<this->KLPolys.size; i++)
-  { this->KLPolys.TheObjects[i].ToString(tempS, i);
-    out << tempS << "<br>\n";
-  }
+  out << "<table border=\"1\">";
+  out << "<tr><td>Weyl elt.</td>";
+  for (int i=0; i<this->TheWeylGroup->size; i++)
+    out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+  out << "</tr>";
+  for (int i=0; i<this->theKLPolys.size; i++)
+    if (this->theKLPolys[i].size>0)
+    { out << "<tr><td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+      for (int j=0; j<this->theKLPolys[i].size; j++)
+        out << "<td>" << this->theKLPolys[i][j].ToString(theFormat) << "</td>";
+      out << "</tr>";
+    }
+  out << "</table>";
   return out.str();
 }
 
 std::string KLpolys::RPolysToString(FormatExpressions* theFormat)
 { std::stringstream out;
-  std::string tempS;
-  for (int i=0; i<this->RPolys.size; i++)
-  { this->RPolys.TheObjects[i].ToString(tempS, i);
-    out << tempS << "<br>\n";
+  out << "<table border=\"1\"><tr><td>Weyl elt.</td>";
+  for (int i=0; i<this->TheWeylGroup->size; i++)
+    out << "<td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+  out << "</tr>";
+  for (int i=0; i<this->theRPolys.size; i++)
+  { out << "<tr><td>" << (*this->TheWeylGroup)[i].ToString() << "</td>";
+    for (int j=0; j<this->theRPolys[i].size; j++)
+      out << "<td>" << this->theRPolys[i][j].ToString(theFormat) << "</td>\n";
+    out << "</tr>";
   }
+  out << "</table>";
   return out.str();
-}
-
-void OneVarIntPolynomial::AddMonomial(int coeff, int power)
-{ if (power<0)
-  { power=-power;
-    this->SetSizeAtLeastInitProperly(this->RationalPart, power);
-    this->RationalPart.TheObjects[power-1]+=coeff;
-  }
-  else
-  { this->SetSizeAtLeastInitProperly(this->PolynomialPart, power+1);
-    this->PolynomialPart.TheObjects[power]+=coeff;
-  }
-  this->FitSize();
-}
-
-void OneVarIntPolynomial::SetSizeAtLeastInitProperly(List<int> &theArray, int desiredSize)
-{ if (theArray.size<desiredSize)
-  { int oldSize=theArray.size;
-    theArray.SetSize(desiredSize);
-    for (int i= oldSize; i<theArray.size; i++)
-      theArray.TheObjects[i]=0;
-  }
-}
-
-void OneVarIntPolynomial::AddPolynomial(OneVarIntPolynomial &p)
-{ OneVarIntPolynomial::SetSizeAtLeastInitProperly(this->RationalPart, p.RationalPart.size);
-  OneVarIntPolynomial::SetSizeAtLeastInitProperly(this->PolynomialPart, p.PolynomialPart.size);
-  for (int i=0; i<p.PolynomialPart.size; i++)
-    this->PolynomialPart.TheObjects[i]+=p.PolynomialPart.TheObjects[i];
-  for (int i=0; i<p.RationalPart.size; i++)
-    this->RationalPart.TheObjects[i]+=p.RationalPart.TheObjects[i];
-  this->FitSize();
-}
-
-void OneVarIntPolynomial::MultiplyBy(OneVarIntPolynomial &p)
-{ OneVarIntPolynomial Accum;
-  Accum.RationalPart.size=0;
-  Accum.PolynomialPart.size=0;
-  OneVarIntPolynomial::SetSizeAtLeastInitProperly(Accum.PolynomialPart, this->PolynomialPart.size+p.PolynomialPart.size -1);
-  OneVarIntPolynomial::SetSizeAtLeastInitProperly(Accum.RationalPart, this->RationalPart.size+p.RationalPart.size);
-  for (int i=0; i<this->PolynomialPart.size; i++)
-  { for(int j=0; j<p.PolynomialPart.size; j++)
-      Accum.PolynomialPart.TheObjects[i+j]+=this->PolynomialPart.TheObjects[i]*p.PolynomialPart.TheObjects[j];
-    for(int j=0; j<p.RationalPart.size; j++)
-      if (i-j-1<0)
-        Accum.RationalPart.TheObjects[j-i]+=this->PolynomialPart.TheObjects[i]*p.RationalPart.TheObjects[j];
-      else
-        Accum.PolynomialPart.TheObjects[i-j-1]+=this->PolynomialPart.TheObjects[i]*p.RationalPart.TheObjects[j];
-  }
-  for (int i=0; i<this->RationalPart.size; i++)
-  { for(int j=0; j<p.RationalPart.size; j++)
-      Accum.RationalPart.TheObjects[i+j+1]+=this->RationalPart.TheObjects[i]*p.RationalPart.TheObjects[j];
-    for(int j=0; j<p.PolynomialPart.size; j++)
-      if (j-i-1<0)
-        Accum.RationalPart.TheObjects[i-j]+=this->RationalPart.TheObjects[i]*p.PolynomialPart.TheObjects[j];
-      else
-        Accum.PolynomialPart.TheObjects[j-i-1]+=this->RationalPart.TheObjects[i]*p.PolynomialPart.TheObjects[j];
-  }
-  Accum.FitSize();
-  this->Assign(Accum);
-}
-
-void OneVarIntPolynomial::SubstitutionOneOverX()
-{ if (this->PolynomialPart.size-1>this->RationalPart.size)
-  { int tempI;
-    for(int i=0; i<this->RationalPart.size; i++)
-    { tempI=this->RationalPart.TheObjects[i];
-      this->RationalPart.TheObjects[i]=this->PolynomialPart.TheObjects[i+1];
-      this->PolynomialPart.TheObjects[i+1]=tempI;
-    }
-    int oldSize= this->RationalPart.size;
-    this->RationalPart.SetSize(this->PolynomialPart.size-1);
-    for(int i=oldSize; i<this->PolynomialPart.size-1; i++)
-      this->RationalPart.TheObjects[i]=this->PolynomialPart.TheObjects[i+1];
-    this->PolynomialPart.size=oldSize+1;
-  }
-  else
-  { int tempI;
-    for(int i=1; i<this->PolynomialPart.size; i++)
-    { tempI=this->RationalPart.TheObjects[i-1];
-      this->RationalPart.TheObjects[i-1]=this->PolynomialPart.TheObjects[i];
-      this->PolynomialPart.TheObjects[i]=tempI;
-    }
-    int oldSize= this->PolynomialPart.size;
-    int start= oldSize;
-    this->SetSizeAtLeastInitProperly(this->PolynomialPart, this->RationalPart.size+1);
-    if (start==0)
-    { start=1;
-      if (this->RationalPart.size!=0)
-        this->PolynomialPart.TheObjects[0]=0;
-    }
-    for(int i=start; i<this->RationalPart.size+1; i++)
-      this->PolynomialPart.TheObjects[i]=this->RationalPart.TheObjects[i-1];
-    this->RationalPart.size=oldSize-1;
-    if (this->RationalPart.size<0){this->RationalPart.size=0; }
-  }
-}
-
-void OneVarIntPolynomial::MakeMonomial(int coeff, int power)
-{ this->PolynomialPart.size=0;
-  this->RationalPart.size=0;
-  if (power<0)
-  { OneVarIntPolynomial::SetSizeAtLeastInitProperly(this->RationalPart, -power);
-    this->RationalPart.TheObjects[-power-1]=coeff;
-  }
-  else
-  { OneVarIntPolynomial::SetSizeAtLeastInitProperly(this->PolynomialPart, power+1);
-    this->PolynomialPart.TheObjects[power]=coeff;
-  }
-}
-
-void OneVarIntPolynomial::ComputeDebugString()
-{ this->ToString(this->DebugString);
-}
-
-void OneVarIntPolynomial::ToString(std::string& output)
-{ std::stringstream out;
-  std::string tempS;
-  for (int i=this->RationalPart.size-1; i>=0; i--)
-    if (this->RationalPart.TheObjects[i]!=0)
-    { std::stringstream out2;
-      if (this->RationalPart.TheObjects[i]==-1)
-        out2 << "-";
-      else
-        if (this->RationalPart.TheObjects[i]!=1)
-          out2 << this->RationalPart.TheObjects[i];
-      out2 << "q^{" << -i-1 << "}";
-      tempS=out2.str();
-      if (tempS[0]!='-')
-        tempS.insert(0, "+");
-      out << tempS;
-    }
-  if (this->PolynomialPart.size>0)
-  { if (this->PolynomialPart.TheObjects[0]>0)
-      out << "+" << this->PolynomialPart.TheObjects[0];
-    if (this->PolynomialPart.TheObjects[0]<0)
-      out << this->PolynomialPart.TheObjects[0];
-  }
-  for (int i=1; i<this->PolynomialPart.size; i++)
-  { if (this->PolynomialPart.TheObjects[i]!=0)
-    { std::stringstream out2;
-      if (this->PolynomialPart.TheObjects[i]==-1)
-        out2 << "-";
-      else
-        if (this->PolynomialPart.TheObjects[i]!=1)
-          out2 << this->PolynomialPart.TheObjects[i];
-      if (i!=1)
-        out2 << "q^{" << i << "}";
-      else
-        out2 << "q";
-      tempS=out2.str();
-      if (tempS[0]!='-')
-        tempS.insert(0, "+");
-      out << tempS;
-    }
-  }
-  output= out.str();
-  if (output.size()>0)
-    if (output[0]=='+')
-      output.erase(0, 1);
-}
-
-int OneVarIntPolynomial::Substitution(int x)
-{ assert(this->RationalPart.size==0);
-  int result=0;
-  for (int i=0; i<this->PolynomialPart.size; i++)
-  { int accum=1;
-    for (int j=0; j<i; j++)
-      accum*=x;
-    result+=accum*PolynomialPart.TheObjects[i];
-  }
-  return result;
-}
-
-void OneVarIntPolynomial::MakeZero()
-{ this->RationalPart.size=0;
-  this->PolynomialPart.size=0;
-}
-
-void OneVarIntPolynomial::MakeConst(int c)
-{ this->RationalPart.size=0;
-  this->PolynomialPart.SetSize(1);
-  this->PolynomialPart.TheObjects[0]=c;
-}
-
-void OneVarIntPolynomial::MakeQuadratic(int x2Term, int x1Term, int constTerm)
-{ this->RationalPart.size=0;
-  this->PolynomialPart.SetSize(3);
-  this->PolynomialPart.TheObjects[0]= constTerm;
-  this->PolynomialPart.TheObjects[1]= x1Term;
-  this->PolynomialPart.TheObjects[2]= x2Term;
-}
-
-void OneVarIntPolynomial::ReleaseMemory()
-{ this->RationalPart.ReleaseMemory();
-  this->PolynomialPart.ReleaseMemory();
-}
-
-void OneVarIntPolynomial::FitSize()
-{ int sizeDecrease=0;
-  for (int i=this->PolynomialPart.size-1; i>=0; i--)
-  { if (this->PolynomialPart.TheObjects[i]==0)
-      sizeDecrease++;
-    else
-      break;
-  }
-  this->PolynomialPart.size-=sizeDecrease;
-  sizeDecrease=0;
-  for (int i=this->RationalPart.size-1; i>=0; i--)
-  { if (this->RationalPart.TheObjects[i]==0)
-      sizeDecrease++;
-    else
-      break;
-  }
-  this->RationalPart.size-=sizeDecrease;
 }
 
 LargeInt partFraction::EvaluateIntPolyAtOne(Polynomial<LargeInt>& input)

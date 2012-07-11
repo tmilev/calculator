@@ -2848,8 +2848,8 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
 
 std::string CommandList::GetCalculatorLink(const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << this->DisplayPathServerBase << "cgi-bin/calculator?textInput=" << CGI::UnCivilizeStringCGI(input) << "\"> "
-  << input << "</a>";
+  out << "<a href=\"" << this->DisplayPathServerBase << "cgi-bin/calculator?textInput=" << CGI::UnCivilizeStringCGI(input)
+  << "\"> " << input << "</a>";
   return out.str();
 }
 
@@ -2858,32 +2858,27 @@ bool CommandList::fKLcoeffs
  std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
   IncrementRecursion theRecursionIncrementer(&theCommands);
-  if (theExpression.children.size!=2)
-    return theExpression.SetError("fKLcoeffs takes two arguments");
-  Expression& theSSalgebraNode=theExpression.children[0];
-  Expression& vectorNode=theExpression.children[1];
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theSSalgebraNode, comments))
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return theExpression.SetError("Failed to created Lie algebra");
-  SemisimpleLieAlgebra& theSSalgebra= theSSalgebraNode.GetAtomicValue().GetAmbientSSAlgebra();
-  Vector <Rational> theHWfundCoords, theHWsimpleCoords;
-  Context theContext;
-  if (!vectorNode.GetVector<Rational>(theHWfundCoords, theContext, theSSalgebra.GetRank(), 0, comments))
-    return theExpression.SetError("Failed to extract highest weight");
+  SemisimpleLieAlgebra& theSSalgebra= theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  if (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim())>500)
-  { out << "I have been instructed to run only for Weyl groups that have at most 500 elements. "
+  if (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim())>192)
+  { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra.GetLieAlgebraName() << " has "
     << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString() << ".";
     theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
     return true;
   }
   FormatExpressions theFormat;
-  theContext.GetFormatExpressions(theFormat);
-  out << "Extracted highest weight: " << theHWfundCoords.ToString(&theFormat);
+  theFormat.polyAlphabeT.SetSize(1);
+  theFormat.polyAlphabeT[0]="q";
+  out << "Our notation follows that of the original Kazhdan-Lusztig paper, "
+  << "Representations of Coxeter Groups and Hecke Algebras.<br>";
   out << " The algebra: " << theSSalgebra.GetLieAlgebraName();
   KLpolys theKLpolys;
-  theKLpolys.ComputeKLPolys(&theWeyl, 0);
+  theKLpolys.ComputeKLPolys(&theWeyl);
+  theFormat.flagUseHTML=true;
   out << theKLpolys.ToString(&theFormat);
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
@@ -3407,10 +3402,17 @@ void CommandList::initPredefinedVars()
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
   this->AddNonBoundVarMustBeNew
   ("KLcoeffs", &this->fKLcoeffs, "",
-   "Experimental please don't use.",
-   "KLcoeffs{}(B_3, (1,0,0))");
-
-
+   "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \
+   polynomials evaluated at one, where n<=192  is the size of the Weyl group (i.e. no larger than D_4(so(8)).\
+   The notation follows the original paper by Kazhdan and Lusztig, \"\
+   Representations of Coxeter Groups and Hecke Algebras\"\
+   . The algorithm is directly derived from formulas (2.0a-c) there, as explained in \
+   the Wikipedia page on Kazhdan-Lusztig polynomials. \
+   Please note that the 192 by 192 element table takes almost 3 minutes to compute.\
+   Faster implementations of the KL polynomials are available from programs by Fokko du Cloux and others\
+   (our simple implementation stores the full table of R-polynomials and KL-polynomials in RAM memory at all times, unlike\
+   the other more efficient implementations).",
+   "KLcoeffs{}(B_3)");
 /*  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
@@ -4161,11 +4163,11 @@ bool CommandList::StandardIsDenotedBy
   }
   Expression& withNotation=theExpression.children[1];
   Expression& theNotation=theExpression.children[0];
-  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation);
-  theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
   if (comments!=0)
-    *comments << "<br>Registered notation: globally, " << withNotation.ToString() << " is denoted by "
+    *comments << "<br>Registering notation: globally, " << withNotation.ToString() << " will be denoted by "
     << theNotation.ToString();
+  theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.ToString());
+  theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
   if (withNotation.EvaluatesToAtom())
     if (withNotation.GetAtomicValue().IsOfType<ElementTensorsGeneralizedVermas<RationalFunction> >())
       if (withNotation.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().IsHWV())
@@ -5113,7 +5115,7 @@ std::string Expression::ToString
     return "(ProgrammingErrorNoBoss)";
   int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
-    return theBoss->theObjectContainer.ExpressionNotation[notationIndex].ToString();
+    return theBoss->theObjectContainer.ExpressionNotation[notationIndex];
   assert((int)(this->theBoss)!=-1);
   std::stringstream out;
 //  AddBrackets=true;

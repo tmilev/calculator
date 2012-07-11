@@ -507,7 +507,7 @@ public:
   HashedList<Context> theContexts;
   HashedListB<std::string, MathRoutines::hashString> theStrings;
   HashedList<VariableNonBound> theNonBoundVars;
-  HashedList<Expression> ExpressionNotation;
+  HashedListB<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   void reset();
   std::string ToString();

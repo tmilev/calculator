@@ -1023,23 +1023,22 @@ template <class CoefficientType>
     return result;
   }
   template <class leftType, class rightType>
-  leftType RootScalarCartanRoot(const Vector<leftType> & r1, const Vector<rightType> & r2)const
+  leftType RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2)const
   { leftType tempRat;
     this->RootScalarCartanRoot(r1, r2, tempRat);
     return tempRat;
   }
   //the below functions perturbs input so that inputH has non-zero scalar product with Vectors<Rational> of the Vector<Rational>  system,
   //without changing the inputH-sign of any Vector<Rational>  that had a non-zero scalar product to begin with
-  void PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational> & output);
+  void PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational>& output);
   template <class CoefficientType>
   bool IsDominantWRTgenerator(const Vector<CoefficientType>& theWeight, int generatorIndex)
 ;
   template <class CoefficientType>
-  bool IsDominantWeight(const Vector<CoefficientType> & theWeight)
+  bool IsDominantWeight(const Vector<CoefficientType>& theWeight)
 ;
   void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens);
-  void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational> & theH);
-  int length(int index);
+  void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   void operator=(const WeylGroup& other);
   bool operator==(const WeylGroup& other)
   { return this->CartanSymmetric==other.CartanSymmetric;
@@ -5081,24 +5080,19 @@ public:
   List<List<int> > SimpleReflectionsActionList;
   List<List<int> > InverseBruhatOrder;
   std::string DebugString;
-  //important: in both the R- and KL-polynomials, if a polynomial Rxy is non-zero,
-  //then x is bigger than y. This is the opposite to the usually accepted convention!
-  //The reason for that is the following: if you want to compute
-  //once you are done with computing with a given highest weight,
-  //you want to be able to release the used memory; that is why the higher weight must
-  //be the first, not the second index!
-  List<OneVarIntPolynomialSubstitution> KLPolys;
-  List<OneVarIntPolynomialSubstitution> RPolys;
+  List<List<Polynomial<Rational> > > theKLPolys;
+  List<List<Polynomial<Rational> > > theRPolys;
+  List<List<Rational> > theKLcoeffs;
   void KLcoeffsToString(List<int>& theKLCoeffs, std::string& output);
   void FindNextToExplore();
-  int FindLowestBruhatNonExplored();
-  int FindHighestBruhatNonExplored(List<bool>& theExplored);
+  int FindMinimalBruhatNonExplored(List<bool>& theExplored);
+  int FindMaximalBruhatNonExplored(List<bool>& theExplored);
   void initTheMults();
   void Compute(int x);
   void Check();
-  //returns true if reduction succeeded, false otherwise
+  //returns true if computation succeeded, false otherwise
   bool ComputeRxy(int x, int y, int SimpleReflectionIndex);
-  void ComputeKLxy(int w, int x);
+  void ComputeKLxy(int x, int y);
   bool IsMaxNonEplored(int index);
   bool IndexGEQIndex(int a, int b);
   bool IndexGreaterThanIndex(int a, int b);
@@ -5106,11 +5100,10 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
   void MergeBruhatLists(int fromList, int toList);
   std::string KLPolysToString(FormatExpressions* theFormat=0);
-  void ComputeKLcoefficientsFromIndex(int ChamberIndex, List<int>& output);
-  void ComputeKLcoefficientsFromChamberIndicator(Vector<Rational>& ChamberIndicator, List<int>& output);
+  void ComputeKLcoefficients();
   int ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
   std::string RPolysToString(FormatExpressions* theFormat=0);
-  void ComputeKLPolys(WeylGroup* theWeylGroup, int TopChamberIndex);
+  void ComputeKLPolys(WeylGroup* theWeylGroup);
   void ComputeRPolys();
   int ComputeProductfromSimpleReflectionsActionList(int x, int y);
   void WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex);

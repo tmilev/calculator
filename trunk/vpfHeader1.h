@@ -4242,6 +4242,11 @@ class MonomialP: public Vector<Rational>
 {
 private:
 public:
+  friend MonomialP operator-(const MonomialP& input)
+  { MonomialP result=input;
+    result.Minus();
+    return result;
+  }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
     return output;
@@ -4627,7 +4632,7 @@ public:
     return result;
   }
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
-  void MakeMonomial(int NumVars, int LetterIndex, int Power, const CoefficientType& Coeff=1);
+  void MakeMonomial(int NumVars, int LetterIndex, const Rational& Power, const CoefficientType& Coeff=1);
   void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff);
   void MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const CoefficientType& coeff1, const CoefficientType& coeff2);
   void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff1, const CoefficientType& ConstantTerm);
@@ -5767,8 +5772,8 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
   for (int i=0; i<r.size; i++)
   { tempM.MakeEi(r.size, i);
     if (!r[i].IsInteger())
-    { std::cout << "This is a programming error. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
-      << " line " << __LINE__ << ".";
+    { std::cout << "This is a programming error. Please debug file "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     this->AddMonomial(tempM, r[i].GetNum());
@@ -5776,11 +5781,11 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
 }
 
 template <class Element>
-void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, int Power, const Element& Coeff)
+void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, const Rational& Power, const Element& Coeff)
 { if (LetterIndex<0 || LetterIndex>=inputNumVars)
   { std::cout << "This is a programming error: you asked to create a monomial of " << inputNumVars << " variables "
     << " of the form x_{" << LetterIndex+1 << "}.  An error check should be performed at an earlier point in the program. "
-    << "Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->MakeZero(inputNumVars);
@@ -6204,58 +6209,6 @@ public:
   }
   void operator=(const ElementWeylGroup& right);
   bool operator==(const ElementWeylGroup& right);
-};
-
-class OneVarPolynomialSubstitution: public List<Polynomial<LargeInt> >
-{
-public:
-  std::string DebugString;
-  int theWeightIndex;
-  void ComputeDebugString();
-  void ToString(std::string& output);
-  void ToString(std::string& output, int KLindex);
-};
-
-//this class is in effect a remake of Polynomial<int>; Use only to minimize RAM usage.
-//The OneVarIntPolynomial assumes coefficients do not exceed int size.
-//The OneVarIntPolynomial has 2 times the basic size of List of "service"
-//RAM usage. On a 32 bit machine that means it has 2*28=56 bytes of extra RAM besides the
-//coefficient storage.
-class OneVarIntPolynomial
-{
-public:
-  List<int> PolynomialPart;
-  List<int> RationalPart;
-  std::string DebugString;
-  void MakeConst(int c);
-  void MakeMonomial(int coeff, int power);
-  void AddMonomial(int coeff, int power);
-  void MakeQuadratic(int x2Term, int x1Term, int constTerm);
-  void MakeZero();
-  void ComputeDebugString();
-  void ToString(std::string& output);
-  void SubstitutionOneOverX();
-  int Substitution(int x);
-  void MultiplyBy(OneVarIntPolynomial& p);
-  void AddPolynomial(OneVarIntPolynomial& p);
-  void Assign(OneVarIntPolynomial& p)
-  { this->PolynomialPart.CopyFromBase(p.PolynomialPart);
-    this->RationalPart.CopyFromBase(p.RationalPart);
-  }
-  void ReleaseMemory();
-  void operator=(OneVarIntPolynomial& p){this->Assign(p); }
-  void FitSize();
-  static void SetSizeAtLeastInitProperly(List<int>& theArray, int desiredSize);
-};
-
-class OneVarIntPolynomialSubstitution: public List<OneVarIntPolynomial>
-{
-public:
-  std::string DebugString;
-  int theWeightIndex;
-  void ComputeDebugString();
-  void ToString(std::string& output){}
-  void ToString(std::string& output, int KLindex){}
 };
 
 class LaTeXProcedures

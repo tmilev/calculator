@@ -626,7 +626,6 @@ public:
   std::string indicatorReportFileNameDisplay;
   std::string userLabel;
   List<std::string> SystemCommands;
-
   std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ElementToStringFunctionHandlers();
@@ -1091,6 +1090,21 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
 }
+template<class CoefficientType>
+bool fTypeHighestWeightParabolic
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments,
+ Vector<CoefficientType>& outputWeightHWcoords, Selection& outputInducingSel,
+ Context* outputContext=0)
+ ;
+ static bool fParabolicWeylGroups
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ ;
+ static bool fParabolicWeylGroupsBruhatGraph
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ ;
   static bool fKLcoeffs
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)
@@ -1170,6 +1184,12 @@ static bool EvaluateDereferenceOneArgument
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
   Vectors<RationalFunction>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
   ;
+  template<class CoefficientType>
+static bool TypeHighestWeightParabolic
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Vector<CoefficientType>& outputWeight,
+ Selection& outputInducingSel, Context* outputContext=0)
+;
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

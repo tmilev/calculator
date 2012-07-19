@@ -1784,72 +1784,64 @@ bool CommandList::fHWTAABF
   return true;
 }
 
-bool CommandList::fHWV
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{if (theExpression.children.size!=3)
-  { if (comments!=0)
-      *comments << "Function HWV is expected to have three arguments: SS algebra type, List{}, List{}. ";
-    return false;
-  }
+template<class CoefficientType>
+bool CommandList::fTypeHighestWeightParabolic
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments,
+ Vector<CoefficientType>& outputWeightHWcoords, Selection& outputInducingSel,
+ Context* outputContext)
+{ if (theExpression.children.size!=3)
+    return theExpression.SetError
+    ("Function  TypeHighestWeightParabolic is expected to have three arguments: SS algebra type, List{}, List{}. ");
   Expression& leftE=theExpression.children[0];
   Expression& middleE=theExpression.children[1];
   Expression& rightE=theExpression.children[2];
-  Expression resultSSalgebraE;
-  resultSSalgebraE=leftE;
-  if (!CommandList::fSSAlgebra(theCommands, inputIndexBoundVars, resultSSalgebraE, comments))
-  { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
-  } else if (!resultSSalgebraE.EvaluatesToAtom())
-  { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
+  if (!CommandList::CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, leftE, comments))
+    return theExpression.SetError("Failed to generate semisimple Lie algebra.");
+  if (!leftE.EvaluatesToAtom())
+  { std::stringstream tempStream;
+    tempStream << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
+    return theExpression.SetError(tempStream.str());
   }
-  if  (resultSSalgebraE.errorString!="")
-  { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
-  }
-  if (!resultSSalgebraE.EvaluatesToAtom())
-  { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
-  }
-  const Data& theSSdata=resultSSalgebraE.GetAtomicValue();
-  if (theSSdata.type!=Data::typeSSalgebra)
-  { if(comments!=0)
-      *comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
-  }
-  if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
-  { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
-    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
-    assert(false);
-  }
-  int indexOfAlgebra=theSSdata.theIndex;
-  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
-  int theRank=theSSalgebra.GetRank();
-  Vector<RationalFunction> highestWeightFundCoords;
-  Vector<Rational> parabolicSel;
-  Context hwContext(theCommands), emptyContext(theCommands);
+  SemisimpleLieAlgebra& theSSalgebra=leftE.GetAtomicValue().GetAmbientSSAlgebra();
+  MemorySaving<Context> tempContext;
+  Context emptyContext;
+  Context& theContext= outputContext!=0 ? *outputContext : tempContext.GetElement();
   if (!middleE.GetVector<RationalFunction>
-      (highestWeightFundCoords, hwContext, theRank, &CommandList::fPolynomial, comments))
-  { if(comments!=0)
-      *comments << "Failed to convert the second argument of HWV to a list of " << theRank
+      (outputWeightHWcoords, theContext, theSSalgebra.GetRank(), &CommandList::fPolynomial, comments))
+  { std::stringstream tempStream;
+    tempStream << "Failed to convert the second argument of HWV to a list of " << theSSalgebra.GetRank()
       << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
-    return false;
+    return theExpression.SetError(tempStream.str());
   }
-  if (!rightE.GetVector<Rational>(parabolicSel, emptyContext, theRank, 0, comments))
-  { if(comments!=0)
-      *comments << "Failed to convert the third argument of HWV to a list of " << theRank
+  Vector<Rational> parabolicSel;
+  if (!rightE.GetVector<Rational>(parabolicSel, emptyContext, theSSalgebra.GetRank(), 0, comments))
+  { std::stringstream tempStream;
+    tempStream << "Failed to convert the third argument of HWV to a list of " << theSSalgebra.GetRank()
       << " rationals. The third argument you gave is " << rightE.ToString() << ".";
-    return false;
+    return theExpression.SetError(tempStream.str());
   }
-  Selection selectionParSel;
-  selectionParSel=parabolicSel;
+  outputInducingSel=parabolicSel;
+  return true;
+}
+
+bool CommandList::fHWV
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ Selection selectionParSel;
+  Vector<RationalFunction> theHWfundcoords;
+  Context hwContext(theCommands);
+  if(!theCommands.fTypeHighestWeightParabolic
+  (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, selectionParSel,  &hwContext)  )
+    return theExpression.SetError("Failed to extract highest weight vector data");
+  else
+    if (theExpression.errorString!="")
+      return true;
+  SemisimpleLieAlgebra& theSSalgebra=
+  theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+
   return theCommands.fHWVinner
   (theCommands, inputIndexBoundVars, theExpression, comments,
-  highestWeightFundCoords, selectionParSel, hwContext, indexOfAlgebra);
+  theHWfundcoords, selectionParSel, hwContext, theSSalgebra.indexInOwner);
 }
 
 bool CommandList::fWriteGenVermaModAsDiffOperator
@@ -2320,7 +2312,6 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   ElementUniversalEnveloping<RationalFunction> genericElt, theGenerator;
   List<ElementWeylAlgebra> actionNilrad;
   List<int> vectorIndices, dualIndices;
-  List<ElementUniversalEnveloping<RationalFunction> > theNilradBasis;
   quasiDiffOp<RationalFunction> tempQDO;
   FormatExpressions theWeylFormat, theUEformat;
   std::stringstream out, latexReport;
@@ -2330,13 +2321,16 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   theUEformat.flagUseLatex=true;
   theUEformat.chevalleyGgeneratorLetter="g";
   theUEformat.chevalleyHgeneratorLetter="h";
+  hwContext.GetFormatExpressions(theUEformat);
   theUEformat.polyDefaultLetter="n";
   hwContext.GetFormatExpressions(theWeylFormat);
-  hwContext.GetFormatExpressions(theUEformat);
   List<ElementUniversalEnveloping<RationalFunction> > theGeneratorsItry;
   for (int j=0; j<theSSalgebra.GetRank(); j++)
   { Vector<Rational> ei;
     ei.MakeEi(theSSalgebra.GetRank(), j);
+    theGenerator.MakeOneGeneratorCoeffOne(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGeneratorsItry.AddOnTop(theGenerator);
+    ei.Minus();
     theGenerator.MakeOneGeneratorCoeffOne(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
   }
@@ -2354,7 +2348,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   << "} Differential operators corresponding to actions of simple positive generators for the "
   << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
   for (int i=0; i<theHws.size; i++)
-  { theCommands.fHWVinner(theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selInducing, hwContext, indexOfAlgebra);
+  { theCommands.fHWVinner
+    (theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selInducing, hwContext, indexOfAlgebra);
     ModuleSSalgebraNew<RationalFunction>& theMod=
     tempExp.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerModule();
     if (i==0)
@@ -2362,18 +2357,25 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
       quasiDiffOp<RationalFunction>::prepareFormatFromShiftAndNumWeylVars
       (hwContext.VariableImages.size, elementsNegativeNilrad.size, theWeylFormat);
-      out << "<tr><td>Generic element U(n_-):</td><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString()) << "</td> </tr>";
+      theUEformat.polyAlphabeT.SetSize(selInducing.CardinalitySelection+ elementsNegativeNilrad.size);
+      for (int k=selInducing.CardinalitySelection; k< theUEformat.polyAlphabeT.size; k++)
+      { std::stringstream tmpStream;
+        tmpStream << "n_{" << k-selInducing.CardinalitySelection+1 << "}";
+        theUEformat.polyAlphabeT[k] = tmpStream.str();
+      }
+      out << "<tr><td>Generic element U(n_-):</td><td>"
+      << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size << "\"> Element acting</td></td></tr>";
       out <<"<tr><td>Action on</td>";
       for (int j=0; j<theGeneratorsItry.size; j++)
-      { out << "<td>" << theGeneratorsItry[j].ToString() << "</td>";
+      { out << "<td>" << theGeneratorsItry[j].ToString(&theUEformat) << "</td>";
         latexReport << "& $" << theGeneratorsItry[j].ToString(&theUEformat)  << "$";
       }
       latexReport << "\\endhead \\hline<br>";
       out << "</tr>";
-      out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString()) << "</td>";
+      out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { theGenerator=theGeneratorsItry[j];
@@ -2908,32 +2910,42 @@ bool CommandList::fWeylOrbit
     theHWfundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimpleCoords);
   } else
     theHWsimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundCoords);
-  std::stringstream out;
+  std::stringstream out, latexReport;
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
+  theFormat.fundamentalWeightLetter="\\psi";
   theHWs.AddOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroup orbitGeneratingSet;
   Polynomial<Rational> theExp;
-  if (!theSSalgebra.theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1000, &orbitGeneratingSet, 1000))
+  if (!theSSalgebra.theWeyl.GenerateOrbit(theHWs, useRho, outputOrbit, false, 1921, &orbitGeneratingSet, 1921))
     out << "Failed to generate the entire orbit (maybe too large?), generated the first " << outputOrbit.size
     << " elements only.";
   else
     out << "The orbit has " << outputOrbit.size << " elements.";
+  latexReport << "\\begin{longtable}{rl}Elt. $\\mathbf W $ & Image in fund. coord. \\\\\n<br>";
   out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td>";
   if (useRho)
     out << "<td>Corresponding b-singular vector candidate</td>";
   out << "</tr>";
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
   LargeInt tempInt;
+  bool useMathTag=outputOrbit.size<150;
   for (int i=0; i<outputOrbit.size; i++)
-  { out << "<tr>" << "<td>" << CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) << "</td><td>"
-    << CGI::GetHtmlMathSpanPure(outputOrbit[i].ToString(&theFormat)) << "</td><td>"
-    << CGI::GetHtmlMathSpanPure
-    (theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
-    ("\\omega", &theFormat))
+  { std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
+    std::string weightEltString=
+    theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
+    ("\\omega", &theFormat);
+    out << "<tr>" << "<td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
+    << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString)<< "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
+    latexReport <<"$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
+    <<  weightEltString << "$ " << "\\\\\n<br>"
+    ;
     if (useRho)
     { currentWeight=theHWsimpleCoords;
       standardElt.MakeConst(*theSSalgebra.owner, theSSalgebra.indexInOwner);
@@ -2963,7 +2975,8 @@ bool CommandList::fWeylOrbit
     }
     out << "</tr>";
   }
-  out << "</table>";
+  latexReport << "\\end{longtable}";
+  out << "</table>" << "<br> " << latexReport.str();
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
@@ -3388,7 +3401,7 @@ void CommandList::initPredefinedVars()
   this->AddNonBoundVarMustBeNew
   ("WeylOrbitSimpleCoords", &this->fWeylOrbitSimple, "",
    "Generates a Weyl orbit printout from simple coords.\
-    First argument = type. Second argument = weight in simple coords. ",
+    First argument = type. Second argument = weight in simple coords. The orbit size is cut off at max 1920 elements (type D_5).",
    "WeylOrbitSimpleCoords{}(B_2, (y, y));");
   this->AddNonBoundVarMustBeNew
   ("WeylOrbitFundCoords", &this->fWeylOrbitFund, "",
@@ -3413,12 +3426,27 @@ void CommandList::initPredefinedVars()
    (our simple implementation stores the full table of R-polynomials and KL-polynomials in RAM memory at all times, unlike\
    the other more efficient implementations).",
    "KLcoeffs{}(B_3)");
-/*  this->AddNonBoundVarMustBeNew
+  this->AddNonBoundVarMustBeNew
   ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-   "printSlTwoSubalgebrasAndRootSubalgebras{}(G_2)");
-*/
+   "printSlTwoSubalgebrasAndRootSubalgebras{}(E_6)");
+/*   this->AddNonBoundVarMustBeNew
+  ("parabolicsInfoBruhatGraph", &this->fParabolicWeylGroupsBruhatGraph, "",
+   " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
+   as well as the cosets \
+   (given by minimal coset representatives) of the Weyl subgroup in question. \
+   The input must have as many integers as there are simple roots in the ambient \
+   Lie algebra. If the root is crossed out (i.e. not a root space of the Levi part), one should put a 1 in the corresponding \
+   coordinate. \
+   Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
+   calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; \
+   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple root. \
+   In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. \
+   You will get your output as a .png file link, you must click onto the link to see the end result. \
+   <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
+   function up to E_6 but LaTeX crashes trying to process the output. </b>",
+   "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");*/
   this->NumPredefinedVars=this->theObjectContainer.theNonBoundVars.size;
 }
 

@@ -232,24 +232,12 @@ bool CommandList::fAnimateLittelmannPaths
 bool CommandList::fRootSAsAndSltwos
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
-  Expression* zeTrueArgument=& theExpression;
-  std::cout << "ze expression i get: " << theExpression.ToString() << "<hr>";
-  std::cout << "which is of type " << theExpression.ToString();
-  if (theExpression.theOperation==theCommands.opList() && theExpression.children.size>0)
-  { zeTrueArgument=&theExpression.children[0];
-    std::cout << "ZeTRueArgument: " << zeTrueArgument->ToString();
-    //showIndicator=false;
-  }
-  if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, *zeTrueArgument, comments))
-    return zeTrueArgument->SetError("Failed to generate semisimple Lie algebra from the argument you gave me");
-  if (zeTrueArgument->errorString!="")
-    return zeTrueArgument->SetError
-    ("While attempting to create a semisimple Lie algebra I got the error message" +
-     zeTrueArgument->errorString);
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
+    return true;
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=10000;
-  SemisimpleLieAlgebra& ownerSS=zeTrueArgument->GetAtomicValue().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   char weylLetter=ownerSS.theWeyl.WeylLetter;
   int theRank=ownerSS.theWeyl.GetDim();
 
@@ -263,18 +251,8 @@ bool CommandList::fRootSAsAndSltwos
   { std::stringstream outMkDirCommand1, outMkDirCommand2;
     outMkDirCommand1 << "mkdir " << outMainPath.str();
     outMkDirCommand2 << "mkdir " << outSltwoPath.str();
-    theCommands.SystemCommands.AddOnTop(outMkDirCommand1.str());
-    theCommands.SystemCommands.AddOnTop(outMkDirCommand2.str());
-    if (comments!=0)
-    { *comments << "<br><br>... Created the missing folders for the database. <b> Running  a second time... Please wait for automatic redirection."
-      << " Clicking back/refresh button in the browser will cause broken links in the calculator due to a technical "
-      << "(Apache server configuration) problem.</b><br><br>"
-      << "<META http-equiv=\"refresh\" content=\"3; url="
-      << theCommands.DisplayNameCalculator << "?"
-      << theCommands.inputStringRawestOfTheRaw;
-      *comments << "\">  Redirecting in 3 seconds";
-    }
-    return false;
+    theCommands.theGlobalVariableS->System(outMkDirCommand1.str());
+    theCommands.theGlobalVariableS->System(outMkDirCommand2.str());
   }
   std::stringstream outRootHtmlFileName, outRootHtmlDisplayName, outSltwoMainFile, outSltwoFileDisplayName;
   outSltwoMainFile << outSltwoPath.str() << "sl2s.html";
@@ -282,50 +260,34 @@ bool CommandList::fRootSAsAndSltwos
   outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
   outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
   bool mustRecompute=false;
+  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds =1000;
   if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
+  std::stringstream out;
   if (mustRecompute)
   { std::cout << theCommands.javaScriptDisplayingIndicator;
     std::cout.flush();
+    std::cout
+    << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. "
+    << "<br>Appologies for this technical (Apache server configuration) problem. "
+    << "<br>Alleviating it is around the bottom of a very long to-do list.</b>"
+    << "<br> The computation is slow, up to around 10 minutes for E_8.";
+    SltwoSubalgebras theSl2s;
+    theSl2s.owner[0].FindSl2Subalgebras(theSl2s, weylLetter, theRank, *theCommands.theGlobalVariableS);
+    std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
+    theSl2s.ElementToHtml
+    (*theCommands.theGlobalVariableS, theSl2s.owner[0].theWeyl, true, PathSl2, DisplayPathSl2,
+    theCommands.DisplayNameCalculator);
+    theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
+    theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
+  } else
+    out << "The table is precomputed and served from the hard disk. ";
+  out <<"<a href=\"" << outRootHtmlDisplayName.str() << "\">Root subalgebras displayed as a separate page. </a>";
+  out << "<iframe src=\"" << outRootHtmlDisplayName .str()<< "\" width=\"800\" height=\"600\" >"
+  << "</iframe>";
 
-/*    if (showIndicator)
-    { if (comments!=0)
-      { *comments << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. <br>Appologies for this technical (Apache server configuration) problem. <br>Hope to alleviate it soon.</b>"
-        << "<br>Below is an indicator for the progress of the computation."
-        << "<br> The computation is slow, up to around 10 minutes for E_8."
-        << "<br>Once it is done, you should be redirected automatically to the result page."
-        << "<br>To go back to the calculator main page use the back button on your browser.";
-        *comments << "\n<br>\nComputing ...<br>" << theCommands.javaScriptDisplayingIndicator
-        << "<br>" << "<META http-equiv=\"refresh\" content=\"10; url="
-        << theCommands.DisplayNameCalculator << "?";
-        std::stringstream civilizedCommand;
-        civilizedCommand << "printSlTwoSubalgebrasAndRootSubalgebras{}(" << weylLetter << "_" << theRank
-        << ",NoIndicatorDisplay)";
-        *comments << "textInput=" << CGI::UnCivilizeStringCGI(civilizedCommand.str()) << "\">";
-        std::cout << "<br>META http-equiv=\"refresh\" content=\"10; url="
-        << theCommands.DisplayNameCalculator << "?"
-        << CGI::UnCivilizeStringCGI(civilizedCommand.str()) << "\"";
-      }
-      return false;
-    } else
-    { std::cout << "so far so good said he who was falling, around floor 2.";*/
-      SltwoSubalgebras theSl2s;
-      theSl2s.owner[0].FindSl2Subalgebras(theSl2s, weylLetter, theRank, *theCommands.theGlobalVariableS);
-      std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
-      theSl2s.ElementToHtml
-      (*theCommands.theGlobalVariableS, theSl2s.owner[0].theWeyl, true, PathSl2, DisplayPathSl2,
-       theCommands.DisplayNameCalculator);
-      theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
-      theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
-//    }
-  }
-  if (comments!=0)
-  {// *comments << "<META http-equiv=\"refresh\" content=\"0; url=";
-   // *comments << outRootHtmlDisplayName.str();
-    //*comments << "\">";
-  }
-//  theGlobalVariables.MaxAllowedComputationTimeInSeconds=oldMaxAllowedComputationTimeInSeconds;
-  return false;
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
 }
 
 bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
@@ -2229,6 +2191,110 @@ bool CommandList::fJacobiSymbol
   if (!leftE.IsSmallInteger(&leftInt) || !rightE.IsSmallInteger(&rightInt))
     return false;
 //  int result=Jacobi(leftInt, rightInt);
+  return true;
+}
+
+bool CommandList::fParabolicWeylGroups
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ Selection selectionParSel;
+  if(!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments)  )
+    return theExpression.SetError("Failed to create Lie algebra.");
+  SemisimpleLieAlgebra& theSSalgebra=
+  theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
+  ReflectionSubgroupWeylGroup theSubgroup;
+  std::stringstream out;
+  for (int i=0; i<numCycles; i++, selectionParSel.incrementSelection())
+  { theSubgroup.MakeParabolicFromSelectionSimpleRoots
+    (theSSalgebra.theWeyl, selectionParSel, *theCommands.theGlobalVariableS, 2000)
+    ;
+    out << "<hr>" << CGI::GetHtmlMathDivFromLatexFormulA(theSubgroup.ToString());
+  }
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
+bool CommandList::fParabolicWeylGroupsBruhatGraph
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ Selection parabolicSel;
+  Vector<RationalFunction> theHWfundcoords;
+  Context hwContext(theCommands);
+  if(!theCommands.fTypeHighestWeightParabolic
+  (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, parabolicSel, &hwContext)  )
+    return theExpression.SetError("Failed to extract highest weight vector data");
+  else
+    if (theExpression.errorString!="")
+      return true;
+  SemisimpleLieAlgebra& theSSalgebra=
+  theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+
+  WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
+  ReflectionSubgroupWeylGroup theSubgroup;
+  std::stringstream out;
+  std::fstream outputFile, outputFile2;
+  std::string fileName, filename2;
+  fileName=theCommands.PhysicalNameDefaultOutput+"1";
+  filename2=theCommands.PhysicalNameDefaultOutput+"2";
+  CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
+  CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
+  theSubgroup.MakeParabolicFromSelectionSimpleRoots
+  (theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500);
+  theSubgroup.FindQuotientRepresentatives(2000);
+  out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
+  out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
+  out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.size;
+  outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  if (theSubgroup.size>498)
+  { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
+        theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
+      out << "Even I can't handle the truth, when it is so large<br>";
+    else
+      out << "LaTeX can't handle handle the truth, when it is so large. <br>";
+  }
+  else
+  { outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+    outputFile << "\n\\end{document}";
+    outputFile2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
+    outputFile2 << "\n\\end{document}";
+    out << "<hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
+    please check whether the .tex corresponds to the .png!</b><br>"
+    << " The requested Bruhat graph is located in a png file here: <a href=\""
+    << theCommands.DisplayNameDefaultOutput << "1.tex\"> "
+    << theCommands.DisplayNameDefaultOutput << "1.tex</a>";
+    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput << "1.png\" width=\"800\" height=\"600\"></iframe>"
+    << theCommands.DisplayNameDefaultOutput << "1.png</a>";
+    out << "<hr><hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
+    please check whether the .tex corresponds to the .png! </b><br>"
+    << " The coset graph is located in a png file here: <a href=\"" << theCommands.DisplayNameDefaultOutput
+    << "2.tex\"> " <<  theCommands.DisplayNameDefaultOutput << "2.tex</a>";
+    out << ", <a href=\"" << theCommands.DisplayNameDefaultOutput << "2.png\"> "
+    << theCommands.DisplayNameDefaultOutput << "2.png</a>";
+
+    out << "<hr>Additional printout follows.<br> ";
+    out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
+    for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
+    { ElementWeylGroup& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
+      out << "<br>" << current.ToString();
+    }
+    out << "<hr>";
+    out << theSubgroup.ToString();
+  }
+  outputFile.close();
+  outputFile2.close();
+  std::string command1="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + fileName + ".tex";
+  std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
+  std::string command3="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + filename2 + ".tex";
+  std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
+  std::cout << "<br>" << command1;
+  std::cout << "<br>" << command2;
+  std::cout << "<br>" << command3;
+  std::cout << "<br>" << command4;
+  theCommands.theGlobalVariableS->System(command1);
+  theCommands.theGlobalVariableS->System(command2);
+  theCommands.theGlobalVariableS->System(command3);
+  theCommands.theGlobalVariableS->System(command4);
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
 

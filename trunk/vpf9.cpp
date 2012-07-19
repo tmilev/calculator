@@ -813,6 +813,7 @@ FormatExpressions::FormatExpressions()
   this->chevalleyHgeneratorLetter="h";
   this->polyDefaultLetter="x";
   this->FDrepLetter="V";
+  this->simpleRootLetter="\\eta";
   this->MaxLineLength=100;
   this->flagPassCustomCoeffMonSeparatorToCoeffs=false;
   this->flagUseCalculatorFormatForUEOrdered=true;

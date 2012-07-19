@@ -698,7 +698,9 @@ void rootSubalgebra::ElementToHtml(int index, std::string& path, SltwoSubalgebra
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
   << " Vector<Rational> subalgebra of type " << this->theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
-  output << "<meta name=\"keywords\" content=\"" << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim()) << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
+  output << "<meta name=\"keywords\" content=\""
+  << SemisimpleLieAlgebra::GetLieAlgebraName(this->AmbientWeyl.WeylLetter, this->AmbientWeyl.GetDim())
+  << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
   if (this->AmbientWeyl.WeylLetter=='E' || this->AmbientWeyl.WeylLetter=='F' || this->AmbientWeyl.WeylLetter=='G' )
     output << ", exceptional Lie algebra";
   output << " \">";
@@ -753,9 +755,7 @@ void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int i
   { out <<" &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
-        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK.TheObjects[i] << ".html\">";
-      rootSubalgebra& largerSA= sl2s->theRootSAs.TheObjects[this->indicesSubalgebrasContainingK.TheObjects[i]];
-      CGI::clearDollarSigns(largerSA.theDynkinDiagram.DynkinStrinG, tempS);
+        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK[i] << ".html\">";
       out << tempS;
       if (useHtml)
         out << "</a>, ";

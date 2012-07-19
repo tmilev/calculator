@@ -158,6 +158,7 @@ int main(int argc, char **argv)
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
   theGlobalVariables.MaxAllowedComputationTimeInSeconds=300;
+  theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
@@ -365,6 +366,7 @@ g_{-2} v_\\lambda\
 //civilizedInput="1+a";
 //  civilizedInput="KLcoeffs{}(B_3, (1,0,0))";
 //  civilizedInput="KLcoeffs{}(A_3)";
+//civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x, 0, 0)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

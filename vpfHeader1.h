@@ -4181,6 +4181,7 @@ public:
   std::string CustomPlusSign;
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
+  std::string simpleRootLetter;
   List<std::string> polyAlphabeT;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
@@ -6192,15 +6193,13 @@ public:
 class ElementWeylGroup: public List<int>
 {
 public:
-  std::string DebugString;
   void ToString(std::string& output){output=this->ToString();}
-  std::string ToString() {return this->ToString(false, true, "\\eta", 0);}
   std::string ToString
-  (bool useLatex, bool useHtml, const std::string& simpleRootLetter, List<int>* DisplayIndicesOfSimpleRoots)
-  { return this->ToString(-1, useLatex, useHtml, simpleRootLetter, "a", DisplayIndicesOfSimpleRoots);
+  (FormatExpressions* theFormat=0,  List<int>* DisplayIndicesOfSimpleRoots=0)
+  { return this->ToString(-1, theFormat,  DisplayIndicesOfSimpleRoots);
   }
   std::string ToString
-  (int NumSimpleGens, bool useLatex, bool useHtml, const std::string& simpleRootLetter, const std::string& outerAutoLetter, List<int>* DisplayIndicesOfSimpleRoots)
+  (int NumSimpleGens, FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)
   ;
   void ComputeDebugString();
   unsigned int HashFunction() const;

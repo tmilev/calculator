@@ -121,8 +121,8 @@ void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right,
   { if (!left[theDimension+i].IsSmallInteger())
     { std::cout << "This is a programming error. You have requested operations with elements of weyl algebra"
       << "that have monomials of exponent " << left[theDimension+i] << " which I cannot handle. "
-      << "Error catching should be done at an earlier level. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
-      << " line " << __LINE__ << ".";
+      << "Error catching should be done at an earlier level. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     tempSel.MaxMultiplicities[i]=left[theDimension+i].NumShort;
@@ -469,7 +469,8 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
     out << "\nSymmetric Cartan matrix in Bourbaki order:\n";
     if (useHtml)
     { out << "<br>";
-      this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+      this->ElementToHtmlCreateFormulaOutputReference
+      (tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
     } else
       out << tempS;
   }
@@ -495,10 +496,10 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
   out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
-  this->bufferEbracketF.ToString(&PolyFormatLocal);
-  tempStreamEF << "\n$[e, f]=$ $" << tempS << "$";
+  tempStreamEF << "\n$[e, f]=$ $" <<  this->bufferEbracketF.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamEF.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
   tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(&PolyFormatLocal) << "$";
   tempS= tempStreamHE.str();
   this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
@@ -548,33 +549,35 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
   theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
   theGlobalVariables.MakeReport();
   for (int i=0; i<output.theRootSAs.size-1; i++)
-  { output.theRootSAs.TheObjects[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
+  { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
     theGlobalVariables.ClearIndicatorVars();
     std::stringstream tempStream;
-    tempStream << "Exploring Vector<Rational> subalgebra number " << (i+1) << " out of " << output.theRootSAs.size-1 << " non-trivial";
+    tempStream << "Exploring root subalgebra number " << (i+1)
+    << " out of " << output.theRootSAs.size-1 << " non-trivial";
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
     theGlobalVariables.MakeReport();
   }
   for (int i=0; i<output.size; i++)
-  { slTwo& theSl2= output.TheObjects[i];
+  { slTwo& theSl2= output[i];
     theSl2.IndicesMinimalContainingRootSA.Reserve(theSl2.IndicesContainingRootSAs.size);
     theSl2.IndicesMinimalContainingRootSA.size=0;
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { bool isMinimalContaining=true;
 //      rootSubalgebra& currentRootSA = output.theRootSAs.TheObjects[];
       for (int k=0; k<theSl2.IndicesContainingRootSAs.size; k++)
-      { rootSubalgebra& theOtherRootSA = output.theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[k]];
-        if (theOtherRootSA.indicesSubalgebrasContainingK.ContainsObject(theSl2.IndicesContainingRootSAs.TheObjects[j]))
+      { rootSubalgebra& theOtherRootSA =
+        output.theRootSAs[theSl2.IndicesContainingRootSAs[k]];
+        if (theOtherRootSA.indicesSubalgebrasContainingK.ContainsObject(theSl2.IndicesContainingRootSAs[j]))
         { isMinimalContaining=false;
           break;
         }
       }
       if (isMinimalContaining)
-        theSl2.IndicesMinimalContainingRootSA.AddOnTopNoRepetition(theSl2.IndicesContainingRootSAs.TheObjects[j]);
+        theSl2.IndicesMinimalContainingRootSA.AddOnTopNoRepetition(theSl2.IndicesContainingRootSAs[j]);
     }
     output.ComputeModuleDecompositionsOfAmbientLieAlgebra(theGlobalVariables);
   }
-  //tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
+//  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
@@ -593,12 +596,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   DynkinDiagramRootSubalgebra tempDiagram;
   int theRelativeDimension = this->SimpleBasisK.size;
   theRootsWithZeroCharacteristic.init(theRelativeDimension);
-  Matrix<Rational>  InvertedRelativeKillingForm;
+  Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
     for (int j=0; j<theRelativeDimension; j++)
-      InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarCartanRoot(this->SimpleBasisK.TheObjects[k], this->SimpleBasisK.TheObjects[j]);
-  InvertedRelativeKillingForm.Invert(theGlobalVariables);
+      InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarCartanRoot
+      (this->SimpleBasisK[k], this->SimpleBasisK[j]);
+  InvertedRelativeKillingForm.Invert();
   theLieAlgebra.theWeyl=this->AmbientWeyl;
   theLieAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
   //int relativeDimension =
@@ -609,12 +613,13 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   Matrix<Rational> tempMat;
 //  Selection tempSel;
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
+
   slTwo theSl2;
   theSl2.owner = &theLieAlgebra;
   for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
-      tempRoots.AddOnTop(this->SimpleBasisK.TheObjects[theRootsWithZeroCharacteristic.elements[j]]);
+      tempRoots.AddOnTop(this->SimpleBasisK[theRootsWithZeroCharacteristic.elements[j]]);
     tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->AmbientWeyl);
     int theSlack=0;
     RootsWithCharacteristic2.size=0;
@@ -622,19 +627,20 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     { Rational DimTwoSpace=0;
       for (int k=0; k<theRelativeDimension; k++)
         if (!theRootsWithZeroCharacteristic.selected[k])
-        { DimTwoSpace+=relativeRootSystem.TheObjects[j].TheObjects[k];
+        { DimTwoSpace+=relativeRootSystem[j][k];
           if (DimTwoSpace>1)
             break;
         }
       if (DimTwoSpace==1)
       { theSlack++;
-        RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK.TheObjects[j]);
+        RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK[j]);
       }
     }
     int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is (but generators still have to be found)
     //this is done in the below code.
+//    std::cout << "Simple basis k: " << this->SimpleBasisK.ToString();
     if (theDynkinEpsilon==0)
     { Vector<Rational> tempRoot, tempRoot2;
       tempRoot.MakeZero(theRelativeDimension);
@@ -642,16 +648,15 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         if(!theRootsWithZeroCharacteristic.selected[k])
           tempRoot[k]=2;
       InvertedRelativeKillingForm.ActOnVectorColumn(tempRoot, tempRoot2);
-      theSl2.theH.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       Vector<Rational> characteristicH;
       characteristicH.MakeZero(theLieAlgebra.GetRank());
-      ElementSemisimpleLieAlgebra tempElt;
       for(int j=0; j<theRelativeDimension; j++)
         characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-      tempElt.AssignElementCartan(characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
+      theSl2.theH.AssignElementCartan(characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theE.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theF.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
+//      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
          (RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK,
           characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
@@ -672,9 +677,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     }
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
+//    std::cout << "<br>" << out.str();
     theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out.str();
     theGlobalVariables.MakeReport();
   }
+//  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
 
 bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rational>& RootsWithCharacteristic2, Vectors<Rational>& relativeRootSystem, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h, ElementSemisimpleLieAlgebra& outputE, ElementSemisimpleLieAlgebra& outputF, Matrix<Rational> & outputMatrixSystemToBeSolved, PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational> & outputSystemColumnVector, GlobalVariables& theGlobalVariables)
@@ -892,10 +899,12 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
 //  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
-  { this->owner->LieBracket(this->theE, this->theF, this->bufferEbracketF);
-    this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
-    this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
-  }
+  this->owner->LieBracket(this->theE, this->theF, this->bufferEbracketF);
+//  std:: cout << "[" << this->theE.ToString() << ", " << this->theF.ToString() << "]="
+//  << this->bufferEbracketF.ToString();
+  this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
+  this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
+
   //theSl2.hCharacteristic.ComputeDebugString();
 //  this->ComputeModuleDecomposition();
 }

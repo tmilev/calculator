@@ -4461,9 +4461,7 @@ public:
   { this->::HashedList<TemplateMonomial>::SetExpectedSize(theSize);
     this->theCoeffs.Reserve(theSize);
   }
-
   bool HasGEQMonomial(TemplateMonomial& m, int& WhichIndex);
-  void RaiseToPower(int d,  const CoefficientType& theRingUniT);
   void WriteToFile(std::fstream& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
   { return this->WriteToFile(output);
@@ -4795,6 +4793,12 @@ public:
       return;
     }
     this->::MonomialCollection<MonomialP, CoefficientType>::operator-=(other);
+  }
+  void operator*=(const MonomialP& other)
+  { Polynomial<CoefficientType> otherP;
+    otherP.MakeZero(this->NumVars);
+    otherP.AddMonomial(other, 1);
+    (*this)*=otherP;
   }
   void operator*=(const Polynomial<CoefficientType>& other)
   { if (this->NumVars!=other.NumVars)
@@ -5244,7 +5248,7 @@ public:
       default: output=this->Numerator.GetElementConst(); return;
     }
   }
-  void GetDenominator(Polynomial<Rational> & output)
+  void GetDenominator(Polynomial<Rational>& output)
   { switch(this->expressionType)
     { case RationalFunction::typeRationalFunction: output=this->Denominator.GetElement(); return;
       default: output.MakeConst(this->NumVars, (Rational) 1); return;
@@ -6024,12 +6028,6 @@ void ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
   tempOne.MakeConst(theRingUniT);
   output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);
-}
-
-template <class TemplateMonomial, class Element>
-void MonomialCollection<TemplateMonomial, Element>::RaiseToPower(int d, const Element& theRingUniT)
-{ if (d!=1)
-    this->RaiseToPower(d, *this, theRingUniT);
 }
 
 template <class Element>
@@ -7274,7 +7272,7 @@ public:
   bool NeedsBrackets()const;
   std::string ToString(FormatExpressions* theFormat=0)const;
   Vector<Rational> GetCartanPart()const;
-  void AssignRootSpace
+  void MakeGGenerator
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
   ;
   bool IsElementCartan()
@@ -7283,13 +7281,13 @@ public:
         return false;
     return true;
   }
-  void AssignElementCartan(const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
-  void AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  void MakeHgenerator(const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
+  void MakeGenerator
   (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
   ;
   void ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces
-(const Vector<Rational> & input, SemisimpleLieAlgebra& owner)
+(const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
   ;
   bool GetCoordsInBasis
   (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<Rational>& output, GlobalVariables& theGlobalVariables)const

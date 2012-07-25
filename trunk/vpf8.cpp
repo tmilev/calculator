@@ -145,14 +145,14 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
 { output.init(this->theRange().GetRank(), this->theDomain().GetRank());
   ElementSemisimpleLieAlgebra domainElt, imageElt;
   for (int i=0; i<this->theDomain().GetRank(); i++)
-  { domainElt.AssignElementCartan
+  { domainElt.MakeHgenerator
     (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), *this->owners, this->indexDomain);
     this->ApplyHomomorphism(domainElt, imageElt);
     output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
 }
 
-void ElementSemisimpleLieAlgebra::AssignElementCartan
+void ElementSemisimpleLieAlgebra::MakeHgenerator
 (const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { ChevalleyGenerator tempGen;
   this->MakeZero(inputOwners, inputIndexInOwners);
@@ -5715,7 +5715,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   out << "}\n";
   out << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i=0; i<numRoots+theDimension; i++)
-  { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  { tempElt1.MakeGenerator
     (i, *this->owner, this->indexInOwner);
     tempS=tempElt1.ToString(theFormat);
     out << " & ";
@@ -5730,12 +5730,12 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   { tempRoot=this->GetWeightOfGenerator(i);
     out << tempRoot.ToString() << "&";
     out << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
-    tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    tempElt1.MakeGenerator
     (i,*this->owner, this->indexInOwner);
     tempS=tempElt1.ToString(theFormat);
     out << tempS;
     for (int j=0; j<numRoots+theDimension; j++)
-    { tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    { tempElt2.MakeGenerator
       (j, *this->owner, this->indexInOwner);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
       tempS=tempElt3.ToString(theFormat);
@@ -8028,16 +8028,16 @@ std::string ElementWeylGroup::ToString
   std::string outerAutoLetter= "a";
   std::stringstream out;
   for (int i=this->size-1; i>=0; i--)
-    if (NumSimpleGens<0 || this->TheObjects[i]<NumSimpleGens)
+    if (NumSimpleGens<0 || (*this)[i]<NumSimpleGens)
     { out << "s_{" << simpleRootLetter << "_{";
       if (DisplayIndicesOfSimpleRoots==0)
-        out << this->TheObjects[i]+1;
+        out << (*this)[i]+1;
       else
-        out << (*DisplayIndicesOfSimpleRoots)[this->TheObjects[i]];
+        out << (*DisplayIndicesOfSimpleRoots)[(*this)[i]];
       out << "} }";
     }
     else
-      out << outerAutoLetter << "_{" << this->TheObjects[i]-NumSimpleGens+1 << "}";
+      out << outerAutoLetter << "_{" << (*this)[i]-NumSimpleGens+1 << "}";
   return out.str();
 }
 
@@ -8356,7 +8356,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
     if (!this->Powers[i].IsSmallInteger(&nextCycleSize))
       return false;
     for (int j=0; j<nextCycleSize; j++)
-    { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    { tempElt.MakeGenerator
         (this->generatorsIndices[i], *this->owners, this->indexInOwners) ;
       output.LieBracketOnTheLeft(tempElt);
     }
@@ -8419,7 +8419,7 @@ int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobal
   { if (theWeight.size!=this->GetContextLieAlgebra().GetRank())
       return this->SetError(this->errorDimensionProblem);
     Polynomial<Rational>  PolyZero;
-    theUEElement.AssignElementCartan
+    theUEElement.MakeHgenerator
     (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
     this->ExpressionType=this->typeUEelement;
     return this->errorNoError;

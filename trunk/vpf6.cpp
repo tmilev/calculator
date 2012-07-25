@@ -424,7 +424,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
     actualIndex+=ownerAlgebra.GetNumPosRoots();
   else
     actualIndex+=ownerAlgebra.GetNumPosRoots()+ownerAlgebra.GetRank()-1;
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  tempElt.MakeGenerator
   (actualIndex, inputOwners, inputIndexInOwners);
   this->owner=&inputOwner;
   this->type=this->typeElementUE;
@@ -867,7 +867,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   }
   ElementSemisimpleLieAlgebra tempElt;
   int actualIndeX=index2-1+ownerAlgebra.GetNumPosRoots();
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  tempElt.MakeGenerator
   (actualIndeX, inputOwners, inputIndexInOwners);
   RationalFunction rfOne, rfZero;
   rfOne.MakeOne(0, this->owner->theGlobalVariableS);
@@ -1989,7 +1989,8 @@ void ModuleSSalgebraNew<CoefficientType>::GetElementsNilradical
 
 template <class CoefficientType>
 void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
-   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+ (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output,
+  GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   RationalFunction tempRF;
@@ -2005,6 +2006,27 @@ void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(numVars, &theGlobalVariables);
+  output.AddMonomial(tempMon, tempRF);
+}
+
+template <class CoefficientType>
+void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
+   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+{ List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
+  this->GetElementsNilradical(eltsNilrad, true);
+  Polynomial<Rational> tempRF;
+  output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
+  tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
+  int varShift=0;
+  if (shiftPowersByNumVarsBaseField)
+    varShift=this->GetNumVars();
+  int numVars=varShift+eltsNilrad.size;
+  for (int i=0; i<eltsNilrad.size; i++)
+  { tempRF.MakeMonomial(numVars, i+varShift, 1, 1);
+    tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
+  }
+  tempRF.MakeOne(numVars);
   output.AddMonomial(tempMon, tempRF);
 }
 
@@ -2058,6 +2080,12 @@ template <class CoefficientType>
 class MatrixTensor: public MonomialCollection<MonMatrixTensor, CoefficientType >
 {
 public:
+  void MakeIdSpecial()
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    theMon.MakeIdSpecial();
+    this->AddMonomial(theMon, 1);
+  }
   void MakeId(int numVars)
   { this->MakeZero();
     MonMatrixTensor theMon;
@@ -2077,6 +2105,38 @@ public:
           theMon.vIndex=i;
           this->AddMonomial(theMon, other.elements[i][j]);
         }
+  }
+  void operator*=(const MatrixTensor<CoefficientType>& other)
+  { MacroRegisterFunctionWithName("MatrixTensor<CoefficientType>::operator*=");
+    if (this==&other)
+    { MatrixTensor<CoefficientType> otherCopy=other;
+      *this*=otherCopy;
+      return;
+    }
+    MatrixTensor<CoefficientType> thisCopy=*this;
+    MonMatrixTensor tempMon;
+    this->MakeZero();
+    this->SetExpectedSize(thisCopy.size*other.size);
+    CoefficientType tempCF;
+    for (int i=0; i<thisCopy.size; i++)
+      for (int j=0; j<other.size; j++)
+      { MonMatrixTensor& leftMon=thisCopy[i];
+        MonMatrixTensor& rightMon=other[j];
+        if (!leftMon.IsId && !rightMon.IsId)
+        { if (leftMon.dualIndex!=rightMon.vIndex)
+            continue;
+          tempMon.IsId=false;
+          tempMon.dualIndex=rightMon.dualIndex;
+          tempMon.vIndex=leftMon.vIndex;
+        }
+        if (leftMon.IsId)
+          tempMon=rightMon;
+        if (rightMon.IsId)
+          tempMon=leftMon;
+        tempCF=thisCopy.theCoeffs[i];
+        tempCF*=other.theCoeffs[j];
+        this->AddMonomial(tempMon, tempCF);
+      }
   }
 };
 
@@ -2186,116 +2246,94 @@ void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
 }
 
 template <class CoefficientType>
+bool ModuleSSalgebraNew<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
+(MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
+ ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator");
+  Rational tempRat;
+  int expConstPart, powerMonCoeff;
+  int varShift=this->GetNumVars();
+  int numVars=varShift+indicesNilrad.size;
+  ElementWeylAlgebra tempElt, tempElt2;
+  Polynomial<Rational> tempMon;
+  outputDO.MakeConst(numVars, 1);
+  for (int i=0; i<indicesNilrad.size; i++)
+  { monUE.Powers[i].GetConstantTerm(tempRat, 0);
+    tempRat.IsSmallInteger(&expConstPart);
+    monCoeff[i+varShift].IsSmallInteger(&powerMonCoeff);
+    tempElt.Makexidj(i+varShift, i+varShift, numVars);
+    tempElt.RaiseToPower(powerMonCoeff);
+    tempMon.MakeMonomial(numVars, i+varShift, expConstPart, 1);
+    tempElt2.AssignPolynomial(tempMon);
+    tempElt.MultiplyOnTheLeft(tempElt2, theGlobalVariables);
+    outputDO*=tempElt;
+  }
+  return true;
+}
+
+template <class CoefficientType>
 bool ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
-(ElementUniversalEnveloping<RationalFunction>& inputElt, quasiDiffOp<RationalFunction>& output,
+(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunction>& output,
   GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
-  ElementUniversalEnveloping<RationalFunction> theGenElt, result;
-  int VarIndexShift=this->GetNumVars();
+  ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables);
-  result=inputElt;
   int numVars=theGenElt.GetNumVars();
-  result.SetNumVariables(numVars);
+//  Polynomial<Rational> Pone, Pzero;
+  result.AssignElementLieAlgebra(inputElt, *this->theAlgebras, this->indexAlgebra, 1, 0);
   theGenElt.SetNumVariables(numVars);
   std::stringstream out;
-//  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify(theGlobalVariables);
-//  std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
-
-//  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
+  std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
+  std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
   result.MultiplyBy(theGenElt);
   result.Simplify(theGlobalVariables);
-//  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString(&tempFormat));
-
-
-  Polynomial<Rational> tempP;
-  MonomialP monUEpart, monTotal;
-  RationalFunction difference, newContrib;
-
-  RationalFunction theWeylEltRatForm, finalCoeff;
-  Matrix<RationalFunction> tempMat, outputOp;
-//  theWeylElt.MakeZero(numVars*2);
-  Vector<Rational> theWeight;
-  MatrixTensor<RationalFunction> endoPart;
+  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
+  MatrixTensor<RationalFunction> endoPart, tempMT, idMT;
+  idMT.MakeIdSpecial();
+  Matrix<RationalFunction> tempM;
+  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
+  ElementWeylAlgebra weylPartSummand;
+  Polynomial<Rational> tempP, theCoeff;
+  quasiDiffMon monQDO;
+  RationalFunction tempRF;
   output.MakeZero();
-  quasiDiffMon tempMon;
   for (int i=0; i<result.size; i++)
-  { MonomialUniversalEnveloping<RationalFunction>& currentMon=result[i];
-    outputOp.MakeIdMatrix(this->GetDim());
-    theWeylEltRatForm=result.theCoeffs[i];
-    theWeylEltRatForm.SetNumVariables(numVars*2);
-//    std::cout << "<br>Processing: " << result[i].ToString();
-    bool MayBeNotId=false;
-    for (int k=0; k<currentMon.generatorsIndices.size; k++)
-    { int currentIndex=currentMon.generatorsIndices[k];
-      int indexInNilrad=indicesNilrad.IndexOfObject(currentIndex);
-      if (indexInNilrad!=-1)
-      { difference.MakeOneLetterMon(numVars, indexInNilrad+VarIndexShift, 1, theGlobalVariables);
-        difference-=currentMon.Powers[k];
-        difference*=-1;
-        int diffInt;
-        if (!difference.IsSmallInteger(&diffInt))
-        { std::cout << "<br>This is s a programming error. indexInNilrad=" << indexInNilrad+VarIndexShift
-          << " The difference must be a small int, instead it is: "
-          << difference.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
-        ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-        (diffInt, numVars, indexInNilrad+VarIndexShift, newContrib, theGlobalVariables);
-//        std::cout << "<br> multiplying " << theWeylEltRatForm.ToString() << " by " << newContrib.ToString();
-        theWeylEltRatForm*=newContrib;
-      } else
-      { tempMat=this->GetActionGeneratorIndex(currentMon.generatorsIndices[k], theGlobalVariables);
-        outputOp.MultiplyOnTheRight(tempMat);
-        MayBeNotId=true;
-      }
+  { MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon=result[i];
+    endoPart=idMT;
+    for (int j=currentMon.Powers.size-1; j>=indicesNilrad.size; j--)
+    { int thePower=0;
+      if (!currentMon.Powers[j].IsSmallInteger(&thePower))
+        return false;
+      tempM=this->GetActionGeneratorIndex(currentMon.generatorsIndices[j], theGlobalVariables);
+      tempMT=tempM;
+      MathRoutines::RaiseToPower(tempMT, thePower, idMT);
+      endoPart*=tempMT;
     }
-    if (theWeylEltRatForm.expressionType==theWeylEltRatForm.typeRationalFunction)
-    { std::cout << "Something unexpected has happened, possibly a mathematical mistake. "
-      << "The rational function corresponding to the weyl element in the conversion to differential operator "
-      << " is instead an honest rational function. This is either a programming error, or in the worse case a "
-      << " mathematical one (in particular, this would mean this function should not exist at all). "
-      << " The bad monomial was: " << currentMon.ToString() << " and the bad weyl elt: "
-      << theWeylEltRatForm.ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    theWeylEltRatForm.GetNumerator(tempP);
-    //tempP.SetNumVariables(numVars);
-    if (MayBeNotId)
-      endoPart=outputOp;
-    for (int l=0; l<tempP.size; l++)
-      if (MayBeNotId)
-      { if (this->GetDim()==1)
-        { tempMon.theMatMon.MakeIdSpecial();
-          tempMon.theWeylMon=tempP[l];
-          finalCoeff=outputOp.elements[0][0];
-          finalCoeff*=tempP.theCoeffs[l];
-          output.AddMonomial(tempMon, finalCoeff);
+    std::cout << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
+    for (int l=0; l<result.theCoeffs[i].size; l++)
+    { if (!this->GetActionMonGenVermaModuleAsDiffOperator
+          (result.theCoeffs[i][l], currentMon, weylPartSummand, indicesNilrad, theGlobalVariables))
+        return false;
+      std::cout << "<br>Weyl part of " << currentMon.ToString() << " with coeff "
+      << result.theCoeffs[i].ToString() << ": " << weylPartSummand.ToString();
+      weylPartSummand.GetStandardOrder(tempP);
+      for (int j=0; j<tempP.size; j++)
+        for (int k=0; k<endoPart.size; k++)
+        { monQDO.theMatMon=endoPart[k];
+          monQDO.theWeylMon=tempP[j];
+          tempRF=endoPart.theCoeffs[k];
+          tempRF*=tempP.theCoeffs[j];
+          tempRF*=result.theCoeffs[i].theCoeffs[l];
+          output.AddMonomial(monQDO, tempRF);
         }
-        else
-          for (int j=0; j<endoPart.size; j++)
-          { tempMon.theMatMon=endoPart[j];
-            tempMon.theWeylMon=tempP[l];
-            finalCoeff=endoPart.theCoeffs[j];
-            finalCoeff.SetNumVariables(numVars);
-            finalCoeff*=tempP.theCoeffs[l];
-            output.AddMonomial(tempMon, finalCoeff);
-          }
-      }
-      else
-      { tempMon.theMatMon.MakeIdSpecial();
-        tempMon.theWeylMon=tempP[l];
-        output.AddMonomial(tempMon, tempP.theCoeffs[l]);
-      }
-
-//    std::cout << "<br>the weyl elt corresponding to " << CGI::GetHtmlMathSpanPure(currentMon.ToString()) << ": "
-//    << CGI::GetHtmlMathSpanPure(currentWeylElt.ToString()) << CGI::GetHtmlMathSpanPure("\\otimes "+ currentVectPart.ToString());
+    }
   }
-//  std::cout << "<br>The  output: " << CGI::GetHtmlMathSpanPure(output.ToString());
-  return false;
+  return true;
 }
 
 bool CommandList::fWriteGenVermaModAsDiffOperatorInner
@@ -2309,7 +2347,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   Expression tempExp;
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
   List<ElementUniversalEnveloping<RationalFunction> > elementsNegativeNilrad;
-  ElementUniversalEnveloping<RationalFunction> genericElt, theGenerator;
+  ElementSemisimpleLieAlgebra theGenerator;
+  ElementUniversalEnveloping<RationalFunction> genericElt, actionOnGenericElt;
   List<ElementWeylAlgebra> actionNilrad;
   List<int> vectorIndices, dualIndices;
   quasiDiffOp<RationalFunction> tempQDO;
@@ -2324,14 +2363,18 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   hwContext.GetFormatExpressions(theUEformat);
   theUEformat.polyDefaultLetter="n";
   hwContext.GetFormatExpressions(theWeylFormat);
-  List<ElementUniversalEnveloping<RationalFunction> > theGeneratorsItry;
+  List<ElementSemisimpleLieAlgebra> theGeneratorsItry;
   for (int j=0; j<theSSalgebra.GetRank(); j++)
   { Vector<Rational> ei;
     ei.MakeEi(theSSalgebra.GetRank(), j);
-    theGenerator.MakeOneGeneratorCoeffOne(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGenerator.MakeGGenerator
+    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGeneratorsItry.AddOnTop(theGenerator);
+    theGenerator.MakeHgenerator
+    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
     ei.Minus();
-    theGenerator.MakeOneGeneratorCoeffOne(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGenerator.MakeGGenerator(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
   }
   if (false)
@@ -2354,6 +2397,9 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     tempExp.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerModule();
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
+      RationalFunction RFone, RFzero;
+      RFone.MakeOne(elementsNegativeNilrad.size+theMod.GetNumVars(), theCommands.theGlobalVariableS);
+      RFzero.MakeZero(elementsNegativeNilrad.size+theMod.GetNumVars(), theCommands.theGlobalVariableS);
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
       quasiDiffOp<RationalFunction>::prepareFormatFromShiftAndNumWeylVars
       (hwContext.VariableImages.size, elementsNegativeNilrad.size, theWeylFormat);
@@ -2378,12 +2424,14 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
-      { theGenerator=theGeneratorsItry[j];
-        theGenerator.MultiplyBy(genericElt);
+      { actionOnGenericElt.AssignElementLieAlgebra
+        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, RFone, RFzero)
+        ;
+        actionOnGenericElt.MultiplyBy(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
-        theGenerator.Simplify(*theCommands.theGlobalVariableS);
-        out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theGenerator.ToString(&theUEformat)) << "</td>";
-        latexReport << "& $\\begin{array}{l} " << theGenerator.ToString(&theUEformat) << "\\end{array}$ ";
+        actionOnGenericElt.Simplify(*theCommands.theGlobalVariableS);
+        out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(actionOnGenericElt.ToString(&theUEformat)) << "</td>";
+        latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat) << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
@@ -2914,7 +2962,7 @@ bool CommandList::fWeylOrbit
   Vectors<Polynomial<Rational> > theHWs;
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
-  theFormat.fundamentalWeightLetter="\\psi";
+//  theFormat.fundamentalWeightLetter="\\psi";
   theHWs.AddOnTop(theHWsimpleCoords);
   HashedList<Vector<Polynomial<Rational> > > outputOrbit;
   WeylGroup orbitGeneratingSet;
@@ -2924,7 +2972,7 @@ bool CommandList::fWeylOrbit
     << " elements only.";
   else
     out << "The orbit has " << outputOrbit.size << " elements.";
-  latexReport << "\\begin{longtable}{rl}Elt. $\\mathbf W $ & Image in fund. coord. \\\\\n<br>";
+  latexReport << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}}Element & Image fund. coordinates& Hw minus wt. \\\\\n<br>";
   out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td>";
   if (useRho)
     out << "<td>Corresponding b-singular vector candidate</td>";
@@ -2933,10 +2981,12 @@ bool CommandList::fWeylOrbit
   LargeInt tempInt;
   bool useMathTag=outputOrbit.size<150;
   for (int i=0; i<outputOrbit.size; i++)
-  { std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
+  { theFormat.simpleRootLetter="\\alpha";
+    theFormat.fundamentalWeightLetter="\\psi";
+    std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
     std::string weightEltString=
     theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
-    ("\\omega", &theFormat);
+    (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
@@ -2944,7 +2994,9 @@ bool CommandList::fWeylOrbit
     << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
     latexReport <<"$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
-    <<  weightEltString << "$ " << "\\\\\n<br>"
+    <<  weightEltString << "$ & $"
+    << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
+    << "$\\\\\n<br>"
     ;
     if (useRho)
     { currentWeight=theHWsimpleCoords;
@@ -3051,7 +3103,7 @@ bool CommandList::fSSAlgebra
         Vector<Rational> tempRoot;
         ElementSemisimpleLieAlgebra tempElt1;
         for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
-        { tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+        { tempElt1.MakeGenerator
           (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
           tempRoot=theSSalgebra.GetWeightOfGenerator(i);
           out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
@@ -3311,7 +3363,7 @@ void CommandList::initPredefinedVars()
    The third argument parametrizes the parabolic subalgebra, e.g. (1,0,0) stands for a \
    parabolic subalgebra with first simple Vector<Rational> crossed-out. The second argument is allowed to have \
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
-   "g:=SemisimpleLieAlgebra{} B_3;\nv_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v_\\lambda");
+   "g:=SemisimpleLieAlgebra{} B_3;\n v_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0)) ;  v_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v_\\lambda");
   this->AddNonBoundVarMustBeNew
   ("hwTAAbf", & this->fHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
@@ -3431,7 +3483,7 @@ void CommandList::initPredefinedVars()
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
    "printSlTwoSubalgebrasAndRootSubalgebras{}(E_6)");
-/*   this->AddNonBoundVarMustBeNew
+   this->AddNonBoundVarMustBeNew
   ("parabolicsInfoBruhatGraph", &this->fParabolicWeylGroupsBruhatGraph, "",
    " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
    as well as the cosets \
@@ -3446,7 +3498,7 @@ void CommandList::initPredefinedVars()
    You will get your output as a .png file link, you must click onto the link to see the end result. \
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
-   "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");*/
+   "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
   this->NumPredefinedVars=this->theObjectContainer.theNonBoundVars.size;
 }
 
@@ -5464,35 +5516,24 @@ std::string Function::ToString(CommandList& theBoss)const
 { std::stringstream out2;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out2 << "<span style=\"display: inline\" id=\"functionBox" << CGI::clearSlashes(this->theName) << "\" >";
-  if (this->flagNameIsVisible)
-  { out2 << openTag2 << this->theName << closeTag2;
-    if (!this->theArgumentList.IsZeroPointer())
-      for (int i=0; i<this->theArgumentList.GetElementConst().size; i++)
-      { out2 << "{}(" << this->theArgumentList.GetElementConst()[i] << ")";
-        if (i!=this->theArgumentList.GetElementConst().size-1)
-          out2 << ", ";
-      }
-  }
-  else
-    out2 << openTag2 << this->theName << closeTag2;
- std::stringstream out;
+  out2 << openTag2 << this->theName << closeTag2;
+  std::stringstream out;
   if (!this->flagNameIsVisible)
     out << "This function is invoked indirectly as an operation handler. ";
-
   out << this->theDescription;
   if (this->theExample!="")
-  out << "<br>Example. <a href=\""
+    out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
+  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
+  if (this->theExample!="")
+    out2 << "<a href=\""
     << theBoss.DisplayNameCalculator  << "?"
     << " textType=Calculator&textDim=1&textInput="
     << CGI::UnCivilizeStringCGI(this->theExample)
-    << "\"> " << this->theExample << "</a>" ;
-  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());//, "Expand/collapse.", "fun"+CGI::clearSlashes(this->theName));
-  out2 << "<span>";
+    << "\"> " << " Example" << "</a>" ;
   return out2.str() ;
 }
 
-std::string CommandList::ElementToStringFunctionHandlers()
+std::string CommandList::ToStringFunctionHandlers()
 { std::stringstream out;
   out << "\n <b>Handler functions (" << this->theFunctions.size << " total).</b><br>\n";
   for (int i=0; i<this->theFunctions.size; i++)
@@ -5531,25 +5572,32 @@ std::string CommandList::ToString()
   std::stringstream tempStreamTime;
   tempStreamTime <<  " Of them "
   << this->StartTimeEvaluationInSecondS
-  << " seconds (" << this->StartTimeEvaluationInSecondS*1000 << " millisecond(s)) boot + " << elapsedSecs-this->StartTimeEvaluationInSecondS << " ("
+  << " seconds (" << this->StartTimeEvaluationInSecondS*1000 << " millisecond(s)) boot + "
+  << elapsedSecs-this->StartTimeEvaluationInSecondS << " ("
   << (elapsedSecs-this->StartTimeEvaluationInSecondS)*1000 << " milliseconds) user computation.<br>"
-  << "Boot time is measured from start of main() until evaluation start and excludes static initializations + executable load. "
+  << "Boot time is measured from start of main() until evaluation start and excludes static initializations "
+  << "+ executable load. "
   << "Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
   out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
-  out2 << "<br>Maximum computation time: " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2
+  out2 << "<br>Maximum computation time: "
+  << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2
   << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
-  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions << " (# successful calls Rational::TryToAddQuickly)";
-  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications << " (# successful calls Rational::TryToMultiplyQuickly)";
+  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
+  << " (# successful calls Rational::TryToAddQuickly)";
+  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications
+  << " (# successful calls Rational::TryToMultiplyQuickly)";
   out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (# calls of Rational::gcd)";
-
-  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions << " (# calls LargeIntUnsigned::AddNoFitSize)";
-  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications << " (# calls LargeIntUnsigned::MultiplyBy)";
-  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls << " (# calls LargeIntUnsigned::gcd)";
+  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions
+  << " (# calls LargeIntUnsigned::AddNoFitSize)";
+  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications
+  << " (# calls LargeIntUnsigned::MultiplyBy)";
+  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls
+  << " (# calls LargeIntUnsigned::gcd)";
   #endif
-  out2 << "<hr>" << this->ElementToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
+  out2 << "<hr>" << this->ToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>."
   << "The object container is the data structure storing all c++ built-in data types requested by the user<br> "
   << this->theObjectContainer.ToString();

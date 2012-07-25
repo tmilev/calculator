@@ -976,7 +976,7 @@ template <class CoefficientType>
       outputWeylElt[i]=i;
   }
   template <class Element>
-  void ActOn(ElementWeylGroup& theGroupElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero)
+  void ActOn(ElementWeylGroup& theGroupElement, Vector<Element>& theVector, bool RhoAction, bool UseMinusRho, const Element& theRingZero=0)
   { for (int i=0; i<theGroupElement.size; i++)
       this->SimpleReflection(theGroupElement[i], theVector, RhoAction, UseMinusRho, theRingZero);
   }
@@ -1080,7 +1080,8 @@ public:
   //format: each element of of the group is a list of generators, reflections with respect to the simple generators, and outer
   //automorphisms.
   //format of the externalAutomorphisms:
-  // For a fixed external automorphism (of type Vectors<Rational>) the i^th entry gives the image of the simple Vector<Rational>  with 1 on the i^th coordinate
+  // For a fixed external automorphism (of type Vectors<Rational>) the i^th entry gives the image
+  //of the simple root  with 1 on the i^th coordinate
   List<Vectors<Rational> > ExternalAutomorphisms;
   HashedList<Vector<Rational> > RootSubsystem;
   Vectors<Rational> RootsOfBorel;
@@ -1144,11 +1145,20 @@ public:
   (Vectors<Rational>& inputGenerators, List<Vectors<Rational> > & inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
    bool recomputeAmbientRho);
   void ComputeRootSubsystem();
-  void ActByElement(int index, Vector<Rational> & theRoot);
-  void ActByElement(int index, Vector<Rational> & input, Vector<Rational> & output){this->ActByElement(this->TheObjects[index], input, output);}
-  void ActByElement(ElementWeylGroup& theElement, Vector<Rational> & input, Vector<Rational> & output);
-  void ActByElement(int index, Vectors<Rational>& input, Vectors<Rational>& output) {this->ActByElement(this->TheObjects[index], input, output);}
-  void ActByElement(ElementWeylGroup& theElement, Vectors<Rational>& input, Vectors<Rational>& output);
+  template <class CoefficientType>
+  void ActByElement(int index, Vector<CoefficientType> & theRoot);
+  template <class CoefficientType>
+  void ActByElement(int index, Vector<CoefficientType> & input, Vector<CoefficientType> & output)
+  { this->ActByElement(this->TheObjects[index], input, output);
+  }
+  template <class CoefficientType>
+  void ActByElement(ElementWeylGroup& theElement, Vector<CoefficientType>& input, Vector<CoefficientType>& output);
+  template <class CoefficientType>
+  void ActByElement(int index, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)
+  { this->ActByElement(this->TheObjects[index], input, output);
+  }
+  template <class CoefficientType>
+  void ActByElement(ElementWeylGroup& theElement, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
   void Assign(const ReflectionSubgroupWeylGroup& other);
@@ -2114,7 +2124,7 @@ public:
   }
   SemisimpleLieAlgebraOrdered* owner;
   void AddMonomial(const MonomialUniversalEnvelopingOrdered<CoefficientType>& input);
-  void AssignElementCartan(const Vector<Rational> & input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
+  void MakeHgenerator(const Vector<Rational> & input, int numVars, SemisimpleLieAlgebraOrdered& theOwner);
   void AssignElementLieAlgebra
 (const ElementSemisimpleLieAlgebra& input, const CoefficientType& theRingUnit,
  const CoefficientType& theRingZero, SemisimpleLieAlgebraOrdered& theOwner)
@@ -2458,7 +2468,7 @@ public:
   }
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
-  void AssignElementCartan
+  void MakeHgenerator
   (const Vector<Rational> & input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
@@ -2711,7 +2721,7 @@ public:
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   (int inputPower, int numVars, int indexVar, RationalFunction& output, GlobalVariables& theGlobalVariables);
   bool ActOnPolynomial(Polynomial<Rational> & thePoly);
-  void GetStandardOrder(Polynomial<Rational> & output){output=this->StandardOrder;}
+  void GetStandardOrder(Polynomial<Rational>& output){output=this->StandardOrder;}
   void SetNumVariables(int newNumVars);
   void TimesConstant(Rational& theConstant){ this->StandardOrder*=(theConstant);}
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
@@ -3235,11 +3245,20 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 (int theGeneratorIndex)
    ;
    void GetGenericUnMinusElt
+   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+   ;
+   void GetGenericUnMinusElt
    (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
    ;
+   //The input of the following function is supposed to be an honest element of the Universal enveloping,
+   //i.e. inputElt is not allowed to have non-small integer exponents.
    bool GetActionGenVermaModuleAsDiffOperator
-(ElementUniversalEnveloping<RationalFunction>& inputElt, quasiDiffOp<RationalFunction>& output,
+(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunction>& output,
   GlobalVariables& theGlobalVariables)
+   ;
+bool GetActionMonGenVermaModuleAsDiffOperator
+(MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
+ ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
    ;
    ModuleSSalgebraNew() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
    {}
@@ -6051,14 +6070,14 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
   { tempRoot1.MakeEi(theDimension, i);
   //implementation without the ninja formula:
 //    killingForm.ActOnVectorColumn(tempRoot1, tempRoot2);
-//    tempElt1.AssignElementCartan(tempRoot1, numVars, theOwner);
-//    tempElt2.AssignElementCartan(tempRoot2, numVars, theOwner);
+//    tempElt1.MakeHgenerator(tempRoot1, numVars, theOwner);
+//    tempElt2.MakeHgenerator(tempRoot2, numVars, theOwner);
 //    tempElt1*=tempElt2;
 //    *this+=tempElt1;
 // Alternative implementation using a ninja formula I cooked up after looking at the printouts:
     invertedSymCartan.ActOnVectorColumn(tempRoot1, tempRoot2);
-    tempElt1.AssignElementCartan(tempRoot1, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
-    tempElt2.AssignElementCartan(tempRoot2, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
+    tempElt1.MakeHgenerator(tempRoot1, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
+    tempElt2.MakeHgenerator(tempRoot2, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
     tempElt1*=tempElt2;
     *this+=tempElt1;
   }
@@ -6283,7 +6302,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::AssignElementCartan
+void ElementUniversalEnveloping<CoefficientType>::MakeHgenerator
 (const Vector<Rational> & input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
@@ -6713,7 +6732,7 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::AssignMonomialUniversal
   { int thePower;
     bool isASmallInt=input.Powers.TheObjects[i].IsSmallInteger(&thePower);
     if (isASmallInt)
-    { tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    { tempElt.MakeGenerator
       (input.generatorsIndices.TheObjects[i], *input.owners, input.indexInOwners);
       theMon.AssignElementLieAlgebra(tempElt, theRingUnit, theRingZero, owner);
       //std::cout << "<br>raising " << theMon.ToString() << " to power " << thePower;
@@ -8307,4 +8326,40 @@ void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
   this->AddMonomial(theMon, theRingUnit);
 }
 
+template <class CoefficientType>
+void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<CoefficientType>& theRoot)
+{ Vector<CoefficientType> tempRoot;
+  this->ActByElement(index, theRoot, tempRoot);
+  theRoot=(tempRoot);
+}
+
+template <class CoefficientType>
+void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vector<CoefficientType>& input, Vector<CoefficientType>& output)
+{ assert(&input!=&output);
+  int NumElts=theElement.size;
+  Vector<CoefficientType> tempRoot, tempRoot2;
+  output=(input);
+  for (int i=0; i<NumElts; i++)
+  { int tempI=theElement[i];
+    if(tempI<this->simpleGenerators.size)
+      this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
+    else
+    { tempI-=this->simpleGenerators.size;
+      tempRoot.MakeZero(input.size);
+      for (int j=0; j<output.size; j++)
+      { tempRoot2=this->ExternalAutomorphisms[tempI][j];
+        tempRoot2*=output[j];
+        tempRoot+=tempRoot2;
+      }
+    }
+  }
+}
+
+template<class CoefficientType>
+void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output)
+{ assert(&input!=&output);
+  output.SetSize(input.size);
+  for (int i=0; i<input.size; i++)
+    this->ActByElement(theElement, input[i], output[i]);
+}
 #endif

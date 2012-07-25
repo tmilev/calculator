@@ -1400,18 +1400,18 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.theRange().ComputeChevalleyConstantS(*this->theGlobalVariableS);
   output.theDomain().ComputeChevalleyConstantS(*this->theGlobalVariableS);
   ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
-  g_2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  g_2.MakeGenerator
   (13, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
-  g_m2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  g_m2.MakeGenerator
   (7, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
-  g_1plusg_3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  g_1plusg_3.MakeGenerator
   (12, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  tempElt.MakeGenerator
   (14, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
   g_1plusg_3+=tempElt;
-  g_m1plusg_m3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  g_m1plusg_m3.MakeGenerator
   (6, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
-  tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  tempElt.MakeGenerator
   (8, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
   g_m1plusg_m3+=tempElt;
 
@@ -2216,8 +2216,10 @@ bool CommandList::fParabolicWeylGroups
 
 bool CommandList::fParabolicWeylGroupsBruhatGraph
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ Selection parabolicSel;
-  Vector<RationalFunction> theHWfundcoords;
+{ MacroRegisterFunctionWithName("CommandList::fParabolicWeylGroupsBruhatGraph");
+  IncrementRecursion theRecursion(&theCommands);
+  Selection parabolicSel;
+  Vector<RationalFunction> theHWfundcoords, tempRoot, theHWsimplecoords;
   Context hwContext(theCommands);
   if(!theCommands.fTypeHighestWeightParabolic
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, parabolicSel, &hwContext)  )
@@ -2245,6 +2247,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   out << "<br>Number of elements of the ambient Weyl: " << theSubgroup.AmbientWeyl.size;
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
+  FormatExpressions theFormat;
+  hwContext.GetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
   { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
         theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
@@ -2253,47 +2257,73 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
   }
   else
-  { outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
+  { bool useJavascript=theSubgroup.size<100;
+    outputFile << "\\[" << theSubgroup.ElementToStringBruhatGraph() << "\\]";
     outputFile << "\n\\end{document}";
     outputFile2 << "\\[" << theSubgroup.ElementToStringCosetGraph() << "\\]";
     outputFile2 << "\n\\end{document}";
-    out << "<hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
-    please check whether the .tex corresponds to the .png!</b><br>"
-    << " The requested Bruhat graph is located in a png file here: <a href=\""
+    out << "<hr>"
+    << " The Hasse graph of the Weyl group of the Levi part follows. <a href=\""
     << theCommands.DisplayNameDefaultOutput << "1.tex\"> "
     << theCommands.DisplayNameDefaultOutput << "1.tex</a>";
-    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput << "1.png\" width=\"800\" height=\"600\"></iframe>"
-    << theCommands.DisplayNameDefaultOutput << "1.png</a>";
-    out << "<hr><hr><b>The .png file might be bad if LaTeX crashed while trying to process it; \
-    please check whether the .tex corresponds to the .png! </b><br>"
-    << " The coset graph is located in a png file here: <a href=\"" << theCommands.DisplayNameDefaultOutput
+    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
+    << "1.png\" width=\"800\" height=\"600\">"
+    << theCommands.DisplayNameDefaultOutput << "1.png</iframe>";
+    out << "<hr>"
+    << " The coset graph of the Weyl group of the Levi part follows. The cosets are right, i.e. a coset "
+    << " of the subgroup X is written in the form Xw, where w is one of the elements below. "
+    << "<a href=\""
+    << theCommands.DisplayNameDefaultOutput
     << "2.tex\"> " <<  theCommands.DisplayNameDefaultOutput << "2.tex</a>";
-    out << ", <a href=\"" << theCommands.DisplayNameDefaultOutput << "2.png\"> "
-    << theCommands.DisplayNameDefaultOutput << "2.png</a>";
-
+    out << ", <iframe src=\"" << theCommands.DisplayNameDefaultOutput
+    << "2.png\" width=\"800\" height=\"600\"> "
+    << theCommands.DisplayNameDefaultOutput << "2.png</iframe>";
+    out <<"<b>The .png file might be bad if LaTeX crashed while trying to process it; "
+    << "please check whether the .tex corresponds to the .png.</b>";
     out << "<hr>Additional printout follows.<br> ";
     out << "<br>Representatives of the coset follow. Below them you can find the elements of the subgroup. <br>";
+    out << "<table><tr><td>Element</td><td>weight simple coords</td><td>weight fund. coords</td></tr>";
+    theFormat.fundamentalWeightLetter="\\omega";
     for (int i=0; i<theSubgroup.RepresentativesQuotientAmbientOrder.size; i++)
     { ElementWeylGroup& current=theSubgroup.RepresentativesQuotientAmbientOrder[i];
-      out << "<br>" << current.ToString();
+      out << "<tr><td>"
+      << (useJavascript ? CGI::GetHtmlMathSpanPure(current.ToString()) : current.ToString())
+      << "</td>";
+      theHWsimplecoords=
+      theSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
+      theSSalgebra.theWeyl.ActOn
+      (theSubgroup.RepresentativesQuotientAmbientOrder[i], theHWsimplecoords, true, false);
+      out << "<td>"
+      << (useJavascript ? CGI::GetHtmlMathSpanPure(theHWsimplecoords.ToString(&theFormat))
+      : theHWsimplecoords.ToString(&theFormat))
+      << "</td>";
+      tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
+      std::string theFundString=
+      tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
+      out << "<td>" << ( useJavascript ? CGI::GetHtmlMathSpanPure(theFundString): theFundString)
+      << "</td>";
+      out << "</tr>";
     }
-    out << "<hr>";
+    out << "</table><hr>";
     out << theSubgroup.ToString();
   }
   outputFile.close();
   outputFile2.close();
+  std::cout << "<!--";
+  std::cout.flush();
   std::string command1="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + fileName + ".tex";
   std::string command2="dvipng " + fileName + ".dvi -o " + fileName + ".png -T tight";
   std::string command3="latex  -output-directory=" + theCommands.PhysicalPathOutputFolder + " " + filename2 + ".tex";
   std::string command4="dvipng " + filename2 + ".dvi -o " + filename2 + ".png -T tight";
-  std::cout << "<br>" << command1;
-  std::cout << "<br>" << command2;
-  std::cout << "<br>" << command3;
-  std::cout << "<br>" << command4;
+//  std::cout << "<br>" << command1;
+//  std::cout << "<br>" << command2;
+//  std::cout << "<br>" << command3;
+//  std::cout << "<br>" << command4;
   theCommands.theGlobalVariableS->System(command1);
   theCommands.theGlobalVariableS->System(command2);
   theCommands.theGlobalVariableS->System(command3);
   theCommands.theGlobalVariableS->System(command4);
+  std::cout << "-->";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

@@ -1152,7 +1152,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         { int theIndex=this->GetOwner().GetNumPosRoots()-j-1;
           if (k==1)
             theIndex=this->GetOwner().GetNumPosRoots()+this->GetOwner().GetRank()+j;
-          tempSSElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(theIndex, *this->theAlgebras, this->indexAlgebra);
+          tempSSElt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
           if (outputReport!=0)
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
           Matrix<CoefficientType>& theMatrix=this->GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
@@ -1192,7 +1192,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
     { int theIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[i]
       + this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
-      tempSSelt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(theIndex, *this->theAlgebras, this->indexAlgebra);
+      tempSSelt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
       latexTableStream << "&action of $" << tempSSElt.ToString() << "$";
     }
     latexTableStream << "\\\\\n";
@@ -2253,9 +2253,9 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
   MonomialUniversalEnveloping<CoefficientType> startMon;
   startMon=tempMon;
   ElementSemisimpleLieAlgebra adAToTheIthOfB, aElt;
-  adAToTheIthOfB.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  adAToTheIthOfB.MakeGenerator
   (rightGeneratorIndeX, *this->owners, this->indexInOwners);
-  aElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  aElt.MakeGenerator
   (leftGeneratorIndeX, *this->owners, this->indexInOwners);
   //Formula realized:
   //a^n b =\sum_{i=0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
@@ -2320,9 +2320,9 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
   MonomialUniversalEnveloping<CoefficientType> startMon, tempMon2;
   startMon=tempMon;
   ElementSemisimpleLieAlgebra adResult, tempElt, rightGeneratorElt;
-  adResult.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  adResult.MakeGenerator
   (leftGeneratorIndex, *this->owners, this->indexInOwners);
-  rightGeneratorElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  rightGeneratorElt.MakeGenerator
   (rightGeneratorIndex, *this->owners, this->indexInOwners);
 //  std::cout << this->ToString() << "=";
   //Formula realized:
@@ -2462,7 +2462,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       }
     if (isInNilradical)
     { this->weightsNilradicalLarge.AddOnTop(currentWeight);
-      tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      tempElt.MakeGenerator
       (i, *this->theHmm.owners, this->theHmm.indexRange);
       this->nilradicalLarge.AddOnTop(tempElt);
       this->indicesNilradicalLarge.AddOnTop(i);
@@ -2478,7 +2478,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       }
     if (isInNilradical)
     { this->weightsNilradicalSmall.AddOnTop(currentWeight);
-      tempElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      tempElt.MakeGenerator
       (i, *this->theHmm.owners, this->theHmm.indexDomain);
       this->nilradicalSmall.AddOnTop(tempElt);
       this->indicesNilradicalSmall.AddOnTop(i);

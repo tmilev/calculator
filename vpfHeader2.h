@@ -628,7 +628,7 @@ public:
   List<std::string> SystemCommands;
   std::string ToString();
   std::string ElementToStringNonBoundVars();
-  std::string ElementToStringFunctionHandlers();
+  std::string ToStringFunctionHandlers();
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");

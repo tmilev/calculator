@@ -2593,14 +2593,14 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
         continue;
       }
       if (leftWeight.IsEqualToZero() && ! rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      { this->theLiebrackets.elements[i][j].MakeGenerator
         (j, *this->owner, this->indexInOwner);
         hRoot.MakeEi(theRank, i-numPosRoots);
         this->theLiebrackets.elements[i][j]*=Vector<Rational>::ScalarProduct(hRoot, rightWeight, this->theWeyl.CartanSymmetric);
         continue;
       }
       if (!leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      { this->theLiebrackets.elements[i][j].MakeGenerator
         (i, *this->owner, this->indexInOwner);
         hRoot.MakeEi(theRank, j-numPosRoots);
         this->theLiebrackets.elements[i][j]*=-Vector<Rational>::ScalarProduct(hRoot, leftWeight, this->theWeyl.CartanSymmetric);
@@ -2609,7 +2609,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
       if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
       { int newIndex=this->GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(leftWeight+rightWeight);
         if (newIndex!=-1)
-        { this->theLiebrackets.elements[i][j].AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+        { this->theLiebrackets.elements[i][j].MakeGenerator
           (newIndex, *this->owner, this->indexInOwner);
           int leftIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
           int rightIndex=this->ChevalleyGeneratorIndexToRootIndex(j);
@@ -2619,7 +2619,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
             this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
           else
           { ElementSemisimpleLieAlgebra& current=this->theLiebrackets.elements[i][j];
-            current.AssignElementCartan(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this->owner, this->indexInOwner);
+            current.MakeHgenerator(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this->owner, this->indexInOwner);
           }
         }
         continue;
@@ -2736,13 +2736,13 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
   ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
-  { g1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  { g1.MakeGenerator
     (i, *this->owner, this->indexInOwner);
     for (int j=0; j<this->GetNumGenerators(); j++)
-    { g2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    { g2.MakeGenerator
       (j, *this->owner, this->indexInOwner);
       for (int k=0; k<this->GetNumGenerators(); k++)
-      { g3.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+      { g3.MakeGenerator
         (k, *this->owner, this->indexInOwner);
         this->LieBracket(g2, g3, g23); this->LieBracket(g1, g23, g123);
         this->LieBracket(g3, g1, g31); this->LieBracket(g2, g31, g231);
@@ -2928,7 +2928,7 @@ void SemisimpleLieAlgebra::GetAd(Matrix<Rational>& output, ElementSemisimpleLieA
   output.NullifyAll();
   ElementSemisimpleLieAlgebra theGen, theResult;
   for (int i=0; i<NumGenerators; i++)
-  { theGen.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE(i, *this->owner, this->indexInOwner);
+  { theGen.MakeGenerator(i, *this->owner, this->indexInOwner);
     this->LieBracket(e, theGen, theResult);
     for (int j=0; j<theResult.size; j++)
       output.elements[i][theResult[j].theGeneratorIndex]=theResult.theCoeffs[j];

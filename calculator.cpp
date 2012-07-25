@@ -367,6 +367,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="KLcoeffs{}(B_3, (1,0,0))";
 //  civilizedInput="KLcoeffs{}(A_3)";
 //civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x, 0, 0)); ";
+//civilizedInput= "printSlTwoSubalgebrasAndRootSubalgebras{}(E_8)";
+//civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x_1, 0,0)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -403,7 +405,6 @@ g_{-2} v_\\lambda\
     if (theParser.parsingLog!="")
       std::cout << "<b> As requested, here is a calculator parsing log</b><br>"
       << theParser.parsingLog;
-
   }
 //  theComputation.flagLogSyntaxRules=inputRankString=="2";
   std::cout << "</td>";

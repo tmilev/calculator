@@ -80,36 +80,6 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   }
 }
 
-void ReflectionSubgroupWeylGroup::ActByElement(int index, Vector<Rational>& theRoot)
-{ Vector<Rational> tempRoot;
-  this->ActByElement(index, theRoot, tempRoot);
-  theRoot=(tempRoot);
-}
-
-void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vector<Rational>& input, Vector<Rational>& output)
-{ assert(&input!=&output);
-  int NumElts=theElement.size;
-  Vector<Rational> tempRoot;
-  output=(input);
-  for (int i=0; i<NumElts; i++)
-  { int tempI=theElement.TheObjects[i];
-    if(tempI<this->simpleGenerators.size)
-      this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators.TheObjects[tempI], output, false, output);
-    else
-    { tempI-=this->simpleGenerators.size;
-      output.GetCoordsInBasiS(this->ExternalAutomorphisms[tempI], tempRoot);
-      output=tempRoot;
-    }
-  }
-}
-
-void ReflectionSubgroupWeylGroup::ActByElement(ElementWeylGroup& theElement, Vectors<Rational>& input, Vectors<Rational>& output)
-{ assert(&input!=&output);
-  output.SetSize(input.size);
-  for (int i=0; i<input.size; i++)
-    this->ActByElement(theElement, input.TheObjects[i], output.TheObjects[i]);
-}
-
 void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right, Polynomial<Rational>& OrderedOutput)
 { MonomialP buffer;
   SelectionWithDifferentMaxMultiplicities tempSel;
@@ -652,7 +622,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       characteristicH.MakeZero(theLieAlgebra.GetRank());
       for(int j=0; j<theRelativeDimension; j++)
         characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-      theSl2.theH.AssignElementCartan(characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
+      theSl2.theH.MakeHgenerator(characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theE.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theF.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
@@ -838,7 +808,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
 { if (outputIndex!=0)
     *outputIndex=-1;
   ElementSemisimpleLieAlgebra tempH;
-  tempH.AssignElementCartan(theH, this->owner, 0);
+  tempH.MakeHgenerator(theH, this->owner, 0);
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].theH==tempH)
     { if (outputIndex!=0)
@@ -2240,7 +2210,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   output=out.str();
 }
 
-void ElementSemisimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+void ElementSemisimpleLieAlgebra::MakeGenerator
   (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { //Changing RootSystem order invalidates this function!
   if (&inputOwners==0 || inputIndexInOwners==-1)
@@ -2254,9 +2224,9 @@ void ElementSemisimpleLieAlgebra::AssignChevalleyGeneratorCoeffOneIndexNegativeR
   this->AddMonomial(tempGenerator,1);
 }
 
-void ElementSemisimpleLieAlgebra::AssignRootSpace
+void ElementSemisimpleLieAlgebra::MakeGGenerator
 (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-{ this->AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+{ this->MakeGenerator
   (inputOwners[inputIndexInOwners].GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(theRoot),
    inputOwners, inputIndexInOwners);
 }
@@ -2313,15 +2283,15 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
   for (int i=0; i<theDimension; i++)
   { domainRoot.MakeEi(theDimension, i);
     mapOnRootSpaces.ActOnVectorColumn(domainRoot, rangeRoot);
-    tempElt.AssignElementCartan(domainRoot, *this->owner, this->indexInOwner);
+    tempElt.MakeHgenerator(domainRoot, *this->owner, this->indexInOwner);
     Domain[numRoots+i]=tempElt;
-    tempElt.AssignElementCartan(rangeRoot, *this->owner, this->indexInOwner);
+    tempElt.MakeHgenerator(rangeRoot, *this->owner, this->indexInOwner);
     Range[numRoots+i]=tempElt;
     for (int i=0; i<2; i++, domainRoot.Minus(), rangeRoot.Minus())
     { int theIndex= this->theWeyl.RootSystem.GetIndex(rangeRoot);
-      tempElt.AssignRootSpace(rangeRoot, *this->owner, this->indexInOwner);
+      tempElt.MakeGGenerator(rangeRoot, *this->owner, this->indexInOwner);
       Range[theIndex]=tempElt;
-      tempElt.AssignRootSpace(domainRoot, *this->owner, this->indexInOwner);
+      tempElt.MakeGGenerator(domainRoot, *this->owner, this->indexInOwner);
       Domain.TheObjects[theIndex]=tempElt;
       NonExplored.RemoveSelection(theIndex);
     }
@@ -2893,7 +2863,7 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     tempRoot.MakeEi(theDimension, theIndex);
     Polynomial<Rational>  polyZero;
     polyZero.MakeZero(0);
-    this->UEElement.GetElement().AssignElementCartan
+    this->UEElement.GetElement().MakeHgenerator
     (tempRoot, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyZero.GetOne(), polyZero);
     this->ExpressionType=this->typeUEelement;
     return;
@@ -3481,9 +3451,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   this->imagesAllChevalleyGenerators.SetSize(tempDomain.size);
   ElementSemisimpleLieAlgebra tempElt;
   for (int i=0; i<this->owners->TheObjects[this->indexDomain].GetNumGenerators(); i++)
-  { this->domainAllChevalleyGenerators[i].
-    AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
-    (i, *this->owners, this->indexDomain);
+  { this->domainAllChevalleyGenerators[i].MakeGenerator(i, *this->owners, this->indexDomain);
   }
   for (int i=0; i<this->imagesAllChevalleyGenerators.size; i++)
   { this->domainAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoot);
@@ -3573,17 +3541,17 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   for (int i=0; i<2*numPosRoots+theWeylDim; i++)
   { ElementSemisimpleLieAlgebra& tempElt1=this->imagesAllChevalleyGenerators.TheObjects[i];
     ElementSemisimpleLieAlgebra& tempElt2=this->domainAllChevalleyGenerators.TheObjects[i];
-    tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    tempElt2.MakeGenerator
     (i, *this->owners, this->indexDomain);
-    tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    tempElt1.MakeGenerator
     (i, *this->owners, this->indexRange);
   }
   for (int i=0; i<theWeylDim; i++)
   { ElementSemisimpleLieAlgebra& tempElt1=this->imagesSimpleChevalleyGenerators.TheObjects[i];
-    tempElt1.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    tempElt1.MakeGenerator
     (i, *this->owners, this->indexRange);
     ElementSemisimpleLieAlgebra& tempElt2=this->imagesSimpleChevalleyGenerators.TheObjects[theWeylDim+i];
-    tempElt2.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    tempElt2.MakeGenerator
     (i+numPosRoots, *this->owners, this->indexRange);
   }
 //  std::cout << this->ToString(theGlobalVariables);
@@ -4825,7 +4793,7 @@ void SemisimpleLieAlgebraOrdered::init
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra currentElt;
   for (int i=0; i<owner.GetNumGenerators(); i++)
-  { currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+  { currentElt.MakeGenerator
     (i, *owner.owner, owner.indexInOwner);
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
@@ -4844,7 +4812,7 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder
   defaultOrder.SetSize(owner.GetNumGenerators());
   for (int i=0; i<defaultOrder.size; i++)
   { ElementSemisimpleLieAlgebra& currentElt=defaultOrder.TheObjects[i];
-    currentElt.AssignChevalleyGeneratorCoeffOneIndexNegativeRootspacesFirstThenCartanThenPositivE
+    currentElt.MakeGenerator
     (i, *owner.owner, owner.indexInOwner);
   }
   this->init(defaultOrder, owner, theGlobalVariables);

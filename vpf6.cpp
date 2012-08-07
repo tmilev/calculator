@@ -2290,7 +2290,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   theGenElt.Simplify(theGlobalVariables);
   std::cout << "<br>the generic elt simplified:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   std::cout << "<br>" << CGI::GetHtmlMathSpanPure(result.ToString() ) << " times " << CGI::GetHtmlMathSpanPure(theGenElt.ToString()) << " = ";
-  result.MultiplyBy(theGenElt);
+  result*=(theGenElt);
   result.Simplify(theGlobalVariables);
   std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<RationalFunction> endoPart, tempMT, idMT;
@@ -2427,7 +2427,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       { actionOnGenericElt.AssignElementLieAlgebra
         (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, RFone, RFzero)
         ;
-        actionOnGenericElt.MultiplyBy(genericElt);
+        actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(*theCommands.theGlobalVariableS);
         out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(actionOnGenericElt.ToString(&theUEformat)) << "</td>";

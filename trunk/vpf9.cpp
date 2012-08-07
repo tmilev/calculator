@@ -2681,7 +2681,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
       assert(StartMonomialPower>=startDenominatorPower);
       for (int k=0; k<=StartMonomialPower-startDenominatorPower; k++)
       { tempMon= theExponent;
-        tempMon*=k;
+        tempMon.RaiseToPower(k);
         theCoeff= MathRoutines::parity(startDenominatorPower)*MathRoutines::NChooseK(StartMonomialPower-1-k, startDenominatorPower-1);
         output.AddMonomial(tempMon, theCoeff);
       }
@@ -2695,7 +2695,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
     { Vector<Rational> tempRoot;
       for (int k=1; k<=-StartMonomialPower; k++)
       { tempMon= theExponent;
-        tempMon*=-k;
+        tempMon.RaiseToPower(-k);
         theCoeff= MathRoutines::NChooseK(startDenominatorPower-StartMonomialPower-1-k, startDenominatorPower-1);
         output.AddMonomial(tempMon, theCoeff);
       }

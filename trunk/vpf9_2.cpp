@@ -4538,7 +4538,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
         int generatorPower=theSel.Multiplicities.TheObjects[generatorIndex];
         tempElt.operator=(generatorsBeingActedOn.TheObjects[generatorIndex]);
         tempElt.RaiseToPower(generatorPower);
-        Accum.MultiplyBy(tempElt);
+        Accum*=(tempElt);
       }
     tempElt.operator=(Accum);
     tempElt.SetNumVariables(numVars);
@@ -4696,7 +4696,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
     { int generatorPower=currentPartition.TheObjects[generatorIndex];
       tempElt.operator=(generatorsBeingActedOn.TheObjects[generatorIndex]);
       tempElt.RaiseToPower(generatorPower);
-      Accum.MultiplyBy(tempElt);
+      Accum*=(tempElt);
     }
     tempElt.operator=(Accum);
     tempElt.SetNumVariables(numVars);

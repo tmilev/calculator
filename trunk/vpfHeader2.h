@@ -497,7 +497,7 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  List<ModuleSSalgebraNew<RationalFunction> > theCategoryOmodules;
+  List<ModuleSSalgebra<RationalFunction> > theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
   HashedList<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
   HashedList<Polynomial<Rational> > thePolys;
@@ -1043,6 +1043,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fPrintAllPartitions
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintB3G2branchingTableCharsOnly

@@ -322,7 +322,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
     *comments << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << ".";
     *comments << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
   }
-  ModuleSSalgebraNew<RationalFunction> theMod;
+  ModuleSSalgebra<RationalFunction> theMod;
   Selection selInducing= inducingParSel;
   Selection selSplittingParSel=splittingParSel;
   theMod.MakeFromHW
@@ -352,7 +352,7 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
   .ToString();
   out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
   out << ".<br>Your parabolic subalgebra selection: " << parSel.ToString() << ".";
-  ModuleSSalgebraNew<Rational> theMod;
+  ModuleSSalgebra<Rational> theMod;
 
   Selection emptySel, selParSel;
   emptySel.init(theDim);
@@ -1196,7 +1196,7 @@ out
 }
 
 template<class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
+void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   (HomomorphismSemisimpleLieAlgebra& theHmm, Selection& LeviInSmall, GlobalVariables& theGlobalVariables,
    List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
    Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace,
@@ -1686,10 +1686,15 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
-    latexTable << "\\begin{longtable}{|p{2cm}lp{5cm}|} \\caption{\\label{tableB3fdsOverG2charsonly" << theg2b3data.selInducing.ToString() << "} "
-    << "Decompositions of inducing $\\mathfrak p$-modules over $\\bar{ \\mathfrak {p}}$}\\\\"
-    << "\\hline $\\mathfrak p$ = " << theg2b3data.selInducing.ToString() << "-par. module& decomp. over Levi part of $\\bar {\\mathfrak {p}}$ = "
-    << theg2b3data.selSmallParSel.ToString() << "-parabolic & Sufficiently generic conditions"
+    latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly" << theg2b3data.selInducing.ToString() << "} "
+    << "Decompositions of inducing $\\mathfrak{p}" << "_{"
+    << theg2b3data.selInducing.ToString()
+    <<  "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
+    << ", where $\\mathfrak{l}$ is the reductive Levi part of "
+    <<   "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.ToString()
+    <<  "}$ and $\\bar{\\mathfrak {l}}$ is the reductive Levi part of $\\bar{\\mathfrak {p}} _{"
+    << theg2b3data.selSmallParSel.ToString()  << "}$" << " } \\\\"
+    << "\\hline $V_\\lambda(\\mathfrak l)$ " << "& Decomposition over $\\bar { \\mathfrak l}$ "
     << "\\endhead \\hline\n<br>";
   }
   theg2b3data.theFormat.flagUseLatex=true;
@@ -1726,12 +1731,13 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
       if (i!=outputChar.size-1)
         out << "+";
       leftWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[i].weightFundamentalCoords);
-      leftWeightDual=smallWeyl.GetDualCoordinatesFromSimple(leftWeightSimple);
+      leftWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[i].weightFundamentalCoords);
       for (int j=0; j<outputChar.size; j++)
       { rightWeightSimple=smallWeyl.GetSimpleCoordinatesFromFundamental(outputChar[j].weightFundamentalCoords);
+        rightWeightDual=smallWeyl.GetDualCoordinatesFromFundamental(outputChar[j].weightFundamentalCoords);
+//        if (i!=j)
         if ((rightWeightSimple-leftWeightSimple).IsPositive())
-        { rightWeightDual=smallWeyl.GetDualCoordinatesFromSimple(outputChar[j].weightFundamentalCoords);
-          resultChar=theCasimir;
+        { resultChar=theCasimir;
           theCentralCharacter=theCasimir;
           resultChar.ModOutVermaRelations(theCommands.theGlobalVariableS, &rightWeightDual);
           theCentralCharacter.ModOutVermaRelations(theCommands.theGlobalVariableS, &leftWeightDual);
@@ -1743,18 +1749,20 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
       }
     }
     out << "</td>";
-    theg2b3data.theFormat.MaxLineLength=60;
+    theg2b3data.theFormat.MaxLineLength=80;
     latexTable << "& $\\begin{array}{l} " << outputChar.ToString(&theg2b3data.theFormat) << "\\end{array} $ ";
     theg2b3data.theFormat.CustomPlusSign="";
-    if (!isFD)
+    if (!isFD && theCentralChars.size>0)
     { out << "<td>";
-      latexTable << " & ";
+      latexTable << " \\\\\n<br> ";
+      latexTable << "\\multicolumn{2}{|p{11.6cm}|}{ \\tiny Strong Condition B: ";
       for (int l=0; l<theCentralChars.size; l++)
       { out << theCentralChars[l].ToString(&theg2b3data.theFormat) << "<br> ";
         latexTable << "$" << theCentralChars[l].ToString(&theg2b3data.theFormat) << "\\neq 0$";
         if (l!=theCentralChars.size-1)
           latexTable << ", ";
       }
+      latexTable << "\\normalsize}";
       out << " </td>";
     }
     out  << "</tr>";
@@ -1763,9 +1771,12 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
   }
   out << "</table>";
   latexTable << "\\end{longtable}";
-  out << "<br><b>Ready for LaTeX consumption:</b><br>%preamble: <br>\\usepackage{longtable}"
+  out << "<br><b>Ready for LaTeX consumption:</b><br>%preamble: "
+  << "<br>\\documentclass{article}<br>\\usepackage{longtable, amssymb}"
+  << "<br>\\begin{document}"
   << "<br>%text body<br>"
-  << latexTable.str();
+  << latexTable.str()
+  << "<br>%end of text body <br>\\end{document}";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
   return true;
 }
@@ -1868,7 +1879,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
-  ModuleSSalgebraNew<RationalFunction> theModCopy;
+  ModuleSSalgebra<RationalFunction> theModCopy;
   theModCopy.MakeFromHW
   (theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange,
    theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
@@ -1885,7 +1896,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 
   theCommands.theObjectContainer.theCategoryOmodules.AddOnTopNoRepetition(theModCopy);
   int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
-  ModuleSSalgebraNew<RationalFunction>& theMod=
+  ModuleSSalgebra<RationalFunction>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   std::stringstream out;
   out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -2145,7 +2156,8 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
     DrawingVariables theDV1;
     std::string tempS;
     output.DrawMeNoMults(tempS, theGlobalVariables, theDV1, 10000);
-    Vector<Rational> tempRoot;
+    Vector<Rational> tempRoot, tempRoot2;
+    WeylFDSmall.AmbientWeyl.ComputeWeylGroup(20);
     out << "<hr>";//In the following weight visualization, a yellow line is drawn if the corresponding weights are "
     //<< " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
@@ -2156,6 +2168,11 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
       std::stringstream tempStream;
       tempStream << output.theCoeffs[i].ToString();
       theDV1.drawTextAtVectorBuffer(tempRoot, tempStream.str(), 0, DrawingVariables::PenStyleNormal, 0);
+      for (int j=1; j<WeylFDSmall.AmbientWeyl.size; j++)
+      { tempRoot2=tempRoot;
+        WeylFDSmall.AmbientWeyl.ActOn(j, tempRoot2, true, false);
+        theDV1.drawCircleAtVectorBuffer(tempRoot2, 5, DrawingVariables::PenStyleNormal, CGI::RedGreenBlue(200,0,0));
+      }
     }
     out << "<hr>" << theDV1.GetHtmlFromDrawOperationsCreateDivWithUniqueName(WeylFDSmall.AmbientWeyl.GetDim());
 /*    DrawingVariables theDV2;
@@ -2324,6 +2341,66 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   theCommands.theGlobalVariableS->System(command3);
   theCommands.theGlobalVariableS->System(command4);
   std::cout << "-->";
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
+bool CommandList::fPrintAllPartitions
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fPrintAllPartitions");
+  IncrementRecursion theRecursion(&theCommands);
+  if (theExpression.children.size!=2)
+    return theExpression.SetError("Function fPrintAllPartitions expects 2 arguments.");
+  if (!theCommands.CallCalculatorFunction
+      (theCommands.fSSAlgebra, inputIndexBoundVars, theExpression.children[0], comments))
+    return theExpression.SetError("Failed to generate Lie algebra from first argument");
+  SemisimpleLieAlgebra& theSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  Context theContext;
+  Vector<Rational> theHW;
+//  std::cout << theExpression.ToString() << " rank "
+//  << theSSalgebra.GetRank() << " child one : " << theExpression.children[1].ToString();
+  if (!theExpression.children[1].GetVector<Rational>(theHW, theContext, theSSalgebra.GetRank()))
+    return theExpression.SetError("Failed to extract weight you want partitioned from "+ theExpression.children[1].ToString());
+  Vector<int> theHWint;
+  theHWint.SetSize(theHW.size);
+  for (int i=0; i<theHW.size; i++)
+    if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i]<0)
+      return theExpression.SetError("The input weight you gave is bad: it must consist of non-negative small integers");
+  std::stringstream out;
+  out << "<br>the weight you want partitioned: " << theHWint;
+  Vector<int> thePartition;
+  thePartition.SetSize(theSSalgebra.GetNumPosRoots());
+  for (int i=0; i<thePartition.size; i++)
+    thePartition[i]=0;
+  Vector<Rational> theWeight, tmpWt;
+  Vectors<Rational>& rootsBorel=theSSalgebra.theWeyl.RootsOfBorel;
+  int counter =0;
+  int totalCycles=0;
+  theWeight.MakeZero(theSSalgebra.GetRank());
+  int i=rootsBorel.size;
+  while (i>0 && counter<10000)// && totalCycles<100000)
+  { totalCycles++;
+    if (theWeight==theHW)
+    { tmpWt=thePartition;
+      out << "<br>" << tmpWt.ToStringLetterFormat("\\alpha");
+      counter++;
+    }
+//    out << "<br>counter: " << counter << " partition: " << thePartition << " i: " << i;
+    if (!(theHW-theWeight).IsPositive() || i>rootsBorel.size)
+    { if (i<=rootsBorel.size)
+      { theWeight-=rootsBorel[i-1]*thePartition[i-1];
+        thePartition[i-1]=0;
+      }
+      i--;
+      if (i>0)
+      { theWeight+=rootsBorel[i-1];
+        thePartition[i-1]++;
+      }
+    } else
+      i++;
+  }
+  out << "<br>Done in " << totalCycles << " cycles.";
+  out << "<br>" << counter << " total partitions ";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

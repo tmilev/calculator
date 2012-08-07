@@ -5,9 +5,6 @@
 
 ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Implementation file intended for small fast changes. ");
 
-
-class Qsqrt2;
-
 template < > int List<LittelmannPath>::ListActualSizeIncrement=1000;
 template < > int List<MonomialUniversalEnvelopingOrdered<Rational> >::ListActualSizeIncrement=100;
 template < > int List<ElementUniversalEnvelopingOrdered<Rational> >::ListActualSizeIncrement=100;
@@ -16,7 +13,6 @@ template < > int List<ElementUniversalEnvelopingOrdered<Rational> >::ListActualS
 //template < > int HashedList<MonomialUniversalEnveloping<Qsqrt2> >::PreferredHashSize=100;
 template < > int HashedListB<MonomialUniversalEnvelopingOrdered<Rational>, MonomialUniversalEnvelopingOrdered<Rational>::HashFunction>::PreferredHashSize=100;
 template < > int HashedListB<LittelmannPath, LittelmannPath::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<MonomialUniversalEnveloping<Qsqrt2>, MonomialUniversalEnveloping<Qsqrt2>::HashFunction>::PreferredHashSize=30;
 
 template <>
 void WeylGroup::RaiseToDominantWeight(Vector<Rational>& theWeight, int* sign, bool* stabilizerFound)
@@ -366,12 +362,12 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   RFZero.MakeZero(theNode.impliedNumVars, & theGlobalVariables);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
-  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theNode.owner->theModulePolys;
+  List<ModuleSSalgebra<RationalFunction> >& theMods=theNode.owner->theModulePolys;
   int indexOfModule=-1;
   Selection selectionParSel;
   selectionParSel=parSel;
   for (int i=0; i<theMods.size; i++)
-  { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
+  { ModuleSSalgebra<RationalFunction>& currentMod=theMods[i];
     if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
           selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
     { indexOfModule=i;
@@ -382,7 +378,7 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   { indexOfModule=theMods.size;
     theMods.SetSize(theMods.size+1);
   }
-  ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
+  ModuleSSalgebra<RationalFunction>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
   { assert(theWeight[0].NumVars==RFOne.NumVars);
     bool isGood=theMod.MakeFromHW
@@ -829,7 +825,7 @@ int ParserNode::EvaluateRepresentationFromHWFundCoords
   }
   std::stringstream out;
   std::string report;
-  ModuleSSalgebraNew<Rational> theModule;
+  ModuleSSalgebra<Rational> theModule;
   Vector<Rational> fullParSel;
   fullParSel.MakeZero(theWeight.size);
   if (!theModule.MakeFromHW
@@ -845,7 +841,7 @@ int ParserNode::EvaluateRepresentationFromHWFundCoords
 
 
 template<class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
+void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
   (Vector<CoefficientType>& HWDualCoordS, GlobalVariables& theGlobalVariables,
     const CoefficientType& theRingUnit, const CoefficientType& theRingZero
    )
@@ -888,7 +884,7 @@ void ModuleSSalgebraNew<CoefficientType>::IntermediateStepForMakeFromHW
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::ExpressAsLinearCombinationHomogenousElement
+void ModuleSSalgebra<CoefficientType>::ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
    ElementUniversalEnveloping<CoefficientType>& outputHomogeneous,
    int indexInputBasis, const Vector<CoefficientType>& subHiGoesToIthElement,
@@ -932,7 +928,7 @@ void ModuleSSalgebraNew<CoefficientType>::ExpressAsLinearCombinationHomogenousEl
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::GetAdActionHomogenousElT
+void ModuleSSalgebra<CoefficientType>::GetAdActionHomogenousElT
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, Vector<Rational>& weightUEEltSimpleCoords,
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -973,12 +969,12 @@ void ModuleSSalgebraNew<CoefficientType>::GetAdActionHomogenousElT
 }
 
 template<class CoefficientType>
-bool ModuleSSalgebraNew<CoefficientType>::MakeFromHW
+bool ModuleSSalgebra<CoefficientType>::MakeFromHW
 (List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
  const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport, bool computeSimpleGens)
-{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::MakeFromHW");
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::MakeFromHW");
 
   this->theAlgebras=&inputAlgebras;
   this->indexAlgebra=inputIndexAlgebra;
@@ -1426,7 +1422,8 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-(CoefficientType& outputCoeff, GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement, const CoefficientType& theRingUnit,
+(CoefficientType& outputCoeff, GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
+ const CoefficientType& theRingUnit,
  const CoefficientType& theRingZero)
 { int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theDimension=this->GetOwner().GetRank();
@@ -1627,7 +1624,7 @@ int ParserNode::EvaluateHWTAABilinearForm
 
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
-  (const ElementUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
+  (const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
    const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)
 { output=theRingZero;
@@ -1666,7 +1663,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
           { *logStream << "tempElt before mult: " << tempElt.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
             *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
           }
-          intermediateAccum.MultiplyBy(tempElt);
+          intermediateAccum*=(tempElt);
           if (logStream!=0)
             *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
           intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
@@ -1760,7 +1757,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
           { //*logStream << "tempElt before mult: " << tempElt.ToString(theGlobalVariables, tempFormat) << "<br>";
             *logStream << "intermediate before mult: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
           }
-          intermediateAccum.MultiplyBy(tempElt);
+          intermediateAccum*=(tempElt);
           if (logStream!=0)
             *logStream << "intermediate before simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat) << "<br>";
           intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
@@ -1835,7 +1832,7 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
   for (int i=0; i<theOrbit.size; i++)
     for (int j=0; j<theDim; j++)
     { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owners, this->indexInOwners, theRingUnit);
-      theElt.MultiplyBy(theOrbit[i]);
+      theElt*=(theOrbit[i]);
       theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
       theElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
 //      theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
@@ -2034,14 +2031,14 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
-  (List<ModuleSSalgebraNew<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
 { assert(TheIndexInOwner<theOwner.size);
   MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
   CoefficientType currentCoeff;
   currentCoeff=theRingUnit;
   tensorMon.theMons.SetSize(1);
   MonomialGeneralizedVerma<CoefficientType>& theMon=tensorMon.theMons[0];
-  ModuleSSalgebraNew<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
+  ModuleSSalgebra<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
   theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
   theMon.MakeConst(theOwner, TheIndexInOwner);
   this->MakeZero();
@@ -2049,7 +2046,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
 }
 
 template <class CoefficientType>
-std::string ModuleSSalgebraNew<CoefficientType>::ToString()const
+std::string ModuleSSalgebra<CoefficientType>::ToString()const
 { std::stringstream out;
   GlobalVariables theGlobalVariables; FormatExpressions theformat;
   out << "<br>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
@@ -2205,7 +2202,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::SwitchConsecutiveIndicesIfThe
 }
 
 template <class CoefficientType>
-bool MonomialUniversalEnveloping<CoefficientType>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
+bool TensorMonomial<CoefficientType>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
 { if (this->generatorsIndices.size<1)
     return false;
   if (lowestNonReducedIndex<0)

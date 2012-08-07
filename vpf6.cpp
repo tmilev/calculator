@@ -25,7 +25,7 @@ template < > int List<Data>::ListActualSizeIncrement=500;
 template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
 template < > int List<ElementTensorsGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=50;
 template < > int List<ElementSumGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<ModuleSSalgebraNew<RationalFunction> >::ListActualSizeIncrement=10;
+template < > int List<ModuleSSalgebra<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<Context>::ListActualSizeIncrement=20;
 template < > int List<ElementUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
 template < > int List<MonomialChar<RationalFunction> >::ListActualSizeIncrement=10;
@@ -1948,7 +1948,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
 }
 
 template <class CoefficientType>
-bool ModuleSSalgebraNew<CoefficientType>::IsNotInLevi
+bool ModuleSSalgebra<CoefficientType>::IsNotInLevi
 (int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
   for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
@@ -1958,7 +1958,7 @@ bool ModuleSSalgebraNew<CoefficientType>::IsNotInLevi
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::GetElementsNilradical
+void ModuleSSalgebra<CoefficientType>::GetElementsNilradical
 (List<ElementUniversalEnveloping<CoefficientType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators)
 { SemisimpleLieAlgebra& ownerSS=this->GetOwner();
   ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
@@ -1988,7 +1988,7 @@ void ModuleSSalgebraNew<CoefficientType>::GetElementsNilradical
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
+void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
  (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output,
   GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
@@ -2010,7 +2010,7 @@ void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::GetGenericUnMinusElt
+void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
    (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
@@ -2246,10 +2246,10 @@ void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
 }
 
 template <class CoefficientType>
-bool ModuleSSalgebraNew<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
+bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
 (MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
  ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator");
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator");
   Rational tempRat;
   int expConstPart, powerMonCoeff;
   int varShift=this->GetNumVars();
@@ -2272,10 +2272,10 @@ bool ModuleSSalgebraNew<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperat
 }
 
 template <class CoefficientType>
-bool ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
+bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 (ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunction>& output,
   GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("ModuleSSalgebraNew<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
@@ -2393,7 +2393,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   for (int i=0; i<theHws.size; i++)
   { theCommands.fHWVinner
     (theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selInducing, hwContext, indexOfAlgebra);
-    ModuleSSalgebraNew<RationalFunction>& theMod=
+    ModuleSSalgebra<RationalFunction>& theMod=
     tempExp.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().GetOwnerModule();
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
@@ -2476,11 +2476,11 @@ bool CommandList::fHWVinner
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunction> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
-  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
+  List<ModuleSSalgebra<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule=-1;
 
   for (int i=0; i<theMods.size; i++)
-  { ModuleSSalgebraNew<RationalFunction>& currentMod=theMods[i];
+  { ModuleSSalgebra<RationalFunction>& currentMod=theMods[i];
     if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField &&
           selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
     { indexOfModule=i;
@@ -2491,7 +2491,7 @@ bool CommandList::fHWVinner
   { indexOfModule=theMods.size;
     theMods.SetSize(theMods.size+1);
   }
-  ModuleSSalgebraNew<RationalFunction>& theMod=theMods[indexOfModule];
+  ModuleSSalgebra<RationalFunction>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
   { for (int i=0; i<highestWeightFundCoords.size; i++)
       if (highestWeightFundCoords[i].NumVars>RFOne.NumVars)
@@ -2522,7 +2522,7 @@ bool CommandList::fHWVinner
 }
 
 template <class CoefficientType>
-void ModuleSSalgebraNew<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
+void ModuleSSalgebra<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
 { output.MakeZero(*this->theAlgebras, this->indexAlgebra);
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
@@ -2645,9 +2645,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   const ElementTensorsGeneralizedVermas<RationalFunction>& theHWfd=
   hwvFD.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >();
 
-  ModuleSSalgebraNew<RationalFunction>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
+  ModuleSSalgebra<RationalFunction>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
   int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
-  ModuleSSalgebraNew<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
+  ModuleSSalgebra<RationalFunction>& theFDMod=theHWfd[0].theMons[0].GetOwner();
   int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunction> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunction> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
@@ -2704,7 +2704,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
   ElementTensorsGeneralizedVermas<RationalFunction> tempElt, tempElt2;
-  List<ModuleSSalgebraNew<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
+  List<ModuleSSalgebra<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   theFDMod.highestWeightVectorNotation="v";
   theGenMod.highestWeightVectorNotation="w";
   out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
@@ -3499,6 +3499,10 @@ void CommandList::initPredefinedVars()
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
+     this->AddNonBoundVarMustBeNew
+  ("printAllPartitions", & this->fPrintAllPartitions, "",
+   "Prints (Kostant) partitions . ",
+   "printAllPartitions{}(A_2, (2,3))");
   this->NumPredefinedVars=this->theObjectContainer.theNonBoundVars.size;
 }
 

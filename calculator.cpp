@@ -369,6 +369,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x, 0, 0)); ";
 //civilizedInput= "printSlTwoSubalgebrasAndRootSubalgebras{}(E_8)";
 //civilizedInput="WriteGenVermaAsDiffOperators{}(B_3, 0, (x_1, 0,0)); ";
+//  civilizedInput="fSplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
+//civilizedInput="printAllPartitions{}(A_2, (2,3))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

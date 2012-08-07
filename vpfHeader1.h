@@ -42,7 +42,7 @@ template <class CoefficientType>
 class charSSAlgMod;
 class ReflectionSubgroupWeylGroup;
 template<class CoefficientType>
-class ModuleSSalgebraNew;
+class ModuleSSalgebra;
 class SltwoSubalgebras;
 template<class CoefficientType>
 class MonomialTensorGeneralizedVermas;
@@ -656,16 +656,28 @@ int ListLight<Object>::SizeWithoutObjects()
 }
 
 template <class Object>
-std::iostream& operator<<(std::iostream& output, const List<Object>& theList);
+std::ostream& operator<<(std::ostream& output, const List<Object>& theList)
+{ output << "size: " << theList.size << "\n";
+  for (int i=0; i<theList.size; i++)
+    output << theList[i] << " ";
+  return output;
+}
 
 template <class Object>
-std::iostream& operator>>(std::iostream& input, List<Object>& theList);
-
+std::iostream& operator>>(std::iostream& input, List<Object>& theList)
+{ std::string tempS; int tempI;
+  input >> tempS >> tempI;
+  assert(tempS=="size:");
+  theList.SetSize(tempI);
+  for (int i=0; i<theList.size; i++)
+    input >> theList[i];
+  return input;
+}
 
 //List serves the same purpose as std::vector
 template <class Object>
 class List
-{ friend std::iostream& operator<< <Object>(std::iostream& output, const List<Object>& theList);
+{ friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
   friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& theList);
 private:
   friend class Polynomial<Rational> ;
@@ -851,25 +863,6 @@ class ProjectInformation
   void AddProjectInfo(const std::string& fileName, const std::string& fileDescription);
   std::string GetStackTraceReport();
 };
-
-template <class Object>
-std::iostream& operator<< (std::iostream& output, const List<Object>& theList)
-{ output << "size: " << theList.size << "\n";
-  for (int i=0; i<theList.size; i++)
-    output << theList.TheObjects[i] << " ";
-  return output;
-}
-
-template <class Object>
-std::iostream& operator >> (std::iostream& input, List<Object>& theList)
-{ std::string tempS; int tempI;
-  input >> tempS >> tempI;
-  assert(tempS=="size:");
-  theList.SetSize(tempI);
-  for (int i=0; i<theList.size; i++)
-    input >> theList.TheObjects[i];
-  return input;
-}
 
 struct CGI
 {
@@ -3076,120 +3069,6 @@ ParallelComputing::GlobalPointerCounter++;
   inline bool operator<(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return tempRat.IsGreaterThan(*this); }
 };
 
-class Qsqrt2
-{
-public:
-  Rational a;
-  Rational b;
-  friend std::iostream& operator<< (std::iostream& output, const Qsqrt2& theElt)
-  { output << theElt.ToString();
-    return output;
-  }
-  void operator =(const Qsqrt2& other)
-  { this->a=other.a;
-    this->b=other.b;
-  }
-  void operator =(int x)
-  { this->a=x;
-    this->b.MakeZero();
-  }
-  Qsqrt2(const Qsqrt2& other)
-  { this->operator=(other);
-  }
-  Qsqrt2()
-  { this->a.MakeZero();
-    this->b.MakeZero();
-  }
-  void MakeAplusSqrt2B(int theA, int theB){ this->a=theA; this->b=theB;}
-  Qsqrt2(int x)
-  { this->operator=(x);
-  }
-  bool IsEqualToZero()const
-  { return this->a.IsEqualToZero() && this->b.IsEqualToZero();
-  }
-  void Assign(const Qsqrt2& other)
-  { this->operator=(other);
-  }
-  void ToString(std::string& output)
-  { output=this->ToString();
-  }
-  std::string ToString()const
-  { if (this->IsEqualToZero())
-      return "0";
-    std::stringstream out;
-    if (!this->a.IsEqualToZero())
-    { out << this->a.ToString();
-      if (this->b.IsPositive())
-        out << "+";
-    }
-    if (this->b.IsEqualToZero())
-      return out.str();
-    else
-    { Rational tempRat=this->b;
-      if (tempRat<0)
-      { out << "-";
-        tempRat.Minus();
-      }
-      if (tempRat!=1)
-        out << tempRat.ToString();
-      out << "\\sqrt{2}";
-    }
-    return out.str();
-  }
-  void operator+=(const Qsqrt2& other)
-  { this->a+=other.a;
-    this->b+=other.b;
-  }
-  void operator-=(const Qsqrt2& other)
-  { this->a-=other.a;
-    this->b-=other.b;
-  }
-  void operator*=(const Qsqrt2& other)
-  { Qsqrt2 result;
-    result.a=this->a*other.a+this->b*other.b*2;
-    result.b=other.b*this->a+this->b*other.a;
-    this->operator=(result);
-  }
-  void operator/=(const Rational& other)
-  { this->a/=other;
-    this->b/=other;
-  }
-  void operator/=(const Qsqrt2& otheR)
-  { Qsqrt2 result, conjugate;
-    conjugate=otheR;
-    conjugate.b.Minus();
-    result.operator=(*this);
-    result*=conjugate;
-    result/=(otheR.a*otheR.a-otheR.b*otheR.b*2);
-    Qsqrt2 old=*this, oldOther=otheR;
-    this->operator=(result);
-    result*=oldOther;
-    result-=old;
-    if (!result.IsEqualToZero())
-    { std::cout << "  start " << old.ToString() << "; oldOther: " << otheR.ToString();
-      std::cout << "<hr>" << (otheR.a*otheR.a+otheR.b*otheR.b*2).ToString();
-      old/=oldOther;
-    }
-    assert(result.IsEqualToZero());
-  }
-  void Minus()
-  { this->a.Minus();
-    this->b.Minus();
-  }
-  void Invert()
-  { Qsqrt2 result;
-    result=1;
-    result/=*this;
-    this->operator=(result);
-  }
-  void MultiplyBy(const Qsqrt2& other)
-  { this->operator*=(other);
-  }
-  void Subtract(const Qsqrt2& other)
-  { this->operator-=(other);
-  }
-};
-
 template<class CoefficientType>
 Vector<CoefficientType> operator-(const Vector<CoefficientType>& input)
 { Vector<CoefficientType> result;
@@ -3200,8 +3079,23 @@ Vector<CoefficientType> operator-(const Vector<CoefficientType>& input)
 }
 
 template <class CoefficientType>
+std::ostream& operator<<
+(std::ostream& out, const Vector<CoefficientType>& theVector)
+{ out  << "(";
+  for (int i=0; i<theVector.size; i++)
+  { out << theVector[i];
+    if (i!=theVector.size-1)
+      out << ", ";
+  }
+  out << ")";
+  return out;
+}
+
+template <class CoefficientType>
 class Vector: public ListLight<CoefficientType>
 { friend Vector<CoefficientType> operator-<CoefficientType>(const Vector<CoefficientType>& input);
+  friend std::ostream& operator<< <CoefficientType>(std::ostream& output, const Vector<CoefficientType>& theVector)
+;
 public:
   Vector(){}
   Vector(const Vector<CoefficientType>& other){*this=other;}
@@ -4242,6 +4136,7 @@ public:
 class MonomialP: public Vector<Rational>
 {
 private:
+  void operator+=(const MonomialP& other);
 public:
   friend MonomialP operator-(const MonomialP& input)
   { MonomialP result=input;
@@ -4336,6 +4231,12 @@ public:
   void InvertDegrees(){this->Minus();}
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   int SizeWithoutCoefficient();
+  void RaiseToPower(const Rational& thePower)
+  { this->Vector<Rational>::operator*=(thePower);
+  }
+  void operator*=(MonomialP& other)
+  { this->Vector<Rational>::operator+=(other);
+  }
   template <class CoefficientType>
   void operator=(const Vector<CoefficientType>& other)
   { this->::Vector<Rational>::operator=(other);
@@ -4550,34 +4451,35 @@ public:
 };
 
 template <class TemplateMonomial, class CoefficientType>
-class ElementCommutativeAlgebra: public MonomialCollection<TemplateMonomial, CoefficientType>
+class ElementAssociativeAlgebra: public MonomialCollection<TemplateMonomial, CoefficientType>
 {
   public:
   void MultiplyBy
-  (const ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& other,
-   ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
+  (const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other,
+   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
+   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
   ;
   void MultiplyBy
-  (const TemplateMonomial& other, const CoefficientType& theCoeff, ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output,
-   ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
+  (const TemplateMonomial& other, const CoefficientType& theCoeff,
+   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
+   ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+   TemplateMonomial& bufferMon)const
   ;
-  void operator*=(const ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& other)
-  { ElementCommutativeAlgebra<TemplateMonomial, CoefficientType> bufferPoly;
+  void operator*=(const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other)
+  { ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> bufferPoly;
     TemplateMonomial bufferMon;
     this->MultiplyBy(other, *this, bufferPoly, bufferMon);
   }
-  template <class otherType>
-  inline void operator*=(const otherType& other)
+  inline void operator*=(const CoefficientType& other)
   { this->::MonomialCollection<TemplateMonomial, CoefficientType>::operator*= (other);
   }
   void RaiseToPower
-(int d, ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
+(int d, ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
 ;
   void RaiseToPower(int d, const TemplateMonomial& theZeroMon, const CoefficientType& theRingUniT)
   { if (d==1)
       return;
-    ElementCommutativeAlgebra<TemplateMonomial, CoefficientType> theOne;
+    ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> theOne;
     theOne.MakeZero();
     theOne.AddMonomial(theZeroMon, theRingUniT);
     MathRoutines::RaiseToPower(*this, d, theOne);
@@ -4585,7 +4487,7 @@ class ElementCommutativeAlgebra: public MonomialCollection<TemplateMonomial, Coe
 };
 
 template<class CoefficientType>
-class Polynomial: public ElementCommutativeAlgebra<MonomialP, CoefficientType>
+class Polynomial: public ElementAssociativeAlgebra<MonomialP, CoefficientType>
 {
 public:
   friend std::iostream& operator << <CoefficientType>(std::iostream& output, const Polynomial<CoefficientType>& input);
@@ -4665,7 +4567,7 @@ public:
   }
   void MakeOne(int inputNumVars);
   void MakeZero(int inputNumVars)
-  { this->::ElementCommutativeAlgebra<MonomialP, CoefficientType>::MakeZero();
+  { this->::ElementAssociativeAlgebra<MonomialP, CoefficientType>::MakeZero();
     this->NumVars=inputNumVars;
   }
   void ScaleToIntegralNoGCDCoeffs();
@@ -4812,7 +4714,7 @@ public:
     //{ std::cout << "This is not supposed to happen, or is it?";
     //  assert(false);
    // }
-    this->::ElementCommutativeAlgebra<MonomialP, CoefficientType>::operator*=((ElementCommutativeAlgebra<MonomialP, CoefficientType>) other);
+    this->::ElementAssociativeAlgebra<MonomialP, CoefficientType>::operator*=((ElementAssociativeAlgebra<MonomialP, CoefficientType>) other);
   }
   template <class otherType>
   inline void operator*=(const otherType& other)
@@ -5702,9 +5604,11 @@ void Polynomial<Element>::Evaluate
 }
 
 template <class TemplateMonomial, class CoefficientType>
-inline void ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>::MultiplyBy
-(const ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& other, ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output,
- ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly, TemplateMonomial& bufferMon)const
+inline void ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>::MultiplyBy
+(const ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& other,
+ ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output,
+ ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& bufferPoly,
+ TemplateMonomial& bufferMon)const
 { if (other.IsEqualToZero())
   { output.MakeZero();
     return;
@@ -5715,7 +5619,7 @@ inline void ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>::Multip
   for (int i=0; i<other.size; i++)
     for (int j=0; j<this->size; j++)
     { bufferMon=this->TheObjects[j];
-      bufferMon.MultiplyBy(other[i]);
+      bufferMon*=(other[i]);
       theCoeff=this->theCoeffs[j];
       theCoeff*=other.theCoeffs[i];
       bufferPoly.AddMonomial(bufferMon, theCoeff);
@@ -6022,9 +5926,9 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractMonomial
 }
 
 template <class TemplateMonomial, class CoefficientType>
-void ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
-(int d, ElementCommutativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
-{ ElementCommutativeAlgebra<TemplateMonomial, CoefficientType> tempOne;
+void ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>::RaiseToPower
+(int d, ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
+{ ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> tempOne;
   tempOne.MakeConst(theRingUniT);
   output=*this;
   MathRoutines::RaiseToPower(output, d, tempOne);

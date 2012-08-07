@@ -27,8 +27,6 @@
 		<Linker>
 			<Add library="libpthread" />
 		</Linker>
-		<Unit filename="RootSystem.html.cpp" />
-		<Unit filename="calculator.cpp" />
 		<Unit filename="vpf.h" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf6.cpp" />
@@ -37,9 +35,11 @@
 		<Unit filename="vpf9.cpp" />
 		<Unit filename="vpf9_1.cpp" />
 		<Unit filename="vpf9_2.cpp" />
+		<Unit filename="vpfCalculatorMain.cpp" />
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfHtmlStrings.cpp" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

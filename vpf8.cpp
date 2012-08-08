@@ -3573,12 +3573,12 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { Polynomial<Rational> tempP, outputPolyPart;
   Rational tempRat2;
-  outputPolyPart.MakeConst(theMon.size, 1);
-  for (int i=0; i<theMon.size; i++)
-  { this->MakePolynomialFromOneNormal(normals[i], theMon, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
+  outputPolyPart.MakeConst(theMon.monBody.size, 1);
+  for (int i=0; i<theMon.monBody.size; i++)
+  { this->MakePolynomialFromOneNormal(normals[i], theMon.monBody, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
     outputPolyPart*=(tempP);
   }
-  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon, theLattice, theGlobalVariables);
+  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon.monBody, theLattice, theGlobalVariables);
   this->AlreadyAccountedForInGUIDisplay=true;
 }
 
@@ -5572,7 +5572,7 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   basisMonsAll.MakeZero(this->theDimension);
   basisMonsAll.SetExpectedSize(numCycles);
   MonomialP theMon;
-  theMon.MakeZero(this->theDimension);
+  theMon.MakeConst(this->theDimension);
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
@@ -8063,7 +8063,7 @@ bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
   Rational coeffMon;
   for (int i=0; i<this->StandardOrder.size; i++)
   { MonomialP& currentActingMon=this->StandardOrder[i];
-    if (!currentActingMon.IsIntegral())
+    if (!currentActingMon.monBody.IsIntegral())
     { std::cout << "Element weyl algebra called inappropriately. Not raising alarm, although I should. ";
       return false;
     }

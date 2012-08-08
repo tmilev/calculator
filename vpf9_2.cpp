@@ -83,8 +83,8 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
 void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right, Polynomial<Rational>& OrderedOutput)
 { MonomialP buffer;
   SelectionWithDifferentMaxMultiplicities tempSel;
-  assert(left.size%2==0);
-  int theDimension=left.size/2;
+  assert(left.monBody.size%2==0);
+  int theDimension=left.monBody.size/2;
   tempSel.Multiplicities.initFillInObject(theDimension, 0);
   tempSel.MaxMultiplicities.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
@@ -98,9 +98,9 @@ void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right,
     tempSel.MaxMultiplicities[i]=left[theDimension+i].NumShort;
   }
   tempSel.elements.initFillInObject(theDimension, 0);
-  buffer.MakeZero(left.size);
-  assert(left.size==right.size);
-  OrderedOutput.MakeZero(left.size);
+  buffer.MakeConst(left.monBody.size);
+  assert(left.monBody.size==right.monBody.size);
+  OrderedOutput.MakeZero(left.monBody.size);
   int numCycles= tempSel.getTotalNumSubsets();
   Rational coeffBuff;
   for (int i=0; i<numCycles; i++)
@@ -143,7 +143,7 @@ void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft
 void ElementWeylAlgebra::MakeConst(int NumVars, const Rational& theConst)
 { this->MakeZero(NumVars);
   MonomialP tempM;
-  tempM.MakeZero(this->NumVariables*2);
+  tempM.MakeConst(this->NumVariables*2);
   this->StandardOrder.AddMonomial(tempM, theConst);
 }
 
@@ -218,7 +218,7 @@ void ElementWeylAlgebra::SetNumVariables(int newNumVars)
   Accum.Reserve(this->StandardOrder.size);
   MonomialP tempM;
   for (int i=0; i<this->StandardOrder.size; i++)
-  { tempM.MakeZero(newNumVars*2);
+  { tempM.MakeConst(newNumVars*2);
     for (int j=0; j< this->NumVariables; j++)
     { tempM[j]=this->StandardOrder[i][j];
       tempM[j+newNumVars]=this->StandardOrder[i][j+this->NumVariables];
@@ -232,11 +232,11 @@ void ElementWeylAlgebra::SetNumVariables(int newNumVars)
 void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
 { this->MakeZero(NumVars*2);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i]=1;
   tempMon[j+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[j]=1;
   tempMon[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon,1);
@@ -245,11 +245,11 @@ void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
 void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->MakeZero(NumVars*2);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i]=1;
   tempMon[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon,1);
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[j+NumVars]=1;
   tempMon[i+this->NumVariables+NumVars]=1;
   this->StandardOrder.AddMonomial(tempMon,1);
@@ -258,11 +258,11 @@ void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
 void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
 { this->MakeZero(NumVars*2);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i+NumVars]=1;
   tempMon[j+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon,1);
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[j+NumVars]=1;
   tempMon[i+this->NumVariables]=1;
   this->StandardOrder.AddMonomial(tempMon,1);
@@ -271,7 +271,7 @@ void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
 void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
 { this->MakeZero(NumVars);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i+NumVars]+=1;
   tempMon[j+NumVars]+=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
@@ -280,7 +280,7 @@ void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
 void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
 { this->MakeZero(NumVars);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i]+=1;
   tempMon[j]+=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
@@ -289,7 +289,7 @@ void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
 void ElementWeylAlgebra::Makexi(int i, int NumVars)
 { this->MakeZero(NumVars);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i]+=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
 }
@@ -297,7 +297,7 @@ void ElementWeylAlgebra::Makexi(int i, int NumVars)
 void ElementWeylAlgebra::Makedi(int i, int NumVars)
 { this->MakeZero(NumVars);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i+NumVars]+=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
 }
@@ -305,7 +305,7 @@ void ElementWeylAlgebra::Makedi(int i, int NumVars)
 void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 { this->MakeZero(NumVars);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVariables*2);
+  tempMon.MakeConst(this->NumVariables*2);
   tempMon[i]=1;
   tempMon[NumVars+j]=1;
   this->StandardOrder.AddMonomial(tempMon, 1);
@@ -693,7 +693,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rationa
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   MonomialP tempM;
-  tempM.MakeZero((int)numberVariables);
+  tempM.MakeConst((int)numberVariables);
   Matrix<Rational> coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
@@ -752,7 +752,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
           outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size+1);
           outputSystemToBeSolved.LastObject()->MakeZero(numberVariables);
         }
-        tempM.MakeZero((int)numberVariables);
+        tempM.MakeConst((int)numberVariables);
         tempM[i]=1;
         tempM[j+halfNumberVariables]=1;
         Rational tempCoeff= this->GetConstant(rootsInPlay[i], -rootsInPlay[j]);
@@ -770,7 +770,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   { assert(rootsInPlay.size==halfNumberVariables);
     this->GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
-    { tempM.MakeZero((int)numberVariables);
+    { tempM.MakeConst((int)numberVariables);
       tempM[i]=1;
       tempM[i+halfNumberVariables]=1;
       outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);
@@ -4016,7 +4016,7 @@ void RationalFunction::RemainderDivision
   MonomialP& highestMonDivisor=divisor[divisorHighest];
   int remainderHighest=-1;
   int theNumVars=input.NumVars;
-  bufferMon1.MakeZero((int)theNumVars);
+  bufferMon1.MakeConst((int)theNumVars);
   assert(input.NumVars==theNumVars);
   assert(divisor.NumVars==theNumVars);
   for(;;)
@@ -4050,8 +4050,8 @@ void RationalFunction::TransformToReducedGroebnerBasis
   MonomialP& leftShift=bufferMon1;
   MonomialP& rightShift=bufferMon2;
   int theNumVars=theBasis.TheObjects[0].NumVars;
-  leftShift.MakeZero(theNumVars);
-  rightShift.MakeZero(theNumVars);
+  leftShift.MakeConst(theNumVars);
+  rightShift.MakeConst(theNumVars);
  // std::string tempS;
   for (int lowestNonExplored=0; lowestNonExplored< theBasis.size; lowestNonExplored++)
   { //warning! currentPoly may expire if theBasis.TheObjects changes size
@@ -4065,7 +4065,7 @@ void RationalFunction::TransformToReducedGroebnerBasis
       MonomialP& rightHighestMon=currentRight[rightIndex];
       Rational leftCoeff=-currentLeft.theCoeffs[leftIndex];
       Rational rightCoeff=currentRight.theCoeffs[rightIndex];
-      for (int k=0; k<leftHighestMon.size; k++)
+      for (int k=0; k<leftHighestMon.monBody.size; k++)
         if (leftHighestMon[k]>rightHighestMon[k])
         { rightShift[k]=leftHighestMon[k]-rightHighestMon[k];
           leftShift[k]=0;
@@ -4205,7 +4205,7 @@ void RationalFunction::lcm
 
 void RationalFunction::operator*=(const MonomialP& other)
 { Polynomial<Rational> otherP;
-  otherP.MakeZero(other.size);
+  otherP.MakeConst(other.monBody.size);
   otherP.AddMonomial(other, 1);
   (*this)*=otherP;
 }
@@ -6388,11 +6388,11 @@ Polynomial<Rational> & ParserNode::GetElement<Polynomial<Rational> >()
 }
 
 bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& m)const
-{ assert(this->size==m.size);
-  for (int i=this->size-1; i>=0; i--)
-  { if (this->TheObjects[i]>m[i])
+{ assert(this->monBody.size==m.monBody.size);
+  for (int i=this->monBody.size-1; i>=0; i--)
+  { if ((*this)[i]>m[i])
       return true;
-    if (this->TheObjects[i]<m[i])
+    if ((*this)[i]<m[i])
       return false;
   }
   return true;
@@ -6400,45 +6400,47 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& m)const
 
 
 bool MonomialP::IsGEQpartialOrder(MonomialP& m)
-{ assert(this->size == m.size);
-  for (int i=0; i<m.size; i++)
-    if (this->TheObjects[i]<m[i])
+{ assert(this->monBody.size == m.monBody.size);
+  for (int i=0; i<m.monBody.size; i++)
+    if ((*this)[i]<m[i])
       return false;
   return true;
 }
 
 bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& m)const
-{ assert(this->size==m.size);
-  for (int i=0; i<this->size; i++)
-  { if (this->TheObjects[i]>m[i])
+{ assert(this->monBody.size==m.monBody.size);
+  for (int i=0; i<this->monBody.size; i++)
+  { if ((*this)[i]>m[i])
       return true;
-    if (this->TheObjects[i]<m[i])
+    if ((*this)[i]<m[i])
       return false;
   }
   return true;
 }
 
 void MonomialP::MultiplyBy(const MonomialP& other)
-{ int numCycles=MathRoutines::Minimum(this->size, other.size);
+{ int numCycles=MathRoutines::Minimum(this->monBody.size, other.monBody.size);
   for (int i=0; i<numCycles; i++)
-    this->TheObjects[i]+=other[i];
-  this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->size, other.size));
+    (*this)[i]+=other[i];
+  this->SetNumVariablesSubDeletedVarsByOne
+  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
 }
 
 void MonomialP::DivideBy(const MonomialP& other)
-{ int numCycles=MathRoutines::Minimum(this->size, other.size);
+{ int numCycles=MathRoutines::Minimum(this->monBody.size, other.monBody.size);
   for (int i=0; i<numCycles; i++)
-    this->TheObjects[i]-=other[i];
-  this->SetNumVariablesSubDeletedVarsByOne(MathRoutines::Maximum(this->size, other.size));
+    (*this)[i]-=other[i];
+  this->SetNumVariablesSubDeletedVarsByOne
+  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
 }
 
 void MonomialP::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
 { if (newNumVars<0)
     newNumVars=0;
-  int oldSize=this->size;
-  this->SetSize(newNumVars);
-  for(int i=oldSize; i<this->size; i++)
-    this->TheObjects[i]=0;
+  int oldSize=this->monBody.size;
+  this->monBody.SetSize(newNumVars);
+  for(int i=oldSize; i<this->monBody.size; i++)
+    (*this)[i]=0;
 }
 
 bool Cone::IsInCone(const Vector<Rational>& point) const
@@ -6468,11 +6470,11 @@ std::string MonomialP::ToString(FormatExpressions* theFormat)const
     theFormat=&tempFormat.GetElement();
   if (this->IsAConstant())
     return "1";
-  for (int i=0; i<this->size; i++)
-    if (!this->TheObjects[i].IsEqualToZero())
+  for (int i=0; i<this->monBody.size; i++)
+    if (!(*this)[i].IsEqualToZero())
     { out << theFormat->GetPolyLetter(i);
-      if (!(this->TheObjects[i]==1))
-        out << "^{" << this->TheObjects[i] << "}";
+      if (!((*this)[i]==1))
+        out << "^{" << (*this)[i] << "}";
     }
   return out.str();
 }

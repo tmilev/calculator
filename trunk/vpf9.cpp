@@ -1950,7 +1950,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 (List<Vector<Rational> >& startingVectors, List<int>& theSelectedIndices, List<int>& theCoefficients,
  List<int>& theGreatestElongations, int theIndex, Polynomial<LargeInt>& output, int theDimension)
 { MonomialP tempM;
-  tempM.MakeZero(theDimension);
+  tempM.MakeConst(theDimension);
   for (int i=0; i<theIndex; i++)
   { int tempI= theSelectedIndices[i];
     for (int j=0; j<theDimension; j++)
@@ -2055,7 +2055,7 @@ void partFraction::ApplySzenesVergneFormulA
     oneFracWithMultiplicitiesAndElongations& currentFrac=tempFrac.TheObjects[theSelectedIndices.TheObjects[i]];
     int LargestElongation= currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(-1, LargestElongation);
-    tempM.SetSize(theDim);
+    tempM.monBody.SetSize(theDim);
     for (int j=0; j<i; j++)
     { int tempElongation=(int) this->TheObjects[theSelectedIndices[j]].GetLargestElongation();
       for (int k=0; k<theDim; k++)
@@ -2134,7 +2134,7 @@ void partFraction::GetAlphaMinusNBetaPoly
 (partFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output)
 { output.MakeZero(owner.AmbientDimension);
   MonomialP tempM;
-  tempM.SetSize(owner.AmbientDimension);
+  tempM.monBody.SetSize(owner.AmbientDimension);
   for (int i=0; i<n; i++)
   { for (int j=0; j<owner.AmbientDimension; j++)
       tempM[j]= owner.startingVectors[indexA][j]- owner.startingVectors[indexB][j]*(i+1);
@@ -2147,7 +2147,7 @@ void partFraction::GetNElongationPoly
  Polynomial<LargeInt>& output, int theDimension)
 { output.MakeZero(theDimension);
   MonomialP tempM;
-  tempM.SetSize(theDimension);
+  tempM.monBody.SetSize(theDimension);
   if (LengthOfGeometricSeries>0)
     for (int i=0; i<LengthOfGeometricSeries; i++)
     { for (int j=0; j<theDimension; j++)
@@ -2668,7 +2668,7 @@ void partFraction::GetPolyReduceMonomialByMonomial
     return;
   }
   MonomialP tempMon;
-  tempMon.MakeZero(owner.AmbientDimension);
+  tempMon.MakeConst(owner.AmbientDimension);
   output.MakeZero(owner.AmbientDimension);
   LargeInt theCoeff=1;
   if (StartMonomialPower>0)
@@ -3155,7 +3155,7 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(Polynomial<Larg
 { assert(MultiplicityIndex<this->Multiplicities.size);
   MonomialP tempM;
   output.MakeOne(theExponent.size);
-  tempM.SetSize(theExponent.size);
+  tempM.monBody.SetSize(theExponent.size);
   for (int i=0; i<theExponent.size; i++)
     tempM[i]=theExponent[i]*this->Elongations[MultiplicityIndex];
   output.AddMonomial(tempM, -1);
@@ -4595,7 +4595,7 @@ void KLpolys::ComputeKLxy(int x, int y)
     { tempP1.MakeZero(1);
       for (int j=0; j<this->theRPolys[x][i].size; j++)
       { tempM=this->theRPolys[x][i][j];
-        tempM.Minus();
+        tempM.Invert();
         tempP1.AddMonomial(tempM, this->theRPolys[x][i].theCoeffs[j]);
       }
       int tempI;
@@ -4623,7 +4623,7 @@ void KLpolys::ComputeKLxy(int x, int y)
   lengthDiff/=2;
 //  std::cout << "Accum: " << Accum.ToString();
   for (int i=0; i<Accum.size; i++)
-    if(Accum[i].IsPositiveOrZero())
+    if(Accum[i].monBody.IsPositiveOrZero())
     { tempM=Accum[i];
       tempM[0].Minus();
       tempM[0]+=lengthDiff;

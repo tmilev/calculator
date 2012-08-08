@@ -4133,15 +4133,13 @@ public:
   }
 };
 
-class MonomialP: public Vector<Rational>
+class MonomialP
 {
 private:
-  void operator+=(const MonomialP& other);
 public:
-  friend MonomialP operator-(const MonomialP& input)
-  { MonomialP result=input;
-    result.Minus();
-    return result;
+  Vector<Rational> monBody;
+  Rational& operator[](int i)const
+  { return monBody[i];
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
@@ -4149,26 +4147,28 @@ public:
   }
   inline static std::string GetXMLClassName(){ return "MonomialP"; }
   unsigned  int HashFunction() const
-  { return this->Vector<Rational>::HashFunction();
+  { return this->monBody.HashFunction();
   }
   static inline unsigned int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
   std::string ToString(FormatExpressions* PolyFormat=0)const;
-  void MakeZeroDegrees();
+  void MakeConst(int numVars)
+  { this->monBody.MakeZero(numVars);
+  }
   bool operator>(const MonomialP& other)const
-  { if (this->operator==(other))
+  { if (this->monBody==other.monBody)
       return false;
     return this->IsGEQLexicographicLastVariableStrongest(other);
   }
   bool IsDivisibleBy(const MonomialP& other)const
-  { for (int i=0; i<this->size; i++)
-      if (this->TheObjects[i]<other[i])
+  { for (int i=0; i<this->monBody.size; i++)
+      if (this->monBody[i]<other.monBody[i])
         return false;
     return true;
   }
   int TotalDegree()const
-  { return this->SumCoords().NumShort;
+  { return this->monBody.SumCoords().NumShort;
   }
   void MultiplyBy(const MonomialP& other);
   void DivideBy(const MonomialP& other);
@@ -4182,14 +4182,14 @@ public:
   }
   bool IsOneLetterFirstDegree(int& whichLetter)const
   { whichLetter=-1;
-    for (int i=0; i<this->size; i++)
-      if (this->TheObjects[i]==1)
+    for (int i=0; i<this->monBody.size; i++)
+      if (this->monBody[i]==1)
       { if (whichLetter==-1)
           whichLetter=i;
         else
           return false;
       } else
-        if (this->TheObjects[i]!=0)
+        if (this->monBody[i]!=0)
           return false;
     return whichLetter!=-1;
   }
@@ -4199,8 +4199,8 @@ public:
   ;
   void MakeMonomial(int NumVars, int LetterIndex, int Power);
   int GetHighestIndexSuchThatHigherIndexVarsDontParticipate()
-  { for (int i=this->size-1; i>=0; i--)
-      if (this->TheObjects[i]!=0)
+  { for (int i=this->monBody.size-1; i>=0; i--)
+      if (this->monBody[i]!=0)
         return i;
     return -1;
   }
@@ -4226,20 +4226,41 @@ public:
   void DecreaseNumVariables(int increment);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsAConstant()const
-  { return this->IsEqualToZero();
+  { return this->monBody.IsEqualToZero();
   }
-  void InvertDegrees(){this->Minus();}
+  void Invert(){this->monBody.Minus();}
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
   int SizeWithoutCoefficient();
   void RaiseToPower(const Rational& thePower)
-  { this->Vector<Rational>::operator*=(thePower);
+  { this->monBody*=thePower;
   }
-  void operator*=(MonomialP& other)
-  { this->Vector<Rational>::operator+=(other);
+  void operator*=(const MonomialP& other)
+  { this->monBody+=other.monBody;
+  }
+  void operator/=(const MonomialP& other)
+  { this->monBody-=other.monBody;
+  }
+  bool operator==(const MonomialP& other)const
+  { return this->monBody==other.monBody;
   }
   template <class CoefficientType>
   void operator=(const Vector<CoefficientType>& other)
-  { this->::Vector<Rational>::operator=(other);
+  { this->monBody=(other);
+  }
+  void operator=(const MonomialP& other)
+  { this->monBody=(other.monBody);
+  }
+  void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables)
+  { this->monBody.ReadFromFile(input);
+  }
+  void ReadFromFile(std::fstream& input)
+  { this->monBody.ReadFromFile(input);
+  }
+  inline void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
+  { this->monBody.WriteToFile(output);
+  }
+  void WriteToFile(std::fstream& output)
+  { this->monBody.WriteToFile(output);
   }
 };
 
@@ -4561,7 +4582,7 @@ public:
     this->MakeZero(inputNumVars);
     //this->GrandMasterConsistencyCheck();
     MonomialP theZeroMon;
-    theZeroMon.MakeZero(inputNumVars);
+    theZeroMon.MakeConst(inputNumVars);
     this->AddMonomial(theZeroMon, theConst);
     //this->GrandMasterConsistencyCheck();
   }
@@ -4677,12 +4698,12 @@ public:
   bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
   void operator-=(int x)
   { MonomialP tempMon;
-    tempMon.MakeZero(this->NumVars);
+    tempMon.MakeConst(this->NumVars);
     this->SubtractMonomial(tempMon, x);
   }
   void operator-=(const CoefficientType& other)
   { MonomialP tempMon;
-    tempMon.MakeZero(this->NumVars);
+    tempMon.MakeConst(this->NumVars);
     this->SubtractMonomial(tempMon, other);
   }
   void operator-=(const Polynomial<CoefficientType>& other)
@@ -4722,12 +4743,12 @@ public:
   }
   void operator+=(int other)
   { MonomialP tempMon;
-    tempMon.MakeZero(this->NumVars);
+    tempMon.MakeConst(this->NumVars);
     this->AddMonomial(tempMon, other);
   }
   void operator+=(const CoefficientType& other)
   { MonomialP tempMon;
-    tempMon.MakeZero(this->NumVars);
+    tempMon.MakeConst(this->NumVars);
     this->AddMonomial(tempMon, other);
   }
   void operator+=(const Polynomial& other)
@@ -4807,7 +4828,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   }
   void MakeOneParameterSubFromDirection(Vector<Rational>& direction)
   { MonomialP tempM;
-    tempM.SetSize(1);
+    tempM.MakeConst(1);
     tempM[0]=1;
     this->SetSize(direction.size);
     for (int i=0; i<this->size; i++)
@@ -5389,7 +5410,8 @@ public:
 template <class Element>
 void MonomialP::Substitution
 (const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)
-{ int NumVarTarget=0;
+{ MacroRegisterFunctionWithName("MonomialP::Substitution");
+  int NumVarTarget=0;
   if (TheSubstitution.size>0)
     NumVarTarget=TheSubstitution[0].NumVars;
   output.MakeConst(NumVarTarget, 1);
@@ -5398,17 +5420,18 @@ void MonomialP::Substitution
   Polynomial<Element> tempPoly;
 //  std::cout << "<hr>subbing in monomial " << this->ToString();
 //  output.ComputeDebugString();
-  assert(TheSubstitution.size==this->size);
-  for (int i=0; i<this->size; i++)
-    if (this->TheObjects[i]!=0)
-    { if (!this->TheObjects[i].IsSmallInteger())
+  assert(TheSubstitution.size==this->monBody.size);
+  for (int i=0; i<this->monBody.size; i++)
+    if (this->monBody[i]!=0)
+    { if (!this->monBody[i].IsSmallInteger())
       { std::cout << "This is a programming error. I cannot carry out a substitution in a monomial "
-        << " that has exponent which is not a small integer: it is " << this->TheObjects[i] << " instead.";
+        << " that has exponent which is not a small integer: it is " << this->monBody[i] << " instead. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();
       tempPoly=TheSubstitution[i];
-      tempPoly.RaiseToPower(this->TheObjects[i].NumShort, 1);
+      tempPoly.RaiseToPower(this->monBody[i].NumShort, 1);
 //      tempPoly.ComputeDebugString();
       output*=(tempPoly);
 //      output.ComputeDebugString();
@@ -5434,7 +5457,7 @@ int Polynomial<Element>::GetMaxPowerOfVariableIndex(int VariableIndex)
 template <class Element>
 void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRingZero)const
 { MonomialP tempM;
-  tempM.MakeZero(this->NumVars);
+  tempM.MakeConst(this->NumVars);
   int i=this->GetIndex(tempM);
   if (i==-1)
     output=theRingZero;
@@ -5445,7 +5468,7 @@ void Polynomial<Element>::GetConstantTerm(Element& output, const Element& theRin
 template <class Element>
 void Polynomial<Element>::GetCoeffInFrontOfLinearTermVariableIndex(int index, Element& output, const Element& theRingZero)
 { MonomialP tempM;
-  tempM.MakeEi(this->NumVars, index);
+  tempM.monBody.MakeEi(this->NumVars, index);
   int i=this->GetIndex(tempM);
   if (i==-1)
     output=theRingZero;
@@ -5456,7 +5479,7 @@ void Polynomial<Element>::GetCoeffInFrontOfLinearTermVariableIndex(int index, El
 template <class Element>
 void Polynomial<Element>::AddConstant(const Element& theConst)
 { MonomialP tempMon;
-  tempMon.MakeZero(this->NumVars);
+  tempMon.MakeConst(this->NumVars);
   this->AddMonomial(tempMon, theConst);
 }
 
@@ -5546,7 +5569,7 @@ void Polynomial<Element>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
   Accum.Reserve(this->size);
   int minNumVars=MathRoutines::Minimum(this->NumVars, newNumVars);
   MonomialP tempM;
-  tempM.MakeZero(newNumVars);
+  tempM.MakeConst(newNumVars);
   for (int i=0; i<this->size; i++)
   { for (int j=0; j<minNumVars; j++)
       tempM[j]=this->TheObjects[i][j];
@@ -5561,7 +5584,7 @@ void Polynomial<CoefficientType>::IncreaseNumVariablesWithShiftToTheRight(int th
   Accum.MakeZero(this->NumVars+theIncrease);
   Accum.Reserve(this->size);
   MonomialP tempM;
-  tempM.MakeZero(Accum.NumVars);
+  tempM.MakeConst(Accum.NumVars);
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
   for (int i=0; i<this->size; i++)
   { for (int j=0; j<minNumVars; j++)
@@ -5642,7 +5665,7 @@ bool MonomialCollection<TemplateMonomial, Element>::IsInteger(LargeInt* whichInt
       *whichInteger=0;
     return true;
   }
-  bool result= this->TheObjects[0].IsEqualToZero();
+  bool result= this->TheObjects[0].IsAConstant();
   if (result)
     result=this->theCoeffs[0].IsInteger(whichInteger);
   return result;
@@ -5657,7 +5680,7 @@ bool MonomialCollection<TemplateMonomial, Element>::IsSmallInteger(int* whichInt
       *whichInteger=0;
     return true;
   }
-  bool result= this->TheObjects[0].IsEqualToZero();
+  bool result= this->TheObjects[0].IsAConstant();
   if (result)
     result=this->theCoeffs[0].IsSmallInteger(whichInteger);
   return result;
@@ -5668,7 +5691,7 @@ void Polynomial<Element>::MakeLinPolyFromRootLastCoordConst(const Vector<Rationa
 { this->MakeZero(input.size-1);
   MonomialP tempM;
   for (int i=0; i<input.size-1; i++)
-  { tempM.MakeEi(input.size-1, i);
+  { tempM.monBody.MakeEi(input.size-1, i);
     this->AddMonomial(tempM, input[i]);
   }
   this->operator+=(*input.LastObject());
@@ -5679,7 +5702,7 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
 { this->MakeZero(r.size);
   MonomialP tempM;
   for (int i=0; i<r.size; i++)
-  { tempM.MakeEi(r.size, i);
+  { tempM.monBody.MakeEi(r.size, i);
     if (!r[i].IsInteger())
     { std::cout << "This is a programming error. Please debug file "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -5699,7 +5722,7 @@ void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, const 
   }
   this->MakeZero(inputNumVars);
   MonomialP tempM;
-  tempM.MakeZero(this->NumVars);
+  tempM.MakeConst(this->NumVars);
   tempM[LetterIndex]=Power;
   this->AddMonomial(tempM, Coeff);
 }
@@ -5761,11 +5784,11 @@ int Polynomial<Element>::GetIndexMaxMonomialTotalDegThenLexicographic()
 
 template <class Element>
 void Polynomial<Element>::ScaleToPositiveMonomials(MonomialP& outputScale)
-{ outputScale.MakeZero(this->NumVars);
+{ outputScale.MakeConst(this->NumVars);
   for (int i=0; i<this->NumVars; i++)
     for (int j=0; j<this->size; j++)
       outputScale[i]= ::MathRoutines::Minimum(outputScale[i], this->TheObjects[j][i]);
-  outputScale.Minus();
+  outputScale.Invert();
   this->MultiplyBy(outputScale, 1);
 }
 
@@ -5809,7 +5832,7 @@ void Polynomial<Element>::DivideBy
     return;
   outputQuotient.Reserve(this->size);
   MonomialP tempMon;
-  tempMon.MakeZero(this->NumVars);
+  tempMon.MakeConst(this->NumVars);
   Polynomial<Element> tempP;
   tempP.Reserve(this->size);
   //if (this->flagAnErrorHasOccuredTimeToPanic)
@@ -5828,8 +5851,8 @@ void Polynomial<Element>::DivideBy
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
   { assert(remainderMaxMonomial<outputRemainder.size);
     tempMon=outputRemainder[remainderMaxMonomial];
-    tempMon-=tempInput[inputMaxMonomial];
-    if (!tempMon.IsPositiveOrZero())
+    tempMon/=tempInput[inputMaxMonomial];
+    if (!tempMon.monBody.IsPositiveOrZero())
       break;
     Element tempCoeff=outputRemainder.theCoeffs[remainderMaxMonomial]/tempInput.theCoeffs[inputMaxMonomial] ;
     outputQuotient.AddMonomial(tempMon, tempCoeff);
@@ -5841,7 +5864,7 @@ void Polynomial<Element>::DivideBy
     if (remainderMaxMonomial==-1)
       break;
   }
-  scaleInput.InvertDegrees();
+  scaleInput.Invert();
   outputQuotient.MultiplyBy(scaleInput,1);
   outputQuotient.MultiplyBy(scaleRemainder,1);
   outputRemainder.MultiplyBy(scaleRemainder,1);
@@ -5987,7 +6010,7 @@ template <class Element>
 void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex, const Element& coeff)
 { this->MakeZero(NVar);
   MonomialP tempM;
-  tempM.MakeEi(this->NumVars, NonZeroIndex);
+  tempM.monBody.MakeEi(this->NumVars, NonZeroIndex);
   this->AddMonomial(tempM, coeff);
 }
 
@@ -5995,9 +6018,9 @@ template <class Element>
 void Polynomial<Element>::MakeDegreeOne(int NVar, int NonZeroIndex1, int NonZeroIndex2, const Element& coeff1, const Element& coeff2)
 { this->MakeZero(NVar);
   MonomialP tempM;
-  tempM.MakeEi(this->NumVars, NonZeroIndex1);
+  tempM.monBody.MakeEi(this->NumVars, NonZeroIndex1);
   this->AddMonomial(tempM, coeff1);
-  tempM.MakeEi(this->NumVars, NonZeroIndex2);
+  tempM.monBody.MakeEi(this->NumVars, NonZeroIndex2);
   this->AddMonomial(tempM, coeff2);
 }
 
@@ -6041,7 +6064,7 @@ template <class Element>
 void PolynomialSubstitution<Element>::MakeExponentSubstitution(Matrix<LargeInt>& theSub)
 { Polynomial<Element> tempP;
   MonomialP tempM;
-  tempM.MakeZero(theSub.NumRows);
+  tempM.MakeConst(theSub.NumRows);
   this->size=0;
   this->SetSize(theSub.NumCols);
   for (int i=0; i<theSub.NumCols; i++)
@@ -7541,7 +7564,7 @@ void Polynomial<CoefficientType> ::MakePolyFromDirectionAndNormal
   this->MakeZero(direction.size);
   MonomialP tempM;
   for (int i=0; i<direction.size; i++)
-  { tempM.MakeEi(direction.size, i);
+  { tempM.monBody.MakeEi(direction.size, i);
     this->AddMonomial(tempM, normal.TheObjects[i]/tempRat2);
   }
   *this+=Correction;
@@ -7863,9 +7886,9 @@ void Polynomial<CoefficientType>::ScaleToIntegralNoGCDCoeffs()
 
 template <typename Element>
 inline void Matrix<Element>::ActOnMonomialAsDifferentialOperator(MonomialP& input, Polynomial<Rational>& output)
-{ assert(this->NumRows==this->NumCols && this->NumRows==input.size);
+{ assert(this->NumRows==this->NumCols && this->NumRows==input.monBody.size);
   MonomialP tempMon;
-  output.MakeZero(input.size);
+  output.MakeZero(input.monBody.size);
   Rational coeff;
   for (int i=0; i<this->NumRows; i++)
     for (int j=0; j<this->NumCols; j++)

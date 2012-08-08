@@ -6847,7 +6847,7 @@ void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Elem
   for (int i=0; i<this->size; i++)
   { this->TheObjects[i].MakeZero((int)theMat.NumRows-1);
     for (int j=0; j<theMat.NumRows-1; j++)
-    { tempM.MakeZero((int)theMat.NumRows-1);
+    { tempM.MakeConst((int)theMat.NumRows-1);
       tempM[j]=1;
       this->TheObjects[i].AddMonomial(tempM, theMat.elements[j][i]);
     }

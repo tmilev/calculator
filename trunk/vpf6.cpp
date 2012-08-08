@@ -432,7 +432,9 @@ bool Data::MakeElementSemisimpleLieAlgebra
   rfOne.MakeOne(0, this->owner->theGlobalVariableS);
   rfZero.MakeZero(0, this->owner->theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunction> tempUE;
+//  std::cout << "tempelt: " << tempElt.ToString();
   tempUE.AssignElementLieAlgebra(tempElt, inputOwners, inputIndexInOwners, rfOne, rfZero);
+//  std::cout << "tempue: " << tempUE.ToString();
   this->theIndex=inputOwner.theObjectContainer.theUEs.AddNoRepetitionOrReturnIndexFirst(tempUE);
   return true;
 }
@@ -503,7 +505,9 @@ bool Data::LieBracket
       return false;
     ElementUniversalEnveloping<RationalFunction> result;
     leftCopy.GetUE().LieBracketOnTheRight(rightCopy.GetUE(), result);
+    std::cout << "result: " << result.ToString();
     result.Simplify(*left.owner->theGlobalVariableS);
+    std::cout << " simpliefied: " << result.ToString();
     output.MakeUE(*left.owner, result, leftCopy.theContextIndex);
     return true;
   }

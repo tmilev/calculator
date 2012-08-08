@@ -5890,7 +5890,7 @@ template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
 { ///
-  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+//  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
   if (inputCoeff.IsEqualToZero())
   { assert(inputCoeff.ToString()=="0");
@@ -5905,7 +5905,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
     << " but I have only " << this->size << " elements ";
     j=this->GetIndex(inputMon);
     std::string debugString=tempStream.str();
-    std::cout << debugString;
+    std::cout << debugString << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (j==-1)
@@ -5913,11 +5913,11 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
     this->theCoeffs.AddOnTop(inputCoeff);
   } else
   { ///
-    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
+//    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
     if (j>=this->theCoeffs.size)
     { std::cout << "This is a programming error. "
       << " Looking for coefficient index " << j << " when number of coefficients is "
-      << this->theCoeffs.size <<  ". ";
+      << this->theCoeffs.size <<  ". " <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     ///

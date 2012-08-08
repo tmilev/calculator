@@ -2283,6 +2283,10 @@ public:
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
   }
+  void operator=(const TensorMonomial<CoefficientType>& other)
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers=other.Powers;
+  }
   template<class otherType>
   void operator=(const TensorMonomial<otherType>& other)
   { this->generatorsIndices=(other.generatorsIndices);
@@ -2333,7 +2337,7 @@ public:
   bool operator==(const TensorMonomial<CoefficientType>& other)const
   { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
-  inline void operator*=(const TensorMonomial& standsOnTheRight)
+  inline void operator*=(const TensorMonomial<CoefficientType>& standsOnTheRight)
   { if (standsOnTheRight.generatorsIndices.size==0)
       return;
     if (this==&standsOnTheRight)
@@ -2352,8 +2356,8 @@ public:
         i=1;
       }
     for (; i<standsOnTheRight.generatorsIndices.size; i++)
-    { this->Powers.AddOnTop(standsOnTheRight.Powers.TheObjects[i]);
-      this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices.TheObjects[i]);
+    { this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
+      this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices[i]);
     }
   }
 };
@@ -2370,8 +2374,6 @@ public:
   int indexInOwners;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
-  List<int> generatorsIndices;
-  List<CoefficientType> Powers;
   friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<CoefficientType>& theMon)
   { output << theMon.ToString();
     return output;
@@ -6209,6 +6211,8 @@ void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheRight
 { ElementUniversalEnveloping<CoefficientType> tempElt, tempElt2;
   tempElt=*this;
   tempElt*=right;
+  std::cout  << "this: " << this->ToString()
+  << " right: " << right.ToString() << " this*right: " << tempElt.ToString();
   tempElt2=right;
   tempElt2*=*this;
   output=tempElt;

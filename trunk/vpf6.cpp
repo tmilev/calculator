@@ -2034,116 +2034,6 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
   output.AddMonomial(tempMon, tempRF);
 }
 
-class MonMatrixTensor
-{
-  friend std::ostream& operator << (std::ostream& output, const MonMatrixTensor& theMon)
-  { output << theMon.ToString();
-    return output;
-  }
-  public:
-  int vIndex;
-  int dualIndex;
-  bool IsId;
-  void operator=(const MonMatrixTensor& other)
-  { this->vIndex=other.vIndex;
-    this->dualIndex=other.dualIndex;
-    this->IsId=other.IsId;
-  }
-  bool operator==(const MonMatrixTensor& other)const
-  { return this->vIndex==other.vIndex && this->dualIndex==other.dualIndex && this->IsId==other.IsId;
-  }
-  static unsigned int HashFunction(const MonMatrixTensor& input)
-  { return input.vIndex*SomeRandomPrimes[0]+input.dualIndex*SomeRandomPrimes[1]+input.IsId;
-  }
-  inline unsigned int HashFunction()const
-  { return HashFunction(*this);
-  }
-  bool operator>(const MonMatrixTensor& other)const
-  { if (this->IsId!=other.IsId)
-      return this->IsId>other.IsId;
-    if (this->vIndex==other.vIndex)
-      return this->dualIndex>other.dualIndex;
-    return this->vIndex>other.vIndex;
-  }
-  void MakeIdSpecial()
-  { this->vIndex=-1;
-    this->dualIndex=-1;
-    this->IsId=true;
-  }
-  std::string ToString(FormatExpressions* theFormat=0)const
-  { std::stringstream out;
-    if (!this->IsId)
-      out << "m_{" << this->vIndex+1 << "}\\otimes " << "m^*_{" << this->dualIndex+1 << "}";
-    else
-      out << "id";
-    return out.str();
-  }
-};
-
-template <class CoefficientType>
-class MatrixTensor: public MonomialCollection<MonMatrixTensor, CoefficientType >
-{
-public:
-  void MakeIdSpecial()
-  { this->MakeZero();
-    MonMatrixTensor theMon;
-    theMon.MakeIdSpecial();
-    this->AddMonomial(theMon, 1);
-  }
-  void MakeId(int numVars)
-  { this->MakeZero();
-    MonMatrixTensor theMon;
-    for (int i=0; i<numVars; i++)
-    { theMon.dualIndex=i;
-      theMon.vIndex=i;
-      this->AddMonomial(theMon, 1);
-    }
-  }
-  void operator=(Matrix<CoefficientType>& other)
-  { this->MakeZero();
-    MonMatrixTensor theMon;
-    for (int i=0; i<other.NumRows; i++)
-      for (int j=0; j<other.NumCols; j++)
-        if (!other.elements[i][j].IsEqualToZero())
-        { theMon.dualIndex=j;
-          theMon.vIndex=i;
-          this->AddMonomial(theMon, other.elements[i][j]);
-        }
-  }
-  void operator*=(const MatrixTensor<CoefficientType>& other)
-  { MacroRegisterFunctionWithName("MatrixTensor<CoefficientType>::operator*=");
-    if (this==&other)
-    { MatrixTensor<CoefficientType> otherCopy=other;
-      *this*=otherCopy;
-      return;
-    }
-    MatrixTensor<CoefficientType> thisCopy=*this;
-    MonMatrixTensor tempMon;
-    this->MakeZero();
-    this->SetExpectedSize(thisCopy.size*other.size);
-    CoefficientType tempCF;
-    for (int i=0; i<thisCopy.size; i++)
-      for (int j=0; j<other.size; j++)
-      { MonMatrixTensor& leftMon=thisCopy[i];
-        MonMatrixTensor& rightMon=other[j];
-        if (!leftMon.IsId && !rightMon.IsId)
-        { if (leftMon.dualIndex!=rightMon.vIndex)
-            continue;
-          tempMon.IsId=false;
-          tempMon.dualIndex=rightMon.dualIndex;
-          tempMon.vIndex=leftMon.vIndex;
-        }
-        if (leftMon.IsId)
-          tempMon=rightMon;
-        if (rightMon.IsId)
-          tempMon=leftMon;
-        tempCF=thisCopy.theCoeffs[i];
-        tempCF*=other.theCoeffs[j];
-        this->AddMonomial(tempMon, tempCF);
-      }
-  }
-};
-
 class quasiDiffMon
 {
   friend std::ostream& operator << (std::ostream& output, const quasiDiffMon& theMon)
@@ -2159,6 +2049,7 @@ class quasiDiffMon
   unsigned int HashFunction()const
   { return HashFunction(*this);
   }
+  static const bool IsEqualToZero(){return false;}
   bool operator==(const quasiDiffMon& other)const
   { return this->theWeylMon==other.theWeylMon && this->theMatMon==other.theMatMon;
   }
@@ -2299,7 +2190,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
   MatrixTensor<RationalFunction> endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
-  Matrix<RationalFunction> tempM;
+  MatrixTensor<RationalFunction> tempM;
   std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
   ElementWeylAlgebra weylPartSummand;
   Polynomial<Rational> tempP, theCoeff;
@@ -2313,7 +2204,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
     { int thePower=0;
       if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
-      tempM=this->GetActionGeneratorIndex(currentMon.generatorsIndices[j], theGlobalVariables);
+      tempM=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j], theGlobalVariables);
       tempMT=tempM;
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart*=tempMT;

@@ -385,7 +385,7 @@ public:
       result+=x[i]*SomeRandomPrimes[i];
     return result;
   }
-  //this function is just redirects to the class CGI function with the same name.
+  //this function just redirects to the class CGI function with the same name.
   //the stupid c++ does not allow me to use an incomplete CGI type.
   //They give a million bullshit reasons why this is a feature of c++, but
   // the only true reason is they are too lazy to sort the call graph topologically
@@ -4105,6 +4105,7 @@ public:
   { output << theGen.ToString();
     return output;
   }
+  static const bool IsEqualToZero(){return false;}
   static unsigned int HashFunction(const ChevalleyGenerator& input)
   { return input.theGeneratorIndex+input.indexOfOwnerAlgebra*SomeRandomPrimes[0];
   }
@@ -4149,6 +4150,7 @@ public:
   unsigned  int HashFunction() const
   { return this->monBody.HashFunction();
   }
+  static const bool IsEqualToZero(){return false;}
   static inline unsigned int HashFunction(const MonomialP& input)
   { return input.HashFunction();
   }
@@ -4415,14 +4417,22 @@ public:
     output+=other;
     return output;
   }
+  void MakeConst(const CoefficientType& coeff)
+  { TemplateMonomial tempM;
+    tempM.MakeOne();
+    this->AddMonomial(tempM, coeff);
+  }
+  void MakeOne()
+  { this->MakeConst(1);
+  }
   inline void operator+=(const CoefficientType& other)
   { TemplateMonomial tempM;
-    tempM.MakeZero();
+    tempM.MakeOne();
     this->AddMonomial(tempM, other);
   }
   inline void operator-=(const CoefficientType& other)
   { TemplateMonomial tempM;
-    tempM.MakeZero();
+    tempM.MakeOne();
     this->SubtractMonomial(tempM, other);
   }
   template <class OtherType>
@@ -4497,12 +4507,11 @@ class ElementAssociativeAlgebra: public MonomialCollection<TemplateMonomial, Coe
   void RaiseToPower
 (int d, ElementAssociativeAlgebra<TemplateMonomial, CoefficientType>& output, const CoefficientType& theRingUniT)
 ;
-  void RaiseToPower(int d, const TemplateMonomial& theZeroMon, const CoefficientType& theRingUniT)
+  void RaiseToPower(int d)
   { if (d==1)
       return;
     ElementAssociativeAlgebra<TemplateMonomial, CoefficientType> theOne;
-    theOne.MakeZero();
-    theOne.AddMonomial(theZeroMon, theRingUniT);
+    theOne.MakeConst(1);
     MathRoutines::RaiseToPower(*this, d, theOne);
   }
 };
@@ -5892,7 +5901,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
-  if (inputCoeff.IsEqualToZero())
+  if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
   { assert(inputCoeff.ToString()=="0");
     return;
   }
@@ -5932,7 +5941,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractMonomial
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
-{ if (inputCoeff.IsEqualToZero())
+{ if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
     return;
   int j= this->GetIndex(inputMon);
   if (j==-1)

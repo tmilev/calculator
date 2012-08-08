@@ -1242,11 +1242,11 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   for (int i=0; i<InvertedLeviInSmall.CardinalitySelection; i++)
   { ElementSemisimpleLieAlgebra& currentElt=theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     //std::cout << "<br>current element is: " << currentElt.ToString();
-    Matrix<CoefficientType> currentOp, tempMat;
-    currentOp.init(this->GetDim(), this->GetDim());
+    MatrixTensor<CoefficientType> currentOp, tempMat;
+    currentOp.MakeZero();
     for (int j=0; j<currentElt.size; j++)
     { //std::cout << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
-      tempMat=this->GetActionGeneratorIndex(currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
+      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
       tempMat*=currentElt.theCoeffs[j];
       currentOp+=tempMat;
     }
@@ -1254,7 +1254,9 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       double timeAtStart1=theGlobalVariables.GetElapsedSeconds();
       tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
       theGlobalVariables.MakeProgressReport(tempStream3.str(), 2);
-    currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    Matrix<CoefficientType> currentOpMat;
+    currentOp.GetMatrix(currentOpMat, this->GetDim());
+    currentOpMat.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
       tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1 << " seconds.";
       theGlobalVariables.MakeProgressReport(tempStream3.str(), 2);
     if (i==0)

@@ -174,9 +174,8 @@ ProjectInformationInstance::ProjectInformationInstance(const char* fileName, con
 RegisterFunctionCall::RegisterFunctionCall(const char* fileName, int line, const std::string& functionName)
 { List<stackInfo>& theStack=ProjectInformation::GetMainProjectInfo().CustomStackTrace;
   static MutexWrapper inCaseOfMultithreading;
-  static stackInfo tempNfo;
   inCaseOfMultithreading.LockMe();
-  theStack.AddOnTop(tempNfo);
+  theStack.SetSize(theStack.size+1);
   stackInfo& stackTop=*theStack.LastObject();
   stackTop.fileName=fileName;
   stackTop.line=line;
@@ -192,7 +191,8 @@ RegisterFunctionCall::~RegisterFunctionCall()
 std::string ProjectInformation::GetStackTraceReport()
 { std::stringstream out;
   for (int i=this->CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromFileName(this->CustomStackTrace[i].fileName) << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
+  { out << "<tr><td>" << CGI::GetHtmlLinkFromFileName(this->CustomStackTrace[i].fileName)
+    << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
     if (this->CustomStackTrace[i].functionName!="")
       out << "<td>" << this->CustomStackTrace[i].functionName << "</td>";
     out << "</tr>";
@@ -202,8 +202,10 @@ std::string ProjectInformation::GetStackTraceReport()
 
 std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
 { std::stringstream out;
-  out << "<br>A partial stack trace follows (function calls not explicitly logged not included). <br>The first two stack trace lines may belong to the same function.";
-  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> " << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
+  out << "<br>A partial stack trace follows (function calls not explicitly logged not included). "
+  << "<br>The first two stack trace lines may belong to the same function.";
+  out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> "
+  << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
   out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
   out  << "</table>";
   return out.str();
@@ -288,12 +290,16 @@ void CGI::subEqualitiesWithSimeq(std::string& theString, std::string& output)
 
 void CGI::PrepareOutputLineJavaScriptSpecific(const std::string& lineTypeName, int numberLines)
 { std::cout << "\n\tvar num" << lineTypeName << "Lines=" << numberLines << "; ";
-  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); " << "  \tvar " << lineTypeName << "2= new Array(" << numberLines << "); " << "  \tvar clr"  << lineTypeName << "= new Array("  << numberLines << "); ";
+  std::cout << "\n\tvar " << lineTypeName << "1= new Array(" << numberLines << "); "
+  << "  \tvar " << lineTypeName << "2= new Array(" << numberLines << "); " << "  \tvar clr"
+  << lineTypeName << "= new Array("  << numberLines << "); ";
 }
 
 void CGI::outputLineJavaScriptSpecific(const std::string& lineTypeName, int theDimension, std::string& stringColor, int& lineCounter)
 { std::string tempS;
-  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension << "); " << "\t" << lineTypeName << "2[" << lineCounter << "]= new Array(" << theDimension << "); " << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
+  std::cout  << "\n\t" << lineTypeName << "1["  << lineCounter << "]= new Array(" << theDimension
+  << "); " << "\t" << lineTypeName << "2[" << lineCounter << "]= new Array(" << theDimension << "); "
+  << "\tclr" << lineTypeName << "[" << lineCounter << "]= new Array(" << 3 << "); \n";
   for (int j=0; j< theDimension; j++)
   { CGI::outputStream >> tempS;
     std::cout << "\t" << lineTypeName << "1[" << lineCounter << "][" << j << "]=" << tempS << "; ";
@@ -449,7 +455,6 @@ void DrawingVariables::drawCircleAtVectorBuffer
 { this->theBuffer.drawCircleAtVectorBuffer(point, radius, thePenStyle, theColor);
 }
 
-
 void DrawingVariables::drawTextDirectly(double X1, double Y1, const std::string& inputText, int color, std::fstream* LatexOutFile)
 { if (this->theDrawTextFunction!=0)
     this->theDrawTextFunction(X1-7, Y1-7, inputText.c_str(), inputText.length(), color, this->fontSizeNormal);
@@ -518,16 +523,16 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
     if (tempRat.IsPositive())
       if (!IntegralCoefficientsOnly || tempRat.DenShort==1)
        { theNewSet.size=0;
-        for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
-          if (this->IsStronglyPerpendicularTo(currentRoot, theSet.TheObjects[i]))
-            theNewSet.AddOnTop(theSet.TheObjects[i]);
-        outputCoeffs.AddOnTop(tempRat);
-        output.AddOnTop(currentRoot);
-        tempRoot = input-currentRoot*tempRat;
-        if (this->HasStronglyPerpendicularDecompositionWRT(tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly))
-          return true;
-        output.size--;
-        outputCoeffs.size--;
+         for (int i=indexFirstNonZeroRoot; i<theSet.size; i++)
+           if (this->IsStronglyPerpendicularTo(currentRoot, theSet.TheObjects[i]))
+             theNewSet.AddOnTop(theSet.TheObjects[i]);
+         outputCoeffs.AddOnTop(tempRat);
+         output.AddOnTop(currentRoot);
+         tempRoot = input-currentRoot*tempRat;
+         if (this->HasStronglyPerpendicularDecompositionWRT(tempRoot, UpperBoundNumBetas, theNewSet, output, outputCoeffs, IntegralCoefficientsOnly))
+           return true;
+         output.size--;
+         outputCoeffs.size--;
        }
   }
   return false;
@@ -836,7 +841,7 @@ std::string FormatExpressions::GetPolyLetter(int index)const
 }
 
 void Rational::WriteToFile(std::fstream& output)
-{ output <<   this->ToString();
+{ output << this->ToString();
 }
 
 inline void Rational::RaiseToPower(int x)

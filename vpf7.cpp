@@ -1151,7 +1151,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
           tempSSElt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
           if (outputReport!=0)
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
-          Matrix<CoefficientType>& theMatrix=this->GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
+          MatrixTensor<CoefficientType>& theMatrix
+          =this->GetActionGeneratorIndeX(theIndex, theGlobalVariables, theRingUnit, theRingZero);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
           theGlobalVariables.MakeProgressReport(tempStream.str(), 2);
@@ -1160,7 +1161,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 
           if (outputReport!=0)
             out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
-            << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ToString(false, true));
+            << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ToString());
       /*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
             for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
             { out << "<br>" << theSimpleGenerator.ToString(theGlobalVariables, tempFormat) << "\\cdot "
@@ -1207,19 +1208,19 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         latexTableStream << "$&$" << theMonString << "  v_\\lambda$";
         for (int s=0; s< this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; s++)
         { int currentIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[s] +this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
-          Matrix<CoefficientType>& theMat=this->GetActionGeneratorIndex(currentIndex, theGlobalVariables, theRingUnit, theRingZero);
+          MatrixTensor<CoefficientType>& theMat=this->GetActionGeneratorIndeX(currentIndex, theGlobalVariables, theRingUnit, theRingZero);
           bool foundMon=false;
           latexTableStream << "&$";
-          for (int l=0; l< this->GetDim(); l++)
-            if (!theMat.elements[l] [monCounter-1].IsEqualToZero())
+          for (int l=0; l< theMat.size; l++)
+            if (theMat[l].dualIndex==monCounter)
             { std::string tempS1;
-              tempS1= theMat.elements[l][monCounter-1].ToString();
+              tempS1= theMat.theCoeffs[l].ToString();
               if (tempS1=="1")
                 tempS1="";
               if (tempS1=="-1")
                 tempS1="-";
               std::stringstream tempStream;
-              tempStream << "m_{" << l+1 << "}";
+              tempStream << "m_{" << theMat[l].vIndex+1 << "}";
               tempS1+=tempStream.str();
               if (foundMon && tempS1[0]!='-')
                 latexTableStream << "+";

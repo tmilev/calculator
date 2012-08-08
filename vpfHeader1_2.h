@@ -192,9 +192,11 @@ public:
   bool RelevanceIsComputed;
   List<int> IndicesNonZeroMults;
   friend std::ostream& operator << (std::ostream& output, const partFraction& input)
-  { output << " Not implemented, please fix at file " << __FILE__ << " line " << __LINE__;
+  { output << " Not implemented, please fix. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     return output;
   }
+  static const bool IsEqualToZero(){return false;}
   bool RemoveRedundantShortRootsClassicalRootSystem
 (partFractions& owner, Vector<Rational>* Indicator, Polynomial<LargeInt>& buffer1, int theDimension, GlobalVariables& theGlobalVariables)
   ;
@@ -2378,6 +2380,7 @@ public:
   { output << theMon.ToString();
     return output;
   }
+  static const bool IsEqualToZero(){return false;}
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2988,6 +2991,9 @@ class MonomialChar
 {
 public:
   Vector<CoefficientType> weightFundamentalCoords;
+  static const bool IsEqualToZero()
+  { return false;
+  }
   friend std::ostream& operator << (std::ostream& output, const MonomialChar<CoefficientType>& input)
   { output << input.ToString();
     return output;
@@ -3146,9 +3152,152 @@ Vector<CoefficientType> branchingData::ProjectWeight(Vector<CoefficientType>& in
   return result;
 }
 
+class MonMatrixTensor
+{
+  friend std::ostream& operator << (std::ostream& output, const MonMatrixTensor& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  int vIndex;
+  int dualIndex;
+  bool IsId;
+  MonMatrixTensor(const MonMatrixTensor& other)
+  { this->operator=(other);
+  }
+  MonMatrixTensor():vIndex(-1), dualIndex(-1), IsId(false){}
+  MonMatrixTensor(int i, int j): vIndex(i), dualIndex(j), IsId(false){}
+  void operator=(const MonMatrixTensor& other)
+  { this->vIndex=other.vIndex;
+    this->dualIndex=other.dualIndex;
+    this->IsId=other.IsId;
+  }
+  void MakeOne()
+  { this->MakeIdSpecial();
+  }
+  void MakeZero()
+  { this->IsId=false;
+    this->vIndex=-1;
+    this->dualIndex=-1;
+  }
+  bool IsEqualToZero()const
+  { return !this->IsId && this->vIndex==-1 && this->dualIndex==-1;
+  }
+  bool operator==(const MonMatrixTensor& other)const
+  { return this->vIndex==other.vIndex && this->dualIndex==other.dualIndex && this->IsId==other.IsId;
+  }
+  static unsigned int HashFunction(const MonMatrixTensor& input)
+  { return input.vIndex*SomeRandomPrimes[0]+input.dualIndex*SomeRandomPrimes[1]+input.IsId;
+  }
+  inline unsigned int HashFunction()const
+  { return HashFunction(*this);
+  }
+  bool operator>(const MonMatrixTensor& other)const
+  { if (this->IsId!=other.IsId)
+      return this->IsId>other.IsId;
+    if (this->vIndex==other.vIndex)
+      return this->dualIndex>other.dualIndex;
+    return this->vIndex>other.vIndex;
+  }
+  void MakeIdSpecial()
+  { this->vIndex=-1;
+    this->dualIndex=-1;
+    this->IsId=true;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)const
+  { std::stringstream out;
+    if (!this->IsId)
+      out << "m_{" << this->vIndex+1 << "}\\otimes " << "m^*_{" << this->dualIndex+1 << "}";
+    else
+      out << "id";
+    return out.str();
+  }
+  void operator*=(const MonMatrixTensor& other)
+  { MacroRegisterFunctionWithName("MonMatrixTensor<CoefficientType>::operator*=");
+    if (this==&other)
+    { MonMatrixTensor otherCopy;
+      otherCopy=other;
+      *this*=otherCopy;
+      return;
+    }
+    if (other.IsId)
+      return;
+    if (this->IsId)
+    { *this=other;
+      return;
+    }
+    if (this->dualIndex==other.vIndex)
+      this->dualIndex=other.dualIndex;
+    else
+      this->MakeZero();
+  }
+};
+
+template <class CoefficientType>
+class MatrixTensor: public ElementAssociativeAlgebra<MonMatrixTensor, CoefficientType >
+{
+public:
+  void MakeIdSpecial()
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    theMon.MakeIdSpecial();
+    this->AddMonomial(theMon, 1);
+  }
+  void MakeId(int numVars)
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    for (int i=0; i<numVars; i++)
+    { theMon.dualIndex=i;
+      theMon.vIndex=i;
+      this->AddMonomial(theMon, 1);
+    }
+  }
+  void operator=(Matrix<CoefficientType>& other)
+  { this->MakeZero();
+    MonMatrixTensor theMon;
+    for (int i=0; i<other.NumRows; i++)
+      for (int j=0; j<other.NumCols; j++)
+        if (!other.elements[i][j].IsEqualToZero())
+        { theMon.dualIndex=j;
+          theMon.vIndex=i;
+          this->AddMonomial(theMon, other.elements[i][j]);
+        }
+  }
+  void Substitution(const PolynomialSubstitution<Rational>& theSub)
+  { MatrixTensor<CoefficientType> thisCopy=*this;
+    this->MakeZero();
+    CoefficientType tempCF;
+    for (int i=0; i<thisCopy.size; i++)
+    { tempCF=thisCopy.theCoeffs[i];
+      tempCF.Substitution(theSub);
+      this->AddMonomial(thisCopy[i] , tempCF);
+    }
+  }
+  void SetNumVariables(int newNumVars)
+  { MatrixTensor<CoefficientType> thisCopy=*this;
+    this->MakeZero();
+    CoefficientType tempCF;
+    for (int i=0; i<thisCopy.size; i++)
+    { tempCF=thisCopy.theCoeffs[i];
+      tempCF.SetNumVariables(newNumVars);
+      this->AddMonomial(thisCopy[i] , tempCF);
+    }
+  }
+  void GetMatrix(Matrix<CoefficientType>& output, int theDim)
+  { output.init(theDim, theDim);
+    output.NullifyAll();
+    for (int i=0; i<this->size; i++)
+      if ((*this)[i].IsId)
+        for (int j=0; j<theDim; j++)
+          output.elements[j][j]+= this->theCoeffs[i];
+      else
+        output.elements[(*this)[i].vIndex][(*this)[i].dualIndex]+=this->theCoeffs[i];
+  }
+};
+
 template <class CoefficientType>
 class ModuleSSalgebra
-{ List<Matrix<CoefficientType> > actionsGeneratorsMaT;
+{ List<MatrixTensor<CoefficientType> > actionsGeneratorsMaT;
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
 public:
@@ -3186,6 +3335,13 @@ public:
     this->indexAlgebra==other.indexAlgebra
     && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
+  }
+  bool GeneratorIndexHasFreeAction(int index)const
+  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(index);
+    for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative())
+        return true;
+    return false;
   }
   void operator=(const ModuleSSalgebra<CoefficientType>& other)
   { if (this==&other)
@@ -3226,7 +3382,7 @@ public:
 //  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
 //  List
 //  List<Matrix<CoefficientType> > ActionsChevalleyGenerators;
-  Matrix<CoefficientType>& GetActionGeneratorIndex
+  MatrixTensor<CoefficientType>& GetActionGeneratorIndeX
   (int generatorIndex, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
  ;
@@ -3257,7 +3413,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   void GetMatrixHomogenousElt
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
-    Vector<Rational> & weightUEEltSimpleCoords, Matrix<CoefficientType>& output,
+    Vector<Rational> & weightUEEltSimpleCoords, MatrixTensor<CoefficientType>& output,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   void ExpressAsLinearCombinationHomogenousElement
@@ -3343,9 +3499,7 @@ class MonomialGeneralizedVerma
   std::string ToString
   (FormatExpressions* theFormat=0, bool includeV=true)const
   ;
-  bool IsEqualToZero()const
-  { return this->Coefficient.IsEqualToZero();
-  }
+  static const bool IsEqualToZero(){return false;}
   bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)
   { if (this->indexFDVector==other.indexFDVector && this->indexInOwner==other.indexInOwner)
       return this->theMonCoeffOne==other.theMonCoeffOne;
@@ -3445,10 +3599,7 @@ public:
   { output << input.ToString();
     return output;
   }
-  void MakeZero( const CoefficientType& theRingZero)
-  { this->Coefficient=theRingZero;
-    this->theMons.SetSize(0);
-  }
+  static const bool IsEqualToZero(){return false;}
   int GetNumVars()
   { return this->Coefficient.GetNumVars();
   }
@@ -7155,7 +7306,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 
   MonomialUniversalEnveloping<CoefficientType> currentMon;
   MonomialGeneralizedVerma<CoefficientType> newMon;
-  Matrix<CoefficientType> tempMat1, tempMat2;
+  MatrixTensor<CoefficientType> tempMat1, tempMat2;
 //  std::cout << theMod.ToString();
   //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
@@ -7164,7 +7315,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
     //std::cout << "<br> Processing monomial " << currentMon.ToString();
-    tempMat1.MakeIdMatrix(theMod.theGeneratingWordsNonReduced.size, theRingUnit, theRingZero);
+    tempMat1.MakeIdSpecial();
     for (int k=currentMon.Powers.size-1; k>=0; k--)
     { std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.ToString() << " of index " << l+1 << " out of "
@@ -7174,17 +7325,13 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       if (!currentMon.Powers[k].IsSmallInteger(&thePower))
         break;
       int theIndex=currentMon.generatorsIndices[k];
-      tempMat2=theMod.GetActionGeneratorIndex(theIndex, theGlobalVariables, theRingUnit, theRingZero);
-      //std::cout << "<hr>Action generator " << theIndex << ":<br>" << tempMat2.ToString();
-      if (tempMat2.NumRows==0)
-      { //if (theIndex>=theMod.GetOwner().GetRank()+theMod.GetOwner().GetNumPosRoots())
-        //{ std::cout << "<br>Error! Accum: " << this->ToString();
-        //return;
-        //}
+      if (theMod.GeneratorIndexHasFreeAction(theIndex))
         break;
-      }
-      for (int s=0; s<thePower; s++)
-        tempMat1.MultiplyOnTheLeft(tempMat2, theRingZero);
+      tempMat2=tempMat1;
+      tempMat1=theMod.GetActionGeneratorIndeX
+      (theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      tempMat1.RaiseToPower(thePower);
+      tempMat1*=tempMat2;
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
       reportStream << "done!";
@@ -7193,14 +7340,14 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 //    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
     newMon.indexInOwner=this->indexInOwner;
-    for (int i=0; i<tempMat1.NumRows; i++)
-      if (!tempMat1.elements[i][this->indexFDVector].IsEqualToZero())
+    for (int i=0; i<tempMat1.size; i++)
+      if (tempMat1[i].dualIndex==this->indexFDVector)
       { newMon.theMonCoeffOne=currentMon;
-        newMon.indexFDVector=i;
+        newMon.indexFDVector=tempMat1[i].vIndex;
 //        std::cout << "<br>adding to " << outputAccum.ToString() << " the monomial " << newMon.ToString() << " with coefficient "
 //        << tempMat1.elements[i][this->indexFDVector].ToString() << " to obtain ";
         theCF=theUEelt.theCoeffs[l];
-        theCF*=tempMat1.elements[i][this->indexFDVector];
+        theCF*=tempMat1.theCoeffs[i];
         output.AddMonomial(newMon, theCF);
 //        std::cout << outputAccum.ToString();
       }
@@ -7211,10 +7358,11 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 }
 
 template <class CoefficientType>
-Matrix<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGeneratorIndex
+MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGeneratorIndeX
 (int generatorIndex, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ int numGenerators=this->GetOwner().GetNumGenerators();
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionGeneratorIndeX");
+  int numGenerators=this->GetOwner().GetNumGenerators();
   int theDim=this->GetOwner().GetRank();
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   assert(generatorIndex>=0 && generatorIndex<numGenerators);
@@ -7235,18 +7383,18 @@ Matrix<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGeneratorInd
   for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
     if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
     { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
-      { this->actionsGeneratorsMaT[generatorIndex].init(0,0);
+      { std::cout << "This is a programming error, due to a change in implementation of "
+        << " the generalized Verma module class. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+        this->actionsGeneratorsMaT[generatorIndex].MakeZero();
 //        std::cout << "<br>generator index " << generatorIndex << " has free action. ";
         return this->actionsGeneratorsMaT[generatorIndex];
       } else
-      { this->actionsGeneratorsMaT[generatorIndex].init
-        (this->theGeneratingWordsNonReduced.size,this->theGeneratingWordsNonReduced.size);
-        this->actionsGeneratorsMaT[generatorIndex].NullifyAll(theRingZero);
+      { this->actionsGeneratorsMaT[generatorIndex].MakeZero();
 //        std::cout << "<br>generator index " << generatorIndex << " has ZERO action. ";
         return this->actionsGeneratorsMaT[generatorIndex];
       }
     }
-
   this->GetMatrixHomogenousElt
   (tempElt, this->actionsGeneratorS[generatorIndex], theWeight,
    this->actionsGeneratorsMaT[generatorIndex], theGlobalVariables, theRingUnit, theRingZero);
@@ -7260,14 +7408,13 @@ void ModuleSSalgebra<CoefficientType>::
 GetMatrixHomogenousElt
 (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
   List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
-  Vector<Rational>& weightUEEltSimpleCoords, Matrix<CoefficientType>& output,
+  Vector<Rational>& weightUEEltSimpleCoords, MatrixTensor<CoefficientType>& output,
   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 {// std::cout << "<hr>status of the module @ start GetMatrixHomogenousElt" << this->ToString();
   this->GetAdActionHomogenousElT
   (inputHomogeneous, weightUEEltSimpleCoords, outputSortedByArgumentWeight, theGlobalVariables, theRingUnit, theRingZero)
   ;
-  output.init(this->theGeneratingWordsNonReduced.size, this->theGeneratingWordsNonReduced.size);
-  output.NullifyAll(theRingZero);
+  output.MakeZero();
   for (int j=0; j<outputSortedByArgumentWeight.size; j++)
     for (int k=0; k<outputSortedByArgumentWeight[j].size; k++)
     { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->theGeneratingWordsGrouppedByWeight[j][k];
@@ -7277,7 +7424,7 @@ GetMatrixHomogenousElt
       for (int l=0; l< imageCurrentMon.size; l++)
       { int indexRow=this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
         assert(indexRow!=-1);
-        output.elements[indexRow][indexColumn]=imageCurrentMon.theCoeffs[l];
+        output.AddMonomial(MonMatrixTensor(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
 //        std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
       }
     }
@@ -8003,8 +8150,11 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
   theFinalEigenSpace.MakeEiBasis(this->GetDim(), theRingUnit, theRingZero);
   for (int i=0; i<splittingParSelectedInLevi.CardinalitySelection; i++)
   { int theGenIndex=splittingParSelectedInLevi.elements[i]+this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
-    Matrix<CoefficientType>& currentOp=this->GetActionGeneratorIndex(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
-    currentOp.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+    MatrixTensor<CoefficientType>& currentOp=
+    this->GetActionGeneratorIndeX(theGenIndex, theGlobalVariables, theRingUnit, theRingZero);
+    Matrix<CoefficientType> currentOpMat;
+    currentOp.GetMatrix(currentOpMat, this->GetDim() );
+    currentOpMat.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
     tempSpace1=theFinalEigenSpace;
     tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
     theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);

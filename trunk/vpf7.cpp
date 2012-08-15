@@ -117,31 +117,59 @@ Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
   (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
    Rational& outputMultiplyLieBracketsToGetGenerator)
-{
+{ outputIndicesFormatAd0Ad1Ad2etc.size=0;
+  if (this->IsGeneratorFromCartan(generatorIndex))
+  { int simpleIndex=generatorIndex-this->GetNumPosRoots();
+    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(generatorIndex+this->GetRank());
+    outputIndicesFormatAd0Ad1Ad2etc.AddOnTop( 2*this->GetNumPosRoots()-1-generatorIndex);
+    outputMultiplyLieBracketsToGetGenerator=this->theWeyl.CartanSymmetric.elements[simpleIndex][simpleIndex]/2;
+    return;
+  }
+  Vector<Rational> theWeight=this->GetWeightOfGenerator(generatorIndex);
+  outputMultiplyLieBracketsToGetGenerator=1;
+  int theIndex=-1;
+  while (!theWeight.IsEqualToZero())
+    for (int i=0; i<this->GetRank(); i++)
+    { bool isChanged=false;
+      if (theWeight.IsPositive())
+        if (this->theWeyl.IsARoot(theWeight-this->theWeyl.RootsOfBorel[i]))
+        { theWeight-=this->theWeyl.RootsOfBorel[i];
+          theIndex=i+this->GetNumPosRoots()+this->GetRank();
+          isChanged=true;
+        }
+      if (theWeight.IsNegative())
+        if (this->theWeyl.IsARoot(theWeight-this->theWeyl.RootsOfBorel[i]))
+        { theWeight+=this->theWeyl.RootsOfBorel[i];
+          theIndex=-i-1+this->GetNumPosRoots();
+          isChanged=true;
+        }
+      if (isChanged)
+      { int currentIndex=this->GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(theWeight);
+        outputIndicesFormatAd0Ad1Ad2etc.AddOnTop(theIndex);
+        outputMultiplyLieBracketsToGetGenerator/=this->ChevalleyConstants.elements[theIndex][currentIndex];
+      }
+    }
 }
 
 template<class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGlobalVariables)
-{ List<int> theGens;
-  List<MatrixTensor<CoefficientType> > theGenImages;
-  MatrixTensor<CoefficientType> tempElt1, tempElt2, tempElt3, a123, a231, a312;
-  for (int i=1; i<this->GetOwner().GetRank(); i++)
-  { theGens.AddOnTop(this->GetOwner().DisplayIndexToChevalleyGeneratorIndex(i));
-    theGens.AddOnTop(this->GetOwner().DisplayIndexToChevalleyGeneratorIndex(-i));
+{ MatrixTensor<CoefficientType> left, right, output;
+  for (int i=0; i<this->GetOwner().GetNumPosRoots(); i++)
+  { left = this->GetActionGeneratorIndeX
+    (this->GetOwner().DisplayIndexToChevalleyGeneratorIndex(i+1) , theGlobalVariables);
+    right = this->GetActionGeneratorIndeX
+    (this->GetOwner().DisplayIndexToChevalleyGeneratorIndex(-i-1) , theGlobalVariables);
+    right.LieBracketOnTheLeft(left);
+    output=left;
+    output.LieBracketOnTheLeft(right);
+    output/=2;
+    output-=left;
+    if(output.IsEqualToZero())
+    { std::cout << "<br>index " << i << " is good ";
+    } else
+    { std::cout << "<br>index " << i << " is bad.";
+    }
   }
-  for (int i=0; i<theGens.size; i++)
-    for (int j=0; j<theGens.size; j++)
-      for (int k=0; k<theGens.size; k++)
-      { tempElt1=this->GetActionSimpleGeneratorIndex(theGens[i], theGlobalVariables);
-        tempElt2=this->GetActionSimpleGeneratorIndex(theGens[j], theGlobalVariables);
-        tempElt3=this->GetActionSimpleGeneratorIndex(theGens[k], theGlobalVariables);
-        a123=tempElt1; a123.LieBracketOnTheLeft(tempElt2); a123.LieBracketOnTheLeft(tempElt3);
-        a231=tempElt2; a231.LieBracketOnTheLeft(tempElt3); a231.LieBracketOnTheLeft(tempElt1);
-        a312=tempElt3; a312.LieBracketOnTheLeft(tempElt1); a312.LieBracketOnTheLeft(tempElt2);
-        a123+=a231;
-        a123+=a312;
-        assert(a123.IsEqualToZero());
-      }
 }
 
 template<class CoefficientType>

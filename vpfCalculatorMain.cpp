@@ -164,7 +164,6 @@ int main(int argc, char **argv)
 
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
-  HashedList<MonomialP>::PreferredHashSize=100;
   std::string inputPatH;
   std::string tempS;
 	std::cin >> theParser.inputStringRawestOfTheRaw;
@@ -372,6 +371,10 @@ g_{-2} v_\\lambda\
 //  civilizedInput="fSplitFDpartB3overG2CharsOnly{}(x_1,2,0)";
 //civilizedInput="printAllPartitions{}(A_2, (2,3))";
 //civilizedInput="g:= SemisimpleLieAlgebra{}A_1; h_{{i}}:=g_{0, i}; g_1;";
+//civilizedInput="(Polynomial{}(x_1+x_2+x_3))^30";
+//civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))";
+//civilizedInput="hwv{}(A_1,1, 0)";
+//  civilizedInput="hwv{}(A_2,(0,1), (0,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

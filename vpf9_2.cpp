@@ -215,7 +215,7 @@ void ElementWeylAlgebra::SetNumVariables(int newNumVars)
     this->NumVariables=newNumVars;
   Polynomial<Rational> Accum;
   Accum.MakeZero(newNumVars*2);
-  Accum.Reserve(this->StandardOrder.size);
+  Accum.ReservE(this->StandardOrder.size);
   MonomialP tempM;
   for (int i=0; i<this->StandardOrder.size; i++)
   { tempM.MakeConst(newNumVars*2);
@@ -511,7 +511,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
 { output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.size);
-  output.IndicesSl2sContainedInRootSA.Reserve(output.theRootSAs.size*2);
+  output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA.TheObjects[i].size=0;
   theGlobalVariables.theIndicatorVariables.StatusString1=output.theRootSAs.DebugString;
@@ -529,7 +529,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
   }
   for (int i=0; i<output.size; i++)
   { slTwo& theSl2= output[i];
-    theSl2.IndicesMinimalContainingRootSA.Reserve(theSl2.IndicesContainingRootSAs.size);
+    theSl2.IndicesMinimalContainingRootSA.ReservE(theSl2.IndicesContainingRootSAs.size);
     theSl2.IndicesMinimalContainingRootSA.size=0;
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { bool isMinimalContaining=true;
@@ -562,7 +562,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 { //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   Vectors<Rational> RootsWithCharacteristic2;
-  RootsWithCharacteristic2.Reserve(this->PositiveRootsK.size);
+  RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
   DynkinDiagramRootSubalgebra tempDiagram;
   int theRelativeDimension = this->SimpleBasisK.size;
   theRootsWithZeroCharacteristic.init(theRelativeDimension);
@@ -578,7 +578,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   //int relativeDimension =
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> tempRoots;
-  tempRoots.Reserve(theRootsWithZeroCharacteristic.MaxSize);
+  tempRoots.ReservE(theRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;
   Matrix<Rational> tempMat;
 //  Selection tempSel;
@@ -952,7 +952,7 @@ Rational WeylGroup::GetSizeWeylByFormula(char weylLetter, int theDim)
 
 void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrder(Vectors<Rational>& output)
 { output.size=0;
-  output.Reserve(this->RankTotal());
+  output.ReservE(this->RankTotal());
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
     this->GetSimpleBasisInBourbakiOrderOneComponentAppend(output, i);
 }
@@ -1045,8 +1045,8 @@ void slTwo::ComputeModuleDecomposition
     outputWeightSpaceDimensions.TheObjects[IndexZeroWeight-tempRat.NumShort]++;
   }
   BufferHighestWeights.CopyFromBase(outputWeightSpaceDimensions);
-  outputHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
-  outputMultiplicitiesHighestWeights.Reserve(positiveRootsContainingRegularSA.size*2);
+  outputHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
+  outputMultiplicitiesHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
   outputHighestWeights.size=0;
   outputMultiplicitiesHighestWeights.size=0;
 //  this->hCharacteristic.ComputeDebugString();
@@ -1183,10 +1183,10 @@ void SltwoSubalgebras::ElementToHtml
   this->theRootSAs.ElementToHtml(tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
   if(usePNG)
   { int numExpectedFiles= this->size*8;
-    this->texFileNamesForPNG.Reserve(numExpectedFiles);
-    this->texStringsEachFile.Reserve(numExpectedFiles);
-    this->listSystemCommandsLatex.Reserve(numExpectedFiles);
-    this->listSystemCommandsDVIPNG.Reserve(numExpectedFiles);
+    this->texFileNamesForPNG.ReservE(numExpectedFiles);
+    this->texStringsEachFile.ReservE(numExpectedFiles);
+    this->listSystemCommandsLatex.ReservE(numExpectedFiles);
+    this->listSystemCommandsDVIPNG.ReservE(numExpectedFiles);
   }
   this->texFileNamesForPNG.size=0;
   this->texStringsEachFile.size=0;
@@ -1361,7 +1361,7 @@ void reductiveSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& th
 void reductiveSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables)
 { this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
   slTwo tempSl2;
-  this->CandidatesPrincipalSl2ofSubalgebra.Reserve(this->theLetters.size);
+  this->CandidatesPrincipalSl2ofSubalgebra.ReservE(this->theLetters.size);
   this->theCandidateSubAlgebras.SetSize(this->theLetters.size);
   for (int i=0; i<this->theLetters.size; i++)
   { this->theCandidateSubAlgebras.TheObjects[i].theRootSAs.AmbientWeyl.MakeFromDynkinType(this->theLetters.TheObjects[i], this->theRanks.TheObjects[i], &this->theMultiplicities.TheObjects[i]);
@@ -1520,8 +1520,8 @@ void reductiveSubalgebras::GenerateAllPartitionsUpTo(int theRank)
 
 void reductiveSubalgebras::GenerateAllPartitionsDontInit(int theRank)
 { int upperLimit= MathRoutines::TwoToTheNth(theRank);
-  this->thePartitionMultiplicities.Reserve(upperLimit);
-  this->thePartitionValues.Reserve(upperLimit);
+  this->thePartitionMultiplicities.ReservE(upperLimit);
+  this->thePartitionValues.ReservE(upperLimit);
   List<int> buffer1, buffer2;
   this->GenerateAllPartitionsRecursive(theRank, theRank, buffer1, buffer2);
 }
@@ -1867,7 +1867,7 @@ void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Se
   owner.ComputeActionNormalizerOfCentralizerIntersectNilradical(emptySel, *this, theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(this->SimpleBasisCentralizerRoots.size);
   List<Selection> StartingNilradicalsNoRepetition;
-  StartingNilradicalsNoRepetition.Reserve(numCycles);
+  StartingNilradicalsNoRepetition.ReservE(numCycles);
   Selection tempSel, ParabolicsGenerator;
   if (!owner.flagNilradicalComputationInitialized)
     owner.CountersNilradicalsGeneration.SetSize(this->kModules.size+1);
@@ -2485,9 +2485,9 @@ std::string Parser::ParseEvaluateAndSimplify
 int DebugCounter=-1;
 
 void Parser::InitAndTokenize(const std::string& input)
-{ this->TokenStack.Reserve(input.size());
-  this->ValueStack.Reserve(input.size());
-  this->Reserve(input.size());
+{ this->TokenStack.ReservE(input.size());
+  this->ValueStack.ReservE(input.size());
+  this->ReservE(input.size());
   this->TokenStack.size=0;
   this->ValueStack.size=0;
   this->TokenBuffer.size=0;
@@ -2514,9 +2514,9 @@ void Parser::InitAndTokenize(const std::string& input)
       buffer="";
     }
   }
-  this->ValueStack.Reserve(this->ValueBuffer.size);
-  this->TokenStack.Reserve(this->TokenBuffer.size);
-  this->NodeIndexStack.Reserve(this->TokenBuffer.size);
+  this->ValueStack.ReservE(this->ValueBuffer.size);
+  this->TokenStack.ReservE(this->TokenBuffer.size);
+  this->NodeIndexStack.ReservE(this->TokenBuffer.size);
   this->StringBeingParsed=input;
   for (int i=0; i<this->numEmptyTokensAtBeginning; i++)
   { this->TokenStack.AddOnTop(this->tokenEmpty);
@@ -4111,7 +4111,7 @@ void RationalFunction::ReduceGroebnerBasis
  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
  )
 { Polynomial<Rational>& LeadingCoeffs=buffer1;
-  LeadingCoeffs.Reserve(theBasis.size);
+  LeadingCoeffs.ReservE(theBasis.size);
   LeadingCoeffs.MakeZero(theBasis[0].NumVars);
   List<MonomialP> tempList;
 //  std::cout << "<br> ... and the leading coefficients are: <br>";
@@ -4517,13 +4517,11 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
  List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
  GlobalVariables& theGlobalVariables)
 { SelectionWithMaxMultiplicity theSel;
-  Polynomial<Rational> ::PreferredHashSize=1;
-  int numGenerators=generatorsBeingActedOn.size;
+ int numGenerators=generatorsBeingActedOn.size;
   theSel.initMaxMultiplicity(numGenerators+1, theDegree);
   int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
   List<ElementUniversalEnveloping<Polynomial<Rational> > > candidateElements, theBracketsOfTheElements;
   ElementUniversalEnveloping<Polynomial<Rational> > tempElt, tempElt2, currentOutput, Accum, UEUnit;
-  theBracketsOfTheElements.ListActualSizeIncrement=50;
   theBracketsOfTheElements.size=0;
   theSel.IncrementSubsetFixedCardinality(theDegree);
   int numVars=this->GetRank();
@@ -4582,7 +4580,6 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
     }
   out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString(false, true) << "</div>";
   List<List<RationalFunction> > theEigenVectors;
-  Polynomial<Rational> ::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
   oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
   minusOneRF.MakeConst(numVars, (Rational) -1, &theGlobalVariables);
@@ -4625,7 +4622,6 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
  List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
  GlobalVariables& theGlobalVariables)
 { VectorPartition theVP;
-  Polynomial<Rational> ::PreferredHashSize=1;
   int numGenerators= this->GetNumPosRoots();
   int numVars=this->GetRank();
   Polynomial<Rational>  polyOne, polyZero;
@@ -4687,7 +4683,6 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
   }
   List<ElementUniversalEnveloping<Polynomial<Rational> > > candidateElements, theBracketsOfTheElements;
   ElementUniversalEnveloping<Polynomial<Rational> > tempElt, tempElt2, currentOutput, Accum, UEUnit;
-  theBracketsOfTheElements.ListActualSizeIncrement=50;
   theBracketsOfTheElements.size=0;
   for (int i=0; i<theVP.thePartitions.size; i++)
   { Accum.MakeConst((Rational) 1, 0, *this->owner, this->indexInOwner);
@@ -4740,7 +4735,6 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
     }
   out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ToString(false, true) << "</div>";
   List<List<RationalFunction> > theEigenVectors;
-  Polynomial<Rational> ::PreferredHashSize=50;
   RationalFunction oneRF, minusOneRF, zeroRF;
   oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
   minusOneRF.MakeConst(numVars, (Rational) -1, &theGlobalVariables);
@@ -5168,8 +5162,8 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   Polynomial<Rational>  currentLeft, currentRight;
   Vectors<Rational> leftHandSide;
   PolynomialSubstitution<Rational> theSubInitial;
-  leftHandSide.Reserve(this->impliedNumVars*2);
-  theSubInitial.Reserve(this->impliedNumVars*2);
+  leftHandSide.ReservE(this->impliedNumVars*2);
+  theSubInitial.ReservE(this->impliedNumVars*2);
   Vector<Rational> currentLeftRoot;
   for (int i=0; i<this->children.size-1; i++)
   { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -6249,8 +6243,8 @@ void CGI::ChopCGIInputStringToMultipleStrings
 (const std::string& input, List<std::string>& outputData, List<std::string>& outputFieldNames)
 { int inputLength= (signed) input.size();
   bool readingData=false;
-  outputData.Reserve(10);
-  outputFieldNames.Reserve(10);
+  outputData.ReservE(10);
+  outputFieldNames.ReservE(10);
   outputData.SetSize(1);
   outputFieldNames.SetSize(1);
   outputData[0]="";

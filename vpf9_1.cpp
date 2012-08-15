@@ -446,8 +446,8 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
   outputSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, outputSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
   outputSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
-  this->CentralizerIsomorphisms.Reserve(this->size);
-  this->CentralizerOuterIsomorphisms.Reserve(this->size);
+  this->CentralizerIsomorphisms.ReservE(this->size);
+  this->CentralizerOuterIsomorphisms.ReservE(this->size);
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
   this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(outputSubgroup.ExternalAutomorphisms);
@@ -526,8 +526,8 @@ void rootSubalgebra::ComputeRootsOfK()
 { this->AllRootsK.size=0;
   this->PositiveRootsK.size=0;
   HashedList<Vector<Rational> >& AllRoots=this->AmbientWeyl.RootSystem;
-  this->AllRootsK.Reserve(AllRoots.size);
-  this->PositiveRootsK.Reserve(AllRoots.size);
+  this->AllRootsK.ReservE(AllRoots.size);
+  this->PositiveRootsK.ReservE(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
   { Vector<Rational> tempHW, tempLW;
     this->ComputeHighestWeightInTheSameKMod(AllRoots.TheObjects[i], tempHW);
@@ -1034,7 +1034,7 @@ void DynkinDiagramRootSubalgebra::Sort()
   this->sameTypeComponents.size=0;
   this->indexInUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
   this->indexUniComponent.SetSize(this->SimpleBasesConnectedComponents.size);
-  this->sameTypeComponents.Reserve(this->SimpleBasesConnectedComponents.size);
+  this->sameTypeComponents.ReservE(this->SimpleBasesConnectedComponents.size);
   std::string LastString="";
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
   { if (!(this->DynkinTypeStrings[i]==LastString))
@@ -1051,7 +1051,7 @@ void DynkinDiagramRootSubalgebra::Sort()
 void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
 (const Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
 { this->SimpleBasesConnectedComponents.size=0;
-  this->SimpleBasesConnectedComponents.Reserve(simpleBasisInput.size);
+  this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
   std::string tempS= simpleBasisInput.ToString();
   //if (tempS=="Num Vectors<Rational>: 2\n(1, 0, 0), (0, 1, 1)")
   //  tempS="!!";
@@ -2030,7 +2030,7 @@ void coneRelation::ComputeKComponents(Vectors<Rational>& input, List<List<int> >
 void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
 { Vectors<Rational> tempRoots;
   tempRoots.size=0;
-  tempRoots.Reserve(owner.AmbientWeyl.CartanSymmetric.NumRows*2);
+  tempRoots.ReservE(owner.AmbientWeyl.CartanSymmetric.NumRows*2);
   tempRoots.AddListOnTop(owner.SimpleBasisK);
   for (int i=0; i<this->theDiagram.SimpleBasesConnectedComponents.size; i++)
     tempRoots.AddListOnTop(this->theDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
@@ -2178,15 +2178,15 @@ void rootSubalgebras::SortDescendingOrderBySSRank()
   inverseOfSortingArray.SetSize(SortingArray.size);
   for(int i=0; i<SortingArray.size; i++)
     inverseOfSortingArray.TheObjects[SortingArray.TheObjects[i]]=i;
-  output.Reserve(this->size);
+  output.ReservE(this->size);
   for (int i=0; i<this->size; i++)
   { output.AddOnTop(this->TheObjects[SortingArray.TheObjects[i]]);
     List<int>& otherArray=this->TheObjects[SortingArray.TheObjects[i]].indicesSubalgebrasContainingK;
     List<int>& currentArray=output.LastObject()->indicesSubalgebrasContainingK;
-    currentArray.Reserve(otherArray.size);
+    currentArray.ReservE(otherArray.size);
     currentArray.size=0;
     for(int j=0; j<otherArray.size; j++)
-      currentArray.AddOnTop(inverseOfSortingArray.TheObjects[otherArray.TheObjects[j]]);
+      currentArray.AddOnTop(inverseOfSortingArray[otherArray[j]]);
   }
   for(int i=0; i<this->size; i++)
     this->TheObjects[i].Assign(output.TheObjects[i]);
@@ -2552,10 +2552,7 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 //  this->ComputeDebugString();
 //  std::cout << "<hr>time before computing multiplication table for chevalley constants:" << theGlobalVariables.GetElapsedSeconds();
   ANNOYINGSTATISTICS;
-  int oldBufferSize= HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize;
-  HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=1;
   this->ComputeMultTable(theGlobalVariables);
-  HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=oldBufferSize;
   ANNOYINGSTATISTICS;
 
 //  std::cout << this->ChevalleyConstants.ToString(true, false);

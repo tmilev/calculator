@@ -424,14 +424,16 @@ void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix
 void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { Vectors<Rational> selectedRoots;
-  selectedRoots.Reserve(ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize- ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
+  selectedRoots.ReservE
+  (ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize-
+   ZeroesMeanSimpleRootSpaceIsInParabolic.CardinalitySelection);
   this->AmbientWeyl=inputWeyl;
   for (int i=0; i<ZeroesMeanSimpleRootSpaceIsInParabolic.MaxSize; i++)
     if (!ZeroesMeanSimpleRootSpaceIsInParabolic.selected[i])
     { selectedRoots.SetSize(selectedRoots.size+1);
       selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
     }
-  List<Vectors<Rational> >  tempRootsCol;
+  List<Vectors<Rational> > tempRootsCol;
   this->ComputeSubGroupFromGeneratingReflections(selectedRoots, tempRootsCol, theGlobalVariables, UpperLimitNumElements, true);
 }
 
@@ -729,8 +731,8 @@ void Lattice::GetRootOnLatticeSmallestPositiveProportionalTo
 }
 
 bool Cone::GetLatticePointsInCone
-  (Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
-   Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)
+(Lattice& theLattice, Vector<Rational>& theShift, int upperBoundPointsInEachDim, bool lastCoordinateIsOne,
+ Vectors<Rational>& outputPoints, Vector<Rational>* shiftAllPointsBy)
 { if (upperBoundPointsInEachDim<=0)
     upperBoundPointsInEachDim=5;
   Vector<Rational> theActualShift=theShift;
@@ -748,7 +750,7 @@ bool Cone::GetLatticePointsInCone
   //This is very restrictive: in 8 dimensions, selecting upperBoundPointsInEachDim=2,
   //we get a total of (2*2+1)^8=390625 points to test, which is a pretty darn small box
     return false;
-  outputPoints.Reserve(numCycles);
+  outputPoints.ReservE(numCycles);
   outputPoints.size=0;
   Vector<Rational> candidatePoint;
   Vectors<Rational> LatticeBasis;
@@ -1264,7 +1266,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
     */
   }
 //  std::cout << "<hr>so far so good!";
-  drawOps.theBuffer.theDrawCircleAtVectorOperations.Reserve(2500);
+  drawOps.theBuffer.theDrawCircleAtVectorOperations.ReservE(2500);
   Accum.DrawMe(drawOps, 10, &smallWeylChamber, &highestWeightSmallAlgBasisChanged);
 //  smallWeylChamber.DrawMeProjective(0, false, drawOps, theFormat);
 //  out << tempVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(2);
@@ -1494,7 +1496,6 @@ void GeneralizedVermaModuleCharacters::IncrementComputation
   (Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
 { std::stringstream out;
 //  this->UpperLimitChambersForDebugPurposes=5;
-  Polynomial<Rational> ::PreferredHashSize=10;
   this->thePauseControlleR.InitComputation();
   this->ParabolicLeviPartRootSpacesZeroStandsForSelected=parabolicSel;
   if (false)
@@ -2464,7 +2465,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
       }
       //all normals should now lie in the subspace spanned by the vertices
       //add the walls needed to go down to the subspace
-      this->Normals.Reserve(this->Normals.size+2*NormalsToSubspace.size);
+      this->Normals.ReservE(this->Normals.size+2*NormalsToSubspace.size);
       for (int i=0; i<NormalsToSubspace.size; i++)
       { NormalsToSubspace[i].ScaleByPositiveRationalToIntegralMinHeight();
         this->Normals.AddOnTop(NormalsToSubspace[i]);
@@ -2778,7 +2779,7 @@ void RationalFunction::GetRelations
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { std::cout << theGroebnerBasis.TheObjects[i].ToString(false, tempFormat) << "<br>";
 //  }
-  theGenerators.Reserve(theGroebnerBasis.size);
+  theGenerators.ReservE(theGroebnerBasis.size);
   theGenerators.size=0;
   for (int i=0; i<theGroebnerBasis.size; i++)
   { Polynomial<Rational> & currentPoly= theGroebnerBasis.TheObjects[i];
@@ -3232,7 +3233,7 @@ bool Lattice::GetAllRepresentativesProjectingDownTo
 { Vectors<Rational> tempRepresentatives;
   if (!this->GetAllRepresentatives(rougherLattice, tempRepresentatives))
     return false;
-  output.Reserve(startingShifts.size*tempRepresentatives.size);
+  output.SetExpectedSize(startingShifts.size*tempRepresentatives.size);
   output.size=0;
   for (int i=0; i<startingShifts.size; i++)
     for (int j=0; j<tempRepresentatives.size; j++)
@@ -4028,8 +4029,8 @@ bool QuasiPolynomial::SubstitutionLessVariables
   Matrix<Rational>  theShiftImage, shiftMatForm;
   output.LatticeShifts.size=0;
   output.valueOnEachLatticeShift.size=0;
-  output.valueOnEachLatticeShift.Reserve(this->LatticeShifts.size);
-  output.LatticeShifts.Reserve(this->LatticeShifts.size);
+  output.valueOnEachLatticeShift.ReservE(this->LatticeShifts.size);
+  output.LatticeShifts.ReservE(this->LatticeShifts.size);
   Vector<Rational> tempRoot;
   Polynomial<Rational>  tempP;
   for (int i=0; i<this->LatticeShifts.size; i++)
@@ -4105,7 +4106,7 @@ void Lattice::IntersectWithLinearSubspaceGivenByNormal(const Vector<Rational>& t
   //std::cout << "<br>The Zn-Lattice: " << theZnLattice.ToString(true, false);
   theZnLattice.IntersectWithBothOfMaxRank(eigenLattice);
   //std::cout << "<br>Zn intersected with eigen-Lattice: " << theZnLattice.ToString(true, false);
-  resultBasis.Reserve(theScalarProducts.size-1);
+  resultBasis.ReservE(theScalarProducts.size-1);
   Vector<Rational> tempRoot, resultRoot; Rational orthogonalComponent;
   for (int i=0; i<theZnLattice.basisRationalForm.NumRows; i++)
   { theZnLattice.basisRationalForm.RowToRoot(i, tempRoot);
@@ -5633,8 +5634,8 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 void GeneralizedVermaModuleCharacters::InitTheMaxComputation
 (GlobalVariables& theGlobalVariables)
 { this->theMaxComputation.numNonParaM=2;
-  this->theMaxComputation.theConesLargerDim.Reserve(this->projectivizedChambeR.size);
-  this->theMaxComputation.LPtoMaximizeLargerDim.Reserve(this->theMultiplicities.size);
+  this->theMaxComputation.theConesLargerDim.ReservE(this->projectivizedChambeR.size);
+  this->theMaxComputation.LPtoMaximizeLargerDim.ReservE(this->theMultiplicities.size);
   this->theMaxComputation.theConesLargerDim.SetSize(0);
   this->theMaxComputation.LPtoMaximizeLargerDim.SetSize(0);
   Lattice ZnLattice;
@@ -7265,7 +7266,7 @@ void AnimationBuffer::operator+=(const DrawOperations& other)
   if (this->theVirtualOpS.size>0)
     theOp.indexPhysicalFrame=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
   theOp.selectedPlaneInPhysicalDrawOp=0;
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
+  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+other.BasisProjectionPlane.size);
   for (int i=0; i<other.BasisProjectionPlane.size; i++)
   { this->theVirtualOpS.AddOnTop(theOp);
     theOp.indexPhysicalFrame++;
@@ -7279,7 +7280,7 @@ void AnimationBuffer::AddPause(int numFrames)
   theVOp.selectedPlaneInPhysicalDrawOp=-1;
   theVOp.theVirtualOp=this->typePause;
   theVOp.indexPhysicalDrawOp=this->thePhysicalDrawOps.size-1;
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+numFrames);
+  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+numFrames);
   for (int i=0; i<numFrames; i++)
     this->theVirtualOpS.AddOnTop(theVOp);
 }
@@ -7328,10 +7329,10 @@ void AnimationBuffer::operator+=(const AnimationBuffer& other)
   int physicalFrameShift=0;
   if (this->theVirtualOpS.size>0)
     physicalFrameShift=this->theVirtualOpS.LastObject()->indexPhysicalFrame+1;
-  this->thePhysicalDrawOps.Reserve(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
+  this->thePhysicalDrawOps.ReservE(this->thePhysicalDrawOps.size+other.thePhysicalDrawOps.size);
   for (int i=0; i<other.thePhysicalDrawOps.size; i++)
     this->thePhysicalDrawOps.AddOnTop(other.thePhysicalDrawOps[i]);
-  this->theVirtualOpS.Reserve(this->theVirtualOpS.size+other.theVirtualOpS.size);
+  this->theVirtualOpS.ReservE(this->theVirtualOpS.size+other.theVirtualOpS.size);
   VirtualDrawOp currentOp;
   for (int i=0; i<other.theVirtualOpS.size; i++)
   { currentOp=other.theVirtualOpS[i];
@@ -7953,7 +7954,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   int estimatedNumWeights=(int )
   (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
-  finalWeights.Reserve(estimatedNumWeights);
+  finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
   dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
@@ -7979,7 +7980,7 @@ void DrawOperations::operator+=(const DrawOperations& other)
   int shiftDrawLine=this->theDrawLineOperations.size;
   int shiftDrawLineBnVectors=this->theDrawLineBetweenTwoRootsOperations.size;
   int shiftDrawCircleAtVector=this->theDrawCircleAtVectorOperations.size;
-  this->IndexNthDrawOperation.Reserve
+  this->IndexNthDrawOperation.ReservE
   (this->IndexNthDrawOperation.size+other.IndexNthDrawOperation.size);
   for (int i=0; i<other.TypeNthDrawOperation.size; i++)
     switch(other.TypeNthDrawOperation[i])
@@ -8150,7 +8151,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
   List<List<List<int> > > arrows;
   List<List<int> > Layers;
   Vector<Rational> tempRoot;
-  Layers.Reserve(this->size);
+  Layers.ReservE(this->size);
   int GraphWidth=1;
   int oldLayerElementLength=-1;
   for (int i=0; i< this->size; i++)
@@ -8162,7 +8163,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringBruhatGraph()
     GraphWidth=MathRoutines::Maximum(GraphWidth, Layers.LastObject()->size);
   }
   HashedList<Vector<Rational> > orbit;
-  orbit.Reserve(this->size);
+  orbit.ReservE(this->size);
   for (int i=0; i<this->size; i++)
   { this->ActByElement(i, this->AmbientWeyl.rho, tempRoot);
     orbit.AddOnTop(tempRoot);
@@ -8454,7 +8455,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     return;
   this->flagFunctionListInitialized=true;
   ParserFunction theFunction;
-  this->theFunctionList.Reserve(1000);
+  this->theFunctionList.ReservE(1000);
   this->AddOneFunctionToDictionaryNoFail
   ("coneFromNormals",
    "((Rational,...),...)",

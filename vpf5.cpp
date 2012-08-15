@@ -291,7 +291,8 @@ bool CommandList::fRootSAsAndSltwos
 }
 
 bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
 { IncrementRecursion recursionCounter(&theCommands);
   if (theExpression.children.size!=4)
     return theExpression.SetError("The function expects 4 arguments.");

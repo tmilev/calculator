@@ -9,7 +9,11 @@ static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header file
 
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
-const int SomeRandomPrimes[SomeRandomPrimesSize]={ 743, 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887, 907, 911};
+const int SomeRandomPrimes[SomeRandomPrimesSize]=
+{ 607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,  7057, 7411,
+  7417, 7681, 7883, 8011, 8209, 8369, 8447, 9539, 10267, 10657,
+  11489, 12071, 12613, 13933, 14759
+};
 
 //the following class is for buffers, i/o function pointers, multitasking, general purpose.
 class GlobalVariables;
@@ -34,6 +38,8 @@ class DynkinDiagramRootSubalgebra;
 class ElementSemisimpleLieAlgebra;
 template<class CoefficientType>
 class ElementUniversalEnveloping;
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+class TensorMonomial;
 template<class CoefficientType>
 class MonomialUniversalEnveloping;
 template<class CoefficientType>
@@ -61,13 +67,13 @@ class affineCones;
 
 //Hybrid classes that serve both memory-management and mathematical purposes
 //(Matrices, Vectors, PolynomialSubstitution, etc.)
+template <class ObjectType1, class ObjectType2>
+class Pair;
 template <class Object>
 class List;
 template <class Object>
 class Matrix;
 template <class Object, unsigned int hashFunction(const Object&)>
-class HashedListB;
-template <class Object>
 class HashedList;
 template <class CoefficientType>
 class Vector;
@@ -674,6 +680,30 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList)
   return input;
 }
 
+template <class ObjectType1, class ObjectType2>
+class Pair
+{
+public:
+  ObjectType1 Object1;
+  ObjectType2 Object2;
+  static unsigned int HashFunction(const Pair<ObjectType1, ObjectType2>& input)
+  { return SomeRandomPrimes[0]*input.Object1.HashFunction()+
+    SomeRandomPrimes[1]*input.Object2.HashFunction();
+  }
+  unsigned int HashFunction()const
+  { return Pair<ObjectType1, ObjectType2>::HashFunction(*this);
+  }
+  void operator=(const Pair<ObjectType1, ObjectType2>& other)
+  { this->Object1=other.Object1;
+    this->Object2=other.Object2;
+  }
+  bool operator==(const Pair<ObjectType1, ObjectType2>& other)const
+  { return this->Object1==other.Object1 && this->Object2==other.Object2;
+  }
+};
+
+static unsigned int NumListsCreated=0;
+static unsigned int NumListResizesTotal=0;
 //List serves the same purpose as std::vector
 template <class Object>
 class List
@@ -684,21 +714,19 @@ private:
   friend class IntegerPoly;
   friend class partFractions;
   friend class partFraction;
-  int ActualSize;
-  int IndexOfVirtualZero;
-  Object* TheActualObjects;
   void ExpandArrayOnTop(int increase);
-  void ExpandArrayOnBottom(int increase);
   void QuickSortAscending(int BottomIndex, int TopIndex);
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly()
-  { this->ActualSize=0;
-    this->IndexOfVirtualZero=0;
+  { this->TheObjects=0;
+    this->ActualSize=0;
     this->size=0;
-    this->TheObjects=0;
-    this->TheActualObjects=0;
+    MacroIncrementCounter(NumListsCreated);
   }
+  int ActualSize;
 public:
+  Object* TheObjects;
+  int size;
   List(const List<Object>& other)
   { this->initConstructorCallOnly();
     this->CopyFromBase(other);
@@ -712,15 +740,24 @@ public:
     result.append(Object::GetXMLClassName());
     return result;
   }
-  static int ListActualSizeIncrement;
-  Object* TheObjects;
-  int size;
 //  void AddOnTop(Object o);
-  int GetResizeStretch()
-  {return MathRoutines::Maximum(List<Object>::ListActualSizeIncrement, this->ActualSize*3/2);
+  inline int GetNewSizeRelativeToExpectedSize(int expectedSize)const
+  { if (expectedSize==1)
+      return 1;
+    if (expectedSize==2)
+      return 2;
+    return (expectedSize*4)/3+1;
+  }
+  inline int GetNewSize()const
+  { return this->GetNewSizeRelativeToExpectedSize(this->ActualSize);
+  }
+  void SetExpectedSize(int theSize)
+  { if ((this->ActualSize)*5/6<theSize)
+      this->ReservE(this->GetNewSizeRelativeToExpectedSize(theSize));
   }
   void AssignLight(const ListLight<Object>& from);
-  void ExpandOnTop(int theIncrease){ int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
+  void ExpandOnTop(int theIncrease)
+  { int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
   void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SetSizeMakeMatrix(int numRows, int numCols)
   { this->SetSize(numRows);
@@ -729,14 +766,12 @@ public:
   }
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
-  void Reserve(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
-  void AddObjectOnBottom(const Object& o);
-  void AddOnBottomNoRepetition(const Object& o) {if (!this->ContainsObject(o)) this->AddObjectOnBottom(o);}
+  void ReservE(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
   void AddOnTopNoRepetition(const List<Object>& theList)
-  { this->Reserve(this->size+theList.size);
+  { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTopNoRepetition(theList[i]);
   }
@@ -748,7 +783,6 @@ public:
     }
     return indexOfObject;
   }
-  void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index)
   { for (int i=index; i<this->size-1; i++)
       this->TheObjects[i]=this->TheObjects[i+1];
@@ -993,8 +1027,10 @@ public:
   ~HashedListReferences(){this->KillAllElements(); };
 };
 
-template <class Object, unsigned int hashFunction(const Object&)>
-class HashedListB: public List<Object>
+static unsigned int NumHashResizes=0;
+
+template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
+class HashedList: public List<Object>
 {
 private:
   void AddObjectOnBottom(const Object& o);
@@ -1020,49 +1056,59 @@ public:
     result.append(Object::GetXMLClassName());
     return result;
   }
-  static int PreferredHashSize;
-  unsigned int HashSize; // <-must be equal to this->TheHashedArrays.size. Left for legacy purposes, might be deleted.
-  void initHash()
-  { this->size=0;
-    for (int i=0; i<(signed) this->HashSize; i++)
-      this->TheHashedArrays[i].size=0;
-  }
   inline unsigned int GetHash(const Object& input)const
   { unsigned int result=hashFunction(input);
-    result%=this->HashSize;
+    result%=this->TheHashedArrays.size;
     if (result<0)
-      result+=this->HashSize;
+      result+=this->TheHashedArrays.size;
     return result;
   }
   void Clear()
-  { //if the hashed list is somewhat sparse (1/5), and the index is somewhat large,
+  { //if the hashed list is somewhat sparse, and the index is somewhat large,
     //(above 20 entries), we clear the hash by finding the occupied hashes and nullifying them one by one.
     //else, we simply go through the entire hash index and nullify everything.
     //Note: for better performance, 20 entries should probably be changed to 100+,
     //however the smaller number is a good consistency test (it would make it easier to detect a faulty hash).
     //If this program ever gets to do some hard-core number crunching, the 20 entries should be increased.
-    if (this->size<(signed)this->HashSize/5 && this->HashSize>20)
+    if (this->IsSparse() && this->TheHashedArrays.size>20)
       for (int i=0; i<this->size; i++)
       { int hashIndex=this->GetHash(this->TheObjects[i]);
         this->TheHashedArrays[hashIndex].size=0;
       }
     else
-      for (int i=0; i<(signed) this->HashSize; i++)
+      for (int i=0; i<(signed) this->TheHashedArrays.size; i++)
         this->TheHashedArrays[i].size=0;
     this->size=0;
+  }
+  std::string GetReport()
+  { std::stringstream out;
+    out << "<br>List size: " << this->size;
+    out << "<br>Hash size: " << this->TheHashedArrays.size;
+    int maxHashSize=0;
+    int numNonZeroHashes=0;
+    for (int i =0; i<this->TheHashedArrays.size; i++)
+    { maxHashSize=MathRoutines::Maximum(maxHashSize, this->TheHashedArrays[i].size);
+      if (this->TheHashedArrays[i].size>0)
+        numNonZeroHashes++;
+    }
+    out << "<br>Max hash array size: " << maxHashSize;
+    out << "<br>Average hash array size: " <<((double) this->size)/((double) numNonZeroHashes);
+    return out.str();
   }
   void AddOnTop(const Object& o)
   { unsigned int hashIndex =this->GetHash(o);
     this->TheHashedArrays[hashIndex].AddOnTop(this->size);
     this->::List<Object>::AddOnTop(o);
+    if (this->size>1)
+      this->AdjustHashes();
   }
   void AddOnTop(const List<Object>& theList)
-  { this->Reserve(this->size+theList.size);
+  { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTop(theList[i]);
   }
   void GrandMasterConsistencyCheck()const
-  { for (unsigned int i=0; i<this->HashSize; i++)
+  { for (int i=0; i<this->TheHashedArrays.size; i++)
     { List<int>& current=this->TheHashedArrays[i];
       for (int j=0; j<current.size; j++)
       { int theIndex=current[j];
@@ -1076,12 +1122,13 @@ public:
         { std::cout << "<hr>This is a programming error: the hashed element in position " << theIndex
           << " is recorded in hash array of index " << i << ", however its hash value is instead "
           << this->GetHash(this->TheObjects[theIndex]) << ". ";
-          std::cout << " The hash size is " << this->HashSize;
+          std::cout << " The hash size is " << this->TheHashedArrays.size;
           std::cout << "<br>hashes of objects: ";
           for (int l=0; l<this->size; l++)
-            std::cout << this->GetHash(this->TheObjects[l]) << "= " << this->GetHash(this->TheObjects[l])%this->HashSize << ", ";
+            std::cout << this->GetHash(this->TheObjects[l])
+            << "= " << this->GetHash(this->TheObjects[l])%this->TheHashedArrays.size << ", ";
           std::cout << "<br>hashes recorded: ";
-          for (unsigned int l=0; l<this->HashSize; l++)
+          for (int l=0; l<this->TheHashedArrays.size; l++)
             for (int k=0; k<this->TheHashedArrays[l].size; k++)
               std::cout << this->TheHashedArrays[l][k] << ", ";
           std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -1104,12 +1151,7 @@ public:
     return true;
   }
   inline void AdjustHashes()
-  { if (this->size/this->HashSize<5)
-      return;
-    this->SetHashSizE(this->size);
-    this->Reserve(this->size*5);
-//    static int counter=0;
-//    std::cout << "<br> Num times adjust hashes is called: " << ++counter;
+  { this->SetExpectedSize(this->size);
   }
   void AddNoRepetition(const List<Object>& theList)
   { this->SetExpectedSize(this->size+theList.size);
@@ -1183,45 +1225,57 @@ public:
     }
     return result;
   }
+  inline bool IsSparseRelativeToExpectedSize(int expectedSize)const
+  { return expectedSize*3<this->TheHashedArrays.size;
+  }
+  inline bool IsSparse()const
+  { return this->IsSparseRelativeToExpectedSize(this->size);
+  }
   void SetExpectedSize(int expectedSize)
   { if (expectedSize<1)
       return;
-    this->Reserve(expectedSize);
-    this->SetHashSizE(MathRoutines::Maximum(this->HashSize, expectedSize*5));
+    if (expectedSize==1 || expectedSize==2)
+    { this->SetHashSizE(1);
+      return;
+    }
+    this->::List<Object>::SetExpectedSize(expectedSize);
+    if (!this->IsSparseRelativeToExpectedSize(expectedSize))
+      this->SetHashSizE(expectedSize*5);
   }
   void SetHashSizE(unsigned int HS)
-  { if (HS==this->HashSize)
+  { if (HS==(unsigned) this->TheHashedArrays.size)
       return;
+    MacroIncrementCounter(NumHashResizes);
     List<int> emptyList; //<-empty list has size 0
     this->TheHashedArrays.initFillInObject(HS, emptyList);
-    this->HashSize=HS;
     if (this->size>0)
       for (int i=0; i<this->size; i++)
       { int theIndex=this->GetHash(this->TheObjects[i]);
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
   }
-  int SizeWithoutObjects()
-  { int Accum=0;
-    Accum+=this->List<Object>::SizeWithoutObjects();
-    Accum+=sizeof(this->TheHashedArrays)*this->HashSize;
-    Accum+=sizeof(this->HashSize);
-    for (int i=0; i<(signed) this->HashSize; i++)
-      Accum+=this->TheHashedArrays[i].SizeWithoutObjects();
-    return Accum;
+  void QuickSortAscending()
+  { List<Object> theList;
+    theList=*this;
+    theList.QuickSortAscending();
+    this->operator=(theList);
   }
-  void QuickSortAscending(){ List<Object> theList; theList=*this; theList.QuickSortAscending(); this->operator=(theList);}
-  void QuickSortDescending(){ List<Object> theList; theList=*this; theList.QuickSortDescending(); this->operator=(theList);}
-  HashedListB(const HashedListB& other)
-  { this->HashSize=0;
-    this->TheHashedArrays=0;
+  void QuickSortDescending()
+  { List<Object> theList;
+    theList=*this;
+    theList.QuickSortDescending();
+    this->operator=(theList);
+  }
+  void initHashesToOne()
+  { this->TheHashedArrays.SetSize(1);
+    this->TheHashedArrays[0].size=0;
+  }
+  HashedList(const HashedList& other)
+  { this->initHashesToOne();
     this->operator=(other);
   }
-  HashedListB()
-  { this->HashSize=0;
-    this->TheHashedArrays=0;
-    this->SetHashSizE(HashedListB<Object, hashFunction>::PreferredHashSize);
-    this->initHash();
+  HashedList()
+  { this->initHashesToOne();
   }
   std::string ToString(FormatExpressions* theFormat)const
   { return this->List<Object>::ToString(theFormat);
@@ -1229,29 +1283,20 @@ public:
   std::string ToString()const
   { return this->List<Object>::ToString();
   }
-  void operator=(const HashedListB<Object, hashFunction>& From)
+  void operator=(const HashedList<Object, hashFunction>& From)
   { if (&From==this)
       return;
-//      int commentwhendone2;
-//      From.GrandMasterConsistencyCheck();
     this->Clear();
-    this->SetHashSizE(From.HashSize);
-//      this->GrandMasterConsistencyCheck();
+    this->SetHashSizE(From.TheHashedArrays.size);
     this->::List<Object>::CopyFromBase(From);
-    if ((unsigned) this->size<this->HashSize)
+    if (From.IsSparse())
     { for (int i=0; i<this->size; i++)
       { unsigned int hashIndex=this->GetHash(this->TheObjects[i]);
-        this->TheHashedArrays[hashIndex].CopyFromBase(From.TheHashedArrays[hashIndex]);
+        this->TheHashedArrays[hashIndex].ReservE(From.TheHashedArrays[hashIndex].size);
+        this->TheHashedArrays[hashIndex].AddOnTop(i);
       }
-//      int commentmewhendone;
-//      this->GrandMasterConsistencyCheck();
-    }
-    else
-    { for (int i=0; i<(signed) this->HashSize; i++)
-        this->TheHashedArrays[i].CopyFromBase(From.TheHashedArrays[i]);
-//      int commentmewhendone;
-//      this->GrandMasterConsistencyCheck();
-    }
+    } else
+      this->TheHashedArrays=From.TheHashedArrays;
   }
   void operator=(const List<Object>& other)
   { if (this==&other)
@@ -1265,56 +1310,11 @@ public:
   }
 };
 
-//NOTE NOTE NOTE NOTE!!!!!!!
-//If you get an error message like "could not convert template argument blah blah blah "
-//this might mean you have a compile-time cyclic dependency
-//(it is due to the way in which memory is allocated in C++).
-//It is usually fixed by one of the following.
-//1) placing constructors out of .h files into .cpp files.
-//2) Removing all compile-time object constructions (i.e. transformations like
-//     replacing Object X by Object* X).
-//Side note:  the template cyclic dependencies give some non-appropriate error message,
-// so I spent like 4+ hours trying to locate and resolve this problem.
-//The above described problem is a major manifestation of C++ design flaws.
-//Think of D's elegant compile time vs runtime, and think of the awful template mess that
-// C++ has instead.
-
+//class used to avoid a gcc compiler bug.
+//This class should probably be removed as soon as the bug is resolved.
 template <class Object>
-class HashedList : public HashedListB<Object, Object::HashFunction>
+class HashedListSpecialized: public HashedList<Object, Object::HashFunction>
 {
-public:
-//code::blocks fails to parse for autocomplete the methods of the parent class.
-//As a (benign) workaround we redefine the methods of HashedListB here.
-  inline static std::string GetXMLClassName(){ return HashedListB<Object, Object::HashFunction>::GetXMLClassName();}
-  inline void initHash(){ this->HashedListB<Object, Object::HashFunction>::initHash();}
-//  inline int GetHash(const Object& input)const{ return this->HashedListB<Object, Object::HashFunction>::GetHash(input);}
-  inline void Clear(){ this->HashedListB<Object, Object::HashFunction>::Clear();}
-  inline void AddOnTop(const Object& o){ this->HashedListB<Object, Object::HashFunction>::AddOnTop(o);}
-  inline void AddOnTop(const List<Object>& theList){ return this->HashedListB<Object, Object::HashFunction>::AddOnTop(theList);}
-  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o){ return this->HashedListB<Object, Object::HashFunction>::AddNoRepetitionOrReturnIndexFirst(o);}
-  inline bool AddNoRepetition(const Object& o){ return this->HashedListB<Object, Object::HashFunction>::AddNoRepetition(o);}
-  inline void AdjustHashes(){ this->HashedListB<Object, Object::HashFunction>::AdjustHashes();}
-  inline void AddNoRepetition(const List<Object>& theList){ this->HashedListB<Object, Object::HashFunction>::AddNoRepetition(theList);}
-  inline void PopIndexSwapWithLast(int index){ this->HashedListB<Object, Object::HashFunction>::PopIndexSwapWithLast(index);}
-  inline void SwapTwoIndicesHash(int i1, int i2){this->HashedListB<Object, Object::HashFunction>::SwapTwoIndicesHash(i1, i2);}
-  inline bool Contains(const Object& o)const{return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
-  inline bool Contains(const List<Object>& o)const{return this->HashedListB<Object, Object::HashFunction>::Contains(o); }
-  inline int GetIndex(const Object& o) const{return this->HashedListB<Object, Object::HashFunction>::GetIndex(o); }
-  inline int GetIndexIMustContainTheObject(const Object& o) const {return this->HashedListB<Object, Object::HashFunction>::GetIndexIMustContainTheObject(o);}
-  inline void SetExpectedSize(int expectedSize) {this->HashedListB<Object, Object::HashFunction>::SetExpectedSize(expectedSize); }
-  inline void SetHashSizE(int HS) {this->HashedListB<Object, Object::HashFunction>::SetHashSizE(HS); }
-  inline int SizeWithoutObjects() {return this->HashedListB<Object, Object::HashFunction>::SizeWithoutObjects(); }
-//  inline void AssignList(const List<Object>& other){this->HashedListB<Object, Object::HashFunction>::AssignList(other); }
-  inline void QuickSortAscending(){ this->HashedListB<Object, Object::HashFunction>::QuickSortAscending();}
-  inline void QuickSortDescending(){this->HashedListB<Object, Object::HashFunction>::QuickSortDescending();}
-  inline std::string ToString()const {return this->HashedListB<Object, Object::HashFunction>::ToString();}
-  inline std::string ToString(FormatExpressions* theFormat)const {return this->HashedListB<Object, Object::HashFunction>::ToString(theFormat);}
-  void operator=(const HashedListB<Object, Object::HashFunction>& other)
-  { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
-  }
-  void operator=(const List<Object>& other)
-  { this->::HashedListB<Object, Object::HashFunction>::operator=(other);
-  }
 };
 
 template<class Base>
@@ -2448,7 +2448,7 @@ public:
   static void GetAllPrimesSmallerThanOrEqualToUseEratosthenesSieve(unsigned int n, List<unsigned int>& output)
   { List<int> theSieve;
     theSieve.initFillInObject(n+1,1);
-    output.Reserve(n/2);
+    output.ReservE(n/2);
     output.size=0;
     for (unsigned int i=2; i<=n; i++)
       if (theSieve.TheObjects[i]!=0)
@@ -2472,9 +2472,9 @@ public:
     output.DivPositive(tempUI, output, tempUI2);
     assert(!output.IsEqualToZero());
   }
-  int HashFunction()
+  unsigned int HashFunction()const
   { int numCycles=MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
-    int result=0;
+    unsigned int result=0;
     for (int i=0; i<numCycles; i++)
       result+=this->TheObjects[i]*SomeRandomPrimes[i];
     return result;
@@ -2557,7 +2557,10 @@ public:
   void MakeZero();
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
   void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
-  int HashFunction()
+  static unsigned int HashFunction (const LargeInt& input)
+  { return input.HashFunction();
+  }
+  unsigned int HashFunction()const
   { return this->value.HashFunction()+this->sign+3;
   }
   int GetIntValueTruncated(){return this->sign* this->value.GetUnsignedIntValueTruncated(); }
@@ -3265,7 +3268,6 @@ static void ProjectOntoHyperPlane
     (*this)[NonZeroIndex]=theRingUnit;
   }
   inline static unsigned int HashFunction(const Vector<CoefficientType>& input){return input.HashFunction();}
-
   unsigned int HashFunction() const
   { unsigned int result=0;
     int theSize= MathRoutines::Minimum(this->size, SomeRandomPrimesSize);
@@ -3762,7 +3764,7 @@ class Vectors: public List<Vector<CoefficientType> >
     for (int i=0; i<input.size; i++)
       count+=input[i].size;
     this->SetSize(0);
-    this->Reserve(count);
+    this->ReservE(count);
     for (int i=0; i<input.size; i++)
       for (int j=0; j<input[i].size; j++)
         this->AddOnTop(input[i][j]);
@@ -4134,6 +4136,110 @@ public:
   }
 };
 
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)= CoefficientType::HashFunction>
+class TensorMonomial
+{
+  friend std::ostream& operator <<
+  (std::ostream& output, const TensorMonomial<CoefficientType, inputHashFunction>& theMon)
+  { if (theMon.generatorsIndices.size==0)
+    { output << "1";
+      return output;
+    }
+    for (int i=0; i< theMon.generatorsIndices.size; i++)
+      output << "g_{" << theMon.generatorsIndices[i] << "}^{" << theMon.Powers[i] << "}";
+    return output;
+  }
+private:
+public:
+  List<int> generatorsIndices;
+  List<CoefficientType> Powers;
+  std::string ToString
+  (FormatExpressions* theFormat=0)const
+  ;
+  bool IsEqualToOne()const
+  { return this->generatorsIndices.size==0;
+  }
+  void operator=(const TensorMonomial<CoefficientType, inputHashFunction>& other)
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers=other.Powers;
+  }
+  template<class otherType>
+  void operator=(const TensorMonomial<otherType>& other)
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers.SetSize(other.Powers.size);
+    for (int i=0; i<other.Powers.size; i++)
+      this->Powers[i]=other.Powers[i];
+  }
+  bool SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex);
+  void MultiplyByGeneratorPowerOnTheRight
+  (int theGeneratorIndex, const CoefficientType& thePower)
+  ;
+  void MultiplyByGeneratorPowerOnTheLeft
+  (int theGeneratorIndexStandsToTheLeft, const CoefficientType& thePower)
+  ;
+  unsigned int HashFunction() const
+  { int top=MathRoutines::Minimum(SomeRandomPrimesSize, this->generatorsIndices.size);
+    unsigned int result=0;
+    for (int i=0; i<top; i++)
+      result+=
+      SomeRandomPrimes[i]*this->generatorsIndices[i] +
+      SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
+    return result;
+  }
+  static inline unsigned int HashFunction(const TensorMonomial<CoefficientType, inputHashFunction>& input)
+  { return input.HashFunction();
+  }
+  void MakeConst()
+  { this->generatorsIndices.size=0;
+    this->Powers.size=0;
+  }
+  bool operator>(const TensorMonomial<CoefficientType, inputHashFunction>& other)const
+  { if (other.generatorsIndices.size>this->generatorsIndices.size)
+      return false;
+    if (other.generatorsIndices.size< this->generatorsIndices.size)
+      return true;
+    for (int i=0; i<this->generatorsIndices.size; i++)
+    { if (other.generatorsIndices[i]>this->generatorsIndices[i])
+        return false;
+      if (other.generatorsIndices[i]<this->generatorsIndices[i])
+        return true;
+      if (other.Powers[i]>this->Powers[i])
+        return false;
+      if (this->Powers[i]>other.Powers[i])
+        return true;
+    }
+    return false;
+  }
+  bool operator==(const TensorMonomial<CoefficientType, inputHashFunction>& other)const
+  { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
+  }
+  inline void operator*=(const TensorMonomial<CoefficientType, inputHashFunction>& standsOnTheRight)
+  { if (standsOnTheRight.generatorsIndices.size==0)
+      return;
+    if (this==&standsOnTheRight)
+    { TensorMonomial<CoefficientType> tempMon;
+      tempMon=standsOnTheRight;
+      (*this)*=(tempMon);
+      return;
+    }
+    this->generatorsIndices.SetExpectedSize
+    (standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+    this->Powers.SetExpectedSize
+    (standsOnTheRight.generatorsIndices.size+this->generatorsIndices.size);
+    int firstIndex=standsOnTheRight.generatorsIndices[0];
+    int i=0;
+    if (this->generatorsIndices.size>0)
+      if (firstIndex==(*this->generatorsIndices.LastObject()))
+      { *this->Powers.LastObject()+=standsOnTheRight.Powers[0];
+        i=1;
+      }
+    for (; i<standsOnTheRight.generatorsIndices.size; i++)
+    { this->Powers.AddOnTop(standsOnTheRight.Powers[i]);
+      this->generatorsIndices.AddOnTop(standsOnTheRight.generatorsIndices[i]);
+    }
+  }
+};
+
 class MonomialP
 {
 private:
@@ -4383,7 +4489,7 @@ public:
   bool IsInteger(LargeInt* whichInteger=0)const;
   void SetExpectedSize(int theSize)
   { this->::HashedList<TemplateMonomial>::SetExpectedSize(theSize);
-    this->theCoeffs.Reserve(theSize);
+    this->theCoeffs.SetExpectedSize(theSize);
   }
   bool HasGEQMonomial(TemplateMonomial& m, int& WhichIndex);
   void WriteToFile(std::fstream& output);
@@ -5229,7 +5335,13 @@ public:
     }
     assert(this->checkConsistency());
   }
-  inline bool operator==(const RationalFunction& other){return this->IsEqualTo(other);}
+  inline bool operator==(int other)const
+  { if (other==0)
+      return this->IsEqualToZero();
+    else
+      return this->expressionType==this->typeRational && (this->ratValue==other);
+  }
+  inline bool operator==(const RationalFunction& other)const{return this->IsEqualTo(other);}
   void Simplify();
   void SimplifyLeadingCoefficientOnly();
   void operator+=(int theConstant)
@@ -5307,7 +5419,9 @@ public:
   { return this->expressionType==this->typeRational &&
     this->ratValue.IsSmallInteger(whichInteger);
   }
-  bool IsEqualToZero()const{return this->expressionType==this->typeRational && this->ratValue.IsEqualToZero();}
+  bool IsEqualToZero()const
+  { return this->expressionType==this->typeRational && this->ratValue.IsEqualToZero();
+  }
   bool IsEqualToOne()const{return this->expressionType==this->typeRational && this->ratValue.IsEqualToOne();}
   bool IsEqualTo(const RationalFunction& other)const
   { if (this->expressionType!=other.expressionType)
@@ -5549,7 +5663,7 @@ inline bool MonomialCollection<TemplateMonomial, CoefficientType>::ReadFromFile
   }
   this->MakeZero();
   TemplateMonomial tempM;
-  this->Reserve(targetSize);
+  this->SetExpectedSize(targetSize);
   input.ignore();
   CoefficientType theCoeff;
   for (int i=0; i<targetSize; i++)
@@ -5575,7 +5689,7 @@ void Polynomial<Element>::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
     newNumVars=0;
   Polynomial<Element> Accum;
   Accum.MakeZero(newNumVars);
-  Accum.Reserve(this->size);
+  Accum.SetExpectedSize(this->size);
   int minNumVars=MathRoutines::Minimum(this->NumVars, newNumVars);
   MonomialP tempM;
   tempM.MakeConst(newNumVars);
@@ -5591,7 +5705,7 @@ template <class CoefficientType>
 void Polynomial<CoefficientType>::IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease)
 { Polynomial<CoefficientType> Accum;
   Accum.MakeZero(this->NumVars+theIncrease);
-  Accum.Reserve(this->size);
+  Accum.SetExpectedSize(this->size);
   MonomialP tempM;
   tempM.MakeConst(Accum.NumVars);
   int minNumVars=MathRoutines::Minimum(this->NumVars, Accum.NumVars);
@@ -5839,11 +5953,11 @@ void Polynomial<Element>::DivideBy
   outputQuotient.MakeZero(this->NumVars);
   if (remainderMaxMonomial==-1)
     return;
-  outputQuotient.Reserve(this->size);
+  outputQuotient.SetExpectedSize(this->size);
   MonomialP tempMon;
   tempMon.MakeConst(this->NumVars);
   Polynomial<Element> tempP;
-  tempP.Reserve(this->size);
+  tempP.SetExpectedSize(this->size);
   //if (this->flagAnErrorHasOccuredTimeToPanic)
   //{ this->ComputeDebugString();
    // tempInput.ComputeDebugString();
@@ -6477,11 +6591,11 @@ public:
     this->indexStartingModifiableTextCommands=0;
   }
   void init()
-  { this->IndexNthDrawOperation.Reserve(10000);
-    this->TypeNthDrawOperation.Reserve(10000);
-    this->theDrawLineBetweenTwoRootsOperations.Reserve(10000);
-    this->theDrawTextAtVectorOperations.Reserve(15);
-    this->theDrawCircleAtVectorOperations.Reserve(280);
+  { this->IndexNthDrawOperation.ReservE(10000);
+    this->TypeNthDrawOperation.ReservE(10000);
+    this->theDrawLineBetweenTwoRootsOperations.ReservE(10000);
+    this->theDrawTextAtVectorOperations.ReservE(15);
+    this->theDrawCircleAtVectorOperations.ReservE(280);
     this->IndexNthDrawOperation.size=0;
     this->TypeNthDrawOperation.size=0;
     this->theDrawTextOperations.size=0;
@@ -7044,7 +7158,7 @@ void Vectors<CoefficientType>::SelectABasis
   if (this->size==0)
     return;
   int theDim=this->TheObjects[0].size;
-  output.Reserve(this->size);
+  output.ReservE(this->size);
   output.size=0;
   Matrix<CoefficientType> theMat, matEmpty;
   theMat.init(1, theDim);
@@ -8015,5 +8129,59 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
       out << inputLetter << "_{" << i+1<< "}";
     }
   return out.str();
+}
+
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
+(int theGeneratorIndexStandsOnTheLeft, const CoefficientType& thePower)
+{ if (thePower==0)
+    return;
+  List<int> newGeneratorIndices;
+  List<CoefficientType> newPowers;
+  newGeneratorIndices.SetExpectedSize(this->generatorsIndices.size+1);
+  newPowers.SetExpectedSize(this->generatorsIndices.size+1);
+  newGeneratorIndices.AddOnTop(theGeneratorIndexStandsOnTheLeft);
+  newPowers.AddOnTop(thePower);
+  newGeneratorIndices.AddListOnTop(this->generatorsIndices);
+  newPowers.AddListOnTop(this->Powers);
+  this->generatorsIndices=newGeneratorIndices;
+  this->Powers=newPowers;
+  this->SimplifyEqualConsecutiveGenerators(0);
+}
+
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
+(int theGeneratorIndex, const CoefficientType& thePower)
+{ if (thePower==0)
+    return;
+  if (this->generatorsIndices.size>0)
+    if (*this->generatorsIndices.LastObject()==theGeneratorIndex)
+    { (*this->Powers.LastObject())+=(thePower);
+      return;
+    }
+  this->Powers.AddOnTop(thePower);
+  this->generatorsIndices.AddOnTop(theGeneratorIndex);
+}
+
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+bool TensorMonomial<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
+{ if (this->generatorsIndices.size<1)
+    return false;
+  if (lowestNonReducedIndex<0)
+    lowestNonReducedIndex=0;
+  bool result=false;
+  for (int next=lowestNonReducedIndex+1; next<this->generatorsIndices.size; next++)
+    if (this->generatorsIndices[lowestNonReducedIndex]==this->generatorsIndices[next])
+    { result=true;
+      this->Powers[lowestNonReducedIndex]+=this->Powers[next];
+    }
+    else
+    { lowestNonReducedIndex++;
+      this->Powers[lowestNonReducedIndex]=this->Powers[next];
+      this->generatorsIndices[lowestNonReducedIndex]=this->generatorsIndices[next];
+    }
+  this->generatorsIndices.SetSize(lowestNonReducedIndex+1);
+  this->Powers.SetSize(lowestNonReducedIndex+1);
+  return result;
 }
 #endif

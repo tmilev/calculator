@@ -32,101 +32,12 @@ int CGI::GlobalFormulaIdentifier=0;
 
 template < > bool Matrix<Rational>::flagComputingDebugInfo=true;
 template < > bool Polynomial<Rational>::flagAnErrorHasOccuredTimeToPanic=true;
-template < > int HashedListB<partFraction, partFraction::HashFunction >::PreferredHashSize=10000;
-template < > int HashedListB<Vector<Rational>, Vector<Rational>::HashFunction>::PreferredHashSize = 10000;
-template < > int HashedListB<oneFracWithMultiplicitiesAndElongations, oneFracWithMultiplicitiesAndElongations::HashFunction>::PreferredHashSize= 10;
-template < > int HashedListB<ElementWeylGroup,ElementWeylGroup::HashFunction>::PreferredHashSize=10000;
-template < > int HashedListB<MonomialP, MonomialP::HashFunction >::PreferredHashSize=20;
-template < > int HashedListB<Selection, Selection::HashFunction>::PreferredHashSize=20;
-template < > int HashedListB<affineHyperplane, affineHyperplane::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<coneRelation, coneRelation::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<slTwo, slTwo::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<ElementSemisimpleLieAlgebra, ElementSemisimpleLieAlgebra::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<MonomialUniversalEnveloping<Polynomial<Rational> >, MonomialUniversalEnveloping<Polynomial<Rational> >::HashFunction>::PreferredHashSize=10000;
-template < > int HashedListB<MonomialUniversalEnvelopingOrdered<Polynomial<Rational> >, MonomialUniversalEnvelopingOrdered<Polynomial<Rational> >::HashFunction >::PreferredHashSize=20;
-template < > int HashedListB<MonomialUniversalEnvelopingOrdered<RationalFunction>, MonomialUniversalEnvelopingOrdered<RationalFunction>::HashFunction >::PreferredHashSize=20;
-template < > int HashedListB<Cone, Cone::HashFunction>::PreferredHashSize=10000;
-template < > int HashedListB<ParserFunction, ParserFunction::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<MonomialChar<Rational>, MonomialChar<Rational>::HashFunction >::PreferredHashSize=100;
-template < > int HashedListB<MonomialUniversalEnveloping<Rational>, MonomialUniversalEnveloping<Rational>::HashFunction >::PreferredHashSize=50;
-template < > int HashedListB<MonomialGeneralizedVerma<Rational>, MonomialGeneralizedVerma<Rational>::HashFunction >::PreferredHashSize=50;
-template < > int HashedListB<MonomialUniversalEnveloping<RationalFunction>, MonomialUniversalEnveloping<RationalFunction>::HashFunction >::PreferredHashSize=50;
-template < > int HashedListB<MonomialGeneralizedVerma<RationalFunction>, MonomialGeneralizedVerma<RationalFunction>::HashFunction >::PreferredHashSize=50;
-template < > int HashedListB<MonomialTensorGeneralizedVermas<RationalFunction>, MonomialTensorGeneralizedVermas<RationalFunction>::HashFunction >::PreferredHashSize=50;
-template < > int HashedListB<std::string, MathRoutines::hashString>::PreferredHashSize=50;
-template < > int HashedListB<ElementTensorsGeneralizedVermas<RationalFunction>, ElementTensorsGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<ChevalleyGenerator, ChevalleyGenerator::HashFunction>::PreferredHashSize=10;
-template < > int HashedListB<Vector<Polynomial<Rational> >, Vector<Polynomial<Rational> >::HashFunction>::PreferredHashSize=100;
-
-template < > int List<ElementUniversalEnveloping<Rational> >::ListActualSizeIncrement=100;
-template < > int List<MonomialUniversalEnveloping<Rational> >::ListActualSizeIncrement=50;
-template < > int List<MonomialChar<Rational> >::ListActualSizeIncrement=100;
-template < > int List<Cone>::ListActualSizeIncrement=100;
-template < > int List<QuasiPolynomial>::ListActualSizeIncrement=100;
-template < > int List<affineCone>::ListActualSizeIncrement=1;
-template < > int List<int>::ListActualSizeIncrement=10;
-template < > int List<char>::ListActualSizeIncrement=5;
-template < > int List<bool>::ListActualSizeIncrement=5;
-template < > int List<partFraction>::ListActualSizeIncrement=1000;
-template < > int List<oneFracWithMultiplicitiesAndElongations>::ListActualSizeIncrement=1;
-template < > int List<ElementWeylGroup>::ListActualSizeIncrement= 101680;
-template < > int List<PolynomialSubstitution<Rational> >::ListActualSizeIncrement=1;
-template < > int List<Polynomial<Rational> >::ListActualSizeIncrement=1;
-template < > int List<MonomialP >::ListActualSizeIncrement=20;
-template < > int List<std::string>::ListActualSizeIncrement=100;
-template < > int List<unsigned int>::ListActualSizeIncrement=1;
-template < > int List<Vectors<Rational> >::ListActualSizeIncrement=5;
-template < > int List<Selection>::ListActualSizeIncrement=5;
-template < > int List<affineHyperplane>::ListActualSizeIncrement=1000;
-template < > int List<Rational>::ListActualSizeIncrement=10;
-template < > int List<coneRelation>::ListActualSizeIncrement=1000;
-template < > int List<DynkinDiagramRootSubalgebra>::ListActualSizeIncrement=100;
-template < > int List<rootSubalgebra>::ListActualSizeIncrement=78;
-template < > int List<List<int> >::ListActualSizeIncrement=10;
-template < > int List<List<char> >::ListActualSizeIncrement=30;
-template < > int List<slTwo>::ListActualSizeIncrement=1000;
-template < > int List<ElementSemisimpleLieAlgebra>::ListActualSizeIncrement=100;
-template < > int List<ReflectionSubgroupWeylGroup>::ListActualSizeIncrement=5;
-template < > int List<MonomialUniversalEnveloping<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<ElementUniversalEnveloping<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<List<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<MonomialCollection<MonomialP, Rational> >::ListActualSizeIncrement=20;
-template < > int List<LargeIntUnsigned>::ListActualSizeIncrement=20;
-template < > int List<double>::ListActualSizeIncrement=20;
-template < > int List<MonomialUniversalEnvelopingOrdered<RationalFunction> >::ListActualSizeIncrement=20;
-template < > int List<ElementWeylAlgebra>::ListActualSizeIncrement=20;
-template < > int List<ElementUniversalEnvelopingOrdered<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<ElementVermaModuleOrdered<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<MonomialUniversalEnvelopingOrdered<Polynomial<Rational> > >::ListActualSizeIncrement=20;
-template < > int List<ElementVermaModuleOrdered<RationalFunction> >::ListActualSizeIncrement=20;
-template < > int List<RationalFunction>::ListActualSizeIncrement=20;
-template < > int List<Vector<RationalFunction> >::ListActualSizeIncrement=20;
-template < > int List<ElementUniversalEnvelopingOrdered<RationalFunction> >::ListActualSizeIncrement=20;
-template < > int List<Vector<Rational> >::ListActualSizeIncrement=10;
-template < > int List<MonomialCollection<MonomialP, RationalFunction> >::ListActualSizeIncrement=20;
-template < > int List<Matrix<Rational> >::ListActualSizeIncrement=10;
-template < > int List<ParserFunction>::ListActualSizeIncrement=20;
-template < > int List<ParserFunctionArgumentTree>::ListActualSizeIncrement=3;
-template < > int List<ConeLatticeAndShift>::ListActualSizeIncrement=50;
-template < > int List<DrawOperations>::ListActualSizeIncrement=5;
-template < > int List<VirtualDrawOp>::ListActualSizeIncrement=1000;
-template < > int List<MonomialGeneralizedVerma<Rational> >::ListActualSizeIncrement=10;
-template < > int List<MonomialUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<MonomialGeneralizedVerma<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<MonomialTensorGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<bool ((*)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression))>::ListActualSizeIncrement=50;
-template < > int List<Polynomial<LargeInt> >::ListActualSizeIncrement=50;
-template < > int List<ChevalleyGenerator >::ListActualSizeIncrement=10;
-template < > int List<LargeInt >::ListActualSizeIncrement=50;
-template < > int List<stackInfo>::ListActualSizeIncrement=100;
-template < > int List<Vector<Polynomial<Rational> > >::ListActualSizeIncrement=100;
 
 template < > bool  CompleX<double>::flagEqualityIsApproximate=true;
 template < > double CompleX<double>::EqualityPrecision=0.00000001;
 
 template <class ElementLeft, class ElementRight, class CoefficientType>
 class TensorProductMonomial;
-template < > int List<TensorProductMonomial<ElementVermaModuleOrdered<Polynomial<Rational> >, ElementSemisimpleLieAlgebra, RationalFunction> >::ListActualSizeIncrement=20;
 
 std::fstream partFraction::TheBigDump;
 std::fstream partFractions::ComputedContributionsList;
@@ -510,11 +421,11 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
       outputCoeffs.LastObject()->MakeOne();
       return true;
     }
-    output.Reserve(theSet.size);
-    outputCoeffs.Reserve(theSet.size);
+    output.ReservE(theSet.size);
+    outputCoeffs.ReservE(theSet.size);
   }
   Vectors<Rational> theNewSet;
-  theNewSet.Reserve(theSet.size);
+  theNewSet.ReservE(theSet.size);
   Vector<Rational> tempRoot;
   Rational tempRat;
   for (int indexFirstNonZeroRoot=0; indexFirstNonZeroRoot<theSet.size; indexFirstNonZeroRoot++)
@@ -2234,7 +2145,7 @@ partFraction::partFraction()
 }
 
 void partFraction::init(int numRoots)
-{ this->IndicesNonZeroMults.Reserve(numRoots);
+{ this->IndicesNonZeroMults.ReservE(numRoots);
   this->IndicesNonZeroMults.size=0;
   this->SetSize(numRoots);
   for (int i=0; i<this->size; i++)
@@ -2278,8 +2189,8 @@ void partFraction::operator =(const partFraction &right)
 int partFractions::SizeWithoutDebugString()
 { int Accum=0;
   Accum+=  this->HashedList<partFraction>::SizeWithoutObjects();
-  for (int i=0; i<this->ActualSize; i++)
-    Accum+=this->TheActualObjects[i].SizeWithoutDebugString();
+  for (int i=0; i<this->size; i++)
+    Accum+=this->TheObjects[i].SizeWithoutDebugString();
   Accum+=  sizeof(this->HighestIndex)+sizeof(this->IndexLowestNonProcessed);
   return Accum;
 }
@@ -3059,7 +2970,7 @@ void partFractions::WriteToFile(std::fstream& output, GlobalVariables* theGlobal
 
 void partFractions::ComputeSupport(List<Vectors<Rational> >& output, std::stringstream& outputString)
 { output.size=0;
-  output.Reserve(this->size);
+  output.ReservE(this->size);
   for (int i=0; i<this->size; i++)
   { Vectors<Rational> tempRoots;
 //    tempRoots.ComputeDebugString();
@@ -3122,7 +3033,11 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
     theVPbasis.AddOnTop(tempRoot);
     for(int i=this->AmbientDimension-3; i>=0; i--)
     { tempRoot.TheObjects[i]=2;
-      theVPbasis.AddObjectOnBottom(tempRoot);
+      std::cout << "This is a programming error: this line of code needs to be fixed but I don't have time right now."
+      << " This code shouldn't be used before the line is fixed! "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+//      theVPbasis.AddObjectOnBottom(tempRoot);
     }
     tempWeight.TheObjects[this->AmbientDimension-2]=7;
     tempWeight.TheObjects[this->AmbientDimension-1]=8;
@@ -3415,7 +3330,7 @@ void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
 { this->Multiplicities.SetSize(NumElements);
   for (int i=0; i<this->Multiplicities.size; i++)
     this->Multiplicities.TheObjects[i]=0;
-  this->elements.Reserve(NumElements);
+  this->elements.ReservE(NumElements);
   this->elements.size=0;
 }
 
@@ -3693,7 +3608,7 @@ void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
   this->GenerateOrbit(startRoots, false, tempHashedRootS, false, estimatedNumRoots);
   this->RootSystem.Clear();
   this->RootsOfBorel.size=0;
-  this->RootsOfBorel.Reserve(tempHashedRootS.size/2);
+  this->RootsOfBorel.ReservE(tempHashedRootS.size/2);
   this->RootSystem.SetExpectedSize(tempHashedRootS.size);
   for (int i=0; i<tempHashedRootS.size; i++)
     if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
@@ -3713,7 +3628,7 @@ void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rat
 void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
 { this->ComputeWeylGroup();
   output.size=0;
-  output.Reserve(this->RootSystem.size/2);
+  output.ReservE(this->RootSystem.size/2);
   for (int i=0; i<this->RootSystem.size; i++)
     if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
       output.AddOnTop(this->RootSystem[i]);
@@ -4382,7 +4297,7 @@ void KLpolys::GeneratePartialBruhatOrder()
   this->SimpleReflectionsActionList.SetSize(this->size);
   this->ComputeDebugString();
   for (int i=0; i<this->size; i++)
-  { this->SimpleReflectionsActionList.TheObjects[i].Reserve(theDimension);
+  { this->SimpleReflectionsActionList[i].ReservE(theDimension);
     for (int j=0; j<theDimension; j++)
     { Vector<Rational> tempRoot, tempRoot2;
       tempRoot=(this->TheObjects[i]);
@@ -4852,9 +4767,9 @@ void rootSubalgebra::ComputeAll()
 void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
 { this->CentralizerKmods.init(this->kModules.size);
   this->CentralizerRoots.size=0;
-  this->CentralizerRoots.Reserve(this->kModules.size);
+  this->CentralizerRoots.ReservE(this->kModules.size);
   this->SimpleBasisCentralizerRoots.size=0;
-  this->SimpleBasisCentralizerRoots.Reserve(this->kModules.size);
+  this->SimpleBasisCentralizerRoots.ReservE(this->kModules.size);
   int counter=0;
   for (int i=0; i<this->kModules.size; i++)
     if (this->kModules.TheObjects[i].size==1)
@@ -5146,10 +5061,7 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
         newNilradical.SetSize(selKmods.CardinalitySelection);
         for (int i=0; i<selKmods.CardinalitySelection; i++)
           newNilradical.TheObjects[i]=selKmods.elements[i];
-        int oldIncrement= List<List<int> >::ListActualSizeIncrement;
-        List<List<int> >::ListActualSizeIncrement=100;
         currentSAList.AddOnTop(newNilradical);
-        List<List<int> >::ListActualSizeIncrement=oldIncrement;
       }
     } else
     {
@@ -5293,10 +5205,10 @@ void rootSubalgebra::ComputeKModules()
   this->ComputeRootsOfK();
   Vector<Rational> tempLW, tempHW;
   HashedList<Vector<Rational> >& AllRoots= this->AmbientWeyl.RootSystem;
-  this->kModules.Reserve(AllRoots.size);
-  this->HighestRootsK.Reserve(this->AmbientWeyl.CartanSymmetric.NumRows);
-  this->LowestWeightsGmodK.Reserve(AllRoots.size);
-  this->HighestWeightsGmodK.Reserve(AllRoots.size);
+  this->kModules.ReservE(AllRoots.size);
+  this->HighestRootsK.ReservE(this->AmbientWeyl.CartanSymmetric.NumRows);
+  this->LowestWeightsGmodK.ReservE(AllRoots.size);
+  this->HighestWeightsGmodK.ReservE(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
   { if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
     { this->ComputeLowestWeightInTheSameKMod(AllRoots.TheObjects[i], tempLW);

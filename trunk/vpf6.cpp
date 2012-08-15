@@ -3,36 +3,6 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for the calculator parser. ");
 
-template < > int HashedListB<VariableNonBound, VariableNonBound::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<Expression, Expression::HashFunction>::PreferredHashSize=50;
-template < > int HashedListB<int, MathRoutines::IntUnsignIdentity>::PreferredHashSize=50;
-template < > int HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
-template < > int HashedListB<Function, Function::HashFunction>::PreferredHashSize=100;
-//template < > int HashedListB<DataOfExpressions<Polynomial<Rational> >, DataOfExpressions<Polynomial<Rational> >::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<RationalFunction, RationalFunction::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<Rational, Rational::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<ElementUniversalEnveloping<RationalFunction> ,ElementUniversalEnveloping<RationalFunction>::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<ElementSumGeneralizedVermas<RationalFunction>,ElementSumGeneralizedVermas<RationalFunction>::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<Polynomial<Rational>, Polynomial<Rational>::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<Context, Context::HashFunction>::PreferredHashSize=100;
-template < > int HashedListB<Vector<RationalFunction>, Vector<RationalFunction>::HashFunction>::PreferredHashSize=10;
-template < > int HashedListB<MonomialChar<RationalFunction>, MonomialChar<RationalFunction>::HashFunction>::PreferredHashSize=10;
-template < > int HashedListB<DataCruncher, DataCruncher::HashFunction>::PreferredHashSize=100;
-
-template < > int List<SyntacticElement>::ListActualSizeIncrement=50;
-template < > int List<Function>::ListActualSizeIncrement=50;
-template < > int List<Data>::ListActualSizeIncrement=500;
-template < > int List<SemisimpleLieAlgebra>::ListActualSizeIncrement=5;
-template < > int List<ElementTensorsGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=50;
-template < > int List<ElementSumGeneralizedVermas<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<ModuleSSalgebra<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<Context>::ListActualSizeIncrement=20;
-template < > int List<ElementUniversalEnveloping<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<MonomialChar<RationalFunction> >::ListActualSizeIncrement=10;
-template < > int List<DataCruncher>::ListActualSizeIncrement=50;
-template < > int List<VariableNonBound>::ListActualSizeIncrement=50;
-template < > int List<Expression>::ListActualSizeIncrement=1;
-
 //If you get a specialization after instantiation error:
 //due to the messed up C++ templates, the following template specialization funcitons must appear
 //here and nowhere else. C++ is a dirty buggy language.
@@ -42,7 +12,7 @@ const Rational& Data::GetValuE()const
 { if (this->type!=this->typeRational)
   { std::cout << "This is a programming error. Rational Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". Please debug file " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theRationals.size || theIndex<0)
@@ -50,7 +20,7 @@ const Rational& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theRationals.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". Please debug file " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theRationals[this->theIndex];
@@ -1262,7 +1232,7 @@ std::string ExpressionPairs::ToString()
 void CommandList::ParseFillDictionary
   (const std::string& input)
 { std::string current;
-  (*this->CurrrentSyntacticSouP).Reserve(input.size());
+  (*this->CurrrentSyntacticSouP).ReservE(input.size());
   (*this->CurrrentSyntacticSouP).SetSize(0);
   char LookAheadChar;
   SyntacticElement currentElement;
@@ -1952,6 +1922,16 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
 }
 
 template <class CoefficientType>
+bool ModuleSSalgebra<CoefficientType>::IsNotInParabolic
+(int theGeneratorIndex)
+{ Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
+  for (int j=0; j<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; j++)
+    if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]]<0)
+      return true;
+  return false;
+}
+
+template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::IsNotInLevi
 (int theGeneratorIndex)
 { Vector<Rational> theWeight=  this->GetOwner().GetWeightOfGenerator(theGeneratorIndex);
@@ -1968,14 +1948,14 @@ void ModuleSSalgebra<CoefficientType>::GetElementsNilradical
   ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
   ElementUniversalEnveloping<CoefficientType> theElt;
   output.SetSize(0);
-  output.Reserve(ownerSS.GetNumPosRoots());
+  output.ReservE(ownerSS.GetNumPosRoots());
 
   int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
   MemorySaving<List<int> > tempList;
   if (listOfGenerators==0)
     listOfGenerators=&tempList.GetElement();
   listOfGenerators->SetSize(0);
-  listOfGenerators->Reserve(ownerSS.GetNumPosRoots());
+  listOfGenerators->ReservE(ownerSS.GetNumPosRoots());
   for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
     if (this->IsNotInLevi(i))
       listOfGenerators->AddOnTop(i);
@@ -2111,15 +2091,6 @@ void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theS
     output.polyAlphabeT[2*theShift+i+inputNumWeylVars]=tempStream.str();
   }
 }
-//template<class CoefficientType>
-//std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)const
-//{
-//}
-
-template <> int HashedListB<MonMatrixTensor, MonMatrixTensor::HashFunction>::PreferredHashSize=10;
-template <> int List<MonMatrixTensor>::ListActualSizeIncrement=10;
-template <> int HashedListB<quasiDiffMon, quasiDiffMon::HashFunction>::PreferredHashSize=20;
-template <> int List<quasiDiffMon>::ListActualSizeIncrement=20;
 
 void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
 (int inputPower, int numVars, int indexVar, RationalFunction& output, GlobalVariables& theGlobalVariables)
@@ -3213,19 +3184,21 @@ void CommandList::initCrunchers()
 void CommandList::initPredefinedVars()
 { this->AddNonBoundVarMustBeNew
 ("IsInteger", &this->fIsInteger, "",
- " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ", "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
+ " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
+ "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddNonBoundVarMustBeNew
   ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
    "Creates a simple Lie algebra. Will be changed to creating a semisimple Lie algebra in the foreseeable future. \
    Creates a function that returns the elements of a simple Lie algebra with Weyl type and rank \
    given in the format WeylLetter_Rank.  \
-   Elements of the cartan are addressed as arguments of the form (0,s), Vector<Rational> system generators are addressed \
+   Elements of the cartan are addressed as arguments of the form (0,s), root system generators are addressed \
    with one index only. ", "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
   ("SemisimpleLieAlgebraVerbose", & this->fSSAlgebraVerbose, "",
    "Same as SemisimpleLieAlgebra but creates in addition a (quite detailed) printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
-   In addition, this function creates a graphics of the root system. The printout is shown in the \"comments\" column to the \
+   In addition, this function creates a graphics of the root system. \
+   The printout is shown in the \"comments\" column to the \
    right of the calculator input. <b>Warning</b> the verbose printout is quite heavy: \
    for E_8 it puts the netbook on which the calculator is developed to sleep.",
    "g:=SemisimpleLieAlgebraVerbose{}F_4;");
@@ -3270,7 +3243,8 @@ void CommandList::initPredefinedVars()
    "g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
   this->AddNonBoundVarMustBeNew
   ("WeylDimFormula", & this->fWeylDimFormula, "",
-   "Weyl dimension formula. First argument gives the type of the Weyl group of the simple Lie algebra in the form Type_Rank (e.g. E_6).\
+   "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
+    Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
   this->AddNonBoundVarMustBeNew
@@ -3292,7 +3266,8 @@ void CommandList::initPredefinedVars()
    "Casimir{}(G_2)");
   this->AddNonBoundVarMustBeNew
   ("hmmG2inB3", & this->fEmbedG2inB3, "",
-   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in a paper by McGovern.",
+   "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in\
+    a paper by McGovern.",
    "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddNonBoundVarMustBeNew
   ("drawWeightSupportWithMults", & this->fDrawWeightSupportWithMults, "",
@@ -3310,26 +3285,35 @@ void CommandList::initPredefinedVars()
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
   this->AddNonBoundVarMustBeNew
-  ("fSplitFDpartB3overG2CharsOnly", & this->fSplitFDpartB3overG2CharsOnly, "",
-   "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
-   The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
-   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
+  ("SplitFDpartB3overG2CharsOnly", & this->fSplitFDpartB3overG2CharsOnly, "",
+   "Splits the finite dimensional part of the inducing module of the generalized Verma module of\
+    B_3(so(7)) into G_2-components. \
+   The argument is gives the highest weight of the generalized Verma module in fundamental \
+   coordinates with respect to so(7). \
+   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic\
+    subalgebra of B_3. ",
    "fSplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
   this->AddNonBoundVarMustBeNew
-  ("fSplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
-   "Splits the finite dimensional part of the inducing module of the generalized Verma module of B_3(so(7)) into G_2-components. \
-   The argument is gives the highest weight of the generalized Verma module in fundamental coordinates with respect to so(7). \
-   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic subalgebra of B_3. ",
+  ("SplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
+   "Splits the finite dimensional part of the inducing module of the generalized Verma module of \
+   B_3(so(7)) into G_2-components. \
+   The argument is gives the highest weight of the generalized Verma module in fundamental \
+   coordinates with respect to so(7). \
+   The arguments which are not small integers indicate the non-selected roots of the inducing parabolic \
+   subalgebra of B_3. ",
    "fSplitFDpartB3overG2{}(x_1,1,0)");
   this->AddNonBoundVarMustBeNew
-  ("fPrintB3G2branchingTableCharsOnly", &this->fPrintB3G2branchingTableCharsOnly, "",
-   "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the function gives the maximum height \
-   of the B_3-weight. The second argument indicates the parabolic subalgebra of B_3- zero entry stands for the corresponding root space lying \
-   in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is not in the parabolic. The expression given \
+  ("PrintB3G2branchingTableCharsOnly", &this->fPrintB3G2branchingTableCharsOnly, "",
+   "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the \
+   function gives the maximum height \
+   of the B_3-weight. The second argument indicates the parabolic subalgebra of B_3- zero entry \
+   stands for the corresponding root space lying \
+   in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is \
+   not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
    "fPrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); fPrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
-  ("fPrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
+  ("PrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
@@ -3370,7 +3354,8 @@ void CommandList::initPredefinedVars()
    the Wikipedia page on Kazhdan-Lusztig polynomials. \
    Please note that the 192 by 192 element table takes almost 3 minutes to compute.\
    Faster implementations of the KL polynomials are available from programs by Fokko du Cloux and others\
-   (our simple implementation stores the full table of R-polynomials and KL-polynomials in RAM memory at all times, unlike\
+   (our simple implementation stores the full table of R-polynomials and KL-polynomials in RAM memory at \
+   all times, unlike\
    the other more efficient implementations).",
    "KLcoeffs{}(B_3)");
   this->AddNonBoundVarMustBeNew
@@ -3388,7 +3373,8 @@ void CommandList::initPredefinedVars()
    coordinate. \
    Otherwise, one should put 0. For example, for Lie algebra B3(so(7)), \
    calling parabolicsInfoBruhatGraph(0,0,0) gives you the Weyl group info for the entire algebra; \
-   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by the last two simple root. \
+   calling parabolicsInfoBruhatGraph(1,0,0) gives you info for the Weyl subgroup generated by \
+   the last two simple root. \
    In the produced graph, the element s_{\\eta_i} corresponds to a reflection with respect to the i^th simple root. \
    You will get your output as a .png file link, you must click onto the link to see the end result. \
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
@@ -3402,8 +3388,7 @@ void CommandList::initPredefinedVars()
 }
 
 void CommandList::init(GlobalVariables& inputGlobalVariables)
-{ HashedListB<Data, Data::HashFunction>::PreferredHashSize=1000;
-  this->theGlobalVariableS=& inputGlobalVariables;
+{ this->theGlobalVariableS=& inputGlobalVariables;
   this->MaxAlgTransformationsPerExpression=100000;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
@@ -3642,7 +3627,7 @@ bool CommandList::CollectSummands
     return false;
   List<Expression> summandsWithCoeff;
   summandsWithCoeff.SetSize(0);
-  summandsWithCoeff.Reserve(summandsNoCoeff.size);
+  summandsWithCoeff.ReservE(summandsNoCoeff.size);
   for (int i=0; i<summandsNoCoeff.size; i++)
   { if (theCoeffs[i].IsEqualToZero())
       continue;
@@ -3735,7 +3720,6 @@ bool Data::Exponentiate(const Data& right, Data& output)const
 { //std::cout << "<br>Attempting to apply the power " << right.ToString() << " on " << this->ToString();
   Rational resultRat;
   MemorySaving<Polynomial<Rational> > tempP;
-
   if (right.type==Data::typeRational)
   { int thePower;
     if (right.IsSmallInteger(&thePower))
@@ -3747,7 +3731,9 @@ bool Data::Exponentiate(const Data& right, Data& output)const
           return true;
         case Data::typePoly:
           tempP.GetElement()=this->GetValuE<Polynomial<Rational> >();
+          std::cout << tempP.GetElement().GetReport();
           tempP.GetElement().RaiseToPower(thePower);
+          std::cout << tempP.GetElement().GetReport();
           output.MakePoly(*this->owner, tempP.GetElement(), this->theContextIndex);
           return true;
         default: break;
@@ -3843,7 +3829,7 @@ bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::st
   ElementUniversalEnveloping<RationalFunction> result;
   result=output.GetUE();
   result+=rightCopy.GetUE();
-//  result.Simplify(*output.owner->theGlobalVariableS);
+  result.Simplify(*output.owner->theGlobalVariableS);
   output.MakeUE(*output.owner, result, output.theContextIndex);
   return true;
 }
@@ -4955,7 +4941,7 @@ bool CommandList::ExtractExpressions
 (Expression& outputExpression, std::string* outputErrors)
 { std::string lookAheadToken;
   std::stringstream errorLog;
-  (*this->CurrentSyntacticStacK).Reserve((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
+  (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
   this->registerNumNonClosedBeginArray=0;
   for (int i=0; i<this->numEmptyTokensStart; i++)
@@ -5484,6 +5470,9 @@ std::string CommandList::ToString()
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";
   #ifdef MacroIncrementCounter
+  out2 << "<br>Number of Lists created: " << NumListsCreated
+  << "<br> Number of List resizes: " << NumListResizesTotal
+  << "<br> Number HashedList hash resizing: " << NumHashResizes;
   out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
   << " (# successful calls Rational::TryToAddQuickly)";
   out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications

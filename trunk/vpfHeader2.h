@@ -369,7 +369,7 @@ class ExpressionPairs
 {
 public:
   std::string ToString();
-  HashedListB<int, MathRoutines::IntUnsignIdentity> BoundVariableIndices;
+  HashedList<int, MathRoutines::IntUnsignIdentity> BoundVariableIndices;
   HashedList<Expression> variableImages;
   void reset()
   { this->BoundVariableIndices.Clear();
@@ -407,7 +407,7 @@ class SyntacticElement
 class ExpressionContext
 {
 public:
-  HashedListB<std::string, MathRoutines::hashString> BoundVariables;
+  HashedList<std::string, MathRoutines::hashString> BoundVariables;
   HashedList<Expression> cachedExpressions;
   List<Expression> imagesCachedExpressions;
   bool flagOpDefineEncountered;
@@ -505,9 +505,9 @@ public:
   HashedList<RationalFunction> theRFs;
   HashedList<Rational> theRationals;
   HashedList<Context> theContexts;
-  HashedListB<std::string, MathRoutines::hashString> theStrings;
+  HashedList<std::string, MathRoutines::hashString> theStrings;
   HashedList<VariableNonBound> theNonBoundVars;
-  HashedListB<std::string, MathRoutines::hashString> ExpressionNotation;
+  HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   void reset();
   std::string ToString();
@@ -554,7 +554,7 @@ template <class dataType>
   ;
 public:
 //control sequences parametrize the syntactical elements
-  HashedListB<std::string, MathRoutines::hashString> controlSequences;
+  HashedList<std::string, MathRoutines::hashString> controlSequences;
 //operations parametrize the expression elements
 //operations are the labels of the nodes of the expression tree
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
@@ -697,7 +697,7 @@ public:
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
-  HashedListB<std::string, MathRoutines::hashString>& GetCurrentContextBoundVars()
+  HashedList<std::string, MathRoutines::hashString>& GetCurrentContextBoundVars()
   { return this->theExpressionContext.LastObject()->BoundVariables;
   }
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
@@ -1072,7 +1072,8 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
   ;
   bool fSplitFDpartB3overG2Init
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,

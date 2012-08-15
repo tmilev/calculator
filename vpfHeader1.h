@@ -3168,6 +3168,9 @@ public:
   bool IsPositive()
   { return this->IsPositiveOrZero() && !this->IsEqualToZero();
   }
+  bool IsNegative()
+  { return this->IsNegativeOrZero() && !this->IsEqualToZero();
+  }
   Vector<Rational> GetVectorRational()
   { Vector<Rational> result;
     result.SetSize(this->size);

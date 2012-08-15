@@ -7302,10 +7302,17 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
     }
   if (this->GetOwner().IsASimpleGenerator(generatorIndex))
     return this->GetActionSimpleGeneratorIndex(generatorIndex, theGlobalVariables, theRingUnit, theRingZero);
-  std::cout << "This is a programming error: this part of the code is not implemented yet. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
-  return this->actionsGeneratorsMaT[generatorIndex];
+  List<int> adActions;
+  Rational theCoeff;
+  this->GetOwner().GetChevalleyGeneratorAsLieBracketsSimpleGens(generatorIndex, adActions, theCoeff);
+  MatrixTensor<CoefficientType>& output=this->actionsGeneratorsMaT[generatorIndex];
+  MatrixTensor<CoefficientType> tempO;
+  output=this->GetActionGeneratorIndeX(*adActions.LastObject(), theGlobalVariables);
+  for (int i=adActions.size-2; i>=0; i--)
+  { tempO=this->GetActionGeneratorIndeX(adActions[i], theGlobalVariables);
+    output.LieBracketOnTheLeft(tempO);
+  }
+  return output;
 }
 
 template  <class CoefficientType>

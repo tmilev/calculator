@@ -2379,6 +2379,7 @@ bool CommandList::fHWVinner
   }
   Data outputData;
   int outputContextIndex= theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(hwContext);
+  std::cout.flush();
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
 //  std::cout << "<br>theElt:" << theElt.ToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
@@ -5903,23 +5904,34 @@ void CommandList::InitJavaScriptDisplayIndicator()
   output << " <!>\n";
   output << " <script type=\"text/javascript\"> \n";
   output << " var timeOutCounter=0;\n";
-  output << " window.setTimeout(\"progressReport()\",1000);\n";
-  output << " var newReportString=\"\";\n";
+//  output << " var newReportString=\"\";\n";
+  output << " var showProgress=false;";
   output << " function progressReport()\n";
-  output << " { timeOutCounter++;\n";
-  output << "   var oRequest = new XMLHttpRequest();\n";
-  output << "   var sURL  = \"" << this->indicatorReportFileNameDisplay << "\";\n";
-  output << "   oRequest.open(\"GET\",sURL,false);\n";
-  output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
-  output << "   oRequest.send(null)\n";
-  output << "   if (oRequest.status==200)\n";
-  output << "   { newReportString= oRequest.responseText;\n";
-  output << "     el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
-  output << "   }\n";
+  output << "{ var el = document.getElementById(\"idProgressReport\");	\n";
+  output << "  if (!showProgress) \n";
+  output << "  { el.style.display = 'none';\n";
+  output << "    return;";
+  output << "  }\n";
+  output << "  el.style.display = '';\n";
+//  output << "  el.contentWindow.location.reload();";
+  output << "  timeOutCounter++;\n";
+  output << "  var oRequest = new XMLHttpRequest();\n";
+  output << "  var sURL  = \"" << this->indicatorFileNameDisplaY << "\";\n";
+  output << "  oRequest.open(\"GET\",sURL,false);\n";
+  output << "  oRequest.setRequestHeader(\"Indicator\",navigator.userAgent);\n";
+  output << "  oRequest.send(null)\n";
+  output << "  if (oRequest.status==200)\n";
+  output << "  { newReportString= oRequest.responseText;\n";
+  output << "    el.innerHTML= \"<hr>Refreshing each second. Client time: ~\"+ timeOutCounter+\" second(s)<br>\" +newReportString+\"<hr>\";\n";
+  output << "  }\n";
   output << "   window.setTimeout(\"progressReport()\",1000);\n";
   output << " }\n";
   output << " </script>\n";
-  output << " <div id=\"idProgressReport\">\n";
+  output << CGI::GetHtmlButton
+  ("progressReportButton", "showProgress=!showProgress; progressReport()", "expand/collapse progress report");
+  output << "<br><div "
+  //<< "src=\"" << this->indicatorFileNameDisplaY << "\" "
+  << "id=\"idProgressReport\" style=\"display:none\">\n";
   output << " </div>\n";
   output << " \n";
   output << " \n";
@@ -5940,10 +5952,8 @@ void CommandList::initDefaultFolderAndFileNames
   this->DisplayNameDefaultOutputNoPath="default"+this->userLabel+"output";
   this->DisplayNameDefaultOutput=this->DisplayPathOutputFolder+this->DisplayNameDefaultOutputNoPath;
 
-  this->indicatorFileName=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
-  this->indicatorFileNameDisplay=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
-  this->indicatorReportFileName=this->PhysicalPathOutputFolder +"report"+ this->userLabel+ ".txt" ;
-  this->indicatorReportFileNameDisplay=this->DisplayPathOutputFolder+"report"+this->userLabel + ".txt" ;
+  this->indicatorFileNamE=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
+  this->indicatorFileNameDisplaY=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
 }
 
 void CommandList::AddNonBoundVarMustBeNew

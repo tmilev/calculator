@@ -157,7 +157,7 @@ void ElementSemisimpleLieAlgebra::MakeHgenerator
 { ChevalleyGenerator tempGen;
   this->MakeZero(inputOwners, inputIndexInOwners);
   for (int i=0; i<theH.size; i++)
-  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, inputOwners[inputIndexInOwners].CartanIndexToChevalleyGeneratorIndex(i));
+  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, inputOwners[inputIndexInOwners].GetCartanIndexFromGenerator(i));
     this->AddMonomial(tempGen, theH[i]);
   }
 }

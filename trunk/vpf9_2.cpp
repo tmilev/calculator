@@ -712,11 +712,11 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rationa
   { for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator
       (*this->owner, this->indexInOwner,
-        this->GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace( -rootsInPlay[i]));
+        this->GetGeneratorFromRoot( -rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
       tempGen.MakeGenerator
       (*this->owner, this->indexInOwner,
-        this->GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace( rootsInPlay[i]));
+        this->GetGeneratorFromRoot( rootsInPlay[i]));
       outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
@@ -2227,8 +2227,7 @@ void ElementSemisimpleLieAlgebra::MakeGenerator
 void ElementSemisimpleLieAlgebra::MakeGGenerator
 (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { this->MakeGenerator
-  (inputOwners[inputIndexInOwners].GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(theRoot),
-   inputOwners, inputIndexInOwners);
+  (inputOwners[inputIndexInOwners].GetGeneratorFromRoot(theRoot), inputOwners, inputIndexInOwners);
 }
 
 void ElementSemisimpleLieAlgebra::AssignVectorNegRootSpacesCartanPosRootSpaces
@@ -2869,8 +2868,8 @@ void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
     return;
   }
   if (leftNode.Operation==Parser::tokenG)
-  { theIndex=this->GetContextLieAlgebra().DisplayIndexToRootIndex(theIndex);
-    theIndex=this->GetContextLieAlgebra().RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(theIndex);
+  { theIndex=this->GetContextLieAlgebra().GetRootIndexFromDisplayIndex(theIndex);
+    theIndex=this->GetContextLieAlgebra().GetGeneratorFromRootIndex(theIndex);
     if (theIndex<0 || theIndex>this->GetContextLieAlgebra().theWeyl.RootSystem.size+theDimension)
     { this->SetError(this->errorBadIndex);
       return;
@@ -3393,8 +3392,7 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
       tempDomain.TheObjects[index].MakeZero(*this->owners, this->indexDomain);
       ChevalleyGenerator tempGen;
       tempGen.MakeGenerator
-      (*this->owners, this->indexDomain,
-        this->theDomain().GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(tempRoot));
+      (*this->owners, this->indexDomain, this->theDomain().GetGeneratorFromRoot(tempRoot));
       tempDomain.TheObjects[index].AddMonomial(tempGen, 1);
       tempRange.TheObjects[index] = this->imagesSimpleChevalleyGenerators.TheObjects[i+j*theDomainDimension];
       NonExplored.RemoveSelection(index);
@@ -3843,7 +3841,7 @@ bool SemisimpleLieAlgebra::AreOrderedProperly(int leftIndex, int rightIndex)
   this->UEGeneratorOrderIncludingCartanElts[rightIndex];
 }
 
-int SemisimpleLieAlgebra::DisplayIndexToRootIndex(int theIndex)
+int SemisimpleLieAlgebra::GetRootIndexFromDisplayIndex(int theIndex)
 { int numPosRoots=this->theWeyl.RootsOfBorel.size;
   if (theIndex<0)
     return theIndex+numPosRoots;
@@ -3852,7 +3850,7 @@ int SemisimpleLieAlgebra::DisplayIndexToRootIndex(int theIndex)
   return -10000000;
 }
 
-int SemisimpleLieAlgebra::RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const
+int SemisimpleLieAlgebra::GetDisplayIndexFromRootIndex(int theIndex)const
 { int numPosRoots=this->theWeyl.RootsOfBorel.size;
   if (theIndex>=numPosRoots)
     return theIndex-numPosRoots+1;
@@ -3861,7 +3859,7 @@ int SemisimpleLieAlgebra::RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(i
   return -10000000;
 }
 
-int SemisimpleLieAlgebra::RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(int theIndex)const
+int SemisimpleLieAlgebra::GetGeneratorFromRootIndex(int theIndex)const
 { if (theIndex<0  || theIndex>=this->theWeyl.RootSystem.size)
     return -1;
   int theDimension=this->theWeyl.CartanSymmetric.NumRows;
@@ -3871,7 +3869,7 @@ int SemisimpleLieAlgebra::RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRo
   return theIndex;
 }
 
-int SemisimpleLieAlgebra::ChevalleyGeneratorIndexToRootIndex(int theIndex)const
+int SemisimpleLieAlgebra::GetRootIndexFromGenerator(int theIndex)const
 { int numPosRoots=this->theWeyl.RootsOfBorel.size;
   int theDimension=this->theWeyl.CartanSymmetric.NumRows;
   if (theIndex<numPosRoots)
@@ -4755,7 +4753,7 @@ void SemisimpleLieAlgebraOrdered::GetLinearCombinationFrom
 { theCoeffs.MakeZero(this->theOwner.GetNumGenerators());
   for (int i=0; i<input.size; i++)
   { int theIndex=input[i].theGeneratorIndex;
-    theCoeffs.TheObjects[this->theOwner.RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(theIndex)]=input.theCoeffs[i];
+    theCoeffs.TheObjects[this->theOwner.GetGeneratorFromRootIndex(theIndex)]=input.theCoeffs[i];
   }
   int numPosRoots=this->theOwner.GetNumPosRoots();
   Vector<Rational> tempH=input.GetCartanPart();

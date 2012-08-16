@@ -613,7 +613,6 @@ public:
   char DefaultWeylLetter;
   int DefaultWeylRank;
   std::string javaScriptDisplayingIndicator;
-  std::string indicatorReportFileName;
   std::string DisplayPathServerBase;
   std::string PhysicalPathServerBase;
   std::string DisplayPathOutputFolder;
@@ -621,9 +620,8 @@ public:
   std::string DisplayNameDefaultOutput;
   std::string DisplayNameDefaultOutputNoPath;
   std::string PhysicalNameDefaultOutput;
-  std::string indicatorFileName;
-  std::string indicatorFileNameDisplay;
-  std::string indicatorReportFileNameDisplay;
+  std::string indicatorFileNamE;
+  std::string indicatorFileNameDisplaY;
   std::string userLabel;
   List<std::string> SystemCommands;
   std::string ToString();

@@ -1708,12 +1708,12 @@ public:
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
-  //the Chevalley constants are listed in the same order as the Vector<Rational>  system of the Weyl group
-  // i.e. if \alpha is the Vector<Rational>  at the i^th position in this->theWyl.RootSystem and \beta -
-  //the Vector<Rational>  at the j^th position, then
+  //the Chevalley constants are listed in the same order as the root system of the Weyl group
+  // i.e. if \alpha is the root at the i^th position in this->theWyl.RootSystem and \beta -
+  //the root  at the j^th position, then
   //the chevalley constant N_{\alpha\beta} given by [g^\alpha, g^\beta]=N_{\alpha\beta}g^{\alpha+\beta}
   //will be located at the ij^{th} entry in the below matrix.
-  //Let $\alpha$ be a Vector<Rational> . Then our choice of the elements of the Cartan subalgebra is such that
+  //Let $\alpha$ be a root . Then our choice of the elements of the Cartan subalgebra is such that
   //1.   [g^{\alpha}, g^{-\alpha}]=h_\alpha * (2/ \langle\alpha,\alpha\rangle)
   //2.   [h_{\alpha},g^\beta] :=\langle\alpha,\beta\rangle g^\beta
   //Reference: Samelson, Notes on Lie algebras, pages 46-51
@@ -1763,7 +1763,7 @@ public:
   (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
    Rational& outputMultiplyLieBracketsToGetGenerator)
   ;
-  std::string ToString(FormatExpressions* inputFormat);
+  std::string ToString(FormatExpressions* inputFormat=0);
   std::string GetStringFromChevalleyGenerator
   (int theIndex, FormatExpressions* thePolynomialFormat)const
   ;
@@ -1792,16 +1792,6 @@ public:
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
   inline int GetNumPosRoots()const{ return this->theWeyl.RootsOfBorel.size;}
   inline int GetRank()const{ return this->theWeyl.CartanSymmetric.NumRows;}
-  int CartanIndexToChevalleyGeneratorIndex(int theIndex){ return this->theWeyl.RootsOfBorel.size+theIndex;}
-  int RootToIndexInUE(const Vector<Rational> & input){ return this->RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(this->theWeyl.RootSystem.GetIndex(input));}
-  int DisplayIndexToRootIndex(int theIndex);
-  int DisplayIndexToChevalleyGeneratorIndex(int theIndex)
-  { if (theIndex<0)
-      return theIndex+this->GetNumPosRoots();
-    return theIndex+this->GetNumPosRoots()+this->GetRank()-1;
-  }
-  int RootIndexOrderAsInRootSystemToGeneratorIndexNegativeRootsThenCartanThenPositive(int theIndex)const;
-  int RootIndexToDisplayIndexNegativeSpacesFirstThenCartan(int theIndex)const;
   void OrderSetNilradicalNegativeMost(Selection& parSelZeroMeansLeviPart)
   { Vector<Rational> tempVect;
     tempVect=parSelZeroMeansLeviPart;
@@ -1820,10 +1810,26 @@ public:
     for (int i=0; i<numGens; i++)
       this->UEGeneratorOrderIncludingCartanElts[i]=i;
   }
+  int GetCartanIndexFromSimpleGeneratorIndex(int theIndex)
+  { return this->theWeyl.RootsOfBorel.size+theIndex;
+  }
+  int GetGeneratorFromRoot(const Vector<Rational>& input)
+  { return this->GetGeneratorFromRootIndex(this->theWeyl.RootSystem.GetIndex(input));
+  }
+  int GetRootIndexFromDisplayIndex(int theIndex);
+  int GetGeneratorFromDisplayIndex(int theIndex)
+  { if (theIndex<0)
+      return theIndex+this->GetNumPosRoots();
+    return theIndex+this->GetNumPosRoots()+this->GetRank()-1;
+  }
+  int GetGeneratorFromRootIndex(int theIndex)const;
+  int GetDisplayIndexFromRootIndex(int theIndex)const;
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
-  int ChevalleyGeneratorIndexToRootIndex(int theIndex)const;
-  int ChevalleyGeneratorIndexToElementCartanIndex(int theIndex){ return theIndex-this->theWeyl.RootsOfBorel.size;}
-  int ChevalleyGeneratorIndexToDisplayIndex(int theIndex)const
+  int GetRootIndexFromGenerator(int theIndex)const;
+  int GetCartanIndexFromGenerator(int theIndex)
+  { return theIndex-this->theWeyl.RootsOfBorel.size;
+  }
+  int GetDisplayIndexFromGenerator(int theIndex)const
   { //std::cout << "<br>num pos roots: " <<  this->GetNumPosRoots();
    // std::cout << " rank: "<< this->GetRank();
     if (theIndex<this->GetNumPosRoots())
@@ -1839,8 +1845,8 @@ public:
   bool AreOppositeRootSpaces(int leftIndex, int rightIndex)
   { if(this->IsGeneratorFromCartan(leftIndex) || this->IsGeneratorFromCartan(rightIndex))
       return false;
-    int left  = this->ChevalleyGeneratorIndexToRootIndex(leftIndex);
-    int right=this->ChevalleyGeneratorIndexToRootIndex(rightIndex);
+    int left  = this->GetRootIndexFromGenerator(leftIndex);
+    int right=this->GetRootIndexFromGenerator(rightIndex);
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
   void GenerateVermaMonomials(Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables)
@@ -1871,12 +1877,6 @@ public:
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToStringVermaMonomials(std::string& output);
   void ElementToStringEmbedding(std::string& output);
-  int GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(const Vector<Rational>& input)const
-  { int theIndex=this->theWeyl.RootSystem.GetIndex(input);
-    if (theIndex>=this->GetNumPosRoots())
-      theIndex+=this->GetRank();
-    return theIndex;
-  }
   Vector<Rational> GetWeightOfGenerator(int index)
   { if (index<this->GetNumPosRoots())
       return this->theWeyl.RootSystem[index];
@@ -2158,7 +2158,7 @@ public:
   void MakeOneGenerator
   (int theIndex, const CoefficientType& theCoeff, SemisimpleLieAlgebraOrdered& owner,
    GlobalVariables* theContext);
-//  void MakeOneGeneratorCoeffOne(Vector<Rational> & rootSpace, int numVars, SemisimpleLieAlgebraOrdered& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.RootToIndexInUE(rootSpace), numVars, theOwner);};
+//  void MakeOneGeneratorCoeffOne(Vector<Rational> & rootSpace, int numVars, SemisimpleLieAlgebraOrdered& theOwner){this->MakeOneGeneratorCoeffOne(theOwner.GetGeneratorFromRoot(rootSpace), numVars, theOwner);};
   void MakeZero(SemisimpleLieAlgebraOrdered& theOwner);
   bool AssignElementUniversalEnveloping
   (ElementUniversalEnveloping<CoefficientType>& input, SemisimpleLieAlgebraOrdered& owner,
@@ -2483,7 +2483,7 @@ public:
   (const Vector<Rational> & rootSpace, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeOneGeneratorCoeffOne
-    (inputOwners[inputIndexInOwners].RootToIndexInUE(rootSpace), inputOwners, inputIndexInOwners,
+    (inputOwners[inputIndexInOwners].GetGeneratorFromRoot(rootSpace), inputOwners, inputIndexInOwners,
      theRingUnit, theRingZero);
   }
   void MakeZero(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
@@ -3217,7 +3217,8 @@ public:
     }
   }
   void LieBracketOnTheLeft(const MatrixTensor<CoefficientType>& standsOnTheLeft)
-  { MatrixTensor<CoefficientType> m1, m2;
+  { MacroRegisterFunctionWithName("MatrixTensor<CoefficientType>::LieBracketOnTheLeft");
+    MatrixTensor<CoefficientType> m1, m2;
     m1=standsOnTheLeft;
     m1*=*this;
     m2=*this;
@@ -3244,12 +3245,12 @@ class ModuleSSalgebra
   Selection ComputedGeneratorActions;
   Rational hwtaabfSimpleGensOnly
   (const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon
-   )
+   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon,
+   GlobalVariables* theGlobalVariables=0)
   ;
   Rational hwTrace
-  (const Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>, TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& thePair
-   )
+  (const Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>, TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& thePair,
+   GlobalVariables* theGlobalVariables=0)
   ;
   void TestConsistency(GlobalVariables& theGlobalVariables);
 public:
@@ -7312,6 +7313,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
   { tempO=this->GetActionGeneratorIndeX(adActions[i], theGlobalVariables);
     output.LieBracketOnTheLeft(tempO);
   }
+  output*=theCoeff;
   return output;
 }
 
@@ -8478,7 +8480,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
             this->ApplyTAA(currentPair.Object1);
             currentPair.Object2=otherWordList[k];
           }
-          theScalarProds[k]=this->hwTrace(currentPair);
+          theScalarProds[k]=this->hwTrace(currentPair, &theGlobalVariables);
         }
         this->theBilinearFormsInverted[weightLevelIndex].ActOnVectorColumn(theScalarProds);
         for (int k=0; k<theScalarProds.size; k++)

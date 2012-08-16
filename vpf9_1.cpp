@@ -2604,12 +2604,12 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
         continue;
       }
       if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
-      { int newIndex=this->GetChevalleyGeneratorIndexCorrespondingToNonZeroRootSpace(leftWeight+rightWeight);
+      { int newIndex=this->GetGeneratorFromRoot(leftWeight+rightWeight);
         if (newIndex!=-1)
         { this->theLiebrackets.elements[i][j].MakeGenerator
           (newIndex, *this->owner, this->indexInOwner);
-          int leftIndex=this->ChevalleyGeneratorIndexToRootIndex(i);
-          int rightIndex=this->ChevalleyGeneratorIndexToRootIndex(j);
+          int leftIndex=this->GetRootIndexFromGenerator(i);
+          int rightIndex=this->GetRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j]*=this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else
         { if (!(leftWeight+rightWeight).IsEqualToZero())

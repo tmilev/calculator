@@ -6019,19 +6019,14 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
   if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
-  { assert(inputCoeff.ToString()=="0");
     return;
-  }
   int j= this->GetIndex(inputMon);
   if (j>=this->size)
-  { std::stringstream tempStream;
-    tempStream << "This is a programming error: function GetIndex "
+  { std::cout << "This is a programming error: function GetIndex "
     << " evaluated on " << inputMon << " with hash function " << inputMon.HashFunction()
     << " returns index " << j
-    << " but I have only " << this->size << " elements ";
-    j=this->GetIndex(inputMon);
-    std::string debugString=tempStream.str();
-    std::cout << debugString << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << " but I have only " << this->size << " elements "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (j==-1)
@@ -6108,8 +6103,7 @@ void Polynomial<CoefficientType>::Substitution
   if (TheSubstitution.size!=this->NumVars)
   { std::cout << "This is a programming error: attempting to carry out a substitution"
     << "in a polynomial of " << this->NumVars << " variables while specifying the images of only "
-    << TheSubstitution.size << " of the variables. Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
-    << " line " << __LINE__ << ".";
+    << TheSubstitution.size << " of the variables. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   Polynomial<CoefficientType> Accum, TempPoly;

@@ -265,7 +265,7 @@ bool CommandList::fRootSAsAndSltwos
     mustRecompute=true;
   std::stringstream out;
   if (mustRecompute)
-  { std::cout << theCommands.javaScriptDisplayingIndicator;
+  { //std::cout << theCommands.javaScriptDisplayingIndicator;
     std::cout.flush();
     std::cout
     << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. "

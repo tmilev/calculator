@@ -74,7 +74,9 @@ void* RunTimer(void* ptr)
   }
   if (!ComputationComplete)
   { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
-    std::cout << "<br>The maximum allowed computation time is <b>" << theGlobalVariables.MaxAllowedComputationTimeInSeconds << " seconds</b>. Please use an offline version of the calculator. <br><b>Signalling ungraceful exit...</b> ";
+    std::cout << "<br>The maximum allowed computation time is <b>"
+    << theGlobalVariables.MaxAllowedComputationTimeInSeconds
+    << " seconds</b>. Please use an offline version of the calculator. <br><b>Signalling ungraceful exit...</b> ";
     ParallelComputing::SafePointDontCallMeFromDestructors();
     ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
     std::exit(0);
@@ -84,16 +86,18 @@ void* RunTimer(void* ptr)
 #endif
 
 std::string IPAdressCaller;
+
+
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
 //  if (counter%10!=0)
 //    return;
   std::fstream theFile;
-  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorReportFileName, false, true, false);
+  CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
-  theFile << " Elapsed seconds: " << GetElapsedTimeInSeconds();
-  theFile << "<hr>\n\n" << input.StatusString1 << "<hr>\n\n";
+  theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
+  theFile << "<br>" << input.StatusString1 << "<br>\n\n";
   for (int i=0; i<input.ProgressReportStrings.size; i++)
     theFile << "\n" << input.ProgressReportStrings[i] << "\n<br>\n";
   theFile.flush();
@@ -375,6 +379,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))";
 //civilizedInput="hwv{}(A_1,1, 0)";
 //  civilizedInput="hwv{}(A_2,(0,1), (0,0))";
+//civilizedInput="hwv{}(A_1, 1,0)";
+//  civilizedInput="hwv{}(A_2, (0,0),(0,0))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -394,11 +400,12 @@ g_{-2} v_\\lambda\
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
   if (civilizedInput!="")
     std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << theParser.inputStringRawestOfTheRaw
-    << "\">Link to your input.</a><br>";
+    << "\">Link to your input.</a>";
 //  std::cout << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw);
   std::cout << "\n</FORM>";
-  std::cout.flush();
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
+  std::cout << theParser.javaScriptDisplayingIndicator;
+  std::cout.flush();
   if (civilizedInput!="")
   { if (inputStringNames.ContainsObject("checkUsePreamble"))
     { std::stringstream tempStream;

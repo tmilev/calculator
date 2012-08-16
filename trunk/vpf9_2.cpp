@@ -2214,8 +2214,8 @@ void ElementSemisimpleLieAlgebra::MakeGenerator
   (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { //Changing RootSystem order invalidates this function!
   if (&inputOwners==0 || inputIndexInOwners==-1)
-  { std::cout << " This is a programming error: usage of non-initialized Semisimple Lie algebra. Please debug file "
-    << __FILE__ << " line " << __LINE__;
+  { std::cout << " This is a programming error: usage of non-initialized Semisimple Lie algebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->MakeZero(inputOwners, inputIndexInOwners);

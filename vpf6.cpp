@@ -475,9 +475,7 @@ bool Data::LieBracket
       return false;
     ElementUniversalEnveloping<RationalFunction> result;
     leftCopy.GetUE().LieBracketOnTheRight(rightCopy.GetUE(), result);
-    std::cout << "result: " << result.ToString();
     result.Simplify(*left.owner->theGlobalVariableS);
-    std::cout << " simpliefied: " << result.ToString();
     output.MakeUE(*left.owner, result, leftCopy.theContextIndex);
     return true;
   }
@@ -2765,7 +2763,7 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
 
 std::string CommandList::GetCalculatorLink(const std::string& input)
 { std::stringstream out;
-  out << "<a href=\"" << this->DisplayPathServerBase << "cgi-bin/calculator?textInput=" << CGI::UnCivilizeStringCGI(input)
+  out << "<a href=\"" << this->DisplayNameCalculator << "?textInput=" << CGI::UnCivilizeStringCGI(input)
   << "\"> " << input << "</a>";
   return out.str();
 }

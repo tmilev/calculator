@@ -2561,9 +2561,10 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 //  for (int i=0; i<this->theWeyl.RootSystem.size; i++)
 //    for (int j=0; j<this->t
 //  std::cout << "<br>pos roots: " << this->GetNumPosRoots();
+//  std::cout << this->ToString();
   if (this->GetNumPosRoots()<=0)
   { std::cout << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. "
-    << " Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
 //  this->TestForConsistency(theGlobalVariables);
@@ -2848,25 +2849,12 @@ void SemisimpleLieAlgebra::LieBracket
 { if (&output==&g1 || &output==&g2)
   { ElementSemisimpleLieAlgebra outputNew;
     this->LieBracket(g1, g2, outputNew);
-//    outputNew.checkConsistency();
-//    static int problemcounter=0;
-//    problemcounter++;
-//    std::string debugString;
-//    if (problemcounter==9633)
-//    { debugString=outputNew.ToString();
-//    }
-//    outputNew.checkConsistency();
     output=outputNew;
-//    int commentwhendone;
-//    output.checkConsistency();
     return;
   }
   output.MakeZero(*this->owner, this->indexInOwner);
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
-  { //int commentwhendone2;
-    //output.checkConsistency();
     return;
-  }
   int maxNumMonsFinal=g1.size*g2.size;
   output.SetExpectedSize(maxNumMonsFinal);
   Rational theCoeff;
@@ -2876,15 +2864,7 @@ void SemisimpleLieAlgebra::LieBracket
     { buffer=this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
       buffer*=g1.theCoeffs[i]*g2.theCoeffs[j];
       output+=buffer;
-//      int commentwhendone3;
-//      buffer.checkConsistency();
-//      output.checkConsistency();
-//      this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex].checkConsistency();
     }
-//    int commentmewhendone;
-//  output.checkConsistency();
-//  g1.checkConsistency();
-//  g2.checkConsistency();
 }
 
 bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)

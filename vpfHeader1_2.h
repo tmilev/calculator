@@ -1827,7 +1827,7 @@ public:
   //the below function returns an negative number if the chevalley generator is an element of the Cartan subalgebra
   int GetRootIndexFromGenerator(int theIndex)const;
   int GetCartanIndexFromGenerator(int theIndex)
-  { return theIndex-this->theWeyl.RootsOfBorel.size;
+  { return theIndex+this->theWeyl.RootsOfBorel.size;
   }
   int GetDisplayIndexFromGenerator(int theIndex)const
   { //std::cout << "<br>num pos roots: " <<  this->GetNumPosRoots();

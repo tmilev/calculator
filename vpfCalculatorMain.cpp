@@ -381,6 +381,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="hwv{}(A_2,(0,1), (0,0))";
 //civilizedInput="hwv{}(A_1, 1,0)";
 //  civilizedInput="hwv{}(A_2, (0,0),(0,0))";
+  civilizedInput="g:= SemisimpleLieAlgebra{}A_2; h_{{i}}:=g_{0, i}; [g_{-1},g_{1}] ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -398,12 +399,12 @@ g_{-2} v_\\lambda\
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
+  theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   if (civilizedInput!="")
-    std::cout << "<a href=\"/vpf/cgi-bin/calculator?" << theParser.inputStringRawestOfTheRaw
+    std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw
     << "\">Link to your input.</a>";
 //  std::cout << CGI::GetLatexEmbeddableLinkFromCalculatorInput(theParser.inputStringRawestOfTheRaw);
   std::cout << "\n</FORM>";
-  theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
   if (civilizedInput!="")

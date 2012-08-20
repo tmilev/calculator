@@ -31,7 +31,7 @@ const std::string& Data::GetValuE()const
 { if (this->type!=this->typeString)
   { std::cout << "This is a programming error.<b> std::string </b> Data::GetValuE  is called on Data of type <b> "
     << this->ElementToStringDataType()
-    << "</b>. Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << "</b>. " <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theStrings.size || theIndex<0)
@@ -39,7 +39,7 @@ const std::string& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theStrings.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << "." << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theStrings[this->theIndex];
@@ -50,7 +50,7 @@ const VariableNonBound& Data::GetValuE()const
 { if (this->type!=this->type)
   { std::cout << "This is a programming error. VariableNonBound Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theNonBoundVars.size || theIndex<0)
@@ -58,7 +58,7 @@ const VariableNonBound& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theNonBoundVars.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theNonBoundVars[this->theIndex];
@@ -69,7 +69,7 @@ const RationalFunction& Data::GetValuE()const
 { if (this->type!=this->typeRationalFunction)
   { std::cout << "This is a programming error. RationalFunction Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theRFs.size || theIndex<0)
@@ -77,7 +77,7 @@ const RationalFunction& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theRFs.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theRFs[this->theIndex];
@@ -88,7 +88,7 @@ const ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
 { if (this->type!=this->typeElementUE)
   { std::cout << "This is a programming error. ElementUniversalEnveloping_RationalFunction Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.theUEs.size || theIndex<0)
@@ -96,7 +96,7 @@ const ElementUniversalEnveloping<RationalFunction>& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.theUEs.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theUEs[this->theIndex];
@@ -107,7 +107,7 @@ const  Polynomial<Rational>& Data::GetValuE()const
 { if (this->type!=this->typePoly)
   { std::cout << "This is a programming error. Polynomial_Rational Data::GetValuE  is called on Data of type "
     << this->ElementToStringDataType()
-    << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->theIndex>=this->owner->theObjectContainer.thePolys.size || theIndex<0)
@@ -115,7 +115,7 @@ const  Polynomial<Rational>& Data::GetValuE()const
     << " A rational of index "
     << this->theIndex << " is requested but the size of the array of rationals is "
     << this->owner->theObjectContainer.thePolys.size
-    << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.thePolys[this->theIndex];
@@ -377,7 +377,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   if (!isGood)
   { if (comments!=0)
       *comments
-       << "<b>Error</b>. You requested element of index " << theDisplayIndex
+      << "<b>Error</b>. You requested element of index " << theDisplayIndex
       << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
       << ". The index of the Vector<Rational> space must be a non-zero integer "
       << " of absolute value between 1 and the number of positive roots. "
@@ -510,8 +510,8 @@ bool Data::IsInteger()const
 
 const Context& Data::GetContext()const
 { if (this->theContextIndex==-1)
-  { std::cout << "This is a programming error: the context requested of a data that has no context. Please debug "
-    << "file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+  { std::cout << "This is a programming error: the context requested of a data that has no context. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theContexts[this->theContextIndex];
@@ -585,7 +585,7 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
     default:
       std::cout << "This is a programming error: don't know how to convert element of type " << this->type
       << " (type " << this->ElementToStringDataType() << ") to string. "
-      << "Please debug file " << CGI::GetHtmlLinkFromFileName( __FILE__ ) << " line " << __LINE__;
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
       assert(false);
       return out.str();
   }
@@ -601,7 +601,9 @@ bool Data::SetError(const std::string& inputError)
 Data Data::operator/(const Data& right)const
 { Data result(*this);
   if (this->type!=this->typeRational || right.type!=this->typeRational)
-  { std::cout << "I cannot divide expression of type " << this->type << " by expression of type " << right.type;
+  { std::cout << "This is a programming error: I cannot divide expression of type " << this->type
+    << " by expression of type " << right.type
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
     return result;
   }
@@ -625,13 +627,13 @@ int Data::GetIndexAmbientSSLieAlgebra()const
 SemisimpleLieAlgebra& Data::GetAmbientSSAlgebra()const
 { if (this->theContextIndex==-1)
   { std::cout << "This is a programming error: GetAmbientSSAlgebra is called on data with empty context. "
-    << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   if (this->GetContext().indexAmbientSSalgebra==-1)
   { std::cout << "This is a programming error: GetAmbientSSAlgebra is called on data whose context does"
     << " not have an ambient Lie algebra. "
-    << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->owner->theObjectContainer.theLieAlgebras[this->GetContext().indexAmbientSSalgebra];
@@ -649,7 +651,9 @@ Data Data::operator*(const Data& right)const
 { MacroRegisterFunctionWithName("Data::operator*");
   Data result(*this);
   if (this->type!=this->typeRational || right.type!=this->typeRational)
-  { std::cout << "I cannot divide expression of type " << this->type << " by expression of type " << right.type;
+  { std::cout << "This is a programming error: I cannot divide expression of type "
+    << this->type << " by expression of type " << right.type
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
     return result;
   }
@@ -695,7 +699,8 @@ void Expression::operator=(const Expression& other)
   { if (this->theBoss==0)
     { std::cout << "This is a programming error: expressions that do not have initialized boss are not allowed to have children. "
       << "The error was noticed while trying to copy such an expression (I am not displaying the expression as its ToString() method"
-      << " cannot be computed correctly if it doesn't have a boss). " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      << " cannot be computed correctly if it doesn't have a boss). "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     IncrementRecursion recursionCounter(this->theBoss);
@@ -796,7 +801,8 @@ void Data::MakeSSAlgebra
 }
 
 std::string Data::ElementToStringDataType() const
-{ switch(this->type)
+{ MacroRegisterFunctionWithName("Data::ElementToStringDataType");
+  switch(this->type)
   { case Data::typeSSalgebra: return "SemisimpleLieAlgebra";
     case Data::typeString: return "String";
     case Data::typeRational:  return "Rational";
@@ -810,8 +816,7 @@ std::string Data::ElementToStringDataType() const
     case Data::typeVariableNonBound: return "Variable";
     default:
       std::cout << "This is a programming error: Data::ElementToStringDataType does not cover type "
-      << this->type <<  ". Please "
-      << " debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+      << this->type <<  ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
       assert(false);
       return "unknown";
   }
@@ -833,7 +838,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
       << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
       << "). For your request to succeed, the first index must be zero and the second must be an integer"
       << " between 1 and the rank of the Algebra which is " << ownerAlgebra.GetRank()
-      << ". If you want to request an element that is in a Vector<Rational> space outside of the Cartan, you should only one index."
+      << ". If you want to request an element that is in a root space outside of the Cartan, you should only one index."
       ;
     return false;
   }
@@ -1557,7 +1562,8 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   }
 ////end of rules that change this->counterInSyntacticSoup
   if (lastE.theData.IndexBoundVars==-1)
-  { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing " << this->ElementToStringSyntacticStack()
+  { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
+    << this->ElementToStringSyntacticStack()
     << " does not have properly initialized context. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
     assert(false);
   }
@@ -1857,7 +1863,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperator
   }
   if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
   { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
-    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   int indexOfAlgebra=theSSdata.theIndex;
@@ -2440,7 +2446,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   }
   if (theSSdata.theIndex>= theCommands.theObjectContainer.theLieAlgebras.size)
   { std::cout << "This is a programming error: semisimple Lie algebra referenced but not allocated. "
-    << "Please debug file " << __FILE__ << " line  " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   int indexOfAlgebra=theSSdata.theIndex;
@@ -3081,9 +3087,10 @@ bool CommandList::fSSAlgebra
 
 bool Expression::HasBoundVariables()
 { IncrementRecursion recursionCounter(this->theBoss);
+  MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
   { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
-    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if (this->theOperation==this->theBoss->opVariableBound())
@@ -3379,6 +3386,12 @@ void CommandList::initPredefinedVars()
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
+     this->AddNonBoundVarMustBeNew
+  ("fTestMonomialBasisConjecture", & this->fTestMonomialBaseConjecture, "",
+   "Tests the monomial basis conjecture from the Jackson-Milev paper. First argument gives rank bound. \
+    Second argument gives dimension bound. ",
+   "fTestMonomialBasisConjecture{}(2, 50)");
+
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
@@ -4332,8 +4345,8 @@ bool CommandList::StandardFunction
         if (!theCommands.ParseAndExtractExpressions(theArgs[i], thePattern, theSynSoup, theSynStack, &err))
         { std::cout << "This is a programming error: failed to parse the hard-coded argument list string " << theArgs[i]
           << " encoding the built-in function " << funHandle.ToString(theCommands)
-          << ".  The error message was: " << err << ". Please debug file " <<  CGI::GetHtmlLinkFromFileName(__FILE__)
-          << " line " << __LINE__ << ".";
+          << ".  The error message was: " << err
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
         std::cout << " to get: " << thePattern.ToString();
@@ -4682,9 +4695,9 @@ bool CommandList::ExpressionMatchesPattern
 { IncrementRecursion recursionCounter(this);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   assert(thePattern.theBoss==this && input.theBoss==this);
-  static int ExpressionMatchesPatternDebugCounter=-1;
-  static bool printLocalDebugInfo=false;
-  ExpressionMatchesPatternDebugCounter++;
+//  static int ExpressionMatchesPatternDebugCounter=-1;
+  const static bool printLocalDebugInfo=false;
+  //ExpressionMatchesPatternDebugCounter++;
 //  std::cout << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
   if (printLocalDebugInfo)
@@ -5693,12 +5706,12 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 SemisimpleLieAlgebra& ElementSemisimpleLieAlgebra::GetOwner()const
 { if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)
   { std::cout << "This is a programming error: a semisimple Lie algebra element has not been initialized properly. "
-    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   if ( this->indexOfOwnerAlgebra<0 || this->ownerArray->size<=this->indexOfOwnerAlgebra)
   { std::cout << "This is a programming error: a semisimple Lie algebra container has not been initialized properly. "
-    << "Please debug file " << __FILE__ << " line " << __LINE__ << ". ";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra];
@@ -5825,7 +5838,7 @@ ElementUniversalEnveloping<RationalFunction> Context::GetPolynomialMonomial
 (int theIndex, GlobalVariables& theGlobalVariables)const
 { if (this->theOwner==0)
   { std::cout << "This is a programming error: the context has not been properly initialized"
-    << ". Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   ElementUniversalEnveloping<RationalFunction> output;
@@ -5841,7 +5854,7 @@ Polynomial<Rational> Context::GetPolynomialMonomial
 (int theIndex, GlobalVariables& theGlobalVariables)const
 { if (this->theOwner==0)
   { std::cout << "This is a programming error: the context has not been properly initialized"
-    << ". Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   Polynomial<Rational> output;

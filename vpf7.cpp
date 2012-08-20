@@ -149,8 +149,8 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
         { int currentIndex=this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex=this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex])
-          { std::cout << "For some reason I am not computed. Here is me: "
-            << this->ToString();
+          { std::cout << "This is a programming error. For some reason I am not computed. Here is me: "
+            << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
           outputMultiplyLieBracketsToGetGenerator/=this->ChevalleyConstants.elements[theIndex][currentIndex];
@@ -209,6 +209,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     assert(false);
   }
   WeylGroup& theWeyl=theAlgebrA.theWeyl;
+  this->cachedPairs.Clear();
+  this->cachedTraces.SetSize(0);
 
   this->parabolicSelectionNonSelectedAreElementsLevi=selNonSelectedAreElementsLevi;
   this->parabolicSelectionSelectedAreElementsLevi=this->parabolicSelectionNonSelectedAreElementsLevi;
@@ -378,8 +380,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     *outputReport=out2.str()+monomialDetailStream.str();
     return false;
   }
-  std::cout << "<br>Cached Shapovalov products before generator action computation: "
-  << this->cachedPairs.size << ". Dimension : " << this->GetDim();
+  if (outputReport!=0)
+    out2 << "<br>Cached Shapovalov products before generator action computation: "
+    << this->cachedPairs.size << ". Dimension : " << this->GetDim();
   ElementSemisimpleLieAlgebra tempSSElt;
   if (computeSimpleGens)
     for (int k=0; k<2; k++)
@@ -416,8 +419,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
               ;
             }*/
         }
-  std::cout << "<br>Cached Shapovalov products final: "
-  << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  if (outputReport!=0)
+    out2 << "<br>Cached Shapovalov products final: "
+    << this->cachedPairs.size << "; dimension : " << this->GetDim();
   Vector<CoefficientType> currentWeightFundCoords;
   Vector<CoefficientType> hwFundCoordsTrimmedBaseField;
   hwFundCoordsTrimmedBaseField=this->theHWFundamentalCoordS;
@@ -697,7 +701,8 @@ void charSSAlgMod<CoefficientType>::MakeFromWeight
 { this->MakeZero(inputOwners, inputIndexInOwner);
   if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
   { std::cout << "This is a programming error: attempting to create a character from highest weight in simple coords "
-    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size << " coordinates) while the owner semisimple "
+    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size
+    << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << this->GetOwner().GetRank()
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
@@ -2130,7 +2135,7 @@ std::string ProjectInformation::ToString()
   << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
   << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts "
   << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
-  << "<br>9) Configure the Apache server so the adress of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
+  << "<br>9) Configure the Apache server so the address of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
   << "<br>10) The basic installation is now complete; test the calculator by running it through your web browser."
   << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp.";
   out <<	"</div>";

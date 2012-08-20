@@ -445,7 +445,7 @@ void wxParserFrame::ReadSettings()
   this->thePNGdisplay->SetSize(tempRect);
   std::string newFileName, oldfileName;
   //int framecount=0, tempInt;
-  this->theSlides.Reserve(100);
+  this->theSlides.ReservE(100);
   List<std::string>& slides=this->theSlidesFileNames;
   List<int>& ind=this->theSlideFrameIndices;
   int s=0;

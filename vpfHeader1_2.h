@@ -798,6 +798,9 @@ public:
   Vectors<Rational> RootsOfBorel;
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
+  void init()
+  { this->flagFundamentalToSimpleMatricesAreComputed=false;
+  }
   void ComputeRho(bool Recompute);
   std::string ToString();
   void MakeArbitrary(char WeylGroupLetter, int n);
@@ -808,6 +811,10 @@ public:
  ;
   int NumRootsConnectedTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
   ;
+    void GetHighestWeightsAllRepsDimLessThanOrEqualTo
+  (List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
+   )
+   ;
   void MakeAn(int n);
   void MakeEn(int n);
   void MakeBn(int n);

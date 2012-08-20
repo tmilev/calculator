@@ -3691,7 +3691,8 @@ void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRan
 }
 
 void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n)
-{ switch(WeylGroupLetter)
+{ this->init();
+  switch(WeylGroupLetter)
   { case 'A': this->MakeAn(n);
     break;
     case 'B': this->MakeBn(n);
@@ -3724,13 +3725,13 @@ void WeylGroup::MakeDn(int n)
 void WeylGroup::MakeAn(int n)
 { if (n<0)
     return;
+  this->init();
   this->WeylLetter='A';
   this->LongRootLength=2;
 //  this->ShortRootLength=0;
 //  this->ShortLongScalarProdPositive=0;
 //  this->ShortShortScalarProdPositive=0;
 //  this->LongLongScalarProdPositive=1;
-
   this->rho.SetSize(n);
   this->CartanSymmetric.init(n, n);
   this->CartanSymmetric.NullifyAll();
@@ -3766,7 +3767,7 @@ void WeylGroup::MakeF4()
 //  this->LongLongScalarProdPositive=2;
 //  this->ShortLongScalarProdPositive=2;
 //  this->ShortShortScalarProdPositive=1;
-
+  this->init();
   this->rho.SetSize(4);
   this->CartanSymmetric.init(4, 4);
   this->CartanSymmetric.elements[0][0]=4 ; this->CartanSymmetric.elements[0][1]=-2; this->CartanSymmetric.elements[0][2]=0 ; this->CartanSymmetric.elements[0][3]=0 ;
@@ -3783,6 +3784,7 @@ void WeylGroup::MakeG2()
 //  this->LongLongScalarProdPositive=3;
 //  this->ShortLongScalarProdPositive=3;
 //  this->ShortShortScalarProdPositive=1;
+  this->init();
   this->rho.SetSize(2);
   this->CartanSymmetric.init(2, 2);
   this->CartanSymmetric.elements[0][0]=2;

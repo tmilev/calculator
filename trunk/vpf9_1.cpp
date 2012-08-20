@@ -2464,8 +2464,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 { ANNOYINGSTATISTICS;
   if (&this->owner->TheObjects[this->indexInOwner]!=this)
   { std::cout << "This is a programming error: a semisimple Lie algebra cannot exist on its own, it must belong "
-    << "to some container array. " << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__)
-    << " line " << __LINE__ << ".";
+    << "to some container array. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
   this->theWeyl.ComputeRho(true);
   ANNOYINGSTATISTICS;

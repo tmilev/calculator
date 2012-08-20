@@ -2408,6 +2408,120 @@ bool CommandList::fPrintAllPartitions
   return true;
 }
 
+void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo
+  (List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
+   )
+{ if (inputDimBound<1)
+  { outputHighestWeightsFundCoords.SetSize(0);
+    return;
+  }
+  HashedList<Vector<Rational> > output;
+  Vector<Rational> current;
+  current.MakeZero(this->GetDim());
+  output.AddOnTop(current);
+  Rational theDim;
+  Rational dimBound=inputDimBound+1;
+  for (int i=0; i<output.size; i++)
+  { current=output[i];
+    for (int k=0; k<this->GetDim(); k++)
+    { current[k]+=1;
+      theDim=this->WeylDimFormulaFundamentalCoords(current);
+      std::string DebugString=current.ToString();
+      std::string DebugString2=theDim.ToString();
+      if (theDim< dimBound)
+        output.AddNoRepetition(current);
+      current[k]-=1;
+    }
+  }
+  outputHighestWeightsFundCoords=output;
+}
+
+bool CommandList::fTestMonomialBaseConjecture
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fTestMonomialBaseConjecture");
+  IncrementRecursion theRecursion(&theCommands);
+  if (theExpression.children.size!=2)
+    return theExpression.SetError("fTestMonomialBaseConjecture takes two arguments as input");
+  Expression& rankE=theExpression.children[0];
+  Expression& dimE=theExpression.children[1];
+  int rankBound=0;
+  int dimBound=0;
+  if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound))
+    return theExpression.SetError("The rank and  dim bounds must be small integers");
+  if (rankBound<2 || rankBound > 100 || dimBound <1 || dimBound > 10000)
+    return theExpression.SetError
+    ("The rank bound must be an integer between 2 and 100, and the dim bound must be an integer between 1 and 10000");
+  std::stringstream out;
+  List<int> theRanks;
+  List<char> theWeylLetters;
+  for (int i=2; i<=rankBound; i++)
+  { theRanks.AddOnTop(i);
+    theWeylLetters.AddOnTop('A');
+    theRanks.AddOnTop(i);
+    theWeylLetters.AddOnTop('B');
+    theRanks.AddOnTop(i);
+    theWeylLetters.AddOnTop('C');
+    if (i>=4)
+    { theRanks.AddOnTop(i);
+      theWeylLetters.AddOnTop('D');
+    }
+    if (i>=6 && i<=8)
+    { theRanks.AddOnTop(i);
+      theWeylLetters.AddOnTop('E');
+    }
+    if (i==4 )
+    { theRanks.AddOnTop(i);
+      theWeylLetters.AddOnTop('F');
+    }
+    if (i==2 )
+    { theRanks.AddOnTop(i);
+      theWeylLetters.AddOnTop('G');
+    }
+  }
+  List<List<Vector<Rational> > > theHighestWeights;
+  theHighestWeights.SetSize(theRanks.size);
+  ModuleSSalgebra<Rational> theMod;
+  bool foundBad=false;
+  theCommands.theObjectContainer.theLieAlgebras.SetSize(theRanks.size);
+  Selection tempSel;
+  for (int i=0; i<theRanks.size; i++)
+  { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
+    currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
+    currentAlg.indexInOwner=i;
+    currentAlg.theWeyl.MakeArbitrary(theWeylLetters[i], theRanks[i]);
+    currentAlg.ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+    currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
+    out << "<br>"
+    << " <table><tr><td  border=\"1\" colspan=\"3\">"
+    << theWeylLetters[i] << "_{" << theRanks[i] << "}"
+    << "</td></tr> <tr><td>highest weight</td><td>dim</td></tr>";
+    List<Vector<Rational> >& theHws=theHighestWeights[i];
+    tempSel.init(theRanks[i]);
+    for (int j=0; j<theHws.size; j++)
+    { Vector<Rational>& currentHW=theHws[j];
+      out << "<tr><td> " << currentHW.ToString() << "</td><td>"
+      << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
+      if (theMod.MakeFromHW
+          (theCommands.theObjectContainer.theLieAlgebras, i,
+           currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, false))
+        out << "<td>is good</td>";
+      else
+      { out << "<td><b>Is bad!!!!</b></td>";
+        foundBad=true;
+        break;
+      }
+      out <<"</tr>";
+      if (foundBad)
+        break;
+    }
+    out << "</table>";
+    if (foundBad)
+      break;
+  }
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 class DoxygenInstance
 {
   public:

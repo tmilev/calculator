@@ -1174,6 +1174,9 @@ bool fTypeHighestWeightParabolic
   static bool fAnimateLittelmannPaths
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fTestMonomialBaseConjecture
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fJacobiSymbol
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

@@ -3379,10 +3379,10 @@ void CommandList::initPredefinedVars()
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
-     this->AddNonBoundVarMustBeNew
-  ("printAllPartitions", & this->fPrintAllPartitions, "",
-   "Prints (Kostant) partitions . ",
-   "printAllPartitions{}(A_2, (2,3))");
+//     this->AddNonBoundVarMustBeNew
+//  ("printAllPartitions", & this->fPrintAllPartitions, "",
+//   "Prints (Kostant) partitions . ",
+//   "printAllPartitions{}(A_2, (2,3))");
   this->NumPredefinedVars=this->theObjectContainer.theNonBoundVars.size;
 }
 

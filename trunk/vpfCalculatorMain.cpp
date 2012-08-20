@@ -381,7 +381,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="hwv{}(A_2,(0,1), (0,0))";
 //civilizedInput="hwv{}(A_1, 1,0)";
 //  civilizedInput="hwv{}(A_2, (0,0),(0,0))";
-  civilizedInput="g:= SemisimpleLieAlgebra{}A_2; h_{{i}}:=g_{0, i}; [g_{-1},g_{1}] ";
+//  civilizedInput="g:= SemisimpleLieAlgebra{}A_2; h_{{i}}:=g_{0, i}; [g_{-1},g_{1}] ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

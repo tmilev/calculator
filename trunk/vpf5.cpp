@@ -2484,6 +2484,10 @@ bool CommandList::fTestMonomialBaseConjecture
   bool foundBad=false;
   theCommands.theObjectContainer.theLieAlgebras.SetSize(theRanks.size);
   Selection tempSel;
+  std::stringstream latexReport;
+  latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
+  latexReport << " \\begin{longtable}{|lllll|} ";
+  ProgressReport theReport(theCommands.theGlobalVariableS);
   for (int i=0; i<theRanks.size; i++)
   { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
     currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
@@ -2491,6 +2495,9 @@ bool CommandList::fTestMonomialBaseConjecture
     currentAlg.theWeyl.MakeArbitrary(theWeylLetters[i], theRanks[i]);
     currentAlg.ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
+    latexReport << "\\hline\\multicolumn{5}{c}{"
+    << "$" << currentAlg.GetLieAlgebraName(true) << "$}\\\\\\hline\n\n"
+    << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out << "<br>"
     << " <table><tr><td  border=\"1\" colspan=\"3\">"
     << theWeylLetters[i] << "_{" << theRanks[i] << "}"
@@ -2498,26 +2505,50 @@ bool CommandList::fTestMonomialBaseConjecture
     List<Vector<Rational> >& theHws=theHighestWeights[i];
     tempSel.init(theRanks[i]);
     for (int j=0; j<theHws.size; j++)
-    { Vector<Rational>& currentHW=theHws[j];
+    { std::stringstream reportStream;
+
+      Vector<Rational>& currentHW=theHws[j];
+
       out << "<tr><td> " << currentHW.ToString() << "</td><td>"
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "</td>";
+      reportStream << "Processing " << currentAlg.GetLieAlgebraName()
+      << ", index  "<< i+1 << " out of " << theRanks.size << ",  highest weight "
+      << currentHW.ToString() << ", dim: "
+      << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW)
+      << ", index " << j+1 << " out of " << theHws.size;
+      theReport.Report(reportStream.str());
+      latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
+      << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
+      int startRatOps=Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+      +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
       if (theMod.MakeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
-           currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, false))
-        out << "<td>is good</td>";
+           currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, true))
+      { out << "<td>is good</td>";
+        latexReport << theMod.NumCachedPairsBeforeSimpleGen
+        << "&" << theMod.cachedPairs.size << " & "
+        << Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+        +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications -
+        startRatOps;
+      }
       else
-      { out << "<td><b>Is bad!!!!</b></td>";
+      { latexReport << " & \\textbf{BAD}";
+        out << "<td><b>Is bad!!!!</b></td>";
+        theReport.Report("BAD BAD BAD!!!");
         foundBad=true;
         break;
       }
       out <<"</tr>";
       if (foundBad)
         break;
+      latexReport << "\\\\";
     }
     out << "</table>";
     if (foundBad)
       break;
   }
+  latexReport << "\\end{longtable} \n\n\n\n" << "\\end{document}";
+  out << "<br><br>\n\n\n\n\n" << latexReport.str();
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

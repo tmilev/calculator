@@ -35,6 +35,7 @@
 		<Unit filename="vpfHeader1_2" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfMacros.h" />
 		<Unit filename="wxDrawPanel.cpp" />
 		<Unit filename="wxDrawPanel.h" />
 		<Unit filename="wxPNGdisplay.cpp" />

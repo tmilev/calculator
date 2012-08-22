@@ -3115,6 +3115,9 @@ class MonMatrixTensor
   void MakeOne()
   { this->MakeIdSpecial();
   }
+  void Transpose()
+  { MathRoutines::swap(this->vIndex, this->dualIndex);
+  }
   void MakeZero()
   { this->IsId=false;
     this->vIndex=-1;
@@ -3213,6 +3216,17 @@ public:
       this->AddMonomial(thisCopy[i] , tempCF);
     }
   }
+  void Transpose()
+  { MatrixTensor<CoefficientType> output;
+    MonMatrixTensor theMon;
+    output.MakeZero();
+    for (int i=0; i<this->size; i++)
+    { theMon=(*this)[i];
+      theMon.Transpose();
+      output.AddMonomial(theMon, this->theCoeffs[i]);
+    }
+    *this=output;
+  }
   void SetNumVariables(int newNumVars)
   { MatrixTensor<CoefficientType> thisCopy=*this;
     this->MakeZero();
@@ -3225,13 +3239,24 @@ public:
   }
   void LieBracketOnTheLeft(const MatrixTensor<CoefficientType>& standsOnTheLeft)
   { MacroRegisterFunctionWithName("MatrixTensor<CoefficientType>::LieBracketOnTheLeft");
-    MatrixTensor<CoefficientType> m1, m2;
-    m1=standsOnTheLeft;
-    m1*=*this;
-    m2=*this;
-    m2*=standsOnTheLeft;
-    *this=m1;
-    *this-=m2;
+    MatrixTensor<CoefficientType> output;
+    MonMatrixTensor theMon;
+    output.MakeZero();
+    output.SetExpectedSize(this->size*standsOnTheLeft.size*2);
+    CoefficientType tempCF;
+    for (int i=0; i<this->size; i++)
+      for (int j=0; j<standsOnTheLeft.size; j++)
+      { tempCF=this->theCoeffs[i];
+        tempCF*=standsOnTheLeft.theCoeffs[j];
+        theMon=standsOnTheLeft[j];
+        theMon*=(*this)[i];
+        output.AddMonomial(theMon, tempCF);
+        tempCF*=-1;
+        theMon=(*this)[i];
+        theMon*=standsOnTheLeft[j];
+        output.AddMonomial(theMon, tempCF);
+      }
+    *this=output;
   }
   void GetMatrix(Matrix<CoefficientType>& output, int theDim)
   { output.init(theDim, theDim);
@@ -3253,11 +3278,11 @@ class ModuleSSalgebra
   Rational hwtaabfSimpleGensOnly
   (const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& leftMon,
    const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon,
-   GlobalVariables* theGlobalVariables=0)
+   ProgressReport* theProgressReport=0)
   ;
   Rational hwTrace
   (const Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>, TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& thePair,
-   GlobalVariables* theGlobalVariables=0)
+   ProgressReport* theProgressReport=0)
   ;
   void TestConsistency(GlobalVariables& theGlobalVariables);
 public:
@@ -3304,6 +3329,9 @@ public:
   List<Rational> cachedTraces;
 
   bool flagIsInitialized;
+  int NumCachedPairsBeforeSimpleGen;
+  int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
+
   bool operator==(const ModuleSSalgebra<CoefficientType>& other)
   { return
     this->indexAlgebra==other.indexAlgebra
@@ -3320,6 +3348,9 @@ public:
   void operator=(const ModuleSSalgebra<CoefficientType>& other)
   { if (this==&other)
       return;
+    this->NumCachedPairsBeforeSimpleGen=other.NumCachedPairsBeforeSimpleGen;
+    this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
+    =other.NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
     this->cachedPairs=other.cachedPairs;
     this->cachedTraces=other.cachedTraces;
     this->actionsGeneratorsMaT=other.actionsGeneratorsMaT;
@@ -8487,7 +8518,8 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
             this->ApplyTAA(currentPair.Object1);
             currentPair.Object2=otherWordList[k];
           }
-          theScalarProds[k]=this->hwTrace(currentPair, &theGlobalVariables);
+          ProgressReport theReport(&theGlobalVariables);
+          theScalarProds[k]=this->hwTrace(currentPair, &theReport);
         }
         this->theBilinearFormsInverted[weightLevelIndex].ActOnVectorColumn(theScalarProds);
         for (int k=0; k<theScalarProds.size; k++)

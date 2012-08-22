@@ -10,7 +10,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
 (const Pair
  <TensorMonomial<int, MathRoutines::IntUnsignIdentity>,
  TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
- & thePair, GlobalVariables* theGlobalVariables
+ & thePair, ProgressReport* theProgressReport
    )
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwTrace");
   int indexInCache=this->cachedPairs.GetIndex(thePair);
@@ -67,7 +67,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
       summand-=oldRight.Powers[i];
  //     std::cout << "<br>summand: " << summand.ToString();
       if (!summand.IsEqualToZero())
-        summand*=this->hwTrace(newPair, theGlobalVariables);
+        summand*=this->hwTrace(newPair, theProgressReport);
 //      std::cout << "<br>summand after recursion: " << summand.ToString();
       summand*=oldRight.Powers[i];
       result+=summand;
@@ -77,10 +77,10 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
   }
   this->cachedPairs.AddOnTop(thePair);
   this->cachedTraces.AddOnTop(result);
-  if (theGlobalVariables!=0)
+  if (theProgressReport!=0)
   { std::stringstream tempStream;
     tempStream << "Number of cached pairs: " << this->cachedPairs.size;
-    theGlobalVariables->MakeProgressReport(tempStream.str(), 0);
+    theProgressReport->Report(tempStream.str());
   }
 //  std::cout << "<br>Computed (" << thePair.Object1 << ", "
 //  << thePair.Object2 << ")=" << result.ToString();
@@ -104,7 +104,8 @@ void ModuleSSalgebra<CoefficientType>::ApplyTAA
 template<class CoefficientType>
 Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
   (const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon, GlobalVariables* theGlobalVariables)
+   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon,
+   ProgressReport* theProgressReport)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly");
   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
@@ -116,7 +117,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
   thePair.Object2=*right;
 //  std::cout << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
   this->ApplyTAA(thePair.Object1);
-  return this->hwTrace(thePair, theGlobalVariables);
+  return this->hwTrace(thePair, theProgressReport);
 }
 
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
@@ -163,27 +164,46 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
 template<class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::TestConsistency");
-  MatrixTensor<CoefficientType> left, right, output;
+  ProgressReport theReport(&theGlobalVariables);
+  MatrixTensor<CoefficientType> left, right, otherOutput, tempMat;
+  for (int i=0; i<this->GetOwner().GetNumGenerators(); i++)
+    for (int j=0; j<this->GetOwner().GetNumGenerators(); j++)
+    { left = this->GetActionGeneratorIndeX(i, theGlobalVariables);
+      right = this->GetActionGeneratorIndeX(j, theGlobalVariables);
+      right.LieBracketOnTheLeft(left);
+      ElementSemisimpleLieAlgebra leftGen, rightGen, outputGen;
+      leftGen.MakeGenerator(i, *this->theAlgebras, this->indexAlgebra);
+      rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
+      this->GetOwner().LieBracket(leftGen, rightGen, outputGen);
+      otherOutput.MakeZero();
+      for (int k=0; k<outputGen.size; k++)
+      { tempMat=this->GetActionGeneratorIndeX(outputGen[k].theGeneratorIndex, theGlobalVariables);
+        tempMat*=outputGen.theCoeffs[k];
+        otherOutput+=tempMat;
+      }
+      otherOutput-=right;
+      if(!otherOutput.IsEqualToZero())
+      { std::cout << "This is a programming error: something is wrong with "
+        << " the algorithm, a check fails! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      } else
+      { std::stringstream tempStream;
+        tempStream << "tested index" << i+1 << " out of "
+        << this->GetOwner().GetNumGenerators() << ", " << j+1 << " out of "
+        << this->GetOwner().GetNumGenerators();
+        theReport.Report(tempStream.str());
+      }
+    }
   for (int i=0; i<this->GetOwner().GetNumPosRoots(); i++)
-  { left = this->GetActionGeneratorIndeX
-    (this->GetOwner().GetGeneratorFromDisplayIndex(i+1) , theGlobalVariables);
-    right = this->GetActionGeneratorIndeX
-    (this->GetOwner().GetGeneratorFromDisplayIndex(-i-1) , theGlobalVariables);
-    std::stringstream tempStream1;//, tempStream2;
-    tempStream1 << "[" << left.ToString() << ", " << right.ToString() << "]= ";
+  { left=this->GetActionGeneratorIndeX(i, theGlobalVariables);
+    right=this->GetActionGeneratorIndeX(this->GetOwner().GetNumGenerators()-1-i, theGlobalVariables);
+    left.Transpose();
+    left-=right;
+    std::cout << "<br>left minus right: " << left.ToString();
+    left=this->GetActionGeneratorIndeX(i, theGlobalVariables);
     right.LieBracketOnTheLeft(left);
-    tempStream1 << right.ToString();
-    output=left;
-    output.LieBracketOnTheLeft(right);
-//    tempStream2 << "[result," << right.ToString() << "]= " << output.ToString();
-//    std::cout << "<br>" << CGI::GetHtmlMathSpanPure(tempStream1.str());
-//    << "&nbsp &nbsp" <<  CGI::GetHtmlMathSpanPure(tempStream2.str());
-    output/=2;
-    output-=left;
-    if(output.IsEqualToZero())
-      std::cout << "<br> is good. ";
-    else
-      std::cout << " <br><b>is bad.</b>";
+    std::cout << "<br> [left,right]" << right.ToString();
+
   }
 }
 
@@ -194,7 +214,7 @@ bool ModuleSSalgebra<CoefficientType>::MakeFromHW
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport, bool computeSimpleGens)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::MakeFromHW");
-
+  ProgressReport theReport(&theGlobalVariables);
   this->theAlgebras=&inputAlgebras;
   this->indexAlgebra=inputIndexAlgebra;
   SemisimpleLieAlgebra& theAlgebrA=inputAlgebras[this->indexAlgebra];
@@ -248,7 +268,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  // std::cout << "<br>simple coords no base field: " << this->theHWSimpleCoordS.ToString();
  // std::cout << "<br>parabolicSelectionNonSelectedAreElementsLevi: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
  // std::cout << "<br>parabolicSelectionSelectedAreElementsLevi: " << this->parabolicSelectionSelectedAreElementsLevi.ToString();
-
+  int startingNumRationalOperations
+  =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+  +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
   LittelmannPath startingPath;
   startingPath.MakeFromWeightInSimpleCoords(this->theHWSimpleCoordS, theWeyl);
 //  std::cout << "<br>starting littelmann path: " << startingPath.ToString() << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
@@ -383,6 +405,11 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   if (outputReport!=0)
     out2 << "<br>Cached Shapovalov products before generator action computation: "
     << this->cachedPairs.size << ". Dimension : " << this->GetDim();
+  this->NumCachedPairsBeforeSimpleGen=this->cachedPairs.size;
+  this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
+  =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+  +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications
+  -startingNumRationalOperations;
   ElementSemisimpleLieAlgebra tempSSElt;
   if (computeSimpleGens)
     for (int k=0; k<2; k++)
@@ -398,10 +425,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
           =this->GetActionGeneratorIndeX(theIndex, theGlobalVariables, theRingUnit, theRingZero);
           std::stringstream tempStream;
           tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
-          theGlobalVariables.MakeProgressReport(tempStream.str(), 2);
+          theReport.Report(tempStream.str());
           tempStream << " done!";
-          theGlobalVariables.MakeProgressReport(tempStream.str(), 2);
-
+          theReport.Report(tempStream.str());
           if (outputReport!=0)
           { if (this->GetDim() <50)
               out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
@@ -502,6 +528,8 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
     const CoefficientType& theRingUnit, const CoefficientType& theRingZero
    )
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW");
+  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
   Vector<Rational> targetWeight;
   this->theBilinearFormsAtEachWeightLevel.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
   this->theBilinearFormsInverted.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
@@ -520,18 +548,19 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
       for (int j=i; j<currentWordList.size; j++)
       { //std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ToString(&theGlobalVariables.theDefaultLieFormat);
         //std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ToString(&theGlobalVariables.theDefaultLieFormat);
-          std::stringstream tempStream;
-          tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
-          << " between indices " << i +1 << " and " << j+1 << " out of " << currentWordList.size;
+        std::stringstream tempStream;
+        tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
+        << " between indices " << i +1 << " and " << j+1 << " out of " << currentWordList.size;
         //currentWordList[i].HWTAAbilinearForm
         //(currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
         //;
         numScalarProducts++;
-        currentBF.elements[i][j]= this->hwtaabfSimpleGensOnly(currentWordListInt[i], currentWordListInt[j], &theGlobalVariables);
+        currentBF.elements[i][j]=
+        this->hwtaabfSimpleGensOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
 //        std::cout << "<br> (" << currentWordList[i].ToString()
 //        << ", " << currentWordList[j].ToString() << ")=  Old: " << currentBF.elements[i][j].ToString()
 //        << "&nbsp    New: " << tempI.ToString();
-          theGlobalVariables.MakeProgressReport(tempStream.str(), 1);
+        theReport.Report(tempStream.str());
 //        std::cout << "[" << currentWordList[i].ToString() << ", " << currentWordList[j].ToString() << "]=" <<currentBF.elements[i][j].ToString();
         if (i!=j)
           currentBF.elements[j][i]=currentBF.elements[i][j];
@@ -1100,33 +1129,36 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
 
 void LittelmannPath::Simplify()
 { Rational strech;
-  Vectors<Rational> output;
-  Vector<Rational> tempRoot1, tempRoot2;
-  output.ReservE(this->Waypoints.size);
-  for (int i=0; i<this->Waypoints.size; i++)
-  { Vector<Rational>& current=this->Waypoints[i];
-    if (output.size==0)
-      output.AddOnTop(current);
-    else if (output.size==1)
-    { if (current!=output[0])
-        output.AddOnTop(current);
-    } else if (output.size>1)
-    { Vector<Rational>& preceding =*output.LastObject();
-      Vector<Rational>& precedingThePreceding=output[output.size-2];
-      tempRoot1=preceding-precedingThePreceding;
-      tempRoot2=current-preceding;
-//      std::cout << "preceding- preceding the preceding: " << tempRoot1.ToString();
-//      std::cout << "<br>current- preceding : " << tempRoot2.ToString() << "<hr>";
-      if ( tempRoot1.IsProportionalTo(tempRoot2, strech))
-      { if (strech.IsNegative())
-          output.AddOnTop(current);
-        else
-          *output.LastObject()=current;
-      } else
-       output.AddOnTop(current);
+  Vector<Rational> d1, d2;
+  Rational d11, d12, d22;
+  int leftIndex=0;
+  int rightIndex=2;
+//  std::stringstream tempStream;
+//  tempStream <<"<br>" << this->ToString();
+  while (rightIndex<this->Waypoints.size)
+  { Vector<Rational>& left=this->Waypoints[leftIndex];
+    Vector<Rational>& middle=this->Waypoints[rightIndex-1];
+    Vector<Rational>& right=this->Waypoints[rightIndex];
+    d1=left-middle;
+    d2=right-middle;
+    d11=d1.ScalarEuclidean(d1);
+    d12=d1.ScalarEuclidean(d2);
+    d22=d2.ScalarEuclidean(d2);
+    bool isBad=((d11*d22-d12*d12).IsEqualToZero() && (d12<=0));
+    if (!isBad)
+    { leftIndex++;
+      this->Waypoints[leftIndex]=middle;
     }
+    rightIndex++;
   }
-  this->Waypoints=output;
+  leftIndex++;
+  this->Waypoints[leftIndex]=*this->Waypoints.LastObject();
+/*  if (leftIndex+1<this->Waypoints.size)
+  { this->Waypoints.SetSize(leftIndex+1);
+    tempStream << " reduced to " << this->ToString();
+    std::cout << tempStream.str();
+  }*/
+  this->Waypoints.SetSize(leftIndex+1);
 }
 
 bool LittelmannPath::MinimaAreIntegral()

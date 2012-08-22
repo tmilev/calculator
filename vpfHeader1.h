@@ -3542,6 +3542,13 @@ static void ProjectOntoHyperPlane
   void operator=(const std::string& input)
   { this->AssignString(input);
   }
+  void operator=(const Vector<CoefficientType>& other)
+  { if (&other==this)
+      return;
+    this->SetSize(other.size);
+    for(int i=0; i<other.size; i++)
+      this->TheObjects[i]=other[i];
+  }
   template <class otherType>
   void operator=(const Vector<otherType>& other)
   { this->SetSize(other.size);
@@ -6304,7 +6311,7 @@ public:
     this->Pause=true;
     this->StatusString1NeedsRefresh=false;
     this->ProgressReportStringsNeedRefresh=false;
-    this->ProgressReportStrings.SetSize(5);
+    this->ProgressReportStrings.SetSize(0);
     this->NumProcessedMonomialsCurrentFraction=0;
     this->NumProcessedMonomialsTotal=0;
     this->modifiedRoot.MakeZero(1);
@@ -6993,7 +7000,6 @@ private:
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
 public:
-  int ProgressReportDepth;
   double MaxAllowedComputationTimeInSeconds;
   FormatExpressions theDefaultFormat;
 
@@ -7092,10 +7098,6 @@ public:
       return this->getElapsedTimePrivate();
     return -1;
   }
-  inline void IncrementReadWriteDepth()
-  { this->ProgressReportDepth++;
-    this->theIndicatorVariables.ProgressReportStrings.SetSize(MathRoutines::Maximum(5,  this->ProgressReportDepth+1));
-  }
   void operator=(const GlobalVariables& other)
   { this->FeedDataToIndicatorWindowDefault=other.FeedDataToIndicatorWindowDefault;
     this->theDrawingVariables=other.theDrawingVariables;
@@ -7121,11 +7123,7 @@ public:
       this->callSystem(systemCommand);
   }
   void ClearIndicatorVars()
-  { this->ProgressReportDepth=0;
-    this->theIndicatorVariables.ProgressReportStrings.SetSize(5);
-    for (int i=0; i<this->theIndicatorVariables.ProgressReportStrings.size; i++)
-      this->theIndicatorVariables.ProgressReportStrings[i]="";
-    this->theIndicatorVariables.StatusString1="";
+  { this->theIndicatorVariables.StatusString1="";
   }
   inline void MakeProgressReport(const std::string& input, int stringIndex=0)
   { if (stringIndex>100)
@@ -7146,6 +7144,40 @@ public:
       this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
   }
   /// @endcond
+};
+
+class ProgressReport
+{
+public:
+  GlobalVariables* pointerGV;
+  int currentLevel;
+  void Report(const std::string& theReport)
+  { if (this->pointerGV==0)
+      return;
+    this->pointerGV->theIndicatorVariables.ProgressReportStrings[currentLevel]=theReport;
+    this->pointerGV->MakeReport();
+  }
+  void initFromGV(GlobalVariables* theGlobalVariables)
+  { this->pointerGV=theGlobalVariables;
+    if (this->pointerGV==0)
+      return;
+    currentLevel=this->pointerGV->theIndicatorVariables.ProgressReportStrings.size;
+    this->pointerGV->theIndicatorVariables.ProgressReportStrings.SetSize
+    (this->pointerGV->theIndicatorVariables.ProgressReportStrings.size+1);
+    *this->pointerGV->theIndicatorVariables.ProgressReportStrings.LastObject()="";
+  }
+  ProgressReport(GlobalVariables* theGlobalVariables)
+  { this->initFromGV(theGlobalVariables);
+  }
+  ProgressReport(GlobalVariables* theGlobalVariables, const std::string& theReport)
+  { this->initFromGV(theGlobalVariables);
+    this->Report(theReport);
+  }
+  ~ProgressReport()
+  { if (this->pointerGV==0)
+      return;
+    pointerGV->theIndicatorVariables.ProgressReportStrings.size--;
+  }
 };
 
 template <class CoefficientType>
@@ -7217,8 +7249,6 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   assert(tempS=="size:");
   if(tempS!="size:")
     return false;
-  if (theGlobalVariables!=0)
-    theGlobalVariables->IncrementReadWriteDepth();
   int CappedListSize = ActualListSize;
   if (UpperLimitForDebugPurposes>0 && UpperLimitForDebugPurposes<CappedListSize)
     CappedListSize=UpperLimitForDebugPurposes;
@@ -7233,8 +7263,7 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
         if (CappedListSize<ActualListSize)
           report << " capped at " << CappedListSize;
         theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-        theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]=report.str();
-        theGlobalVariables->MakeReport();
+        ProgressReport tempReport(theGlobalVariables, report.str());
       }
       theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();
     }
@@ -7242,8 +7271,6 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
   }
   bool tempBool= XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, NumWordsBeforeTag, this->GetXMLClassName());
   assert(tempBool);
-  if (theGlobalVariables!=0)
-    theGlobalVariables->ProgressReportDepth--;
   return true;
 }
 

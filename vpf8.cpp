@@ -4362,125 +4362,67 @@ void ConeLatticeAndShiftMaxComputation::WriteToFile
 
 bool ConeLatticeAndShiftMaxComputation::ReadFromFile
 (std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitDebugPurposes)
-{ int numReadWords;
+{ ProgressReport theReport(theGlobalVariables);
+  int numReadWords;
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
   std::string tempS;
   input >> tempS >> this->numNonParaM >> tempS >> this->numProcessedNonParam;
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->IncrementReadWriteDepth();
-    theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading complex starting per representative...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading complex starting per representative...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "complexStartingPerRepresentative");
   this->complexStartingPerRepresentative.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "complexStartingPerRepresentative");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading complex refined per representative...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading complex refined per representative...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "complexRefinedPerRepresentative");
   this->complexRefinedPerRepresentative.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "complexRefinedPerRepresentative");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading the max candidates...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading the max candidates...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theMaximaCandidates");
   this->theMaximaCandidates.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theMaximaCandidates");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading starting linear polys...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading starting linear polys...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "startingLPtoMaximize");
   this->startingLPtoMaximize.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "startingLPtoMaximize");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading final maxima...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading final maxima...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "finalMaxima");
   this->finalMaxima.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "finalMaxima");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading starting lattice...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading starting lattice...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theStartingLattice");
   this->theStartingLattice.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingLattice");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading final rougher lattice...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading final rougher lattice...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theFinalRougherLattice");
   this->theFinalRougherLattice.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRougherLattice");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading starting representative...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading starting representative...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theStartingRepresentative");
   this->theStartingRepresentative.ReadFromFile(input);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theStartingRepresentative");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading final representatives...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading final representatives...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theFinalRepresentatives");
   this->theFinalRepresentatives.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theFinalRepresentatives");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading cones larger dim...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading cones larger dim...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theConesLargerDim");
   this->theConesLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesLargerDim");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading cones smaller dim...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading cones smaller dim...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "theConesSmallerDim");
   this->theConesSmallerDim.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "theConesSmallerDim");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading IsInfinite array...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading IsInfinite array...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "IsInfinity");
   input >> this->IsInfinity;
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "IsInfinity");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading LPtoMaximizeLargerDim...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading LPtoMaximizeLargerDim...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "LPtoMaximizeLargerDim");
   this->LPtoMaximizeLargerDim.ReadFromFile(input, theGlobalVariables, UpperLimitDebugPurposes);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeLargerDim");
-
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading LPtoMaximizeSmallerDim...";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading LPtoMaximizeSmallerDim...");
   XMLRoutines::ReadThroughFirstOpenTag(input, "LPtoMaximizeSmallerDim");
   this->LPtoMaximizeSmallerDim.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, "LPtoMaximizeSmallerDim");
-
-  if (theGlobalVariables!=0)
-    theGlobalVariables->ProgressReportDepth--;
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, this->GetXMLClassName());
   assert(numReadWords==0);
   return true;
@@ -4596,6 +4538,7 @@ bool Lattice::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariab
 bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   (std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS;
+  ProgressReport theReport(theGlobalVariables);
   input >> tempS >> this->NumProcessedConesParam;
   input >> tempS >> this->NumProcessedExtremaEqualOne;
   input >> tempS;
@@ -4615,24 +4558,14 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   this->preferredBasisChangeInversE.ReadFromFile(input);
   this->theExtendedIntegralLatticeMatForM.ReadFromFile(input, theGlobalVariables);
   if (theGlobalVariables!=0)
-    theGlobalVariables->IncrementReadWriteDepth();
-  if (theGlobalVariables!=0)
 {} //   this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
   else
   { GlobalVariables tempGlobalVars;
 {}//    this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
   }
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.StatusString1="";
-    theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-    theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading param subchambers cone form... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading param subchambers cone form... ");
   this->theMaxComputation.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading more pieces of data... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading more pieces of data... ");
   this->GmodKnegativeWeightS.ReadFromFile(input, theGlobalVariables);
   this->GmodKNegWeightsBasisChanged.ReadFromFile(input, theGlobalVariables);
   this->theLinearOperators.ReadFromFile(input, theGlobalVariables);
@@ -4644,37 +4577,21 @@ bool GeneralizedVermaModuleCharacters::ReadFromFileNoComputationPhase
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, "QPsSubbed");
   this->theQPsSubstituted.ReadFromFile(input, theGlobalVariables);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "QPsSubbed");
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading multiplicities... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading multiplicities... ");
   XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, "theMultiplicities");
   this->theMultiplicities.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   XMLRoutines::ReadEverythingPassedTagOpenUntilTagClose(input, numReadWords, "theMultiplicities");
   this->theCoeffs.ReadFromFile(input);
   this->theTranslationS.ReadFromFile(input, theGlobalVariables);
   this->theTranslationsProjectedBasisChanged.ReadFromFile(input, theGlobalVariables);
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading partial fractions... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading partial fractions... ");
 //  this->thePfs.ReadFromFile(input, theGlobalVariables);
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading projectivized param complex... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading projectivized param complex... ");
   this->projectivizedParamComplex.ReadFromFile(input, theGlobalVariables, -1);
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading the complex... ";
-    theGlobalVariables->MakeReport();
-  }
+  theReport.Report("Loading the complex... ");
   this->smallerAlgebraChamber.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
   this->projectivizedChambeR.ReadFromFile(input, theGlobalVariables, this->UpperLimitChambersForDebugPurposes);
-  if (theGlobalVariables!=0)
-  { theGlobalVariables->theIndicatorVariables.ProgressReportStrings[theGlobalVariables->ProgressReportDepth]="Loading complete... ";
-    theGlobalVariables->MakeReport();
-    theGlobalVariables->ProgressReportDepth--;
-  }
+  theReport.Report("Loading complete... ");
   return true;
 }
 

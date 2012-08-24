@@ -207,6 +207,27 @@ void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGloba
   }
 }
 
+template<class Element>
+bool Matrix<Element>::IsPositiveDefinite()
+{ if (this->NumRows!=this->NumCols)
+  { std::cout << "This is a programming error: attempting to evaluate whether a matrix is positive definite, but"
+    << " the matrix is not square. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Element det;
+  Matrix<Element> tempMat;
+  for (int i=0; i< this->NumRows; i++)
+  { tempMat.init(i+1, i+1);
+    for (int j=0; j<tempMat.NumCols; j++)
+      for (int k=0; k<tempMat.NumCols; k++)
+        tempMat.elements[j][k]=this->elements[j][k];
+    det=tempMat.GetDeterminant();
+    if (det<=0)
+      return false;
+  }
+  return true;
+}
+
 template<class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::MakeFromHW
 (List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
@@ -384,7 +405,20 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
           << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
         }
         monomialDetailStream << "; Matrix of Shapovalov form associated to current weight level: <br> "
-        << theBF.ToString(true, false) << " corresonding inverted matrix:<br>";
+        << theBF.ToString(true, false);
+        if (!theBF.IsPositiveDefinite())
+        { monomialDetailStream << "<b>Is not positive definite!</b>";
+          this->flagConjectureCholds=false;
+        }
+        else
+          monomialDetailStream << " (positive definite)";
+        if (!theBF.IsNonNegativeAllEntries())
+        { monomialDetailStream << "<b>Has negative entries</b>";
+          this->flagConjectureBholds=false;
+        }
+        else
+          monomialDetailStream << " (positive entries only )";
+        monomialDetailStream << " corresonding inverted matrix:<br>";
       }
       if (theBFinverted.NumRows>0)
       { if (outputReport!=0)
@@ -537,6 +571,8 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
   this->actionsGeneratorS.SetSize(this->GetOwner().GetNumGenerators());
   this->actionsGeneratorsMaT.SetSize(this->GetOwner().GetNumGenerators());
   int numScalarProducts=0;
+  this->flagConjectureBholds=true;
+  this->flagConjectureCholds=true;
   for (int l=0; l<this->theGeneratingWordsGrouppedByWeight.size; l++)
   { Matrix<CoefficientType>& currentBF=this->theBilinearFormsAtEachWeightLevel[l];
     List<MonomialUniversalEnveloping<CoefficientType> >& currentWordList=
@@ -572,6 +608,10 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
     if (!tempRat.IsEqualToZero())
     { this->theBilinearFormsInverted[l]=currentBF;
       this->theBilinearFormsInverted[l].Invert(theRingUnit, theRingZero);
+      if (!currentBF.IsPositiveDefinite())
+        this->flagConjectureCholds=false;
+      if (!currentBF.IsNonNegativeAllEntries())
+        this->flagConjectureBholds=false;
     } else
       this->theBilinearFormsInverted[l].init(0,0);
   }
@@ -1108,20 +1148,20 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
     Rational x= (theMin+1-s2)/(s1-s2);
     this->Waypoints[succeedingIndex]= (r1-r2)*x+ r2;
   }
-  Vectors<Rational> differences;
-  differences.SetSize(succeedingIndex-minIndex);
-  Rational distMax=0;
+//  Vectors<Rational> differences;
+  Vector<Rational> diff, oldWayPoint;
+  oldWayPoint=this->Waypoints[minIndex];
   Rational currentDist=0;
-  for (int i=0; i<differences.size; i++)
-  { differences[i]=this->Waypoints[i+minIndex+1]-this->Waypoints[i+minIndex];
-    currentDist+=theWeyl.RootScalarCartanRoot(differences[i], alphaScaled);
-    if (currentDist>distMax)
-    { theWeyl.SimpleReflection(indexAlpha, differences[i], false, false);
-      currentDist=distMax;
+  for (int i=0; i<succeedingIndex-minIndex; i++)
+  { diff=this->Waypoints[i+minIndex+1]-oldWayPoint;
+    currentDist+=theWeyl.RootScalarCartanRoot(diff, alphaScaled);
+    if (currentDist>0)
+    { theWeyl.SimpleReflection(indexAlpha, diff, false, false);
+      currentDist=0;
     }
+    oldWayPoint=this->Waypoints[i+minIndex+1];
+    this->Waypoints[i+minIndex+1]=this->Waypoints[i+minIndex]+diff;
   }
-  for (int i=0; i<differences.size; i++)
-    this->Waypoints[i+minIndex+1]=this->Waypoints[i+minIndex]+differences[i];
   for (int i=succeedingIndex+1; i<this->Waypoints.size; i++)
     this->Waypoints[i]-=alpha;
   this->Simplify();

@@ -2488,6 +2488,8 @@ bool CommandList::fTestMonomialBaseConjecture
   latexReport << "\\documentclass{article} <br>\\usepackage{longtable}\\begin{document}<br>\n\n\n\n\n";
   latexReport << " \\begin{longtable}{|lllll|} ";
   ProgressReport theReport(theCommands.theGlobalVariableS);
+  bool ConjectureBholds=true;
+  bool ConjectureCholds=true;
   for (int i=0; i<theRanks.size; i++)
   { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
     currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
@@ -2525,6 +2527,14 @@ bool CommandList::fTestMonomialBaseConjecture
           (theCommands.theObjectContainer.theLieAlgebras, i,
            currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, true))
       { out << "<td>is good</td>";
+        if (!theMod.flagConjectureBholds)
+        { out << "<td><b>conjecture B fails!</b></td>";
+          ConjectureBholds=false;
+        }
+        if (!theMod.flagConjectureCholds)
+        { out << "<td><b>conjecture C holds</b></td>";
+          ConjectureCholds=false;
+        }
         latexReport << theMod.NumCachedPairsBeforeSimpleGen
         << "&" << theMod.cachedPairs.size << " & "
         << Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
@@ -2547,7 +2557,16 @@ bool CommandList::fTestMonomialBaseConjecture
     if (foundBad)
       break;
   }
-  latexReport << "\\end{longtable} \n\n\n\n" << "\\end{document}";
+  latexReport << "\\end{longtable} \n\n\n\n";
+  if (ConjectureBholds)
+    latexReport << " Conjecture B holds for all computed entries.";
+  else
+    latexReport << "Conjecture B fails.";
+  if (ConjectureCholds)
+    latexReport << "Conjecture C holds for all computed entries.";
+  else
+    latexReport << "Conjecture C fails.";
+  latexReport << "\\end{document}";
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;

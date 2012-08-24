@@ -3195,7 +3195,20 @@ public:
       this->AddMonomial(theMon, 1);
     }
   }
-  void operator=(Matrix<CoefficientType>& other)
+  int GetMaxNumColsNumRows()
+  { int result=0;
+    for (int i=0; i<this->size; i++)
+    { result=MathRoutines::Maximum(result, (*this)[i].dualIndex);
+      result=MathRoutines::Maximum(result, (*this)[i].vIndex);
+    }
+    return result;
+  }
+  bool IsPositiveDefinite()
+  { Matrix<CoefficientType> other;
+    this->GetMatrix(other, this->GetMaxNumColsNumRows());
+    return other.IsPositiveDefinite();
+  }
+  void operator=(const Matrix<CoefficientType>& other)
   { this->MakeZero();
     MonMatrixTensor theMon;
     for (int i=0; i<other.NumRows; i++)
@@ -3329,6 +3342,8 @@ public:
   List<Rational> cachedTraces;
 
   bool flagIsInitialized;
+  bool flagConjectureBholds;
+  bool flagConjectureCholds;
   int NumCachedPairsBeforeSimpleGen;
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
 
@@ -3379,6 +3394,8 @@ public:
     this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
     this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
     this->flagIsInitialized=other.flagIsInitialized;
+    this->flagConjectureBholds=other.flagConjectureBholds;
+    this->flagConjectureCholds=other.flagConjectureCholds;
     this->highestWeightVectorNotation=other.highestWeightVectorNotation;
 //    std::cout << "<hr><hr><b>Copying from:</b> " << other.ToString()
 //    << "<b>Copy result:</b>" << this->ToString() << "<br><b>End of copy</b><hr><hr>";

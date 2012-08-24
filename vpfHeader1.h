@@ -1347,6 +1347,14 @@ public:
   void init(int r, int c);
   void ReleaseMemory();
   void Resize(int r, int c, bool PreserveValues) {this->Resize(r, c, PreserveValues, 0);}
+  bool IsPositiveDefinite();
+  bool IsNonNegativeAllEntries()
+  { for (int i=0; i<this->NumRows; i++)
+      for (int j=0; j<this->NumCols; j++)
+        if (this->elements[i][j]<0)
+          return false;
+    return true;
+  }
   void Resize
   (int r, int c, bool PreserveValues, const Element* TheRingZero)
   ;
@@ -5371,6 +5379,11 @@ public:
 //  }
   bool operator<(const RationalFunction& other)const
   { return other>*this;
+  }
+  bool operator<=(const RationalFunction& other)const
+  { if (*this==other)
+      return true;
+    return other>*this;
   }
   bool operator>(const RationalFunction& other)const
   { if (this->expressionType<other.expressionType)

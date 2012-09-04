@@ -1819,7 +1819,7 @@ bool CommandList::fDecomposeCharGenVerma
   MacroRegisterFunctionWithName("CommandList::fDecomposeCharGenVerma");
   Context theContext;
   Vector<RationalFunction> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
-  Selection parSel;
+  Selection parSel, invertedParSel;
   if (!theCommands.fGetTypeHighestWeightParabolic
   (theCommands, inputIndexBoundVars, theExpression, comments,
    theHWfundcoords, parSel, &theContext))
@@ -1830,8 +1830,8 @@ bool CommandList::fDecomposeCharGenVerma
   std::stringstream out;
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
-  out << "Highest weight: " << theHWfundcoords.ToString(&theFormat)
-  << "Parabolic selection: " << parSel.ToString();
+  out << "<br>Highest weight: " << theHWfundcoords.ToString(&theFormat)
+  << "<br>Parabolic selection: " << parSel.ToString();
   theHWFundCoordsFDPart=theHWfundcoords;
   for (int i=0; i<parSel.CardinalitySelection; i++)
     theHWFundCoordsFDPart[parSel.elements[i]]=0;
@@ -1847,19 +1847,30 @@ bool CommandList::fDecomposeCharGenVerma
   theHWSimpCoordsFDPart=theSSlieAlg.theWeyl.GetSimpleCoordinatesFromFundamental
   (theHWFundCoordsFDPart);
   theHWSimpCoordsFDPart+=theSSlieAlg.theWeyl.rho;
-  ElementWeylGroup raisingElt;
-  theSSlieAlg.theWeyl.RaiseToDominantWeight
-  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
+//  ElementWeylGroup raisingElt;
+//  theSSlieAlg.theWeyl.RaiseToDominantWeight
+//  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   ReflectionSubgroupWeylGroup theSub;
   if (! theSub.MakeParabolicFromSelectionSimpleRoots
   (theSSlieAlg.theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
     return theExpression.SetError
     ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).");
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
-  Vectors<RationalFunction> theOrbit;
-  Vector<RationalFunction> theHWPlusRhoSimpCoords;
-
-
+  List<ElementWeylGroup> theWeylElements;
+  theWeylElements.ReservE(theSub.size);
+  ElementWeylGroup tempElt;
+  out << "<br>Weyl group of Levi part follows. "
+  << "<br><table>";
+  invertedParSel=parSel;
+  invertedParSel.InvertSelection();
+  for (int i=0; i<theSub.size; i++)
+  { ElementWeylGroup& currentElt=theSub[i];
+    tempElt.SetSize(0);
+    for(int j=0; j<currentElt.size; j++)
+      tempElt.AddOnTop(invertedParSel.elements[currentElt[j]]);
+    out << "<tr><td>" << theSub[i].ToString() << "</td><td>" << tempElt.ToString() << "</td></tr>";
+  }
+  out << "</table>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

@@ -1037,7 +1037,14 @@ static bool EvaluateDereferenceOneArgument
   static bool EvaluateIf
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fGetMatrix
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Matrix<Expression>& output)
+   ;
   static bool fMatrix
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fDet
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger
@@ -1057,6 +1064,9 @@ static bool EvaluateDereferenceOneArgument
   static bool fPrintB3G2branchingTableInit
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
    branchingData& theG2B3data, int& desiredHeight, Context& outputContext)
+  ;
+  static bool fDecomposeCharGenVerma
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintB3G2branchingTable
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
@@ -1093,10 +1103,10 @@ static bool EvaluateDereferenceOneArgument
 { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
 }
 template<class CoefficientType>
-bool fTypeHighestWeightParabolic
+bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments,
- Vector<CoefficientType>& outputWeightHWcoords, Selection& outputInducingSel,
+ Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Context* outputContext=0)
  ;
  static bool fParabolicWeylGroups

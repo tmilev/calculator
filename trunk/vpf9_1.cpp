@@ -444,7 +444,9 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   //theGlobalVariables.theIndicatorVariables.StatusString1=tempS;
   //theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   //theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-  outputSubgroup.ComputeSubGroupFromGeneratingReflections(selectedRootsBasisCentralizer, outputSubgroup.ExternalAutomorphisms, theGlobalVariables, this->UpperLimitNumElementsWeyl, false);
+  outputSubgroup.ComputeSubGroupFromGeneratingReflections
+  (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables,
+   this->UpperLimitNumElementsWeyl, false);
   outputSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
   this->CentralizerIsomorphisms.ReservE(this->size);
   this->CentralizerOuterIsomorphisms.ReservE(this->size);
@@ -1882,7 +1884,8 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   }
   ReflectionSubgroupWeylGroup tempSubgroup;
   tempSubgroup.AmbientWeyl=(owner.AmbientWeyl);
-  tempSubgroup.ComputeSubGroupFromGeneratingReflections(tempRoots, tempSubgroup.ExternalAutomorphisms, theGlobalVariables, 0, true);
+  tempSubgroup.ComputeSubGroupFromGeneratingReflections
+  (&tempRoots, &tempSubgroup.ExternalAutomorphisms, &theGlobalVariables, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
   tempRoots.CopyFromBase(tempSubgroup.RootSubsystem);
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);

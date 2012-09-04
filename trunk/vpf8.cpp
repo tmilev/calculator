@@ -422,7 +422,7 @@ void WeylGroup::GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix
   this->GetMatrixOfElement(this->TheObjects[theIndex], outputMatrix);
 }
 
-void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
+bool ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 { Vectors<Rational> selectedRoots;
   selectedRoots.ReservE
@@ -435,7 +435,9 @@ void ReflectionSubgroupWeylGroup::MakeParabolicFromSelectionSimpleRoots
       selectedRoots.LastObject()->MakeEi(inputWeyl.GetDim(), i);
     }
   List<Vectors<Rational> > tempRootsCol;
-  this->ComputeSubGroupFromGeneratingReflections(selectedRoots, tempRootsCol, theGlobalVariables, UpperLimitNumElements, true);
+  return
+  this->ComputeSubGroupFromGeneratingReflections
+  (&selectedRoots, &tempRootsCol, &theGlobalVariables, UpperLimitNumElements, true);
 }
 
 void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix)

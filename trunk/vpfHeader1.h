@@ -4173,9 +4173,19 @@ public:
   List<CoefficientType> Powers;
   std::string ToString
   (FormatExpressions* theFormat=0)const
-  ;
+  { std::stringstream tempStream;
+    tempStream << *this;
+    return tempStream.str();
+  }
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
+  }
+  void operator=(List<int>& other)
+  { this->generatorsIndices.ReservE(other.size);
+    this->Powers.ReservE(other.size);
+    this->MakeConst();
+    for (int i=0; i<other.size; i++)
+      this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
   }
   void operator=(const TensorMonomial<CoefficientType, inputHashFunction>& other)
   { this->generatorsIndices=(other.generatorsIndices);
@@ -4571,8 +4581,8 @@ public:
   inline void operator/=(const otherType& other)
   { if (other==0)
     { std::cout << "This is a programming error. A MonmialCollection/= division by zero has been requested: division by zero error should"
-      << " be handled before calling operator/=. Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
-      << " line " << __LINE__;
+      << " be handled before calling operator/=. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
       assert(false);
       return;
     }
@@ -4770,6 +4780,12 @@ public:
     whichConstant=this->theCoeffs[0];
     return theMon.IsAConstant();
   }
+  bool IsNegative()const
+  { CoefficientType tempC;
+    if(!this->IsAConstant(tempC))
+      return false;
+    return tempC.IsNegative();
+  }
   bool IsAConstant()const
   { CoefficientType tempC;
     return this->IsAConstant(tempC);
@@ -4901,6 +4917,11 @@ public:
   }
   void operator=(const CoefficientType& other)
   { this->MakeConst(other);
+  }
+  void operator=(int other)
+  { CoefficientType tempCF;
+    tempCF=other;
+    this->MakeConst(tempCF);
   }
   template <class otherType>
   void AssignOtherType(const Polynomial<otherType>& other)
@@ -5303,6 +5324,11 @@ public:
     { case RationalFunction::typeRational: output.MakeConst(this->NumVars, this->ratValue); return;
       default: output=this->Numerator.GetElementConst(); return;
     }
+  }
+  bool IsNegative()
+  { if (this->expressionType==this->typeRational)
+      return this->ratValue.IsNegative();
+    return false;
   }
   void GetDenominator(Polynomial<Rational>& output)
   { switch(this->expressionType)
@@ -6266,7 +6292,6 @@ public:
   std::string ToString
   (int NumSimpleGens, FormatExpressions* theFormat=0, List<int>* DisplayIndicesOfSimpleRoots=0)
   ;
-  void ComputeDebugString();
   unsigned int HashFunction() const;
   static inline unsigned int HashFunction(const ElementWeylGroup& input)
   { return input.HashFunction();

@@ -1065,6 +1065,7 @@ void Expression::MakeProducT
 void Expression::MakeFunction
   (CommandList& owner, int inputIndexBoundVars, const Expression& theFunction, const Expression& theArgument)
 { this->MakeXOX(owner, inputIndexBoundVars, owner.opApplyFunction(), theFunction, theArgument);
+  this->format=this->formatFunctionUseUnderscore;
 }
 
 void Expression::MakeXOX
@@ -1763,17 +1764,16 @@ bool CommandList::fHWTAABF
 }
 
 template<class CoefficientType>
-bool CommandList::fTypeHighestWeightParabolic
+bool CommandList::fGetTypeHighestWeightParabolic
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments,
- Vector<CoefficientType>& outputWeightHWcoords, Selection& outputInducingSel,
+ Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Context* outputContext)
-{ if (theExpression.children.size!=3)
+{ if (theExpression.children.size!=3 && theExpression.children.size!=2 )
     return theExpression.SetError
-    ("Function  TypeHighestWeightParabolic is expected to have three arguments: SS algebra type, List{}, List{}. ");
+    ("Function  TypeHighestWeightParabolic is expected to have two or three arguments: SS algebra type, highest weight, [optional] parabolic selection. ");
   Expression& leftE=theExpression.children[0];
   Expression& middleE=theExpression.children[1];
-  Expression& rightE=theExpression.children[2];
   if (!CommandList::CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, leftE, comments))
     return theExpression.SetError("Failed to generate semisimple Lie algebra.");
   if (!leftE.EvaluatesToAtom())
@@ -1785,21 +1785,82 @@ bool CommandList::fTypeHighestWeightParabolic
   MemorySaving<Context> tempContext;
   Context emptyContext;
   Context& theContext= outputContext!=0 ? *outputContext : tempContext.GetElement();
-  if (!middleE.GetVector<RationalFunction>
-      (outputWeightHWcoords, theContext, theSSalgebra.GetRank(), &CommandList::fPolynomial, comments))
+  if (!middleE.GetVector<CoefficientType>
+      (outputWeightHWFundcoords, theContext, theSSalgebra.GetRank(), &CommandList::fPolynomial,
+       comments))
   { std::stringstream tempStream;
     tempStream << "Failed to convert the second argument of HWV to a list of " << theSSalgebra.GetRank()
       << " polynomials. The second argument you gave is " << middleE.ToString() << ".";
     return theExpression.SetError(tempStream.str());
   }
-  Vector<Rational> parabolicSel;
-  if (!rightE.GetVector<Rational>(parabolicSel, emptyContext, theSSalgebra.GetRank(), 0, comments))
-  { std::stringstream tempStream;
-    tempStream << "Failed to convert the third argument of HWV to a list of " << theSSalgebra.GetRank()
-      << " rationals. The third argument you gave is " << rightE.ToString() << ".";
-    return theExpression.SetError(tempStream.str());
+  if (theExpression.children.size==3)
+  { Vector<Rational> parabolicSel;
+    Expression& rightE=theExpression.children[2];
+    if (!rightE.GetVector<Rational>(parabolicSel, emptyContext, theSSalgebra.GetRank(), 0, comments))
+    { std::stringstream tempStream;
+      tempStream << "Failed to convert the third argument of HWV to a list of " << theSSalgebra.GetRank()
+        << " rationals. The third argument you gave is " << rightE.ToString() << ".";
+      return theExpression.SetError(tempStream.str());
+    }
+    outputInducingSel=parabolicSel;
+  } else
+  { outputInducingSel.init(theSSalgebra.GetRank());
+    for (int i=0; i<outputWeightHWFundcoords.size; i++)
+      if (!outputWeightHWFundcoords[i].IsSmallInteger())
+        outputInducingSel.AddSelectionAppendNewIndex(i);
   }
-  outputInducingSel=parabolicSel;
+  return true;
+}
+
+bool CommandList::fDecomposeCharGenVerma
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
+{ IncrementRecursion theRecursionIncrementer(&theCommands);
+  MacroRegisterFunctionWithName("CommandList::fDecomposeCharGenVerma");
+  Context theContext;
+  Vector<RationalFunction> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
+  Selection parSel;
+  if (!theCommands.fGetTypeHighestWeightParabolic
+  (theCommands, inputIndexBoundVars, theExpression, comments,
+   theHWfundcoords, parSel, &theContext))
+   return false;
+  if (theExpression.errorString!="")
+    return true;
+  SemisimpleLieAlgebra& theSSlieAlg=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  std::stringstream out;
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+  out << "Highest weight: " << theHWfundcoords.ToString(&theFormat)
+  << "Parabolic selection: " << parSel.ToString();
+  theHWFundCoordsFDPart=theHWfundcoords;
+  for (int i=0; i<parSel.CardinalitySelection; i++)
+    theHWFundCoordsFDPart[parSel.elements[i]]=0;
+  KLpolys theKLpolys;
+  if (!theKLpolys.ComputeKLPolys(&theSSlieAlg.theWeyl))
+    return theExpression.SetError("failed to generate Kazhdan-Lusztig polynomials (output too large?)");
+//  Vectors<Polynomial<Rational> > tempVects;
+//  tempVects.AddOnTop(theSSlieAlg.theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords) );
+//  HashedList<Vector<Polynomial<Rational> > > theOrbit;
+//  if (!theSSlieAlg.theWeyl.GenerateOrbit(tempVects, true, theOrbit, false, -1, 0, 1000))
+//    out << "Error: failed to generate highest weight \rho-modified orbit (too large?)";
+  WeylGroup& theWeyl=theSSlieAlg.theWeyl;
+  theHWSimpCoordsFDPart=theSSlieAlg.theWeyl.GetSimpleCoordinatesFromFundamental
+  (theHWFundCoordsFDPart);
+  theHWSimpCoordsFDPart+=theSSlieAlg.theWeyl.rho;
+  ElementWeylGroup raisingElt;
+  theSSlieAlg.theWeyl.RaiseToDominantWeight
+  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
+  ReflectionSubgroupWeylGroup theSub;
+  if (! theSub.MakeParabolicFromSelectionSimpleRoots
+  (theSSlieAlg.theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
+    return theExpression.SetError
+    ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).");
+  theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
+  Vectors<RationalFunction> theOrbit;
+  Vector<RationalFunction> theHWPlusRhoSimpCoords;
+
+
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
 
@@ -1808,7 +1869,7 @@ bool CommandList::fHWV
 { Selection selectionParSel;
   Vector<RationalFunction> theHWfundcoords;
   Context hwContext(theCommands);
-  if(!theCommands.fTypeHighestWeightParabolic
+  if(!theCommands.fGetTypeHighestWeightParabolic
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, selectionParSel,  &hwContext)  )
     return theExpression.SetError("Failed to extract highest weight vector data");
   else
@@ -2667,6 +2728,13 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   return true;
 }
 
+bool CommandList::fGetMatrix
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+ Matrix<Expression>& output)
+{
+  return false;
+}
+
 bool CommandList::fMatrix
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.children.size!=3)
@@ -3391,7 +3459,15 @@ void CommandList::initPredefinedVars()
    "Tests the monomial basis conjecture from the Jackson-Milev paper. First argument gives rank bound. \
     Second argument gives dimension bound. ",
    "fTestMonomialBasisConjecture{}(2, 50)");
-
+  this->AddNonBoundVarMustBeNew
+  ("DecomposeCharGenVermaToIrreps", & this->fDecomposeCharGenVerma, "",
+   "<b>This is an experiment; I have no mathematical proof that this function works. \
+   If you are seeing this function then I forgot to comment it out before updating the calculator. \
+   Please don't use this function.</b> Decomposes the \
+   character of a generalized Verma module as a sum of characters of irreducible highest weight \
+    modules.\
+    First argument = type. Second argument = highest weight. Non-integer entries give parabolic selection. ",
+   "DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))");
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

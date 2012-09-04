@@ -519,7 +519,10 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
 { std::stringstream out;
   List<LittelmannPath> theOrbit;
   List<List<int> > theGens;
-  this->GenerateOrbit(theOrbit, theGens, theGlobalVariables, 1000, 0);
+  if (!
+  this->GenerateOrbit(theOrbit, theGens, theGlobalVariables, 1000, 0))
+  { out  << "<b>Not all paths were genenerated, only the first " << theOrbit.size << "</b>";
+  }
   AnimationBuffer theBuffer;
 //  int theDim=this->owner->GetDim();
   Vectors<double> coxPlane;
@@ -550,8 +553,52 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   out << "<br>Here are all Littelmann paths drawn simultaneously. ";
   out << tempDV2.GetHtmlFromDrawOperationsCreateDivWithUniqueName(this->owner->GetDim());
   out << "Littelmann paths in simple coordinates given in the order in which they are generated (" << theOrbit.size << " total):<br>";
+  out << "<table>";
   for (int i=0; i<theOrbit.size; i++)
-    out << theOrbit[i].ToString() << "&nbsp&nbsp" << this->ElementToStringOperatorSequenceStartingOnMe(theGens [i]) << "<br>";
+  { LittelmannPath& currentPath=theOrbit[i];
+    out << "<tr><td>" << currentPath.ToString() << "</td>"
+    << "<td>" << this->ElementToStringOperatorSequenceStartingOnMe(theGens[i]) << "</td></tr>";
+  }
+  out << "</table>";
+  LittelmannPath lastPath=theOrbit[0];
+  LittelmannPath tempPath;
+  TensorMonomial<int, MathRoutines::IntUnsignIdentity> tempMon;
+  tempMon=*theGens.LastObject();
+  tempMon.generatorsIndices.ReverseOrderElements();
+  tempMon.Powers.ReverseOrderElements();
+  out << "<table>";
+  for (int i=tempMon.generatorsIndices.size-1; i>=1; i--)
+  { int curInd=-tempMon.generatorsIndices[i]-1;
+    int nextInd=-tempMon.generatorsIndices[i-1] -1;
+    for (int k=0; k<tempMon.Powers[i]; k++)
+      lastPath.ActByFalpha(curInd);
+    tempPath=lastPath;
+    tempPath.ActByEalpha(nextInd);
+    out << "<tr><td> e_" << nextInd+1 << "("
+    << lastPath.ToString() << ") =</td>" <<"<td>" << tempPath.ToString() << "</td>";
+/*    for (int j=0; j<this->owner->GetDim(); j++)
+    { tempPath=lastPath;
+      tempPath.ActByEalpha(j);
+      out << "<td> e_" << j+1 << "("
+      << lastPath.ToString() << ")=</td>" <<"<td>" << tempPath.ToString() << "</td>";
+    }*/
+    out << "</tr>";
+  }
+  out << "</table>";
+  out << "<table>";
+  for (int i=0; i<theGens.size; i++)
+  { //tempPath.MakeFromWeightInSimpleCoords(*theOrbit[i].Waypoints.LastObject(), *this->owner);
+    //tempPath=*theOrbit.LastObject();
+    tempPath=theOrbit[i];
+    tempMon=theGens[i];
+    tempMon.generatorsIndices.ReverseOrderElements();
+    tempMon.Powers.ReverseOrderElements();
+    bool isadapted=tempPath.IsAdaptedString(tempMon);
+    out << "<tr><td>" << tempMon.ToString() << "</td><td>"
+    << (isadapted ? "is adapted to" : "is not adapted to" )
+    <<  "</td><td>" << tempPath.ToString() << "</td></tr>";
+  }
+  out << "</table>";
   return out.str();
 }
 
@@ -2241,7 +2288,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   Selection parabolicSel;
   Vector<RationalFunction> theHWfundcoords, tempRoot, theHWsimplecoords;
   Context hwContext(theCommands);
-  if(!theCommands.fTypeHighestWeightParabolic
+  if(!theCommands.fGetTypeHighestWeightParabolic
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, parabolicSel, &hwContext)  )
     return theExpression.SetError("Failed to extract highest weight vector data");
   else
@@ -2523,6 +2570,7 @@ bool CommandList::fTestMonomialBaseConjecture
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
       int startRatOps=Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
       +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
+//      goto tmp;
       if (theMod.MakeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
            currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, true))
@@ -2535,7 +2583,11 @@ bool CommandList::fTestMonomialBaseConjecture
         { out << "<td><b>conjecture C holds</b></td>";
           ConjectureCholds=false;
         }
-        latexReport << theMod.NumCachedPairsBeforeSimpleGen
+        if (theMod.NumCachedPairsBeforeSimpleGen>=theMod.MaxNumCachedPairs)
+          latexReport << "$ \\geq$ " << theMod.MaxNumCachedPairs;
+        else
+          latexReport << theMod.NumCachedPairsBeforeSimpleGen;
+        latexReport
         << "&" << theMod.cachedPairs.size << " & "
         << Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
         +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications -
@@ -2548,6 +2600,7 @@ bool CommandList::fTestMonomialBaseConjecture
         foundBad=true;
         break;
       }
+//      tmp:
       out <<"</tr>";
       if (foundBad)
         break;

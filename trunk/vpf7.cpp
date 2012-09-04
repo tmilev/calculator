@@ -45,7 +45,11 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
 //  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
 //    std::cout << "<hr><hr>";
 //  std::cout << "<br>Computing (" << thePair.Object1 << ", " << thePair.Object2 << ")";
-
+//  if (this->cachedPairs.size<this->MaxNumCachedPairs)
+//  { indexInCache=this->cachedPairs.size;
+//    this->cachedPairs.AddOnTop(thePair);
+//    this->cachedTraces.AddOnTop(0);
+//  }
   for (int i=0; i<oldRight.generatorsIndices.size; i++)
   { if (oldRight.generatorsIndices[i]==theIndexMinus)
     { summand=0;
@@ -75,13 +79,20 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
     Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
     Accum.Powers.AddOnTop(oldRight.Powers[i]);
   }
-  this->cachedPairs.AddOnTop(thePair);
-  this->cachedTraces.AddOnTop(result);
-  if (theProgressReport!=0)
+//  if (indexInCache!=-1)
+//    this->cachedTraces[indexInCache]=result;
+//  if (ProjectInformation::GetMainProjectInfo().CustomStackTrace.size<35)
+  if (this->cachedPairs.size<this->MaxNumCachedPairs)
+  { this->cachedPairs.AddOnTop(thePair);
+    this->cachedTraces.AddOnTop(result);
+  }
+  if (theProgressReport!=0 && this->cachedPairs.size<500000)
   { std::stringstream tempStream;
-    tempStream << "Number of cached pairs: " << this->cachedPairs.size;
+    tempStream << "Number of cached pairs: " << this->cachedPairs.size
+    << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
     theProgressReport->Report(tempStream.str());
   }
+
 //  std::cout << "<br>Computed (" << thePair.Object1 << ", "
 //  << thePair.Object2 << ")=" << result.ToString();
 //  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
@@ -117,7 +128,13 @@ Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
   thePair.Object2=*right;
 //  std::cout << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
   this->ApplyTAA(thePair.Object1);
-  return this->hwTrace(thePair, theProgressReport);
+  Rational result= this->hwTrace(thePair, theProgressReport);
+  if (theProgressReport!=0)
+  { std::stringstream tempStream;
+    tempStream << this->cachedPairs.size << " total cached pairs";
+    theProgressReport->Report(tempStream.str());
+  }
+  return result;
 }
 
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
@@ -335,7 +352,6 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   }
   MonomialUniversalEnveloping<CoefficientType> currentNonReducedElement;
   TensorMonomial<int, MathRoutines::IntUnsignIdentity> tempMonInt;
-
   for (int i=0; i<thePaths.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
     currentNonReducedElement.MakeConst(*this->theAlgebras, this->indexAlgebra);
@@ -369,7 +385,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->theGeneratingWordsNonReduced.size=0;
   this->theGeneratingWordsNonReducedWeights.SetSize(0);
   this->theGeneratingWordsNonReducedWeights.ReservE(thePaths.size);
-  int wordCounter=-1;
+  HashedList<ElementWeylGroup> theWeylElts;
+  ElementWeylGroup tempWelt;
+//  int wordCounter=-1;
+  monomialDetailStream << "<table>";
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
     this->theGeneratingWordsGrouppedByWeight[i];
@@ -378,16 +397,23 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     currentList.QuickSortDescending();
     currentListInt.QuickSortDescending();
     for (int j=0; j<currentList.size; j++)
-    { wordCounter++;
+    { //wordCounter++;
+      tempWelt.SetSize(currentListInt[j].generatorsIndices.size);
+      for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
+      { tempWelt[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+      }
       this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
       this->theGeneratingWordsNonReducedInt.AddOnTop(currentListInt[j]);
       this->theGeneratingWordsNonReducedWeights.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
       if (outputReport!=0)
-      { monomialDetailStream << "<br>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
-        << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda";
+      { monomialDetailStream << "<tr><td>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
+        << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda</td><td>"
+        << tempWelt.ToString() << "</td> </tr>";
       }
     }
   }
+  monomialDetailStream << "</table>";
+
   this->IntermediateStepForMakeFromHW
   (this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
@@ -585,7 +611,8 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
       { //std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ToString(&theGlobalVariables.theDefaultLieFormat);
         //std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ToString(&theGlobalVariables.theDefaultLieFormat);
         std::stringstream tempStream;
-        tempStream << " Computing Shapovalov form layer " << l << " out of " << this->theGeneratingWordsGrouppedByWeight.size
+        tempStream << " Computing Shapovalov form layer " << l << " out of "
+        << this->theGeneratingWordsGrouppedByWeight.size
         << " between indices " << i +1 << " and " << j+1 << " out of " << currentWordList.size;
         //currentWordList[i].HWTAAbilinearForm
         //(currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
@@ -619,63 +646,6 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
 //  { std::cout << "<br>(" << this->cachedPairs[i].Object1 << ", " << this->cachedPairs[i].Object2
 //    << ") = " << this->cachedTraces[i];
 //  }
-}
-
-template <>
-void WeylGroup::RaiseToDominantWeight(Vector<Rational>& theWeight, int* sign, bool* stabilizerFound)
-{ if (sign!=0)
-    *sign=1;
-  if (stabilizerFound!=0)
-    *stabilizerFound=false;
-  Rational theScalarProd;
-  int theDim=this->GetDim();
-  for (bool found = true; found; )
-  { found=false;
-    for (int i=0; i<theDim; i++)
-    { theScalarProd=this->GetScalarProdSimpleRoot(theWeight, i);
-      if (theScalarProd.IsNegative())
-      { found=true;
-        theScalarProd*=2;
-        theScalarProd/=this->CartanSymmetric.elements[i][i];
-        theWeight[i]-=theScalarProd;
-        if (sign!=0)
-          *sign*=-1;
-      }
-      if (stabilizerFound!=0)
-        if (theScalarProd.IsEqualToZero())
-          *stabilizerFound=true;
-    }
-  }
-//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
-}
-
-template <>
-void WeylGroup::RaiseToDominantWeight(Vector<RationalFunction>& theWeight, int* sign, bool* stabilizerFound)
-{ if (sign!=0)
-    *sign=1;
-  if (stabilizerFound!=0)
-    *stabilizerFound=false;
-  RationalFunction theScalarProd;
-  int theDim=this->GetDim();
-  for (bool found = true; found; )
-  { found=false;
-    for (int i=0; i<theDim; i++)
-    { theScalarProd=this->GetScalarProdSimpleRoot(theWeight, i);
-      if (theScalarProd.expressionType==theScalarProd.typeRational)
-        if (theScalarProd.ratValue.IsNegative())
-        { found=true;
-          theScalarProd*=2;
-          theScalarProd/=this->CartanSymmetric.elements[i][i];
-          theWeight[i]-=theScalarProd;
-          if (sign!=0)
-            *sign*=-1;
-        }
-      if (stabilizerFound!=0)
-        if (theScalarProd.IsEqualToZero())
-          *stabilizerFound=true;
-    }
-  }
-//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 
 std::string ReflectionSubgroupWeylGroup::ElementToStringCosetGraph()
@@ -1292,7 +1262,8 @@ int ParserNode::EvaluateAllLittelmannPaths
     << " (the hard-coded limit for a path's orbit size is " << 1000 << ")</b>";
   out << "; Weyl dimension formula: "
   << theWeyl.WeylDimFormulaSimpleCoords(*thePath.Waypoints.LastObject()).ToString();
-  out << ".<br> A printout of the paths follows. The waypoints of the Littelmann paths are given in simple coordinates.";
+  out << ".<br> A printout of the paths follows. The waypoints of the "
+  << "Littelmann paths are given in simple coordinates.";
   for (int i=0; i<allPaths.size; i++)
   { out << "\n<br>\n" << allPaths[i].ToString();
     out << " corresponds to sequence "
@@ -1388,7 +1359,6 @@ bool LittelmannPath::GenerateOrbit
         { found=false;
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
-            //hashedOutput.AddNoRepetition(currentPath);
             if (hashedOutput.AddNoRepetition(currentPath))
             { found=true;
               currentSequence.AddOnTop(-theIndex-1);
@@ -1405,23 +1375,12 @@ bool LittelmannPath::GenerateOrbit
 }
 
 std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
-(List<int> & input)
-{ std::stringstream out;
-  int currentCount=0;
-  for (int i=input.size-1; i>=0; i--)
-  { int displayIndexNext=0;
-    if (i>0)
-      displayIndexNext=(input[i-1]<0) ? input[i-1]: input[i]+1;
-    int displayIndexCurrent= (input[i]<0) ? input[i] : input[i]+1;
-    currentCount++;
-    if (displayIndexNext!=displayIndexCurrent)
-    { out << "g_{" << displayIndexCurrent << "}";
-      if (currentCount>1)
-        out << "^{" << currentCount << "}";
-      currentCount=0;
-    }
-  }
-  return out.str();
+(List<int>& input)
+{ TensorMonomial<Rational> tempMon;
+  tempMon=input;
+  tempMon.generatorsIndices.ReverseOrderElements();
+  tempMon.Powers.ReverseOrderElements();
+  return tempMon.ToString();
 }
 
 int ParserNode::EvaluateRepresentationFromHWFundCoords
@@ -2348,7 +2307,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
 void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariables& theGlobalVariables)
 { List<Vectors<Rational> > emptyList;
   this->WeylFDSmallAsSubInLarge.ComputeSubGroupFromGeneratingReflections
-  (this->generatorsSmallSub, emptyList, theGlobalVariables, 1000, true);
+  (&this->generatorsSmallSub, &emptyList, &theGlobalVariables, 1000, true);
   this->WeylFDSmall.MakeParabolicFromSelectionSimpleRoots
   (this->WeylFDSmall.AmbientWeyl, this->selSmallParSel, theGlobalVariables, 1000);
   this->WeylFD.MakeParabolicFromSelectionSimpleRoots
@@ -2380,4 +2339,21 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
   if (!found)
     formulaStream1 << "id";
   return formulaStream1.str();
+}
+
+bool LittelmannPath::IsAdaptedString
+  (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theString)
+{ LittelmannPath tempPath=*this;
+  LittelmannPath tempPath2;
+  for (int i=0; i<theString.generatorsIndices.size; i++)
+  { for (int k=0; k<theString.Powers[i]; k++)
+      tempPath.ActByEalpha(-theString.generatorsIndices[i]-1);
+    if (tempPath.IsEqualToZero())
+      return false;
+    tempPath2=tempPath;
+    tempPath2.ActByEalpha(-theString.generatorsIndices[i]-1);
+    if (!tempPath2.IsEqualToZero())
+      return false;
+  }
+  return true;
 }

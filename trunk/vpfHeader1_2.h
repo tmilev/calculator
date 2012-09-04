@@ -891,7 +891,8 @@ public:
   ;
   template <class CoefficientType>
   void RaiseToDominantWeight
-  (Vector<CoefficientType>& theWeight, int* sign=0, bool* stabilizerFound=0)
+  (Vector<CoefficientType>& theWeight, int* sign=0, bool* stabilizerFound=0,
+   ElementWeylGroup* raisingElt=0)
   ;
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
@@ -1122,11 +1123,11 @@ public:
  List<CoefficientType>& outputMultsSimpleCoordS, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
   ;
-  void MakeParabolicFromSelectionSimpleRoots
+  bool MakeParabolicFromSelectionSimpleRoots
 (WeylGroup& inputWeyl, const Selection& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
   ;
   void MakeParabolicFromSelectionSimpleRoots
-(WeylGroup& inputWeyl, const Vector<Rational> & ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
+(WeylGroup& inputWeyl, const Vector<Rational>& ZeroesMeanSimpleRootSpaceIsInParabolic, GlobalVariables& theGlobalVariables, int UpperLimitNumElements)
 ;
   bool GetAlLDominantWeightsHWFDIMwithRespectToAmbientAlgebra
   (Vector<Rational>& highestWeightSimpleCoords, HashedList<Vector<Rational> >& outputWeightsSimpleCoords,
@@ -1158,8 +1159,9 @@ public:
   void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
   template <class CoefficientType>
   bool GenerateOrbitReturnFalseIfTruncated(const Vector<CoefficientType>& input, Vectors<CoefficientType>& outputOrbit, int UpperLimitNumElements);
-  void ComputeSubGroupFromGeneratingReflections
-  (Vectors<Rational>& inputGenerators, List<Vectors<Rational> > & inputExternalAutos, GlobalVariables& theGlobalVariables, int UpperLimitNumElements,
+  bool ComputeSubGroupFromGeneratingReflections
+  (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos,
+   GlobalVariables* theGlobalVariables, int UpperLimitNumElements,
    bool recomputeAmbientRho);
   void ComputeRootSubsystem();
   template <class CoefficientType>
@@ -2781,6 +2783,9 @@ public:
     for (int i=0; i<other.Waypoints.size; i++)
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
   }
+  bool IsAdaptedString
+  (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theString)
+  ;
   std::string ElementToStringIndicesToCalculatorOutput
 (LittelmannPath& inputStartingPath, List<int> & input)
   ;
@@ -3346,6 +3351,7 @@ public:
   bool flagConjectureCholds;
   int NumCachedPairsBeforeSimpleGen;
   int NumRationalMultiplicationsAndAdditionsBeforeSimpleGen;
+  int MaxNumCachedPairs;
 
   bool operator==(const ModuleSSalgebra<CoefficientType>& other)
   { return
@@ -3510,7 +3516,7 @@ bool GetActionMonGenVermaModuleAsDiffOperator
 (MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
  ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
    ;
-   ModuleSSalgebra() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false)
+   ModuleSSalgebra() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
    {}
 };
 
@@ -5327,7 +5333,7 @@ public:
   void ComputeKLcoefficients();
   int ChamberIndicatorToIndex(Vector<Rational>& ChamberIndicator);
   std::string RPolysToString(FormatExpressions* theFormat=0);
-  void ComputeKLPolys(WeylGroup* theWeylGroup);
+  bool ComputeKLPolys(WeylGroup* theWeylGroup);
   void ComputeRPolys();
   int ComputeProductfromSimpleReflectionsActionList(int x, int y);
   void WriteKLCoeffsToFile(std::fstream& output, List<int>& KLcoeff, int TopIndex);
@@ -9003,5 +9009,39 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
       this->Powers.size--;
     }
   }
+}
+
+template <class CoefficientType>
+void WeylGroup::RaiseToDominantWeight
+(Vector<CoefficientType>& theWeight, int* sign, bool* stabilizerFound,
+  ElementWeylGroup* raisingElt)
+{ if (sign!=0)
+    *sign=1;
+  if (stabilizerFound!=0)
+    *stabilizerFound=false;
+  CoefficientType theScalarProd;
+  int theDim=this->GetDim();
+  if (raisingElt!=0)
+    raisingElt->SetSize(0);
+  for (bool found = true; found; )
+  { found=false;
+    for (int i=0; i<theDim; i++)
+    { theScalarProd=this->GetScalarProdSimpleRoot(theWeight, i);
+      if (theScalarProd.IsNegative())
+      { found=true;
+        theScalarProd*=2;
+        theScalarProd/=this->CartanSymmetric.elements[i][i];
+        theWeight[i]-=theScalarProd;
+        if (sign!=0)
+          *sign*=-1;
+        if (raisingElt!=0)
+          raisingElt->AddOnTop(i);
+      }
+      if (stabilizerFound!=0)
+        if (theScalarProd.IsEqualToZero())
+          *stabilizerFound=true;
+    }
+  }
+//  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
 }
 #endif

@@ -19,18 +19,24 @@ void ReflectionSubgroupWeylGroup::ReadFromFile(std::fstream& input, GlobalVariab
   this->ExternalAutomorphisms.ReadFromFile(input, theGlobalVariables);
 }
 
-void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
-(Vectors<Rational>& inputGenerators, List<Vectors<Rational> > & inputExternalAutos, GlobalVariables& theGlobalVariables,
+bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
+(Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos,
+ GlobalVariables* theGlobalVariables,
  int UpperLimitNumElements, bool recomputeAmbientRho)
-{ HashedList<Vector<Rational> >& orbitRho = theGlobalVariables.hashedRootsComputeSubGroupFromGeneratingReflections.GetElement();
+{ MemorySaving< HashedList<Vector<Rational> > > bufferOrbit;
+  HashedList<Vector<Rational> >& orbitRho = (theGlobalVariables==0) ? bufferOrbit.GetElement() :
+  theGlobalVariables->hashedRootsComputeSubGroupFromGeneratingReflections.GetElement();
   this->truncated=false;
   this->Clear();
   orbitRho.Clear();
   if (this->AmbientWeyl.CartanSymmetric.NumRows<1)
-    return;
+    return false;
   if (recomputeAmbientRho)
     this->AmbientWeyl.ComputeRho(false);
-  this->simpleGenerators.CopyFromBase(inputGenerators);
+  if (inputGenerators!=0)
+    this->simpleGenerators.CopyFromBase(*inputGenerators);
+  if (inputExternalAutos!=0)
+    this->ExternalAutomorphisms=*inputExternalAutos;
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
   this->ComputeRootSubsystem();
   ElementWeylGroup tempEW;
@@ -56,8 +62,8 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
         tempEW.PopLastObject();
       }
     }
-    for (int j=1; j<inputExternalAutos.size; j++)
-    { orbitRho[i].GetCoordsInBasiS(inputExternalAutos[j], currentRoot);
+    for (int j=1; j<this->ExternalAutomorphisms.size; j++)
+    { orbitRho[i].GetCoordsInBasiS(this->ExternalAutomorphisms[j], currentRoot);
       if (!orbitRho.Contains(currentRoot))
       { orbitRho.AddOnTop(currentRoot);
         tempEW.AddOnTop(j+this->simpleGenerators.size);
@@ -68,7 +74,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
     if (UpperLimitNumElements>0)
       if (this->size>=UpperLimitNumElements)
       { this->truncated=true;
-        return;
+        return false;
       }
 /*    if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
@@ -78,6 +84,7 @@ void ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
       theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
     }*/
   }
+  return true;
 }
 
 void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right, Polynomial<Rational>& OrderedOutput)
@@ -1263,7 +1270,7 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   for (int i=fromIndex; i<NumToProcess; i++)
   { rootSubalgebra& current= this->TheObjects[i];
     ReflectionSubgroupWeylGroup& theOuterIsos= this->CentralizerOuterIsomorphisms.TheObjects[i];
-    theOuterIsos.ComputeSubGroupFromGeneratingReflections(emptyRoots, theOuterIsos.ExternalAutomorphisms, theGlobalVariables, 0, true);
+    theOuterIsos.ComputeSubGroupFromGeneratingReflections(&emptyRoots, &theOuterIsos.ExternalAutomorphisms, &theGlobalVariables, 0, true);
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";

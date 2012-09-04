@@ -384,6 +384,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="g:= SemisimpleLieAlgebra{}A_2; h_{{i}}:=g_{0, i}; [g_{-1},g_{1}] ";
 //  civilizedInput="fTestMonomialBasisConjecture{}(2, 50)";
 //civilizedInput="hwv{} (G_2, (2,1),(0,0)) ;";
+//civilizedInput="DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))";
+  //civilizedInput="WeylOrbitSimpleCoords{}(B_2, (y, y));";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -4408,7 +4408,7 @@ void KLpolys::initFromWeyl(WeylGroup* theWeylGroup)
   this->initTheMults();
 }
 
-void KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup)
+bool KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup)
 { MacroRegisterFunctionWithName("KLpolys::ComputeKLPolys");
   theWeylGroup->ComputeWeylGroup(-1);
   this->initFromWeyl(theWeylGroup);
@@ -4433,6 +4433,7 @@ void KLpolys::ComputeKLPolys(WeylGroup* theWeylGroup)
     }
   }
   this->ComputeKLcoefficients();
+  return true;
 }
 
 void KLpolys::ComputeRPolys()

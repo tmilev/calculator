@@ -2306,8 +2306,9 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   filename2=theCommands.PhysicalNameDefaultOutput+"2";
   CGI::OpenFileCreateIfNotPresent(outputFile, fileName+".tex", false, true, false);
   CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
-  theSubgroup.MakeParabolicFromSelectionSimpleRoots
-  (theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500);
+  if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots
+      (theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
+    return theExpression.SetError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit");
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;

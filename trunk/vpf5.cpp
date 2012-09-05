@@ -1249,7 +1249,8 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
    List<ElementUniversalEnveloping<CoefficientType> >* outputEigenVectors,
    Vectors<CoefficientType>* outputWeightsFundCoords, Vectors<CoefficientType>* outputEigenSpace,
    std::stringstream* comments, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ if (this->theChaR.size!=1)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg");
+  if (this->theChaR.size!=1)
   { if (comments!=0)
     { std::stringstream out;
       out << "I have been instructed only to split modules that are irreducible over the ambient Lie algebra";
@@ -1333,7 +1334,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   Vector<CoefficientType> currentWeight;
   Vector<CoefficientType> hwFundCoordsNilPart;
   hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
-  hwFundCoordsNilPart-=this->theHWFundamentalCoordS;
+  hwFundCoordsNilPart-=this->theHWFDpartFundamentalCoordS;
   ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
   if (outputEigenVectors!=0)
     outputEigenVectors->SetSize(0);
@@ -1351,7 +1352,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
         lastNonZeroIndex=i;
       }
     currentWeight=theHmm.theRange().theWeyl.GetFundamentalCoordinatesFromSimple
-    (this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex]);//<-implicit type conversion here
+    (this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]);//<-implicit type conversion here
     currentWeight+=hwFundCoordsNilPart;
     readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
     << "$&$" << currentVect.ToStringLetterFormat("m") << "$";

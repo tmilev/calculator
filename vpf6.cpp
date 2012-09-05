@@ -3377,7 +3377,7 @@ void CommandList::initPredefinedVars()
    coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic\
     subalgebra of B_3. ",
-   "fSplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
+   "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
   this->AddNonBoundVarMustBeNew
   ("SplitFDpartB3overG2", &this->fSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of \
@@ -3386,7 +3386,7 @@ void CommandList::initPredefinedVars()
    coordinates with respect to so(7). \
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic \
    subalgebra of B_3. ",
-   "fSplitFDpartB3overG2{}(x_1,1,0)");
+   "SplitFDpartB3overG2{}(x_1,1,0)");
   this->AddNonBoundVarMustBeNew
   ("PrintB3G2branchingTableCharsOnly", &this->fPrintB3G2branchingTableCharsOnly, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the \
@@ -3396,13 +3396,13 @@ void CommandList::initPredefinedVars()
    in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is \
    not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
-   "fPrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); fPrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
+   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); fPrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
   ("PrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
-   "fPrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))");
+   "PrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
   ("SplitFDTensorGenericGeneralizedVerma", &this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",

@@ -3312,7 +3312,7 @@ public:
   HashedListSpecialized
   <TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
   theGeneratingWordsNonReducedInt;
-  Vectors<Rational> theGeneratingWordsNonReducedWeights;
+  Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
 
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
   List<List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
@@ -3325,11 +3325,11 @@ public:
 
   Vector<CoefficientType> theHWDualCoordsBaseFielD;
   Vector<CoefficientType> theHWSimpleCoordSBaseField;
-
-  Vector<Rational> theHWDualCoords;
-  Vector<Rational> theHWSimpleCoordS;
-  Vector<Rational> theHWFundamentalCoordS;
   Vector<CoefficientType> theHWFundamentalCoordsBaseField;
+
+  Vector<Rational> theHWFDpartDualCoords;
+  Vector<Rational> theHWFDpartSimpleCoordS;
+  Vector<Rational> theHWFDpartFundamentalCoordS;
 
 //  List<List<Matrix<CoefficientType> > >
   HashedList<Vector<Rational> > theModuleWeightsSimpleCoords;
@@ -3359,10 +3359,17 @@ public:
     && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
   }
-  bool GeneratorIndexHasFreeAction(int index)const
-  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(index);
+  bool HasFreeAction(int generatorIndex)const
+  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(generatorIndex);
     for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
       if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsNegative())
+        return true;
+    return false;
+  }
+  bool HasZeroActionFDpart(int generatorIndex)const
+  { Vector<Rational> theWeight= this->GetOwner().GetWeightOfGenerator(generatorIndex);
+    for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
+      if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]].IsPositive())
         return true;
     return false;
   }
@@ -3381,18 +3388,18 @@ public:
     this->indexAlgebra=other.indexAlgebra;
     this->theGeneratingWordsNonReduced= other.theGeneratingWordsNonReduced;
     this->theGeneratingWordsNonReducedInt=other.theGeneratingWordsNonReducedInt;
-    this->theGeneratingWordsNonReducedWeights=other.theGeneratingWordsNonReducedWeights;
+    this->theGeneratingWordsWeightsPlusWeightFDpart=other.theGeneratingWordsWeightsPlusWeightFDpart;
     this->theGeneratingWordsGrouppedByWeight= other.theGeneratingWordsGrouppedByWeight;
     this->theGeneratingWordsIntGrouppedByWeight=other.theGeneratingWordsIntGrouppedByWeight;
 //    this->theSimpleGens=other.theSimpleGens;
     this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
     this->theBilinearFormsInverted=other.theBilinearFormsInverted;
 //    this->weightsSimpleGens=other.weightsSimpleGens;
+    this->theHWFDpartDualCoords = other.theHWFDpartDualCoords;
+    this->theHWFDpartSimpleCoordS=other.theHWFDpartSimpleCoordS;
+    this->theHWFDpartFundamentalCoordS=other.theHWFDpartFundamentalCoordS;
     this->theHWDualCoordsBaseFielD=other.theHWDualCoordsBaseFielD;
-    this->theHWDualCoords = other.theHWDualCoords;
-    this->theHWSimpleCoordS=other.theHWSimpleCoordS;
     this->theHWSimpleCoordSBaseField=other.theHWSimpleCoordSBaseField;
-    this->theHWFundamentalCoordS=other.theHWFundamentalCoordS;
     this->theHWFundamentalCoordsBaseField= other.theHWFundamentalCoordsBaseField;
     this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
     this->theCharOverH=other.theCharOverH;
@@ -7198,7 +7205,8 @@ template <class CoefficientType>
 void MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLefT
 (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementSumGeneralizedVermas<CoefficientType>& output,
 GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ MonomialGeneralizedVerma<CoefficientType> currentMon;
+{ MacroRegisterFunctionWithName("MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLefT");
+  MonomialGeneralizedVerma<CoefficientType> currentMon;
   output.MakeZero(*this->owneR);
   ElementSumGeneralizedVermas<CoefficientType> buffer;
   for (int j=0; j<theUE.size; j++)
@@ -7229,7 +7237,8 @@ template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
+{ MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft");
+  ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
 //std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
   Accum.MakeZero(*this->owneR);
   for (int i=0; i<this->size; i++)
@@ -7249,7 +7258,8 @@ template <class CoefficientType>
 void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 (ElementSumGeneralizedVermas<CoefficientType>& output, GlobalVariables& theGlobalVariables,
   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
-{ //std::cout << "<hr><hr>Reducing  " << this->ToString();
+{ MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
+  //std::cout << "<hr><hr>Reducing  " << this->ToString();
   ModuleSSalgebra<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
   output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
@@ -7301,7 +7311,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       if (!currentMon.Powers[k].IsSmallInteger(&thePower))
         break;
       int theIndex=currentMon.generatorsIndices[k];
-      if (theMod.GeneratorIndexHasFreeAction(theIndex))
+      if (theMod.HasFreeAction(theIndex))
         break;
       tempMat2=tempMat1;
       tempMat1=theMod.GetActionGeneratorIndeX
@@ -7317,9 +7327,14 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     newMon.owneR=this->owneR;
     newMon.indexInOwner=this->indexInOwner;
     for (int i=0; i<tempMat1.size; i++)
+    { int otherIndex=-1;
       if (tempMat1[i].dualIndex==this->indexFDVector)
+        otherIndex=tempMat1[i].vIndex;
+      if (tempMat1[i].IsId)
+        otherIndex=this->indexFDVector;
+      if (otherIndex!=-1)
       { newMon.theMonCoeffOne=currentMon;
-        newMon.indexFDVector=tempMat1[i].vIndex;
+        newMon.indexFDVector=otherIndex;
 //        std::cout << "<br>adding to " << outputAccum.ToString() << " the monomial " << newMon.ToString() << " with coefficient "
 //        << tempMat1.elements[i][this->indexFDVector].ToString() << " to obtain ";
         theCF=theUEelt.theCoeffs[l];
@@ -7327,6 +7342,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
         output.AddMonomial(newMon, theCF);
 //        std::cout << outputAccum.ToString();
       }
+    }
   }
 //  std::cout << "<br>Matrix of the action: " << tempMat1.ToString();
 //  std::cout << "<br> Final output: " << output.ToString();
@@ -7346,28 +7362,47 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
     return this->actionsGeneratorsMaT[generatorIndex];
   }
   this->ComputedGeneratorActions.AddSelectionAppendNewIndex(generatorIndex);
-  Vector<Rational> theWeight = this->GetOwner().GetWeightOfGenerator(generatorIndex);
-  for (int i=0; i<this->parabolicSelectionNonSelectedAreElementsLevi.CardinalitySelection; i++)
-    if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]!=0)
-    { if (theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[i]]<0)
-      { std::cout << "This is a programming error, due to a change in implementation of "
-        << " the generalized Verma module class. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-        this->actionsGeneratorsMaT[generatorIndex].MakeZero();
-        //std::cout << "<br>generator index " << generatorIndex << " has free action. ";
-        return this->actionsGeneratorsMaT[generatorIndex];
-      } else
-      { this->actionsGeneratorsMaT[generatorIndex].MakeZero();
-        //std::cout << "<br>generator index " << generatorIndex << " has ZERO action. ";
-        return this->actionsGeneratorsMaT[generatorIndex];
-      }
-    }
+  if (this->HasFreeAction(generatorIndex))
+  { std::cout << "This is a programming error, due to a change in implementation of "
+    << " the generalized Verma module class. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    this->actionsGeneratorsMaT[generatorIndex].MakeZero();
+    //std::cout << "<br>generator index " << generatorIndex << " has free action. ";
+    return this->actionsGeneratorsMaT[generatorIndex];
+  }
+  if (this->HasZeroActionFDpart(generatorIndex))
+  { this->actionsGeneratorsMaT[generatorIndex].MakeZero();
+    //std::cout << "<br>generator index " << generatorIndex << " has ZERO action. ";
+    return this->actionsGeneratorsMaT[generatorIndex];
+  }
   if (this->GetOwner().IsASimpleGenerator(generatorIndex))
     return this->GetActionSimpleGeneratorIndex(generatorIndex, theGlobalVariables, theRingUnit, theRingZero);
+  MatrixTensor<CoefficientType>& output=this->actionsGeneratorsMaT[generatorIndex];
+  if (this->GetOwner().IsGeneratorFromCartan(generatorIndex))
+  { output.MakeZero();
+    MonMatrixTensor theMon;
+    Vector<CoefficientType> weightH;
+    CoefficientType tempCF, hwCFshift;
+    weightH.MakeEi(this->GetOwner().GetRank(), generatorIndex-this->GetOwner().GetNumPosRoots());
+    hwCFshift=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
+    hwCFshift-=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
+    std::cout << "<br>the h: " << weightH.ToString() << "<br> the hw: " << this->theHWSimpleCoordSBaseField.ToString()
+    << "<br>hwCfshift: " << hwCFshift.ToString() << "  <br>the generator equals: ";
+    for (int i=0; i<this->theGeneratingWordsNonReduced.size; i++)
+    { Vector<Rational>& theWeight=this->theGeneratingWordsWeightsPlusWeightFDpart[i];
+      tempCF=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, theWeight);
+      tempCF+=hwCFshift;
+      theMon.IsId=false;
+      theMon.vIndex=i;
+      theMon.dualIndex=i;
+      output.AddMonomial(theMon, tempCF);
+//      std::cout << " + " << tempCF.ToString() << "*" << theMon.ToString();
+    }
+    return output;
+  }
   List<int> adActions;
   Rational theCoeff;
   this->GetOwner().GetChevalleyGeneratorAsLieBracketsSimpleGens(generatorIndex, adActions, theCoeff);
-  MatrixTensor<CoefficientType>& output=this->actionsGeneratorsMaT[generatorIndex];
   MatrixTensor<CoefficientType> tempO;
   output=this->GetActionGeneratorIndeX(*adActions.LastObject(), theGlobalVariables);
   for (int i=adActions.size-2; i>=0; i--)
@@ -7494,7 +7529,13 @@ CoefficientType WeylGroup::WeylDimFormulaFundamentalCoords(Vector<CoefficientTyp
 
 template<class leftType, class rightType>
 void WeylGroup::RootScalarCartanRoot(const Vector<leftType>& r1, const Vector<rightType>& r2, leftType& output)const
-{ output=r1[0].GetZero();
+{ if (r1.size!=r2.size || r1.size!=this->GetDim())
+  { std::cout << "This is a programming error: attempting to get the scalar products of two weights "
+    << " that are not of the same dimension as the rank of the Weyl group. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output=r1[0].GetZero();
   leftType buffer;
   for (int i=0; i<this->CartanSymmetric.NumRows; i++)
     for (int j=0; j<this->CartanSymmetric.NumCols; j++)
@@ -8146,7 +8187,7 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
   Vector<CoefficientType> currentWeight;
   Vector<CoefficientType> hwFundCoordsNilPart;
   hwFundCoordsNilPart=this->theHWFundamentalCoordsBaseField;
-  hwFundCoordsNilPart-=this->theHWFundamentalCoordS;
+  hwFundCoordsNilPart-=this->theHWFDpartFundamentalCoordS;
   ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
@@ -8162,7 +8203,7 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
         lastNonZeroIndex=i;
       }
     currentWeight=subWeyl.AmbientWeyl.GetFundamentalCoordinatesFromSimple
-    (this->theGeneratingWordsNonReducedWeights[lastNonZeroIndex]);//<-implicitTypeConversionHere
+    (this->theGeneratingWordsWeightsPlusWeightFDpart[lastNonZeroIndex]);//<-implicitTypeConversionHere
     currentWeight+=hwFundCoordsNilPart;
     readyForLatexComsumption <<  "$" << currentWeight.ToStringLetterFormat("\\omega")
     << "$&$" << currentVect.ToStringLetterFormat("m") << "$";
@@ -8522,8 +8563,8 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
 //    << currentWeight.ToString() << "+" << inputWeight.ToString();
     int weightLevelIndex=this->theModuleWeightsSimpleCoords.GetIndex(targetWeight);
     if (weightLevelIndex!=-1)
-    { int rowOffset=this->GetOffsetFromWeightIndex(i);
-      int columnOffset=this->GetOffsetFromWeightIndex(weightLevelIndex);
+    { int columnOffset=this->GetOffsetFromWeightIndex(i);
+      int rowOffset=this->GetOffsetFromWeightIndex(weightLevelIndex);
       List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> >&
       otherWordList=this->theGeneratingWordsIntGrouppedByWeight[weightLevelIndex];
       for (int j=0; j<currentWordList.size; j++)
@@ -8546,7 +8587,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
         }
         this->theBilinearFormsInverted[weightLevelIndex].ActOnVectorColumn(theScalarProds);
         for (int k=0; k<theScalarProds.size; k++)
-          outputMat.AddMonomial(MonMatrixTensor(rowOffset+j, columnOffset+k), theScalarProds[k]);
+          outputMat.AddMonomial(MonMatrixTensor(rowOffset+k, columnOffset+j), theScalarProds[k]);
       }
     }
   }

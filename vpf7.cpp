@@ -61,7 +61,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
       { newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.Powers[j]);
         RemainingWeight+=theWeyl.RootSystem[oldRight.generatorsIndices[j]]* oldRight.Powers[j];
       }
-      RemainingWeight+=this->theHWSimpleCoordS;
+      RemainingWeight+=this->theHWFDpartSimpleCoordS;
 //      std::cout << "<br>Remaining weight: " << RemainingWeight.ToString();
       summand+=theWeyl.GetScalarProdSimpleRoot(RemainingWeight, theSimpleIndex);
       summand*=2;
@@ -182,12 +182,13 @@ template<class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::TestConsistency");
   ProgressReport theReport(&theGlobalVariables);
-  MatrixTensor<CoefficientType> left, right, otherOutput, tempMat;
+  MatrixTensor<CoefficientType> left, right, output, otherOutput, tempMat, diffMat;
   for (int i=0; i<this->GetOwner().GetNumGenerators(); i++)
     for (int j=0; j<this->GetOwner().GetNumGenerators(); j++)
     { left = this->GetActionGeneratorIndeX(i, theGlobalVariables);
       right = this->GetActionGeneratorIndeX(j, theGlobalVariables);
-      right.LieBracketOnTheLeft(left);
+      output=right;
+      output.LieBracketOnTheLeft(left);
       ElementSemisimpleLieAlgebra leftGen, rightGen, outputGen;
       leftGen.MakeGenerator(i, *this->theAlgebras, this->indexAlgebra);
       rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
@@ -198,9 +199,13 @@ void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGloba
         tempMat*=outputGen.theCoeffs[k];
         otherOutput+=tempMat;
       }
-      otherOutput-=right;
-      if(!otherOutput.IsEqualToZero())
-      { std::cout << "This is a programming error: something is wrong with "
+      diffMat=otherOutput;
+      diffMat-=output;
+      if(!diffMat.IsEqualToZero())
+      { std::cout << "<br>[" << left.ToString() << ", " << right.ToString() << "] = " << output.ToString();
+        std::cout << "<br> [" << leftGen.ToString() << ", " << rightGen.ToString() << "] = " << outputGen.ToString();
+        std::cout << "<br> " << outputGen.ToString() << "->" << otherOutput.ToString();
+        std::cout << "<br>This is a programming error: something is wrong with "
         << " the algorithm, a check fails! " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       } else
@@ -216,12 +221,13 @@ void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGloba
     right=this->GetActionGeneratorIndeX(this->GetOwner().GetNumGenerators()-1-i, theGlobalVariables);
     left.Transpose();
     left-=right;
-    std::cout << "<br>left minus right: " << left.ToString();
+//    std::cout << "<br>left minus right: " << left.ToString();
     left=this->GetActionGeneratorIndeX(i, theGlobalVariables);
     right.LieBracketOnTheLeft(left);
-    std::cout << "<br> [left,right]" << right.ToString();
+//    std::cout << "<br> [left,right]" << right.ToString();
 
   }
+  std::cout  << "Consistency check passed successfully!";
 }
 
 template<class Element>
@@ -276,10 +282,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 
   this->theHWFundamentalCoordsBaseField=HWFundCoords;
   this->theHWDualCoordsBaseFielD.SetSize(theRank);
-  this->theHWFundamentalCoordS.SetSize(theRank);
+  this->theHWFDpartFundamentalCoordS.SetSize(theRank);
 
   for (int i=0; i<theRank; i++)
-  { this->theHWFundamentalCoordS[i]=0;
+  { this->theHWFDpartFundamentalCoordS[i]=0;
     if (this->parabolicSelectionSelectedAreElementsLevi.selected[i])
     { int theCoord;
       if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(&theCoord))
@@ -287,30 +293,34 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
           *outputReport="The given module over the Levi part is not finite dimensional";
         return false;
       }
-      this->theHWFundamentalCoordS[i]=theCoord;
+      this->theHWFDpartFundamentalCoordS[i]=theCoord;
     }
     this->theHWDualCoordsBaseFielD[i]=this->theHWFundamentalCoordsBaseField[i];
     this->theHWDualCoordsBaseFielD[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
   }
 
-  this->theHWSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordS);
-  this->theHWDualCoords= theWeyl.GetDualCoordinatesFromFundamental(this->theHWFundamentalCoordS);
-  this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental(this->theHWFundamentalCoordsBaseField);
-  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
+  this->theHWFDpartSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental
+  (this->theHWFDpartFundamentalCoordS);
+  this->theHWFDpartDualCoords= theWeyl.GetDualCoordinatesFromFundamental
+  (this->theHWFDpartFundamentalCoordS);
+  this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental
+  (this->theHWFundamentalCoordsBaseField);
+  this->theChaR.MakeFromWeight
+  (this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
 
  // std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
  // std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
  // std::cout << "<br>dual coords: " << this->theHWDualCoordsBaseField.ToString();
- // std::cout << "<br>fund coords no base field: " << this->theHWFundamentalCoordS.ToString();
+ // std::cout << "<br>fund coords no base field: " << this->theHWFDpartFundamentalCoordS.ToString();
  // std::cout << "<br>fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
- // std::cout << "<br>simple coords no base field: " << this->theHWSimpleCoordS.ToString();
+ // std::cout << "<br>simple coords no base field: " << this->theHWFDpartSimpleCoordS.ToString();
  // std::cout << "<br>parabolicSelectionNonSelectedAreElementsLevi: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
  // std::cout << "<br>parabolicSelectionSelectedAreElementsLevi: " << this->parabolicSelectionSelectedAreElementsLevi.ToString();
   int startingNumRationalOperations
   =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
   +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
   LittelmannPath startingPath;
-  startingPath.MakeFromWeightInSimpleCoords(this->theHWSimpleCoordS, theWeyl);
+  startingPath.MakeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
 //  std::cout << "<br>starting littelmann path: " << startingPath.ToString() << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   List<LittelmannPath> thePaths;
   List<List<int> > generatorsIndices;
@@ -335,7 +345,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   if (outputReport!=0)
   { monomialDetailStream << "<br>Number of Littelmann paths: " << thePaths.size;
     monomialDetailStream << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
-    << this->theHWSimpleCoordS.ToString();
+    << this->theHWFDpartSimpleCoordS.ToString();
     std::string tempS;
     DrawingVariables theDV;
     this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theGlobalVariables, theDV);
@@ -383,8 +393,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->theGeneratingWordsNonReducedInt.Clear();
   this->theGeneratingWordsNonReducedInt.SetExpectedSize(thePaths.size);
   this->theGeneratingWordsNonReduced.size=0;
-  this->theGeneratingWordsNonReducedWeights.SetSize(0);
-  this->theGeneratingWordsNonReducedWeights.ReservE(thePaths.size);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.ReservE(thePaths.size);
   HashedList<ElementWeylGroup> theWeylElts;
   ElementWeylGroup tempWelt;
 //  int wordCounter=-1;
@@ -404,7 +414,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
       this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
       this->theGeneratingWordsNonReducedInt.AddOnTop(currentListInt[j]);
-      this->theGeneratingWordsNonReducedWeights.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
+      this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
       if (outputReport!=0)
       { monomialDetailStream << "<tr><td>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
         << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda</td><td>"
@@ -510,7 +520,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     << this->cachedPairs.size << "; dimension : " << this->GetDim();
   Vector<CoefficientType> currentWeightFundCoords;
   Vector<CoefficientType> hwFundCoordsTrimmedBaseField;
-  hwFundCoordsTrimmedBaseField=this->theHWFundamentalCoordS;
+  hwFundCoordsTrimmedBaseField=this->theHWFDpartFundamentalCoordS;
   ElementSemisimpleLieAlgebra tempSSelt;
   if (outputReport!=0)
   { std::stringstream latexTableStream;
@@ -2085,7 +2095,7 @@ std::string ModuleSSalgebra<CoefficientType>::ToString()const
   out << "<br>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
   out << "<br>in simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
   out << "<br>Rational part highest weight fund. coords:" << this->theHWDualCoordS.ToString();
-  out << "<br>Rational part highest weight simple coords: " << this->theHWSimpleCoordS.ToString();
+  out << "<br>Rational part highest weight simple coords: " << this->theHWFDpartSimpleCoordS.ToString();
   out << "<br>Type semisimple Lie algebra: " << this->theAlgebras->TheObjects[this->indexAlgebra].GetLieAlgebraName();
   out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Character over H: " << this->theCharOverH.ToString();

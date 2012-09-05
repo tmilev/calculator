@@ -719,7 +719,7 @@ public:
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceECByC();
   bool ReplaceEXEByList(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceYXByListYX(int theControlIndex, int inputFormat=Expression::formatDefault)
+  bool ReplaceYXByListX(int theControlIndex, int inputFormat=Expression::formatDefault)
   { return this->ReplaceYXdotsXByListYXdotsX(theControlIndex, inputFormat, 1);
   }
   bool ReplaceXOXbyEusingO(int theControlIndex, int inputFormat=Expression::formatDefault)
@@ -733,6 +733,7 @@ public:
   }
   bool ReplaceYXdotsXByListYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
   bool ReplaceListXEByList(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceListXEYByListY(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceCEByC();
   bool ReplaceCCByC();
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)

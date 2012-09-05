@@ -1325,6 +1325,25 @@ bool CommandList::LookAheadAllowsApplyFunction(const std::string& lookAhead)
 { return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
 }
 
+bool CommandList::ReplaceListXEYByListY(int theControlIndex, int inputFormat)
+{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
+  SyntacticElement& afterleft = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+
+  Expression newExpr;
+  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.theOperation=this->opList();
+  newExpr.children.AddListOnTop(left.theData.children);
+  newExpr.children.AddOnTop(right.theData);
+  newExpr.format=inputFormat;
+  left.theData=newExpr;
+  left.controlIndex=theControlIndex;
+  afterleft=*this->CurrentSyntacticStacK->LastObject();
+  this->DecreaseStackSetCharacterRanges(2);
+//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
 bool CommandList::ReplaceListXEByList(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
@@ -1639,7 +1658,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (thirdToLastS=="Expression" && secondToLastS=="\\sqcup" && lastS== "Expression" && this->isSeparatorFromTheRightGeneral(lookAhead))
     return this->ReplaceEOEByE();
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
-    return this->ReplaceYXByListYX(this->conList(), secondToLastE.theData.format);
+    return this->ReplaceYXByListX(this->conList(), secondToLastE.theData.format);
   if (thirdToLastS=="OperationList" && secondToLastS==","  && lastS=="Expression" && this->isSeparatorFromTheRightGeneral(lookAhead))
     return this->ReplaceListXEByList(this->conList(), Expression::formatDefault);
   if (this->isSeparatorFromTheLeftForList(thirdToLastS) && secondToLastS=="OperationList" && this->isSeparatorFromTheRightForList(lastS))
@@ -1661,13 +1680,15 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
       return this->PopTopSyntacticStack();
   }
   if (secondToLastS=="Expression" && lastS=="&")
-    return this->ReplaceYXByListYX(this->conMatrixRow(), Expression::formatMatrixRow);
+    return this->ReplaceYXByListX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (thirdToLastS=="MatrixRow" && secondToLastS=="&"  && lastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lookAhead))
     return this->ReplaceListXEByList(this->conMatrixRow(), Expression::formatMatrixRow);
+  if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
+    return this->ReplaceListXEYByListY(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXByListYX(this->conMatrixRow(), Expression::formatMatrixRow);
+    return this->ReplaceYXByListX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
-    return this->ReplaceYXByListYX(this->conListMatrixRow(), Expression::formatMatrix);
+    return this->ReplaceYXByListX(this->conListMatrixRow(), Expression::formatMatrix);
   if (thirdToLastS=="ListMatrixRows" && secondToLastS=="MatrixRowSeparator" && lastS=="Expression" && this->isSeparatorFromTheRightForListMatrixRow(lookAhead) )
     return this->ReplaceYByListY(this->conMatrixRow(), Expression::formatMatrixRow);
   if (thirdToLastS=="ListMatrixRows" && secondToLastS=="MatrixRowSeparator" && lastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lookAhead) )

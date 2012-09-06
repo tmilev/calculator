@@ -1878,20 +1878,15 @@ bool CommandList::fDecomposeCharGenVerma
     ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).");
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
-  theWeylElements.ReservE(theSub.size);
-  ElementWeylGroup tempElt;
+  theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
   out << "<br>Weyl group of Levi part follows. "
   << "<br><table>";
   invertedParSel=parSel;
   invertedParSel.InvertSelection();
-  for (int i=0; i<theSub.size; i++)
-  { ElementWeylGroup& currentElt=theSub[i];
-    tempElt.SetSize(0);
-    for(int j=0; j<currentElt.size; j++)
-      tempElt.AddOnTop(invertedParSel.elements[currentElt[j]]);
-    out << "<tr><td>" << theSub[i].ToString() << "</td><td>" << tempElt.ToString() << "</td></tr>";
-  }
+  for (int i=0; i<theWeylElements.size; i++)
+    out << "<tr><td>" << theWeylElements[i].ToString() << "</td></tr>";
   out << "</table>";
+
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

@@ -2367,3 +2367,26 @@ bool LittelmannPath::IsAdaptedString
   }
   return true;
 }
+
+void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup
+(List<ElementWeylGroup>& output)
+{ if (this->ExternalAutomorphisms.size>0)
+  { std::cout << "This is  a programming error: a function meant for subgroups that "
+    << " are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output.ReservE(this->size);
+  output.SetSize(0);
+  ElementWeylGroup tempElt;
+  Vector<int> indexShifts;
+  indexShifts.SetSize(this->simpleGenerators.size);
+  for (int i=0; i<this->simpleGenerators.size; i++)
+    indexShifts[i]=this->simpleGenerators[i].GetIndexFirstNonZeroCoordinate();
+  for (int i=0; i<this->size; i++)
+  { tempElt=(*this)[i];
+    for (int j=0; j<tempElt.size; j++)
+      tempElt[j]= indexShifts[tempElt[j]];
+    output.AddOnTop(tempElt);
+  }
+}

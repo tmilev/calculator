@@ -3355,7 +3355,7 @@ static void ProjectOntoHyperPlane
     return true;
   }
   bool MakeAffineProjectionFromNormal(affineHyperplane& output);
-/*  { int tempI= this->getIndexFirstNonZeroCoordinate();
+/*  { int tempI= this->GetIndexFirstNonZeroCoordinate();
     if (tempI==this->size-1)
       return false;
     output.affinePoint.MakeZero(this->size-1);
@@ -3367,7 +3367,7 @@ static void ProjectOntoHyperPlane
       output.normal[i]=this->TheObjects[i];
     return true;
   }*/
-  int getIndexFirstNonZeroCoordinate()
+  int GetIndexFirstNonZeroCoordinate()
   { for(int i=0; i<this->size; i++)
       if (!this->TheObjects[i].IsEqualToZero())
         return i;

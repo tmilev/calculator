@@ -1536,7 +1536,7 @@ bool affineHyperplane::operator ==(const affineHyperplane& right)
 
 bool affineHyperplane::ProjectFromFacetNormal(Vector<Rational>& input)
 { Rational tempRat;
-  int tempI=input.getIndexFirstNonZeroCoordinate();
+  int tempI=input.GetIndexFirstNonZeroCoordinate();
   assert(tempI!=-1);
   if (tempI==input.size-1)
     return false;

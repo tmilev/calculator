@@ -1106,6 +1106,8 @@ public:
   std::string DebugString;
   void ComputeDebugString(){this->ToString(this->DebugString, true); }
   void ToString(std::string& output, bool displayElements);
+  void GetGroupElementsIndexedAsAmbientGroup
+  (List<ElementWeylGroup>& output);
   std::string ElementToStringBruhatGraph();
   std::string ElementToStringCosetGraph();
   std::string ElementToStringFromLayersAndArrows
@@ -5353,7 +5355,6 @@ public:
   void initFromWeyl(WeylGroup* theWeylGroup);
 };
 
-
 template<class CoefficientType>
 void ElementVermaModuleOrdered<CoefficientType>::GetBasisFromSpanOfElements
   (List<ElementVermaModuleOrdered>& theElements, Vectors<RationalFunction>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
@@ -5441,8 +5442,6 @@ void ElementVermaModuleOrdered<CoefficientType>::ActOnMe
   output.theElT.ModOutVermaRelationSOld(false, this->theSubNthElementIsImageNthCoordSimpleBasis, theContext, theRingUnit);
 //  std::cout << "<br>and after modding out we get: " << output.ToString();
 }
-
-
 
 template<class CoefficientType>
 template<class CoefficientTypeQuotientField>
@@ -5707,7 +5706,6 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
   }
   output.CleanUpZeroCoeff();
 }
-
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::SwitchConsecutiveIndicesIfTheyCommute
@@ -6237,8 +6235,6 @@ bool ParserNode::GetListDontUseForFunctionArguments
   }
   return true;
 }
-
-
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
@@ -8103,7 +8099,7 @@ bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
     this->DrawMeNoMults(tempS, theGlobalVariables, theDV, 10000);
     Vector<Rational> tempRoot;
     out << "<hr>In the following weight visualization, a yellow line is drawn if the corresponding weights are "
-    << " simple reflections of one another, with respect to a simple Vector<Rational> of the Levi part of the parabolic subalgebra. ";
+    << " simple reflections of one another, with respect to a simple root of the Levi part of the parabolic subalgebra. ";
     for (int i=0; i<output.size; i++)
     { tempRoot=theWeyL.GetSimpleCoordinatesFromFundamental(output[i].weightFundamentalCoords).GetVectorRational();
       outputWeylSub.DrawContour
@@ -8148,8 +8144,8 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
   splittingParSelectedInLevi.InvertSelection();
   if (!splittingParSelectedInLevi.IsSubset(this->parabolicSelectionSelectedAreElementsLevi))
   { out << "The parabolic subalgebra you selected is not a subalgebra of the ambient parabolic subalgebra."
-    << " The parabolic has Vectors<Rational> of Levi given by " << splittingParSel.ToString()
-    <<" while the ambient parabolic subalgebra has Vectors<Rational> of Levi given by "
+    << " The parabolic has root of Levi given by " << splittingParSel.ToString()
+    <<" while the ambient parabolic subalgebra has root of Levi given by "
     << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
     if (Report!=0)
       *Report=out.str();

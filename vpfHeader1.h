@@ -6,7 +6,6 @@
 #include "vpfMacros.h"
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header file. ");
 
-
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
 const int SomeRandomPrimes[SomeRandomPrimesSize]=

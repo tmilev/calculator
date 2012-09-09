@@ -27,7 +27,6 @@ class wxPNGdisplay: public wxFrame
 		void OnPaint(wxPaintEvent& event);
 		void OnMouseWheel(wxMouseEvent& event);
 		//*)
-
 		DECLARE_EVENT_TABLE()
 };
 

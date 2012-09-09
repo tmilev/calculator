@@ -383,8 +383,10 @@ bool Data::MakeElementSemisimpleLieAlgebra
       << " of absolute value between 1 and the number of positive roots. "
       << "The number of positive roots for the current semisimple Lie algebra is "
       << ownerAlgebra.GetNumPosRoots()
-      << ". If you want to request an element of the Cartan, you should use two indices, the first of which is zero. For example,"
-      << " ElementSemisimpleAlgebra{}(0,1) gives you the an element of the Cartan corresponding to the first simple Vector<Rational>. "
+      << ". If you want to request an element of the Cartan, you should use two indices, "
+      << "the first of which is zero. For example,"
+      << " ElementSemisimpleAlgebra{}(0,1) gives you the an element of the Cartan "
+      << "corresponding to the first simple Vector<Rational>. "
       ;
     return false;
   }
@@ -570,7 +572,9 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
     case Data::typeEltTensorGenVermasOverRF:
       if (theFormat.flagUseLatex)
         out << "\\begin{array}{l} ";
-      out << "EltTensor{}(" << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().ToString(&theFormat) << ")";
+      out << "EltTensor{}("
+      << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunction> >().ToString(&theFormat)
+      << ")";
       if (theFormat.flagUseLatex)
         out <<"\\end{array}";
       return out.str();
@@ -697,8 +701,11 @@ void Expression::operator=(const Expression& other)
   this->children.SetSize(other.children.size);
   if (this->children.size>0)
   { if (this->theBoss==0)
-    { std::cout << "This is a programming error: expressions that do not have initialized boss are not allowed to have children. "
-      << "The error was noticed while trying to copy such an expression (I am not displaying the expression as its ToString() method"
+    { std::cout
+      << "This is a programming error: expressions that do not have initialized boss "
+      << "are not allowed to have children. "
+      << "The error was noticed while trying to copy such an expression "
+      << "(I am not displaying the expression as its ToString() method"
       << " cannot be computed correctly if it doesn't have a boss). "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -715,9 +722,12 @@ Rational Expression::GetRationalValue()const
 
 const Data& Expression::GetAtomicValue()const
 { if (this->theDatA==-1)
-  { std::cout << "This is a programming error. The unsafe method Expression::GetData is called on an object that does not have atomic value. "
-    << "The lazy programmer has forgotten to check whether Expression::EvaluatesToAtom() is true. That same lazy programmer might want to  "
-    << " consider using CommandList::fAtomicValue (the same function that is available directly from the calculator). "
+  { std::cout << "This is a programming error. The unsafe method Expression::GetData is "
+    << "called on an object that does not have atomic value. "
+    << "The lazy programmer has forgotten to check whether Expression::EvaluatesToAtom() is true. "
+    << "That same lazy programmer might want to  "
+    << " consider using CommandList::fAtomicValue (the same function that is available directly from the
+    << " calculator). "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

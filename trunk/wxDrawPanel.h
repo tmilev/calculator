@@ -11,7 +11,6 @@ class wxDrawPanel: public wxFrame
 
 		wxDrawPanel(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~wxDrawPanel();
-
 		//(*Declarations(wxDrawPanel)
 		//*)
 
@@ -29,7 +28,6 @@ class wxDrawPanel: public wxFrame
 		void OnPanel1LeftUp(wxMouseEvent& event);
 		void OnPanel1MouseWheel(wxMouseEvent& event);
 		//*)
-
 		DECLARE_EVENT_TABLE()
 };
 

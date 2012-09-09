@@ -1879,14 +1879,66 @@ bool CommandList::fDecomposeCharGenVerma
   theHWsimpCoords=theWeyl.GetSimpleCoordinatesFromFundamental(theHWfundcoords);
   List<ElementWeylGroup> theWeylElements;
   theSub.GetGroupElementsIndexedAsAmbientGroup(theWeylElements);
-  out << "<br>Weyl group of Levi part follows. "
-  << "<br><table>";
+  Vector<RationalFunction> currentHW;
+  out << "<br>Orbit modified with small rho: <table><tr><td>Simple coords</td><td>Fund coords</td></tr>";
+  for (int i=0; i<theWeyl.size; i++)
+  { currentHW=theHWsimpCoords;
+    currentHW+=theSub.GetRho();
+    theWeyl.ActOn(i, currentHW, false, false);
+    currentHW-=theSub.GetRho();
+    out << "<tr><td>" << currentHW.ToString() << "</td><td>"
+    << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToString() << "</td></tr>";
+  }
+  out << "</table>";
+  out << "<br>The rho of the Levi part is: " << theSub.GetRho().ToString()
+  << "<br>Weyl group of Levi part follows. "
+  << "<br><table><tr><td>Weyl element<td><td>Image hw under small rho modified action fund coords</td>"
+  << "<td>Character Verma given h.w.</td></tr>";
   invertedParSel=parSel;
   invertedParSel.InvertSelection();
+  charSSAlgMod<RationalFunction> theChar, currentChar;
+  MonomialChar<RationalFunction> theMon;
+  theChar.MakeZero(*theSSlieAlg.owner, theSSlieAlg.indexInOwner);
+  FormatExpressions formatChars;
+  formatChars.FDrepLetter="L";
+  formatChars.fundamentalWeightLetter="\\omega";
+  formatChars.flagUseLatex=true;
   for (int i=0; i<theWeylElements.size; i++)
-    out << "<tr><td>" << theWeylElements[i].ToString() << "</td></tr>";
+  { ElementWeylGroup& currentElt=theWeylElements[i];
+    out << "<tr><td>" << currentElt.ToString() << "</td>";
+    int indexInWeyl=theKLpolys.TheWeylGroup->GetIndex(currentElt);
+    if (indexInWeyl==-1)
+    { std::cout << "This is a programming error. Something is wrong: I am getting that an element "
+      << "of the Weyl group of the Levi part of the parabolic does not lie in the ambient Weyl group, which "
+      << " is impossible. There is a bug somewhere; crashing in accordance. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    currentChar.MakeZero(*theSSlieAlg.owner, theSSlieAlg.indexInOwner);
+    for (int j=0; j< theKLpolys.theKLcoeffs[indexInWeyl].size; j++)
+      if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero())
+      { currentHW=theHWsimpCoords;
+//        currentHW+=theSub.GetRho();
+        theWeyl.ActOn(j, currentHW, true, false);
+//        currentHW-=theSub.GetRho();
+        theMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(currentHW);
+        int sign= (currentElt.size- theWeyl[j].size)%2==0 ? 1 :-1;
+        currentChar.AddMonomial(theMon, theKLpolys.theKLcoeffs[indexInWeyl][j]*sign);
+      }
+    currentHW=theHWsimpCoords;
+    currentHW+=theSub.GetRho();
+    theWeyl.ActOn(indexInWeyl, currentHW, false, false);
+    currentHW-=theSub.GetRho();
+    out << "<td>" << theWeyl.GetFundamentalCoordinatesFromSimple(currentHW).ToStringLetterFormat("\\omega")
+    << "</td>";
+    out << "<td>" << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(currentChar.ToString(&formatChars)) << "</td>";
+    if (currentElt.size%2==1)
+      currentChar*=-1;
+    theChar+=currentChar;
+    out << "</tr>";
+  }
   out << "</table>";
-
+  out << "Final char: " << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(theChar.ToString(&formatChars));
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
@@ -2666,8 +2718,10 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   List<ModuleSSalgebra<RationalFunction> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   theFDMod.highestWeightVectorNotation="v";
   theGenMod.highestWeightVectorNotation="w";
-  out << "Let w be the highest weight vector of the generalized Verma component, and let v be the highest weight vector of the finite dimensional component";
-  out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td><td>Additional multiplier</td>";
+  out << "Let w be the highest weight vector of the generalized Verma component, "
+  << "and let v be the highest weight vector of the finite dimensional component";
+  out << "<br><table><tr><td>weight in fundamental coords</td><td>Algebraic expression</td>"
+  << "<td>Additional multiplier</td>";
   if (theNumVars==1)
     out << "<td>gcd polynomial coeffs</td>";
   out << "<td>the hwv</td>";
@@ -2678,7 +2732,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   latexReport2 << "\\begin{longtable}{p{2.5cm}p{2.5cm}p{1.5cm}l}\\caption{"
   << "\\label{tableDecompo" << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "times7dim}"
   << "Decomposition for the $"
-  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString() << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
+  << theGenMod.parabolicSelectionNonSelectedAreElementsLevi.ToString()
+  << "$-parabolic subalgebra $\\bar{\\mathfrak{p}}$ } \\\\ Weight & Projector applied to &"
   << " Extra multiplier & Resulting $\\bar {\\mathfrak b}$-singular vector \\endhead\\hline";
   //std::cout << theGenMod.theGeneratingWordsNonReduced.ToString();
   for (int i=0; i<theCentralCharacters.size; i++)
@@ -2690,7 +2745,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
      RFOne, RFZero);
     tempElt.MakeHWV(theMods, indexGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
-//      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+//      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra,
+//         *theCommands.theGlobalVariableS,
 //       RFOne, RFZero);
     theElt.TensorOnTheRight(tempElt, *theCommands.theGlobalVariableS, RFOne, RFZero);
     theElt*=-1;
@@ -2704,7 +2760,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       if ((otherWeightSimpleCoords-currentWeightSimpleCoords).IsPositive())
       { theCasimirMinusChar=theCasimir;
         theCasimirMinusChar-=theCentralCharacters[j];
-        theElt.MultiplyOnTheLeft(theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
+        theElt.MultiplyOnTheLeft
+        (theCasimirMinusChar, tempElt2, theMods, theSSalgebra, *theCommands.theGlobalVariableS,
         RFOne, RFZero);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
@@ -2743,7 +2800,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     if (theNumVars==1)
     { tmpRF=tmpGCD;
       theElt/=tmpRF;
-      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}") << "</td>";
+      out << "<td>" << CGI::GetHtmlMathSpanPure("\\begin{array}{l}"+theElt.ToString(&tempFormat)+"\\end{array}")
+      << "</td>";
     }
     out << "</tr>";
   }
@@ -3418,7 +3476,7 @@ void CommandList::initPredefinedVars()
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
-   "PrintB3G2branchingTable{}(1, (0,0,0)); fPrintB3G2branchingTable{}(1, (x_1,0,0))");
+   "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
   ("SplitFDTensorGenericGeneralizedVerma", &this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
@@ -3846,9 +3904,9 @@ bool Data::Exponentiate(const Data& right, Data& output)const
           return true;
         case Data::typePoly:
           tempP.GetElement()=this->GetValuE<Polynomial<Rational> >();
-          std::cout << tempP.GetElement().GetReport();
+//          std::cout << tempP.GetElement().GetReport();
           tempP.GetElement().RaiseToPower(thePower);
-          std::cout << tempP.GetElement().GetReport();
+//          std::cout << tempP.GetElement().GetReport();
           output.MakePoly(*this->owner, tempP.GetElement(), this->theContextIndex);
           return true;
         default: break;

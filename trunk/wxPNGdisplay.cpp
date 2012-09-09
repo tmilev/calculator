@@ -18,7 +18,6 @@ wxPNGdisplay::wxPNGdisplay(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 {
 	//(*Initialize(wxPNGdisplay)
 	wxBoxSizer* BoxSizer1;
-	
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCAPTION|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);
@@ -27,7 +26,7 @@ wxPNGdisplay::wxPNGdisplay(wxWindow* parent,wxWindowID id,const wxPoint& pos,con
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
-	
+
 	Connect(wxEVT_PAINT,(wxObjectEventFunction)&wxPNGdisplay::OnPaint);
 	//*)
 }

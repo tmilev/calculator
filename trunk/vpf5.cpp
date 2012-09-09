@@ -1479,13 +1479,71 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
 }
 
+template<class CoefficientType>
+bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
+{ MacroRegisterFunctionWithName("Polynomial<CoefficientType>::FindOneVarRatRoots");
+  if (this->GetNumVars()>1)
+    return false;
+  output.SetSize(0);
+  if (this->GetNumVars()==0 ||this->size==0)
+    return true;
+  Polynomial<CoefficientType> myCopy;
+  myCopy=*this;
+  myCopy.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+  Rational lowestTerm, highestTerm;
+  this->GetConstantTerm(lowestTerm);
+  if (lowestTerm==0)
+  { Polynomial<Rational> x1, tempP;
+    x1.MakeMonomial(1, 0,1, 1);
+    myCopy.DivideBy(x1, myCopy, tempP);
+    List<Rational> tempList;
+    bool result=myCopy.FindOneVarRatRoots(tempList);
+    output.AddOnTop(0);
+    output.AddListOnTop(tempList);
+    return result;
+  }
+  if (this->IsAConstant())
+    return true;
+  int indexHighest= this->GetIndexMaxMonomialTotalDegThenLexicographic();
+  highestTerm=this->theCoeffs[indexHighest];
+  if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger())
+    return false;
+  Vector<Rational> tempV;
+  Rational val;
+  tempV.SetSize(1);
+  List<int> divisorsH, divisorsS;
+  LargeInt hT, lT;
+  highestTerm.GetNum(hT);
+  lowestTerm.GetNum(lT);
+  if (! hT.GetDivisors(divisorsH, false) || !  lT.GetDivisors(divisorsS, true))
+    return false;
+  for (int i=0; i<divisorsH.size; i++)
+    for (int j=0; j<divisorsS.size; j++)
+    { tempV[0].AssignNumeratorAndDenominator(divisorsS[j],divisorsH[i]);
+      myCopy.Evaluate(tempV, val, 0);
+//      std::cout << "<br>" << myCopy.ToString() << " eval at "
+//      << tempV.ToString() << " equals " << val.ToString();
+      if (val==0)
+      { Polynomial<Rational> divisor, tempP;
+        divisor.MakeDegreeOne(1, 0, 1, -tempV[0]);
+        myCopy.DivideBy(divisor, myCopy, tempP);
+        output.AddOnTop(tempV[0]);
+        List<Rational> tempList;
+        bool result=myCopy.FindOneVarRatRoots(tempList);
+        output.AddListOnTop(tempList);
+        return result;
+      }
+    }
+  return true;
+}
+
 bool CommandList::fPrintB3G2branchingIntermediate
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
  Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data, Context& theContext
  )
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
-  std::stringstream latexTable;
+  std::stringstream latexTable, latexTable2;
   bool isFD=(theG2B3Data.selInducing.CardinalitySelection==0);
   if (isFD)
   { out << "<table border=\"1\"><tr><td>$so(7)$-highest weight</td><td>Decomposition over $G_2$</td>"
@@ -1504,13 +1562,16 @@ bool CommandList::fPrintB3G2branchingIntermediate
     << "<td>character difference from top</td>"
     << "<td>Decomposition of inducing module over "
     << CGI::GetHtmlMathSpanPure("p'")
-    << "</td><td>" << CGI::GetHtmlMathSpanPure("p'\\cap b") << "-eigenvectors</td><td>Casimir projector</td><td>corresponding "
+    << "</td><td>" << CGI::GetHtmlMathSpanPure("p'\\cap b")
+    << "-eigenvectors</td><td>Casimir projector</td><td>Extra multiplier</td><td>corresponding "
     << CGI::GetHtmlMathSpanPure("G_2\\cap b")
-    << "-eigenvectors</td></tr>";
-    latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"<< theG2B3Data.selInducing.ToString() << "} "
+    << "-eigenvectors</td><td>Shapovalov square</td></tr>";
+    latexTable << "\\begin{longtable}{|cccclll|} \\caption{\\label{tableB3fdsOverG2charsAndHWV"
+    << theG2B3Data.selInducing.ToString() << "} "
     << "Decomposition of inducing $" << theG2B3Data.selInducing.ToString() << "$-$\\mathfrak p$-module over $"
     << theG2B3Data.selSmallParSel.ToString() << "$-$\\mathfrak p':=\\mathfrak p\\cap G_2$}\\\\"
-    << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.& $\\mathfrak b \\cap \\mathfrak p'$-singular vectors & Casimir projector "
+    << "\\hline $\\mathfrak p-inducing$& dim. &$\\mathfrak p' decomp. $&dim.&"
+    << " $\\mathfrak b \\cap \\mathfrak p'$-singular vectors & Casimir projector "
     << "& Corresp. $\\mathfrak b \\cap G_2$-singular vectors  \\\\ \\hline"
     << "\\endhead \n<br>";
   }
@@ -1522,6 +1583,9 @@ bool CommandList::fPrintB3G2branchingIntermediate
   RationalFunction rfZero, rfOne;
   rfZero.MakeZero(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
   rfOne.MakeOne(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
+  latexTable2 << "\\begin{longtable}{|rll|}\\caption"
+  << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
+  << "\\endhead";
   for (int i=0; i<theHWs.size; i++)
   { theG2B3Data.theWeightFundCoords=theHWs[i];
     theCommands.fSplitFDpartB3overG2inner
@@ -1533,9 +1597,14 @@ bool CommandList::fPrintB3G2branchingIntermediate
       numEigenVectors+=theG2B3Data.theSmallCharFDpart.theCoeffs[j];
     theG2B3Data.theFormat.CustomPlusSign="";
     int eigenIndexcounter=0;
+    if (i!=0)
+      latexTable2 << "\\hline\\multicolumn{3}{|c|}{$\\lambda="
+      << theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega", &theG2B3Data.theFormat)
+      << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     for (int k=0; k<theG2B3Data.theSmallCharFDpart.size; k++ )
     { charSSAlgMod<RationalFunction> tempChar;
-      tempChar.AddMonomial(theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
+      tempChar.AddMonomial
+      (theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
       int multiplicity=0;
       theG2B3Data.theSmallCharFDpart.theCoeffs[k].IsSmallInteger(&multiplicity);
       for (int counter=0; counter<multiplicity; counter++, eigenIndexcounter++)
@@ -1550,7 +1619,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
             for (int charcounter1=0; charcounter1<theG2B3Data.theCharacterDifferences.size; charcounter1++)
             { std::string tempS=theG2B3Data.theFormat.CustomPlusSign;
               theG2B3Data.theFormat.CustomPlusSign="";
-              out << "A_{" << charcounter1 << "}:=" << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat)
+              out << "A_{" << charcounter1 << "}:="
+              << theG2B3Data.theCharacterDifferences[charcounter1].ToString(&theG2B3Data.theFormat)
               << ";";
               if (charcounter1!=theG2B3Data.theCharacterDifferences.size-1)
                 out << "<br>";
@@ -1571,7 +1641,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
         if (counter==0)
         { theG2B3Data.theFormat.fundamentalWeightLetter= "\\psi";
           theG2B3Data.theFormat.CustomPlusSign="\\oplus ";
-          out << "<td rowspan=\"" << multiplicity << " \">" << tempChar.ToString(&theG2B3Data.theFormat) << "</td>";
+          out << "<td rowspan=\"" << multiplicity << " \">"
+          << tempChar.ToString(&theG2B3Data.theFormat) << "</td>";
           latexTable << "\\multirow{" << multiplicity  << "}{*}{$";
 //          if (k!=0)
 //            latexTable << "\\oplus ";
@@ -1593,12 +1664,39 @@ bool CommandList::fPrintB3G2branchingIntermediate
         << "</td>";
         theG2B3Data.theFormat.MaxLineLength=20;
         latexTable << "$\\begin{array}{l}"
-        << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat) << "\\end{array}$ \n";
+        << theG2B3Data.theEigenVectorsLevi[eigenIndexcounter].ToString(&theG2B3Data.theFormat)
+        << "\\end{array}$ \n";
         if (!isFD)
         { std::string tempS1=theG2B3Data.GetStringCasimirProjector(eigenIndexcounter, 12);
-          std::string tempS2=theG2B3Data.theEigenVectorS[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
+          std::string tempS2=
+          "("+ theG2B3Data.theUEelts[eigenIndexcounter].ToString(&theG2B3Data.theFormat)
+          + ")\\cdot v_\\lambda";
           out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempS1) << "</td>";
+          out << "<td>" << theG2B3Data.additionalMultipliers[eigenIndexcounter].ToString() << "</td>";
           out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempS2) << "</td>";
+          out << "<td>"
+          << theG2B3Data.theShapovalovProducts[eigenIndexcounter].ToString(&theG2B3Data.theFormat);
+          out << "</td>";
+          int theIndex;
+          numEigenVectors.IsSmallInteger(&theIndex);
+          if (theIndex- eigenIndexcounter -1>0)
+          { List<Rational> tempList, tempList2;
+            latexTable2 << " $v_{\\lambda," <<  theIndex- eigenIndexcounter -1 << "} $&";
+            Polynomial<Rational> tempP;
+            theG2B3Data.theShapovalovProducts[eigenIndexcounter].GetNumerator(tempP);
+//            std::cout << "<br>before scaling: " << tempP.ToString();
+            tempP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+//            std::cout << "<br>after scaling: " << tempP.ToString();
+            latexTable2 << "$\\begin{array}{l}"
+            << tempP.ToString(&theG2B3Data.theFormat)
+            << "\\end{array}$ & ";
+            if (tempP.FindOneVarRatRoots(tempList))
+            { tempList2.AddOnTopNoRepetition(tempList);
+              out << "<td>Rational roots: " << tempList.ToString() << "</td>";
+              latexTable2 << tempList2.ToString();
+            }
+            latexTable2 << "\\\\";
+          }
           latexTable << "& $\\begin{array}{l}" << tempS1 << "\\end{array}$" << "&"
           << "$\\begin{array}{l}" << tempS2 << "\\end{array}$";
         }
@@ -1627,8 +1725,12 @@ bool CommandList::fPrintB3G2branchingIntermediate
   latexTable << "\\hline";
   out << "</table>";
   latexTable << "\\end{longtable}";
+  latexTable2 << "\\end{longtable}";
   out << "<br>" << timeReport.str() << "<br><br><br><b>Ready for LaTeX consumption:</b><br  >";
+  out << latexTable2.str();
+  out <<"<br><br><br>";
   out << latexTable.str();
+  out <<"<br>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str(), theContext);
   return true;
 }
@@ -1737,7 +1839,8 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << "</td><td>Dimensions</td>"
     << " <td>Highest weight <br> is sufficiently generic <br> if none of <br>the following vanish</td>"
     << "</tr>";
-    latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly" << theg2b3data.selInducing.ToString() << "} "
+    latexTable << "\\begin{longtable}{|p{2cm}l|} \\caption{\\label{tableB3fdsOverG2charsonly"
+    << theg2b3data.selInducing.ToString() << "} "
     << "Decompositions of inducing $\\mathfrak{p}" << "_{"
     << theg2b3data.selInducing.ToString()
     <<  "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
@@ -1924,6 +2027,25 @@ void branchingData::resetOutputData()
   this->theCharacterDifferences.Clear();
 }
 
+template<class CoefficientType>
+bool ElementSumGeneralizedVermas<CoefficientType>::
+ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output)
+{ output.MakeZero(*(*this->owneR)[0].theAlgebras, 0);
+  int theModIndex=0;
+  MonomialUniversalEnveloping<CoefficientType> tempMon;
+  for (int i=0; i<this->size; i++)
+  { MonomialGeneralizedVerma<CoefficientType>& currentMon=(*this)[i];
+    if (i==0)
+      theModIndex=currentMon.indexInOwner;
+    if (currentMon.indexInOwner!=theModIndex)
+      return false;
+    tempMon=currentMon.theMonCoeffOne;
+    tempMon*=currentMon.GetOwner().theGeneratingWordsNonReduced[currentMon.indexFDVector];
+    output.AddMonomial(tempMon, this->theCoeffs[i]);
+  }
+  return true;
+}
+
 bool CommandList::fSplitFDpartB3overG2inner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
   branchingData& theG2B3Data)
@@ -2009,7 +2131,11 @@ bool CommandList::fSplitFDpartB3overG2inner
 //  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
   theG2B3Data.theEigenVectorsLevi.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theEigenVectorS.SetSize(theG2B3Data.g2Weights.size);
-  ElementSumGeneralizedVermas<RationalFunction>& theHWV=*theG2B3Data.theEigenVectorsLevi.LastObject();
+  theG2B3Data.additionalMultipliers.SetSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theShapovalovProducts.SetSize(theG2B3Data.g2Weights.size);
+  theG2B3Data.theUEelts.SetSize(theG2B3Data.g2Weights.size);
+  ElementSumGeneralizedVermas<RationalFunction>& theHWV=
+  *theG2B3Data.theEigenVectorsLevi.LastObject();
   theHWV.MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
   theHWV*=-1;
   *theG2B3Data.theEigenVectorS.LastObject()=theHWV;
@@ -2021,6 +2147,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
   { ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltLevi=theG2B3Data.theEigenVectorsLevi[k];
     ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
+    ElementUniversalEnveloping<RationalFunction>& currentUEelt=theG2B3Data.theUEelts[k];
     currentTensorEltLevi=theHWV;
     //std::cout << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
     currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS, 1, 0);
@@ -2044,6 +2171,11 @@ bool CommandList::fSplitFDpartB3overG2inner
           //std::cout << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
         }
       }
+    theG2B3Data.additionalMultipliers[k]= currentTensorEltEigen.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    currentTensorEltEigen.ExtractElementUE(currentUEelt);
+    currentUEelt.HWTAAbilinearForm
+    (currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD,
+     *theCommands.theGlobalVariableS,1,0,0);
   }
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;

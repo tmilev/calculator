@@ -19,7 +19,6 @@ wxStatus::wxStatus(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSiz
 {
 	//(*Initialize(wxStatus)
 	wxBoxSizer* BoxSizer1;
-	
 	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCAPTION|wxRESIZE_BORDER|wxMAXIMIZE_BOX|wxMINIMIZE_BOX, _T("id"));
 	SetClientSize(wxDefaultSize);
 	Move(wxDefaultPosition);

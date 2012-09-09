@@ -3036,6 +3036,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const MonomialChar<Rational>& other);
+  void operator*=(const CoefficientType& other)
+  { this->::MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>::operator*=(other);
+  }
 };
 
 //the following data is isolated in a struct because it is
@@ -3067,6 +3070,9 @@ struct branchingData
   List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
   List<RationalFunction> theChars;
   List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorS;
+  List<ElementUniversalEnveloping<RationalFunction> > theUEelts;
+  List<Rational> additionalMultipliers;
+  List<RationalFunction> theShapovalovProducts;
   List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorsLevi;
   ReflectionSubgroupWeylGroup WeylFD;
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
@@ -3633,6 +3639,7 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
         return -1;
     return theAnswer;
   }
+  bool ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output);
   void MakeZero
   (List<ModuleSSalgebra<CoefficientType> >& theOwner)
   { this->::MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >::MakeZero();
@@ -7382,8 +7389,8 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
     weightH.MakeEi(this->GetOwner().GetRank(), generatorIndex-this->GetOwner().GetNumPosRoots());
     hwCFshift=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWSimpleCoordSBaseField);
     hwCFshift-=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, this->theHWFDpartSimpleCoordS);
-    std::cout << "<br>the h: " << weightH.ToString() << "<br> the hw: " << this->theHWSimpleCoordSBaseField.ToString()
-    << "<br>hwCfshift: " << hwCFshift.ToString() << "  <br>the generator equals: ";
+//    std::cout << "<br>the h: " << weightH.ToString() << "<br> the hw: " << this->theHWSimpleCoordSBaseField.ToString()
+//    << "<br>hwCfshift: " << hwCFshift.ToString() << "  <br>the generator equals: ";
     for (int i=0; i<this->theGeneratingWordsNonReduced.size; i++)
     { Vector<Rational>& theWeight=this->theGeneratingWordsWeightsPlusWeightFDpart[i];
       tempCF=this->GetOwner().theWeyl.RootScalarCartanRoot(weightH, theWeight);
@@ -7738,9 +7745,9 @@ std::string MonomialChar<CoefficientType>::ToString
     VectorSpaceLetter=theFormat->FDrepLetter;
   }
   if (useOmega)
-    out << "V_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
+    out << VectorSpaceLetter << "_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
   else
-    out << "V_{" << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+    out << VectorSpaceLetter << "_{" << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   if (theFormat!=0)
     theFormat->CustomPlusSign=oldCustomPlus;
   return out.str();

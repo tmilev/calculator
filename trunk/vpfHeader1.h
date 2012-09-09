@@ -2563,6 +2563,21 @@ public:
   void ReadFromFile(std::fstream& input);
   void checkConsistency(){}
   void MakeZero();
+  bool GetDivisors(List<int>& output, bool includeNegative)
+  { if (this->value.size>1)
+      return false;
+    int val= this->value[0];
+    if (val>50000)
+      return false;
+    output.SetSize(0);
+    for (int i=1; i<= val; i++)
+      if (val% i==0)
+      { output.AddOnTop(i);
+        if (includeNegative)
+          output.AddOnTop(-i);
+      }
+    return true;
+  }
   void MakeOne(){this->value.MakeOne(); this->sign=1; }
   void MakeMOne(){this->value.MakeOne(); this->sign=-1;}
   static unsigned int HashFunction (const LargeInt& input)
@@ -4696,6 +4711,7 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
+  bool FindOneVarRatRoots(List<Rational>& output);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
   void MakeMonomial(int NumVars, int LetterIndex, const Rational& Power, const CoefficientType& Coeff=1);
   void MakeDegreeOne(int NVar, int NonZeroIndex, const CoefficientType& coeff);
@@ -5138,6 +5154,15 @@ public:
       case RationalFunction::typeRationalFunction: return false;
     }
     return false;
+  }
+  bool FindOneVarRatRoots(List<Rational>& output)
+  { if (this->expressionType==this->typeRational)
+    { output.SetSize(0);
+      return true;
+    }
+    Polynomial<Rational> tempP;
+    this->GetNumerator(tempP);
+    return tempP.FindOneVarRatRoots(output);
   }
   Rational GetLCMNumeratorRationalDenominators()
   { Polynomial<Rational> Num;
@@ -5774,23 +5799,25 @@ void Polynomial<Element>::Evaluate
   for (int i=0; i<this->size; i++)
   { tempElt=this->theCoeffs[i];
     for (int j=0; j<this->NumVars; j++)
-    { if (!this->TheObjects[i][j].IsSmallInteger() )
+    { int numCycles;
+      if (!this->TheObjects[i][j].IsSmallInteger(&numCycles) )
       { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose"
         <<  i+1 << "^{th} variable is raised is raised to the power " << this->TheObjects[i][j].ToString()
-        << ". Raising variables to power is allowed only if the power is a small integer. If the user has requested such an operation, it"
-        << " *must* be intercepted at an earlier level (and the user must be informed).";
+        << ". Raising variables to power is allowed only if the power is a small integer. "
+        << "If the user has requested such an operation, it"
+        << " *must* be intercepted at an earlier level (and the user must be informed)."
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
         return;
       }
-      int numCycles=this->TheObjects[i][j].NumShort;
       bool isPositive=numCycles>0;
       if (numCycles<0)
         numCycles=-numCycles;
       for (int k=0; k<numCycles; k++)
       { if (isPositive)
-          tempElt*=input.TheObjects[j];
+          tempElt*=input[j];
         else
-          tempElt/=input.TheObjects[j];
+          tempElt/=input[j];
         ParallelComputing::SafePointDontCallMeFromDestructors();
       }
     }
@@ -5989,7 +6016,13 @@ template <class Element>
 void Polynomial<Element>::DivideBy
 (const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
 { MacroRegisterFunctionWithName("Polynomial<Element>::DivideBy");
-  assert(&outputQuotient!=this && &outputRemainder!=this && &outputQuotient!=&outputRemainder);
+  if (&outputRemainder==this || &outputQuotient==&outputRemainder)
+  { Polynomial<Element> newQuot, newRemaind;
+    this->DivideBy(inputDivisor, newQuot, newRemaind);
+    outputQuotient=newQuot;
+    outputRemainder=newRemaind;
+    return;
+  }
   outputRemainder=(*this);
   MonomialP scaleRemainder;
   MonomialP scaleInput;

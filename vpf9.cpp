@@ -4196,13 +4196,12 @@ void KLpolys::Check()
 void KLpolys::Compute(int x)
 { this->initTheMults();
   this->TheMultiplicities.TheObjects[x]=1;
-  this->ComputeDebugString();
   while (this->NextToExplore!=-1)
-  { for (int i=0; i<this->BruhatOrder.TheObjects[this->NextToExplore].size; i++)
-    { int a=this->BruhatOrder.TheObjects[this->NextToExplore].TheObjects[i];
-      this->TheMultiplicities.TheObjects[a]-=this->TheMultiplicities.TheObjects[this->NextToExplore];
+  { for (int i=0; i<this->BruhatOrder[this->NextToExplore].size; i++)
+    { int a=this->BruhatOrder[this->NextToExplore][i];
+      this->TheMultiplicities[a]-=this->TheMultiplicities[this->NextToExplore];
     }
-    this->Explored.TheObjects[this->NextToExplore]=true;
+    this->Explored[this->NextToExplore]=true;
     this->FindNextToExplore();
   //  this->ComputeDebugString();
   }
@@ -4292,7 +4291,8 @@ void KLpolys::ComputeDebugString()
 void KLpolys::GeneratePartialBruhatOrder()
 { MacroRegisterFunctionWithName("KLpolys::GeneratePartialBruhatOrder");
   int theDimension= this->TheWeylGroup->CartanSymmetric.NumRows;
-  Vector<Rational> ZeroRoot; ZeroRoot.MakeZero(theDimension);
+  Vector<Rational> ZeroRoot;
+  ZeroRoot.MakeZero(theDimension);
   this->BruhatOrder.SetSize(this->size);
   this->InverseBruhatOrder.SetSize(this->size);
   this->SimpleReflectionsActionList.SetSize(this->size);
@@ -4301,15 +4301,21 @@ void KLpolys::GeneratePartialBruhatOrder()
   { this->SimpleReflectionsActionList[i].ReservE(theDimension);
     for (int j=0; j<theDimension; j++)
     { Vector<Rational> tempRoot, tempRoot2;
-      tempRoot=(this->TheObjects[i]);
-      tempRoot2=(this->TheObjects[i]);
-      this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, true, false);
+      tempRoot=(*this)[i];
+      tempRoot2=(*this)[i];
+      this->TheWeylGroup->SimpleReflectionRoot(j, tempRoot, false, false);
       int x= this->GetIndex(tempRoot);
-      this->SimpleReflectionsActionList.TheObjects[i].AddOnTop(x);
+      if (x==-1)
+      { std::cout << "This is a programming error: something wrong has happened. A weight that is supposed to "
+        << " be in a certain Weyl group orbit isn't there. There is an error in the code, crashing accordingly. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      this->SimpleReflectionsActionList[i].AddOnTop(x);
       tempRoot2-=(tempRoot);
       if (tempRoot2.IsPositiveOrZero() && !tempRoot2.IsEqualToZero() )
-      { this->BruhatOrder.TheObjects[i].AddOnTop(x);
-        this->InverseBruhatOrder.TheObjects[x].AddOnTop(i);
+      { this->BruhatOrder[i].AddOnTop(x);
+        this->InverseBruhatOrder[x].AddOnTop(i);
       }
     }
   }
@@ -4343,15 +4349,15 @@ int KLpolys::FindMaximalBruhatNonExplored(List<bool>& theExplored)
 }
 
 void KLpolys::MergeBruhatLists(int fromList, int toList)
-{ for (int i=0; i<this->BruhatOrder.TheObjects[fromList].size; i++)
+{ for (int i=0; i<this->BruhatOrder[fromList].size; i++)
   { bool found=false;
-    for (int j=0; j<this->BruhatOrder.TheObjects[toList].size; j++)
-      if (this->BruhatOrder.TheObjects[toList].TheObjects[j]==this->BruhatOrder.TheObjects[fromList].TheObjects[i])
+    for (int j=0; j<this->BruhatOrder[toList].size; j++)
+      if (this->BruhatOrder[toList][j]==this->BruhatOrder[fromList][i])
       { found = true;
         break;
       }
     if (!found)
-      this->BruhatOrder.TheObjects[toList].AddOnTop(this->BruhatOrder.TheObjects[fromList].TheObjects[i]);
+      this->BruhatOrder[toList].AddOnTop(this->BruhatOrder[fromList][i]);
   }
 }
 
@@ -4403,8 +4409,9 @@ void KLpolys::ComputeKLcoefficients()
 void KLpolys::initFromWeyl(WeylGroup* theWeylGroup)
 { this->TheWeylGroup= theWeylGroup;
   Vectors<Rational> tempRoots;
+  this->TheWeylGroup->ComputeRho(true);
   tempRoots.AddOnTop(this->TheWeylGroup->rho);
-  this->TheWeylGroup->GenerateOrbit(tempRoots, true, *this, false);
+  this->TheWeylGroup->GenerateOrbit(tempRoots, false, *this, false);
   this->initTheMults();
 }
 

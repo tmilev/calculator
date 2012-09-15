@@ -2355,15 +2355,21 @@ bool LittelmannPath::IsAdaptedString
   (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theString)
 { LittelmannPath tempPath=*this;
   LittelmannPath tempPath2;
+  std::cout << "<hr>";
   for (int i=0; i<theString.generatorsIndices.size; i++)
-  { for (int k=0; k<theString.Powers[i]; k++)
+  { std::cout << "e_" << -theString.generatorsIndices[i] << "^"
+    << theString.Powers[i] << "(" << tempPath.ToString() << ") =";
+    for (int k=0; k<theString.Powers[i]; k++)
       tempPath.ActByEalpha(-theString.generatorsIndices[i]-1);
     if (tempPath.IsEqualToZero())
       return false;
     tempPath2=tempPath;
     tempPath2.ActByEalpha(-theString.generatorsIndices[i]-1);
+    std::cout << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
+    if (i!=theString.generatorsIndices.size-1)
+      std::cout << "<br>";
   }
   return true;
 }

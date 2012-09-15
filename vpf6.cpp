@@ -726,7 +726,7 @@ const Data& Expression::GetAtomicValue()const
     << "called on an object that does not have atomic value. "
     << "The lazy programmer has forgotten to check whether Expression::EvaluatesToAtom() is true. "
     << "That same lazy programmer might want to  "
-    << " consider using CommandList::fAtomicValue (the same function that is available directly from the
+    << " consider using CommandList::fAtomicValue (the same function that is available directly from the "
     << " calculator). "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);

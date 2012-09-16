@@ -5260,11 +5260,10 @@ std::string Expression::ToString
   { if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
       return "(...)";
   } else
-    return "(ProgrammingErrorNoBoss)";
+    return "(Error:NoOwner)";
   int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
     return theBoss->theObjectContainer.ExpressionNotation[notationIndex];
-  assert((int)(this->theBoss)!=-1);
   std::stringstream out;
 //  AddBrackets=true;
 //  if (this->theBoss->flagLogSyntaxRules && recursionDepth<=1)

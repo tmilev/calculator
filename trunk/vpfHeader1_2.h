@@ -2802,18 +2802,26 @@ std::string GenerateOrbitAndAnimate
 (GlobalVariables& theGlobalVariables)
 ;
   bool MinimaAreIntegral();
-  std::string ToString(bool useSimpleCoords=true)
+  std::string ToString(bool useSimpleCoords=true, bool useArrows=true)const
   { if (this->Waypoints.size==0)
       return "0";
     std::stringstream out;
+    if (!useArrows)
+      out << "(";
     for (int i=0; i<this->Waypoints.size; i++)
     { if (useSimpleCoords)
         out << this->Waypoints[i].ToString();
       else
         out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ToString();
       if (i!=this->Waypoints.size-1)
-        out << "->";
+      { if (useArrows)
+          out << "->";
+        else
+          out << ",";
+      }
     }
+    if (!useArrows)
+      out << ")";
     return out.str();
   }
   void Simplify();

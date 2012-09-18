@@ -22,7 +22,7 @@ public:
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
-    typeString, typeVariableNonBound
+    typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -34,6 +34,13 @@ public:
   Data(const Data& otherData) {this->operator=(otherData);}
   bool SetError(const std::string& inputError);
   bool IsEqualToOne()const;
+  void MakeEalpha
+  (CommandList& theBoss, SemisimpleLieAlgebra& owner, int displayIndex)
+;
+  void MakeLSpath
+  (CommandList& theBoss, SemisimpleLieAlgebra& owner, List<Vector<Rational> >& waypts)
+  ;
+
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
   ;
@@ -65,6 +72,13 @@ public:
 (CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt, int inputContextIndex)
   ;
   int GetNumContextVars()const;
+  void reset(CommandList& inputOwner)
+  { this->owner=&inputOwner;
+    this->theIndex=-1;
+    this->theContextIndex=-1;
+    this->type=-1;
+    this->theError.FreeMemory();
+  }
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  int theDisplayIndex, std::stringstream* comments)
@@ -324,11 +338,6 @@ void MakeVariableNonBounD
   Expression(const Expression& other)
   { this->operator=(other);
   }
-  template <class theType>
-  bool GetVector
-  (Vector<theType>& output, Context& inputStartingContext, int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
-   std::stringstream* comments=0)
-  ;
   bool HasBoundVariables();
 //  bool IsRationalAtom()const;
   bool EvaluatesToRational()const;
@@ -509,6 +518,7 @@ public:
   HashedList<VariableNonBound> theNonBoundVars;
   HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
+  HashedList<LittelmannPath> theLSpaths;
   void reset();
   std::string ToString();
 };
@@ -1038,12 +1048,24 @@ static bool EvaluateDereferenceOneArgument
   static bool EvaluateIf
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool fGetMatrix
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- Matrix<Expression>& output)
-   ;
+  template<class theType>
+  bool fGetMatrix
+  (Expression& theExpression,
+   Matrix<theType>& outputMat, Context* inputOutputStartingContext=0,
+   int targetNumColsNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
+   std::stringstream* comments=0)
+  ;
+  template <class theType>
+  bool GetVector
+  (Expression& theExpression,
+   Vector<theType>& output, Context* inputOutputStartingContext=0,
+   int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
+   std::stringstream* comments=0)
+  ;
+
   static bool fMatrix
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
   ;
   static bool fDet
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
@@ -1185,6 +1207,9 @@ bool fGetTypeHighestWeightParabolic
   static bool fAnimateLittelmannPaths
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fLSPath
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fTestMonomialBaseConjecture
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
@@ -1306,5 +1331,129 @@ class IncrementRecursion
       this->theBoss->RecursionDeptH--;
   }
 };
+
+template <class theType>
+bool CommandList::GetVector
+(Expression& theExpression,
+ Vector<theType>& output, Context* inputOutputStartingContext,
+ int targetDimNonMandatory, Function::FunctionAddress conversionFunction,
+ std::stringstream* comments)
+{ MemorySaving<Context> tempContext;
+  Context& startContext=
+  inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
+  if (theExpression.theOperation!=this->opList())
+  { if (targetDimNonMandatory!=-1)
+      if (targetDimNonMandatory!=1)
+        return false;
+    Data outputData;
+    if (!theExpression.EvaluatesToAtom())
+    { Expression tempExpression=theExpression;
+      if (conversionFunction!=0)
+        if (!this->CallCalculatorFunction
+            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+          return false;
+      if (!tempExpression.EvaluatesToAtom())
+        return false;
+      outputData=tempExpression.GetAtomicValue();
+    } else
+      outputData=theExpression.GetAtomicValue();
+    if (!outputData.MergeContextsAndConvertToType<theType>(startContext))
+      return false;
+    output.SetSize(1);
+    output.TheObjects[0]=outputData.GetValuE<theType>();
+    return true;
+  }
+  if (targetDimNonMandatory!=-1)
+    if (targetDimNonMandatory!=theExpression.children.size)
+      return false;
+  Vector<Data> outputData;
+  outputData.SetSize(theExpression.children.size);
+  for (int i=0; i<theExpression.children.size; i++)
+  { Expression& currentE=theExpression.children[i];
+    bool needsConversion=true;
+    if (currentE.EvaluatesToAtom())
+      if (currentE.GetAtomicValue().IsOfType<theType>())
+        needsConversion=false;
+    if (needsConversion)
+    { Expression tempExpression=currentE;
+      if (conversionFunction!=0)
+        if (!this->CallCalculatorFunction
+            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+          return false;
+      if (!tempExpression.EvaluatesToAtom())
+        return false;
+      outputData[i]=tempExpression.GetAtomicValue();
+    } else
+      outputData[i]=currentE.GetAtomicValue();
+    if (outputData[i].theContextIndex!=-1)
+      if (!startContext.MergeContextWith(outputData[i].GetContext()))
+        return false;
+  }
+  output.SetSize(theExpression.children.size);
+  for (int i=0; i<outputData.size; i++)
+  { if (!outputData[i].ConvertToTypeResizesContextArrays<theType>(startContext))
+      return false;
+    output[i]=outputData[i].GetValuE<theType>();
+  }
+  return true;
+}
+
+template <class theType>
+bool CommandList::fGetMatrix
+(Expression& theExpression,
+ Matrix<theType>& outputMat, Context* inputOutputStartingContext,
+ int targetNumColsNonMandatory, Function::FunctionAddress conversionFunction,
+ std::stringstream* comments)
+{ MemorySaving<Context> tempContext;
+  Context& startContext=
+  inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
+  if (theExpression.theOperation!=this->opList())
+  { if (targetNumColsNonMandatory!=-1)
+      if (targetNumColsNonMandatory!=1)
+        return false;
+    Data outputData;
+    if (!theExpression.EvaluatesToAtom())
+    { Expression tempExpression=theExpression;
+      if (conversionFunction!=0)
+        if (!this->CallCalculatorFunction
+            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+          return false;
+      if (!theExpression.EvaluatesToAtom())
+        return false;
+      outputData=tempExpression.GetAtomicValue();
+    } else
+      outputData=theExpression.GetAtomicValue();
+    if (!outputData.MergeContextsAndConvertToType<theType>(startContext))
+      return false;
+    outputMat.init(1,1);
+    outputMat.elements[0][0]=outputData.GetValuE<theType>();
+    return true;
+  }
+  int targetNumRows=theExpression.children.size;
+  for (int i=0; i<theExpression.children.size; i++)
+  { Expression& currentE=theExpression.children[i];
+    if (i==0)
+    { int numCols=1;
+      if (currentE.theOperation==this->opList())
+        numCols=currentE.children.size;
+      if (targetNumColsNonMandatory!=-1)
+        if (numCols!=targetNumColsNonMandatory)
+        { if (comments!=0)
+            *comments << "Error getting matrix: target number of columns is "
+            << targetNumColsNonMandatory << " but the first row has " << numCols << " columns instead. ";
+          return false;
+        }
+      targetNumColsNonMandatory=numCols;
+      outputMat.init(targetNumRows, targetNumColsNonMandatory);
+    }
+    Vector<theType> currentRow;
+    if (!this->GetVector
+        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction, comments))
+      return false;
+    for (int j=0; j<targetNumColsNonMandatory; j++)
+      outputMat.elements[i][j]=currentRow[j];
+  }
+  return true;
+}
 
 #endif

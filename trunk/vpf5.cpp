@@ -174,7 +174,9 @@ bool CommandList::fWeylDimFormula
   theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<RationalFunction> theWeight;
   Context tempContext(theCommands);
-  if (!theExpression.children[1].GetVector<RationalFunction>(theWeight, tempContext, theSSowner->GetRank(), theCommands.fPolynomial, comments))
+  if (!theCommands.GetVector<RationalFunction>
+      (theExpression.children[1], theWeight, &tempContext, theSSowner->GetRank(),
+       theCommands.fPolynomial, comments))
   { theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
     return true;
   }
@@ -202,20 +204,16 @@ bool CommandList::fAnimateLittelmannPaths
   }
   Expression LieAlgebraNameNode=theExpression.children[0];
   if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, LieAlgebraNameNode, comments))
-  { theExpression.SetError("Failed to convert the first argument of "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
-    return true;
-  }
+    return theExpression.SetError
+    ("Failed to convert the first argument of "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
   if (LieAlgebraNameNode.errorString!="")
-  { theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
-    return true;
-  }
+    return theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
   theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<Rational> theWeight;
   Context tempContext(theCommands);
-  if (!theExpression.children[1].GetVector<Rational>(theWeight, tempContext, theSSowner->GetRank(), 0, comments))
-  { theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
-    return true;
-  }
+  if (!theCommands.GetVector<Rational>
+      (theExpression.children[1], theWeight, &tempContext, theSSowner->GetRank(), 0, comments))
+    return theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
@@ -309,12 +307,12 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Context finalContext;
-  if (!weightNode.GetVector<RationalFunction>
-      (theWeightFundCoords, finalContext, theDim, theCommands.fPolynomial, comments))
+  if (!theCommands.GetVector<RationalFunction>
+      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.fPolynomial, comments))
     return theExpression.SetError("Failed to extract highest weight from the second argument.");
-  if (! inducingParNode.GetVector<Rational>(inducingParSel, finalContext, theDim, 0, comments))
+  if (!theCommands.GetVector<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0, comments))
     return theExpression.SetError("Failed to extract parabolic selection from the third argument");
-  if (! splittingParNode.GetVector<Rational>(splittingParSel, finalContext, theDim, 0, comments))
+  if (!theCommands.GetVector<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, 0, comments))
     return theExpression.SetError("Failed to extract parabolic selection from the fourth argument");
   if (comments!=0)
   { *comments << "Your input weight in fundamental coordinates: "
@@ -416,7 +414,8 @@ bool CommandList::fDrawWeightSupportWithMults
   SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<Rational> highestWeightFundCoords;
   Context tempContext;
-  if (!hwNode.GetVector<Rational>(highestWeightFundCoords, tempContext, theAlg.GetRank(), 0, comments))
+  if (!theCommands.GetVector<Rational>
+      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0, comments))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -453,7 +452,8 @@ bool CommandList::fDrawWeightSupport
   SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
   Vector<Rational> highestWeightFundCoords;
   Context tempContext;
-  if (!hwNode.GetVector<Rational>(highestWeightFundCoords, tempContext, theAlg.GetRank(), 0, comments))
+  if (!theCommands.GetVector<Rational>
+      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0, comments))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -585,7 +585,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     out << "</tr>";
   }
   out << "</table>";
-  out << "<table>";
+  out << "<table><td>corresponding element of U(g)</td><td>is adapted</td><td>path</td><td>e operators with non-zero action.</td>";
   for (int i=0; i<theGens.size; i++)
   { //tempPath.MakeFromWeightInSimpleCoords(*theOrbit[i].Waypoints.LastObject(), *this->owner);
     //tempPath=*theOrbit.LastObject();
@@ -596,7 +596,14 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     bool isadapted=tempPath.IsAdaptedString(tempMon);
     out << "<tr><td>" << tempMon.ToString() << "</td><td>"
     << (isadapted ? "is adapted to" : "is not adapted to" )
-    <<  "</td><td>" << tempPath.ToString() << "</td></tr>";
+    <<  "</td><td>" << tempPath.ToString() << "</td><td>";
+    for (int j=0; j<this->owner->GetDim(); j++)
+    { tempPath=theOrbit[i];
+      tempPath.ActByEalpha(j);
+      if (!tempPath.IsEqualToZero())
+        out << "e_{" << j+1 << "}, ";
+    }
+    out << "</td></tr>";
   }
   out << "</table>";
   return out.str();
@@ -1397,9 +1404,11 @@ bool CommandList::fSplitFDpartB3overG2Init
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2Init");
   if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
     return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
-  if (!theExpression.GetVector<RationalFunction>(theG2B3Data.theWeightFundCoords, outputContext, 3, theCommands.fPolynomial, comments))
+  if (!theCommands.GetVector<RationalFunction>
+      (theExpression, theG2B3Data.theWeightFundCoords, &outputContext, 3, theCommands.fPolynomial, comments))
   { std::stringstream errorStream;
-    errorStream << "Failed to extract highest weight in fundamental coordinates from the expression " << theExpression.ToString() << ".";
+    errorStream << "Failed to extract highest weight in fundamental coordinates from the expression "
+    << theExpression.ToString() << ".";
     return theExpression.SetError(errorStream.str());
   }
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
@@ -2543,7 +2552,8 @@ bool CommandList::fPrintAllPartitions
   Vector<Rational> theHW;
 //  std::cout << theExpression.ToString() << " rank "
 //  << theSSalgebra.GetRank() << " child one : " << theExpression.children[1].ToString();
-  if (!theExpression.children[1].GetVector<Rational>(theHW, theContext, theSSalgebra.GetRank()))
+  if (!theCommands.GetVector<Rational>
+      (theExpression.children[1], theHW, &theContext, theSSalgebra.GetRank()))
     return theExpression.SetError("Failed to extract weight you want partitioned from "+ theExpression.children[1].ToString());
   Vector<int> theHWint;
   theHWint.SetSize(theHW.size);
@@ -2757,6 +2767,36 @@ bool CommandList::fTestMonomialBaseConjecture
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
+}
+
+bool CommandList::fLSPath
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ IncrementRecursion theRecutionIncrementer(& theCommands);
+  MacroRegisterFunctionWithName("CommandList::fLSPath");
+  if (theExpression.children.size<2)
+    return theExpression.SetError("LSPath needs at least two arguments.");
+  if (!theCommands.CallCalculatorFunction
+      (theCommands.fSSAlgebra, inputIndexBoundVars, theExpression.children[0], comments))
+    return theExpression.SetError("Failed to create semisimple Lie algebra from first argument");
+  SemisimpleLieAlgebra& ownerSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  theExpression.children.PopIndexShiftDown(0);
+  if (theExpression.children.size<1)
+    return theExpression.SetError("Error: no waypoints. ");
+  Matrix<Rational> outputMat;
+  List<Vector<Rational> > waypoints;
+  if (!theCommands.fGetMatrix<Rational>(theExpression, outputMat, 0, -1, 0, comments))
+    return theExpression.SetError("Failed to extract waypoints");
+  if (theExpression.errorString!="")
+    return true;
+  if (outputMat.NumCols!=ownerSSalgebra.GetRank())
+    return theExpression.SetError("Error: waypoints must have as many coordinates as is the rank of the ambient Lie algebra");
+  outputMat.GetListRowsToVectors(waypoints);
+  Data thePath;
+
+  thePath.MakeLSpath(theCommands, ownerSSalgebra, waypoints);
+  theExpression.MakeAtom(thePath, theCommands, inputIndexBoundVars);
+  return true;
+
 }
 
 class DoxygenInstance

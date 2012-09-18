@@ -1549,6 +1549,14 @@ public:
   void NonPivotPointsToEigenVectorMatrixForm
   (Selection& TheNonPivotPoints, Matrix<Element>& output, const Element& theRingUnit, const Element& theRingZero)
 ;
+  void GetListRowsToVectors(List<Vector<Element> >& output)
+  { output.SetSize(this->NumRows);
+    for (int i=0; i<this->NumRows; i++)
+    { output[i].SetSize(this->NumCols);
+      for (int j=0; j<this->NumCols; j++)
+        output[i][j]=this->elements[i][j];
+    }
+  }
 void NonPivotPointsToEigenVector
 (Selection& TheNonPivotPoints, Vector<Element>& output, const Element& theRingUnit=1, const Element& theRingZero=0)
 ;

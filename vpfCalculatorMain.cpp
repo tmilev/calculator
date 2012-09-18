@@ -390,6 +390,7 @@ g_{-2} v_\\lambda\
 //  "g:=SemisimpleLieAlgebra{} B_3;v_\\lambda:=:hwv{}(B_3, (x_1,0,1),(1,0,0));w:=g_{-1} v_\\lambda;g_1 w";
 //  civilizedInput="DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))";
 //  civilizedInput="SplitFDpartB3overG2{}(x_1,1,0)";
+//  civilizedInput="LSpath{}(G_2, (0,0), (2,1) )";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -34,9 +34,9 @@ public:
   Data(const Data& otherData) {this->operator=(otherData);}
   bool SetError(const std::string& inputError);
   bool IsEqualToOne()const;
-  void MakeEalpha
-  (CommandList& theBoss, SemisimpleLieAlgebra& owner, int displayIndex)
-;
+  void MakeLittelmannRootOperator
+(int inputIndex, CommandList& theBoss)
+  ;
   void MakeLSpath
   (CommandList& theBoss, SemisimpleLieAlgebra& owner, List<Vector<Rational> >& waypts)
   ;
@@ -145,7 +145,7 @@ public:
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
   static bool DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-
+  static bool MultiplyLRObyLSPath(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
@@ -180,6 +180,7 @@ class Function
   std::string theDescription;
   std::string theExample;
   bool flagNameIsVisible;
+  bool flagMayActOnBoundVars;
   MemorySaving<List<Expression> > theArgumentPatterns;
   MemorySaving<List<bool> > theArgumentPatternIsParsed;
   typedef  bool (*FunctionAddress)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments);
@@ -192,6 +193,7 @@ class Function
     this->theExample=other.theExample;
     this->theFunction=other.theFunction;
     this->flagNameIsVisible=other.flagNameIsVisible;
+    this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentList==other.theArgumentList &&
@@ -200,7 +202,7 @@ class Function
   Function(){this->theFunction=0;}
   Function
   (const Function::FunctionAddress& functionPointer, const std::string& functionName, const std::string& argumentList,
-   const std::string& description, const std::string& inputExample, bool inputflagNameIsVisible)
+   const std::string& description, const std::string& inputExample, bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
   { this->theFunction=functionPointer;
     this->theName=functionName;
     this->theDescription=description;
@@ -211,6 +213,7 @@ class Function
       this->theArgumentPatterns.GetElement().SetSize(1);
     }
     this->flagNameIsVisible=inputflagNameIsVisible;
+    this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
@@ -1202,6 +1205,9 @@ bool fGetTypeHighestWeightParabolic
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fWeylDimFormula
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fLittelmannOperator
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fAnimateLittelmannPaths

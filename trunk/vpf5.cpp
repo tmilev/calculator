@@ -2769,6 +2769,25 @@ bool CommandList::fTestMonomialBaseConjecture
   return true;
 }
 
+bool CommandList::fLittelmannOperator
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fLittelmannOperator");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (theExpression.HasBoundVariables())
+    return false;
+  int theIndex=0;
+  if (!theExpression.EvaluatesToSmallInteger(&theIndex))
+    return theExpression.SetError
+    ("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"
+     +theExpression.ToString());
+  if (theIndex==0)
+    return theExpression.SetError("The index of the Littelmann root operator is expected to be non-zero");
+  Data answer;
+  answer.MakeLittelmannRootOperator(theIndex, theCommands);
+  theExpression.MakeAtom(answer, theCommands, inputIndexBoundVars);
+  return true;
+}
+
 bool CommandList::fLSPath
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { IncrementRecursion theRecutionIncrementer(& theCommands);
@@ -2783,7 +2802,7 @@ bool CommandList::fLSPath
   if (theExpression.children.size<1)
     return theExpression.SetError("Error: no waypoints. ");
   Matrix<Rational> outputMat;
-  List<Vector<Rational> > waypoints;
+  Vectors<Rational> waypoints;
   if (!theCommands.fGetMatrix<Rational>(theExpression, outputMat, 0, -1, 0, comments))
     return theExpression.SetError("Failed to extract waypoints");
   if (theExpression.errorString!="")
@@ -2791,6 +2810,7 @@ bool CommandList::fLSPath
   if (outputMat.NumCols!=ownerSSalgebra.GetRank())
     return theExpression.SetError("Error: waypoints must have as many coordinates as is the rank of the ambient Lie algebra");
   outputMat.GetListRowsToVectors(waypoints);
+  waypoints=ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
   Data thePath;
 
   thePath.MakeLSpath(theCommands, ownerSSalgebra, waypoints);

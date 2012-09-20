@@ -1090,6 +1090,16 @@ void LittelmannPath::ActByEalpha(int indexAlpha)
 void LittelmannPath::ActByFalpha(int indexAlpha)
 { if (this->Waypoints.size==0)
     return;
+  if(this->owner==0)
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
+  { std::cout << " This is a programming error: index of Littelmann root operator out of range. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   Rational theMin=0;
   int minIndex=-1;
   WeylGroup& theWeyl=*this->owner;
@@ -1148,7 +1158,9 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
 }
 
 void LittelmannPath::Simplify()
-{ Rational strech;
+{ if (this->Waypoints.size==0)
+    return;
+  Rational strech;
   Vector<Rational> d1, d2;
   Rational d11, d12, d22;
   int leftIndex=0;

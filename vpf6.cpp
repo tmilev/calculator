@@ -579,6 +579,9 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
       return out.str();
     case Data::typeRational:
       return this->GetValuE<Rational>().ToString();
+    case Data::typeLittelmannRootOperator:
+      out << "LRO{}_" << this->theIndex;
+      return out.str();
     case Data::typePoly:
       if (theFormat.flagUseLatex)
         out << "\\begin{array}{l} ";
@@ -851,6 +854,7 @@ std::string Data::ElementToStringDataType() const
     case Data::typeEltSumGenVermas: return "ElementSumGeneralizedVermaModules";
     case Data::typeMonomialGenVerma: return "MonomialGeneralizedVerma";
     case Data::typeVariableNonBound: return "Variable";
+    case Data::typeLittelmannRootOperator: return "LittelmannRootOperator";
     case Data::typeLSpath: return "LSpath";
     default:
       std::cout << "This is a programming error: Data::ElementToStringDataType does not cover type "
@@ -3230,9 +3234,7 @@ bool Expression::HasBoundVariables()
 
 bool CommandList::fIsInteger
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.HasBoundVariables())
-    return false;
-  if (theExpression.IsInteger())
+{ if (theExpression.IsInteger())
     theExpression.MakeAtom(1, theCommands, inputIndexBoundVars);
   else
     theExpression.MakeAtom(0, theCommands, inputIndexBoundVars);
@@ -3296,6 +3298,7 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::MultiplyRatOrPolyByRatOrPoly);
+  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeLittelmannRootOperator, Data::typeLSpath, Data::MultiplyLRObyLSPath);
 
   this->RegisterAdditiveDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeEltTensorGenVermasOverRF, Data::AddEltTensorToEltTensor);
   this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::AddUEToAny);
@@ -3532,6 +3535,12 @@ void CommandList::initPredefinedVars()
    "Lakshmibai-Seshadri path starting at 0. The first argument gives the semisimple Lie algebra, \
     the next arguments give the waypoints of the path.",
    "LSpath{}(G_2, (0,0), (2,1) )");
+  this->AddNonBoundVarMustBeNew
+  ("LRO", & this->fLittelmannOperator, "",
+   "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
+   respect to root of index i. If i is negative then the e_i root operator is defined to be \
+   the f_\alpha operator.",
+   "e_{{i}}:=LRO_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))");
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
@@ -3983,6 +3992,25 @@ bool Data::AddUEToAny(const Data& left, const Data& right, Data& output, std::st
   result+=rightCopy.GetUE();
   result.Simplify(*output.owner->theGlobalVariableS);
   output.MakeUE(*output.owner, result, output.theContextIndex);
+  return true;
+}
+
+bool Data::MultiplyLRObyLSPath
+(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Data::MultiplyLRObyLSPath");
+  LittelmannPath outputPath=right.GetValuE<LittelmannPath>();
+  WeylGroup& theWeyl=*outputPath.owner;
+  if (left.theIndex==0 || left.theIndex< -theWeyl.GetDim() || right.theIndex> theWeyl.GetDim())
+  { std::stringstream out;
+    out << " The Littelmann root operator must have an index whose absolute value is "
+    << "between 1 and the rank of the ambient Lie algebra. " ;
+    return output.SetError(out.str());
+  }
+  if (left.theIndex<0)
+    outputPath.ActByFalpha(-1-left.theIndex);
+  else
+    outputPath.ActByEalpha(left.theIndex-1);
+  output.MakeLSpath(*right.owner, right.GetAmbientSSAlgebra(), outputPath.Waypoints);
   return true;
 }
 
@@ -4500,6 +4528,8 @@ bool CommandList::StandardFunction
     if (!isGood)
       return false;
   }
+  if (result.HasBoundVariables() && !funHandle.flagMayActOnBoundVars)
+    return false;
   if(theFun(theCommands, inputIndexBoundVars, result, comments))
   { theExpression=result;
     return true;
@@ -6117,6 +6147,13 @@ void CommandList::AddNonBoundVarMustBeNew
   this->theObjectContainer.theNonBoundVars.AddNoRepetition(theV);
 }
 
+void Data::MakeLittelmannRootOperator
+(int inputIndex, CommandList& theBoss)
+{ this->reset(theBoss);
+  this->type=this->typeLittelmannRootOperator;
+  this->theIndex= inputIndex;
+}
+
 void Data::MakeLSpath
 (CommandList& theBoss, SemisimpleLieAlgebra& owner, List<Vector<Rational> >& waypts)
 { this->reset(theBoss);
@@ -6130,6 +6167,4 @@ void Data::MakeLSpath
   thePath.Waypoints=waypts;
   thePath.Simplify();
   this->theIndex= theBoss.theObjectContainer.theLSpaths.AddNoRepetitionOrReturnIndexFirst(thePath);
-
-
 }

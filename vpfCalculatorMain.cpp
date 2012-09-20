@@ -391,6 +391,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))";
 //  civilizedInput="SplitFDpartB3overG2{}(x_1,1,0)";
 //  civilizedInput="LSpath{}(G_2, (0,0), (2,1) )";
+//civilizedInput="e_{{i}}:=LRO_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -419,7 +420,8 @@ g_{-2} v_\\lambda\
   if (civilizedInput!="")
   { if (inputStringNames.ContainsObject("checkUsePreamble"))
     { std::stringstream tempStream;
-      tempStream << "g:=SemisimpleLieAlgebra{}" << inputWeylString << "_" << inputRankString << "; h_{{i}}:=g_{0, i};";
+      tempStream << "g:=SemisimpleLieAlgebra{}" << inputWeylString
+      << "_" << inputRankString << "; h_{{i}}:=g_{0, i};";
       civilizedInput=tempStream.str()+civilizedInput;
     }
     theParser.Evaluate(civilizedInput);

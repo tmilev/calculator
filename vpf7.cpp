@@ -8,8 +8,8 @@ ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Implementation file int
 template<class CoefficientType>
 Rational ModuleSSalgebra<CoefficientType>::hwTrace
 (const Pair
- <TensorMonomial<int, MathRoutines::IntUnsignIdentity>,
- TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
+ <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+ MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
  & thePair, ProgressReport* theProgressReport
    )
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwTrace");
@@ -18,11 +18,11 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
     return this->cachedTraces[indexInCache];
   if (thePair.Object1.generatorsIndices.size==0)
     return 1;
-  Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>,
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity> > newPair;
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity>& newLeft=newPair.Object1;
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity>& newRight=newPair.Object2;
-  const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& oldRight=thePair.Object2;
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > newPair;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft=newPair.Object1;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight=newPair.Object2;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight=thePair.Object2;
   newLeft=thePair.Object1;
   (*newLeft.Powers.LastObject())-=1;
   int theIndex= *newLeft.generatorsIndices.LastObject();
@@ -33,7 +33,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
   int theIndexMinus=
   2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
   int theSimpleIndex= theIndex-this->GetOwner().GetNumPosRoots()-this->GetOwner().GetRank();
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity> Accum;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
   Accum.Powers.ReservE(oldRight.Powers.size);
   Accum.generatorsIndices.ReservE(oldRight.generatorsIndices.size);
   Vector<Rational> RemainingWeight;
@@ -103,7 +103,7 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
 
 template<class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::ApplyTAA
-(TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theMon)
+(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
 { for (int i=0; i<theMon.generatorsIndices.size; i++)
     theMon.generatorsIndices[i]=
     this->GetOwner().GetNumPosRoots()*2+
@@ -114,16 +114,16 @@ void ModuleSSalgebra<CoefficientType>::ApplyTAA
 
 template<class CoefficientType>
 Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
-  (const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon,
+  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
+   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
    ProgressReport* theProgressReport)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly");
-  const TensorMonomial<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
-  const TensorMonomial<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
   if (leftMon>rightMon)
     MathRoutines::swap(left, right);
-  Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>,
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity> > thePair;
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
   thePair.Object1=*left;
   thePair.Object2=*right;
 //  std::cout << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
@@ -361,7 +361,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     this->theGeneratingWordsIntGrouppedByWeight[i].size=0;
   }
   MonomialUniversalEnveloping<CoefficientType> currentNonReducedElement;
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity> tempMonInt;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMonInt;
   for (int i=0; i<thePaths.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
     currentNonReducedElement.MakeConst(*this->theAlgebras, this->indexAlgebra);
@@ -402,7 +402,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
     this->theGeneratingWordsGrouppedByWeight[i];
-    List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
     this->theGeneratingWordsIntGrouppedByWeight[i];
     currentList.QuickSortDescending();
     currentListInt.QuickSortDescending();
@@ -613,7 +613,7 @@ void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
   { Matrix<CoefficientType>& currentBF=this->theBilinearFormsAtEachWeightLevel[l];
     List<MonomialUniversalEnveloping<CoefficientType> >& currentWordList=
     this->theGeneratingWordsGrouppedByWeight[l];
-    List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& currentWordListInt=
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordListInt=
     this->theGeneratingWordsIntGrouppedByWeight[l];
     currentBF.init(currentWordList.size, currentWordList.size);
     for (int i=0; i<currentWordList.size; i++)
@@ -1016,8 +1016,32 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
     this->basisRationalForm.RowToRoot(0, outputGenerator);
 }
 
+void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
+{ if(this->owner==0)
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (displayIndex>0)
+    this->ActByEalpha(displayIndex-1);
+  else
+    this->ActByFalpha(-displayIndex-1);
+}
+
 void LittelmannPath::ActByEalpha(int indexAlpha)
-{ Rational theMin=0;
+{ if(this->owner==0)
+  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (indexAlpha<0 || indexAlpha>=this->owner->GetDim())
+  { std::cout << " This is a programming error: index of Littelmann root operator out of range. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+ if (this->Waypoints.size==0)
+    return;
+  Rational theMin=0;
   int minIndex=-1;
   assert (this->owner!=0);
   WeylGroup& theWeyl=*this->owner;
@@ -1398,7 +1422,7 @@ bool LittelmannPath::GenerateOrbit
 
 std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
 (List<int>& input)
-{ TensorMonomial<Rational> tempMon;
+{ MonomialTensor<Rational> tempMon;
   tempMon=input;
   tempMon.generatorsIndices.ReverseOrderElements();
   tempMon.Powers.ReverseOrderElements();
@@ -1828,10 +1852,10 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
 
 /*template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::
-GetWithSimpleGeneratorsOnly(MonomialCollection<TensorMonomial<CoefficientType> >& output)
+GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<CoefficientType> >& output)
 { output.MakeZero();
-  MonomialCollection<TensorMonomial<CoefficientType> > pbwmon, singlemon;
-  TensorMonomial tempMon;
+  MonomialCollection<MonomialTensor<CoefficientType> > pbwmon, singlemon;
+  MonomialTensor tempMon;
   for (int i=0; i<this->size; i++)
   { pbwmon.MakeOne();
     for (int j=0; j<(*this)[i].generatorsIndices.size; j++)
@@ -2364,24 +2388,24 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
 }
 
 bool LittelmannPath::IsAdaptedString
-  (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theString)
+  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
 { LittelmannPath tempPath=*this;
   LittelmannPath tempPath2;
-  std::cout << "<hr>";
+//  std::cout << "<hr>";
   for (int i=0; i<theString.generatorsIndices.size; i++)
-  { std::cout << "e_" << -theString.generatorsIndices[i] << "^"
-    << theString.Powers[i] << "(" << tempPath.ToString() << ") =";
+  { //std::cout << "e_" << -theString.generatorsIndices[i] << "^"
+    //<< theString.Powers[i] << "(" << tempPath.ToString() << ") =";
     for (int k=0; k<theString.Powers[i]; k++)
       tempPath.ActByEalpha(-theString.generatorsIndices[i]-1);
     if (tempPath.IsEqualToZero())
       return false;
     tempPath2=tempPath;
     tempPath2.ActByEalpha(-theString.generatorsIndices[i]-1);
-    std::cout << tempPath.ToString();
+    //std::cout << tempPath.ToString();
     if (!tempPath2.IsEqualToZero())
       return false;
-    if (i!=theString.generatorsIndices.size-1)
-      std::cout << "<br>";
+    //if (i!=theString.generatorsIndices.size-1)
+    //  std::cout << "<br>";
   }
   return true;
 }
@@ -2407,4 +2431,46 @@ void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup
       tempElt[j]= indexShifts[tempElt[j]];
     output.AddOnTop(tempElt);
   }
+}
+
+std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool includeDominance)const
+{ if (this->Waypoints.size==0)
+    return "0";
+  std::stringstream out;
+  for (int i=0; i<this->Waypoints.size; i++)
+  { if (useSimpleCoords)
+      out << this->Waypoints[i].ToString();
+    else
+      out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ToString();
+    if (i!=this->Waypoints.size-1)
+    { if (useArrows)
+        out << "->";
+      else
+        out << ",";
+    }
+  }
+  if (includeDominance)
+  { List<int> dominantIndices;
+    Vector<Rational> tempV;
+    out << " ";
+    for (int i=0; i<this->owner->GetDim(); i++)
+    { tempV.MakeEi(this->owner->GetDim(),i);
+      for (int j=0; j<this->Waypoints.size; j++)
+        if (this->owner->RootScalarCartanRoot(this->Waypoints[j], tempV).IsPositive())
+        { dominantIndices.AddOnTop(i+1);
+          break;
+        }
+      for (int j=0; j<this->Waypoints.size; j++)
+        if (this->owner->RootScalarCartanRoot(this->Waypoints[j], tempV).IsNegative())
+        { dominantIndices.AddOnTop(-i-1);
+          break;
+        }
+    }
+    for (int i=0; i<dominantIndices.size; i++)
+    { out << "e_{" << i << "}";
+      if (i!=dominantIndices.size-1)
+        out << ", ";
+    }
+  }
+  return out.str();
 }

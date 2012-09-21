@@ -562,7 +562,7 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
   out << "</table>";
   LittelmannPath lastPath=theOrbit[0];
   LittelmannPath tempPath;
-  TensorMonomial<int, MathRoutines::IntUnsignIdentity> tempMon;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
   tempMon=*theGens.LastObject();
   tempMon.generatorsIndices.ReverseOrderElements();
   tempMon.Powers.ReverseOrderElements();
@@ -599,9 +599,13 @@ std::string LittelmannPath::GenerateOrbitAndAnimate(GlobalVariables& theGlobalVa
     <<  "</td><td>" << tempPath.ToString() << "</td><td>";
     for (int j=0; j<this->owner->GetDim(); j++)
     { tempPath=theOrbit[i];
-      tempPath.ActByEalpha(j);
+      tempPath.ActByEFDisplayIndex(j+1);
       if (!tempPath.IsEqualToZero())
         out << "e_{" << j+1 << "}, ";
+      tempPath=theOrbit[i];
+      tempPath.ActByEFDisplayIndex(-j-1);
+      if (!tempPath.IsEqualToZero())
+        out << "e_{" << -j-1 << "}, ";
     }
     out << "</td></tr>";
   }

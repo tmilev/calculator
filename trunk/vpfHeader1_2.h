@@ -2308,7 +2308,7 @@ public:
 };
 
 template <class CoefficientType>
-class MonomialUniversalEnveloping : public TensorMonomial<CoefficientType>
+class MonomialUniversalEnveloping : public MonomialTensor<CoefficientType>
 {
 private:
 public:
@@ -2329,7 +2329,7 @@ public:
   ;
   template<class otherType>
   void operator=(const MonomialUniversalEnveloping<otherType>& other)
-  { this->TensorMonomial<CoefficientType>::operator=(other);
+  { this->MonomialTensor<CoefficientType>::operator=(other);
     this->owners=other.owners;
     this->indexInOwners=other.indexInOwners;
   }
@@ -2354,7 +2354,7 @@ public:
   void SetNumVariables(int newNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   unsigned int HashFunction() const
-  { return this->::TensorMonomial<CoefficientType>::HashFunction();
+  { return this->::MonomialTensor<CoefficientType>::HashFunction();
   }
   static inline unsigned int HashFunction(const MonomialUniversalEnveloping<CoefficientType>& input)
   { return input.HashFunction();
@@ -2410,19 +2410,19 @@ public:
   ;
   MonomialUniversalEnveloping():owners(0), indexInOwners(-1){}
   bool operator>(const MonomialUniversalEnveloping& other)
-  { return this->::TensorMonomial<CoefficientType>::operator>(other);
+  { return this->::MonomialTensor<CoefficientType>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other)const
   { return this->owners==other.owners && this->indexInOwners==other.indexInOwners
     && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other)
-  { this->::TensorMonomial<CoefficientType>::operator=(other);
+  { this->::MonomialTensor<CoefficientType>::operator=(other);
     this->owners=other.owners;
     this->indexInOwners=other.indexInOwners;
   }
   inline void operator*=(const MonomialUniversalEnveloping& other)
-  { this->::TensorMonomial<CoefficientType>::operator*=(other);
+  { this->::MonomialTensor<CoefficientType>::operator*=(other);
   }
 };
 
@@ -2479,7 +2479,7 @@ public:
 (const ElementSemisimpleLieAlgebra& input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
   ;
-  bool GetWithSimpleGeneratorsOnly(MonomialCollection<TensorMonomial<CoefficientType>, CoefficientType>& output);
+  bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<CoefficientType>, CoefficientType>& output);
   void MakeOneGenerator
 (int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners, const CoefficientType& theRingUnit)
   ;
@@ -2778,6 +2778,7 @@ public:
   }
   void ActByFalpha(int indexAlpha);
   void ActByEalpha(int indexAlpha);
+  void ActByEFDisplayIndex(int displayIndex);
 //   List<Rational> Speeds;
   void operator+=(const LittelmannPath& other)
   { this->Waypoints.ReservE(this->Waypoints.size+other.Waypoints.size);
@@ -2786,7 +2787,7 @@ public:
       this->Waypoints.AddOnTop(other.Waypoints[i]+endPoint);
   }
   bool IsAdaptedString
-  (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theString)
+  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theString)
   ;
   std::string ElementToStringIndicesToCalculatorOutput
 (LittelmannPath& inputStartingPath, List<int> & input)
@@ -2802,28 +2803,7 @@ std::string GenerateOrbitAndAnimate
 (GlobalVariables& theGlobalVariables)
 ;
   bool MinimaAreIntegral();
-  std::string ToString(bool useSimpleCoords=true, bool useArrows=true)const
-  { if (this->Waypoints.size==0)
-      return "0";
-    std::stringstream out;
-    if (!useArrows)
-      out << "(";
-    for (int i=0; i<this->Waypoints.size; i++)
-    { if (useSimpleCoords)
-        out << this->Waypoints[i].ToString();
-      else
-        out << this->owner->GetFundamentalCoordinatesFromSimple(this->Waypoints[i]).ToString();
-      if (i!=this->Waypoints.size-1)
-      { if (useArrows)
-          out << "->";
-        else
-          out << ",";
-      }
-    }
-    if (!useArrows)
-      out << ")";
-    return out.str();
-  }
+  std::string ToString(bool useSimpleCoords=true, bool useArrows=true, bool includeDominance=false)const;
   void Simplify();
   unsigned int HashFunction()const
   { return this->Waypoints.HashFunction();
@@ -3310,12 +3290,12 @@ class ModuleSSalgebra
   List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsGeneratorS;
   Selection ComputedGeneratorActions;
   Rational hwtaabfSimpleGensOnly
-  (const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const TensorMonomial<int, MathRoutines::IntUnsignIdentity>& rightMon,
+  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
+   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
    ProgressReport* theProgressReport=0)
   ;
   Rational hwTrace
-  (const Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>, TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& thePair,
+  (const Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& thePair,
    ProgressReport* theProgressReport=0)
   ;
   void TestConsistency(GlobalVariables& theGlobalVariables);
@@ -3326,12 +3306,12 @@ public:
   //Note: for some reason, the linker fails to resolve without the explicit template specialization below.
   //As far as I am concerned this is a bug with either the compiler or the C++ language itself.
   HashedListSpecialized
-  <TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
+  <MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   theGeneratingWordsNonReducedInt;
   Vectors<Rational> theGeneratingWordsWeightsPlusWeightFDpart;
 
   List<List<MonomialUniversalEnveloping<CoefficientType> > > theGeneratingWordsGrouppedByWeight;
-  List<List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
+  List<List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > > theGeneratingWordsIntGrouppedByWeight;
 //  List<ElementUniversalEnveloping<CoefficientType> > theSimpleGens;
 //  List<List<List<ElementUniversalEnveloping<CoefficientType> > > > actionsSimpleGens;
 //  List<Matrix<CoefficientType> > actionsSimpleGensMatrixForM;
@@ -3358,7 +3338,7 @@ public:
   //As far as I am concerned this is a bug with either the compiler or the C++ language itself.
   HashedListSpecialized
   <
-  Pair<TensorMonomial<int, MathRoutines::IntUnsignIdentity>, TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   > cachedPairs;
   List<Rational> cachedTraces;
 
@@ -3437,7 +3417,7 @@ public:
     return result;
   }
   void ApplyTAA
-  (TensorMonomial<int, MathRoutines::IntUnsignIdentity>& theMon)
+  (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
   ;
   void GetFDchar(charSSAlgMod<CoefficientType>& output);
   void SetNumVariables(int GoalNumVars);
@@ -8559,14 +8539,14 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
 { Vector<Rational> genWeight=this->GetOwner().GetWeightOfGenerator(generatorIndex);
   Vector<Rational> targetWeight;
   Pair
-  <TensorMonomial<int, MathRoutines::IntUnsignIdentity>,
-    TensorMonomial<int, MathRoutines::IntUnsignIdentity> >
+  <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+    MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   currentPair;
   MatrixTensor<CoefficientType>& outputMat= this->actionsGeneratorsMaT[generatorIndex];
   Vector<CoefficientType> theScalarProds;
   outputMat.MakeZero();
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-  { List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> >& currentWordList=
+  { List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordList=
     this->theGeneratingWordsIntGrouppedByWeight[i];
     Vector<Rational>& currentWeight=this->theModuleWeightsSimpleCoords[i];
     targetWeight=currentWeight+genWeight;
@@ -8576,7 +8556,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
     if (weightLevelIndex!=-1)
     { int columnOffset=this->GetOffsetFromWeightIndex(i);
       int rowOffset=this->GetOffsetFromWeightIndex(weightLevelIndex);
-      List<TensorMonomial<int, MathRoutines::IntUnsignIdentity> >&
+      List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >&
       otherWordList=this->theGeneratingWordsIntGrouppedByWeight[weightLevelIndex];
       for (int j=0; j<currentWordList.size; j++)
       { theScalarProds.SetSize(otherWordList.size);

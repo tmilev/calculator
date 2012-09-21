@@ -38,7 +38,7 @@ class ElementSemisimpleLieAlgebra;
 template<class CoefficientType>
 class ElementUniversalEnveloping;
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-class TensorMonomial;
+class MonomialTensor;
 template<class CoefficientType>
 class MonomialUniversalEnveloping;
 template<class CoefficientType>
@@ -4177,17 +4177,11 @@ public:
 };
 
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)= CoefficientType::HashFunction>
-class TensorMonomial
+class MonomialTensor
 {
   friend std::ostream& operator <<
-  (std::ostream& output, const TensorMonomial<CoefficientType, inputHashFunction>& theMon)
-  { if (theMon.generatorsIndices.size==0)
-    { output << "1";
-      return output;
-    }
-    for (int i=0; i< theMon.generatorsIndices.size; i++)
-      output << "g_{" << theMon.generatorsIndices[i] << "}^{" << theMon.Powers[i] << "}";
-    return output;
+  (std::ostream& output, const MonomialTensor<CoefficientType, inputHashFunction>& theMon)
+  { return output << theMon.ToString();
   }
 private:
 public:
@@ -4195,9 +4189,16 @@ public:
   List<CoefficientType> Powers;
   std::string ToString
   (FormatExpressions* theFormat=0)const
-  { std::stringstream tempStream;
-    tempStream << *this;
-    return tempStream.str();
+  { if (this->generatorsIndices.size==0)
+      return "1";
+    std::string theLetter= theFormat==0 ?  "g" : theFormat->chevalleyGgeneratorLetter;
+    std::stringstream out;
+    for (int i=0; i< this->generatorsIndices.size; i++)
+    { out << theLetter << "_{" << this->generatorsIndices[i] << "}";
+      if (!(this->Powers[i]==1))
+        out << "^{" << this->Powers[i] << "}";
+    }
+    return out.str();
   }
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
@@ -4209,12 +4210,12 @@ public:
     for (int i=0; i<other.size; i++)
       this->MultiplyByGeneratorPowerOnTheRight(other[i], 1);
   }
-  void operator=(const TensorMonomial<CoefficientType, inputHashFunction>& other)
+  void operator=(const MonomialTensor<CoefficientType, inputHashFunction>& other)
   { this->generatorsIndices=(other.generatorsIndices);
     this->Powers=other.Powers;
   }
   template<class otherType>
-  void operator=(const TensorMonomial<otherType>& other)
+  void operator=(const MonomialTensor<otherType>& other)
   { this->generatorsIndices=(other.generatorsIndices);
     this->Powers.SetSize(other.Powers.size);
     for (int i=0; i<other.Powers.size; i++)
@@ -4236,14 +4237,14 @@ public:
       SomeRandomPrimes[top-1-i]* inputHashFunction(this->Powers[i]);
     return result;
   }
-  static inline unsigned int HashFunction(const TensorMonomial<CoefficientType, inputHashFunction>& input)
+  static inline unsigned int HashFunction(const MonomialTensor<CoefficientType, inputHashFunction>& input)
   { return input.HashFunction();
   }
   void MakeConst()
   { this->generatorsIndices.size=0;
     this->Powers.size=0;
   }
-  bool operator>(const TensorMonomial<CoefficientType, inputHashFunction>& other)const
+  bool operator>(const MonomialTensor<CoefficientType, inputHashFunction>& other)const
   { if (other.generatorsIndices.size>this->generatorsIndices.size)
       return false;
     if (other.generatorsIndices.size< this->generatorsIndices.size)
@@ -4260,14 +4261,14 @@ public:
     }
     return false;
   }
-  bool operator==(const TensorMonomial<CoefficientType, inputHashFunction>& other)const
+  bool operator==(const MonomialTensor<CoefficientType, inputHashFunction>& other)const
   { return this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
-  inline void operator*=(const TensorMonomial<CoefficientType, inputHashFunction>& standsOnTheRight)
+  inline void operator*=(const MonomialTensor<CoefficientType, inputHashFunction>& standsOnTheRight)
   { if (standsOnTheRight.generatorsIndices.size==0)
       return;
     if (this==&standsOnTheRight)
-    { TensorMonomial<CoefficientType> tempMon;
+    { MonomialTensor<CoefficientType, inputHashFunction> tempMon;
       tempMon=standsOnTheRight;
       (*this)*=(tempMon);
       return;
@@ -8234,7 +8235,7 @@ std::string Vector<CoefficientType>::ToStringLetterFormat
 }
 
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
+void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheLeft
 (int theGeneratorIndexStandsOnTheLeft, const CoefficientType& thePower)
 { if (thePower==0)
     return;
@@ -8252,7 +8253,7 @@ void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowe
 }
 
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
+void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowerOnTheRight
 (int theGeneratorIndex, const CoefficientType& thePower)
 { if (thePower==0)
     return;
@@ -8266,7 +8267,7 @@ void TensorMonomial<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowe
 }
 
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
-bool TensorMonomial<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
+bool MonomialTensor<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
 { if (this->generatorsIndices.size<1)
     return false;
   if (lowestNonReducedIndex<0)

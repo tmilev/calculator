@@ -146,6 +146,7 @@ public:
   ;
   static bool DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyLRObyLSPath(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyLRObyLRO(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
@@ -522,6 +523,7 @@ public:
   HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   HashedList<LittelmannPath> theLSpaths;
+  HashedList<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
   std::string ToString();
 };

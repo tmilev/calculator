@@ -2730,7 +2730,7 @@ bool CommandList::fTestMonomialBaseConjecture
       MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort),
        0);
       reportStream << "\nPath orbit size = " << theStrings.size << " generated in "
-      << theCommands.theGlobalVariableS0>GetElapsedSeconds() << " seconds.";
+      << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
       theReport.Report(reportStream.str());
       for (int k=0; k<theStrings.size; k++)
       { LittelmannPath& currentPath=tempList[k];

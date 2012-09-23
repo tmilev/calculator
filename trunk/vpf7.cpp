@@ -1320,13 +1320,8 @@ int ParserNode::EvaluateAllLittelmannPaths
 }
 
 void LittelmannPath::MakeFromWeightInSimpleCoords
-  (Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
+  (const Vector<Rational>& weightInSimpleCoords, WeylGroup& theOwner)
 { this->owner=& theOwner;
-  if (weightInSimpleCoords.IsEqualToZero())
-  { this->Waypoints.SetSize(1);
-    this->Waypoints[0]=weightInSimpleCoords;
-    return;
-  }
   this->Waypoints.SetSize(2);
   this->Waypoints[0].MakeZero(theOwner.GetDim());
   this->Waypoints[1]=weightInSimpleCoords;
@@ -2454,22 +2449,14 @@ std::string LittelmannPath::ToString(bool useSimpleCoords, bool useArrows, bool 
     Vector<Rational> tempV;
     out << " ";
     for (int i=0; i<this->owner->GetDim(); i++)
-    { tempV.MakeEi(this->owner->GetDim(),i);
-      for (int j=0; j<this->Waypoints.size; j++)
-        if (this->owner->RootScalarCartanRoot(this->Waypoints[j], tempV).IsPositive())
-        { dominantIndices.AddOnTop(i+1);
-          break;
-        }
-      for (int j=0; j<this->Waypoints.size; j++)
-        if (this->owner->RootScalarCartanRoot(this->Waypoints[j], tempV).IsNegative())
-        { dominantIndices.AddOnTop(-i-1);
-          break;
-        }
-    }
-    for (int i=0; i<dominantIndices.size; i++)
-    { out << "e_{" << i << "}";
-      if (i!=dominantIndices.size-1)
-        out << ", ";
+    { LittelmannPath tempP=*this;
+      tempP.ActByEFDisplayIndex(i+1);
+      if (!tempP.IsEqualToZero())
+        out << "e_{" << i+1 << "}";
+      tempP=*this;
+      tempP.ActByEFDisplayIndex(-i-1);
+      if (!tempP.IsEqualToZero())
+        out << "e_{" << -i-1 << "},";
     }
   }
   return out.str();

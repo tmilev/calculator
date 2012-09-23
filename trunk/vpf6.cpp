@@ -4051,7 +4051,7 @@ bool Data::MultiplyLRObyLSPath
   WeylGroup& theWeyl=*outputPath.owner;
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> theLRO=
   left.GetValuE<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >();
-  for (int i=theLRO.generatorsIndices.size-1; i>=theLRO.generatorsIndices.size; i--)
+  for (int i=theLRO.generatorsIndices.size-1; i>=0; i--)
     if (theLRO.generatorsIndices[i]==0 || theLRO.generatorsIndices[i]< -theWeyl.GetDim()
         || theLRO.generatorsIndices[i]> theWeyl.GetDim())
     { std::stringstream out;

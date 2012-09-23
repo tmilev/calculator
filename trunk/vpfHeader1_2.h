@@ -2768,7 +2768,7 @@ public:
   WeylGroup* owner;
   Vectors<Rational> Waypoints;
   void MakeFromWeightInSimpleCoords
-  (Vector<Rational> & weightInSimpleCoords, WeylGroup& theOwner)
+  (const Vector<Rational> & weightInSimpleCoords, WeylGroup& theOwner)
   ;
   void MakeFromWaypoints
   (Vectors<Rational>& weightsInSimpleCoords, WeylGroup& theOwner)

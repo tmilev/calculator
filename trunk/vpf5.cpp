@@ -2685,6 +2685,10 @@ bool CommandList::fTestMonomialBaseConjecture
   ProgressReport theReport(theCommands.theGlobalVariableS);
   bool ConjectureBholds=true;
   bool ConjectureCholds=true;
+  LittelmannPath hwPath;
+  List<LittelmannPath> tempList;
+  List<List<int> > theStrings;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMon;
   for (int i=0; i<theRanks.size; i++)
   { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
     currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
@@ -2718,8 +2722,32 @@ bool CommandList::fTestMonomialBaseConjecture
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
       int startRatOps=Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
       +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
+      hwPath.MakeFromWeightInSimpleCoords
+      (currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl);
+      double timeBeforeOrbit=theCommands.theGlobalVariableS->GetElapsedSeconds();
+      hwPath.GenerateOrbit
+      (tempList, theStrings, *theCommands.theGlobalVariableS,
+      MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort),
+       0);
+      reportStream << "\nPath orbit size = " << theStrings.size << " generated in "
+      << theCommands.theGlobalVariableS0>GetElapsedSeconds() << " seconds.";
+      theReport.Report(reportStream.str());
+      for (int k=0; k<theStrings.size; k++)
+      { LittelmannPath& currentPath=tempList[k];
+        tempMon=theStrings[k];
+        tempMon.generatorsIndices.ReverseOrderElements();
+        tempMon.Powers.ReverseOrderElements();
+        if (!currentPath.IsAdaptedString(tempMon))
+        { foundBad=true;
+          break;
+        }
+      }
+      if (!foundBad)
+        out << "<td>all strings adapted</td>";
+      else
+        out << "<td>has non-adapted string</td>";
 //      goto tmp;
-      if (theMod.MakeFromHW
+/*      if (theMod.MakeFromHW
           (theCommands.theObjectContainer.theLieAlgebras, i,
            currentHW, tempSel, *theCommands.theGlobalVariableS, 1, 0, 0, true))
       { out << "<td>is good</td>";
@@ -2747,9 +2775,9 @@ bool CommandList::fTestMonomialBaseConjecture
         theReport.Report("BAD BAD BAD!!!");
         foundBad=true;
         break;
-      }
+      }*/
 //      tmp:
-      out <<"</tr>";
+      out << "</tr>";
       if (foundBad)
         break;
       latexReport << "\\\\";

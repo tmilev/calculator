@@ -2851,6 +2851,51 @@ bool CommandList::fLSPath
 
 }
 
+bool CommandList::fInvertMatrix
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ Matrix<Rational> mat, output, tempMat;
+  if (!theCommands.fGetMatrix<Rational>(theExpression, mat, 0, -1, 0, comments))
+    return theExpression.SetError("Failed to extract matrix with rational coefficients");
+  if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
+    return theExpression.SetError("The matrix is not square");
+  output.MakeIdMatrix(mat.NumRows);
+  int tempI;
+  int NumFoundPivots = 0;
+  std::stringstream out;
+  Rational tempElement;
+  FormatExpressions theFormat;
+  theFormat.flagUseLatex=true;
+  theFormat.flagUseHTML=false;
+  out << CGI::GetHtmlMathSpanPure(mat.ToString(&theFormat)+"^{-1}=");
+  for (int i=0; i<mat.NumCols; i++)
+  { tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
+    if (tempI!=-1)
+    { if (tempI!=NumFoundPivots)
+      { mat.SwitchTwoRows(NumFoundPivots, tempI);
+        output.SwitchTwoRows (NumFoundPivots, tempI);
+      }
+      tempElement=mat.elements[NumFoundPivots][i];
+      tempElement.Invert();
+      mat.RowTimesScalar(NumFoundPivots, tempElement);
+      output.RowTimesScalar(NumFoundPivots, tempElement);
+      for (int j = 0; j<mat.NumRows; j++)
+        if (j!=NumFoundPivots)
+          if (!mat.elements[j][i].IsEqualToZero())
+          { tempElement=(mat.elements[j][i]);
+            tempElement.Minus();
+            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
+            output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+          }
+      NumFoundPivots++;
+    }
+  }
+  if (NumFoundPivots<mat.NumRows)
+    out << "Matrix is not invertible. ";
+  out << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 class DoxygenInstance
 {
   public:

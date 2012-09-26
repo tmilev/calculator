@@ -392,6 +392,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="SplitFDpartB3overG2{}(x_1,1,0)";
 //  civilizedInput="LSpath{}(G_2, (0,0), (2,1) )";
 //civilizedInput="e_{{i}}:=LRO_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))";
+//  civilizedInput="x:=Polynomial{}x;\n(1+x)/x";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

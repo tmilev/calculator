@@ -3116,7 +3116,9 @@ bool CommandList::fSSAlgebra
   if (oldSize<theCommands.theObjectContainer.theLieAlgebras.size)
     if (comments!=0)
     { std::stringstream out;
-      FormatExpressions theFormat;
+      FormatExpressions theFormat, latexFormat;
+      latexFormat.flagUseLatex=true;
+      latexFormat.flagUseHTML=false;
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
       out
@@ -3144,12 +3146,12 @@ bool CommandList::fSSAlgebra
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
       << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
-      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(false, true) );
+      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
       Rational tempRat;
       Matrix<Rational> tempMat;
       tempMat = theWeyl.CartanSymmetric;
       tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
-      out  << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ToString();
+      out << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ToString();
     /*  Rational theRatio;
       for (int j=0; j<theWeyl.GetDim(); j++)
       { theRatio=0;
@@ -3233,7 +3235,7 @@ bool CommandList::fSSAlgebra
         std::stringstream tempStream;
         tempStream << "SemisimpleLieAlgebraVerbose{}" << theSSalgebra.theWeyl.WeylLetter << "_" << theSSalgebra.GetRank();
         out << theCommands.GetCalculatorLink(tempStream.str());
-        out  << " instead. ";
+        out << " instead. ";
       }
       *comments << out.str();
     }
@@ -3311,10 +3313,13 @@ void CommandList::initCrunchers()
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeElementUE, Data::MultiplyAnyByUE);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeElementUE, Data::MultiplyAnyByUE);
 
-  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::DivideRFOrPolyByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::DivideRFOrPolyByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::DivideRFOrPolyByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typePoly, Data::DivideRFOrPolyByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
+  this->RegisterDivCruncherNoFail(Data::typeRational, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
+
 
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
   this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
@@ -3569,6 +3574,12 @@ void CommandList::initPredefinedVars()
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
    "e_{{i}}:=LRO_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))");
+  this->AddNonBoundVarMustBeNew
+  ("InvertMatrixVerbose", & this->fInvertMatrix, "",
+   "Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
+   printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
+   / calculus students. ",
+   "InvertMatrixVerbose{}((1,2),(2,3))");
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
@@ -3966,7 +3977,7 @@ bool Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& ri
   return true;
 }
 
-bool Data::DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
+bool Data::DivideRFOrPolyOrRatByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
 { output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))

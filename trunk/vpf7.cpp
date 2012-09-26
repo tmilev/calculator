@@ -427,6 +427,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->IntermediateStepForMakeFromHW
   (this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
   bool isBad=false;
+  FormatExpressions htmlFormat;
   if (outputReport!=0)
     for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
     { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
@@ -441,7 +442,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
           << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
         }
         monomialDetailStream << "; Matrix of Shapovalov form associated to current weight level: <br> "
-        << theBF.ToString(true, false);
+        << theBF.ToString(&theGlobalVariables.theDefaultFormat);
         if (!theBF.IsPositiveDefinite())
         { monomialDetailStream << "<b>Is not positive definite!</b>";
           this->flagConjectureCholds=false;
@@ -458,7 +459,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
       }
       if (theBFinverted.NumRows>0)
       { if (outputReport!=0)
-          monomialDetailStream << theBFinverted.ToString(true, false);
+          monomialDetailStream << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat);
       }
       else
       { if (outputReport!=0)

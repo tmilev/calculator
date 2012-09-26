@@ -1447,7 +1447,7 @@ public:
   { for (int i=0; i<inputOutput.size; i++)
       this->ActOnVectorColumn(inputOutput[i], TheRingZero);
   }
-  std::string ToString(bool useHtml=true, bool useLatex=false)const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   std::string ElementToStringWithBlocks(List<int>& theBlocks);
   void MakeIdMatrix(int theDimension, const Element& theRingUnit=1, const Element& theRingZero=0)
   { this->init(theDimension, theDimension);
@@ -2148,47 +2148,6 @@ std::string Matrix<Element>::ElementToStringWithBlocks(List<int>& theBlocks)
   return out.str();
 }
 
-template <typename Element>
-std::string Matrix<Element>::ToString(bool useHtml, bool useLatex)const
-{ std::stringstream out;
-  std::string tempS;
-  if (useHtml)
-    out << "<table>";
-  if (useLatex)
-  { out << "\\left(\\begin{array}{";
-    for (int j=0; j<this->NumCols; j++)
-      out << "c";
-    out << "}";
-  }
-  for (int i=0; i<this->NumRows; i++)
-  { if (useHtml)
-      out << "<tr>";
-    for (int j=0; j<this->NumCols; j++)
-    { tempS=this->elements[i][j].ToString();
-      if (useHtml)
-        out << "<td>";
-      out << tempS;
-      if (useLatex)
-        if (j!=this->NumCols-1)
-          out << " & ";
-      if (useHtml)
-        out << "</td>";
-      if (!useHtml && !useLatex)
-        out << ", \t ";
-    }
-    if (useHtml)
-      out << "</tr>";
-    if (useLatex)
-      out << "\\\\";
-    out << "\n";
-  }
-  if (useHtml)
-    out << "</table>";
-  if (useLatex)
-    out << "\\end{array}\\right)";
-  return out.str();
-}
-
 template<typename Element>
 void Matrix<Element>::FindZeroEigenSpacE(List<List<Element> >& output, const Element& theRingUnit, const Element& theRingMinusUnit, const Element& theRingZero, GlobalVariables& theGlobalVariables)
 { Matrix<Element> tempMat;
@@ -2353,7 +2312,9 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows
 }
 
 template <typename Element>
-void Matrix<Element>::GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints)
+void Matrix<Element>::GaussianEliminationByRows
+(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
+ bool returnNonPivotPoints)
 { int tempI;
   int NumFoundPivots = 0;
   int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
@@ -4789,19 +4750,21 @@ public:
   int TotalDegree()const;
   bool IsEqualToOne()const
   { CoefficientType tempC;
-    if (this->IsAConstant(tempC))
+    if (this->IsAConstant(&tempC))
       return tempC.IsEqualToOne();
     return false;
   }
-  bool IsAConstant(CoefficientType& whichConstant)const
+  bool IsAConstant(CoefficientType* whichConstant=0)const
   { if (this->size>1)
       return false;
     if (this->size==0)
-    { whichConstant=0;
+    { if (whichConstant!=0)
+        *whichConstant=0;
       return true;
     }
+    if (whichConstant!=0)
+      *whichConstant=this->theCoeffs[0];
     MonomialP& theMon=this->TheObjects[0];
-    whichConstant=this->theCoeffs[0];
     return theMon.IsAConstant();
   }
   bool IsNegative()const
@@ -4809,10 +4772,6 @@ public:
     if(!this->IsAConstant(tempC))
       return false;
     return tempC.IsNegative();
-  }
-  bool IsAConstant()const
-  { CoefficientType tempC;
-    return this->IsAConstant(tempC);
   }
   bool IsLinearNoConstantTerm()
   { for (int i=0; i<this->size; i++)
@@ -5193,7 +5152,7 @@ public:
     return tempRat;
   }
 
-  int GetNumVars() {return this->NumVars;}
+  int GetNumVars()const {return this->NumVars;}
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
   RationalFunction(const RationalFunction& other): context(0), NumVars(0), expressionType(RationalFunction::typeRational)
   { this->Assign(other);
@@ -5288,43 +5247,7 @@ public:
 //    other.checkConsistency();
 //    this->checkConsistency();
   }
-  bool checkConsistency()const
-  { if (this->expressionType==this->typePoly)
-    { if (this->Numerator.IsZeroPointer())
-      { std::cout << "This is a programming error: "
-        << "  a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-        return false;
-      }
-      if (this->Numerator.GetElementConst().IsAConstant())
-      { std::cout << "This is a programming error: "
-        << " a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-        return false;
-      }
-//      int commentMeOutWhenDoneDebugging=-1;
-//      this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
-    }
-    if (this->expressionType==this->typeRationalFunction)
-    { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
-      { std::cout << "This is a programming error: "
-        << "  a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-        return false;
-      }
-      if (this->Denominator.GetElementConst().IsAConstant())
-      { std::cout << "This is a programming error: "
-        << "  a rational function is flagged as having non-constant denominator, but the denominator is constant. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-        return false;
-      }
-    }
-    return true;
-  }
+  bool checkConsistency()const;
   inline void SetNumVariables
   (int GoalNumVars)
   { this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
@@ -5352,7 +5275,7 @@ public:
     this->Numerator.GetElement().MakeDegreeOne(this->NumVars, theIndex, theCoeff);
     this->context=&theGlobalVariables;
   }
-  void GetNumerator(Polynomial<Rational> & output)
+  void GetNumerator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
     { case RationalFunction::typeRational: output.MakeConst(this->NumVars, this->ratValue); return;
       default: output=this->Numerator.GetElementConst(); return;
@@ -5462,23 +5385,7 @@ public:
     }
   }
   inline void TimesConstant(const Rational& theConst){ this->operator*=(theConst);}
-  void Invert()
-  { //std::cout << "inverting " << this->ToString();
-    assert(this->checkConsistency());
-    if (this->expressionType==this->typeRational)
-    { assert(!this->ratValue.IsEqualToZero());
-      this->ratValue.Invert();
-      return;
-    }
-    if (this->expressionType==this->typePoly)
-      this->ConvertToType(this->typeRationalFunction);
-    assert(!this->Numerator.GetElement().IsEqualToZero());
-    MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
-    this->ReduceMemory();
-    this->SimplifyLeadingCoefficientOnly();
-    assert(this->checkConsistency());
-    //std::cout << " to get: " << this->ToString();
-  }
+  void Invert();
   void MakeOne(int theNumVars, GlobalVariables* theContext)
   { this->MakeConst(theNumVars, 1, theContext);
   }
@@ -8286,5 +8193,48 @@ bool MonomialTensor<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiv
   this->generatorsIndices.SetSize(lowestNonReducedIndex+1);
   this->Powers.SetSize(lowestNonReducedIndex+1);
   return result;
+}
+
+template <typename Element>
+std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
+{ std::stringstream out;
+  std::string tempS;
+  bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
+  bool useLatex= theFormat==0 ? false : theFormat->flagUseLatex;
+  if (useHtml)
+    out << "<table>";
+  if (useLatex)
+  { out << "\\left(\\begin{array}{";
+    for (int j=0; j<this->NumCols; j++)
+      out << "c";
+    out << "}";
+  }
+  for (int i=0; i<this->NumRows; i++)
+  { if (useHtml)
+      out << "<tr>";
+    for (int j=0; j<this->NumCols; j++)
+    { tempS=this->elements[i][j].ToString();
+      if (useHtml)
+        out << "<td>";
+      out << tempS;
+      if (useLatex)
+        if (j!=this->NumCols-1)
+          out << " & ";
+      if (useHtml)
+        out << "</td>";
+      if (!useHtml && !useLatex)
+        out << ", \t ";
+    }
+    if (useHtml)
+      out << "</tr>";
+    if (useLatex)
+      out << "\\\\";
+    out << "\n";
+  }
+  if (useHtml)
+    out << "</table>";
+  if (useLatex)
+    out << "\\end{array}\\right)";
+  return out.str();
 }
 #endif

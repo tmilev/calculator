@@ -416,6 +416,11 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
     if (useHtml)
     out << "<br>";
   }
+  FormatExpressions localFormat, latexFormat;
+  localFormat.flagUseHTML=useHtml;
+  localFormat.flagUseLatex=useLatex;
+  latexFormat.flagUseHTML=false;
+  latexFormat.flagUseLatex=true;
   for (int i=0; i<this->IndicesContainingRootSAs.size; i++)
   { out << "\nContaining regular semisimple subalgebra number " << i+1 << ": ";
     rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
@@ -434,10 +439,10 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
     out << "\nSimple basis subalgebra: " << tempS;
     currentSA.theDynkinDiagram.GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
     if (!usePNG)
-      tempS=tempMat.ToString(useHtml, useLatex);
+      tempS=tempMat.ToString(&localFormat);
     else
     { std::stringstream tempStreamX;
-      tempS=tempMat.ToString(false, true);
+      tempS=tempMat.ToString(&latexFormat);
       tempStreamX << "\\[" << tempS << "\\]";
       tempS=tempStreamX.str();
     }
@@ -3618,7 +3623,7 @@ void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
   WeylGroup& theWeyl=this->owner->theHmm.theRange().theWeyl;
   theWeyl.ComputeWeylGroup(51840);
   out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">"
-  << this->owner->theHmm.theRange().theWeyl.CartanSymmetric.ToString(false, true) << "</div>Root system:";
+  << this->owner->theHmm.theRange().theWeyl.CartanSymmetric.ToString() << "</div>Root system:";
   out << "<br>Size of Weyl group by formula: " << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
   out << "<br>Explicitly computed elements: " << theWeyl.size;
   out << "<br>Each element is parametrized by a list of simple reflections. <br>For example an element parametrized by 1,2 corresponds to the element <span class=\"math\">s_{\\alpha_1}s_{\\alpha_2}</span>,";
@@ -3648,7 +3653,7 @@ void ParserNode::EvaluateOuterAutos(GlobalVariables& theGlobalVariables)
   tempMat2.ComputeDeterminantOverwriteMatrix(tempRat);
   out << "<br>one outer automorphism of the Lie algebra is realized as the following matrix. <br> The coordinates of the matrix are given in the ordered basis ";
   out << " <div class=\"math\" scale=\"50\"> g_{-n}, \\dots, g_{-1}, h_1,\\dots, h_k, g_1,\\dots, g_n</div> where the generators are as in the table on the right.<br> Its determinant is \n" << tempRat.ToString();
-  out << "<div class=\"math\" scale=\"50\">" << tempMat.ToString(false, true) << "</div>";
+  out << "<div class=\"math\" scale=\"50\">" << tempMat.ToString() << "</div>";
   this->outputString=out.str();
 }
 
@@ -3966,29 +3971,83 @@ std::string VectorPartition::ToString(bool useHtml)
   return out.str();
 }
 
+void RationalFunction::Invert()
+{ //std::cout << "inverting " << this->ToString();
+  assert(this->checkConsistency());
+  if (this->expressionType==this->typeRational)
+  { assert(!this->ratValue.IsEqualToZero());
+    this->ratValue.Invert();
+    return;
+  }
+  if (this->expressionType==this->typePoly)
+    this->ConvertToType(this->typeRationalFunction);
+  assert(!this->Numerator.GetElement().IsEqualToZero());
+  MathRoutines::swap(this->Numerator.GetElement(), this->Denominator.GetElement());
+  this->expressionType=this->typeRationalFunction;
+  this->ReduceMemory();
+  this->SimplifyLeadingCoefficientOnly();
+  assert(this->checkConsistency());
+  //std::cout << " to get: " << this->ToString();
+}
+
+
+bool RationalFunction::checkConsistency()const
+{ if (this->expressionType==this->typePoly)
+  { if (this->Numerator.IsZeroPointer())
+    { std::cout << "This is a programming error: "
+      << "  a rational function is flagged as being a non-constant polynomial, but the numerator pointer is zero. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    if (this->Numerator.GetElementConst().IsAConstant())
+    { std::cout << "This is a programming error: "
+      << " a rational funtion is flagged as having a non-constant numerator, but the numerator is constant. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+//      int commentMeOutWhenDoneDebugging=-1;
+//      this->Numerator.GetElementConst().GrandMasterConsistencyCheck();
+  }
+  if (this->expressionType==this->typeRationalFunction)
+  { if (this->Numerator.IsZeroPointer() || this->Denominator.IsZeroPointer())
+    { std::cout << "This is a programming error: "
+      << "  a rational function is flagged as having non-constant denominator, but either the numerator or the denominator pointer is zero. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    if (this->Denominator.GetElementConst().IsAConstant())
+    { std::cout << "This is a programming error: "
+      << "  a rational function is flagged as having non-constant denominator, but the denominator is constant. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string RationalFunction::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
-  //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
+{ //out << "( Number variables: " << this->NumVars << ", hash: " << this->HashFunction() << ")";
   if (this->expressionType==this->typeRational)
   { //out << "(type: rational)";
-    out << this->ratValue.ToString();
-    return out.str();
+    return this->ratValue.ToString();
   }
-  bool hasDenominator=(this->expressionType==this->typeRationalFunction);
-  //if (hasDenominator)
-    //out << "(type: honest RF)";
-  //else
-    //out << "(type: poly)";
-//  if (hasDenominator && useLatex)
-//    out << "\\frac{";
+  if (this->expressionType==this->typePoly)
+    return this->Numerator.GetElementConst().ToString(theFormat);
+  std::stringstream out;
+  bool needBracket=false;
+  if (this->Numerator.GetElementConst().NeedsBrackets())
+  { needBracket=true;
+    out << "(";
+  }
   out << this->Numerator.GetElementConst().ToString(theFormat);
-  if (hasDenominator)
-  { //if (useLatex)
-    //  out << "}{";
-    out << "/(" << this->Denominator.GetElementConst().ToString(theFormat) << ")";
-    //if (useLatex)
-    //  out << "}";
-  }
+  if (needBracket)
+    out << ")";
+  out << "/(" << this->Denominator.GetElementConst().ToString(theFormat) << ")";
+//  out << " Num vars: " << this->GetNumVars();
   return out.str();
 }
 
@@ -4403,6 +4462,13 @@ void RationalFunction::SimplifyLeadingCoefficientOnly()
   tempRat.Invert();
   this->Denominator.GetElement()*=(tempRat);
   this->Numerator.GetElement()*=(tempRat);
+  if (this->Denominator.GetElement().IsEqualToOne())
+  { this->expressionType=this->typePoly;
+    if (this->Numerator.GetElement().IsAConstant(&tempRat))
+    { this->ratValue=tempRat;
+      this->expressionType=this->typeRational;
+    }
+  }
 }
 
 void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<Rational> & output)
@@ -4583,7 +4649,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
       for (int j=0; j<currentRoot.size; j++)
         theSystem.elements[currentRoot.size*k+j][i]=currentRoot.TheObjects[j];
     }
-  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString(false, true) << "</div>";
+  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString() << "</div>";
   List<List<RationalFunction> > theEigenVectors;
   RationalFunction oneRF, minusOneRF, zeroRF;
   oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
@@ -4738,7 +4804,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
       for (int j=0; j<currentRoot.size; j++)
         theSystem.elements[currentRoot.size*k+j][i]=currentRoot[j];
     }
-  out << "<br>...and the system is: <div class=\"math\">" <<  theSystem.ToString(false, true) << "</div>";
+  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString() << "</div>";
   List<List<RationalFunction> > theEigenVectors;
   RationalFunction oneRF, minusOneRF, zeroRF;
   oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
@@ -4882,7 +4948,7 @@ bool ParserNode::ConvertToNextType
   }
   if (this->ExpressionType==this->typePoly)
   { if (GoalType<this->typePoly)
-    { if(this->polyValue.GetElement().IsAConstant(this->rationalValue))
+    { if(this->polyValue.GetElement().IsAConstant(&this->rationalValue))
       { this->ExpressionType=this->typeRational;
         return true;
       }
@@ -6029,6 +6095,9 @@ std::string slTwoInSlN::initPairingTable(bool useHtml)
 std::string slTwoInSlN::PairTwoIndices
   (List<int>& output, int leftIndex, int rightIndex, bool useHtml)
 { std::string beginMath, endMath, newLine;
+  FormatExpressions latexFormat;
+  latexFormat.flagUseLatex=true;
+  latexFormat.flagUseHTML=false;
   if (useHtml)
   { beginMath= "<span class=\"math\">";
     endMath= "</span>";
@@ -6047,16 +6116,16 @@ std::string slTwoInSlN::PairTwoIndices
   List<Matrix<Rational> > tempDecomposition;
   for (int i=0; i<leftElements.size; i++)
     for (int j=0; j<rightElements.size; j++)
-    { Matrix<Rational> & leftElt=leftElements.TheObjects[i];
-      Matrix<Rational> & rightElt=rightElements.TheObjects[j];
-      Matrix<Rational> ::LieBracket(leftElt, rightElt, tempMat);
+    { Matrix<Rational>& leftElt=leftElements.TheObjects[i];
+      Matrix<Rational>& rightElt=rightElements.TheObjects[j];
+      Matrix<Rational>::LieBracket(leftElt, rightElt, tempMat);
       if (!tempMat.IsEqualToZero())
       { this->ExtractHighestWeightVectorsFromVector(tempMat, tempDecomposition, HighestWeightsContainingModules);
         for (int k=0; k<HighestWeightsContainingModules.size; k++)
         { output.AddOnTopNoRepetition(this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k]));
           if (this->GetModuleIndexFromHighestWeightVector(HighestWeightsContainingModules.TheObjects[k])==-1)
-            std::cout << newLine << beginMath << "[" << leftElt.ToString(false, true) << ", "
-            << rightElt.ToString(false, true) << "]=" << tempMat.ToString(false, true) << endMath;
+            std::cout << newLine << beginMath << "[" << leftElt.ToString(&latexFormat) << ", "
+            << rightElt.ToString(&latexFormat) << "]=" << tempMat.ToString(&latexFormat) << endMath;
         }
       }
     }

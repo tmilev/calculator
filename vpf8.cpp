@@ -250,7 +250,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     if (ParabolicEvaluationRootImage.ScalarEuclidean(tempRoot).IsPositive())
       this->ParabolicSelectionSmallerAlgebra.AddSelectionAppendNewIndex(i);
   }
-  this->log << "\nDual cartan embedding smaller into larger:\n" << DualCartanEmbedding.ToString(false, false);
+  this->log << "\nDual cartan embedding smaller into larger:\n" <<
+  DualCartanEmbedding.ToString(&theGlobalVariables.theDefaultFormat);
   this->log << "\nParabolic subalgebra large algebra: " << this->ParabolicLeviPartRootSpacesZeroStandsForSelected.ToString();
   tempRoot= this->ParabolicSelectionSmallerAlgebra;
   this->log << "\nParabolic subalgebra smaller algebra: " << tempRoot.ToString();
@@ -270,7 +271,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   { Matrix<Rational> & currentLinearOperator=this->theLinearOperators[i];
     theSubgroup.GetMatrixOfElement(theSubgroup[i], currentLinearOperator);
 //    currentLinearOperator.MultiplyOnTheLeft(preferredBasisChangeInverse);
-    this->log << "\n" << currentLinearOperator.ToString(false, false);
+    this->log << "\n" << currentLinearOperator.ToString(&theGlobalVariables.theDefaultFormat);
     currentLinearOperator.ActOnVectorColumn(theSubgroup.GetRho(), this->theTranslationS[i]);
     this->theTranslationS[i]-=theSubgroup.GetRho();
     this->theTranslationS[i].Minus();
@@ -280,7 +281,8 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     else
       this->theCoeffs[i]=-1;
   }
-  this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n" << theProjectionBasisChanged.ToString(false, false);
+  this->log << "\n\n\nMatrix of the projection operator (basis-changed):\n"
+  << theProjectionBasisChanged.ToString(&theGlobalVariables.theDefaultFormat);
   this->log << "\n\n\nMatrix form of the operators $u_w$, the translations $\tau_w$ and their projections (" << this->theLinearOperatorsExtended.size << "):";
   //List<Matrix<Rational> > tempList;
   for (int k=0; k<this->theLinearOperators.size; k++)
@@ -294,7 +296,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
     for (int i=0; i<currentLO.NumRows; i++)
       for (int j=0; j<currentLO.NumCols; j++)
         currentLOExtended.elements[i][j+currentLO.NumRows]=currentLO.elements[i][j];
-    this->log << "\n\n" << currentLOExtended.ToString(false, false);
+    this->log << "\n\n" << currentLOExtended.ToString(&theGlobalVariables.theDefaultFormat);
     this->log << this->theTranslationS[k].ToString() << ";   " << this->theTranslationsProjectedBasisChanged[k].ToString();
   }
 
@@ -359,7 +361,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   Vectors<Rational> rootsGeneratingExtendedLattice;
   int totalDim=input.theRange().GetRank()+input.theDomain().GetRank();
   rootsGeneratingExtendedLattice.SetSize(totalDim);
-  this->log << "\n" << tempMat.ToString(false, false) << "\n";
+  this->log << "\n" << tempMat.ToString(&theGlobalVariables.theDefaultFormat) << "\n";
   this->log << this->theExtendedIntegralLatticeMatForM.ToString(false, false);
   this->WeylChamberSmallerAlgebra.CreateFromNormals(WallsWeylChamberLargerAlgebra, theGlobalVariables);
   this->log << "\nWeyl chamber larger algebra before projectivizing: " << this->WeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
@@ -389,8 +391,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->PreimageWeylChamberSmallerAlgebra.CreateFromVertices(tempRoots, theGlobalVariables);
   this->log << "\nWeyl chamber smaller algebra: " << this->PreimageWeylChamberSmallerAlgebra.ToString(&theFormat) << "\n";
   this->log << "**********************\n\n\n";
-  this->log << "\nThe first operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[0].ToString(false, false) << "\n";
-  this->log << "\nThe second operator extended:\n" << this->theLinearOperatorsExtended.TheObjects[1].ToString(false, false) << "\n";
+  this->log << "\nThe first operator extended:\n"
+  << this->theLinearOperatorsExtended.TheObjects[0].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
+  this->log << "\nThe second operator extended:\n"
+  << this->theLinearOperatorsExtended.TheObjects[1].ToString(&theGlobalVariables.theDefaultFormat) << "\n";
   /*tempMat=this->theLinearOperatorsExtended.TheObjects[0];
   tempMat.Transpose();
   tempMat.ActOnVectorsColumn(this->PreimageWeylChamberSmallerAlgebra);
@@ -2955,11 +2959,11 @@ void Lattice::Reduce
 void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output)
 { output.AssignMatrixIntWithDen(this->basis, this->Den);
   std::stringstream out;
-  std::cout << "Test output: " << output.ToString(true, false);
-  out << "Test output: " << output.ToString(true, false);
+  std::cout << "Test output: " << output.ToString();
+  out << "Test output: " << output.ToString();
   output.GaussianEliminationEuclideanDomain((Rational) -1, (Rational) 1);
-  std::cout << "<br>After gaussian elimination:" << output.ToString(true, false);
-  out << "<br>After gaussian elimination:" << output.ToString(true, false);
+  std::cout << "<br>After gaussian elimination:" << output.ToString();
+  out << "<br>After gaussian elimination:" << output.ToString();
 //  tempDebugString=out.str();
 }
 
@@ -6774,7 +6778,7 @@ void rootSubalgebra::GetCoxeterPlane
   ZeroRoot.MakeZero(theDimension);
   Matrix<Rational>  matCoxeterElt;
   this->GetCoxeterElement(matCoxeterElt);
-  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ToString(true, false);
+  std::cout << "the SA Coxeter matrix: " << matCoxeterElt.ToString();
 //  tempMat=matCoxeterElt;
   this->ComputeDynkinDiagramKandCentralizer();
   ReflectionSubgroupWeylGroup tempGroup;
@@ -7820,9 +7824,9 @@ int ParserNode::EvaluateLatticeImprecise
   for (int i=0; i<theMat.NumRows; i++)
     for (int j=0; j<theMat.NumCols; j++)
       theMat.elements[i][j]=tempRoots[i][j];
-  std::cout << "starting matrix: " << theMat.ToString(true, false);
+  std::cout << "starting matrix: " << theMat.ToString();
   theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
-  std::cout << "<br>final matrix: " << theMat.ToString(true, false);
+  std::cout << "<br>final matrix: " << theMat.ToString();
   return theNode.errorNoError;
 }
 
@@ -7837,9 +7841,9 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
       theMat.elements[i][j]=theOps.ProjectionsEiVectors[i][j];
   theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
   std::stringstream out;
-  out << "before elimination:\n" << theMat.ToString(false, false);
+  out << "before elimination:\n" << theMat.ToString();
   theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
-  out << "after elimination:\n" << theMat.ToString(false, false);
+  out << "after elimination:\n" << theMat.ToString();
   theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
   theGlobalVariables.MakeReport();
 
@@ -8107,6 +8111,9 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
 { std::stringstream out, head, head2;
   List<int> DisplayIndicesSimpleGenerators;
   DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
+  FormatExpressions latexFormat;
+  latexFormat.flagUseHTML=false;
+  latexFormat.flagUseLatex=true;
   bool isGood=true;
   for (int i=0; i<this->simpleGenerators.size; i++)
   { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
@@ -8137,7 +8144,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
     for (int i=0; i<this->ExternalAutomorphisms.size; i++)
     { tempMat.AssignRootsToRowsOfMatrix(this->ExternalAutomorphisms[i]);
       tempMat.Transpose();
-      head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(false, true) << "\\\\";
+      head2 << "a_{" << i+1 << "}&:=&" << tempMat.ToString(&latexFormat) << "\\\\";
     }
     head2 << "\\end{array}";
     out << CGI::GetHtmlMathDivFromLatexFormulA(head2.str());

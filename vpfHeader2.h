@@ -144,7 +144,7 @@ public:
   bool OperatorDereference
   (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
   ;
-  static bool DivideRFOrPolyByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool DivideRFOrPolyOrRatByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyLRObyLSPath(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyLRObyLRO(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
@@ -1073,6 +1073,9 @@ static bool EvaluateDereferenceOneArgument
    std::stringstream* comments)
   ;
   static bool fDet
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fInvertMatrix
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger

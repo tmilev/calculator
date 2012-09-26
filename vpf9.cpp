@@ -734,6 +734,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseCalculatorFormatForUEOrdered=true;
   this->flagUseHTML=true;
   this->flagUseLatex=false;
+  this->MatrixColumnVerticalLineIndex=-1;
   this->flagQuasiDiffOpCombineWeylPart=true;
   this->flagMakingExpressionTableWithLatex=false;
   this->MaxLinesPerPage=40;

@@ -1385,6 +1385,26 @@ public:
         tempMat.elements[j][i].Assign(this->elements[i][j]);
     *this=tempMat;
   }
+  void AppendMatrixOnTheRight(const Matrix<Element>& standsOnTheRight)
+  { if (standsOnTheRight.NumRows<this->NumRows)
+    { Element theZero;
+      theZero=0;
+      Matrix<Element> standsOnTheRightNew=standsOnTheRight;
+      standsOnTheRightNew.Resize(this->NumRows, standsOnTheRight.NumCols, true, &theZero);
+      this->AppendMatrixOnTheRight(standsOnTheRightNew);
+      return;
+    }
+    if (this->NumRows<standsOnTheRight.NumRows)
+    { Element theZero;
+      theZero=0;
+      this->Resize(standsOnTheRight.NumRows, this->NumCols, true, &theZero);
+    }
+    int oldNumCols=this->NumCols;
+    this->Resize(this->NumRows, standsOnTheRight.NumCols+oldNumCols, true);
+    for (int i=0; i<this->NumRows; i++)
+      for (int j=oldNumCols; j<this->NumCols; j++)
+        this->elements[i][j]=standsOnTheRight.elements[i][j-oldNumCols];
+  }
   void ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne=1, const Element& theRingZero=0);
   void ActMultiplyVectorRowOnTheRight(Vector<Element>& theRoot,  const Element& TheRingZero)const{ Vector<Element> output; this->ActMultiplyVectorRowOnTheRight(theRoot, output, TheRingZero); theRoot=output; }
   void ActMultiplyVectorRowOnTheRight(const Vector<Element>& input, Vector<Element>& output, const Element& TheRingZero)const
@@ -4088,6 +4108,7 @@ public:
   int MaxRecursionDepthPerExpression;
   int MaxLineLength;
   int MaxLinesPerPage;
+  int MatrixColumnVerticalLineIndex;
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
@@ -8204,9 +8225,13 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
   if (useHtml)
     out << "<table>";
   if (useLatex)
-  { out << "\\left(\\begin{array}{";
+  { int verticalLineIndex= theFormat==0 ? -1 : theFormat->MatrixColumnVerticalLineIndex;
+    out << "\\left(\\begin{array}{";
     for (int j=0; j<this->NumCols; j++)
-      out << "c";
+    { out << "c";
+      if (verticalLineIndex==j)
+        out << "|";
+    }
     out << "}";
   }
   for (int i=0; i<this->NumRows; i++)

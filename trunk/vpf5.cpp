@@ -2866,18 +2866,27 @@ bool CommandList::fInvertMatrix
   FormatExpressions theFormat;
   theFormat.flagUseLatex=true;
   theFormat.flagUseHTML=false;
-  out << CGI::GetHtmlMathSpanPure(mat.ToString(&theFormat)+"^{-1}=");
+  theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
+  out << "Computing " << CGI::GetHtmlMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
+  tempMat=mat;
+  tempMat.AppendMatrixOnTheRight(output);
+  out << "<br>" << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat)) ;
   for (int i=0; i<mat.NumCols; i++)
   { tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
     if (tempI!=-1)
     { if (tempI!=NumFoundPivots)
       { mat.SwitchTwoRows(NumFoundPivots, tempI);
         output.SwitchTwoRows (NumFoundPivots, tempI);
+        out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(output);
+        out << "<br>" << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
       }
       tempElement=mat.elements[NumFoundPivots][i];
       tempElement.Invert();
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       output.RowTimesScalar(NumFoundPivots, tempElement);
+      bool found = false;
       for (int j = 0; j<mat.NumRows; j++)
         if (j!=NumFoundPivots)
           if (!mat.elements[j][i].IsEqualToZero())
@@ -2885,13 +2894,27 @@ bool CommandList::fInvertMatrix
             tempElement.Minus();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
             output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            if(!found)
+              out << "<br>";
+            else
+              out << ", ";
+            found =true;
+            out << " Row index " << NumFoundPivots+1 << " times " << tempElement << " added to row index " << j+1;
           }
+      if (found)
+      { out << ": <br> ";
+        tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(output);
+        out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
+      }
       NumFoundPivots++;
     }
   }
   if (NumFoundPivots<mat.NumRows)
-    out << "Matrix is not invertible. ";
-  out << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
+    out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
+  else
+    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the vertical line: "
+    << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

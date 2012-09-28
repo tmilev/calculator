@@ -2884,8 +2884,15 @@ bool CommandList::fInvertMatrix
       }
       tempElement=mat.elements[NumFoundPivots][i];
       tempElement.Invert();
+      if (tempElement!=1)
+        out << "<br> multiply row " << NumFoundPivots+1 << " by " << tempElement << ": ";
       mat.RowTimesScalar(NumFoundPivots, tempElement);
       output.RowTimesScalar(NumFoundPivots, tempElement);
+      if (tempElement!=1)
+      { tempMat=mat;
+        tempMat.AppendMatrixOnTheRight(output);
+        out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
+      }
       bool found = false;
       for (int j = 0; j<mat.NumRows; j++)
         if (j!=NumFoundPivots)
@@ -2899,7 +2906,8 @@ bool CommandList::fInvertMatrix
             else
               out << ", ";
             found =true;
-            out << " Row index " << NumFoundPivots+1 << " times " << tempElement << " added to row index " << j+1;
+            out << " Row index " << NumFoundPivots+1 << " times "
+            << tempElement << " added to row index " << j+1;
           }
       if (found)
       { out << ": <br> ";
@@ -2913,7 +2921,7 @@ bool CommandList::fInvertMatrix
   if (NumFoundPivots<mat.NumRows)
     out << "<br>Matrix to the right of the vertical line not transformed to the identity matrix => starting matrix is not invertible. ";
   else
-    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the vertical line: "
+    out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
     << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;

@@ -4212,19 +4212,32 @@ void RationalFunction::gcd
  Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3,
  Polynomial<Rational>& buffer4, Polynomial<Rational>& buffer5, MonomialP& bufferMon1,
  MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
-{ RationalFunction::lcm(left, right, buffer1, buffer2, buffer3, buffer4, buffer5, bufferMon1, bufferMon2, bufferList);
+{ MacroRegisterFunctionWithName("RationalFunction::gcd");
+  RationalFunction::lcm
+  (left, right, buffer1, buffer2, buffer3, buffer4, buffer5, bufferMon1, bufferMon2, bufferList);
   buffer2=left;
   buffer2*=right;
 //  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
   buffer2.DivideBy(buffer1, output, buffer3);
+  if (!buffer3.IsEqualToZero() || output.IsEqualToZero() )
+  { std::cout << "This is a programming error. While computing the gcd of left=" << left.ToString()
+    << " and right=" << right.ToString() << " I got that left*right= " << buffer2.ToString()
+    << ", and that lcm(left,right)=" << buffer1.ToString() << " but at the same time "
+    << "right*left=lcm (left, right)*(" << output.ToString() << ") +(" << buffer3.ToString() << ")"
+    << " which is imposible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+
 //  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
 void RationalFunction::lcm
 (const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output,
  Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational>& buffer3,
- Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList)
-{ Polynomial<Rational>& leftTemp=buffer1;
+ Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
+ List<Polynomial<Rational> >& bufferList)
+{ MacroRegisterFunctionWithName("RationalFunction::lcm");
+  Polynomial<Rational>& leftTemp=buffer1;
   Polynomial<Rational>& rightTemp=buffer2;
   Polynomial<Rational>& tempP=buffer3;
   List<Polynomial<Rational> >& tempList=bufferList;
@@ -4246,25 +4259,35 @@ void RationalFunction::lcm
   tempList.AddOnTop(rightTemp);
 //  std::cout << "<br>In the beginning: <br>";
 //  for (int i=0; i<tempList.size; i++)
-//  { std::cout << "the groebner basis element with index " << i << " is " << tempList.TheObjects[i].ToString() << "<br>\n";
+//  { std::cout << "the groebner basis element with index " << i << " is " << tempList[i].ToString() << "<br>\n";
 //  }
   RationalFunction::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, 0);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
-//  { std::cout << tempList.TheObjects[i].ToString() << "<br>\n";
+//  { std::cout << tempList[i].ToString() << "<br>\n";
 //  }
+  int maxMonNoTIndex=-1;
+  Rational MaxTotalDeg;
   for(int i=0; i<tempList.size; i++)
-  { Polynomial<Rational> & current=tempList.TheObjects[i];
-    MonomialP& currentMon= current.TheObjects[current.GetIndexMaxMonomialLexicographicLastVariableStrongest()];
-    //currentMon.ComputeDebugString();
+  { MonomialP& currentMon= tempList[i][tempList[i].GetIndexMaxMonomialLexicographicLastVariableStrongest()];
     if (currentMon[theNumVars]==0)
-    { output=current;
-//      std::cout << "<br> the highest mon is: " << currentMon.DebugString << "<br>";
-      output.SetNumVariablesSubDeletedVarsByOne((int)theNumVars);
-      return;
+    { if (maxMonNoTIndex==-1)
+      { MaxTotalDeg= currentMon.TotalDegree();
+        maxMonNoTIndex=i;
+      }
+      if (MaxTotalDeg>currentMon.TotalDegree())
+      { MaxTotalDeg=currentMon.TotalDegree();
+        maxMonNoTIndex=i;
+      }
     }
   }
-  output.MakeZero(theNumVars);
+  if (maxMonNoTIndex==-1)
+  { std::cout << "This is a programming error: failed to obtain lcm of two rational functions. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output=tempList[maxMonNoTIndex];
+  output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
 }
 
 void RationalFunction::operator*=(const MonomialP& other)

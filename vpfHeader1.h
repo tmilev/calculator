@@ -2651,7 +2651,12 @@ class Rational
   }
   inline bool TryToAddQuickly(int OtherNum, int OtherDen)
   { register int OtherNumAbs, thisNumAbs;
-    assert(this->DenShort>0 && OtherDen>0);
+    if (this->DenShort<=0 || OtherDen<=0)
+    { std::cout << "This is a programming error: corrupt rational number(s) with denominator "
+      << this->DenShort << " and " << OtherDen << ". The cause of the error should be in some of "
+      << " the calling functions. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     if (OtherNum<0)
       OtherNumAbs=-OtherNum;
     else
@@ -4279,7 +4284,7 @@ private:
 public:
   Vector<Rational> monBody;
   Rational& operator[](int i)const
-  { return monBody[i];
+  { return this->monBody[i];
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
@@ -5989,13 +5994,15 @@ void Polynomial<Element>::DivideBy
   }
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
-  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest(tempInput[inputMaxMonomial]))
+  while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest
+        (tempInput[inputMaxMonomial]))
   { assert(remainderMaxMonomial<outputRemainder.size);
     tempMon=outputRemainder[remainderMaxMonomial];
     tempMon/=tempInput[inputMaxMonomial];
     if (!tempMon.monBody.IsPositiveOrZero())
       break;
-    Element tempCoeff=outputRemainder.theCoeffs[remainderMaxMonomial]/tempInput.theCoeffs[inputMaxMonomial] ;
+    Element tempCoeff=outputRemainder.theCoeffs[remainderMaxMonomial];
+    tempCoeff/=tempInput.theCoeffs[inputMaxMonomial] ;
     outputQuotient.AddMonomial(tempMon, tempCoeff);
     tempP=(tempInput);
     tempP.MultiplyBy(tempMon, tempCoeff);

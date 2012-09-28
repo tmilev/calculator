@@ -336,7 +336,9 @@ void MakeVariableNonBounD
   { this->reset(-1);
   }
   inline bool SetError (const std::string& theError)
-  { this->errorString=theError;
+  { Data tempData(*this->theBoss);
+    tempData.SetError(theError);
+    this->MakeAtom(tempData, *this->theBoss, this->IndexBoundVars);
     return true;
   }
   Expression(const Expression& other)

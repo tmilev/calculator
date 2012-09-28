@@ -3975,7 +3975,12 @@ void RationalFunction::Invert()
 { //std::cout << "inverting " << this->ToString();
   assert(this->checkConsistency());
   if (this->expressionType==this->typeRational)
-  { assert(!this->ratValue.IsEqualToZero());
+  { if (this->ratValue.IsEqualToZero())
+    { std::cout << "This is a programming error: division by zero. Division by zero errors "
+      << "must be caught earlier in the program and handled gracefully. Crashing ungracefully. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     this->ratValue.Invert();
     return;
   }
@@ -3989,7 +3994,6 @@ void RationalFunction::Invert()
   assert(this->checkConsistency());
   //std::cout << " to get: " << this->ToString();
 }
-
 
 bool RationalFunction::checkConsistency()const
 { if (this->expressionType==this->typePoly)

@@ -628,8 +628,8 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
         out <<"\\end{array}";
       return out.str();
     case Data::typeError:
-      out << "(Error)";
-      if (comments!=0)
+      out << "(Error:SeeComments)";
+      if (comments!=0&& !this->theError.IsZeroPointer())
         *comments << this->theError.GetElementConst();
       return out.str();
     case Data::typeVariableNonBound:
@@ -1027,7 +1027,18 @@ bool Data::IsEqualToZero()const
 { switch (this->type)
   { case Data::typeRational:
       return this->GetValuE<Rational>().IsEqualToZero();
+    case Data::typePoly:
+      return this->GetValuE<Polynomial<Rational> > ().IsEqualToZero();
+    case Data::typeRationalFunction:
+      return this->GetValuE<RationalFunction> ().IsEqualToZero();
     default:
+      std::cout << "This might or might not be a programming error: "
+      <<" I have not been instructed how to check whether "
+      << "data of type  " << this->ElementToStringDataType() << " is equal to zero. "
+      << "In order to fix this problem you have to edit the current function and add"
+      << " an extra case to a switch statement. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
       return false;
    }
 }
@@ -3978,7 +3989,8 @@ bool Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& ri
 }
 
 bool Data::DivideRFOrPolyOrRatByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments)
-{ output=left;
+{ MacroRegisterFunctionWithName("Data::DivideRFOrPolyOrRatByRFOrPoly");
+  output=left;
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))
     return false;
@@ -3988,7 +4000,7 @@ bool Data::DivideRFOrPolyOrRatByRFOrPoly(const Data& left, const Data& right, Da
     return false;
   RationalFunction result;
   result=output.GetValuE<RationalFunction>();
-  if (rightCopy.IsEqualToZero())
+  if (rightCopy.GetValuE<RationalFunction>().IsEqualToZero())
   { output.SetError("Error:division by zero");
     return true;
   }
@@ -4709,7 +4721,8 @@ bool CommandList::StandardUnionNoRepetition
 
 bool CommandList::StandardDivide
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ if (theExpression.children.size!=2)
+{ MacroRegisterFunctionWithName("CommandList::StandardDivide");
+  if (theExpression.children.size!=2)
     return false;
   Expression& leftE= theExpression.children[0];
   Expression& rightE= theExpression.children[1];
@@ -4977,7 +4990,8 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Recursion depth limit of " << this->MaxRecursionDeptH << " exceeded while evaluating expressions.";
+    out << "Recursion depth limit of " << this->MaxRecursionDeptH
+    << " exceeded while evaluating expressions.";
     theExpression.errorString=out.str();
     if (this->flagMaxRecursionErrorEncountered)
       this->evaluationErrors.AddOnTop(out.str());
@@ -5022,15 +5036,18 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2)
       { if (!this->flagTimeLimitErrorDetected)
-          std::cout << "<br><b>Max allowed computational time is " << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2 << ";  so far, "
-          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS  << " have elapsed -> aborting computation ungracefully.</b>";
+          std::cout << "<br><b>Max allowed computational time is "
+          << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2 << ";  so far, "
+          << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS
+          << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
         break;
       }
     if (counter>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << "<br>Maximum number of algebraic transformations of " << this->MaxAlgTransformationsPerExpression << " exceeded."
+        out << "<br>Maximum number of algebraic transformations of "
+        << this->MaxAlgTransformationsPerExpression << " exceeded."
         << " while simplifying " << theExpression.ToString();
         theExpression.errorString=out.str();
       }
@@ -5526,7 +5543,7 @@ std::string Expression::ToString
     out << ")";
   if (outComments!=0)
     if (additionalDataComments!="")
-      *outComments << "Comments to expression " << out.str() << ":<br>";
+      *outComments << "Comments to expression " << out.str() << ": " << additionalDataComments;
   if (startingExpression!=0)
   { std::stringstream outTrue;
     outTrue << "<table>";

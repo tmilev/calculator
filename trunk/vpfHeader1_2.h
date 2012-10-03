@@ -4,7 +4,7 @@
 #define vpfHeader1_2_h_already_included
 
 #include "vpfHeader1.h"
-static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header file containing c++ math routines. ");
+static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 
 class Lattice
@@ -1976,12 +1976,12 @@ public:
   (ElementSemisimpleLieAlgebra& input, ElementSemisimpleLieAlgebra& output)
   ;
   bool ApplyHomomorphism
-  (ElementUniversalEnveloping<RationalFunction>& input,
-   ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+  (ElementUniversalEnveloping<RationalFunctionOld>& input,
+   ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
   bool ApplyHomomorphism
-(MonomialUniversalEnveloping<RationalFunction>& input, const RationalFunction& theCoeff,
- ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+(MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
+ ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
 };
 
@@ -2718,7 +2718,7 @@ public:
   void Makexidj(int i, int j, int NumVars);
   void MakeZero(int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-  (int inputPower, int numVars, int indexVar, RationalFunction& output, GlobalVariables& theGlobalVariables);
+  (int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables);
   bool ActOnPolynomial(Polynomial<Rational> & thePoly);
   void GetStandardOrder(Polynomial<Rational>& output){output=this->StandardOrder;}
   void SetNumVariables(int newNumVars);
@@ -3034,9 +3034,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 struct branchingData
 { HomomorphismSemisimpleLieAlgebra theHmm;
   FormatExpressions theFormat;
-  Vector<RationalFunction> theWeightFundCoords;
-  charSSAlgMod<RationalFunction> theAmbientChar;
-  charSSAlgMod<RationalFunction> theSmallCharFDpart;
+  Vector<RationalFunctionOld> theWeightFundCoords;
+  charSSAlgMod<RationalFunctionOld> theAmbientChar;
+  charSSAlgMod<RationalFunctionOld> theSmallCharFDpart;
   Selection selInducing;
   Selection selSmallParSel;
   Selection SelSplittingParSel;
@@ -3048,20 +3048,20 @@ struct branchingData
   List<ElementSemisimpleLieAlgebra> nilradicalLarge;
   List<ElementSemisimpleLieAlgebra> nilradicalSmall;
   List<ElementSemisimpleLieAlgebra> NilModPreNil;
-  Vectors<RationalFunction> outputWeightsFundCoordS;
-  Vectors<RationalFunction> outputWeightsSimpleCoords;
-  Vectors<RationalFunction> g2Weights;
-  Vectors<RationalFunction> g2DualWeights;
-  Vectors<RationalFunction> leviEigenSpace;
+  Vectors<RationalFunctionOld> outputWeightsFundCoordS;
+  Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
+  Vectors<RationalFunctionOld> g2Weights;
+  Vectors<RationalFunctionOld> g2DualWeights;
+  Vectors<RationalFunctionOld> leviEigenSpace;
   Vectors<Rational> generatorsSmallSub;
-  HashedList<RationalFunction> theCharacterDifferences;
-  List<ElementUniversalEnveloping<RationalFunction> > outputEigenWords;
-  List<RationalFunction> theChars;
-  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorS;
-  List<ElementUniversalEnveloping<RationalFunction> > theUEelts;
+  HashedList<RationalFunctionOld> theCharacterDifferences;
+  List<ElementUniversalEnveloping<RationalFunctionOld> > outputEigenWords;
+  List<RationalFunctionOld> theChars;
+  List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorS;
+  List<ElementUniversalEnveloping<RationalFunctionOld> > theUEelts;
   List<Rational> additionalMultipliers;
-  List<RationalFunction> theShapovalovProducts;
-  List<ElementSumGeneralizedVermas<RationalFunction> > theEigenVectorsLevi;
+  List<RationalFunctionOld> theShapovalovProducts;
+  List<ElementSumGeneralizedVermas<RationalFunctionOld> > theEigenVectorsLevi;
   ReflectionSubgroupWeylGroup WeylFD;
   ReflectionSubgroupWeylGroup WeylFDSmallAsSubInLarge;
   ReflectionSubgroupWeylGroup WeylFDSmall;
@@ -3507,12 +3507,12 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
    ;
    void GetGenericUnMinusElt
-   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunction>& output, GlobalVariables& theGlobalVariables)
+   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
    //The input of the following function is supposed to be an honest element of the Universal enveloping,
    //i.e. inputElt is not allowed to have non-small integer exponents.
    bool GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunction>& output,
+(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunctionOld>& output,
   GlobalVariables& theGlobalVariables)
    ;
 bool GetActionMonGenVermaModuleAsDiffOperator
@@ -3866,7 +3866,7 @@ public:
   MemorySaving<ElementUniversalEnvelopingOrdered<Polynomial<Rational> > > UEElementOrdered;
   MemorySaving<Polynomial<Rational> > polyBeingMappedTo;
   MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
-  MemorySaving<RationalFunction> ratFunction;
+  MemorySaving<RationalFunctionOld> ratFunction;
   MemorySaving<Cone> theCone;
   MemorySaving<Lattice> theLattice;
   MemorySaving<QuasiPolynomial> theQP;
@@ -3875,7 +3875,7 @@ public:
   MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
   MemorySaving<AnimationBuffer> theAnimation;
   MemorySaving<LittelmannPath> theLittelmann;
-  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theGenVermaElt;
+  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theGenVermaElt;
   List<int> children;
   int intValue;
   Rational rationalValue;
@@ -4365,7 +4365,7 @@ public:
   SemisimpleLieAlgebraOrdered testAlgebra;
   SemisimpleLieAlgebraOrdered testSubAlgebra;
   ModuleSSalgebra<Rational> theModulE;
-  List<ModuleSSalgebra<RationalFunction> > theModulePolys;
+  List<ModuleSSalgebra<RationalFunctionOld> > theModulePolys;
   List<SemisimpleLieAlgebra> theAlgebras;
 
   std::string javaScriptDisplayingIndicator;
@@ -4630,8 +4630,8 @@ public:
   (const ElementSemisimpleLieAlgebra& actingElt, ElementVermaModuleOrdered<CoefficientType>& output, SemisimpleLieAlgebra& owner, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables* theContext)const
   ;
   static void GetBasisFromSpanOfElements
-  (List<ElementVermaModuleOrdered<CoefficientType> >& theElements, Vectors<RationalFunction>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
-    const RationalFunction& RFOne, const RationalFunction& RFZero, GlobalVariables& theGlobalVariables)
+  (List<ElementVermaModuleOrdered<CoefficientType> >& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
+    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero, GlobalVariables& theGlobalVariables)
     ;
   bool GetCoordsInBasis
   (const List<ElementVermaModuleOrdered<CoefficientType> >& theBasis, Vector<CoefficientType>& output, const CoefficientType& theRingUnit, const CoefficientType& theRingZero, GlobalVariables& theGlobalVariables)const
@@ -5352,8 +5352,8 @@ public:
 
 template<class CoefficientType>
 void ElementVermaModuleOrdered<CoefficientType>::GetBasisFromSpanOfElements
-  (List<ElementVermaModuleOrdered>& theElements, Vectors<RationalFunction>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
-    const RationalFunction& RFOne, const RationalFunction& RFZero, GlobalVariables& theGlobalVariables)
+  (List<ElementVermaModuleOrdered>& theElements, Vectors<RationalFunctionOld>& outputCoordinates, List<ElementVermaModuleOrdered>& outputTheBasis,
+    const RationalFunctionOld& RFOne, const RationalFunctionOld& RFZero, GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnvelopingOrdered<CoefficientType> > theEltsUEform;
   theEltsUEform.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)

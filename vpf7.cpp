@@ -931,12 +931,12 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
   Vector<Rational> parSel;
-  List<RationalFunction> weight;
+  List<RationalFunctionOld> weight;
   theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
   theNode.impliedNumVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->MaxFoundVars);
   theNode.owner->SetNumVarsModulePolys(theNode.impliedNumVars);
 
-  if (!leftNode.GetListDontUseForFunctionArguments<RationalFunction>
+  if (!leftNode.GetListDontUseForFunctionArguments<RationalFunctionOld>
       (weight, theGlobalVariables, theNode.typeRationalFunction, theNode.impliedNumVars))
     return theNode.SetError(theNode.errorBadOrNoArgument);
   if (!rightNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
@@ -944,19 +944,19 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   int theDim=theNode.GetContextLieAlgebra().GetRank();
   if (parSel.size!=theDim || weight.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
-  Vector<RationalFunction> theWeight;
+  Vector<RationalFunctionOld> theWeight;
   theWeight=weight;
-  RationalFunction RFOne, RFZero;
+  RationalFunctionOld RFOne, RFZero;
   RFOne.MakeConst(theNode.impliedNumVars, 1, & theGlobalVariables);
   RFZero.MakeZero(theNode.impliedNumVars, & theGlobalVariables);
   std::string report;
-  ElementTensorsGeneralizedVermas<RationalFunction>& theElt=theNode.theGenVermaElt.GetElement();
-  List<ModuleSSalgebra<RationalFunction> >& theMods=theNode.owner->theModulePolys;
+  ElementTensorsGeneralizedVermas<RationalFunctionOld>& theElt=theNode.theGenVermaElt.GetElement();
+  List<ModuleSSalgebra<RationalFunctionOld> >& theMods=theNode.owner->theModulePolys;
   int indexOfModule=-1;
   Selection selectionParSel;
   selectionParSel=parSel;
   for (int i=0; i<theMods.size; i++)
-  { ModuleSSalgebra<RationalFunction>& currentMod=theMods[i];
+  { ModuleSSalgebra<RationalFunctionOld>& currentMod=theMods[i];
     if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
           selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
     { indexOfModule=i;
@@ -967,7 +967,7 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   { indexOfModule=theMods.size;
     theMods.SetSize(theMods.size+1);
   }
-  ModuleSSalgebra<RationalFunction>& theMod=theMods[indexOfModule];
+  ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
   { assert(theWeight[0].NumVars==RFOne.NumVars);
     bool isGood=theMod.MakeFromHW
@@ -2088,9 +2088,9 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
     return theNode.errorNoError;
   }
   theNode.theGenVermaElt=right.theGenVermaElt;
-  ElementUniversalEnveloping<RationalFunction> tempElt;
+  ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   tempElt.Assign(left.UEElement.GetElement());
-  RationalFunction RFone, RFZero;
+  RationalFunctionOld RFone, RFZero;
   RFone.MakeConst(theNode.impliedNumVars, 1, &theGlobalVariables);
   RFZero.MakeConst(theNode.impliedNumVars, 0, &theGlobalVariables);
 //  FormatExpressions theFormat;
@@ -2363,9 +2363,9 @@ void branchingData::initAssumingParSelAndHmmInittedPart2Subgroups(GlobalVariable
 }
 
 std::string branchingData::GetStringCasimirProjector(int theIndex, const Rational& additionalMultiple)
-{ Vector<RationalFunction> weightDifference;
+{ Vector<RationalFunctionOld> weightDifference;
   std::stringstream formulaStream1;
-  HashedList<Vector<RationalFunction> > accountedDiffs;
+  HashedList<Vector<RationalFunctionOld> > accountedDiffs;
   accountedDiffs.SetExpectedSize(this->g2Weights.size);
   bool found=false;
   for (int i=0; i<this->g2Weights.size; i++)

@@ -4,9 +4,7 @@
 #define vpfHeader2_h_already_included
 
 //the following  include contains all the c++ math routines used in the calculator.
-//The calculator uses relatively few functions, nevertheless the include is needed.
-#include "vpfHeader1.h"
-#include "vpfHeader1_2.h"
+#include "vpfHeader1_3.h"
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 class Context;
 
@@ -18,11 +16,12 @@ public:
   int theContextIndex;
   int type;
   MemorySaving<std::string> theError;
-//  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunction> > theElementTensorGenVermas;
+//  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theElementTensorGenVermas;
   enum DataType
   { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
-    typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound
+    typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound,
+    typeDifferentialForm, typeRationalRadical
   };
   void operator=(const Data& other);
   bool operator==(const Data& other)const;
@@ -47,14 +46,17 @@ public:
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
 ;
+  void MakeRationalRadical
+(CommandList& theBoss, const RationalAlgebraic& inputRationalRad)
+;
   void MakeRF
-(CommandList& theBoss, const RationalFunction& inputRF, int inputContextIndex)
+(CommandList& theBoss, const RationalFunctionOld& inputRF, int inputContextIndex)
 ;
   template<class dataType>
   void Make(CommandList& theBoss, const dataType& input)
   ;
   void MakeUE
-(CommandList& theBoss, const ElementUniversalEnveloping<RationalFunction>& inputUE, int inputContextIndex)
+(CommandList& theBoss, const ElementUniversalEnveloping<RationalFunctionOld>& inputUE, int inputContextIndex)
 ;
   void MakeVariableNonBound
 (CommandList& theBoss, const VariableNonBound& input)
@@ -69,7 +71,7 @@ public:
 (CommandList& theBoss, const Polynomial<Rational>& inputPoly, int inputContextIndex)
 ;
   void MakeElementTensorGeneralizedVermas
-(CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunction>& theElt, int inputContextIndex)
+(CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunctionOld>& theElt, int inputContextIndex)
   ;
   int GetNumContextVars()const;
   void reset(CommandList& inputOwner)
@@ -91,8 +93,8 @@ public:
   bool MakeElementSemisimpleLieAlgebra
 (CommandList& inputOwner, int inputIndexInOwners, int index1, int index2, std::stringstream* comments)
  ;
-  const ElementUniversalEnveloping<RationalFunction>& GetUE()const;
-  const RationalFunction& GetRF()const;
+  const ElementUniversalEnveloping<RationalFunctionOld>& GetUE()const;
+  const RationalFunctionOld& GetRF()const;
   int GetIndexAmbientSSLieAlgebra()const;
   SemisimpleLieAlgebra& GetAmbientSSAlgebra()const;
   template<class theType>
@@ -127,7 +129,7 @@ public:
   bool IsInteger()const;
   ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
   int GetSmallInT()const;
-  MonomialGeneralizedVerma<RationalFunction>& GetMonGenVerma()const;
+  MonomialGeneralizedVerma<RationalFunctionOld>& GetMonGenVerma()const;
   bool operator+=(const Data& other);
   bool operator*=(const Rational& other);
   bool operator/=(const Data& other);
@@ -161,6 +163,7 @@ public:
       return Data::MultiplyUEByAny(right, left, output, comments);
     return false;
   }
+  static bool AddRatOrAlgebraicToRatOrAlgebraic(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
@@ -259,10 +262,10 @@ class Expression
   const Data& GetAtomicValue()const;
   Rational GetRationalValue()const;
   void MakeMonomialGenVerma
-  (const MonomialGeneralizedVerma<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+  (const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakeElementTensorsGeneralizedVermas
-  (const ElementTensorsGeneralizedVermas<RationalFunction>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+  (const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
  ;
   void MakePolyAtom
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
@@ -270,7 +273,7 @@ class Expression
   void MakePolY
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
   ;
-  void MakeRFAtom(const RationalFunction& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
+  void MakeRFAtom(const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
   void MakeAtom(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeAtom(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
@@ -512,19 +515,21 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  List<ModuleSSalgebra<RationalFunction> > theCategoryOmodules;
+  List<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<ElementTensorsGeneralizedVermas<RationalFunction> > theTensorElts;
+  HashedList<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedList<Polynomial<Rational> > thePolys;
-  HashedList<ElementUniversalEnveloping<RationalFunction> > theUEs;
-  HashedList<RationalFunction> theRFs;
+  HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
+  HashedList<RationalFunctionOld> theRFs;
   HashedList<Rational> theRationals;
+  HashedList<RationalAlgebraic> theRationalRadicals;
   HashedList<Context> theContexts;
   HashedList<std::string, MathRoutines::hashString> theStrings;
   HashedList<VariableNonBound> theNonBoundVars;
   HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   HashedList<LittelmannPath> theLSpaths;
+//  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedList<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
   std::string ToString();
@@ -1091,7 +1096,7 @@ static bool EvaluateDereferenceOneArgument
   ;
   bool fPrintB3G2branchingIntermediate
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data, Context& theContext
+ Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Context& theContext
  )
  ;
   static bool fPrintB3G2branchingTableInit
@@ -1104,9 +1109,12 @@ static bool EvaluateDereferenceOneArgument
   static bool fPrintB3G2branchingTable
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+  static bool fDifferential
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
   static bool fPrintB3G2branchingTableCommon
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunction>& outputHWs, branchingData& theG2B3Data, Context& theContext
+  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Context& theContext
   )
   ;
   static bool fPolynomial
@@ -1220,6 +1228,12 @@ bool fGetTypeHighestWeightParabolic
   static bool fAnimateLittelmannPaths
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSqrt
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fMinPoly
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fLSPath
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
@@ -1231,12 +1245,12 @@ bool fGetTypeHighestWeightParabolic
 ;
   static bool fHWVinner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- Vector<RationalFunction>& highestWeightFundCoords,
+ Vector<RationalFunctionOld>& highestWeightFundCoords,
  Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunction>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+  Vectors<RationalFunctionOld>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic
@@ -1247,7 +1261,10 @@ static bool TypeHighestWeightParabolic
   static bool fHWV
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
-  static bool fWriteGenVermaModAsDiffOperator
+  static bool fWriteGenVermaModAsDiffOperatorUpToLevel
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fWriteGenVermaModAsDiffOperators
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fEmbedG2inB3

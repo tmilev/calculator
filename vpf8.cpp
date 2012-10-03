@@ -1645,7 +1645,7 @@ int ParserNode::EvaluateWeylAction
   (ParserNode& theNode,
    List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
    bool DualAction, bool useRho, bool useMinusRho)
-{ Vector<RationalFunction> theWeight;
+{ Vector<RationalFunctionOld> theWeight;
   WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
   if (theArgumentList.size!=theWeyl.GetDim())
     return theNode.SetError(theNode.errorDimensionProblem);
@@ -1665,15 +1665,15 @@ int ParserNode::EvaluateWeylAction
   if (theWeyl.size>=51840)
     out << "Only the first 51840 elements have been computed. <br> If you want a larger computation <br> please use the C++ code directly.";
   out << "Number of elements: " << theWeyl.size << "<br>";
-  Vector<RationalFunction> theOrbitElement;
-  RationalFunction RFZero;
+  Vector<RationalFunctionOld> theOrbitElement;
+  RationalFunctionOld RFZero;
   RFZero.MakeZero(theNode.impliedNumVars, &theGlobalVariables);
   std::stringstream tempStream;
   tempStream << "\\begin{array}{rcl}";
   for (int i=0; i<theWeyl.size; i++)
   { theOrbitElement=theWeight;
     if (!DualAction)
-      theWeyl.ActOn<RationalFunction>(i, theOrbitElement, useRho, useMinusRho, RFZero);
+      theWeyl.ActOn<RationalFunctionOld>(i, theOrbitElement, useRho, useMinusRho, RFZero);
     else
     {
     }
@@ -2740,7 +2740,7 @@ int ParserNode::EvaluateGroebner
   inputBasis=outputGroebner;
   Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
   MonomialP bufferMon1, bufferMon2;
-  RationalFunction::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, & theGlobalVariables);
+  RationalFunctionOld::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, & theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting basis: ";
   std::stringstream out1, out2;
@@ -2757,7 +2757,7 @@ int ParserNode::EvaluateGroebner
   return theNode.errorNoError;
 }
 
-void RationalFunction::GetRelations
+void RationalFunctionOld::GetRelations
   ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
    )
 { if (theGenerators.size==0)
@@ -2777,7 +2777,7 @@ void RationalFunction::GetRelations
   }
   Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
   MonomialP bufferMon1, bufferMon2;
-  RationalFunction::TransformToReducedGroebnerBasis
+  RationalFunctionOld::TransformToReducedGroebnerBasis
   (
    theGroebnerBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
    & MonomialP::LeftIsGEQLexicographicLastVariableWeakest, & theGlobalVariables
@@ -2811,7 +2811,7 @@ int ParserNode::EvaluateRelations
     outputRelations.AddOnTop(currentPoly);
   }
   inputBasis=outputRelations;
-  RationalFunction::GetRelations(outputRelations, theGlobalVariables);
+  RationalFunctionOld::GetRelations(outputRelations, theGlobalVariables);
   std::stringstream out;
   out << "<br>Starting elements:";
   FormatExpressions theFormat;
@@ -3089,7 +3089,7 @@ void Lattice::MakeFromMat(const Matrix<Rational> & input)
 }
 
 void Lattice::MakeFromRoots(const Vectors<Rational>& input)
-{ Matrix<Rational>  tempMat;
+{ Matrix<Rational> tempMat;
   tempMat.AssignRootsToRowsOfMatrix(input);
   tempMat.GetMatrixIntWithDen(this->basis, this->Den);
   this->Reduce();
@@ -8203,18 +8203,18 @@ void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariabl
 { this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
 
-void RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theSub)
+void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& theSub)
 { if (theSub.size<1)
     return;
 //  FormatExpressions tempFormat;
   Rational rationalOne=1;
 //  int commentMEWhenDone;
   switch(this->expressionType)
-  { case RationalFunction::typeRational:
+  { case RationalFunctionOld::typeRational:
       this->SetNumVariables(theSub[0].NumVars);
 //      assert(this->checkConsistency());
       return;
-    case RationalFunction::typePoly:
+    case RationalFunctionOld::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
       this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
@@ -8223,7 +8223,7 @@ void RationalFunction::Substitution(const PolynomialSubstitution<Rational>& theS
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      assert(this->checkConsistency());
       return;
-    case RationalFunction::typeRationalFunction:
+    case RationalFunctionOld::typeRationalFunction:
       this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
       this->Denominator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
       this->Simplify();

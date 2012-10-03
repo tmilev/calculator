@@ -12,9 +12,9 @@ ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for
 //- Write at least one angry email to the highest C++ authority you can get an email hold of.
 
 template <>
-bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunction>(const Vector<RationalFunction>& theWeight, int generatorIndex)
-{ Vector<RationalFunction> tempVect;
-  RationalFunction tempRF;
+bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
+{ Vector<RationalFunctionOld> tempVect;
+  RationalFunctionOld tempRF;
   tempVect=this->simpleGenerators[generatorIndex].GetVectorRational();
   tempRF=this->AmbientWeyl.RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType!=tempRF.typeRational)
@@ -41,9 +41,9 @@ bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<Rational>(const Vector<
 }
 
 template <>
-bool WeylGroup::IsDominantWRTgenerator<RationalFunction>(const Vector<RationalFunction>& theWeight, int generatorIndex)
+bool WeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
 { Vector<Rational> tempVect;
-  RationalFunction tempRF;
+  RationalFunctionOld tempRF;
   tempVect.MakeEi(this->GetDim(), generatorIndex);
   tempRF=this->RootScalarCartanRoot(theWeight, tempVect);
   if (tempRF.expressionType!=tempRF.typeRational)
@@ -172,23 +172,23 @@ bool CommandList::fWeylDimFormula
     return true;
   }
   theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
-  Vector<RationalFunction> theWeight;
+  Vector<RationalFunctionOld> theWeight;
   Context tempContext(theCommands);
-  if (!theCommands.GetVector<RationalFunction>
+  if (!theCommands.GetVector<RationalFunctionOld>
       (theExpression.children[1], theWeight, &tempContext, theSSowner->GetRank(),
        theCommands.fPolynomial, comments))
   { theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
     return true;
   }
   int newContext=theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(tempContext);
-  RationalFunction rfOne;
+  RationalFunctionOld rfOne;
   rfOne.MakeOne(tempContext.VariableImages.size, theCommands.theGlobalVariableS);
-  Vector<RationalFunction> theWeightInSimpleCoords;
+  Vector<RationalFunctionOld> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
   if (comments!=0)
     *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
-  RationalFunction tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  RationalFunctionOld tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   //std::cout << "<br>The result: " << tempRF.ToString();
   theExpression.MakeRFAtom(tempRF, newContext, theCommands, inputIndexBoundVars);
   return true;
@@ -301,13 +301,13 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   bool success=theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, typeNode, comments);
   if (!success || typeNode.errorString!="")
     return theExpression.SetError("Failed to construct semisimple Lie algebra from the first argument. See comments.");
-  Vector<RationalFunction> theWeightFundCoords;
+  Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
   SemisimpleLieAlgebra& ownerSS=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Context finalContext;
-  if (!theCommands.GetVector<RationalFunction>
+  if (!theCommands.GetVector<RationalFunctionOld>
       (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.fPolynomial, comments))
     return theExpression.SetError("Failed to extract highest weight from the second argument.");
   if (!theCommands.GetVector<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0, comments))
@@ -321,7 +321,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
     *comments << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << ".";
     *comments << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
   }
-  ModuleSSalgebra<RationalFunction> theMod;
+  ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing= inducingParSel;
   Selection selSplittingParSel=splittingParSel;
   theMod.MakeFromHW
@@ -377,10 +377,10 @@ bool CommandList::fCasimir
   SemisimpleLieAlgebra& theSSowner=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   if (theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds<50)
     theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=50;
-  RationalFunction rfOne, rfZero;
+  RationalFunctionOld rfOne, rfZero;
   rfOne.MakeOne(0, theCommands.theGlobalVariableS);
   rfZero.MakeZero(0, theCommands.theGlobalVariableS);
-  ElementUniversalEnveloping<RationalFunction> theCasimir;
+  ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
   if (comments!=0)
@@ -485,8 +485,8 @@ bool CommandList::fEmbedG2inB3
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
 
-  ElementUniversalEnveloping<RationalFunction> argument=theExpression.GetAtomicValue().GetUE();
-  ElementUniversalEnveloping<RationalFunction> output;
+  ElementUniversalEnveloping<RationalFunctionOld> argument=theExpression.GetAtomicValue().GetUE();
+  ElementUniversalEnveloping<RationalFunctionOld> output;
   if(!theHmm.ApplyHomomorphism(argument, output, *theCommands.theGlobalVariableS))
     return theExpression.SetError("Failed to apply homomorphism for unspecified reason");
 //  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
@@ -1408,7 +1408,7 @@ bool CommandList::fSplitFDpartB3overG2Init
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2Init");
   if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
     return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
-  if (!theCommands.GetVector<RationalFunction>
+  if (!theCommands.GetVector<RationalFunctionOld>
       (theExpression, theG2B3Data.theWeightFundCoords, &outputContext, 3, theCommands.fPolynomial, comments))
   { std::stringstream errorStream;
     errorStream << "Failed to extract highest weight in fundamental coordinates from the expression "
@@ -1436,13 +1436,13 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
   std::stringstream out;
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: " << theG2B3Data.selInducing.ToString();
   std::string report;
-  Vectors<RationalFunction> outputWeightsFundCoordS;
-  Vectors<RationalFunction> outputWeightsSimpleCoords;
-  Vectors<RationalFunction> leviEigenSpace;
-  Vector<RationalFunction> ih1, ih2;
+  Vectors<RationalFunctionOld> outputWeightsFundCoordS;
+  Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
+  Vectors<RationalFunctionOld> leviEigenSpace;
+  Vector<RationalFunctionOld> ih1, ih2;
   ReflectionSubgroupWeylGroup subGroupLarge, subGroupSmall;
-  charSSAlgMod<RationalFunction> tempChar;
-  charSSAlgMod<RationalFunction> startingChar;
+  charSSAlgMod<RationalFunctionOld> tempChar;
+  charSSAlgMod<RationalFunctionOld> startingChar;
   startingChar.MakeFromWeight
   (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
    (theG2B3Data.theWeightFundCoords),
@@ -1552,7 +1552,7 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
 
 bool CommandList::fPrintB3G2branchingIntermediate
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
- Vectors<RationalFunction>& theHWs, branchingData& theG2B3Data, Context& theContext
+ Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Context& theContext
  )
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
@@ -1593,7 +1593,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
   theG2B3Data.theFormat.flagUseLatex=true;
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
   Expression tempExpression;
-  RationalFunction rfZero, rfOne;
+  RationalFunctionOld rfZero, rfOne;
   rfZero.MakeZero(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
   rfOne.MakeOne(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
@@ -1604,7 +1604,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
     theCommands.fSplitFDpartB3overG2inner
     (theCommands, inputIndexBoundVars, tempExpression, comments, theG2B3Data);
     timeReport << tempExpression.GetAtomicValue().GetValuE<std::string>();
-    RationalFunction numEigenVectors;
+    RationalFunctionOld numEigenVectors;
     numEigenVectors=rfZero;
     for (int j=0; j<theG2B3Data.theSmallCharFDpart.size; j++)
       numEigenVectors+=theG2B3Data.theSmallCharFDpart.theCoeffs[j];
@@ -1615,7 +1615,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
       << theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega", &theG2B3Data.theFormat)
       << "$}\\\\vector& coefficient of $v_\\lambda$ in $Sh_{\\lambda,i}$ &$x_1\\notin$ \\\\\\hline";
     for (int k=0; k<theG2B3Data.theSmallCharFDpart.size; k++ )
-    { charSSAlgMod<RationalFunction> tempChar;
+    { charSSAlgMod<RationalFunctionOld> tempChar;
       tempChar.AddMonomial
       (theG2B3Data.theSmallCharFDpart[k], theG2B3Data.theSmallCharFDpart.theCoeffs[k]);
       int multiplicity=0;
@@ -1770,7 +1770,7 @@ bool CommandList::fPrintB3G2branchingTableInit
 bool CommandList::fPrintB3G2branchingTable
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTable");
-  Vectors<RationalFunction> theHWs;
+  Vectors<RationalFunctionOld> theHWs;
   branchingData theG2B3Data;
   Context theContext(theCommands);
   theCommands.fPrintB3G2branchingTableCommon
@@ -1786,12 +1786,12 @@ bool CommandList::fPrintB3G2branchingTable
 
 bool CommandList::fPrintB3G2branchingTableCommon
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunction>& outputHWs, branchingData& theG2B3Data, Context& theContext
+  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Context& theContext
   )
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCommon");
   std::stringstream out, timeReport;
   Vector<Rational> theHW;
-  Vector<RationalFunction> theHWrf;
+  Vector<RationalFunctionOld> theHWrf;
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight=0;
   theCommands.fPrintB3G2branchingTableInit
@@ -1822,12 +1822,12 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCharsOnly");
   branchingData theg2b3data;
   Context theContext(theCommands);
-  Vectors<RationalFunction> theHWs;
+  Vectors<RationalFunctionOld> theHWs;
   theCommands.fPrintB3G2branchingTableCommon
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWs, theg2b3data, theContext);
   if (theExpression.errorString!="")
     return true;
-  charSSAlgMod<RationalFunction> theCharacter, outputChar;
+  charSSAlgMod<RationalFunctionOld> theCharacter, outputChar;
   Vector<Rational> theHW;
   std::stringstream out;
   std::stringstream latexTable;
@@ -1865,8 +1865,8 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << "\\endhead \\hline\n<br>";
   }
   theg2b3data.theFormat.flagUseLatex=true;
-  ElementUniversalEnveloping<RationalFunction> theCasimir, theCentralCharacter, resultChar;
-  HashedList<ElementUniversalEnveloping<RationalFunction> > theCentralChars;
+  ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCentralCharacter, resultChar;
+  HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theCentralChars;
 
   theCasimir.MakeCasimir(theg2b3data.theHmm.theDomain(), *theCommands.theGlobalVariableS);
   WeylGroup& smallWeyl=theg2b3data.theHmm.theDomain().theWeyl;
@@ -1887,7 +1887,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     out << "<td>" << outputChar.ToString(&theg2b3data.theFormat) << "</td>";
     out << "<td>";
     theg2b3data.theFormat.CustomPlusSign="\\oplus ";
-    Vector<RationalFunction> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
+    Vector<RationalFunctionOld> leftWeightSimple, leftWeightDual, rightWeightSimple, rightWeightDual;
     theCentralChars.Clear();
     for (int i=0; i<outputChar.size; i++)
     { if (!outputChar.theCoeffs[i].IsEqualToOne())
@@ -1958,7 +1958,7 @@ bool CommandList::fSplitFDpartB3overG2
   if (theExpression.errorString!="")
     return true;
   std::stringstream out;
-  Vectors<RationalFunction> theHWs;
+  Vectors<RationalFunctionOld> theHWs;
   theHWs.AddOnTop(theG2B3Data.theWeightFundCoords);
   theCommands.fPrintB3G2branchingIntermediate
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWs, theG2B3Data, theContext);
@@ -1990,10 +1990,10 @@ bool CommandList::fSplitFDpartB3overG2old
   <<  theG2B3Data.theWeightFundCoords.ToStringLetterFormat("\\omega")
   << "$}\\\\ weight fund. coord.& singular vector& weight proj. $\\bar h^*$ \\\\\\hline\n<br> ";
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeightSimpleB3coords=theG2B3Data.outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentWeightFundB3coords=theG2B3Data.outputWeightsFundCoordS[i];
-    Vector<RationalFunction>& currentG2Weight=theG2B3Data.g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
+  { Vector<RationalFunctionOld>& currentWeightSimpleB3coords=theG2B3Data.outputWeightsSimpleCoords[i];
+    Vector<RationalFunctionOld>& currentWeightFundB3coords=theG2B3Data.outputWeightsFundCoordS[i];
+    Vector<RationalFunctionOld>& currentG2Weight=theG2B3Data.g2Weights[i];
+    Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     readyForLatexConsumptionTable1 << "$" << currentWeightFundB3coords.ToStringLetterFormat("\\omega")
     << " $ & $" << theG2B3Data.leviEigenSpace[i].ToStringLetterFormat("m")
     << " $ & $ " << currentG2Weight.ToStringLetterFormat("\\alpha") << " $ \\\\\n<br>";
@@ -2010,7 +2010,7 @@ bool CommandList::fSplitFDpartB3overG2old
   out << "<br>Ready for LaTeX consumption: ";
   out << "<br><br>" << readyForLatexConsumptionTable1.str() << "<br><br>";
   out << "<table border=\"1\"><tr><td>weight</td><td>the elt closed form</td><td>the elt</td></tr>";
-  Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
+  Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
   std::stringstream formulaStream1;
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
   { out << "<tr><td>" << theG2B3Data.g2Weights[k].ToString() << "</td><td>";
@@ -2065,7 +2065,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
-  ModuleSSalgebra<RationalFunction> theModCopy;
+  ModuleSSalgebra<RationalFunctionOld> theModCopy;
   theModCopy.MakeFromHW
   (theCommands.theObjectContainer.theLieAlgebras, theG2B3Data.theHmm.indexRange,
    theG2B3Data.theWeightFundCoords, theG2B3Data.selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
@@ -2082,7 +2082,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 
   theCommands.theObjectContainer.theCategoryOmodules.AddOnTopNoRepetition(theModCopy);
   int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
-  ModuleSSalgebra<RationalFunction>& theMod=
+  ModuleSSalgebra<RationalFunctionOld>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   std::stringstream out;
   out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
@@ -2106,11 +2106,11 @@ bool CommandList::fSplitFDpartB3overG2inner
   (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords),
    *theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexRange);
   theG2B3Data.theSmallCharFDpart.MakeZero(*theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
-  charSSAlgMod<RationalFunction> tempMon;
+  charSSAlgMod<RationalFunctionOld> tempMon;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
-    Vector<RationalFunction>& currentG2Weight=theG2B3Data.g2Weights[i];
-    Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
+  { Vector<RationalFunctionOld>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];
+    Vector<RationalFunctionOld>& currentG2Weight=theG2B3Data.g2Weights[i];
+    Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     currentG2DualWeight.SetSize(2);
     currentG2DualWeight[0]=theG2B3Data.theHmm.theRange().theWeyl.RootScalarCartanRoot
     (currentWeight, theG2B3Data.theHmm.ImagesCartanDomain[0]);//<-note: implicit type conversion: the return type is the left coefficient type.
@@ -2120,12 +2120,12 @@ bool CommandList::fSplitFDpartB3overG2inner
     tempMon.MakeFromWeight(currentG2Weight, *theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
     theG2B3Data.theSmallCharFDpart+=tempMon;
   }
-  ElementUniversalEnveloping<RationalFunction> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
+  ElementUniversalEnveloping<RationalFunctionOld> theG2Casimir, theG2CasimirCopy, imageCasimirInB3, bufferCasimirImage, tempElt;
   theG2Casimir.MakeCasimir(theG2B3Data.theHmm.theDomain(), *theCommands.theGlobalVariableS, 1, 0);
-  Vector<RationalFunction> highestWeightG2dualCoords=*theG2B3Data.g2DualWeights.LastObject();
+  Vector<RationalFunctionOld> highestWeightG2dualCoords=*theG2B3Data.g2DualWeights.LastObject();
 
   theG2B3Data.theChars.SetSize(theG2B3Data.outputWeightsFundCoordS.size);
-//  RationalFunction& baseChar=*theChars.LastObject();
+//  RationalFunctionOld& baseChar=*theChars.LastObject();
 //  baseChar.MakeZero(numVars, theCommands.theGlobalVariableS);
 //  theG2Casimir.ModOutVermaRelations(theCommands.theGlobalVariableS, &highestWeightG2dualCoords, 1, 0);
 //  if (!theG2Casimir.IsEqualToZero())
@@ -2133,7 +2133,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=400;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
-  { Vector<RationalFunction>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
+  { Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy=theG2Casimir;
     theG2CasimirCopy.ModOutVermaRelations(theCommands.theGlobalVariableS, &currentG2DualWeight, 1,0);
     if (theG2CasimirCopy.IsEqualToZero())
@@ -2147,20 +2147,20 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.additionalMultipliers.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theShapovalovProducts.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theUEelts.SetSize(theG2B3Data.g2Weights.size);
-  ElementSumGeneralizedVermas<RationalFunction>& theHWV=
+  ElementSumGeneralizedVermas<RationalFunctionOld>& theHWV=
   *theG2B3Data.theEigenVectorsLevi.LastObject();
   theHWV.MakeHWV(theCommands.theObjectContainer.theCategoryOmodules, theModIndex, 1);
   theHWV*=-1;
   *theG2B3Data.theEigenVectorS.LastObject()=theHWV;
-  Vector<RationalFunction> weightDifference, weightDifferenceDualCoords;
+  Vector<RationalFunctionOld> weightDifference, weightDifferenceDualCoords;
   theG2B3Data.theHmm.ApplyHomomorphism(theG2Casimir, imageCasimirInB3, *theCommands.theGlobalVariableS);
   theG2Casimir.checkConsistency();
   imageCasimirInB3.checkConsistency();
-  RationalFunction charDiff;
+  RationalFunctionOld charDiff;
   for (int k=0; k<theG2B3Data.g2Weights.size; k++)
-  { ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltLevi=theG2B3Data.theEigenVectorsLevi[k];
-    ElementSumGeneralizedVermas<RationalFunction>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
-    ElementUniversalEnveloping<RationalFunction>& currentUEelt=theG2B3Data.theUEelts[k];
+  { ElementSumGeneralizedVermas<RationalFunctionOld>& currentTensorEltLevi=theG2B3Data.theEigenVectorsLevi[k];
+    ElementSumGeneralizedVermas<RationalFunctionOld>& currentTensorEltEigen=theG2B3Data.theEigenVectorS[k];
+    ElementUniversalEnveloping<RationalFunctionOld>& currentUEelt=theG2B3Data.theUEelts[k];
     currentTensorEltLevi=theHWV;
     //std::cout << "<br>multiplying " << currentTensorElt.ToString() << " by " << theG2B3Data.outputEigenWords[k].ToString();
     currentTensorEltLevi.MultiplyMeByUEEltOnTheLeft(theG2B3Data.outputEigenWords[k], *theCommands.theGlobalVariableS, 1, 0);
@@ -2432,7 +2432,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
 { MacroRegisterFunctionWithName("CommandList::fParabolicWeylGroupsBruhatGraph");
   IncrementRecursion theRecursion(&theCommands);
   Selection parabolicSel;
-  Vector<RationalFunction> theHWfundcoords, tempRoot, theHWsimplecoords;
+  Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Context hwContext(theCommands);
   if(!theCommands.fGetTypeHighestWeightParabolic
   (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, parabolicSel, &hwContext)  )
@@ -2720,11 +2720,11 @@ bool CommandList::fTestMonomialBaseConjecture
       theReport.Report(reportStream.str());
       latexReport << "$" << currentHW.ToStringLetterFormat("\\omega") << "$ &"
       << currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW) << "&";
-      int startRatOps=Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
-      +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
+//      int startRatOps=Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+//      +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
       hwPath.MakeFromWeightInSimpleCoords
       (currentAlg.theWeyl.GetSimpleCoordinatesFromFundamental(currentHW), currentAlg.theWeyl);
-      double timeBeforeOrbit=theCommands.theGlobalVariableS->GetElapsedSeconds();
+//      double timeBeforeOrbit=theCommands.theGlobalVariableS->GetElapsedSeconds();
       hwPath.GenerateOrbit
       (tempList, theStrings, *theCommands.theGlobalVariableS,
       MathRoutines::Minimum(1000, currentAlg.theWeyl.WeylDimFormulaFundamentalCoords(currentHW).NumShort),
@@ -2927,10 +2927,83 @@ bool CommandList::fInvertMatrix
   return true;
 }
 
+bool CommandList::fDifferential
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ return false;
+  /* if (!theExpression.EvaluatesToAtom())
+    if (!theCommands.CallCalculatorFunction
+        (theCommands., inputIndexBoundVars, theExpression, comments))
+      return theExpression.SetError("Failed to convert argument of differential to differential form. ");
+  Data theData;
+  theData=theExpression.GetAtomicValue();
+  if (!theData.ConvertToTypE<DifferentialForm<Rational> >())
+    return theExpression.SetError("Failed to convert argument of differential to differential form.");
+
+  theCommands.fPolynomial(the)*/
+  return true;
+}
+
+bool CommandList::fMinPoly
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (!theExpression.EvaluatesToAtom())
+    return false;
+  Data theData;
+  theData=theExpression.GetAtomicValue();
+  if (!theData.ConvertToTypE<RationalAlgebraic>())
+    return false;
+  Polynomial<Rational> outputMinPoly;
+  const RationalAlgebraic& theRA=theData.GetValuE<RationalAlgebraic>();
+  theRA.GetMinPolyAlgebraicInteger(outputMinPoly);
+  theExpression.MakePolyAtom(outputMinPoly, -1, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool CommandList::fSqrt
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ if (!theExpression.EvaluatesToAtom())
+    return false;
+  Data theData;
+  theData=theExpression.GetAtomicValue();
+  if (!theData.ConvertToTypE<RationalAlgebraic>())
+    return false;
+  static bool hereIgo=true;
+  if (hereIgo)
+  { std::cout << "Here i go again on my own. ";
+    hereIgo=false;
+  }
+  RationalAlgebraic theRat=theData.GetValuE<RationalAlgebraic> ();
+  theRat.SqrtMe();
+  theData.MakeRationalRadical(theCommands, theRat);
+  theExpression.MakeAtom(theData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool CommandList::fWriteGenVermaModAsDiffOperators
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperators");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  Vectors<RationalFunctionOld> theHWs;
+  theHWs.SetSize(1);
+  Context theContext;
+  Selection theParSel;
+  if (!theCommands.fGetTypeHighestWeightParabolic
+      (theCommands, inputIndexBoundVars, theExpression, comments, theHWs[0], theParSel, &theContext))
+    return theExpression.SetError("Failed to extract type, highest weight, parabolic selection");
+  if (theExpression.errorString!="")
+    return true;
+  SemisimpleLieAlgebra& theSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+//  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
+  return theCommands.fWriteGenVermaModAsDiffOperatorInner
+  (theCommands, inputIndexBoundVars, theExpression, comments, theHWs, theContext, theParSel,
+   theSSalgebra.indexInOwner);
+}
+
 class DoxygenInstance
 {
   public:
-  ElementTensorsGeneralizedVermas<RationalFunction> doXyCanYouParseME;
+  ElementTensorsGeneralizedVermas<RationalFunctionOld> doXyCanYouParseME;
 };
 
 

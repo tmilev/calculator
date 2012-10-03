@@ -4,7 +4,7 @@
 #define vpfHeader1_h_already_included
 
 #include "vpfMacros.h"
-static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header file. ");
+static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header. Math and general routines. ");
 
 const int SomeRandomPrimesSize= 25;
 //used for hashing various things.
@@ -28,7 +28,7 @@ class Rational;
 //More involved mathematical types
 template<class Base>
 class CompleX;
-class RationalFunction;
+class RationalFunctionOld;
 class SemisimpleLieAlgebra;
 class rootSubalgebra;
 class rootSubalgebras;
@@ -4848,9 +4848,28 @@ public:
     return result;
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
-  int GetIndexMaxMonomialTotalDegThenLexicographic();
+  int GetIndexMaxMonomialTotalDegThenLexicographic()const;
 //  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
+  bool operator>(const Polynomial<CoefficientType>& other)const
+  { if (other.size==0 && this->size==0)
+      return false;
+    if (this->TotalDegree()>other.TotalDegree())
+      return true;
+    if (this->TotalDegree()<other.TotalDegree())
+      return false;
+    int thisMaxMonIndex= this->GetIndexMaxMonomialTotalDegThenLexicographic();
+    int otherMaxMonIndex= this->GetIndexMaxMonomialTotalDegThenLexicographic();
+    if( (*this)[thisMaxMonIndex]>other[otherMaxMonIndex])
+      return true;
+    if( other[otherMaxMonIndex]>(*this)[thisMaxMonIndex])
+      return false;
+    if(this->theCoeffs[thisMaxMonIndex]>other.theCoeffs[otherMaxMonIndex])
+      return true;
+    if(other.theCoeffs[otherMaxMonIndex]>this->theCoeffs[thisMaxMonIndex])
+      return false;
+    return this->ToString()>other.ToString();
+  }
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
   bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
@@ -5070,22 +5089,22 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   void MakeIdSubstitution(int numVars);
 };
 
-//std::iostream& operator<<(std::iostream& output, const RationalFunction& theRF);
-//std::iostream& operator>>(std::iostream& input, RationalFunction& theRF);
+//std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
+//std::iostream& operator>>(std::iostream& input, RationalFunctionOld& theRF);
 
-class RationalFunction
+class RationalFunctionOld
 {
 private:
-  void AddSameTypes(const RationalFunction& other)
+  void AddSameTypes(const RationalFunctionOld& other)
   { switch (this->expressionType)
-    { case RationalFunction::typeRational: this->ratValue+=other.ratValue; break;
-      case RationalFunction::typePoly: this->Numerator.GetElement()+=other.Numerator.GetElementConst(); break;
-      case RationalFunction::typeRationalFunction: this->AddHonestRF(other); break;
+    { case RationalFunctionOld::typeRational: this->ratValue+=other.ratValue; break;
+      case RationalFunctionOld::typePoly: this->Numerator.GetElement()+=other.Numerator.GetElementConst(); break;
+      case RationalFunctionOld::typeRationalFunction: this->AddHonestRF(other); break;
     }
     this->ReduceMemory();
     assert(this->checkConsistency());
   }
-  void AddHonestRF(const RationalFunction& other);
+  void AddHonestRF(const RationalFunctionOld& other);
   void ReduceRFToPoly()
   { if (this->expressionType==this->typeRationalFunction)
     { if (this->Denominator.GetElement().IsAConstant())
@@ -5126,11 +5145,11 @@ private:
     return true;
   }
 public:
-  friend std::iostream& operator<< (std::iostream& output, const RationalFunction& theRF)
+  friend std::iostream& operator<< (std::iostream& output, const RationalFunctionOld& theRF)
   { output << theRF.ToString();
     return output;
   }
-  friend std::iostream& operator>> (std::iostream& input, RationalFunction& theRF);
+  friend std::iostream& operator>> (std::iostream& input, RationalFunctionOld& theRF);
 
   MemorySaving<Polynomial<Rational> > Numerator;
   MemorySaving<Polynomial<Rational> > Denominator;
@@ -5142,9 +5161,9 @@ public:
   std::string ToString(FormatExpressions* theFormat=0)const;
   bool NeedsBrackets()const
   { switch(this->expressionType)
-    { case RationalFunction::typeRational: return false;
-      case RationalFunction::typePoly: return this->Numerator.GetElementConst().NeedsBrackets();
-      case RationalFunction::typeRationalFunction: return false;
+    { case RationalFunctionOld::typeRational: return false;
+      case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst().NeedsBrackets();
+      case RationalFunctionOld::typeRationalFunction: return false;
     }
     return false;
   }
@@ -5167,35 +5186,35 @@ public:
     this->GetNumerator(Num);
     return Num.FindGCDCoefficientNumeratorsOverRationals();
   }
-  RationalFunction GetOne()const
-  { RationalFunction tempRat;
+  RationalFunctionOld GetOne()const
+  { RationalFunctionOld tempRat;
     tempRat.MakeConst(this->NumVars, 1, this->context);
     return tempRat;
   }
-  RationalFunction GetZero()const
-  { RationalFunction tempRat;
+  RationalFunctionOld GetZero()const
+  { RationalFunctionOld tempRat;
     tempRat.MakeZero(this->NumVars, this->context);
     return tempRat;
   }
 
   int GetNumVars()const {return this->NumVars;}
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  RationalFunction(const RationalFunction& other): context(0), NumVars(0), expressionType(RationalFunction::typeRational)
+  RationalFunctionOld(const RationalFunctionOld& other): context(0), NumVars(0), expressionType(RationalFunctionOld::typeRational)
   { this->Assign(other);
   }
-  RationalFunction()
+  RationalFunctionOld()
   { this->NumVars=0;
     this->expressionType=this->typeRational;
     this->ratValue.MakeZero();
     this->context=0;
   }
-  RationalFunction(int other)
+  RationalFunctionOld(int other)
   { this->NumVars=0;
     this->expressionType=this->typeRational;
     this->context=0;
     this->operator=(other);
   }
-  RationalFunction(const Rational& other)
+  RationalFunctionOld(const Rational& other)
   { this->NumVars=0;
     this->expressionType=this->typeRational;
     this->context=0;
@@ -5203,14 +5222,14 @@ public:
   }
   Rational RationalValue()const
   { switch(this->expressionType)
-    { case RationalFunction::typeRational:  return this->ratValue;
-      case RationalFunction::typeError: return 0;
+    { case RationalFunctionOld::typeRational:  return this->ratValue;
+      case RationalFunctionOld::typeError: return 0;
       default:
         return this->Numerator.GetElementConst().GetConstantTerm();
     }
   }
   void RaiseToPower(int thePower);
-//  RationalFunction(const RationalFunction& other){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->operator=(other);}
+//  RationalFunctionOld(const RationalFunctionOld& other){this->NumVars=0; this->expressionType=this->typeRational; this->ratValue.MakeZero(); this->operator=(other);}
   void ReduceMemory()
   { this->ReduceRFToPoly();
     this->ReducePolyToRational();
@@ -5224,24 +5243,24 @@ public:
   }
   inline unsigned int HashFunction()const
   { switch(this->expressionType)
-    { case RationalFunction::typeRational:
+    { case RationalFunctionOld::typeRational:
         return this->ratValue.HashFunction();
-      case RationalFunction::typePoly:
+      case RationalFunctionOld::typePoly:
         return this->Numerator.GetElementConst().HashFunction();
-      case RationalFunction::typeRationalFunction:
+      case RationalFunctionOld::typeRationalFunction:
         return this->Numerator.GetElementConst().HashFunction()*SomeRandomPrimes[0]+
         this->Denominator.GetElementConst().HashFunction()*SomeRandomPrimes[1];
       default:
         return (unsigned)-1;
     }
   }
-  static inline unsigned int HashFunction(const RationalFunction& input)
+  static inline unsigned int HashFunction(const RationalFunctionOld& input)
   { return input.HashFunction();
   }
   inline void operator=(int other){this->MakeConst(0, other, 0);}
   inline void operator=(const Rational& other){this->MakeConst(0, other, 0);}
-  inline void operator=(const RationalFunction& other){this->Assign(other);}
-  void Assign(const RationalFunction& other)
+  inline void operator=(const RationalFunctionOld& other){this->Assign(other);}
+  void Assign(const RationalFunctionOld& other)
   {// int commentmewhendone2;
     //other.checkConsistency();
     //this->checkConsistency();
@@ -5250,19 +5269,19 @@ public:
     if (other.context!=0)
       this->context=other.context;
     switch (this->expressionType)
-    { case RationalFunction::typeRational:
+    { case RationalFunctionOld::typeRational:
         this->ratValue=other.ratValue;
         //The below is for testing purposes. I think it is generally better to comment those lines!
         //this->Numerator.FreeMemory();
         //this->Denominator.FreeMemory();
         break;
-      case RationalFunction::typePoly:
+      case RationalFunctionOld::typePoly:
         assert(!other.Numerator.IsZeroPointer() );
         this->Numerator.GetElement()=other.Numerator.GetElementConst();
         //The below is for testing purposes. I think it is generally better to comment those lines!
         //this->Denominator.FreeMemory();
         break;
-      case RationalFunction::typeRationalFunction:
+      case RationalFunctionOld::typeRationalFunction:
         assert(!other.Numerator.IsZeroPointer() && !other.Denominator.IsZeroPointer());
         this->Numerator.GetElement()=other.Numerator.GetElementConst();
         this->Denominator.GetElement()=other.Denominator.GetElementConst();
@@ -5303,7 +5322,7 @@ public:
   }
   void GetNumerator(Polynomial<Rational>& output)const
   { switch(this->expressionType)
-    { case RationalFunction::typeRational: output.MakeConst(this->NumVars, this->ratValue); return;
+    { case RationalFunctionOld::typeRational: output.MakeConst(this->NumVars, this->ratValue); return;
       default: output=this->Numerator.GetElementConst(); return;
     }
   }
@@ -5314,21 +5333,21 @@ public:
   }
   void GetDenominator(Polynomial<Rational>& output)
   { switch(this->expressionType)
-    { case RationalFunction::typeRationalFunction: output=this->Denominator.GetElement(); return;
+    { case RationalFunctionOld::typeRationalFunction: output=this->Denominator.GetElement(); return;
       default: output.MakeConst(this->NumVars, (Rational) 1); return;
     }
   }
   void ClearDenominators
-  (RationalFunction& outputWasMultipliedBy)
+  (RationalFunctionOld& outputWasMultipliedBy)
   ;
-  void operator+=(const RationalFunction& other)
+  void operator+=(const RationalFunctionOld& other)
   { if (this==&other)
     { *this*=(Rational)2;
       return;
     }
     if (this->NumVars!=other.NumVars)
     { int newNumvars=MathRoutines::Maximum(this->NumVars, other.NumVars);
-      RationalFunction tempRF;
+      RationalFunctionOld tempRF;
       tempRF=other;
       this->SetNumVariables(newNumvars);
       tempRF.SetNumVariables(newNumvars);
@@ -5340,7 +5359,7 @@ public:
     if (this->context==0)
       this->context=other.context;
     if (other.expressionType< this->expressionType)
-    { RationalFunction tempRF;
+    { RationalFunctionOld tempRF;
       tempRF=other;
       tempRF.ConvertToType(this->expressionType);
       this->AddSameTypes(tempRF);
@@ -5367,41 +5386,41 @@ public:
     else
       return this->expressionType==this->typeRational && (this->ratValue==other);
   }
-  inline bool operator==(const RationalFunction& other)const{return this->IsEqualTo(other);}
+  inline bool operator==(const RationalFunctionOld& other)const{return this->IsEqualTo(other);}
   void Simplify();
   void SimplifyLeadingCoefficientOnly();
   void operator+=(int theConstant)
-  { RationalFunction tempRF;
+  { RationalFunctionOld tempRF;
     tempRF.MakeConst(this->NumVars, (Rational) theConstant, this->context);
     (*this)+=tempRF;
   }
-  void operator*=(const RationalFunction& other);
+  void operator*=(const RationalFunctionOld& other);
   void operator*=(const Polynomial<Rational>& other);
   void operator*=(const MonomialP& other);
   void operator*=(const Rational& other);
   void operator*=(int other){*this*=(Rational)other;}
 //  void operator-=(const Rational& theConstant)
-//  { RationalFunction tempRF;
+//  { RationalFunctionOld tempRF;
 //    tempRF.MakeConst(this->NumVars, -theConstant, this->context);
 //    (*this)+=tempRF;
 //  }
-  bool operator<(const RationalFunction& other)const
+  bool operator<(const RationalFunctionOld& other)const
   { return other>*this;
   }
-  bool operator<=(const RationalFunction& other)const
+  bool operator<=(const RationalFunctionOld& other)const
   { if (*this==other)
       return true;
     return other>*this;
   }
-  bool operator>(const RationalFunction& other)const
+  bool operator>(const RationalFunctionOld& other)const
   { if (this->expressionType<other.expressionType)
       return false;
     if (this->expressionType>other.expressionType)
       return true;
     switch(this->expressionType)
-    { case RationalFunction::typeRational:  return this->ratValue>other.ratValue;
-      case RationalFunction::typePoly: return this->Numerator.GetElementConst()>other.Numerator.GetElementConst();
-      case RationalFunction::typeRationalFunction:
+    { case RationalFunctionOld::typeRational:  return this->ratValue>other.ratValue;
+      case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst()>other.Numerator.GetElementConst();
+      case RationalFunctionOld::typeRationalFunction:
         if (other.Denominator.GetElementConst()>this->Denominator.GetElementConst())
           return true;
         if (this->Denominator.GetElementConst()>other.Denominator.GetElementConst())
@@ -5438,13 +5457,13 @@ public:
   { return this->expressionType==this->typeRational && this->ratValue.IsEqualToZero();
   }
   bool IsEqualToOne()const{return this->expressionType==this->typeRational && this->ratValue.IsEqualToOne();}
-  bool IsEqualTo(const RationalFunction& other)const
+  bool IsEqualTo(const RationalFunctionOld& other)const
   { if (this->expressionType!=other.expressionType)
       return false;
     switch(this->expressionType)
-    { case RationalFunction::typeRationalFunction:  return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst()) && this->Denominator.GetElementConst().IsEqualTo(other.Denominator.GetElementConst());
-      case RationalFunction::typePoly: return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst());
-      case RationalFunction::typeRational: return this->ratValue==other.ratValue;
+    { case RationalFunctionOld::typeRationalFunction:  return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst()) && this->Denominator.GetElementConst().IsEqualTo(other.Denominator.GetElementConst());
+      case RationalFunctionOld::typePoly: return this->Numerator.GetElementConst().IsEqualTo(other.Numerator.GetElementConst());
+      case RationalFunctionOld::typeRational: return this->ratValue==other.ratValue;
     }
     assert(false);
     return false;
@@ -5462,7 +5481,7 @@ public:
   (List<Polynomial<Rational> >& theBasis,
    Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational> & buffer3,
    Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, GlobalVariables* theGlobalVariables)
-  { RationalFunction::TransformToReducedGroebnerBasis
+  { RationalFunctionOld::TransformToReducedGroebnerBasis
     (
      theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &MonomialP::LeftIsGEQLexicographicLastVariableStrongest, theGlobalVariables
      );
@@ -5491,50 +5510,50 @@ public:
   (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, GlobalVariables* theContext=0)
   ;
   static void ScaleClearDenominator
-  (List<RationalFunction>& input, Vector<Polynomial<Rational> >& output)
+  (List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output)
   ;
   static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, Polynomial<Rational> & buffer5, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
   static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
   static inline void lcm(Polynomial<Rational>& left, Polynomial<Rational> & right, Polynomial<Rational> & output)
   { Polynomial<Rational> buffer1, buffer2, buffer3, buffer4; List<Polynomial<Rational> > bufferList; MonomialP tempMon1, tempMon2;
-    RationalFunction::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
+    RationalFunctionOld::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
   }
   inline void operator-=(int other)
   { *this-=(Rational) other;
   }
   inline void operator-=(const Rational& other)
   { assert(this->checkConsistency());
-    RationalFunction tempRF;
+    RationalFunctionOld tempRF;
     tempRF.MakeConst(this->NumVars, other, this->context);
     tempRF.Minus();
     this->operator+=(tempRF);
     assert(this->checkConsistency());
   }
-  inline void operator-=(const RationalFunction& other)
+  inline void operator-=(const RationalFunctionOld& other)
   { assert(this->checkConsistency());
     assert(other.checkConsistency());
     if (other.context!=0)
       this->context=other.context;
-    RationalFunction tempRF;
+    RationalFunctionOld tempRF;
     tempRF=other;
     tempRF.Minus();
     this->operator+=(tempRF);
     assert(this->checkConsistency());
   }
   inline void operator/=(int other)
-  { RationalFunction tempRF;
+  { RationalFunctionOld tempRF;
     tempRF.MakeConst(this->NumVars, other, this->context);
     *this/=tempRF;
   }
   inline void operator/=(const Polynomial<Rational>& other)
-  { RationalFunction tempRF;
+  { RationalFunctionOld tempRF;
     tempRF=other;
     tempRF.Invert();
     *this*=(tempRF);
     assert(this->checkConsistency());
   }
-  inline void operator/=(const RationalFunction& other)
-  { RationalFunction tempRF;
+  inline void operator/=(const RationalFunctionOld& other)
+  { RationalFunctionOld tempRF;
     if (other.context!=0)
       this->context=other.context;
     tempRF=other;
@@ -5911,7 +5930,7 @@ int Polynomial<Element>::GetIndexMaxMonomialLexicographicLastVariableStrongest()
 }
 
 template <class Element>
-int Polynomial<Element>::GetIndexMaxMonomialTotalDegThenLexicographic()
+int Polynomial<Element>::GetIndexMaxMonomialTotalDegThenLexicographic()const
 { if (this->size==0)
     return -1;
   int result;
@@ -7382,7 +7401,7 @@ public:
 ;
   SemisimpleLieAlgebra& GetOwner()const;
   bool GetCoordsInBasis
-  (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunction>& output, GlobalVariables& theGlobalVariables)const
+  (const List<ElementSemisimpleLieAlgebra>& theBasis, Vector<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)const
   { Vector<Rational> tempVect;
     if (! this->GetCoordsInBasis(theBasis, tempVect, theGlobalVariables))
       return false;
@@ -7391,7 +7410,7 @@ public:
   }
   void MultiplyByRational(SemisimpleLieAlgebra& owner, const Rational& theNumber);
   static void GetBasisFromSpanOfElements
-  (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunction>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
+  (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
     ;
   int GetFirstOwnerIndex()
   { if (this->size<=0)
@@ -7403,7 +7422,7 @@ public:
   ;
   void ActOnMe
     (const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner,
-   const RationalFunction& theRingUnit, const RationalFunction& theRingZero, GlobalVariables* theGlobalVariables)
+   const RationalFunctionOld& theRingUnit, const RationalFunctionOld& theRingZero, GlobalVariables* theGlobalVariables)
    ;
   bool IsACoeffOneChevalleyGenerator(int& outputGenerator, SemisimpleLieAlgebra& owner);
   bool IsProportionalTo(const ElementSemisimpleLieAlgebra& other)const

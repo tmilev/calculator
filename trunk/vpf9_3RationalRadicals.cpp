@@ -41,37 +41,49 @@ void RationalAlgebraic::ReduceModAnBm
  const Polynomial<Rational>& An, const Polynomial<Rational>& Bm, int theN, int theM,
  Polynomial<Rational>& buffer
  )const
-{ if (toBeReduced.GetNumVars()!=2)
+{ if (toBeReduced.IsEqualToZero())
+    return;
+  if (toBeReduced.GetNumVars()!=2)
   { std::cout << "This is a programming error: function RationalAlgebraic::ReduceModAnBm"
-    << " expects as input two variable polynomial, but got a polynomial of "
+    << " expects as input two variable polynomial, but got the "
+    << toBeReduced.ToString() << " polynomial of "
     << toBeReduced.GetNumVars() << " instead. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   Rational currentCoeff;
   MonomialP tempM;
+  std::cout << "<br>Reducing " << toBeReduced.ToString() << " mod "
+  << "x_1^" << theN << "- (" << An.ToString() << ") (it has " << An.NumVars << " variables)  and mod "
+  << "x_2^" << theM << "- (" << Bm.ToString() << ") (it has " << Bm.NumVars << " variables)";
   for (int i=0; i<toBeReduced.size; i++)
     if (toBeReduced[i][0]>=theN || toBeReduced[i][1]>=theM)
     { toBeReduced.PopMonomial(i, tempM, currentCoeff);
-      if (toBeReduced[i][0]>=theN)
+      std::cout << " select monomial " << tempM.ToString() << " with coeff " << currentCoeff;
+      if (tempM[0]>=theN)
       { tempM[0]-=theN;
         buffer=An;
-      }
-      else
+      } else
       { tempM[1]-=theM;
         buffer=Bm;
       }
       buffer.MultiplyBy(tempM, currentCoeff);
+      std::cout << "toBeReduced: " << toBeReduced.ToString() << " buffer: " << buffer.ToString();
+      if (buffer.ToString()=="4x_{1}")
+        std::cout << "!";
       toBeReduced+=buffer;
-      i=0;
+      i=-1;
+      std::cout << "<br>=" <<  toBeReduced.ToString();
     }
+  std::cout << " <br>to get:  " << toBeReduced.ToString();
 }
 
 void RationalAlgebraic::AssignOperation
-(Polynomial<Rational>& theOperation, const RationalAlgebraic& other)
-{ if (&other==this)
+(Polynomial<Rational>& theOperationIsModified, const RationalAlgebraic& other)
+{ MacroRegisterFunctionWithName("RationalAlgebraic::AssignOperation");
+  if (&other==this)
   { RationalAlgebraic buffer=*this;
-    this->AssignOperation(theOperation, buffer);
+    this->AssignOperation(theOperationIsModified, buffer);
     return;
   }
   Polynomial<Rational> An, Bm, buffer1, buffer2;
@@ -84,6 +96,7 @@ void RationalAlgebraic::AssignOperation
   int theN=An.TotalDegree();
   int theM=Bm.TotalDegree();
   int MtimesN=theN*theM;
+  int MtimesNplusOne=MtimesN+1;
   if (MtimesN>=LargeIntUnsigned::SquareRootOfCarryOverBound)
   { std::cout << "Minimal polynomial out of bounds: the upper bound for the minimal poly "
     << " degree is <" << LargeIntUnsigned::SquareRootOfCarryOverBound
@@ -97,22 +110,40 @@ void RationalAlgebraic::AssignOperation
   Bm.PopMonomial(Bm.GetIndexMaxMonomialLexicographicLastVariableStrongest(), tempM, tempRat);
   Bm/=tempRat*(-1);
   Matrix<Rational> theDep;
-  theDep.init(MtimesN, MtimesN);
+  theDep.init(MtimesN, MtimesNplusOne);
   theDep.NullifyAll();
-  this->ReduceModAnBm(theOperation, An, Bm, theN, theM, buffer1);
+  this->ReduceModAnBm(theOperationIsModified, An, Bm, theN, theM, buffer1);
 
   buffer2.MakeOne(2);
-  for (int i=0; i<MtimesN; i++)
+
+  for (int i=0; i<MtimesNplusOne; i++)
   { for (int j=0; j<buffer2.size; j++)
-    { int theIndex=buffer2[j][0].NumShort*theM+buffer2[j][1].NumShort*theN;
-      theDep.elements[i][theIndex]=buffer2.theCoeffs[j];
+    { int theIndex=buffer2[j][0].NumShort*theM+buffer2[j][1].NumShort;
+      theDep(theIndex, i)=buffer2.theCoeffs[j];
     }
-    if (i!=MtimesN-1)
-    { buffer2*=theOperation;
+    if (i!=MtimesNplusOne-1)
+    { buffer2*=theOperationIsModified;
       this->ReduceModAnBm(buffer2 , An, Bm, theN, theM, buffer1);
     }
   }
-  std::cout << "The matrix: " << theDep.ToString();
+  std::cout << "<br>The matrix: " << theDep.ToString();
+  Vectors<Rational> theEigenVectors;
+  theDep.FindZeroEigenSpace(theEigenVectors);
+  std::cout << "<br>result eigenvectors: " << theEigenVectors.ToString();
+  if (theEigenVectors.size<1)
+  { std::cout << "This is a programing error: I am asked to find the eigenspace of "
+    << " a matrix with more columns than rows, but I get "
+    << " zero eigenvectors. Something is very wrong. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->minPoly.MakeZero(1);
+  tempM.monBody.SetSize(1);
+  for (int i=0; i<theEigenVectors[0].size; i ++)
+  { tempM[0]=i;
+    this->minPoly.AddMonomial(tempM, theEigenVectors[0][i]);
+  }
+  this->minPoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
 }
 
 

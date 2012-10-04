@@ -398,6 +398,8 @@ g_{-2} v_\\lambda\
 //civilizedInput= "x:=1;x:=Polynomial{}x;(4x^{5}-4 x^{4}+12 x^{3}-12 x^{2}+9 x-9)/(x-1)";
 //civilizedInput="1/(1-1)";
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ";
+//  civilizedInput="\\sqrt{}(2)+\\sqrt{}2";
+//  civilizedInput="\\sqrt{}(2)+\\sqrt{}2";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

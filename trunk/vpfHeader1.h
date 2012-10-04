@@ -1507,6 +1507,16 @@ public:
       }
     return Result;
   }
+  inline Element& operator()(int i, int j)
+  { if (i<0  || i>=this->NumRows || j<0 || j>this->NumCols)
+    { std::cout << "This is a programming error: requesting row, column indexed"
+      << " by " << i+1 << " and " << j+1 << " but I am a matrix with "
+      << this->NumRows << " rows and " << this->NumCols << " colums. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return this->elements[i][j];
+  }
   bool IsIdMatrix()const
   { if (this->NumRows!=this->NumCols || this->NumRows<=0)
        return false;
@@ -1737,7 +1747,8 @@ void NonPivotPointsToEigenVector
   ;
   inline  void GaussianEliminationEuclideanDomain
   (const Element& theRingMinusUnit, const Element& theRingUnit) {this->GaussianEliminationEuclideanDomain(0, theRingMinusUnit, theRingUnit);}
-    static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
+  static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+  (Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
   Element GetDeterminant();
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);

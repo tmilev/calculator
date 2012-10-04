@@ -53,12 +53,9 @@ class DifferentialForm: ElementAssociativeAlgebra<MonomialDiffForm, CoefficientT
   }
 };
 
-class AlgebraicInteger
-{ friend std::ostream& operator << (std::ostream& output, const AlgebraicInteger& theRat)
-  { output << theRat.ToString();
-    return output;
-  }
-  public:
+class RationalAlgebraic
+{
+public:
   //The mathematical definition of an algebraic integer
   //is an algebraic number whose mathematical minimal polynomial has leading coefficient 1.
   //Format of minPoly.
@@ -72,8 +69,59 @@ class AlgebraicInteger
   int rootIndex;
   Polynomial<Rational> minPoly;
   std::string DisplayString;
+  friend std::ostream& operator << (std::ostream& output, const RationalAlgebraic& theRat)
+  { output << theRat.ToString();
+    return output;
+  }
+
+  void SqrtMe();
+  void RadicalMe(int theRad);
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const RationalAlgebraic& input)
+  { return input.minPoly.HashFunction()*SomeRandomPrimes[0]+input.rootIndex*SomeRandomPrimes[1];
+  }
+
+  RationalAlgebraic(){};
+  RationalAlgebraic(const RationalAlgebraic& other)
+  { this->operator=(other);
+  }
+  void operator=(const RationalAlgebraic& other)
+  { this->minPoly=other.minPoly;
+    this->rootIndex=other.rootIndex;
+  }
+  void MakeOneVarPolyIntoTwoVarPoly(Polynomial<Rational>& thePoly)
+  { Polynomial<Rational> output;
+    MonomialP tempM;
+    tempM.MakeConst(2);
+    for (int i =0; i<thePoly.size; i++)
+    { tempM[1]=thePoly[i][0];
+      output.AddMonomial(tempM, thePoly.theCoeffs[i]);
+    }
+    thePoly=output;
+  }
+  void operator=(const Rational& other);
+  void AssignOperation
+  (Polynomial<Rational>& theOperation, const RationalAlgebraic& other)
+  ;
+  void ReduceModAnBm
+(Polynomial<Rational>& toBeReduced, const Polynomial<Rational>& An,
+ const Polynomial<Rational>& Bm, int theN, int theM, Polynomial<Rational>& buffer
+ )const
+  ;
+  void operator+=(const RationalAlgebraic& other)
+  { Polynomial<Rational> theOperation;
+    MonomialP tempM;
+    tempM.MakeConst(2);
+    tempM[0]=1;
+    theOperation.AddMonomial(tempM, 1);
+    tempM[0]=0;
+    tempM[1]=1;
+    theOperation.AddMonomial(tempM, 1);
+    this->AssignOperation(theOperation, other);
+  }
   std::string ToString(FormatExpressions* theFormat=0)const;
-  AlgebraicInteger():rootIndex(0){}
   void AssignRadical(const LargeInt& undertheRadical, int theRadical)
   { MonomialP tempM;
     tempM.monBody.SetSize(1);
@@ -90,19 +138,13 @@ class AlgebraicInteger
   bool IsAConstant()
   { return this->minPoly.IsEqualToZero();
   }
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  static unsigned int HashFunction(const AlgebraicInteger& input)
-  { return input.rootIndex*SomeRandomPrimes[0]+ input.minPoly.HashFunction()*SomeRandomPrimes[1];
-  }
-  bool operator==(const AlgebraicInteger& other)const
+  bool operator==(const RationalAlgebraic& other)const
   { return this->rootIndex==other.rootIndex && this->minPoly==other.minPoly;
   }
   inline bool IsEqualToZero()const
   { return false;
   }
-  bool operator> (const AlgebraicInteger& other) const
+  bool operator> (const RationalAlgebraic& other) const
   { if (this->minPoly>other.minPoly)
       return true;
     if (other.minPoly>this->minPoly)
@@ -110,38 +152,5 @@ class AlgebraicInteger
     return this->rootIndex>other.rootIndex;
   }
 };
-
-class RationalAlgebraic : public MonomialCollection<AlgebraicInteger, Rational>
-{
-public:
-  void SqrtMe();
-  void RadicalMe(int theRad);
-  static unsigned int HashFunction(const RationalAlgebraic& input)
-  { return ::MonomialCollection<AlgebraicInteger, Rational>::HashFunction(input);
-  }
-  unsigned int HashFunction()const
-  { return this->HashFunction(*this);
-  }
-  RationalAlgebraic(){};
-  RationalAlgebraic(const RationalAlgebraic& other)
-  { this->operator=(other);
-  }
-  void operator=(const RationalAlgebraic& other)
-  { this->::MonomialCollection<AlgebraicInteger, Rational>::operator=(other);
-  }
-  void operator=(const Rational& other);
-  bool operator==(const RationalAlgebraic& other)const
-  { return this->::MonomialCollection<AlgebraicInteger, Rational>::operator==(other);
-  }
-  void Simplify();
-  void operator+=(const RationalAlgebraic& other)
-  { this->::MonomialCollection<AlgebraicInteger, Rational>::operator+=(other);
-    this->Simplify();
-  }
-  void GetMinPolyAlgebraicInteger(Polynomial<Rational>& output)const
-  ;
-
-};
-
 
 #endif

@@ -2951,10 +2951,8 @@ bool CommandList::fMinPoly
   theData=theExpression.GetAtomicValue();
   if (!theData.ConvertToTypE<RationalAlgebraic>())
     return false;
-  Polynomial<Rational> outputMinPoly;
   const RationalAlgebraic& theRA=theData.GetValuE<RationalAlgebraic>();
-  theRA.GetMinPolyAlgebraicInteger(outputMinPoly);
-  theExpression.MakePolyAtom(outputMinPoly, -1, theCommands, inputIndexBoundVars);
+  theExpression.MakePolyAtom(theRA.minPoly, -1, theCommands, inputIndexBoundVars);
   return true;
 }
 

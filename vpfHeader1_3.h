@@ -95,6 +95,7 @@ public:
   { Polynomial<Rational> output;
     MonomialP tempM;
     tempM.MakeConst(2);
+    output.MakeZero(2);
     for (int i =0; i<thePoly.size; i++)
     { tempM[1]=thePoly[i][0];
       output.AddMonomial(tempM, thePoly.theCoeffs[i]);
@@ -103,7 +104,7 @@ public:
   }
   void operator=(const Rational& other);
   void AssignOperation
-  (Polynomial<Rational>& theOperation, const RationalAlgebraic& other)
+  (Polynomial<Rational>& theOperationIsModified, const RationalAlgebraic& other)
   ;
   void ReduceModAnBm
 (Polynomial<Rational>& toBeReduced, const Polynomial<Rational>& An,
@@ -111,7 +112,9 @@ public:
  )const
   ;
   void operator+=(const RationalAlgebraic& other)
-  { Polynomial<Rational> theOperation;
+  { MacroRegisterFunctionWithName("RationalAlgebraic::operator+=");
+    Polynomial<Rational> theOperation;
+    theOperation.MakeZero(2);
     MonomialP tempM;
     tempM.MakeConst(2);
     tempM[0]=1;

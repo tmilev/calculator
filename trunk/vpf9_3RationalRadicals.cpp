@@ -3,127 +3,120 @@
 #include "vpfHeader1_3.h"
 ProjectInformationInstance ProjectInfoVpf9_3cpp(__FILE__, "Implementation of rational radical extensions. ");
 
-
-void RationalAlgebraic::operator=(const Rational& other)
-{ this->minPoly.MakeDegreeOne(1,0, 1, -other);
-  this->minPoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+void AlgebraicNumber::operator=(const Rational& other)
+{ this->minPolyIndex=this->theRegistry->RegisterRational(other);
+  this->rootIndex=0;
 }
 
-void RationalAlgebraic::SqrtMe()
+void AlgebraicNumber::SqrtMe()
 { this->RadicalMe(2);
 }
 
-void RationalAlgebraic::RadicalMe(int theRad)
+void AlgebraicNumber::RadicalMe(int theRad)
 { Polynomial<Rational> newMinPoly;
   newMinPoly.MakeZero(1);
   MonomialP tempM;
-  for (int i=0; i<this->minPoly.size; i++)
-  { tempM=this->minPoly[i];
+  for (int i=0; i<this->GetMinPoly().size; i++)
+  { tempM=this->GetMinPoly()[i];
     tempM.monBody*=theRad;
-    newMinPoly.AddMonomial(tempM, this->minPoly.theCoeffs[i]);
+    newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
   }
   this->rootIndex=0;
-  this->minPoly=newMinPoly;
+  this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);
 }
 
-std::string RationalAlgebraic::ToString(FormatExpressions* theFormat)const
-{ if (this->minPoly.IsEqualToZero())
-    return "";
-  if (this->DisplayString!="")
+std::string AlgebraicNumber::ToString(FormatExpressions* theFormat)const
+{ if (this->DisplayString!="")
     return this->DisplayString;
+  if (this->minPolyIndex==-1 || this->theRegistry==0)
+    return "(NonInitializedAlgebraicNumber)";
   std::stringstream out;
-  out << "(rootIndex: " << this->rootIndex << ", minpoly: " << this->minPoly.ToString(theFormat) << ")";
+  out << "(rootIndex: " << this->rootIndex << ", minpoly: " << this->GetMinPoly().ToString(theFormat) << ")";
   return out.str();
 }
 
-void RationalAlgebraic::ReduceModAnBm
-(Polynomial<Rational>& toBeReduced,
- const Polynomial<Rational>& An, const Polynomial<Rational>& Bm, int theN, int theM,
- Polynomial<Rational>& buffer
+void AlgebraicNumber::
+ReduceMod
+(Polynomial<Rational>& toBeReduced, const List<Polynomial<Rational> >& thePolys,
+ List<int>& theNs, Polynomial<Rational>& buffer
  )const
 { if (toBeReduced.IsEqualToZero())
     return;
-  if (toBeReduced.GetNumVars()!=2)
-  { std::cout << "This is a programming error: function RationalAlgebraic::ReduceModAnBm"
-    << " expects as input two variable polynomial, but got the "
+  if (toBeReduced.GetNumVars()!=theNs.size)
+  { std::cout << "This is a programming error: function AlgebraicNumber::ReduceModAnBm"
+    << " expects as input a polynomial of  " << theNs.size << " variables, but got the "
     << toBeReduced.ToString() << " polynomial of "
-    << toBeReduced.GetNumVars() << " instead. "
+    << toBeReduced.GetNumVars() << "variables instead. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   Rational currentCoeff;
   MonomialP tempM;
-  std::cout << "<br>Reducing " << toBeReduced.ToString() << " mod "
-  << "x_1^" << theN << "- (" << An.ToString() << ") (it has " << An.NumVars << " variables)  and mod "
-  << "x_2^" << theM << "- (" << Bm.ToString() << ") (it has " << Bm.NumVars << " variables)";
+//  std::cout << "<br>Reducing " << toBeReduced.ToString() << " mod "
+//  << "x_1^" << theN << "- (" << An.ToString() << ") (it has " << An.NumVars << " variables)  and mod "
+//  << "x_2^" << theM << "- (" << Bm.ToString() << ") (it has " << Bm.NumVars << " variables)";
   for (int i=0; i<toBeReduced.size; i++)
-    if (toBeReduced[i][0]>=theN || toBeReduced[i][1]>=theM)
-    { toBeReduced.PopMonomial(i, tempM, currentCoeff);
-      std::cout << " select monomial " << tempM.ToString() << " with coeff " << currentCoeff;
-      if (tempM[0]>=theN)
-      { tempM[0]-=theN;
-        buffer=An;
-      } else
-      { tempM[1]-=theM;
-        buffer=Bm;
+    for (int j=0; j<theNs.size; j++)
+      if (toBeReduced[i][j]>=theNs[j])
+      { toBeReduced.PopMonomial(i, tempM, currentCoeff);
+  //      std::cout << " select monomial " << tempM.ToString() << " with coeff " << currentCoeff;
+        int thePower=tempM[j].NumShort/theNs[j];
+        tempM[j]-=theNs[j]*thePower;
+        buffer=thePolys[j];
+        buffer.RaiseToPower(thePower);
+        buffer.MultiplyBy(tempM, currentCoeff);
+  //      std::cout << "toBeReduced: " << toBeReduced.ToString() << " buffer: " << buffer.ToString();
+        toBeReduced+=buffer;
+        i=-1;
+        break;
+  //      std::cout << "<br>=" <<  toBeReduced.ToString();
       }
-      buffer.MultiplyBy(tempM, currentCoeff);
-      std::cout << "toBeReduced: " << toBeReduced.ToString() << " buffer: " << buffer.ToString();
-      if (buffer.ToString()=="4x_{1}")
-        std::cout << "!";
-      toBeReduced+=buffer;
-      i=-1;
-      std::cout << "<br>=" <<  toBeReduced.ToString();
-    }
-  std::cout << " <br>to get:  " << toBeReduced.ToString();
+//  std::cout << " <br>to get:  " << toBeReduced.ToString();
 }
 
-void RationalAlgebraic::AssignOperation
-(Polynomial<Rational>& theOperationIsModified, const RationalAlgebraic& other)
-{ MacroRegisterFunctionWithName("RationalAlgebraic::AssignOperation");
-  if (&other==this)
-  { RationalAlgebraic buffer=*this;
-    this->AssignOperation(theOperationIsModified, buffer);
-    return;
-  }
-  Polynomial<Rational> An, Bm, buffer1, buffer2;
-  An=this->minPoly;
-  Bm=other.minPoly;
-  An.SetNumVariables(2);
-  this->MakeOneVarPolyIntoTwoVarPoly(Bm);
+bool AlgebraicNumber::AssignOperation
+  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumber>& theOperationArguments)
+{ MacroRegisterFunctionWithName("AlgebraicNumber::AssignOperation");
+  List<Polynomial<Rational> > thePolys;
+  List<int> theNs;
   MonomialP tempM;
   Rational tempRat;
-  int theN=An.TotalDegree();
-  int theM=Bm.TotalDegree();
-  int MtimesN=theN*theM;
-  int MtimesNplusOne=MtimesN+1;
-  if (MtimesN>=LargeIntUnsigned::SquareRootOfCarryOverBound)
+  Polynomial<Rational> buffer1, buffer2;
+  thePolys.SetSize(theOperationArguments.size);
+  theNs.SetSize(theOperationArguments.size);
+  int ProductNs=1;
+  for (int i=0; i<theOperationArguments.size; i++)
+  { this->MakeOneVarPolyIntoNVarPoly(theOperationArguments[i].GetMinPoly(), thePolys[i], theOperationArguments.size, i);
+    theNs[i]=thePolys[i].TotalDegree();
+    ProductNs*=theNs[i];
+    thePolys[i].PopMonomial
+    (thePolys[i].GetIndexMaxMonomialLexicographicLastVariableStrongest(), tempM, tempRat);
+    thePolys[i]/=tempRat*(-1);
+  }
+  int ProductNsPlusOne= ProductNs+1;
+  if (ProductNsPlusOne>=LargeIntUnsigned::SquareRootOfCarryOverBound)
   { std::cout << "Minimal polynomial out of bounds: the upper bound for the minimal poly "
     << " degree is <" << LargeIntUnsigned::SquareRootOfCarryOverBound
     << " which has been exceeded. Until proper error handling is implemented, I shall crash. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-
-  An.PopMonomial(An.GetIndexMaxMonomialLexicographicLastVariableStrongest(), tempM, tempRat);
-  An/=tempRat*(-1);
-  Bm.PopMonomial(Bm.GetIndexMaxMonomialLexicographicLastVariableStrongest(), tempM, tempRat);
-  Bm/=tempRat*(-1);
   Matrix<Rational> theDep;
-  theDep.init(MtimesN, MtimesNplusOne);
+  theDep.init(ProductNs, ProductNsPlusOne);
   theDep.NullifyAll();
-  this->ReduceModAnBm(theOperationIsModified, An, Bm, theN, theM, buffer1);
-
-  buffer2.MakeOne(2);
-
-  for (int i=0; i<MtimesNplusOne; i++)
+  this->ReduceMod(theOperationIsModified, thePolys, theNs, buffer1);
+  buffer2.MakeOne(theNs.size);
+  for (int i=0; i<ProductNsPlusOne; i++)
   { for (int j=0; j<buffer2.size; j++)
-    { int theIndex=buffer2[j][0].NumShort*theM+buffer2[j][1].NumShort;
+    { MonomialP& currentMon=buffer2[j];
+      int theIndex=currentMon[0].NumShort;
+      for (int k=1; k<theNs.size; k++)
+        theIndex=theIndex*theNs[k]+ currentMon[k].NumShort;
       theDep(theIndex, i)=buffer2.theCoeffs[j];
     }
-    if (i!=MtimesNplusOne-1)
+    if (i!=ProductNs)
     { buffer2*=theOperationIsModified;
-      this->ReduceModAnBm(buffer2 , An, Bm, theN, theM, buffer1);
+      this->ReduceMod(buffer2, thePolys, theNs, buffer1);
     }
   }
   std::cout << "<br>The matrix: " << theDep.ToString();
@@ -137,13 +130,37 @@ void RationalAlgebraic::AssignOperation
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->minPoly.MakeZero(1);
+  Polynomial<Rational> newMinPoly;
+  newMinPoly.MakeZero(1);
   tempM.monBody.SetSize(1);
-  for (int i=0; i<theEigenVectors[0].size; i ++)
+  for (int i=0; i<theEigenVectors[0].size; i++)
   { tempM[0]=i;
-    this->minPoly.AddMonomial(tempM, theEigenVectors[0][i]);
+    newMinPoly.AddMonomial(tempM, theEigenVectors[0][i]);
   }
-  this->minPoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+  newMinPoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+  this->minPolyIndex= this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(newMinPoly);
+//  this->theRegistry->theOrigins.SetSize(this->theRegistry.theOrigins.size+1);
+  return true;
 }
 
+const Polynomial<Rational>& AlgebraicNumber::GetMinPoly()const
+{ return this->theRegistry->theMinPolys[this->minPolyIndex];
+}
 
+bool AlgebraicNumber::AssignRadical(const LargeInt& undertheRadical, int theRadical)
+{ Polynomial<Rational> theMinPoly;
+  MonomialP tempM;
+  tempM.monBody.SetSize(1);
+  tempM.monBody[0]=theRadical;
+  theMinPoly.MakeZero(1);
+  theMinPoly.AddMonomial(tempM, 1);
+  tempM.monBody[0]=0;
+  theMinPoly.AddMonomial(tempM, undertheRadical);
+  this->rootIndex=0;
+  this->minPolyIndex=this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(theMinPoly);
+//  this->theRegistry.theOrigins.SetSize(this->theRegistry.theOrigins.size+1);
+  std::stringstream out;
+  out << "\\sqrt{{}" << undertheRadical.ToString() << "}";
+  this->DisplayString= out.str();
+  return true;
+}

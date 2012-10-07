@@ -2949,10 +2949,242 @@ bool CommandList::fMinPoly
     return false;
   Data theData;
   theData=theExpression.GetAtomicValue();
-  if (!theData.ConvertToTypE<RationalAlgebraic>())
+  if (!theData.ConvertToTypE<AlgebraicNumber>())
     return false;
-  const RationalAlgebraic& theRA=theData.GetValuE<RationalAlgebraic>();
-  theExpression.MakePolyAtom(theRA.minPoly, -1, theCommands, inputIndexBoundVars);
+  const AlgebraicNumber& theRA=theData.GetValuE<AlgebraicNumber>();
+  theExpression.MakePolyAtom(theRA.GetMinPoly(), -1, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool LargeIntUnsigned::Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites)
+{ if (this->size>1)
+    return false;
+  unsigned int n=(*this)[0];
+  outputPrimeFactors.size=0;
+  outputMultiplicites.size=0;
+  while (n%2==0)
+  { this->AccountPrimeFactor(2, outputPrimeFactors, outputMultiplicites);
+    n/=2;
+  }
+  unsigned int upperboundPrimeDivisors= (unsigned int) sqrt((double)n);
+  List<bool> theSieve;
+  theSieve.initFillInObject(upperboundPrimeDivisors+1,true);
+  for (unsigned int i=3; i<=upperboundPrimeDivisors; i+=2)
+    if (theSieve[i])
+    { while (n%i==0)
+      { this->AccountPrimeFactor(i, outputPrimeFactors, outputMultiplicites);
+        n/=i;
+        upperboundPrimeDivisors= (unsigned int) sqrt((double)n);
+      }
+      for (unsigned int j=i; j<=upperboundPrimeDivisors; j+=i)
+        theSieve[j]=false;
+    }
+  if (n>1)
+    this->AccountPrimeFactor(n, outputPrimeFactors, outputMultiplicites);
+  return true;
+}
+
+class SelectionOneItem
+{
+  public:
+  int MaxMultiplicity;
+  int SelectedMult;
+  SelectionOneItem():MaxMultiplicity(0), SelectedMult(-1){}
+  bool IncrementReturnFalseIfBackToBeginning()
+  { if (this->MaxMultiplicity==0)
+      return false;
+    this->SelectedMult++;
+    if (this->SelectedMult>this->MaxMultiplicity)
+      this->SelectedMult=0;
+    return this->SelectedMult!=0;
+  }
+  void initFromMults(int theMult)
+  { this->MaxMultiplicity=theMult;
+    this->SelectedMult=0;
+  }
+  std::string ToString()const
+  { std::stringstream out;
+    out << this->SelectedMult << " out of " << this->MaxMultiplicity;
+    return out.str();
+  }
+};
+
+template <class Base>
+class Incrementable
+{ public:
+  List<Base> theElements;
+  Base& operator[](int i)
+  { return this->theElements[i];
+  }
+  bool IncrementReturnFalseIfBackToBeginning()
+  { for (int i=this->theElements.size-1; i>=0; i--)
+      if (this->theElements[i].IncrementReturnFalseIfBackToBeginning())
+        return true;
+    return false;
+  }
+  void initFromMults(int inputBase, int numElts)
+  { this->theElements.SetSize(numElts);
+    for (int i=0; i<this->theElements.size; i++)
+      this->theElements[i].initFromMults(inputBase);
+  }
+  template<class Element>
+  void initFromMults(const List<Element>& input, int useOnlyNElementsOnly=0)
+  { if (useOnlyNElementsOnly>0 && useOnlyNElementsOnly<=input.size)
+      this->theElements.SetSize(useOnlyNElementsOnly);
+    else
+      this->theElements.SetSize(input.size);
+    for (int i=0; i<this->theElements.size; i++)
+      this->theElements[i].initFromMults(input[i]);
+  }
+  std::string ToString()const
+  { std::stringstream out;
+    out << "(";
+    for (int i=0; i<this->theElements.size; i++)
+    { out << this->theElements[i].ToString();
+      if (i!=this->theElements.size-1)
+        out << ", ";
+    }
+    out << ")";
+    return out.str();
+  }
+};
+
+template <class CoefficientType>
+void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& thePoints, const Vector<CoefficientType>& ValuesAtThePoints)
+{ Polynomial<CoefficientType> theLagrangeInterpolator, tempP;
+  this->MakeZero(1);
+  for (int i=0; i<thePoints.size; i++)
+  { theLagrangeInterpolator.MakeConst(1, 1);
+    for (int j=0; j<thePoints.size; j++)
+      if (i!=j)
+      { tempP.MakeDegreeOne(1, 0, 1, -thePoints[j]);
+        tempP/=thePoints[i]-thePoints[j];
+        theLagrangeInterpolator*=tempP;
+      }
+    theLagrangeInterpolator*=ValuesAtThePoints[i];
+    *this+=theLagrangeInterpolator;
+  }
+}
+
+template <class CoefficientType>
+bool Polynomial<CoefficientType>::
+FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("Polynomial<CoefficientType>::FactorMeOutputIsSmallestDivisor");
+  if (this->NumVars!=1)
+    return false;
+  Polynomial<Rational> thePoly=*this;
+  Rational theMultiple=thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+  int upperBoundDegDivisors=thePoly.TotalDegree()/2;
+  List<int> thePoints;
+  List<List<unsigned int> > thePrimeFactorsAtPoints;
+  List<List<int> > thePrimeFactorsMults;
+  List<LargeInt> theValuesAtPoints;
+  Rational tempRat;
+  thePoints.SetSize(upperBoundDegDivisors+1);
+  theValuesAtPoints.SetSize(upperBoundDegDivisors+1);
+  thePrimeFactorsAtPoints.SetSize(upperBoundDegDivisors+1);
+  thePrimeFactorsMults.SetSize(upperBoundDegDivisors+1);
+  std::cout << "<br>Upper bound degree divisor: " << upperBoundDegDivisors;
+  std::cout << "<br>Interpolating at: 0,";
+  thePoints[0]=0;
+  for (int i=1; i<thePoints.size; i++)
+  { thePoints[i]= i%2==1 ? i/2+1 : -(i/2);
+    std::cout << thePoints[i] << ", ";
+  }
+  Vector<Rational> theArgument;
+  theArgument.SetSize(1);
+  for (int i=0; i<=upperBoundDegDivisors; i++)
+  { theArgument[0]=thePoints[i];
+    thePoly.Evaluate(theArgument,tempRat);
+    tempRat.GetNum(theValuesAtPoints[i]);
+    std::cout << "<br>value at " << thePoints[i] << " = " << theValuesAtPoints[i].ToString();
+    if(!theValuesAtPoints[i].value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
+    { if (comments!=0)
+        *comments << "<br>Aborting polynomial factorization: failed to factor the integer "
+        << theValuesAtPoints[i].ToString() << " (most probably the integer is too large).";
+      return false;
+    }
+    std::cout << "=+/- ";
+    for (int j=0; j<thePrimeFactorsAtPoints[i].size; j++)
+      for (int k=0; k<thePrimeFactorsMults[i][j]; k++)
+        std::cout << thePrimeFactorsAtPoints[i][j] << "*";
+  }
+  Incrementable<Incrementable<SelectionOneItem> > theDivisorSel;
+  Incrementable<SelectionOneItem> signSel;
+  Vector<Rational> interPol;
+  Polynomial<Rational> CandidateDivisor, candidateResult, candidateQuotient;
+  Vector<Rational> thePointsForInterpolation;
+  for (int i=1; i<=upperBoundDegDivisors; i++)
+  { theDivisorSel.initFromMults(thePrimeFactorsMults, i+1);
+    signSel.initFromMults(1, upperBoundDegDivisors+1);
+    signSel.theElements[0].initFromMults(0);
+    interPol.SetSize(i+1);
+    thePointsForInterpolation.SetSize(i+1);
+    for (int k=0; k<thePointsForInterpolation.size; k++)
+      thePointsForInterpolation[k]=thePoints[k];
+    do
+      do
+      { std::cout << "<br>Selection: " << theDivisorSel.ToString()
+        << "<br>Sign selection: " << signSel.ToString();  ;
+        for (int j=0; j<theDivisorSel.theElements.size; j++)
+        { interPol[j]=1;
+          for (int k=0; k<theDivisorSel[j].theElements.size; k++)
+          { tempRat=thePrimeFactorsAtPoints[j][k];
+            tempRat.RaiseToPower(theDivisorSel[j][k].SelectedMult);
+            interPol[j]*=tempRat;
+          }
+          if (signSel[j].SelectedMult == 1)
+            interPol[j]*=-1;
+        }
+        CandidateDivisor.Interpolate(thePointsForInterpolation, interPol);
+        if (CandidateDivisor.TotalDegree()==i)
+        { std::cout << "<br>Interpolation at  " << thePointsForInterpolation.ToString()
+          << " with target values  " << interPol.ToString() << " equals "
+          << CandidateDivisor.ToString();
+          thePoly.DivideBy(CandidateDivisor, candidateResult, candidateQuotient);
+          if (candidateQuotient.IsEqualToZero())
+          { output=CandidateDivisor;
+            output/=theMultiple;
+            *this=candidateResult;
+            return true;
+          }
+        }
+      }
+      while (theDivisorSel.IncrementReturnFalseIfBackToBeginning());
+    while (signSel.IncrementReturnFalseIfBackToBeginning());
+  }
+  output=*this;
+  this->MakeOne(1);
+  return true;
+}
+
+bool CommandList::fFactor
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fFactor");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  if (!theCommands.CallCalculatorFunction
+      (theCommands.fPolynomial, inputIndexBoundVars,  theExpression, comments))
+    return false;
+  Polynomial<Rational> thePoly=theExpression.GetAtomicValue().GetValuE<Polynomial<Rational> >();
+  if (thePoly.GetNumVars()!=1)
+    return theExpression.SetError("I have been taught to factor one variable polys only. ");
+  Polynomial<Rational> smallestDiv;
+  List<Polynomial<Rational> > theFactors;
+  while (!thePoly.IsAConstant())
+  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, comments))
+      return false;
+    Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    thePoly/=tempRat;
+    theFactors.AddOnTop(smallestDiv);
+  }
+  int theContextIndex=theExpression.GetAtomicValue().theContextIndex;
+  theExpression.theOperation=theCommands.opList();
+  theExpression.children.SetSize(theFactors.size);
+  for (int i=0; i<theFactors.size; i++)
+    theExpression.children[i].MakePolyAtom
+  (theFactors[i], theContextIndex, theCommands, inputIndexBoundVars);
+  theExpression.theDatA=-1;
+  std::cout << "<hr>At this point of time, theExpression is: " << theExpression.ToString();
   return true;
 }
 
@@ -2962,14 +3194,14 @@ bool CommandList::fSqrt
     return false;
   Data theData;
   theData=theExpression.GetAtomicValue();
-  if (!theData.ConvertToTypE<RationalAlgebraic>())
+  if (!theData.ConvertToTypE<AlgebraicNumber>())
     return false;
   static bool hereIgo=true;
   if (hereIgo)
   { std::cout << "Here i go again on my own. ";
     hereIgo=false;
   }
-  RationalAlgebraic theRat=theData.GetValuE<RationalAlgebraic> ();
+  AlgebraicNumber theRat=theData.GetValuE<AlgebraicNumber> ();
   theRat.SqrtMe();
   theData.MakeRationalRadical(theCommands, theRat);
   theExpression.MakeAtom(theData, theCommands, inputIndexBoundVars);

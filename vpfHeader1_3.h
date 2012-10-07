@@ -53,8 +53,14 @@ class DifferentialForm: ElementAssociativeAlgebra<MonomialDiffForm, CoefficientT
   }
 };
 
-class RationalAlgebraic
+class AlgebraicNumberRegistry;
+
+class AlgebraicNumber
 {
+  friend class List<AlgebraicNumber>;
+  friend class Matrix<AlgebraicNumber>;
+  AlgebraicNumber():rootIndex(-1),minPolyIndex(-1), theRegistry(0){}
+
 public:
   //The mathematical definition of an algebraic integer
   //is an algebraic number whose mathematical minimal polynomial has leading coefficient 1.
@@ -67,52 +73,54 @@ public:
   //1.1. Minimal polynomials have relatively prime coefficients.
   //1.2. The leading coefficient of the minimal polynomial is 1.
   int rootIndex;
-  Polynomial<Rational> minPoly;
+  int minPolyIndex;
+  //  Polynomial<Rational> minPoly;
   std::string DisplayString;
-  friend std::ostream& operator << (std::ostream& output, const RationalAlgebraic& theRat)
+  AlgebraicNumberRegistry* theRegistry;
+  friend std::ostream& operator << (std::ostream& output, const AlgebraicNumber& theRat)
   { output << theRat.ToString();
     return output;
   }
-
   void SqrtMe();
   void RadicalMe(int theRad);
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  static unsigned int HashFunction(const RationalAlgebraic& input)
-  { return input.minPoly.HashFunction()*SomeRandomPrimes[0]+input.rootIndex*SomeRandomPrimes[1];
+  static unsigned int HashFunction(const AlgebraicNumber& input)
+  { return input.minPolyIndex*SomeRandomPrimes[0]+input.rootIndex*SomeRandomPrimes[1];
   }
-
-  RationalAlgebraic(){};
-  RationalAlgebraic(const RationalAlgebraic& other)
+  AlgebraicNumber(AlgebraicNumberRegistry& owner) :rootIndex(-1), minPolyIndex(-1)
+  { this->theRegistry=&owner;
+  }
+  AlgebraicNumber(const AlgebraicNumber& other)
   { this->operator=(other);
   }
-  void operator=(const RationalAlgebraic& other)
-  { this->minPoly=other.minPoly;
+  void operator=(const AlgebraicNumber& other)
+  { this->minPolyIndex=other.minPolyIndex;
     this->rootIndex=other.rootIndex;
+    this->theRegistry=other.theRegistry;
   }
-  void MakeOneVarPolyIntoTwoVarPoly(Polynomial<Rational>& thePoly)
-  { Polynomial<Rational> output;
-    MonomialP tempM;
-    tempM.MakeConst(2);
-    output.MakeZero(2);
+  void MakeOneVarPolyIntoNVarPoly
+  (const Polynomial<Rational>& thePoly, Polynomial<Rational>& theOutput, int numVars, int desiredIndex)
+  { MonomialP tempM;
+    tempM.MakeConst(numVars);
+    theOutput.MakeZero(numVars);
     for (int i =0; i<thePoly.size; i++)
-    { tempM[1]=thePoly[i][0];
-      output.AddMonomial(tempM, thePoly.theCoeffs[i]);
+    { tempM[desiredIndex]=thePoly[i][0];
+      theOutput.AddMonomial(tempM, thePoly.theCoeffs[i]);
     }
-    thePoly=output;
   }
   void operator=(const Rational& other);
-  void AssignOperation
-  (Polynomial<Rational>& theOperationIsModified, const RationalAlgebraic& other)
+  bool AssignOperation
+  (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumber>& theOperationArguments)
   ;
-  void ReduceModAnBm
-(Polynomial<Rational>& toBeReduced, const Polynomial<Rational>& An,
- const Polynomial<Rational>& Bm, int theN, int theM, Polynomial<Rational>& buffer
+  void ReduceMod
+(Polynomial<Rational>& toBeReduced, const List<Polynomial<Rational> >& thePolys,
+ List<int>& theNs, Polynomial<Rational>& buffer
  )const
   ;
-  void operator+=(const RationalAlgebraic& other)
-  { MacroRegisterFunctionWithName("RationalAlgebraic::operator+=");
+  bool operator+=(const AlgebraicNumber& other)
+  { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
     Polynomial<Rational> theOperation;
     theOperation.MakeZero(2);
     MonomialP tempM;
@@ -122,38 +130,76 @@ public:
     tempM[0]=0;
     tempM[1]=1;
     theOperation.AddMonomial(tempM, 1);
-    this->AssignOperation(theOperation, other);
+    List<AlgebraicNumber> tempList;
+    tempList.SetSize(2);
+    tempList[0]=*this;
+    tempList[1]=other;
+    return this->AssignOperation(theOperation, tempList);
+  }
+  bool operator*=(const AlgebraicNumber& other)
+  { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
+    Polynomial<Rational> theOperation;
+    theOperation.MakeZero(2);
+    MonomialP tempM;
+    tempM.MakeConst(2);
+    tempM[0]=1;
+    tempM[1]=1;
+    theOperation.AddMonomial(tempM, 1);
+    List<AlgebraicNumber> tempList;
+    tempList.SetSize(2);
+    tempList[0]=*this;
+    tempList[1]=other;
+    return this->AssignOperation(theOperation, tempList);
   }
   std::string ToString(FormatExpressions* theFormat=0)const;
-  void AssignRadical(const LargeInt& undertheRadical, int theRadical)
-  { MonomialP tempM;
-    tempM.monBody.SetSize(1);
-    tempM.monBody[0]=theRadical;
-    this->minPoly.MakeZero(1);
-    this->minPoly.AddMonomial(tempM, 1);
-    tempM.monBody[0]=0;
-    this->minPoly.AddMonomial(tempM, undertheRadical);
-    this->rootIndex=0;
-    std::stringstream out;
-    out << "\\sqrt{{}" << undertheRadical.ToString() << "}";
-    this->DisplayString= out.str();
-  }
+  bool AssignRadical(const LargeInt& undertheRadical, int theRadical);
+  const Polynomial<Rational>& GetMinPoly()const;
   bool IsAConstant()
-  { return this->minPoly.IsEqualToZero();
+  { return this->GetMinPoly().TotalDegree()==1;
   }
-  bool operator==(const RationalAlgebraic& other)const
-  { return this->rootIndex==other.rootIndex && this->minPoly==other.minPoly;
+  bool operator==(const AlgebraicNumber& other)const
+  { if (this->theRegistry!=other.theRegistry)
+    { std::cout << "This is a programming error: comparing two algebraic numbers whose "
+      << " algebraic number registries are different."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return this->rootIndex==other.rootIndex && this->minPolyIndex==other.minPolyIndex;
   }
   inline bool IsEqualToZero()const
   { return false;
   }
-  bool operator> (const RationalAlgebraic& other) const
-  { if (this->minPoly>other.minPoly)
+  bool operator> (const AlgebraicNumber& other) const
+  { if (this->GetMinPoly()>other.GetMinPoly())
       return true;
-    if (other.minPoly>this->minPoly)
+    if (other.GetMinPoly()>this->GetMinPoly())
       return false;
     return this->rootIndex>other.rootIndex;
   }
 };
 
+class AlgebraicNumberOrigin
+{
+  public:
+  List<List<AlgebraicNumber> > theParents;
+  List<Polynomial<Rational> > theOriginOperation;
+};
+
+class AlgebraicNumberRegistry
+{
+  public:
+  HashedList<Polynomial<Rational> > theMinPolys;
+  List<AlgebraicNumberOrigin> theOrigins;
+  int RegisterRational(const Rational& theRational)
+  { Polynomial<Rational> theMinP;
+    theMinP.MakeDegreeOne(1,0, 1, -theRational);
+    theMinP.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    if (!theMinPolys.Contains(theMinP))
+    { this->theMinPolys.AddOnTop(theMinP);
+//      this->theOrigins.SetSize(this->theOrigins.size+1);
+      return this->theMinPolys.size-1;
+    }
+    return theMinPolys.GetIndex(theMinP);
+  }
+};
 #endif

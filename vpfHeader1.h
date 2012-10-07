@@ -2497,6 +2497,21 @@ public:
   void MultiplyByUInt(unsigned int x);
   void AddShiftedUIntSmallerThanCarryOverBound(unsigned int x, int shift);
   void AssignShiftedUInt(unsigned int x, int shift);
+  inline void AccountPrimeFactor
+  (unsigned int theP, List<unsigned int>& outputPrimeFactors, List<int>& outputMults)
+  { if (outputPrimeFactors.size==0)
+    { outputPrimeFactors.AddOnTop(theP);
+      outputMults.AddOnTop(1);
+      return;
+    }
+    if (*outputPrimeFactors.LastObject()==theP)
+      (*outputMults.LastObject())++;
+    else
+    { outputPrimeFactors.AddOnTop(theP);
+      outputMults.AddOnTop(1);
+    }
+  }
+  bool Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites);
   inline void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); }
   void AssignString(const std::string& input);
   int GetUnsignedIntValueTruncated();
@@ -4454,8 +4469,33 @@ public:
   inline int HashFunction()const
   { return this->HashFunction(*this);
   }
-  void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
-  void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
+  void AddMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  { this->CleanupMonIndex
+    (this->AddMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
+
+  }
+  inline bool CleanupMonIndex(int theIndex)
+  { if (theIndex!=-1)
+      if (this->theCoeffs[theIndex].IsEqualToZero())
+      { this->PopIndexSwapWithLast(theIndex);
+        this->theCoeffs.PopIndexSwapWithLast(theIndex);
+        return true;
+      }
+    return false;
+  }
+  int AddMonomialNoCoeffCleanUpReturnsCoeffIndex
+  (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  ;
+  int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
+  (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
+  void CleanUpZeroCoeffs()
+  { for (int i=0; i<this->size; i++)
+      if (this->CleanupMonIndex(i))
+        i--;
+  }
+  void SubtractMonomial(const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
+  { this->CleanupMonIndex(this->SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex(inputMon, inputCoeff));
+  }
   int TotalDegree();
   void checkConsistency()const
   { this->GrandMasterConsistencyCheck();
@@ -4717,6 +4757,10 @@ public:
     this->GetConstantTerm(result, theRingZero);
     return result;
   }
+bool
+FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
+  ;
+  void Interpolate(const Vector<CoefficientType>& thePoints, const Vector<CoefficientType>& ValuesAtThePoints);
   bool FindOneVarRatRoots(List<Rational>& output);
   void GetCoeffInFrontOfLinearTermVariableIndex(int index, CoefficientType& output, const CoefficientType& theRingZero);
   void MakeMonomial(int NumVars, int LetterIndex, const Rational& Power, const CoefficientType& Coeff=1);
@@ -4756,6 +4800,16 @@ public:
   { this->::ElementAssociativeAlgebra<MonomialP, CoefficientType>::MakeZero();
     this->NumVars=inputNumVars;
   }
+  Rational ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy()
+  { if (this->IsEqualToZero())
+      return 1;
+    Rational result=this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
+    if (this->theCoeffs[this->GetIndexMaxMonomialTotalDegThenLexicographic()].IsNegative())
+    { *this*=-1;
+      result*=-1;
+    }
+    return result;
+  }
   void ScaleToIntegralNoGCDCoeffs();
   void TimesInteger(int a);
   void DivideBy(const Polynomial<CoefficientType>& inputDivisor, Polynomial<CoefficientType>& outputQuotient, Polynomial<CoefficientType>& outputRemainder)const;
@@ -4766,7 +4820,7 @@ public:
   void IncreaseNumVariablesWithShiftToTheRight(int theShift, int theIncrease);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   inline void SetNumVariables(int newNumVars){this->SetNumVariablesSubDeletedVarsByOne(newNumVars);}
-  inline int GetNumVars()
+  inline int GetNumVars()const
   { return this->NumVars;
   }
   inline void SetDynamicSubtype(int newNumVars)
@@ -6065,13 +6119,13 @@ void Polynomial<Element>::TimesInteger(int a)
 }
 
 template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
+int MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomialNoCoeffCleanUpReturnsCoeffIndex
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
   if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
-    return;
+    return -1;
   int j= this->GetIndex(inputMon);
   if (j>=this->size)
   { std::cout << "This is a programming error: function GetIndex "
@@ -6084,6 +6138,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
   if (j==-1)
   { this->::HashedList<TemplateMonomial>::AddOnTop(inputMon);
     this->theCoeffs.AddOnTop(inputCoeff);
+    j=this->size-1;
   } else
   { ///
 //    this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
@@ -6095,30 +6150,25 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomial
     }
     ///
     this->theCoeffs[j]+=inputCoeff;
-    if (this->theCoeffs[j].IsEqualToZero())
-    { this->PopIndexSwapWithLast(j);
-      this->theCoeffs.PopIndexSwapWithLast(j);
-    }
   }
+  return j;
 }
 
 template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractMonomial
+int MonomialCollection<TemplateMonomial, CoefficientType>::
+SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
 (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
 { if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
-    return;
+    return -1;
   int j= this->GetIndex(inputMon);
   if (j==-1)
   { this->::HashedList<TemplateMonomial>::AddOnTop(inputMon);
     this->theCoeffs.AddOnTop(inputCoeff);
     *this->theCoeffs.LastObject()*=-1;
+    j=this->theCoeffs.size-1;
   } else
-  { this->theCoeffs[j]-=inputCoeff;
-    if (this->theCoeffs[j].IsEqualToZero())
-    { this->PopIndexSwapWithLast(j);
-      this->theCoeffs.PopIndexSwapWithLast(j);
-    }
-  }
+    this->theCoeffs[j]-=inputCoeff;
+  return j;
 }
 
 template <class TemplateMonomial, class CoefficientType>

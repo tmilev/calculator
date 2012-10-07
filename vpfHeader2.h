@@ -47,7 +47,7 @@ public:
 (CommandList& theBoss, const Rational& inputRational)
 ;
   void MakeRationalRadical
-(CommandList& theBoss, const RationalAlgebraic& inputRationalRad)
+(CommandList& theBoss, const AlgebraicNumber& inputRationalRad)
 ;
   void MakeRF
 (CommandList& theBoss, const RationalFunctionOld& inputRF, int inputContextIndex)
@@ -152,6 +152,8 @@ public:
   static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
+  static bool MultiplyRatOrAlgebraicByRatOrAlgebraic
+  (const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
   static bool MultiplyEltTensorByCoeff(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
   { if (right.type==Data::typeRational || right.type==Data::typePoly || right.type==Data::typeRationalFunction)
       return Data::MultiplyAnyByEltTensor(right, left, output, comments);
@@ -522,7 +524,8 @@ public:
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedList<RationalFunctionOld> theRFs;
   HashedList<Rational> theRationals;
-  HashedList<RationalAlgebraic> theRationalRadicals;
+  AlgebraicNumberRegistry theAlgebraicNumberRegistry;
+  HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedList<Context> theContexts;
   HashedList<std::string, MathRoutines::hashString> theStrings;
   HashedList<VariableNonBound> theNonBoundVars;
@@ -1229,6 +1232,9 @@ bool fGetTypeHighestWeightParabolic
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSqrt
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
+  static bool fFactor
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fMinPoly

@@ -899,7 +899,7 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       outputHashed.AddNoRepetition(tempRoot);
     }
-  output.CopyFromBase(outputHashed);
+  output=(outputHashed);
 }
 
 void ConeComplex::RefineMakeCommonRefinement(const ConeComplex& other, GlobalVariables& theGlobalVariables)
@@ -1329,7 +1329,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
     tripleNode=( currentComponent.TheObjects[tripleNodeindex]);
     Vectors<Rational> tempRoots;
-    tempRoots.CopyFromBase(currentComponent);
+    tempRoots=(currentComponent);
     tempRoots.PopIndexSwapWithLast(tripleNodeindex);
     DynkinDiagramRootSubalgebra tempDiagram;
     tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl);
@@ -1347,9 +1347,9 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     for(int i=0; i<3; i++)
       for(int j=i+1; j<3; j++)
         if (tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size<tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
-        { tempRoots.CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
-          tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].CopyFromBase(tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
-          tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].CopyFromBase(tempRoots);
+        { tempRoots=(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+          tempDiagram.SimpleBasesConnectedComponents[i]=(tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
+          tempDiagram.SimpleBasesConnectedComponents[j]=(tempRoots);
         }
     currentComponent.size=0;
     currentComponent.AddOnTop(tripleNode);
@@ -2710,7 +2710,7 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
     out << "<br>";
   out << "Normals of walls to refine by: ";
   Vectors<Rational> tempRoots;
-  tempRoots.CopyFromBase(this->splittingNormals);
+  tempRoots=(this->splittingNormals);
   out << tempRoots.ToString(&theFormat);
   if (this->slicingDirections.size>0)
   { if (useHtml)
@@ -6944,7 +6944,7 @@ void WeylGroup::DrawRootSystem
 //  tempStream << eigenMat;
 //  std::cout << tempStream.str();
   Vectors<Rational> RootSystemSorted;
-  RootSystemSorted.CopyFromBase(this->RootSystem);
+  RootSystemSorted=(this->RootSystem);
   List<double> lengths;
   lengths.SetSize(RootSystemSorted.size);
   for (int i=0; i<this->RootSystem.size; i++)
@@ -7042,7 +7042,7 @@ int ParserNode::EvaluateG2ParabolicSupport
   theWeyl.MakeG2();
   theWeyl.ComputeRho(true);
   Vectors<Rational> theNegativeRoots;
-  theNegativeRoots.CopyFromBase(theWeyl.RootSystem);
+  theNegativeRoots=(theWeyl.RootSystem);
   theNegativeRoots.size=6;
   out << "the negative Vectors<Rational> of G_2: " << theNegativeRoots.ToString();
   std::string tempS;
@@ -7881,7 +7881,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
   Vectors<Rational> dominantWeightsNonHashed;
-  dominantWeightsNonHashed.CopyFromBase(theDominantWeights);
+  dominantWeightsNonHashed=(theDominantWeights);
   this->GenerateOrbit(dominantWeightsNonHashed, false, finalWeights, false, 0, 0, 10000);
   if (finalWeights.size>=10000)
   { out << "Did not generate all weights of the module due to RAM limits. ";
@@ -7891,7 +7891,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   }
   if (!isTrimmed && finalWeights.size<10000)
     out << "All weights were computed and are drawn. <br>";
-  outputWeightsSimpleCoords.CopyFromBase(finalWeights);
+  outputWeightsSimpleCoords=(finalWeights);
   return out.str();
 }
 

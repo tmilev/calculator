@@ -1368,7 +1368,7 @@ void LargeInt::MakeZero()
 
 void LargeInt::Assign(const LargeInt& x)
 { this->sign=x.sign;
-  this->value.CopyFromBase(x.value);
+  this->value=(x.value);
 //  assert(this->CheckForConsistensy());
 }
 
@@ -1588,7 +1588,7 @@ void partFraction::AssignDenominatorOnly(const partFraction& p)
 
 void partFraction::Assign(const partFraction& p)
 { this->CopyFromLight(p);
-  this->IndicesNonZeroMults.CopyFromBase(p.IndicesNonZeroMults);
+  this->IndicesNonZeroMults=(p.IndicesNonZeroMults);
   this->IsIrrelevant= p.IsIrrelevant;
   this->RelevanceIsComputed= p.RelevanceIsComputed;
   this->LastDistinguishedIndex=p.LastDistinguishedIndex;
@@ -3305,7 +3305,7 @@ void partFractions::ComputeTable(int theDimension)
 
 int partFractions::AddRootAndSort(Vector<Rational>& theRoot)
 { List<Vector<Rational> > tempList;
-  tempList.CopyFromBase(this->startingVectors);
+  tempList=(this->startingVectors);
   int index=0;
   for (index=0; index<tempList.size; index++)
     if (this->IsHigherThanWRTWeight(theRoot, tempList.TheObjects[index], this->weights))
@@ -3553,7 +3553,7 @@ void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane&
 }
 
 void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output)
-{ output.CopyFromBase(input);
+{ output=(input);
   Vector<Rational> tempRoot;
   for (int i=0; i<output.size; i++)
     for (int j=i+1; j<output.size; j++)
@@ -3638,7 +3638,7 @@ void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
 { output.size=0;
   this->RootSystem.Clear();
   this->GenerateRootSystemFromKillingFormMatrix();
-  output.CopyFromBase(this->RootsOfBorel);
+  output=(this->RootsOfBorel);
 }
 
 std::string WeylGroup::ToString()
@@ -3801,7 +3801,7 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
   DynkinDiagramRootSubalgebra& tempDyn = this->bufferDynNotCopied.GetElement();
   Vectors<Rational>& simpleBasis = this->buffer1VectorsNotCopied.GetElement();
   Vectors<Rational>& coordsInNewBasis = this->buffer2VectorsNotCopied.GetElement();
-  simpleBasis.CopyFromBase(generators);
+  simpleBasis=(generators);
   tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
   bool tempBool = true;
   if (generators.size==0)
@@ -4098,8 +4098,8 @@ void WeylGroup::ComputeRho(bool Recompute)
 
 void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& other)
 { this->::HashedList<ElementWeylGroup>::operator=(other);
-  this->simpleGenerators.CopyFromBase(other.simpleGenerators);
-  this->ExternalAutomorphisms.CopyFromBase(other.ExternalAutomorphisms);
+  this->simpleGenerators=(other.simpleGenerators);
+  this->ExternalAutomorphisms=(other.ExternalAutomorphisms);
   this->AmbientWeyl=(other.AmbientWeyl);
 }
 
@@ -4115,7 +4115,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
       this->RootSubsystem.AddNoRepetition(currentRoot);
     }
   Vectors<Rational> tempRoots;
-  tempRoots.CopyFromBase(this->RootSubsystem);
+  tempRoots=(this->RootSubsystem);
   tempRoots.QuickSortAscending();
   this->RootSubsystem=(tempRoots);
   assert(this->RootSubsystem.size%2==0);
@@ -4126,7 +4126,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 }
 
 void ElementWeylGroup::operator =(const ElementWeylGroup& right)
-{ this->CopyFromBase(right);
+{ *this=(right);
 }
 
 bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
@@ -4746,7 +4746,7 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 }
 
 void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
-{ this->SimpleBasisK.CopyFromBase(this->genK);
+{ this->SimpleBasisK=(this->genK);
   this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
   this->SimpleBasisCentralizerRoots.size=0;
   for (int i=0; i<this->AmbientWeyl.RootsOfBorel.size; i++)
@@ -4759,7 +4759,7 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
 { this->PosRootsKConnectedComponents.size=0;
   this->theKComponentRanks.size=0;
   this->theKEnumerations.size=0;
-  this->SimpleBasisK.CopyFromBase(this->genK);
+  this->SimpleBasisK=(this->genK);
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->SimpleBasisK);
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();

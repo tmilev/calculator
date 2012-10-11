@@ -306,23 +306,23 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
 { this->AmbientWeyl=(right.AmbientWeyl);
-  this->genK.CopyFromBase(right.genK);
-  this->AllRootsK.CopyFromBase(right.AllRootsK);
+  this->genK=(right.genK);
+  this->AllRootsK=(right.AllRootsK);
   this->CentralizerKmods.Assign(right.CentralizerKmods);
-  this->CentralizerRoots.CopyFromBase(right.CentralizerRoots);
-  this->HighestRootsK.CopyFromBase(right.HighestRootsK);
-  this->HighestWeightsGmodK.CopyFromBase(right.HighestWeightsGmodK);
-  this->kModules.CopyFromBase(right.kModules);
-  this->LowestWeightsGmodK.CopyFromBase(right.LowestWeightsGmodK);
+  this->CentralizerRoots=(right.CentralizerRoots);
+  this->HighestRootsK=(right.HighestRootsK);
+  this->HighestWeightsGmodK=(right.HighestWeightsGmodK);
+  this->kModules=(right.kModules);
+  this->LowestWeightsGmodK=(right.LowestWeightsGmodK);
   this->flagAnErrorHasOccuredTimeToPanic=right.flagAnErrorHasOccuredTimeToPanic;
   this->theDynkinDiagram.Assign(right.theDynkinDiagram);
   this->theCentralizerDiagram.Assign(right.theCentralizerDiagram);
-  this->PositiveRootsK.CopyFromBase(right.PositiveRootsK);
-  this->PosRootsKConnectedComponents.CopyFromBase(right.PosRootsKConnectedComponents);
+  this->PositiveRootsK=(right.PositiveRootsK);
+  this->PosRootsKConnectedComponents=(right.PosRootsKConnectedComponents);
   this->NilradicalKmods.Assign(right.NilradicalKmods);
-  this->SimpleBasisCentralizerRoots.CopyFromBase(right.SimpleBasisCentralizerRoots);
-  this->SimpleBasisK.CopyFromBase(right.SimpleBasisK);
-  this->indicesSubalgebrasContainingK.CopyFromBase(right.indicesSubalgebrasContainingK);
+  this->SimpleBasisCentralizerRoots=(right.SimpleBasisCentralizerRoots);
+  this->SimpleBasisK=(right.SimpleBasisK);
+  this->indicesSubalgebrasContainingK=(right.indicesSubalgebrasContainingK);
 }
 
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
@@ -447,12 +447,12 @@ void rootSubalgebras::ComputeNormalizerOfCentralizerIntersectNilradical(Reflecti
   outputSubgroup.ComputeSubGroupFromGeneratingReflections
   (&selectedRootsBasisCentralizer, &outputSubgroup.ExternalAutomorphisms, &theGlobalVariables,
    this->UpperLimitNumElementsWeyl, false);
-  outputSubgroup.simpleGenerators.CopyFromBase(selectedRootsBasisCentralizer);
+  outputSubgroup.simpleGenerators=(selectedRootsBasisCentralizer);
   this->CentralizerIsomorphisms.ReservE(this->size);
   this->CentralizerOuterIsomorphisms.ReservE(this->size);
   this->CentralizerIsomorphisms.AddOnTop(outputSubgroup);
   this->CentralizerOuterIsomorphisms.SetSize(this->CentralizerIsomorphisms.size);
-  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms.CopyFromBase(outputSubgroup.ExternalAutomorphisms);
+  this->CentralizerOuterIsomorphisms.LastObject()->ExternalAutomorphisms=(outputSubgroup.ExternalAutomorphisms);
   this->CentralizerOuterIsomorphisms.LastObject()->AmbientWeyl=(this->AmbientWeyl);
   this->MakeProgressReportAutomorphisms(outputSubgroup, theRootSA, theGlobalVariables);
   //theSubgroup.ComputeDebugString();
@@ -573,7 +573,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
 //    Stop();
   Vectors<Rational>& domainRec =theGlobalVariables.rootsAttemptExtensionIso1.GetElement().TheObjects[RecursionDepth];
   Vectors<Rational>& rangeRec =theGlobalVariables.rootsAttemptExtensionIso2.GetElement().TheObjects[RecursionDepth];
-  domainRec.CopyFromBase(Domain); rangeRec.CopyFromBase(Range);
+  domainRec=(Domain);
+  rangeRec=(Range);
   rootSubalgebra& leftSA=theGlobalVariables.rootSAAttemptExtensionIso1.GetElement().TheObjects[RecursionDepth];
   rootSubalgebra& rightSA= theGlobalVariables.rootSAAttemptExtensionIso2.GetElement().TheObjects[RecursionDepth];
   Rational tempRatD, tempRatR;
@@ -1153,14 +1154,14 @@ void DynkinDiagramRootSubalgebra::Assign(const DynkinDiagramRootSubalgebra& righ
 { this->ComponentLetters=right.ComponentLetters;
   this->ComponentRanks=right.ComponentRanks;
   this->DynkinStrinG=right.DynkinStrinG;
-  this->DynkinTypeStrings.CopyFromBase(right.DynkinTypeStrings);
-  this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
-  this->SimpleBasesConnectedComponents.CopyFromBase(right.SimpleBasesConnectedComponents);
-  this->indexInUniComponent.CopyFromBase(right.indexInUniComponent);
-  this->indexUniComponent.CopyFromBase(right.indexUniComponent);
-  this->indicesEnds.CopyFromBase(right.indicesEnds);
-  this->indicesThreeNodes.CopyFromBase(right.indicesThreeNodes);
-  this->sameTypeComponents.CopyFromBase(right.sameTypeComponents);
+  this->DynkinTypeStrings=(right.DynkinTypeStrings);
+  this->indicesThreeNodes=(right.indicesThreeNodes);
+  this->SimpleBasesConnectedComponents=(right.SimpleBasesConnectedComponents);
+  this->indexInUniComponent=(right.indexInUniComponent);
+  this->indexUniComponent=(right.indexUniComponent);
+  this->indicesEnds=(right.indicesEnds);
+  this->indicesThreeNodes=(right.indicesThreeNodes);
+  this->sameTypeComponents=(right.sameTypeComponents);
 }
 
 void DynkinDiagramRootSubalgebra::GetAutomorphism(List<List<int> >& output, int index)
@@ -1312,7 +1313,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   out2 << "\n\n" << tempS;
   this->DebugString=out2.str();
   if (DoEnumeration)
-  { this->TestedRootsAlpha.CopyFromBase(this->LowestWeightsGmodK);
+  { this->TestedRootsAlpha=(this->LowestWeightsGmodK);
     this->DoKRootsEnumeration(theGlobalVariables);
   }
 //  this->GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2();
@@ -1332,7 +1333,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
     if (!tempRat.IsEqualToZero())
     { int counter=0;
       Vectors<Rational> tempRoots;
-      tempRoots.CopyFromBase(this->SimpleBasisK);
+      tempRoots=(this->SimpleBasisK);
       tempRoots[l]=(tempRoot);
       Matrix<Rational> tempMat;
       tempRoots.GetMatrixRootsToRows(tempMat);
@@ -1872,7 +1873,7 @@ void coneRelation::ComputeConnectedComponents(Vectors<Rational>& input, rootSuba
 
 bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables, rootSubalgebras& owners, int indexInOwner)
 { Vectors<Rational> tempRoots;
-  tempRoots.CopyFromBase(this->Alphas);
+  tempRoots=(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
   tempRoots.AddListOnTop(owner.genK);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
@@ -1887,7 +1888,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   tempSubgroup.ComputeSubGroupFromGeneratingReflections
   (&tempRoots, &tempSubgroup.ExternalAutomorphisms, &theGlobalVariables, 0, true);
   Vectors<Rational> NilradicalIntersection, genSingHW;
-  tempRoots.CopyFromBase(tempSubgroup.RootSubsystem);
+  tempRoots=(tempSubgroup.RootSubsystem);
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);
   for (int i=0; i<owner.HighestWeightsGmodK.size; i++)
     if (!owner.NilradicalKmods.selected[i] && tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
@@ -1905,7 +1906,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
 
 void coneRelation::ComputeTheDiagramAndDiagramRelAndK(rootSubalgebra& owner)
 { Vectors<Rational> tempRoots;
-  tempRoots.CopyFromBase(this->Alphas);
+  tempRoots=(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
   this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
   this->ComputeDiagramRelAndK(owner);
@@ -1917,7 +1918,7 @@ void coneRelation::MakeLookCivilized(rootSubalgebra& owner, Vectors<Rational>& N
   Vectors<Rational> tempRoots;
 //  this->Alphas.ComputeDebugString();
 //  this->Betas.ComputeDebugString();
-  tempRoots.CopyFromBase(this->Alphas);
+  tempRoots=(this->Alphas);
   tempRoots.AddListOnTop(this->Betas);
   //owner.AmbientWeyl.TransformToSimpleBasisGenerators(tempRoots);
   this->theDiagram.ComputeDiagramTypeModifyInput(tempRoots, owner.AmbientWeyl);
@@ -2993,8 +2994,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism(Vectors<Rational>& Domain, Ve
   rootSubalgebra& theRangeRootSA = theGlobalVariables.rootSAAttemptExtensionToIso2.GetElement();
   theDomainRootSA.AmbientWeyl=(theWeyl);
   theRangeRootSA.AmbientWeyl=(theWeyl);
-  theDomainRootSA.genK.CopyFromBase(Domain);
-  theRangeRootSA.genK.CopyFromBase(Range);
+  theDomainRootSA.genK=(Domain);
+  theRangeRootSA.genK=(Range);
   theDomainRootSA.ComputeAllButAmbientWeyl();
   theRangeRootSA.ComputeAllButAmbientWeyl();
   if (theDomainRootSA.theDynkinDiagram.DynkinStrinG!= theRangeRootSA.theDynkinDiagram.DynkinStrinG || theDomainRootSA.theCentralizerDiagram.DynkinStrinG!=theRangeRootSA.theCentralizerDiagram.DynkinStrinG)
@@ -3059,7 +3060,7 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   if (outputAutomorphisms!=0)
   { outputAutomorphisms->ExternalAutomorphisms.size=0;
     outputAutomorphisms->simpleGenerators.size=0;
-    outputAutomorphisms->simpleGenerators.CopyFromBase(this->SimpleBasisCentralizerRoots);
+    outputAutomorphisms->simpleGenerators=(this->SimpleBasisCentralizerRoots);
   }
   Vectors<Rational> isoDomain, isoRange;
   permutation permComponents, permComponentsCentralizer;

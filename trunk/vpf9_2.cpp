@@ -34,7 +34,7 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   if (recomputeAmbientRho)
     this->AmbientWeyl.ComputeRho(false);
   if (inputGenerators!=0)
-    this->simpleGenerators.CopyFromBase(*inputGenerators);
+    this->simpleGenerators=(*inputGenerators);
   if (inputExternalAutos!=0)
     this->ExternalAutomorphisms=*inputExternalAutos;
   this->AmbientWeyl.TransformToSimpleBasisGenerators(this->simpleGenerators);
@@ -862,7 +862,7 @@ void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, Sltwo
 { int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
-  tempRoots.CopyFromBase(MinimalContainingRegularSubalgebra.SimpleBasisK);
+  tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
@@ -1056,7 +1056,7 @@ void slTwo::ComputeModuleDecomposition
     outputWeightSpaceDimensions.TheObjects[IndexZeroWeight+tempRat.NumShort]++;
     outputWeightSpaceDimensions.TheObjects[IndexZeroWeight-tempRat.NumShort]++;
   }
-  BufferHighestWeights.CopyFromBase(outputWeightSpaceDimensions);
+  BufferHighestWeights=(outputWeightSpaceDimensions);
   outputHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
   outputMultiplicitiesHighestWeights.ReservE(positiveRootsContainingRegularSA.size*2);
   outputHighestWeights.size=0;
@@ -1856,7 +1856,7 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, Globa
   input >> tempS;
   assert(tempS=="Simple_basis_k:");
   this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
-  this->genK.CopyFromBase(this->SimpleBasisK);
+  this->genK=(this->SimpleBasisK);
   this->AmbientWeyl=(owner.AmbientWeyl);
   this->ComputeAll();
 }
@@ -4191,7 +4191,7 @@ void RationalFunctionOld::ReduceGroebnerBasis
 //    LeadingCoeffs.LastObject()->ComputeDebugString();
 //    std::cout << LeadingCoeffs.LastObject()->DebugString << ", ";
   }
-  tempList.CopyFromBase(LeadingCoeffs);
+  tempList=(LeadingCoeffs);
   tempList.QuickSortAscending();
 //  std::cout << "<br><br> and the sorted leading monomials are: ";
 //  for (int i=0; i<theBasis.size; i++)
@@ -4702,7 +4702,7 @@ void RationalFunctionOld::ScaleClearDenominator
   (List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output)
 { Polynomial<Rational>  tempP;
   List<RationalFunctionOld> buffer;
-  buffer.CopyFromBase(input);
+  buffer=(input);
   for (int i=0; i<buffer.size; i++)
   { RationalFunctionOld& current=buffer.TheObjects[i];
     if (current.expressionType==RationalFunctionOld::typeRationalFunction)
@@ -5420,7 +5420,7 @@ void ParserNode::CopyValue(const ParserNode& other)
   this->ErrorType=other.ErrorType;
   this->rationalValue=other.rationalValue;
   this->IndexContextLieAlgebra=other.IndexContextLieAlgebra;
-  this->children.CopyFromBase(other.children);
+  this->children=(other.children);
   this->Evaluated= other.Evaluated;
   this->outputString= other.outputString;
   this->ExpressionType=other.ExpressionType;
@@ -6025,7 +6025,7 @@ std::string slTwoInSlN::GetNotationString(bool useHtml)
 std::string slTwoInSlN::initFromModuleDecomposition
 (List<int>& decompositionDimensions, bool useHtml, bool computePairingTable)
 { std::stringstream out;
-  this->thePartition.CopyFromBase(decompositionDimensions);
+  this->thePartition=(decompositionDimensions);
   this->thePartition.QuickSortDescending();
   this->theDimension=0;
   for (int i=0; i<this->thePartition.size; i++)

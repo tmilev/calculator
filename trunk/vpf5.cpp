@@ -3208,28 +3208,6 @@ bool CommandList::fSqrt
   return true;
 }
 
-bool CommandList::fWriteGenVermaModAsDiffOperators
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperators");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
-  Vectors<RationalFunctionOld> theHWs;
-  theHWs.SetSize(1);
-  Context theContext;
-  Selection theParSel;
-  if (!theCommands.fGetTypeHighestWeightParabolic
-      (theCommands, inputIndexBoundVars, theExpression, comments, theHWs[0], theParSel, &theContext))
-    return theExpression.SetError("Failed to extract type, highest weight, parabolic selection");
-  if (theExpression.errorString!="")
-    return true;
-  SemisimpleLieAlgebra& theSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
-  FormatExpressions theFormat;
-  theContext.GetFormatExpressions(theFormat);
-//  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
-  return theCommands.fWriteGenVermaModAsDiffOperatorInner
-  (theCommands, inputIndexBoundVars, theExpression, comments, theHWs, theContext, theParSel,
-   theSSalgebra.indexInOwner);
-}
-
 class DoxygenInstance
 {
   public:

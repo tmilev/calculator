@@ -1321,12 +1321,12 @@ public:
   bool CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots);
   void SortRelation(rootSubalgebra& owner);
   void operator=(const coneRelation& right)
-  { this->Alphas.CopyFromBase(right.Alphas);
-    this->Betas.CopyFromBase(right.Betas);
-    this->AlphaCoeffs.CopyFromBase(right.AlphaCoeffs);
-    this->BetaCoeffs.CopyFromBase(right.BetaCoeffs);
-    this->AlphaKComponents.CopyFromBase(right.AlphaKComponents);
-    this->BetaKComponents.CopyFromBase(right.BetaKComponents);
+  { this->Alphas=(right.Alphas);
+    this->Betas=(right.Betas);
+    this->AlphaCoeffs=(right.AlphaCoeffs);
+    this->BetaCoeffs=(right.BetaCoeffs);
+    this->AlphaKComponents=(right.AlphaKComponents);
+    this->BetaKComponents=(right.BetaKComponents);
     this->theDiagram=right.theDiagram;
     this->theDiagramRelAndK=right.theDiagramRelAndK;
     this->IndexOwnerRootSubalgebra=right.IndexOwnerRootSubalgebra;
@@ -1650,15 +1650,15 @@ public:
   void ElementToHtml(std::string& filePath);
   void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
   void operator=(const slTwo& right)
-  { this->highestWeights.CopyFromBase(right.highestWeights);
-    this->multiplicitiesHighestWeights.CopyFromBase(right.multiplicitiesHighestWeights);
-    this->weightSpaceDimensions.CopyFromBase(right.weightSpaceDimensions);
-    this->HighestWeightsDecompositionMinimalContainingRootSA.CopyFromBase(right.HighestWeightsDecompositionMinimalContainingRootSA);
-    this->MultiplicitiesDecompositionMinimalContainingRootSA.CopyFromBase(right.MultiplicitiesDecompositionMinimalContainingRootSA);
-    this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+  { this->highestWeights=(right.highestWeights);
+    this->multiplicitiesHighestWeights=(right.multiplicitiesHighestWeights);
+    this->weightSpaceDimensions=(right.weightSpaceDimensions);
+    this->HighestWeightsDecompositionMinimalContainingRootSA=(right.HighestWeightsDecompositionMinimalContainingRootSA);
+    this->MultiplicitiesDecompositionMinimalContainingRootSA=(right.MultiplicitiesDecompositionMinimalContainingRootSA);
+    this->hCommutingRootSpaces=(right.hCommutingRootSpaces);
     this->CentralizerDiagram.Assign(right.CentralizerDiagram);
     this->DiagramM.Assign(right.DiagramM);
-    this->hCommutingRootSpaces.CopyFromBase(right.hCommutingRootSpaces);
+    this->hCommutingRootSpaces=(right.hCommutingRootSpaces);
     this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
     this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
     this->DynkinsEpsilon=right.DynkinsEpsilon;
@@ -1674,7 +1674,7 @@ public:
     this->theSystemToBeSolved=right.theSystemToBeSolved;
     this->theSystemMatrixForm=right.theSystemMatrixForm;
     this->theSystemColumnVector= right.theSystemColumnVector;
-    this->IndicesContainingRootSAs.CopyFromBase(right.IndicesContainingRootSAs);
+    this->IndicesContainingRootSAs=(right.IndicesContainingRootSAs);
     this->preferredAmbientSimpleBasis= right.preferredAmbientSimpleBasis;
   }
   bool  operator==(const slTwo& right)
@@ -1743,7 +1743,6 @@ public:
     this->indexInOwner=other.indexInOwner;
     this->theWeyl=(other.theWeyl);
     this->ChevalleyConstants=other.ChevalleyConstants;
-//    this->OppositeRootSpaces.CopyFromBase(other.OppositeRootSpaces);
     this->theLiebrackets=(other.theLiebrackets);
 //    this->theLiebracketPairingIndices=(other.theLiebracketPairingIndices);
     this->Computed=(other.Computed);
@@ -2110,8 +2109,8 @@ public:
       this->Powers[i]=other.Powers[i];
   }
   inline void operator=(const MonomialUniversalEnvelopingOrdered& other)
-  { this->generatorsIndices.CopyFromBase(other.generatorsIndices);
-    this->Powers.CopyFromBase(other.Powers);
+  { this->generatorsIndices=(other.generatorsIndices);
+    this->Powers=(other.Powers);
     this->Coefficient=(other.Coefficient);
     this->owner=other.owner;
   }
@@ -2720,7 +2719,12 @@ public:
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   (int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables);
   bool ActOnPolynomial(Polynomial<Rational> & thePoly);
-  void GetStandardOrder(Polynomial<Rational>& output){output=this->StandardOrder;}
+  const Polynomial<Rational>& GetStandardOrder()const
+  { return this->StandardOrder;
+  }
+  void GetStandardOrder(Polynomial<Rational>& output)
+  { output=this->StandardOrder;
+  }
   void SetNumVariables(int newNumVars);
   void TimesConstant(Rational& theConstant){ this->StandardOrder*=(theConstant);}
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
@@ -3093,9 +3097,9 @@ Vector<CoefficientType> branchingData::ProjectWeight(Vector<CoefficientType>& in
   return result;
 }
 
-class MonMatrixTensor
+class MonomialMatrix
 {
-  friend std::ostream& operator << (std::ostream& output, const MonMatrixTensor& theMon)
+  friend std::ostream& operator << (std::ostream& output, const MonomialMatrix& theMon)
   { output << theMon.ToString();
     return output;
   }
@@ -3103,12 +3107,12 @@ class MonMatrixTensor
   int vIndex;
   int dualIndex;
   bool IsId;
-  MonMatrixTensor(const MonMatrixTensor& other)
+  MonomialMatrix(const MonomialMatrix& other)
   { this->operator=(other);
   }
-  MonMatrixTensor():vIndex(-1), dualIndex(-1), IsId(false){}
-  MonMatrixTensor(int i, int j): vIndex(i), dualIndex(j), IsId(false){}
-  void operator=(const MonMatrixTensor& other)
+  MonomialMatrix():vIndex(-1), dualIndex(-1), IsId(false){}
+  MonomialMatrix(int i, int j): vIndex(i), dualIndex(j), IsId(false){}
+  void operator=(const MonomialMatrix& other)
   { this->vIndex=other.vIndex;
     this->dualIndex=other.dualIndex;
     this->IsId=other.IsId;
@@ -3127,16 +3131,16 @@ class MonMatrixTensor
   bool IsEqualToZero()const
   { return !this->IsId && this->vIndex==-1 && this->dualIndex==-1;
   }
-  bool operator==(const MonMatrixTensor& other)const
+  bool operator==(const MonomialMatrix& other)const
   { return this->vIndex==other.vIndex && this->dualIndex==other.dualIndex && this->IsId==other.IsId;
   }
-  static unsigned int HashFunction(const MonMatrixTensor& input)
+  static unsigned int HashFunction(const MonomialMatrix& input)
   { return input.vIndex*SomeRandomPrimes[0]+input.dualIndex*SomeRandomPrimes[1]+input.IsId;
   }
   inline unsigned int HashFunction()const
   { return HashFunction(*this);
   }
-  bool operator>(const MonMatrixTensor& other)const
+  bool operator>(const MonomialMatrix& other)const
   { if (this->IsId!=other.IsId)
       return this->IsId>other.IsId;
     if (this->vIndex==other.vIndex)
@@ -3156,10 +3160,10 @@ class MonMatrixTensor
       out << "id";
     return out.str();
   }
-  void operator*=(const MonMatrixTensor& other)
-  { MacroRegisterFunctionWithName("MonMatrixTensor<CoefficientType>::operator*=");
+  void operator*=(const MonomialMatrix& other)
+  { MacroRegisterFunctionWithName("MonomialMatrix<CoefficientType>::operator*=");
     if (this==&other)
-    { MonMatrixTensor otherCopy;
+    { MonomialMatrix otherCopy;
       otherCopy=other;
       *this*=otherCopy;
       return;
@@ -3178,18 +3182,18 @@ class MonMatrixTensor
 };
 
 template <class CoefficientType>
-class MatrixTensor: public ElementAssociativeAlgebra<MonMatrixTensor, CoefficientType >
+class MatrixTensor: public ElementAssociativeAlgebra<MonomialMatrix, CoefficientType >
 {
 public:
   void MakeIdSpecial()
   { this->MakeZero();
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     theMon.MakeIdSpecial();
     this->AddMonomial(theMon, 1);
   }
   void MakeId(int numVars)
   { this->MakeZero();
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     for (int i=0; i<numVars; i++)
     { theMon.dualIndex=i;
       theMon.vIndex=i;
@@ -3211,7 +3215,7 @@ public:
   }
   void operator=(const Matrix<CoefficientType>& other)
   { this->MakeZero();
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     for (int i=0; i<other.NumRows; i++)
       for (int j=0; j<other.NumCols; j++)
         if (!other.elements[i][j].IsEqualToZero())
@@ -3232,7 +3236,7 @@ public:
   }
   void Transpose()
   { MatrixTensor<CoefficientType> output;
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     output.MakeZero();
     for (int i=0; i<this->size; i++)
     { theMon=(*this)[i];
@@ -3254,7 +3258,7 @@ public:
   void LieBracketOnTheLeft(const MatrixTensor<CoefficientType>& standsOnTheLeft)
   { MacroRegisterFunctionWithName("MatrixTensor<CoefficientType>::LieBracketOnTheLeft");
     MatrixTensor<CoefficientType> output;
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     output.MakeZero();
     output.SetExpectedSize(this->size*standsOnTheLeft.size*2);
     CoefficientType tempCF;
@@ -3494,8 +3498,10 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    std::stringstream* comments=0, const CoefficientType& theRingUnit=1,
    const CoefficientType& theRingZero=0)
    ;
+   template<class ResultType>
    void GetElementsNilradical
-(List<ElementUniversalEnveloping<CoefficientType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators=0)
+(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,
+ List<int>* listOfGenerators=0)
    ;
    bool IsNotInLevi
 (int theGeneratorIndex)
@@ -3512,7 +3518,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    //The input of the following function is supposed to be an honest element of the Universal enveloping,
    //i.e. inputElt is not allowed to have non-small integer exponents.
    bool GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunctionOld>& output,
+(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
    ;
 bool GetActionMonGenVermaModuleAsDiffOperator
@@ -4927,7 +4933,7 @@ public:
 //  bool SystemLinearInequalitiesHasSolution
 //    (Matrix<Rational> & matA, Matrix<Rational> & matb, Matrix<Rational> & outputPoint);
   bool SplitByAffineHyperplane(affineHyperplane& theKillerPlane, affineCones& output);
-  void Assign(const affineCone& right){this->theWalls.CopyFromBase(right.theWalls); }
+  void Assign(const affineCone& right){this->theWalls=(right.theWalls); }
   inline void operator=(const affineCone& right){this->Assign(right); }
 };
 
@@ -5073,15 +5079,6 @@ bool List<Object>::HasACommonElementWith(List<Object>& right)
 template <class Object>
 void List<Object>::AssignLight(const ListLight<Object>& From)
 { this->SetSize(From.size);
-  for (int i=0; i<this->size; i++)
-    this->TheObjects[i]= From.TheObjects[i];
-}
-
-template <class Object>
-void List<Object>::CopyFromBase(const List<Object>& From)
-{ if (this==&From)
-    return;
-  this->SetSize(From.size);
   for (int i=0; i<this->size; i++)
     this->TheObjects[i]= From.TheObjects[i];
 }
@@ -5927,7 +5924,8 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element &output, const E
       return;
     }
     this->SwitchTwoRows(i, tempI);
-    if(tempI!=i){output.Minus(); }
+    if(tempI!=i)
+      output*=-1;
     tempRat.Assign(this->elements[i][i]);
     output*=(tempRat);
     tempRat.Invert();
@@ -5951,7 +5949,7 @@ void ModuleSSalgebra<CoefficientType>::SetNumVariables
       for (int k=0; k<this->actionsGeneratorS[i][j].size; k++)
         this->actionsGeneratorS[i][j][k].SetNumVariables(GoalNumVars);
   List<MonomialUniversalEnveloping<CoefficientType> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced.CopyFromBase(this->theGeneratingWordsNonReduced);
+  oldGeneratingWordsNonReduced=(this->theGeneratingWordsNonReduced);
   this->theGeneratingWordsNonReduced.Clear();
   for (int i=0; i<oldGeneratingWordsNonReduced.size; i++)
   { oldGeneratingWordsNonReduced[i].SetNumVariables(GoalNumVars);
@@ -5988,7 +5986,7 @@ void ModuleSSalgebra<CoefficientType>::Substitution
       for (int k=0; k<this->actionsGeneratorS[i][j].size; k++)
         this->actionsGeneratorS[i][j][k].Substitution(theSub);
   List<MonomialUniversalEnveloping<CoefficientType> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced.CopyFromBase(this->theGeneratingWordsNonReduced);
+  oldGeneratingWordsNonReduced=(this->theGeneratingWordsNonReduced);
   this->theGeneratingWordsNonReduced.Clear();
   for (int i=0; i<oldGeneratingWordsNonReduced.size; i++)
   { oldGeneratingWordsNonReduced[i].Substitution(theSub);
@@ -7371,7 +7369,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
   MatrixTensor<CoefficientType>& output=this->actionsGeneratorsMaT[generatorIndex];
   if (this->GetOwner().IsGeneratorFromCartan(generatorIndex))
   { output.MakeZero();
-    MonMatrixTensor theMon;
+    MonomialMatrix theMon;
     Vector<CoefficientType> weightH;
     CoefficientType tempCF, hwCFshift;
     weightH.MakeEi(this->GetOwner().GetRank(), generatorIndex-this->GetOwner().GetNumPosRoots());
@@ -7400,7 +7398,9 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionGenera
   { tempO=this->GetActionGeneratorIndeX(adActions[i], theGlobalVariables);
     output.LieBracketOnTheLeft(tempO);
   }
-  output*=theCoeff;
+  CoefficientType tempCF;
+  tempCF=theCoeff;
+  output*=tempCF;
   return output;
 }
 
@@ -7425,7 +7425,7 @@ GetMatrixHomogenousElt
       for (int l=0; l< imageCurrentMon.size; l++)
       { int indexRow=this->theGeneratingWordsNonReduced.GetIndex(imageCurrentMon[l]);
         assert(indexRow!=-1);
-        output.AddMonomial(MonMatrixTensor(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
+        output.AddMonomial(MonomialMatrix(indexRow, indexColumn), imageCurrentMon.theCoeffs[l]);
 //        std::cout <<"<br> Index row: " << indexRow << "; index column: " << indexColumn;
       }
     }
@@ -7783,7 +7783,6 @@ bool charSSAlgMod<CoefficientType>::DrawMe
   else
     out << "<br><b> Not all weights were computed. </b>";
   outputDetails=out.str();
-//  outputWeights.CopyFromBase(finalWeights);
   return result;
 }
 
@@ -7836,7 +7835,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
         break;
       }
   }
-  outputOrbit.CopyFromBase(theOrbit);
+  outputOrbit=(theOrbit);
   return result;
 }
 
@@ -8578,7 +8577,7 @@ MatrixTensor<CoefficientType>& ModuleSSalgebra<CoefficientType>::GetActionSimple
         }
         this->theBilinearFormsInverted[weightLevelIndex].ActOnVectorColumn(theScalarProds);
         for (int k=0; k<theScalarProds.size; k++)
-          outputMat.AddMonomial(MonMatrixTensor(rowOffset+k, columnOffset+j), theScalarProds[k]);
+          outputMat.AddMonomial(MonomialMatrix(rowOffset+k, columnOffset+j), theScalarProds[k]);
       }
     }
   }
@@ -9075,5 +9074,467 @@ void WeylGroup::RaiseToDominantWeight
     }
   }
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+}
+
+
+template<class Element>
+bool Matrix<Element>::IsPositiveDefinite()
+{ if (this->NumRows!=this->NumCols)
+  { std::cout << "This is a programming error: attempting to evaluate whether a matrix is positive definite, but"
+    << " the matrix is not square. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Element det;
+  Matrix<Element> tempMat;
+  for (int i=0; i< this->NumRows; i++)
+  { tempMat.init(i+1, i+1);
+    for (int j=0; j<tempMat.NumCols; j++)
+      for (int k=0; k<tempMat.NumCols; k++)
+        tempMat.elements[j][k]=this->elements[j][k];
+    det=tempMat.GetDeterminant();
+    if (det<=0)
+      return false;
+  }
+  return true;
+}
+
+template<class CoefficientType>
+bool ModuleSSalgebra<CoefficientType>::MakeFromHW
+(List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
+ const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
+const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
+ std::string* outputReport, bool computeSimpleGens)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::MakeFromHW");
+  ProgressReport theReport(&theGlobalVariables);
+  this->theAlgebras=&inputAlgebras;
+  this->indexAlgebra=inputIndexAlgebra;
+  SemisimpleLieAlgebra& theAlgebrA=inputAlgebras[this->indexAlgebra];
+
+  int theRank=theAlgebrA.GetRank();
+  if (HWFundCoords.size!=theRank || selNonSelectedAreElementsLevi.MaxSize!=theRank)
+  { std::cout << "This is a programming error. I am asked to create a generalized Verma module "
+    << " with a semisimple Lie algebra of rank " << theRank << " but the input highest weight, "
+    << HWFundCoords.ToString() << ", has " << HWFundCoords.size << " coordinates and "
+    << " the parabolic section indicates rank of " << selNonSelectedAreElementsLevi.MaxSize
+    << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  WeylGroup& theWeyl=theAlgebrA.theWeyl;
+  this->cachedPairs.Clear();
+  this->cachedTraces.SetSize(0);
+
+  this->parabolicSelectionNonSelectedAreElementsLevi=selNonSelectedAreElementsLevi;
+  this->parabolicSelectionSelectedAreElementsLevi=this->parabolicSelectionNonSelectedAreElementsLevi;
+  this->parabolicSelectionSelectedAreElementsLevi.InvertSelection();
+
+  this->theHWFundamentalCoordsBaseField=HWFundCoords;
+  this->theHWDualCoordsBaseFielD.SetSize(theRank);
+  this->theHWFDpartFundamentalCoordS.SetSize(theRank);
+
+  for (int i=0; i<theRank; i++)
+  { this->theHWFDpartFundamentalCoordS[i]=0;
+    if (this->parabolicSelectionSelectedAreElementsLevi.selected[i])
+    { int theCoord;
+      if (!this->theHWFundamentalCoordsBaseField[i].IsSmallInteger(&theCoord))
+      { if (outputReport!=0)
+          *outputReport="The given module over the Levi part is not finite dimensional";
+        return false;
+      }
+      this->theHWFDpartFundamentalCoordS[i]=theCoord;
+    }
+    this->theHWDualCoordsBaseFielD[i]=this->theHWFundamentalCoordsBaseField[i];
+    this->theHWDualCoordsBaseFielD[i]*=theWeyl.CartanSymmetric.elements[i][i]/2;
+  }
+
+  this->theHWFDpartSimpleCoordS=theWeyl.GetSimpleCoordinatesFromFundamental
+  (this->theHWFDpartFundamentalCoordS);
+  this->theHWFDpartDualCoords= theWeyl.GetDualCoordinatesFromFundamental
+  (this->theHWFDpartFundamentalCoordS);
+  this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental
+  (this->theHWFundamentalCoordsBaseField);
+  this->theChaR.MakeFromWeight
+  (this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
+
+ // std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
+ // std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
+ // std::cout << "<br>dual coords: " << this->theHWDualCoordsBaseField.ToString();
+ // std::cout << "<br>fund coords no base field: " << this->theHWFDpartFundamentalCoordS.ToString();
+ // std::cout << "<br>fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
+ // std::cout << "<br>simple coords no base field: " << this->theHWFDpartSimpleCoordS.ToString();
+ // std::cout << "<br>parabolicSelectionNonSelectedAreElementsLevi: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+ // std::cout << "<br>parabolicSelectionSelectedAreElementsLevi: " << this->parabolicSelectionSelectedAreElementsLevi.ToString();
+  int startingNumRationalOperations
+  =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+  +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications;
+  LittelmannPath startingPath;
+  startingPath.MakeFromWeightInSimpleCoords(this->theHWFDpartSimpleCoordS, theWeyl);
+//  std::cout << "<br>starting littelmann path: " << startingPath.ToString() << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+  List<LittelmannPath> thePaths;
+  List<List<int> > generatorsIndices;
+  if (!startingPath.GenerateOrbit
+      (thePaths, generatorsIndices, theGlobalVariables, 1000, & this->parabolicSelectionNonSelectedAreElementsLevi))
+  { if (outputReport!=0)
+      *outputReport = "Error: number of Littelmann paths exceeded allowed limit of 1000.";
+    return false;
+  }
+  this->theModuleWeightsSimpleCoords.Clear();
+  MonomialChar<CoefficientType> tempCharMon;
+  this->theCharOverH.Reset();
+  for (int i=0; i<thePaths.size; i++)
+  { this->theModuleWeightsSimpleCoords.AddNoRepetition(*thePaths[i].Waypoints.LastObject());
+    tempCharMon.weightFundamentalCoords= theWeyl.GetFundamentalCoordinatesFromSimple(*thePaths[i].Waypoints.LastObject());
+    this->theCharOverH.AddMonomial(tempCharMon,1);
+  }
+//  std::cout << "<br>character over h (i.e. the set of weights with mults): " << this->theCharOverH.ToString();
+//  std::cout << "<br>character: " << this->theChaR.ToString();
+  this->theModuleWeightsSimpleCoords.QuickSortAscending();
+  std::stringstream out2, monomialDetailStream;
+  if (outputReport!=0)
+  { monomialDetailStream << "<br>Number of Littelmann paths: " << thePaths.size;
+    monomialDetailStream << "<br>Let v denote the highest weight vector of highest weight in simple coordinates "
+    << this->theHWFDpartSimpleCoordS.ToString();
+    std::string tempS;
+    DrawingVariables theDV;
+    this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theGlobalVariables, theDV);
+    out2 << " A picture of the weight support follows. "
+    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+    monomialDetailStream << "<br>Then the elements corresponding to the Littelmann paths are as follows. ";
+  }
+  ElementUniversalEnveloping<CoefficientType> tempElt;
+  this->theGeneratingWordsGrouppedByWeight.SetSize(this->theModuleWeightsSimpleCoords.size);
+  this->theGeneratingWordsIntGrouppedByWeight.SetSize(this->theModuleWeightsSimpleCoords.size);
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+  { this->theGeneratingWordsGrouppedByWeight[i].size=0;
+    this->theGeneratingWordsIntGrouppedByWeight[i].size=0;
+  }
+  MonomialUniversalEnveloping<CoefficientType> currentNonReducedElement;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMonInt;
+  for (int i=0; i<thePaths.size; i++)
+  { List<int>& currentPath= generatorsIndices[i];
+    currentNonReducedElement.MakeConst(*this->theAlgebras, this->indexAlgebra);
+    tempMonInt.MakeConst();
+    for (int j=currentPath.size-1; j>=0; j--)
+    { int theIndex=currentPath[j];
+      if (theIndex>0)
+        theIndex++;
+      currentNonReducedElement.MultiplyByGeneratorPowerOnTheRight
+      (this->GetOwner().GetGeneratorFromDisplayIndex(theIndex), theRingUnit);
+      tempMonInt.MultiplyByGeneratorPowerOnTheRight
+      (this->GetOwner().GetGeneratorFromDisplayIndex(theIndex), 1);
+    }
+    Vector<Rational>& hwCurrent=*thePaths[i].Waypoints.LastObject();
+    int theIndex=this->theModuleWeightsSimpleCoords.GetIndex(hwCurrent);
+    if (theIndex==-1)
+    { //std::cout << "couldn't find weight : " << hwCurrent.ToString() << " in " << this->theModuleWeightsSimpleCoords.ToString();
+      out2 << "Error: could not generate all weights in the weight support. Maybe they are too many? Allowed "
+      << " # of weights is 10000";
+      if (outputReport!=0)
+        *outputReport=out2.str() + monomialDetailStream.str();
+      return false;
+    }
+    this->theGeneratingWordsGrouppedByWeight[theIndex].AddOnTop(currentNonReducedElement);
+    this->theGeneratingWordsIntGrouppedByWeight[theIndex].AddOnTop(tempMonInt);
+  }
+  this->theGeneratingWordsNonReduced.Clear();
+  this->theGeneratingWordsNonReduced.SetExpectedSize(thePaths.size);
+  this->theGeneratingWordsNonReducedInt.Clear();
+  this->theGeneratingWordsNonReducedInt.SetExpectedSize(thePaths.size);
+  this->theGeneratingWordsNonReduced.size=0;
+  this->theGeneratingWordsWeightsPlusWeightFDpart.SetSize(0);
+  this->theGeneratingWordsWeightsPlusWeightFDpart.ReservE(thePaths.size);
+  HashedList<ElementWeylGroup> theWeylElts;
+  ElementWeylGroup tempWelt;
+//  int wordCounter=-1;
+  monomialDetailStream << "<table>";
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
+    this->theGeneratingWordsGrouppedByWeight[i];
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
+    this->theGeneratingWordsIntGrouppedByWeight[i];
+    currentList.QuickSortDescending();
+    currentListInt.QuickSortDescending();
+    for (int j=0; j<currentList.size; j++)
+    { //wordCounter++;
+      tempWelt.SetSize(currentListInt[j].generatorsIndices.size);
+      for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
+      { tempWelt[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+      }
+      this->theGeneratingWordsNonReduced.AddOnTop(currentList[j]);
+      this->theGeneratingWordsNonReducedInt.AddOnTop(currentListInt[j]);
+      this->theGeneratingWordsWeightsPlusWeightFDpart.AddOnTop(this->theModuleWeightsSimpleCoords[i]);
+      if (outputReport!=0)
+      { monomialDetailStream << "<tr><td>m_{ " << this->theGeneratingWordsNonReduced.size << "} := "
+        << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda</td><td>"
+        << tempWelt.ToString() << "</td> </tr>";
+      }
+    }
+  }
+  monomialDetailStream << "</table>";
+
+  this->IntermediateStepForMakeFromHW
+  (this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
+  bool isBad=false;
+  FormatExpressions htmlFormat;
+  if (outputReport!=0)
+    for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
+    { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
+      Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[k];
+      if (outputReport!=0)
+      { monomialDetailStream << "<hr>weight in simple coords: "
+        << this->theModuleWeightsSimpleCoords[k].ToString();
+        List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
+        for (int i=0; i<currentList.size; i++)
+        { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
+          monomialDetailStream << "<br>monomial " << i+1 << ": "
+          << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+        }
+        monomialDetailStream << "; Matrix of Shapovalov form associated to current weight level: <br> "
+        << theBF.ToString(&theGlobalVariables.theDefaultFormat);
+/*        if (!theBF.IsPositiveDefinite())
+        { monomialDetailStream << "<b>Is not positive definite!</b>";
+          this->flagConjectureCholds=false;
+        }
+        else
+          monomialDetailStream << " (positive definite)";*/
+        if (!theBF.IsNonNegativeAllEntries())
+        { monomialDetailStream << "<b>Has negative entries</b>";
+          this->flagConjectureBholds=false;
+        }
+        else
+          monomialDetailStream << " (positive entries only )";
+        monomialDetailStream << " corresonding inverted matrix:<br>";
+      }
+      if (theBFinverted.NumRows>0)
+      { if (outputReport!=0)
+          monomialDetailStream << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat);
+      }
+      else
+      { if (outputReport!=0)
+          monomialDetailStream << "<b>The matrix of the bilinear form is not invertible!</b>";
+        isBad=true;
+      }
+    }
+  if (isBad)
+  { if(outputReport!=0)
+      monomialDetailStream << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
+    *outputReport=out2.str()+monomialDetailStream.str();
+    return false;
+  }
+  if (outputReport!=0)
+    out2 << "<br>Cached Shapovalov products before generator action computation: "
+    << this->cachedPairs.size << ". Dimension : " << this->GetDim();
+  this->NumCachedPairsBeforeSimpleGen=this->cachedPairs.size;
+  this->NumRationalMultiplicationsAndAdditionsBeforeSimpleGen
+  =Rational::TotalLargeAdditions+Rational::TotalSmallAdditions
+  +Rational::TotalLargeMultiplications+Rational::TotalSmallMultiplications
+  -startingNumRationalOperations;
+  ElementSemisimpleLieAlgebra tempSSElt;
+  if (computeSimpleGens)
+    for (int k=0; k<2; k++)
+      for (int j=0; j<this->GetOwner().GetRank(); j++)
+        if (this->parabolicSelectionSelectedAreElementsLevi.selected[j])
+        { int theIndex=this->GetOwner().GetNumPosRoots()-j-1;
+          if (k==1)
+            theIndex=this->GetOwner().GetNumPosRoots()+this->GetOwner().GetRank()+j;
+          tempSSElt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
+          if (outputReport!=0)
+            out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
+          MatrixTensor<CoefficientType>& theMatrix
+          =this->GetActionGeneratorIndeX(theIndex, theGlobalVariables, theRingUnit, theRingZero);
+          std::stringstream tempStream;
+          tempStream << "computing action simple generator index " << (2*k-1)*(j+1) << " ... ";
+          theReport.Report(tempStream.str());
+          tempStream << " done!";
+          theReport.Report(tempStream.str());
+          if (outputReport!=0)
+          { if (this->GetDim() <50)
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
+              << CGI::GetHtmlMathSpanFromLatexFormula(theMatrix.ToString());
+            else
+              out2 << "<br>Matrix of elemenent in the m_i basis:<br>"
+              << theMatrix.ToString();
+          }
+      /*    for (int j=0; j<this->actionsSimpleGens[i].size; j++)
+            for (int k=0; k<this->actionsSimpleGens[i][j].size; k++)
+            { out << "<br>" << theSimpleGenerator.ToString(theGlobalVariables, tempFormat) << "\\cdot "
+              << this->theGeneratingWordsGrouppedByWeight[j][k].ToString(false, false, theGlobalVariables, tempFormat)
+              << "\\cdot v=" << this->actionsSimpleGens[i][j][k].ToString(theGlobalVariables, tempFormat)
+              << "\\cdot v"
+              ;
+            }*/
+        }
+  if (outputReport!=0)
+    out2 << "<br>Cached Shapovalov products final: "
+    << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  Vector<CoefficientType> currentWeightFundCoords;
+  Vector<CoefficientType> hwFundCoordsTrimmedBaseField;
+  hwFundCoordsTrimmedBaseField=this->theHWFDpartFundamentalCoordS;
+  ElementSemisimpleLieAlgebra tempSSelt;
+  if (outputReport!=0)
+  { std::stringstream latexTableStream;
+    latexTableStream << "<hr>Ready copy +paste for your .tex file:<br> <br>"
+    << "\\begin{tabular}{lll";
+    for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
+      latexTableStream <<"l";
+    latexTableStream << "} \n\\hline\\hline \\multicolumn{"
+    << this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection+3
+    << "}{|c|}{ Highest weight $\\lambda="
+    << this->theHWFundamentalCoordsBaseField.ToStringLetterFormat("\\omega")
+    << "$}\\\\\\hline Element& weight & monomial expression";
+    for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
+    { int theIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[i]
+      + this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
+      tempSSelt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
+      latexTableStream << "&action of $" << tempSSElt.ToString() << "$";
+    }
+    latexTableStream << "\\\\\n";
+    int monCounter=0;
+    for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+      for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
+      { monCounter++;
+        latexTableStream << "$m_{" << monCounter << "}$&";
+        currentWeightFundCoords=theWeyl.GetFundamentalCoordinatesFromSimple(this->theModuleWeightsSimpleCoords[i]);
+        latexTableStream << "\n$"
+        << (this->theHWFundamentalCoordsBaseField
+        +currentWeightFundCoords-hwFundCoordsTrimmedBaseField).ToStringLetterFormat("\\omega");
+        std::string theMonString=this->theGeneratingWordsGrouppedByWeight[i][j].ToString(&theGlobalVariables.theDefaultFormat);
+        if (theMonString=="1")
+          theMonString="";
+        latexTableStream << "$&$" << theMonString << "  v_\\lambda$";
+        for (int s=0; s< this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; s++)
+        { int currentIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[s] +this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
+          MatrixTensor<CoefficientType>& theMat=this->GetActionGeneratorIndeX(currentIndex, theGlobalVariables, theRingUnit, theRingZero);
+          bool foundMon=false;
+          latexTableStream << "&$";
+          for (int l=0; l< theMat.size; l++)
+            if (theMat[l].dualIndex==monCounter)
+            { std::string tempS1;
+              tempS1= theMat.theCoeffs[l].ToString();
+              if (tempS1=="1")
+                tempS1="";
+              if (tempS1=="-1")
+                tempS1="-";
+              std::stringstream tempStream;
+              tempStream << "m_{" << theMat[l].vIndex+1 << "}";
+              tempS1+=tempStream.str();
+              if (foundMon && tempS1[0]!='-')
+                latexTableStream << "+";
+              latexTableStream << tempS1;
+              foundMon=true;
+            }
+          if (!foundMon)
+            latexTableStream << "0";
+          latexTableStream << "$";
+        }
+        latexTableStream << "\\\\\n";
+      }
+    latexTableStream << "\\end{tabular}<hr>";
+    monomialDetailStream << (latexTableStream.str());
+  }
+  if (outputReport!=0)
+    *outputReport= out2.str()+monomialDetailStream.str();
+  this->flagIsInitialized=true;
+//  std::cout << "<hr>MakeHW result: <br>" << this->ToString();
+//  this->TestConsistency(theGlobalVariables);
+  theGlobalVariables.MakeStatusReport("Done with module generation");
+  return true;
+}
+
+template<class CoefficientType>
+void ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW
+  (Vector<CoefficientType>& HWDualCoordS, GlobalVariables& theGlobalVariables,
+    const CoefficientType& theRingUnit, const CoefficientType& theRingZero
+   )
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::IntermediateStepForMakeFromHW");
+  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
+  Vector<Rational> targetWeight;
+  this->theBilinearFormsAtEachWeightLevel.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->theBilinearFormsInverted.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
+  this->ComputedGeneratorActions.init(this->GetOwner().GetNumGenerators());
+  this->actionsGeneratorS.SetSize(this->GetOwner().GetNumGenerators());
+  this->actionsGeneratorsMaT.SetSize(this->GetOwner().GetNumGenerators());
+  int numScalarProducts=0;
+  this->flagConjectureBholds=true;
+  this->flagConjectureCholds=true;
+  for (int l=0; l<this->theGeneratingWordsGrouppedByWeight.size; l++)
+  { Matrix<CoefficientType>& currentBF=this->theBilinearFormsAtEachWeightLevel[l];
+    List<MonomialUniversalEnveloping<CoefficientType> >& currentWordList=
+    this->theGeneratingWordsGrouppedByWeight[l];
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentWordListInt=
+    this->theGeneratingWordsIntGrouppedByWeight[l];
+    currentBF.init(currentWordList.size, currentWordList.size);
+    for (int i=0; i<currentWordList.size; i++)
+      for (int j=i; j<currentWordList.size; j++)
+      { //std::cout << "<br>word " << i+1 << ": " << currentWordList[i].ToString(&theGlobalVariables.theDefaultLieFormat);
+        //std::cout << "<br>word " << j+1 << ": " << currentWordList[j].ToString(&theGlobalVariables.theDefaultLieFormat);
+        std::stringstream tempStream;
+        tempStream << " Computing Shapovalov form layer " << l << " out of "
+        << this->theGeneratingWordsGrouppedByWeight.size
+        << " between indices " << i +1 << " and " << j+1 << " out of " << currentWordList.size;
+        //currentWordList[i].HWTAAbilinearForm
+        //(currentWordList[j], currentBF.elements[i][j], &HWDualCoordS, theGlobalVariables, theRingUnit, theRingZero, 0)
+        //;
+        numScalarProducts++;
+        currentBF.elements[i][j]=
+        this->hwtaabfSimpleGensOnly(currentWordListInt[i], currentWordListInt[j], &theReport2);
+//        std::cout << "<br> (" << currentWordList[i].ToString()
+//        << ", " << currentWordList[j].ToString() << ")=  Old: " << currentBF.elements[i][j].ToString()
+//        << "&nbsp    New: " << tempI.ToString();
+        theReport.Report(tempStream.str());
+//        std::cout << "[" << currentWordList[i].ToString() << ", " << currentWordList[j].ToString() << "]=" <<currentBF.elements[i][j].ToString();
+        if (i!=j)
+          currentBF.elements[j][i]=currentBF.elements[i][j];
+      }
+    Matrix<CoefficientType> tempMat;
+    tempMat=(currentBF);
+    CoefficientType tempRat;
+    tempMat.ComputeDeterminantOverwriteMatrix(tempRat, theRingUnit, theRingZero);
+    if (!tempRat.IsEqualToZero())
+    { this->theBilinearFormsInverted[l]=currentBF;
+      this->theBilinearFormsInverted[l].Invert(theRingUnit, theRingZero);
+//      if (!currentBF.IsPositiveDefinite())
+//        this->flagConjectureCholds=false;
+      if (!currentBF.IsNonNegativeAllEntries())
+        this->flagConjectureBholds=false;
+    } else
+      this->theBilinearFormsInverted[l].init(0,0);
+  }
+//  for (int i=0; i<this->cachedPairs.size; i++)
+//  { std::cout << "<br>(" << this->cachedPairs[i].Object1 << ", " << this->cachedPairs[i].Object2
+//    << ") = " << this->cachedTraces[i];
+//  }
+}
+
+template <class CoefficientType>
+template <class ResultType>
+void ModuleSSalgebra<CoefficientType>::GetElementsNilradical
+(List<ElementUniversalEnveloping<ResultType> >& output, bool useNegativeNilradical,
+ List<int>* listOfGenerators)
+{ SemisimpleLieAlgebra& ownerSS=this->GetOwner();
+  ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
+  ElementUniversalEnveloping<ResultType> theElt;
+  output.SetSize(0);
+  output.ReservE(ownerSS.GetNumPosRoots());
+
+  int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
+  MemorySaving<List<int> > tempList;
+  if (listOfGenerators==0)
+    listOfGenerators=&tempList.GetElement();
+  listOfGenerators->SetSize(0);
+  listOfGenerators->ReservE(ownerSS.GetNumPosRoots());
+  for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
+    if (this->IsNotInLevi(i))
+      listOfGenerators->AddOnTop(i);
+  //bubble sort:
+  for (int i=0; i<listOfGenerators->size; i++)
+    for (int j=i+1; j<listOfGenerators->size; j++)
+      if (ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[i]]>
+          ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[j]])
+        listOfGenerators->SwapTwoIndices(i, j);
+  for (int i=0; i<listOfGenerators->size; i++)
+  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->theAlgebras, this->indexAlgebra);
+    output.AddOnTop(theElt);
+  }
 }
 #endif

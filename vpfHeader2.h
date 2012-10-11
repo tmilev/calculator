@@ -1256,7 +1256,7 @@ bool fGetTypeHighestWeightParabolic
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunctionOld>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+  Vectors<Polynomial<Rational> >& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic

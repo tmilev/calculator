@@ -2085,9 +2085,9 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   int indexOfAlgebra=theSSdata.theIndex;
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
   int theRank=theSSalgebra.GetRank();
-  Vector<RationalFunctionOld> highestWeightFundCoords;
+  Vector<Polynomial<Rational> > highestWeightFundCoords;
   Context hwContext(theCommands), emptyContext(theCommands);
-  if (!theCommands.GetVector<RationalFunctionOld>
+  if (!theCommands.GetVector
       (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, &CommandList::fPolynomial, comments))
   { if(comments!=0)
       *comments << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of " << theRank
@@ -2118,12 +2118,12 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
         selInducing.RemoveSelection(i);
 //  std::cout << "Your input so far: " << theSSalgebra.GetLieAlgebraName() << " with hw: " << highestWeightFundCoords.ToString()
 //  << " parabolic selection: " << selInducing.ToString() << " degree: " << desiredHeight;
-  Vectors<RationalFunctionOld> theHws;
+  Vectors<Polynomial<Rational> > theHws;
   Selection invertedSelInducing=selInducing;
   invertedSelInducing.InvertSelection();
   theHws.SetSize(0);
   SelectionWithMaxMultiplicity theHWenumerator;
-  Vector<RationalFunctionOld> theHWrf;
+  Vector<Polynomial<Rational> > theHWrf;
   for (int j=0; j<=desiredHeight; j++)
   { theHWenumerator.initMaxMultiplicity(theRank-selInducing.CardinalitySelection, j);
     theHWenumerator.IncrementSubsetFixedCardinality(j);
@@ -2159,36 +2159,6 @@ bool ModuleSSalgebra<CoefficientType>::IsNotInLevi
     if (!theWeight[this->parabolicSelectionNonSelectedAreElementsLevi.elements[j]].IsEqualToZero())
       return true;
   return false;
-}
-
-template <class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::GetElementsNilradical
-(List<ElementUniversalEnveloping<CoefficientType> >& output, bool useNegativeNilradical, List<int>* listOfGenerators)
-{ SemisimpleLieAlgebra& ownerSS=this->GetOwner();
-  ownerSS.OrderSetNilradicalNegativeMost(this->parabolicSelectionNonSelectedAreElementsLevi);
-  ElementUniversalEnveloping<CoefficientType> theElt;
-  output.SetSize(0);
-  output.ReservE(ownerSS.GetNumPosRoots());
-
-  int theBeginning=useNegativeNilradical ? 0: ownerSS.GetNumPosRoots()+ownerSS.GetRank();
-  MemorySaving<List<int> > tempList;
-  if (listOfGenerators==0)
-    listOfGenerators=&tempList.GetElement();
-  listOfGenerators->SetSize(0);
-  listOfGenerators->ReservE(ownerSS.GetNumPosRoots());
-  for (int i=theBeginning; i<theBeginning+ownerSS.GetNumPosRoots(); i++)
-    if (this->IsNotInLevi(i))
-      listOfGenerators->AddOnTop(i);
-  //bubble sort:
-  for (int i=0; i<listOfGenerators->size; i++)
-    for (int j=i+1; j<listOfGenerators->size; j++)
-      if (ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[i]]>
-          ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[j]])
-        listOfGenerators->SwapTwoIndices(i, j);
-  for (int i=0; i<listOfGenerators->size; i++)
-  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->theAlgebras, this->indexAlgebra);
-    output.AddOnTop(theElt);
-  }
 }
 
 template <class CoefficientType>
@@ -2241,8 +2211,11 @@ class quasiDiffMon
     return output;
   }
   public:
+  //theWeylMon is a polynomial monomial in 2n variables if the Weyl algebra is in n variables.
+  //The first n variables are the x_i generators, the second n variables are the \partial_i (derivative)
+  //generators.
   MonomialP theWeylMon;
-  MonMatrixTensor theMatMon;
+  MonomialMatrix theMatMon;
   static unsigned int HashFunction(const quasiDiffMon& input)
   { return input.theWeylMon.HashFunction()*SomeRandomPrimes[0]+input.theMatMon.HashFunction()*SomeRandomPrimes[1];
   }
@@ -2279,7 +2252,116 @@ public:
   static void prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output);
   std::string ToString(FormatExpressions* theFormat=0)const
   ;
+  void GenerateBasisLieAlgebra(List<quasiDiffOp<CoefficientType> >& theElts);
+  void operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight);
+  void operator=(const  MonomialCollection<quasiDiffMon, CoefficientType>& other)
+  { this->MonomialCollection<quasiDiffMon, CoefficientType>::operator=(other);
+  }
+  void LieBracketMeOnTheRight(const MonomialCollection<quasiDiffMon, CoefficientType>& standsOnTheRight)
+  { quasiDiffOp<CoefficientType> tempRight;
+    tempRight=standsOnTheRight;
+    MathRoutines::LieBracket(*this, tempRight, *this);
+  }
 };
+
+template <class TemplateMonomial, class CoefficientType>
+void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
+  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList
+   )
+{ int topBoundNumMons=0;
+  for (int i =0; i<theList.size; i++)
+    topBoundNumMons+=theList[i].size;
+  HashedList<TemplateMonomial> allMons;
+  allMons.SetExpectedSize(topBoundNumMons);
+  for (int i =0; i<theList.size; i++)
+    allMons.AddNoRepetition(theList[i]);
+  allMons.QuickSortAscending();
+  int currentRowIndex=0;
+  CoefficientType tempCF;
+  for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
+  { TemplateMonomial& currentMon=allMons[i];
+    int goodRow=currentRowIndex;
+    for (; goodRow< theList.size; goodRow++)
+      if (theList[goodRow].Contains(currentMon))
+        break;
+    if (goodRow>=theList.size)
+      continue;
+    theList.SwapTwoIndices(currentRowIndex, goodRow);
+    MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=theList[currentRowIndex];
+    int colIndex=currentPivot.GetIndex(currentMon);
+    if (colIndex==-1)
+    { std::cout << "This is a programming error. "
+      << "An internal check at the Gaussian elimination method for "
+      << " monomial collections fails. Something is wrong. Here is the List you wanted "
+      << " to perform Gaussian elimination upon. "
+      << theList.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    tempCF=currentPivot.theCoeffs[colIndex];
+    currentPivot/=tempCF;
+    for (int j=0; j<theList.size; j++)
+      if (j!=i)
+      { MonomialCollection<TemplateMonomial, CoefficientType>& currentOther=theList[j];
+        int otherColIndex=currentOther.GetIndex(currentMon);
+        if (otherColIndex!=-1)
+        { tempCF=currentOther.theCoeffs[otherColIndex];
+          currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
+        }
+      }
+    currentRowIndex++;
+  }
+}
+
+template <class CoefficientType>
+void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<CoefficientType> >& theElts)
+{ List< MonomialCollection<quasiDiffMon, CoefficientType> > theEltsConverted;
+  theEltsConverted=theElts;
+  this->GaussianEliminationByRows(theEltsConverted);
+  quasiDiffOp tempQDO, tempQDO2;
+  for(int i=0; i<theEltsConverted.size; i++)
+    for (int j=i+1; j<theEltsConverted.size; j++)
+    { tempQDO=theEltsConverted[i];
+      tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
+      theEltsConverted.AddOnTop(tempQDO);
+      quasiDiffOp::GaussianEliminationByRows(theEltsConverted);
+      for (int k=theEltsConverted.size-1; k>=0; k--)
+        if (theEltsConverted[k].IsEqualToZero())
+          theEltsConverted.PopIndexSwapWithLast(k);
+        else
+          break;
+    }
+  theElts=theEltsConverted;
+}
+
+template <class CoefficientType>
+void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight)
+{ quasiDiffOp<CoefficientType> output;
+  ElementWeylAlgebra leftElt, rightElt;
+  Polynomial<CoefficientType> tempP;
+  quasiDiffMon outputMon;
+  output.MakeZero();
+  for (int j=0; j<standsOnTheRight.size; j++)
+  { quasiDiffMon& currentRightMon =standsOnTheRight[j];
+    tempP.MakeZero(currentRightMon.theWeylMon.monBody.size);
+    tempP.AddMonomial(currentRightMon.theWeylMon, standsOnTheRight.theCoeffs[j]);
+    rightElt.AssignStandardOrder(tempP);
+    for (int i=0; i<this->size; i++)
+    { quasiDiffMon& currentLeftMon =(*this)[i];
+      tempP.MakeZero(currentLeftMon.theWeylMon.monBody.size);
+      tempP.AddMonomial(currentLeftMon.theWeylMon, this->theCoeffs[i]);
+      leftElt.AssignStandardOrder(tempP);
+      outputMon.theWeylMon= (*this)[i].theWeylMon;
+      outputMon.theWeylMon*=standsOnTheRight[j].theWeylMon;
+      leftElt*=rightElt;
+      for (int k=0; k<leftElt.GetStandardOrder().size; k++)
+      { outputMon.theWeylMon=(leftElt.GetStandardOrder())[k];
+        output.AddMonomial(outputMon, leftElt.GetStandardOrder().theCoeffs[k]);
+      }
+    }
+  }
+  *this=output;
+}
 
 template <class CoefficientType>
 std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)const
@@ -2288,14 +2370,14 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
     combineWeylPart=theFormat->flagQuasiDiffOpCombineWeylPart;
   if (!combineWeylPart)
     return this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat);
-  MatrixTensor<CoefficientType> reordered;
+  MatrixTensor<Polynomial<Rational> > reordered;
   reordered.MakeZero();
-  CoefficientType theCF;
+  Polynomial<Rational> tempP;
   for (int i=0; i<this->size; i++)
-  { theCF=this->theCoeffs[i];
-    quasiDiffMon& currentMon=(*this)[i];
-    theCF*=currentMon.theWeylMon;
-    reordered.AddMonomial(currentMon.theMatMon, theCF);
+  { quasiDiffMon& currentMon=(*this)[i];
+    tempP.MakeZero(currentMon.theWeylMon.monBody.size);
+    tempP.AddMonomial(currentMon.theWeylMon, this->theCoeffs[i]);
+    reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
   return reordered.ToString(theFormat);
 }
@@ -2305,7 +2387,7 @@ void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theS
 { output.polyAlphabeT.SetSize((inputNumWeylVars+theShift)*2);
   for (int i=0; i<inputNumWeylVars; i++)
   { std::stringstream tempStream, tempStream2;
-    tempStream2 << "\\xi_{" << i+1 << "}";
+    tempStream2 << "x_{" << i+1 << "}";
     output.polyAlphabeT[theShift+i]=tempStream2.str();
     tempStream << "\\partial" << "_{" << i+1 << "}";
     output.polyAlphabeT[2*theShift+i+inputNumWeylVars]=tempStream.str();
@@ -2359,7 +2441,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
 
 template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<RationalFunctionOld>& output,
+(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
@@ -2379,14 +2461,15 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   result*=(theGenElt);
   result.Simplify(theGlobalVariables);
 //  std::cout << " <br>" << CGI::GetHtmlMathSpanPure(result.ToString());
-  MatrixTensor<RationalFunctionOld> endoPart, tempMT, idMT;
+  MatrixTensor<Polynomial<Rational> > endoPart, tempMT, idMT;
   idMT.MakeIdSpecial();
-  MatrixTensor<RationalFunctionOld> tempM;
+  MatrixTensor<RationalFunctionOld> tempMat1;
+
 //  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
   ElementWeylAlgebra weylPartSummand;
   Polynomial<Rational> tempP, theCoeff;
-  quasiDiffMon monQDO;
-  RationalFunctionOld tempRF;
+  quasiDiffMon monQDO, monQDO2;
+  Rational tempRat;
   output.MakeZero();
   for (int i=0; i<result.size; i++)
   { MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon=result[i];
@@ -2395,8 +2478,14 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
     { int thePower=0;
       if (!currentMon.Powers[j].IsSmallInteger(&thePower))
         return false;
-      tempM=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j], theGlobalVariables);
-      tempMT=tempM;
+      tempMat1=this->GetActionGeneratorIndeX(currentMon.generatorsIndices[j], theGlobalVariables);
+      tempMT.MakeZero();
+      for (int k=0; k<tempMat1.size; k++)
+      { if (tempMat1.theCoeffs[k].expressionType==RationalFunctionOld::typeRationalFunction)
+          return false;
+        tempMat1.theCoeffs[k].GetNumerator(tempP);
+        tempMT.AddMonomial(tempMat1[k], tempP);
+      }
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart*=tempMT;
     }
@@ -2412,13 +2501,19 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
         for (int k=0; k<endoPart.size; k++)
         { monQDO.theMatMon=endoPart[k];
           monQDO.theWeylMon=tempP[j];
-          tempRF=endoPart.theCoeffs[k];
-          tempRF*=tempP.theCoeffs[j];
-          tempRF*=result.theCoeffs[i].theCoeffs[l];
-//          std::cout << "<br>adding " << monQDO.ToString() << " times " << tempRF.ToString()  << " to "
-//          << output.ToString();
-          output.AddMonomial(monQDO, tempRF);
-//          std::cout << " to get " << output.ToString();
+          Polynomial<Rational>& currentEndoCoeff=endoPart.theCoeffs[k];
+          for (int m=0; m<currentEndoCoeff.size; m++)
+          { monQDO2=monQDO;
+            for (int n=0; n<currentEndoCoeff.NumVars; n++)
+              monQDO2.theWeylMon[n]+=currentEndoCoeff[m][n];
+            tempRat=currentEndoCoeff.theCoeffs[m];
+            tempRat*=tempP.theCoeffs[j];
+            tempRat*=result.theCoeffs[i].theCoeffs[l];
+  //          std::cout << "<br>adding " << monQDO.ToString() << " times " << tempRF.ToString()  << " to "
+  //          << output.ToString();
+            output.AddMonomial(monQDO2, tempRat);
+  //          std::cout << " to get " << output.ToString();
+          }
         }
     }
   }
@@ -2428,7 +2523,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 
 bool CommandList::fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunctionOld>& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+  Vectors<Polynomial<Rational> >& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
 { MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
@@ -2436,14 +2531,14 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     return false;
   Expression tempExp;
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
-  List<ElementUniversalEnveloping<RationalFunctionOld> > elementsNegativeNilrad;
+  List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra theGenerator;
-  ElementUniversalEnveloping<RationalFunctionOld> genericElt, actionOnGenericElt;
+  ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
   List<ElementWeylAlgebra> actionNilrad;
   List<int> vectorIndices, dualIndices;
-  quasiDiffOp<RationalFunctionOld> tempQDO;
+  List<quasiDiffOp<Rational> > theQDOs;
   FormatExpressions theWeylFormat, theUEformat;
-  std::stringstream out, latexReport;
+  std::stringstream out, latexReport, latexReport2;
   theWeylFormat.MaxLineLength=40;
   theWeylFormat.flagUseLatex=true;
   theUEformat.MaxLineLength=20;
@@ -2451,7 +2546,10 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   theUEformat.chevalleyGgeneratorLetter="g";
   theUEformat.chevalleyHgeneratorLetter="h";
   hwContext.GetFormatExpressions(theUEformat);
-  theUEformat.polyDefaultLetter="n";
+  theUEformat.polyDefaultLetter="a";
+  theUEformat.MaxLineLength=178;
+  theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
+  theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
   hwContext.GetFormatExpressions(theWeylFormat);
   List<ElementSemisimpleLieAlgebra> theGeneratorsItry;
   for (int j=0; j<theSSalgebra.GetRank(); j++)
@@ -2460,13 +2558,14 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     theGenerator.MakeGGenerator
     (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
-    theGenerator.MakeHgenerator
-    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
-    theGeneratorsItry.AddOnTop(theGenerator);
+//    theGenerator.MakeHgenerator
+//    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+//    theGeneratorsItry.AddOnTop(theGenerator);
     ei.Minus();
     theGenerator.MakeGGenerator(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
   }
+  theQDOs.SetSize(theGeneratorsItry.size);
   if (false)
     if (theSSalgebra.GetRank()==3 && theSSalgebra.theWeyl.WeylLetter=='B')
     { theGenerator=theGeneratorsItry[0];
@@ -2474,39 +2573,42 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       theGeneratorsItry.AddOnTop(theGenerator);
     }
   out << "<table border=\"1\">";
-  latexReport << "\\begin{longtable}{r";
+  latexReport << "\\begin{longtable}{rll}";
   for (int i =0; i<theGeneratorsItry.size; i++)
     latexReport << "l";
   latexReport << "}\\caption{\\label{tableDiffOps" << selInducing.ToString()
   << "} Differential operators corresponding to actions of simple positive generators for the "
   << selInducing.ToString() << "-parabolic subalgebra.}\\\\<br>";
+  List<ModuleSSalgebra<RationalFunctionOld > > theMods;
+  theMods.SetSize(theHws.size);
+  Vector<RationalFunctionOld> tempV;
   for (int i=0; i<theHws.size; i++)
-  { theCommands.fHWVinner
-    (theCommands, inputIndexBoundVars, tempExp, comments, theHws[i], selInducing,
-     hwContext, indexOfAlgebra);
-    ModuleSSalgebra<RationalFunctionOld>& theMod=
-    tempExp.GetAtomicValue().GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().
-    GetOwnerModule();
+  { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
+    tempV=theHws[i];
+    if (!theMod.MakeFromHW
+        (*theSSalgebra.owner, theSSalgebra.indexInOwner, tempV, selInducing,
+         *theCommands.theGlobalVariableS, 1, 0, 0, true) )
+      return theExpression.SetError("Failed to create module.");
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
-      RationalFunctionOld RFone, RFzero;
-      RFone.MakeOne(elementsNegativeNilrad.size+theMod.GetNumVars(), theCommands.theGlobalVariableS);
-      RFzero.MakeZero(elementsNegativeNilrad.size+theMod.GetNumVars(), theCommands.theGlobalVariableS);
+      Polynomial<Rational> Pone, Pzero;
+      Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetNumVars());
+      Pzero.MakeZero(elementsNegativeNilrad.size+theMod.GetNumVars());
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
-      quasiDiffOp<RationalFunctionOld>::prepareFormatFromShiftAndNumWeylVars
+      quasiDiffOp<Polynomial<Rational> >::prepareFormatFromShiftAndNumWeylVars
       (hwContext.VariableImages.size, elementsNegativeNilrad.size, theWeylFormat);
-      std::cout << "theWeylFormat: ";
-      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
-        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
+//      std::cout << "theWeylFormat: ";
+//      for (int k=0; k<theWeylFormat.polyAlphabeT.size; k++)
+//        std::cout << theWeylFormat.polyAlphabeT[k] << ", ";
       theUEformat.polyAlphabeT.SetSize(hwContext.VariableImages.size+ elementsNegativeNilrad.size);
       for (int k=hwContext.VariableImages.size; k<theUEformat.polyAlphabeT.size; k++)
       { std::stringstream tmpStream;
-        tmpStream << "n_{" << k-hwContext.VariableImages.size+1 << "}";
+        tmpStream << "a_{" << k-hwContext.VariableImages.size+1 << "}";
         theUEformat.polyAlphabeT[k] = tmpStream.str();
       }
-      std::cout << "<br>theUEformat: ";
-      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
-        std::cout << theUEformat.polyAlphabeT[k] << ", ";
+//      std::cout << "<br>theUEformat: ";
+//      for (int k=0; k<theUEformat.polyAlphabeT.size; k++)
+//        std::cout << theUEformat.polyAlphabeT[k] << ", ";
       out << "<tr><td>Generic element U(n_-):</td><td>"
       << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
       latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
@@ -2524,40 +2626,68 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { actionOnGenericElt.AssignElementLieAlgebra
-        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, RFone, RFzero)
+        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, Pone, Pzero)
         ;
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
         actionOnGenericElt.Simplify(*theCommands.theGlobalVariableS);
-        out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-        (actionOnGenericElt.ToString(&theUEformat)) << "</td>";
+        theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
+        out << "<td>" << CGI::GetHtmlMathSpanPure
+        ("\\begin{array}{rcl}&&" +actionOnGenericElt.ToString(&theUEformat)+"\\end{array}")
+        << "</td>";
+        theUEformat.NumAmpersandsPerNewLineForLaTeX=0;
         latexReport << "& $\\begin{array}{l} " << actionOnGenericElt.ToString(&theUEformat)
         << "\\end{array}$ ";
       }
       latexReport << "\\\\ \\hline\\hline<br>";
       out << "</tr>";
     }
-    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString()) << "</td>";
-    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString() << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
+    out << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theMod.theChaR.ToString())
+    << "</td>";
+    latexReport2 << "\\begin{longtable}{rll}";
+    latexReport2 << "$\\gog$& $n$& element of $\\mathbb W_n$ \\\\\\hline"
+    << "\\multirow{"
+    << theGeneratorsItry.size
+    << "}{*}{$"
+    << theSSalgebra.GetLieAlgebraName(false) << "$}"
+    << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
+    << elementsNegativeNilrad.size << "}&";
+
+    latexReport << "$\\begin{array}{r}" << theMod.theChaR.ToString()
+    << "(\\mathfrak{l}) \\\\ \\\\dim:~" << theMod.GetDim() << " \\end{array}$";
     //std::cout << "<hr>hw: " << theMod.theHWFundamentalCoordsBaseField.ToString() << " nilrad elts: " << elementsNegativeNilrad.ToString();
     //std::cout << "<br>generic element: " << genericElt.ToString();
     for (int j=0; j<theGeneratorsItry.size; j++)
     { theGenerator=theGeneratorsItry[j];
       theMod.GetActionGenVermaModuleAsDiffOperator
-      (theGenerator, tempQDO, *theCommands.theGlobalVariableS)
+      (theGenerator, theQDOs[j], *theCommands.theGlobalVariableS)
       ;
       theWeylFormat.CustomCoeffMonSeparator="\\otimes ";
-      out << "<td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(tempQDO.ToString(&theWeylFormat))
+      theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
+      out << "<td>" << CGI::GetHtmlMathSpanPure
+      ("\\begin{array}{|r|c|l|}&&"+theQDOs[j].ToString(&theWeylFormat)+"\\end{array}")
       << "</td>";
-      latexReport << " & $\\begin{array}{l}" << tempQDO.ToString(&theWeylFormat) << "\\end{array}$";
+      theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
+      theWeylFormat.MaxLineLength=300;
+      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
+      if (j!=0)
+        latexReport2 << "&&";
+      latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat)
+      << "\\end{array}$\\\\ "
+      << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
+    theQDOs[0].GenerateBasisLieAlgebra(theQDOs);
+    std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
+    std::cout << "<br>The qdos: " << theQDOs.ToString();
+    latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";
   }
   latexReport << "\\end{longtable}";
   out << "</table>";
   out << "<br>" << latexReport.str();
+  out << "<br><br>" << latexReport2.str();
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
@@ -3147,7 +3277,8 @@ bool CommandList::fSSAlgebra
 { IncrementRecursion recursionCounter(&theCommands);
   std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
-    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ToString() << " at file "
+    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ToString()
+    << ". The cpp code is located at file "
     << __FILE__ << " line " <<  __LINE__ << ".";
   if (theExpression.children.size!=2)
   { errorStream << " The input of the function does not have two arguments";
@@ -3290,9 +3421,12 @@ bool CommandList::fSSAlgebra
         << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
         << " <br> For F_4, we follow "
         << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
-        << " integral; 2) the long roots come first. <br>Point (1) does not hold either for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-        << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed of computations, <br>and for reducing sizes of the printouts.";
-        out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td><td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
+        << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
+        << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+        << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
+        << "of computations, <br>and for reducing sizes of the printouts.";
+        out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
+        << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
         Vectors<Rational> rootSystemEpsCoords;
         theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
         for (int i=0; i<theWeyl.RootSystem.size; i++)
@@ -3310,10 +3444,12 @@ bool CommandList::fSSAlgebra
         << "<br>The grey lines are the edges of the Weyl chamber."
         << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
       } else
-      { out << "<hr>If you want extra details (root system info, interactive picture in the Coxeter plane of the root system, "
+      { out << "<hr>If you want extra details (root system info, interactive "
+        << "picture in the Coxeter plane of the root system, "
         << " with the Weyl chamber drawn, etc.), use the function";
         std::stringstream tempStream;
-        tempStream << "SemisimpleLieAlgebraVerbose{}" << theSSalgebra.theWeyl.WeylLetter << "_" << theSSalgebra.GetRank();
+        tempStream << "SemisimpleLieAlgebraVerbose{}" << theSSalgebra.theWeyl.WeylLetter
+        << "_" << theSSalgebra.GetRank();
         out << theCommands.GetCalculatorLink(tempStream.str());
         out << " instead. ";
       }
@@ -3329,7 +3465,8 @@ bool Expression::HasBoundVariables()
 { IncrementRecursion recursionCounter(this->theBoss);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
-  { std::cout << "This is a programming error: function HasBoundVariables has exceeded recursion depth limit. "
+  { std::cout << "This is a programming error: function HasBoundVariables has "
+    << "exceeded recursion depth limit. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -6128,4 +6265,27 @@ void Data::MakeLSpath
   thePath.Waypoints=waypts;
   thePath.Simplify();
   this->theIndex= theBoss.theObjectContainer.theLSpaths.AddNoRepetitionOrReturnIndexFirst(thePath);
+}
+
+
+bool CommandList::fWriteGenVermaModAsDiffOperators
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperators");
+  IncrementRecursion theRecursionIncrementer(&theCommands);
+  Vectors<Polynomial<Rational> > theHWs;
+  theHWs.SetSize(1);
+  Context theContext;
+  Selection theParSel;
+  if (!theCommands.fGetTypeHighestWeightParabolic
+      (theCommands, inputIndexBoundVars, theExpression, comments, theHWs[0], theParSel, &theContext))
+    return theExpression.SetError("Failed to extract type, highest weight, parabolic selection");
+  if (theExpression.errorString!="")
+    return true;
+  SemisimpleLieAlgebra& theSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+//  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
+  return theCommands.fWriteGenVermaModAsDiffOperatorInner
+  (theCommands, inputIndexBoundVars, theExpression, comments, theHWs, theContext, theParSel,
+   theSSalgebra.indexInOwner);
 }

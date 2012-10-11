@@ -390,6 +390,22 @@ public:
       result+=x[i]*SomeRandomPrimes[i];
     return result;
   }
+  template <class Element>
+  static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output)
+  { if (&standsOnTheLeft==&output || &standsOnTheRight==&output)
+    { Element standsOnTheLeftNew, standsOnTheRightNew;
+      standsOnTheLeftNew=standsOnTheLeft;
+      standsOnTheRightNew=standsOnTheRight;
+      MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
+      return;
+    }
+    Element tempE;
+    output=standsOnTheLeft;
+    output*=standsOnTheRight;
+    tempE=standsOnTheRight;
+    tempE*=standsOnTheLeft;
+    output-=tempE;
+  }
   //this function just redirects to the class CGI function with the same name.
   //the stupid c++ does not allow me to use an incomplete CGI type.
   //They give a million bullshit reasons why this is a feature of c++, but
@@ -728,7 +744,7 @@ public:
   int size;
   List(const List<Object>& other)
   { this->initConstructorCallOnly();
-    this->CopyFromBase(other);
+    *this=(other);
   }
   List(const ListLight<Object>& other)
   { this->initConstructorCallOnly();
@@ -825,10 +841,21 @@ public:
   { return input.HashFunction();
   }
   void IntersectWith(const List<Object>& other, List<Object>& output)const;
-  void operator=(const List<Object>& right){ this->CopyFromBase(right); }
+  void operator=(const List<Object>& right)
+  { if (this==&right)
+      return;
+    this->SetSize(right.size);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]= right.TheObjects[i];
+  }
+  template <class otherObjectType>
+  void operator=(const List<otherObjectType>& right)
+  { this->SetSize(right.size);
+    for (int i=0; i<this->size; i++)
+      this->TheObjects[i]= right.TheObjects[i];
+  }
   static void swap(List<Object>& l1, List<Object>& l2);
   void ReverseOrderElements();
-  void CopyFromBase (const List<Object>& From);
   bool IsEqualTo(const List<Object>& Other)const
   { if (this->size!=Other.size)
       return false;
@@ -1038,7 +1065,6 @@ private:
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
-  void CopyFromBase(const List<Object>& From);
   void SwapTwoIndices(int index1, int index2);
   void AssignLight(const ListLight<Object>& from);
   void SetSize(int theSize);
@@ -1287,7 +1313,7 @@ public:
       return;
     this->Clear();
     this->SetHashSizE(From.TheHashedArrays.size);
-    this->::List<Object>::CopyFromBase(From);
+    this->::List<Object>::operator=(From);
     if (From.IsSparse())
     { for (int i=0; i<this->size; i++)
       { unsigned int hashIndex=this->GetHash(this->TheObjects[i]);
@@ -2055,9 +2081,9 @@ public:
   void initFromInts(const List<int>& theMaxMults);
   bool HasSameMaxMultiplicities(SelectionWithDifferentMaxMultiplicities& other){ return this->MaxMultiplicities.IsEqualTo(other.MaxMultiplicities); }
   void operator=(const SelectionWithDifferentMaxMultiplicities& right)
-  { this->Multiplicities.CopyFromBase(right.Multiplicities);
-    this->MaxMultiplicities.CopyFromBase(right.MaxMultiplicities);
-    this->elements.CopyFromBase(right.elements);
+  { this->Multiplicities=(right.Multiplicities);
+    this->MaxMultiplicities=(right.MaxMultiplicities);
+    this->elements=(right.elements);
   }
 };
 
@@ -2512,7 +2538,9 @@ public:
     }
   }
   bool Factor(List<unsigned int>& outputPrimeFactors, List<int>& outputMultiplicites);
-  inline void Assign(const LargeIntUnsigned& x){this->CopyFromBase(x); }
+  inline void Assign(const LargeIntUnsigned& x)
+  { this->::List<unsigned int>::operator =(x);
+  }
   void AssignString(const std::string& input);
   int GetUnsignedIntValueTruncated();
   int operator%(unsigned int x);
@@ -4486,6 +4514,11 @@ public:
   int AddMonomialNoCoeffCleanUpReturnsCoeffIndex
   (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff)
   ;
+
+  static void GaussianEliminationByRows
+  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList
+   )
+   ;
   int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
   (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   void CleanUpZeroCoeffs()
@@ -4559,9 +4592,10 @@ public:
   }
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->size)
-    { std::cout << "This is a programming error: a monomial collection has " << this->size << " monomials but "
-      << this->theCoeffs.size << " coefficients. Please debug file " << CGI::GetHtmlLinkFromFileName(fileName)
-      << " line " << lineName << ". ";
+    { std::cout << "This is a programming error: a monomial collection has "
+      << this->size << " monomials but "
+      << this->theCoeffs.size << " coefficients. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
@@ -4637,7 +4671,11 @@ public:
     for (int i=0; i<other.size; i++)
       this->theCoeffs[i]=other.theCoeffs[i];
   }
-  inline void operator-=(const MonomialCollection<TemplateMonomial, CoefficientType>& other);
+  inline void operator-=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+  { this->SubtractOtherTimesCoeff(other);
+  }
+  inline void SubtractOtherTimesCoeff
+  (const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* theCoeff=0);
   template <class otherType>
   inline void operator/=(const otherType& other)
   { if (other==0)
@@ -4782,6 +4820,11 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     result.MakeZero(this->NumVars);
     return result;
   }
+  Rational RationalValue()
+  { Rational result;
+    this->GetConstantTerm(result, 0);
+    return result;
+  }
   void MakeConst(const CoefficientType& theConst)
   { this->MakeConst(0, theConst);
   }
@@ -4916,6 +4959,32 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   int GetIndexMaxMonomialTotalDegThenLexicographic()const;
 //  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
+  bool operator<=(const CoefficientType& other)const
+  { CoefficientType constME;
+    if (!this->IsAConstant(&constME))
+    { std::cout << "This may or may not be a programming error: "
+      << "attempting to compare a non-constant polynomial to "
+      << " a constant. I cannot judge at the moment whether allowing "
+      << " that is a good decision. In any case, crashing to let you know. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return constME<=other;
+  }
+  bool operator<(const CoefficientType& other)const
+  { CoefficientType constME;
+    if (!this->IsAConstant(&constME))
+    { std::cout << "This may or may not be a programming error: "
+      << "attempting to compare a non-constant polynomial to "
+      << " a constant. I cannot judge at the moment whether allowing "
+      << " that is a good decision. In any case, crashing to let you know. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return constME<other;
+  }
   bool operator>(const Polynomial<CoefficientType>& other)const
   { if (other.size==0 && this->size==0)
       return false;
@@ -5952,12 +6021,25 @@ void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, const 
 }
 
 template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::
-operator-=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
-{ this->SetExpectedSize(other.size+this->size);
+void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractOtherTimesCoeff
+(const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* theCoeff)
+{ if (this==&other)
+  { if (theCoeffs==0)
+    { this->MakeZero();
+      return;
+    }
+    MonomialCollection<TemplateMonomial, CoefficientType> otherNew=other;
+    this->SubtractOtherTimesCoeff(otherNew, theCoeff);
+    return;
+  }
+  this->SetExpectedSize(other.size+this->size);
+  CoefficientType tempCF;
   for (int i=0; i<other.size; i++)
   { ParallelComputing::SafePointDontCallMeFromDestructors();
-    this->SubtractMonomial(other[i], other.theCoeffs[i]);
+    tempCF=other.theCoeffs[i];
+    if (theCoeff!=0)
+      tempCF*=*theCoeff;
+    this->SubtractMonomial(other[i], tempCF);
   }
 }
 
@@ -6874,7 +6956,7 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 template <class CoefficientType>
 bool Vectors<CoefficientType>::LinSpanContainsRoot(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
 { Vectors<CoefficientType> tempVectors;
-  tempVectors.CopyFromBase(*this);
+  tempVectors=(*this);
   tempVectors.AddOnTop(input);
 //  this->ComputeDebugString();
 //  tempRoots.ComputeDebugString();

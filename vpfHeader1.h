@@ -391,21 +391,7 @@ public:
     return result;
   }
   template <class Element>
-  static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output)
-  { if (&standsOnTheLeft==&output || &standsOnTheRight==&output)
-    { Element standsOnTheLeftNew, standsOnTheRightNew;
-      standsOnTheLeftNew=standsOnTheLeft;
-      standsOnTheRightNew=standsOnTheRight;
-      MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
-      return;
-    }
-    Element tempE;
-    output=standsOnTheLeft;
-    output*=standsOnTheRight;
-    tempE=standsOnTheRight;
-    tempE*=standsOnTheLeft;
-    output-=tempE;
-  }
+  static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   //this function just redirects to the class CGI function with the same name.
   //the stupid c++ does not allow me to use an incomplete CGI type.
   //They give a million bullshit reasons why this is a feature of c++, but
@@ -1714,7 +1700,8 @@ void NonPivotPointsToEigenVector
 
   void operator-=(const Matrix<Element>& right)
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
-    { std::cout << "This is a programming error: attempting to subtract fromm matrix with " << this->NumRows << " rows and "
+    { std::cout << "This is a programming error: attempting to subtract from matrix with "
+      << this->NumRows << " rows and "
       << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols
       << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -4675,7 +4662,7 @@ public:
   { this->SubtractOtherTimesCoeff(other);
   }
   inline void SubtractOtherTimesCoeff
-  (const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* theCoeff=0);
+  (const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* inputcf=0);
   template <class otherType>
   inline void operator/=(const otherType& other)
   { if (other==0)
@@ -5737,8 +5724,8 @@ int Polynomial<Element>::GetMaxPowerOfVariableIndex(int VariableIndex)
   { result= MathRoutines::Maximum(result, this->TheObjects[i][VariableIndex].NumShort);
     if (!this->TheObjects[i][VariableIndex].IsSmallInteger())
     { std::cout << " This is a programming error: GetMaxPowerOfVariableIndex is called on a polynomial whose monomials"
-      << " have degrees that are not small integers. This neesd to be fixed! Debug file "
-      << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ". ";
+      << " have degrees that are not small integers. This neesd to be fixed! "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }
@@ -6022,14 +6009,14 @@ void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, const 
 
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractOtherTimesCoeff
-(const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* theCoeff)
+(const MonomialCollection<TemplateMonomial, CoefficientType>& other, CoefficientType* inputcf)
 { if (this==&other)
-  { if (theCoeffs==0)
+  { if (inputcf==0)
     { this->MakeZero();
       return;
     }
     MonomialCollection<TemplateMonomial, CoefficientType> otherNew=other;
-    this->SubtractOtherTimesCoeff(otherNew, theCoeff);
+    this->SubtractOtherTimesCoeff(otherNew, inputcf);
     return;
   }
   this->SetExpectedSize(other.size+this->size);
@@ -6037,8 +6024,8 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::SubtractOtherTimesCo
   for (int i=0; i<other.size; i++)
   { ParallelComputing::SafePointDontCallMeFromDestructors();
     tempCF=other.theCoeffs[i];
-    if (theCoeff!=0)
-      tempCF*=*theCoeff;
+    if (inputcf!=0)
+      tempCF*=*inputcf;
     this->SubtractMonomial(other[i], tempCF);
   }
 }
@@ -7601,8 +7588,8 @@ public:
 template <class Object>
 const Object& MemorySaving<Object>::GetElementConst()const
 { if (this->theValue==0)
-  { std::cout << "Programming error: attempting to access zero pointer, file "
-    << CGI::GetHtmlLinkFromFileName(__FILE__) << ", line " << __LINE__;
+  { std::cout << "Programming error: attempting to access zero pointer. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
     assert(false);
   }
   return *this->theValue;

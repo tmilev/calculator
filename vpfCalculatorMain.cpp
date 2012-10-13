@@ -402,6 +402,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="\\sqrt{}(2)+\\sqrt{}2";
 //civilizedInput="FactorOneVarPolyOverRationals{}{x^2-4}";
 //civilizedInput="hwv{} (A_3, (1,0,1),(0,0,0)) ; ";
+//  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (0,0), (0, 1)); ";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

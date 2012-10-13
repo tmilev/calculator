@@ -5617,7 +5617,6 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   Vector<Rational> tempRoot;
-  bool useHtml=true;
   int numRoots=this->theWeyl.RootSystem.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
   ElementSemisimpleLieAlgebra tempElt1, tempElt2, tempElt3;
@@ -5633,43 +5632,64 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   << " The generator " << CGI::GetHtmlMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
   << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" +hLetter+"_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
   << ", <br> where g is a Chevalley generator, " << CGI::GetHtmlMathSpanPure("\\gamma") << " is its weight, and <br>"
-  << CGI::GetHtmlMathSpanPure("\\alpha_i") << " is the i^th simple root. "
-  << " <DIV class=\"math\" scale=\"50\">\\begin{array}{cc|";
+  << CGI::GetHtmlMathSpanPure("\\alpha_i") << " is the i^th simple root. ";
+  std::stringstream theTableLateXStream, theHtmlStream;
+  theHtmlStream << "<table><tr><td> roots simple coords </td><td>epsilon coordinates</td>"
+  << "<td>[,]</td>";
+  theTableLateXStream << "\\begin{array}{cc|";
   for (int i=0; i<this->GetNumGenerators()+1; i++)
-    out << "c";
-  out << "}\n";
-  out << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
+    theTableLateXStream << "c";
+  theTableLateXStream << "}\n";
+  theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i=0; i<numRoots+theDimension; i++)
   { tempElt1.MakeGenerator
     (i, *this->owner, this->indexInOwner);
     tempS=tempElt1.ToString(theFormat);
-    out << " & ";
-    out << tempS;
+    theHtmlStream << "<td>" << tempS << "</td>";
+    theTableLateXStream << " & ";
+    theTableLateXStream << tempS;
   }
-  out << "\\\\\n";
-  if (useHtml)
-    out << "<hr>";
+  theTableLateXStream << "\\\\\n";
+  theHtmlStream << "</tr>";
   Rational tempRat;
   //int lineCounter=0;
   for (int i=0; i<theDimension+numRoots; i++)
   { tempRoot=this->GetWeightOfGenerator(i);
-    out << tempRoot.ToString() << "&";
-    out << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
-    tempElt1.MakeGenerator
-    (i,*this->owner, this->indexInOwner);
+    theTableLateXStream << tempRoot.ToString() << "&";
+    theHtmlStream << "<tr><td>" << tempRoot.ToString() << "</td>";
+    theTableLateXStream
+    << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
+    theHtmlStream
+    << "<td>" << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("e") << "</td>";
+    tempElt1.MakeGenerator(i,*this->owner, this->indexInOwner);
     tempS=tempElt1.ToString(theFormat);
-    out << tempS;
+    theTableLateXStream << tempS;
+    theHtmlStream << "<td>" << tempS << "</td>";
     for (int j=0; j<numRoots+theDimension; j++)
     { tempElt2.MakeGenerator
       (j, *this->owner, this->indexInOwner);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
       tempS=tempElt3.ToString(theFormat);
-      out << "& ";
-      out << tempS;
+      theTableLateXStream << "& ";
+      theTableLateXStream << tempS;
+      theHtmlStream << "<td>" << tempS << "</td>";
     }
-    out << "\\\\\n";
+    theHtmlStream << "</tr>";
+    theTableLateXStream << "\\\\\n";
   }
-  out << "\\end{array}</DIV>";
+  theHtmlStream << "</table>";
+  theTableLateXStream << "\\end{array}";
+  if (this->GetNumGenerators()<22)
+  { out << "<div class=\"math\">" << theTableLateXStream.str() << "</div>";
+    return out.str();
+  }
+  out << "<br><b> The Lie bracket table is too large to be rendered in LaTeX, displaying in"
+  << " html format instead.</b> "
+  << " Below you can find the same table in pure LaTeX, "
+  << " which you can render in a separate LaTeX session, should "
+  << " wish to do so on your own. " <<  theHtmlStream.str()
+  << "The above table in LaTex format follows. <hr>"
+  << theTableLateXStream.str() << "<hr>";
   return out.str();
 }
 

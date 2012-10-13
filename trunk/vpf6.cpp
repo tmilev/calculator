@@ -2264,6 +2264,35 @@ public:
   }
 };
 
+template<class Element>
+void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output)
+{ if (&standsOnTheLeft==&output || &standsOnTheRight==&output)
+  { Element standsOnTheLeftNew, standsOnTheRightNew;
+    standsOnTheLeftNew=standsOnTheLeft;
+    standsOnTheRightNew=standsOnTheRight;
+    MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
+    return;
+  }
+    FormatExpressions tempFormat;
+  tempFormat.polyAlphabeT.SetSize(4);
+  tempFormat.polyAlphabeT[0]="x_1";
+  tempFormat.polyAlphabeT[1]="x_2";
+  tempFormat.polyAlphabeT[2]="\\partial_1";
+  tempFormat.polyAlphabeT[3]="\\partial_2";
+
+  Element tempE;
+  std::cout << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
+  std::cout << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
+  output=standsOnTheLeft;
+  output*=standsOnTheRight;
+  std::cout << "<br>intermediate: " << output.ToString(&tempFormat);
+  tempE=standsOnTheRight;
+  tempE*=standsOnTheLeft;
+  std::cout << "<br>intermediate2: " << tempE.ToString(&tempFormat);
+  output-=tempE;
+  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
+}
+
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
   (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList
@@ -2276,6 +2305,15 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
   for (int i =0; i<theList.size; i++)
     allMons.AddNoRepetition(theList[i]);
   allMons.QuickSortAscending();
+  FormatExpressions tempFormat;
+  tempFormat.flagUseHTML=true;
+  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
+  << allMons.ToString(&tempFormat);
+  tempFormat.flagUseLatex=true;
+  std::cout << "<br><b>starting list:</b> ";
+  for (int i=0; i<theList.size; i++)
+    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
   CoefficientType tempCF;
   for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
@@ -2287,7 +2325,8 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
     if (goodRow>=theList.size)
       continue;
     theList.SwapTwoIndices(currentRowIndex, goodRow);
-    MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=theList[currentRowIndex];
+    MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=
+    theList[currentRowIndex];
     int colIndex=currentPivot.GetIndex(currentMon);
     if (colIndex==-1)
     { std::cout << "This is a programming error. "
@@ -2301,28 +2340,48 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
     tempCF=currentPivot.theCoeffs[colIndex];
     currentPivot/=tempCF;
     for (int j=0; j<theList.size; j++)
-      if (j!=i)
+      if (j!=currentRowIndex)
       { MonomialCollection<TemplateMonomial, CoefficientType>& currentOther=theList[j];
         int otherColIndex=currentOther.GetIndex(currentMon);
         if (otherColIndex!=-1)
         { tempCF=currentOther.theCoeffs[otherColIndex];
+          //std::cout << "<br>subtracting " << CGI::GetHtmlMathSpanPure(currentPivot.ToString())
+            //<< " times " << tempCF.ToString() << " from "
+            //<< CGI::GetHtmlMathSpanPure(currentOther.ToString());
           currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
+          //std::cout << "<br>to get " << CGI::GetHtmlMathSpanPure(currentOther.ToString());
         }
       }
     currentRowIndex++;
   }
+    std::cout << "<br><b>final list:</b> ";
+  for (int i=0; i<theList.size; i++)
+    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
 template <class CoefficientType>
 void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<CoefficientType> >& theElts)
-{ List< MonomialCollection<quasiDiffMon, CoefficientType> > theEltsConverted;
+{ MacroRegisterFunctionWithName("quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra");
+  std::cout << "<br> the elts:" << theElts.ToString();
+  List< MonomialCollection<quasiDiffMon, CoefficientType> > theEltsConverted;
   theEltsConverted=theElts;
+  std::cout << "<br>the elts converted: " << theEltsConverted.ToString();
   this->GaussianEliminationByRows(theEltsConverted);
-  quasiDiffOp tempQDO, tempQDO2;
+  quasiDiffOp tempQDO;
+  FormatExpressions tempFormat;
+  tempFormat.polyAlphabeT.SetSize(4);
+  tempFormat.polyAlphabeT[0]="x_1";
+  tempFormat.polyAlphabeT[1]="x_2";
+  tempFormat.polyAlphabeT[2]="\\partial_1";
+  tempFormat.polyAlphabeT[3]="\\partial_2";
   for(int i=0; i<theEltsConverted.size; i++)
     for (int j=i+1; j<theEltsConverted.size; j++)
     { tempQDO=theEltsConverted[i];
+      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
+      << " and " << theEltsConverted[j].ToString(&tempFormat);
       tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
+      std::cout << ", to get " << tempQDO.ToString(&tempFormat);
       theEltsConverted.AddOnTop(tempQDO);
       quasiDiffOp::GaussianEliminationByRows(theEltsConverted);
       for (int k=theEltsConverted.size-1; k>=0; k--)
@@ -2331,7 +2390,18 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<Coef
         else
           break;
     }
-  theElts=theEltsConverted;
+  std::cout << "<hr>the elts converted at end: ";
+  theElts.SetSize(theEltsConverted.size);
+  for (int i=0; i<theEltsConverted.size; i++)
+  { theElts[i]=theEltsConverted[i];
+    std::cout << "<br>" << theEltsConverted[i].ToString(&tempFormat) << "=";
+    std::cout << theElts[i].ToString(&tempFormat);
+
+  }
+  std::cout << "<hr>the elts at end: ";
+//  theElts=theEltsConverted;
+  for (int i=0; i<theElts.size; i++)
+    std::cout << "<br>" << theElts[i].ToString(&tempFormat);
 }
 
 template <class CoefficientType>
@@ -2351,8 +2421,8 @@ void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>
       tempP.MakeZero(currentLeftMon.theWeylMon.monBody.size);
       tempP.AddMonomial(currentLeftMon.theWeylMon, this->theCoeffs[i]);
       leftElt.AssignStandardOrder(tempP);
-      outputMon.theWeylMon= (*this)[i].theWeylMon;
-      outputMon.theWeylMon*=standsOnTheRight[j].theWeylMon;
+      outputMon.theMatMon= (*this)[i].theMatMon;
+      outputMon.theMatMon*=standsOnTheRight[j].theMatMon;
       leftElt*=rightElt;
       for (int k=0; k<leftElt.GetStandardOrder().size; k++)
       { outputMon.theWeylMon=(leftElt.GetStandardOrder())[k];
@@ -2679,7 +2749,9 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     }
     theQDOs[0].GenerateBasisLieAlgebra(theQDOs);
     std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
-    std::cout << "<br>The qdos: " << theQDOs.ToString();
+    std::cout << "<br>The qdos: ";
+    for (int j=0; j<theQDOs.size; j++)
+      std::cout << "<br>" << theQDOs[j].ToString();
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";

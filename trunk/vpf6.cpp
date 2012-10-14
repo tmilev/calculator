@@ -2295,7 +2295,7 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList
+  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList, bool *IvemadeARowSwitch
    )
 { int topBoundNumMons=0;
   for (int i =0; i<theList.size; i++)
@@ -2310,6 +2310,8 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
   std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
   << allMons.ToString(&tempFormat);
   tempFormat.flagUseLatex=true;
+  if (IvemadeARowSwitch!=0)
+    *IvemadeARowSwitch=false;
   std::cout << "<br><b>starting list:</b> ";
   for (int i=0; i<theList.size; i++)
     std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
@@ -2324,7 +2326,11 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
         break;
     if (goodRow>=theList.size)
       continue;
-    theList.SwapTwoIndices(currentRowIndex, goodRow);
+    if (currentRowIndex!=goodRow)
+    { theList.SwapTwoIndices(currentRowIndex, goodRow);
+      if (IvemadeARowSwitch!=0)
+        *IvemadeARowSwitch=true;
+    }
     MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=
     theList[currentRowIndex];
     int colIndex=currentPivot.GetIndex(currentMon);
@@ -2370,11 +2376,18 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<Coef
   this->GaussianEliminationByRows(theEltsConverted);
   quasiDiffOp tempQDO;
   FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(4);
+  tempFormat.polyAlphabeT.SetSize(10);
   tempFormat.polyAlphabeT[0]="x_1";
   tempFormat.polyAlphabeT[1]="x_2";
-  tempFormat.polyAlphabeT[2]="\\partial_1";
-  tempFormat.polyAlphabeT[3]="\\partial_2";
+  tempFormat.polyAlphabeT[2]="x_3";
+  tempFormat.polyAlphabeT[3]="x_4";
+  tempFormat.polyAlphabeT[4]="x_5";
+  tempFormat.polyAlphabeT[5]="\\partial_1";
+  tempFormat.polyAlphabeT[6]="\\partial_2";
+  tempFormat.polyAlphabeT[7]="\\partial_3";
+  tempFormat.polyAlphabeT[8]="\\partial_4";
+  tempFormat.polyAlphabeT[9]="\\partial_5";
+  bool IveSwitchedRows=false;
   for(int i=0; i<theEltsConverted.size; i++)
     for (int j=i+1; j<theEltsConverted.size; j++)
     { tempQDO=theEltsConverted[i];
@@ -2383,12 +2396,16 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<Coef
       tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
       std::cout << ", to get " << tempQDO.ToString(&tempFormat);
       theEltsConverted.AddOnTop(tempQDO);
-      quasiDiffOp::GaussianEliminationByRows(theEltsConverted);
+      quasiDiffOp::GaussianEliminationByRows(theEltsConverted, &IveSwitchedRows);
       for (int k=theEltsConverted.size-1; k>=0; k--)
         if (theEltsConverted[k].IsEqualToZero())
           theEltsConverted.PopIndexSwapWithLast(k);
         else
           break;
+      if (IveSwitchedRows)
+      { i=-1;
+        break;
+      }
     }
   std::cout << "<hr>the elts converted at end: ";
   theElts.SetSize(theEltsConverted.size);

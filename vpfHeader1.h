@@ -4504,7 +4504,7 @@ public:
 
   static void GaussianEliminationByRows
   (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList,
-   bool *IvemadeARowSwitch=0
+   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
    ;
   int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex

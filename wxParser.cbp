@@ -24,6 +24,7 @@
 			<Add option="`wx-config --libs`" />
 		</Linker>
 		<Unit filename="vpf.h" />
+		<Unit filename="vpf4CalculatorFunctionList.cpp" />
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf6.cpp" />
 		<Unit filename="vpf7.cpp" />
@@ -31,9 +32,11 @@
 		<Unit filename="vpf9.cpp" />
 		<Unit filename="vpf9_1.cpp" />
 		<Unit filename="vpf9_2.cpp" />
+		<Unit filename="vpf9_3RationalRadicals.cpp" />
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2" />
 		<Unit filename="vpfHeader1_2.h" />
+		<Unit filename="vpfHeader1_3.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="wxDrawPanel.cpp" />

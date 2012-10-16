@@ -2222,7 +2222,9 @@ class quasiDiffMon
   unsigned int HashFunction()const
   { return HashFunction(*this);
   }
-  static const bool IsEqualToZero(){return false;}
+  bool IsEqualToZero()const
+  { return this->theMatMon.IsEqualToZero();
+  }
   bool operator==(const quasiDiffMon& other)const
   { return this->theWeylMon==other.theWeylMon && this->theMatMon==other.theMatMon;
   }
@@ -2402,6 +2404,7 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
         //      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
   //      << " and " << theEltsConverted[j].ToString(&tempFormat);
         tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
+        theReport.Report(report.str());
         report << tempQDO.ToString(theFormat);
         theReport.Report(report.str());
   //      std::cout << ", to get " << tempQDO.ToString(&tempFormat);
@@ -2474,7 +2477,19 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
     tempP.AddMonomial(currentMon.theWeylMon, this->theCoeffs[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
-  return reordered.ToString(theFormat);
+  std::string result=reordered.ToString(theFormat);
+  if (result=="0" && this->size!=0)
+  { std::cout << "This is likely a programming error (crashing at any rate): I have a non-zero  "
+    << " quasidifferential operator "
+    << " with non-properly formatted LaTeX string "
+    << this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat)
+    << ", however its properly formatted string is 0. "
+    << "Probably there is something wrong with the initializations of the monomials "
+    << "of the qdo. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return result;
 }
 
 template <class CoefficientType>
@@ -2772,11 +2787,11 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
-    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
-    std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
-    std::cout << "<br>The qdos: ";
-    for (int j=0; j<theQDOs.size; j++)
-      std::cout << "<br>" << theQDOs[j].ToString();
+//    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
+    //std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
+    //std::cout << "<br>The qdos: ";
+    //for (int j=0; j<theQDOs.size; j++)
+    //  std::cout << "<br>" << theQDOs[j].ToString();
     latexReport2 << "\\end{longtable}";
     latexReport << "\\\\\\hline<br>";
     out << "</tr>";

@@ -961,7 +961,9 @@ public:
     output << "</script>";
     return output.str();
   }
-  static std::string GetLatexEmbeddableLinkFromCalculatorInput(const std::string& input);
+  static std::string GetLatexEmbeddableLinkFromCalculatorInput
+(const std::string& address, const std::string& display)
+  ;
   static bool GetHtmlStringSafeishReturnFalseIfIdentical(const std::string& input, std::string& output);
   static void TransormStringToHtmlSafeish(std::string& theString){std::string tempS; CGI::GetHtmlStringSafeishReturnFalseIfIdentical(theString, tempS); theString=tempS; }
   static std::string GetHtmlMathDivFromLatexFormulA(const std::string& input)

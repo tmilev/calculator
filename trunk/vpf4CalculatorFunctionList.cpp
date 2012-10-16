@@ -253,13 +253,13 @@ void CommandList::initPredefinedVars()
 //  ("Differential", & this->fDifferential, "",
 //   "Differential. ",
 //   "d{}{{a}}:=Differential{}a;\nx:=Polynomial{}x;\nd{}(x^2/(x+1))");
-  this->AddNonBoundVarMustBeNew
-  ("\\sqrt", & this->fSqrt, "",
-   "Square root of a rational, implemented as algebraic extension of the rationals. ",
-   "\\sqrt{}{3+2\\sqrt{}2}");
-  this->AddNonBoundVarMustBeNew
-  ("FactorOneVarPolyOverRationals", & this->fFactor, "",
-   "Factors a one variable polynomial over the rationals using Kroenecker's method. \
+//  this->AddNonBoundVarMustBeNew
+//  ("\\sqrt", & this->fSqrt, "",
+//   "Square root of a rational, implemented as algebraic extension of the rationals. ",
+//   "\\sqrt{}{3+2\\sqrt{}2}");
+//  this->AddNonBoundVarMustBeNew
+//  ("FactorOneVarPolyOverRationals", & this->fFactor, "",
+/*   "Factors a one variable polynomial over the rationals using Kroenecker's method. \
     After clearing denominators, assume the poly has integer coefficients.\
     If looking for an integer coefficient divisor of degree k, \
     plug in k different integer values of the poly\
@@ -267,7 +267,7 @@ void CommandList::initPredefinedVars()
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}");
-
+*/
 //  this->AddNonBoundVarMustBeNew
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",

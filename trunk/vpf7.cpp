@@ -1788,19 +1788,36 @@ std::string ProjectInformation::ToString()
   return out.str();
 }
 
-std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput(const std::string& input)
+std::string CGI::GetLatexEmbeddableLinkFromCalculatorInput
+(const std::string& address, const std::string& display)
 { std::stringstream out;
-  out << "\\url{http://vector-partition.jacobs-university.de/vpf/cgi-bin/calculator?";
-  for (unsigned i=0; i<input.size(); i++)
+  out << "\\href{http://cartan.math.umb.edu/vpf/cgi-bin/calculator?";
+  for (unsigned i=0; i<address.size(); i++)
   { //if (input[i]=='&')
      // out << "\\&";
     //else
-    if (input[i]=='%')
+    if (address[i]=='%')
       out << "\\%";
-    else if (input[i]=='_')
+    else if (address[i]=='_')
       out << "\\_";
     else
-      out << input[i];
+      out << address[i];
+  }
+  out << "}{";
+  for (unsigned i=0; i<display.size(); i++)
+  { //if (input[i]=='&')
+     // out << "\\&";
+    //else
+    if (display[i]=='%')
+      out << "\\%";
+    else if (display[i]=='_')
+      out << "\\_";
+    else if (display[i]=='{')
+      out << "\\{";
+    else if (display[i]=='}')
+      out << "\\}";
+    else
+      out << display[i];
   }
   out << "}";
   return out.str();

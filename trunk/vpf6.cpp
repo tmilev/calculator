@@ -2252,7 +2252,10 @@ public:
   static void prepareFormatFromShiftAndNumWeylVars(int theShift, int inputNumWeylVars, FormatExpressions& output);
   std::string ToString(FormatExpressions* theFormat=0)const
   ;
-  void GenerateBasisLieAlgebra(List<quasiDiffOp<CoefficientType> >& theElts);
+  void GenerateBasisLieAlgebra
+  (List<quasiDiffOp<CoefficientType> >& theElts,
+ FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0)
+  ;
   void operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight);
   void operator=(const  MonomialCollection<quasiDiffMon, CoefficientType>& other)
   { this->MonomialCollection<quasiDiffMon, CoefficientType>::operator=(other);
@@ -2273,49 +2276,52 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
     MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
     return;
   }
-    FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(4);
-  tempFormat.polyAlphabeT[0]="x_1";
-  tempFormat.polyAlphabeT[1]="x_2";
-  tempFormat.polyAlphabeT[2]="\\partial_1";
-  tempFormat.polyAlphabeT[3]="\\partial_2";
+//    FormatExpressions tempFormat;
+//  tempFormat.polyAlphabeT.SetSize(4);
+//  tempFormat.polyAlphabeT[0]="x_1";
+//  tempFormat.polyAlphabeT[1]="x_2";
+//  tempFormat.polyAlphabeT[2]="\\partial_1";
+//  tempFormat.polyAlphabeT[3]="\\partial_2";
 
   Element tempE;
-  std::cout << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
-  std::cout << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
+//  std::cout << "<hr>[ " << standsOnTheLeft.ToString(&tempFormat);
+//  std::cout << " , " << standsOnTheRight.ToString(&tempFormat) << " ] = ";
   output=standsOnTheLeft;
   output*=standsOnTheRight;
-  std::cout << "<br>intermediate: " << output.ToString(&tempFormat);
+//  std::cout << "<br>intermediate: " << output.ToString(&tempFormat);
   tempE=standsOnTheRight;
   tempE*=standsOnTheLeft;
-  std::cout << "<br>intermediate2: " << tempE.ToString(&tempFormat);
+//  std::cout << "<br>intermediate2: " << tempE.ToString(&tempFormat);
   output-=tempE;
-  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
+//  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
 }
 
 template <class TemplateMonomial, class CoefficientType>
 void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList, bool *IvemadeARowSwitch
-   )
-{ int topBoundNumMons=0;
-  for (int i =0; i<theList.size; i++)
-    topBoundNumMons+=theList[i].size;
-  HashedList<TemplateMonomial> allMons;
-  allMons.SetExpectedSize(topBoundNumMons);
+  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList, bool *IvemadeARowSwitch,
+   HashedList<TemplateMonomial>* seedMonomials)
+{ MemorySaving<HashedList<TemplateMonomial> > bufferMons;
+  HashedList<TemplateMonomial>& allMons = seedMonomials==0 ? bufferMons.GetElement() : *seedMonomials;
+  if (seedMonomials==0)
+  { int topBoundNumMons=0;
+    for (int i =0; i<theList.size; i++)
+      topBoundNumMons+=theList[i].size;
+    allMons.SetExpectedSize(topBoundNumMons);
+  }
   for (int i =0; i<theList.size; i++)
     allMons.AddNoRepetition(theList[i]);
   allMons.QuickSortAscending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
-  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
-  << allMons.ToString(&tempFormat);
+//  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
+//  << allMons.ToString(&tempFormat);
   tempFormat.flagUseLatex=true;
   if (IvemadeARowSwitch!=0)
     *IvemadeARowSwitch=false;
-  std::cout << "<br><b>starting list:</b> ";
-  for (int i=0; i<theList.size; i++)
-    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
-    (theList[i].ToString(&tempFormat)) << ", ";
+//  std::cout << "<br><b>starting list:</b> ";
+//  for (int i=0; i<theList.size; i++)
+//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+//    (theList[i].ToString(&tempFormat)) << ", ";
   int currentRowIndex=0;
   CoefficientType tempCF;
   for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
@@ -2360,65 +2366,67 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
       }
     currentRowIndex++;
   }
-    std::cout << "<br><b>final list:</b> ";
-  for (int i=0; i<theList.size; i++)
-    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
-    (theList[i].ToString(&tempFormat)) << ", ";
+//    std::cout << "<br><b>final list:</b> ";
+//  for (int i=0; i<theList.size; i++)
+//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
+//    (theList[i].ToString(&tempFormat)) << ", ";
 }
 
 template <class CoefficientType>
-void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra(List<quasiDiffOp<CoefficientType> >& theElts)
+void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
+(List<quasiDiffOp<CoefficientType> >& theElts,
+ FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra");
-  std::cout << "<br> the elts:" << theElts.ToString();
+  ProgressReport theReport (theGlobalVariables);
+  HashedList<quasiDiffMon> bufferMons;
+  //std::cout << "<br> the elts:" << theElts.ToString();
   List< MonomialCollection<quasiDiffMon, CoefficientType> > theEltsConverted;
   theEltsConverted=theElts;
-  std::cout << "<br>the elts converted: " << theEltsConverted.ToString();
+  //std::cout << "<br>the elts converted: " << theEltsConverted.ToString();
   this->GaussianEliminationByRows(theEltsConverted);
   quasiDiffOp tempQDO;
-  FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(10);
-  tempFormat.polyAlphabeT[0]="x_1";
-  tempFormat.polyAlphabeT[1]="x_2";
-  tempFormat.polyAlphabeT[2]="x_3";
-  tempFormat.polyAlphabeT[3]="x_4";
-  tempFormat.polyAlphabeT[4]="x_5";
-  tempFormat.polyAlphabeT[5]="\\partial_1";
-  tempFormat.polyAlphabeT[6]="\\partial_2";
-  tempFormat.polyAlphabeT[7]="\\partial_3";
-  tempFormat.polyAlphabeT[8]="\\partial_4";
-  tempFormat.polyAlphabeT[9]="\\partial_5";
-  bool IveSwitchedRows=false;
-  for(int i=0; i<theEltsConverted.size; i++)
-    for (int j=i+1; j<theEltsConverted.size; j++)
-    { tempQDO=theEltsConverted[i];
-      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
-      << " and " << theEltsConverted[j].ToString(&tempFormat);
-      tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
-      std::cout << ", to get " << tempQDO.ToString(&tempFormat);
-      theEltsConverted.AddOnTop(tempQDO);
-      quasiDiffOp::GaussianEliminationByRows(theEltsConverted, &IveSwitchedRows);
-      for (int k=theEltsConverted.size-1; k>=0; k--)
-        if (theEltsConverted[k].IsEqualToZero())
-          theEltsConverted.PopIndexSwapWithLast(k);
-        else
-          break;
-      if (IveSwitchedRows)
-      { i=-1;
-        break;
+  bool foundNew=true;
+  int numTimesEliminationWasExecuted=0;
+  while (foundNew)
+  { foundNew=false;
+    for(int i=0; i<theEltsConverted.size; i++)
+      for (int j=i+1; j<theEltsConverted.size; j++)
+      { tempQDO=theEltsConverted[i];
+        std::stringstream report;
+        report << "Lie bracketing elements "
+        << " of indices " << i+1 << " and "
+        << j+1 << " out of " << theEltsConverted.size << "<br> "
+        << tempQDO.ToString(theFormat) << "<br> with element <br>"
+        << theEltsConverted[j].ToString(theFormat)
+        << " to get <br>";
+        //      std::cout << "<hr>Lie bracketing " << tempQDO.ToString(&tempFormat)
+  //      << " and " << theEltsConverted[j].ToString(&tempFormat);
+        tempQDO.LieBracketMeOnTheRight(theEltsConverted[j]);
+        report << tempQDO.ToString(theFormat);
+        theReport.Report(report.str());
+  //      std::cout << ", to get " << tempQDO.ToString(&tempFormat);
+        theEltsConverted.AddOnTop(tempQDO);
+        quasiDiffOp::GaussianEliminationByRows(theEltsConverted, 0, &bufferMons);
+        numTimesEliminationWasExecuted++;
+        if (!theEltsConverted.LastObject()->IsEqualToZero())
+          foundNew=true;
+        for (int k=theEltsConverted.size-1; k>=0; k--)
+          if (theEltsConverted[k].IsEqualToZero())
+            theEltsConverted.PopIndexSwapWithLast(k);
+          else
+            break;
       }
-    }
-  std::cout << "<hr>the elts converted at end: ";
+  }
+  std::cout << "<hr>" << "<b>Num times Gaussian Elimination was called = "
+  << numTimesEliminationWasExecuted
+   << ".</b>";
   theElts.SetSize(theEltsConverted.size);
   for (int i=0; i<theEltsConverted.size; i++)
-  { theElts[i]=theEltsConverted[i];
-    std::cout << "<br>" << theEltsConverted[i].ToString(&tempFormat) << "=";
-    std::cout << theElts[i].ToString(&tempFormat);
-
-  }
-  std::cout << "<hr>the elts at end: ";
+    theElts[i]=theEltsConverted[i];
+//  std::cout << "<hr>the elts at end: ";
 //  theElts=theEltsConverted;
-  for (int i=0; i<theElts.size; i++)
-    std::cout << "<br>" << theElts[i].ToString(&tempFormat);
+//  for (int i=0; i<theElts.size; i++)
+//    std::cout << "<br>" << theElts[i].ToString();
 }
 
 template <class CoefficientType>
@@ -2764,7 +2772,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       << (j!=theGeneratorsItry.size-1 ? "\\cline{3-3}" : "\\hline" ) << "\n<br>";
       theWeylFormat.CustomCoeffMonSeparator="";
     }
-    theQDOs[0].GenerateBasisLieAlgebra(theQDOs);
+    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
     std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
     std::cout << "<br>The qdos: ";
     for (int j=0; j<theQDOs.size; j++)

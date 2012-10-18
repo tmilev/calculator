@@ -245,6 +245,10 @@ void CommandList::initPredefinedVars()
    printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
    / calculus students. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
+/*  this->AddNonBoundVarMustBeNew
+  ("PrintSemisimpleSubalgebras", & this->fSSsubalgebras, "",
+   "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+   "PrintSemisimpleSubalgebras{}(A_2)");*/
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

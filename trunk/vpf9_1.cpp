@@ -325,24 +325,6 @@ void rootSubalgebra::Assign(const rootSubalgebra& right)
   this->indicesSubalgebrasContainingK=(right.indicesSubalgebrasContainingK);
 }
 
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
-{ this->size=0;
-  this->AmbientWeyl.ComputeRho(true);
-  //the below is not needed. See proposition Chapter 5 of Todor Milev's phd thesis.
-  //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
-  rootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.SetSize(this->AmbientWeyl.CartanSymmetric.NumRows*2+1);
-  rootSAsGenerateAll.TheObjects[0].genK.size=0;
-  rootSAsGenerateAll.TheObjects[0].AmbientWeyl=(this->AmbientWeyl);
-  rootSAsGenerateAll.TheObjects[0].ComputeAll();
-  this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(rootSAsGenerateAll, 1, theGlobalVariables);
-  if (sort)
-    this->SortDescendingOrderBySSRank();
-  if(computeEpsCoords)
-    for(int i=0; i<this->size; i++)
-      this->TheObjects[i].ComputeEpsCoordsWRTk(theGlobalVariables);
-}
-
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalVariables& theGlobalVariables, char WeylLetter, int WeylRank, bool sort, bool computeEpsCoords)
 { this->AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
   this->GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, sort, computeEpsCoords);
@@ -350,13 +332,13 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism(GlobalV
 
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
 (rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables)
-{ this->AddOnTop(bufferSAs.TheObjects[RecursionDepth-1]);
+{ this->AddOnTop(bufferSAs[RecursionDepth-1]);
   int currentAlgebraIndex=this->size-1;
   rootSubalgebra::ProblemCounter++;
   if (RecursionDepth>=bufferSAs.size)
     bufferSAs.SetSize(bufferSAs.size+this->AmbientWeyl.CartanSymmetric.NumRows);
-  bufferSAs.TheObjects[RecursionDepth].genK = bufferSAs.TheObjects[RecursionDepth-1].genK;
-  bufferSAs.TheObjects[RecursionDepth].AmbientWeyl=(this->AmbientWeyl);
+  bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth-1].genK;
+  bufferSAs[RecursionDepth].AmbientWeyl=(this->AmbientWeyl);
   //if (RecursionDepth>4)
    // return;
   for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size; k++)
@@ -738,6 +720,182 @@ void rootSubalgebra::ElementToStringHeaderFooter(std::string& outputHeader, std:
     outputHeader.append("\\\\");
     outputFooter.append("\\hline \\end{tabular}");
   }
+}
+
+std::string rootSubalgebra::ToString()
+{ std::stringstream out;
+  std::string tempS;
+  std::string latexFooter, latexHeader;
+  bool useLatex=false;
+  bool useHtml=true;
+  bool includeKEpsCoords=false;
+  if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size || this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
+    includeKEpsCoords=false;
+  int LatexLineCounter=0;
+  this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
+  this->theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+  if (useLatex)
+    out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
+  else
+    out << "k_{ss}: ";
+  out << tempS;
+  tempS=this->SimpleBasisK.ToString();
+  if (useHtml)
+    out << "\n<br>\n";
+  if (useLatex)
+    out << "\n\\noindent";
+  out << " Simple basis: "<< tempS;
+  tempS=this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  if (useHtml)
+    out << "\n<br>\nSimple basis epsilon form: " << tempS;
+  tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  if (useHtml)
+    out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
+  this->theCentralizerDiagram.ElementToStrinG(tempS, false, true);
+  if(!useLatex)
+    CGI::clearDollarSigns(tempS, tempS);
+  if (useLatex)
+    out << "\n\n\\noindent ";
+  if (useHtml)
+    out << "<br>\n";
+  if (useLatex)
+    out<< "$C(\\mathfrak{k_{ss}})_{ss}$: ";
+  else
+    out << "C(k_{ss})_{ss}: ";
+  out << tempS;
+  //int CartanPieceSize=
+    //this->AmbientWeyl.CartanSymmetric.NumRows- this->SimpleBasisCentralizerRoots.size-
+    //  this->SimpleBasisK.size;
+  //if (CartanPieceSize!=0)
+  //{  if (useLatex)
+  //    out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
+  //  if (useHtml)
+  //    out <<"+h_"<<CartanPieceSize;
+  //}
+  if (useHtml)
+    out << "<br>\n simple basis centralizer: ";
+  if (useLatex)
+    out << "; simple basis centralizer: ";
+  tempS=this->SimpleBasisCentralizerRoots.ToString();
+  out << tempS;
+  if (useHtml)
+  { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
+    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2) simple coordinates w.r.t. g <br> ";
+    std::stringstream //tempStream1,
+    tempStream2, tempStream3;
+    for(int i=0; i<this->HighestWeightsGmodK.size; i++)
+    { //tempStream1 << "\\underbrace{V_{";
+      tempStream2 << "\\underbrace{V_{";
+      tempStream3 << "\\underbrace{V_{";
+      //tempStream1
+      //<< this->AmbientWeyl.GetFundamentalCoordinatesFromSimple
+      //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
+    //  tempStream2
+     // << this->kModulesgEpsCoords[i][0].ToStringLetterFormat("\\epsilon");
+      tempStream3
+      << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
+      //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";
+      if (i!=this->HighestWeightsGmodK.size-1)
+      { //tempStream1 << "\\oplus";
+        tempStream2 << "\\oplus";
+        tempStream3 << "\\oplus";
+      }
+    }
+//    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream3.str()) << "\n<hr>\n";
+  }
+  if (useLatex)
+    out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
+  if (!useHtml)
+    out << this->LowestWeightsGmodK.size ;
+  if (useHtml)
+    out << "<br>\n";
+  if (useLatex)
+    out << "\n\n";
+  out << latexHeader;
+  this->kModulesgEpsCoords.SetSize(this->kModules.size);
+  for (int i=0; i<this->kModules.size; i++)
+  { tempS=this->LowestWeightsGmodK[i].ToString();
+    if (useHtml)
+      out << "\n<tr><td>";
+    if (useLatex)
+      out << "\\hline ";
+    out << i;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out << this->kModules[i].size;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out << tempS;
+    tempS=this->HighestWeightsGmodK[i].ToString();
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out  << tempS;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & \n";
+    out << this->kModules[i].ToString();
+    if (useHtml)
+      out << "</td><td>";
+    if (i>=this->kModulesgEpsCoords.size)
+      this->AmbientWeyl.GetEpsilonCoords(this->kModules[i], this->kModulesgEpsCoords[i]);
+    out << this->kModulesgEpsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
+    if (useLatex)
+      out << " & \n";
+    if (useHtml)
+      out << "</td>";
+    if (includeKEpsCoords)
+    { if (useHtml)
+        out << "<td>";
+      if (useLatex)
+        out << " & ";
+      out << tempS << this->kModulesKepsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
+      if (useHtml)
+        out << "</td>";
+      if (useLatex)
+        out << "\\\\\n";
+    }
+    if (useHtml)
+      out << "</tr>";
+    if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
+    { LatexLineCounter=0;
+      out << latexFooter << latexHeader;
+    }
+    if (i!=this->kModules.size-1)
+    { LatexLineCounter+=this->kModules.TheObjects[i].size;
+      if (useLatex)
+       if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
+        { out << latexFooter << latexHeader;
+          LatexLineCounter = this->kModules.TheObjects[i].size;
+        }
+    }
+  }
+  if (useHtml)
+    out << "</table>";
+  if (useLatex)
+    out << latexFooter;
+  GlobalVariables theGlobalVariables;
+  if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
+    this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
+  if (this->theMultTable.size!=0)
+  { if (useHtml)
+      out << "\n\n Pairing table:\n\n";
+    if (useLatex)
+      out << "\n\n\\noindent Pairing table:\n\n\\noindent";
+    this->theMultTable.ToString(tempS, useLatex, useHtml, *this);
+    out << tempS << "\n";
+  }
+  return out.str();
 }
 
 void rootSubalgebra::ToString(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables)

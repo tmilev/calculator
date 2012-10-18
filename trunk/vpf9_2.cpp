@@ -520,24 +520,20 @@ void slTwo::ElementToHtml(std::string& filePath)
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
-{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism(theGlobalVariables, true, true);
+{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+  (theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.size);
   output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
     output.IndicesSl2sContainedInRootSA.TheObjects[i].size=0;
-  theGlobalVariables.theIndicatorVariables.StatusString1=output.theRootSAs.DebugString;
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  theGlobalVariables.MakeReport();
+  ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<output.theRootSAs.size-1; i++)
   { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
-    theGlobalVariables.ClearIndicatorVars();
     std::stringstream tempStream;
     tempStream << "Exploring root subalgebra number " << (i+1)
     << " out of " << output.theRootSAs.size-1 << " non-trivial";
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=tempStream.str();
-    theGlobalVariables.MakeReport();
+    theReport.Report(tempStream.str());
   }
   for (int i=0; i<output.size; i++)
   { slTwo& theSl2= output[i];
@@ -571,7 +567,8 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, char Wey
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 (SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables,
  SemisimpleLieAlgebra& theLieAlgebra)
-{ //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
+{ MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
+  //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   Vectors<Rational> RootsWithCharacteristic2;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
@@ -4507,66 +4504,6 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
   output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
-std::string SemisimpleSubalgebras::ToString()
-{ std::stringstream out;
-  out << this->theHcandidates.ToString();
-  return out.str();
-}
-
-void SemisimpleSubalgebras::FindHCandidates(char WeylLetter, int WeylDim, GlobalVariables& theGlobalVariables)
-{ Vectors<Rational> emptyStart;
-//  List<List<Vector<Rational>> >::ListActualSizeIncrement=10000;
-  this->theAlgebra.FindSl2Subalgebras(this->theSl2s, WeylLetter, WeylDim, theGlobalVariables);
-  this->theHcandidates.size=0;
-  this->theHcandidates.AddOnTop(emptyStart);
-  for (this->indexLowestUnexplored=0; this->indexLowestUnexplored<this->theHcandidates.size; this->indexLowestUnexplored++)
-    this->FindHCandidatesWithOneExtraHContaining(this->theHcandidates.TheObjects[this->indexLowestUnexplored], theGlobalVariables);
-  this->ComputeDebugString();
-  theGlobalVariables.theIndicatorVariables.StatusString1.append(this->DebugString);
-  theGlobalVariables.MakeReport();
-}
-
-void  SemisimpleSubalgebras::FindHCandidatesWithOneExtraHContaining(Vectors<Rational>& inpuT, GlobalVariables& theGlobalVariables)
-{ int theDimension= this->theAlgebra.theWeyl.CartanSymmetric.NumRows;
-  SelectionWithMaxMultiplicity theSel;
-  theSel.initMaxMultiplicity(theDimension, 2);
-  int theCounter=MathRoutines::KToTheNth(3, theDimension);
-  Vector<Rational> theRoot;
-  WeylGroup& theWeyl=this->theAlgebra.theWeyl;
-  Matrix<Rational>  invertedCartan=this->theAlgebra.theWeyl.CartanSymmetric;
-  invertedCartan.Invert(theGlobalVariables);
-  Vectors<Rational> tempRoots;
-  tempRoots=inpuT;
-  Vectors<Rational> inputCopy;
-  inputCopy=inpuT;
-  for (int i=0; i<theCounter; i++, theSel.IncrementSubset())
-  { //slTwo& currentSl2=this->theSl2s.TheObjects[i];
-    theRoot=theSel;
-    invertedCartan.ActOnVectorColumn(theRoot, theRoot);
-    bool isGood=true;
-    if (!inputCopy.LinSpanContainsRoot(theRoot))
-    { for (int j=0; j<inputCopy.size; j++)
-        if (theWeyl.RootScalarCartanRoot(inputCopy.TheObjects[j], theRoot).IsPositive())
-        { isGood=false;
-          break;
-        }
-      if (isGood)
-      { tempRoots= inputCopy;
-        tempRoots.AddOnTop(theRoot);
-        for (int k=tempRoots.size-1; k>0; k--)
-          if (tempRoots[k]< tempRoots[k-1])
-            tempRoots.SwapTwoIndices(k, k-1);
-        this->theHcandidates.AddOnTopNoRepetition(tempRoots);
-        //this->th
-      }
-      std::stringstream out;
-      out << "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
-      theGlobalVariables.theIndicatorVariables.StatusString1=out.str();
-      theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-      theGlobalVariables.MakeReport();
-    }
-  }
-}
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfElements

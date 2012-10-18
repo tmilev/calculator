@@ -231,7 +231,7 @@ bool CommandList::fRootSAsAndSltwos
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
-    return true;
+    return false;
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=10000;

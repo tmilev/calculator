@@ -4126,7 +4126,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
 }
 
 void ElementWeylGroup::operator =(const ElementWeylGroup& right)
-{ *this=(right);
+{ this->::List<int>::operator=(right);
 }
 
 bool ElementWeylGroup::operator ==(const ElementWeylGroup& right)
@@ -5165,11 +5165,12 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   out << "Computing pairing table for the module decomposition of the Vector<Rational> subalgebra of type "
   << this->theDynkinDiagram.ElementToStrinG(false, true)
   << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(false, true);
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out.str();
+  ProgressReport theReport(&theGlobalVariables);
+  theReport.Report(out.str());
   for (int i=0; i<this->kModules.size; i++)
-  { output.TheObjects[i].SetSize(this->kModules.size);
+  { output[i].SetSize(this->kModules.size);
     for (int j=0; j<this->kModules.size; j++)
-    { this->KmodTimesKmod(i, j, oppositeKmods, output.TheObjects[i].TheObjects[j]);
+    { this->KmodTimesKmod(i, j, oppositeKmods, output[i][j]);
       this->MakeProgressReportMultTable(i*this->kModules.size+j, numTotal, theGlobalVariables);
     }
   }

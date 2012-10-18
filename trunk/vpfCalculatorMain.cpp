@@ -404,6 +404,8 @@ g_{-2} v_\\lambda\
 //civilizedInput="hwv{} (A_3, (1,0,1),(0,0,0)) ; ";
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (0,0), (0, 1)); ";
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (1,0), ( 0, 1)); ";
+//  civilizedInput="PrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -425,8 +427,8 @@ g_{-2} v_\\lambda\
   if (civilizedInput!="")
     std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw
     << "\">Link to your input.</a>";
-  std::cout << "<br>" << CGI::GetLatexEmbeddableLinkFromCalculatorInput
-  (theParser.inputStringRawestOfTheRaw, civilizedInput);
+//  std::cout << "<br>" << CGI::GetLatexEmbeddableLinkFromCalculatorInput
+//  (theParser.inputStringRawestOfTheRaw, civilizedInput);
   std::cout << "\n</FORM>";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();

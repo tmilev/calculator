@@ -1466,6 +1466,7 @@ public:
   bool ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations);
   void PossibleNilradicalComputation(GlobalVariables& theGlobalVariables, Selection& selKmods, rootSubalgebras& owner, int indexInOwner);
   void ElementToStringHeaderFooter(std::string& outputHeader, std::string& outputFooter, bool useLatex, bool useHtml, bool includeKEpsCoords);
+  std::string ToString();
   void ToString(std::string& output, GlobalVariables& theGlobalVariables){this->ToString(output, false, false, false, theGlobalVariables); };
   void ElementToHtml(int index, std::string& path, SltwoSubalgebras* sl2s, GlobalVariables& theGlobalVariables);
   void ToString(std::string& output, bool useLatex, bool useHtml, bool includeKEpsCoords, GlobalVariables& theGlobalVariables){this->ToString(output, 0, 0, useLatex, useHtml, includeKEpsCoords, theGlobalVariables); };
@@ -1537,6 +1538,7 @@ public:
   bool flagComputeConeCondition;
   bool flagLookingForMinimalRels;
   bool flagStoringNilradicals;
+  std::string ToString();
   void ComputeKmodMultTables(GlobalVariables& theGlobalVariables);
   bool ApproveKmoduleSelectionWRTActionsNormalizerCentralizerNilradical(Selection& targetSel, GlobalVariables& theGlobalVariables);
   bool ApproveSelAgainstOneGenerator(List<int>& generator, Selection& targetSel, GlobalVariables& theGlobalVariables);
@@ -4837,24 +4839,6 @@ public:
   ;
   void TransformToWeylProjective
   (int indexOperator, Vector<Rational> & startingNormal, Vector<Rational> & outputNormal)
-  ;
-};
-
-class SemisimpleSubalgebras
-{
-public:
-  std::string DebugString;
-  std::string ToString();
-  void ComputeDebugString(){this->DebugString=this->ToString();}
-  SltwoSubalgebras theSl2s;
-  SemisimpleLieAlgebra theAlgebra;
-  List<Vectors<Rational> >  theHcandidates;
-  int indexLowestUnexplored;
-  void FindHCandidates
-    (char WeylLetter, int WeylDim, GlobalVariables& theGlobalVariables)
-  ;
-  void FindHCandidatesWithOneExtraHContaining
-  (Vectors<Rational>& inpuT, GlobalVariables& theGlobalVariables)
   ;
 };
 

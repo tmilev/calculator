@@ -1282,6 +1282,9 @@ static bool TypeHighestWeightParabolic
   static bool fRootSAsAndSltwos
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSSsubalgebras
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   void AddEmptyHeadedCommand();
   CommandList();
   void AddOperationNoFail

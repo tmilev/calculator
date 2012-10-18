@@ -1441,7 +1441,11 @@ public:
   }
   template <class otherType>
   void ActOnVectorColumn(const Vector<otherType>& input, Vector<otherType>& output, const otherType& TheRingZero=0)const
-  { assert(&input!=&output);
+  { if (&input==&output)
+    { Vector<otherType> inputNew=input;
+      this->ActOnVectorColumn(inputNew, output, TheRingZero);
+      return;
+    }
     if (this->NumCols!=input.size)
     { std::cout << "This is a programming error: attempting to multply a matrix with " << this->NumCols << " columns with a vector(column) of "
       << " dimension " << input.size << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -7350,6 +7354,7 @@ template <class CoefficientType>
 void Vectors<CoefficientType>::SelectABasis
   (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices, GlobalVariables& theGlobalVariables)const
 { assert(this!=&output);
+  ProgressReport theReport(&theGlobalVariables);
   if (this->size==0)
     return;
   int theDim=this->TheObjects[0].size;
@@ -7364,12 +7369,10 @@ void Vectors<CoefficientType>::SelectABasis
   { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-      theGlobalVariables.MakeReport();
+      theReport.Report(out.str());
     }
     for (int j=0; j<theDim; j++)
-      theMat.elements[currentRow][j]=this->TheObjects[i].TheObjects[j];
+      theMat.elements[currentRow][j]=(*this)[i][j];
     theMat.GaussianEliminationByRows(theMat, matEmpty, theSel);
     if (currentRow<theDim-theSel.CardinalitySelection)
     { output.AddOnTop(this->TheObjects[i]);
@@ -7380,9 +7383,7 @@ void Vectors<CoefficientType>::SelectABasis
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-      theGlobalVariables.MakeReport();
+      theReport.Report(out.str());
     }
     if (currentRow==theDim)
       return;

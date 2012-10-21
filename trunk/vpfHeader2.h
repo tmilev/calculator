@@ -383,6 +383,9 @@ void MakeVariableNonBounD
     this->IndexBoundVars=other.IndexBoundVars;
   }
   void operator=(const Expression& other);
+  bool operator>(const Expression& other)const
+  { return this->ToString()>other.ToString();
+  }
 };
 
 class ExpressionPairs
@@ -1153,6 +1156,23 @@ bool fGetTypeHighestWeightParabolic
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Context* outputContext=0)
  ;
+ static bool fGroebnerBuchbergerGrLex
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ { return theCommands.fGroebnerBuchberger
+  (theCommands, inputIndexBoundVars, theExpression, comments, true);
+ }
+ static bool fGroebnerBuchbergerLex
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ { return theCommands.fGroebnerBuchberger
+  (theCommands, inputIndexBoundVars, theExpression, comments, false);
+ }
+ static bool fGroebnerBuchberger
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool useGr)
+ ;
+
  static bool fParabolicWeylGroups
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)

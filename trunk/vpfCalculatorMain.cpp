@@ -406,6 +406,9 @@ g_{-2} v_\\lambda\
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (1,0), ( 0, 1)); ";
 //  civilizedInput="PrintSemisimpleSubalgebras{}(A_2)";
 //  civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))";
+//  civilizedInput="GroebnerBuchberger{}(x^2+1, y^2, x+y )";
+  //civilizedInput="GroebnerBuchberger{}(1-s^2-c^2, -x+s^3,-y+c^3)";
+//  civilizedInput="GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

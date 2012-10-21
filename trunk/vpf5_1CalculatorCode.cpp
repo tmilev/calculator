@@ -148,4 +148,58 @@ bool CommandList::fSSsubalgebras
   return true;
 }
 
+bool CommandList::fGroebnerBuchberger
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool useGr)
+{ MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
+  Vector<Polynomial<Rational> > inputVector;
+  List<Polynomial<Rational> > outputGroebner, outputGroebner2;
+  Context theContext;
+  if (!theCommands.GetVector<Polynomial<Rational> >
+      (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments))
+    return theExpression.SetError("Failed to extract polynomial expressions");
+  if (theExpression.errorString!="")
+    return true;
+  theContext.VariableImages.QuickSortAscending();
+  theCommands.GetVector<Polynomial<Rational> >
+  (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments);
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+//  int theNumVars=theContext.VariableImages.size;
+  outputGroebner=inputVector;
+  outputGroebner2=inputVector;
+//  std::cout << outputGroebner.ToString(&theFormat);
+  Polynomial<Rational> buffer1, buffer2, buffer3, buffer4;
+  MonomialP bufferMon1, bufferMon2;
+  theContext.GetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
+
+  MathRoutines::MonomialOrder theMonOrder=
+  useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographic :
+  MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  RationalFunction<Rational>::TransformToReducedGroebnerBasisImprovedAlgorithm
+(outputGroebner2, theMonOrder, theCommands.theGlobalVariableS
+)
+;
+  RationalFunctionOld::TransformToReducedGroebnerBasis
+  (outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, theMonOrder
+   , theCommands.theGlobalVariableS);
+
+  std::stringstream out;
+  out << "<br>Starting basis: ";
+  std::stringstream out1, out2, out3;
+  for(int i=0; i<inputVector.size; i++)
+    out1 << inputVector[i].ToString(&theFormat) << ", ";
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
+  out << "<br>Minimal Groebner basis algorithm 1:";
+  for(int i=0; i<outputGroebner.size; i++)
+    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
+  out << "<br>Minimal Groebner basis algorithm 2:";
+  for(int i=0; i<outputGroebner2.size; i++)
+    out3 << outputGroebner2[i].ToString(&theFormat) << ", ";
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out3.str());
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 

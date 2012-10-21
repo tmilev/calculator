@@ -2728,35 +2728,6 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
   return out.str();
 }
 
-int ParserNode::EvaluateGroebner
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ List<Polynomial<Rational> > inputBasis, outputGroebner;
-  theNode.impliedNumVars= theNode.GetMaxImpliedNumVarsChildren();
-  for (int i=0; i<theArgumentList.size; i++)
-  { Polynomial<Rational> & currentPoly=theNode.owner->TheObjects[theArgumentList[i]].polyValue.GetElement();
-    currentPoly.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
-    outputGroebner.AddOnTop(currentPoly);
-  }
-  inputBasis=outputGroebner;
-  Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
-  MonomialP bufferMon1, bufferMon2;
-  RationalFunctionOld::TransformToReducedGroebnerBasis(outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, & theGlobalVariables);
-  std::stringstream out;
-  out << "<br>Starting basis: ";
-  std::stringstream out1, out2;
-  FormatExpressions theFormat;
-  for(int i=0; i<inputBasis.size; i++)
-    out1 << inputBasis.TheObjects[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
-  out << "<br>Reduced Groebner basis:";
-  for(int i=0; i<outputGroebner.size; i++)
-    out2 << outputGroebner.TheObjects[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
-  theNode.ExpressionType=theNode.typeString;
-  theNode.outputString= out.str();
-  return theNode.errorNoError;
-}
-
 void RationalFunctionOld::GetRelations
   ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
    )
@@ -8494,15 +8465,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "vpf((-1,0), (0,-1), (-1,-1), (-1,-2))",
       DefaultWeylLetter, DefaultWeylRank, false ,
     & ParserNode::EvaluateVPF
-   );
-   this->AddOneFunctionToDictionaryNoFail
-  ("transformToReducedGroebnerBasis",
-   "(Polynomial,...)",
-   "<b> This function is largely untested. If you use it make sure to double-check the output. \
-   </b> Transforms to reduced Groebner basis using Buchberger's algorithm with respect to the lexicographic monomial \
-   ordering x_1^l&lt; x_2^m&lt;x_3^n&lt;....",
-   "transformToReducedGroebnerBasis(x_1^3+x_1x_2+1, x_1x_2, x_2^3)",
-    & ParserNode::EvaluateGroebner
    );
    this->AddOneFunctionToDictionaryNoFail
   ("getRelations",

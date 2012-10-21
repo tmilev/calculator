@@ -297,15 +297,15 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
         leftBuf.MultiplyBy(leftShift, theLeadingCoeffs[lastPair.Object2]);
         rightBuf.MultiplyBy(rightShift, theLeadingCoeffs[lastPair.Object1]);
         leftBuf-=rightBuf;
-        std::cout << "<br>testing sopoly: "
-        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
-        ;
+//        std::cout << "<br>testing sopoly: "
+//        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
+//        ;
         RationalFunctionOld::RemainderDivisionWithRespectToBasis
         (leftBuf, theBasis, outputRemainder, buffer1, monLCM, theMonOrder, theGlobalVariables)
         ;
-        std::cout << "<br>and sopoly divided by "
-        << theBasis.ToString(&theGlobalVariables->theDefaultFormat) << " is "
-        << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+//        std::cout << "<br>and sopoly divided by "
+//        << theBasis.ToString(&theGlobalVariables->theDefaultFormat) << " is "
+//        << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat);
         if (!outputRemainder.IsEqualToZero())
         { outputRemainder.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
           theBasis.AddOnTop(outputRemainder);
@@ -315,14 +315,14 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
           for (int i=0; i<theBasis.size-1; i++)
             indexPairs.AddOnTop(PairInts(i, theBasis.size-1));
         }
-      } else
-        std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
-        << " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
-        << " failed the closh criterium";
-    else
-      std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
-      << " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
-      << " failed the lcm criterium";
+      } //else
+        //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+        //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+        //<< " failed the closh criterium";
+    //else
+      //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+      //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
+      //<< " failed the lcm criterium";
     indexPairs.PopIndexSwapWithLast(currentPairIndex);
   }
   RationalFunctionOld::GroebnerBasisMakeMinimal(theBasis, theMonOrder);

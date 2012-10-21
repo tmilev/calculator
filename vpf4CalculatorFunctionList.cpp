@@ -245,6 +245,27 @@ void CommandList::initPredefinedVars()
    printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
    / calculus students. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
+  this->AddNonBoundVarMustBeNew
+  ("GroebnerBuchbergerGrLex", & this->fGroebnerBuchbergerGrLex, "",
+   "Transforms to Groebner basis using the Buchberger algorithm, relative to the graded \
+   lexicographic order. In the graded lexicographic order, monomials are first compared by\
+   total degree, then by lexicographic order.\
+   In the lexicographic order the last alphabetically \
+   is greatest, i.e., z>y>x, i.e., z is the leading monomial of x+y+z.  The expressions \
+   making the polynomials are sorted according to their string equivalents. For example,\
+   x_{1}<x_{2} because the corresponding C++ strings compare like that. ",
+   "GroebnerBuchbergerGrLex{}(a^2+b^2+1, x-a^4, y-b^4 )");
+  this->AddNonBoundVarMustBeNew
+  ("GroebnerBuchbergerLex", & this->fGroebnerBuchbergerLex, "",
+   "Transforms to Groebner basis using the Buchberger algorithm, relative to the \
+   lexicographic order. In the lexicographic order, monomials are first compared  only by \
+   lexicographic order.\
+   In the lexicographic order the last alphabetically \
+   is greatest, i.e., z>y>x, i.e., z is the leading monomial of x^1000y^200+z.  The expressions \
+   making the polynomials are sorted according to their string equivalents. For example,\
+   x_{1}<x_{2} because the corresponding C++ strings compare like that. ",
+   "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
+
 /*  this->AddNonBoundVarMustBeNew
   ("PrintSemisimpleSubalgebras", & this->fSSsubalgebras, "",
    "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
@@ -261,9 +282,9 @@ void CommandList::initPredefinedVars()
 //  ("\\sqrt", & this->fSqrt, "",
 //   "Square root of a rational, implemented as algebraic extension of the rationals. ",
 //   "\\sqrt{}{3+2\\sqrt{}2}");
-//  this->AddNonBoundVarMustBeNew
-//  ("FactorOneVarPolyOverRationals", & this->fFactor, "",
-/*   "Factors a one variable polynomial over the rationals using Kroenecker's method. \
+  this->AddNonBoundVarMustBeNew
+  ("FactorOneVarPolyOverRationals", & this->fFactor, "",
+   "Factors a one variable polynomial over the rationals using Kroenecker's method. \
     After clearing denominators, assume the poly has integer coefficients.\
     If looking for an integer coefficient divisor of degree k, \
     plug in k different integer values of the poly\
@@ -271,7 +292,7 @@ void CommandList::initPredefinedVars()
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}");
-*/
+
 //  this->AddNonBoundVarMustBeNew
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",

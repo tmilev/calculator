@@ -66,7 +66,10 @@ class affineCones;
 
 //Hybrid classes that serve both memory-management and mathematical purposes
 //(Matrices, Vectors, PolynomialSubstitution, etc.)
-template <class ObjectType1, class ObjectType2>
+template <class ObjectType1, class ObjectType2,
+unsigned int hashFunction1(const ObjectType1&)=ObjectType1::HashFunction,
+unsigned int hashFunction2(const ObjectType2&)=ObjectType2::HashFunction
+>
 class Pair;
 template <class Object>
 class List;
@@ -280,6 +283,9 @@ typedef void (*drawClearScreenFunction)();
 class MathRoutines
 {
 public:
+  typedef bool (*MonomialOrder) (const MonomialP& left, const MonomialP& right)
+  ;
+
   int InvertModN(int X, int N)
   { int q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     int vD[2], vP[2], temp;
@@ -681,28 +687,6 @@ std::iostream& operator>>(std::iostream& input, List<Object>& theList)
   return input;
 }
 
-template <class ObjectType1, class ObjectType2>
-class Pair
-{
-public:
-  ObjectType1 Object1;
-  ObjectType2 Object2;
-  static unsigned int HashFunction(const Pair<ObjectType1, ObjectType2>& input)
-  { return SomeRandomPrimes[0]*input.Object1.HashFunction()+
-    SomeRandomPrimes[1]*input.Object2.HashFunction();
-  }
-  unsigned int HashFunction()const
-  { return Pair<ObjectType1, ObjectType2>::HashFunction(*this);
-  }
-  void operator=(const Pair<ObjectType1, ObjectType2>& other)
-  { this->Object1=other.Object1;
-    this->Object2=other.Object2;
-  }
-  bool operator==(const Pair<ObjectType1, ObjectType2>& other)const
-  { return this->Object1==other.Object1 && this->Object2==other.Object2;
-  }
-};
-
 static unsigned int NumListsCreated=0;
 static unsigned int NumListResizesTotal=0;
 //List serves the same purpose as std::vector
@@ -1041,6 +1025,35 @@ public:
   ~HashedListReferences(){this->KillAllElements(); };
 };
 
+template <class ObjectType1, class ObjectType2,
+unsigned int hashFunction1(const ObjectType1&),
+unsigned int hashFunction2(const ObjectType2&)
+>
+class Pair
+{
+public:
+  ObjectType1 Object1;
+  ObjectType2 Object2;
+  Pair(){}
+  Pair(const ObjectType1& o1, const ObjectType2& o2): Object1(o1), Object2(o2) {}
+  static unsigned int HashFunction
+  (const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& input)
+  { return SomeRandomPrimes[0]*hashFunction1(input.Object1)+
+    SomeRandomPrimes[1]*hashFunction2(input.Object2);
+  }
+  unsigned int HashFunction()const
+  { return Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>::HashFunction(*this);
+  }
+  void operator=(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)
+  { this->Object1=other.Object1;
+    this->Object2=other.Object2;
+  }
+  bool operator==(const Pair<ObjectType1, ObjectType2, hashFunction1, hashFunction2>& other)const
+  { return this->Object1==other.Object1 && this->Object2==other.Object2;
+  }
+};
+typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> PairInts;
+
 static unsigned int NumHashResizes=0;
 
 template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
@@ -1060,7 +1073,6 @@ private:
   bool ContainsObject(const Object& o);
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
-  void PopLastObject();
 protected:
   List<List<int> > TheHashedArrays;
 public:
@@ -1170,6 +1182,9 @@ public:
   { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddNoRepetition(theList.TheObjects[i]);
+  }
+  void PopLastObject()
+  { this->PopIndexSwapWithLast(this->size-1);
   }
   void PopIndexSwapWithLast(int index)
   { if (index<0 || index>=this->size)
@@ -4407,6 +4422,11 @@ public:
   (const MonomialP& left, const MonomialP& right)
   { return left.IsGEQLexicographicLastVariableWeakest(right);
   }
+  static bool LeftIsGEQTotalDegThenLexicographic
+  (const MonomialP& left, const MonomialP& right)
+  { return left.IsGEQTotalDegThenLexicographic(right);
+  }
+
   bool IsGEQLexicographicLastVariableStrongest(const MonomialP& m)const;
   bool IsGEQLexicographicLastVariableWeakest(const MonomialP& m)const;
   bool IsGEQTotalDegThenLexicographic(const MonomialP& m)const
@@ -4480,6 +4500,10 @@ public:
     for (int i=0; i<input.size; i++)
       result+= input.theCoeffs[i].HashFunction()*input[i].HashFunction();
     return result;
+  }
+  void PopMonomial(int index)
+  { this->PopIndexSwapWithLast(index);
+    this->theCoeffs.PopIndexSwapWithLast(index);
   }
   void PopMonomial(int index, TemplateMonomial& outputMon, CoefficientType& outputCoeff)
   { outputMon=this->TheObjects[index];
@@ -4939,14 +4963,16 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   ;
   bool IsProportionalTo(const Polynomial<CoefficientType>& other, CoefficientType& TimesMeEqualsOther, const CoefficientType& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
-  int GetIndexMaxMonomial( bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right))
+  const MonomialP& GetMaxMonomial(MathRoutines::MonomialOrder theMonOrder)
+  {return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
+  }
+  int GetIndexMaxMonomial(MathRoutines::MonomialOrder theMonOrder)
   { if (this->size==0)
       return -1;
     int result=0;
     for (int i=1; i<this->size; i++)
-    { if ( MonomialOrderLeftIsGreaterThanOrEqualToRight(this->TheObjects[i], this->TheObjects[result]))
+      if (theMonOrder(this->TheObjects[i], this->TheObjects[result]))
         result=i;
-    }
     return result;
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest();
@@ -5596,46 +5622,34 @@ public:
     assert(false);
     return false;
   }
-  static void ReduceGroebnerBasis
-  (List<Polynomial<Rational> >& theBasis, Polynomial<Rational> & buffer1,
- bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
-   )
+  static void GroebnerBasisMakeMinimal
+(List<Polynomial<Rational> >& theBasis,
+  MathRoutines::MonomialOrder theMonomialOrder
+ )
   ;
   static void GetRelations
   ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
    )
    ;
   static void TransformToReducedGroebnerBasis
-  (List<Polynomial<Rational> >& theBasis,
-   Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational> & buffer3,
-   Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, GlobalVariables* theGlobalVariables)
-  { RationalFunctionOld::TransformToReducedGroebnerBasis
-    (
-     theBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, &MonomialP::LeftIsGEQLexicographicLastVariableStrongest, theGlobalVariables
-     );
-  }
-  static void TransformToReducedGroebnerBasis
-    (List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& buffer1, Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
-  bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right), GlobalVariables* theGlobalVariables
- )
- ;
+(List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& buffer1,
+ Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3,
+ Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
+ MathRoutines::MonomialOrder theMonomialOrder=0, GlobalVariables* theGlobalVariables=0
+)
+;
   static void RemainderDivisionWithRespectToBasis
-(Polynomial<Rational>& input, List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& outputRemainder, Polynomial<Rational>& buffer1,
- Polynomial<Rational>& buffer2, MonomialP& bufferMon1,
- bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
+(Polynomial<Rational>& inputIsModified, List<Polynomial<Rational> >& theBasis,
+ Polynomial<Rational>& outputRemainder, Polynomial<Rational>& buffer1,
+ MonomialP& bufferMon1,
+ MathRoutines::MonomialOrder theMonOrder, GlobalVariables* theGlobalVariables=0
  )
  ;
-  static void RemainderDivision
-(Polynomial<Rational>& input, Polynomial<Rational>& divisor, Polynomial<Rational>& outputRemainder,
- Polynomial<Rational>& buffer, MonomialP& bufferMon1,
-   bool (*MonomialOrderLeftIsGreaterThanOrEqualToRight) (const MonomialP& left, const MonomialP& right)
- )
-   ;
   static bool gcdQuicK
-  (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
+  (const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational> & output)
   ;
   static void gcd
-  (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output, GlobalVariables* theContext=0)
+  (const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational> & output, GlobalVariables* theContext=0)
   ;
   static void ScaleClearDenominator
   (List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output)

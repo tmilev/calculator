@@ -4098,11 +4098,11 @@ void RationalFunctionOld::RemainderDivisionWithRespectToBasis
           << ". Subtracting from it  "
           << buffer1.ToString(&theGlobalVariables->theDefaultFormat);
           theReport.Report(out.str());
-          std::cout << out.str();
+          //std::cout << out.str();
         }
         currentRemainder-=buffer1;
         divisionOcurred=true;
-        std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
+        //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
         i++;
     }
@@ -4116,9 +4116,9 @@ void RationalFunctionOld::RemainderDivisionWithRespectToBasis
       }
     }
   }
-  std::cout << " <br>final remainder: "
-  << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat)
-  << "<hr>";
+//  std::cout << " <br>final remainder: "
+//  << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat)
+//  << "<hr>";
 }
 
 void RationalFunctionOld::TransformToReducedGroebnerBasis
@@ -4163,23 +4163,22 @@ void RationalFunctionOld::TransformToReducedGroebnerBasis
         { leftShift[k]=rightHighestMon[k]-leftHighestMon[k];
           rightShift[k]=0;
         }
-      std::cout << "<hr>Sopoly of indices " << lowestNonExplored +1 << " and "
+/*      std::cout << "<hr>Sopoly of indices " << lowestNonExplored +1 << " and "
       << j+1 << " ("
       << currentLeft.ToString(&theGlobalVariables->theDefaultFormat)
       << " and "
       << currentRight.ToString(&theGlobalVariables->theDefaultFormat)
-      << ") = ";
+      << ") = ";*/
       tempP=currentLeft;
       tempP.MultiplyBy(leftShift, currentRight.theCoeffs[rightIndex]);
       Spoly=currentRight;
       Spoly.MultiplyBy(rightShift, currentLeft.theCoeffs[leftIndex]);
       Spoly-=(tempP);
-      std::cout << Spoly.ToString(&theGlobalVariables->theDefaultFormat);
-
+//      std::cout << Spoly.ToString(&theGlobalVariables->theDefaultFormat);
       RationalFunctionOld::RemainderDivisionWithRespectToBasis
       (Spoly, theBasis, tempP, buffer3, bufferMon1, theMonOrder, theGlobalVariables);
-      std::cout << " <br> After division: "
-      << Spoly.ToString(&theGlobalVariables->theDefaultFormat);
+      //std::cout << " <br> After division: "
+      //<< Spoly.ToString(&theGlobalVariables->theDefaultFormat);
       if (!tempP.IsEqualToZero())
       { tempP.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
         theBasis.AddOnTop(tempP);

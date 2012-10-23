@@ -2555,6 +2555,24 @@ public:
   inline void operator=(const LargeIntUnsigned& x){ this->Assign(x); }
   inline void operator=(unsigned int x){ this->AssignShiftedUInt(x,0); }
   inline void operator+=(const LargeIntUnsigned& other){this->Add(other);}
+  inline void operator--(int)
+  { if (this->IsEqualToZero())
+    { std::cout << "This is a programming error: attempting to subtract 1 from a large unsigned "
+      << " integer with value 0. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->SubtractSmallerPositive(1);
+  }
+  inline void operator%=(const LargeIntUnsigned& other)
+  { if (&other==this)
+    { this->MakeZero();
+      return;
+    }
+    LargeIntUnsigned copyMe=*this;
+    LargeIntUnsigned temp1;
+    copyMe.DivPositive(other, temp1, *this);
+  }
   LargeIntUnsigned operator/(unsigned int x)const;
   LargeIntUnsigned operator/(const LargeIntUnsigned& x)const;
   LargeIntUnsigned(unsigned int x)
@@ -2859,9 +2877,14 @@ public:
     return result;
   }
   Rational GetGCDNumeratorsRationalCoeffs()
-  { return this->GetNum();
+  { return this->GetNumerator();
   }
-  inline void GetDenominator(LargeIntUnsigned& output)
+  inline LargeIntUnsigned GetDenominator()const
+  { LargeIntUnsigned tempI;
+    this->GetDenominator(tempI);
+    return tempI;
+  }
+  inline void GetDenominator(LargeIntUnsigned& output)const
   { if (this->Extended==0)
     { unsigned int tempI= (unsigned int) this->DenShort;
       output.AssignShiftedUInt(tempI, 0);
@@ -2871,19 +2894,19 @@ public:
   }
   bool BeginsWithMinus(){ return this->IsNegative();}
 
-  inline LargeInt GetNum()
+  inline LargeInt GetNumerator()const
   { LargeInt result;
-    this->GetNum(result);
+    this->GetNumerator(result);
     return result;
   }
-  inline void GetNum(LargeInt& output)
+  inline void GetNumerator(LargeInt& output)const
   { this->GetNumerator(output.value);
     output.sign=1;
     if (this->IsNegative())
       output.sign=-1;
   }
   inline void SetDynamicSubtype(int dummyParameter){}
-  inline void GetNumerator(LargeIntUnsigned& output)
+  inline void GetNumerator(LargeIntUnsigned& output)const
   { if (this->Extended==0)
     { if (this->NumShort<0)
         output.AssignShiftedUInt((unsigned int)(-this->NumShort), 0);
@@ -6009,7 +6032,7 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    this->AddMonomial(tempM, r[i].GetNum());
+    this->AddMonomial(tempM, r[i].GetNumerator());
   }
 }
 

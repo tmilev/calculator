@@ -18,7 +18,7 @@ public:
   MemorySaving<std::string> theError;
 //  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theElementTensorGenVermas;
   enum DataType
-  { typeError=1, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
+  { typeError=1, typeZmodP, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
     typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound,
     typeDifferentialForm, typeRationalRadical
@@ -1171,6 +1171,10 @@ bool fGetTypeHighestWeightParabolic
  static bool fGroebnerBuchberger
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useGr)
+ ;
+ static bool fPlotDirectionField
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
  ;
 
  static bool fParabolicWeylGroups

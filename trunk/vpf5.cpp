@@ -1526,8 +1526,8 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
   tempV.SetSize(1);
   List<int> divisorsH, divisorsS;
   LargeInt hT, lT;
-  highestTerm.GetNum(hT);
-  lowestTerm.GetNum(lT);
+  highestTerm.GetNumerator(hT);
+  lowestTerm.GetNumerator(lT);
   if (! hT.GetDivisors(divisorsH, false) || !  lT.GetDivisors(divisorsS, true))
     return false;
   for (int i=0; i<divisorsH.size; i++)
@@ -3096,7 +3096,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   for (int i=0; i<=upperBoundDegDivisors; i++)
   { theArgument[0]=thePoints[i];
     thePoly.Evaluate(theArgument,tempRat);
-    tempRat.GetNum(theValuesAtPoints[i]);
+    tempRat.GetNumerator(theValuesAtPoints[i]);
     std::cout << "<br>value at " << thePoints[i] << " = " << theValuesAtPoints[i].ToString();
     if(!theValuesAtPoints[i].value.Factor(thePrimeFactorsAtPoints[i], thePrimeFactorsMults[i]))
     { if (comments!=0)

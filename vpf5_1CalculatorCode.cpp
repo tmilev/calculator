@@ -153,6 +153,8 @@ bool CommandList::fGroebnerBuchberger
  std::stringstream* comments, bool useGr)
 { MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
+  Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
+
   List<Polynomial<Rational> > outputGroebner, outputGroebner2;
   Context theContext;
   if (!theCommands.GetVector<Polynomial<Rational> >
@@ -163,6 +165,10 @@ bool CommandList::fGroebnerBuchberger
   theContext.VariableImages.QuickSortAscending();
   theCommands.GetVector<Polynomial<Rational> >
   (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments);
+
+  for (int i=0; i<inputVector.size; i++)
+    inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
 //  int theNumVars=theContext.VariableImages.size;
@@ -180,10 +186,10 @@ bool CommandList::fGroebnerBuchberger
 (outputGroebner2, theMonOrder, theCommands.theGlobalVariableS
 )
 ;
-  RationalFunctionOld::TransformToReducedGroebnerBasis
+/*  RationalFunctionOld::TransformToReducedGroebnerBasis
   (outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, theMonOrder
    , theCommands.theGlobalVariableS);
-
+*/
   std::stringstream out;
   out << "<br>Starting basis: ";
   std::stringstream out1, out2, out3;
@@ -201,5 +207,3 @@ bool CommandList::fGroebnerBuchberger
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
-
-

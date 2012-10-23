@@ -3144,7 +3144,7 @@ bool Lattice::GetAllRepresentatives
   { while (this->basisRationalForm.elements[i][col].IsEqualToZero())
       col++;
     currentPeriod=rougherLattice.basisRationalForm.elements[i][col]/this->basisRationalForm.elements[i][col];
-    currentPeriod.GetNum(currentPeriodInt);
+    currentPeriod.GetNumerator(currentPeriodInt);
     if (currentPeriodInt.value.size>1)
 //    { std::cout << "exited at point 1 counter i is " << i;
       return false;

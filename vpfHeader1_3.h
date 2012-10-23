@@ -269,6 +269,8 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
   rightShift.monBody.SetSize(theNumVars);
   Polynomial<CoefficientType> leftBuf, rightBuf, buffer1;
   Polynomial<CoefficientType>& outputRemainder=rightBuf; //to save some RAM
+  ProgressReport reportOuter(theGlobalVariables);
+  ProgressReport reportInner(theGlobalVariables);
   while (indexPairs.size>0)
   { PairInts& lastPair=*indexPairs.LastObject();
     int currentPairIndex=indexPairs.size-1;
@@ -277,6 +279,13 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
     Polynomial<Rational>& currentRight= theBasis[lastPair.Object2];
     MonomialP& leftHighestMon= theLeadingMons[lastPair.Object1];
     MonomialP& rightHighestMon=theLeadingMons[lastPair.Object2];
+    if (theGlobalVariables!=0)
+    { std::stringstream out;
+      out << "Minimal remaining cases: " << indexPairs.size
+      << ", processing " << currentLeft.ToString(&theGlobalVariables->theDefaultFormat)
+      << " and " << currentRight.ToString(&theGlobalVariables->theDefaultFormat);
+      reportOuter.Report(out.str());
+    }
     for (int k=0; k<theNumVars; k++)
     { if (leftHighestMon[k]>0 && rightHighestMon[k]>0)
         isGood=true;
@@ -300,9 +309,20 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
 //        std::cout << "<br>testing sopoly: "
 //        << leftBuf.ToString(&theGlobalVariables->theDefaultFormat)
 //        ;
+        if (theGlobalVariables!=0)
+        { std::stringstream out;
+          out << "Dividing spoly: " << leftBuf.ToString(& theGlobalVariables->theDefaultFormat);
+          reportInner.Report(out.str());
+        }
         RationalFunctionOld::RemainderDivisionWithRespectToBasis
         (leftBuf, theBasis, outputRemainder, buffer1, monLCM, theMonOrder, theGlobalVariables)
         ;
+        if (theGlobalVariables!=0)
+        { std::stringstream out;
+          out << "and the remainder is: "
+          << outputRemainder.ToString(& theGlobalVariables->theDefaultFormat);
+          reportInner.Report(out.str());
+        }
 //        std::cout << "<br>and sopoly divided by "
 //        << theBasis.ToString(&theGlobalVariables->theDefaultFormat) << " is "
 //        << outputRemainder.ToString(&theGlobalVariables->theDefaultFormat);
@@ -327,4 +347,104 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
   }
   RationalFunctionOld::GroebnerBasisMakeMinimal(theBasis, theMonOrder);
 }
+
+class ElementZmodP
+{
+public:
+  LargeIntUnsigned theModulo;
+  LargeIntUnsigned theValue;
+  ElementZmodP(){}
+  ElementZmodP(const ElementZmodP& other){this->operator=(other);}
+  void CheckIamInitialized()
+  { if (this->theModulo.IsEqualToZero())
+    { std::cout << "This is a programming error: computing with non-initialized "
+      << " element the ring Z mod p (the number p has not been initialized!)."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
+  bool IsEqualToZero()const
+  { return this->theValue.IsEqualToZero();
+  }
+  void operator=(const ElementZmodP& other)
+  { this->theModulo=other.theModulo;
+    this->theValue=other.theValue;
+  }
+  void operator=(const LargeIntUnsigned& other)
+  { this->CheckIamInitialized();
+    this->theValue=other;
+    this->theValue%=this->theModulo;
+  }
+  void MakeMOne(const LargeIntUnsigned& newModulo)
+  { this->theModulo=newModulo;
+    this->theValue=newModulo;
+    this->theValue--;
+  }
+  void CheckEqualModuli(const ElementZmodP& other)
+  { if (!this->theModulo.IsEqualTo(other.theModulo))
+    { std::cout << "This is a programming error: "
+      << " attempting to make an operation with two elemetns of Z mod P with different moduli, "
+      << this->theModulo.ToString() << " and " << other.theModulo.ToString()
+      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
+  void operator*=(const ElementZmodP& other)
+  { if (this==&other)
+    { ElementZmodP other=*this;
+      *this*=other;
+      return;
+    }
+    this->CheckEqualModuli(other);
+    this->theValue*=other.theValue;
+    this->theValue%=this->theModulo;
+  }
+  void operator+=(const ElementZmodP& other)
+  { if (this==&other)
+    { ElementZmodP other=*this;
+      *this+=other;
+      return;
+    }
+    this->CheckEqualModuli(other);
+    this->theValue+=other.theValue;
+    this->theValue%=this->theModulo;
+  }
+  void operator=(const LargeInt& other)
+  { this->CheckIamInitialized();
+    this->theValue=other.value;
+    this->theValue%=this->theModulo;
+    if (other.sign==-1)
+    { ElementZmodP mOne;
+      mOne.MakeMOne(this->theModulo);
+      *this*=mOne;
+    }
+  }
+  void operator=(const Rational& other)
+  { this->CheckIamInitialized();
+    *this= other.GetNumerator();
+    ElementZmodP den;
+    den.theModulo=this->theModulo;
+    den=other.GetDenominator();
+    *this/=den;
+  }
+  void operator/=(const ElementZmodP& den)
+  { std::cout << "Not implemented yet!";
+    assert(false);
+  }
+  void ScaleToIntegralMinHeightAndGetPoly
+  (const Polynomial<Rational>& input, Polynomial<ElementZmodP>& output,
+   const LargeIntUnsigned& newModulo)
+  { Polynomial<Rational> rescaled;
+    rescaled=input;
+    rescaled.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    output.SetExpectedSize(input.size);
+    ElementZmodP theCF;
+    theCF.theModulo=newModulo;
+    output.MakeZero(input.GetNumVars());
+    for (int i=0; i<input.size; i++)
+    { theCF=input.theCoeffs[i];
+      output.AddMonomial(input[i], theCF);
+    }
+  }
+};
 #endif

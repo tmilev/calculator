@@ -1738,7 +1738,9 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
 
 std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
-  out << " <a href=\"http://vectorpartition.svn.sourceforge.net/viewvc/vectorpartition/trunk/"
+  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/"
+  << 1118
+  << "/tree/trunk/"
   << CGI::RemovePathFromFileName(fileName) << "?view=markup\">"
   << CGI::RemovePathFromFileName(fileName);
   if (fileDesc!="")

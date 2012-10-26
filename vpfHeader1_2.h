@@ -1614,6 +1614,7 @@ class slTwo
 {
 public:
   std::string DebugString;
+  std::string ToString(FormatExpressions* theFormat);
   void ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal);
   void ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, FormatExpressions& PolyFormatLocal){ this->ToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);}
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
@@ -2618,86 +2619,6 @@ static bool GetBasisFromSpanOfElements
   }
   ElementUniversalEnveloping<CoefficientType>():owners(0), indexInOwners(-1){}
   ElementUniversalEnveloping<CoefficientType>(const ElementUniversalEnveloping<CoefficientType>& other){this->operator=(other);}
-};
-
-class SltwoSubalgebras : public HashedList<slTwo>
-{
-public:
-  std::string DebugString;
-//  List< int > hSingularWeights;
-  List<int> MultiplicitiesFixedHweight;
-  List<List<int> > IndicesSl2sContainedInRootSA;
-  List<int> IndicesSl2decompositionFlas;
-  Vectors<Rational> BadHCharacteristics;
-  int IndexZeroWeight;
-  List<SemisimpleLieAlgebra> owner;
-  rootSubalgebras theRootSAs;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml){ this->ToString(this->DebugString, theGlobalVariables, theWeyl, useLatex, useHtml, false, 0, 0);};
-  List<std::string> texFileNamesForPNG;
-  List<std::string> texStringsEachFile;
-  List<std::string> listSystemCommandsLatex;
-  List<std::string> listSystemCommandsDVIPNG;
-  void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
-  { for(int i=0; i<this->size; i++)
-      this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
-  }
-  SltwoSubalgebras()
-  { this->owner.SetSize(1);
-    this->owner[0].indexInOwner=0;
-    this->owner[0].owner=&this->owner;
-  }
-  void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
-  { for(int i=0; i<this->size; i++)
-      this->TheObjects[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
-  }
-  void getZuckermansArrayE8(Vectors<Rational>& output);
-  void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
-  void ComputeDebugStringCurrent();
-  bool ContainsSl2WithGivenH(Vector<Rational> & theH, int* outputIndex);
-  bool ContainsSl2WithGivenHCharacteristic(Vector<Rational> & theHCharacteristic, int* outputIndex);
-  void ElementToHtml
-(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer,
- std::string& DisplayNameCalculator)
-   ;
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-  void ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-};
-
-class reductiveSubalgebra
-{
-  public:
-  int indexInOwner;
-};
-
-class reductiveSubalgebras
-{
-public:
-  SltwoSubalgebras theSl2s;
-  SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
-  Selection RemainingCandidates;
-//  List<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
-  List<List<int> > theRanks;
-  List<List<int> > theMultiplicities;
-  List<List<char> > theLetters;
-  List<List<int> > thePartitionValues;
-  List<List<int> > thePartitionMultiplicities;
-  List<SltwoSubalgebras> theCandidateSubAlgebras;
-  List<List<int> > IndicesMatchingSl2s;
-  List<List<int> > IndicesMatchingPartitionSl2s;
-  List<List<int> > IndicesMatchingActualSl2s;
-  void MatchRealSl2sToPartitionSl2s();
-  void MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables);
-  void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
-  void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
-  void ElementToStringCandidatePrincipalSl2s(bool useLatex, bool useHtml, std::string& output, GlobalVariables& theGlobalVariables);
-  void ElementToStringDynkinType(int theIndex, bool useLatex, bool useHtml, std::string& output);
-  void FindTheReductiveSubalgebras(char WeylLetter, int WeylIndex, GlobalVariables& theGlobalVariables);
-  void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
-  void GenerateAllPartitionsUpTo(int theRank);
-  void GenerateAllPartitionsDontInit(int theRank);
-  void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, List<int>& ranksBuffer, List<int>& multiplicitiesBuffer, List<char>& lettersBuffer);
-  void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, List<int>& Multiplicities, List<int>& Values);
 };
 
 class ElementWeylAlgebra

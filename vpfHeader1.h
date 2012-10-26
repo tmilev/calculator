@@ -5029,14 +5029,20 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return constME<other;
   }
   bool operator>(const Polynomial<CoefficientType>& other)const
-  { if (other.size==0 && this->size==0)
+  { if (other.size==0)
+    { if (this->size==0)
+        return false;
+      else
+        return true;
+    }
+    if (this->size==0)
       return false;
     if (this->TotalDegree()>other.TotalDegree())
       return true;
     if (this->TotalDegree()<other.TotalDegree())
       return false;
     int thisMaxMonIndex= this->GetIndexMaxMonomialTotalDegThenLexicographic();
-    int otherMaxMonIndex= this->GetIndexMaxMonomialTotalDegThenLexicographic();
+    int otherMaxMonIndex= other.GetIndexMaxMonomialTotalDegThenLexicographic();
     if( (*this)[thisMaxMonIndex]>other[otherMaxMonIndex])
       return true;
     if( other[otherMaxMonIndex]>(*this)[thisMaxMonIndex])
@@ -6114,7 +6120,7 @@ int Polynomial<Element>::GetIndexMaxMonomialTotalDegThenLexicographic()const
   int result;
   result = 0;
   for (int i=1; i<this->size; i++)
-    if (this->TheObjects[i].IsGEQTotalDegThenLexicographic(this->TheObjects[result]))
+    if ((*this)[i].IsGEQTotalDegThenLexicographic((*this)[result]))
       result=i;
   return result;
 }

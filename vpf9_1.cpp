@@ -1,7 +1,8 @@
 //The current file is licensed under the license terms found in the main header file "vpf.h".
 //For additional information refer to the file "vpf.h".
-#include "vpfHeader1.h"
 #include "vpfHeader1_2.h"
+#include "vpfHeader1_4SemisimpleLieAlgebras.h"
+
 ProjectInformationInstance ProjectInfoVpf9_1cpp(__FILE__, "Main implementation file, part 2. ");
 
 bool rootSubalgebra::ConeConditionHolds(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner, bool doExtractRelations)
@@ -2955,13 +2956,6 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
   }
   outputH=(root1*2)/Vector<Rational>::ScalarProduct(root1, root1, this->theWeyl.CartanSymmetric);
   return false;
-}
-
-void SltwoSubalgebras::ComputeDebugStringCurrent()
-{ std::string tempS; std::stringstream out;
-  for (int i=0; i<this->MultiplicitiesFixedHweight.size; i++)
-    out << i-this->IndexZeroWeight << ": " << this->MultiplicitiesFixedHweight.TheObjects[i] << "\n";
-  this->DebugString=out.str();
 }
 
 void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables)

@@ -38,10 +38,12 @@
 		<Unit filename="vpf9_1.cpp" />
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
+		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
 		<Unit filename="vpfCalculatorMain.cpp" />
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
+		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHtmlStrings.cpp" />
 		<Unit filename="vpfMacros.h" />

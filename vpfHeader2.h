@@ -1172,11 +1172,6 @@ bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useGr)
  ;
- static bool fPlotDirectionField
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
- std::stringstream* comments)
- ;
-
  static bool fParabolicWeylGroups
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)

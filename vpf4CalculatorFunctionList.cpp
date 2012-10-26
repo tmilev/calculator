@@ -134,7 +134,7 @@ void CommandList::initPredefinedVars()
    in the Levi part of the parabolic. Non-zero entry means the corresponding negative root space is \
    not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
-   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); fPrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
+   "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
   this->AddNonBoundVarMustBeNew
   ("PrintB3G2branchingTable", &this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
@@ -266,10 +266,11 @@ void CommandList::initPredefinedVars()
    x_{1}<x_{2} because the corresponding C++ strings compare like that. ",
    "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
 
-/*  this->AddNonBoundVarMustBeNew
-  ("PrintSemisimpleSubalgebras", & this->fSSsubalgebras, "",
-   "Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)");*/
+  this->AddNonBoundVarMustBeNew
+  ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Prints the semisimple subalgebras of a semisimple Lie algebra. ",
+   "PrintSemisimpleSubalgebras{}(A_2)");
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

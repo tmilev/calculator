@@ -3,56 +3,7 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
-class SemisimpleSubalgebras
-{
-public:
-  std::string ToString();
-  SltwoSubalgebras theSl2s;
-  List<SemisimpleLieAlgebra>* owner;
-  int indexInOwner;
-  List<Vectors<Rational> >  theHcandidates;
-  int indexLowestUnexplored;
-  void FindHCandidates
-    (GlobalVariables* theGlobalVariables)
-  ;
-  void FindHCandidatesWithOneExtraHContaining
-  (Vectors<Rational>& inpuT, GlobalVariables* theGlobalVariables)
-  ;
-  SemisimpleLieAlgebra& GetSSowner()
-  { if (this->owner==0 || this->indexInOwner<0)
-    { std::cout << "This is a programming error: attempted to access non-initialized "
-      << " semisimple Lie subalgerbas. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    return (*owner)[this->indexInOwner];
-  }
-  SemisimpleSubalgebras(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner)
-  :owner(inputOwners), indexInOwner(inputIndexInOwner){}
-};
 
-
-std::string SemisimpleSubalgebras::ToString()
-{ std::stringstream out;
-  out << this->theHcandidates.ToString();
-  return out.str();
-}
-
-void SemisimpleSubalgebras::FindHCandidates(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindHCandidates");
-  Vectors<Rational> emptyStart;
-//  List<List<Vector<Rational>> >::ListActualSizeIncrement=10000;
-  MemorySaving<GlobalVariables> tempGV;
-  if (theGlobalVariables==0)
-    theGlobalVariables=&tempGV.GetElement();
-  this->GetSSowner().FindSl2Subalgebras
-  (this->theSl2s, this->GetSSowner().theWeyl.WeylLetter, this->GetSSowner().GetRank(),
-   *theGlobalVariables);
-  this->theHcandidates.size=0;
-  this->theHcandidates.AddOnTop(emptyStart);
-  for (this->indexLowestUnexplored=0; this->indexLowestUnexplored<this->theHcandidates.size; this->indexLowestUnexplored++)
-    this->FindHCandidatesWithOneExtraHContaining(this->theHcandidates.TheObjects[this->indexLowestUnexplored], theGlobalVariables);
-}
 
 std::string rootSubalgebras::ToString()
 { std::stringstream out;
@@ -84,50 +35,6 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
       (*this)[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
-void  SemisimpleSubalgebras::FindHCandidatesWithOneExtraHContaining
-(Vectors<Rational>& inpuT, GlobalVariables* theGlobalVariables)
-{ int theDimension= this->GetSSowner().theWeyl.CartanSymmetric.NumRows;
-  SelectionWithMaxMultiplicity theSel;
-  theSel.initMaxMultiplicity(theDimension, 2);
-  int theCounter=MathRoutines::KToTheNth(3, theDimension);
-  Vector<Rational> theRoot;
-  WeylGroup& theWeyl=this->GetSSowner().theWeyl;
-  Matrix<Rational> invertedCartan=this->GetSSowner().theWeyl.CartanSymmetric;
-  invertedCartan.Invert();
-  Vectors<Rational> tempRoots;
-  tempRoots=inpuT;
-  Vectors<Rational> inputCopy;
-  inputCopy=inpuT;
-  ProgressReport theReport(theGlobalVariables);
-  for (int i=0; i<theCounter; i++, theSel.IncrementSubset())
-  { //slTwo& currentSl2=this->theSl2s.TheObjects[i];
-    theRoot=theSel;
-    invertedCartan.ActOnVectorColumn(theRoot, theRoot);
-    bool isGood=true;
-    if (!inputCopy.LinSpanContainsRoot(theRoot))
-    { for (int j=0; j<inputCopy.size; j++)
-        if (theWeyl.RootScalarCartanRoot(inputCopy.TheObjects[j], theRoot).IsPositive())
-        { isGood=false;
-          break;
-        }
-      if (isGood)
-      { tempRoots= inputCopy;
-        tempRoots.AddOnTop(theRoot);
-        for (int k=tempRoots.size-1; k>0; k--)
-          if (tempRoots[k]< tempRoots[k-1])
-            tempRoots.SwapTwoIndices(k, k-1);
-        this->theHcandidates.AddOnTopNoRepetition(tempRoots);
-        //this->th
-      }
-      if (theGlobalVariables!=0)
-      { std::stringstream out;
-        out << "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
-        theReport.Report(out.str());
-      }
-    }
-  }
-}
-
 bool CommandList::fSSsubalgebras
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
@@ -141,7 +48,8 @@ bool CommandList::fSSsubalgebras
   std::stringstream out;
   out << "not implemented";
   SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
-  theSSsubalgebras.FindHCandidates(theCommands.theGlobalVariableS);
+  theSSsubalgebras.FindTheSSSubalgebras
+  (ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
   out << "<br>" << theSSsubalgebras.ToString();
 
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
@@ -196,10 +104,10 @@ bool CommandList::fGroebnerBuchberger
   for(int i=0; i<inputVector.size; i++)
     out1 << inputVector[i].ToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
-  out << "<br>Minimal Groebner basis algorithm 1:";
-  for(int i=0; i<outputGroebner.size; i++)
-    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
+//  out << "<br>Minimal Groebner basis algorithm 1:";
+//  for(int i=0; i<outputGroebner.size; i++)
+//    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
+//  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
   out << "<br>Minimal Groebner basis algorithm 2:";
   for(int i=0; i<outputGroebner2.size; i++)
     out3 << outputGroebner2[i].ToString(&theFormat) << ", ";

@@ -1856,9 +1856,9 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     << theg2b3data.selInducing.ToString() << "} "
     << "Decompositions of inducing $\\mathfrak{p}" << "_{"
     << theg2b3data.selInducing.ToString()
-    <<  "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
+    << "}" << "$-modules over $\\bar{ \\mathfrak {l}}$"
     << ", where $\\mathfrak{l}$ is the reductive Levi part of "
-    <<   "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.ToString()
+    << "$\\mathfrak{p}" << "_{" << theg2b3data.selInducing.ToString()
     <<  "}$ and $\\bar{\\mathfrak {l}}$ is the reductive Levi part of $\\bar{\\mathfrak {p}} _{"
     << theg2b3data.selSmallParSel.ToString()  << "}$" << " } \\\\"
     << "\\hline $V_\\lambda(\\mathfrak l)$ " << "& Decomposition over $\\bar { \\mathfrak l}$ "
@@ -1891,7 +1891,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
     theCentralChars.Clear();
     for (int i=0; i<outputChar.size; i++)
     { if (!outputChar.theCoeffs[i].IsEqualToOne())
-        out << outputChar.theCoeffs[i].ToString()  << " x ";
+        out << outputChar.theCoeffs[i].ToString() << " x ";
       out << theg2b3data.WeylFDSmall.WeylDimFormulaSimpleCoords
       (theg2b3data.WeylFDSmall.AmbientWeyl.GetSimpleCoordinatesFromFundamental
       (outputChar[i].weightFundamentalCoords));
@@ -1932,7 +1932,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
       latexTable << "\\normalsize}";
       out << " </td>";
     }
-    out  << "</tr>";
+    out << "</tr>";
     latexTable << "\\\\\n <br>\n";
     latexTable << "\\hline";
   }

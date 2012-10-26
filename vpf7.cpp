@@ -167,7 +167,8 @@ void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
         { int currentIndex=this->theWeyl.RootSystem.GetIndex(theWeight);
           theIndex=this->GetRootIndexFromGenerator(theIndex);
           if (!this->Computed.elements[theIndex][currentIndex])
-          { std::cout << "This is a programming error. For some reason I am not computed. Here is me: "
+          { std::cout << "This is a programming error. For some reason I am not computed. "
+            << " Here is me: "
             << this->ToString() << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
@@ -227,7 +228,7 @@ void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGloba
 //    std::cout << "<br> [left,right]" << right.ToString();
 
   }
-  std::cout  << "Consistency check passed successfully!";
+  std::cout << "Consistency check passed successfully!";
 }
 
 
@@ -322,7 +323,8 @@ void charSSAlgMod<CoefficientType>::MakeFromWeight
  int inputIndexInOwner)
 { this->MakeZero(inputOwners, inputIndexInOwner);
   if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
-  { std::cout << "This is a programming error: attempting to create a character from highest weight in simple coords "
+  { std::cout << "This is a programming error: attempting to create a character "
+    << " from highest weight in simple coords "
     << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size
     << " coordinates) while the owner semisimple "
     << " Lie algebra is of rank " << this->GetOwner().GetRank()
@@ -1090,7 +1092,8 @@ void ModuleSSalgebra<CoefficientType>::GetAdActionHomogenousElT
     for (int j=0; j<currentWordList.size; j++)
     { std::stringstream progressStream;
       progressStream << "Computing action of " << generatorString << " on weight layer "
-      << i+1 << " out of " << this->theGeneratingWordsGrouppedByWeight.size << ", word " << j+1 << " out of " << currentWordList.size
+      << i+1 << " out of " << this->theGeneratingWordsGrouppedByWeight.size << ", word "
+      << j+1 << " out of " << currentWordList.size
       << "...";
       theGlobalVariables.MakeProgressReport(progressStream.str(), 2);
       ElementUniversalEnveloping<CoefficientType>& currentOutputWord=outputCurrentList[j];
@@ -1380,7 +1383,8 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   { intermediateAccum=*this;
     intermediateAccum.Simplify(theGlobalVariables, theRingUnit, theRingZero);
     if (logStream!=0)
-      *logStream << "intermediate after simplification: " << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat)
+      *logStream << "intermediate after simplification: "
+      << intermediateAccum.ToString(&theGlobalVariables.theDefaultFormat)
       << "<br>";
     intermediateAccum.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
     MonomialUniversalEnveloping<CoefficientType>& rightMon=MTright[j];
@@ -1417,20 +1421,6 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
     *logStream << "final UE element: " << Accum.ToString(&theGlobalVariables.theDefaultFormat);
   return true;
 }
-
-/*template <class CoefficientType>
-bool ElementUniversalEnveloping<CoefficientType>::
-GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<CoefficientType> >& output)
-{ output.MakeZero();
-  MonomialCollection<MonomialTensor<CoefficientType> > pbwmon, singlemon;
-  MonomialTensor tempMon;
-  for (int i=0; i<this->size; i++)
-  { pbwmon.MakeOne();
-    for (int j=0; j<(*this)[i].generatorsIndices.size; j++)
-    { singlemon.
-    }
-  }
-}*/
 
 int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
@@ -1739,9 +1729,9 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
 std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/"
-  << 1118
+  << 1121
   << "/tree/trunk/"
-  << CGI::RemovePathFromFileName(fileName) << "?view=markup\">"
+  << CGI::RemovePathFromFileName(fileName) << "\">"
   << CGI::RemovePathFromFileName(fileName);
   if (fileDesc!="")
     out << " (" << fileDesc << ")";
@@ -1770,7 +1760,9 @@ std::string ProjectInformation::ToString()
   Simplifying the installation procedure is on our to-do list. \
   <br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. \
   <br>1) Download the c++ files in the links above. Alternatively you can check out the program's "
-  << " svn repository. The svn check out command is  &nbsp&nbsp  svn co https://vectorpartition.svn.sourceforge.net/svnroot/vectorpartition vectorpartition &nbsp&nbsp."
+  << " svn repository. The svn check out command is  &nbsp&nbsp"
+  << " svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code"
+  << " &nbsp&nbsp."
   << "<br>2) Put them in a c++ project and make sure the following includes work:"
   << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. "
   << "They should work by default on almost any Linux distro. "
@@ -1836,11 +1828,13 @@ std::string CGI::GetHtmlMathSpanPure(const std::string& input)
   if (input.size()< 300)
     out << "<span class=\"math\">" << input << "</span>";
   else
-    out << "<b>LaTeX output is long and I dare not use jsmath. Here is the output as plain LaTeX.</b><br> " << input;
+    out << "<b>LaTeX output is long and I dare not use jsmath. "
+    << "Here is the output as plain LaTeX.</b><br> " << input;
   return out.str();
 }
 
-void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariables& theGlobalVariables)
+void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
+(GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups");
   this->WeylFDSmallAsSubInLarge.AmbientWeyl=this->theHmm.theRange().theWeyl;
   this->WeylFDSmall.AmbientWeyl=this->theHmm.theDomain().theWeyl;
@@ -1901,7 +1895,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       this->indicesNilradicalSmall.AddOnTop(i);
     }
   }
-//  std::cout << "<br>call stack look who is callng me: " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+//  std::cout << "<br>call stack look who is callng me: "
+//  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   this->NilModPreNil=this->nilradicalLarge;
   this->weightsNilModPreNil=this->weightsNilradicalLarge;
   Vector<Rational> proj;
@@ -1925,7 +1920,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups(GlobalVariab
       }
     }
     if (!isGood)
-    { std::cout << "This is either or a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
+    { std::cout << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
       << " is wrong. The question is, which is the more desirable case... The bad apple is element "
       << this->nilradicalSmall[i].ToString() << " of weight " << this->weightsNilradicalSmall[i].ToString()
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);

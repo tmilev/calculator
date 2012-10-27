@@ -42,9 +42,6 @@ bool CommandList::fSSsubalgebras
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return false;
   SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
-  char weylLetter=ownerSS.theWeyl.WeylLetter;
-  int theRank=ownerSS.theWeyl.GetDim();
-  WeylGroup& theWeyl=ownerSS.theWeyl;
   std::stringstream out;
   out << "not implemented";
   SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);

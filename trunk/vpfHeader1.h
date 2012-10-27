@@ -82,6 +82,8 @@ class Vector;
 template <class CoefficientType>
 class Vectors;
 class MonomialP;
+template <class TemplateMonomial, class CoefficientType>
+class MonomialCollection;
 template <class CoefficientType>
 class Polynomial;
 template <class CoefficientType>
@@ -3112,6 +3114,12 @@ ParallelComputing::GlobalPointerCounter++;
   }
   inline void operator=(const LargeIntUnsigned& right){LargeInt tempI; tempI=right; this->operator=(tempI); }
   inline void operator=(const Rational& right){this->Assign(right); }
+  inline bool operator==(const int other)
+  { if (other==0)
+      return this->IsEqualToZero();
+    Rational tempRat=other;
+    return this->IsEqualTo(other);
+  }
   inline bool operator==(const Rational& right)const{return this->IsEqualTo(right); }
   inline void operator+=(const Rational& r)
   { //static std::string tempS1, tempS2, tempS3, tempS4, tempS5, tempS6, tempS7;
@@ -4507,15 +4515,24 @@ std::iostream& operator <<(std::iostream& output, const Polynomial<Element>& inp
 }
 
 template <class TemplateMonomial, class CoefficientType>
+std::ostream& operator<<
+(std::ostream& output, const MonomialCollection<TemplateMonomial, CoefficientType>& theCollection)
+;
+
+template <class TemplateMonomial, class CoefficientType>
 class MonomialCollection : public HashedList<TemplateMonomial>
 {
 private:
   void AddOnTop(const MonomialP& tempP);//<-to guard the now unsafe base class method
   void Clear();//<-to guard the now unsafe base class method
+  friend std::ostream& operator<< <TemplateMonomial, CoefficientType>
+  (std::ostream& output,
+   const MonomialCollection<TemplateMonomial, CoefficientType>& theCollection)
+;
 public:
+  List<CoefficientType> theCoeffs;
   MonomialCollection(){};
   MonomialCollection(const MonomialCollection& other){this->operator=(other);}
-  List<CoefficientType> theCoeffs;
   bool NeedsBrackets()const{return this->size>1;}
   std::string ToString(FormatExpressions* theFormat=0)const;
   static unsigned int HashFunction(const MonomialCollection<TemplateMonomial, CoefficientType>& input)
@@ -4544,7 +4561,7 @@ public:
   }
   inline bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
-      if (this->theCoeffs[theIndex].IsEqualToZero())
+      if (this->theCoeffs[theIndex]==0)
       { this->PopIndexSwapWithLast(theIndex);
         this->theCoeffs.PopIndexSwapWithLast(theIndex);
         return true;
@@ -6243,7 +6260,7 @@ int MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomialNoCoeffCle
 { ///
 //  this->CheckNumCoeffsConsistency(__FILE__, __LINE__);
   ///
-  if (inputCoeff.IsEqualToZero() || inputMon.IsEqualToZero())
+  if (inputCoeff==0 || inputMon.IsEqualToZero())
     return -1;
   int j= this->GetIndex(inputMon);
   if (j>=this->size)

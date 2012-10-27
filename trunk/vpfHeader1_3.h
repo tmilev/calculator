@@ -389,6 +389,15 @@ public:
       assert(false);
     }
   }
+  bool operator==(int other)const
+  { ElementZmodP tempElt;
+    tempElt.theModulo=this->theModulo;
+    tempElt=(LargeInt) other;
+    return *this==other;
+  }
+  bool operator==(const ElementZmodP& other)const
+  { return this->theModulo==other.theModulo && this->theValue==other.theValue;
+  }
   void operator*=(const ElementZmodP& other)
   { if (this==&other)
     { ElementZmodP other=*this;

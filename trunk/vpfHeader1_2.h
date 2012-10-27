@@ -5969,8 +5969,53 @@ std::string MonomialGeneralizedVerma<CoefficientType>::ToString
   return out.str();
 }
 
-template <class TemplateMonomial, class Element>
-std::string MonomialCollection<TemplateMonomial, Element>::ToString
+template <class TemplateMonomial, class CoefficientType>
+std::ostream& operator<<
+  (std::ostream& output,
+   const MonomialCollection<TemplateMonomial, CoefficientType>& theCollection)
+{ if (theCollection.size==0)
+  { output << "0";
+    return output;
+  }
+  std::string tempS1, tempS2;
+  List<TemplateMonomial> sortedMons;
+  sortedMons=theCollection;
+  sortedMons.QuickSortDescending();
+//  out << "(hash: " << this->HashFunction() << ")";
+  int cutOffCounter=0;
+  std::string oldCustomTimes="";
+  for (int i=0; i<sortedMons.size; i++)
+  { TemplateMonomial& currentMon=sortedMons[i];
+    std::stringstream tempStream;
+    CoefficientType& currentCoeff=theCollection.theCoeffs[theCollection.GetIndex(currentMon)];
+    tempStream << currentCoeff;
+    tempS1=tempStream.str();
+    tempS2=currentMon.ToString();
+    if (tempS1=="1" && tempS2!="1")
+      tempS1="";
+    if (tempS1=="-1"&& tempS2!="1")
+      tempS1="-";
+    if(tempS2!="1")
+      tempS1+=tempS2;
+    if (i>0)
+    { if (tempS1.size()>0)
+      { if (tempS1[0]!='-')
+        { output << "+";
+          cutOffCounter+=1;
+        }
+      } else
+      { output << "+";
+        cutOffCounter+=1;
+      }
+    }
+    output << tempS1;
+    cutOffCounter+=tempS1.size();
+  }
+  return output;
+}
+
+template <class TemplateMonomial, class CoefficientType>
+std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
 (FormatExpressions* theFormat)const
 { if (this->size==0)
     return "0";
@@ -5994,7 +6039,7 @@ std::string MonomialCollection<TemplateMonomial, Element>::ToString
   }
   for (int i=0; i<sortedMons.size; i++)
   { TemplateMonomial& currentMon=sortedMons[i];
-    Element& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    CoefficientType& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
     if (currentCoeff.NeedsBrackets())
       tempS1="("+currentCoeff.ToString(theFormat)+ ")";
     else

@@ -89,8 +89,8 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras
 }
 
 void SemisimpleSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables)
-{ this->RemainingCandidates.init(this->theLetters.size);
-  for (int i=0; i<this->theLetters.size; i++)
+{ this->RemainingCandidates.init(this->theTypes.size);
+  for (int i=0; i<this->theTypes.size; i++)
     if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
     { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras.TheObjects[i];
       SemisimpleLieAlgebra& theSSLieAlgebra= theCurrentAlgebrasSl2s.owner[0];
@@ -118,11 +118,16 @@ void SemisimpleSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& t
 void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables)
 { this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
   slTwo tempSl2;
-  this->CandidatesPrincipalSl2ofSubalgebra.ReservE(this->theLetters.size);
-  this->theCandidateSubAlgebras.SetSize(this->theLetters.size);
-  for (int i=0; i<this->theLetters.size; i++)
-  { this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.MakeFromDynkinType
-    (this->theLetters[i], this->theRanks[i], &this->theMultiplicities[i]);
+  this->CandidatesPrincipalSl2ofSubalgebra.ReservE(this->theTypes.size);
+  this->theCandidateSubAlgebras.SetSize(this->theTypes.size);
+  List<char> theLetters;
+  List<int> theRanks;
+  List<int> theMults;
+  for (int i=0; i<this->theTypes.size; i++)
+  { this->theTypes[i].GetLettersTypesMults(theLetters, theRanks, theMults);
+    this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.MakeFromDynkinType
+    (theLetters, theRanks, &theMults);
+
     this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
     this->theCandidateSubAlgebras[i].owner[0].theWeyl=
     (this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl);
@@ -137,9 +142,7 @@ void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRan
 
 void SemisimpleSubalgebras::EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank)
 { this->GenerateAllPartitionsUpTo(theRank);
-  this->theLetters.size=0;
-  this->theMultiplicities.size=0;
-  this->theRanks.size=0;
+  this->theTypes.size=0;
   List<int> ranksBuffer, multiplicitiesBuffer;
   List<char> lettersBuffer;
   for (int i=0; i<this->thePartitionMultiplicities.size; i++)
@@ -153,9 +156,15 @@ void SemisimpleSubalgebras::GenerateAllDiagramsForPartitionRecursive
 { List<int>& partitionValues= this->thePartitionValues[indexPartition];
   List<int>& partitionMults= this->thePartitionMultiplicities[indexPartition];
   if (indexInPartition>= partitionValues.size)
-  { this->theLetters.AddOnTop(lettersBuffer);
-    this->theMultiplicities.AddOnTop(multiplicitiesBuffer);
-    this->theRanks.AddOnTop(ranksBuffer);
+  { DynkinSimpleType currentType;
+    DynkinType outputType;
+    outputType.MakeZero();
+    for (int i=0; i<ranksBuffer.size; i++)
+    { currentType.theLetter=lettersBuffer[i];
+      currentType.theRank=ranksBuffer[i];
+      outputType.AddMonomial(currentType, multiplicitiesBuffer[i]);
+    }
+    this->theTypes.AddOnTop(outputType);
     return;
   }
   Selection DistributionBetweenTheFourLetters;
@@ -209,7 +218,7 @@ void SemisimpleSubalgebras::GenerateAllDiagramsForPartitionRecursive
 }
 
 void SemisimpleSubalgebras::MatchRealSl2sToPartitionSl2s()
-{ this->IndicesMatchingSl2s.SetSize(this->theLetters.size);
+{ this->IndicesMatchingSl2s.SetSize(this->theTypes.size);
   for (int i=0; i<this->CandidatesPrincipalSl2ofSubalgebra.size; i++)
   { this->IndicesMatchingSl2s[i].size=0;
     for (int j=0; j<this->theSl2s.size; j++)
@@ -222,7 +231,7 @@ void SemisimpleSubalgebras::MatchActualSl2sFixedRootSAToPartitionSl2s
 (GlobalVariables& theGlobalVariables)
 { this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
   List<int> tempL;
-  this->IndicesMatchingActualSl2s.initFillInObject(this->theLetters.size, tempL);
+  this->IndicesMatchingActualSl2s.initFillInObject(this->theTypes.size, tempL);
   this->IndicesMatchingPartitionSl2s.initFillInObject(this->theSl2s.size, tempL);
   for (int i=0; i<this->theSl2s.size; i++)
   { slTwo& theSl2= this->theSl2s[i];
@@ -280,32 +289,15 @@ void SemisimpleSubalgebras::GenerateAllPartitionsDontInit(int theRank)
   this->GenerateAllPartitionsRecursive(theRank, theRank, buffer1, buffer2);
 }
 
-std::string SemisimpleSubalgebras::ElementToStringDynkinType(int theIndex)
-{ std::stringstream out;
-  for (int j=0; j<this->theLetters[theIndex].size; j++)
-  { int theMult= this->theMultiplicities[theIndex][j];
-    int theRank= this->theRanks[theIndex][j];
-    char theLetter= this->theLetters[theIndex][j];
-    if (theMult!=1)
-      out << theMult;
-    out << theLetter << "_" << theRank << " ";
-    if (j!=this->theLetters[theIndex].size-1)
-      out << "+ ";
-  }
-  return out.str();
-}
-
 std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
 (FormatExpressions* theFormat)
 { std::stringstream out;
   std::string tempS;
   out << "the candidate mults: "
   << this->thePartitionMultiplicities;
-  out << this->theRanks.size << " candidate subalgebras: ";
-  for (int i=0; i<this->theRanks.size; i++)
-  { out << this->theLetters[i] << "_" << this->theRanks[i] << ", ";
-  }
-
+  out << this->theTypes.size << " candidate subalgebras: ";
+  for (int i=0; i<this->theTypes.size; i++)
+    out << "<br>" << this->theTypes[i];
   for (int i =0; i<this->thePartitionValues.size; i++)
   { for (int j=0; j< this->thePartitionValues[i].size; j++)
     { int mult= this->thePartitionMultiplicities[i][j];
@@ -319,8 +311,8 @@ std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
     out << "\n<br>";
     out << "\n";
   }
-  for (int i=0; i<this->theLetters.size; i++)
-  { out << this->ElementToStringDynkinType(i) << "     Module decomposition: ";
+  for (int i=0; i<this->theTypes.size; i++)
+  { out << this->theTypes[i] << "     Module decomposition: ";
     slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra[i];
     theSl2.ElementToStringModuleDecomposition(false, true, tempS);
     out << tempS;
@@ -339,7 +331,7 @@ std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
   for (int i=0; i<this->theCandidateSubAlgebras.size; i++)
   { SltwoSubalgebras& currentSl2s= this->theCandidateSubAlgebras[i];
     if (currentSl2s.size>0)
-    { out << this->ElementToStringDynkinType(i);
+    { out << this->theTypes[i];
       if (this->RemainingCandidates.selected[i])
         out << " orbits fit\n";
       else

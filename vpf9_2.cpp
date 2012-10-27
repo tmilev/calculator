@@ -747,10 +747,10 @@ void WeylGroup::MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, 
 { WeylGroup tempW;
   this->CartanSymmetric.init(0, 0);
   for (int i=0; i<theLetters.size; i++)
-  { tempW.MakeArbitrary(theLetters.TheObjects[i], theRanks.TheObjects[i]);
+  { tempW.MakeArbitrary(theLetters[i], theRanks[i]);
     int numSummands=1;
     if (theMultiplicities!=0)
-      numSummands =theMultiplicities->TheObjects[i];
+      numSummands =(*theMultiplicities)[i];
     for (int j=0; j<numSummands; j++)
       this->CartanSymmetric.DirectSumWith(tempW.CartanSymmetric, (Rational) 0);
   }

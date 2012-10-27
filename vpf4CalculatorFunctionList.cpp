@@ -270,7 +270,7 @@ void CommandList::initPredefinedVars()
   ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)");
+   "PrintSemisimpleSubalgebras{}(A_2)", false);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

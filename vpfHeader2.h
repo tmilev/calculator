@@ -1312,7 +1312,8 @@ static bool TypeHighestWeightParabolic
    ;
   void AddNonBoundVarMustBeNew
   (const std::string& theName, const Function::FunctionAddress& funHandler,
-   const std::string& argList, const std::string& description, const std::string& exampleArgs)
+   const std::string& argList, const std::string& description, const std::string& exampleArgs,
+   bool visible=true)
    ;
 //  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
 //    if (theIndex!=this->theNonBoundVars.size-1)

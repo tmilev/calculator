@@ -51,20 +51,79 @@ public:
   void ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
+class DynkinSimpleType
+{ friend std::ostream& operator << (std::ostream& output, const DynkinSimpleType& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  char theLetter;
+  int theRank;
+  DynkinSimpleType():theLetter('X'), theRank(-1){}
+  bool operator>(const DynkinSimpleType& other)const
+  { if (this->theRank>other.theRank)
+      return true;
+    if (this->theRank<other.theRank)
+      return false;
+    if (this->theLetter=='B' && other.theLetter=='D')
+      return true;
+    if (this->theLetter=='D' && other.theLetter=='B')
+      return false;
+    return this->theLetter>other.theLetter;
+  }
+  void operator=(const DynkinSimpleType& other)
+  { this->theLetter=other.theLetter;
+    this->theRank=other.theRank;
+  }
+  bool operator==(const DynkinSimpleType& other)const
+  { return this->theLetter==other.theLetter && this->theRank==other.theRank;
+  }
+  static unsigned int HashFunction(const DynkinSimpleType& input)
+  { return ((unsigned int) input.theLetter)*2+input.theRank;
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  inline bool IsEqualToZero()const
+  { return false;
+  }
+  std::string ToString()const
+  { std::stringstream out;
+    if (theRank>=10)
+      out << theLetter << "_{" << theRank << "}";
+    else
+      out << theLetter << "_" << theRank;
+    return out.str();
+  }
+};
+
+class DynkinType : public MonomialCollection<DynkinSimpleType, int>
+{
+public:
+  void GetLettersTypesMults (List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults)
+  { outputLetters.SetSize(0);
+    outputRanks.SetSize(0);
+    outputMults.SetSize(0);
+    for (int i=0; i<this->size; i++)
+    { outputLetters.AddOnTop((*this)[i].theLetter);
+      outputRanks.AddOnTop((*this)[i].theRank);
+      outputMults.AddOnTop(this->theCoeffs[i]);
+    }
+  }
+};
+
 class SemisimpleSubalgebras
 {
 public:
   SltwoSubalgebras theSl2s;
   List<SemisimpleLieAlgebra>* owner;
   int indexInOwner;
-  List<Vectors<Rational> >  theHcandidates;
+  List<Vectors<Rational> > theHcandidates;
   int indexLowestUnexplored;
   SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
   Selection RemainingCandidates;
 //  List<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
-  List<List<int> > theRanks;
-  List<List<char> > theLetters;
-  List<List<int> > theMultiplicities;
+  List<DynkinType> theTypes;
   List<List<int> > thePartitionValues;
   List<List<int> > thePartitionMultiplicities;
   List<SltwoSubalgebras> theCandidateSubAlgebras;
@@ -95,7 +154,6 @@ public:
   void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
   void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
   std::string ElementToStringCandidatePrincipalSl2s(FormatExpressions* theFormat=0);
-  std::string ElementToStringDynkinType(int theIndex);
   void FindTheSSSubalgebras
 (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
   ;

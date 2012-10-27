@@ -5807,11 +5807,14 @@ std::string Function::ToString(CommandList& theBoss)const
 std::string CommandList::ToStringFunctionHandlers()
 { std::stringstream out;
   out << "\n <b>Handler functions (" << this->theFunctions.size << " total).</b><br>\n";
+  bool found=false;
   for (int i=0; i<this->theFunctions.size; i++)
-  { out << "\n" << this->theFunctions[i].ToString(*this);
-    if (i!=this->theFunctions.size-1)
-      out << "<br>";
-  }
+    if (this->theFunctions[i].flagNameIsVisible)
+    { if (found)
+        out << "<br>";
+      found=true;
+      out << "\n" << this->theFunctions[i].ToString(*this);
+    }
   return out.str();
 }
 
@@ -5861,9 +5864,11 @@ std::string CommandList::ToString()
   << "<br> Number HashedList hash resizing: " << NumHashResizes;
   out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
   << " (# successful calls Rational::TryToAddQuickly)";
-  out2 << "<br>Number small rational number multiplications: " << Rational::TotalSmallMultiplications
+  out2 << "<br>Number small rational number multiplications: "
+  << Rational::TotalSmallMultiplications
   << " (# successful calls Rational::TryToMultiplyQuickly)";
-  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls << " (# calls of Rational::gcd)";
+  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls
+  << " (# calls of Rational::gcd)";
   out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions
   << " (# calls LargeIntUnsigned::AddNoFitSize)";
   out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications
@@ -5873,7 +5878,8 @@ std::string CommandList::ToString()
   #endif
   out2 << "<hr>" << this->ToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>."
-  << "The object container is the data structure storing all c++ built-in data types requested by the user<br> "
+  << "The object container is the data structure storing all c++ built-in data types "
+  << " requested by the user<br> "
   << this->theObjectContainer.ToString();
   out << "<hr>Control sequences (" << this->controlSequences.size << " total):\n<br>\n";
   for (int i=0; i<this->controlSequences.size; i++)
@@ -5901,7 +5907,8 @@ std::string CommandList::ToString()
   for (int k=0; k<this->theExpressionContext.size; k++)
   { ExpressionContext& currentContext=this->theExpressionContext[k];
     out <<"<hr>" << "Context " << k+1;
-    out << "<br>\n Cached expressions (" << currentContext.cachedExpressions.size << " total):\n<br>\n";
+    out << "<br>\n Cached expressions (" << currentContext.cachedExpressions.size
+    << " total):\n<br>\n";
     for (int i=0; i<currentContext.cachedExpressions.size; i++)
     { out << currentContext.cachedExpressions[i].ToString(0, false, false, 0, false)
       << " -> " << currentContext.imagesCachedExpressions[i].ToString(0, false, false, 0, false);
@@ -6345,9 +6352,10 @@ void CommandList::initDefaultFolderAndFileNames
 
 void CommandList::AddNonBoundVarMustBeNew
   (const std::string& theName, const Function::FunctionAddress& funHandler,
-   const std::string& argList, const std::string& description, const std::string& exampleArgs)
+   const std::string& argList, const std::string& description, const std::string& exampleArgs,
+   bool visible)
 { VariableNonBound theV;
-  Function theF(funHandler, theName, argList, description, exampleArgs, true);
+  Function theF(funHandler, theName, argList, description, exampleArgs, visible);
   theV.HandlerFunctionIndex= this->theFunctions.AddNoRepetitionOrReturnIndexFirst(theF);
   theV.theName=theName;
   this->theObjectContainer.theNonBoundVars.AddNoRepetition(theV);

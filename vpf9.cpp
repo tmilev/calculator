@@ -3998,7 +3998,8 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>
     output.elements[7][4]=RHalf;
   }
   if (WeylLetter=='F')
-  { //convention different from Humpreys, Introduction to Lie algebras and representation theory, page 65
+  { //convention different from Humpreys, Introduction to Lie algebras and representation
+    //theory, page 65
     //rather using our own version
     output.init(4, 4);
     output.NullifyAll();

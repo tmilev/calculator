@@ -193,10 +193,16 @@ void CommandList::initPredefinedVars()
    the other more efficient implementations).",
    "KLcoeffs{}(B_3)");
   this->AddNonBoundVarMustBeNew
-  ("printSlTwoSubalgebrasAndRootSubalgebras", & this->fRootSAsAndSltwos, "",
+  ("printRootSubalgebras", &this->fprintRootSAs, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
-   "printSlTwoSubalgebrasAndRootSubalgebras{}(E_6)");
+   "printRootSubalgebras{}(E_6)");
+  this->AddNonBoundVarMustBeNew
+  ("printSlTwoSubalgebras", &this->fprintSltwos, "",
+   "Prints sl(2) subalgebras and root subalgebras. \
+   The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
+   "printSlTwoSubalgebras{}(E_6)");
+
    this->AddNonBoundVarMustBeNew
   ("parabolicsInfoBruhatGraph", &this->fParabolicWeylGroupsBruhatGraph, "",
    " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
@@ -270,7 +276,7 @@ void CommandList::initPredefinedVars()
   ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)", false);
+   "PrintSemisimpleSubalgebras{}(A_2)", true);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

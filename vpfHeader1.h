@@ -4003,7 +4003,7 @@ bool GetNormalSeparatingCones
     for (int i=0; i<this->size; i++)
       output+=this->TheObjects[i];
   }
-  void GetCoordsInBasis
+  bool GetCoordsInBasis
   (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& outputCoords,
    Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
@@ -4197,6 +4197,8 @@ public:
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   std::string simpleRootLetter;
+  std::string physicalPath;
+  std::string htmlPathServer;
   List<std::string> polyAlphabeT;
   std::string GetPolyLetter(int index)const;
   std::string GetChevalleyHletter(int index)const;
@@ -7077,14 +7079,17 @@ std::string Vectors<CoefficientType>::ElementsToInequalitiesString
 }
 
 template <class CoefficientType>
-void Vectors<CoefficientType>::GetCoordsInBasis
+bool Vectors<CoefficientType>::GetCoordsInBasis
 (const Vectors<CoefficientType>& inputBasis, Vectors<CoefficientType>& outputCoords,
  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { assert(this!=&outputCoords);
   outputCoords.SetSize(this->size);
   for(int i=0; i<this->size; i++)
-    this->TheObjects[i].GetCoordsInBasiS(inputBasis, outputCoords.TheObjects[i], bufferVectors, bufferMat, theRingUnit, theRingZero);
+    if (!(*this)[i].GetCoordsInBasiS
+    (inputBasis, outputCoords[i], bufferVectors, bufferMat, theRingUnit, theRingZero))
+      return false;
+  return true;
 }
 
 template <class CoefficientType>
@@ -7133,8 +7138,8 @@ bool Vector<CoefficientType>::GetIntegralCoordsInBasisIfTheyExist
 template <class CoefficientType>
 bool Vector<CoefficientType>::GetCoordsInBasiS
 (const Vectors<CoefficientType>& inputBasis, Vector<CoefficientType>& output,
-  Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
-  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ Vectors<CoefficientType>& bufferVectors, Matrix<CoefficientType>& bufferMat,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { bufferVectors.size=0;
   bufferVectors.AddListOnTop(inputBasis);
   bufferVectors.AddOnTop(*this);

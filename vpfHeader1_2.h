@@ -1160,7 +1160,9 @@ public:
   void FindQuotientRepresentatives(int UpperLimit);
   void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
   template <class CoefficientType>
-  bool GenerateOrbitReturnFalseIfTruncated(const Vector<CoefficientType>& input, Vectors<CoefficientType>& outputOrbit, int UpperLimitNumElements);
+  bool GenerateOrbitReturnFalseIfTruncated
+  (const Vector<CoefficientType>& input, Vectors<CoefficientType>& outputOrbit,
+   int UpperLimitNumElements);
   bool ComputeSubGroupFromGeneratingReflections
   (Vectors<Rational>* inputGenerators, List<Vectors<Rational> >* inputExternalAutos,
    GlobalVariables* theGlobalVariables, int UpperLimitNumElements,
@@ -1237,7 +1239,7 @@ public:
   static std::string GetDiagramAndAlgebraName
   (const std::string& WeylLetterWithLength, int WeylRank)
   {return DynkinDiagramRootSubalgebra::GetNameFrom(WeylLetterWithLength, WeylRank, true);}
-  List<Vectors<Rational> >  SimpleBasesConnectedComponents;
+  List<Vectors<Rational> > SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
   List<std::string> DynkinTypeStrings;
@@ -1271,15 +1273,12 @@ public:
   void ComputeDynkinString
 (int indexComponent, WeylGroup& theWeyl)
   ;
-  void GetKillingFormMatrixUseBourbakiOrder(Matrix<Rational> & output, WeylGroup& theWeyl);
   int numberOfThreeValencyNodes(int indexComponent, WeylGroup& theWeyl);
   void Assign(const DynkinDiagramRootSubalgebra& right);
   inline void operator=(const DynkinDiagramRootSubalgebra& right){this->Assign(right); }
   bool operator==(const DynkinDiagramRootSubalgebra& right) const;
   bool IsGreaterThan(DynkinDiagramRootSubalgebra& right);
   Rational GetSizeCorrespondingWeylGroupByFormula();
-  void GetSimpleBasisInBourbakiOrder(Vectors<Rational>& output);
-  void GetSimpleBasisInBourbakiOrderOneComponentAppend(Vectors<Rational>& outputAppend, int index);
   void GetAutomorphism(List<List<int> >& output, int index);
   void GetAutomorphisms(List<List<List<int> > >& output);
   void GetMapFromPermutation(Vectors<Rational>& domain, Vectors<Rational>& range, List<int>& thePerm, List<List<List<int> > >& theAutos, SelectionWithDifferentMaxMultiplicities& theAutosPerm, DynkinDiagramRootSubalgebra& right);
@@ -1413,8 +1412,8 @@ public:
   Vectors<Rational> SimpleBasisCentralizerRoots;
   Vectors<Rational> SimpleBasisKEpsCoords;
   Vectors<Rational> SimpleBasisgEpsCoords;
-  List<Vectors<Rational> >  kModulesKepsCoords;
-  List<Vectors<Rational> >  kModulesgEpsCoords;
+  List<Vectors<Rational> > kModulesKepsCoords;
+  List<Vectors<Rational> > kModulesgEpsCoords;
   List<Vectors<Rational> > kModules;
   List<Vectors<Rational> > PosRootsKConnectedComponents;
   List<Selection> theKEnumerations;
@@ -1422,19 +1421,20 @@ public:
   std::string DebugString;
   rootSubalgebra();
   //returns -1 if the weight/Vector<Rational>  is not in g/k
-  int GetIndexKmoduleContainingRoot(Vector<Rational> & input);
+  int GetIndexKmoduleContainingRoot(Vector<Rational>& input);
   void GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
   ;
-  void GetCoxeterElement(Matrix<Rational> & output);
+  void GetCoxeterElement(Matrix<Rational>& output);
   bool IsGeneratingSingularVectors(int indexKmod, Vectors<Rational>& NilradicalRoots);
-  bool rootIsInCentralizer(Vector<Rational> & input);
-  bool IsBKhighest(Vector<Rational> & input);
-  bool rootIsInNilradicalParabolicCentralizer(Selection& positiveSimpleRootsSel, Vector<Rational> & input);
+  bool rootIsInCentralizer(Vector<Rational>& input);
+  bool IsBKhighest(Vector<Rational>& input);
+  bool rootIsInNilradicalParabolicCentralizer
+  (Selection& positiveSimpleRootsSel, Vector<Rational>& input);
   void ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables);
   bool AttemptTheTripleTrick(coneRelation& theRel, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
   bool AttemptTheTripleTrickWRTSubalgebra(coneRelation& theRel, Vectors<Rational>& highestWeightsAllowed, Vectors<Rational>& NilradicalRoots, GlobalVariables& theGlobalVariables);
-  void ExtractRelations(Matrix<Rational> & matA, Matrix<Rational> & matX, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, Vectors<Rational>& Ksingular);
+  void ExtractRelations(Matrix<Rational>& matA, Matrix<Rational>& matX, Vectors<Rational>& NilradicalRoots, rootSubalgebras& owner, int indexInOwner, GlobalVariables& theGlobalVariables, Vectors<Rational>& Ksingular);
   bool GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms, bool actOnCentralizerOnly);
   void GenerateAutomorphismsPreservingBorel(GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup& outputAutomorphisms);
   void MakeGeneratingSingularVectors(coneRelation& theRelation, Vectors<Rational>& nilradicalRoots);
@@ -1482,11 +1482,13 @@ public:
   void ComputeAll();
   void ComputeRootsOfK();
   void ComputeKModules();
-  void ComputeHighestWeightInTheSameKMod(Vector<Rational> & input, Vector<Rational> & outputHW);
-  void ComputeExtremeWeightInTheSameKMod(Vector<Rational> & input, Vector<Rational> & outputW, bool lookingForHighest);
-  inline void operator=(const rootSubalgebra& right){this->Assign(right); }
+  void ComputeHighestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputHW);
+  void ComputeExtremeWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputW, bool lookingForHighest);
+  inline void operator=(const rootSubalgebra& right)
+  { this->Assign(right);
+  }
   void Assign(const rootSubalgebra& right);
-  void ComputeLowestWeightInTheSameKMod(Vector<Rational> & input, Vector<Rational> & outputLW);
+  void ComputeLowestWeightInTheSameKMod(Vector<Rational>& input, Vector<Rational>& outputLW);
   void GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnumeration, GlobalVariables& theGlobalVariables);
 //  void commonCodeForGetLinearCombinationFromMaxRankRootsAndExtraRoot();
   void initForNilradicalGeneration();
@@ -1613,35 +1615,34 @@ public:
 class slTwo
 {
 public:
-  std::string DebugString;
-  std::string ToString(FormatExpressions* theFormat);
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal);
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, bool useLatex, bool useHtml, FormatExpressions& PolyFormatLocal){ this->ToString(output, theGlobalVariables, container, 0, useLatex, useHtml, false, 0, 0, PolyFormatLocal);}
-  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
-  void ComputeDebugString(bool useHtml, bool useLatex, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container){ FormatExpressions PolyFormatLocal; this->ToString(this->DebugString, theGlobalVariables, container, useLatex, useHtml, PolyFormatLocal); }
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
   ElementSemisimpleLieAlgebra theH, theE, theF;
   ElementSemisimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
   SemisimpleLieAlgebra* owner;
+  SltwoSubalgebras* container;
+  int indexInContainer;
   List<int> IndicesContainingRootSAs;
   List<int> IndicesMinimalContainingRootSA;
   List<List<int> > HighestWeightsDecompositionMinimalContainingRootSA;
   List<List<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
   Vectors<Rational> preferredAmbientSimpleBasis;
-  Vector<Rational>  hCharacteristic;
-  Vector<Rational>  hElementCorrespondingToCharacteristic;
+  Vector<Rational> hCharacteristic;
+  Vector<Rational> hElementCorrespondingToCharacteristic;
   Vectors<Rational> hCommutingRootSpaces;
   Vectors<Rational> RootsHavingScalarProduct2WithH;
   DynkinDiagramRootSubalgebra DiagramM;
   DynkinDiagramRootSubalgebra CentralizerDiagram;
   PolynomialSubstitution<Rational> theSystemToBeSolved;
-  Matrix<Rational>  theSystemMatrixForm;
-  Matrix<Rational>  theSystemColumnVector;
+  Matrix<Rational> theSystemMatrixForm;
+  Matrix<Rational> theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
+  slTwo(): owner(0), indexInContainer(-1){}
+  std::string ToString(FormatExpressions* theFormat=0);
+  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
+  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
   void ComputeModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
@@ -1653,32 +1654,36 @@ public:
   void ElementToHtml(std::string& filePath);
   void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
   void operator=(const slTwo& right)
-  { this->highestWeights=(right.highestWeights);
-    this->multiplicitiesHighestWeights=(right.multiplicitiesHighestWeights);
-    this->weightSpaceDimensions=(right.weightSpaceDimensions);
-    this->HighestWeightsDecompositionMinimalContainingRootSA=(right.HighestWeightsDecompositionMinimalContainingRootSA);
-    this->MultiplicitiesDecompositionMinimalContainingRootSA=(right.MultiplicitiesDecompositionMinimalContainingRootSA);
-    this->hCommutingRootSpaces=(right.hCommutingRootSpaces);
-    this->CentralizerDiagram.Assign(right.CentralizerDiagram);
-    this->DiagramM.Assign(right.DiagramM);
-    this->hCommutingRootSpaces=(right.hCommutingRootSpaces);
+  { this->highestWeights=right.highestWeights;
+    this->multiplicitiesHighestWeights=right.multiplicitiesHighestWeights;
+    this->weightSpaceDimensions=right.weightSpaceDimensions;
+    this->HighestWeightsDecompositionMinimalContainingRootSA=
+    right.HighestWeightsDecompositionMinimalContainingRootSA;
+    this->MultiplicitiesDecompositionMinimalContainingRootSA=
+    right.MultiplicitiesDecompositionMinimalContainingRootSA;
+    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
+    this->CentralizerDiagram=right.CentralizerDiagram;
+    this->DiagramM=right.DiagramM;
+    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
     this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
     this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
     this->DynkinsEpsilon=right.DynkinsEpsilon;
-    this->hCharacteristic=(right.hCharacteristic);
-    this->hElementCorrespondingToCharacteristic=(right.hElementCorrespondingToCharacteristic);
-    this->owner = right.owner;
-    this->theE= right.theE;
-    this->theH= right.theH;
-    this->theF= right.theF;
-    this->bufferEbracketF= right.bufferEbracketF;
+    this->hCharacteristic=right.hCharacteristic;
+    this->hElementCorrespondingToCharacteristic=right.hElementCorrespondingToCharacteristic;
+    this->owner=right.owner;
+    this->theE=right.theE;
+    this->theH=right.theH;
+    this->theF=right.theF;
+    this->bufferEbracketF=right.bufferEbracketF;
     this->bufferHbracketE=right.bufferHbracketE;
     this->bufferHbracketF=right.bufferHbracketF;
     this->theSystemToBeSolved=right.theSystemToBeSolved;
     this->theSystemMatrixForm=right.theSystemMatrixForm;
-    this->theSystemColumnVector= right.theSystemColumnVector;
-    this->IndicesContainingRootSAs=(right.IndicesContainingRootSAs);
-    this->preferredAmbientSimpleBasis= right.preferredAmbientSimpleBasis;
+    this->theSystemColumnVector=right.theSystemColumnVector;
+    this->IndicesContainingRootSAs=right.IndicesContainingRootSAs;
+    this->preferredAmbientSimpleBasis=right.preferredAmbientSimpleBasis;
+    this->container=right.container;
+    this->indexInContainer=right.indexInContainer;
   }
   bool  operator==(const slTwo& right)
   {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
@@ -1688,7 +1693,7 @@ public:
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result=0;
     for (int i=0; i<tempI; i++)
-      result+= this->hCharacteristic.TheObjects[i].NumShort*SomeRandomPrimes[i];
+      result+= this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
   static inline unsigned int HashFunction(const slTwo& input)
@@ -1700,7 +1705,7 @@ class VectorPartition
 {
 public:
   Vectors<Rational> PartitioningRoots;
-  Vector<Rational>  theRoot;
+  Vector<Rational> theRoot;
   //format: each element of thePartitions gives an array whose entries give
   // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions.TheObjects[0]
   // would have 2 elements: the first giving the multiplicity of PartitioningRoots.TheObjects[0] and the second - the multiplicity of
@@ -1708,7 +1713,9 @@ public:
   List<List<int> > thePartitions;
   std::string DebugString;
   std::string ToString(bool useHtml);
-  void ComputeDebugString(bool useHtml){this->DebugString=this->ToString(useHtml);}
+  void ComputeDebugString(bool useHtml)
+  { this->DebugString=this->ToString(useHtml);
+  }
   int ComputeVectorPartitionFunctionSmall(Vector<Rational> & theRoot, Vectors<Rational>& theRoots);
   void ComputeAllPartitions();
   void ComputeAllPartitionsRecursive(int currentIndex, List<int>& CurrentPartition, int UpperBoundEachIndex, Vector<Rational> & toBePartitioned);

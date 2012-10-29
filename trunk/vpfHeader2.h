@@ -1299,8 +1299,21 @@ static bool TypeHighestWeightParabolic
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fRootSAsAndSltwos
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments, bool showSLtwos)
 ;
+  static bool fprintRootSAs
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
+  { return theCommands.fRootSAsAndSltwos
+    (theCommands, inputIndexBoundVars, theExpression, comments, false);
+  }
+  static bool fprintSltwos
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
+  { return theCommands.fRootSAsAndSltwos
+    (theCommands, inputIndexBoundVars, theExpression, comments, true);
+  }
   static bool fSSsubalgebras
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;

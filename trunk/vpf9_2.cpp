@@ -508,24 +508,25 @@ Vector<Rational> ElementSemisimpleLieAlgebra::GetCartanPart
 }
 
 void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
-{ int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
+{ MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
+  int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
   tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
-  theDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
   this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
   this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
-  tempDiagram.GetSimpleBasisInBourbakiOrder(this->preferredAmbientSimpleBasis);
+  this->preferredAmbientSimpleBasis=tempRoots;
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
-    this->hCharacteristic.TheObjects[i]=
-    this->owner->theWeyl.RootScalarCartanRoot(this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
+    this->hCharacteristic[i]=
+    this->owner->theWeyl.RootScalarCartanRoot
+    (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
   //this->hCharacteristic.ComputeDebugString();
 //  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
@@ -609,62 +610,6 @@ Rational WeylGroup::GetSizeWeylByFormula(char weylLetter, int theDim)
   if (weylLetter=='G')
     theOutput=12;
   return theOutput;
-}
-
-void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrder(Vectors<Rational>& output)
-{ output.size=0;
-  output.ReservE(this->RankTotal());
-  for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    this->GetSimpleBasisInBourbakiOrderOneComponentAppend(output, i);
-}
-
-void DynkinDiagramRootSubalgebra::GetSimpleBasisInBourbakiOrderOneComponentAppend(Vectors<Rational>& outputAppend, int index)
-{ std::string& theString= this->DynkinTypeStrings.TheObjects[index];
-  // the order implemented here I took from the atlas of lie groups (http://www.liegroups.org/dissemination/spherical/explorer/rootSystem.cgi)
-  // which should be the Bourbaki order. The order is as follows:
-  // type A all Vectors<Rational> are from left to right (or the other way round, whichever is your orientation)
-  // in type B first comes the long Vectors<Rational> in the order they appear in the diagram;
-  // in types C,
-  // Types F and G there were some recent changes due to different order choice in different parts of the code.
-  // The info for F and G needs to be updated!
-  // in type D first comes the long string, with the end node with lowest index;
-  // then come the two end one-Vector<Rational> strings in any order.
-  // in type E the order is as below
-  //  2
-  //13456(78)
-  //(2 is connected to 4)
-  //The format of this function is in accordance with WeylGroup::GetEpsilonMatrix
-  assert(theString.size()>0);
-  if (theString.at(0)=='A'|| theString.at(0)=='B' || theString.at(0)=='G')
-    outputAppend.AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[index]);
-  if (theString.at(0)=='C' || theString.at(0)=='F')
-    for (int i=this->SimpleBasesConnectedComponents.TheObjects[index].size-1; i>=0; i--)
-      outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
-  if (theString.at(0)=='D')
-  { int componentRank=this->SimpleBasesConnectedComponents.TheObjects[index].size;
-    for (int i=componentRank-3; i>=0; i--)
-      outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
-    outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-2]);
-    outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-1]);
-  }
-  if (theString.at(0)=='E')
-  { int componentRank=this->SimpleBasesConnectedComponents.TheObjects[index].size;
-    outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-2]);
-    outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-1]);
-    outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[componentRank-3]);
-    for (int i=0; i<componentRank-3; i++)
-      outputAppend.AddOnTop(this->SimpleBasesConnectedComponents.TheObjects[index].TheObjects[i]);
-  }
-}
-
-void DynkinDiagramRootSubalgebra::GetKillingFormMatrixUseBourbakiOrder(Matrix<Rational> & output, WeylGroup& theWeyl)
-{ Vectors<Rational> tempRoots;
-  int theDimension= this->RankTotal();
-  output.init(theDimension, theDimension);
-  this->GetSimpleBasisInBourbakiOrder(tempRoots);
-  for (int i=0; i<theDimension; i++)
-    for (int j=0; j<theDimension; j++)
-      output.elements[i][j]=theWeyl.RootScalarCartanRoot(tempRoots.TheObjects[i], tempRoots.TheObjects[j]);
 }
 
 void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables)

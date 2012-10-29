@@ -1315,8 +1315,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
 (int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
   std::stringstream out;
-  Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents.TheObjects[indexComponent];
-  List<int>& currentEnds=this->indicesEnds.TheObjects[indexComponent];
+  Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
+  List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
   {//type D or E
     //in type D first comes the triple node, then the long string, then the one-Vector<Rational> strings
@@ -1326,8 +1326,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     // then comes the second longest string (oriented in the same fashion)
     // and last the one-Vector<Rational> string
     Vector<Rational> tripleNode;
-    int tripleNodeindex=this->indicesThreeNodes.TheObjects[indexComponent];
-    tripleNode=( currentComponent.TheObjects[tripleNodeindex]);
+    int tripleNodeindex=this->indicesThreeNodes[indexComponent];
+    tripleNode=(currentComponent[tripleNodeindex]);
     Vectors<Rational> tempRoots;
     tempRoots=(currentComponent);
     tempRoots.PopIndexSwapWithLast(tripleNodeindex);
@@ -1338,23 +1338,24 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     indicesLongComponents.size=0;
     Rational tempRat;
     for (int i=0; i<3; i++)
-    { if(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size>1)
+    { if(tempDiagram.SimpleBasesConnectedComponents[i].size>1)
         indicesLongComponents.AddOnTop(i);
-      theWeyl.RootScalarCartanRoot(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].TheObjects[0], currentComponent.TheObjects[tripleNodeindex], tempRat);
-      if (tempRat.IsEqualToZero())
-        tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].ReverseOrderElements();
+      if (theWeyl.RootScalarCartanRoot
+          (tempDiagram.SimpleBasesConnectedComponents[i][0],
+           currentComponent[tripleNodeindex]).IsEqualToZero())
+        tempDiagram.SimpleBasesConnectedComponents[i].ReverseOrderElements();
     }
     for(int i=0; i<3; i++)
       for(int j=i+1; j<3; j++)
-        if (tempDiagram.SimpleBasesConnectedComponents.TheObjects[i].size<tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
-        { tempRoots=(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+        if (tempDiagram.SimpleBasesConnectedComponents[i].size<tempDiagram.SimpleBasesConnectedComponents.TheObjects[j].size)
+        { tempRoots=(tempDiagram.SimpleBasesConnectedComponents[i]);
           tempDiagram.SimpleBasesConnectedComponents[i]=(tempDiagram.SimpleBasesConnectedComponents.TheObjects[j]);
           tempDiagram.SimpleBasesConnectedComponents[j]=(tempRoots);
         }
     currentComponent.size=0;
     currentComponent.AddOnTop(tripleNode);
     for (int i=0; i<3; i++)
-      currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents.TheObjects[i]);
+      currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents[i]);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
       out << this->SetComponent("D", currentComponent.size, indexComponent);
     else
@@ -1364,17 +1365,15 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     }
   }else
   { Rational length1, length2, tempRat;
-    theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[0], currentComponent.TheObjects[0], length1);
+    theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0], length1);
     int numLength1=1; int numLength2=0;
     for(int i=1; i<currentComponent.size; i++)
-    { theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[i], currentComponent.TheObjects[i],  tempRat);
-      if (tempRat.IsEqualTo(length1))
+      if (theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[i])==length1)
         numLength1++;
       else
       { numLength2++;
-        length2.Assign(tempRat);
+        length2=theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[i]);
       }
-    }
     if (numLength2==0 )
     { //type A
       if (length1.IsEqualTo(theWeyl.LongRootLength))
@@ -1388,13 +1387,13 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       int numGreaterLength=numLength2;
       int numSmallerLength=numLength1;
       greaterlength.Assign(length2);
-      if (length1.IsGreaterThan(length2))
+      if (length1>length2)
       { greaterlength.Assign(length1);
         numGreaterLength=numLength1;
         numSmallerLength=numLength2;
       }
-      theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[currentEnds.TheObjects[0]], currentComponent.TheObjects[currentEnds.TheObjects[0]], tempRat);
-      if (greaterlength.IsGreaterThan(tempRat))
+      if (greaterlength>theWeyl.RootScalarCartanRoot
+          (currentComponent[currentEnds[0]], currentComponent[currentEnds[0]]))
         currentEnds.SwapTwoIndices(0, 1);
       if (numLength1==numLength2)
       {//B2, C2, F4 or G2
@@ -1419,17 +1418,17 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
           out << this->SetComponent("C", currentComponent.size, indexComponent);
       }
     }
-    currentComponent.SwapTwoIndices(0, currentEnds.TheObjects[0]);
+    currentComponent.SwapTwoIndices(0, currentEnds[0]);
     for (int i=0; i<currentComponent.size; i++)
       for (int j=i+1; j<currentComponent.size; j++)
-      { theWeyl.RootScalarCartanRoot(currentComponent.TheObjects[i], currentComponent.TheObjects[j], tempRat);
+      { theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[j], tempRat);
         if (!tempRat.IsEqualToZero())
         { currentComponent.SwapTwoIndices(i+1, j);
           break;
         }
       }
   }
-  this->DynkinTypeStrings.TheObjects[indexComponent]=out.str();
+  this->DynkinTypeStrings[indexComponent]=out.str();
 }
 
 std::string DynkinDiagramRootSubalgebra::SetComponent(const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)

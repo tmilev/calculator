@@ -228,7 +228,8 @@ bool CommandList::fAnimateLittelmannPaths
 }
 
 bool CommandList::fRootSAsAndSltwos
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool showSLtwos)
 { //bool showIndicator=true;
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return false;
@@ -280,10 +281,12 @@ bool CommandList::fRootSAsAndSltwos
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
   } else
     out << "The table is precomputed and served from the hard disk. ";
-  out <<"<a href=\"" << outRootHtmlDisplayName.str() << "\">Root subalgebras displayed as a separate page. </a>";
-  out << "<iframe src=\"" << outRootHtmlDisplayName .str()<< "\" width=\"800\" height=\"600\" >"
-  << "</iframe>";
-
+  out <<"<a href=\""
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
+  << "\">See your printout in a separate page. </a>";
+  out << "<iframe src=\""
+  << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
+  << "\" width=\"800\" height=\"600\" ></iframe>";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

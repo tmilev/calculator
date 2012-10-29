@@ -1220,14 +1220,14 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
   for (int i=0; i<simpleBasisInput.size; i++)
   { int indexFirstComponentConnectedToRoot=-1;
     for (int j=0; j<this->SimpleBasesConnectedComponents.size; j++)
-      if (this->SimpleBasesConnectedComponents.TheObjects[j].ContainsARootNonPerpendicularTo
-          (simpleBasisInput.TheObjects[i], theWeyl.CartanSymmetric))
+      if (this->SimpleBasesConnectedComponents[j].ContainsARootNonPerpendicularTo
+          (simpleBasisInput[i], theWeyl.CartanSymmetric))
       { if (indexFirstComponentConnectedToRoot==-1)
         { indexFirstComponentConnectedToRoot=j;
-          this->SimpleBasesConnectedComponents.TheObjects[j].AddOnTop(simpleBasisInput.TheObjects[i]);
+          this->SimpleBasesConnectedComponents[j].AddOnTop(simpleBasisInput[i]);
         }
         else
-        { this->SimpleBasesConnectedComponents.TheObjects[indexFirstComponentConnectedToRoot].AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[j]);
+        { this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[j]);
           this->SimpleBasesConnectedComponents.PopIndexSwapWithLast(j);
           j--;
         }
@@ -1235,7 +1235,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
     if (indexFirstComponentConnectedToRoot==-1)
     { this->SimpleBasesConnectedComponents.SetSize(this->SimpleBasesConnectedComponents.size+1);
       this->SimpleBasesConnectedComponents.LastObject()->size=0;
-      this->SimpleBasesConnectedComponents.LastObject()->AddOnTop(simpleBasisInput.TheObjects[i]);
+      this->SimpleBasesConnectedComponents.LastObject()->AddOnTop(simpleBasisInput[i]);
     }
   }
   this->ComputeDynkinStrings(theWeyl);

@@ -77,7 +77,8 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 
 void SemisimpleSubalgebras::FindTheSSSubalgebras
 (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
-{ this->owner=newOwner;
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
+  this->owner=newOwner;
   this->indexInOwner=newIndexInOwner;
   int theRank=this->GetSSowner().GetRank();
   this->theSl2s.owner[0].FindSl2Subalgebras
@@ -343,123 +344,6 @@ std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
   return out.str();
 }
 
-std::string slTwo::ToString(FormatExpressions* theFormat)
-{ std::stringstream out;
-  std::string tempS;
-  out << "h-characteristic: " << this->hCharacteristic.ToString();
-  out << "<br>";
-  out << "\nSimple basis ambient algebra w.r.t defining h: " << tempS;
-  Vectors<Rational> tempRoots;
-  Matrix<Rational> tempMat;
-  out << "<br>";
-  if (this->IndicesContainingRootSAs.size>1)
-  { out << "Number of containing regular semisimple subalgebras: "
-    << this->IndicesContainingRootSAs.size;
-    out << "<br>";
-  }
-  FormatExpressions localFormat, latexFormat;
-  localFormat.flagUseHTML=true;
-  localFormat.flagUseLatex=true;
-  latexFormat.flagUseHTML=false;
-  latexFormat.flagUseLatex=true;
-  out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
-  out << "\nThe below list one possible realization of the sl(2) subalgebra.";
-  out << "\n<br>\n";
-  std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
-  tempS=this->theH.ToString(theFormat);
-  tempStreamH << "\n$h=$ $" << tempS << "$";
-  tempS= tempStreamH.str();
-  tempStreamE << "\n$e=$ $" << this->theE.ToString(theFormat) << "$";
-  tempS= tempStreamE.str();
-  tempStreamF << "\n$f=$ $" << this->theF.ToString(theFormat) << "$";
-  tempS= tempStreamF.str();
-  out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
-  out << "\n<br>\n";
-  tempStreamEF << "\n$[e, f]=$ $" << this->bufferEbracketF.ToString(theFormat) << "$";
-  tempS= tempStreamEF.str();
-  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(theFormat) << "$";
-  tempS= tempStreamHE.str();
-  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(theFormat) << "$";
-  tempS= tempStreamHF.str();
-  //this->theSystemMatrixForm.ToString(tempS);
-  //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
-  //this->theSystemColumnVector.ToString(tempS);
-  //out <<"\nColumn vector of the system:\n"<<tempS;
-  std::stringstream tempStreamActual;
-  for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { tempStreamActual
-    << CGI::GetHtmlMathSpanPure(this->theSystemToBeSolved[i].ToString(theFormat)+"=0")
-    << "<br>";
-  }
-  out << "\nThe system we need to solve:\n";
-  out << "\n<br>\n" << tempStreamActual.str();
-  return out.str();
-}
-
-std::string SltwoSubalgebras::ElementToStringNoGenerators
-(FormatExpressions* theFormat)
-{ std::string tempS; std::stringstream out;
-  std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple Vectors<Rational> w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
-  std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
-  std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a Vector<Rational> subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
-  std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
-  out << "Number of sl(2) subalgebras "<< this->size <<"\n";
-  out << "<br><br><table><tr><td style=\"padding-right:20px\">"
-  << CGI::ElementToStringTooltip("Characteristic", tooltipHchar)
-  << "</td><td align=\"center\" title=\"" << tooltipHvalue
-  << "\"> h</td><td style=\"padding-left:20px\" title=\""
-  << tooltipVDecomposition << "\"> Decomposition of ambient Lie algebra</td> <td>Minimal containing regular semisimple SAs</td><td title=\"" << tooltipContainingRegular << "\">Containing regular semisimple SAs in which the sl(2) has no centralizer</td> </tr>";
-  if (this->BadHCharacteristics.size>0)
-  { out << "<tr><td>Bad values of h</td><td>";
-    tempS= this->BadHCharacteristics.ToString();
-    out << tempS;
-    out << "</td></tr>";
-  }
-  for (int i=0; i<this->size; i++)
-  { slTwo& theSl2= this->TheObjects[i];
-    out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index" << i << "\"title=\"" << tooltipHchar << "\" >";
-    out << theSl2.hCharacteristic.ToString();
-    out << "</a></td><td title=\"" << tooltipHvalue << "\">";
-    out << theSl2.theH.GetCartanPart().ToString();
-    out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
-    theSl2.ElementToStringModuleDecomposition(false, true, tempS);
-    out << tempS;
-    out << "</td><td>";
-    for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
-    { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesMinimalContainingRootSA.TheObjects[j]];
-      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
-    }
-    out << "</td><td title=\"" << tooltipContainingRegular << "\">";
-    for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
-    { rootSubalgebra& currentSA= this->theRootSAs.TheObjects[theSl2.IndicesContainingRootSAs.TheObjects[j]];
-      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs.TheObjects[j] << ".html\">" << tempS << "</a>" << ";  ";
-    }
-    out <<"</td></tr>\n";
-  }
-  out << "</table><HR width=\"100%\">";
-  return out.str();
-}
-
-std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
-{ std::string tempS;
-  std::stringstream out;
-  std::stringstream body;
-  for (int i=0; i<this->size; i++)
-  { body << "<br>";
-    body << (*this)[i].ToString(theFormat);
-    body << "<HR width=\"100%\">";
-  }
-  out << "<br>";
-  tempS=this->ElementToStringNoGenerators(theFormat);
-  out << tempS;
-  tempS = body.str();
-  out << tempS;
-  return out.str();
-}
-
-
 void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
 { std::stringstream out;
   std::string tempS;
@@ -512,15 +396,29 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
   tempStream << (*physicalPath) << "fla";
   tempStream << container.texFileNamesForPNG.size << ".tex";
   container.texFileNamesForPNG.TheObjects[container.texFileNamesForPNG.size-1]=tempStream.str();
-  output << "<img src=\"" << (*htmlPathServer) << "fla" << container.texFileNamesForPNG.size << ".png\">";
+  output << "<img src=\"" << (*htmlPathServer) << "fla" << container.texFileNamesForPNG.size
+  << ".png\">";
   if (useHtml)
     output << "\n<br>\n";
 }
 
-void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer, FormatExpressions& PolyFormatLocal)
-{ std::stringstream out;  std::string tempS;
-  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<  this->hCharacteristic.ToString() << "</a>";
+std::string slTwo::ToString(FormatExpressions* theFormat)
+{ if (this->container==0)
+    return "sl(2) subalgebra not initialized.";
+  std::stringstream out;  std::string tempS;
+  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<
+  this->hCharacteristic.ToString() << "</a>";
   tempS=this->preferredAmbientSimpleBasis.ToString();
+  std::string* physicalPath=0;
+  std::string* htmlPathServer=0;
+  bool usePNG=true;
+  bool useHtml=true;
+  bool useLatex=false;
+  if (theFormat!=0)
+    if (theFormat->physicalPath!="")
+    { physicalPath=&theFormat->physicalPath;
+      htmlPathServer=&theFormat->htmlPathServer;
+    }
   if (physicalPath==0 || htmlPathServer==0)
   { usePNG=false;
     useHtml=false;
@@ -528,12 +426,12 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
   if (useHtml)
     out << "<br>";
   out << "\nSimple basis ambient algebra w.r.t defining h: " << tempS;
-  Vectors<Rational> tempRoots;
   Matrix<Rational> tempMat;
   if (useHtml)
     out << "<br>";
   if (this->IndicesContainingRootSAs.size>1)
-  { out << "Number of containing regular semisimple subalgebras: " << this->IndicesContainingRootSAs.size;
+  { out << "Number of containing regular semisimple subalgebras: "
+    << this->IndicesContainingRootSAs.size;
     if (useHtml)
     out << "<br>";
   }
@@ -544,78 +442,65 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
   latexFormat.flagUseLatex=true;
   for (int i=0; i<this->IndicesContainingRootSAs.size; i++)
   { out << "\nContaining regular semisimple subalgebra number " << i+1 << ": ";
-    rootSubalgebra& currentSA= container.theRootSAs.TheObjects[this->IndicesContainingRootSAs.TheObjects[i]];
+    rootSubalgebra& currentSA= this->container->theRootSAs[this->IndicesContainingRootSAs[i]];
     if (useHtml)
-    { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA" << this->IndicesContainingRootSAs.TheObjects[i] << ".html\">";
+    { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA"
+      << this->IndicesContainingRootSAs[i] << ".html\">";
       currentSA.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
       CGI::clearDollarSigns(tempS, tempS);
     }
-    currentSA.theDynkinDiagram.GetSimpleBasisInBourbakiOrder(tempRoots);
     out << tempS;
-    if(useHtml)
+    if (useHtml)
       out << "</a>";
-    tempS = tempRoots.ToString();
-    if (useHtml)
-      out << "<br>";
-    out << "\nSimple basis subalgebra: " << tempS;
-    currentSA.theDynkinDiagram.GetKillingFormMatrixUseBourbakiOrder(tempMat, this->owner->theWeyl);
-    if (!usePNG)
-      tempS=tempMat.ToString(&localFormat);
-    else
-    { std::stringstream tempStreamX;
-      tempS=tempMat.ToString(&latexFormat);
-      tempStreamX << "\\[" << tempS << "\\]";
-      tempS=tempStreamX.str();
-    }
-    if (useHtml)
-      out << "<br>";
-    out << "\nSymmetric Cartan matrix in Bourbaki order:\n";
-    if (useHtml)
-    { out << "<br>";
-      this->ElementToHtmlCreateFormulaOutputReference
-      (tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-    } else
-      out << tempS;
   }
+  if (useHtml)
+    out << "<br>";
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex || usePNG, useHtml, tempS);
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  container.IndicesSl2decompositionFlas.SetSize(container.size);
-  container.IndicesSl2decompositionFlas.TheObjects[indexInContainer]=container.texFileNamesForPNG.size-1;
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
+  this->container->IndicesSl2decompositionFlas[indexInContainer]=
+  this->container->texFileNamesForPNG.size-1;
   out << "\nThe below list one possible realization of the sl(2) subalgebra.";
   if (useHtml)
     out << "\n<br>\n";
   std::stringstream tempStreamH, tempStreamE, tempStreamF, tempStreamHE, tempStreamHF, tempStreamEF;
-  tempS=this->theH.ToString(&PolyFormatLocal);
+  tempS=this->theH.ToString(theFormat);
   tempStreamH << "\n$h=$ $" << tempS << "$";
   tempS= tempStreamH.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamE << "\n$e=$ $" << this->theE.ToString(&PolyFormatLocal) << "$";
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  tempStreamE << "\n$e=$ $" << this->theE.ToString(theFormat) << "$";
   tempS= tempStreamE.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamF << "\n$f=$ $" << this->theF.ToString(&PolyFormatLocal) << "$";
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  tempStreamF << "\n$f=$ $" << this->theF.ToString(theFormat) << "$";
   tempS= tempStreamF.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
   out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
-  tempStreamEF << "\n$[e, f]=$ $" <<  this->bufferEbracketF.ToString(&PolyFormatLocal) << "$";
+  tempStreamEF << "\n$[e, f]=$ $" <<  this->bufferEbracketF.ToString(theFormat) << "$";
   tempS= tempStreamEF.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(&PolyFormatLocal) << "$";
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(theFormat) << "$";
   tempS= tempStreamHE.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(&PolyFormatLocal) << "$";
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(theFormat) << "$";
   tempS= tempStreamHF.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
   //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
   //out <<"\nColumn vector of the system:\n"<<tempS;
   std::stringstream tempStreamActual;
   for (int i=0; i<this->theSystemToBeSolved.size; i++)
-  { tempS=this->theSystemToBeSolved.TheObjects[i].ToString(&PolyFormatLocal);
+  { tempS=this->theSystemToBeSolved[i].ToString(theFormat);
     if (tempS=="")
     { if (useLatex || usePNG)
         tempStreamActual << "~\\\\";
@@ -629,8 +514,9 @@ void slTwo::ToString(std::string& output, GlobalVariables& theGlobalVariables, S
   if (useHtml)
     out << "\n<br>\n";
   tempS= tempStreamActual.str();
-  this->ElementToHtmlCreateFormulaOutputReference(tempS, out, usePNG, useHtml, container, physicalPath, htmlPathServer);
-  output = out.str();
+  this->ElementToHtmlCreateFormulaOutputReference
+  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  return out.str();
 }
 
 void slTwo::ElementToHtml(std::string& filePath)
@@ -647,10 +533,11 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.size);
   output.IndicesSl2sContainedInRootSA.ReservE(output.theRootSAs.size*2);
   for (int i=0; i<output.IndicesSl2sContainedInRootSA.size; i++)
-    output.IndicesSl2sContainedInRootSA.TheObjects[i].size=0;
+    output.IndicesSl2sContainedInRootSA[i].size=0;
   ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<output.theRootSAs.size-1; i++)
-  { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition(output, i, theGlobalVariables, *this);
+  { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
+    (output, i, theGlobalVariables, *this);
     std::stringstream tempStream;
     tempStream << "Exploring root subalgebra number " << (i+1)
     << " out of " << output.theRootSAs.size-1 << " non-trivial";
@@ -717,6 +604,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 
   slTwo theSl2;
   theSl2.owner = &theLieAlgebra;
+  theSl2.container=&output;
   for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
@@ -765,11 +653,12 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       { int indexIsoSl2;
         theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
-        { output.TheObjects[indexIsoSl2].IndicesContainingRootSAs.AddOnTop(indexInContainer);
-          output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddOnTop(indexIsoSl2);
+        { output[indexIsoSl2].IndicesContainingRootSAs.AddOnTop(indexInContainer);
+          output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
         }
         else
-        { output.IndicesSl2sContainedInRootSA.TheObjects[indexInContainer].AddOnTop(output.size);
+        { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
+          theSl2.indexInContainer=output.size;
           output.AddOnTop(theSl2);
         }
       }
@@ -825,7 +714,8 @@ void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalge
   for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
   { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[i]];
     this->ComputeModuleDecomposition
-    (theSA.PositiveRootsK, theSA.SimpleBasisK.size, this->HighestWeightsDecompositionMinimalContainingRootSA[i],
+    (theSA.PositiveRootsK, theSA.SimpleBasisK.size,
+     this->HighestWeightsDecompositionMinimalContainingRootSA[i],
      this->MultiplicitiesDecompositionMinimalContainingRootSA[i], buffer, theGlobalVariables);
   }
 }
@@ -837,19 +727,25 @@ void slTwo::ComputeModuleDecomposition
  List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
 { int IndexZeroWeight=positiveRootsContainingRegularSA.size*2;
   outputWeightSpaceDimensions.initFillInObject(4*positiveRootsContainingRegularSA.size+1, 0);
-  outputWeightSpaceDimensions.TheObjects[IndexZeroWeight]=dimensionContainingRegularSA;
+  outputWeightSpaceDimensions[IndexZeroWeight]=dimensionContainingRegularSA;
   List<int> BufferHighestWeights;
-  bool possible=true;
   Rational tempRat;
-  Vectors<Rational> tempRoots, tempRoots2;
+  Vectors<Rational> coordsInPreferredSimpleBasis, tempRoots2;
   Matrix<Rational> tempMat;
   positiveRootsContainingRegularSA.GetCoordsInBasis
-  (this->preferredAmbientSimpleBasis, tempRoots, tempRoots2, tempMat);
+  (this->preferredAmbientSimpleBasis, coordsInPreferredSimpleBasis, tempRoots2, tempMat);
   for (int k=0; k<positiveRootsContainingRegularSA.size; k++)
-  { tempRat=Vector<Rational>::ScalarEuclidean(this->hCharacteristic, tempRoots[k]);
+  { tempRat=Vector<Rational>::ScalarEuclidean
+    (this->hCharacteristic, coordsInPreferredSimpleBasis[k]);
     assert(tempRat.DenShort==1);
-    if (tempRat.NumShort>positiveRootsContainingRegularSA.size*2)
-    { possible=false;
+    if (tempRat>positiveRootsContainingRegularSA.size*2)
+    { std::cout << "This is a programming error. The scalar product of the h-Characteristic "
+      << this->hCharacteristic.ToString()
+      << " with the simple root " << coordsInPreferredSimpleBasis[k].ToString()
+      << " is larger than " << positiveRootsContainingRegularSA.size*2
+      << ". The affected sl(2) subalgebra is " << this->ToString()
+      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
       break;
     }
     outputWeightSpaceDimensions[IndexZeroWeight+tempRat.NumShort]++;
@@ -861,30 +757,49 @@ void slTwo::ComputeModuleDecomposition
   outputHighestWeights.size=0;
   outputMultiplicitiesHighestWeights.size=0;
 //  this->hCharacteristic.ComputeDebugString();
+//  std::cout << "Starting weights:  " << BufferHighestWeights;
   for (int j=BufferHighestWeights.size-1; j>=IndexZeroWeight; j--)
   { int topMult = BufferHighestWeights[j];
     if (topMult<0)
-    { possible=false;
-      break;
+    { std::cout << "This is a programming error: "
+      << " the sl(2)-module decomposition "
+      << " shows an sl(2)-module with highest weight "
+      << topMult << " which is impossible. Here is the sl(2) subalgebra. "
+      << this->ToString() << "."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
     if (topMult>0)
     { outputHighestWeights.AddOnTop(j-IndexZeroWeight);
       outputMultiplicitiesHighestWeights.AddOnTop(topMult);
       if (j!=IndexZeroWeight)
-        BufferHighestWeights.TheObjects[IndexZeroWeight*2-j]-=topMult;
+        BufferHighestWeights[IndexZeroWeight*2-j]-=topMult;
       for (int k=j-2; k>=IndexZeroWeight; k-=2)
-      { BufferHighestWeights.TheObjects[k]-=topMult;
+      { BufferHighestWeights[k]-=topMult;
         if (k!=IndexZeroWeight)
-           BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]-=topMult;
-        assert(BufferHighestWeights.TheObjects[k]==BufferHighestWeights.TheObjects[IndexZeroWeight*2-k]);
-        if(BufferHighestWeights.TheObjects[k]<0)
-        { possible=false;
-          break;
+          BufferHighestWeights[IndexZeroWeight*2-k]-=topMult;
+        if(BufferHighestWeights[k]<0 ||
+           !(BufferHighestWeights[k]==BufferHighestWeights[IndexZeroWeight*2-k]))
+        { std::cout << " This is a programming error: an error check has failed. "
+          << " While trying to decompose with respect to  h-characteristic <br> "
+          << this->hCharacteristic.ToString()
+          << ". The positive root system of the containing root subalgebra is <br>"
+          << positiveRootsContainingRegularSA.ToString() << ". "
+          << "<br>The preferred simple basis is <br>"
+          << this->preferredAmbientSimpleBasis.ToString()
+          << "."
+          << "The coordinates relative to the preferred simple basis are<br>"
+          << coordsInPreferredSimpleBasis.ToString()
+          << " The starting weights list is <br>"
+          << outputWeightSpaceDimensions << ". "
+          << " I got that the root space of index  "
+          <<  k+1 << " has negative dimension. Something is wrong. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
         }
       }
     }
   }
-  assert(possible);
 }
 
 void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml)
@@ -900,12 +815,15 @@ void SltwoSubalgebras::ElementToStringModuleDecompositionMinimalContainingRegula
   output=out.str();
 }
 
-void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* theFormat)
 { std::string tempS; std::stringstream out;
   std::string tooltipHchar="Let h be in the Cartan s.a. Let \\alpha_1, ..., \\alpha_n be simple Vectors<Rational> w.r.t. h. Then the h-characteristic is the n-tuple (\\alpha_1(h), ..., \\alpha_n(h))";
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a Vector<Rational> subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
+  bool usePNG=true;
+  bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
+  bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
   out << "Number of sl(2) subalgebras "<< this->size<<"\n";
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
@@ -959,18 +877,19 @@ void SltwoSubalgebras::ElementToStringNoGenerators(std::string& output, GlobalVa
       << tempS << "</a>" << ";  ";
     }
     if (useHtml)
-      out <<"</td></tr>\n";
+      out << "</td></tr>\n";
   }
   if (useHtml)
     out << "</table><HR width=\"100%\">";
-  output= out.str();
+  return out.str();
 }
 
-std::string SltwoSubalgebras::ToString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer)
+std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 { std::string tempS; std::stringstream out; std::stringstream body;
   FormatExpressions PolyFormatLocal;
+  bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].ToString(tempS, theGlobalVariables, *this, i, useLatex, useHtml, usePNG, physicalPath, htmlPathServer, PolyFormatLocal);
+  { tempS=(*this)[i].ToString(theFormat);
   //  body<< "Index "<< i<<": ";
     if(useHtml)
       body << "<br>";
@@ -980,10 +899,8 @@ std::string SltwoSubalgebras::ToString(GlobalVariables& theGlobalVariables, Weyl
   }
   if(useHtml)
     out << "<br>";
-  this->ElementToStringNoGenerators(tempS, theGlobalVariables, theWeyl, useLatex, useHtml, usePNG, physicalPath, htmlPathServer);
-  out << tempS;
-  tempS = body.str();
-  out << tempS;
+  out << this->ElementToStringNoGenerators(theFormat);
+  out << body.str();
   return out.str();
 }
 
@@ -1018,7 +935,12 @@ void SltwoSubalgebras::ElementToHtml
   outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a>"
   << "<br> <a href=\""<< DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
-  out << this->ToString(theGlobalVariables, theWeyl, false, true, usePNG, &physicalPath, &htmlPathServer);
+  FormatExpressions theFormat;
+  theFormat.flagUseHTML=true;
+  theFormat.flagUseLatex=false;
+  theFormat.physicalPath=physicalPath;
+  theFormat.htmlPathServer=htmlPathServer;
+  out << this->ToString(&theFormat);
   if(usePNG)
   { fileName= physicalPath;
     fileName.append("sl2s.html");
@@ -1040,7 +962,7 @@ void SltwoSubalgebras::ElementToHtml
   }
   fileName= physicalPath;
   fileName.append("sl2s_nopng.html");
-  tempS = this->ToString(theGlobalVariables, theWeyl, false, true, false, &physicalPath, &htmlPathServer);
+  tempS = this->ToString(&theFormat);
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
   theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();

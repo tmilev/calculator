@@ -33,12 +33,12 @@ public:
   }
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
   { for(int i=0; i<this->size; i++)
-      this->TheObjects[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
+      (*this)[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
   }
   void getZuckermansArrayE8(Vectors<Rational>& output);
   void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
   void ComputeDebugStringCurrent();
-  bool ContainsSl2WithGivenH(Vector<Rational> & theH, int* outputIndex);
+  bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational> & theHCharacteristic, int* outputIndex);
   void ElementToHtml
 (GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer,
@@ -47,8 +47,6 @@ public:
   std::string ElementToStringNoGenerators(FormatExpressions* theFormat=0);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(std::string& output, bool useLatex, bool useHtml);
   std::string ToString(FormatExpressions* theFormat=0);
-  std::string ToString(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
-  void ElementToStringNoGenerators(std::string& output, GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool useLatex, bool useHtml, bool usePNG, std::string* physicalPath, std::string* htmlPathServer);
 };
 
 class DynkinSimpleType

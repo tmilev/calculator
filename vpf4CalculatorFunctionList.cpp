@@ -17,14 +17,14 @@ void CommandList::initPredefinedVars()
    Elements of the cartan are addressed as arguments of the form (0,s), root system generators are addressed \
    with one index only. ", "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
-  ("SemisimpleLieAlgebraVerbose", & this->fSSAlgebraVerbose, "",
+  ("printSemisimpleLieAlgebra", & this->fSSAlgebraVerbose, "",
    "Same as SemisimpleLieAlgebra but creates in addition a (quite detailed) printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
    In addition, this function creates a graphics of the root system. \
    The printout is shown in the \"comments\" column to the \
    right of the calculator input. <b>Warning</b> the verbose printout is quite heavy: \
    for E_8 it puts the netbook on which the calculator is developed to sleep.",
-   "g:=SemisimpleLieAlgebraVerbose{}F_4;");
+   "printSemisimpleLieAlgebra{}F_4;");
   this->AddNonBoundVarMustBeNew
   ("Polynomial", & this->fPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",
@@ -276,7 +276,7 @@ void CommandList::initPredefinedVars()
   ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)", true);
+   "PrintSemisimpleSubalgebras{}(A_2)", false);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
@@ -298,7 +298,7 @@ void CommandList::initPredefinedVars()
     and finds the set of all possible divisors of the value of poly at the k points.\
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
-   "FactorOneVarPolyOverRationals{}{x^2-4}");
+   "FactorOneVarPolyOverRationals{}{x^2-4}", false);
 
 //  this->AddNonBoundVarMustBeNew
 //  ("minPoly", & this->fMinPoly, "",

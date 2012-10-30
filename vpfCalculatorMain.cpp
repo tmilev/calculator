@@ -412,26 +412,34 @@ g_{-2} v_\\lambda\
 //  civilizedInput= "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))";
 //  civilizedInput="PrintSemisimpleSubalgebras{}(F_4)";
 //  civilizedInput="printSlTwoSubalgebrasAndRootSubalgebras{}(F_4)";
+//  civilizedInput="printSlTwoSubalgebras{}(A_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
   std::cout << "\n<FORM method=\"POST\" name=\"formCalculator\" action=\""
   << theParser.DisplayNameCalculator << "\">\n" ;
-  std::cout << GetSelectHTMLStringTEmp(optionsType, optionsRank, inputWeylString, inputRankString, inputStringNames.ContainsObject("checkUsePreamble"))
+  std::cout << GetSelectHTMLStringTEmp
+  (optionsType, optionsRank, inputWeylString, inputRankString,
+   inputStringNames.ContainsObject("checkUsePreamble"))
   << tempStreamXX.str();
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
   if (CGI::GetHtmlStringSafeishReturnFalseIfIdentical(civilizedInput, civilizedInputSafish))
-    std::cout << "Your input has been treated normally, however the return string of your input has been modified. More precisely, &lt; and &gt;  are modified due to a javascript hijack issue. ";
+    std::cout
+    << "Your input has been treated normally, however the return string"
+    << " of your input has been modified. More precisely, &lt; and &gt;  are "
+    << " modified due to a javascript hijack issue. ";
   std::cout << "<textarea rows=\"3\" cols=\"30\" name=\"textInput\" id=\"textInputID\""
-  << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings();  this.form.submit(); return false;}\" >";
+  << " onkeypress=\"if (event.keyCode == 13 && event.shiftKey) {storeSettings(); "
+  << " this.form.submit(); return false;}\" >";
   std::cout << civilizedInputSafish;
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   if (civilizedInput!="")
-    std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?" << theParser.inputStringRawestOfTheRaw
+    std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?"
+    << theParser.inputStringRawestOfTheRaw
     << "\">Link to your input.</a>";
 //  std::cout << "<br>" << CGI::GetLatexEmbeddableLinkFromCalculatorInput
 //  (theParser.inputStringRawestOfTheRaw, civilizedInput);

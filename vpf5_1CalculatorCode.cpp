@@ -3,38 +3,6 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
-
-
-std::string rootSubalgebras::ToString()
-{ std::stringstream out;
-  for (int i=0; i<this->size; i++)
-  { out << (*this)[i].ToString();
-  }
-  return out.str();
-}
-
-void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
-(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
-{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism");
-  this->size=0;
-  this->AmbientWeyl.ComputeRho(true);
-  //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
-  rootSubalgebras rootSAsGenerateAll;
-  rootSAsGenerateAll.SetSize(this->AmbientWeyl.CartanSymmetric.NumRows*2+1);
-  rootSAsGenerateAll[0].genK.size=0;
-  rootSAsGenerateAll[0].AmbientWeyl=(this->AmbientWeyl);
-  rootSAsGenerateAll[0].ComputeAll();
-  this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
-  (rootSAsGenerateAll, 1, theGlobalVariables)
-  ;
-//  std::cout << this->ToString();
-  if (sort)
-    this->SortDescendingOrderBySSRank();
-  if(computeEpsCoords)
-    for(int i=0; i<this->size; i++)
-      (*this)[i].ComputeEpsCoordsWRTk(theGlobalVariables);
-}
-
 bool CommandList::fSSsubalgebras
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;

@@ -509,33 +509,33 @@ Vector<Rational> ElementSemisimpleLieAlgebra::GetCartanPart
 
 void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
 { MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
-  int theDimension=this->owner->theWeyl.CartanSymmetric.NumRows;
+  int theDimension=this->GetOwnerSSAlgebra().GetRank();
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
   tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
-  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
+  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
   this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
-  this->owner->theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->owner->theWeyl);
+  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
   this->preferredAmbientSimpleBasis=tempRoots;
   this->hCharacteristic.SetSize(theDimension);
   for (int i=0; i<theDimension; i++)
     this->hCharacteristic[i]=
-    this->owner->theWeyl.RootScalarCartanRoot
+    this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
     (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
   //this->hCharacteristic.ComputeDebugString();
 //  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
 //      && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
-  this->owner->LieBracket(this->theE, this->theF, this->bufferEbracketF);
+  this->GetOwnerSSAlgebra().LieBracket(this->theE, this->theF, this->bufferEbracketF);
 //  std:: cout << "[" << this->theE.ToString() << ", " << this->theF.ToString() << "]="
 //  << this->bufferEbracketF.ToString();
-  this->owner->LieBracket(this->theH, this->theE, this->bufferHbracketE);
-  this->owner->LieBracket(this->theH, this->theF, this->bufferHbracketF);
+  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theE, this->bufferHbracketE);
+  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theF, this->bufferHbracketF);
 
   //theSl2.hCharacteristic.ComputeDebugString();
 //  this->ComputeModuleDecomposition();
@@ -881,7 +881,7 @@ void rootSubalgebras::WriteToDefaultFileNilradicalGeneration(GlobalVariables* th
 }
 
 void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, GlobalVariables* theGlobalVariables)
-{ this->AmbientWeyl.WriteToFile(output);
+{ this->GetOwnerWeyl().WriteToFile(output);
   output << "Number_subalgebras: " << this->size << "\n";
   //////////////////////////////////////////////////////////////////////////////////////
   output << "Index_current_SA_nilradicals_generation: " << this->IndexCurrentSANilradicalsGeneration << "\n";
@@ -903,8 +903,8 @@ void rootSubalgebras::WriteToFileNilradicalGeneration(std::fstream& output, Glob
 
 void rootSubalgebras::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables)
 { std::string tempS; int tempI;
-  this->AmbientWeyl.ReadFromFile(input);
-  this->AmbientWeyl.ComputeRho(true);
+  this->GetOwnerWeyl().ReadFromFile(input);
+  this->GetOwnerWeyl().ComputeRho(true);
   input >> tempS >> tempI;
   assert(tempS=="Number_subalgebras:");
   this->SetSize(tempI);
@@ -932,14 +932,29 @@ void rootSubalgebra::WriteToFileNilradicalGeneration(std::fstream& output, Globa
   this->SimpleBasisK.WriteToFile(output, theGlobalVariables);
 }
 
-void rootSubalgebra::ReadFromFileNilradicalGeneration(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
+void rootSubalgebra::ReadFromFileNilradicalGeneration
+(std::fstream& input, GlobalVariables* theGlobalVariables, rootSubalgebras& owner)
 { std::string tempS;
   input >> tempS;
   assert(tempS=="Simple_basis_k:");
   this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
   this->genK=(this->SimpleBasisK);
-  this->AmbientWeyl=(owner.AmbientWeyl);
+  this->init(owner.ownerArray, owner.indexInOwner);
   this->ComputeAll();
+}
+
+WeylGroup& rootSubalgebra::GetAmbientWeyl()
+{ return this->GetOwnerSSalg().theWeyl;
+}
+
+SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg()
+{ if (this->owners==0 || this->indexInOwners<0)
+  { std::cout << "This is a programming error. Attempting to access "
+    << "ambient Lie algebra of non-initialized root subalgebras. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return (*this->owners)[this->indexInOwners];
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter)
@@ -947,13 +962,14 @@ void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSel
   parabolicsCounter=0;
 }
 
-void rootSubalgebra::GeneratePossibleNilradicals(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter, GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical, rootSubalgebras& owner, int indexInOwner)
+void rootSubalgebra::GeneratePossibleNilradicals
+(Controller& PauseMutex, List<Selection>& impliedSelections, int& parabolicsCounter,
+ GlobalVariables& theGlobalVariables, bool useParabolicsInNilradical,
+ rootSubalgebras& owner, int indexInOwner)
 {  //this->ComputeAll();
-  this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
+  this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, &theGlobalVariables);
   if (this->flagAnErrorHasOccuredTimeToPanic)
     this->theMultTable.ComputeDebugString(*this);
-  if (this->flagAnErrorHasOccuredTimeToPanic)
-    this->ComputeDebugString(theGlobalVariables);
   this->NumTotalSubalgebras=0;
   Selection emptySel;
   emptySel.init(this->SimpleBasisCentralizerRoots.size);
@@ -1070,35 +1086,38 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   std::stringstream out2;
   std::string tempS;
   int numNonSolvableNonReductive=0;
-  if (this->AmbientWeyl.WeylLetter=='B')
+  if (this->GetOwnerWeyl().WeylLetter=='B')
     out << "$\\mathrm{so}(2n+1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C=-C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D=-D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
-  if (this->AmbientWeyl.WeylLetter=='C')
+  if (this->GetOwnerWeyl().WeylLetter=='C')
     out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D=D^T\\right\\}.$";
   out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
   if (!includeMatrixForm)
   { out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
-    if (this->AmbientWeyl.WeylLetter=='B')
-      out << " $ \\mathfrak{g}\\simeq \\mathrm{so("<<this->AmbientWeyl.CartanSymmetric.NumRows*2+1 << ")}$";
-    if (this->AmbientWeyl.WeylLetter=='C')
-      out << " $\\mathfrak{g}\\simeq \\mathrm{sp("<<this->AmbientWeyl.CartanSymmetric.NumRows*2 << ")}$";
+    if (this->GetOwnerWeyl().WeylLetter=='B')
+      out << " $ \\mathfrak{g}\\simeq \\mathrm{so("
+      << this->GetOwnerWeyl().CartanSymmetric.NumRows*2+1 << ")}$";
+    if (this->GetOwnerWeyl().WeylLetter=='C')
+      out << " $\\mathfrak{g}\\simeq \\mathrm{sp("
+      << this->GetOwnerWeyl().CartanSymmetric.NumRows*2 << ")}$";
     out << "} \\\\\\hline";
   }
   for (int i=0; i<this->size-1; i++)
-    if (this->storedNilradicals.TheObjects[i].size>0)
+    if (this->storedNilradicals[i].size>0)
     { rootSubalgebra& currentRootSA=this->TheObjects[i];
       tempRoots.size=0;
       for (int j=0; j<currentRootSA.PositiveRootsK.size; j++)
-      { tempRoots.AddOnTop(currentRootSA.PositiveRootsK.TheObjects[j]);
-        tempRoots.AddOnTop(-currentRootSA.PositiveRootsK.TheObjects[j]);
+      { tempRoots.AddOnTop(currentRootSA.PositiveRootsK[j]);
+        tempRoots.AddOnTop(-currentRootSA.PositiveRootsK[j]);
       }
       if (includeMatrixForm)
         out << "\n\n\\noindent\\rule{\\textwidth}{1.5pt}\n\n";
       else
         out << "\\hline\\begin{tabular}{r}";
-      out << "$\\Delta(\\mathfrak{k})$ is of type " << currentRootSA.theDynkinDiagram.DynkinStrinG << "; ";
+      out << "$\\Delta(\\mathfrak{k})$ is of type "
+      << currentRootSA.theDynkinDiagram.DynkinStrinG << "; ";
       if (!includeMatrixForm)
-        out <<"\\\\";
-      currentRootSA.AmbientWeyl.GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2);
+        out << "\\\\";
+      currentRootSA.GetAmbientWeyl().GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2);
       tempS=tempRoots2.ElementToStringEpsilonForm(true, false, false);
       out << " $\\Delta^+(\\mathfrak{k})=$ " << tempS;
       if (includeMatrixForm)
@@ -1106,8 +1125,8 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       else
         out << "\\end{tabular} &\n\\begin{tabular}{l}";
       int numNonReductiveCurrent=0;
-      for (int j=0; j<this->storedNilradicals.TheObjects[i].size; j++)
-      { List<int>& currentNilrad= this->storedNilradicals[i].TheObjects[j];
+      for (int j=0; j<this->storedNilradicals[i].size; j++)
+      { List<int>& currentNilrad= this->storedNilradicals[i][j];
         if (currentNilrad.size>0)
         { numNonSolvableNonReductive++;
           numNonReductiveCurrent++;
@@ -1128,7 +1147,9 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
     }
   if (!includeMatrixForm)
     out << "\n\\end{longtable}";
-  out2 << "\n\nThe number of non-conjugate non-solvable non-reductive Vector<Rational> subalgebras not satisfying the cone condition is: " << numNonSolvableNonReductive << "\n\n";
+  out2 << "\n\nThe number of non-conjugate non-solvable non-reductive "
+  << "root subalgebras not satisfying the cone condition is: "
+  << numNonSolvableNonReductive << "\n\n";
   tempS = out.str();
   out2 << tempS;
   output=out2.str();
@@ -1138,9 +1159,9 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 { std::string tempS; std::stringstream out;
   Vectors<Rational> epsCoords;
   Matrix<int> tempMat;
-  int theDimension=this->AmbientWeyl.CartanSymmetric.NumRows;
-  if (this->AmbientWeyl.WeylLetter=='B')
-  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords);
+  int theDimension=this->GetOwnerWeyl().CartanSymmetric.NumRows;
+  if (this->GetOwnerWeyl().WeylLetter=='B')
+  { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2+1, 1, 0);
     tempMat.elements[theDimension][theDimension]=0;
     for (int i=0; i<epsCoords.size; i++)
@@ -1201,8 +1222,8 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       }
     }
   }
-  if (this->AmbientWeyl.WeylLetter=='C')
-  { this->AmbientWeyl.GetEpsilonCoords(input, epsCoords);
+  if (this->GetOwnerWeyl().WeylLetter=='C')
+  { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2, 1, 0);
     for (int i=0; i<epsCoords.size; i++)
     { bool isLong=false;
@@ -1280,12 +1301,12 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   { out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
     for (int i=0; i<tempMat.NumCols; i++)
     { out << "c";
-      if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
+      if (this->GetOwnerWeyl().WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
         out << "|";
     }
     out << "}";
     for (int i=0; i< tempMat.NumRows; i++)
-    { if (this->AmbientWeyl.WeylLetter=='B' && (i==theDimension || i==theDimension+1))
+    { if (this->GetOwnerWeyl().WeylLetter=='B' && (i==theDimension || i==theDimension+1))
         out << "\\hline";
       for (int j=0; j<tempMat.NumCols; j++)
       { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
@@ -1342,14 +1363,14 @@ void ElementSemisimpleLieAlgebra::ElementToVectorNegativeRootSpacesFirst(Vector<
 }
 
 void SemisimpleLieAlgebra::ComputeOneAutomorphism
-(GlobalVariables& theGlobalVariables, Matrix<Rational> & outputAuto, bool useNegativeRootsFirst)
+(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
 { rootSubalgebra theRootSA;
-  theRootSA.AmbientWeyl=(this->theWeyl);
+  theRootSA.init(this->owner, this->indexInOwner);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   ReflectionSubgroupWeylGroup theAutos;
   theRootSA.GenerateAutomorphismsPreservingBorel(theGlobalVariables, theAutos);
-  Matrix<Rational>  mapOnRootSpaces;
+  Matrix<Rational> mapOnRootSpaces;
   int theAutoIndex= theAutos.ExternalAutomorphisms.size>1? 1 : 0;
   /*if (this->theWeyl.WeylLetter=='D' && theDimension==4)
     theAutoIndex=2;

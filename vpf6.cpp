@@ -3247,13 +3247,6 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   return true;
 }
 
-std::string CommandList::GetCalculatorLink(const std::string& input)
-{ std::stringstream out;
-  out << "<a href=\"" << this->DisplayNameCalculator << "?textInput=" << CGI::UnCivilizeStringCGI(input)
-  << "\"> " << input << "</a>";
-  return out.str();
-}
-
 bool CommandList::fKLcoeffs
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)
@@ -3436,10 +3429,10 @@ bool CommandList::fSSAlgebra
   tempData.MakeSSAlgebra(theCommands, theWeylLetter, theRank);
   SemisimpleLieAlgebra& theSSalgebra = tempData.GetAmbientSSAlgebra();
   theSSalgebra.ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+  std::stringstream out;
   if (oldSize<theCommands.theObjectContainer.theLieAlgebras.size)
     if (comments!=0)
-    { std::stringstream out;
-      FormatExpressions theFormat, latexFormat;
+    { FormatExpressions theFormat, latexFormat;
       latexFormat.flagUseLatex=true;
       latexFormat.flagUseHTML=false;
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
@@ -3560,16 +3553,19 @@ bool CommandList::fSSAlgebra
         << "picture in the Coxeter plane of the root system, "
         << " with the Weyl chamber drawn, etc.), use the function";
         std::stringstream tempStream;
-        tempStream << "SemisimpleLieAlgebraVerbose{}" << theSSalgebra.theWeyl.WeylLetter
+        tempStream << "printSemisimpleLieAlgebra{}" << theSSalgebra.theWeyl.WeylLetter
         << "_" << theSSalgebra.GetRank();
         out << theCommands.GetCalculatorLink(tempStream.str());
         out << " instead. ";
       }
-      *comments << out.str();
     }
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
-  theExpression.theOperation=theCommands.opAtom();
-  theExpression.children.SetSize(0);
+  if (!Verbose)
+  { *comments << out.str();
+    theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+    theExpression.theOperation=theCommands.opAtom();
+    theExpression.children.SetSize(0);
+  } else
+    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
 
@@ -3720,41 +3716,44 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoFail
   ("+", this->StandardPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
-    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", false);
+    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
   this->AddOperationNoFail
   ("-", this->StandardMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
-   -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", false);
+   -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
   this->AddOperationNoFail
   ("/", this->StandardDivide, "",
     "1) If a and b are rational substitutes a/b with its value. \
-     <br>2)If b is rational computes (anything)/b with anything* (1/b). This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", false);
+     <br>2)If b is rational computes (anything)/b with anything* (1/b). \
+     This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", true);
   this->AddOperationNoFail
   ("*", this->StandardTimes, "",
    "<br>The following description is out of date. Must be updated.\
-   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, substitutes a*b by the result of the built-in handler.<br>\n \
+   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, \
+   substitutes a*b by the result of the built-in handler.<br>\n \
    2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
-   3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
+   3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; \
+   {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
    4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
    4.2) If the expression is of the form a*(b*c) and  a and b are rational, substitutes a*(b*c) by (a*b)*c. <br>\
    4.3) If the expression is of the form a*(b*c) and b is rational but a is not, substitutes the expression by b*(a*c).",
-   "2*c_1*d*3", false);
+   "2*c_1*d*3", true);
     this->AddOperationNoFail
   ("\\otimes", this->StandardTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
    " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
-   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", false);
+   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
   this->AddOperationNoFail
   ("[]", this->StandardLieBracket, "",
-   "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", false);
-  this->AddOperationNoFail(":=", 0, "", "", "", false);
+   "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
+  this->AddOperationNoFail(":=", 0, "", "", "", true);
   this->AddOperationNoFail
   (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. The expression a:=:b always reduces to \
    a:=b. In addition to the transformation, the pair of expressions a,b is registered in a special global \"registry\". This has the following effect. Every time \
    the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated\
-   by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", false);
-  this->AddOperationNoFail("if:=", 0, "", "", "", false);
+   by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", true);
+  this->AddOperationNoFail("if:=", 0, "", "", "", true);
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
   moreInfoOnIntegers
   << " LargeIntUnsigned::SquareRootOfCarryOverBound is "
@@ -3768,7 +3767,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   << LargeIntUnsigned::CarryOverBound
   << " . When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
   << " a check is performed whether the denominator and numerator are smaller in absolute value than "
-  << " LargeIntUnsigned::SquareRootOfCarryOverBound=" << LargeIntUnsigned::SquareRootOfCarryOverBound
+  << " LargeIntUnsigned::SquareRootOfCarryOverBound="
+  << LargeIntUnsigned::SquareRootOfCarryOverBound
   << ". If that check passes, the two rationals are multiplied using the "
   << " built-in processor instructions for operations with integers. If any of the check fails, both rationals are converted to the larger dynamically "
   << " resizeable structure, sufficient memory is allocated, and multiplication/addition is carried using algorithms located in class "
@@ -3780,15 +3780,17 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   << "If the left argument evaluates to atom, and if the right argument is a small integer atom, "
   << " tries to carry out the raise-to-power operation. If successful, substitutes the expression with the obtained atom. "
   << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
-  << LargeIntUnsigned::SquareRootOfCarryOverBound << "). " << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
+  << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
+  << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
   this->AddOperationNoFail
   ("^", this->StandardPower, "", StandardPowerStreamInfo.str(),
-   "3^3^3;\n3^{3^3}", false);
+   "3^3^3;\n3^{3^3}", true);
   this->AddOperationNoFail
   ("==", this->StandardEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \
     Else evaluates to 1 if the left argument equals the right argument.",
-   "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", false);
+   "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
+   \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
   //expression
   this->AddOperationNoFail
@@ -3802,7 +3804,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    If the invocation is successful, the expression is substituted with the result, otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
    the only noticeable difference is that the functions invoked in (2) are anonymous from the calculator standpoint (i.e. have only technical c++ names), \
    while the functions in (4) have human-readable calculator-visible names. In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
-   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", false);
+   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if \
+   IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
+   \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
   this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
@@ -3811,11 +3815,13 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoFail
   ("\\cup", this->StandardUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with a list containing \
-   the union of all members (with repetition).", "x\\cup List{} x \\cup List{}x \\cup (a,b,x)", false);
+   the union of all members (with repetition).",
+   "x\\cup List{} x \\cup List{}x \\cup (a,b,x)", true);
   this->AddOperationNoFail
   ("\\sqcup", this->StandardUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list containing \
-   the union of all members; all repeating members are discarded.", "(x,y,x)\\sqcup(1,x,y,2)", false);
+   the union of all members; all repeating members are discarded.",
+   "(x,y,x)\\sqcup(1,x,y,2)", true);
   this->AddOperationNoFail("Error", 0, "", "", "", false);
   this->AddOperationNoFail("Atom", 0, "", "", "", false);
   this->AddOperationNoFail(";", 0, "", "", "", false);
@@ -5729,11 +5735,11 @@ void CommandList::AddOperationNoFail
   (const std::string& theOpName,
    const Function::FunctionAddress& theFunAddress,
    const std::string& opArgumentList, const std::string& opDescription,
-   const std::string& opExample, bool inputNameNotUsed
+   const std::string& opExample, bool inputNameUsed
    )
 { VariableNonBound theVar;
   if (theFunAddress!=0)
-  { Function currentFunction(theFunAddress, theOpName, opArgumentList, opDescription, opExample, inputNameNotUsed);
+  { Function currentFunction(theFunAddress, theOpName, opArgumentList, opDescription, opExample, inputNameUsed);
     theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(currentFunction);
   } else
     theVar.HandlerFunctionIndex=-1;

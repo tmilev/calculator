@@ -929,6 +929,9 @@ public:
   inline static std::string GetHtmlLinkFromFileName(const std::string& fileName)
   { return CGI::GetHtmlLinkFromFileName(fileName, "");
   }
+  static std::string GetCalculatorLink
+  (const std::string& DisplayNameCalculator, const std::string& input)
+  ;
   static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
   static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
@@ -2006,8 +2009,7 @@ public:
   static inline unsigned int HashFunction(const Selection& input)
   { return input.HashFunction();
   }
-  std::string ToString()const {std::string tempS; this->ToString(tempS); return tempS;}
-  void ToString(std::string& output)const;
+  std::string ToString()const;
   void incrementSelection();
   int SelectionToIndex();
   void ExpandMaxSize();
@@ -4197,6 +4199,7 @@ public:
   std::string CustomCoeffMonSeparator;
   std::string FDrepLetter;
   std::string simpleRootLetter;
+  std::string DisplayNameCalculator;
   std::string physicalPath;
   std::string htmlPathServer;
   List<std::string> polyAlphabeT;

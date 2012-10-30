@@ -1823,6 +1823,15 @@ std::string CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(const std::string& input)
   return out.str();
 }
 
+std::string CGI::GetCalculatorLink
+(const std::string& DisplayNameCalculator, const std::string& input)
+{ std::stringstream out;
+  out << "<a href=\"" << DisplayNameCalculator
+  << "?textInput=" << CGI::UnCivilizeStringCGI(input)
+  << "\"> " << input << "</a>";
+  return out.str();
+}
+
 std::string CGI::GetHtmlMathSpanPure(const std::string& input)
 { std::stringstream out;
   if (input.size()< 300)

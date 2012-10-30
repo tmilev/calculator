@@ -230,7 +230,8 @@ bool CommandList::fAnimateLittelmannPaths
 bool CommandList::fRootSAsAndSltwos
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool showSLtwos)
-{ //bool showIndicator=true;
+{ MacroRegisterFunctionWithName("CommandList::fRootSAsAndSltwos");
+  //bool showIndicator=true;
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return false;
   CGI::SetCGIServerIgnoreUserAbort();
@@ -260,6 +261,12 @@ bool CommandList::fRootSAsAndSltwos
   outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
   bool mustRecompute=false;
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds =1000;
+  FormatExpressions theFormat;
+  theFormat.flagUseHTML=true;
+  theFormat.flagUseLatex=false;
+  theFormat.DisplayNameCalculator=theCommands.DisplayNameCalculator;
+  theFormat.physicalPath=outMainPath.str();
+  theFormat.htmlPathServer=outMainDisplayPath.str();
   if (!CGI::FileExists(outSltwoMainFile.str()) || !CGI::FileExists(outRootHtmlFileName.str()))
     mustRecompute=true;
   std::stringstream out;
@@ -271,19 +278,18 @@ bool CommandList::fRootSAsAndSltwos
     << "<br>Appologies for this technical (Apache server configuration) problem. "
     << "<br>Alleviating it is around the bottom of a very long to-do list.</b>"
     << "<br> The computation is slow, up to around 10 minutes for E_8.";
-    SltwoSubalgebras theSl2s;
-    theSl2s.owner[0].FindSl2Subalgebras(theSl2s, weylLetter, theRank, *theCommands.theGlobalVariableS);
+    SltwoSubalgebras theSl2s(ownerSS.owner, ownerSS.indexInOwner);
+    ownerSS.FindSl2Subalgebras
+    (*ownerSS.owner, ownerSS.indexInOwner, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
-    theSl2s.ElementToHtml
-    (*theCommands.theGlobalVariableS, theSl2s.owner[0].theWeyl, true, PathSl2, DisplayPathSl2,
-    theCommands.DisplayNameCalculator);
+    theSl2s.ElementToHtml(&theFormat, theCommands.theGlobalVariableS);
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);
   } else
     out << "The table is precomputed and served from the hard disk. ";
-  out <<"<a href=\""
+  out << "<a href=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
-  << "\">See your printout in a separate page. </a>";
+  << "\">See the result in a separate file/page. </a>";
   out << "<iframe src=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\" width=\"800\" height=\"600\" ></iframe>";
@@ -350,9 +356,11 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
   out << "Your input weight in fundamental coordinates: "
-  << theWeyl.GetFundamentalCoordinatesFromSimple(theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords)  )
+  << theWeyl.GetFundamentalCoordinatesFromSimple
+  (theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords))
   .ToString();
-  out << ". <br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
+  out << ". <br>Your input weight in simple coordinates: "
+  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
   out << ".<br>Your parabolic subalgebra selection: " << parSel.ToString() << ".";
   ModuleSSalgebra<Rational> theMod;
 
@@ -404,7 +412,8 @@ bool CommandList::fDrawWeightSupportWithMults
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (theExpression.children.size!=2)
   { std::stringstream errorStream;
-    errorStream << "Error: the function for drawing weight support takes two arguments (type and highest weight)"
+    errorStream << "Error: the function for drawing weight support takes two"
+    << " arguments (type and highest weight)"
     << ", but you gave " << theExpression.children.size << " arguments instead. ";
     return theExpression.SetError(errorStream.str());
   }
@@ -442,7 +451,8 @@ bool CommandList::fDrawWeightSupport
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (theExpression.children.size!=2)
   { std::stringstream errorStream;
-    errorStream << "Error: the function for drawing weight support takes two arguments (type and highest weight)"
+    errorStream << "Error: the function for drawing weight support takes two arguments"
+    << " (type and highest weight)"
     << ", but you gave " << theExpression.children.size << " arguments instead. ";
     return theExpression.SetError(errorStream.str());
   }

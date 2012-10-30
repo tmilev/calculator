@@ -6738,11 +6738,11 @@ void WeylGroup::GetMatrixReflection(Vector<Rational>& reflectionRoot, Matrix<Rat
 }
 
 void rootSubalgebra::GetCoxeterElement(Matrix<Rational> & output)
-{ int theDim=this->AmbientWeyl.GetDim();
+{ int theDim=this->GetAmbientWeyl().GetDim();
   output.MakeIdMatrix(theDim);
   Matrix<Rational>  tempMat;
   for (int i=0; i<this->SimpleBasisK.size; i++)
-  { this->AmbientWeyl.GetMatrixReflection(this->SimpleBasisK[i], tempMat);
+  { this->GetAmbientWeyl().GetMatrixReflection(this->SimpleBasisK[i], tempMat);
     output.MultiplyOnTheLeft(tempMat);
   }
 }
@@ -6750,7 +6750,7 @@ void rootSubalgebra::GetCoxeterElement(Matrix<Rational> & output)
 void rootSubalgebra::GetCoxeterPlane
   (Vector<double>& outputBasis1, Vector<double>& outputBasis2, GlobalVariables& theGlobalVariables)
 { //this->ComputeRho(true);
-  int theDimension=this->AmbientWeyl.GetDim();
+  int theDimension=this->GetAmbientWeyl().GetDim();
   if (theDimension<2)
     return;
   if (this->SimpleBasisK.size<2)
@@ -6774,7 +6774,7 @@ void rootSubalgebra::GetCoxeterPlane
   ReflectionSubgroupWeylGroup tempGroup;
   int coxeterNumber=1;
   for (int i=0; i<this->theDynkinDiagram.SimpleBasesConnectedComponents.size; i++)
-  { tempGroup.AmbientWeyl=this->AmbientWeyl;
+  { tempGroup.AmbientWeyl=this->GetAmbientWeyl();
     tempGroup.simpleGenerators=this->theDynkinDiagram.SimpleBasesConnectedComponents[i];
     tempGroup.ComputeRootSubsystem();
     Vector<Rational>& lastRoot= *tempGroup.RootSubsystem.LastObject();
@@ -6810,7 +6810,7 @@ void rootSubalgebra::GetCoxeterPlane
   for (int i=0; i<theDimension; i++)
     for (int j=0; j<theDimension; j++)
       tempDO.theBilinearForm.elements[i][j]=
-      this->AmbientWeyl.CartanSymmetric.elements[i][j].DoubleValue();
+      this->GetAmbientWeyl().CartanSymmetric.elements[i][j].DoubleValue();
   Vector<double> tempRoot;
   outputBasis1.SetSize(theDimension);
   outputBasis2.SetSize(theDimension);
@@ -7356,7 +7356,7 @@ int ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
   if (theIndex<0 || theIndex>=theRootSAs.size)
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
 
-  theRootSAs.AmbientWeyl.DrawRootSystem(theDrawVars, true, theGlobalVariables, true);
+  theRootSAs.GetOwnerWeyl().DrawRootSystem(theDrawVars, true, theGlobalVariables, true);
   Vector<double> start1, start2;
   rootSubalgebra& currentSA=theRootSAs[theIndex];
   std::stringstream out;
@@ -7401,7 +7401,7 @@ int ParserNode::EvaluateAnimateRootSAs
   }
   NumTransitions--;
   theDrawOps.initDimensions(theDim, NumTransitions*numFramesPerTransition);
-  theRootSAs.AmbientWeyl.DrawRootSystem(theDrawingVars, true, theGlobalVariables, true);
+  theRootSAs.GetOwnerWeyl().DrawRootSystem(theDrawingVars, true, theGlobalVariables, true);
   Vector<double> start1, start2, target1, target2;
   //theGlobalVariables.MakeStatusReport("The SA: " + currentSA.theDynkinDiagram.DynkinStrinG);
   theDrawOps.BasisProjectionPlane.size=0;

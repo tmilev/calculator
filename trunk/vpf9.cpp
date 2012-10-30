@@ -569,13 +569,10 @@ void Selection::ReadFromFile(std::fstream& input)
   }
 }
 
-void Selection::ToString(std::string& output)const
-{ std::stringstream out;
-  //out << "Cardinality: " << this->CardinalitySelection << "\n";
-  Vector<Rational> tempRoot;
+std::string Selection::ToString()const
+{ Vector<Rational> tempRoot;
   tempRoot=*this;
-  out << tempRoot.ToString();
-  output=out.str();
+  return tempRoot.ToString();
 }
 
 void Selection::incrementSelection()
@@ -4748,12 +4745,13 @@ void LaTeXProcedures::drawline(double X1, double Y1, double X2, double Y2, unsig
 
 void rootSubalgebra::ComputeDynkinDiagramKandCentralizer()
 { this->SimpleBasisK=(this->genK);
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
   this->SimpleBasisCentralizerRoots.size=0;
-  for (int i=0; i<this->AmbientWeyl.RootsOfBorel.size; i++)
-    if (this->rootIsInCentralizer(this->AmbientWeyl.RootsOfBorel.TheObjects[i]))
-      this->SimpleBasisCentralizerRoots.AddOnTop(this->AmbientWeyl.RootsOfBorel.TheObjects[i]);
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl);
+  for (int i=0; i<this->GetAmbientWeyl().RootsOfBorel.size; i++)
+    if (this->rootIsInCentralizer(this->GetAmbientWeyl().RootsOfBorel[i]))
+      this->SimpleBasisCentralizerRoots.AddOnTop(this->GetAmbientWeyl().RootsOfBorel[i]);
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput
+  (this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
 void rootSubalgebra::ComputeAllButAmbientWeyl()
@@ -4761,17 +4759,17 @@ void rootSubalgebra::ComputeAllButAmbientWeyl()
   this->theKComponentRanks.size=0;
   this->theKEnumerations.size=0;
   this->SimpleBasisK=(this->genK);
-  this->AmbientWeyl.TransformToSimpleBasisGenerators(this->SimpleBasisK);
+  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisK);
   this->ComputeKModules();
   this->ComputeCentralizerFromKModulesAndSortKModules();
   this->NilradicalKmods.init(this->kModules.size);
-  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->AmbientWeyl);
-  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisCentralizerRoots, this->AmbientWeyl);
+  this->theDynkinDiagram.ComputeDiagramTypeModifyInput(this->SimpleBasisK, this->GetAmbientWeyl());
+  this->theCentralizerDiagram.ComputeDiagramTypeModifyInput
+  (this->SimpleBasisCentralizerRoots, this->GetAmbientWeyl());
 }
 
 void rootSubalgebra::ComputeAll()
-{ this->initFromAmbientWeyl();
-  this->ComputeAllButAmbientWeyl();
+{ this->ComputeAllButAmbientWeyl();
   //this->ComputeDebugString();
 }
 
@@ -4783,20 +4781,21 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
   this->SimpleBasisCentralizerRoots.ReservE(this->kModules.size);
   int counter=0;
   for (int i=0; i<this->kModules.size; i++)
-    if (this->kModules.TheObjects[i].size==1)
+    if (this->kModules[i].size==1)
     { this->kModules.SwapTwoIndices(counter, i);
       this->HighestWeightsGmodK.SwapTwoIndices(counter, i);
       this->LowestWeightsGmodK.SwapTwoIndices(counter, i);
       this->CentralizerKmods.AddSelectionAppendNewIndex(counter);
-      this->CentralizerRoots.AddOnTop(this->kModules.TheObjects[counter].TheObjects[0]);
-      this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules.TheObjects[counter].TheObjects[0]);
+      this->CentralizerRoots.AddOnTop(this->kModules[counter][0]);
+      this->SimpleBasisCentralizerRoots.AddOnTop(this->kModules[counter][0]);
       counter++;
     }
-  this->AmbientWeyl.TransformToSimpleBasisGenerators(this->SimpleBasisCentralizerRoots);
+  this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisCentralizerRoots);
 }
 
-void rootSubalgebra::initFromAmbientWeyl()
-{ this->AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
+void rootSubalgebra::init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwners)
+{ this->owners=inputOwners;
+  this->indexInOwners=inputIndexInOwners;
 }
 
 void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
@@ -4872,12 +4871,12 @@ void rootSubalgebra::ComputeExtremeWeightInTheSameKMod(Vector<Rational>& input, 
         tempRoot+=(this->SimpleBasisK.TheObjects[i]);
       else
         tempRoot-=(this->SimpleBasisK.TheObjects[i]);
-      if (this->AmbientWeyl.RootSystem.GetIndex(tempRoot)!=-1)
+      if (this->GetAmbientWeyl().RootSystem.GetIndex(tempRoot)!=-1)
       { outputW=(tempRoot);
         FoundHigher=true;
       }
       if (tempRoot.IsEqualToZero())
-      { outputW.MakeZero(this->AmbientWeyl.CartanSymmetric.NumRows);
+      { outputW.MakeZero(this->GetOwnerSSalg().GetRank());
         return;
       }
     }
@@ -5055,7 +5054,7 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
 { this->NumNilradicalsAllowed++;
   if (owner.flagCountingNilradicalsOnlyNoComputation)
   { owner.numNilradicalsBySA.TheObjects[indexInOwner]++;
-    this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables, owner, indexInOwner);
+    this->MakeProgressReportPossibleNilradicalComputation(&theGlobalVariables, owner, indexInOwner);
     return;
   }
   //this->ComputeDebugString();
@@ -5106,7 +5105,7 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
       }*/
     }
   }
-  this->MakeProgressReportPossibleNilradicalComputation(theGlobalVariables, owner, indexInOwner);
+  this->MakeProgressReportPossibleNilradicalComputation(&theGlobalVariables, owner, indexInOwner);
 }
 
 void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
@@ -5120,19 +5119,12 @@ void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int fou
   theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
-void rootSubalgebra::MakeProgressReportMultTable(int index, int outOf, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
+(GlobalVariables* theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
+{ if (theGlobalVariables==0)
     return;
-  std::stringstream out5;
-  out5 << "Computing pairing table: " << index+1 << " out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
-void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
+  ProgressReport report1(theGlobalVariables), report2(theGlobalVariables),
+  report3(theGlobalVariables), report4(theGlobalVariables), report5(theGlobalVariables);
   if (this->flagMakingProgressReport)
   { std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting)
@@ -5148,17 +5140,18 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation(GlobalVaria
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
       out4 << "Num cone condition failures: " << owner.NumConeConditionFailures;
       out5 << "Num failures to find l-prohibiting relations: " << owner.theBadRelations.size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
+      report4.Report(out4.str());
+      report5.Report(out5.str());
     }
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
-    theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+    report1.Report(out1.str());
+    report2.Report(out2.str());
+    report3.Report(out3.str());
   }
 }
 
-void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List<int>& oppositeKmods, GlobalVariables& theGlobalVariables)
+void rootSubalgebra::GenerateKmodMultTable
+(List<List<List<int> > >& output, List<int>& oppositeKmods,
+ GlobalVariables* theGlobalVariables)
 { output.SetSize(this->kModules.size);
   oppositeKmods.SetSize(this->kModules.size);
   int numTotal= this->kModules.size* this->kModules.size;
@@ -5166,21 +5159,27 @@ void rootSubalgebra::GenerateKmodMultTable(List<List<List<int> > >& output, List
   out << "Computing pairing table for the module decomposition of the Vector<Rational> subalgebra of type "
   << this->theDynkinDiagram.ElementToStrinG(false, true)
   << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(false, true);
-  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport(theGlobalVariables);
   theReport.Report(out.str());
+  ProgressReport theReport2(theGlobalVariables);
   for (int i=0; i<this->kModules.size; i++)
   { output[i].SetSize(this->kModules.size);
     for (int j=0; j<this->kModules.size; j++)
     { this->KmodTimesKmod(i, j, oppositeKmods, output[i][j]);
-      this->MakeProgressReportMultTable(i*this->kModules.size+j, numTotal, theGlobalVariables);
+      if (theGlobalVariables!=0)
+      { std::stringstream out5;
+        out5 << "Computing pairing table: " << i*this->kModules.size+j+1
+        << " out of " << numTotal;
+        theReport2.Report(out5.str());
+      }
     }
   }
 }
 
 bool rootSubalgebra::IsARoot(const Vector<Rational>& input)
-{ if (input.size!=this->AmbientWeyl.CartanSymmetric.NumRows)
+{ if (input.size!=this->GetOwnerSSalg().GetRank())
     return false;
-  return !(this->AmbientWeyl.RootSystem.GetIndex(input)==-1);
+  return this->GetAmbientWeyl().RootSystem.Contains(input);
 }
 
 bool rootSubalgebra::IsARootOrZero(Vector<Rational>& input)
@@ -5216,9 +5215,9 @@ void rootSubalgebra::ComputeKModules()
   //this->ComputeDebugString();
   this->ComputeRootsOfK();
   Vector<Rational> tempLW, tempHW;
-  HashedList<Vector<Rational> >& AllRoots= this->AmbientWeyl.RootSystem;
+  HashedList<Vector<Rational> >& AllRoots= this->GetAmbientWeyl().RootSystem;
   this->kModules.ReservE(AllRoots.size);
-  this->HighestRootsK.ReservE(this->AmbientWeyl.CartanSymmetric.NumRows);
+  this->HighestRootsK.ReservE(this->GetAmbientWeyl().CartanSymmetric.NumRows);
   this->LowestWeightsGmodK.ReservE(AllRoots.size);
   this->HighestWeightsGmodK.ReservE(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
@@ -5270,7 +5269,8 @@ int rootSubalgebra::GetIndexKmoduleContainingRoot(Vector<Rational>& input)
 bool rootSubalgebra::ConeConditionHolds
 (GlobalVariables& theGlobalVariables, rootSubalgebras& owner, int indexInOwner,
  Vectors<Rational>& NilradicalRoots, Vectors<Rational>& Ksingular, bool doExtractRelations)
-{ if (Vectors<Rational>::ConesIntersect(theGlobalVariables, NilradicalRoots, Ksingular, this->AmbientWeyl.CartanSymmetric.NumRows))
+{ if (Vectors<Rational>::ConesIntersect
+      (theGlobalVariables, NilradicalRoots, Ksingular, this->GetOwnerSSalg().GetRank()))
   { if (doExtractRelations)
       this->ExtractRelations
       (theGlobalVariables.matConeCondition1.GetElement(), theGlobalVariables.matConeCondition3.GetElement(),

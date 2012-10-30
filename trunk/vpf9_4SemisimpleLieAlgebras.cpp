@@ -57,8 +57,7 @@ void SemisimpleSubalgebras::FindHCandidates(GlobalVariables* theGlobalVariables)
   if (theGlobalVariables==0)
     theGlobalVariables=&tempGV.GetElement();
   this->GetSSowner().FindSl2Subalgebras
-  (this->theSl2s, this->GetSSowner().theWeyl.WeylLetter, this->GetSSowner().GetRank(),
-   *theGlobalVariables);
+  (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
   std::cout << this->theSl2s.ToString();
   this->theHcandidates.size=0;
   this->theHcandidates.AddOnTop(emptyStart);
@@ -78,31 +77,40 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 void SemisimpleSubalgebras::FindTheSSSubalgebras
 (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
-  this->owner=newOwner;
-  this->indexInOwner=newIndexInOwner;
-  int theRank=this->GetSSowner().GetRank();
-  this->theSl2s.owner[0].FindSl2Subalgebras
-  (this->theSl2s, this->GetSSowner().theWeyl.WeylLetter, theRank, *theGlobalVariables);
-  this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(*theGlobalVariables);
-  this->GenerateModuleDecompositionsPrincipalSl2s(theRank, *theGlobalVariables);
-  this->MatchActualSl2sFixedRootSAToPartitionSl2s(*theGlobalVariables);
-  this->MakeSelectionBasedOnPrincipalSl2s(*theGlobalVariables);
+  this->owners=newOwner;
+  this->indexInOwners=newIndexInOwner;
+//  int theRank=this->GetSSowner().GetRank();
+  this->GetSSowner().FindSl2Subalgebras
+  (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
+//  this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(*theGlobalVariables);
+//  this->GenerateModuleDecompositionsPrincipalSl2s(theRank, *theGlobalVariables);
+//  this->MatchActualSl2sFixedRootSAToPartitionSl2s(*theGlobalVariables);
+//  this->MakeSelectionBasedOnPrincipalSl2s(*theGlobalVariables);
+  this->FindTheSSSubalgebrasPart2(theGlobalVariables);
+}
+
+void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
+(GlobalVariables* theGlobalVariables)
+{
+
 }
 
 void SemisimpleSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables)
 { this->RemainingCandidates.init(this->theTypes.size);
   for (int i=0; i<this->theTypes.size; i++)
-    if (this->IndicesMatchingActualSl2s.TheObjects[i].size>0)
-    { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras.TheObjects[i];
-      SemisimpleLieAlgebra& theSSLieAlgebra= theCurrentAlgebrasSl2s.owner[0];
-      theSSLieAlgebra.FindSl2Subalgebras(theCurrentAlgebrasSl2s, theGlobalVariables);
+    if (this->IndicesMatchingActualSl2s[i].size>0)
+    { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras[i];
+      SemisimpleLieAlgebra& theSSLieAlgebra= this->GetSSowner();
+      theSSLieAlgebra.FindSl2Subalgebras(*this->owners, this->indexInOwners, theCurrentAlgebrasSl2s, theGlobalVariables);
       bool DoesFit=true;
       for (int j=0; j<theCurrentAlgebrasSl2s.size; j++)
-      { slTwo& currentSl2= theCurrentAlgebrasSl2s.TheObjects[j];
+      { slTwo& currentSl2= theCurrentAlgebrasSl2s[j];
         bool currentSl2Fits=false;
         for (int k=0; k<this->theSl2s.size; k++)
-        { slTwo& other= this->theSl2s.TheObjects[k];
-          currentSl2Fits=currentSl2.ModuleDecompositionFitsInto(currentSl2.highestWeights, currentSl2.multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+        { slTwo& other= this->theSl2s[k];
+          currentSl2Fits=currentSl2.ModuleDecompositionFitsInto
+          (currentSl2.highestWeights, currentSl2.multiplicitiesHighestWeights,
+           other.highestWeights, other.multiplicitiesHighestWeights);
           if (currentSl2Fits)
             break;
         }
@@ -116,7 +124,8 @@ void SemisimpleSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& t
     }
 }
 
-void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables)
+void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s
+(int theRank, GlobalVariables& theGlobalVariables)
 { this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
   slTwo tempSl2;
   this->CandidatesPrincipalSl2ofSubalgebra.ReservE(this->theTypes.size);
@@ -126,16 +135,17 @@ void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s(int theRan
   List<int> theMults;
   for (int i=0; i<this->theTypes.size; i++)
   { this->theTypes[i].GetLettersTypesMults(theLetters, theRanks, theMults);
-    this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.MakeFromDynkinType
+    this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().MakeFromDynkinType
     (theLetters, theRanks, &theMults);
 
-    this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.GenerateRootSystemFromKillingFormMatrix();
-    this->theCandidateSubAlgebras[i].owner[0].theWeyl=
-    (this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl);
-    int theDimension = this->theCandidateSubAlgebras[i].theRootSAs.AmbientWeyl.GetDim();
+    this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().GenerateRootSystemFromKillingFormMatrix();
+    (*this->theCandidateSubAlgebras[i].owners)[0].theWeyl=
+    (this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl());
+    int theDimension = this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().GetDim();
     tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
     tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
-    tempSl2.owner = &this->theCandidateSubAlgebras[i].owner[0];
+    tempSl2.owners=this->owners;
+    tempSl2.indexOwnerAlgebra=this->indexInOwners;
     tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
     this->CandidatesPrincipalSl2ofSubalgebra.AddOnTop(tempSl2);
   }
@@ -327,8 +337,8 @@ std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
     out << "\n<br>";
     out << "\n";
   }
-  out << "Remaining candidates:\n";
-  out << "<br>\n";
+  out << "Remaining candidates:\n" << this->RemainingCandidates.ToString();
+  out << "<br>The candidate details follow.<br>\n";
   for (int i=0; i<this->theCandidateSubAlgebras.size; i++)
   { SltwoSubalgebras& currentSl2s= this->theCandidateSubAlgebras[i];
     if (currentSl2s.size>0)
@@ -402,24 +412,28 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formula
     output << "\n<br>\n";
 }
 
+WeylGroup& slTwo::GetOwnerWeyl()
+{ return this->GetOwnerSSAlgebra().theWeyl;
+}
+
 std::string slTwo::ToString(FormatExpressions* theFormat)
 { if (this->container==0)
     return "sl(2) subalgebra not initialized.";
   std::stringstream out;  std::string tempS;
-  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: " <<
-  this->hCharacteristic.ToString() << "</a>";
+  out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: "
+  << this->hCharacteristic.ToString() << "</a>";
   tempS=this->preferredAmbientSimpleBasis.ToString();
-  std::string* physicalPath=0;
-  std::string* htmlPathServer=0;
+  std::string physicalPath="";
+  std::string htmlPathServer="";
   bool usePNG=true;
   bool useHtml=true;
   bool useLatex=false;
   if (theFormat!=0)
     if (theFormat->physicalPath!="")
-    { physicalPath=&theFormat->physicalPath;
-      htmlPathServer=&theFormat->htmlPathServer;
+    { physicalPath=theFormat->physicalPath+"sl2s/";
+      htmlPathServer=theFormat->htmlPathServer+"sl2s/";
     }
-  if (physicalPath==0 || htmlPathServer==0)
+  if (physicalPath=="" || htmlPathServer=="")
   { usePNG=false;
     useHtml=false;
   }
@@ -433,7 +447,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   { out << "Number of containing regular semisimple subalgebras: "
     << this->IndicesContainingRootSAs.size;
     if (useHtml)
-    out << "<br>";
+      out << "<br>";
   }
   FormatExpressions localFormat, latexFormat;
   localFormat.flagUseHTML=useHtml;
@@ -444,7 +458,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   { out << "\nContaining regular semisimple subalgebra number " << i+1 << ": ";
     rootSubalgebra& currentSA= this->container->theRootSAs[this->IndicesContainingRootSAs[i]];
     if (useHtml)
-    { out << "<a href=\"" << (*htmlPathServer) << "../rootHtml_rootSA"
+    { out << "<a href=\"" << htmlPathServer << "../rootHtml_rootSA"
       << this->IndicesContainingRootSAs[i] << ".html\">";
       currentSA.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
       CGI::clearDollarSigns(tempS, tempS);
@@ -458,7 +472,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
   this->ElementToStringModuleDecomposition(useLatex || usePNG, useHtml, tempS);
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
   this->container->IndicesSl2decompositionFlas[indexInContainer]=
   this->container->texFileNamesForPNG.size-1;
@@ -470,30 +484,30 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   tempStreamH << "\n$h=$ $" << tempS << "$";
   tempS= tempStreamH.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   tempStreamE << "\n$e=$ $" << this->theE.ToString(theFormat) << "$";
   tempS= tempStreamE.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   tempStreamF << "\n$f=$ $" << this->theF.ToString(theFormat) << "$";
   tempS= tempStreamF.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   out << "\n\nThe below are the Lie brackets of the above elements. Printed for debugging.";
   if (useHtml)
     out << "\n<br>\n";
   tempStreamEF << "\n$[e, f]=$ $" <<  this->bufferEbracketF.ToString(theFormat) << "$";
   tempS= tempStreamEF.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   tempStreamHE << "\n$[h, e]=$ $" << this->bufferHbracketE.ToString(theFormat) << "$";
   tempS= tempStreamHE.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   tempStreamHF << "\n$[h, f]=$ $" << this->bufferHbracketF.ToString(theFormat) << "$";
   tempS= tempStreamHF.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   //this->theSystemMatrixForm.ToString(tempS);
   //out <<"\nSystem matrix form we try to solve:\n"<< tempS;
   //this->theSystemColumnVector.ToString(tempS);
@@ -515,7 +529,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
     out << "\n<br>\n";
   tempS= tempStreamActual.str();
   this->ElementToHtmlCreateFormulaOutputReference
-  (tempS, out, usePNG, useHtml, *this->container, physicalPath, htmlPathServer);
+  (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   return out.str();
 }
 
@@ -526,8 +540,19 @@ void slTwo::ElementToHtml(std::string& filePath)
   CGI::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
-{ output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+void SltwoSubalgebras::init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner)
+{ this->owners=inputOwners;
+  this->IndexInOwners=inputIndexInOwner;
+  this->theRootSAs.ownerArray=inputOwners;
+  this->theRootSAs.indexInOwner=inputIndexInOwner;
+}
+
+void SemisimpleLieAlgebra::FindSl2Subalgebras
+  (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner,
+   SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
+  output.init(&inputOwner, inputIndexInOwner);
+  output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
   (theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
   output.IndicesSl2sContainedInRootSA.SetSize(output.theRootSAs.size);
@@ -537,7 +562,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
   ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<output.theRootSAs.size-1; i++)
   { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
-    (output, i, theGlobalVariables, *this);
+    (output, i, theGlobalVariables);
     std::stringstream tempStream;
     tempStream << "Exploring root subalgebra number " << (i+1)
     << " out of " << output.theRootSAs.size-1 << " non-trivial";
@@ -566,16 +591,52 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras(SltwoSubalgebras& output, GlobalVa
 //  tempRootSA.GetSsl2Subalgebras(tempSl2s, theGlobalVariables, *this);
 }
 
-void SemisimpleLieAlgebra::FindSl2Subalgebras
-(SltwoSubalgebras& output, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables)
-{ output.theRootSAs.AmbientWeyl.MakeArbitrary(WeylLetter, WeylRank);
-  this->theWeyl.MakeArbitrary(WeylLetter, WeylRank);
-  this->FindSl2Subalgebras(output, theGlobalVariables);
+std::string rootSubalgebras::ToString()
+{ std::stringstream out;
+  for (int i=0; i<this->size; i++)
+    out << (*this)[i].ToString();
+  return out.str();
+}
+
+WeylGroup& rootSubalgebras::GetOwnerWeyl()
+{ return this->GetOwnerSSalgebra().theWeyl;
+}
+
+SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()
+{ if (this->ownerArray==0 || this->indexInOwner<0)
+  { std::cout << "This is a programming error. Attempting to access the "
+    << " ambient Lie algebra of a non-initialized collection of root subalgebras. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return (*this->ownerArray)[this->indexInOwner];
+}
+
+void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
+(GlobalVariables& theGlobalVariables, bool sort, bool computeEpsCoords)
+{ MacroRegisterFunctionWithName("rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism");
+  this->size=0;
+  this->GetOwnerWeyl().ComputeRho(true);
+  //this->initDynkinDiagramsNonDecided(this->AmbientWeyl, WeylLetter, WeylRank);
+  rootSubalgebras rootSAsGenerateAll;
+  rootSAsGenerateAll.SetSize(this->GetOwnerSSalgebra().GetRank()*2+1);
+  rootSAsGenerateAll[0].genK.size=0;
+  rootSAsGenerateAll[0].owners=this->ownerArray;
+  rootSAsGenerateAll[0].indexInOwners=this->indexInOwner;
+  rootSAsGenerateAll[0].ComputeAll();
+  this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
+  (rootSAsGenerateAll, 1, theGlobalVariables)
+  ;
+//  std::cout << this->ToString();
+  if (sort)
+    this->SortDescendingOrderBySSRank();
+  if(computeEpsCoords)
+    for(int i=0; i<this->size; i++)
+      (*this)[i].ComputeEpsCoordsWRTk(theGlobalVariables);
 }
 
 void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
-(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables,
- SemisimpleLieAlgebra& theLieAlgebra)
+(SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition");
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
@@ -588,12 +649,10 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
   for (int k=0; k<theRelativeDimension; k++)
     for (int j=0; j<theRelativeDimension; j++)
-      InvertedRelativeKillingForm.elements[k][j]=this->AmbientWeyl.RootScalarCartanRoot
+      InvertedRelativeKillingForm.elements[k][j]=this->GetAmbientWeyl().RootScalarCartanRoot
       (this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
-  theLieAlgebra.theWeyl=this->AmbientWeyl;
-  theLieAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
-  //int relativeDimension =
+  this->GetOwnerSSalg().ComputeChevalleyConstantS(theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> tempRoots;
   tempRoots.ReservE(theRootsWithZeroCharacteristic.MaxSize);
@@ -601,15 +660,16 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   Matrix<Rational> tempMat;
 //  Selection tempSel;
   this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
-
   slTwo theSl2;
-  theSl2.owner = &theLieAlgebra;
   theSl2.container=&output;
+  theSl2.owners=this->owners;
+  theSl2.indexOwnerAlgebra=this->indexInOwners;
+  SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
   { tempRoots.size=0;
     for (int j=0; j<theRootsWithZeroCharacteristic.CardinalitySelection; j++)
       tempRoots.AddOnTop(this->SimpleBasisK[theRootsWithZeroCharacteristic.elements[j]]);
-    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->AmbientWeyl);
+    tempDiagram.ComputeDiagramTypeModifyInput(tempRoots, this->GetAmbientWeyl());
     int theSlack=0;
     RootsWithCharacteristic2.size=0;
     for (int j=0; j<relativeRootSystem.size; j++)
@@ -678,7 +738,8 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
 { if (outputIndex!=0)
     *outputIndex=-1;
   ElementSemisimpleLieAlgebra tempH;
-  tempH.MakeHgenerator(theH, this->owner, 0);
+  this->CheckForCorrectInitializationCrashIfNot();
+  tempH.MakeHgenerator(theH, *this->owners, this->IndexInOwners);
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].theH==tempH)
     { if (outputIndex!=0)
@@ -700,9 +761,11 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& the
   return false;
 }
 
-
 void slTwo::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
-{ this->ComputeModuleDecomposition(this->owner->theWeyl.RootsOfBorel, this->owner->theWeyl.CartanSymmetric.NumRows, this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions, theGlobalVariables);
+{ this->ComputeModuleDecomposition
+  (this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows,
+   this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions,
+   theGlobalVariables);
 }
 
 void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
@@ -787,8 +850,7 @@ void slTwo::ComputeModuleDecomposition
           << positiveRootsContainingRegularSA.ToString() << ". "
           << "<br>The preferred simple basis is <br>"
           << this->preferredAmbientSimpleBasis.ToString()
-          << "."
-          << "The coordinates relative to the preferred simple basis are<br>"
+          << ". The coordinates relative to the preferred simple basis are<br>"
           << coordsInPreferredSimpleBasis.ToString()
           << " The starting weights list is <br>"
           << outputWeightSpaceDimensions << ". "
@@ -866,7 +928,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j] << ".html\">" << tempS << "</a>" << ";  ";
+      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
+      << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
@@ -886,7 +949,6 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
 
 std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 { std::string tempS; std::stringstream out; std::stringstream body;
-  FormatExpressions PolyFormatLocal;
   bool useHtml= theFormat==0 ? true : theFormat->flagUseHTML;
   for (int i=0; i<this->size; i++)
   { tempS=(*this)[i].ToString(theFormat);
@@ -905,19 +967,21 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
 }
 
 void SltwoSubalgebras::ElementToHtml
-(GlobalVariables& theGlobalVariables, WeylGroup& theWeyl, bool usePNG, std::string& physicalPath, std::string& htmlPathServer,
- std::string& DisplayNameCalculator)
-{ std::string physicalPathSAs;
-  std::string htmlPathServerSAs;
-  physicalPathSAs= physicalPath;
-  physicalPathSAs.append("../");
-  htmlPathServerSAs= htmlPathServer;
-  htmlPathServerSAs.append("../");
-  theGlobalVariables.theIndicatorVariables.StatusString1NeedsRefresh=true;
-  theGlobalVariables.theIndicatorVariables.StatusString1= "Preparing html pages for sl(2) subalgebras. This might take a while.";
-  theGlobalVariables.MakeReport();
+(FormatExpressions* theFormat, GlobalVariables* theGlobalVariables)
+{ std::string physicalPathSAs= theFormat==0 ? "": theFormat->physicalPath;
+  std::string htmlPathServerSAs= theFormat==0 ? "": theFormat->htmlPathServer;
+  std::string physicalPathSl2s= theFormat==0 ? "": theFormat->physicalPath+"sl2s/";
+  std::string htmlPathServerSl2s= theFormat==0 ? "": theFormat->htmlPathServer+"sl2s/";
+
+  ProgressReport theReport(theGlobalVariables);
+  theReport.Report("Preparing html pages for sl(2) subalgebras. This might take a while.");
   std::string tempS;
-  this->theRootSAs.ElementToHtml(tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
+  std::string DisplayNameCalculator= theFormat==0 ? "" : theFormat->DisplayNameCalculator;
+  this->theRootSAs.ElementToHtml
+  (tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
+  bool usePNG=true;
+  if (physicalPathSAs=="")
+    usePNG=false;
   if(usePNG)
   { int numExpectedFiles= this->size*8;
     this->texFileNamesForPNG.ReservE(numExpectedFiles);
@@ -929,26 +993,25 @@ void SltwoSubalgebras::ElementToHtml
   this->texStringsEachFile.size=0;
   this->listSystemCommandsLatex.size=0;
   this->listSystemCommandsDVIPNG.size=0;
-  std::stringstream out, outNotation;
+  std::stringstream out, outNotation, outNotationCommand;
   std::string fileName;
   std::fstream theFile, fileFlas;
-  outNotation << "<a href=\"" << htmlPathServer << "StructureConstants.html\">Notation, structure constants and Weyl group info</a>"
+  outNotationCommand << "printSemisimpleLieAlgebra{}" << this->GetOwnerWeyl().WeylLetter
+  << "_" << this->GetOwnerWeyl().GetDim();
+  outNotation
+  << "Notation, structure constants and Weyl group info: "
+  << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())
   << "<br> <a href=\""<< DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
-  FormatExpressions theFormat;
-  theFormat.flagUseHTML=true;
-  theFormat.flagUseLatex=false;
-  theFormat.physicalPath=physicalPath;
-  theFormat.htmlPathServer=htmlPathServer;
-  out << this->ToString(&theFormat);
+  out << this->ToString(theFormat);
   if(usePNG)
-  { fileName= physicalPath;
+  { fileName= physicalPathSl2s;
     fileName.append("sl2s.html");
     CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
-    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true) <<  "</title>";
+    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
     theFile << "<meta name=\"keywords\" content=\""
     <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"
@@ -957,34 +1020,34 @@ void SltwoSubalgebras::ElementToHtml
     << ", sl(2)-triples of "
     << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
     << " \">";
-    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n" <<tempS<<"</HTML></BODY>";
+    theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
+    << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n"
+    << tempS << "</HTML></BODY>";
     theFile.close();
   }
-  fileName= physicalPath;
+  fileName= physicalPathSl2s;
   fileName.append("sl2s_nopng.html");
-  tempS = this->ToString(&theFormat);
+  tempS = this->ToString(theFormat);
   CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  theFile << "<HMTL><BODY>" << notation << "<a href=\"" << htmlPathServer << "sl2s.html\"> " << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
-  theFile.close();
-  fileName= physicalPath;
-  fileName.append("StructureConstants.html");
-  CGI::OpenFileCreateIfNotPresent(theFile, fileName, false, true, false);
-  this->owner[0].ToString(&theGlobalVariables.theDefaultFormat);
-  theFile << tempS;
+  theFile << "<HMTL><BODY>" << notation << "<a href=\""
+  << htmlPathServerSl2s << "sl2s.html\"> "
+  << ".png rich html for your viewing pleasure</a><br>\n" << tempS << "</HTML></BODY>";
   theFile.close();
   if (usePNG)
   { this->listSystemCommandsLatex.SetSize(this->texFileNamesForPNG.size);
     this->listSystemCommandsDVIPNG.SetSize(this->texFileNamesForPNG.size);
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
-    { CGI::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG.TheObjects[i], false, true, false);
-      fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n" << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
+    { CGI::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
+      fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"
+      << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
-      tempStreamLatex << "latex " << " -output-directory=" << physicalPath << " " << this->texFileNamesForPNG.TheObjects[i];
-      tempS= this->texFileNamesForPNG.TheObjects[i];
+      tempStreamLatex << "latex " << " -output-directory="
+      << physicalPathSl2s << " " << this->texFileNamesForPNG[i];
+      tempS= this->texFileNamesForPNG[i];
       tempS.resize(tempS.size()-4);
       tempStreamPNG << "dvipng " << tempS << ".dvi -o " << tempS << ".png -T tight";
-      this->listSystemCommandsLatex.TheObjects[i]= tempStreamLatex.str();
-      this->listSystemCommandsDVIPNG.TheObjects[i]=tempStreamPNG.str();
+      this->listSystemCommandsLatex[i]= tempStreamLatex.str();
+      this->listSystemCommandsDVIPNG[i]=tempStreamPNG.str();
       fileFlas.close();
     }
   }

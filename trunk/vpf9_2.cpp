@@ -341,7 +341,13 @@ void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std:
   output=out.str();
 }
 
-bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rational>& RootsWithCharacteristic2, Vectors<Rational>& relativeRootSystem, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h, ElementSemisimpleLieAlgebra& outputE, ElementSemisimpleLieAlgebra& outputF, Matrix<Rational> & outputMatrixSystemToBeSolved, PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational> & outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
+(Vectors<Rational>& RootsWithCharacteristic2,
+ Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+ ElementSemisimpleLieAlgebra& outputE, ElementSemisimpleLieAlgebra& outputF,
+ Matrix<Rational>& outputMatrixSystemToBeSolved,
+ PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+ Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
 { if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
   Vectors<Rational> SelectedExtraPositiveRoots;
@@ -352,29 +358,33 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rationa
 //  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
   Vector<Rational> tempRoot, tempRoot2;
-  //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+\dots a_kg^\alpha_k, and f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
+  //format. We are looking for an sl(2) for which e= a_0 g^\alpha_0+... a_kg^\alpha_k, and
+  // f=b_0 g^{-\alpha_0}+... +b_kg^{-\alpha_k}
   //where the first \alpha's are ordered as in rootsInPlay.
-  //Those are ordered as follows. First come the simple Vectors<Rational> of characteristic 2,
+  //Those are ordered as follows. First come the simple roots of characteristic 2,
   //and the last \alpha's are the members of SelectedExtraPositiveRoots
-  //(i.e. Vectors<Rational> equal to the sum of one simple Vector<Rational> of characteristic 2 a simple Vector<Rational> of characteristic 0).
-  // Then the first k variables of the polynomials below will be a_0, ..., a_k., and the last k variables will be the b_i's
-  // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2}, where l/2 is the index of the Vector<Rational>
+  //(i.e. Vectors<Rational> equal to the sum of one simple roots
+  // of characteristic 2 a simple root of characteristic 0).
+  // Then the first k variables of the polynomials below will be a_0, ..., a_k., and
+  // the last k variables will be the b_i's
+  // the l^th polynomial will correspond to the coefficient of g^\alpha_{l/2}, where
+  // l/2 is the index of the root
   // of SelectedExtraPositiveRoots, if l is even, and to the
   // coefficient of  g^{-\alpha_{(l+1)/2}} otherwise
   for (int i=0; i<theRelativeDimension; i++)
     if (!theZeroCharacteristics.selected[i])
-      rootsInPlay.AddOnTop(simpleBasisSA.TheObjects[i]);
+      rootsInPlay.AddOnTop(simpleBasisSA[i]);
     else
       for (int j=0; j<theRelativeDimension; j++)
         if (!theZeroCharacteristics.selected[j])
-        { tempRoot= simpleBasisSA.TheObjects[i]+simpleBasisSA.TheObjects[j];
+        { tempRoot= simpleBasisSA[i]+simpleBasisSA[j];
           if (this->theWeyl.IsARoot(tempRoot))
             SelectedExtraPositiveRoots.AddOnTop(tempRoot);
         }
   SelectedExtraPositiveRoots.size=0;
   for (int i=0; i<RootsWithCharacteristic2.size; i++)
-    if (!simpleBasisSA.ContainsObject(RootsWithCharacteristic2.TheObjects[i]))
-      SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2.TheObjects[i]);
+    if (!simpleBasisSA.ContainsObject(RootsWithCharacteristic2[i]))
+      SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
   int halfNumberVariables = rootsInPlay.size;
@@ -387,7 +397,10 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rationa
     coeffsF.elements[0][i]=i+1; //(i%2==0)? 1: 2;
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
     coeffsF.elements[0][i]=i+1;
-  this->initHEFSystemFromECoeffs(theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA, SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables, h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
+  this->initHEFSystemFromECoeffs
+  (theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA,
+   SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
+   h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
   Matrix<Rational>  tempMat, tempMatColumn, tempMatResult;
   tempMat=(outputMatrixSystemToBeSolved);
   tempMatColumn=(outputSystemColumnVector);
@@ -395,7 +408,8 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rationa
   outputE.MakeZero(*this->owner, this->indexInOwner);
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
   ChevalleyGenerator tempGen;
-  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(tempMat, tempMatColumn, tempMatResult))
+  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+     (tempMat, tempMatColumn, tempMatResult))
   { for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator
       (*this->owner, this->indexInOwner,
@@ -507,18 +521,22 @@ Vector<Rational> ElementSemisimpleLieAlgebra::GetCartanPart
   return result;
 }
 
-void slTwo::MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
+void slTwo::MakeReportPrecomputations
+(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer,
+ int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
 { MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
   int theDimension=this->GetOwnerSSAlgebra().GetRank();
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
   tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
+  (tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra theDiagram;
   theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
   this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
   tempRoots.MakeEiBasis(theDimension);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh(tempRoots, this->theH.GetCartanPart());
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
+  (tempRoots, this->theH.GetCartanPart());
   DynkinDiagramRootSubalgebra tempDiagram;
   tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
   this->preferredAmbientSimpleBasis=tempRoots;

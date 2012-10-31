@@ -416,6 +416,18 @@ WeylGroup& slTwo::GetOwnerWeyl()
 { return this->GetOwnerSSAlgebra().theWeyl;
 }
 
+bool slTwo::operator==(const slTwo& right)const
+{// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
+  if (this->owners!=right.owners || this->indexOwnerAlgebra!=right.indexOwnerAlgebra)
+  { std::cout << "This is a programming error: comparing sl(2) subalgebras"
+    << "that have different ambient Lie algebras. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->hCharacteristic==(right.hCharacteristic);
+}
+
+
 std::string slTwo::ToString(FormatExpressions* theFormat)
 { if (this->container==0)
     return "sl(2) subalgebra not initialized.";
@@ -430,8 +442,8 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   bool useLatex=false;
   if (theFormat!=0)
     if (theFormat->physicalPath!="")
-    { physicalPath=theFormat->physicalPath+"sl2s/";
-      htmlPathServer=theFormat->htmlPathServer+"sl2s/";
+    { physicalPath=theFormat->physicalPath + "sl2s/";
+      htmlPathServer=theFormat->htmlPathServer + "sl2s/";
     }
   if (physicalPath=="" || htmlPathServer=="")
   { usePNG=false;
@@ -641,9 +653,11 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   Vectors<Rational> RootsWithCharacteristic2;
+  Vectors<Rational> reflectedSimpleBasisK;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
+  ElementWeylGroup raisingElt;
   DynkinDiagramRootSubalgebra tempDiagram;
-  int theRelativeDimension = this->SimpleBasisK.size;
+  int theRelativeDimension= this->SimpleBasisK.size;
   theRootsWithZeroCharacteristic.init(theRelativeDimension);
   Matrix<Rational> InvertedRelativeKillingForm;
   InvertedRelativeKillingForm.init(theRelativeDimension, theRelativeDimension);
@@ -654,12 +668,14 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   InvertedRelativeKillingForm.Invert();
   this->GetOwnerSSalg().ComputeChevalleyConstantS(theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
+  ProgressReport theReport(&theGlobalVariables);
   Vectors<Rational> tempRoots;
   tempRoots.ReservE(theRootsWithZeroCharacteristic.MaxSize);
   Vectors<Rational> relativeRootSystem, bufferVectors;
   Matrix<Rational> tempMat;
 //  Selection tempSel;
-  this->PositiveRootsK.GetCoordsInBasis(this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
+  this->PositiveRootsK.GetCoordsInBasis
+  (this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
   slTwo theSl2;
   theSl2.container=&output;
   theSl2.owners=this->owners;
@@ -685,7 +701,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
         RootsWithCharacteristic2.AddOnTop(this->PositiveRootsK[j]);
       }
     }
-    int theDynkinEpsilon = tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
+    int theDynkinEpsilon =
+    tempDiagram.NumRootsGeneratedByDiagram() + theRelativeDimension - theSlack;
     //if Dynkin's epsilon is not zero the subalgebra cannot be an S sl(2) subalgebra.
     //otherwise, as far as I understand, it always is (but generators still have to be found)
     //this is done in the below code.
@@ -701,22 +718,28 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       characteristicH.MakeZero(theLieAlgebra.GetRank());
       for(int j=0; j<theRelativeDimension; j++)
         characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
-      theSl2.theH.MakeHgenerator(characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
+      this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
+      reflectedSimpleBasisK=this->SimpleBasisK;
+      for (int k=0; k<reflectedSimpleBasisK.size; k++)
+        this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k], false, false);
+      theSl2.theH.MakeHgenerator
+      (characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theE.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theF.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-         (RootsWithCharacteristic2, relativeRootSystem, theRootsWithZeroCharacteristic, this->SimpleBasisK,
-          characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
-          theSl2.theSystemColumnVector, theGlobalVariables))
+         (RootsWithCharacteristic2, theRootsWithZeroCharacteristic,
+          this->SimpleBasisK,
+          characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm,
+          theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
       { int indexIsoSl2;
-        theSl2.MakeReportPrecomputations(theGlobalVariables, output, output.size, indexInContainer, *this);
+        theSl2.MakeReportPrecomputations
+        (theGlobalVariables, output, output.size, indexInContainer, *this);
         if(output.ContainsSl2WithGivenHCharacteristic(theSl2.hCharacteristic, &indexIsoSl2))
         { output[indexIsoSl2].IndicesContainingRootSAs.AddOnTop(indexInContainer);
           output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(indexIsoSl2);
-        }
-        else
+        } else
         { output.IndicesSl2sContainedInRootSA[indexInContainer].AddOnTop(output.size);
           theSl2.indexInContainer=output.size;
           output.AddOnTop(theSl2);
@@ -728,8 +751,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
     std::stringstream out;
     out << "Exploring Dynkin characteristics case " << i+1 << " out of " << numCycles;
 //    std::cout << "<br>" << out.str();
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out.str();
-    theGlobalVariables.MakeReport();
+    theReport.Report(out.str());
   }
 //  std::cout << "Bad chracteristics: " << output.BadHCharacteristics.ToString();
 }
@@ -749,7 +771,8 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
   return false;
 }
 
-bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex)
+bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic
+(Vector<Rational>& theHCharacteristic, int* outputIndex)
 { if (outputIndex!=0)
     *outputIndex=-1;
   for (int i=0; i<this->size; i++)
@@ -901,7 +924,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << "which the sl(2) has no centralizer</td> </tr>";
   if (this->BadHCharacteristics.size>0)
   { if (useHtml)
-      out << "<tr><td>Bad values of h</td><td>";
+      out << "<tr><td><b>Bad values of h</b></td><td>";
     tempS= this->BadHCharacteristics.ToString();
     out << tempS;
     if (useHtml)
@@ -910,11 +933,14 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   for (int i=0; i<this->size; i++)
   { slTwo& theSl2= (*this)[i];
     if (useHtml)
-      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index" << i << "\"title=\"" << tooltipHchar << "\" >";
+      out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"
+      << i << "\"title=\"" << tooltipHchar << "\" >";
     out << theSl2.hCharacteristic.ToString();
     if (useHtml)
       out << "</a></td><td title=\"" << tooltipHvalue << "\">";
     out << theSl2.theH.GetCartanPart().ToString();
+    if(!this->GetOwnerWeyl().IsDominantWeight(theSl2.theH.GetCartanPart()))
+      out << "<b>This is wrong!!!!!!!!!!!!! The h is not dual to a dominant weight... </b>";
     if (useHtml)
       out << "</td><td style=\"padding-left:20px\" title=\"" << tooltipVDecomposition << "\">";
     if (useHtml && usePNG)

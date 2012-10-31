@@ -1721,11 +1721,7 @@ public:
     this->indexInContainer=right.indexInContainer;
     this->indexOwnerAlgebra=right.indexOwnerAlgebra;
   }
-  bool operator==(const slTwo& right)const
-  {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
-     return this->hCharacteristic==(right.hCharacteristic) && this->owners==right.owners &&
-     this->indexOwnerAlgebra==right.indexOwnerAlgebra;
-  }
+  bool operator==(const slTwo& right)const;
   unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result=0;
@@ -1948,7 +1944,14 @@ public:
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent(ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEF(Vector<Rational> & h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEFWRTSubalgebra(Vectors<Rational>& RootsWithCharacteristic2, Vectors<Rational>& relativeRootSystem, Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational> & h, ElementSemisimpleLieAlgebra& outputE, ElementSemisimpleLieAlgebra& outputF, Matrix<Rational> & outputMatrixSystemToBeSolved, PolynomialSubstitution<Rational>& outputSystemToBeSolved, Matrix<Rational> & outputSystemColumnVector, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEFWRTSubalgebra
+  (Vectors<Rational>& RootsWithCharacteristic2,
+   Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
+   ElementSemisimpleLieAlgebra& outputE, ElementSemisimpleLieAlgebra& outputF,
+   Matrix<Rational>& outputMatrixSystemToBeSolved,
+   PolynomialSubstitution<Rational>& outputSystemToBeSolved,
+   Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
+  ;
   static void FindSl2Subalgebras
   (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner,
    SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)

@@ -413,6 +413,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="PrintSemisimpleSubalgebras{}(F_4)";
 //  civilizedInput="printSlTwoSubalgebrasAndRootSubalgebras{}(F_4)";
 //  civilizedInput="printSlTwoSubalgebras{}(A_2)";
+//  civilizedInput="printSlTwoSubalgebras{}(E_9)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

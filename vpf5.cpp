@@ -3,13 +3,10 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5cpp(__FILE__, "Implementation file for the calculator parser part 2: meant for built-in functions. ");
 
-//If you get a the C++ multiple definition shit error:
-//1) It's not your fault. C++ is idiotic.
-//2) To fix it:
+//If you get a the C++ multiple definition error:
 //- Try moving template *EXPLICIT* specializations (i.e. template <>)
 //  to the *beginning* (!) of .cpp files.
 //- Try moving template generics into .h files.
-//- Write at least one angry email to the highest C++ authority you can get an email hold of.
 
 template <>
 bool ReflectionSubgroupWeylGroup::IsDominantWRTgenerator<RationalFunctionOld>(const Vector<RationalFunctionOld>& theWeight, int generatorIndex)
@@ -234,6 +231,8 @@ bool CommandList::fRootSAsAndSltwos
   //bool showIndicator=true;
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return false;
+  if (theExpression.errorString!="")
+    return true;
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=10000;

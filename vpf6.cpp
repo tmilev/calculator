@@ -3403,7 +3403,8 @@ bool CommandList::fSSAlgebra
     return theExpression.SetError(errorStream.str());
   }
   if (theRank<1 || theRank>8)
-  { errorStream << "The rank of a simple Lie algebra must be between 1 and 8; you entered " << theRank << " instead.";
+  { errorStream << "The rank of a simple Lie algebra must be between 1 and 8; you entered "
+    << theRank << " instead.";
     return theExpression.SetError(errorStream.str());
   }
   const VariableNonBound& theTypeName=typeE.GetAtomicValue().GetValuE<VariableNonBound>();

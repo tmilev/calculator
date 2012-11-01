@@ -344,6 +344,7 @@ void MakeVariableNonBounD
   { Data tempData(*this->theBoss);
     tempData.SetError(theError);
     this->MakeAtom(tempData, *this->theBoss, this->IndexBoundVars);
+    this->errorString=theError;
     return true;
   }
   Expression(const Expression& other)

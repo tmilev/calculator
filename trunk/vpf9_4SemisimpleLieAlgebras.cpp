@@ -1027,7 +1027,8 @@ void SltwoSubalgebras::ElementToHtml
   outNotation
   << "Notation, structure constants and Weyl group info: "
   << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())
-  << "<br> <a href=\""<< DisplayNameCalculator << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
+  << "<br> <a href=\""<< DisplayNameCalculator
+  << "\"> Calculator main page</a><br><a href=\"../rootHtml.html\">Root subsystem table</a><br>";
   std::string notation= outNotation.str();
   out << this->ToString(theFormat);
   if(usePNG)
@@ -1065,7 +1066,7 @@ void SltwoSubalgebras::ElementToHtml
     for (int i=0; i<this->texFileNamesForPNG.size; i++)
     { CGI::OpenFileCreateIfNotPresent(fileFlas, this->texFileNamesForPNG[i], false, true, false);
       fileFlas << "\\documentclass{article}\\begin{document}\\pagestyle{empty}\n"
-      << this->texStringsEachFile.TheObjects[i] << "\n\\end{document}";
+      << this->texStringsEachFile[i] << "\n\\end{document}";
       std::stringstream tempStreamLatex, tempStreamPNG;
       tempStreamLatex << "latex " << " -output-directory="
       << physicalPathSl2s << " " << this->texFileNamesForPNG[i];

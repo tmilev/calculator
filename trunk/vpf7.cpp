@@ -1729,7 +1729,7 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
 std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
   out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/"
-  << 1121
+  << 1125
   << "/tree/trunk/"
   << CGI::RemovePathFromFileName(fileName) << "\">"
   << CGI::RemovePathFromFileName(fileName);

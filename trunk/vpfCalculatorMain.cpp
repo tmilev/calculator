@@ -514,7 +514,6 @@ g_{-2} v_\\lambda\
   return 0;
 }
 
-
 void static_html3(std::stringstream& output){
 output << " <!>\n";
 output << " <script type=\"text/javascript\"> \n";

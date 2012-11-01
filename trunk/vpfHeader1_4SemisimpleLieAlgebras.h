@@ -62,7 +62,7 @@ public:
   void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
-  bool ContainsSl2WithGivenHCharacteristic(Vector<Rational> & theHCharacteristic, int* outputIndex);
+  bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
   void ElementToHtml
   (FormatExpressions* theFormat=0, GlobalVariables* theGlobalVariables=0)
    ;
@@ -77,26 +77,35 @@ class DynkinSimpleType
     return output;
   }
   public:
+  SltwoSubalgebras* owner;
   char theLetter;
   int theRank;
-  DynkinSimpleType():theLetter('X'), theRank(-1){}
-  bool operator>(const DynkinSimpleType& other)const
-  { if (this->theRank>other.theRank)
-      return true;
-    if (this->theRank<other.theRank)
-      return false;
-    if (this->theLetter=='B' && other.theLetter=='D')
-      return true;
-    if (this->theLetter=='D' && other.theLetter=='B')
-      return false;
-    return this->theLetter>other.theLetter;
-  }
+  int DynkinIndex;
+  DynkinSimpleType(): owner(0), theLetter('X'), theRank(-1), DynkinIndex(-1){}
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
+    this->DynkinIndex=other.DynkinIndex;
+  }
+  void assertIAmInitialized()const
+  { if (this->owner==0)
+    { std::cout << "This is a programming error:  "
+      << " using a non-initialized Dynkin simple type. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
   }
   bool operator==(const DynkinSimpleType& other)const
-  { return this->theLetter==other.theLetter && this->theRank==other.theRank;
+  { this->assertIAmInitialized();
+    if (this->owner!=other.owner)
+    { std::cout << "This is a programming error: attempting to compare "
+      << " Dynkin types of subalgebras with different owners. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return
+    this->theLetter==other.theLetter && this->theRank==other.theRank &&
+    this->DynkinIndex==other.DynkinIndex;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int) input.theLetter)*2+input.theRank;
@@ -115,6 +124,26 @@ class DynkinSimpleType
       out << theLetter << "_" << theRank;
     return out.str();
   }
+  void operator++();
+  bool operator>(const DynkinSimpleType& other)const
+  { if (this->theRank>other.theRank)
+      return true;
+    if (this->theRank<other.theRank)
+      return false;
+    if (this->DynkinIndex>other.DynkinIndex)
+      return true;
+    if (this->DynkinIndex<other.DynkinIndex)
+      return false;
+    if (this->theLetter=='B' && other.theLetter=='D')
+      return true;
+    if (this->theLetter=='D' && other.theLetter=='B')
+      return false;
+    return this->theLetter>other.theLetter;
+  }
+  inline bool operator<(const DynkinSimpleType& other)const
+  { return other>*this;
+  }
+  bool operator<(int otherRank)const;
 };
 
 class DynkinType : public MonomialCollection<DynkinSimpleType, int>
@@ -132,30 +161,24 @@ public:
   }
 };
 
+class CandidateSSSubalgebra
+{
+public:
+  List<Vectors<Rational> > CartanSAsByComponent;
+  List<DynkinType> theTypes;
+  void operator=(const CandidateSSSubalgebra& other)
+  { this->CartanSAsByComponent=other.CartanSAsByComponent;
+  }
+};
+
 class SemisimpleSubalgebras
 {
 public:
-  SltwoSubalgebras theSl2s;
   List<SemisimpleLieAlgebra>* owners;
   int indexInOwners;
-  List<Vectors<Rational> > theHcandidates;
-  int indexLowestUnexplored;
-  SltwoSubalgebras CandidatesPrincipalSl2ofSubalgebra;
-  Selection RemainingCandidates;
-//  List<DynkinDiagramRootSubalgebra> thePossibleDynkinDiagrams;
-  List<DynkinType> theTypes;
-  List<List<int> > thePartitionValues;
-  List<List<int> > thePartitionMultiplicities;
-  List<SltwoSubalgebras> theCandidateSubAlgebras;
-  List<List<int> > IndicesMatchingSl2s;
-  List<List<int> > IndicesMatchingPartitionSl2s;
-  List<List<int> > IndicesMatchingActualSl2s;
-  void FindHCandidates
-  (GlobalVariables* theGlobalVariables)
-  ;
-  void FindHCandidatesWithOneExtraHContaining
-  (Vectors<Rational>& inpuT, GlobalVariables* theGlobalVariables)
-  ;
+  SltwoSubalgebras theSl2s;
+  List<CandidateSSSubalgebra> Hcandidates;
+  int theRecursionCounter;
   SemisimpleLieAlgebra& GetSSowner()
   { if (this->owners==0 || this->indexInOwners<0)
     { std::cout << "This is a programming error: attempted to access non-initialized "
@@ -169,24 +192,18 @@ public:
   owners(inputOwners), indexInOwners(inputIndexInOwner)
   { this->theSl2s.owners=inputOwners;
     this->theSl2s.IndexInOwners=inputIndexInOwner;
+    this->theRecursionCounter=0;
   }
   std::string ToString(FormatExpressions* theFormat=0);
-  void MatchRealSl2sToPartitionSl2s();
-  void MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables);
-  void MatchActualSl2sFixedRootSAToPartitionSl2s(GlobalVariables& theGlobalVariables);
-  void GenerateModuleDecompositionsPrincipalSl2s(int theRank, GlobalVariables& theGlobalVariables);
-  std::string ElementToStringCandidatePrincipalSl2s(FormatExpressions* theFormat=0);
   void FindTheSSSubalgebras
   (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
   ;
   void FindTheSSSubalgebrasPart2
   (GlobalVariables* theGlobalVariables)
   ;
-  void EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank);
-  void GenerateAllPartitionsUpTo(int theRank);
-  void GenerateAllPartitionsDontInit(int theRank);
-  void GenerateAllDiagramsForPartitionRecursive(int indexPartition, int indexInPartition, List<int>& ranksBuffer, List<int>& multiplicitiesBuffer, List<char>& lettersBuffer);
-  void GenerateAllPartitionsRecursive(int remainingToBePartitioned, int CurrentValue, List<int>& Multiplicities, List<int>& Values);
+  void ExtendCandidatesRecursive
+  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  ;
 };
 
 

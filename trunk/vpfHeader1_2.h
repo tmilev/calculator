@@ -1219,26 +1219,20 @@ class DynkinDiagramRootSubalgebra
 public:
   std::string DynkinStrinG;
   void ElementToStrinG
-  (std::string& output, bool useDollarSigns, bool IncludeAlgebraNames)
+  (std::string& output, bool IncludeAlgebraNames)
   ;
   std::string ElementToStrinG
-  (bool useDollarSigns, bool IncludeAlgebraNames)
+  (bool IncludeAlgebraNames)
   { std::string result;
-    this->ElementToStrinG(result, useDollarSigns, IncludeAlgebraNames);
+    this->ElementToStrinG(result, IncludeAlgebraNames);
     return result;
   }
   void ComputeDynkinStrinG()
-  { this->ElementToStrinG(this->DynkinStrinG, false, false);
+  { this->ElementToStrinG(this->DynkinStrinG, false);
   }
   std::string SetComponent
   (const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
   ;
-  static std::string GetNameFrom
-  (const std::string& WeylLetterWithLength, int WeylRank, bool IncludeAlgebraNames)
-  ;
-  static std::string GetDiagramAndAlgebraName
-  (const std::string& WeylLetterWithLength, int WeylRank)
-  {return DynkinDiagramRootSubalgebra::GetNameFrom(WeylLetterWithLength, WeylRank, true);}
   List<Vectors<Rational> > SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
@@ -1638,6 +1632,7 @@ public:
   List<SemisimpleLieAlgebra>* owners;
   int indexOwnerAlgebra;
   SltwoSubalgebras* container;
+  Rational DynkinIndex; //the Dynkin index is the square of the length of the root dual to theH
   int indexInContainer;
   List<int> IndicesContainingRootSAs;
   List<int> IndicesMinimalContainingRootSA;
@@ -1720,6 +1715,7 @@ public:
     this->container=right.container;
     this->indexInContainer=right.indexInContainer;
     this->indexOwnerAlgebra=right.indexOwnerAlgebra;
+    this->DynkinIndex=right.DynkinIndex;
   }
   bool operator==(const slTwo& right)const;
   unsigned int HashFunction() const
@@ -1826,9 +1822,11 @@ public:
   std::string GetLieAlgebraName(bool includeNonTechnicalNames=true)const
   { return this->GetLieAlgebraName(this->theWeyl.WeylLetter, this->GetRank(), includeNonTechnicalNames);
   }
-  static std::string GetLieAlgebraName(char WeylLetter, int WeylDim, bool includeNonTechnicalNames=true)
+  static std::string GetLieAlgebraName
+  (char WeylLetter, int WeylDim, bool includeNonTechnicalNames=true, bool includeTechnicalNames=true)
   { std::stringstream out;
-    out << WeylLetter << "_" << WeylDim;
+    if (includeTechnicalNames)
+      out << WeylLetter << "_" << WeylDim;
     if (includeNonTechnicalNames)
       if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
         switch (WeylLetter)

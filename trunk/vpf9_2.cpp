@@ -521,44 +521,6 @@ Vector<Rational> ElementSemisimpleLieAlgebra::GetCartanPart
   return result;
 }
 
-void slTwo::MakeReportPrecomputations
-(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer,
- int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
-{ MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
-  int theDimension=this->GetOwnerSSAlgebra().GetRank();
-  this->IndicesContainingRootSAs.size=0;
-  Vectors<Rational> tempRoots;
-  tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
-  (tempRoots, this->theH.GetCartanPart());
-  DynkinDiagramRootSubalgebra theDiagram;
-  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
-  this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
-  tempRoots.MakeEiBasis(theDimension);
-  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
-  (tempRoots, this->theH.GetCartanPart());
-  DynkinDiagramRootSubalgebra tempDiagram;
-  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
-  this->preferredAmbientSimpleBasis=tempRoots;
-  this->hCharacteristic.SetSize(theDimension);
-  for (int i=0; i<theDimension; i++)
-    this->hCharacteristic[i]=
-    this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
-    (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
-  //this->hCharacteristic.ComputeDebugString();
-//  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
-//      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
-//      && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
-  this->GetOwnerSSAlgebra().LieBracket(this->theE, this->theF, this->bufferEbracketF);
-//  std:: cout << "[" << this->theE.ToString() << ", " << this->theF.ToString() << "]="
-//  << this->bufferEbracketF.ToString();
-  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theE, this->bufferHbracketE);
-  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theF, this->bufferHbracketF);
-
-  //theSl2.hCharacteristic.ComputeDebugString();
-//  this->ComputeModuleDecomposition();
-}
-
 void WeylGroup::PerturbWeightToRegularWRTrootSystem(const Vector<Rational>& inputH, Vector<Rational>& output)
 { output=(inputH);
   int indexFirstNonRegular;
@@ -648,13 +610,13 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";
-    current.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+    current.theDynkinDiagram.ElementToStrinG(tempS, true);
     out << tempS;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    current.theCentralizerDiagram.ElementToStrinG(tempS, useLatex, true);
+    current.theCentralizerDiagram.ElementToStrinG(tempS, true);
     out << tempS;
     if (useHtml)
       out << "</td><td>";

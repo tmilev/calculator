@@ -528,6 +528,23 @@ public:
   ~MemorySaving();
 };
 
+class RecursionDepthCounter
+{
+public:
+  int* theCounter;
+  RecursionDepthCounter(int* inputCounter): theCounter(0)
+  { if (inputCounter==0)
+      return;
+    this->theCounter=inputCounter;
+    (*this->theCounter)++;
+  }
+  ~RecursionDepthCounter()
+  { if (this->theCounter!=0)
+      (*this->theCounter)--;
+    this->theCounter=0;
+  }
+};
+
 //The below class is to be used together with List.
 //The purpose of the class is to save up RAM memory use.
 //This is the "light" version it is to be used for storage purposes only.
@@ -3904,10 +3921,10 @@ class Vectors: public List<Vector<CoefficientType> >
   int ArrangeFirstVectorsBeOfMaxPossibleRank
   (Matrix<CoefficientType>& bufferMat, Selection& bufferSel)
 ;
-  static int HashFunction(const Vectors<CoefficientType>& input)
+  static unsigned int HashFunction(const Vectors<CoefficientType>& input)
   { return input.HashFunction();
   }
-  int HashFunction()const
+  unsigned int HashFunction()const
   { return this->::List<Vector<CoefficientType> >::HashFunction();
   }
   //The below function is required to preserve the order of elements given by theSelection.elements.

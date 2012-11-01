@@ -4,72 +4,8 @@
 ProjectInformationInstance ProjectInfoVpf9_4cpp
 (__FILE__, "Implementation of semisimple subalgebra routines. ");
 
-
-void  SemisimpleSubalgebras::FindHCandidatesWithOneExtraHContaining
-(Vectors<Rational>& inpuT, GlobalVariables* theGlobalVariables)
-{ int theDimension= this->GetSSowner().theWeyl.CartanSymmetric.NumRows;
-  SelectionWithMaxMultiplicity theSel;
-  theSel.initMaxMultiplicity(theDimension, 2);
-  int theCounter=MathRoutines::KToTheNth(3, theDimension);
-  Vector<Rational> theRoot;
-  WeylGroup& theWeyl=this->GetSSowner().theWeyl;
-  Matrix<Rational> invertedCartan=this->GetSSowner().theWeyl.CartanSymmetric;
-  invertedCartan.Invert();
-  Vectors<Rational> tempRoots;
-  tempRoots=inpuT;
-  Vectors<Rational> inputCopy;
-  inputCopy=inpuT;
-  ProgressReport theReport(theGlobalVariables);
-  for (int i=0; i<theCounter; i++, theSel.IncrementSubset())
-  { //slTwo& currentSl2=this->theSl2s.TheObjects[i];
-    theRoot=theSel;
-    invertedCartan.ActOnVectorColumn(theRoot, theRoot);
-    bool isGood=true;
-    if (!inputCopy.LinSpanContainsRoot(theRoot))
-    { for (int j=0; j<inputCopy.size; j++)
-        if (theWeyl.RootScalarCartanRoot(inputCopy.TheObjects[j], theRoot).IsPositive())
-        { isGood=false;
-          break;
-        }
-      if (isGood)
-      { tempRoots= inputCopy;
-        tempRoots.AddOnTop(theRoot);
-        for (int k=tempRoots.size-1; k>0; k--)
-          if (tempRoots[k]< tempRoots[k-1])
-            tempRoots.SwapTwoIndices(k, k-1);
-        this->theHcandidates.AddOnTopNoRepetition(tempRoots);
-        //this->th
-      }
-      if (theGlobalVariables!=0)
-      { std::stringstream out;
-        out << "index lowest non explored: " << this->indexLowestUnexplored+1 << " Total number found: " << this->theHcandidates.size;
-        theReport.Report(out.str());
-      }
-    }
-  }
-}
-
-void SemisimpleSubalgebras::FindHCandidates(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindHCandidates");
-  Vectors<Rational> emptyStart;
-//  List<List<Vector<Rational>> >::ListActualSizeIncrement=10000;
-  MemorySaving<GlobalVariables> tempGV;
-  if (theGlobalVariables==0)
-    theGlobalVariables=&tempGV.GetElement();
-  this->GetSSowner().FindSl2Subalgebras
-  (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
-  std::cout << this->theSl2s.ToString();
-  this->theHcandidates.size=0;
-  this->theHcandidates.AddOnTop(emptyStart);
-  for (this->indexLowestUnexplored=0; this->indexLowestUnexplored<this->theHcandidates.size; this->indexLowestUnexplored++)
-    this->FindHCandidatesWithOneExtraHContaining
-    (this->theHcandidates[this->indexLowestUnexplored], theGlobalVariables);
-}
-
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
-  out << this->theHcandidates.ToString();
-  out << this->ElementToStringCandidatePrincipalSl2s(theFormat);
   out << this->theSl2s.ToString(theFormat);
   return out.str();
 }
@@ -79,279 +15,31 @@ void SemisimpleSubalgebras::FindTheSSSubalgebras
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
   this->owners=newOwner;
   this->indexInOwners=newIndexInOwner;
-//  int theRank=this->GetSSowner().GetRank();
   this->GetSSowner().FindSl2Subalgebras
   (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
-//  this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(*theGlobalVariables);
-//  this->GenerateModuleDecompositionsPrincipalSl2s(theRank, *theGlobalVariables);
-//  this->MatchActualSl2sFixedRootSAToPartitionSl2s(*theGlobalVariables);
-//  this->MakeSelectionBasedOnPrincipalSl2s(*theGlobalVariables);
   this->FindTheSSSubalgebrasPart2(theGlobalVariables);
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
 (GlobalVariables* theGlobalVariables)
-{
-
+{ CandidateSSSubalgebra emptyCandidate;
+  this->ExtendCandidatesRecursive(emptyCandidate, theGlobalVariables);
 }
 
-void SemisimpleSubalgebras::MakeSelectionBasedOnPrincipalSl2s(GlobalVariables& theGlobalVariables)
-{ this->RemainingCandidates.init(this->theTypes.size);
-  for (int i=0; i<this->theTypes.size; i++)
-    if (this->IndicesMatchingActualSl2s[i].size>0)
-    { SltwoSubalgebras& theCurrentAlgebrasSl2s= this->theCandidateSubAlgebras[i];
-      SemisimpleLieAlgebra& theSSLieAlgebra= this->GetSSowner();
-      theSSLieAlgebra.FindSl2Subalgebras(*this->owners, this->indexInOwners, theCurrentAlgebrasSl2s, theGlobalVariables);
-      bool DoesFit=true;
-      for (int j=0; j<theCurrentAlgebrasSl2s.size; j++)
-      { slTwo& currentSl2= theCurrentAlgebrasSl2s[j];
-        bool currentSl2Fits=false;
-        for (int k=0; k<this->theSl2s.size; k++)
-        { slTwo& other= this->theSl2s[k];
-          currentSl2Fits=currentSl2.ModuleDecompositionFitsInto
-          (currentSl2.highestWeights, currentSl2.multiplicitiesHighestWeights,
-           other.highestWeights, other.multiplicitiesHighestWeights);
-          if (currentSl2Fits)
-            break;
-        }
-        if (!currentSl2Fits)
-        { DoesFit=false;
-          break;
-        }
-      }
-      if (DoesFit)
-        this->RemainingCandidates.AddSelectionAppendNewIndex(i);
-    }
-}
-
-void SemisimpleSubalgebras::GenerateModuleDecompositionsPrincipalSl2s
-(int theRank, GlobalVariables& theGlobalVariables)
-{ this->EnumerateAllPossibleDynkinDiagramsOfRankUpTo(theRank);
-  slTwo tempSl2;
-  this->CandidatesPrincipalSl2ofSubalgebra.ReservE(this->theTypes.size);
-  this->theCandidateSubAlgebras.SetSize(this->theTypes.size);
-  List<char> theLetters;
-  List<int> theRanks;
-  List<int> theMults;
-  for (int i=0; i<this->theTypes.size; i++)
-  { this->theTypes[i].GetLettersTypesMults(theLetters, theRanks, theMults);
-    this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().MakeFromDynkinType
-    (theLetters, theRanks, &theMults);
-
-    this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().GenerateRootSystemFromKillingFormMatrix();
-    (*this->theCandidateSubAlgebras[i].owners)[0].theWeyl=
-    (this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl());
-    int theDimension = this->theCandidateSubAlgebras[i].theRootSAs.GetOwnerWeyl().GetDim();
-    tempSl2.hCharacteristic.initFillInObject(theDimension, 2);
-    tempSl2.preferredAmbientSimpleBasis.MakeEiBasis(theDimension);
-    tempSl2.owners=this->owners;
-    tempSl2.indexOwnerAlgebra=this->indexInOwners;
-    tempSl2.ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
-    this->CandidatesPrincipalSl2ofSubalgebra.AddOnTop(tempSl2);
+void DynkinSimpleType::operator++()
+{ this->assertIAmInitialized();
+  for (int i=0; i<this->owner->size; i++)
+  {
   }
 }
 
-void SemisimpleSubalgebras::EnumerateAllPossibleDynkinDiagramsOfRankUpTo(int theRank)
-{ this->GenerateAllPartitionsUpTo(theRank);
-  this->theTypes.size=0;
-  List<int> ranksBuffer, multiplicitiesBuffer;
-  List<char> lettersBuffer;
-  for (int i=0; i<this->thePartitionMultiplicities.size; i++)
-    this->GenerateAllDiagramsForPartitionRecursive
-    (i, 0, ranksBuffer, multiplicitiesBuffer, lettersBuffer);
+bool DynkinSimpleType::operator<(int otherRank)const
+{ return this->theRank<otherRank;
 }
 
-void SemisimpleSubalgebras::GenerateAllDiagramsForPartitionRecursive
-(int indexPartition, int indexInPartition,
- List<int>& ranksBuffer, List<int>& multiplicitiesBuffer, List<char>& lettersBuffer)
-{ List<int>& partitionValues= this->thePartitionValues[indexPartition];
-  List<int>& partitionMults= this->thePartitionMultiplicities[indexPartition];
-  if (indexInPartition>= partitionValues.size)
-  { DynkinSimpleType currentType;
-    DynkinType outputType;
-    outputType.MakeZero();
-    for (int i=0; i<ranksBuffer.size; i++)
-    { currentType.theLetter=lettersBuffer[i];
-      currentType.theRank=ranksBuffer[i];
-      outputType.AddMonomial(currentType, multiplicitiesBuffer[i]);
-    }
-    this->theTypes.AddOnTop(outputType);
-    return;
-  }
-  Selection DistributionBetweenTheFourLetters;
-  int theMult = partitionMults[indexInPartition];
-  int theRank = partitionValues[indexInPartition];
-  int numLetters;
-  List<char> lettersAvailable; lettersAvailable.SetSize(5);
-  lettersAvailable[0]='A';
-  lettersAvailable[1]='B';
-  lettersAvailable[2]='C';
-  lettersAvailable[3]='D';
-  switch(theRank)
-  { case 1: numLetters=1; break;
-    case 2: numLetters=3; lettersAvailable[2]='G'; break;
-    case 3: numLetters=3; break;
-    case 4: numLetters=5; lettersAvailable[4]='F'; break;
-    case 6: numLetters=5; lettersAvailable[4]='E'; break;
-    case 7: numLetters=5; lettersAvailable[4]='E'; break;
-    case 8: numLetters=5; lettersAvailable[4]='E'; break;
-    default: numLetters=4; break;
-  }
-  int numBars=numLetters-1;
-  DistributionBetweenTheFourLetters.init(numBars+theMult);
-  //there are numLetters letters, therefore we need numLetters-1 barriers
-  //in numLetters-1+theMult cells to record a partition of mult into 7 letters.
-  int numCycles= MathRoutines::NChooseK(DistributionBetweenTheFourLetters.MaxSize, numBars);
-  int oldsize= ranksBuffer.size;
-  for (int i=0; i<numCycles; i++)
-  { DistributionBetweenTheFourLetters.incrementSelectionFixedCardinality(numBars);
-    int startIndex=-1;
-    int endIndex;
-    for (int k=0; k< numLetters; k++)
-    { if (k!=0)
-        startIndex= DistributionBetweenTheFourLetters.elements[k-1];
-      if (k!=numBars)
-        endIndex= DistributionBetweenTheFourLetters.elements[k];
-      else
-        endIndex= DistributionBetweenTheFourLetters.MaxSize;
-      int numIsotypic= endIndex-startIndex-1;
-      if (numIsotypic!=0)
-      { ranksBuffer.AddOnTop(theRank);
-        lettersBuffer.AddOnTop(lettersAvailable.TheObjects[k]);
-        multiplicitiesBuffer.AddOnTop(numIsotypic);
-      }
-    }
-    this->GenerateAllDiagramsForPartitionRecursive(indexPartition, indexInPartition+1, ranksBuffer, multiplicitiesBuffer, lettersBuffer);
-    ranksBuffer.size=oldsize;
-    multiplicitiesBuffer.size=oldsize;
-    lettersBuffer.size=oldsize;
-  }
-}
-
-void SemisimpleSubalgebras::MatchRealSl2sToPartitionSl2s()
-{ this->IndicesMatchingSl2s.SetSize(this->theTypes.size);
-  for (int i=0; i<this->CandidatesPrincipalSl2ofSubalgebra.size; i++)
-  { this->IndicesMatchingSl2s[i].size=0;
-    for (int j=0; j<this->theSl2s.size; j++)
-      if (this->CandidatesPrincipalSl2ofSubalgebra[i].ModuleDecompositionFitsInto(this->theSl2s[j]))
-        this->IndicesMatchingSl2s[i].AddOnTop(j);
-  }
-}
-
-void SemisimpleSubalgebras::MatchActualSl2sFixedRootSAToPartitionSl2s
-(GlobalVariables& theGlobalVariables)
-{ this->theSl2s.ComputeModuleDecompositionsOfMinimalContainingRegularSAs(theGlobalVariables);
-  List<int> tempL;
-  this->IndicesMatchingActualSl2s.initFillInObject(this->theTypes.size, tempL);
-  this->IndicesMatchingPartitionSl2s.initFillInObject(this->theSl2s.size, tempL);
-  for (int i=0; i<this->theSl2s.size; i++)
-  { slTwo& theSl2= this->theSl2s[i];
-    for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
-      for (int k=0; k<this->CandidatesPrincipalSl2ofSubalgebra.size; k++)
-      { slTwo& candidateSl2= this->CandidatesPrincipalSl2ofSubalgebra[k];
-        if (theSl2.ModuleDecompositionFitsInto
-            (candidateSl2.highestWeights, candidateSl2.multiplicitiesHighestWeights,
-             theSl2.HighestWeightsDecompositionMinimalContainingRootSA[j],
-             theSl2.MultiplicitiesDecompositionMinimalContainingRootSA[j]))
-        { this->IndicesMatchingActualSl2s[k].AddOnTop(i);
-          this->IndicesMatchingPartitionSl2s[i].AddOnTop(k);
-        }
-      }
-  }
-}
-
-
-void SemisimpleSubalgebras::GenerateAllPartitionsRecursive
-(int remainingToBePartitioned, int CurrentValue, List<int>& Multiplicities, List<int>& Values)
-{ if (remainingToBePartitioned==0)
-  { this->thePartitionMultiplicities.AddOnTop(Multiplicities);
-    this->thePartitionValues.AddOnTop(Values);
-    return;
-  }
-  int possibleMults=(remainingToBePartitioned/CurrentValue)+1;
-  for(int i=0; i<possibleMults; i++)
-  { if (i>0)
-    { Multiplicities.AddOnTop(i);
-      Values.AddOnTop(CurrentValue);
-    }
-    int newRemainder = remainingToBePartitioned - i*CurrentValue;
-    int newCurrentValue = MathRoutines::Minimum(CurrentValue-1, newRemainder);
-    if (newCurrentValue!=0 || newRemainder==0)
-      this->GenerateAllPartitionsRecursive(newRemainder, newCurrentValue, Multiplicities, Values);
-    if (i>0)
-    { Multiplicities.size--;
-      Values.size--;
-    }
-  }
-}
-
-void SemisimpleSubalgebras::GenerateAllPartitionsUpTo(int theRank)
-{ this->thePartitionMultiplicities.size=0;
-  this->thePartitionValues.size=0;
-  for (int i=1; i<=theRank; i++)
-    this->GenerateAllPartitionsDontInit(i);
-}
-
-void SemisimpleSubalgebras::GenerateAllPartitionsDontInit(int theRank)
-{ int upperLimit= MathRoutines::TwoToTheNth(theRank);
-  this->thePartitionMultiplicities.ReservE(upperLimit);
-  this->thePartitionValues.ReservE(upperLimit);
-  List<int> buffer1, buffer2;
-  this->GenerateAllPartitionsRecursive(theRank, theRank, buffer1, buffer2);
-}
-
-std::string SemisimpleSubalgebras::ElementToStringCandidatePrincipalSl2s
-(FormatExpressions* theFormat)
-{ std::stringstream out;
-  std::string tempS;
-  out << "the candidate mults: "
-  << this->thePartitionMultiplicities;
-  out << this->theTypes.size << " candidate subalgebras: ";
-  for (int i=0; i<this->theTypes.size; i++)
-    out << "<br>" << this->theTypes[i];
-  for (int i =0; i<this->thePartitionValues.size; i++)
-  { for (int j=0; j< this->thePartitionValues[i].size; j++)
-    { int mult= this->thePartitionMultiplicities[i][j];
-      int val= this->thePartitionValues[i][j];
-      if (mult!=1)
-        out << mult << " x ";
-      out << val << " ";
-      if (j!=this->thePartitionValues[i].size-1)
-        out << "+ ";
-    }
-    out << "\n<br>";
-    out << "\n";
-  }
-  for (int i=0; i<this->theTypes.size; i++)
-  { out << this->theTypes[i] << "     Module decomposition: ";
-    slTwo& theSl2= this->CandidatesPrincipalSl2ofSubalgebra[i];
-    theSl2.ElementToStringModuleDecomposition(false, true, tempS);
-    out << tempS;
-    if (this->IndicesMatchingActualSl2s.size>0)
-    { out << " Matching actual sl(2)'s: ";
-      for (int j=0; j<this->IndicesMatchingActualSl2s[i].size; j++)
-      { int tempI= this->IndicesMatchingActualSl2s[i][j];
-        out << this->theSl2s[tempI].hCharacteristic.ToString() << ", ";
-      }
-    }
-    out << "\n<br>";
-    out << "\n";
-  }
-  out << "Remaining candidates:\n" << this->RemainingCandidates.ToString();
-  out << "<br>The candidate details follow.<br>\n";
-  for (int i=0; i<this->theCandidateSubAlgebras.size; i++)
-  { SltwoSubalgebras& currentSl2s= this->theCandidateSubAlgebras[i];
-    if (currentSl2s.size>0)
-    { out << this->theTypes[i];
-      if (this->RemainingCandidates.selected[i])
-        out << " orbits fit\n";
-      else
-        out << " orbits do not fit, embedding impossible\n";
-      out << "<br>\n";
-      out << currentSl2s.ElementToStringNoGenerators(theFormat);
-    }
-  }
-  return out.str();
+void SemisimpleSubalgebras::ExtendCandidatesRecursive
+  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+{ RecursionDepthCounter theCounter(&this->theRecursionCounter);
 }
 
 void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
@@ -434,6 +122,8 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   std::stringstream out;  std::string tempS;
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: "
   << this->hCharacteristic.ToString() << "</a>";
+  out << "<br>Dynkin index, defined as the length of the weight dual to h: "
+  << this->DynkinIndex;
   tempS=this->preferredAmbientSimpleBasis.ToString();
   std::string physicalPath="";
   std::string htmlPathServer="";
@@ -472,8 +162,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
     if (useHtml)
     { out << "<a href=\"" << htmlPathServer << "../rootHtml_rootSA"
       << this->IndicesContainingRootSAs[i] << ".html\">";
-      currentSA.theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
-      CGI::clearDollarSigns(tempS, tempS);
+      currentSA.theDynkinDiagram.ElementToStrinG(tempS, true);
     }
     out << tempS;
     if (useHtml)
@@ -806,6 +495,47 @@ void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalge
   }
 }
 
+void slTwo::MakeReportPrecomputations
+(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer,
+ int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
+{ MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
+  int theDimension=this->GetOwnerSSAlgebra().GetRank();
+  this->IndicesContainingRootSAs.size=0;
+  Vectors<Rational> tempRoots;
+  tempRoots=(MinimalContainingRegularSubalgebra.SimpleBasisK);
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
+  (tempRoots, this->theH.GetCartanPart());
+  DynkinDiagramRootSubalgebra theDiagram;
+  theDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
+  this->IndicesContainingRootSAs.AddOnTop(indexMinimalContainingRegularSA);
+  tempRoots.MakeEiBasis(theDimension);
+  this->GetOwnerSSAlgebra().theWeyl.TransformToSimpleBasisGeneratorsWRTh
+  (tempRoots, this->theH.GetCartanPart());
+  DynkinDiagramRootSubalgebra tempDiagram;
+  tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, this->GetOwnerSSAlgebra().theWeyl);
+  this->preferredAmbientSimpleBasis=tempRoots;
+  this->hCharacteristic.SetSize(theDimension);
+  for (int i=0; i<theDimension; i++)
+    this->hCharacteristic[i]=
+    this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
+    (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
+  this->DynkinIndex=
+  this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
+  (this->theH.GetCartanPart(), this->theH.GetCartanPart());
+  //this->hCharacteristic.ComputeDebugString();
+//  if (this->theE.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
+//      && this->theF.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size
+//      && this->theH.NonZeroElements.MaxSize==this->owner->theWeyl.RootSystem.size)
+  this->GetOwnerSSAlgebra().LieBracket(this->theE, this->theF, this->bufferEbracketF);
+//  std:: cout << "[" << this->theE.ToString() << ", " << this->theF.ToString() << "]="
+//  << this->bufferEbracketF.ToString();
+  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theE, this->bufferHbracketE);
+  this->GetOwnerSSAlgebra().LieBracket(this->theH, this->theF, this->bufferHbracketF);
+
+  //theSl2.hCharacteristic.ComputeDebugString();
+//  this->ComputeModuleDecomposition();
+}
+
 //The below code is related to sl(2) subalgebras of simple Lie algebras
 void slTwo::ComputeModuleDecomposition
 (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
@@ -919,6 +649,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << "\"> h</td><td style=\"padding-left:20px\" title=\""
     << tooltipVDecomposition
     << "\"> Decomposition of ambient Lie algebra</td>"
+    << "<td>Dynkin index, defined as the length of the weight dual to h</td>"
     << "<td>Minimal containing regular semisimple SAs</td><td title=\""
     << tooltipContainingRegular << "\">Containing regular semisimple SAs in "
     << "which the sl(2) has no centralizer</td> </tr>";
@@ -951,6 +682,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       if (useHtml)
         out << "</td><td>";
     }
+    out << theSl2.DynkinIndex;
+    if (useHtml)
+     out << "</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
@@ -1038,14 +772,14 @@ void SltwoSubalgebras::ElementToHtml
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
-    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
+    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true) << "</title>";
     theFile << "<meta name=\"keywords\" content=\""
-    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"
     << " nilpotent orbits of "
-    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
     << ", sl(2)-triples of "
-    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(false, true)
+    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
     << " \">";
     theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
     << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n"

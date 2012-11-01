@@ -281,7 +281,8 @@ bool CommandList::fRootSAsAndSltwos
     SltwoSubalgebras theSl2s(ownerSS.owner, ownerSS.indexInOwner);
     ownerSS.FindSl2Subalgebras
     (*ownerSS.owner, ownerSS.indexInOwner, theSl2s, *theCommands.theGlobalVariableS);
-    std::string PathSl2= outSltwoPath.str(); std::string DisplayPathSl2=outSltwoDisplayPath.str();
+    std::string PathSl2= outSltwoPath.str();
+    std::string DisplayPathSl2=outSltwoDisplayPath.str();
     theSl2s.ElementToHtml(&theFormat, theCommands.theGlobalVariableS);
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsLatex);
     theCommands.SystemCommands.AddListOnTop(theSl2s.listSystemCommandsDVIPNG);

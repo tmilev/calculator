@@ -504,8 +504,11 @@ g_{-2} v_\\lambda\
   std::cout << "</body></html>";
   std::cout << "<!--";
   std::cout.flush();
+  ProgressReport theReport(theParser.theGlobalVariableS);
   for(int i=0; i<theParser.SystemCommands.size; i++)
-  { std::cout << "\n\ncommand: " << theParser.SystemCommands[i].c_str() << "\n" ;
+  { std::stringstream out;
+    out << "\n\ncommand: " << theParser.SystemCommands[i] << "\n" ;
+    theReport.Report(out.str());
     system(theParser.SystemCommands[i].c_str());
   }
   std::cout << "-->";

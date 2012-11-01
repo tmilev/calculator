@@ -686,7 +686,8 @@ void rootSubalgebra::ElementToHtml
   output << "<html><title>"
   << SemisimpleLieAlgebra::GetLieAlgebraName
   (this->GetAmbientWeyl().WeylLetter, this->GetAmbientWeyl().GetDim())
-  << " Vector<Rational> subalgebra of type " << this->theDynkinDiagram.ElementToStrinG(false, true) << "</title>";
+  << " Vector<Rational> subalgebra of type "
+  << this->theDynkinDiagram.ElementToStrinG(true) << "</title>";
   output << "<meta name=\"keywords\" content=\""
   << SemisimpleLieAlgebra::GetLieAlgebraName
   (this->GetAmbientWeyl().WeylLetter, this->GetAmbientWeyl().GetDim())
@@ -740,7 +741,7 @@ std::string rootSubalgebra::ToString
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  this->theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+  this->theDynkinDiagram.ElementToStrinG(tempS, true);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
@@ -758,7 +759,7 @@ std::string rootSubalgebra::ToString
   tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  this->theCentralizerDiagram.ElementToStrinG(tempS, false, true);
+  this->theCentralizerDiagram.ElementToStrinG(tempS, true);
   if(!useLatex)
     CGI::clearDollarSigns(tempS, tempS);
   if (useLatex)
@@ -914,7 +915,7 @@ void rootSubalgebra::ToString
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  this->theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+  this->theDynkinDiagram.ElementToStrinG(tempS, true);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
@@ -930,7 +931,7 @@ void rootSubalgebra::ToString
         out << "</a>, ";
     }
     if (useHtml)
-      out << "<br> <a href=\"./rootHtml.html\">Back to Vector<Rational> subsystem table </a> ";
+      out << "<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
   }
   tempS=this->SimpleBasisK.ToString();
   if (useHtml)
@@ -944,7 +945,7 @@ void rootSubalgebra::ToString
   tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  this->theCentralizerDiagram.ElementToStrinG(tempS, false, true);
+  this->theCentralizerDiagram.ElementToStrinG(tempS, true);
   if(!useLatex)
     CGI::clearDollarSigns(tempS, tempS);
   if (useLatex)
@@ -1986,9 +1987,9 @@ int coneRelation::ToString(std::string& output, rootSubalgebras& owners, bool us
   out << tempS;
   if (useLatex)
     out << " & ";
-  this->theDiagram.ElementToStrinG(tempS, useLatex, true);
+  this->theDiagram.ElementToStrinG(tempS, true);
   out << tempS;
-  this->theDiagramRelAndK.ElementToStrinG(tempS, useLatex, true);
+  this->theDiagramRelAndK.ElementToStrinG(tempS, true);
   if (useLatex)
     out << " & ";
   out << tempS;
@@ -2396,10 +2397,10 @@ void rootSubalgebras::ElementToHtml
   childrenPathPhysical.append("rootHtml_"); childrenPathServer.append("rootHtml_");
   CGI::OpenFileCreateIfNotPresent(output, MyPathPhysical, false, true, false);
   output << "<html><title> Root subsystems of "
-  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
+  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(true)
   << "</title>";
   output << "<meta name=\"keywords\" content=\""
-  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(false, true)
+  << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(true)
   << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
   if (this->GetOwnerWeyl().WeylLetter=='E' || this->GetOwnerWeyl().WeylLetter=='F'
       || this->GetOwnerWeyl().WeylLetter=='G' )
@@ -2464,7 +2465,7 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
   std::string tooltipSAs="h - fixed Cartan subalgebra. k - subalgebra containing h. k_{ss}=[k, k] - regular semisimple subalgebra in the sense of Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras. k_{ss} is parametrized by a Vector<Rational> subsytem of \\Delta(g). C(k_{ss}) consists Vector<Rational> spaces with Vectors<Rational> strongly orthogonal to \\Delta(k) and a part of the Cartan h";
   this->GetTableHeaderAndFooter(header, footer, useLatex, useHtml);
   int col=0; int row=0;
-  this->TheObjects[0].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+  this->TheObjects[0].theDynkinDiagram.ElementToStrinG(tempS, true);
   if (useLatex)
     out << "$\\mathfrak{g}$: ";
   else
@@ -2476,8 +2477,8 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       if (useHtml)
         out << "<td title=\"" << tooltipSAs << "\">";
     }
-    this->TheObjects[i].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
-    this->TheObjects[i].theCentralizerDiagram.ElementToStrinG(tempS2, useLatex, true);
+    this->TheObjects[i].theDynkinDiagram.ElementToStrinG(tempS, true);
+    this->TheObjects[i].theCentralizerDiagram.ElementToStrinG(tempS2, true);
     if (tempS=="") tempS="-";
     if (useLatex)
     { CGI::subEqualitiesWithSimeq(tempS, tempS);
@@ -2519,8 +2520,8 @@ void rootSubalgebras::ElementToStringDynkinTable(bool useLatex, bool useHtml, st
       out << "\n<br>\n";
     int counter=0;
     for(int j=0; j<this->TheObjects[i].indicesSubalgebrasContainingK.size; j++)
-    { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK.TheObjects[j];
-      this->TheObjects[tempI].theDynkinDiagram.ElementToStrinG(tempS, useLatex, true);
+    { int tempI=this->TheObjects[i].indicesSubalgebrasContainingK[j];
+      this->TheObjects[tempI].theDynkinDiagram.ElementToStrinG(tempS, true);
       if (useLatex)
         CGI::subEqualitiesWithSimeq(tempS, tempS);
       counter+=(signed)tempS.length();

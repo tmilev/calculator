@@ -153,7 +153,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
 
 bool CommandList::fWeylDimFormula
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(&theCommands);
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSowner=0;
   if (theExpression.children.size!=2)
   { theExpression.SetError("This function takes 2 arguments");
@@ -193,7 +193,7 @@ bool CommandList::fWeylDimFormula
 
 bool CommandList::fAnimateLittelmannPaths
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(&theCommands);
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   SemisimpleLieAlgebra* theSSowner=0;
   if (theExpression.children.size!=2)
   { theExpression.SetError("This function takes 2 arguments");
@@ -300,7 +300,7 @@ bool CommandList::fRootSAsAndSltwos
 bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)
-{ IncrementRecursion recursionCounter(&theCommands);
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=4)
     return theExpression.SetError("The function expects 4 arguments.");
   Expression& typeNode=theExpression.children[0];
@@ -380,7 +380,7 @@ int ParserNode::EvaluateSplitIrrepOverLeviParabolic
 
 bool CommandList::fCasimir
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(&theCommands);
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   if (!theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments))
     return theExpression.SetError("Failed to convert the argument "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
   if (theExpression.errorString!="")
@@ -2443,7 +2443,7 @@ bool CommandList::fParabolicWeylGroups
 bool CommandList::fParabolicWeylGroupsBruhatGraph
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fParabolicWeylGroupsBruhatGraph");
-  IncrementRecursion theRecursion(&theCommands);
+  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   Selection parabolicSel;
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Context hwContext(theCommands);
@@ -2558,7 +2558,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
 bool CommandList::fPrintAllPartitions
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fPrintAllPartitions");
-  IncrementRecursion theRecursion(&theCommands);
+  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=2)
     return theExpression.SetError("Function fPrintAllPartitions expects 2 arguments.");
   if (!theCommands.CallCalculatorFunction
@@ -2647,7 +2647,7 @@ void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo
 bool CommandList::fTestMonomialBaseConjecture
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fTestMonomialBaseConjecture");
-  IncrementRecursion theRecursion(&theCommands);
+  RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=2)
     return theExpression.SetError("fTestMonomialBaseConjecture takes two arguments as input");
   Expression& rankE=theExpression.children[0];
@@ -2817,7 +2817,7 @@ bool CommandList::fTestMonomialBaseConjecture
 bool CommandList::fLittelmannOperator
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fLittelmannOperator");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theExpression.HasBoundVariables())
     return false;
   int theIndex=0;
@@ -2835,7 +2835,7 @@ bool CommandList::fLittelmannOperator
 
 bool CommandList::fLSPath
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion theRecutionIncrementer(& theCommands);
+{ RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fLSPath");
   if (theExpression.children.size<2)
     return theExpression.SetError("LSPath needs at least two arguments.");
@@ -3174,7 +3174,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
 bool CommandList::fFactor
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fFactor");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!theCommands.CallCalculatorFunction
       (theCommands.fPolynomial, inputIndexBoundVars,  theExpression, comments))
     return false;

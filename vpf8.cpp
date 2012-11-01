@@ -1366,7 +1366,8 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
   }else
   { Rational length1, length2, tempRat;
     theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0], length1);
-    int numLength1=1; int numLength2=0;
+    int numLength1=1;
+    int numLength2=0;
     for(int i=1; i<currentComponent.size; i++)
       if (theWeyl.RootScalarCartanRoot(currentComponent[i], currentComponent[i])==length1)
         numLength1++;
@@ -1434,30 +1435,27 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
 std::string DynkinDiagramRootSubalgebra::SetComponent(const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
 { this->ComponentLetters[componentIndex]=WeylLetterWithLength;
   this->ComponentRanks[componentIndex]=WeylRank;
-  std::string result=this->GetNameFrom(WeylLetterWithLength, WeylRank, false);
-  this->DynkinTypeStrings[componentIndex]=result;
-  return result;
-}
-
-std::string DynkinDiagramRootSubalgebra::GetNameFrom
-  (const std::string& WeylLetterWithLength , int WeylRank, bool IncludeAlgebraNames)
-{ return SemisimpleLieAlgebra::GetLieAlgebraName(WeylLetterWithLength[0], WeylRank, IncludeAlgebraNames);
+  std::stringstream tempStream;
+  tempStream << WeylLetterWithLength << "_" << WeylRank;
+  this->DynkinTypeStrings[componentIndex]=tempStream.str();
+  return tempStream.str();
 }
 
 void DynkinDiagramRootSubalgebra::ElementToStrinG
-  (std::string& output, bool useDollarSigns, bool IncludeAlgebraNames)
+  (std::string& output, bool IncludeAlgebraNames)
 { std::stringstream out;
   for (int j=0; j<this->sameTypeComponents.size; j++)
-  { int numSameTypeComponents= this->sameTypeComponents.TheObjects[j].size;
-    if (useDollarSigns)
-      out << "$";
+  { int numSameTypeComponents= this->sameTypeComponents[j].size;
     if (numSameTypeComponents!=1)
       out << numSameTypeComponents;
-    out << this->GetNameFrom
-    (this->ComponentLetters[this->sameTypeComponents[j][0]], this->ComponentRanks[this->sameTypeComponents[j][0]],
-     IncludeAlgebraNames);
-    if (useDollarSigns)
-      out << "$";
+    out
+    << this->ComponentLetters[this->sameTypeComponents[j][0]]
+    << "_" << this->ComponentRanks[this->sameTypeComponents[j][0]];
+    if (IncludeAlgebraNames)
+      out << SemisimpleLieAlgebra::GetLieAlgebraName
+      (this->ComponentLetters[this->sameTypeComponents[j][0]][0],
+       this->ComponentRanks[this->sameTypeComponents[j][0]],
+       true, false);
     if (j!=this->sameTypeComponents.size-1)
       out << "+";
   }
@@ -1466,7 +1464,7 @@ void DynkinDiagramRootSubalgebra::ElementToStrinG
 
 void WeylGroup::GetWeylChamber
 (Cone& output, GlobalVariables& theGlobalVariables)
-{ Matrix<Rational>  tempMat;
+{ Matrix<Rational> tempMat;
   tempMat=this->CartanSymmetric;
   tempMat.Invert();
   Vectors<Rational> tempRoots;

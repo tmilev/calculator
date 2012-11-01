@@ -1390,23 +1390,6 @@ static bool TypeHighestWeightParabolic
 
 };
 
-class IncrementRecursion
-{ CommandList* theBoss;
-  public:
-  IncrementRecursion(CommandList* owner): theBoss(0)
-  { if (owner!=0)
-    { owner->RecursionDeptH++;
-      if (owner->DepthRecursionReached<owner->RecursionDeptH)
-        owner->DepthRecursionReached=owner->RecursionDeptH;
-      this->theBoss=owner;
-    }
-  }
-  ~IncrementRecursion()
-  { if (this->theBoss!=0)
-      this->theBoss->RecursionDeptH--;
-  }
-};
-
 template <class theType>
 bool CommandList::GetVector
 (Expression& theExpression,

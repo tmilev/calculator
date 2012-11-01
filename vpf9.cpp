@@ -5165,8 +5165,8 @@ void rootSubalgebra::GenerateKmodMultTable
   int numTotal= this->kModules.size* this->kModules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
-  << this->theDynkinDiagram.ElementToStrinG(false, true)
-  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(false, true);
+  << this->theDynkinDiagram.ElementToStrinG(true)
+  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(true);
   ProgressReport theReport(theGlobalVariables);
   theReport.Report(out.str());
   ProgressReport theReport2(theGlobalVariables);

@@ -810,7 +810,7 @@ void Expression::operator=(const Expression& other)
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    IncrementRecursion recursionCounter(this->theBoss);
+    RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
     for (int i=0; i<other.children.size; i++)
       this->children[i]=(other.children[i]);
   }
@@ -1783,7 +1783,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 
 bool CommandList::fHWTAABF
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion theRecursionCounter(&theCommands);
+{ RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=3)
   { if (comments!=0)
       *comments << "Error: this function expects 3 arguments. ";
@@ -1912,7 +1912,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
 bool CommandList::fDecomposeCharGenVerma
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
    std::stringstream* comments)
-{ IncrementRecursion theRecursionIncrementer(&theCommands);
+{ RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fDecomposeCharGenVerma");
   Context theContext;
   Vector<RationalFunctionOld> theHWfundcoords, theHWsimpCoords, theHWFundCoordsFDPart, theHWSimpCoordsFDPart;
@@ -2041,7 +2041,7 @@ bool CommandList::fHWV
 bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=3)
   { if (comments!=0)
       *comments << "Function fSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, Number, List{}. ";
@@ -2809,7 +2809,7 @@ bool CommandList::fHWVinner
  Vector<RationalFunctionOld>& highestWeightFundCoords,
  Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
 { MacroRegisterFunctionWithName("CommandList::fHWVinner");
-  IncrementRecursion therecursionIncrementer(&theCommands);
+  RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
@@ -2882,7 +2882,7 @@ void ModuleSSalgebra<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& 
 bool CommandList::fSplitGenericGenVermaTensorFD
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fSplitGenericGenVermaTensorFD");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=3)
   { if (comments!=0)
       *comments << "Function fSplitGenericGenVermaTensorFD is expected to have three arguments: SS algebra type, List{}, List{}. ";
@@ -3194,7 +3194,7 @@ bool CommandList::fMatrix
 bool CommandList::fPolynomial
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fPolynomial");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theCommands.ExpressionHasBoundVars(theExpression))
     return false;
   Polynomial<Rational> outputPoly;
@@ -3211,7 +3211,7 @@ bool CommandList::fPolynomial
 bool CommandList::fElementUniversalEnvelopingAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fElementUniversalEnvelopingAlgebra");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theCommands.ExpressionHasBoundVars(theExpression))
     return false;
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -3251,7 +3251,7 @@ bool CommandList::fKLcoeffs
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
     return theExpression.SetError("Failed to created Lie algebra");
   SemisimpleLieAlgebra& theSSalgebra= theExpression.GetAtomicValue().GetAmbientSSAlgebra();
@@ -3379,7 +3379,7 @@ bool CommandList::fWeylOrbit
 
 bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
-{ IncrementRecursion recursionCounter(&theCommands);
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   std::stringstream errorStream;
   errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
     << " (in mathematical language Type_Rank). Instead I received " << theExpression.ToString()
@@ -3571,7 +3571,13 @@ bool CommandList::fSSAlgebra
 }
 
 bool Expression::HasBoundVariables()
-{ IncrementRecursion recursionCounter(this->theBoss);
+{ if (this->theBoss==0)
+  { std::cout << "This is a programming error: calling function HasBoundVariables"
+    << " on non-initialized expression. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
   MacroRegisterFunctionWithName("Expression::HasBoundVariables");
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
   { std::cout << "This is a programming error: function HasBoundVariables has "
@@ -3598,7 +3604,7 @@ bool CommandList::fIsInteger
 
 bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int theOp)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
     return false;
   bool result=false;
@@ -4378,7 +4384,7 @@ bool CommandList::StandardPower
 bool CommandList::StandardTensor
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::StandardTensor");
   if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTensor()))
     return true;
@@ -4400,7 +4406,7 @@ bool CommandList::StandardTensor
 bool CommandList::StandardTimes
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::StandardTimes");
   if (theCommands.DoTheOperation(theCommands, inputIndexBoundVars, theExpression, comments, theCommands.opTimes()))
     return true;
@@ -4421,7 +4427,7 @@ bool CommandList::StandardTimes
 
 bool CommandList::EvaluateDoExtractBaseMultiplication
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ IncrementRecursion theRecursionIncrementer(&theCommands);
+{ RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateDoExtractBaseMultiplication");
   if (theExpression.children.size!=2 || theExpression.theOperation!=theCommands.opTimes())
     return false;
@@ -4507,7 +4513,7 @@ bool CommandList::EvaluateDoAssociatE
 bool CommandList::StandardIsDenotedBy
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::StandardIsDenotedBy");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (theExpression.children.size!=2)
   { std::cout << "This is a programming error: operators isDenotedBy takes exactly two arguments, but I am getting "
     << theExpression.children.size << " arguments instead. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -4912,7 +4918,7 @@ bool Expression::operator==(const Expression& other)const
 template <class dataType>
 bool CommandList::ExtractPMTDtreeContext
 (Context& outputContext, const Expression& theInput, std::stringstream* errorLog)
-{ IncrementRecursion theRecursionCounter(this);
+{ RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { if (errorLog!=0)
       *errorLog << "Max recursion depth of " << this->MaxRecursionDeptH
@@ -4961,7 +4967,7 @@ template <class dataType>
 bool CommandList::EvaluatePMTDtreeFromContextRecursive
 (dataType& output, const Context& inputContext,
  const Expression& theInput, std::stringstream* errorLog)
-{ IncrementRecursion theRecursionCounter(this);
+{ RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { if (errorLog!=0)
       *errorLog << "Max recursion depth of " << this->MaxRecursionDeptH
@@ -5050,7 +5056,7 @@ bool CommandList::EvaluatePMTDtreeFromContextRecursive
 
 bool CommandList::ExpressionsAreEqual
   (const Expression& left, const Expression& right)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Error: maximium recursion depth of " << this->MaxRecursionDeptH << " exceeded while comparing expressions: " ;
@@ -5070,7 +5076,7 @@ bool CommandList::ExpressionsAreEqual
 bool CommandList::ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
    std::stringstream* theLog)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   assert(thePattern.theBoss==this && input.theBoss==this);
 //  static int ExpressionMatchesPatternDebugCounter=-1;
@@ -5118,7 +5124,7 @@ bool CommandList::ExpressionMatchesPattern
 
 bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 (Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
@@ -5235,7 +5241,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
 Expression* CommandList::PatternMatch
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    Expression* condition, std::stringstream* theLog, bool logAttempts)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH
@@ -5268,7 +5274,7 @@ Expression* CommandList::PatternMatch
 
 void CommandList::SpecializeBoundVars
 (Expression& toBeSubbed, int targetinputIndexBoundVars, ExpressionPairs& matchedPairs)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   toBeSubbed.IndexBoundVars=targetinputIndexBoundVars;
   if (toBeSubbed.theOperation==this->opVariableBound())
   { int indexMatching= matchedPairs.BoundVariableIndices.GetIndex(toBeSubbed.theDatA);
@@ -5284,7 +5290,7 @@ void CommandList::SpecializeBoundVars
 bool CommandList::ProcessOneExpressionOnePatternOneSub
   (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
    std::stringstream* theLog, bool logAttempts)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   assert(thePattern.theOperation==this->opDefine() ||
   thePattern.theOperation==this->opDefineConditional());
   assert(thePattern.children.size==2 || thePattern.children.size==3);
@@ -5315,7 +5321,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
 }
 
 bool CommandList::ExpressionHasBoundVars(Expression& theExpression)
-{ IncrementRecursion recursionCounter(this);
+{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Max recursion depth of " << this->MaxRecursionDeptH << " exceeded.";
@@ -5466,12 +5472,12 @@ int Expression::GetNumCols()const
 
 std::string Expression::ToString
 (FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces, std::stringstream* outComments, bool isFinal, Expression* startingExpression)const
-{ IncrementRecursion theRecursionCounter(this->theBoss);
-  if (this->theBoss!=0)
-  { if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
+{ if (this->theBoss!=0)
+  { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
       return "(...)";
   } else
     return "(Error:NoOwner)";
+  RecursionDepthCounter theRecursionCounter(&this->theBoss->RecursionDeptH);
   int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
     return theBoss->theObjectContainer.ExpressionNotation[notationIndex];
@@ -6398,7 +6404,7 @@ void Data::MakeLSpath
 bool CommandList::fWriteGenVermaModAsDiffOperators
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperators");
-  IncrementRecursion theRecursionIncrementer(&theCommands);
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   Vectors<Polynomial<Rational> > theHWs;
   theHWs.SetSize(1);
   Context theContext;

@@ -342,6 +342,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   //reference: Dynkin, semisimple Lie algebras of simple lie algebras, theorems 10.1-10.4
   Selection theRootsWithZeroCharacteristic;
   Vectors<Rational> RootsWithCharacteristic2;
+  Vectors<Rational> reflectedRootsWithCharacteristic2;
   Vectors<Rational> reflectedSimpleBasisK;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
   ElementWeylGroup raisingElt;
@@ -408,9 +409,15 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       for(int j=0; j<theRelativeDimension; j++)
         characteristicH+=this->SimpleBasisK[j]*tempRoot2[j];
       this->GetAmbientWeyl().RaiseToDominantWeight(characteristicH, 0, 0, &raisingElt);
+      ////////////////////
       reflectedSimpleBasisK=this->SimpleBasisK;
       for (int k=0; k<reflectedSimpleBasisK.size; k++)
         this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k], false, false);
+      ////////////////////
+      reflectedRootsWithCharacteristic2=RootsWithCharacteristic2;
+      for (int k=0; k<reflectedRootsWithCharacteristic2.size; k++)
+        this->GetAmbientWeyl().ActOn(raisingElt, reflectedRootsWithCharacteristic2[k], false, false);
+
       theSl2.theH.MakeHgenerator
       (characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
       theSl2.theE.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
@@ -418,8 +425,8 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-         (RootsWithCharacteristic2, theRootsWithZeroCharacteristic,
-          this->SimpleBasisK,
+         (reflectedRootsWithCharacteristic2, theRootsWithZeroCharacteristic,
+          reflectedSimpleBasisK,
           characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm,
           theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
       { int indexIsoSl2;

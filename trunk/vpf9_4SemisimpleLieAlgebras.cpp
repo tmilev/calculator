@@ -26,11 +26,53 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
   this->ExtendCandidatesRecursive(emptyCandidate, theGlobalVariables);
 }
 
-void DynkinSimpleType::operator++()
+void DynkinSimpleType::operator++(int)
 { this->assertIAmInitialized();
-  for (int i=0; i<this->owner->size; i++)
-  {
+  if (this->longRootOrbitIndex<this->owner->size-1)
+  { this->longRootOrbitIndex++;
+    return;
   }
+  this->longRootOrbitIndex=0;
+  if (this->theRank==1)
+  { this->theRank++;
+    return;
+  }
+  if (this->theLetter=='A')
+  { if (this->theRank>=4)
+      this->theLetter='D';
+    else
+      this->theLetter='B';
+    return;
+  }
+  if (this->theLetter=='B')
+  { if (this->theRank>=3)
+      this->theLetter='C';
+    else
+      this->theLetter='G';
+    return;
+  }
+  if (this->theLetter=='C')
+  { if (this->theRank==4)
+    { this->theLetter='F';
+      return;
+    }
+    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
+    { this->theLetter='F';
+      return;
+    }
+    this->theLetter='A';
+    this->theRank++;
+    return;
+  }
+  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
+  { this->theRank++;
+    this->theLetter='A';
+    return;
+  }
+  std::cout << "This is a programming error. This is a portion of code that should "
+  << "never be reached. Something has gone very wrong. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
 }
 
 bool DynkinSimpleType::operator<(int otherRank)const
@@ -40,6 +82,11 @@ bool DynkinSimpleType::operator<(int otherRank)const
 void SemisimpleSubalgebras::ExtendCandidatesRecursive
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
+  DynkinSimpleType theType;
+  std::cout << "The types to be tested: ";
+  for (theType.MakeAone(this->theSl2s); theType<this->GetSSowner().GetRank()+1; theType++)
+  { std::cout << theType.ToString() << ", ";
+  }
 }
 
 void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
@@ -656,7 +703,8 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << "\"> h</td><td style=\"padding-left:20px\" title=\""
     << tooltipVDecomposition
     << "\"> Decomposition of ambient Lie algebra</td>"
-    << "<td>Dynkin index, defined as the length of the weight dual to h</td>"
+    << "<td>The square of the length of the weight dual to h.</td>"
+    << "<td>Dynkin index = (previous column) *(long root length ambient algebra)^2/4</td>"
     << "<td>Minimal containing regular semisimple SAs</td><td title=\""
     << tooltipContainingRegular << "\">Containing regular semisimple SAs in "
     << "which the sl(2) has no centralizer</td> </tr>";
@@ -691,7 +739,11 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     }
     out << theSl2.DynkinIndex;
     if (useHtml)
-     out << "</td><td>";
+      out << "</td><td>";
+    out << theSl2.DynkinIndex * this->GetOwnerWeyl().LongRootLength/4;
+    if (useHtml)
+      out << "</td><td>";
+
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);

@@ -80,12 +80,18 @@ class DynkinSimpleType
   SltwoSubalgebras* owner;
   char theLetter;
   int theRank;
-  int DynkinIndex;
-  DynkinSimpleType(): owner(0), theLetter('X'), theRank(-1), DynkinIndex(-1){}
+  int longRootOrbitIndex;
+  DynkinSimpleType(): owner(0), theLetter('X'), theRank(-1), longRootOrbitIndex(-1){}
+  void MakeAone(SltwoSubalgebras& inputOwner)
+  { this->owner=&inputOwner;
+    this->theLetter='A';
+    this->theRank=1;
+    this->longRootOrbitIndex=0;
+  }
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
-    this->DynkinIndex=other.DynkinIndex;
+    this->longRootOrbitIndex=other.longRootOrbitIndex;
   }
   void assertIAmInitialized()const
   { if (this->owner==0)
@@ -105,7 +111,7 @@ class DynkinSimpleType
     }
     return
     this->theLetter==other.theLetter && this->theRank==other.theRank &&
-    this->DynkinIndex==other.DynkinIndex;
+    this->longRootOrbitIndex==other.longRootOrbitIndex;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int) input.theLetter)*2+input.theRank;
@@ -124,15 +130,15 @@ class DynkinSimpleType
       out << theLetter << "_" << theRank;
     return out.str();
   }
-  void operator++();
+  void operator++(int);
   bool operator>(const DynkinSimpleType& other)const
   { if (this->theRank>other.theRank)
       return true;
     if (this->theRank<other.theRank)
       return false;
-    if (this->DynkinIndex>other.DynkinIndex)
+    if (this->longRootOrbitIndex>other.longRootOrbitIndex)
       return true;
-    if (this->DynkinIndex<other.DynkinIndex)
+    if (this->longRootOrbitIndex<other.longRootOrbitIndex)
       return false;
     if (this->theLetter=='B' && other.theLetter=='D')
       return true;
@@ -165,7 +171,7 @@ class CandidateSSSubalgebra
 {
 public:
   List<Vectors<Rational> > CartanSAsByComponent;
-  List<DynkinType> theTypes;
+  List<DynkinSimpleType> theTypes;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
   }

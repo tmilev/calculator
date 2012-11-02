@@ -410,7 +410,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
   ChevalleyGenerator tempGen;
   if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
      (tempMat, tempMatColumn, tempMatResult))
-    for (int i=0; i<rootsInPlay.size; i++)
+  { for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator
       (*this->owner, this->indexInOwner, this->GetGeneratorFromRoot(-rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
@@ -419,7 +419,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
       outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
-
+  }
   return false;
 }
 

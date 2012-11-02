@@ -257,9 +257,9 @@ void CommandList::initPredefinedVars()
    lexicographic order. In the graded lexicographic order, monomials are first compared by\
    total degree, then by lexicographic order.\
    In the lexicographic order the last alphabetically \
-   is greatest, i.e., z>y>x, i.e., z is the leading monomial of x+y+z.  The expressions \
+   is greatest, i.e., z&gt;y&gt;x, i.e., z is the leading monomial of x+y+z.  The expressions \
    making the polynomials are sorted according to their string equivalents. For example,\
-   x_{1}<x_{2} because the corresponding C++ strings compare like that. ",
+   x_{1}&lt;x_{2} because the corresponding C++ strings compare like that. ",
    "GroebnerBuchbergerGrLex{}(a^2+b^2+1, x-a^4, y-b^4 )");
   this->AddNonBoundVarMustBeNew
   ("GroebnerBuchbergerLex", & this->fGroebnerBuchbergerLex, "",
@@ -267,16 +267,16 @@ void CommandList::initPredefinedVars()
    lexicographic order. In the lexicographic order, monomials are first compared  only by \
    lexicographic order.\
    In the lexicographic order the last alphabetically \
-   is greatest, i.e., z>y>x, i.e., z is the leading monomial of x^1000y^200+z.  The expressions \
+   is greatest, i.e., z&gt;y&gt;x, i.e., z is the leading monomial of x^1000y^200+z.  The expressions \
    making the polynomials are sorted according to their string equivalents. For example,\
-   x_{1}<x_{2} because the corresponding C++ strings compare like that. ",
+   x_{1}&lt;x_{2} because the corresponding C++ strings compare like that. ",
    "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
 
   this->AddNonBoundVarMustBeNew
   ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)", false);
+   "PrintSemisimpleSubalgebras{}(A_2)", true);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

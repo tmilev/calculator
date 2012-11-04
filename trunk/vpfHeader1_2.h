@@ -1621,115 +1621,6 @@ public:
   }
 };
 
-class slTwo
-{
-public:
-  List<int> highestWeights;
-  List<int> multiplicitiesHighestWeights;
-  List<int> weightSpaceDimensions;
-  ElementSemisimpleLieAlgebra theH, theE, theF;
-  ElementSemisimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
-  List<SemisimpleLieAlgebra>* owners;
-  int indexOwnerAlgebra;
-  SltwoSubalgebras* container;
-  Rational DynkinIndex; //the Dynkin index is the square of the length of the root dual to theH
-  int indexInContainer;
-  List<int> IndicesContainingRootSAs;
-  List<int> IndicesMinimalContainingRootSA;
-  List<List<int> > HighestWeightsDecompositionMinimalContainingRootSA;
-  List<List<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
-  Vectors<Rational> preferredAmbientSimpleBasis;
-  Vector<Rational> hCharacteristic;
-  Vector<Rational> hElementCorrespondingToCharacteristic;
-  Vectors<Rational> hCommutingRootSpaces;
-  Vectors<Rational> RootsHavingScalarProduct2WithH;
-  DynkinDiagramRootSubalgebra DiagramM;
-  DynkinDiagramRootSubalgebra CentralizerDiagram;
-  PolynomialSubstitution<Rational> theSystemToBeSolved;
-  Matrix<Rational> theSystemMatrixForm;
-  Matrix<Rational> theSystemColumnVector;
-  bool DifferenceTwoHsimpleRootsIsARoot;
-  int DynkinsEpsilon;
-  slTwo(): owners(0), indexOwnerAlgebra(-1), container(0), indexInContainer(-1){}
-  SltwoSubalgebras& GetContainerSl2s()
-  { if (this->container==0)
-    { std::cout << "This is a programming error: attempting to access the container "
-      << " list of a non-initialized sl(2)-subalgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    return *this->container;
-  }
-  WeylGroup& GetOwnerWeyl();
-  SemisimpleLieAlgebra& GetOwnerSSAlgebra()
-  { if (this->owners==0)
-    { std::cout << "This is a programming error: attempting to access the ambient "
-      << " Lie algebra of a non-initialized sl(2)-subalgebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    return (*this->owners)[this->indexOwnerAlgebra];
-  }
-  std::string ToString(FormatExpressions* theFormat=0);
-  void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
-  void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
-  void ComputeModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
-  void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
-  void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
-  bool ModuleDecompositionFitsInto(const slTwo& other);
-  static bool ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
-  void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
-  //the below is outdated, must be deleted as soon as equivalent code is written.
-  void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
-  void ElementToHtml(std::string& filePath);
-  void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
-  void operator=(const slTwo& right)
-  { this->highestWeights=right.highestWeights;
-    this->multiplicitiesHighestWeights=right.multiplicitiesHighestWeights;
-    this->weightSpaceDimensions=right.weightSpaceDimensions;
-    this->HighestWeightsDecompositionMinimalContainingRootSA=
-    right.HighestWeightsDecompositionMinimalContainingRootSA;
-    this->MultiplicitiesDecompositionMinimalContainingRootSA=
-    right.MultiplicitiesDecompositionMinimalContainingRootSA;
-    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
-    this->CentralizerDiagram=right.CentralizerDiagram;
-    this->DiagramM=right.DiagramM;
-    this->hCommutingRootSpaces=right.hCommutingRootSpaces;
-    this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
-    this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
-    this->DynkinsEpsilon=right.DynkinsEpsilon;
-    this->hCharacteristic=right.hCharacteristic;
-    this->hElementCorrespondingToCharacteristic=right.hElementCorrespondingToCharacteristic;
-    this->owners=right.owners;
-    this->theE=right.theE;
-    this->theH=right.theH;
-    this->theF=right.theF;
-    this->bufferEbracketF=right.bufferEbracketF;
-    this->bufferHbracketE=right.bufferHbracketE;
-    this->bufferHbracketF=right.bufferHbracketF;
-    this->theSystemToBeSolved=right.theSystemToBeSolved;
-    this->theSystemMatrixForm=right.theSystemMatrixForm;
-    this->theSystemColumnVector=right.theSystemColumnVector;
-    this->IndicesContainingRootSAs=right.IndicesContainingRootSAs;
-    this->preferredAmbientSimpleBasis=right.preferredAmbientSimpleBasis;
-    this->container=right.container;
-    this->indexInContainer=right.indexInContainer;
-    this->indexOwnerAlgebra=right.indexOwnerAlgebra;
-    this->DynkinIndex=right.DynkinIndex;
-  }
-  bool operator==(const slTwo& right)const;
-  unsigned int HashFunction() const
-  { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
-    int result=0;
-    for (int i=0; i<tempI; i++)
-      result+= this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
-    return result;
-  }
-  static inline unsigned int HashFunction(const slTwo& input)
-  { return input.HashFunction();
-  }
-};
-
 class VectorPartition
 {
 public:
@@ -1900,10 +1791,16 @@ public:
     int right=this->GetRootIndexFromGenerator(rightIndex);
     return (this->theWeyl.RootSystem[left]+this->theWeyl.RootSystem[right]).IsEqualToZero();
   }
-  void GenerateVermaMonomials(Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables)
+  void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables)
   ;
+  void init
+  (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner, char inputWeylLetter, int inputRank)
+  { this->owner=&inputOwner;
+    this->indexInOwner=inputIndexInOwner;
+    this->theWeyl.MakeArbitrary(inputWeylLetter, inputRank);
+  }
   void ComputeChevalleyConstantS
-(GlobalVariables& theGlobalVariables)
+(GlobalVariables* theGlobalVariables)
   ;
   //Setup: \gamma+\delta=\epsilon+\zeta=\eta is a Vector<Rational> .
   //then the below function computes n_{-\epsilon, -\zeta}

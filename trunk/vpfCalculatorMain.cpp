@@ -207,7 +207,6 @@ int main(int argc, char **argv)
   std::cout << "\n"
 //  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
   << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
-  ANNOYINGSTATISTICS;
   //std::cout << IPAdressCaller;
 //  std::stringstream tempStreamX;
 //  static_html3(tempStreamX);
@@ -412,6 +411,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="printSlTwoSubalgebrasAndRootSubalgebras{}(F_4)";
 //  civilizedInput="printSlTwoSubalgebras{}(A_2)";
 //  civilizedInput="printSlTwoSubalgebras{}(E_9)";
+//  civilizedInput="PrintSemisimpleSubalgebras{}(A_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

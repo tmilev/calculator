@@ -325,22 +325,6 @@ void ElementWeylAlgebra::MakeZero(int NumVars)
   this->StandardOrder.MakeZero(this->NumVariables*2);
 }
 
-void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
-{ std::stringstream out;
-  if (useLatex)
-    out << "$";
-  for (int i=0; i<this->highestWeights.size; i++)
-  { if (this->multiplicitiesHighestWeights.TheObjects[i]>1)
-      out << this->multiplicitiesHighestWeights.TheObjects[i];
-    out << "V_{" << this->highestWeights.TheObjects[i] << "}";
-    if (i!=this->highestWeights.size-1)
-      out << "+";
-  }
-  if (useLatex)
-    out << "$";
-  output=out.str();
-}
-
 bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
 (Vectors<Rational>& RootsWithCharacteristic2,
  Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
@@ -429,8 +413,6 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
  Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
  Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved)
 { Vector<Rational> tempRoot;
-  static int ProblemCounter=0;
-  ProblemCounter++;
   MonomialP tempM;
   Rational tempRat;
   HashedList<Vector<Rational> > RootSpacesThatNeedToBeKilled;
@@ -647,22 +629,6 @@ bool IsRegularWRT(Vectors<Rational>& input, Vector<Rational>& h1, Vector<Rationa
 { for (int i=0; i<input.size; i++)
     if (theWeyl.RootScalarCartanRoot(h1, input.TheObjects[i]).IsEqualToZero() && theWeyl.RootScalarCartanRoot(h2, input.TheObjects[i]).IsEqualToZero())
       return false;
-  return true;
-}
-
-bool slTwo::ModuleDecompositionFitsInto(const slTwo& other)
-{ return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
-}
-
-bool slTwo::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
-{ for (int i=0; i<highestWeightsLeft.size; i++)
-  { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft.TheObjects[i]);
-    if (theIndex==-1)
-      return false;
-    else
-      if (multiplicitiesHighestWeightsLeft.TheObjects[i]>multiplicitiesHighestWeightsRight.TheObjects[theIndex])
-        return false;
-  }
   return true;
 }
 
@@ -1366,7 +1332,7 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
   NonExplored.MakeFullSelection();
   Vector<Rational> domainRoot, rangeRoot;
 
-  this->ComputeChevalleyConstantS(theGlobalVariables);
+  this->ComputeChevalleyConstantS(&theGlobalVariables);
   List<ElementSemisimpleLieAlgebra> Domain, Range;
   Range.SetSize(numRoots+theDimension);
   Domain.SetSize(numRoots+theDimension);
@@ -1535,9 +1501,8 @@ Parser::ParseAndCompute(const std::string& input, GlobalVariables& theGlobalVari
 
 void Parser::ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables)
 { this->theHmm.theRange().ComputeChevalleyConstantS
-  (theGlobalVariables)
+  (&theGlobalVariables)
   ;
-  ANNOYINGSTATISTICS;
   //std::cout << "<hr>Chevalley constants computed on the " << theGlobalVariables.GetElapsedSeconds() << " second.";
   this->Parse(input);
   //this->ComputeDebugString(false, theGlobalVariables);
@@ -2465,8 +2430,8 @@ void ParserNode::ToString(std::string& output, GlobalVariables& theGlobalVariabl
 
 bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleChevalleyGenerators
 (GlobalVariables& theGlobalVariables)
-{ this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
+{ this->theDomain().ComputeChevalleyConstantS(&theGlobalVariables);
+  this->theRange().ComputeChevalleyConstantS(&theGlobalVariables);
   int theDomainDimension= this->theDomain().theWeyl.CartanSymmetric.NumRows;
   Selection NonExplored;
   int numRoots= this->theDomain().theWeyl.RootSystem.size;
@@ -2622,25 +2587,25 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   this->theRange().owner=this->owners;
   this->theDomain().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
   this->theRange().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
-  this->theDomain().ComputeChevalleyConstantS(theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS(theGlobalVariables);
+  this->theDomain().ComputeChevalleyConstantS(&theGlobalVariables);
+  this->theRange().ComputeChevalleyConstantS(&theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
   this->domainAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
   this->imagesSimpleChevalleyGenerators.SetSize(theWeylDim*2);
   for (int i=0; i<2*numPosRoots+theWeylDim; i++)
-  { ElementSemisimpleLieAlgebra& tempElt1=this->imagesAllChevalleyGenerators.TheObjects[i];
-    ElementSemisimpleLieAlgebra& tempElt2=this->domainAllChevalleyGenerators.TheObjects[i];
+  { ElementSemisimpleLieAlgebra& tempElt1=this->imagesAllChevalleyGenerators[i];
+    ElementSemisimpleLieAlgebra& tempElt2=this->domainAllChevalleyGenerators[i];
     tempElt2.MakeGenerator
     (i, *this->owners, this->indexDomain);
     tempElt1.MakeGenerator
     (i, *this->owners, this->indexRange);
   }
   for (int i=0; i<theWeylDim; i++)
-  { ElementSemisimpleLieAlgebra& tempElt1=this->imagesSimpleChevalleyGenerators.TheObjects[i];
+  { ElementSemisimpleLieAlgebra& tempElt1=this->imagesSimpleChevalleyGenerators[i];
     tempElt1.MakeGenerator
     (i, *this->owners, this->indexRange);
-    ElementSemisimpleLieAlgebra& tempElt2=this->imagesSimpleChevalleyGenerators.TheObjects[theWeylDim+i];
+    ElementSemisimpleLieAlgebra& tempElt2=this->imagesSimpleChevalleyGenerators[theWeylDim+i];
     tempElt2.MakeGenerator
     (i+numPosRoots, *this->owners, this->indexRange);
   }

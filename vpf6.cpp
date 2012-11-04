@@ -916,7 +916,7 @@ void Data::MakeSSAlgebra
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].indexInOwner=this->theIndex;
   theBoss.theObjectContainer.theLieAlgebras[this->theIndex].owner=& theBoss.theObjectContainer.theLieAlgebras;
   SemisimpleLieAlgebra& realSS= theBoss.theObjectContainer.theLieAlgebras[this->theIndex];
-  realSS.ComputeChevalleyConstantS(*theBoss.theGlobalVariableS);
+  realSS.ComputeChevalleyConstantS(theBoss.theGlobalVariableS);
 }
 
 std::string Data::ElementToStringDataType() const
@@ -926,7 +926,7 @@ std::string Data::ElementToStringDataType() const
     case Data::typeString: return "String";
     case Data::typeRational:  return "Rational";
     case Data::typePoly: return "Polynomial";
-    case Data::typeError:  return "Error";
+    case Data::typeError: return "Error";
     case Data::typeRationalRadical: return "NumberFromAlgebraicExtensionRationals";
     case Data::typeRationalFunction: return "RationalFunctionOld";
     case Data::typeElementUE: return "ElementUniversalEnveloping";
@@ -3429,7 +3429,7 @@ bool CommandList::fSSAlgebra
   Data tempData;
   tempData.MakeSSAlgebra(theCommands, theWeylLetter, theRank);
   SemisimpleLieAlgebra& theSSalgebra = tempData.GetAmbientSSAlgebra();
-  theSSalgebra.ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+  theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
   std::stringstream out;
   if (oldSize<theCommands.theObjectContainer.theLieAlgebras.size)
     if (comments!=0)

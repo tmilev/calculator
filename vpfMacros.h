@@ -70,7 +70,6 @@
 //#define MacroRegisterFunction
 #endif
 
-#define ANNOYINGSTATISTICS //std::cout << "<hr>" << "Time elapsed at file " << __FILE__ << " line " << __LINE__ << ": " << theGlobalVariables.GetElapsedSeconds()
 //-----------------------------------------------------------
 //-----------------Preprocessor macros end--------
 //-----------------------------------------------------------

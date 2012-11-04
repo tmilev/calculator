@@ -26,6 +26,22 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
   this->ExtendCandidatesRecursive(emptyCandidate, theGlobalVariables);
 }
 
+std::string DynkinSimpleType::ToString()const
+{ std::stringstream out;
+  if (this->owner==0)
+    return "non-initialized";
+
+  if (theRank>=10)
+    out << theLetter << "_{" << theRank << "}";
+  else
+    out << theLetter << "_" << theRank;
+  if (!(*this->owner)[this->longRootOrbitIndex].LengthHsquared.IsEqualTo
+      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
+    out << "^{" << (*this->owner)[this->longRootOrbitIndex].LengthHsquared
+    << "}";
+  return out.str();
+}
+
 void DynkinSimpleType::operator++(int)
 { this->assertIAmInitialized();
   if (this->longRootOrbitIndex<this->owner->size-1)
@@ -79,6 +95,43 @@ bool DynkinSimpleType::operator<(int otherRank)const
 { return this->theRank<otherRank;
 }
 
+void SemisimpleSubalgebras::ExtendOneComponentRecursive
+(const CandidateSSSubalgebra& baseCandidate, const DynkinSimpleType& theNewType,
+ int numVectorsFound, GlobalVariables* theGlobalVariables)
+{ RecursionDepthCounter theCounter(&this->theRecursionCounter);
+  CandidateSSSubalgebra theCandidate;
+  theCandidate=baseCandidate;
+  SemisimpleLieAlgebra tempAlgebra;
+  tempAlgebra.theWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
+  int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
+  bool mustComputeSSalgebra=(indexSubalgebra==-1);
+  if (mustComputeSSalgebra)
+  { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
+    this->SimpleComponentsSubalgebras.AddOnTop(tempAlgebra);
+    this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
+  }
+  SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
+  if (mustComputeSSalgebra)
+  { ProgressReport theReport(theGlobalVariables);
+    std::stringstream tempStream;
+    tempStream << "Generating simple Lie algebra "
+    << SemisimpleLieAlgebra::GetLieAlgebraName(theNewType.theLetter, theNewType.theRank)
+    << " (total " << this->SimpleComponentsSubalgebras.size << ")";
+    theReport.Report(tempStream.str());
+    theSmallAlgebra.init
+    (this->SimpleComponentsSubalgebras, indexSubalgebra, theNewType.theLetter, theNewType.theRank);
+    theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
+    theSmallAlgebra.FindSl2Subalgebras
+    (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
+     this->theSl2sOfSubalgebras[indexSubalgebra], *theGlobalVariables);
+  }
+  Rational desiredLength=
+  this->theSl2s[theNewType.longRootOrbitIndex].LengthHsquared/
+  theSmallAlgebra.theWeyl.CartanSymmetric(0,0)*
+  theSmallAlgebra.theWeyl.CartanSymmetric(numVectorsFound, numVectorsFound);
+
+}
+
 void SemisimpleSubalgebras::ExtendCandidatesRecursive
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
@@ -86,6 +139,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   std::cout << "The types to be tested: ";
   for (theType.MakeAone(this->theSl2s); theType<this->GetSSowner().GetRank()+1; theType++)
   { std::cout << theType.ToString() << ", ";
+    this->ExtendOneComponentRecursive(theCandidate, theType, 0, theGlobalVariables);
   }
 }
 
@@ -169,8 +223,8 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   std::stringstream out;  std::string tempS;
   out << "<a name=\"sl2index" << indexInContainer << "\">h-characteristic: "
   << this->hCharacteristic.ToString() << "</a>";
-  out << "<br>Dynkin index, defined as the length of the weight dual to h: "
-  << this->DynkinIndex;
+  out << "<br>Length of the weight dual to h: "
+  << this->LengthHsquared;
   tempS=this->preferredAmbientSimpleBasis.ToString();
   std::string physicalPath="";
   std::string htmlPathServer="";
@@ -281,6 +335,48 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
+void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
+{//outdates, must be erased as soon as I implement an equivalent
+  this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
+  int r=0;
+  for (int i=0; i<this->hCharacteristic.size; i++)
+    if (!this->hCharacteristic.TheObjects[i].IsEqualToZero())
+      r++;
+  this->DynkinsEpsilon+= r;
+  for (int i=0; i<theWeyl.RootSystem.size; i++)
+  { int NumNonZeroFound=0;
+    for (int j=0; j<this->hCharacteristic.size; j++)
+    { if (theWeyl.RootSystem.TheObjects[i].TheObjects[j]==1)
+        NumNonZeroFound++;
+      if(NumNonZeroFound>1)
+        break;
+    }
+    if (NumNonZeroFound==1)
+      this->DynkinsEpsilon--;
+  }
+  this->DynkinsEpsilon=0;
+  for (int i=0; i<this->hCharacteristic.size; i++)
+    if (this->hCharacteristic[i]==1)
+      this->DynkinsEpsilon=-1;
+  this->DynkinsEpsilon=0;
+}
+
+bool slTwo::ModuleDecompositionFitsInto(const slTwo& other)
+{ return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
+}
+
+bool slTwo::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
+{ for (int i=0; i<highestWeightsLeft.size; i++)
+  { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft[i]);
+    if (theIndex==-1)
+      return false;
+    else
+      if (multiplicitiesHighestWeightsLeft[i]>multiplicitiesHighestWeightsRight[theIndex])
+        return false;
+  }
+  return true;
+}
+
 void slTwo::ElementToHtml(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
@@ -300,6 +396,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
    SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
   output.init(&inputOwner, inputIndexInOwner);
+  output.GetOwner().ComputeChevalleyConstantS(&theGlobalVariables);
   output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
   (theGlobalVariables, true, true);
   //output.theRootSAs.ComputeDebugString(false, false, false, 0, 0, theGlobalVariables);
@@ -403,7 +500,6 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       InvertedRelativeKillingForm.elements[k][j]=this->GetAmbientWeyl().RootScalarCartanRoot
       (this->SimpleBasisK[k], this->SimpleBasisK[j]);
   InvertedRelativeKillingForm.Invert();
-  this->GetOwnerSSalg().ComputeChevalleyConstantS(theGlobalVariables);
   int numCycles= MathRoutines::TwoToTheNth(theRootsWithZeroCharacteristic.MaxSize);
   ProgressReport theReport(&theGlobalVariables);
   Vectors<Rational> tempRoots;
@@ -527,6 +623,22 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic
   return false;
 }
 
+void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
+{ std::stringstream out;
+  if (useLatex)
+    out << "$";
+  for (int i=0; i<this->highestWeights.size; i++)
+  { if (this->multiplicitiesHighestWeights[i]>1)
+      out << this->multiplicitiesHighestWeights[i];
+    out << "V_{" << this->highestWeights[i] << "}";
+    if (i!=this->highestWeights.size-1)
+      out << "+";
+  }
+  if (useLatex)
+    out << "$";
+  output=out.str();
+}
+
 void slTwo::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
 { this->ComputeModuleDecomposition
   (this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows,
@@ -573,7 +685,7 @@ void slTwo::MakeReportPrecomputations
     this->hCharacteristic[i]=
     this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
     (this->theH.GetCartanPart(), this->preferredAmbientSimpleBasis[i]);
-  this->DynkinIndex=
+  this->LengthHsquared=
   this->GetOwnerSSAlgebra().theWeyl.RootScalarCartanRoot
   (this->theH.GetCartanPart(), this->theH.GetCartanPart());
   //this->hCharacteristic.ComputeDebugString();
@@ -693,7 +805,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   bool usePNG=true;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
-  out << "Number of sl(2) subalgebras "<< this->size<<"\n";
+  out << "Number of sl(2) subalgebras " << this->size << "\n";
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
   if(useHtml)
@@ -737,13 +849,12 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       if (useHtml)
         out << "</td><td>";
     }
-    out << theSl2.DynkinIndex;
+    out << theSl2.LengthHsquared;
     if (useHtml)
       out << "</td><td>";
-    out << theSl2.DynkinIndex * this->GetOwnerWeyl().LongRootLength/4;
+    out << theSl2.LengthHsquared * this->GetOwnerWeyl().LongRootLength/4;
     if (useHtml)
       out << "</td><td>";
-
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
@@ -783,6 +894,16 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   out << this->ElementToStringNoGenerators(theFormat);
   out << body.str();
   return out.str();
+}
+
+void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables)
+{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
+    return;
+  std::stringstream out;
+  out << index << " out of " << outOf << " =3^8-1 computed";
+  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
+  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
+  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void SltwoSubalgebras::ElementToHtml
@@ -871,4 +992,224 @@ void SltwoSubalgebras::ElementToHtml
       fileFlas.close();
     }
   }
+}
+
+void rootSubalgebra::ToString
+(std::string& output, SltwoSubalgebras* sl2s, int indexInOwner, bool useLatex,
+ bool useHtml, bool includeKEpsCoords, GlobalVariables* theGlobalVariables)
+{ std::stringstream out;
+  std::string tempS;
+  std::string latexFooter, latexHeader;
+  if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size || this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
+    includeKEpsCoords=false;
+  int LatexLineCounter=0;
+  this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
+  this->theDynkinDiagram.ElementToStrinG(tempS, true);
+  if (useLatex)
+    out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
+  else
+    out << "k_{ss}: ";
+  out << tempS;
+  if (sl2s!=0)
+  { out <<" &nbsp&nbsp&nbsp Contained in: ";
+    for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
+    { if (useHtml)
+        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK[i] << ".html\">";
+      out << tempS;
+      if (useHtml)
+        out << "</a>, ";
+    }
+    if (useHtml)
+      out << "<br> <a href=\"./rootHtml.html\">Back to root subsystem table </a> ";
+  }
+  tempS=this->SimpleBasisK.ToString();
+  if (useHtml)
+    out << "\n<br>\n";
+  if (useLatex)
+    out << "\n\\noindent";
+  out << " Simple basis: "<< tempS;
+  tempS=this->SimpleBasisgEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  if (useHtml)
+    out << "\n<br>\nSimple basis epsilon form: " << tempS;
+  tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
+  if (useHtml)
+    out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
+  this->theCentralizerDiagram.ElementToStrinG(tempS, true);
+  if(!useLatex)
+    CGI::clearDollarSigns(tempS, tempS);
+  if (useLatex)
+    out << "\n\n\\noindent ";
+  if (useHtml)
+    out << "<br>\n";
+  if (useLatex)
+    out<< "$C(\\mathfrak{k_{ss}})_{ss}$: ";
+  else
+    out << "C(k_{ss})_{ss}: ";
+  out << tempS;
+  //int CartanPieceSize=
+    //this->AmbientWeyl.CartanSymmetric.NumRows- this->SimpleBasisCentralizerRoots.size-
+    //  this->SimpleBasisK.size;
+  //if (CartanPieceSize!=0)
+  //{  if (useLatex)
+  //    out << "$\\oplus\\mathfrak{h}_" << CartanPieceSize<<"$";
+  //  if (useHtml)
+  //    out <<"+h_"<<CartanPieceSize;
+  //}
+  if (useHtml)
+    out << "<br>\n simple basis centralizer: ";
+  if (useLatex)
+    out << "; simple basis centralizer: ";
+  tempS=this->SimpleBasisCentralizerRoots.ToString();
+  out << tempS;
+  if (sl2s!=0)
+  { if (useHtml)
+      out << "\n<hr>\n";
+    List<int> hCharacteristics_S_subalgebras;
+    //this->ComputeIndicesSl2s(indexInOwner, *sl2s, hCharacteristics_S_subalgebras);
+    hCharacteristics_S_subalgebras.size=0;
+    out << "\nCharacteristics of sl(2) subalgebras that have no centralizer in k (total "
+    << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
+    for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size; i++)
+    { int theSl2index=sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i];
+      slTwo& theSl2 = (*sl2s)[theSl2index];
+      if (useHtml)
+        out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
+      out << theSl2.hCharacteristic.ToString() << ", ";
+      if (useHtml)
+        out << "</a>";
+      bool isS_subalgebra=true;
+//      theSl2.hCharacteristic.ComputeDebugString();
+      for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
+      { int indexComparison= theSl2.IndicesContainingRootSAs.TheObjects[j];
+        if (indexComparison!=indexInOwner && sl2s->theRootSAs.TheObjects[indexComparison].indicesSubalgebrasContainingK.ContainsObject(indexInOwner))
+        { isS_subalgebra=false;
+          break;
+        }
+      }
+      if (isS_subalgebra)
+        hCharacteristics_S_subalgebras.AddOnTop(sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].TheObjects[i]);
+    }
+    if (useHtml)
+      out << "\n<br>\n";
+    out << "\nS-sl(2) subalgebras in k (total " << hCharacteristics_S_subalgebras.size << "): ";
+    for (int i=0; i<hCharacteristics_S_subalgebras.size; i++)
+      out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ToString() << ", ";
+  }
+  if (useHtml)
+  { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
+    out << "<br>Module decomposition over k follows. The decomposition is given in 1) epsilon coordinates w.r.t. g 2) simple coordinates w.r.t. g <br> ";
+    std::stringstream //tempStream1,
+    tempStream2, tempStream3;
+    for(int i=0; i<this->HighestWeightsGmodK.size; i++)
+    { //tempStream1 << "\\underbrace{V_{";
+      tempStream2 << "\\underbrace{V_{";
+      tempStream3 << "\\underbrace{V_{";
+      //tempStream1
+      //<< this->AmbientWeyl.GetFundamentalCoordinatesFromSimple
+      //(this->HighestWeightsGmodK[i]).ElementToStringLetterFormat("\\omega", true, false);
+      tempStream2
+      << this->kModulesgEpsCoords[i][0].ToStringLetterFormat("\\epsilon");
+      tempStream3
+      << this->HighestWeightsGmodK[i].ToStringLetterFormat("\\alpha");
+      //tempStream1 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream2 << "}}_{dim= " << this->kModules[i].size << "} ";
+      tempStream3 << "}}_{dim= " << this->kModules[i].size << "} ";
+      if (i!=this->HighestWeightsGmodK.size-1)
+      { //tempStream1 << "\\oplus";
+        tempStream2 << "\\oplus";
+        tempStream3 << "\\oplus";
+      }
+    }
+//    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream1.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream2.str()) << "\n";
+    out << "\n<hr>\n" << CGI::GetHtmlMathSpanFromLatexFormula(tempStream3.str()) << "\n<hr>\n";
+  }
+  if (useLatex)
+    out << "\n\n\\noindent Number $\\mathfrak{g}/\\mathfrak{k}$ $\\mathfrak{k}$-submodules: ";
+  if (!useHtml)
+    out << this->LowestWeightsGmodK.size ;
+  if (useHtml)
+    out << "<br>\n";
+  if (useLatex)
+    out << "\n\n";
+  out << latexHeader;
+  this->kModulesgEpsCoords.SetSize(this->kModules.size);
+  for (int i=0; i<this->kModules.size; i++)
+  { tempS=this->LowestWeightsGmodK[i].ToString();
+    if (useHtml)
+      out << "\n<tr><td>";
+    if (useLatex)
+      out << "\\hline ";
+    out << i;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out << this->kModules[i].size;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out << tempS;
+    tempS=this->HighestWeightsGmodK[i].ToString();
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & ";
+    out  << tempS;
+    if (useHtml)
+      out << "</td><td>";
+    if (useLatex)
+      out << " & \n";
+    out << this->kModules[i].ToString();
+    if (useHtml)
+      out << "</td><td>";
+    if (i>=this->kModulesgEpsCoords.size)
+      this->GetAmbientWeyl().GetEpsilonCoords(this->kModules[i], this->kModulesgEpsCoords[i]);
+    out << this->kModulesgEpsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
+    if (useLatex)
+      out << " & \n";
+    if (useHtml)
+      out << "</td>";
+    if (includeKEpsCoords)
+    { if (useHtml)
+        out << "<td>";
+      if (useLatex)
+        out << " & ";
+      out << tempS << this->kModulesKepsCoords[i].ElementToStringEpsilonForm(useLatex, useHtml, true);
+      if (useHtml)
+        out << "</td>";
+      if (useLatex)
+        out << "\\\\\n";
+    }
+    if (useHtml)
+      out << "</tr>";
+    if (LatexLineCounter>this->NumGmodKtableRowsAllowedLatex)
+    { LatexLineCounter=0;
+      out << latexFooter << latexHeader;
+    }
+    if (i!=this->kModules.size-1)
+    { LatexLineCounter+=this->kModules.TheObjects[i].size;
+      if (useLatex)
+       if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
+        { out << latexFooter << latexHeader;
+          LatexLineCounter = this->kModules.TheObjects[i].size;
+        }
+    }
+  }
+  if (useHtml)
+    out << "</table>";
+  if (useLatex)
+    out << latexFooter;
+  if ((useLatex|| useHtml)&& this->theMultTable.size==0 && this->kModules.size!=0)
+    this->GenerateKmodMultTable(this->theMultTable, this->theOppositeKmods, theGlobalVariables);
+  if (this->theMultTable.size!=0)
+  { if (useHtml)
+      out << "\n\n Pairing table:\n\n";
+    if (useLatex)
+      out << "\n\n\\noindent Pairing table:\n\n\\noindent";
+    this->theMultTable.ToString(tempS, useLatex, useHtml, *this);
+    out << tempS << "\n";
+  }
+  output=out.str();
 }

@@ -1474,8 +1474,8 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.owners=&this->theObjectContainer.theLieAlgebras;
   output.indexRange=tempDataB3.theIndex;
   output.indexDomain=tempDataG2.theIndex;
-  output.theRange().ComputeChevalleyConstantS(*this->theGlobalVariableS);
-  output.theDomain().ComputeChevalleyConstantS(*this->theGlobalVariableS);
+  output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
+  output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
   ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator
   (13, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
@@ -2707,7 +2707,7 @@ bool CommandList::fTestMonomialBaseConjecture
     currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
     currentAlg.indexInOwner=i;
     currentAlg.theWeyl.MakeArbitrary(theWeylLetters[i], theRanks[i]);
-    currentAlg.ComputeChevalleyConstantS(*theCommands.theGlobalVariableS);
+    currentAlg.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{"
     << "$" << currentAlg.GetLieAlgebraName(true) << "$}\\\\\\hline\n\n"

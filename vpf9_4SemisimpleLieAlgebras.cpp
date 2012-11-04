@@ -60,6 +60,10 @@ void DynkinSimpleType::operator++(int)
       this->theLetter='B';
     return;
   }
+  if (this->theLetter=='D')
+  { this->theLetter='B';
+    return;
+  }
   if (this->theLetter=='B')
   { if (this->theRank>=3)
       this->theLetter='C';
@@ -98,7 +102,8 @@ bool DynkinSimpleType::operator<(int otherRank)const
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
 (const CandidateSSSubalgebra& baseCandidate, const DynkinSimpleType& theNewType,
  int numVectorsFound, GlobalVariables* theGlobalVariables)
-{ RecursionDepthCounter theCounter(&this->theRecursionCounter);
+{ MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentRecursive");
+  RecursionDepthCounter theCounter(&this->theRecursionCounter);
   CandidateSSSubalgebra theCandidate;
   theCandidate=baseCandidate;
   SemisimpleLieAlgebra tempAlgebra;
@@ -111,6 +116,7 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive
     this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
   }
   SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
+  SltwoSubalgebras& theSmallSl2s=this->theSl2sOfSubalgebras[indexSubalgebra];
   if (mustComputeSSalgebra)
   { ProgressReport theReport(theGlobalVariables);
     std::stringstream tempStream;
@@ -125,20 +131,36 @@ void SemisimpleSubalgebras::ExtendOneComponentRecursive
     (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
      this->theSl2sOfSubalgebras[indexSubalgebra], *theGlobalVariables);
   }
-  Rational desiredLength=
+  Rational desiredScale=
   this->theSl2s[theNewType.longRootOrbitIndex].LengthHsquared/
-  theSmallAlgebra.theWeyl.CartanSymmetric(0,0)*
-  theSmallAlgebra.theWeyl.CartanSymmetric(numVectorsFound, numVectorsFound);
-
+  theSmallAlgebra.theWeyl.CartanSymmetric(0,0);
+  bool isGood=true;
+  for (int i=0; i<theSmallSl2s.size; i++)
+  { isGood=false;
+    Rational impliedRootLength= desiredScale * theSmallSl2s[i].LengthHsquared;
+    for (int j=0; j<this->theSl2s.size; j++)
+    { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
+          !(impliedRootLength==this->theSl2s[j].LengthHsquared))
+        continue;
+      isGood=true;
+      break;
+    }
+    if (!isGood)
+      break;
+  }
+  if (isGood)
+  { std::cout << "<br>Module decompositions and lengths of " << theNewType.ToString()
+    << " fit.";
+  }
 }
 
 void SemisimpleSubalgebras::ExtendCandidatesRecursive
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
   DynkinSimpleType theType;
-  std::cout << "The types to be tested: ";
+  //std::cout << "The types to be tested: ";
   for (theType.MakeAone(this->theSl2s); theType<this->GetSSowner().GetRank()+1; theType++)
-  { std::cout << theType.ToString() << ", ";
+  { //std::cout << theType.ToString() << ", ";
     this->ExtendOneComponentRecursive(theCandidate, theType, 0, theGlobalVariables);
   }
 }

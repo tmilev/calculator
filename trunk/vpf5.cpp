@@ -235,7 +235,7 @@ bool CommandList::fRootSAsAndSltwos
     return true;
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=10000;
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
   SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   char weylLetter=ownerSS.theWeyl.WeylLetter;
   int theRank=ownerSS.theWeyl.GetDim();
@@ -259,10 +259,11 @@ bool CommandList::fRootSAsAndSltwos
   outRootHtmlFileName << outMainPath.str() << "rootHtml.html";
   outRootHtmlDisplayName << outMainDisplayPath.str() << "rootHtml.html";
   bool mustRecompute=false;
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds =1000;
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit =1000;
   FormatExpressions theFormat;
   theFormat.flagUseHTML=true;
   theFormat.flagUseLatex=false;
+  theFormat.flagUsePNG=true;
   theFormat.DisplayNameCalculator=theCommands.DisplayNameCalculator;
   theFormat.physicalPath=outMainPath.str();
   theFormat.htmlPathServer=outMainDisplayPath.str();
@@ -273,7 +274,9 @@ bool CommandList::fRootSAsAndSltwos
   { //std::cout << theCommands.javaScriptDisplayingIndicator;
     std::cout.flush();
     std::cout
-    << "<br>The computation is in progress. <b><br>Please do not click back/refresh button: it will cause broken links in the calculator. "
+    << "<br>The computation is in progress. <b>"
+    << "<br>Please do not click back/refresh button: "
+    << "it will cause broken links in the calculator. "
     << "<br>Appologies for this technical (Apache server configuration) problem. "
     << "<br>Alleviating it is around the bottom of a very long to-do list.</b>"
     << "<br> The computation is slow, up to around 10 minutes for E_8.";
@@ -386,8 +389,8 @@ bool CommandList::fCasimir
   if (theExpression.errorString!="")
     return theExpression.SetError("While trying to generate Lie algebra for the Casimir element, I got the error: " + theExpression.errorString);
   SemisimpleLieAlgebra& theSSowner=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
-  if (theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds<50)
-    theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=50;
+  if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
+    theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   RationalFunctionOld rfOne, rfZero;
   rfOne.MakeOne(0, theCommands.theGlobalVariableS);
   rfZero.MakeZero(0, theCommands.theGlobalVariableS);
@@ -1298,7 +1301,8 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   std::stringstream tempStream1;
   tempStream1 << "Started splitting the f.d. part of the " << theHmm.theRange().GetLieAlgebraName() << "-module with highest weight in fund coords "
   << this->theChaR[0].weightFundamentalCoords.ToString();
-  theGlobalVariables.MakeStatusReport(tempStream1.str());
+  ProgressReport theReport(&theGlobalVariables);
+  theReport.Report(tempStream1.str());
 //  std::cout << "<br>Parabolic selection: " << LeviInSmall.ToString();
   List<List<List<CoefficientType> > > eigenSpacesPerSimpleGenerator;
   Selection InvertedLeviInSmall;
@@ -1326,12 +1330,12 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       std::stringstream tempStream3;
       double timeAtStart1=theGlobalVariables.GetElapsedSeconds();
       tempStream3 << "Computing eigenspace corresponding to " << currentElt.ToString() << "...";
-      theGlobalVariables.MakeProgressReport(tempStream3.str(), 2);
+      theReport.Report(tempStream3.str());
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
     currentOpMat.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
       tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1 << " seconds.";
-      theGlobalVariables.MakeProgressReport(tempStream3.str(), 2);
+      theReport.Report(tempStream3.str());
     if (i==0)
       theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
     else
@@ -1339,11 +1343,11 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
         double timeAtStart2=theGlobalVariables.GetElapsedSeconds();
         tempStream4 << "Intersecting with eigenspace corresponding to " << currentElt.ToString() << "...";
       tempSpace1=theFinalEigenSpace;
-        theGlobalVariables.MakeProgressReport(tempStream4.str(), 2);
+        theReport.Report(tempStream4.str());
       tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
       theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
         tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart2 << " seconds.";
-        theGlobalVariables.MakeProgressReport(tempStream4.str(), 2);
+        theReport.Report(tempStream4.str());
     }
   }
   out << "<br>Eigenvectors:<table> ";
@@ -1401,7 +1405,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
 //  if (outputEigenSpace!=0)
 //  { std::cout << "<br> outputEigenSpace->size=" << outputEigenSpace->size << "; outputEigenVectors->size=" << outputEigenVectors->size;
 //  }
-  theGlobalVariables.MakeProgressReport("SplitFDpartOverFKLeviRedSubalg done!", 0);
+  theReport.Report("SplitFDpartOverFKLeviRedSubalg done!");
   if (comments!=0)
     *comments << out.str();
 }
@@ -2144,7 +2148,7 @@ bool CommandList::fSplitFDpartB3overG2inner
 //  if (!theG2Casimir.IsEqualToZero())
 //    baseChar=theG2Casimir.theCoeffs[0];
 //  out << "<br>Base G_2-character: " << baseChar.ToString() << " corresponding to g2-dual weight " << highestWeightG2dualCoords.ToString();
-  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=400;
+  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=400;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentG2DualWeight=theG2B3Data.g2DualWeights[i];
     theG2CasimirCopy=theG2Casimir;
@@ -2154,7 +2158,7 @@ bool CommandList::fSplitFDpartB3overG2inner
     else
       theG2B3Data.theChars[i]=theG2CasimirCopy.theCoeffs[0];
   }
-//  theCommands.theGlobalVariableS->MaxAllowedComputationTimeInSeconds=1000;
+//  theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theG2B3Data.theEigenVectorsLevi.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.theEigenVectorS.SetSize(theG2B3Data.g2Weights.size);
   theG2B3Data.additionalMultipliers.SetSize(theG2B3Data.g2Weights.size);

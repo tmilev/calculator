@@ -1078,6 +1078,7 @@ void ModuleSSalgebra<CoefficientType>::GetAdActionHomogenousElT
   outputSortedByArgumentWeight.SetSize(this->theGeneratingWordsGrouppedByWeight.size);
   ElementUniversalEnveloping<CoefficientType> theElt;
   std::string generatorString=inputHomogeneous.ToString();
+  ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
   { List<MonomialUniversalEnveloping<CoefficientType> >& currentWordList=
     this->theGeneratingWordsGrouppedByWeight[i];
@@ -1095,7 +1096,7 @@ void ModuleSSalgebra<CoefficientType>::GetAdActionHomogenousElT
       << i+1 << " out of " << this->theGeneratingWordsGrouppedByWeight.size << ", word "
       << j+1 << " out of " << currentWordList.size
       << "...";
-      theGlobalVariables.MakeProgressReport(progressStream.str(), 2);
+      theReport.Report(progressStream.str());
       ElementUniversalEnveloping<CoefficientType>& currentOutputWord=outputCurrentList[j];
       if (theIndex==-1)
         currentOutputWord.MakeZero(*this->theAlgebras, this->indexAlgebra);
@@ -1106,7 +1107,7 @@ void ModuleSSalgebra<CoefficientType>::GetAdActionHomogenousElT
         (theElt, currentOutputWord, theIndex, this->theHWDualCoordsBaseFielD, theGlobalVariables, theRingUnit, theRingZero);
       }
       progressStream << " done!";
-      theGlobalVariables.MakeProgressReport(progressStream.str(), 2);
+      theReport.Report(progressStream.str());
     }
   }
 }
@@ -1442,7 +1443,7 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
   std::stringstream out;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=30;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30;
   out << "Highest weight in dual coords: " << weight.ToString() << "<br>";
   theHW.SetSize(weight.size);
   for (int i=0; i<weight.size; i++)

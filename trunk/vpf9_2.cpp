@@ -3405,13 +3405,12 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
     return;
   }
   Polynomial<Rational> theGCD, theResult, tempP;
+  ProgressReport theReport(this->context);
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
     << other.ToString(&this->context->theDefaultFormat);
-    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
-    this->context->theIndicatorVariables.StatusString1=out.str();
-    this->context->MakeReport();
+    theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other, theGCD, this->context);
   this->Numerator.GetElement()*=other;
@@ -3434,9 +3433,7 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
     out << "Multiplying " << this->ToString(&this->context->theDefaultFormat) << " by "
     << other.ToString(&this->context->theDefaultFormat);
     out << " and the result is:\n" << this->ToString();
-    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
-    this->context->theIndicatorVariables.StatusString1=out.str();
-    this->context->MakeReport();
+    theReport.Report(out.str());
   }
 //  this->ComputeDebugString();
 }
@@ -3504,12 +3501,11 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 //  RationalFunctionOld tempde_Bugger;
 //  tempde_Bugger=other;
 //  tempde_Bugger.ComputeDebugString();
+  ProgressReport theReport(this->context);
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
-    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
-    this->context->theIndicatorVariables.StatusString1=out.str();
-    this->context->MakeReport();
+    theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
   RationalFunctionOld::gcd(this->Denominator.GetElement(), other.Numerator.GetElementConst(), theGCD2, this->context);
@@ -3531,9 +3527,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
     out << " and the result is:\n" << this->ToString();
-    this->context->theIndicatorVariables.StatusString1NeedsRefresh=true;
-    this->context->theIndicatorVariables.StatusString1=out.str();
-    this->context->MakeReport();
+    theReport.Report(out.str());
   }
 }
 
@@ -3689,7 +3683,7 @@ void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
   std::string tempS;
   out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
   for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis.TheObjects[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
+    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
   Matrix<RationalFunctionOld> theSystem;
   theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
   for (int k=0; k<theGenerators.size; k++)
@@ -3728,13 +3722,13 @@ void RationalFunctionOld::ScaleClearDenominator
     if (current.expressionType==RationalFunctionOld::typeRationalFunction)
     { tempP.operator=(current.Denominator.GetElement());
       for (int j=0; j<buffer.size; j++)
-        buffer.TheObjects[j].operator*=(tempP);
+        buffer[j].operator*=(tempP);
     }
   }
   output.SetSize(input.size);
   for (int i=0; i<buffer.size; i++)
-  { buffer.TheObjects[i].GetNumerator(tempP);
-    output.TheObjects[i]=tempP;
+  { buffer[i].GetNumerator(tempP);
+    output[i]=tempP;
   }
 }
 
@@ -5266,8 +5260,8 @@ int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
           this->intValue=theInt.value.TheObjects[0]*theInt.sign;
       break;
       case ParserNode::typeCharSSFDMod:
-        theGlobalVariables.MaxAllowedComputationTimeInSeconds=MathRoutines::Maximum
-        (theGlobalVariables.MaxAllowedComputationTimeInSeconds, 30);
+        theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=MathRoutines::Maximum
+        (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit, 30);
 //        tempS=(this->theChar.GetElement().MultiplyBy(currentChild.theChar.GetElement(), theGlobalVariables));
         if (tempS!="")
         { this->ExpressionType=this->typeError;

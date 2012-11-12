@@ -2,9 +2,8 @@
 #define WXSTATUS_H
 
 //(*Headers(wxStatus)
-#include <wx/sizer.h>
-#include <wx/textctrl.h>
 #include <wx/frame.h>
+#include <wx/textctrl.h>
 //*)
 
 class wxStatus: public wxFrame
@@ -15,7 +14,6 @@ class wxStatus: public wxFrame
 		virtual ~wxStatus();
 
 		//(*Declarations(wxStatus)
-		wxTextCtrl* TextCtrlStatusString;
 		wxTextCtrl* TextCtrlProgressString;
 		//*)
 
@@ -23,7 +21,6 @@ class wxStatus: public wxFrame
 
 		//(*Identifiers(wxStatus)
 		static const long ID_TEXTCTRL1;
-		static const long ID_TEXTCTRL2;
 		//*)
 
 	private:

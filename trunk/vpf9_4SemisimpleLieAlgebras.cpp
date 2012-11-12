@@ -6,6 +6,9 @@ ProjectInformationInstance ProjectInfoVpf9_4cpp
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
+  out << "There are " << this->Hcandidates.size << " candidates total. ";
+  for (int i=0; i<this->Hcandidates.size; i++)
+    out << "<br>" << this->Hcandidates[i].ToString(theFormat);
   out << this->theSl2s.ToString(theFormat);
   return out.str();
 }
@@ -30,25 +33,24 @@ std::string DynkinSimpleType::ToString()const
 { std::stringstream out;
   if (this->owner==0)
     return "non-initialized";
-
   if (theRank>=10)
     out << theLetter << "_{" << theRank << "}";
   else
     out << theLetter << "_" << theRank;
-  if (!(*this->owner)[this->longRootOrbitIndex].LengthHsquared.IsEqualTo
-      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
-    out << "^{" << (*this->owner)[this->longRootOrbitIndex].LengthHsquared
+//  if (!(*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared.IsEqualTo
+//      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
+  out << "^{" << (*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared
     << "}";
   return out.str();
 }
 
 void DynkinSimpleType::operator++(int)
 { this->assertIAmInitialized();
-  if (this->longRootOrbitIndex<this->owner->size-1)
-  { this->longRootOrbitIndex++;
+  if (this->firstSimpleRootOrbitIndex<this->owner->size-1)
+  { this->firstSimpleRootOrbitIndex++;
     return;
   }
-  this->longRootOrbitIndex=0;
+  this->firstSimpleRootOrbitIndex=0;
   if (this->theRank==1)
   { this->theRank++;
     return;
@@ -101,71 +103,208 @@ bool DynkinSimpleType::operator<(int otherRank)const
 
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
 (const CandidateSSSubalgebra& baseCandidate, const DynkinSimpleType& theNewType,
- int numVectorsFound, GlobalVariables* theGlobalVariables)
+GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentRecursive");
   RecursionDepthCounter theCounter(&this->theRecursionCounter);
-  CandidateSSSubalgebra theCandidate;
-  theCandidate=baseCandidate;
-  SemisimpleLieAlgebra tempAlgebra;
-  tempAlgebra.theWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
-  int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
-  bool mustComputeSSalgebra=(indexSubalgebra==-1);
-  if (mustComputeSSalgebra)
-  { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
-    this->SimpleComponentsSubalgebras.AddOnTop(tempAlgebra);
-    this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
+  int numVectorsFound=baseCandidate.CartanSAsByComponent.LastObject()->size;
+  ProgressReport theReport(theGlobalVariables);
+  ProgressReport theReport2(theGlobalVariables);
+  ProgressReport theReport0(theGlobalVariables);
+  CandidateSSSubalgebra newCandidate;
+  //std::cout << "<br>extending " << theNewType.ToString();
+  if (numVectorsFound==theNewType.theRank)
+  { //std::cout << "<br><b>Base candidate that appears to be good: "
+    //<< theNewType.ToString() << "</b>";
+    newCandidate=baseCandidate;
+    newCandidate.theTypes.AddOnTop(theNewType);
+    if (!newCandidate.ComputeChar(this->GetSSowner().theWeyl))
+      return;
+    this->Hcandidates.AddOnTop(newCandidate);
+    this->ExtendCandidatesRecursive(newCandidate, theGlobalVariables);
+    return;
   }
-  SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
-  SltwoSubalgebras& theSmallSl2s=this->theSl2sOfSubalgebras[indexSubalgebra];
-  if (mustComputeSSalgebra)
-  { ProgressReport theReport(theGlobalVariables);
-    std::stringstream tempStream;
-    tempStream << "Generating simple Lie algebra "
-    << SemisimpleLieAlgebra::GetLieAlgebraName(theNewType.theLetter, theNewType.theRank)
-    << " (total " << this->SimpleComponentsSubalgebras.size << ")";
-    theReport.Report(tempStream.str());
-    theSmallAlgebra.init
-    (this->SimpleComponentsSubalgebras, indexSubalgebra, theNewType.theLetter, theNewType.theRank);
-    theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
-    theSmallAlgebra.FindSl2Subalgebras
-    (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
-     this->theSl2sOfSubalgebras[indexSubalgebra], *theGlobalVariables);
-  }
+
+  WeylGroup tempWeyl;
+  tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
   Rational desiredScale=
-  this->theSl2s[theNewType.longRootOrbitIndex].LengthHsquared/
-  theSmallAlgebra.theWeyl.CartanSymmetric(0,0);
-  bool isGood=true;
-  for (int i=0; i<theSmallSl2s.size; i++)
-  { isGood=false;
-    Rational impliedRootLength= desiredScale * theSmallSl2s[i].LengthHsquared;
-    for (int j=0; j<this->theSl2s.size; j++)
-    { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
-          !(impliedRootLength==this->theSl2s[j].LengthHsquared))
-        continue;
-      isGood=true;
-      break;
+  this->theSl2s[theNewType.firstSimpleRootOrbitIndex].LengthHsquared/
+  tempWeyl.CartanSymmetric(0,0);
+  Vectors<Rational> startingVector;
+  HashedList<Vector<Rational> > theOrbit;
+  startingVector.SetSize(1);
+  std::stringstream out0;
+  if (theGlobalVariables!=0)
+  { out0 << "Attempting to complete component " << theNewType.ToString()
+    << ", root " << baseCandidate.CartanSAsByComponent.LastObject()->size+1
+    << " out of " << theNewType.theRank << ".";
+    theReport0.Report(out0.str());
+  }
+  for (int i=0; i<this->theSl2s.size; i++)
+  { Rational currentScale=this->theSl2s[i].LengthHsquared/tempWeyl.CartanSymmetric
+    (numVectorsFound, numVectorsFound);
+    if (desiredScale!=currentScale)
+      continue;
+    startingVector[0]=this->theSl2s[i].theH.GetCartanPart();
+    std::stringstream out;
+    if (theGlobalVariables!=0)
+    { out << "Generating orbit of " << startingVector[0].ToString() << "...";
+      theReport.Report(out.str());
     }
-    if (!isGood)
-      break;
+    if (baseCandidate.theTypes.size!=0 || baseCandidate.CartanSAsByComponent.LastObject()->size!=0)
+      this->GetSSowner().theWeyl.GenerateOrbit
+      (startingVector, false, theOrbit, false, 1152, 0, 10000);
+    else
+      theOrbit=startingVector;
+    if (theGlobalVariables!=0)
+    { out << " done. The size of the orbit is " << theOrbit.size;
+      theReport.Report(out.str());
+    }
+    for (int j=0; j<theOrbit.size; j++)
+    { bool isGood=true;
+      std::stringstream out2;
+      for (int k=0; k<baseCandidate.CartanSAsByComponent.size && isGood; k++)
+      { Vectors<Rational>& currentComponent=baseCandidate.CartanSAsByComponent[k];
+        if (theGlobalVariables!=0)
+        { out2 << "Exploring orbit element of index  " << j+1 << " out of "
+          << theOrbit.size << ".";
+          theReport2.Report(out2.str());
+        }
+        for (int l=0; l<currentComponent.size && isGood; l++)
+        { Rational theScalarProd=
+          this->GetSSowner().theWeyl.RootScalarCartanRoot
+          (theOrbit[j], currentComponent[l]);
+
+          if (k!=baseCandidate.CartanSAsByComponent.size-1 &&
+              !theScalarProd.IsEqualToZero())
+          { isGood=false;
+            break;
+          }
+          if (k==baseCandidate.CartanSAsByComponent.size-1)
+          { Rational desiredScalarProd=
+            desiredScale*tempWeyl.CartanSymmetric(l, numVectorsFound);
+            if (desiredScalarProd!=theScalarProd)
+            { isGood=false;
+              break;
+            }
+          }
+
+        }
+      }
+      if (isGood)
+      { if (theGlobalVariables!=0)
+        { out2 << " the candidate is good. Attempting to extend it by recursion. ";
+          theReport2.Report(out2.str());
+        }
+        //std::cout << "Is good!";
+        newCandidate=baseCandidate;
+        newCandidate=baseCandidate;
+        newCandidate.CartanSAsByComponent.LastObject()->AddOnTop(theOrbit[j]);
+        this->ExtendOneComponentRecursive(newCandidate, theNewType, theGlobalVariables);
+      } else
+      { if (theGlobalVariables!=0)
+        { out2 << " the candidate is no good. ";
+          theReport2.Report(out2.str());
+        }
+      }
+    }
   }
-  if (isGood)
-  { std::cout << "<br>Module decompositions and lengths of " << theNewType.ToString()
-    << " fit.";
-  }
+}
+
+bool CandidateSSSubalgebra::ComputeChar(WeylGroup& ownerWeyl)
+{ this->theWeylSubgroup.AmbientWeyl=ownerWeyl;
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+    this->theWeylSubgroup.simpleGenerators.AddListOnTop(this->CartanSAsByComponent[i]);
+  this->theWeylSubgroup.ComputeRootSubsystem();
+
+  return true;
 }
 
 void SemisimpleSubalgebras::ExtendCandidatesRecursive
-  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, GlobalVariables* theGlobalVariables)
 { RecursionDepthCounter theCounter(&this->theRecursionCounter);
+  MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendCandidatesRecursive");
   DynkinSimpleType theType;
   //std::cout << "The types to be tested: ";
-  for (theType.MakeAone(this->theSl2s); theType<this->GetSSowner().GetRank()+1; theType++)
+  CandidateSSSubalgebra theCandidate;
+  SemisimpleLieAlgebra tempAlgebra;
+  ProgressReport theProgressReport1(theGlobalVariables);
+  ProgressReport theProgressReport2(theGlobalVariables);
+  ProgressReport theProgressReport3(theGlobalVariables);
+  if(theGlobalVariables!=0)
+  { std::stringstream out;
+    out << "\nExploring extensions of (" << baseCandidate.ToString() << ") via: ";
+    out << "\n";
+    theProgressReport1.Report(out.str());
+    //std::cout << "Exploring extensions of " << baseCandidate.ToString() << " by: ";
+  }
+  DynkinSimpleType myType;
+  myType.MakeAone(this->theSl2s);
+  myType.theLetter=this->GetSSowner().theWeyl.WeylLetter;
+  myType.theRank=this->GetSSowner().GetRank();
+  for (theType.MakeAone(this->theSl2s); theType<myType; theType++)
   { //std::cout << theType.ToString() << ", ";
-    this->ExtendOneComponentRecursive(theCandidate, theType, 0, theGlobalVariables);
+    theCandidate=baseCandidate;
+    tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
+    int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
+    bool mustComputeSSalgebra=(indexSubalgebra==-1);
+    if (mustComputeSSalgebra)
+    { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
+      this->SimpleComponentsSubalgebras.AddOnTop(tempAlgebra);
+      this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
+    }
+    SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
+    SltwoSubalgebras& theSmallSl2s=this->theSl2sOfSubalgebras[indexSubalgebra];
+    if (mustComputeSSalgebra)
+    { std::stringstream tempStream;
+      tempStream << "\nGenerating simple Lie algebra "
+      << SemisimpleLieAlgebra::GetLieAlgebraName(theType.theLetter, theType.theRank)
+      << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
+      theProgressReport2.Report(tempStream.str());
+      theSmallAlgebra.init
+      (this->SimpleComponentsSubalgebras, indexSubalgebra, theType.theLetter, theType.theRank);
+      theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
+      theSmallAlgebra.FindSl2Subalgebras
+      (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
+       theSmallSl2s, *theGlobalVariables);
+      tempStream << " done.";
+      theProgressReport2.Report(tempStream.str());
+    }
+    Rational desiredScale=
+    this->theSl2s[theType.firstSimpleRootOrbitIndex].LengthHsquared/
+    theSmallAlgebra.theWeyl.CartanSymmetric(0,0);
+    bool isGood=true;
+    for (int i=0; i<theSmallSl2s.size; i++)
+    { isGood=false;
+      Rational impliedRootLength= desiredScale * theSmallSl2s[i].LengthHsquared;
+      for (int j=0; j<this->theSl2s.size; j++)
+      { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
+            !(impliedRootLength==this->theSl2s[j].LengthHsquared))
+          continue;
+        isGood=true;
+        break;
+      }
+      if (!isGood)
+        break;
+    }
+    if (theGlobalVariables!=0)
+    { std::stringstream out;
+      out << " \n" << theType.ToString();
+      if (isGood)
+        out << " has fitting sl(2) decompositions.";
+      else
+        out << " does not have fitting sl(2) decompositions.";
+      theProgressReport3.Report(out.str());
+    }
+    if (isGood)
+    { theCandidate.CartanSAsByComponent.SetSize(baseCandidate.CartanSAsByComponent.size+1);
+      theCandidate.CartanSAsByComponent.LastObject()->size=0;
+      this->ExtendOneComponentRecursive(theCandidate, theType, theGlobalVariables);
+    }
   }
 }
 
-void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
+void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs
+(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
 { std::stringstream out;
   std::string tempS;
   if (useLatex)
@@ -173,7 +312,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   if (useHtml)
   { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
-    { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[i]];
+    { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[i]];
       CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<td align=\"center\">Decomp. " << tempS << "</td>";
     }
@@ -181,15 +320,15 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   }
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
-  { rootSubalgebra& theSA= owner.theRootSAs.TheObjects[this->IndicesMinimalContainingRootSA.TheObjects[k]];
+  { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[k]];
     CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
     if (useHtml)
       out << "<td align=\"center\">";
-    for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size; i++)
-    { if (this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i]>1)
-        out << this->MultiplicitiesDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i];
-      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].TheObjects[i] << "}";
-      if (i!=this->HighestWeightsDecompositionMinimalContainingRootSA.TheObjects[k].size-1)
+    for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA[k].size; i++)
+    { if (this->MultiplicitiesDecompositionMinimalContainingRootSA[k][i]>1)
+        out << this->MultiplicitiesDecompositionMinimalContainingRootSA[k][i];
+      out << "V_{"<<this->HighestWeightsDecompositionMinimalContainingRootSA[k][i] << "}";
+      if (i!=this->HighestWeightsDecompositionMinimalContainingRootSA[k].size-1)
         out << "+";
     }
     if (useHtml)
@@ -203,7 +342,9 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool u
   output=out.str();
 }
 
-void slTwo::ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
+void slTwo::ElementToHtmlCreateFormulaOutputReference
+(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml,
+ SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
 { if (!usePNG)
   { output << formulaTex;
     //if (useHtml)
@@ -250,13 +391,14 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   tempS=this->preferredAmbientSimpleBasis.ToString();
   std::string physicalPath="";
   std::string htmlPathServer="";
-  bool usePNG=true;
+  bool usePNG=false;
   bool useHtml=true;
   bool useLatex=false;
   if (theFormat!=0)
     if (theFormat->physicalPath!="")
     { physicalPath=theFormat->physicalPath + "sl2s/";
       htmlPathServer=theFormat->htmlPathServer + "sl2s/";
+      usePNG=theFormat->flagUsePNG;
     }
   if (physicalPath=="" || htmlPathServer=="")
   { usePNG=false;
@@ -294,7 +436,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   if (useHtml)
     out << "<br>";
   out << "\nsl(2)-module decomposition of the ambient Lie algebra: ";
-  this->ElementToStringModuleDecomposition(useLatex || usePNG, useHtml, tempS);
+  this->ElementToStringModuleDecomposition(useLatex, useHtml, tempS);
   this->ElementToHtmlCreateFormulaOutputReference
   (tempS, out, usePNG, useHtml, *this->container, &physicalPath, &htmlPathServer);
   this->container->IndicesSl2decompositionFlas.SetSize(this->container->size);
@@ -362,13 +504,13 @@ void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
   this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
   int r=0;
   for (int i=0; i<this->hCharacteristic.size; i++)
-    if (!this->hCharacteristic.TheObjects[i].IsEqualToZero())
+    if (!this->hCharacteristic[i].IsEqualToZero())
       r++;
   this->DynkinsEpsilon+= r;
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { int NumNonZeroFound=0;
     for (int j=0; j<this->hCharacteristic.size; j++)
-    { if (theWeyl.RootSystem.TheObjects[i].TheObjects[j]==1)
+    { if (theWeyl.RootSystem[i][j]==1)
         NumNonZeroFound++;
       if(NumNonZeroFound>1)
         break;
@@ -428,12 +570,13 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
     output.IndicesSl2sContainedInRootSA[i].size=0;
   ProgressReport theReport(&theGlobalVariables);
   for (int i=0; i<output.theRootSAs.size-1; i++)
-  { output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
-    (output, i, theGlobalVariables);
-    std::stringstream tempStream;
-    tempStream << "Exploring root subalgebra number " << (i+1)
-    << " out of " << output.theRootSAs.size-1 << " non-trivial";
+  { std::stringstream tempStream;
+    tempStream << "\nExploring root subalgebra "
+    << output.theRootSAs[i].theDynkinDiagram.ElementToStrinG() << "(" << (i+1)
+    << " out of " << output.theRootSAs.size-1 << " non-trivial)\n";
     theReport.Report(tempStream.str());
+    output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
+    (output, i, theGlobalVariables);
   }
   for (int i=0; i<output.size; i++)
   { slTwo& theSl2= output[i];
@@ -647,8 +790,6 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic
 
 void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
 { std::stringstream out;
-  if (useLatex)
-    out << "$";
   for (int i=0; i<this->highestWeights.size; i++)
   { if (this->multiplicitiesHighestWeights[i]>1)
       out << this->multiplicitiesHighestWeights[i];
@@ -656,8 +797,6 @@ void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std:
     if (i!=this->highestWeights.size-1)
       out << "+";
   }
-  if (useLatex)
-    out << "$";
   output=out.str();
 }
 
@@ -824,9 +963,12 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
   std::string tooltipVDecomposition= "The sl(2) submodules of g are parametrized by their highest weight w.r.t. h. V_l is l+1 dimensional";
   std::string tooltipContainingRegular="A regular semisimple subalgebra might contain an sl(2) such that the sl(2) has no centralizer in the regular semisimple subalgebra, but the regular semisimple subalgebra might fail to be minimal containing. This happens when another minimal containing regular semisimple subalgebra of equal rank nests as a Vector<Rational> subalgebra in the containing SA. See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, remark before Theorem 10.4.";
   std::string tooltipHvalue="The actual realization of h. The coordinates of h are given with respect to the fixed original simple basis. Note that the characteristic of h is given *with respect to another basis* (namely, with respect to an h-positive simple basis). I will fix this in the future (email me if you want that done sooner).";
-  bool usePNG=true;
+  bool usePNG=theFormat==0? false : theFormat->flagUsePNG;
   bool useHtml=theFormat==0 ? true : theFormat->flagUseHTML;
   bool useLatex=theFormat==0 ? true : theFormat->flagUseLatex;
+  std::string physicalPath, displayPath;
+  physicalPath=theFormat==0 ? "../" : theFormat->physicalPath;
+  displayPath=theFormat==0 ? "../" : theFormat->htmlPathServer;
   out << "Number of sl(2) subalgebras " << this->size << "\n";
   if (this->IndicesSl2decompositionFlas.size < this->size)
     usePNG = false;
@@ -880,7 +1022,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
+      out << "<a href=\""
+      << displayPath
+      << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
       << ".html\">" << tempS << "</a>" << ";  ";
     }
     if (useHtml)
@@ -888,7 +1032,9 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesContainingRootSAs[j]];
       CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<a href=\"../rootHtml_rootSA" << theSl2.IndicesContainingRootSAs[j] << ".html\">"
+      out << "<a href=\""
+      <<  displayPath
+      << "rootHtml_rootSA" << theSl2.IndicesContainingRootSAs[j] << ".html\">"
       << tempS << "</a>" << ";  ";
     }
     if (useHtml)
@@ -916,16 +1062,6 @@ std::string SltwoSubalgebras::ToString(FormatExpressions* theFormat)
   out << this->ElementToStringNoGenerators(theFormat);
   out << body.str();
   return out.str();
-}
-
-void SltwoSubalgebras::MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
-  std::stringstream out;
-  out << index << " out of " << outOf << " =3^8-1 computed";
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
 }
 
 void SltwoSubalgebras::ElementToHtml
@@ -1025,7 +1161,7 @@ void rootSubalgebra::ToString
   if (this->SimpleBasisgEpsCoords.size!=this->SimpleBasisK.size || this->SimpleBasisKEpsCoords.size!= this->SimpleBasisK.size || this->kModulesgEpsCoords.size!= this->kModules.size || this->kModulesKepsCoords.size!= this->kModules.size)
     includeKEpsCoords=false;
   int LatexLineCounter=0;
-  this->ElementToStringHeaderFooter (latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
+  this->ElementToStringHeaderFooter(latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
   this->theDynkinDiagram.ElementToStrinG(tempS, true);
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
@@ -1036,7 +1172,8 @@ void rootSubalgebra::ToString
   { out <<" &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
-        out << "<a href=\"./rootHtml_rootSA" << this->indicesSubalgebrasContainingK[i] << ".html\">";
+        out << "<a href=\"./rootHtml_rootSA"
+        << this->indicesSubalgebrasContainingK[i] << ".html\">";
       out << tempS;
       if (useHtml)
         out << "</a>, ";
@@ -1102,20 +1239,20 @@ void rootSubalgebra::ToString
       bool isS_subalgebra=true;
 //      theSl2.hCharacteristic.ComputeDebugString();
       for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
-      { int indexComparison= theSl2.IndicesContainingRootSAs.TheObjects[j];
-        if (indexComparison!=indexInOwner && sl2s->theRootSAs.TheObjects[indexComparison].indicesSubalgebrasContainingK.ContainsObject(indexInOwner))
+      { int indexComparison= theSl2.IndicesContainingRootSAs[j];
+        if (indexComparison!=indexInOwner && sl2s->theRootSAs[indexComparison].indicesSubalgebrasContainingK.ContainsObject(indexInOwner))
         { isS_subalgebra=false;
           break;
         }
       }
       if (isS_subalgebra)
-        hCharacteristics_S_subalgebras.AddOnTop(sl2s->IndicesSl2sContainedInRootSA.TheObjects[indexInOwner].TheObjects[i]);
+        hCharacteristics_S_subalgebras.AddOnTop(sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i]);
     }
     if (useHtml)
       out << "\n<br>\n";
     out << "\nS-sl(2) subalgebras in k (total " << hCharacteristics_S_subalgebras.size << "): ";
     for (int i=0; i<hCharacteristics_S_subalgebras.size; i++)
-      out << sl2s->TheObjects[hCharacteristics_S_subalgebras.TheObjects[i]].hCharacteristic.ToString() << ", ";
+      out << sl2s->TheObjects[hCharacteristics_S_subalgebras[i]].hCharacteristic.ToString() << ", ";
   }
   if (useHtml)
   { out << "<hr>\n Number of k-submodules of g/k: " << this->HighestWeightsGmodK.size;
@@ -1211,11 +1348,11 @@ void rootSubalgebra::ToString
       out << latexFooter << latexHeader;
     }
     if (i!=this->kModules.size-1)
-    { LatexLineCounter+=this->kModules.TheObjects[i].size;
+    { LatexLineCounter+=this->kModules[i].size;
       if (useLatex)
        if ((LatexLineCounter>this->NumGmodKtableRowsAllowedLatex) && (LatexLineCounter!=this->kModules.TheObjects[i].size))
         { out << latexFooter << latexHeader;
-          LatexLineCounter = this->kModules.TheObjects[i].size;
+          LatexLineCounter = this->kModules[i].size;
         }
     }
   }
@@ -1235,3 +1372,17 @@ void rootSubalgebra::ToString
   }
   output=out.str();
 }
+
+std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
+{ DynkinType accumType;
+  accumType.MakeZero();
+  for (int i=0; i<theTypes.size; i++)
+    accumType.AddMonomial(this->theTypes[i], 1);
+  std::stringstream out;
+  out << accumType;
+  out << ". Hcandidates: ";
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+    out << this->CartanSAsByComponent[i].ToString() << ", ";
+  return out.str();
+}
+

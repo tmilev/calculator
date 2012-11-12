@@ -164,10 +164,9 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
   //  return;
   theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
-  for (int i=0; i<output.ProgressReportStrings.size; i++)
-    out << output.ProgressReportStrings[i] << "\n";
+  for (int i=0; i<output.ProgressReportStringS.size; i++)
+    out << output.ProgressReportStringS[i] << "\n";
   theMainWindow->ProgressReportString=out.str();
-  theMainWindow->StatusString=output.StatusString1;
 //  theMainWindow->theStatus->TextCtrlProgressString->SetValue(wxString(theMainWindow->ProgressReportString.c_str(), wxConvUTF8));
 //  theMainWindow->theStatus->TextCtrlStatusString->SetValue(wxString(theMainWindow->StatusString.c_str(), wxConvUTF8));
   theMainWindow->mutexRuN.UnlockMe();
@@ -390,7 +389,6 @@ void wxParserFrame::OnProgressReport(wxCommandEvent& ev)
 //    return;
   this->mutexRuN.LockMe();
   this->theStatus->TextCtrlProgressString->SetValue(wxString(theMainWindow->ProgressReportString.c_str(), wxConvUTF8));
-  this->theStatus->TextCtrlStatusString->SetValue(wxString(theMainWindow->StatusString.c_str(), wxConvUTF8));
   this->theStatus->Update();
   this->mutexRuN.UnlockMe();
 //  this->theStatus->Refresh();

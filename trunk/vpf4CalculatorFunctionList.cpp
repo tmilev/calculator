@@ -273,10 +273,10 @@ void CommandList::initPredefinedVars()
    "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
 
   this->AddNonBoundVarMustBeNew
-  ("PrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
+  ("experimentalPrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
-   "PrintSemisimpleSubalgebras{}(A_2)", true);
+   "experimentalPrintSemisimpleSubalgebras{}(A_2)", true);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

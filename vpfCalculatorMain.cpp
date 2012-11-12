@@ -65,16 +65,21 @@ double GetElapsedTimeInSeconds()
 }
 
 void* RunTimer(void* ptr)
-{ for (; GetElapsedTimeInSeconds()<theGlobalVariables.MaxAllowedComputationTimeInSeconds ||
-        theGlobalVariables.MaxAllowedComputationTimeInSeconds<=0;)
+{ double elapsedtime=-1;
+  for (; ;)
   { usleep(100);
+    elapsedtime=GetElapsedTimeInSeconds();
     if (ComputationComplete)
+      break;
+    if (elapsedtime >=theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit && !
+        (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit<=0))
       break;
   }
   if (!ComputationComplete)
-  { std::cout << "</div><br><br><br>Your computation has taken " << GetElapsedTimeInSeconds() << " seconds so far.";
+  { std::cout << "</div><br><br><br>Your computation has taken "
+    << elapsedtime << " seconds so far.";
     std::cout << "<br>The maximum allowed computation time is <b>"
-    << theGlobalVariables.MaxAllowedComputationTimeInSeconds
+    << theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit
     << " seconds</b>. Please use an offline version of the calculator. <br><b>Signalling ungraceful exit...</b> ";
     ParallelComputing::SafePointDontCallMeFromDestructors();
     ParallelComputing::controllerSignalPauseUseForNonGraciousExitOnly.SignalPauseToSafePointCallerAndPauseYourselfUntilOtherReachesSafePoint();
@@ -86,7 +91,6 @@ void* RunTimer(void* ptr)
 
 std::string IPAdressCaller;
 
-
 void makeReport(IndicatorWindowVariables& input)
 { static int counter =-1;
   counter++;
@@ -96,9 +100,8 @@ void makeReport(IndicatorWindowVariables& input)
   CGI::OpenFileCreateIfNotPresent(theFile, theParser.indicatorFileNamE, false, true, false);
   std::stringstream outStream;
   theFile << " Elapsed calculator time: " << GetElapsedTimeInSeconds() << " second(s).";
-  theFile << "<br>" << input.StatusString1 << "<br>\n\n";
-  for (int i=0; i<input.ProgressReportStrings.size; i++)
-    theFile << "\n" << input.ProgressReportStrings[i] << "\n<br>\n";
+  for (int i=0; i<input.ProgressReportStringS.size; i++)
+    theFile << "\n" << input.ProgressReportStringS[i] << "\n<br>\n";
   theFile.flush();
   theFile.close();
 }
@@ -160,7 +163,7 @@ int main(int argc, char **argv)
 #endif
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=300;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=2000;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
@@ -196,14 +199,15 @@ int main(int argc, char **argv)
 	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
-  << "Root subalgebras, sl(2)-triples\"> <head> <title>Vector partition calculator updated "
+  << "Root subalgebras, sl(2)-triples\"> <head> <title>vpf version  "
   << __DATE__ << ", " << __TIME__ << "</title>";
   //below follows a script for collapsing and expanding menus
 //  std::cout << "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/dojo/1.6.1/dojo/dojo.xd.js\""
 //  << "></script>";
 //  << " djConfig = \"parseOnLoad: true\"></script>";
 
-  std::cout << "<script src=\"" << theParser.DisplayPathServerBase << "jsmath/easy/load.js\"></script> ";
+  std::cout << "<script src=\"" << theParser.DisplayPathServerBase
+  << "jsmath/easy/load.js\"></script> ";
   std::cout << "\n"
 //  << CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
   << "</head>\n<body onload=\"checkCookie(); updatePreamble();\">\n";
@@ -409,9 +413,9 @@ g_{-2} v_\\lambda\
 //  civilizedInput= "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))";
 //  civilizedInput="PrintSemisimpleSubalgebras{}(F_4)";
 //  civilizedInput="printSlTwoSubalgebrasAndRootSubalgebras{}(F_4)";
-//  civilizedInput="printSlTwoSubalgebras{}(A_2)";
 //  civilizedInput="printSlTwoSubalgebras{}(E_9)";
-//  civilizedInput="PrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(a_3)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -528,8 +532,10 @@ output << "   oRequest.open(\"GET\",sURL,false);\n";
 output << "   oRequest.setRequestHeader(\"User-Agent\",navigator.userAgent);\n";
 output << "   oRequest.send(null)\n";
 output << "   if (oRequest.status==200)\n";
-output << "     newReportString= oRequest.responseText;\n";
-output << "   el = document.getElementById(\"idProgressReport\").innerHTML= \"Refreshing indicator each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+output << "   { newReportString= oRequest.responseText;\n";
+output << "     if (newReportString!=\"\")\n";
+output << "       el = document.getElementById(\"idProgressReport\").innerHTML= \"Attempting indicator refresh each second. Number of seconds: \"+ timeOutCounter+\"<br>Status file content:<br>\" +newReportString;\n";
+output << "   }\n";
 output << "   window.setTimeout(\"progressReport()\",1000);\n";
 output << " }\n";
 output << " </script>\n";

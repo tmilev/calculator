@@ -1103,8 +1103,6 @@ public:
   List<Vectors<Rational> > ExternalAutomorphisms;
   HashedList<Vector<Rational> > RootSubsystem;
   Vectors<Rational> RootsOfBorel;
-  std::string DebugString;
-  void ComputeDebugString(){this->ToString(this->DebugString, true); }
   void ToString(std::string& output, bool displayElements);
   void GetGroupElementsIndexedAsAmbientGroup
   (List<ElementWeylGroup>& output);
@@ -1222,7 +1220,7 @@ public:
   (std::string& output, bool IncludeAlgebraNames)
   ;
   std::string ElementToStrinG
-  (bool IncludeAlgebraNames)
+  (bool IncludeAlgebraNames=false)
   { std::string result;
     this->ElementToStrinG(result, IncludeAlgebraNames);
     return result;
@@ -1588,7 +1586,6 @@ public:
   ;
   void ComputeLProhibitingRelations(GlobalVariables& theGlobalVariables);
   void ComputeAllRootSubalgebrasUpToIso(GlobalVariables& theGlobalVariables, int StartingIndex, int NumToBeProcessed);
-  void MakeProgressReportGenerationSubalgebras(rootSubalgebras& bufferSAs, int RecursionDepth, GlobalVariables& theGlobalVariables, int currentIndex, int TotalIndex);
   void MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables);
   void initForNilradicalGeneration()
   { this->NumSubalgebrasProcessed=0;
@@ -1855,8 +1852,6 @@ public:
   void GetAd(Matrix<Rational> & output, ElementSemisimpleLieAlgebra& e);
   void initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,  Vectors<Rational>& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational> & targetH, Matrix<Rational> & inputFCoeffs, Matrix<Rational> & outputMatrixSystemToBeSolved, Matrix<Rational> & outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
-  void MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables);
-  void MakeSl2ProgressReportNumCycles(int progress, int outOf, GlobalVariables& theGlobalVariables);
   bool IsInTheWeightSupport(Vector<Rational> & theWeight, Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables);
   void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational> & theHighestWeight, GlobalVariables& theGlobalVariables);
   void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational> & theHighestWeight, GlobalVariables& theGlobalVariables);
@@ -2805,12 +2800,15 @@ public:
     return output;
   }
   void AccountSingleWeight
-(Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords, WeylGroup& theWeyl,
- Rational& theMult, CoefficientType& theCoeff, charSSAlgMod<CoefficientType>& outputAccum, Rational& finalCoeff
+(Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords,
+ WeylGroup& theWeyl,
+ Rational& theMult, CoefficientType& theCoeff, charSSAlgMod<CoefficientType>& outputAccum,
+ Rational& finalCoeff
  )
   ;
   std::string TensorAndDecompose
-(MonomialChar<CoefficientType>& other, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners, charSSAlgMod<CoefficientType>& output,
+(MonomialChar<CoefficientType>& other, List<SemisimpleLieAlgebra>& inputOwners,
+ int inputIndexInOwners, charSSAlgMod<CoefficientType>& output,
  GlobalVariables& theGlobalVariables)
    ;
   std::string ToString
@@ -4906,7 +4904,7 @@ bool List<Object>::AddOnTopNoRepetition(const Object& o)
 }
 
 template <class Object>
-inline Object* List<Object>::LastObject()
+inline Object* List<Object>::LastObject()const
 { // <-Registering stack trace forbidden! Multithreading deadlock alert.
   if (this->size<=0)
   { std::cout << "This is a programming error: trying to fetch the last object of an array with "
@@ -7092,6 +7090,7 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
   MonomialGeneralizedVerma<CoefficientType> currentMon;
   output.MakeZero(*this->owneR);
   ElementSumGeneralizedVermas<CoefficientType> buffer;
+  ProgressReport theReport(&theGlobalVariables);
   for (int j=0; j<theUE.size; j++)
   { currentMon.theMonCoeffOne=theUE[j];
 //    std::cout << "<br>currentMon: " << currentMon.theMonCoeffOne.ToString();
@@ -7104,11 +7103,11 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
 //    << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
     reportStream << "reducing mon: " << currentMon.ToString() << ", index" << j+1 << " out of " << theUE.size << "...";
-    theGlobalVariables.MakeProgressReport(reportStream.str(), 2 );
+    theReport.Report(reportStream.str());
     currentMon.ReduceMe(buffer, theGlobalVariables, theRingUnit, theRingZero);
-    reportStream << "done.";
-    theGlobalVariables.MakeProgressReport(reportStream.str(), 2 );
-//    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
+    reportStream << " done.";
+    theReport.Report(reportStream.str());
+    //    std::cout << "<br>buffer: " << buffer.ToString() << " multiplied by " << theUE.theCoeffs[j].ToString();
     buffer*=theUE.theCoeffs[j];
     output+=buffer;
 //    std::cout << " equals: " << buffer.ToString();
@@ -7179,7 +7178,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
 //  std::cout << theMod.ToString();
   //std::cout << "<br>theMod.theModuleWeightsSimpleCoords.size: "
   //<< theMod.theModuleWeightsSimpleCoords.size;
-
+  ProgressReport theReport(&theGlobalVariables);
   CoefficientType theCF;
   for (int l=0; l<theUEelt.size; l++)
   { currentMon=theUEelt[l];
@@ -7189,7 +7188,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     { std::stringstream reportStream;
       reportStream << "accounting monomial " << currentMon.ToString() << " of index " << l+1 << " out of "
       << theUEelt.size << " and letter index " << currentMon.Powers.size-k << " out of " << currentMon.Powers.size << "...";
-      theGlobalVariables.MakeProgressReport(reportStream.str(), 3);
+      theReport.Report(reportStream.str());
       int thePower;
       if (!currentMon.Powers[k].IsSmallInteger(&thePower))
         break;
@@ -7204,7 +7203,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
       currentMon.Powers.size--;
       currentMon.generatorsIndices.size--;
       reportStream << "done!";
-      theGlobalVariables.MakeProgressReport(reportStream.str(), 3);
+      theReport.Report(reportStream.str());
     }
 //    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
@@ -7629,7 +7628,8 @@ std::string MonomialChar<CoefficientType>::ToString
   if (useOmega)
     out << VectorSpaceLetter << "_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
   else
-    out << VectorSpaceLetter << "_{" << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+    out << VectorSpaceLetter << "_{"
+    << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
   if (theFormat!=0)
     theFormat->CustomPlusSign=oldCustomPlus;
   return out.str();
@@ -7735,7 +7735,8 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
 
 template <class CoefficientType>
 bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
-(Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoordS,
+(Vector<CoefficientType>& inputHWfundamentalCoords,
+ HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoordS,
  List<CoefficientType>& outputMultsSimpleCoords, std::string& outputDetails,
  GlobalVariables& theGlobalVariables, int UpperBoundFreudenthal)
 { MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart");
@@ -7767,7 +7768,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
       (hwSimpleCoordsLeviPart, outputDomWeightsSimpleCoordsLeviPart, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
   { std::stringstream errorLog;
     errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
-    << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
+    << UpperBoundFreudenthal
+    << ". Please check out whether LiE's implementation of the Freudenthal "
     << " formula can do your computation.";
     outputDetails=errorLog.str();
     return false;
@@ -7793,6 +7795,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 //std::cout << "Freudenthal eval w.r.t subalgebra: positive root subsystem: " <<  this->RootsOfBorel.ToString();
   Vector<CoefficientType> convertor;
   CoefficientType bufferCoeff;
+  ProgressReport theReport(&theGlobalVariables);
   for (int k=1; k< outputDomWeightsSimpleCoordsLeviPart.size; k++)
   { Explored[k]=true;
     CoefficientType& currentAccum=outputMultsSimpleCoords[k];
@@ -7814,8 +7817,10 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 //        std::cout << "<br> summing over weight: " << currentWeight.ToString();
         if (!Explored[theIndex])
         { std::stringstream errorLog;
-          errorLog << "This is an internal error check. If you see it, that means " << " that the Freudenthal algorithm implementation is "
-          << " wrong (because the author of the implementation was dumb enough to try to write less code than what is "
+          errorLog << "This is an internal error check. If you see it, that means "
+          << " that the Freudenthal algorithm implementation is "
+          << " wrong (because the author of the implementation was dumb enough to"
+          << " try to write less code than what is "
           << " suggested by LiE).";
           outputDetails=errorLog.str();
           return false;
@@ -7840,7 +7845,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of "
     << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
-    theGlobalVariables.MakeStatusReport(out.str());
+    theReport.Report(out.str());
 //    std::cout
   //  << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDomWeightsSimpleCoordsLeviPart.size << " dominant weights in the support.";
  //   theGlobalVariables.MakeStatusReport(out.str());
@@ -7858,7 +7863,8 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
 
 template <class CoefficientType>
 bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
-(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
+(std::string* Report, charSSAlgMod& output, const Selection& splittingParSel,
+ const Selection& ParSelFDInducingPart,
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight");
   std::stringstream out;
@@ -7870,7 +7876,8 @@ bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
   Selection invertedSel;
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
-  complementGroup.MakeParabolicFromSelectionSimpleRoots(this->listOwners->TheObjects[this->indexInOwners].theWeyl, invertedSel, theGlobalVariables,1);
+  complementGroup.MakeParabolicFromSelectionSimpleRoots
+  (this->listOwners->TheObjects[this->indexInOwners].theWeyl, invertedSel, theGlobalVariables,1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ToString(false);
 //  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ToString(false);
@@ -8238,6 +8245,7 @@ bool WeylGroup::FreudenthalEval
   //static double totalTimeSpentOnHashIndexing=0;
 //  static double timeSpentRaisingWeights=0;
   CoefficientType BufferCoeff;
+  ProgressReport theReport(&theGlobalVariables);
   for (int k=1; k<outputDominantWeightsSimpleCoords.size; k++)
   { Explored[k]=true;
     CoefficientType& currentAccum=outputMultsSimpleCoords[k];
@@ -8283,10 +8291,9 @@ bool WeylGroup::FreudenthalEval
     std::stringstream out;
     out << " Computed the multiplicities of " << k+1 << " out of "
     << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
-    theGlobalVariables.MakeStatusReport(out.str());
+    theReport.Report(out.str());
 //    std::cout
 //    << "<hr> Computed the multiplicities of " << k+1 << " out of " << outputDominantWeightsSimpleCoords.size << " dominant weights in the support.";
-    theGlobalVariables.MakeStatusReport(out.str());
 //    std::cout << "<br>time so far: " << theGlobalVariables.GetElapsedSeconds()-startTimer;
 //    std::cout << " of which " << totalTimeSpentOnHashIndexing << " used for hash routines";
 //    std::cout << " of which " << timeSpentRaisingWeights << " used to raise weights";
@@ -8307,8 +8314,10 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   this->RaiseToDominantWeight(highestWeightTrue);
   Vector<CoefficientType> highestWeightFundCoords=this->GetFundamentalCoordinatesFromSimple(highestWeightTrue);
   if (!highestWeightFundCoords.SumCoords().IsSmallInteger())
-  { out << "<hr> The highest weight you gave in simple coordinates: " << highestWeightSimpleCoords.ToString()
-    << " which equals " << highestWeightFundCoords.ToString() << "  in fundamental coordinates "
+  { out << "<hr> The highest weight you gave in simple coordinates: "
+    << highestWeightSimpleCoords.ToString()
+    << " which equals " << highestWeightFundCoords.ToString()
+    << "  in fundamental coordinates "
     << " is not integral dominant.<br>";
     outputDetails=out.str();
     return false;
@@ -8331,8 +8340,9 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
   int numPosRoots=this->RootsOfBorel.size;
   Vector<CoefficientType> currentWeight;
 //  std::cout << "<br>time spend before working cycle: " << theGlobalVariables.GetElapsedSeconds()-startTime;
-  for (int lowestUnexploredHeightDiff=0; lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
-  lowestUnexploredHeightDiff++)
+  for(int lowestUnexploredHeightDiff=0;
+      lowestUnexploredHeightDiff<=theTopHeightSimpleCoords;
+      lowestUnexploredHeightDiff++)
   { //double startCycleTime=theGlobalVariables.GetElapsedSeconds();
     if (upperBoundDominantWeights>0 && numTotalWeightsFound>upperBoundDominantWeights)
       break;
@@ -8355,7 +8365,8 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    std::cout << " Size of current level: " << currentHashes.size;
     outputWeightsSimpleCoords.AddOnTop(currentHashes);
-//    std::cout << ". Time spent after accounting at height level " << lowestUnexploredHeightDiff
+//    std::cout << ". Time spent after accounting at height level "
+//    << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
 //    startCycleTime=theGlobalVariables.GetElapsedSeconds();
     outputWeightsSimpleCoords.AdjustHashes();
@@ -8376,7 +8387,8 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
 
 template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
+   const CoefficientType& theRingUnit)
 { this->MakeZero(theOwner);
   MonomialGeneralizedVerma<CoefficientType> theMon;
   theMon.indexInOwner=TheIndexInOwner;
@@ -9330,7 +9342,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   this->flagIsInitialized=true;
 //  std::cout << "<hr>MakeHW result: <br>" << this->ToString();
 //  this->TestConsistency(theGlobalVariables);
-  theGlobalVariables.MakeStatusReport("Done with module generation");
+  theReport.Report("Done with module generation");
   return true;
 }
 

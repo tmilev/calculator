@@ -34,10 +34,11 @@
 		<Unit filename="vpf9_1.cpp" />
 		<Unit filename="vpf9_2.cpp" />
 		<Unit filename="vpf9_3RationalRadicals.cpp" />
+		<Unit filename="vpf9_4SemisimpleLieAlgebras.cpp" />
 		<Unit filename="vpfHeader1.h" />
-		<Unit filename="vpfHeader1_2" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
+		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfMacros.h" />
 		<Unit filename="wxDrawPanel.cpp" />
@@ -52,7 +53,6 @@
 		<Unit filename="wxParserOutput.h" />
 		<Unit filename="wxStatus.cpp" />
 		<Unit filename="wxStatus.h" />
-		<Unit filename="wxsmith/wxParserframe.wxs" />
 		<Extensions>
 			<envvars />
 			<code_completion />
@@ -62,8 +62,8 @@
 					<wxFrame wxs="wxsmith/wxParserframe.wxs" src="wxParserMain.cpp" hdr="wxParserMain.h" name="wxParserFrame" language="CPP" />
 					<wxFrame wxs="wxsmith/wxDrawPanel.wxs" src="wxDrawPanel.cpp" hdr="wxDrawPanel.h" name="wxDrawPanel" language="CPP" />
 					<wxFrame wxs="wxsmith/wxParserOutput1.wxs" src="wxParserOutput.cpp" hdr="wxParserOutput.h" name="wxParserOutput" language="CPP" />
-					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" name="wxStatus" language="CPP" />
 					<wxFrame wxs="wxsmith/wxPNGdisplay.wxs" src="wxPNGdisplay.cpp" hdr="wxPNGdisplay.h" name="wxPNGdisplay" language="CPP" />
+					<wxFrame wxs="wxsmith/wxStatus.wxs" src="wxStatus.cpp" hdr="wxStatus.h" name="wxStatus" language="CPP" />
 				</resources>
 			</wxsmith>
 			<debugger />

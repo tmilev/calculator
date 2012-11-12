@@ -180,8 +180,6 @@ public:
       (*this)[i].ComputeModuleDecompositionOfMinimalContainingRegularSAs(*this, i, theGlobalVariables);
       */
   }
-  void getZuckermansArrayE8(Vectors<Rational>& output);
-  void MakeProgressReport(int index, int outOf, GlobalVariables& theGlobalVariables);
   void ComputeDebugStringCurrent();
   bool ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex);
   bool ContainsSl2WithGivenHCharacteristic(Vector<Rational>& theHCharacteristic, int* outputIndex);
@@ -202,18 +200,19 @@ class DynkinSimpleType
   SltwoSubalgebras* owner;
   char theLetter;
   int theRank;
-  int longRootOrbitIndex;
-  DynkinSimpleType(): owner(0), theLetter('X'), theRank(-1), longRootOrbitIndex(-1){}
+  int firstSimpleRootOrbitIndex;
+  DynkinSimpleType(): owner(0), theLetter('X'), theRank(-1), firstSimpleRootOrbitIndex(-1){}
   void MakeAone(SltwoSubalgebras& inputOwner)
   { this->owner=&inputOwner;
     this->theLetter='A';
     this->theRank=1;
-    this->longRootOrbitIndex=0;
+    this->firstSimpleRootOrbitIndex=0;
   }
   void operator=(const DynkinSimpleType& other)
-  { this->theLetter=other.theLetter;
+  { this->owner=other.owner;
+    this->theLetter=other.theLetter;
     this->theRank=other.theRank;
-    this->longRootOrbitIndex=other.longRootOrbitIndex;
+    this->firstSimpleRootOrbitIndex=other.firstSimpleRootOrbitIndex;
   }
   void assertIAmInitialized()const
   { if (this->owner==0)
@@ -233,7 +232,7 @@ class DynkinSimpleType
     }
     return
     this->theLetter==other.theLetter && this->theRank==other.theRank &&
-    this->longRootOrbitIndex==other.longRootOrbitIndex;
+    this->firstSimpleRootOrbitIndex==other.firstSimpleRootOrbitIndex;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int) input.theLetter)*2+input.theRank;
@@ -251,9 +250,9 @@ class DynkinSimpleType
       return true;
     if (this->theRank<other.theRank)
       return false;
-    if (this->longRootOrbitIndex>other.longRootOrbitIndex)
+    if (this->firstSimpleRootOrbitIndex>other.firstSimpleRootOrbitIndex)
       return true;
-    if (this->longRootOrbitIndex<other.longRootOrbitIndex)
+    if (this->firstSimpleRootOrbitIndex<other.firstSimpleRootOrbitIndex)
       return false;
     if (this->theLetter=='B' && other.theLetter=='D')
       return true;
@@ -285,11 +284,21 @@ public:
 class CandidateSSSubalgebra
 {
 public:
+  ReflectionSubgroupWeylGroup theWeylSubgroup;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
+  charSSAlgMod<Rational> theChar;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
+    this->theTypes=other.theTypes;
+    this->theChar=other.theChar;
+    this->theWeylSubgroup=other.theWeylSubgroup;
   }
+  bool ComputeChar
+  ( WeylGroup& ownerWeyl
+  )
+  ;
+  std::string ToString(FormatExpressions* theFormat=0)const;
 };
 
 class SemisimpleSubalgebras
@@ -326,11 +335,11 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ExtendCandidatesRecursive
-  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, GlobalVariables* theGlobalVariables)
   ;
   void ExtendOneComponentRecursive
   (const CandidateSSSubalgebra& baseCandidate, const DynkinSimpleType& theNewType,
-   int numVectorsFound, GlobalVariables* theGlobalVariables)
+   GlobalVariables* theGlobalVariables)
   ;
 };
 

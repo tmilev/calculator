@@ -11,12 +11,27 @@ bool CommandList::fSSsubalgebras
     return false;
   SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   std::stringstream out;
-  out << "not implemented";
+  if (ownerSS.GetRank()>4)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
+    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+    return true;
+  }
+  else
+    out << "<b>This code is completely experimental. Use the following printouts on "
+    << "your own risk</b>";
   SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
   theSSsubalgebras.FindTheSSSubalgebras
   (ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
-  out << "<br>" << theSSsubalgebras.ToString();
-
+  FormatExpressions theFormat;
+  std::stringstream out1, out2;
+  out1 << theCommands.PhysicalPathOutputFolder
+  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  out2 << theCommands.DisplayPathOutputFolder
+  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  theFormat.physicalPath=out1.str();
+  theFormat.htmlPathServer=out2.str();
+  out << "<br>" << theSSsubalgebras.ToString(&theFormat);
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

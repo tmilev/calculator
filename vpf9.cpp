@@ -73,7 +73,7 @@ unsigned int Rational::TotalSmallMultiplications=0;
 
 GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
-  this->MaxAllowedComputationTimeInSeconds=1000000;
+  this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->callSystem=0;
 }
 
@@ -731,6 +731,7 @@ FormatExpressions::FormatExpressions()
   this->flagUseCalculatorFormatForUEOrdered=true;
   this->flagUseHTML=true;
   this->flagUseLatex=false;
+  this->flagUsePNG=false;
   this->MatrixColumnVerticalLineIndex=-1;
   this->flagQuasiDiffOpCombineWeylPart=true;
   this->flagMakingExpressionTableWithLatex=false;
@@ -2222,6 +2223,8 @@ void partFractions::initFromOtherPartFractions(partFractions& input, GlobalVaria
 void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
 { if (!this->flagUsingCheckSum)
     return;
+  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
   if (!this->flagDiscardingFractions)
   { this->ComputeOneCheckSum(this->EndCheckSum, theGlobalVariables);
   //partFraction::MakingConsistencyCheck=true;
@@ -2231,27 +2234,23 @@ void partFractions::CompareCheckSums(GlobalVariables& theGlobalVariables)
     tempRat.ToString(tempS1);
   }*/
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum) || this->flagAnErrorHasOccurredTimeToPanic)
-    { std::string tempS1, tempS2;
-      tempS1=this->StartCheckSum.ToString();
-      tempS2=this->EndCheckSum.ToString();
-      std::stringstream out1, out2;
-      out1 << "Starting checksum: " << tempS1;
-      out2 << "  Ending checksum: " << tempS2;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out1.str();
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
-      theGlobalVariables.MakeReport();
+    { std::stringstream out1, out2;
+      out1 << "Starting checksum: " << this->StartCheckSum.ToString();
+      out2 << "  Ending checksum: " << this->EndCheckSum.ToString();
+      theReport1.Report(out1.str());
+      theReport2.Report(out2.str());
     }
     assert(this->StartCheckSum.IsEqualTo(this->EndCheckSum));
-#ifdef CGIversionLimitRAMuse
     if (!this->StartCheckSum.IsEqualTo(this->EndCheckSum))
-    { std::cout<< "<b>Checksum partial fractions failed!!! </b> </BODY></HTML>";
-      std::exit(0);
+    { std::cout
+      << "<b>This is a programmign error. The checksum of the partial fractions failed. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
     else
     { //std::cout<< "Checksum successful";
       //std::cout.flush();
     }
-#endif
   }
 }
 
@@ -2751,21 +2750,23 @@ void partFractions::MakeProgressReportSplittingMainPart(GlobalVariables& theGlob
   if (this->NumRelevantNonReducedFractions!=0)
     out1 << " + " << this->NumRelevantNonReducedFractions << " relevant unreduced ";
   out1 << " out of "<< this->size << " total fractions";
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]= out1.str();
+  ProgressReport theReport1(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
+  ProgressReport theReport3(&theGlobalVariables);
+  theReport1.Report(out1.str());
   out2 << this->NumMonomialsInNumeratorsRelevantFractions << " relevant reduced + "
   << this->NumMonomialsInNumeratorsIrrelevantFractions << " disjoint = "
-  << this->NumMonomialsInNumeratorsRelevantFractions +this->NumMonomialsInNumeratorsIrrelevantFractions
+  << this->NumMonomialsInNumeratorsRelevantFractions + this->NumMonomialsInNumeratorsIrrelevantFractions
   << " out of " << this->NumMonomialsInTheNumerators << " total monomials in the numerators";
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
+  theReport2.Report(out2.str());
   if (this->NumGeneratorsInTheNumerators!=0)
   { out3 << this->NumGeneratorsRelevenatFractions << " relevant reduced + "
     << this->NumGeneratorsIrrelevantFractions << " disjoint = "
     << this->NumGeneratorsIrrelevantFractions +this->NumGeneratorsRelevenatFractions << " out of "
     << this->NumGeneratorsInTheNumerators << " total generators in the numerators";
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
+    theReport3.Report(out3.str());
   } else
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2].clear();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+    theReport3.Report("");
 }
 
 void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariables)
@@ -2773,18 +2774,19 @@ void partFractions::MakeProgressVPFcomputation(GlobalVariables& theGlobalVariabl
   if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
   std::stringstream out2, out3;
+  ProgressReport theReport(&theGlobalVariables);
   out2  << "Processed " << this->NumProcessedForVPFfractions << " out of "
   << this->NumberRelevantReducedFractions << " relevant fractions";
 //  out3  << "Processed " <<" out of " <<this->NumMonomialsInNumeratorsRelevantFractions
 //        << " relevant fractions";
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]= out2.str();
-  //::theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]= out3.str();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  theReport.Report(out2.str());
 }
 
 void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlobalVariables)
 { output.MakeZero();
   Vector<Rational> CheckSumRoot=oneFracWithMultiplicitiesAndElongations::GetCheckSumRoot(this->AmbientDimension);
+  ProgressReport theReport(&theGlobalVariables);
+  ProgressReport theReport2(&theGlobalVariables);
   for(int i=0; i<this->size; i++)
   { Rational currentCheckSum, tempRat;
     this->TheObjects[i].ComputeOneCheckSuM(*this, currentCheckSum, this->AmbientDimension, theGlobalVariables);
@@ -2794,15 +2796,13 @@ void partFractions::ComputeOneCheckSum(Rational& output, GlobalVariables& theGlo
     if (this->flagMakingProgressReport)
     { std::stringstream out;
       out << "Checksum " << i+1 << " out of " << this->size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]= out.str();
-      theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+      theReport.Report(out.str());
     }
   }
   if (this->flagMakingProgressReport)
   { std::stringstream out;
     out << "Checksum: " << output.ToString();
-    theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]= out.str();
-    theGlobalVariables.MakeReport();
+    theReport2.Report(out.str());
   }
 }
 
@@ -2874,20 +2874,19 @@ void partFractions::Run(Vectors<Rational>& input, GlobalVariables& theGlobalVari
 void partFractions::RemoveRedundantShortRoots(GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator)
 { partFraction tempFrac;
   Rational startCheckSum, tempCheckSum, tempCheckSum2, tempCheckSum3;
+  ProgressReport theReport(&theGlobalVariables);
   if (partFraction::MakingConsistencyCheck)
     this->ComputeOneCheckSum(startCheckSum, theGlobalVariables);
   MonomialCollection<partFraction, Polynomial<LargeInt> > buffer, output;
-
   for (int i=0; i<this->size; i++)
     if(this->RemoveRedundantShortRootsIndex(buffer, i, theGlobalVariables, Indicator))
     { i--;
       if (this->flagMakingProgressReport)
       { std::stringstream out;
         out << "Elongating denominator " << i+1 << " out of " << this->size;
-        theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out.str();
-        theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+        theReport.Report(out.str());
       }
-     }
+    }
 }
 
 void partFractions::RemoveRedundantShortRootsClassicalRootSystem(GlobalVariables& theGlobalVariables, Vector<Rational>* Indicator)
@@ -5116,15 +5115,13 @@ void rootSubalgebra::PossibleNilradicalComputation(GlobalVariables& theGlobalVar
   this->MakeProgressReportPossibleNilradicalComputation(&theGlobalVariables, owner, indexInOwner);
 }
 
-void rootSubalgebra::MakeProgressReportGenAutos(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
+void rootSubalgebra::MakeProgressReportGenAutos
+(int progress, int outOf, int found, GlobalVariables& theGlobalVariables)
+{ ProgressReport theReport(&theGlobalVariables);
   std::stringstream out4, out5;
   out5 << progress+1 << " out of " << outOf << " checked; ";
   out5 << found << " found pos. generators";
-  //::theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[4]=out5.str();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  theReport.Report(out5.str());
 }
 
 void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation

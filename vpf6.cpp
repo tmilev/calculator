@@ -5172,10 +5172,10 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
       this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
 //////------Handling naughty expressions------
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
-      if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2)
+      if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
       { if (!this->flagTimeLimitErrorDetected)
           std::cout << "<br><b>Max allowed computational time is "
-          << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2 << ";  so far, "
+          << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2 << ";  so far, "
           << this->theGlobalVariableS->GetElapsedSeconds()-this->StartTimeEvaluationInSecondS
           << " have elapsed -> aborting computation ungracefully.</b>";
         this->flagTimeLimitErrorDetected=true;
@@ -5867,7 +5867,7 @@ std::string CommandList::ToString()
   << "Computation time excludes the time needed to compute the strings that follow below (which might take a while).";
   out2 << CGI::GetHtmlSpanHidableStartsHiddeN(tempStreamTime.str());
   out2 << "<br>Maximum computation time: "
-  << this->theGlobalVariableS->MaxAllowedComputationTimeInSeconds/2
+  << this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2
   << " seconds. ";
   if (this->DepthRecursionReached>0)
     out2 << "<br>Maximum recursion depth reached: " << this->DepthRecursionReached << ".";

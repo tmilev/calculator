@@ -817,7 +817,7 @@ public:
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
 //  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
   int SizeWithoutObjects();
-  inline Object* LastObject();// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  inline Object* LastObject()const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
   int HashFunction()const
   { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, this->size);
@@ -4232,6 +4232,7 @@ public:
   bool flagPassCustomCoeffMonSeparatorToCoeffs;
   bool flagMakingExpressionTableWithLatex;
   bool flagUseLatex;
+  bool flagUsePNG;
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
@@ -6552,18 +6553,13 @@ public:
   Vector<Rational> modifiedRoot;
   bool flagRootIsModified;
   bool Pause;
-  IndicatorWindowVariables(){this->MakeZero(); }
-  bool ProgressReportStringsNeedRefresh;
-  bool StatusString1NeedsRefresh;
-  List<std::string> ProgressReportStrings;
-  std::string StatusString1;
+  IndicatorWindowVariables(){this->init(); }
+  List<std::string> ProgressReportStringS;
   void Assign(IndicatorWindowVariables& right);
-  void MakeZero()
+  void init()
   { this->Busy=false;
     this->Pause=true;
-    this->StatusString1NeedsRefresh=false;
-    this->ProgressReportStringsNeedRefresh=false;
-    this->ProgressReportStrings.SetSize(0);
+    this->ProgressReportStringS.SetSize(0);
     this->NumProcessedMonomialsCurrentFraction=0;
     this->NumProcessedMonomialsTotal=0;
     this->modifiedRoot.MakeZero(1);
@@ -7255,7 +7251,7 @@ private:
   double (*getElapsedTimePrivate)();
   void (*callSystem)(const std::string& theSystemCommand);
 public:
-  double MaxAllowedComputationTimeInSeconds;
+  double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   FormatExpressions theDefaultFormat;
 
   IndicatorWindowVariables theIndicatorVariables;
@@ -7377,23 +7373,6 @@ public:
   { if (this->callSystem!=0)
       this->callSystem(systemCommand);
   }
-  void ClearIndicatorVars()
-  { this->theIndicatorVariables.StatusString1="";
-  }
-  inline void MakeProgressReport(const std::string& input, int stringIndex=0)
-  { if (stringIndex>100)
-      return;
-    this->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-    if (this->theIndicatorVariables.ProgressReportStrings.size<=stringIndex)
-      this->theIndicatorVariables.ProgressReportStrings.SetSize(stringIndex+1);
-    this->theIndicatorVariables.ProgressReportStrings[stringIndex]=input;
-    this->MakeReport();
-  }
-  inline void MakeStatusReport(const std::string& input)
-  { this->theIndicatorVariables.StatusString1NeedsRefresh=true;
-    this->theIndicatorVariables.StatusString1=input;
-    this->MakeReport();
-  }
   inline void MakeReport()
   { if (this->FeedDataToIndicatorWindowDefault!=0)
       this->FeedDataToIndicatorWindowDefault(this->theIndicatorVariables);
@@ -7409,17 +7388,17 @@ public:
   void Report(const std::string& theReport)
   { if (this->pointerGV==0)
       return;
-    this->pointerGV->theIndicatorVariables.ProgressReportStrings[currentLevel]=theReport;
+    this->pointerGV->theIndicatorVariables.ProgressReportStringS[currentLevel]=theReport;
     this->pointerGV->MakeReport();
   }
   void initFromGV(GlobalVariables* theGlobalVariables)
   { this->pointerGV=theGlobalVariables;
     if (this->pointerGV==0)
       return;
-    currentLevel=this->pointerGV->theIndicatorVariables.ProgressReportStrings.size;
-    this->pointerGV->theIndicatorVariables.ProgressReportStrings.SetSize
-    (this->pointerGV->theIndicatorVariables.ProgressReportStrings.size+1);
-    *this->pointerGV->theIndicatorVariables.ProgressReportStrings.LastObject()="";
+    currentLevel=this->pointerGV->theIndicatorVariables.ProgressReportStringS.size;
+    this->pointerGV->theIndicatorVariables.ProgressReportStringS.SetSize
+    (this->pointerGV->theIndicatorVariables.ProgressReportStringS.size+1);
+    *this->pointerGV->theIndicatorVariables.ProgressReportStringS.LastObject()="";
   }
   ProgressReport(GlobalVariables* theGlobalVariables)
   { this->initFromGV(theGlobalVariables);
@@ -7431,7 +7410,7 @@ public:
   ~ProgressReport()
   { if (this->pointerGV==0)
       return;
-    pointerGV->theIndicatorVariables.ProgressReportStrings.size--;
+    pointerGV->theIndicatorVariables.ProgressReportStringS.size--;
   }
 };
 
@@ -7514,7 +7493,6 @@ bool List<Object>::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
         report << "Reading object number " << i+1 << " out of " << ActualListSize;
         if (CappedListSize<ActualListSize)
           report << " capped at " << CappedListSize;
-        theGlobalVariables->theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
         ProgressReport tempReport(theGlobalVariables, report.str());
       }
       theGlobalVariables->theLocalPauseController.SafePointDontCallMeFromDestructors();

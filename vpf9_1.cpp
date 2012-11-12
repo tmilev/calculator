@@ -342,36 +342,36 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
   bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth-1].genK;
   bufferSAs[RecursionDepth].owners=this->ownerArray;
   bufferSAs[RecursionDepth].indexInOwners=this->indexInOwner;
-  //if (RecursionDepth>4)
-   // return;
-  for (int k=0; k<bufferSAs.TheObjects[RecursionDepth-1].kModules.size; k++)
-    if (bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k].IsPositiveOrZero())
-    { bufferSAs.TheObjects[RecursionDepth].genK.AddOnTop(bufferSAs.TheObjects[RecursionDepth-1].HighestWeightsGmodK.TheObjects[k]);
-      bufferSAs.TheObjects[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
-      this->MakeProgressReportGenerationSubalgebras(bufferSAs, RecursionDepth, theGlobalVariables, k, bufferSAs.TheObjects[RecursionDepth-1].kModules.size);
-      int indexSA= this->IndexSubalgebra(bufferSAs.TheObjects[RecursionDepth], theGlobalVariables);
+  ProgressReport theReport(&theGlobalVariables);
+  for (int k=0; k<bufferSAs[RecursionDepth-1].kModules.size; k++)
+    if (bufferSAs[RecursionDepth-1].HighestWeightsGmodK[k].IsPositiveOrZero())
+    { bufferSAs[RecursionDepth].genK.AddOnTop(bufferSAs[RecursionDepth-1].HighestWeightsGmodK[k]);
+      bufferSAs[RecursionDepth].ComputeDynkinDiagramKandCentralizer();
+      std::stringstream out;
+      out << "Included root " << k+1 << " out of " << bufferSAs[RecursionDepth-1].kModules.size
+      << " Total found SAs: " << this->size;
+      theReport.Report(out.str());
+      int indexSA= this->IndexSubalgebra(bufferSAs[RecursionDepth], theGlobalVariables);
       if (indexSA==-1)
-      { bufferSAs.TheObjects[RecursionDepth].ComputeAllButAmbientWeyl();
-        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->size);
-        this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism(bufferSAs, RecursionDepth+1, theGlobalVariables);
+      { bufferSAs[RecursionDepth].ComputeAllButAmbientWeyl();
+        (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(this->size);
+        this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
+        (bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
-        this->TheObjects[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
-      bufferSAs.TheObjects[RecursionDepth].genK.PopIndexSwapWithLast(bufferSAs.TheObjects[RecursionDepth].genK.size-1);
+        (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
+      bufferSAs[RecursionDepth].genK.PopIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);
     }
 }
 
 void rootSubalgebras::MakeProgressReportAutomorphisms(ReflectionSubgroupWeylGroup& theSubgroup, rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
-  std::stringstream out4, out1;
+{ std::stringstream out4, out1;
   out1 << "k_ss: " << theRootSA.theDynkinDiagram.DynkinStrinG << " C(k_ss): " << theRootSA.theCentralizerDiagram.DynkinStrinG;
   out4 << "Num elements ";
   if (theSubgroup.truncated)
     out4 << "truncated ";
   out4 << "group preserving k: " << theSubgroup.size;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[0]=out1.str();
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  ProgressReport theReport(&theGlobalVariables);
+  theReport.Report(out1.str()+out4.str());
 }
 
 void rootSubalgebras::GenerateActionKintersectBIsos(rootSubalgebra& theRootSA, GlobalVariables& theGlobalVariables)
@@ -392,6 +392,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
   this->ComputeNormalizerOfCentralizerIntersectNilradical(theSubgroup, SelectedBasisRoots, theRootSA, theGlobalVariables);
   this->ActionsNormalizerCentralizerNilradical.SetSize(theSubgroup.size-1);
   Vector<Rational> tempRoot;
+  ProgressReport theReport(&theGlobalVariables);
   for(int i=0; i<theSubgroup.size-1; i++)
   { this->ActionsNormalizerCentralizerNilradical.TheObjects[i].SetSize(theRootSA.kModules.size);
     for (int j=0; j<theRootSA.kModules.size; j++)
@@ -408,8 +409,7 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
       out << "Computing action of element " << i+1 << " out of " << theSubgroup.size;
-      theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3] = out.str();
-      theGlobalVariables.MakeReport();
+      theReport.Report(out.str());
     }
   }
 }
@@ -1435,10 +1435,7 @@ void rootSubalgebra::KEnumerationsToLinComb(GlobalVariables& theGlobalVariables)
 }
 
 void IndicatorWindowVariables::Assign(IndicatorWindowVariables& right)
-{ this->ProgressReportStrings=right.ProgressReportStrings;
-  this->ProgressReportStringsNeedRefresh=right.ProgressReportStringsNeedRefresh;
-  this->StatusString1=right.StatusString1;
-  this->StatusString1NeedsRefresh=right.StatusString1NeedsRefresh;
+{ this->ProgressReportStringS=right.ProgressReportStringS;
   this->flagRootIsModified= right.flagRootIsModified;
   this->modifiedRoot=right.modifiedRoot;
 }
@@ -2834,28 +2831,6 @@ void SemisimpleLieAlgebra::GetAd(Matrix<Rational>& output, ElementSemisimpleLieA
   }
 }
 
-void SemisimpleLieAlgebra::MakeSl2ProgressReport(int progress, int found, int foundGood, int DifferentHs, int outOf, GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
-  std::stringstream out2, out3;
-  out2 << "found " << found << " out of " << progress+1 << " processed out of total " << outOf<<" candidates";
-  out3 << foundGood << " good subalgebras realizing " << DifferentHs << " different h's";
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
-void SemisimpleLieAlgebra::MakeSl2ProgressReportNumCycles(  int progress, int outOf,  GlobalVariables& theGlobalVariables)
-{ if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
-    return;
-  std::stringstream out4;
-  out4 << "Searching fixed characteristic: " << progress << " out of " << outOf;
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[3]=out4.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
-}
-
 void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables)
 { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()==0)
     return;
@@ -2863,25 +2838,18 @@ void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Tota
   int x=(i*Total*Total+j*Total+k+1);
   out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[1]=out2.str();
-  theGlobalVariables.theIndicatorVariables.ProgressReportStrings[2]=out3.str();
-  //if (x%100==0)
-  { theGlobalVariables.theIndicatorVariables.ProgressReportStringsNeedRefresh=true;
-  } //else
-  //{ theGlobalVariables.theIndicatorVariables.String2NeedsRefresh=false;
-   // theGlobalVariables.theIndicatorVariables.String3NeedsRefresh=false;
-  //}
-  theGlobalVariables.FeedIndicatorWindow(theGlobalVariables.theIndicatorVariables);
+  ProgressReport theReport(&theGlobalVariables);
+  theReport.Report(out2.str()+out3.str());
 }
 
 void WeylGroup::GenerateRootSubsystem(Vectors<Rational>& theRoots)
 { Vector<Rational> tempRoot;
   int oldsize=theRoots.size;
   for (int i=0; i<oldsize; i++)
-    theRoots.AddOnTopNoRepetition(-theRoots.TheObjects[i]);
+    theRoots.AddOnTopNoRepetition(-theRoots[i]);
   for (int i =0; i<theRoots.size; i++)
     for (int j=0; j<theRoots.size; j++)
-    { tempRoot= theRoots.TheObjects[i]+theRoots.TheObjects[j];
+    { tempRoot= theRoots[i]+theRoots[j];
       if (this->IsARoot(tempRoot))
         theRoots.AddOnTopNoRepetition(tempRoot);
     }
@@ -2994,21 +2962,21 @@ bool rootSubalgebra::GenerateIsomorphismsPreservingBorel(rootSubalgebra& right, 
   tempAutos.initIncomplete(DiagramAutomorphisms.size);
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
   for (int i=0; i<DiagramAutomorphisms.size; i++)
-    tempAutos.MaxMultiplicities.TheObjects[i]= DiagramAutomorphisms.TheObjects[i].size-1;
+    tempAutos.MaxMultiplicities[i]= DiagramAutomorphisms[i].size-1;
   for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
-    tempAutosCentralizer.MaxMultiplicities.TheObjects[i]= CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
+    tempAutosCentralizer.MaxMultiplicities[i]= CentralizerDiagramAutomorphisms[i].size-1;
   tempList.SetSize(this->theDynkinDiagram.sameTypeComponents.size);
   int tempSize=0;
   for (int i=0; i<this->theDynkinDiagram.sameTypeComponents.size; i++)
-  { tempList.TheObjects[i]= this->theDynkinDiagram.sameTypeComponents.TheObjects[i].size;
-    tempSize+=tempList.TheObjects[i];
+  { tempList[i]= this->theDynkinDiagram.sameTypeComponents[i].size;
+    tempSize+=tempList[i];
   }
   permComponents.initPermutation(tempList, tempSize);
   tempList.SetSize(this->theCentralizerDiagram.sameTypeComponents.size);
   tempSize=0;
   for (int i=0; i<this->theCentralizerDiagram.sameTypeComponents.size; i++)
-  { tempList.TheObjects[i]= this->theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
-    tempSize+=tempList.TheObjects[i];
+  { tempList[i]= this->theCentralizerDiagram.sameTypeComponents[i].size;
+    tempSize+=tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI1;

@@ -1182,8 +1182,7 @@ public:
   void ActByElement(ElementWeylGroup& theElement, Vectors<CoefficientType>& input, Vectors<CoefficientType>& output);
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables);
   void ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables);
-  void Assign(const ReflectionSubgroupWeylGroup& other);
-  void operator=(const ReflectionSubgroupWeylGroup& other){ this->Assign(other); }
+  void operator=(const ReflectionSubgroupWeylGroup& other);
 };
 
 template <class CoefficientType>
@@ -1247,8 +1246,9 @@ public:
   void Sort();
   void SwapDynkinStrings(int i, int j);
   bool LetterIsDynkinGreaterThanLetter(char letter1, char letter2);
-  //the below function takes as an input a set of Vectors<Rational> and computes the corredponding Dynkin diagram of the
-  //Vector<Rational>  subsystem. Note: the simleBasisInput is required to be a set of simple Vectors<Rational>. The procedure calls a
+  //the below function takes as an input a set of roots and computes the corredponding Dynkin diagram of the
+  //root  subsystem. Note: the simleBasisInput is required to be a set of simple roots.
+  //The procedure calls a
   //transformation to simple basis on the simpleBasisInput, so your input will get changed if it wasn't
   //simple as required!
   inline void ComputeDiagramTypeModifyInput(Vectors<Rational>& simpleBasisInput, WeylGroup& theWeyl)
@@ -1624,9 +1624,10 @@ public:
   Vectors<Rational> PartitioningRoots;
   Vector<Rational> theRoot;
   //format: each element of thePartitions gives an array whose entries give
-  // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions.TheObjects[0]
-  // would have 2 elements: the first giving the multiplicity of PartitioningRoots.TheObjects[0] and the second - the multiplicity of
-  // PartitioningRoots.TheObjects[1]
+  // the multiplicity of the weights. I.e. if PartitioningRoots has 2 elements, then thePartitions[0]
+  // would have 2 elements: the first giving the multiplicity of PartitioningRoots[0]
+  //and the second - the multiplicity of
+  // PartitioningRoots[1]
   List<List<int> > thePartitions;
   std::string DebugString;
   std::string ToString(bool useHtml);
@@ -1871,10 +1872,13 @@ public:
   int indexDomain;
   int indexRange;
   //Let rk:=Rank(Domain)
-  //format of ImagesSimpleChevalleyGenerators: the first rk elements give the images of the Chevalley generators corresponding to simple positive Vectors<Rational>
-  //the second rk elements give the images of the Chevalley generators corresponding to simple negative Vectors<Rational>
+  //format of ImagesSimpleChevalleyGenerators: the first rk elements give
+  //the images of the Chevalley generators corresponding to simple positive roots
+  //the second rk elements give the images of the Chevalley generators corresponding to simple
+  //negative roots
   List<ElementSemisimpleLieAlgebra> imagesSimpleChevalleyGenerators;
-  //format of ImagesAllChevalleyGenerators: the Generators are given in the same order as the one used in MonomialUniversalEnveloping
+  //format of ImagesAllChevalleyGenerators: the Generators are given in the same order as
+  //the one used in MonomialUniversalEnveloping
   List<ElementSemisimpleLieAlgebra> imagesAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra> domainAllChevalleyGenerators;
   List<ElementSemisimpleLieAlgebra> GmodK;
@@ -1932,12 +1936,14 @@ public:
   SemisimpleLieAlgebra theOwner;
   //the format of the order is arbitrary except for the following requirements:
   //-All elements of the order must be either 1) nilpotent or 2) elements of the Cartan
-  //-Let the number of positive Vectors<Rational> be N and the rank be K. Then the indices N,..., N+K-1 must
+  //-Let the number of positive roots be N and the rank be K. Then the indices N,..., N+K-1 must
   //   correspond to the elements of the Cartan.
   List<ElementSemisimpleLieAlgebra> theOrder;
-  //The order of chevalley generators is as follows. First come negative Vectors<Rational>, then elements of cartan, then positive Vectors<Rational>
+  //The order of chevalley generators is as follows. First come negative roots,
+  //then elements of cartan, then positive Vectors<Rational>
   //The weights are in increasing order
-  //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator in the current coordinates
+  //The i^th column of the matrix gives the coordinates of the i^th Chevalley generator
+  //in the current coordinates
   Matrix<Rational>  ChevalleyGeneratorsInCurrentCoords;
   void AssignGeneratorCoeffOne(int theIndex, ElementSemisimpleLieAlgebra& output){output.operator=(this->theOrder.TheObjects[theIndex]);}
   int GetDisplayIndexFromGeneratorIndex(int GeneratorIndex);
@@ -2057,7 +2063,6 @@ public:
     this->owner=other.owner;
   }
 };
-
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::flagAnErrorHasOccurredTimeToPanic=false;
@@ -2331,12 +2336,16 @@ public:
     this->indexInOwners=inputIndexInOwner;
   }
   //we assume the standard order for being simplified to be Ascending.
-  //this way the positive Vectors<Rational> will end up being in the end, which is very convenient for computing with Verma modules
+  //this way the positive roots will end up being in the end, which is very
+  //convenient for computing with Verma modules
   //format of the order of the generators:
-  // first come the negative Vectors<Rational>, in increasing height, then the elements of the Cartan subalgebra, then the positive Vectors<Rational>, in increasing height
-  //The order of the positive Vectors<Rational> is the same as the order in which Vectors<Rational> are kept in WeylGroup::RootSystem
-  // The order of the negative Vectors<Rational> is reverse to the order in which they are kept in WeylGroup::RootSystem
-  // with the "zero level Vectors<Rational>" - i.e. the elements of the Cartan subalgebra - put in between.
+  // first come the negative roots, in increasing height, then the elements of
+  //the Cartan subalgebra, then the positive roots, in increasing height
+  //The order of the positive roots is the same as the order in which roots are kept
+  //in WeylGroup::RootSystem
+  // The order of the negative roots is reverse to the order in which they are kept in
+  //WeylGroup::RootSystem
+  // with the "zero level roots" - i.e. the elements of the Cartan subalgebra - put in between.
   void Simplify
   (ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0 )
@@ -2563,7 +2572,8 @@ static bool GetBasisFromSpanOfElements
 class ElementWeylAlgebra
 {
 private:
-  //the standard order is as follows. First come the variables, then the differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
+  //the standard order is as follows. First come the variables, then the
+  //differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
   Polynomial<Rational> StandardOrder;
 public:
   //NumVariables must equal 2*StandardOrder.NumVars
@@ -3172,8 +3182,10 @@ public:
   int indexAlgebra;
   List<SemisimpleLieAlgebra>* theAlgebras;
   HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
-  //Note: for some reason, the linker fails to resolve without the explicit template specialization below.
-  //As far as I am concerned this is a bug with either the compiler or the C++ language itself.
+  //Note: for some reason, the linker fails to resolve without the explicit template
+  //specialization below.
+  //[Update:] mae a bug report on this in the gcc bug tracker.
+  //This issue has officially been recognized as a bug. Hope to get a fix soon.
   HashedListSpecialized
   <MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
   theGeneratingWordsNonReducedInt;
@@ -3203,8 +3215,9 @@ public:
   Selection parabolicSelectionNonSelectedAreElementsLevi;
   Selection parabolicSelectionSelectedAreElementsLevi;
   std::string highestWeightVectorNotation;
-  //Note: for some reason, the linker fails to resolve without the explicit template specialization below.
-  //As far as I am concerned this is a bug with either the compiler or the C++ language itself.
+  //Note: for some reason, the linker fails to resolve without the
+  //explicit template specialization below.
+  //[Update:] This is now a recognized gcc bug.
   HashedListSpecialized
   <
   Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>, MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
@@ -3380,7 +3393,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
    void GetGenericUnMinusElt
    (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
    ;
-   //The input of the following function is supposed to be an honest element of the Universal enveloping,
+   //The input of the following function is supposed to be an honest element of the
+   //Universal enveloping,
    //i.e. inputElt is not allowed to have non-small integer exponents.
    bool GetActionGenVermaModuleAsDiffOperator
 (ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<Rational>& output,
@@ -5072,7 +5086,8 @@ void List<Object>::AddOnTop(const Object& o)
     assert(false);
   }
   if (this->size==this->ActualSize)
-    this->ExpandArrayOnTop(this->GetNewSize());
+    this->ExpandArrayOnTop
+    (this->GetNewSizeRelativeToExpectedSize(this->ActualSize+1)- this->size);
   this->TheObjects[size]=o;
   this->size++;
 }
@@ -5139,7 +5154,7 @@ void HashedListReferences<Object>::KillAllElements()
 
 template<class Object>
 bool HashedListReferences<Object>::AddOnTop(const Object& o)
-{ if (this->ContainsObject(o)==-1)
+{ if (this->Contains(o)==-1)
   { this->AddOnTop(o);
     return true;
   }
@@ -7752,7 +7767,7 @@ bool ReflectionSubgroupWeylGroup::FreudenthalEvalIrrepIsWRTLeviPart
   hwSimpleCoordsNilPart=inputHWfundamentalCoords;
   for (int i=0; i<hwSimpleCoordsLeviPart.size; i++)
   { EiVect.MakeEi(hwSimpleCoordsLeviPart.size, i);
-    if (!this->RootsOfBorel.ContainsObject(EiVect))
+    if (!this->RootsOfBorel.Contains(EiVect))
       hwSimpleCoordsLeviPart[i]=theRingZero;
     else
       hwSimpleCoordsNilPart[i]=theRingZero;

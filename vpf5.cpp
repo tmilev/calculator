@@ -1317,13 +1317,15 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   if (InvertedLeviInSmall.CardinalitySelection==0)
     theFinalEigenSpace.MakeEiBasis(this->GetDim());
   for (int i=0; i<InvertedLeviInSmall.CardinalitySelection; i++)
-  { ElementSemisimpleLieAlgebra& currentElt=theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
+  { ElementSemisimpleLieAlgebra& currentElt=
+    theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     //std::cout << "<br>current element is: " << currentElt.ToString();
     MatrixTensor<CoefficientType> currentOp, tempMat;
     currentOp.MakeZero();
     for (int j=0; j<currentElt.size; j++)
     { //std::cout << "<br>fetching action of generator of index " << currentElt[j].theGeneratorIndex;
-      tempMat=this->GetActionGeneratorIndeX(currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
+      tempMat=this->GetActionGeneratorIndeX
+      (currentElt[j].theGeneratorIndex, theGlobalVariables, theRingUnit, theRingZero);
       tempMat*=currentElt.theCoeffs[j];
       currentOp+=tempMat;
     }
@@ -1333,8 +1335,10 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       theReport.Report(tempStream3.str());
     Matrix<CoefficientType> currentOpMat;
     currentOp.GetMatrix(currentOpMat, this->GetDim());
-    currentOpMat.FindZeroEigenSpacE(eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
-      tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1 << " seconds.";
+    currentOpMat.FindZeroEigenSpacE
+    (eigenSpacesPerSimpleGenerator[i], 1, -1, 0, theGlobalVariables);
+      tempStream3 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart1
+      << " seconds.";
       theReport.Report(tempStream3.str());
     if (i==0)
       theFinalEigenSpace.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
@@ -1345,7 +1349,8 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
       tempSpace1=theFinalEigenSpace;
         theReport.Report(tempStream4.str());
       tempSpace2.AssignListListCoefficientType(eigenSpacesPerSimpleGenerator[i]);
-      theFinalEigenSpace.IntersectTwoLinSpaces(tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
+      theFinalEigenSpace.IntersectTwoLinSpaces
+      (tempSpace1, tempSpace2, theFinalEigenSpace, theGlobalVariables);
         tempStream4 << " done in " << theGlobalVariables.GetElapsedSeconds()-timeAtStart2 << " seconds.";
         theReport.Report(tempStream4.str());
     }
@@ -2102,7 +2107,8 @@ bool CommandList::fSplitFDpartB3overG2inner
   ModuleSSalgebra<RationalFunctionOld>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   std::stringstream out;
-  out << "<br>Time elapsed before making B3 irrep: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
+  out << "<br>Time elapsed before making B3 irrep: "
+  << theCommands.theGlobalVariableS->GetElapsedSeconds();
   double timeAtStart=theCommands.theGlobalVariableS->GetElapsedSeconds();
   theMod.SplitFDpartOverFKLeviRedSubalg
   (theG2B3Data.theHmm, theG2B3Data.selSmallParSel, *theCommands.theGlobalVariableS, &theG2B3Data.outputEigenWords,
@@ -2120,9 +2126,11 @@ bool CommandList::fSplitFDpartB3overG2inner
   theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
   (theG2B3Data.outputWeightsFundCoordS);
   theG2B3Data.theAmbientChar.MakeFromWeight
-  (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theG2B3Data.theWeightFundCoords),
+  (theG2B3Data.theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental
+   (theG2B3Data.theWeightFundCoords),
    *theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexRange);
-  theG2B3Data.theSmallCharFDpart.MakeZero(*theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
+  theG2B3Data.theSmallCharFDpart.MakeZero
+  (*theG2B3Data.theHmm.owners, theG2B3Data.theHmm.indexDomain);
   charSSAlgMod<RationalFunctionOld> tempMon;
   for (int i=0; i< theG2B3Data.outputWeightsSimpleCoords.size; i++)
   { Vector<RationalFunctionOld>& currentWeight=theG2B3Data.outputWeightsSimpleCoords[i];

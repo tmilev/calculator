@@ -8801,19 +8801,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateHWMTABilinearForm
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("hwTAAbf",
-   "(UE, UE, (Polynomial,...))",
-   "<b>Experimental, might be hidden or changed in future versions. \
-   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v given in \
-   fundamental coordinates. Let P:M->M\
-   be a projection map onto Cv that maps every weight vector of M of weight different from the \
-   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
-   Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g.",
-    "hwTAAbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
-   'G', 2, false,
-    & ParserNode::EvaluateHWTAABilinearForm
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("taa",
    "(UE)",
    "<b>Experimental, might be hidden or changed in future versions. \

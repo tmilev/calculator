@@ -39,9 +39,11 @@ public:
   void MakeLSpath
   (CommandList& theBoss, SemisimpleLieAlgebra& owner, List<Vector<Rational> >& waypts)
   ;
-
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
+  ;
+  void MakeSSAlgebra
+  (CommandList& theBoss, const Matrix<Rational>& cartanSymmetric)
   ;
   void MakeRational
 (CommandList& theBoss, const Rational& inputRational)
@@ -352,7 +354,7 @@ void MakeVariableNonBounD
   }
   bool HasBoundVariables();
 //  bool IsRationalAtom()const;
-  bool EvaluatesToRational()const;
+  bool EvaluatesToRational(Rational* whichRational=0)const;
   bool IsString()const;
   bool IsElementUE()const;
   bool IsInteger()const;
@@ -490,12 +492,18 @@ class Context
   HashedList<Expression> VariableImages;
   int indexAmbientSSalgebra;
   CommandList* theOwner;
-  Context(CommandList& inputOwner):indexAmbientSSalgebra(-1){this->theOwner=&inputOwner;}
+  Context(CommandList& inputOwner):indexAmbientSSalgebra(-1)
+  { this->theOwner=&inputOwner;
+  }
   Context():indexAmbientSSalgebra(-1),theOwner(0){}
+  Context(const Context& other)
+  { this->operator=(other);
+  }
   void GetFormatExpressions(FormatExpressions& output)const;
   void operator=(const Context& other);
   bool operator==(const Context& other)
-  { return this->VariableImages==other.VariableImages && indexAmbientSSalgebra==other.indexAmbientSSalgebra;
+  { return this->VariableImages==other.VariableImages &&
+    indexAmbientSSalgebra==other.indexAmbientSSalgebra;
   }
   std::string ToString()const;
   static inline unsigned int HashFunction(const Context& input){return input.HashFunction();}

@@ -367,7 +367,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
         }
   SelectedExtraPositiveRoots.size=0;
   for (int i=0; i<RootsWithCharacteristic2.size; i++)
-    if (!simpleBasisSA.ContainsObject(RootsWithCharacteristic2[i]))
+    if (!simpleBasisSA.Contains(RootsWithCharacteristic2[i]))
       SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
   int numRootsChar2 = rootsInPlay.size;
   rootsInPlay.AddListOnTop(SelectedExtraPositiveRoots);
@@ -1233,7 +1233,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   for (int i=0; i<epsCoords.size; i++)
   { Vector<Rational>& currentRoot=epsCoords.TheObjects[i];
     tempS=currentRoot.ToStringEpsilonFormat();
-    if (!epsCoords.ContainsObject(-currentRoot))
+    if (!epsCoords.Contains(-currentRoot))
     { out << tempS << ", ";
       numNilradicalRootSpaces++;
     }
@@ -1468,14 +1468,14 @@ int SemisimpleLieAlgebra::GetLengthStringAlongAlphaThroughBeta(Vector<Rational>&
 { Vector<Rational> tempRoot=beta;
   for (int i=0; ; i++)
   { tempRoot+= alpha;
-    if (!weightSupport.ContainsObject(tempRoot))
+    if (!weightSupport.Contains(tempRoot))
     { distanceToHighestWeight=i;
       break;
     }
   }
   for (int i=0; ; i++)
   { tempRoot-= alpha;
-    if (!weightSupport.ContainsObject(tempRoot))
+    if (!weightSupport.Contains(tempRoot))
       return i;
   }
 //  assert(false);

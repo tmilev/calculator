@@ -3,7 +3,8 @@
 #include "vpfHeader1.h"
 #include "vpfHeader1_2.h"
 
-ProjectInformationInstance ProjectInfoVpf7cpp(__FILE__, "Implementation file intended for small fast changes. ");
+ProjectInformationInstance ProjectInfoVpf7cpp
+(__FILE__, "Implementation file intended for small fast changes. ");
 
 template<class CoefficientType>
 Rational ModuleSSalgebra<CoefficientType>::hwTrace
@@ -58,7 +59,8 @@ Rational ModuleSSalgebra<CoefficientType>::hwTrace
       (oldRight.generatorsIndices[i], oldRight.Powers[i]-1);
       RemainingWeight.MakeZero(theWeyl.GetDim());
       for (int j=i+1; j<oldRight.generatorsIndices.size; j++)
-      { newRight.MultiplyByGeneratorPowerOnTheRight(oldRight.generatorsIndices[j], oldRight.Powers[j]);
+      { newRight.MultiplyByGeneratorPowerOnTheRight
+        (oldRight.generatorsIndices[j], oldRight.Powers[j]);
         RemainingWeight+=theWeyl.RootSystem[oldRight.generatorsIndices[j]]* oldRight.Powers[j];
       }
       RemainingWeight+=this->theHWFDpartSimpleCoordS;
@@ -521,8 +523,8 @@ int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, Glo
   Vector<RationalFunctionOld> theWeight;
   theWeight=weight;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeConst(theNode.impliedNumVars, 1, & theGlobalVariables);
-  RFZero.MakeZero(theNode.impliedNumVars, & theGlobalVariables);
+  RFOne.MakeConst(theNode.impliedNumVars, 1, &theGlobalVariables);
+  RFZero.MakeZero(theNode.impliedNumVars, &theGlobalVariables);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld>& theElt=theNode.theGenVermaElt.GetElement();
   List<ModuleSSalgebra<RationalFunctionOld> >& theMods=theNode.owner->theModulePolys;
@@ -593,7 +595,8 @@ void Lattice::IntersectWithLineGivenBy(Vector<Rational>& inputLine, Vector<Ratio
 
 void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized owner is begin "
+    << "acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -605,7 +608,8 @@ void LittelmannPath::ActByEFDisplayIndex(int displayIndex)
 
 void LittelmannPath::ActByEalpha(int indexAlpha)
 { if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized owner "
+    << "is begin acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -690,7 +694,8 @@ void LittelmannPath::ActByFalpha(int indexAlpha)
 { if (this->Waypoints.size==0)
     return;
   if(this->owner==0)
-  { std::cout << " This is a programming error: LS path without initialized owner is begin acted upon. "
+  { std::cout << " This is a programming error: LS path without initialized "
+    << "owner is begin acted upon. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -921,7 +926,8 @@ std::string LittelmannPath::ElementToStringIndicesToCalculatorOutput
 }
 
 bool LittelmannPath::GenerateOrbit
-(List<LittelmannPath>& output, List<List<int> >& outputOperators, GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
+(List<LittelmannPath>& output, List<List<int> >& outputOperators,
+ GlobalVariables& theGlobalVariables, int UpperBoundNumElts,
  Selection* parabolicNonSelectedAreInLeviPart)
 { HashedList<LittelmannPath> hashedOutput;
   hashedOutput.AddOnTop(*this);
@@ -1352,12 +1358,6 @@ int ParserNode::EvaluateHWMTABilinearForm
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateHWTAABilinearForm
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
@@ -1434,7 +1434,7 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<Polynomial<Rational> >& theUE=ueNode.UEElement.GetElement();
-  Polynomial<Rational>  theRingZero, theRingUnit;
+  Polynomial<Rational> theRingZero, theRingUnit;
   theNode.impliedNumVars=ueNode.impliedNumVars;
   int& numVars= theNode.impliedNumVars;
   theRingZero.MakeZero(numVars);
@@ -1532,64 +1532,6 @@ int ParserNode::EvaluateMakeWeylFromParSel
   return theNode.errorNoError;
 }
 
-std::string Parser::CreateBasicStructureConstantInfoIfItDoesntExist
-(GlobalVariables& theGlobalVariables)
-{ std::stringstream stream1, stream2, stream3;
-  std::stringstream out;
-
-  stream1 << this->PhysicalPathOutputFolder << this->DefaultWeylLetter << this->DefaultWeylRank << "/";
-  std::string PhysicalPathCurrentType=stream1.str();
-
-  stream2 << this->DisplayPathOutputFolder << this->DefaultWeylLetter << this->DefaultWeylRank << "/" << this->DefaultWeylLetter << this->DefaultWeylRank << "table";
-  std::string DisplayNameLieBracketNoEnding= stream2.str();
-
-  stream3 << PhysicalPathCurrentType << this->DefaultWeylLetter << this->DefaultWeylRank << "table";
-  std::string PhysicalNameLieBracketFullPathNoEnding=stream3.str();
-
-  out << " <hr><b>Chevalley-Weyl basis of simple Lie algebra of type " << this->DefaultWeylLetter << this->DefaultWeylRank
-  << "(" << SemisimpleLieAlgebra::GetLieAlgebraName(this->DefaultWeylLetter, this->DefaultWeylRank, true) << ").</b><br>";
-  out << "Notation formats: <button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"showItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); "
-  << "hideItem('ChevalleyWeylBasisEpsFormat'); \">Calculator format</button> ";
-  out << "<button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"hideItem('ChevalleyWeylBasis'); showItem('ChevalleyWeylBasisRootFormat'); "
-  << "hideItem('ChevalleyWeylBasisEpsFormat'); \">Simple basis format</button> ";
-  out << "<button " << CGI::GetStyleButtonLikeHtml()
-  << " onclick=\"hideItem('ChevalleyWeylBasis'); hideItem('ChevalleyWeylBasisRootFormat'); "
-  << "showItem('ChevalleyWeylBasisEpsFormat'); \">Epsilon format</button> ";
-
-  out << "<div id=\"ChevalleyWeylBasis\" ><a href=\""
-  << DisplayNameLieBracketNoEnding << ".tex\">Latex source</a>. <br>\n<img src=\""
-  << DisplayNameLieBracketNoEnding << ".png\"></img></div>";
-
-  out << "<div id=\"ChevalleyWeylBasisRootFormat\" style=\"display: none\"><a href=\""
-  << DisplayNameLieBracketNoEnding << "RootFormat.tex\">Latex source</a>. <br>\n<img src=\""
-  << DisplayNameLieBracketNoEnding << "RootFormat.png\"></img></div>";
-
-  out << "<div id=\"ChevalleyWeylBasisEpsFormat\" style=\"display: none\"><a href=\""
-  << DisplayNameLieBracketNoEnding << "EpsFormat.tex\">Latex source</a>. <br>\n<img src=\""
-  << DisplayNameLieBracketNoEnding << "EpsFormat.png\"></img></div>";
-
-  std::string latexCommandTemp;
-  if (!CGI::FileExists(PhysicalNameLieBracketFullPathNoEnding+".png") )
-  { out << "<br>the file: " << PhysicalNameLieBracketFullPathNoEnding << ".png" << " was just created<br>";
-    std::fstream lieBracketFile1, lieBracketFile2, lieBracketFile3;
-    std::stringstream tempCommand;
-    tempCommand << "mkdir " << PhysicalPathCurrentType;
-    std::string tempS;
-    tempS=tempCommand.str();
-    system(tempS.c_str());
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile1, PhysicalNameLieBracketFullPathNoEnding+".tex", false, true, false);
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile2, PhysicalNameLieBracketFullPathNoEnding+"RootFormat.tex", false, true, false);
-    CGI::OpenFileCreateIfNotPresent(lieBracketFile3, PhysicalNameLieBracketFullPathNoEnding+"EpsFormat.tex", false, true, false);
-    lieBracketFile1 << "\\documentclass{article}\\usepackage{longtable}\n\\begin{document}\\pagestyle{empty}\n"
-    << this->theHmm.theRange().ToString(&theGlobalVariables.theDefaultFormat) << "\n\\end{document}";
-    this->SystemCommands.AddOnTop("latex  -output-directory=" + PhysicalPathCurrentType + " " + PhysicalNameLieBracketFullPathNoEnding +".tex");
-    this->SystemCommands.AddOnTop("dvipng " + PhysicalNameLieBracketFullPathNoEnding + ".dvi -o " + PhysicalNameLieBracketFullPathNoEnding + ".png -T tight");
-  }
-  return out.str();
-}
-
 bool ReflectionSubgroupWeylGroup::DrawContour
 (const Vector<Rational>& highestWeightSimpleCoord, DrawingVariables& theDV, GlobalVariables& theGlobalVariables, int theColor,
  int UpperBoundVertices)
@@ -1669,7 +1611,8 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+(List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
+ const CoefficientType& theRingUnit)
 { assert(TheIndexInOwner<theOwner.size);
   MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
   CoefficientType currentCoeff;
@@ -1690,9 +1633,12 @@ std::string ModuleSSalgebra<CoefficientType>::ToString()const
   out << "<br>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
   out << "<br>in simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
   out << "<br>Rational part highest weight fund. coords:" << this->theHWDualCoordS.ToString();
-  out << "<br>Rational part highest weight simple coords: " << this->theHWFDpartSimpleCoordS.ToString();
-  out << "<br>Type semisimple Lie algebra: " << this->theAlgebras->TheObjects[this->indexAlgebra].GetLieAlgebraName();
-  out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+  out << "<br>Rational part highest weight simple coords: "
+  << this->theHWFDpartSimpleCoordS.ToString();
+  out << "<br>Type semisimple Lie algebra: "
+  << this->theAlgebras->TheObjects[this->indexAlgebra].GetLieAlgebraName();
+  out << "<br>Parabolic selection: "
+  << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
   out << "<br>Character over H: " << this->theCharOverH.ToString();
   out << "<br>Character: " << this->theChaR.ToString();
   out << "<br>Actions generators matrix form (" << this->actionsGeneratorsMaT.size << "): ";
@@ -1721,7 +1667,7 @@ std::string ModuleSSalgebra<CoefficientType>::ToString()const
 }
 
 void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
-{ if (this->FileNames.ContainsObject(fileName))
+{ if (this->FileNames.Contains(fileName))
     return;
   this->FileNames.AddOnTop(fileName);
   this->FileDescriptions.AddOnTop(fileDescription);
@@ -1742,42 +1688,57 @@ std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std:
 
 std::string ProjectInformation::ToString()
 { std::stringstream out;
-  out << "<button " << CGI::GetStyleButtonLikeHtml() << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator (expand/collapse)</button>";
+  out << "<button " << CGI::GetStyleButtonLikeHtml()
+  << " onclick=\"switchMenu('sourceDetails');\" >C++ source of the calculator "
+  << "(expand/collapse)</button>";
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
   for (int i=0; i<this->FileNames.size; i++)
   { out << " <br>\n";
     out << CGI::GetHtmlLinkFromFileName(this->FileNames[i], this->FileDescriptions[i]);
   }
-  out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\"). It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
-  out << " <br>The calculator errors get caught either by 1) in-line asserts() (blank screen), or 2) by Apache/the system (internal server error)."
-  << "  \n  <br> The file input/output is done via std::fstream. <br>The LaTeX'ing is called using std::system() \
-  calls. The LaTeX logs can be found by viewing the calculator page's source. <br> \
-  The html output is hardcoded: either by hand or transformed from a separate .html file using a \
-  micro-tool written for the purpose. ";
+  out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\")."
+  << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";
+  out << " <br>The calculator errors get caught either by 1) in-line asserts() (blank screen), "
+  << "or 2) by Apache/the system (internal server error)."
+  << "  \n  <br> The file input/output is done via std::fstream. "
+  << "<br>The LaTeX'ing is called using std::system() "
+  << " calls. The LaTeX logs can be found by viewing the calculator page's source. <br> "
+  << "The html output is hardcoded. ";
   out << " ";
   out << " \n";
-  out << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> \
-  In order to get the calculator running on your machine you need to do the following. \
-  Simplifying the installation procedure is on our to-do list. \
-  <br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. If you are interested in making the system run on Windows please write us an email. \
-  <br>1) Download the c++ files in the links above. Alternatively you can check out the program's "
+  out << "<hr><b>Installing the calculator on your machine from c++ source. </b><br> "
+  << "In order to get the calculator running on your machine you need to do the following. "
+  << " Simplifying the installation procedure is on our to-do list. "
+  << "<br>0) You need a Linux machine. Tested it only on Ubuntu and OpenSUSE. "
+  << "If you are interested in making the system run on Windows please write us an email. "
+  << "<br>1) Download the c++ files in the links above. Alternatively you "
+  << " can check out the program's "
   << " svn repository. The svn check out command is  &nbsp&nbsp"
   << " svn checkout svn://svn.code.sf.net/p/vectorpartition/code/trunk vectorpartition-code"
   << " &nbsp&nbsp."
   << "<br>2) Put them in a c++ project and make sure the following includes work:"
   << " #include &lt;sys/time.h&gt; #include &lt;unistd.h&gt; #include &lt;pthread.h&gt;. "
   << "They should work by default on almost any Linux distro. "
-  << "<br>3) Build the project to a console application named  &nbsp&nbsp calculator &nbsp&nbsp with default console application settings.  "
-  << "<br>4) Create a folder to contain the server files; assume without loss of generality the so created folder is called "
+  << "<br>3) Build the project to a console application named  &nbsp&nbsp "
+  << "calculator &nbsp&nbsp with default console application settings.  "
+  << "<br>4) Create a folder to contain the server files; assume without loss of "
+  << "generality the so created folder is called "
   << "&nbsp&nbsp ServerBase/    &nbsp&nbsp."
-  << "<br>5) Create folders &nbsp&nbsp ServerBase/cgi-bin  &nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
-  << "<br>6) Enable full read/write access for every user in the folder &nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
-  << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
-  << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> and enable cgi scripts "
+  << "<br>5) Create folders &nbsp&nbsp ServerBase/cgi-bin  "
+  << "&nbsp&nbsp and &nbsp&nbsp ServerBase/output &nbsp&nbsp. "
+  << "<br>6) Enable full read/write access for every user in the folder "
+  << "&nbsp&nbsp ServerBase/output  &nbsp&nbsp. "
+  << "<br>7) Copy the file &nbsp&nbsp calculator  &nbsp&nbsp into &nbsp&nbsp "
+  << "ServerBase/cgi-bin/ &nbsp&nbsp and allow read/execute access to every user."
+  << "<br> 8) Install an <a href=\"http://httpd.apache.org/\">Apache web server</a> "
+  << "and enable cgi scripts "
   << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
-  << "<br>9) Configure the Apache server so the address of physical folder &nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
-  << "<br>10) The basic installation is now complete; test the calculator by running it through your web browser."
-  << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp ServerBase/jsmath/ &nbsp&nbsp.";
+  << "<br>9) Configure the Apache server so the address of physical folder "
+  << "&nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
+  << "<br>10) The basic installation is now complete; test the calculator by "
+  << "running it through your web browser."
+  << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp "
+  << "ServerBase/jsmath/ &nbsp&nbsp.";
   out <<	"</div>";
 
   return out.str();
@@ -1930,9 +1891,12 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
       }
     }
     if (!isGood)
-    { std::cout << "This is either a programming error, or Lemma 3.3, T. Milev, P. Somberg, \"On branching...\""
-      << " is wrong. The question is, which is the more desirable case... The bad apple is element "
-      << this->nilradicalSmall[i].ToString() << " of weight " << this->weightsNilradicalSmall[i].ToString()
+    { std::cout << "This is either a programming error, or Lemma 3.3, "
+      << "T. Milev, P. Somberg, \"On branching...\""
+      << " is wrong. The question is, which is the more desirable case... "
+      << "The bad apple is element "
+      << this->nilradicalSmall[i].ToString() << " of weight "
+      << this->weightsNilradicalSmall[i].ToString()
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -1973,7 +1937,7 @@ std::string branchingData::GetStringCasimirProjector(int theIndex, const Rationa
     { accountedDiffs.AddOnTop(weightDifference);
       if (additionalMultiple!=1)
         formulaStream1 << additionalMultiple.ToString(&this->theFormat);
-      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].ToString(&this->theFormat) <<  "))";
+      formulaStream1 << "(i(\\bar c) - (" << this->theChars[i].ToString(&this->theFormat) << "))";
       found=true;
     }
   }
@@ -2009,7 +1973,8 @@ void ReflectionSubgroupWeylGroup::GetGroupElementsIndexedAsAmbientGroup
 (List<ElementWeylGroup>& output)
 { if (this->ExternalAutomorphisms.size>0)
   { std::cout << "This is  a programming error: a function meant for subgroups that "
-    << " are Weyl groups of Levi parts of parabolics is called on a subgroup that is not of that type. "
+    << " are Weyl groups of Levi parts of parabolics is called on a subgroup that "
+    << "is not of that type. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }

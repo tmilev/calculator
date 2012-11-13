@@ -231,11 +231,11 @@ int main(int argc, char **argv)
 //    std::cout << inputStringNames[i] << " = " << inputStrings[i] << "<br>";
 //  std::cout << "<hr>";
   std::string civilizedInput, inputRankString, inputWeylString;
-  if (inputStringNames.ContainsObject("textInput"))
+  if (inputStringNames.Contains("textInput"))
     civilizedInput= inputStrings[inputStringNames.IndexOfObject("textInput")];
-  if (inputStringNames.ContainsObject("textDim"))
+  if (inputStringNames.Contains("textDim"))
     inputRankString= inputStrings[inputStringNames.IndexOfObject("textDim")];
-  if (inputStringNames.ContainsObject("textType"))
+  if (inputStringNames.Contains("textType"))
     inputWeylString= inputStrings[inputStringNames.IndexOfObject("textType")];
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   List<std::string> optionsType, optionsRank;
@@ -416,6 +416,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="printSlTwoSubalgebras{}(E_9)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(a_3)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(b_3)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -423,7 +425,7 @@ g_{-2} v_\\lambda\
   << theParser.DisplayNameCalculator << "\">\n" ;
   std::cout << GetSelectHTMLStringTEmp
   (optionsType, optionsRank, inputWeylString, inputRankString,
-   inputStringNames.ContainsObject("checkUsePreamble"))
+   inputStringNames.Contains("checkUsePreamble"))
   << tempStreamXX.str();
   std::cout << "\n<br>\n";
   std::string civilizedInputSafish;
@@ -450,7 +452,7 @@ g_{-2} v_\\lambda\
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
   if (civilizedInput!="")
-  { if (inputStringNames.ContainsObject("checkUsePreamble"))
+  { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;
       tempStream << "g:=SemisimpleLieAlgebra{}" << inputWeylString
       << "_" << inputRankString << "; h_{{i}}:=g_{0, i};";

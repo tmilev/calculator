@@ -218,7 +218,7 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<R
         beta1+=(theRel.Alphas.TheObjects[j]);
         if (this->IsARootOrZero(beta1))
         { this->ComputeHighestWeightInTheSameKMod(beta1, tempRoot);
-          if (NilradicalRoots.ContainsObject(beta1))
+          if (NilradicalRoots.Contains(beta1))
           { alpha1=(theRel.Alphas.TheObjects[i]);
             alpha2=(theRel.Alphas.TheObjects[j]);
             theRel.Alphas.SetSize(2);
@@ -911,7 +911,7 @@ bool rootSubalgebra::IsGeneratingSingularVectors(int indexKmod, Vectors<Rational
   { tempRoot=(currentRoot);
     tempRoot+=(NilradicalRoots.TheObjects[i]);
     if (this->IsARootOrZero(tempRoot))
-      if (!NilradicalRoots.ContainsObject(tempRoot))
+      if (!NilradicalRoots.Contains(tempRoot))
         return false;
   }
   return true;
@@ -931,7 +931,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, Ve
         tempRoot+=(nilradicalRoots.TheObjects[j]);
         //tempRoot.ComputeDebugString();
         //theRelation.ComputeDebugString(*this);
-        if ((this->IsARoot(tempRoot) || tempRoot.IsEqualToZero()) &&(!nilradicalRoots.ContainsObject(tempRoot)))
+        if ((this->IsARoot(tempRoot) || tempRoot.IsEqualToZero()) &&(!nilradicalRoots.Contains(tempRoot)))
         { this->ComputeHighestWeightInTheSameKMod(tempRoot, tempRoot);
           //tempRoot.ComputeDebugString();
           tempRoot-=(theRelation.Alphas.TheObjects[i]);
@@ -1835,7 +1835,7 @@ bool coneRelation::IsStrictlyWeaklyProhibiting(rootSubalgebra& owner, Vectors<Ra
   tempRoots=(tempSubgroup.RootSubsystem);
   NilradicalRoots.IntersectWith(tempRoots, NilradicalIntersection);
   for (int i=0; i<owner.HighestWeightsGmodK.size; i++)
-    if (!owner.NilradicalKmods.selected[i] && tempRoots.ContainsObject(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
+    if (!owner.NilradicalKmods.selected[i] && tempRoots.Contains(owner.HighestWeightsGmodK.TheObjects[i]) && owner.IsGeneratingSingularVectors(i, NilradicalIntersection))
       genSingHW.AddOnTop(owner.HighestWeightsGmodK.TheObjects[i]);
   if (owner.ConeConditionHolds(theGlobalVariables, owners, indexInOwner, NilradicalIntersection, genSingHW, false))
     return false;
@@ -1912,7 +1912,7 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
           { this->BetaCoeffs.PopIndexSwapWithLast(remainingIndex);
             this->Betas.PopIndexSwapWithLast(remainingIndex);
           }
-          assert(NilradicalRoots.ContainsObject(tempRoot));
+          assert(NilradicalRoots.Contains(tempRoot));
           hasChanged=true;
         }
       }
@@ -1924,11 +1924,11 @@ bool coneRelation::CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& Nilrad
   { int tempI= owner.HighestWeightsGmodK.IndexOfObject(this->Alphas.TheObjects[i]);
     if (tempI==-1)
       return false;
-    if (NilradicalRoots.ContainsObject(this->Alphas.TheObjects[i]))
+    if (NilradicalRoots.Contains(this->Alphas.TheObjects[i]))
       return false;
   }
   for (int i=0; i<this->Betas.size; i++)
-    if (!NilradicalRoots.ContainsObject(this->Betas.TheObjects[i]))
+    if (!NilradicalRoots.Contains(this->Betas.TheObjects[i]))
       return false;
   return true;
 }
@@ -2719,8 +2719,7 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
           << "<br>g123= " << g123.ToString(&theFormat) << "<br>g231="
           << g231.ToString(&theFormat)
           << "<br>g312=" << g312.ToString(&theFormat) << "<br>"
-          << " Please debug " << CGI::GetHtmlLinkFromFileName(__FILE__)
-          << " line " << __LINE__ << ". ";
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
           return false;
         }

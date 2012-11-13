@@ -287,16 +287,27 @@ public:
   ReflectionSubgroupWeylGroup theWeylSubgroup;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
-  charSSAlgMod<Rational> theChar;
+  Polynomial<Rational> theCharFundamentalCoords;
+  Matrix<Rational> theSymmetricCartanScaled;
+  Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;
-    this->theChar=other.theChar;
+    this->theCharFundamentalCoords=other.theCharFundamentalCoords;
     this->theWeylSubgroup=other.theWeylSubgroup;
+    this->theSymmetricCartanScaled=other.theSymmetricCartanScaled;
+    this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
   }
+  void AddTypeIncomplete(const DynkinSimpleType& theNewType);
+  void AddHincomplete
+  (WeylGroup& ownerWeyl, const Vector<Rational>& theH)
+  ;
   bool ComputeChar
-  ( WeylGroup& ownerWeyl
-  )
+(WeylGroup& ownerWeyl, List<SemisimpleLieAlgebra>& owners, int indexInOwners)
+
+  ;
+  bool isGoodForTheTop
+  (WeylGroup& ownerWeyl, const Vector<Rational>& Hnew)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
 };
@@ -338,7 +349,7 @@ public:
   (const CandidateSSSubalgebra& baseCandidate, GlobalVariables* theGlobalVariables)
   ;
   void ExtendOneComponentRecursive
-  (const CandidateSSSubalgebra& baseCandidate, const DynkinSimpleType& theNewType,
+  (const CandidateSSSubalgebra& baseCandidate,
    GlobalVariables* theGlobalVariables)
   ;
 };

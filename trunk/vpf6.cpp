@@ -442,10 +442,14 @@ bool Expression::EvaluatesToAtom()const
   return this->theOperation!= this->theBoss->opVariableBound();
 }
 
-bool Expression::EvaluatesToRational()const
+bool Expression::EvaluatesToRational(Rational* whichRational)const
 { if (!this->EvaluatesToAtom())
     return false;
-  return this->GetAtomicValue().IsOfType<Rational>();
+  if (! this->GetAtomicValue().IsOfType<Rational>())
+    return false;
+  if (whichRational!=0)
+    *whichRational=this->GetAtomicValue().GetValuE<Rational>();
+  return true;
 }
 
 bool Expression::EvaluatesToVariableNonBound()const
@@ -905,10 +909,17 @@ void Data::MakeString
 
 void Data::MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
+{ WeylGroup tempW;
+  tempW.MakeArbitrary(WeylLetter, WeylRank);
+  this->MakeSSAlgebra(theBoss, tempW.CartanSymmetric);
+}
+
+void Data::MakeSSAlgebra
+  (CommandList& theBoss, const Matrix<Rational>& cartanSymmetric)
 { this->owner=&theBoss;
   this->type=this->typeSSalgebra;
   SemisimpleLieAlgebra tempSS;
-  tempSS.theWeyl.MakeArbitrary(WeylLetter, WeylRank);
+  tempSS.theWeyl.CartanSymmetric=cartanSymmetric;
   this->theIndex=theBoss.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSS);
   Context newContext;
   newContext.indexAmbientSSalgebra=this->theIndex;
@@ -3380,54 +3391,114 @@ bool CommandList::fWeylOrbit
 bool CommandList::fSSAlgebra
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  std::stringstream errorStream;
-  errorStream << "Error: the simple Lie algebra takes as argument of the form VariableNonBound_Data "
-    << " (in mathematical language Type_Rank). Instead I received " << theExpression.ToString()
-    << ". The cpp code is located at file "
-    << __FILE__ << " line " <<  __LINE__ << ".";
-  if (theExpression.children.size!=2)
-  { errorStream << " The input of the function does not have two arguments";
-    return theExpression.SetError(errorStream.str());
+  MacroRegisterFunctionWithName("CommandList::fSSAlgebra");
+  if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, theExpression, comments))
+    return theExpression.SetError
+    ("Failed to extract the semismiple Lie algebra type from " + theExpression.ToString());
+  if (theExpression.errorString!="")
+    return true;
+  if (!theExpression.EvaluatesToAtom())
+  { std::cout << "This is a programming error: I called successfully function fPolynomial, "
+    << " but the output does not evaluate to an atom (polynomial). "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
-  Expression& typeE=theExpression.children[0];
-  Expression& rankE=theExpression.children[1];
-  if (!rankE.EvaluatesToSmallInteger() || !typeE.EvaluatesToVariableNonBound())
-  { errorStream << "Error: to create a semisimple Lie algebra I need input similar to something like A_3, "
-    << " where the first letter indicates type and the second expression must be a small positive integer indicating rank. Instead, I got "
-    << theExpression.ToString() << ".";
-    return theExpression.SetError(errorStream.str());
+  FormatExpressions theFormat;
+  Polynomial<Rational> theType=
+  theExpression.GetAtomicValue().GetValuE< Polynomial<Rational> > ();
+  Context theContext=theExpression.GetAtomicValue().GetContext();
+  theContext.GetFormatExpressions(theFormat);
+  Matrix<Rational> theCartanSymmetric;
+  theCartanSymmetric.init(0,0);
+  WeylGroup tempW;
+  for (int i=0; i<theType.size; i++)
+  { MonomialP& currentMon=theType[i];
+    int variableIndex;
+    if (!currentMon.IsOneLetterFirstDegree(variableIndex))
+      return theExpression.SetError
+      ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat));
+    Expression typeE= theContext.VariableImages[variableIndex];
+    if (typeE.children.size!=2)
+      return theExpression.SetError
+      ("The monomial "+ currentMon.ToString(&theFormat)+
+       " appears not to be a Dynkin simple type ");
+    Expression rankE;
+    Expression lengthE;
+    Rational firstRootLength;
+    bool foundLengthFromExpression=false;
+    if (typeE.theOperation==theCommands.opThePower())
+    { lengthE=typeE.children[1];
+      typeE.AssignChild(0);
+      foundLengthFromExpression=true;
+    }
+    if (typeE.theOperation==theCommands.opApplyFunction())
+    { rankE=typeE.children[1];
+      typeE.AssignChild(0);
+    }
+    if (typeE.theOperation==theCommands.opThePower())
+    { lengthE=typeE.children[1];
+      typeE.AssignChild(0);
+      foundLengthFromExpression=true;
+    }
+    if (foundLengthFromExpression)
+    { if (!lengthE.EvaluatesToRational(&firstRootLength))
+        return theExpression.SetError
+        ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
+      if (firstRootLength<=0)
+        return theExpression.SetError
+        ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
+    }
+    if (!typeE.EvaluatesToAtom())
+      return theExpression.SetError
+      ("I couldn't extract a type letter from "+ currentMon.ToString(&theFormat));
+    const VariableNonBound& theTypeName=typeE.GetAtomicValue().GetValuE<VariableNonBound>();
+    if (theTypeName.theName.size()!=1)
+      return theExpression.SetError
+      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
+        Instead, it is "+ theTypeName.theName + "; error while processing "
+       + currentMon.ToString(&theFormat));
+    char theWeylLetter=theTypeName.theName[0];
+    if (theWeylLetter=='a') theWeylLetter='A';
+    if (theWeylLetter=='b') theWeylLetter='B';
+    if (theWeylLetter=='c') theWeylLetter='C';
+    if (theWeylLetter=='d') theWeylLetter='D';
+    if (theWeylLetter=='e') theWeylLetter='E';
+    if (theWeylLetter=='f') theWeylLetter='F';
+    if (theWeylLetter=='g') theWeylLetter='G';
+    if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C'
+          || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F'
+          || theWeylLetter=='G'))
+      return theExpression.SetError
+      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing "
+       + currentMon.ToString(&theFormat));
+    int theRank;
+    if (!rankE.EvaluatesToSmallInteger(&theRank))
+      return theExpression.SetError
+      ("I wasn't able to extract rank from " + currentMon.ToString(&theFormat));
+    if (theRank<1 || theRank>8)
+      return theExpression.SetError
+      ("The rank of a simple Lie algebra must be between 1 and 8; error while processing "
+       + currentMon.ToString(&theFormat));
+    tempW.MakeArbitrary(theWeylLetter, theRank);
+    if (foundLengthFromExpression)
+    { firstRootLength/=tempW.CartanSymmetric(0,0);
+      tempW.CartanSymmetric*=firstRootLength;
+    }
+    theCartanSymmetric.DirectSumWith(tempW.CartanSymmetric);
   }
-  int theRank=1;
-  if (!rankE.GetAtomicValue().IsSmallInteger(&theRank))
-  { errorStream << "The rank of a Lie algebra must be a small integer.";
-    return theExpression.SetError(errorStream.str());
-  }
-  if (theRank<1 || theRank>8)
-  { errorStream << "The rank of a simple Lie algebra must be between 1 and 8; you entered "
-    << theRank << " instead.";
-    return theExpression.SetError(errorStream.str());
-  }
-  const VariableNonBound& theTypeName=typeE.GetAtomicValue().GetValuE<VariableNonBound>();
-  if (theTypeName.theName.size()!=1)
-  { errorStream << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G. Instead, it is "
-    << theTypeName.theName << ".";
-    return theExpression.SetError(errorStream.str());
-  }
-  char theWeylLetter=theTypeName.theName[0];
-  if (theWeylLetter=='a') theWeylLetter='A';
-  if (theWeylLetter=='b') theWeylLetter='B';
-  if (theWeylLetter=='c') theWeylLetter='C';
-  if (theWeylLetter=='d') theWeylLetter='D';
-  if (theWeylLetter=='e') theWeylLetter='E';
-  if (theWeylLetter=='f') theWeylLetter='F';
-  if (theWeylLetter=='g') theWeylLetter='G';
-  if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
-  { errorStream << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.";
-    return theExpression.SetError(errorStream.str());
+  if (theCartanSymmetric.NumCols>20)
+  { std::stringstream out;
+    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+    << " If you would like to relax this limitation edit file " << __FILE__ << " line "
+    << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
+    << " table of RAM memory, so beware the computational risks. "
+    << " Alternatively, you may want to implement a sparse structure constant table "
+    << "(write me an email if you want to do that, I will help you). ";
+    return theExpression.SetError(out.str());
   }
   int oldSize=theCommands.theObjectContainer.theLieAlgebras.size;
   Data tempData;
-  tempData.MakeSSAlgebra(theCommands, theWeylLetter, theRank);
+  tempData.MakeSSAlgebra(theCommands, theCartanSymmetric);
   SemisimpleLieAlgebra& theSSalgebra = tempData.GetAmbientSSAlgebra();
   theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
   std::stringstream out;
@@ -3567,6 +3638,7 @@ bool CommandList::fSSAlgebra
     theExpression.children.SetSize(0);
   } else
     theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
 }
 
@@ -4967,7 +5039,8 @@ template <class dataType>
 bool CommandList::EvaluatePMTDtreeFromContextRecursive
 (dataType& output, const Context& inputContext,
  const Expression& theInput, std::stringstream* errorLog)
-{ RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
+{ MacroRegisterFunctionWithName("CommandList::EvaluatePMTDtreeFromContextRecursive");
+  RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { if (errorLog!=0)
       *errorLog << "Max recursion depth of " << this->MaxRecursionDeptH

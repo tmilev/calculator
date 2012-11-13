@@ -413,7 +413,7 @@ bool WeylGroup::HasStronglyPerpendicularDecompositionWRT
   if (theSet.size==0)
     return false;
   if (output.size==0)
-  { if (theSet.ContainsObject(input))
+  { if (theSet.Contains(input))
     { output.SetSize(1);
       *output.LastObject()=input;
       outputCoeffs.SetSize(1);
@@ -4096,15 +4096,18 @@ void WeylGroup::ComputeRho(bool Recompute)
     this->rho.TheObjects[i].DivideByInteger(2);
 }
 
-void ReflectionSubgroupWeylGroup::Assign(const ReflectionSubgroupWeylGroup& other)
+void ReflectionSubgroupWeylGroup::operator=(const ReflectionSubgroupWeylGroup& other)
 { this->::HashedList<ElementWeylGroup>::operator=(other);
   this->simpleGenerators=(other.simpleGenerators);
   this->ExternalAutomorphisms=(other.ExternalAutomorphisms);
   this->AmbientWeyl=(other.AmbientWeyl);
+  this->RootSubsystem=other.RootSubsystem;
+  this->RootsOfBorel=other.RootsOfBorel;
 }
 
 void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
-{ this->RootSubsystem.Clear();
+{ MacroRegisterFunctionWithName("ReflectionSubgroupWeylGroup::ComputeRootSubsystem");
+  this->RootSubsystem.Clear();
   this->RootSubsystem.AddOnTop(this->simpleGenerators);
   this->RootSubsystem.SetExpectedSize(100);
   Vector<Rational> currentRoot;
@@ -4119,7 +4122,14 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
   tempRoots=(this->RootSubsystem);
   tempRoots.QuickSortAscending();
   this->RootSubsystem=(tempRoots);
-  assert(this->RootSubsystem.size%2==0);
+  if (this->RootSubsystem.size%2!=0)
+  { std::cout << "This is a programming error. I am getting that the number of weights of "
+    << " a root system is odd. The generating set of simple weights is "
+    << this->simpleGenerators.ToString()
+    << ", and the generated weight subsystem is " << tempRoots.ToString()
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   int numPosRoots=this->RootSubsystem.size/2;
   this->RootsOfBorel.SetSize(numPosRoots);
   for (int i=0; i<numPosRoots; i++)
@@ -4907,7 +4917,7 @@ bool rootSubalgebra::RootsDefineASubalgebra(Vectors<Rational>& theRoots)
     { tempRoot=(theRoots[i]);
       tempRoot+=(theRoots[j]);
       if (this->IsARoot(tempRoot))
-        if (!theRoots.ContainsObject(tempRoot))
+        if (!theRoots.Contains(tempRoot))
           return false;
     }
   }
@@ -5266,7 +5276,7 @@ int rootSubalgebra::NumRootsInNilradical()
 
 int rootSubalgebra::GetIndexKmoduleContainingRoot(Vector<Rational>& input)
 { for (int i=0; i<this->kModules.size; i++)
-    if (this->kModules[i].ContainsObject(input))
+    if (this->kModules[i].Contains(input))
       return i;
   return -1;
 }

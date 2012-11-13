@@ -570,7 +570,7 @@ public:
         return i;
     return -1;
   }
-  inline bool ContainsObject(const Object& o)
+  inline bool Contains(const Object& o)
   { return this->IndexInList(o)!=-1;
   }
   void SetSize(int theSize);
@@ -752,9 +752,6 @@ public:
       return 2;
     return (expectedSize*4)/3+1;
   }
-  inline int GetNewSize()const
-  { return this->GetNewSizeRelativeToExpectedSize(this->ActualSize);
-  }
   void SetExpectedSize(int theSize)
   { if ((this->ActualSize)*5/6<theSize)
       this->ReservE(this->GetNewSizeRelativeToExpectedSize(theSize));
@@ -808,14 +805,16 @@ public:
   { output= this->ToString(theFormat);
   }
   int IndexOfObject(const Object& o) const;
-  bool ContainsObject(const Object& o){ return this->IndexOfObject(o)!=-1; }
+  bool Contains(const Object& o)const
+  { return this->IndexOfObject(o)!=-1;
+  }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}
   void WriteToFile(std::fstream& output){this->WriteToFile(output, 0, -1);}
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables){this->WriteToFile(output, theGlobalVariables, -1);}
   void WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
-//  inline bool ContainsObject(Object& o){return this->ContainsObject(o)!=-1; };
+//  inline bool Contains(Object& o){return this->Contains(o)!=-1; };
   int SizeWithoutObjects();
   inline Object* LastObject()const;// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void ReleaseMemory();
@@ -1092,7 +1091,6 @@ private:
   void AssignLight(const ListLight<Object>& from);
   void SetSize(int theSize);
   int IndexOfObject(const Object& o);
-  bool ContainsObject(const Object& o);
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
 protected:
@@ -1562,7 +1560,7 @@ public:
       }
     return Result;
   }
-  inline Element& operator()(int i, int j)
+  inline Element& operator()(int i, int j)const
   { if (i<0  || i>=this->NumRows || j<0 || j>this->NumCols)
     { std::cout << "This is a programming error: requesting row, column indexed"
       << " by " << i+1 << " and " << j+1 << " but I am a matrix with "
@@ -1689,7 +1687,7 @@ void NonPivotPointsToEigenVector
   void FindZeroEigenSpacE
   (List<List<Element> >& output, const Element& theRingUnit, const Element& theRingMinusUnit, const Element& theRingZero, GlobalVariables& theGlobalVariables)
 ;
-  void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero);
+  void DirectSumWith(const Matrix<Element>& m2, const Element& theRingZero=0);
   inline bool operator==(const Matrix<Element>& other)const
   { if (this->NumRows!=other.NumRows || this->NumCols!=other.NumCols)
       return false;
@@ -4443,17 +4441,26 @@ public:
     return this->IsOneLetterFirstDegree(tempInt);
   }
   bool IsOneLetterFirstDegree(int& whichLetter)const
-  { whichLetter=-1;
+  { Rational whichDegree;
+    if (!this->IsOneLetterNthDegree(&whichLetter, &whichDegree))
+      return false;
+    return whichDegree==1;
+  }
+  bool IsOneLetterNthDegree(int* whichLetter=0, Rational* whichDegree=0)const
+  { int tempI1;
+    if (whichLetter==0)
+      whichLetter=&tempI1;
+    *whichLetter=-1;
     for (int i=0; i<this->monBody.size; i++)
-      if (this->monBody[i]==1)
-      { if (whichLetter==-1)
-          whichLetter=i;
+      if (this->monBody[i]!=0)
+      { if (whichDegree!=0)
+          *whichDegree=this->monBody[i];
+        if ((*whichLetter)==-1)
+          *whichLetter=i;
         else
           return false;
-      } else
-        if (this->monBody[i]!=0)
-          return false;
-    return whichLetter!=-1;
+      }
+    return (*whichLetter)!=-1;
   }
   template <class Element>
   void Substitution

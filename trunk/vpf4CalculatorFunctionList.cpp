@@ -11,20 +11,28 @@ void CommandList::initPredefinedVars()
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddNonBoundVarMustBeNew
   ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
-   "Creates a simple Lie algebra. Will be changed to creating a semisimple Lie algebra in the foreseeable future. \
-   Creates a function that returns the elements of a simple Lie algebra with Weyl type and rank \
-   given in the format WeylLetter_Rank.  \
-   Elements of the cartan are addressed as arguments of the form (0,s), root system generators are addressed \
-   with one index only. ", "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
+   "Creates a semisimple Lie algebra. \
+   The type of the semisimple Lie algebra is given in one of two formats:\
+   either format such as A_3, or format such as A^2_3 (note that A_3^2 will not work). \
+   The format A_3 means a Lie algebra type with default root lengths. \
+   The format A^5_3 means a Lie algebra in which the first root has squared length 5.\
+   In this way, the types A_6, B_6, C_6, D_6, E_6, G_2 are a short-hand for\
+   A^2_6, B^2_6, C^2_6, D^2_6, E^2_6, G^2_2. The type F_4 is short-hand for\
+   F^4_4.<br><br> A semisimple Lie algebra is treated like a function \
+   that returns the elements of a simple Lie algebra.  \
+   Elements of the cartan are addressed as arguments of the form (0,s), root system \
+   generators are addressed \
+   with one index only. ",
+   "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
   ("printSemisimpleLieAlgebra", & this->fSSAlgebraVerbose, "",
-   "Same as SemisimpleLieAlgebra but creates in addition a (quite detailed) printout with information about \
+   "Creates a quite detailed \
+   printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
-   In addition, this function creates a graphics of the root system. \
-   The printout is shown in the \"comments\" column to the \
-   right of the calculator input. <b>Warning</b> the verbose printout is quite heavy: \
-   for E_8 it puts the netbook on which the calculator is developed to sleep.",
-   "printSemisimpleLieAlgebra{}F_4;");
+   In addition, this function creates a graphics of the root system. Warning. \
+   For E_8 the printout is so heavy it  \
+   puts the netbook on which the calculator is developed to sleep.",
+   "printSemisimpleLieAlgebra{}(A^3_2+G^5_2);");
   this->AddNonBoundVarMustBeNew
   ("Polynomial", & this->fPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",

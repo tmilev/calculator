@@ -3414,6 +3414,7 @@ bool CommandList::fSSAlgebra
   DynkinType dynkinType;
   DynkinSimpleType simpleComponent;
   dynkinType.MakeZero();
+  char theWeylLetter='X';
   for (int i=0; i<theType.size; i++)
   { MonomialP& currentMon=theType[i];
     int variableIndex;
@@ -3460,7 +3461,7 @@ bool CommandList::fSSAlgebra
       ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
         Instead, it is "+ theTypeName.theName + "; error while processing "
        + currentMon.ToString(&theFormat));
-    char theWeylLetter=theTypeName.theName[0];
+    theWeylLetter=theTypeName.theName[0];
     if (theWeylLetter=='a') theWeylLetter='A';
     if (theWeylLetter=='b') theWeylLetter='B';
     if (theWeylLetter=='c') theWeylLetter='C';
@@ -3518,6 +3519,7 @@ bool CommandList::fSSAlgebra
   Data tempData;
   tempData.MakeSSAlgebra(theCommands, theCartanSymmetric);
   SemisimpleLieAlgebra& theSSalgebra = tempData.GetAmbientSSAlgebra();
+  theSSalgebra.theWeyl.WeylLetter=theWeylLetter;
   theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
   std::stringstream out;
   if (oldSize<theCommands.theObjectContainer.theLieAlgebras.size)

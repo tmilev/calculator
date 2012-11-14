@@ -3487,6 +3487,81 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
     }
 }
 
+Rational DynkinType::GetSizeWeylByFormula()const
+{ Rational result=1;
+  Rational tempRat;
+  for (int i=0; i<this->size; i++)
+  { tempRat=WeylGroup::GetSizeWeylByFormula((*this)[i].theLetter, (*this)[i].theRank);
+    tempRat.RaiseToPower(this->theCoeffs[i]);
+    result*=tempRat;
+  }
+  return result;
+}
+
+std::string DynkinSimpleType::ToString()const
+{ std::stringstream out;
+  out << theLetter << "^{"
+  << this->lengthFirstSimpleRootSquared << "}";
+  if (theRank>=10)
+    out << "_{" << theRank << "}";
+  else
+    out << "_" << theRank;
+//  if (!(*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared.IsEqualTo
+//      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
+  return out.str();
+}
+
+void DynkinSimpleType::operator++(int)
+{ if (this->theRank==1)
+  { this->theRank++;
+    return;
+  }
+  if (this->theLetter=='A')
+  { if (this->theRank>=4)
+      this->theLetter='D';
+    else
+      this->theLetter='B';
+    return;
+  }
+  if (this->theLetter=='D')
+  { this->theLetter='B';
+    return;
+  }
+  if (this->theLetter=='B')
+  { if (this->theRank>=3)
+      this->theLetter='C';
+    else
+      this->theLetter='G';
+    return;
+  }
+  if (this->theLetter=='C')
+  { if (this->theRank==4)
+    { this->theLetter='F';
+      return;
+    }
+    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
+    { this->theLetter='F';
+      return;
+    }
+    this->theLetter='A';
+    this->theRank++;
+    return;
+  }
+  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
+  { this->theRank++;
+    this->theLetter='A';
+    return;
+  }
+  std::cout << "This is a programming error. This is a portion of code that should "
+  << "never be reached. Something has gone very wrong. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
+}
+
+bool DynkinSimpleType::operator<(int otherRank)const
+{ return this->theRank<otherRank;
+}
+
 void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement)
 {  Rational coefficient, tempRat;
   coefficient.Assign(DualSpaceElement.TheObjects[index]);
@@ -3561,7 +3636,6 @@ void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors
 
 void WeylGroup::operator=(const WeylGroup& right)
 { this->WeylLetter=right.WeylLetter;
-  this->LongRootLength.Assign(right.LongRootLength);
 //  this->ShortRootLength.Assign(right.ShortRootLength);
 //  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
 //  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
@@ -3575,6 +3649,7 @@ void WeylGroup::operator=(const WeylGroup& right)
   this->rho=right.rho;
   this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
   this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
+  this->lengthLongestRootSquared=right.lengthLongestRootSquared;
   this->flagFundamentalToSimpleMatricesAreComputed=right.flagFundamentalToSimpleMatricesAreComputed;
 }
 
@@ -3724,7 +3799,7 @@ void WeylGroup::MakeAn(int n)
     return;
   this->init();
   this->WeylLetter='A';
-  this->LongRootLength=2;
+  this->lengthLongestRootSquared=2;
 //  this->ShortRootLength=0;
 //  this->ShortLongScalarProdPositive=0;
 //  this->ShortShortScalarProdPositive=0;
@@ -3759,7 +3834,7 @@ void WeylGroup::MakeEn(int n)
 
 void WeylGroup::MakeF4()
 { this->WeylLetter='F';
-  this->LongRootLength=4;
+  this->lengthLongestRootSquared=4;
 //  this->ShortRootLength=2;
 //  this->LongLongScalarProdPositive=2;
 //  this->ShortLongScalarProdPositive=2;
@@ -3775,8 +3850,8 @@ void WeylGroup::MakeF4()
 }
 
 void WeylGroup::MakeG2()
-{  this->WeylLetter='G';
-  this->LongRootLength=6;
+{ this->WeylLetter='G';
+  this->lengthLongestRootSquared=6;
 //  this->ShortRootLength=2;
 //  this->LongLongScalarProdPositive=3;
 //  this->ShortLongScalarProdPositive=3;
@@ -4047,7 +4122,7 @@ void WeylGroup::MakeCn(int n)
 { this->MakeAn(n);
   if(n<2)
     return;
-  this->LongRootLength=4;
+  this->lengthLongestRootSquared=4;
   this->WeylLetter='C';
   this->CartanSymmetric.elements[n-1][n-1]=4;
   this->CartanSymmetric.elements[n-2][n-1]=-2;
@@ -4090,10 +4165,12 @@ void WeylGroup::ComputeRho(bool Recompute)
   //this->ComputeDebugString();
   this->rho.MakeZero(this->CartanSymmetric.NumRows);
   for (int i=0; i<this->RootSystem.size; i++)
-    if (RootSystem.TheObjects[i].IsPositiveOrZero() )
-      this->rho+=(RootSystem.TheObjects[i]);
+    if (RootSystem[i].IsPositiveOrZero() )
+      this->rho+=(RootSystem[i]);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-    this->rho.TheObjects[i].DivideByInteger(2);
+    this->rho[i].DivideByInteger(2);
+  this->lengthLongestRootSquared=this->GetLongestRootLengthSquared();
+  this->flagFundamentalToSimpleMatricesAreComputed=false;
 }
 
 void ReflectionSubgroupWeylGroup::operator=(const ReflectionSubgroupWeylGroup& other)

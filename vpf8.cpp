@@ -1376,7 +1376,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       }
     if (numLength2==0 )
     { //type A
-      if (length1.IsEqualTo(theWeyl.LongRootLength))
+      if (length1.IsEqualTo(theWeyl.GetLongestRootLengthSquared()))
         out << this->SetComponent("A", numLength1, indexComponent);
       else
         out << this->SetComponent("A'", numLength1, indexComponent);
@@ -6641,6 +6641,20 @@ void WeylGroup::GetExtremeElementInOrbit
     }
   }
 //  std::cout << "<hr># simple reflections applied total: " << numTimesReflectionWasApplied;
+}
+
+WeylGroup::WeylGroup()
+{ this->flagFundamentalToSimpleMatricesAreComputed=false;
+  this->lengthLongestRootSquared=0;
+  this->WeylLetter='X';
+}
+
+Rational WeylGroup::GetLongestRootLengthSquared()
+{ if (this->lengthLongestRootSquared==0)
+    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
+      if (this->lengthLongestRootSquared<this->CartanSymmetric(i,i))
+        this->lengthLongestRootSquared=this->CartanSymmetric(i,i);
+  return this->lengthLongestRootSquared;
 }
 
 bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)

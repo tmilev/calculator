@@ -756,6 +756,86 @@ public:
   void operator=(const partFractions& other);
 };
 
+class DynkinSimpleType
+{ friend std::ostream& operator << (std::ostream& output, const DynkinSimpleType& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
+  public:
+  char theLetter;
+  int theRank;
+  Rational lengthFirstSimpleRootSquared;
+  DynkinSimpleType(): theLetter('X'), theRank(-1), lengthFirstSimpleRootSquared(0){}
+  void MakeAone()
+  { this->theLetter='A';
+    this->theRank=1;
+    this->lengthFirstSimpleRootSquared=2;
+  }
+  void operator=(const DynkinSimpleType& other)
+  { this->theLetter=other.theLetter;
+    this->theRank=other.theRank;
+    this->lengthFirstSimpleRootSquared=other.lengthFirstSimpleRootSquared;
+  }
+  bool operator==(const DynkinSimpleType& other)const
+  { return
+    this->theLetter==other.theLetter && this->theRank==other.theRank &&
+    this->lengthFirstSimpleRootSquared==other.lengthFirstSimpleRootSquared;
+  }
+  static unsigned int HashFunction(const DynkinSimpleType& input)
+  { return ((unsigned int)
+    input.theLetter)*2+input.theRank
+    +SomeRandomPrimes[0]*input.lengthFirstSimpleRootSquared.HashFunction();
+  }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  inline bool IsEqualToZero()const
+  { return false;
+  }
+  std::string ToString()const;
+  void operator++(int);
+  bool operator>(const DynkinSimpleType& other)const
+  { if (this->theRank>other.theRank)
+      return true;
+    if (this->theRank<other.theRank)
+      return false;
+    if (this->lengthFirstSimpleRootSquared>other.lengthFirstSimpleRootSquared)
+      return true;
+    if (this->lengthFirstSimpleRootSquared<other.lengthFirstSimpleRootSquared)
+      return false;
+    if (this->theLetter=='B' && other.theLetter=='D')
+      return true;
+    if (this->theLetter=='D' && other.theLetter=='B')
+      return false;
+    return this->theLetter>other.theLetter;
+  }
+  inline bool operator<(const DynkinSimpleType& other)const
+  { return other>*this;
+  }
+  bool operator<(int otherRank)const;
+};
+
+class DynkinType : public MonomialCollection<DynkinSimpleType, int>
+{
+public:
+  void GetLettersTypesMults (List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults)
+  { outputLetters.SetSize(0);
+    outputRanks.SetSize(0);
+    outputMults.SetSize(0);
+    for (int i=0; i<this->size; i++)
+    { outputLetters.AddOnTop((*this)[i].theLetter);
+      outputRanks.AddOnTop((*this)[i].theRank);
+      outputMults.AddOnTop(this->theCoeffs[i]);
+    }
+  }
+  Rational GetSizeWeylByFormula()const;
+  std::string ToString(FormatExpressions* theFormat=0)
+  { std::stringstream out;
+    out << *this;
+    return out.str();
+  }
+};
+
 class WeylGroup: public HashedList<ElementWeylGroup>
 {
 //  Matrix<int> CartanSymmetricIntBuffer;
@@ -774,6 +854,7 @@ class WeylGroup: public HashedList<ElementWeylGroup>
   MemorySaving<Vectors<Rational> > buffer1VectorsNotCopied;
   MemorySaving<Vectors<Rational> > buffer2VectorsNotCopied;
   bool flagFundamentalToSimpleMatricesAreComputed;
+  Rational lengthLongestRootSquared;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
       return;
@@ -789,11 +870,6 @@ public:
   Matrix<Rational> CartanSymmetric;
   Vector<Rational> rho;
   char WeylLetter;
-  Rational LongRootLength;
-  //Rational LongLongScalarProdPositive;
-  //Rational ShortShortScalarProdPositive;
-  //Rational ShortLongScalarProdPositive;
-  //Rational ShortRootLength;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
   static bool flagAnErrorHasOcurredTimeToPanic;
@@ -815,6 +891,7 @@ public:
   (List<Vector<Rational> >& outputHighestWeightsFundCoords, int inputDimBound
    )
    ;
+  Rational GetLongestRootLengthSquared();
   void MakeAn(int n);
   void MakeEn(int n);
   void MakeBn(int n);
@@ -822,7 +899,7 @@ public:
   void MakeDn(int n);
   void MakeF4();
   void MakeG2();
-  WeylGroup(){this->flagFundamentalToSimpleMatricesAreComputed=false;}
+  WeylGroup();
   Matrix<Rational>* GetMatrixFundamentalToSimpleCoords()
   { this->ComputeFundamentalToSimpleMatrices();
     return &this->FundamentalToSimpleCoords;
@@ -1713,20 +1790,7 @@ public:
   }
   static std::string GetLieAlgebraName
   (char WeylLetter, int WeylDim, bool includeNonTechnicalNames=true, bool includeTechnicalNames=true)
-  { std::stringstream out;
-    if (includeTechnicalNames)
-      out << WeylLetter << "_" << WeylDim;
-    if (includeNonTechnicalNames)
-      if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
-        switch (WeylLetter)
-        { case 'A':  out << "(sl(" << WeylDim+1 << "))"; break;
-          case 'B':  out << "(so(" << 2*WeylDim+1 << "))"; break;
-          case 'C':  out << "(sp(" << 2*WeylDim << "))"; break;
-          case 'D':  out << "(so(" << 2*WeylDim << "))"; break;
-          default: out << "(" << WeylLetter << "_" << WeylDim << ")"; break;
-        }
-    return out.str();
-  }
+  ;
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra& input, ElementSemisimpleLieAlgebra& output);
   void GenerateWeightSupportMethod2(Vector<Rational> & theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}

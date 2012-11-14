@@ -3411,6 +3411,9 @@ bool CommandList::fSSAlgebra
   Matrix<Rational> theCartanSymmetric;
   theCartanSymmetric.init(0,0);
   WeylGroup tempW;
+  DynkinType dynkinType;
+  DynkinSimpleType simpleComponent;
+  dynkinType.MakeZero();
   for (int i=0; i<theType.size; i++)
   { MonomialP& currentMon=theType[i];
     int variableIndex;
@@ -3484,7 +3487,22 @@ bool CommandList::fSSAlgebra
     { firstRootLength/=tempW.CartanSymmetric(0,0);
       tempW.CartanSymmetric*=firstRootLength;
     }
-    theCartanSymmetric.DirectSumWith(tempW.CartanSymmetric);
+    simpleComponent.theLetter=theWeylLetter;
+    simpleComponent.theRank= theRank;
+    simpleComponent.lengthFirstSimpleRootSquared= tempW.CartanSymmetric(0,0);
+    int theMultiplicity=-1;
+    if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
+      theMultiplicity=-1;
+    if (theMultiplicity<0)
+    { std::stringstream out;
+      out << "I faiiled to convert the coefficient " << theType.theCoeffs[i]
+      << " of " << currentMon.ToString(&theFormat) << " to a small integer";
+      return theExpression.SetError(out.str());
+    }
+    for (int k=0; k<theMultiplicity; k++)
+    { dynkinType.AddMonomial(simpleComponent, 1);
+      theCartanSymmetric.DirectSumWith(tempW.CartanSymmetric);
+    }
   }
   if (theCartanSymmetric.NumCols>20)
   { std::stringstream out;
@@ -3510,8 +3528,7 @@ bool CommandList::fSSAlgebra
 //      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
 //      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
       out
-      << "Lie algebra of type " << tempData.GetAmbientSSAlgebra().GetLieAlgebraName()
-      << " generated.";
+      << "Lie algebra of type " << dynkinType << " generated.";
       if (Verbose)
       { out
         << " The resulting Lie bracket pairing table follows. <hr> "
@@ -3533,7 +3550,7 @@ bool CommandList::fSSAlgebra
       }
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
       out << "<br>Symmetric Cartan matrix follows.<br>"
-      << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th Vectors<Rational>.<br>"
+      << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>"
       << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
       Rational tempRat;
       Matrix<Rational> tempMat;
@@ -3563,12 +3580,12 @@ bool CommandList::fSSAlgebra
       //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
       theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
       Vectors<Rational> simpleBasis, simplebasisEpsCoords;
-      out << "<hr> Half sum of positive Vectors<Rational>: " << theWeyl.rho.ToString();
+      out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
       Vector<Rational> tempRoot;
       theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
       out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
-      out << "<hr>Size of Weyl group according to formula: " <<
-      theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
+      out << "<hr>Size of Weyl group according to formula: "
+      << dynkinType.GetSizeWeylByFormula();
       out
       << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
       << " with the j^th simple root times 2 divided by the root length squared,<br> "
@@ -3638,7 +3655,7 @@ bool CommandList::fSSAlgebra
     theExpression.children.SetSize(0);
   } else
     theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
-  theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
+  //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
 }
 

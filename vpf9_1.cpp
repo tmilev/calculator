@@ -2416,6 +2416,24 @@ void coneRelations::ToString
   output=out.str();
 }
 
+std::string SemisimpleLieAlgebra::GetLieAlgebraName
+(char WeylLetter, int WeylDim, bool includeNonTechnicalNames,
+ bool includeTechnicalNames)
+{ std::stringstream out;
+  if (includeTechnicalNames)
+    out << WeylLetter << "_" << WeylDim;
+  if (includeNonTechnicalNames)
+    if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
+      switch (WeylLetter)
+      { case 'A':  out << "(sl(" << WeylDim+1 << "))"; break;
+        case 'B':  out << "(so(" << 2*WeylDim+1 << "))"; break;
+        case 'C':  out << "(sp(" << 2*WeylDim << "))"; break;
+        case 'D':  out << "(so(" << 2*WeylDim << "))"; break;
+        default: out << "(" << WeylLetter << "_" << WeylDim << ")"; break;
+      }
+  return out.str();
+}
+
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
 { this->CheckConsistency();
@@ -2426,7 +2444,6 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
   Selection nonExploredRoots;
   this->flagAnErrorHasOccurredTimeToPanic=false;
   Vectors<Rational>& posRoots=this->theWeyl.RootsOfBorel;
-
   nonExploredRoots.MakeFullSelection(posRoots.size);
   Vector<Rational> tempRoot;
   std::stringstream out;

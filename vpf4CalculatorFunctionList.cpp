@@ -30,9 +30,9 @@ void CommandList::initPredefinedVars()
    printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
    In addition, this function creates a graphics of the root system. Warning. \
-   For E_8 the printout is so heavy it  \
-   puts the netbook on which the calculator is developed to sleep.",
-   "printSemisimpleLieAlgebra{}(A^3_2+G^5_2);");
+   For E_8 is quite heavy and might put a slower computer to sleep.  \
+   ",
+   "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
   this->AddNonBoundVarMustBeNew
   ("Polynomial", & this->fPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",

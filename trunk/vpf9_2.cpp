@@ -1010,7 +1010,7 @@ void WeylGroup::WriteToFile(std::fstream& output)
 { output << "Weyl_group: ";
   output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
-  this->LongRootLength.WriteToFile(output);
+  this->lengthLongestRootSquared.WriteToFile(output);
   output << "\n";
   this->CartanSymmetric.WriteToFile(output);
 }
@@ -1020,7 +1020,7 @@ void WeylGroup::ReadFromFile(std::fstream& input)
   input >> tempS;
   input >> this->WeylLetter >> tempI >> tempS;
   assert(tempS=="Long_root_length:");
-  this->LongRootLength.ReadFromFile(input);
+  this->lengthLongestRootSquared.ReadFromFile(input);
   this->CartanSymmetric.ReadFromFile(input);
 }
 

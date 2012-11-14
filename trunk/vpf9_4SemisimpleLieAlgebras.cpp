@@ -29,78 +29,6 @@ void SemisimpleSubalgebras::FindTheSSSubalgebrasPart2
   this->ExtendCandidatesRecursive(emptyCandidate, theGlobalVariables);
 }
 
-std::string DynkinSimpleType::ToString()const
-{ std::stringstream out;
-  if (this->owner==0)
-    return "non-initialized";
-  out << "^{" << (*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared
-    << "}";
-  if (theRank>=10)
-    out << theLetter << "_{" << theRank << "}";
-  else
-    out << theLetter << "_" << theRank;
-//  if (!(*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared.IsEqualTo
-//      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
-  return out.str();
-}
-
-void DynkinSimpleType::operator++(int)
-{ this->assertIAmInitialized();
-  if (this->firstSimpleRootOrbitIndex<this->owner->size-1)
-  { this->firstSimpleRootOrbitIndex++;
-    return;
-  }
-  this->firstSimpleRootOrbitIndex=0;
-  if (this->theRank==1)
-  { this->theRank++;
-    return;
-  }
-  if (this->theLetter=='A')
-  { if (this->theRank>=4)
-      this->theLetter='D';
-    else
-      this->theLetter='B';
-    return;
-  }
-  if (this->theLetter=='D')
-  { this->theLetter='B';
-    return;
-  }
-  if (this->theLetter=='B')
-  { if (this->theRank>=3)
-      this->theLetter='C';
-    else
-      this->theLetter='G';
-    return;
-  }
-  if (this->theLetter=='C')
-  { if (this->theRank==4)
-    { this->theLetter='F';
-      return;
-    }
-    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
-    { this->theLetter='F';
-      return;
-    }
-    this->theLetter='A';
-    this->theRank++;
-    return;
-  }
-  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
-  { this->theRank++;
-    this->theLetter='A';
-    return;
-  }
-  std::cout << "This is a programming error. This is a portion of code that should "
-  << "never be reached. Something has gone very wrong. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
-}
-
-bool DynkinSimpleType::operator<(int otherRank)const
-{ return this->theRank<otherRank;
-}
-
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
 (const CandidateSSSubalgebra& baseCandidate,
 GlobalVariables* theGlobalVariables)
@@ -197,11 +125,9 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  theNewType.assertIAmInitialized();
   WeylGroup tempWeyl;
   tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
-  Rational scale=(*theNewType.owner)[theNewType.firstSimpleRootOrbitIndex].LengthHsquared/
-  tempWeyl.CartanSymmetric(0,0);
+  Rational scale=theNewType.lengthFirstSimpleRootSquared/tempWeyl.CartanSymmetric(0,0);
   tempWeyl.CartanSymmetric*=scale;
   this->theSymmetricCartanScaled.DirectSumWith(tempWeyl.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
@@ -282,66 +208,68 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
     //std::cout << "Exploring extensions of " << baseCandidate.ToString() << " by: ";
   }
   DynkinSimpleType myType;
-  myType.MakeAone(this->theSl2s);
+  myType.MakeAone();
   myType.theLetter=this->GetSSowner().theWeyl.WeylLetter;
   myType.theRank=this->GetSSowner().GetRank();
-  for (theType.MakeAone(this->theSl2s); theType<myType; theType++)
-  { //std::cout << theType.ToString() << ", ";
-    theCandidate=baseCandidate;
-    tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
-    int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
-    bool mustComputeSSalgebra=(indexSubalgebra==-1);
-    if (mustComputeSSalgebra)
-    { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
-      this->SimpleComponentsSubalgebras.AddOnTop(tempAlgebra);
-      this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
-    }
-    SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
-    SltwoSubalgebras& theSmallSl2s=this->theSl2sOfSubalgebras[indexSubalgebra];
-    if (mustComputeSSalgebra)
-    { std::stringstream tempStream;
-      tempStream << "\nGenerating simple Lie algebra "
-      << SemisimpleLieAlgebra::GetLieAlgebraName(theType.theLetter, theType.theRank)
-      << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
-      theProgressReport2.Report(tempStream.str());
-      theSmallAlgebra.init
-      (this->SimpleComponentsSubalgebras, indexSubalgebra, theType.theLetter, theType.theRank);
-      theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
-      theSmallAlgebra.FindSl2Subalgebras
-      (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
-       theSmallSl2s, *theGlobalVariables);
-      tempStream << " done.";
-      theProgressReport2.Report(tempStream.str());
-    }
-    Rational desiredScale=
-    this->theSl2s[theType.firstSimpleRootOrbitIndex].LengthHsquared/
-    theSmallAlgebra.theWeyl.CartanSymmetric(0,0);
-    bool isGood=true;
-    for (int i=0; i<theSmallSl2s.size; i++)
-    { isGood=false;
-      Rational impliedRootLength= desiredScale * theSmallSl2s[i].LengthHsquared;
-      for (int j=0; j<this->theSl2s.size; j++)
-      { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
-            !(impliedRootLength==this->theSl2s[j].LengthHsquared))
-          continue;
-        isGood=true;
-        break;
+  for (theType.MakeAone(); theType<myType; theType++)
+  { for (int k=0; k<this->theSl2s.size; k++)
+    { theType.lengthFirstSimpleRootSquared=this->theSl2s[k].LengthHsquared;
+      //std::cout << theType.ToString() << ", ";
+      theCandidate=baseCandidate;
+      tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
+      int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
+      bool mustComputeSSalgebra=(indexSubalgebra==-1);
+      if (mustComputeSSalgebra)
+      { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
+        this->SimpleComponentsSubalgebras.AddOnTop(tempAlgebra);
+        this->theSl2sOfSubalgebras.SetSize(this->theSl2sOfSubalgebras.size+1);
       }
-      if (!isGood)
-        break;
-    }
-    if (theGlobalVariables!=0)
-    { std::stringstream out;
-      out << " \n" << theType.ToString();
+      SemisimpleLieAlgebra& theSmallAlgebra=this->SimpleComponentsSubalgebras[indexSubalgebra];
+      SltwoSubalgebras& theSmallSl2s=this->theSl2sOfSubalgebras[indexSubalgebra];
+      if (mustComputeSSalgebra)
+      { std::stringstream tempStream;
+        tempStream << "\nGenerating simple Lie algebra "
+        << SemisimpleLieAlgebra::GetLieAlgebraName(theType.theLetter, theType.theRank)
+        << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
+        theProgressReport2.Report(tempStream.str());
+        theSmallAlgebra.init
+        (this->SimpleComponentsSubalgebras, indexSubalgebra, theType.theLetter, theType.theRank);
+        theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
+        theSmallAlgebra.FindSl2Subalgebras
+        (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
+         theSmallSl2s, *theGlobalVariables);
+        tempStream << " done.";
+        theProgressReport2.Report(tempStream.str());
+      }
+      Rational desiredScale=
+      theType.lengthFirstSimpleRootSquared/theSmallAlgebra.theWeyl.CartanSymmetric(0,0);
+      bool isGood=true;
+      for (int i=0; i<theSmallSl2s.size; i++)
+      { isGood=false;
+        Rational impliedRootLength= desiredScale * theSmallSl2s[i].LengthHsquared;
+        for (int j=0; j<this->theSl2s.size; j++)
+        { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
+              !(impliedRootLength==this->theSl2s[j].LengthHsquared))
+            continue;
+          isGood=true;
+          break;
+        }
+        if (!isGood)
+          break;
+      }
+      if (theGlobalVariables!=0)
+      { std::stringstream out;
+        out << " \n" << theType.ToString();
+        if (isGood)
+          out << " has fitting sl(2) decompositions.";
+        else
+          out << " does not have fitting sl(2) decompositions.";
+        theProgressReport3.Report(out.str());
+      }
       if (isGood)
-        out << " has fitting sl(2) decompositions.";
-      else
-        out << " does not have fitting sl(2) decompositions.";
-      theProgressReport3.Report(out.str());
-    }
-    if (isGood)
-    { theCandidate.AddTypeIncomplete(theType);
-      this->ExtendOneComponentRecursive(theCandidate, theGlobalVariables);
+      { theCandidate.AddTypeIncomplete(theType);
+        this->ExtendOneComponentRecursive(theCandidate, theGlobalVariables);
+      }
     }
   }
 }
@@ -1059,7 +987,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     out << theSl2.LengthHsquared;
     if (useHtml)
       out << "</td><td>";
-    out << theSl2.LengthHsquared * this->GetOwnerWeyl().LongRootLength/4;
+    out << theSl2.LengthHsquared * this->GetOwnerWeyl().GetLongestRootLengthSquared()/4;
     if (useHtml)
       out << "</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)

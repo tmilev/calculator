@@ -2931,12 +2931,21 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   }
   charSSAlgMod(): listOwners(0), indexInOwners(-1){}
   std::string ElementToStringCharacter(List<Vector<Rational> >& theWeights, List<Rational>& theMults);
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const charSSAlgMod<CoefficientType>& input)
+  { return input.::MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>
+    ::HashFunction(input);
+  }
+
   void MakeFromWeight
 (const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
  int inputIndexInOwner)
    ;
   bool SplitCharOverRedSubalg
-(std::string* Report, charSSAlgMod& output, branchingData& inputData,GlobalVariables& theGlobalVariables)
+(std::string* Report, charSSAlgMod& output, branchingData& inputData,
+ GlobalVariables& theGlobalVariables)
    ;
   bool GetDominantCharacterWRTsubalgebra
  (charSSAlgMod& outputCharOwnerSetToZero, std::string& outputDetails,
@@ -2971,6 +2980,9 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 (std::string* Report, charSSAlgMod& output, const Selection& splittingParSel, const Selection& ParSelFDInducingPart,
  ReflectionSubgroupWeylGroup& outputWeylSub, GlobalVariables& theGlobalVariables)
      ;
+  int GetIndexExtremeWeightRelativeToWeyl
+  (WeylGroup& theWeyl)const
+  ;
   void MakeTrivial(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);

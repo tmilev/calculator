@@ -307,6 +307,14 @@ void CommandList::initPredefinedVars()
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}", false);
+  this->AddNonBoundVarMustBeNew
+  ("Freudenthal", & this->fFreudenthalEval, "",
+   "Computes the dominant weights with multiplicities of a finite dimensional \
+   module of a highest weight given in fundamental coordinates. The first argument gives \
+   the semisimple Lie algebra type, the second argument gives the highest weight in \
+   fundamental coordinates. ",
+   "Freudenthal{}(B_3, (2,2,2))", true)
+   ;
 
 //  this->AddNonBoundVarMustBeNew
 //  ("minPoly", & this->fMinPoly, "",

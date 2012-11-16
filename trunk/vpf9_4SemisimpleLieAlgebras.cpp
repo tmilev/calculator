@@ -6,9 +6,9 @@ ProjectInformationInstance ProjectInfoVpf9_4cpp
 
 std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 { std::stringstream out;
-  out << "There are " << this->Hcandidates.size << " candidates total. ";
+  out << "There are " << this->Hcandidates.size << " candidates total.\n<hr>\n ";
   for (int i=0; i<this->Hcandidates.size; i++)
-    out << "<br>" << this->Hcandidates[i].ToString(theFormat);
+    out << this->Hcandidates[i].ToString(theFormat) << "\n<hr>\n ";
   out << this->theSl2s.ToString(theFormat);
   return out.str();
 }
@@ -191,13 +191,34 @@ bool CandidateSSSubalgebra::isGoodForTheTop
   return true;
 }
 
+template <class CoefficientType>
+int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
+(WeylGroup& theWeyl)const
+{ HashedList<Vector<CoefficientType> > weightsSimpleCoords;
+  weightsSimpleCoords.SetExpectedSize(this->size);
+  for (int i=0; i<this->size; i++)
+    weightsSimpleCoords.AddOnTop(
+    theWeyl.GetSimpleCoordinatesFromFundamental((*this)[i].weightFundamentalCoords));
+  for (int i=0; weightsSimpleCoords.size; i++)
+  { bool isGood=true;
+    for (int j=0; j<theWeyl.RootsOfBorel.size; j++)
+      if(weightsSimpleCoords.Contains((weightsSimpleCoords[i]+theWeyl.RootsOfBorel[j])))
+      { isGood=false;
+        break;
+      }
+    if (isGood)
+      return i;
+  }
+  return -1;
+}
+
 bool CandidateSSSubalgebra::ComputeChar
 (WeylGroup& ownerWeyl, List<SemisimpleLieAlgebra>& owners, int indexInOwners)
 { this->theWeyl.ComputeRho(true);
   MonomialChar<Rational> tempMon;
   tempMon.weightFundamentalCoords.MakeZero(this->theWeyl.CartanSymmetric.NumRows);
-  this->theCharFundamentalCoords.Reset();
-  this->theCharFundamentalCoords.AddMonomial(tempMon, ownerWeyl.GetDim());
+  this->theCharFundamentalCoordsRelativeToCartan.Reset();
+  this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, ownerWeyl.GetDim());
   tempMon.weightFundamentalCoords.SetSize(this->theWeyl.GetDim());
   for (int k=0; k<ownerWeyl.RootSystem.size; k++)
   { int counter=-1;
@@ -209,7 +230,13 @@ bool CandidateSSSubalgebra::ComputeChar
         (ownerWeyl.RootSystem[k], this->CartanSAsByComponent[i][j])
         ;//this->theWeyl.CartanSymmetric(counter, counter);
       }
-    this->theCharFundamentalCoords.AddMonomial(tempMon, 1);
+    this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, 1);
+  }
+  this->theCharFundCoords=this->theCharFundamentalCoordsRelativeToCartan;
+  while (this->theCharFundCoords.size>0)
+  { int currentIndex=
+    this->theCharFundCoords.GetIndexExtremeWeightRelativeToWeyl(this->theWeyl);
+    break;
   }
   return true;
 }
@@ -1435,10 +1462,13 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << this->CartanSAsByComponent[i].ToString() << ", ";
   out << "Positive weight subsystem: " << this->theWeyl.RootsOfBorel.ToString();
   if (this->PosRootsPerpendicularPrecedingWeights.size>0)
-    out << "Positive roots that commute with the weight subsystem: "
+    out << " Positive roots that commute with the weight subsystem: "
     << this->PosRootsPerpendicularPrecedingWeights.ToString();
-  out << "Symmetric Cartan matrix scaled: "
+  out << "<br>Symmetric Cartan matrix scaled: "
   << this->theWeyl.CartanSymmetric.ToString(theFormat);
-  out << "Character ambient Lie algebra: " << this->theCharFundamentalCoords.ToString();
+  out << "Character ambient Lie algebra: "
+  << this->theCharFundamentalCoordsRelativeToCartan.ToString();
+  out << "<br>Decomposition ambient Lie algebra: "
+  << this->theCharFundCoords.ToString();
   return out.str();
 }

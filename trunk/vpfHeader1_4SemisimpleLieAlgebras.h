@@ -197,12 +197,14 @@ public:
   WeylGroup theWeyl;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
-  charSSAlgMod<Rational> theCharFundamentalCoords;
+  charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
+  charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;
-    this->theCharFundamentalCoords=other.theCharFundamentalCoords;
+    this->theCharFundamentalCoordsRelativeToCartan=other.theCharFundamentalCoordsRelativeToCartan;
+    this->theCharFundCoords=other.theCharFundCoords;
     this->theWeyl=other.theWeyl;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
   }

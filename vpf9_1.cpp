@@ -538,8 +538,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
  bool* abortKmodule, Vectors<Rational>* additionalDomain, Vectors<Rational>* additionalRange)
 { Matrix<Rational> tempMat;
   Selection tempSel;
-  int CurrentRank=Domain.GetRankOfSpanOfElements(tempMat, tempSel);
-  assert(CurrentRank==Range.GetRankOfSpanOfElements(tempMat, tempSel));
+  int CurrentRank=Domain.GetRankOfSpanOfElements(&tempMat, &tempSel);
+  assert(CurrentRank==Range.GetRankOfSpanOfElements(&tempMat, &tempSel));
   if (abortKmodule!=0)
     *abortKmodule=false;
   if (CurrentRank==this->GetAmbientWeyl().CartanSymmetric.NumRows)
@@ -583,31 +583,31 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
       return false;
     }
   int counter =0;
-  domainRec.AddOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
-  while(domainRec.GetRankOfSpanOfElements(tempMat, tempSel)==CurrentRank)
+  domainRec.AddOnTop(leftSA.HighestWeightsGmodK[counter]);
+  while(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank)
   { counter++;
     assert(leftSA.kModules.size>counter);
     domainRec.PopIndexSwapWithLast(domainRec.size-1);
-    domainRec.AddOnTop(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+    domainRec.AddOnTop(leftSA.HighestWeightsGmodK[counter]);
   }
   //find a minimal possible new kmodule to throw in
   for (int i=0; i<leftSA.kModules.size; i++)
-    if (leftSA.kModules.TheObjects[i].size> leftSA.kModules.TheObjects[counter].size)
-    { domainRec.LastObject()->operator=(leftSA.HighestWeightsGmodK.TheObjects[i]);
-      if (domainRec.GetRankOfSpanOfElements(tempMat, tempSel)==CurrentRank)
-        domainRec.LastObject()->operator=(leftSA.HighestWeightsGmodK.TheObjects[counter]);
+    if (leftSA.kModules[i].size> leftSA.kModules[counter].size)
+    { domainRec.LastObject()->operator=(leftSA.HighestWeightsGmodK[i]);
+      if (domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank)
+        domainRec.LastObject()->operator=(leftSA.HighestWeightsGmodK[counter]);
       else
         counter=i;
     }
-  assert(domainRec.GetRankOfSpanOfElements(tempMat, tempSel)==CurrentRank+1);
-  Vectors<Rational>& firstKmodLeft= leftSA.kModules.TheObjects[counter];
+  assert(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank+1);
+  Vectors<Rational>& firstKmodLeft= leftSA.kModules[counter];
   bool result=false;
   bool tempBool;
   for (int i=0; i<rightSA.kModules.size; i++)
-    if (firstKmodLeft.size==rightSA.kModules.TheObjects[i].size)
+    if (firstKmodLeft.size==rightSA.kModules[i].size)
       for (int j=0; j<firstKmodLeft.size; j++)
-      { rangeRec.AddOnTop(rightSA.kModules.TheObjects[i].TheObjects[j]);
-        if (rangeRec.GetRankOfSpanOfElements(tempMat, tempSel)==(CurrentRank+1))
+      { rangeRec.AddOnTop(rightSA.kModules[i][j]);
+        if (rangeRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==(CurrentRank+1))
         { if (this->attemptExtensionToIsomorphismNoCentralizer(domainRec, rangeRec, theGlobalVariables, RecursionDepth+1, outputAutomorphisms, GenerateAllpossibleExtensions, &tempBool, additionalDomain, additionalRange))
           { if (!GenerateAllpossibleExtensions)
               return true;
@@ -1373,19 +1373,20 @@ void rootSubalgebra::DoKRootsEnumeration(GlobalVariables& theGlobalVariables)
   Matrix<Rational> tempMat;
   Selection tempSel;
   for (int i=0; i<this->PosRootsKConnectedComponents.size; i++)
-  { this->theKEnumerations.TheObjects[i].init(this->PosRootsKConnectedComponents.TheObjects[i].size);
-    this->theKComponentRanks.TheObjects[i]=
-    this->PosRootsKConnectedComponents.TheObjects[i].GetRankOfSpanOfElements(tempMat, tempSel);
+  { this->theKEnumerations[i].init(this->PosRootsKConnectedComponents[i].size);
+    this->theKComponentRanks[i]=
+    this->PosRootsKConnectedComponents[i].GetRankOfSpanOfElements(&tempMat, &tempSel);
   }
   this->DoKRootsEnumerationRecursively(0, theGlobalVariables);
 }
 
 void rootSubalgebra::DoKRootsEnumerationRecursively(int indexEnumeration, GlobalVariables& theGlobalVariables)
-{ int theRank=this->theKComponentRanks.TheObjects[indexEnumeration];
-  int numRuns=MathRoutines::NChooseK( this->PosRootsKConnectedComponents.TheObjects[indexEnumeration].size, theRank);
-  this->theKEnumerations.TheObjects[indexEnumeration].initNoMemoryAllocation();
+{ int theRank=this->theKComponentRanks[indexEnumeration];
+  int numRuns=MathRoutines::NChooseK
+  (this->PosRootsKConnectedComponents[indexEnumeration].size, theRank);
+  this->theKEnumerations[indexEnumeration].initNoMemoryAllocation();
   for (int i=0; i<numRuns; i++)
-  { this->theKEnumerations.TheObjects[indexEnumeration].incrementSelectionFixedCardinality(theRank);
+  { this->theKEnumerations[indexEnumeration].incrementSelectionFixedCardinality(theRank);
     if (indexEnumeration<this->PosRootsKConnectedComponents.size-1)
       this->DoKRootsEnumerationRecursively(indexEnumeration+1, theGlobalVariables);
     else
@@ -2923,7 +2924,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   int tempSize=0;
   for (int i=0; i<theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size; i++)
   { tempList.TheObjects[i]=theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
-    tempSize+=tempList.TheObjects[i];
+    tempSize+=tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);
   int tempI2= permComponentsCentralizer.getTotalNumSubsets();
@@ -2932,13 +2933,13 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   Matrix<Rational> tempMat;
   Selection tempSel;
   for (int i=0; i<Domain.size; i++)
-  { isoDomain.AddOnTop(Domain.TheObjects[i]);
-    if (isoDomain.GetRankOfSpanOfElements(tempMat, tempSel)<isoDomain.size)
+  { isoDomain.AddOnTop(Domain[i]);
+    if (isoDomain.GetRankOfSpanOfElements(&tempMat, &tempSel)<isoDomain.size)
       isoDomain.PopLastObject();
     else
-      isoRange.AddOnTop(Range.TheObjects[i]);
+      isoRange.AddOnTop(Range[i]);
   }
-  if (isoRange.GetRankOfSpanOfElements(tempMat, tempSel)<isoRange.size)
+  if (isoRange.GetRankOfSpanOfElements(&tempMat, &tempSel)<isoRange.size)
     return false;
   int givenSize=isoDomain.size;
   for(int j=0; j<tempI2; j++)
@@ -2949,7 +2950,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
         if (outputAutomorphisms==0)
           return true;
       if (outputAutomorphisms!=0)
-        theDomainRootSA.MakeProgressReportGenAutos( l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
+        theDomainRootSA.MakeProgressReportGenAutos(l+NumAutosCentralizer*j, tempI2*NumAutosCentralizer, outputAutomorphisms->ExternalAutomorphisms.size, theGlobalVariables);
       tempAutosCentralizer.IncrementSubset();
     }
     permComponentsCentralizer.incrementAndGetPermutation(tempPermutation2);

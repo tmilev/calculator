@@ -2238,7 +2238,7 @@ bool ConeComplex::SplitChamber
   Matrix<Rational>& bufferMat=theGlobalVariables.matSplitChamberBuff.GetElement();
   Selection& bufferSel=theGlobalVariables.selSplitChamber.GetElement();
   bool needToRecomputeVertices=
-  (myDyingCone.Normals.GetRankOfSpanOfElements(bufferMat, bufferSel)<this->GetDim());
+  (myDyingCone.Normals.GetRankOfSpanOfElements(&bufferMat, &bufferSel)<this->GetDim());
 //  newPlusCone.flagHasSufficientlyManyVertices=true;
 //  newMinusCone.flagHasSufficientlyManyVertices=true;
   newPlusCone.LowestIndexNotCheckedForSlicingInDirection=myDyingCone.LowestIndexNotCheckedForSlicingInDirection;
@@ -2471,7 +2471,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
   }
   Matrix<Rational>& tempMatX=theGlobalVariables.matEliminateFakeNormalsUsingVertices.GetElement();
   Selection& tempSelX=theGlobalVariables.selEliminateFakeNormalsUsingVertices.GetElement();
-  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(tempMatX, tempSelX);
+  int DesiredRank=this->Vertices.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
   if (DesiredRank>1)
     for (int i=0; i<this->Normals.size; i++)
     { Vector<Rational>& currentNormal=this->Normals.TheObjects[i];
@@ -2480,7 +2480,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
       for (int j=0; j<this->Vertices.size; j++)
         if (Vector<Rational>::ScalarEuclidean(this->Vertices.TheObjects[j], currentNormal).IsEqualToZero())
         { verticesOnWall.AddOnTop(this->Vertices.TheObjects[j]);
-          int theRank=verticesOnWall.GetRankOfSpanOfElements(tempMatX, tempSelX);
+          int theRank=verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank< verticesOnWall.size)
             verticesOnWall.PopLastObject();
           else
@@ -2527,7 +2527,7 @@ bool Cone::CreateFromVertices(Vectors<Rational>& inputVertices, GlobalVariables&
   this->Normals.size=0;
   Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
   Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
-  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(tempMat, tempSel);
+  int rankVerticesSpan=inputVertices.GetRankOfSpanOfElements(&tempMat, &tempSel);
   int theDim=inputVertices.GetDim();
   Vectors<Rational>& extraVertices=theGlobalVariables.rootsCreateFromVertices.GetElement();
   extraVertices.SetSize(0);
@@ -2591,7 +2591,7 @@ bool Cone::CreateFromNormalS
   Matrix<Rational>& tempMat=theGlobalVariables.matCreateFromVertices.GetElement();
   Selection& tempSel=theGlobalVariables.selCreateFromVertices.GetElement();
   if (!UseWithExtremeMathCautionAssumeConeHasSufficientlyManyProjectiveVertices)
-    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(tempMat, tempSel)<theDim; i++)
+    for (int i=0; i<theDim && this->Normals.GetRankOfSpanOfElements(&tempMat, &tempSel)<theDim; i++)
     { Vector<Rational> tempRoot;
       tempRoot.MakeEi(theDim, i);
       if(!this->Normals.LinSpanContainsRoot(tempRoot, tempMat, tempSel))

@@ -4298,9 +4298,9 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   int NumVarsDoubled=this->impliedNumVars*2;
   Matrix<Rational> tempMat;
   Selection tempSel;
-  int currentRank=leftHandSide.GetRankOfSpanOfElements(tempMat, tempSel);
+  int currentRank=leftHandSide.GetRankOfSpanOfElements(&tempMat, &tempSel);
   Vector<Rational> ei;
-  Polynomial<Rational>  tempP;
+  Polynomial<Rational> tempP;
   std::stringstream report, out;
   bool found=false;
   int numImpliedDsubs=0;
@@ -4308,7 +4308,7 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
   for (int i=0; i<NumVarsDoubled && currentRank<NumVarsDoubled; i++)
   { ei.MakeEi(this->impliedNumVars*2, i);
     leftHandSide.AddOnTop(ei);
-    int candidateRank=leftHandSide.GetRankOfSpanOfElements(tempMat, tempSel);
+    int candidateRank=leftHandSide.GetRankOfSpanOfElements(&tempMat, &tempSel);
     if (candidateRank>currentRank)
     { currentRank=candidateRank;
       tempP.MakeLinPolyFromRootNoConstantTerm(ei);
@@ -4316,7 +4316,8 @@ int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
       if (found)
         report << ",";
       found=true;
-      report << tempP.ToString(&theGlobalVariables.theDefaultFormat) << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultFormat);
+      report << tempP.ToString(&theGlobalVariables.theDefaultFormat)
+      << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultFormat);
       if (i<NumVarsDoubled/2)
         numImpliedXsubs++;
       else

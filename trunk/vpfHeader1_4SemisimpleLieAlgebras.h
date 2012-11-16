@@ -194,18 +194,16 @@ public:
 class CandidateSSSubalgebra
 {
 public:
-  ReflectionSubgroupWeylGroup theWeylSubgroup;
+  WeylGroup theWeyl;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
-  Polynomial<Rational> theCharFundamentalCoords;
-  Matrix<Rational> theSymmetricCartanScaled;
+  charSSAlgMod<Rational> theCharFundamentalCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;
     this->theCharFundamentalCoords=other.theCharFundamentalCoords;
-    this->theWeylSubgroup=other.theWeylSubgroup;
-    this->theSymmetricCartanScaled=other.theSymmetricCartanScaled;
+    this->theWeyl=other.theWeyl;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
   }
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
@@ -217,7 +215,7 @@ public:
 
   ;
   bool isGoodForTheTop
-  (WeylGroup& ownerWeyl, const Vector<Rational>& Hnew)const
+  (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const
   ;
   std::string ToString(FormatExpressions* theFormat=0)const;
 };

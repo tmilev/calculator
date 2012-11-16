@@ -3999,7 +3999,7 @@ class Vectors: public List<Vector<CoefficientType> >
   (Vectors<CoefficientType>& output, const CoefficientType& theRingZero, Selection& outputSelectedIndices, GlobalVariables& theGlobalVariables)const
   ;
   int GetRankOfSpanOfElements
-  (Matrix<CoefficientType>& buffer, Selection& bufferSelection)const
+  (Matrix<CoefficientType>* buffer=0, Selection* bufferSelection=0)const
 ;
 static bool ConesIntersect
 (GlobalVariables& theGlobalVariables, List<Vector<Rational> >& StrictCone, List<Vector<Rational> >& NonStrictCone,
@@ -4175,7 +4175,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
     Selection tempSel;
     for (int i=0; i<this->size; i++)
     { output.AddOnTop(this->TheObjects[i]);
-      if (output.GetRankOfSpanOfElements(tempMat, tempSel)< output.size)
+      if (output.GetRankOfSpanOfElements(&tempMat, &tempSel)< output.size)
         output.PopLastObject();
     }
     this->operator=(output);
@@ -4269,8 +4269,10 @@ public:
   bool IsNilpotent()const;
   bool operator==(const ChevalleyGenerator& other)
   { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
-    { std::cout << "This is a programming error: attempting to compare Chevalley generators of different Lie algebras. "
-      << "Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+    { std::cout
+      << "This is a programming error: attempting to compare Chevalley generators "
+      << "of different Lie algebras. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << ".";
       assert(false);
     }
     return this->theGeneratorIndex==other.theGeneratorIndex;
@@ -7027,11 +7029,6 @@ void MathRoutines::RaiseToPower(Element& theElement, int thePower, const Element
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//The implementation of the big templating-in effort for the Vector<Rational>  class starts here.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template <class CoefficientType>
 bool Vectors<CoefficientType>::LinSpanContainsRoot(const Vector<CoefficientType>& input, Matrix<CoefficientType>& bufferMatrix, Selection& bufferSelection)const
 { Vectors<CoefficientType> tempVectors;
@@ -7040,16 +7037,22 @@ bool Vectors<CoefficientType>::LinSpanContainsRoot(const Vector<CoefficientType>
 //  this->ComputeDebugString();
 //  tempRoots.ComputeDebugString();
 //  input.ComputeDebugString();
-  return this->GetRankOfSpanOfElements(bufferMatrix, bufferSelection)==tempVectors.GetRankOfSpanOfElements(bufferMatrix, bufferSelection);
+  return this->GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection)==tempVectors.GetRankOfSpanOfElements(&bufferMatrix, &bufferSelection);
 }
 
 template <class CoefficientType>
-int Vectors<CoefficientType>::GetRankOfSpanOfElements(Matrix<CoefficientType>& buffer, Selection& bufferSelection)const
+int Vectors<CoefficientType>::GetRankOfSpanOfElements(Matrix<CoefficientType>* buffer, Selection* bufferSelection)const
 { if (this->size==0)
     return 0;
   int theDimension= this->TheObjects[0].size;
-  this->GaussianEliminationForNormalComputation(buffer, bufferSelection, theDimension);
-  return (theDimension-bufferSelection.CardinalitySelection);
+  MemorySaving<Matrix<CoefficientType> > emergencyMatBuf;
+  MemorySaving<Selection> emergencySelBuf;
+  if (buffer==0)
+    buffer=&emergencyMatBuf.GetElement();
+  if (bufferSelection==0)
+    bufferSelection=&emergencySelBuf.GetElement();
+  this->GaussianEliminationForNormalComputation(*buffer, *bufferSelection, theDimension);
+  return (theDimension-bufferSelection->CardinalitySelection);
 }
 
 template <class CoefficientType>

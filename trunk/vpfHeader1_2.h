@@ -792,6 +792,14 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
+  static Rational GetRatioLongRootToFirst
+  (char inputWeylLetter, int inputRank)
+  ;
+  Rational GetDefaultRootLengthDiv2(int rootIndex)const;
+  Rational GetRatioLongRootToFirst()const
+  { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
+  }
+  Rational GetHCoRootLengthSquared();
   std::string ToString()const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other)const
@@ -7705,10 +7713,12 @@ std::string MonomialChar<CoefficientType>::ToString
     VectorSpaceLetter=theFormat->FDrepLetter;
   }
   if (useOmega)
-    out << VectorSpaceLetter << "_{" << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
+    out << VectorSpaceLetter << "_{"
+    << weightFundamentalCoords.ToStringLetterFormat("\\omega") << "}";
   else
     out << VectorSpaceLetter << "_{"
-    << weightFundamentalCoords.ToStringLetterFormat(theFormat->fundamentalWeightLetter, theFormat) << "}";
+    << weightFundamentalCoords.ToStringLetterFormat
+    (theFormat->fundamentalWeightLetter, theFormat) << "}";
   if (theFormat!=0)
     theFormat->CustomPlusSign=oldCustomPlus;
   return out.str();

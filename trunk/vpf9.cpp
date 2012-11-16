@@ -3333,7 +3333,8 @@ void SelectionWithMultiplicities::initWithMultiplicities(int NumElements)
 void SelectionWithMultiplicities::ToString(std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->elements.size; i++)
-    out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: " <<this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
+    out << "Index: " << this->elements.TheObjects[i] << "\nMultiplicity: "
+    << this->Multiplicities.TheObjects[this->elements.TheObjects[i]];
   output= out.str();
 }
 
@@ -3509,6 +3510,69 @@ std::string DynkinSimpleType::ToString()const
 //  if (!(*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared.IsEqualTo
 //      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
   return out.str();
+}
+
+Rational DynkinSimpleType::GetHCoRootLengthSquared()
+{ Rational result;
+  switch(this->theLetter)
+  { case 'A':
+    case 'B':
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'G':
+      return this->lengthFirstSimpleRootSquared;
+    case 'F':
+      return this->lengthFirstSimpleRootSquared/2;
+    default: return -1;
+  }
+}
+
+Rational DynkinSimpleType::GetDefaultRootLengthDiv2
+(int rootIndex)const
+{ Rational result;
+  switch (this->theLetter)
+  { case 'A':
+    case 'D':
+    case 'E':
+      return 1;
+    case 'B':
+      if (rootIndex==this->theRank-1)
+      { result.AssignNumeratorAndDenominator(1,2);
+        return result;
+      }
+      return 1;
+    case 'C':
+      if (rootIndex==this->theRank-1)
+        return 2;
+      return 1;
+    case 'F':
+      if (rootIndex<2)
+        return 2;
+      return 1;
+    case 'G':
+      if (rootIndex==1)
+        return 3;
+      return 1;
+    default:
+      return -1;
+  }
+}
+
+Rational DynkinSimpleType::GetRatioLongRootToFirst
+(char inputWeylLetter, int inputRank)
+{ Rational result;
+  switch (inputWeylLetter)
+  { case 'A': return 1;
+    case 'B': return 1;
+    case 'C': return 2;
+    case 'D': return 1;
+    case 'E': return 1;
+    case 'F': return 1;
+    case 'G': return 3;
+    default:
+      return -1;
+  }
 }
 
 void DynkinSimpleType::operator++(int)

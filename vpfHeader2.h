@@ -21,6 +21,7 @@ public:
   { typeError=1, typeZmodP, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
     typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
     typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound,
+    typeCharSSalgFinite,
     typeDifferentialForm, typeRationalRadical
   };
   void operator=(const Data& other);
@@ -41,6 +42,9 @@ public:
   ;
   void MakeSSAlgebra
   (CommandList& theBoss, char WeylLetter, int WeylRank)
+  ;
+  void MakeChar
+  (CommandList& theBoss, charSSAlgMod<Rational>& theChar)
   ;
   void MakeSSAlgebra
   (CommandList& theBoss, const Matrix<Rational>& cartanSymmetric)
@@ -536,6 +540,7 @@ public:
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedList<RationalFunctionOld> theRFs;
   HashedList<Rational> theRationals;
+  HashedList<charSSAlgMod<Rational> > theChars;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedList<Context> theContexts;
@@ -1103,6 +1108,9 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fFreudenthalEval
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintAllPartitions

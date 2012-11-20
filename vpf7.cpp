@@ -350,7 +350,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   finalCoefficient=this->Coefficient*other.Coefficient;
   if (finalCoefficient==0)
     return "";
-  WeylGroup& theWeyl=inputOwners.TheObjects[inputIndexInOwners].theWeyl;
+  WeylGroup& theWeyl=inputOwners[inputIndexInOwners].theWeyl;
   Vector<Rational> leftHWFundCoords;
   leftHWFundCoords=this->weightFundamentalCoords;
   Vector<Rational> rightHWFundCoords;
@@ -365,7 +365,7 @@ std::string MonomialChar<CoefficientType>::TensorAndDecompose
   HashedList<Vector<Rational> > weightsLeftSimpleCoords;
   List<Rational> multsLeft;
   if (!theWeyl.FreudenthalEval
-      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, tempS, theGlobalVariables, 1000000))
+      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, &theGlobalVariables, 1000000))
   { errorLog << "Freudenthal formula generated error: " << tempS;
     return errorLog.str();
   }
@@ -463,22 +463,6 @@ std::string charSSAlgMod<CoefficientType>::ElementToStringCharacter
   }
   out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theMod.ToString());
   return out.str();
-}
-
-int ParserNode::EvaluateFreudenthal(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  out << "Freudenthal formula: ";
-  charSSAlgMod<Rational>& ch=theNode.owner->TheObjects[theArgumentList[0]].theChar.GetElement();
-  charSSAlgMod<Rational> finalChar;
-  std::string localDetailsString;
-  if (ch.FreudenthalEvalMe(finalChar, localDetailsString, theGlobalVariables, 1000000))
-  { out << "resulting character in fundamental coordinates: <br>";
-    out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(finalChar.ToString());
-  }
-  out << "<br>" << localDetailsString;
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
 }
 
 int Parser::GetNumVarsModulePolys()

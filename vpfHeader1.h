@@ -1495,14 +1495,30 @@ public:
         output[i]+=tempElt;
       }
   }
+  unsigned int HashFunction()const
+  { return this->HashFunction(*this);
+  }
+  static unsigned int HashFunction(const Matrix<Element>& input)
+  { unsigned int result=0;
+    int counter=0;
+    for (int i=0; i<input.NumRows; i++, counter++)
+      for (int j=0; j<input.NumCols; j++, counter++)
+        if (counter<SomeRandomPrimesSize)
+          result+=input.elements[i][j].HashFunction()*SomeRandomPrimes[counter];
+        else
+          result+=input.elements[i][j].HashFunction()*(i+1)+j;
+    return result;
+  }
   template <class otherType>
   void ActOnVectorsColumn(const Vectors<otherType>& input, Vectors<otherType>& output, const otherType& TheRingZero=0)const
   { assert(&input!=&output);
     if (input.size==0)
       return;
     if (this->NumCols!=input.GetDim())
-    { std::cout << "This is a programming error: attempting to act by " << this->ToString() << "(an " << this->NumRows << " x "
-      << this->NumCols << " matrix) on a column vector " << input.ToString() << "(dimension " << input.size << ").";
+    { std::cout << "This is a programming error: attempting to act by "
+      << this->ToString() << "(an " << this->NumRows << " x "
+      << this->NumCols << " matrix) on a column vector " << input.ToString()
+      << "(dimension " << input.size << ").";
       assert(false);
     }
     output.SetSize(input.size);

@@ -200,6 +200,9 @@ public:
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
+  List<SemisimpleLieAlgebra>* owners;
+  int indexInOwners;
+  CandidateSSSubalgebra() :owners(0), indexInOwners(-1){}
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;
@@ -207,13 +210,16 @@ public:
     this->theCharFundCoords=other.theCharFundCoords;
     this->theWeyl=other.theWeyl;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
+    this->owners=other.owners;
+    this->indexInOwners=other.indexInOwners;
   }
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
   void AddHincomplete
   (WeylGroup& ownerWeyl, const Vector<Rational>& theH)
   ;
   bool ComputeChar
-(WeylGroup& ownerWeyl, List<SemisimpleLieAlgebra>& owners, int indexInOwners)
+(WeylGroup& ownerWeyl, List<SemisimpleLieAlgebra>& owners, int indexInOwners,
+ GlobalVariables* theGlobalVariables)
 
   ;
   bool isGoodForTheTop
@@ -229,6 +235,7 @@ public:
   int indexInOwners;
   SltwoSubalgebras theSl2s;
   List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
+  HashedList<SemisimpleLieAlgebra> theSubalgebras;
   List<SltwoSubalgebras> theSl2sOfSubalgebras;
 
   List<CandidateSSSubalgebra> Hcandidates;
@@ -249,6 +256,7 @@ public:
     this->theRecursionCounter=0;
   }
   std::string ToString(FormatExpressions* theFormat=0);
+  void AddCandidate(CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables);
   void FindTheSSSubalgebras
   (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
   ;

@@ -531,7 +531,7 @@ bool Data::IsInteger()const
 
 const Context& Data::GetContext()const
 { if (this->theContextIndex==-1)
-  { std::cout << "This is a programming error: the context requested of a data that has no context. "
+  { std::cout << "This is a programming error: requested context of data that has no context. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -622,7 +622,8 @@ std::string Data::ToString(std::stringstream* comments, bool isFinal, FormatExpr
     case Data::typeCharSSalgFinite:
       return this->GetValuE<charSSAlgMod<Rational> >().ToString(&theFormat);
     default:
-      std::cout << "This is a programming error: don't know how to convert element of type " << this->type
+      std::cout << "This is a programming error: don't know how to convert element of type "
+      << this->type
       << " (type " << this->ElementToStringDataType() << ") to string. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
       assert(false);
@@ -907,7 +908,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
   if (!isGood)
   { if (comments!=0)
       *comments
-       << "You requested element of the Cartan subalgebra labeled by (" << index1 << ", " << index2
+      << "You requested element of the Cartan subalgebra labeled by (" << index1 << ", " << index2
       << " of semisimple Lie algebra " << ownerAlgebra.GetLieAlgebraName()
       << "). For your request to succeed, the first index must be zero and the second must be an integer"
       << " between 1 and the rank of the Algebra which is " << ownerAlgebra.GetRank()
@@ -1899,7 +1900,7 @@ bool CommandList::fDecomposeCharGenVerma
 //  theSSlieAlg.theWeyl.RaiseToDominantWeight
 //  (theHWSimpCoordsFDPart, 0, 0, &raisingElt);
   ReflectionSubgroupWeylGroup theSub;
-  if (! theSub.MakeParabolicFromSelectionSimpleRoots
+  if (!theSub.MakeParabolicFromSelectionSimpleRoots
   (theSSlieAlg.theWeyl, parSel, *theCommands.theGlobalVariableS, 1000))
     return theExpression.SetError
     ("Failed to generate Weyl subgroup of Levi part (possibly too large? element limit is 1000).");
@@ -1976,7 +1977,7 @@ bool CommandList::fHWV
   Vector<RationalFunctionOld> theHWfundcoords;
   Context hwContext(theCommands);
   if(!theCommands.fGetTypeHighestWeightParabolic
-  (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, selectionParSel,  &hwContext)  )
+  (theCommands, inputIndexBoundVars, theExpression, comments, theHWfundcoords, selectionParSel, &hwContext)  )
     return theExpression.SetError("Failed to extract highest weight vector data");
   else
     if (theExpression.errorString!="")
@@ -2163,7 +2164,8 @@ class quasiDiffMon
   }
   public:
   //theWeylMon is a polynomial monomial in 2n variables if the Weyl algebra is in n variables.
-  //The first n variables are the x_i generators, the second n variables are the \partial_i (derivative)
+  //The first n variables are the x_i generators, the second n variables are the
+  //\partial_i (derivative)
   //generators.
   MonomialP theWeylMon;
   MonomialMatrix theMatMon;
@@ -2229,7 +2231,7 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
     MathRoutines::LieBracket(standsOnTheLeftNew, standsOnTheRightNew, output);
     return;
   }
-//    FormatExpressions tempFormat;
+//  FormatExpressions tempFormat;
 //  tempFormat.polyAlphabeT.SetSize(4);
 //  tempFormat.polyAlphabeT[0]="x_1";
 //  tempFormat.polyAlphabeT[1]="x_2";
@@ -3413,7 +3415,8 @@ bool CommandList::fSSAlgebra
           || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F'
           || theWeylLetter=='G'))
       return theExpression.SetError
-      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; error while processing "
+      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; \
+       error while processing "
        + currentMon.ToString(&theFormat));
     int theRank;
     if (!rankE.EvaluatesToSmallInteger(&theRank))
@@ -3553,7 +3556,8 @@ bool CommandList::fSSAlgebra
           << "</td></tr>";
         }
         out << "</table>";
-        out << "Note on root system convention. Except for F_4, our epsilon notation follows the convention "
+        out << "Note on root system convention. Except for F_4, "
+        << "our epsilon notation follows the convention "
         << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
         << " <br> For F_4, we follow "
         << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
@@ -3773,23 +3777,29 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; \
    {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
    4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
-   4.2) If the expression is of the form a*(b*c) and  a and b are rational, substitutes a*(b*c) by (a*b)*c. <br>\
-   4.3) If the expression is of the form a*(b*c) and b is rational but a is not, substitutes the expression by b*(a*c).",
+   4.2) If the expression is of the form a*(b*c) and  a and b are rational, \
+   substitutes a*(b*c) by (a*b)*c. <br>\
+   4.3) If the expression is of the form a*(b*c) and b is rational but a is not, \
+   substitutes the expression by b*(a*c).",
    "2*c_1*d*3", true);
     this->AddOperationNoFail
   ("\\otimes", this->StandardTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
-   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
+   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
+   \n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
    g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
   this->AddOperationNoFail
   ("[]", this->StandardLieBracket, "",
    "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
   this->AddOperationNoFail(":=", 0, "", "", "", true);
   this->AddOperationNoFail
-  (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. The expression a:=:b always reduces to \
-   a:=b. In addition to the transformation, the pair of expressions a,b is registered in a special global \"registry\". This has the following effect. Every time \
-   the expression b is met, it is displayed on the screen as a. We note that subsequent occurrences of the expression a will first be replaced by b (as mandated\
+  (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
+   The expression a:=:b always reduces to \
+   a:=b. In addition to the transformation, the pair of expressions a,b is registered in a \
+   special global \"registry\". This has the following effect. Every time \
+   the expression b is met, it is displayed on the screen as a. We note that subsequent \
+   occurrences of the expression a will first be replaced by b (as mandated\
    by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", true);
   this->AddOperationNoFail("if:=", 0, "", "", "", true);
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
@@ -4020,7 +4030,8 @@ bool CommandList::DoThePower
   if (leftE.IsElementUE())
     if (!theCommands.fPolynomial(theCommands, inputIndexBoundVars, rightE, 0))
     { if (comments!=0)
-        *comments << "<br>Failed to convert " << rightE.ToString() << ", the exponent of " << leftE.ToString()
+        *comments << "<br>Failed to convert " << rightE.ToString() << ", the exponent of "
+        << leftE.ToString()
         << ", to type polynomial. ";
       return false;
     }
@@ -4953,7 +4964,8 @@ bool CommandList::ExtractPMTDtreeContext
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
   { if (errorLog!=0)
       *errorLog << "Max recursion depth of " << this->MaxRecursionDeptH
-      << " exceeded while trying to evaluate polynomial expression (i.e. your polynomial expression is too large).";
+      << " exceeded while trying to evaluate polynomial expression "
+      << "(i.e. your polynomial expression is too large).";
     return false;
   }
   if (theInput.theOperation==this->opTimes() || theInput.theOperation==this->opPlus() || theInput.theOperation==this->opMinus())
@@ -6474,8 +6486,8 @@ bool CommandList::fFreudenthalEval
   (hwSimple, theCommands.theObjectContainer.theLieAlgebras, theSSalg.indexInOwner)
   ;
   std::string reportString;
-  if (!startingChar.FreudenthalEvalMe
-      (resultChar, reportString, *theCommands.theGlobalVariableS, 10000))
+  if (!startingChar.FreudenthalEvalMeDominantWeightsOnly
+      (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
     return theExpression.SetError(reportString);
   Data theData;
   theData.MakeChar(theCommands, resultChar);

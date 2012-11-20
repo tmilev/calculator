@@ -7803,8 +7803,8 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
 }
 
 std::string WeylGroup::GenerateWeightSupportMethoD1
-(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords, int upperBoundWeights,
- GlobalVariables& theGlobalVariables)
+(Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords,
+ int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
   double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
@@ -7819,7 +7819,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   out << "The highest weight in simple coordinates is: " << highestWeightTrue.ToString() << ".<br>";
   std::string tempS;
   bool isTrimmed = !this->GetAlLDominantWeightsHWFDIM
-  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, tempS, theGlobalVariables);
+  (highestWeightSimpleCoords, theDominantWeights, upperBoundInt, &tempS, &theGlobalVariables);
 
   out <<  tempS << "<br>";
   if (isTrimmed)
@@ -7828,7 +7828,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
     out << "Number of (non-strictly) dominant weights: " << theDominantWeights.size << "<br>";
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
-  int estimatedNumWeights=(int )
+  int estimatedNumWeights=(int)
   (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.ReservE(estimatedNumWeights);
@@ -8710,16 +8710,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     "(char(0,0,1)*char(1,0,0)-char(0,1,0))*char(0,0,1)",
    'B', 3, false,
     & ParserNode::EvaluateChar
-   );
-   this->AddOneFunctionToDictionaryNoFail
-  ("freudenthal",
-   "(Char)",
-   "<b>Experimental. </b> Freudenthal formula that gives the multiplicities of the dominant weights of the \
-    representation. The implementation works considerably slower than LiE(>10 times - the reason is technical; \
-     the algorithm used is approximately the same), so consider using LiE if you need to do a larger example. ",
-    "freudenthal(char(2,2,2))",
-   'B', 3, false,
-    & ParserNode::EvaluateFreudenthal
    );
    this->AddOneFunctionToDictionaryNoFail
   ("v",

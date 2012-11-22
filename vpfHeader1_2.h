@@ -2985,7 +2985,13 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 (WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)
   ;
   SemisimpleLieAlgebra& GetOwner()
-  { return this->listOwners->TheObjects[this->indexInOwners];
+  { if (this->listOwners==0)
+    { std::cout << "This is a programming error: requesting owner semisimple Lie algebra "
+      << " of non-initialized "
+      << " character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return this->listOwners->TheObjects[this->indexInOwners];
   }
 
   bool DrawMe
@@ -8249,7 +8255,8 @@ template <class CoefficientType>
 bool charSSAlgMod<CoefficientType>::FreudenthalEvalMeFullCharacter
  (charSSAlgMod<CoefficientType>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
   std::string* outputDetails, GlobalVariables* theGlobalVariables)
-{ charSSAlgMod<CoefficientType> domChar;
+{ MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeFullCharacter");
+  charSSAlgMod<CoefficientType> domChar;
   if (!this->FreudenthalEvalMeDominantWeightsOnly
       (domChar, upperBoundNumDominantWeights, outputDetails, theGlobalVariables))
     return false;
@@ -8279,7 +8286,8 @@ template <class CoefficientType>
 bool charSSAlgMod<CoefficientType>::FreudenthalEvalMeDominantWeightsOnly
  (charSSAlgMod<CoefficientType>& outputCharOwnerSetToZero, int upperBoundNumDominantWeights,
   std::string* outputDetails, GlobalVariables* theGlobalVariables)
-{ assert(&outputCharOwnerSetToZero!=this);
+{ MacroRegisterFunctionWithName("charSSAlgMod_CoefficientType::FreudenthalEvalMeDominantWeightsOnly");
+  assert(&outputCharOwnerSetToZero!=this);
   outputCharOwnerSetToZero.Reset();
   Vector<CoefficientType> currentWeightFundCoords;
   List<CoefficientType> currentMults;
@@ -8364,10 +8372,18 @@ bool WeylGroup::GenerateOrbit
 
 template <class CoefficientType>
 bool WeylGroup::FreudenthalEval
-(Vector<CoefficientType>& inputHWfundamentalCoords, HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoords,
+(Vector<CoefficientType>& inputHWfundamentalCoords,
+ HashedList<Vector<CoefficientType> >& outputDominantWeightsSimpleCoords,
  List<CoefficientType>& outputMultsSimpleCoords, std::string* outputDetails,
  GlobalVariables* theGlobalVariables, int UpperBoundFreudenthal)
 { //double startTimer=theGlobalVariables.GetElapsedSeconds();
+  MacroRegisterFunctionWithName("WeylGroup::FreudenthalEval");
+  for (int i=0; i<inputHWfundamentalCoords.size; i++)
+    if (inputHWfundamentalCoords[i]<0)
+    { if (outputDetails!=0)
+        *outputDetails= "The highest weight is not dominant and I cannot apply the Freudenthal formula.";
+      return false;
+    }
   this->ComputeRho(true);
   Vectors<Rational> EiBasis;
   EiBasis.MakeEiBasis(this->GetDim());
@@ -8375,15 +8391,7 @@ bool WeylGroup::FreudenthalEval
   Vector<CoefficientType> hwSimpleCoords=this->GetSimpleCoordinatesFromFundamental(inputHWfundamentalCoords);
   if (!this->GetAlLDominantWeightsHWFDIM
       (hwSimpleCoords, outputDominantWeightsSimpleCoords, UpperBoundFreudenthal, outputDetails, theGlobalVariables))
-  { if (outputDetails!=0)
-    { std::stringstream errorLog;
-      errorLog << "Error: the number of dominant weights exceeded hard-coded limit of "
-      << UpperBoundFreudenthal << ". Please check out whether LiE's implementation of the Freudenthal "
-      << " formula can do your computation.";
-      *outputDetails=errorLog.str();
-    }
     return false;
-  }
   Explored.initFillInObject(outputDominantWeightsSimpleCoords.size, false);
   outputMultsSimpleCoords.SetSize(outputDominantWeightsSimpleCoords.size);
   Vector<CoefficientType> currentWeight, currentDominantRepresentative, convertor;
@@ -8436,6 +8444,14 @@ bool WeylGroup::FreudenthalEval
     convertor+=this->rho;
     BufferCoeff=hwPlusRhoSquared;
     BufferCoeff-=this->RootScalarCartanRoot(convertor, convertor);
+    if (BufferCoeff==0)
+    { std::cout << "This is a programming or a mathematical error. I get "
+      << " that the denominator in the Freundenthal formula is zero. "
+      << " The highest weight is " << inputHWfundamentalCoords.ToString()
+      << ". The Weyl group details follow. "
+      << this->ToString();
+      assert(false);
+    }
     currentAccum/=BufferCoeff;
 
 //    std::cout << "<br>Coeff we divide by: " << (hwPlusRhoSquared-this->RootScalarCartanRoot
@@ -8529,17 +8545,17 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
     currentHashes.Clear();
 //    std::cout << ". Time spent clearing up buffer at height level " << lowestUnexploredHeightDiff
 //    << ": " << theGlobalVariables.GetElapsedSeconds()-startCycleTime;
+    if (numTotalWeightsFound>upperBoundDominantWeights && upperBoundDominantWeights>0)
+    { out << "<hr>The number of weights has "
+      << "exceeded the RAM memory limits, aborting the weight generation. ";
+      return false;
+    }
   }
-  out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
-  if (numTotalWeightsFound>=upperBoundDominantWeights)
-    out << "<hr>This message is generated either because the number of weights has "
-    << "exceeded the hard-coded RAM memory limits, or because "
-    << " a priori bound for the number of weights is WRONG. If the latter "
-    << " is the case, make sure to send an angry email to the author(s).";
   if (outputDetails!=0)
+  { out << " Total number of dominant weights: " << outputWeightsSimpleCoords.size;
     *outputDetails=out.str();
-  //std::cout << "<hr><hr>Total time spent generating weights: " << -startTime+theGlobalVariables.GetElapsedSeconds();
-  return (numTotalWeightsFound<=upperBoundDominantWeights);
+  }
+  return true;
 }
 
 template <class CoefficientType>

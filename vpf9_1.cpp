@@ -2437,7 +2437,8 @@ std::string SemisimpleLieAlgebra::GetLieAlgebraName
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
-{ this->CheckConsistency();
+{ MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstantS");
+  this->CheckConsistency();
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);

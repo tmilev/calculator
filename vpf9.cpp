@@ -3786,6 +3786,8 @@ std::string WeylGroup::ToString()
   out << "Elements of the group:\n";
   for (int i=0; i<this->size; i++)
     out << i << ". " << this->TheObjects[i].ToString() << "\n";
+  out << "<br>Symmetric cartan: "
+  << this->CartanSymmetric.ToString();
   return out.str();
 }
 

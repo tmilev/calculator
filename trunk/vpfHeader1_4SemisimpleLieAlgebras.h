@@ -256,7 +256,9 @@ public:
     this->theRecursionCounter=0;
   }
   std::string ToString(FormatExpressions* theFormat=0);
-  void AddCandidate(CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables);
+  void AddCandidatesSubalgebra
+  (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
+  ;
   void FindTheSSSubalgebras
   (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
   ;

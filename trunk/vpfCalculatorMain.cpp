@@ -401,14 +401,14 @@ g_{-2} v_\\lambda\
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ";
 //  civilizedInput="\\sqrt{}(2)+\\sqrt{}2";
 //  civilizedInput="\\sqrt{}(2)+\\sqrt{}2";
-//civilizedInput="FactorOneVarPolyOverRationals{}{x^2-4}";
-//civilizedInput="hwv{} (A_3, (1,0,1),(0,0,0)) ; ";
+//  civilizedInput="FactorOneVarPolyOverRationals{}{x^2-4}";
+//  civilizedInput="hwv{} (A_3, (1,0,1),(0,0,0)) ; ";
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (0,0), (0, 1)); ";
 //  civilizedInput="EmbedSSalgebraInWeylAlgebra{}(A_2, (1,0), ( 0, 1)); ";
 //  civilizedInput="PrintSemisimpleSubalgebras{}(A_2)";
 //  civilizedInput="DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))";
 //  civilizedInput="GroebnerBuchberger{}(x^2+1, y^2, x+y )";
-  //civilizedInput="GroebnerBuchberger{}(1-s^2-c^2, -x+s^3,-y+c^3)";
+//  civilizedInput="GroebnerBuchberger{}(1-s^2-c^2, -x+s^3,-y+c^3)";
 //  civilizedInput="GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )";
 //  civilizedInput= "PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))";
 //  civilizedInput="PrintSemisimpleSubalgebras{}(F_4)";
@@ -417,7 +417,8 @@ g_{-2} v_\\lambda\
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(a_3)";
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(b_3)";
-  //civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(A_2)";
+//  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(g_2)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

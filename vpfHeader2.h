@@ -1203,6 +1203,10 @@ bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments)
  ;
+  static bool fEmbedSSalgInSSalg
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments)
+ ;
   static bool fWeylOrbit
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useFundCoords, bool useRho)

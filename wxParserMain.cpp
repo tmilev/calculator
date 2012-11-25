@@ -11,8 +11,8 @@
 #include <wx/msgdlg.h>
 
 //(*InternalHeaders(wxParserFrame)
-#include <wx/intl.h>
 #include <wx/string.h>
+#include <wx/intl.h>
 //*)
 
 //helper functions
@@ -42,10 +42,6 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 //(*IdInit(wxParserFrame)
-const long wxParserFrame::ID_CHOICE1 = wxNewId();
-const long wxParserFrame::ID_SPINCTRL1 = wxNewId();
-const long wxParserFrame::ID_STATICTEXT1 = wxNewId();
-const long wxParserFrame::ID_SPINCTRL2 = wxNewId();
 const long wxParserFrame::ID_TEXTCTRL1 = wxNewId();
 const long wxParserFrame::ID_BUTTON1 = wxNewId();
 const long wxParserFrame::ID_BUTTON2 = wxNewId();
@@ -165,7 +161,8 @@ void FeedDataToIndicatorWindowWX(IndicatorWindowVariables& output)
   theMainWindow->mutexRuN.LockMe();
   std::stringstream out, out2;
   for (int i=0; i<output.ProgressReportStringS.size; i++)
-    out << output.ProgressReportStringS[i] << "\n";
+    if (output.ProgressReportStringS[i]!="")
+      out << output.ProgressReportStringS[i] << "\n";
   theMainWindow->ProgressReportString=out.str();
 //  theMainWindow->theStatus->TextCtrlProgressString->SetValue(wxString(theMainWindow->ProgressReportString.c_str(), wxConvUTF8));
 //  theMainWindow->theStatus->TextCtrlStatusString->SetValue(wxString(theMainWindow->StatusString.c_str(), wxConvUTF8));
@@ -177,57 +174,24 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
 { //(*Initialize(wxParserFrame)
   wxBoxSizer* BoxSizer2;
   wxBoxSizer* BoxSizer1;
-  wxBoxSizer* BoxSizer3;
 
-  Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
-  SetClientSize(wxSize(322,151));
-  this->TimerReady=false;
+  Create(parent, wxID_ANY, _("Frame"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
   BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-  BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
-  Choice1 = new wxChoice(this, ID_CHOICE1, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE1"));
-  Choice1->Append(_("A"));
-  Choice1->SetSelection( Choice1->Append(_("B")) );
-  Choice1->Append(_("C"));
-  Choice1->Append(_("D"));
-  Choice1->Append(_("E"));
-  Choice1->Append(_("F"));
-  Choice1->Append(_("G"));
-  Choice1->Disable();
-  BoxSizer3->Add(Choice1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-  SpinCtrl1 = new wxSpinCtrl(this, ID_SPINCTRL1, _T("3"), wxDefaultPosition, wxSize(36,27), 0, 2, 8, 3, _T("ID_SPINCTRL1"));
-  SpinCtrl1->SetValue(_T("3"));
-  SpinCtrl1->Disable();
-  BoxSizer3->Add(SpinCtrl1, 0, wxALL|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-  StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("frame:"), wxDefaultPosition, wxSize(42,17), 0, _T("ID_STATICTEXT1"));
-  StaticText1->Disable();
-  BoxSizer3->Add(StaticText1, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-  SpinCtrl2 = new wxSpinCtrl(this, ID_SPINCTRL2, _T("0"), wxDefaultPosition, wxSize(54,27), 0, 0, 5000, 0, _T("ID_SPINCTRL2"));
-  SpinCtrl2->SetValue(_T("0"));
-  SpinCtrl2->Disable();
-  BoxSizer3->Add(SpinCtrl2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-  BoxSizer1->Add(BoxSizer3, 0, wxALL|wxEXPAND|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("fTestMonomialBasisConjecture{}(4,50)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
-  TextCtrl1->SetMinSize(wxSize(100,20));
+  TextCtrl1 = new wxTextCtrl(this, ID_TEXTCTRL1, _("experimentalPrintSemisimpleSubalgebras{}(b_3)"), wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
   BoxSizer1->Add(TextCtrl1, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-  Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxSize(137,29), 0, wxDefaultValidator, _T("ID_BUTTON1"));
-  BoxSizer2->Add(Button1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-  Button2 = new wxButton(this, ID_BUTTON2, _("Pause Animation"), wxDefaultPosition, wxSize(155,29), 0, wxDefaultValidator, _T("ID_BUTTON2"));
-  BoxSizer2->Add(Button2, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+  Button1 = new wxButton(this, ID_BUTTON1, _("Go"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON1"));
+  BoxSizer2->Add(Button1, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+  Button2 = new wxButton(this, ID_BUTTON2, _("Pause"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON2"));
+  BoxSizer2->Add(Button2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   BoxSizer1->Add(BoxSizer2, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
   SetSizer(BoxSizer1);
   Timer1.SetOwner(this, ID_TIMER1);
-  Timer1.Start(100, false);
+  BoxSizer1->Fit(this);
   BoxSizer1->SetSizeHints(this);
 
-  Connect(ID_CHOICE1,wxEVT_COMMAND_CHOICE_SELECTED,(wxObjectEventFunction)&wxParserFrame::OnChoice1Select);
-  Connect(ID_SPINCTRL1,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl1Change);
-  Connect(ID_SPINCTRL2,wxEVT_COMMAND_SPINCTRL_UPDATED,(wxObjectEventFunction)&wxParserFrame::OnSpinCtrl2Change);
-  Connect(ID_TEXTCTRL1,wxEVT_COMMAND_TEXT_ENTER,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
   Connect(ID_BUTTON1,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton1Click);
   Connect(ID_BUTTON2,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&wxParserFrame::OnButton2Click);
-  Connect(ID_TIMER1,wxEVT_TIMER,(wxObjectEventFunction)&wxParserFrame::OnTimer1Trigger);
-  Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&wxParserFrame::OnClose);
   //*)
   this->theDrawPanel= new wxDrawPanel(this);
   this->theParserOutput= new wxParserOutput(this);
@@ -267,7 +231,7 @@ wxParserFrame::wxParserFrame(wxWindow* parent,wxWindowID id)
   //this->theDrawPanel->GetSize(&this->bitmapW, &this->bitmapH);
   theGlobalVariables.theDefaultFormat.flagUseLatex=true;
   theGlobalVariables.theDefaultFormat.flagUseHTML=false;
-  theGlobalVariables.MaxAllowedComputationTimeInSeconds=10000000;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000000;
   this->theCommandList.init(theGlobalVariables);
   this->indexCurrentPng=-1;
   this->bitmapH=600;
@@ -623,15 +587,6 @@ void wxParserFrame::OnChoice1Select(wxCommandEvent& event)
     this->UpdateChoices();*/
 }
 
-void wxParserFrame::OnSpinCtrl1Change(wxSpinEvent& event)
-{/* theParser.DefaultWeylRank=this->SpinCtrl1->GetValue();
-  char oldLetter=theParser.DefaultWeylLetter;
-  int oldRank = theParser.DefaultWeylRank;
-  CGI::MakeSureWeylGroupIsSane(theParser.DefaultWeylLetter, theParser.DefaultWeylRank);
-  if (oldLetter!=theParser.DefaultWeylLetter || oldRank != theParser.DefaultWeylRank)
-    this->UpdateChoices();*/
-}
-
 void wxPNGdisplay::OnMouseWheel(wxMouseEvent& event)
 { /*double rot = event.GetWheelRotation()/event.GetWheelDelta();
   theMainWindow->scalePNG+=(rot/100);
@@ -696,32 +651,3 @@ void AnimationBuffer::AddCloneLastFrameAppendOperations
   }
 }
 */
-
-
-void wxParserFrame::OnSpinCtrl2Change(wxSpinEvent& event)
-{ /*AnimationBuffer& theOps=theParser.theValue.theAnimation.GetElement();
-  int candidate= this->SpinCtrl2->GetValue();
-  if (candidate<theOps.theVirtualOpS.size && candidate>=0 && this->theSlideFrameIndices.size>0)
-  { theOps.indexVirtualOp=candidate;
-    this->theDrawPanel->Refresh();
-    int oldSize=-1; int newSize=0;
-    for (int i=-1; i<theMainWindow->theSlideFrameIndices.size; i++)
-    { oldSize=newSize;
-      if (i+1<this->theSlideFrameIndices.size)
-        newSize=this->theSlideFrameIndices[i+1];
-      else
-        newSize=100000; //"infinity"
-      if (theOps.indexVirtualOp>=oldSize && theOps.indexVirtualOp<newSize)
-      { theMainWindow->indexCurrentPng=i;
-          wxPostEvent(theMainWindow->thePNGdisplay->GetEventHandler(),
-             theMainWindow->eventPNGrepaint
-              );
-        break;
-      }
-    }
-  }
-  if (candidate>=theOps.theVirtualOpS.size)
-  { this->SpinCtrl2->SetRange(0, theOps.theVirtualOpS.size-1);
-    this->SpinCtrl2->SetValue(theOps.theVirtualOpS.size-1);
-  }*/
-}

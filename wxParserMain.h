@@ -12,12 +12,9 @@
 
 //(*Headers(wxParserFrame)
 #include <wx/sizer.h>
-#include <wx/stattext.h>
-#include <wx/textctrl.h>
-#include <wx/spinctrl.h>
-#include <wx/choice.h>
 #include <wx/button.h>
 #include <wx/frame.h>
+#include <wx/textctrl.h>
 #include <wx/timer.h>
 //*)
 
@@ -78,24 +75,18 @@ class wxParserFrame: public wxFrame
         //(*Handlers(wxParserFrame)
         void OnQuit(wxCommandEvent& event);
         void OnClose(wxCloseEvent& event);
-        void OnButton2Click(wxCommandEvent& event);
-        void OnButton1Click(wxCommandEvent& event);
         void OnTimer1Trigger(wxTimerEvent& event);
         void OnChoice1Select(wxCommandEvent& event);
-        void OnSpinCtrl1Change(wxSpinEvent& event);
         void OnTextCtrl1Text(wxCommandEvent& event);
         void OnTextCtrl1Text1(wxCommandEvent& event);
         void OnTextCtrl1Text2(wxCommandEvent& event);
-        void OnSpinCtrl2Change(wxSpinEvent& event);
         void OnTextCtrl1Text3(wxCommandEvent& event);
         void OnTextCtrl1Text4(wxCommandEvent& event);
+        void OnButton1Click(wxCommandEvent& event);
+        void OnButton2Click(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(wxParserFrame)
-        static const long ID_CHOICE1;
-        static const long ID_SPINCTRL1;
-        static const long ID_STATICTEXT1;
-        static const long ID_SPINCTRL2;
         static const long ID_TEXTCTRL1;
         static const long ID_BUTTON1;
         static const long ID_BUTTON2;
@@ -103,14 +94,10 @@ class wxParserFrame: public wxFrame
         //*)
 
         //(*Declarations(wxParserFrame)
-        wxSpinCtrl* SpinCtrl1;
         wxButton* Button1;
-        wxStaticText* StaticText1;
         wxButton* Button2;
-        wxSpinCtrl* SpinCtrl2;
-        wxTextCtrl* TextCtrl1;
-        wxChoice* Choice1;
         wxTimer Timer1;
+        wxTextCtrl* TextCtrl1;
         //*)
         void OnComputationOver(wxCommandEvent& ev);
         void OnProgressReport(wxCommandEvent& ev);

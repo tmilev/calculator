@@ -3512,6 +3512,30 @@ std::string DynkinSimpleType::ToString()const
   return out.str();
 }
 
+int DynkinSimpleType::GetRootSystemSize()const
+{ switch(this->theLetter)
+  { case 'A':
+      return this->theRank*(this->theRank+1);
+    case 'B':
+    case 'C':
+      return this->theRank*this->theRank*2;
+    case 'D':
+      return this->theRank*(this->theRank-1) *2;
+    case 'E':
+      switch(this->theRank)
+      { case 6: return 72;
+        case 7: return 126;
+        case 8: return 240;
+        default: return -1;
+      }
+    case 'G':
+      return 12;
+    case 'F':
+      return 48;
+    default: return -1;
+  }
+}
+
 Rational DynkinSimpleType::GetHCoRootLengthSquared()
 { Rational result;
   switch(this->theLetter)
@@ -3525,6 +3549,38 @@ Rational DynkinSimpleType::GetHCoRootLengthSquared()
     case 'F':
       return this->lengthFirstSimpleRootSquared/2;
     default: return -1;
+  }
+}
+
+Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
+(int rootIndex)const
+{ Rational result;
+  switch (this->theLetter)
+  { case 'A':
+    case 'D':
+    case 'E':
+      return 1;
+    case 'B':
+      if (rootIndex==this->theRank-1)
+      { result.AssignNumeratorAndDenominator(1,2);
+        return result;
+      }
+      return 1;
+    case 'C':
+      if (rootIndex==this->theRank-1)
+        return 2;
+      return 1;
+    case 'F':
+      if (rootIndex<2)
+        return 1;
+      result.AssignNumeratorAndDenominator(1,2);
+      return result;
+    case 'G':
+      if (rootIndex==1)
+        return 3;
+      return 1;
+    default:
+      return -1;
   }
 }
 

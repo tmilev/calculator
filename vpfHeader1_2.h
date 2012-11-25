@@ -771,6 +771,10 @@ class DynkinSimpleType
     this->theRank=1;
     this->lengthFirstSimpleRootSquared=2;
   }
+  int GetRootSystemSize()const;
+  int GetSSAlgDim()const
+  { return this->GetRootSystemSize()+this->theRank;
+  }
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
@@ -792,6 +796,10 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
+  Rational GetRatioRootSquaredToFirstSquared
+  (int rootIndex)const
+  ;
+
   static Rational GetRatioLongRootToFirst
   (char inputWeylLetter, int inputRank)
   ;
@@ -837,7 +845,7 @@ public:
     }
   }
   Rational GetSizeWeylByFormula()const;
-  std::string ToString(FormatExpressions* theFormat=0)
+  std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out << *this;
     return out.str();

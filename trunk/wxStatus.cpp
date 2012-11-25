@@ -17,8 +17,8 @@ END_EVENT_TABLE()
 wxStatus::wxStatus(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
 	//(*Initialize(wxStatus)
-	Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
-	TextCtrlProgressString = new wxTextCtrl(this, ID_TEXTCTRL1, wxEmptyString, wxPoint(152,312), wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
+	Create(parent, id, _("Progress"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("id"));
+	TextCtrlProgressString = new wxTextCtrl(this, ID_TEXTCTRL1, wxEmptyString, wxPoint(152,312), wxDefaultSize, wxTE_MULTILINE, wxDefaultValidator, _T("ID_TEXTCTRL1"));
 	//*)
 }
 

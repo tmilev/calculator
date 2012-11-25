@@ -36,6 +36,51 @@ bool CommandList::fSSsubalgebras
   return true;
 }
 
+bool CommandList::fEmbedSSalgInSSalg
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ //bool showIndicator=true;
+  MacroRegisterFunctionWithName("CommandList::fEmbedSSalgInSSalg");
+  if (theExpression.children.size!=2)
+    return theExpression.SetError("I expect two arguments - the two semisimple subalgebras.");
+  Expression& EsmallSA=theExpression.children[0];
+  Expression& ElargeSA=theExpression.children[1];
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, EsmallSA, comments))
+    return false;
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, ElargeSA, comments))
+    return false;
+
+  SemisimpleLieAlgebra& ownerSS=ElargeSA.GetAtomicValue().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& smallSS=EsmallSA.GetAtomicValue().GetAmbientSSAlgebra();
+
+  std::stringstream out;
+  if (ownerSS.GetRank()>4)
+  { out << "<b>This code is completely experimental and has been set to run up to rank 4."
+    << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
+    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+    return true;
+  }
+  else
+    out << "<b>This code is completely experimental. Use the following printouts on "
+    << "your own risk</b>";
+  SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
+  DynkinSimpleType theType;
+  theType.theLetter=smallSS.theWeyl.WeylLetter;
+  theType.theRank=smallSS.GetRank();
+  theSSsubalgebras.FindAllEmbeddings
+  (theType, ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
+  FormatExpressions theFormat;
+  std::stringstream out1, out2;
+  out1 << theCommands.PhysicalPathOutputFolder
+  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  out2 << theCommands.DisplayPathOutputFolder
+  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  theFormat.physicalPath=out1.str();
+  theFormat.htmlPathServer=out2.str();
+  out << "<br>" << theSSsubalgebras.ToString(&theFormat);
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
 bool CommandList::fGroebnerBuchberger
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
  std::stringstream* comments, bool useGr)

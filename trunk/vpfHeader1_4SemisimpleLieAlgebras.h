@@ -197,6 +197,7 @@ public:
   WeylGroup theWeyl;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
+  DynkinType theTypeTotal;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
@@ -212,6 +213,7 @@ public:
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
     this->owners=other.owners;
     this->indexInOwners=other.indexInOwners;
+    this->theTypeTotal=other.theTypeTotal;
   }
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
   void AddHincomplete
@@ -259,6 +261,10 @@ public:
   void AddCandidatesSubalgebra
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;
+  void FindAllEmbeddings
+  (DynkinSimpleType& theType, List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner,
+   GlobalVariables* theGlobalVariables)
+  ;
   void FindTheSSSubalgebras
   (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
   ;
@@ -266,10 +272,14 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ExtendCandidatesRecursive
-  (const CandidateSSSubalgebra& baseCandidate, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
   ;
+  void ExtendOneComponentOneTypeAllLengthsRecursive
+  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType,
+   bool propagateRecursion, GlobalVariables* theGlobalVariables)
+;
   void ExtendOneComponentRecursive
-  (const CandidateSSSubalgebra& baseCandidate,
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
    GlobalVariables* theGlobalVariables)
   ;
 };

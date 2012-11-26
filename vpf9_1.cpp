@@ -1002,7 +1002,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
 { this->SimpleBasesConnectedComponents.size=0;
   this->SimpleBasesConnectedComponents.ReservE(simpleBasisInput.size);
 //  std::string tempS= simpleBasisInput.ToString();
-  //if (tempS=="Num Vectors<Rational>: 2\n(1, 0, 0), (0, 1, 1)")
+  //if (tempS=="Num vectors: 2\n(1, 0, 0), (0, 1, 1)")
   //  tempS="!!";
   for (int i=0; i<simpleBasisInput.size; i++)
   { int indexFirstComponentConnectedToRoot=-1;

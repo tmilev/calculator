@@ -285,6 +285,11 @@ void CommandList::initPredefinedVars()
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebras{}(A_2)", true);
+  this->AddNonBoundVarMustBeNew
+  ("experimentalEmbedSemisimpleInSemisimple", &this->fEmbedSSalgInSSalg, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Prints all embeddings of the first subalgebra into the second. ",
+   "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true);
 //     this->AddNonBoundVarMustBeNew
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
@@ -297,6 +302,7 @@ void CommandList::initPredefinedVars()
 //  ("\\sqrt", & this->fSqrt, "",
 //   "Square root of a rational, implemented as algebraic extension of the rationals. ",
 //   "\\sqrt{}{3+2\\sqrt{}2}");
+
   this->AddNonBoundVarMustBeNew
   ("FactorOneVarPolyOverRationals", & this->fFactor, "",
    "Factors a one variable polynomial over the rationals using Kroenecker's method. \
@@ -308,7 +314,7 @@ void CommandList::initPredefinedVars()
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}", false);
   this->AddNonBoundVarMustBeNew
-  ("Freudenthal", & this->fFreudenthalEval, "",
+  ("Freudenthal", &this->fFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
    module of a highest weight given in fundamental coordinates. The first argument gives \
    the semisimple Lie algebra type, the second argument gives the highest weight in \

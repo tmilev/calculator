@@ -8339,7 +8339,7 @@ std::string Vectors<CoefficientType>::ToString(FormatExpressions* theFormat)cons
 //    makeTable=theFormat->flagma
   }
   if (!useLaTeX && !useHtml)
-    out << "Num Vectors<Rational>: " << this->size << "\n";
+    out << this->size << " vectors: \n";
   if (useLaTeX && makeTable)
     out << "\\begin{tabular}{c}";
   if (useHtml && makeTable)

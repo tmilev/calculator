@@ -51,7 +51,6 @@ bool CommandList::fEmbedSSalgInSSalg
 
   SemisimpleLieAlgebra& ownerSS=ElargeSA.GetAtomicValue().GetAmbientSSAlgebra();
   SemisimpleLieAlgebra& smallSS=EsmallSA.GetAtomicValue().GetAmbientSSAlgebra();
-
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
@@ -66,6 +65,7 @@ bool CommandList::fEmbedSSalgInSSalg
   DynkinSimpleType theType;
   theType.theLetter=smallSS.theWeyl.WeylLetter;
   theType.theRank=smallSS.GetRank();
+  out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindAllEmbeddings
   (theType, ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
   FormatExpressions theFormat;

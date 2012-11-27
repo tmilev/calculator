@@ -3502,7 +3502,7 @@ Rational DynkinType::GetSizeWeylByFormula()const
 std::string DynkinSimpleType::ToString()const
 { std::stringstream out;
   out << theLetter << "^{"
-  << this->lengthFirstSimpleRootSquared << "}";
+  << this->lengthFirstCoRootSquared << "}";
   if (theRank>=10)
     out << "_{" << theRank << "}";
   else
@@ -3536,20 +3536,11 @@ int DynkinSimpleType::GetRootSystemSize()const
   }
 }
 
-Rational DynkinSimpleType::GetHCoRootLengthSquared()
-{ Rational result;
-  switch(this->theLetter)
-  { case 'A':
-    case 'B':
-    case 'C':
-    case 'D':
-    case 'E':
-    case 'G':
-      return this->lengthFirstSimpleRootSquared;
-    case 'F':
-      return this->lengthFirstSimpleRootSquared/2;
-    default: return -1;
-  }
+Rational DynkinSimpleType::GetDefaultCoRootLengthSquared(int rootIndex)const
+{ Rational result=this->GetDefaultRootLengthSquared(rootIndex);
+  result.Invert();
+  result*=4;
+  return result;
 }
 
 Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
@@ -3584,33 +3575,35 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
   }
 }
 
-Rational DynkinSimpleType::GetDefaultRootLengthDiv2
+Rational DynkinSimpleType::GetDefaultRootLengthSquared
 (int rootIndex)const
-{ Rational result;
-  switch (this->theLetter)
+{ switch (this->theLetter)
   { case 'A':
     case 'D':
     case 'E':
-      return 1;
+      return 2;
     case 'B':
       if (rootIndex==this->theRank-1)
-      { result.AssignNumeratorAndDenominator(1,2);
-        return result;
-      }
-      return 1;
+        return 1;
+      return 2;
     case 'C':
       if (rootIndex==this->theRank-1)
-        return 2;
-      return 1;
+        return 4;
+      return 2;
     case 'F':
       if (rootIndex<2)
-        return 2;
-      return 1;
+        return 4;
+      return 2;
     case 'G':
       if (rootIndex==1)
-        return 3;
-      return 1;
+        return 6;
+      return 2;
     default:
+      std::cout << "This is a programming error: "
+      << "calling DynkinSimpleType::GetDefaultRootLengthSquared on the non-initialized "
+      << " Dynkin type " << this->ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
       return -1;
   }
 }
@@ -3986,6 +3979,21 @@ void WeylGroup::MakeG2()
   this->CartanSymmetric.elements[1][0]=-3;
   this->CartanSymmetric.elements[0][1]=-3;
 //  this->UpdateIntBuffer();
+}
+
+void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
+{ Vectors<Rational> tempRoots;
+  tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
+}
+
+void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
+{ Vectors<Rational> tempRoots;
+  Vectors<Rational> tempInput, tempOutput;
+  tempInput.AddOnTop(input);
+  tempRoots.MakeEiBasis(this->GetDim());
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
+  output=tempOutput.TheObjects[0];
 }
 
 void WeylGroup::GetEpsilonCoordsWRTsubalgebra

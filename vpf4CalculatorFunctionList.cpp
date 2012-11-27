@@ -12,17 +12,32 @@ void CommandList::initPredefinedVars()
   this->AddNonBoundVarMustBeNew
   ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
    "Creates a semisimple Lie algebra. \
-   The type of the semisimple Lie algebra is given in one of two formats:\
-   either format such as A_3, or format such as A^2_3 (note that A_3^2 will not work). \
-   The format A_3 means a Lie algebra type with default root lengths. \
-   The format A^5_3 means a Lie algebra in which the first root has squared length 5.\
-   In this way, the types A_6, B_6, C_6, D_6, E_6, G_2 are a short-hand for\
-   A^2_6, B^2_6, C^2_6, D^2_6, E^2_6, G^2_2. The type F_4 is short-hand for\
-   F^4_4.<br><br> A semisimple Lie algebra is treated like a function \
-   that returns the elements of a simple Lie algebra.  \
-   Elements of the cartan are addressed as arguments of the form (0,s), root system \
-   generators are addressed \
-   with one index only. ",
+    The type of the semisimple Lie algebra is given in the format\
+    such as A_3, where A stands for the type and 3 for the rank. \
+    The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
+    E_6, E_7, E_8, F_4, G_2. \
+    The roots are ordered in order identical with the order implied by \
+    the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
+    Introduction to Lie algebras and representation theory. \
+    In addition, we scale the roots so that the long root has squared length 2 in types \
+    A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2. \
+    Except for F_4, our root length convention coincides with Humphreys', paragraph 12.1\
+    (for F_4, Humphreys' convention dictates long root length squared 2, unlike our convention).\
+    <br>An upper index may be present in the type notation, but is non-mandatory. \
+    The upper index denotes the length of the first co-root squared, \
+    and is used when dealing with Lie subalgebras/ \
+    Lie algebra homomorphisms. If you are computing with one Lie algebra only, the upper index\
+    plays no practical role.  \
+    <br>The i^th co-root length squared is defined as 4/(default squared length of the \
+    i^th simple root). \
+    <br>If you omit the upper index, a default first co-root  length squared is chosen for you. \
+    The default first co-root length squared is 2 for all types except for F_4, where the \
+    default first co-root length squared is 1. \
+    <br> A semisimple Lie algebra is treated like a function \
+    that returns the elements of a simple Lie algebra.  \
+    Elements of the cartan are addressed as arguments of the form (0,s), root system \
+    generators are addressed \
+    with one index only. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
   ("printSemisimpleLieAlgebra", & this->fSSAlgebraVerbose, "",

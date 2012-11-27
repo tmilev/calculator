@@ -189,8 +189,8 @@ int main(int argc, char **argv)
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-	getPath(argv[0], inputPatH);
-
+	if (argc>=1)
+    getPath(argv[0], inputPatH);
   theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
   theParser.InitJavaScriptDisplayIndicator();
 

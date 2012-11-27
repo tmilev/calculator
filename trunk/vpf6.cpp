@@ -3269,28 +3269,40 @@ bool CommandList::fWeylOrbit
     << " elements only.";
   else
     out << "The orbit has " << outputOrbit.size << " elements.";
-  latexReport << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}}Element & Image fund. coordinates& Hw minus wt. \\\\\n<br>";
-  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> <td>In fundamental coords</td>";
+  latexReport
+  << "\\begin{longtable}{p{3cm}p{4cm}p{4cm}p{4cm}}Element & Eps. coord. & Image fund. coordinates& "
+  << "Hw minus wt. \\\\\n<br>";
+  out << "<table><tr> <td>Group element</td> <td>Image in simple coords</td> "
+  << "<td>Epsilon coords</td><td>Fundamental coords</td>";
   if (useRho)
     out << "<td>Corresponding b-singular vector candidate</td>";
   out << "</tr>";
   MonomialUniversalEnveloping<Polynomial<Rational> > standardElt;
   LargeInt tempInt;
   bool useMathTag=outputOrbit.size<150;
+  Matrix<Rational> epsCoordMat;
+  theSSalgebra.theWeyl.GetEpsilonMatrix
+  (theSSalgebra.theWeyl.WeylLetter, theSSalgebra.GetRank(), epsCoordMat);
   for (int i=0; i<outputOrbit.size; i++)
   { theFormat.simpleRootLetter="\\alpha";
     theFormat.fundamentalWeightLetter="\\psi";
     std::string orbitEltString=outputOrbit[i].ToString(&theFormat);
+    Vector<Polynomial<Rational> > epsVect=outputOrbit[i];
+    epsCoordMat.ActOnVectorColumn(epsVect);
+    std::string orbitEltStringEpsilonCoords=epsVect.ToStringEpsilonFormat();
     std::string weightEltString=
     theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(outputOrbit[i]).ToStringLetterFormat
     (theFormat.fundamentalWeightLetter, &theFormat);
     out << "<tr>" << "<td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitGeneratingSet[i].ToString()) : orbitGeneratingSet[i].ToString())
     << "</td><td>"
-    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString)<< "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltString) : orbitEltString) << "</td><td>"
+    << (useMathTag ? CGI::GetHtmlMathSpanPure(orbitEltStringEpsilonCoords) : orbitEltStringEpsilonCoords) << "</td><td>"
     << (useMathTag ? CGI::GetHtmlMathSpanPure(weightEltString) : weightEltString)
     << "</td>";
-    latexReport <<"$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
+    latexReport << "$" << orbitGeneratingSet[i].ToString(&theFormat) << "$ & $"
+    << orbitEltStringEpsilonCoords
+    << "$ & $"
     <<  weightEltString << "$ & $"
     << (outputOrbit[0]-outputOrbit[i]).ToStringLetterFormat(theFormat.simpleRootLetter, &theFormat)
     << "$\\\\\n<br>"
@@ -3370,7 +3382,7 @@ bool CommandList::fSSAlgebra
        " appears not to be a Dynkin simple type ");
     Expression rankE;
     Expression lengthE;
-    Rational firstRootLength;
+    Rational firstCoRootLength=0;
     bool foundLengthFromExpression=false;
     if (typeE.theOperation==theCommands.opThePower())
     { lengthE=typeE.children[1];
@@ -3387,10 +3399,10 @@ bool CommandList::fSSAlgebra
       foundLengthFromExpression=true;
     }
     if (foundLengthFromExpression)
-    { if (!lengthE.EvaluatesToRational(&firstRootLength))
+    { if (!lengthE.EvaluatesToRational(&firstCoRootLength))
         return theExpression.SetError
         ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
-      if (firstRootLength<=0)
+      if (firstCoRootLength<=0)
         return theExpression.SetError
         ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
     }
@@ -3427,19 +3439,18 @@ bool CommandList::fSSAlgebra
       ("The rank of a simple Lie algebra must be between 1 and 8; error while processing "
        + currentMon.ToString(&theFormat));
     tempW.MakeArbitrary(theWeylLetter, theRank);
-    if (foundLengthFromExpression)
-    { firstRootLength/=tempW.CartanSymmetric(0,0);
-      tempW.CartanSymmetric*=firstRootLength;
-    }
     simpleComponent.theLetter=theWeylLetter;
     simpleComponent.theRank= theRank;
-    simpleComponent.lengthFirstSimpleRootSquared= tempW.CartanSymmetric(0,0);
+    if (!foundLengthFromExpression)
+      simpleComponent.lengthFirstCoRootSquared=simpleComponent.GetDefaultCoRootLengthSquared(0);
+    else
+      simpleComponent.lengthFirstCoRootSquared= firstCoRootLength;
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
     if (theMultiplicity<0)
     { std::stringstream out;
-      out << "I faiiled to convert the coefficient " << theType.theCoeffs[i]
+      out << "I failed to convert the coefficient " << theType.theCoeffs[i]
       << " of " << currentMon.ToString(&theFormat) << " to a small integer";
       return theExpression.SetError(out.str());
     }

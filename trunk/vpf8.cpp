@@ -3183,7 +3183,7 @@ bool Lattice::GetClosestPointInDirectionOfTheNormalToAffineWallMovingIntegralSte
     if (theDirection.ScalarEuclidean(theNormal).IsPositive())
       theMovement+=1;
   }
-  std::cout << "the normal: " << theNormal.ToString() <<", the direction: " << theDirection.ToString() << ", the shift: " << theShift.ToString()
+  std::cout << "the normal: " << theNormal.ToString() << ", the direction: " << theDirection.ToString() << ", the shift: " << theShift.ToString()
   << ", the movement: " << theMovement.ToString() << ", startingPoint: " << startingPoint.ToString();
   outputPoint=startingPoint;
   outputPoint+=(theDirection*theMovement);

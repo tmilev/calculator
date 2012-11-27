@@ -86,10 +86,9 @@ GlobalVariables* theGlobalVariables)
   }
   int indexFirstWeight=baseCandidate.theWeyl.CartanSymmetric.NumRows- theNewTypE.theRank;
   int indexCurrentWeight=indexFirstWeight+numVectorsFound;
-  Rational desiredLengthSquared=theNewTypE.lengthFirstSimpleRootSquared;
-
-//  desiredLengthSquared*=theNewTypE.GetRatioRootSquaredToFirstSquared(numVectorsFound);
-  desiredLengthSquared/=theNewTypE.GetRatioRootSquaredToFirstSquared(numVectorsFound);
+  Rational desiredLengthSquared=theNewTypE.lengthFirstCoRootSquared;
+  desiredLengthSquared*=theNewTypE.GetDefaultRootLengthSquared(0);
+  desiredLengthSquared/=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
   Vectors<Rational> startingVector;
   HashedList<Vector<Rational> > theOrbit;
   Vector<Rational> Hrescaled;
@@ -105,7 +104,7 @@ GlobalVariables* theGlobalVariables)
   { if (theGlobalVariables!=0)
     { std::stringstream reportStreamX;
       reportStreamX
-      << "extending  " << baseCandidate.theTypeTotal.ToString() << ", "
+      << "Extending  " << baseCandidate.theTypeTotal.ToString() << ", "
       << numVectorsFound << " out of "
       << theNewTypE.theRank << ", desired length squared= " << desiredLengthSquared << " ."
       << " Current length is " << this->theSl2s[i].LengthHsquared;
@@ -114,7 +113,7 @@ GlobalVariables* theGlobalVariables)
       else
         reportStreamX << " which is all nice and dandy.<br>";
       theReport1.Report(reportStreamX.str());
-      std::cout << reportStreamX.str();
+      std::cout << "<br>" << reportStreamX.str();
     }
     if (this->theSl2s[i].LengthHsquared!=desiredLengthSquared)
       continue;
@@ -141,7 +140,8 @@ GlobalVariables* theGlobalVariables)
         theReport2.Report(out2.str());
       }
       Hrescaled=theOrbit[j];
-      Hrescaled*=theNewTypE.GetDefaultRootLengthDiv2(numVectorsFound);
+      Hrescaled*=theNewTypE.GetDefaultRootLengthSquared(numVectorsFound);
+      Hrescaled/=2;
       if (baseCandidate.isGoodForTheTop(this->GetSSowner().theWeyl, Hrescaled))
       { if (theGlobalVariables!=0)
         { out2 << " the candidate is good. Attempting to extend it by recursion. ";
@@ -185,8 +185,8 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   }
   WeylGroup tempWeyl;
   tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
-  Rational scale=theNewType.lengthFirstSimpleRootSquared/tempWeyl.CartanSymmetric(0,0);
-  tempWeyl.CartanSymmetric*=scale;
+//  Rational scale=theNewType.lengthFirstSimpleRootSquared/tempWeyl.CartanSymmetric(0,0);
+//  tempWeyl.CartanSymmetric*=scale;
   this->theWeyl.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;
@@ -278,7 +278,14 @@ bool CandidateSSSubalgebra::ComputeChar
       this->theTypeTotal.ToString()=="G^{6}_2"
       )
   { std::cout << "<br>the root system of the Weyl is: "
-    << this->theWeyl.RootSystem.ToString();
+    << this->theWeyl.RootSystem.ToString()
+    << ". The first type is " << this->theTypes[0].ToString()
+    << " with default root lengths squared "
+    << this->theTypes[0].GetDefaultRootLengthSquared(0)
+    << " and "
+    << this->theTypes[0].GetDefaultRootLengthSquared(1)
+    << "<br>"
+    ;
   }
   for (int k=0; k<ownerWeyl.RootSystem.size; k++)
   { int counter=-1;
@@ -288,8 +295,14 @@ bool CandidateSSSubalgebra::ComputeChar
         tempMon.weightFundamentalCoords[counter]=
         ownerWeyl.RootScalarCartanRoot
         (ownerWeyl.RootSystem[k], this->CartanSAsByComponent[i][j])
-        /this->theTypes[i].GetDefaultRootLengthDiv2(j)
+        /this->theTypes[i].GetDefaultRootLengthSquared(j)*2
         ;
+        if (this->theTypeTotal.ToString()=="G^{6}_2")
+        { std::cout << "<br> ((" <<  ownerWeyl.RootSystem[k]
+          << ", " << this->CartanSAsByComponent[i][j] << "))="
+          << ownerWeyl.RootScalarCartanRoot
+          (ownerWeyl.RootSystem[k], this->CartanSAsByComponent[i][j]);
+        }
       }
     this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, 1);
   }
@@ -359,12 +372,13 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
         &&
         theType.theLetter==baseCandidate.theTypes.LastObject()->theLetter
         )
-      baseLength=baseCandidate.theTypes.LastObject()->lengthFirstSimpleRootSquared;
+      baseLength=baseCandidate.theTypes.LastObject()->lengthFirstCoRootSquared;
   //if (this->GetSSowner().GetRank()-(+)
   std::stringstream consideringStream;
   consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
   consideringStream << "<br>\nCurrent rank: " << currentRank
   << "<br>\nConsidering: " << theType.ToString();
+  std::cout << "<br>Considering: " << theType.ToString();
   theProgressReport1.Report(consideringStream.str());
   if (currentRank!=0 && dimCentralizerBase < theType.GetSSAlgDim())
   { consideringStream << " turns out to be no good as the desired root system size is "
@@ -375,8 +389,8 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     return;
   }
   for (int k=0; k<this->theSl2s.size; k++)
-  { theType.lengthFirstSimpleRootSquared=this->theSl2s[k].LengthHsquared;
-    if (theType.lengthFirstSimpleRootSquared<baseLength)
+  { theType.lengthFirstCoRootSquared=this->theSl2s[k].LengthHsquared;
+    if (theType.lengthFirstCoRootSquared<baseLength)
       continue;
     theCandidate=baseCandidate;
     tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
@@ -407,11 +421,8 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     bool isGood=true;
     for (int i=0; i<theSmallSl2s.size; i++)
     { isGood=false;
-      Rational desiredLength=theType.lengthFirstSimpleRootSquared/
-      tempAlgebra.theWeyl.CartanSymmetric(0,0)*theSmallSl2s[i].LengthHsquared;
       for (int j=0; j<this->theSl2s.size; j++)
-      { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]) ||
-            !(this->theSl2s[j].LengthHsquared==desiredLength))
+      { if (!theSmallSl2s[i].ModuleDecompositionFitsInto(this->theSl2s[j]))
           continue;
         isGood=true;
         break;
@@ -423,10 +434,11 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     { std::stringstream out;
       out << " \n" << theType.ToString();
       if (isGood)
-      { out << " has fitting sl(2) decompositions.";
-      }
-      else
-      { out << " does not have fitting sl(2) decompositions.";
+      { out << "<br>" << theType.ToString() << " has fitting sl(2) decompositions.";
+        std::cout  << "<br>" << theType.ToString() << " has fitting sl(2) decompositions.";
+      } else
+      { out << "<br>" << theType.ToString() << " does not have fitting sl(2) decompositions.";
+        std::cout  << "<br>" << theType.ToString() << " does not have fitting sl(2) decompositions.";
       }
       theProgressReport3.Report(out.str());
     }
@@ -448,7 +460,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   myType.MakeAone();
   myType.theLetter=this->GetSSowner().theWeyl.WeylLetter;
   myType.theRank=this->GetSSowner().GetRank();
-  myType.lengthFirstSimpleRootSquared=this->theSl2s[0].LengthHsquared;
+  myType.lengthFirstCoRootSquared=this->theSl2s[0].LengthHsquared;
   if(theGlobalVariables!=0)
   { std::stringstream out;
     out << "\nExploring extensions of " << baseCandidate.ToString();
@@ -459,7 +471,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
     theType.MakeAone();
   else
     theType=*baseCandidate.theTypes.LastObject();
-  for (; theType<myType; theType++)
+  for (; theType<myType; theType++, theType.lengthFirstCoRootSquared=-1)
     this->ExtendOneComponentOneTypeAllLengthsRecursive
       (baseCandidate, theType, propagateRecursion, theGlobalVariables);
 }

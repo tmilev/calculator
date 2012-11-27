@@ -764,12 +764,12 @@ class DynkinSimpleType
   public:
   char theLetter;
   int theRank;
-  Rational lengthFirstSimpleRootSquared;
-  DynkinSimpleType(): theLetter('X'), theRank(-1), lengthFirstSimpleRootSquared(0){}
+  Rational lengthFirstCoRootSquared;
+  DynkinSimpleType(): theLetter('X'), theRank(-1), lengthFirstCoRootSquared(0){}
   void MakeAone()
   { this->theLetter='A';
     this->theRank=1;
-    this->lengthFirstSimpleRootSquared=2;
+    this->lengthFirstCoRootSquared=2;
   }
   int GetRootSystemSize()const;
   int GetSSAlgDim()const
@@ -778,17 +778,17 @@ class DynkinSimpleType
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
-    this->lengthFirstSimpleRootSquared=other.lengthFirstSimpleRootSquared;
+    this->lengthFirstCoRootSquared=other.lengthFirstCoRootSquared;
   }
   bool operator==(const DynkinSimpleType& other)const
   { return
     this->theLetter==other.theLetter && this->theRank==other.theRank &&
-    this->lengthFirstSimpleRootSquared==other.lengthFirstSimpleRootSquared;
+    this->lengthFirstCoRootSquared==other.lengthFirstCoRootSquared;
   }
   static unsigned int HashFunction(const DynkinSimpleType& input)
   { return ((unsigned int)
     input.theLetter)*2+input.theRank
-    +SomeRandomPrimes[0]*input.lengthFirstSimpleRootSquared.HashFunction();
+    +SomeRandomPrimes[0]*input.lengthFirstCoRootSquared.HashFunction();
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -796,18 +796,10 @@ class DynkinSimpleType
   inline bool IsEqualToZero()const
   { return false;
   }
-  Rational GetRatioRootSquaredToFirstSquared
-  (int rootIndex)const
-  ;
-
-  static Rational GetRatioLongRootToFirst
-  (char inputWeylLetter, int inputRank)
-  ;
-  Rational GetDefaultRootLengthDiv2(int rootIndex)const;
-  Rational GetRatioLongRootToFirst()const
-  { return this->GetRatioLongRootToFirst(this->theLetter, this->theRank);
-  }
-  Rational GetHCoRootLengthSquared();
+  Rational GetDefaultCoRootLengthSquared(int rootIndex)const;
+  Rational GetDefaultRootLengthSquared(int rootIndex)const;
+  Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
+  static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
   std::string ToString()const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other)const
@@ -823,7 +815,7 @@ class DynkinSimpleType
       return true;
     if (this->theLetter<other.theLetter)
       return false;
-    return this->lengthFirstSimpleRootSquared>other.lengthFirstSimpleRootSquared;
+    return this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared;
   }
   inline bool operator<(const DynkinSimpleType& other)const
   { return other>*this;

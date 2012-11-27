@@ -2873,21 +2873,6 @@ void WeylGroup::GenerateRootSubsystem(Vectors<Rational>& theRoots)
     }
 }
 
-void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
-}
-
-void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  Vectors<Rational> tempInput, tempOutput;
-  tempInput.AddOnTop(input);
-  tempRoots.MakeEiBasis(this->GetDim());
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
-  output=tempOutput.TheObjects[0];
-}
-
 bool rootSubalgebra::attemptExtensionToIsomorphism
 (Vectors<Rational>& Domain, Vectors<Rational>& Range,
  GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,

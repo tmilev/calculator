@@ -3382,7 +3382,7 @@ bool CommandList::fSSAlgebra
        " appears not to be a Dynkin simple type ");
     Expression rankE;
     Expression lengthE;
-    Rational firstCoRootLength=0;
+    Rational firstCoRootLength=2;
     bool foundLengthFromExpression=false;
     if (typeE.theOperation==theCommands.opThePower())
     { lengthE=typeE.children[1];
@@ -3401,10 +3401,10 @@ bool CommandList::fSSAlgebra
     if (foundLengthFromExpression)
     { if (!lengthE.EvaluatesToRational(&firstCoRootLength))
         return theExpression.SetError
-        ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
+        ("Couldn't extract first co-root length from " + currentMon.ToString(&theFormat));
       if (firstCoRootLength<=0)
         return theExpression.SetError
-        ("Couldn't extract first root length from " + currentMon.ToString(&theFormat));
+        ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat));
     }
     if (!typeE.EvaluatesToAtom())
       return theExpression.SetError
@@ -3438,13 +3438,13 @@ bool CommandList::fSSAlgebra
       return theExpression.SetError
       ("The rank of a simple Lie algebra must be between 1 and 8; error while processing "
        + currentMon.ToString(&theFormat));
-    tempW.MakeArbitrary(theWeylLetter, theRank);
     simpleComponent.theLetter=theWeylLetter;
     simpleComponent.theRank= theRank;
     if (!foundLengthFromExpression)
-      simpleComponent.lengthFirstCoRootSquared=simpleComponent.GetDefaultCoRootLengthSquared(0);
-    else
-      simpleComponent.lengthFirstCoRootSquared= firstCoRootLength;
+      if (theWeylLetter=='F')
+        firstCoRootLength=1;
+    simpleComponent.lengthFirstCoRootSquared= firstCoRootLength;
+    tempW.MakeArbitrary(theWeylLetter, theRank, &firstCoRootLength);
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;

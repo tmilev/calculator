@@ -184,9 +184,7 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
     assert(false);
   }
   WeylGroup tempWeyl;
-  tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
-//  Rational scale=theNewType.lengthFirstSimpleRootSquared/tempWeyl.CartanSymmetric(0,0);
-//  tempWeyl.CartanSymmetric*=scale;
+  tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
   this->theWeyl.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;

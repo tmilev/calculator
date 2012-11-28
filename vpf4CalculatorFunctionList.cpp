@@ -13,31 +13,43 @@ void CommandList::initPredefinedVars()
   ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
-    such as A_3, where A stands for the type and 3 for the rank. \
-    The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
-    E_6, E_7, E_8, F_4, G_2. \
+    such as A_3 or, alternatively, in the format A^2_3, \
+    where A stands for the type, 3 for the rank, and the upper index stands for \
+    the length of the first co-root squared. When omitted, the upper index is substituted \
+    with a default value. \
+    <br>The upper index is used \
+    to scale the symmetric Cartan matrix.  A non-default value for the upper index \
+    will also result in rescaling the structure constants of the corresponding \
+    Chevalley-Weyl generators (in general making those constants non-integral).\
+    The need to use the index arises from computations with semisimple subalgebras. \
+    <b>It is advisable to use the default values for the upper index \
+    whenever computing with a single semisimple Lie algebra. </b>\
+    <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
+    E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^1_4, G^2_2 in extended notation). \
     The roots are ordered in order identical with the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
-    In addition, we scale the roots so that the long root has squared length 2 in types \
+    If the upper index is not present, we scale the roots so that the long \
+    root has squared length 2 in types \
     A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2. \
-    Except for F_4, our root length convention coincides with Humphreys', paragraph 12.1\
-    (for F_4, Humphreys' convention dictates long root length squared 2, unlike our convention).\
-    <br>An upper index may be present in the type notation, but is non-mandatory. \
-    The upper index denotes the length of the first co-root squared, \
-    and is used when dealing with Lie subalgebras/ \
-    Lie algebra homomorphisms. If you are computing with one Lie algebra only, the upper index\
-    plays no practical role.  \
-    <br>The i^th co-root length squared is defined as 4/(default squared length of the \
+    Except for F_4, our default root length convention coincides with Humphreys', paragraph 12.1\
+    (for F_4, Humphreys' convention dictates long root length squared 2). \
+    If the upper index is present, the root length squared of the first simple root is chosen to be \
+    (upper index)*(default first root length squared)^2/4.\
+    <br>The i^th co-root length squared is defined as 4/(default length squared of the \
     i^th simple root). \
-    <br>If you omit the upper index, a default first co-root  length squared is chosen for you. \
-    The default first co-root length squared is 2 for all types except for F_4, where the \
-    default first co-root length squared is 1. \
-    <br> A semisimple Lie algebra is treated like a function \
-    that returns the elements of a simple Lie algebra.  \
-    Elements of the cartan are addressed as arguments of the form (0,s), root system \
-    generators are addressed \
-    with one index only. ",
+    <br> A semisimple Lie algebra is treated as a function \
+    that returns the elements of a semisimple Lie algebra.  \
+    Let h_i:=(SemisimpleLieAlgebra{}G_2)_(0,i). Then h_i stands for the \
+    element of the Cartan dual to the i^th root, i.e., for the element which \
+    has the same action on a root space as the scalar product with the i^th simple root.\
+    Let g_i:=(SemisimpleLieAlgebra{}G_2)_(i). Then g_i stands for the i^th Chevalley-Weyl \
+    generator, where the Chevalley-Weyl generators are ordered according to the graded \
+    lexicographic order in the simple coordinates of the roots. \
+    The indices run in the ranges -r,..., -1 and 1,..., r, \
+    where r is the number of roots in the root system. \
+    The roots of indices 1,..., k are the simple roots, where k is the rank of the Lie algebra. \
+    The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
   ("printSemisimpleLieAlgebra", & this->fSSAlgebraVerbose, "",

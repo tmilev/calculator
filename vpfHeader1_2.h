@@ -887,7 +887,7 @@ public:
   }
   void ComputeRho(bool Recompute);
   std::string ToString();
-  void MakeArbitrary(char WeylGroupLetter, int n);
+  void MakeArbitrary(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational> & inputHWsimpleCoords, GlobalVariables& theGlobalVariables);

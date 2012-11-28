@@ -3877,24 +3877,28 @@ void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRan
       outputRank=4;
 }
 
-void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n)
+void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
 { this->init();
   switch(WeylGroupLetter)
-  { case 'A': this->MakeAn(n);
-    break;
-    case 'B': this->MakeBn(n);
-    break;
-    case 'C': this->MakeCn(n);
-    break;
-    case 'D': this->MakeDn(n);
-    break;
-    case 'E': this->MakeEn(n);
-    break;
-    case 'F': this->MakeF4();
-    break;
-    case 'G': this->MakeG2();
-    break;
+  { case 'A': this->MakeAn(n); break;
+    case 'B': this->MakeBn(n); break;
+    case 'C': this->MakeCn(n); break;
+    case 'D': this->MakeDn(n); break;
+    case 'E': this->MakeEn(n); break;
+    case 'F': this->MakeF4();  break;
+    case 'G': this->MakeG2();  break;
+    default:
+      std::cout << "This is a programming error: I am asked to create a Weyl group of type "
+      << WeylGroupLetter << " but the Weyl group type is allowed to be A, B, C, D, E, F or G only."
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
   }
+  if (firstCoRootLengthSquared==0)
+    return;
+  Rational cartanMatScale=this->CartanSymmetric(0,0);
+  cartanMatScale/=4;
+  cartanMatScale*=*firstCoRootLengthSquared;
+  this->CartanSymmetric*=cartanMatScale;
 }
 
 void WeylGroup::MakeDn(int n)

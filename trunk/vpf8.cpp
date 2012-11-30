@@ -1150,9 +1150,9 @@ bool partFractions::split(GlobalVariables& theGlobalVariables, Vector<Rational>*
 }
 
 void Cone::ChangeBasis
-  (Matrix<Rational> & theLinearMap, GlobalVariables& theGlobalVariables)
+  (Matrix<Rational>& theLinearMap, GlobalVariables& theGlobalVariables)
 { //Vectors<Rational> newNormals;
-//  Matrix<Rational>  tempMat=theLinearMap;
+//  Matrix<Rational> tempMat=theLinearMap;
   theLinearMap.ActOnVectorsColumn(this->Normals);
   this->CreateFromNormals(this->Normals, theGlobalVariables);
 }

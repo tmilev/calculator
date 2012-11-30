@@ -1047,7 +1047,8 @@ template <class CoefficientType>
   template <class CoefficientType>
   bool GenerateOrbit
   (Vectors<CoefficientType>& theRoots, bool RhoAction, HashedList<Vector<CoefficientType> >& output,
-   bool UseMinusRho, int expectedOrbitSize=-1, WeylGroup* outputSubset=0, int UpperLimitNumElements=-1)
+   bool UseMinusRho, int expectedOrbitSize=-1, HashedList<ElementWeylGroup>* outputSubset=0,
+   int UpperLimitNumElements=-1)
    ;
 //  int GetNumRootsFromFormula();
   void GenerateRootSystemFromKillingFormMatrix();
@@ -8324,7 +8325,7 @@ bool charSSAlgMod<CoefficientType>::FreudenthalEvalMeDominantWeightsOnly
 template <class CoefficientType>
 bool WeylGroup::GenerateOrbit
 (Vectors<CoefficientType>& theRoots, bool RhoAction, HashedList<Vector<CoefficientType> >& output,
- bool UseMinusRho, int expectedOrbitSize, WeylGroup* outputSubset, int UpperLimitNumElements)
+ bool UseMinusRho, int expectedOrbitSize, HashedList<ElementWeylGroup>* outputSubset, int UpperLimitNumElements)
 { output.Clear();
   for (int i=0; i<theRoots.size; i++)
     output.AddOnTop(theRoots.TheObjects[i]);
@@ -8340,7 +8341,6 @@ bool WeylGroup::GenerateOrbit
       expectedOrbitSize=MathRoutines::Minimum(UpperLimitNumElements, expectedOrbitSize);
     tempEW.size=0;
     outputSubset->SetExpectedSize(expectedOrbitSize);
-    outputSubset->CartanSymmetric=this->CartanSymmetric;
     outputSubset->Clear();
     outputSubset->AddOnTop(tempEW);
   }

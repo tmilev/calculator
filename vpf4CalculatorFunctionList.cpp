@@ -13,31 +13,32 @@ void CommandList::initPredefinedVars()
   ("SemisimpleLieAlgebra", & this->fSSAlgebraShort, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
-    such as A_3 or, alternatively, in the format A^2_3, \
-    where A stands for the type, 3 for the rank, and the upper index stands for \
-    the length of the first co-root squared. When omitted, the upper index is substituted \
+    such as A_n or, alternatively, in the format A^k_n, \
+    where the capital letter stands for the type, \
+    the lower index stands for the rank, and the upper index stands for \
+    the length of the first co-root squared. \
+    Here, we define i^th co-root length squared as 4/(default length squared of the \
+    i^th simple root). \
+    <br>When omitted, the upper index is substituted \
     with a default value. \
-    <br>The upper index is used \
-    to scale the symmetric Cartan matrix.  A non-default value for the upper index \
-    will also result in rescaling the structure constants of the corresponding \
+    <br>The upper index determines the scaling of \
+    the symmetric Cartan matrix.  A non-default value for the upper index \
+    will result in rescaling the structure constants of the corresponding \
     Chevalley-Weyl generators (in general making those constants non-integral).\
-    The need to use the index arises from computations with semisimple subalgebras. \
-    <b>It is advisable to use the default values for the upper index \
-    whenever computing with a single semisimple Lie algebra. </b>\
+    <b>Remark.</b> It is advisable to omit the upper index (i.e., use default values) \
+    when computing with a single semisimple Lie algebra. \
     <br>The allowed types are A_n, n>=1, B_n, n>=2, C_n, n>=3, D_n, n>=4,\
     E_6, E_7, E_8, F_4, G_2 (A^2_n, B^2_n, C^2_n, D^2_n, E^2_n, F^1_4, G^2_2 in extended notation). \
-    The roots are ordered in order identical with the order implied by \
+    The roots are ordered in order the order implied by \
     the (non-symmetric) Cartan matrices on page 59 in Huphreys, \
     Introduction to Lie algebras and representation theory. \
-    If the upper index is not present, we scale the roots so that the long \
+    By default (when the upper index is not present), the roots are scaled so that the long \
     root has squared length 2 in types \
     A_n, B_n, D_n, E_6, E_7, E_8, length 4 in types F_4, C_n, and length 6 in type G_2. \
     Except for F_4, our default root length convention coincides with Humphreys', paragraph 12.1\
     (for F_4, Humphreys' convention dictates long root length squared 2). \
-    If the upper index is present, the root length squared of the first simple root is chosen to be \
+    If the upper index is present, the root length squared of the first simple root equals \
     (upper index)*(default first root length squared)^2/4.\
-    <br>The i^th co-root length squared is defined as 4/(default length squared of the \
-    i^th simple root). \
     <br> A semisimple Lie algebra is treated as a function \
     that returns the elements of a semisimple Lie algebra.  \
     Let h_i:=(SemisimpleLieAlgebra{}G_2)_(0,i). Then h_i stands for the \

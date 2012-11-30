@@ -191,37 +191,57 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
+class SemisimpleSubalgebras;
+
 class CandidateSSSubalgebra
 {
 public:
-  WeylGroup theWeyl;
+  WeylGroup theWeylNonEmbedded;
   List<Vectors<Rational> > CartanSAsByComponent;
   List<DynkinSimpleType> theTypes;
+  List<List<ElementSemisimpleLieAlgebra> > thePosGens;
+  List<List<ElementSemisimpleLieAlgebra> > theNegGens;
+  List<List<int> > theHorbitIndices;
+  List<List<ElementWeylGroup> > theHWeylGroupElts;
+  List<List<List<ChevalleyGenerator> > > theInvolvedPosGenerators;
+  List<List<List<ChevalleyGenerator> > > theInvolvedNegGenerators;
   DynkinType theTypeTotal;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
-  List<SemisimpleLieAlgebra>* owners;
-  int indexInOwners;
-  CandidateSSSubalgebra() :owners(0), indexInOwners(-1){}
+  SemisimpleSubalgebras* owner;
+  int indexInOwnersOfNonEmbeddedMe;
+  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;
     this->theCharFundamentalCoordsRelativeToCartan=other.theCharFundamentalCoordsRelativeToCartan;
     this->theCharFundCoords=other.theCharFundCoords;
-    this->theWeyl=other.theWeyl;
+    this->theWeylNonEmbedded=other.theWeylNonEmbedded;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
-    this->owners=other.owners;
-    this->indexInOwners=other.indexInOwners;
+    this->indexInOwnersOfNonEmbeddedMe=other.indexInOwnersOfNonEmbeddedMe;
     this->theTypeTotal=other.theTypeTotal;
+    this->thePosGens=other.thePosGens;
+    this->theNegGens=other.theNegGens;
+    this->theHorbitIndices=other.theHorbitIndices;
+    this->theHWeylGroupElts=other.theHWeylGroupElts;
+    this->theInvolvedPosGenerators=other.theInvolvedPosGenerators;
+    this->theInvolvedNegGenerators=other.theInvolvedNegGenerators;
+    this->owner=other.owner;
   }
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
   void AddHincomplete
-  (WeylGroup& ownerWeyl, const Vector<Rational>& theH)
+  (const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
   ;
+  bool CheckInitialization()const;
+  SemisimpleLieAlgebra& GetAmbientSS();
+  WeylGroup& GetAmbientWeyl();
+  bool ComputeSystem
+(SemisimpleLieAlgebra& ownerSS, List<SemisimpleLieAlgebra>& ownersSubalgebra,
+ int indexInOwners, GlobalVariables* theGlobalVariables)
+ ;
   bool ComputeChar
-(WeylGroup& ownerWeyl, List<SemisimpleLieAlgebra>& owners, int indexInOwners,
- GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables)
 
   ;
   bool isGoodForTheTop
@@ -237,7 +257,7 @@ public:
   int indexInOwners;
   SltwoSubalgebras theSl2s;
   List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
-  HashedList<SemisimpleLieAlgebra> theSubalgebras;
+  HashedList<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
   List<SltwoSubalgebras> theSl2sOfSubalgebras;
 
   List<CandidateSSSubalgebra> Hcandidates;

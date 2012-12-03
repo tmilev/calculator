@@ -3577,7 +3577,14 @@ Rational DynkinSimpleType::GetRatioRootSquaredToFirstSquared
 
 Rational DynkinSimpleType::GetDefaultRootLengthSquared
 (int rootIndex)const
-{ switch (this->theLetter)
+{ if (rootIndex>=this->theRank)
+  { std::cout << "This is a programming error: "
+    << " attempting to get the squared length of simple root number " << rootIndex+1
+    << ", however the root system if of rank " << this->theRank << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  switch (this->theLetter)
   { case 'A':
     case 'D':
     case 'E':

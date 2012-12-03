@@ -1918,10 +1918,10 @@ public:
     return result;
   }
   //returns true if returning constant, false if returning element of h
-  bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational> & root2, Rational& outputRat, Vector<Rational> & outputH);
+  bool GetConstantOrHElement(const Vector<Rational> & root1, const Vector<Rational>& root2, Rational& outputRat, Vector<Rational>& outputH);
   bool TestForConsistency(GlobalVariables& theGlobalVariables);
   bool FindComplementaryNilpotent(ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
-  bool AttemptExtendingHEtoHEF(Vector<Rational> & h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
+  bool AttemptExtendingHEtoHEF(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables);
   bool AttemptExtendingHEtoHEFWRTSubalgebra
   (Vectors<Rational>& RootsWithCharacteristic2,
    Selection& theZeroCharacteristics, Vectors<Rational>& simpleBasisSA, Vector<Rational>& h,
@@ -1935,14 +1935,19 @@ public:
    SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
    ;
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
-  void GetAd(Matrix<Rational> & output, ElementSemisimpleLieAlgebra& e);
-  void initHEFSystemFromECoeffs(int theRelativeDimension, Selection& theZeroCharacteristics, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,  Vectors<Rational>& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables, Vector<Rational> & targetH, Matrix<Rational> & inputFCoeffs, Matrix<Rational> & outputMatrixSystemToBeSolved, Matrix<Rational> & outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved);
+  void GetAd(Matrix<Rational>& output, ElementSemisimpleLieAlgebra& e);
+  void initHEFSystemFromECoeffs
+  (int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,
+   Vectors<Rational>& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2,
+   int halfNumberVariables, Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs,
+   Matrix<Rational>& outputMatrixSystemToBeSolved, Matrix<Rational>& outputSystemColumnVector,
+   PolynomialSubstitution<Rational>& outputSystemToBeSolved);
   void MakeChevalleyTestReport(int i, int j, int k, int Total, GlobalVariables& theGlobalVariables);
-  bool IsInTheWeightSupport(Vector<Rational> & theWeight, Vector<Rational> & highestWeight, GlobalVariables& theGlobalVariables);
-  void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational> & theHighestWeight, GlobalVariables& theGlobalVariables);
-  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational> & theHighestWeight, GlobalVariables& theGlobalVariables);
-  int GetLengthStringAlongAlphaThroughBeta(Vector<Rational> & alpha, Vector<Rational> & beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
-  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational> & outputAuto,  bool useNegativeRootsFirst);
+  bool IsInTheWeightSupport(Vector<Rational>& theWeight, Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables);
+  void GenerateOneMonomialPerWeightInTheWeightSupport(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
+  void CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vector<Rational>& theHighestWeight, GlobalVariables& theGlobalVariables);
+  int GetLengthStringAlongAlphaThroughBeta(Vector<Rational>& alpha, Vector<Rational>& beta, int& distanceToHighestWeight, Vectors<Rational>& weightSupport);
+  void ComputeOneAutomorphism(GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto,  bool useNegativeRootsFirst);
   void operator=(const SemisimpleLieAlgebra& other){ this->Assign(other);}
   bool operator==(const SemisimpleLieAlgebra& other)
   { return this->theWeyl==other.theWeyl;

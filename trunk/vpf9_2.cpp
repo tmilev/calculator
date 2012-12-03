@@ -334,10 +334,8 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
  Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
 { if (theZeroCharacteristics.CardinalitySelection== theZeroCharacteristics.MaxSize)
     return false;
-  Vectors<Rational> SelectedExtraPositiveRoots;
   Vectors<Rational> rootsInPlay;
   rootsInPlay.size=0;
-  SelectedExtraPositiveRoots.size=0;
   int theRelativeDimension = simpleBasisSA.size;
 //  int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   assert(theRelativeDimension==theZeroCharacteristics.MaxSize);
@@ -358,14 +356,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
   for (int i=0; i<theRelativeDimension; i++)
     if (!theZeroCharacteristics.selected[i])
       rootsInPlay.AddOnTop(simpleBasisSA[i]);
-    else
-      for (int j=0; j<theRelativeDimension; j++)
-        if (!theZeroCharacteristics.selected[j])
-        { tempRoot= simpleBasisSA[i]+simpleBasisSA[j];
-          if (this->theWeyl.IsARoot(tempRoot))
-            SelectedExtraPositiveRoots.AddOnTop(tempRoot);
-        }
-  SelectedExtraPositiveRoots.size=0;
+  Vectors<Rational> SelectedExtraPositiveRoots;
   for (int i=0; i<RootsWithCharacteristic2.size; i++)
     if (!simpleBasisSA.Contains(RootsWithCharacteristic2[i]))
       SelectedExtraPositiveRoots.AddOnTop(RootsWithCharacteristic2[i]);
@@ -382,17 +373,17 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
   for (int i=numRootsChar2; i<coeffsF.NumCols; i++)
     coeffsF.elements[0][i]=i+1;
   this->initHEFSystemFromECoeffs
-  (theRelativeDimension, theZeroCharacteristics, rootsInPlay, simpleBasisSA,
+  (theRelativeDimension, rootsInPlay, simpleBasisSA,
    SelectedExtraPositiveRoots, numberVariables, numRootsChar2, halfNumberVariables,
    h, coeffsF, outputMatrixSystemToBeSolved, outputSystemColumnVector, outputSystemToBeSolved);
-  Matrix<Rational>  tempMat, tempMatColumn, tempMatResult;
+  Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat=(outputMatrixSystemToBeSolved);
   tempMatColumn=(outputSystemColumnVector);
   outputF.MakeZero(*this->owner, this->indexInOwner);
   outputE.MakeZero(*this->owner, this->indexInOwner);
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
   ChevalleyGenerator tempGen;
-  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+  if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
      (tempMat, tempMatColumn, tempMatResult))
   { for (int i=0; i<rootsInPlay.size; i++)
     { tempGen.MakeGenerator
@@ -408,7 +399,7 @@ bool SemisimpleLieAlgebra:: AttemptExtendingHEtoHEFWRTSubalgebra
 }
 
 void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
-(int theRelativeDimension, Selection& theZeroCharacteristics, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,
+(int theRelativeDimension, Vectors<Rational>& rootsInPlay, Vectors<Rational>& simpleBasisSA,
  Vectors<Rational>& SelectedExtraPositiveRoots, int numberVariables, int numRootsChar2, int halfNumberVariables,
  Vector<Rational>& targetH, Matrix<Rational>& inputFCoeffs, Matrix<Rational>& outputMatrixSystemToBeSolved,
  Matrix<Rational>& outputSystemColumnVector, PolynomialSubstitution<Rational>& outputSystemToBeSolved)
@@ -458,7 +449,7 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
     }
   }
   for (int i=0; i<this->theWeyl.CartanSymmetric.NumRows; i++)
-    outputSystemToBeSolved.TheObjects[i+oldSize].AddConstant(targetH.TheObjects[i]*(-1));
+    outputSystemToBeSolved[i+oldSize].AddConstant(targetH[i]*(-1));
   outputMatrixSystemToBeSolved.init(outputSystemToBeSolved.size, halfNumberVariables);
   outputSystemColumnVector.init(outputSystemToBeSolved.size, 1);
   outputMatrixSystemToBeSolved.NullifyAll();

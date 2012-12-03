@@ -7,7 +7,7 @@
 static ProjectInformationInstance ProjectInfoVpfHeader1_4
 (__FILE__, "Header, math routines concerning semisimple Lie algebras. ");
 
-class slTwo
+class slTwoSubalgebra
 {
 public:
   List<int> highestWeights;
@@ -28,7 +28,7 @@ public:
   Vector<Rational> hCharacteristic;
   Vector<Rational> hElementCorrespondingToCharacteristic;
   Vectors<Rational> hCommutingRootSpaces;
-  Vectors<Rational> RootsHavingScalarProduct2WithH;
+  Vectors<Rational> RootsWithScalar2WithH;
   DynkinDiagramRootSubalgebra DiagramM;
   DynkinDiagramRootSubalgebra CentralizerDiagram;
   PolynomialSubstitution<Rational> theSystemToBeSolved;
@@ -36,7 +36,7 @@ public:
   Matrix<Rational> theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
-  slTwo(): owners(0), indexOwnerAlgebra(-1), container(0), indexInContainer(-1){}
+  slTwoSubalgebra(): owners(0), indexOwnerAlgebra(-1), container(0), indexInContainer(-1){}
   SltwoSubalgebras& GetContainerSl2s()
   { if (this->container==0)
     { std::cout << "This is a programming error: attempting to access the container "
@@ -57,19 +57,21 @@ public:
     return (*this->owners)[this->indexOwnerAlgebra];
   }
   std::string ToString(FormatExpressions* theFormat=0);
+  void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
+  void GetInvolvedNegGenerators(List<ChevalleyGenerator>& output);
   void ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output);
   void ElementToStringModuleDecompositionMinimalContainingRegularSAs(bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output);
   void ComputeModuleDecomposition(Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA, List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights, List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables);
   void ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables);
-  bool ModuleDecompositionFitsInto(const slTwo& other);
+  bool ModuleDecompositionFitsInto(const slTwoSubalgebra& other);
   static bool ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight);
   void MakeReportPrecomputations(GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer, int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra);
   //the below is outdated, must be deleted as soon as equivalent code is written.
   void ComputeDynkinsEpsilon(WeylGroup& theWeyl);
   void ElementToHtml(std::string& filePath);
   void ElementToHtmlCreateFormulaOutputReference(const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml, SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer);
-  void operator=(const slTwo& right)
+  void operator=(const slTwoSubalgebra& right)
   { this->highestWeights=right.highestWeights;
     this->multiplicitiesHighestWeights=right.multiplicitiesHighestWeights;
     this->weightSpaceDimensions=right.weightSpaceDimensions;
@@ -82,7 +84,7 @@ public:
     this->DiagramM=right.DiagramM;
     this->hCommutingRootSpaces=right.hCommutingRootSpaces;
     this->DifferenceTwoHsimpleRootsIsARoot=right.DifferenceTwoHsimpleRootsIsARoot;
-    this->RootsHavingScalarProduct2WithH=right.RootsHavingScalarProduct2WithH;
+    this->RootsWithScalar2WithH=right.RootsWithScalar2WithH;
     this->DynkinsEpsilon=right.DynkinsEpsilon;
     this->hCharacteristic=right.hCharacteristic;
     this->hElementCorrespondingToCharacteristic=right.hElementCorrespondingToCharacteristic;
@@ -103,7 +105,7 @@ public:
     this->indexOwnerAlgebra=right.indexOwnerAlgebra;
     this->LengthHsquared=right.LengthHsquared;
   }
-  bool operator==(const slTwo& right)const;
+  bool operator==(const slTwoSubalgebra& right)const;
   unsigned int HashFunction() const
   { int tempI=MathRoutines::Minimum(SomeRandomPrimesSize, this->hCharacteristic.size);
     int result=0;
@@ -111,12 +113,12 @@ public:
       result+= this->hCharacteristic[i].NumShort*SomeRandomPrimes[i];
     return result;
   }
-  static inline unsigned int HashFunction(const slTwo& input)
+  static inline unsigned int HashFunction(const slTwoSubalgebra& input)
   { return input.HashFunction();
   }
 };
 
-class SltwoSubalgebras : public HashedList<slTwo>
+class SltwoSubalgebras : public HashedList<slTwoSubalgebra>
 {
   friend class SemisimpleSubalgebras;
 public:

@@ -169,7 +169,7 @@ GlobalVariables* theGlobalVariables)
         }
         //std::cout << "Is good!";
         newCandidate=baseCandidate;
-        newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], j);
+        newCandidate.AddHincomplete(Hrescaled, theOrbitGenerators[j], i);
         this->ExtendOneComponentRecursive(newCandidate, propagateRecursion, theGlobalVariables);
       } else
         if (theGlobalVariables!=0)
@@ -321,22 +321,32 @@ int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
 bool CandidateSSSubalgebra::ComputeSystem
 (SemisimpleLieAlgebra& ownerSS, List<SemisimpleLieAlgebra>& ownersSubalgebra, int indexInOwners,
  GlobalVariables* theGlobalVariables)
-{ Vector<Rational> theV;
+{ List<ChevalleyGenerator> negGens;
+  List<ChevalleyGenerator> posGens;
+  ChevalleyGenerator currentGen;
+
   for (int i=0; i<this->theHorbitIndices.size; i++)
     for (int j=0; j<this->theHorbitIndices[i].size; j++)
     { List<ChevalleyGenerator>& currentInvolvedPosGens= this->theInvolvedPosGenerators[i][j];
       List<ChevalleyGenerator>& currentInvolvedNegGens= this->theInvolvedNegGenerators[i][j];
-      slTwo& currentSl2=this->owner->theSl2s[this->theHorbitIndices[i][j]];
-      ElementWeylGroup& theElt=this->theHWeylGroupElts[i][j];
-      for (int k=0; k<currentSl2.theE.size; k++)
-      { ChevalleyGenerator& currentGen=currentSl2.theE[k];
-        theV=this->GetAmbientWeyl().RootSystem
-        [this->GetAmbientSS().GetRootIndexFromGenerator(currentGen.theGeneratorIndex)];
-        this->GetAmbientWeyl().ActOn(theElt, theV, false, false);
-
+      currentInvolvedNegGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
+      currentInvolvedPosGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
+      currentInvolvedNegGens.SetSize(0);
+      currentInvolvedPosGens.SetSize(0);
+      Vector<Rational> currentH=this->CartanSAsByComponent[i][j];
+      currentH/=(this->theTypes[i].GetDefaultRootLengthSquared(j)/2);
+      for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
+      { Rational theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot
+        (currentH, this->GetAmbientWeyl().RootSystem[k]);
+        currentGen.MakeGenerator
+        (*this->owner->owners, this->owner->indexInOwners,
+         this->GetAmbientSS().GetGeneratorFromRootIndex(k));
+        if (theScalarProd==2)
+          currentInvolvedPosGens.AddOnTop(currentGen);
+        if (theScalarProd==-2)
+          currentInvolvedNegGens.AddOnTop(currentGen);
       }
     }
-
   return true;
 }
 
@@ -562,7 +572,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
       (baseCandidate, theType, propagateRecursion, theGlobalVariables);
 }
 
-void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs
+void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegularSAs
 (bool useLatex, bool useHtml, SltwoSubalgebras& owner, std::string& output)
 { std::stringstream out;
   std::string tempS;
@@ -601,7 +611,7 @@ void slTwo::ElementToStringModuleDecompositionMinimalContainingRegularSAs
   output=out.str();
 }
 
-void slTwo::ElementToHtmlCreateFormulaOutputReference
+void slTwoSubalgebra::ElementToHtmlCreateFormulaOutputReference
 (const std::string& formulaTex, std::stringstream& output, bool usePNG, bool useHtml,
  SltwoSubalgebras& container, std::string* physicalPath, std::string* htmlPathServer)
 { if (!usePNG)
@@ -623,11 +633,11 @@ void slTwo::ElementToHtmlCreateFormulaOutputReference
     output << "\n<br>\n";
 }
 
-WeylGroup& slTwo::GetOwnerWeyl()
+WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
 { return this->GetOwnerSSAlgebra().theWeyl;
 }
 
-bool slTwo::operator==(const slTwo& right)const
+bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
 {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
   if (this->owners!=right.owners || this->indexOwnerAlgebra!=right.indexOwnerAlgebra)
   { std::cout << "This is a programming error: comparing sl(2) subalgebras"
@@ -639,7 +649,7 @@ bool slTwo::operator==(const slTwo& right)const
 }
 
 
-std::string slTwo::ToString(FormatExpressions* theFormat)
+std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)
 { if (this->container==0)
     return "sl(2) subalgebra not initialized.";
   std::stringstream out;  std::string tempS;
@@ -758,7 +768,7 @@ std::string slTwo::ToString(FormatExpressions* theFormat)
   return out.str();
 }
 
-void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
+void slTwoSubalgebra::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
 {//outdates, must be erased as soon as I implement an equivalent
   this->DynkinsEpsilon = this->DiagramM.NumRootsGeneratedByDiagram()+this->DiagramM.RankTotal();
   int r=0;
@@ -784,11 +794,11 @@ void slTwo::ComputeDynkinsEpsilon(WeylGroup& theWeyl)
   this->DynkinsEpsilon=0;
 }
 
-bool slTwo::ModuleDecompositionFitsInto(const slTwo& other)
+bool slTwoSubalgebra::ModuleDecompositionFitsInto(const slTwoSubalgebra& other)
 { return this->ModuleDecompositionFitsInto(this->highestWeights, this->multiplicitiesHighestWeights, other.highestWeights, other.multiplicitiesHighestWeights);
 }
 
-bool slTwo::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
+bool slTwoSubalgebra::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
 { for (int i=0; i<highestWeightsLeft.size; i++)
   { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft[i]);
     if (theIndex==-1)
@@ -800,7 +810,7 @@ bool slTwo::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, con
   return true;
 }
 
-void slTwo::ElementToHtml(std::string& filePath)
+void slTwoSubalgebra::ElementToHtml(std::string& filePath)
 { std::fstream theFile;
   std::string theFileName=filePath;
   theFileName.append("theSlTwo.txt");
@@ -838,7 +848,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
     (output, i, theGlobalVariables);
   }
   for (int i=0; i<output.size; i++)
-  { slTwo& theSl2= output[i];
+  { slTwoSubalgebra& theSl2= output[i];
     theSl2.IndicesMinimalContainingRootSA.ReservE(theSl2.IndicesContainingRootSAs.size);
     theSl2.IndicesMinimalContainingRootSA.size=0;
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
@@ -911,7 +921,6 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   Selection theRootsWithZeroCharacteristic;
   Selection simpleRootsChar2;
   Vectors<Rational> RootsWithCharacteristic2;
-  Vectors<Rational> reflectedRootsWithCharacteristic2;
   Vectors<Rational> reflectedSimpleBasisK;
   RootsWithCharacteristic2.ReservE(this->PositiveRootsK.size);
   ElementWeylGroup raisingElt;
@@ -934,7 +943,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 //  Selection tempSel;
   this->PositiveRootsK.GetCoordsInBasis
   (this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
-  slTwo theSl2;
+  slTwoSubalgebra theSl2;
   theSl2.container=&output;
   theSl2.owners=this->owners;
   theSl2.indexOwnerAlgebra=this->indexInOwners;
@@ -980,9 +989,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       for (int k=0; k<reflectedSimpleBasisK.size; k++)
         this->GetAmbientWeyl().ActOn(raisingElt, reflectedSimpleBasisK[k], false, false);
       ////////////////////
-      reflectedRootsWithCharacteristic2=RootsWithCharacteristic2;
-      for (int k=0; k<reflectedRootsWithCharacteristic2.size; k++)
-        this->GetAmbientWeyl().ActOn(raisingElt, reflectedRootsWithCharacteristic2[k], false, false);
+      theSl2.RootsWithScalar2WithH=RootsWithCharacteristic2;
+      for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
+        this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k], false, false);
 
       theSl2.theH.MakeHgenerator
       (characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
@@ -991,10 +1000,10 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
-         (reflectedRootsWithCharacteristic2, theRootsWithZeroCharacteristic,
-          reflectedSimpleBasisK,
-          characteristicH, theSl2.theE, theSl2.theF, theSl2.theSystemMatrixForm,
-          theSl2.theSystemToBeSolved, theSl2.theSystemColumnVector, theGlobalVariables))
+         (theSl2.RootsWithScalar2WithH, theRootsWithZeroCharacteristic,
+          reflectedSimpleBasisK, characteristicH, theSl2.theE, theSl2.theF,
+          theSl2.theSystemMatrixForm, theSl2.theSystemToBeSolved,
+          theSl2.theSystemColumnVector, theGlobalVariables))
       { int indexIsoSl2;
         theSl2.MakeReportPrecomputations
         (theGlobalVariables, output, output.size, indexInContainer, *this);
@@ -1057,7 +1066,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenHCharacteristic
   return false;
 }
 
-void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
+void slTwoSubalgebra::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std::string& output)
 { std::stringstream out;
   for (int i=0; i<this->highestWeights.size; i++)
   { if (this->multiplicitiesHighestWeights[i]>1)
@@ -1069,14 +1078,14 @@ void slTwo::ElementToStringModuleDecomposition(bool useLatex, bool useHtml, std:
   output=out.str();
 }
 
-void slTwo::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
+void slTwoSubalgebra::ComputeModuleDecompositionAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
 { this->ComputeModuleDecomposition
   (this->GetOwnerWeyl().RootsOfBorel, this->GetOwnerWeyl().CartanSymmetric.NumRows,
    this->highestWeights, this->multiplicitiesHighestWeights, this->weightSpaceDimensions,
    theGlobalVariables);
 }
 
-void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
+void slTwoSubalgebra::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalgebras& owner, int IndexInOwner, GlobalVariables& theGlobalVariables)
 { this->MultiplicitiesDecompositionMinimalContainingRootSA.SetSize
   (this->IndicesMinimalContainingRootSA.size);
   this->HighestWeightsDecompositionMinimalContainingRootSA.SetSize
@@ -1091,10 +1100,10 @@ void slTwo::ComputeModuleDecompositionOfMinimalContainingRegularSAs(SltwoSubalge
   }
 }
 
-void slTwo::MakeReportPrecomputations
+void slTwoSubalgebra::MakeReportPrecomputations
 (GlobalVariables& theGlobalVariables, SltwoSubalgebras& container, int indexInContainer,
  int indexMinimalContainingRegularSA, rootSubalgebra& MinimalContainingRegularSubalgebra)
-{ MacroRegisterFunctionWithName("slTwo::MakeReportPrecomputations");
+{ MacroRegisterFunctionWithName("slTwoSubalgebra::MakeReportPrecomputations");
   int theDimension=this->GetOwnerSSAlgebra().GetRank();
   this->IndicesContainingRootSAs.size=0;
   Vectors<Rational> tempRoots;
@@ -1133,7 +1142,7 @@ void slTwo::MakeReportPrecomputations
 }
 
 //The below code is related to sl(2) subalgebras of simple Lie algebras
-void slTwo::ComputeModuleDecomposition
+void slTwoSubalgebra::ComputeModuleDecomposition
 (Vectors<Rational>& positiveRootsContainingRegularSA, int dimensionContainingRegularSA,
  List<int>& outputHighestWeights, List<int>& outputMultiplicitiesHighestWeights,
  List<int>& outputWeightSpaceDimensions, GlobalVariables& theGlobalVariables)
@@ -1297,7 +1306,7 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
     << "which the sl(2) has no centralizer</td> </tr>";
 
   for (int i=0; i<this->size; i++)
-  { slTwo& theSl2= (*this)[i];
+  { slTwoSubalgebra& theSl2= (*this)[i];
     if (useHtml)
       out << "<tr><td style=\"padding-right:20px\"><a href=\"./sl2s.html#sl2index"
       << i << "\"title=\"" << tooltipHchar << "\" >";
@@ -1536,7 +1545,7 @@ void rootSubalgebra::ToString
     << sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size << "): ";
     for (int i=0; i<sl2s->IndicesSl2sContainedInRootSA[indexInOwner].size; i++)
     { int theSl2index=sl2s->IndicesSl2sContainedInRootSA[indexInOwner][i];
-      slTwo& theSl2 = (*sl2s)[theSl2index];
+      slTwoSubalgebra& theSl2 = (*sl2s)[theSl2index];
       if (useHtml)
         out << "<a href=\"./sl2s/sl2s.html#sl2index" << theSl2index << "\">";
       out << theSl2.hCharacteristic.ToString() << ", ";
@@ -1684,9 +1693,14 @@ void rootSubalgebra::ToString
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   out << this->theTypeTotal;
-  out << ". Hcandidates: ";
+  out << ". ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
-    out << this->CartanSAsByComponent[i].ToString() << ", ";
+  { out << "Component " << this->theTypes[i];
+    for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
+      out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << " "
+      << " e = combination of " << this->theInvolvedPosGenerators[i][j].ToString()
+      << ", f= combination of " << this->theInvolvedNegGenerators[i][j].ToString();
+  }
   out << "Positive weight subsystem: " << this->theWeylNonEmbedded.RootsOfBorel.ToString();
   if (this->PosRootsPerpendicularPrecedingWeights.size>0)
     out << " Positive roots that commute with the weight subsystem: "

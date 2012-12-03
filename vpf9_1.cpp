@@ -2804,7 +2804,9 @@ void SemisimpleLieAlgebra::LieBracket
     }
 }
 
-bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output, GlobalVariables& theGlobalVariables)
+bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
+(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output,
+ GlobalVariables& theGlobalVariables)
 { Vector<Rational> Difference;
   //format of the system
   //let an element of the simple lie algebra be written so that the first theWeyl.RootSystem.size

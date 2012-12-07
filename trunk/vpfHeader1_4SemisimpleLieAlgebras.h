@@ -198,19 +198,23 @@ class SemisimpleSubalgebras;
 class CandidateSSSubalgebra
 {
 public:
-  WeylGroup theWeylNonEmbedded;
+  WeylGroup theWeylNonEmbeddeD;
+  WeylGroup theWeylNonEmbeddeDdefaultScale;
   List<Vectors<Rational> > CartanSAsByComponent;
+  Vectors<Rational> theCoRoots;
+  Vectors<Rational> theHs;
   List<DynkinSimpleType> theTypes;
-  List<List<ElementSemisimpleLieAlgebra> > thePosGens;
-  List<List<ElementSemisimpleLieAlgebra> > theNegGens;
-  List<List<int> > theHorbitIndices;
-  List<List<ElementWeylGroup> > theHWeylGroupElts;
-  List<List<List<ChevalleyGenerator> > > theInvolvedPosGenerators;
-  List<List<List<ChevalleyGenerator> > > theInvolvedNegGenerators;
+  List<ElementSemisimpleLieAlgebra> thePosGens;
+  List<ElementSemisimpleLieAlgebra> theNegGens;
+//  List<List<int> > theHorbitIndices;
+//  List<List<ElementWeylGroup> > theHWeylGroupElts;
+  List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
+  List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   DynkinType theTypeTotal;
   charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
+  List<Polynomial<Rational> > theSystemToSolve;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
@@ -219,18 +223,24 @@ public:
     this->theTypes=other.theTypes;
     this->theCharFundamentalCoordsRelativeToCartan=other.theCharFundamentalCoordsRelativeToCartan;
     this->theCharFundCoords=other.theCharFundCoords;
-    this->theWeylNonEmbedded=other.theWeylNonEmbedded;
+    this->theWeylNonEmbeddeD=other.theWeylNonEmbeddeD;
+    this->theWeylNonEmbeddeDdefaultScale=other.theWeylNonEmbeddeDdefaultScale;
     this->PosRootsPerpendicularPrecedingWeights=other.PosRootsPerpendicularPrecedingWeights;
     this->indexInOwnersOfNonEmbeddedMe=other.indexInOwnersOfNonEmbeddedMe;
     this->theTypeTotal=other.theTypeTotal;
     this->thePosGens=other.thePosGens;
     this->theNegGens=other.theNegGens;
-    this->theHorbitIndices=other.theHorbitIndices;
-    this->theHWeylGroupElts=other.theHWeylGroupElts;
+//    this->theHorbitIndices=other.theHorbitIndices;
+//    this->theHWeylGroupElts=other.theHWeylGroupElts;
     this->theInvolvedPosGenerators=other.theInvolvedPosGenerators;
     this->theInvolvedNegGenerators=other.theInvolvedNegGenerators;
     this->owner=other.owner;
+    this->theSystemToSolve=other.theSystemToSolve;
+    this->theCoRoots=other.theCoRoots;
+    this->theHs=other.theHs;
   }
+  bool IsWeightSystemSpaceIndex
+(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
   void AddTypeIncomplete(const DynkinSimpleType& theNewType);
   void AddHincomplete
   (const Vector<Rational>& theH, const ElementWeylGroup& theWE, int indexOfOrbit)
@@ -294,7 +304,8 @@ public:
   (GlobalVariables* theGlobalVariables)
   ;
   void ExtendCandidatesRecursive
-  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion, GlobalVariables* theGlobalVariables)
+  (const CandidateSSSubalgebra& baseCandidate, bool propagateRecursion,
+   GlobalVariables* theGlobalVariables)
   ;
   void ExtendOneComponentOneTypeAllLengthsRecursive
   (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType,

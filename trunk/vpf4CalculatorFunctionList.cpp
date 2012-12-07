@@ -5,7 +5,21 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
 void CommandList::initPredefinedVars()
-{ this->AddNonBoundVarMustBeNew
+{ this->AddNonBoundVarMustBeNew ("suffixNotationForPostScript", &this->fSuffixNotationForPostScript, "",
+   "Suffix notation.  \
+   ",
+   "suffixNotationForPostScript{}((1/3 +a+b)*c)")
+   ;
+this->AddNonBoundVarMustBeNew ("drawPolar", &this->fDrawPolarRfunctionTheta, "",
+   "Draws polar curve given in polar coordinates in the form \
+   r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
+   The first argument gives the function, the second and third argument give the upper and \
+   lower bounds of the angle. \
+   ",
+   "drawPolar{}(1+sin {} t, 0, 360)")
+   ;
+
+  this->AddNonBoundVarMustBeNew
 ("IsInteger", &this->fIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
@@ -17,7 +31,7 @@ void CommandList::initPredefinedVars()
     where the capital letter stands for the type, \
     the lower index stands for the rank, and the upper index stands for \
     the length of the first co-root squared. \
-    Here, we define i^th co-root length squared as 4/(default length squared of the \
+    Here, we define i^th co-root length squared as 4/(length squared of the \
     i^th simple root). \
     <br>When omitted, the upper index is substituted \
     with a default value. \
@@ -53,7 +67,7 @@ void CommandList::initPredefinedVars()
     The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddNonBoundVarMustBeNew
-  ("printSemisimpleLieAlgebra", & this->fSSAlgebraVerbose, "",
+  ("printSemisimpleLieAlgebra", &this->fSSAlgebraVerbose, "",
    "Creates a quite detailed \
    printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \

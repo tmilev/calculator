@@ -48,7 +48,7 @@ void SemisimpleSubalgebras::AddCandidatesSubalgebra
 (CandidateSSSubalgebra& input, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddCandidatesSubalgebra");
   SemisimpleLieAlgebra tempSA;
-  tempSA.theWeyl=input.theWeylNonEmbedded;
+  tempSA.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
   tempSA.owner=&this->theSubalgebrasNonEmbedded;
   tempSA.indexInOwner=this->theSubalgebrasNonEmbedded.GetIndex(tempSA);
   if (tempSA.indexInOwner==-1)
@@ -76,20 +76,21 @@ GlobalVariables* theGlobalVariables)
   { newCandidate=baseCandidate;
     this->AddCandidatesSubalgebra(newCandidate, theGlobalVariables);
     if (!newCandidate.ComputeChar(theGlobalVariables))
-    { theReport.Report("Candidate " + newCandidate.ToString() +" ain't no good");
-      std::cout << newCandidate.ToString() << " is bad<br>";
+    { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
+      //std::cout << newCandidate.ToString() << " is bad<br>";
       return;
     }
     newCandidate.ComputeSystem
     (this->GetSSowner(), *this->owners, this->indexInOwners, theGlobalVariables)
     ;
-    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
+//    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
     this->Hcandidates.AddOnTop(newCandidate);
     if (propagateRecursion)
       this->ExtendCandidatesRecursive(newCandidate, propagateRecursion, theGlobalVariables);
     return;
   }
-  int indexFirstWeight=baseCandidate.theWeylNonEmbedded.CartanSymmetric.NumRows- theNewTypE.theRank;
+  int indexFirstWeight=
+  baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows - theNewTypE.theRank;
   int indexCurrentWeight=indexFirstWeight+numVectorsFound;
   Rational desiredLengthSquared=theNewTypE.lengthFirstCoRootSquared;
   desiredLengthSquared*=theNewTypE.GetDefaultRootLengthSquared(0);
@@ -217,18 +218,12 @@ void CandidateSSSubalgebra::AddHincomplete
       i--;
     }
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
-  this->theHorbitIndices.LastObject()->AddOnTop(indexOfOrbit);
-  this->theHWeylGroupElts.LastObject()->AddOnTop(theWE);
+//  this->theHorbitIndices.LastObject()->AddOnTop(indexOfOrbit);
+//  this->theHWeylGroupElts.LastObject()->AddOnTop(theWE);
   this->theInvolvedPosGenerators.LastObject()->SetSize
   (this->theInvolvedPosGenerators.LastObject()->size+1);
   this->theInvolvedNegGenerators.LastObject()->SetSize
   (this->theInvolvedNegGenerators.LastObject()->size+1);
-  List<ChevalleyGenerator>& currentlyInvolvedNegGens=
-  *this->theInvolvedNegGenerators.LastObject()->LastObject();
-  List<ChevalleyGenerator>& currentlyInvolvedPosGens=
-  *this->theInvolvedPosGenerators.LastObject()->LastObject();
-  currentlyInvolvedPosGens.SetSize(0);
-  currentlyInvolvedNegGens.SetSize(0);
 }
 
 void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType)
@@ -238,15 +233,18 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  WeylGroup tempWeyl;
+  WeylGroup tempWeyl, tempWeylnonScaled;
+  Rational two=2;
   tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
-  this->theWeylNonEmbedded.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
+  tempWeylnonScaled.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
+  this->theWeylNonEmbeddeD.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
+  this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.DirectSumWith(tempWeylnonScaled.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;
-  this->theHorbitIndices.SetSize(this->theHorbitIndices.size+1);
-  this->theHorbitIndices.LastObject()->size=0;
-  this->theHWeylGroupElts.SetSize(this->theHWeylGroupElts.size+1);
-  this->theHWeylGroupElts.LastObject()->size=0;
+//  this->theHorbitIndices.SetSize(this->theHorbitIndices.size+1);
+//  this->theHorbitIndices.LastObject()->size=0;
+//  this->theHWeylGroupElts.SetSize(this->theHWeylGroupElts.size+1);
+//  this->theHWeylGroupElts.LastObject()->size=0;
   this->theInvolvedNegGenerators.SetSize(this->theInvolvedNegGenerators.size+1);
   this->theInvolvedNegGenerators.LastObject()->size=0;
   this->theInvolvedPosGenerators.SetSize(this->theInvolvedPosGenerators.size+1);
@@ -263,14 +261,14 @@ bool CandidateSSSubalgebra::isGoodForTheTop
   int indexHnewInSmallType=this->CartanSAsByComponent.LastObject()->size;
   DynkinSimpleType& currentType=*this->theTypes.LastObject();
   int indexHnew=
-  this->theWeylNonEmbedded.CartanSymmetric.NumRows-currentType.theRank+indexHnewInSmallType;
+  this->theWeylNonEmbeddeD.CartanSymmetric.NumRows-currentType.theRank+indexHnewInSmallType;
 
   for (int k=0; k<this->CartanSAsByComponent.size; k++)
     for (int l=0; l<this->CartanSAsByComponent[k].size; l++)
     { counter++;
       theScalarProd= ownerWeyl.RootScalarCartanRoot
       (HneW, this->CartanSAsByComponent[k][l]);
-      if (theScalarProd!=this->theWeylNonEmbedded.CartanSymmetric(indexHnew, counter))
+      if (theScalarProd!=this->theWeylNonEmbeddeD.CartanSymmetric(indexHnew, counter))
         return false;
     }
   for (int i=0; i<this->PosRootsPerpendicularPrecedingWeights.size; i++)
@@ -318,35 +316,75 @@ int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
   return -1;
 }
 
+bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
+(int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace)
+{ std::cout << "<br>h's: " << this->theHs << " testing: "
+  << AmbientRootTestedForWeightSpace << " for being e-possibility for "
+  << this->theHs[theIndex];
+  for (int k=0; k<this->theHs.size; k++)
+  { Rational desiredScalarProd=
+    this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
+//    if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
+    { std::cout << "<br>Desired scalar product of "
+      << AmbientRootTestedForWeightSpace.ToString() << " and "
+      << this->theHs[k].ToString() << ", determined by indices "
+      << k << " and " << theIndex << ", is " << desiredScalarProd
+      << " = "
+      << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[k])
+      << "*2/"
+      << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[theIndex]);
+    }
+    Rational actualScalar=
+    this->GetAmbientWeyl().RootScalarCartanRoot
+    (this->theHs[k], AmbientRootTestedForWeightSpace);
+    if (desiredScalarProd!=actualScalar)
+    { //if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
+      { std::cout << ", instead got " << actualScalar;
+      }
+      return false;
+    }
+  }
+  return true;
+}
+
 bool CandidateSSSubalgebra::ComputeSystem
 (SemisimpleLieAlgebra& ownerSS, List<SemisimpleLieAlgebra>& ownersSubalgebra, int indexInOwners,
  GlobalVariables* theGlobalVariables)
-{ List<ChevalleyGenerator> negGens;
-  List<ChevalleyGenerator> posGens;
-  ChevalleyGenerator currentGen;
-
-  for (int i=0; i<this->theHorbitIndices.size; i++)
-    for (int j=0; j<this->theHorbitIndices[i].size; j++)
-    { List<ChevalleyGenerator>& currentInvolvedPosGens= this->theInvolvedPosGenerators[i][j];
-      List<ChevalleyGenerator>& currentInvolvedNegGens= this->theInvolvedNegGenerators[i][j];
-      currentInvolvedNegGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
-      currentInvolvedPosGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
-      currentInvolvedNegGens.SetSize(0);
-      currentInvolvedPosGens.SetSize(0);
-      Vector<Rational> currentH=this->CartanSAsByComponent[i][j];
-      currentH/=(this->theTypes[i].GetDefaultRootLengthSquared(j)/2);
-      for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
-      { Rational theScalarProd=this->GetAmbientWeyl().RootScalarCartanRoot
-        (currentH, this->GetAmbientWeyl().RootSystem[k]);
-        currentGen.MakeGenerator
-        (*this->owner->owners, this->owner->indexInOwners,
-         this->GetAmbientSS().GetGeneratorFromRootIndex(k));
-        if (theScalarProd==2)
-          currentInvolvedPosGens.AddOnTop(currentGen);
-        if (theScalarProd==-2)
-          currentInvolvedNegGens.AddOnTop(currentGen);
-      }
+{ ChevalleyGenerator currentGen, currentOpGen;
+  this->theHs.AssignListList(this->CartanSAsByComponent);
+  this->theCoRoots.SetSize(this->theHs.size);
+  int counter=-1;
+  for (int i=0; i<this->CartanSAsByComponent.size; i++)
+    for (int j=0; j< this->CartanSAsByComponent[i].size; j++)
+    { counter++;
+      this->theCoRoots[counter]=
+      (this->theHs[counter]/this->theTypes[i].GetDefaultRootLengthSquared(j))*2;
     }
+  this->theInvolvedNegGenerators.SetSize(this->theCoRoots.size);
+  this->theInvolvedPosGenerators.SetSize(this->theCoRoots.size);
+  for (int i=0; i<this->theCoRoots.size; i++)
+  { List<ChevalleyGenerator>& currentInvolvedPosGens= this->theInvolvedPosGenerators[i];
+    List<ChevalleyGenerator>& currentInvolvedNegGens= this->theInvolvedNegGenerators[i];
+    currentInvolvedNegGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
+    currentInvolvedPosGens.SetExpectedSize(this->GetAmbientWeyl().GetDim()*2);
+    currentInvolvedNegGens.SetSize(0);
+    currentInvolvedPosGens.SetSize(0);
+    for (int j=0; j<this->GetAmbientWeyl().RootSystem.size; j++)
+    { Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
+      int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
+      int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-currentAmbRoot);
+      currentGen.MakeGenerator(*this->owner->owners, this->owner->indexInOwners, indexCurGen);
+      currentOpGen.MakeGenerator(*this->owner->owners, this->owner->indexInOwners, opIndex);
+      if (this->IsWeightSystemSpaceIndex(i, this->GetAmbientWeyl().RootSystem[j]))
+      { currentInvolvedPosGens.AddOnTop(currentGen);
+        currentInvolvedNegGens.AddOnTop(currentOpGen);
+        std::cout << "<br>Generator " << currentGen.ToString() << " is good";
+      } else
+        std::cout << "<br>Generator " << currentGen.ToString() << " ain't no good";
+
+    }
+  }
+  theSystemToSolve.SetSize(0);
   return true;
 }
 
@@ -360,26 +398,12 @@ bool CandidateSSSubalgebra::ComputeChar
   }
   MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeChar");
   this->CheckInitialization();
-  this->theWeylNonEmbedded.ComputeRho(true);
+  this->theWeylNonEmbeddeD.ComputeRho(true);
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords.MakeZero(this->theWeylNonEmbedded.GetDim());
+  tempMon.weightFundamentalCoords.MakeZero(this->theWeylNonEmbeddeD.GetDim());
   this->theCharFundamentalCoordsRelativeToCartan.Reset();
   this->theCharFundamentalCoordsRelativeToCartan.AddMonomial
   (tempMon, this->GetAmbientSS().GetRank());
-  if (this->theTypeTotal.ToString()=="G^{2}_2" ||
-      this->theTypeTotal.ToString()=="G^{4}_2" ||
-      this->theTypeTotal.ToString()=="G^{6}_2"
-      )
-  { std::cout << "<br>the root system of the Weyl is: "
-    << this->theWeylNonEmbedded.RootSystem.ToString()
-    << ". The first type is " << this->theTypes[0].ToString()
-    << " with default root lengths squared "
-    << this->theTypes[0].GetDefaultRootLengthSquared(0)
-    << " and "
-    << this->theTypes[0].GetDefaultRootLengthSquared(1)
-    << "<br>"
-    ;
-  }
   for (int k=0; k<this->GetAmbientWeyl().RootSystem.size; k++)
   { int counter=-1;
     for (int i=0; i<this->CartanSAsByComponent.size; i++)
@@ -390,12 +414,6 @@ bool CandidateSSSubalgebra::ComputeChar
         (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j])
         /this->theTypes[i].GetDefaultRootLengthSquared(j)*2
         ;
-        if (this->theTypeTotal.ToString()=="G^{6}_2")
-        { std::cout << "<br> ((" << this->GetAmbientWeyl().RootSystem[k]
-          << ", " << this->CartanSAsByComponent[i][j] << "))="
-          << this->GetAmbientWeyl().RootScalarCartanRoot
-          (this->GetAmbientWeyl().RootSystem[k], this->CartanSAsByComponent[i][j]);
-        }
       }
     this->theCharFundamentalCoordsRelativeToCartan.AddMonomial(tempMon, 1);
   }
@@ -407,7 +425,7 @@ bool CandidateSSSubalgebra::ComputeChar
   ;
   while (accumChar.size>0)
   { int currentIndex=
-    accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbedded);
+    accumChar.GetIndexExtremeWeightRelativeToWeyl(this->theWeylNonEmbeddeD);
     if (currentIndex==-1)
     { std::cout << "This is a programming error: while decomposing ambient Lie algebra "
       << "over the candidate subalgebra, I got that there is no extreme weight. This is "
@@ -442,8 +460,8 @@ bool CandidateSSSubalgebra::ComputeChar
 }
 
 void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
-  (const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion,
-   GlobalVariables* theGlobalVariables)
+(const CandidateSSSubalgebra& baseCandidate, DynkinSimpleType& theType, bool propagateRecursion,
+ GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive");
   baseCandidate.CheckInitialization();
   CandidateSSSubalgebra theCandidate;
@@ -451,7 +469,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   ProgressReport theProgressReport1(theGlobalVariables);
   ProgressReport theProgressReport2(theGlobalVariables);
   ProgressReport theProgressReport3(theGlobalVariables);
-  int currentRank=baseCandidate.theWeylNonEmbedded.CartanSymmetric.NumRows;
+  int currentRank=baseCandidate.theWeylNonEmbeddeD.CartanSymmetric.NumRows;
   MonomialChar<Rational> tempMon;
   tempMon.weightFundamentalCoords.MakeZero(currentRank);
   Rational dimCentralizerBase=this->GetSSowner().GetNumGenerators();
@@ -473,7 +491,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
   consideringStream << "\nThe centralizer dimension is " << dimCentralizerBase;
   consideringStream << "<br>\nCurrent rank: " << currentRank
   << "<br>\nConsidering: " << theType.ToString();
-  std::cout << "<br>Considering: " << theType.ToString();
+//  std::cout << "<br>Considering: " << theType.ToString();
   theProgressReport1.Report(consideringStream.str());
   if (currentRank!=0 && dimCentralizerBase < theType.GetSSAlgDim())
   { consideringStream << " turns out to be no good as the desired root system size is "
@@ -1691,22 +1709,28 @@ void rootSubalgebra::ToString
 }
 
 std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ToString");
+  std::stringstream out;
   out << this->theTypeTotal;
   out << ". ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { out << "Component " << this->theTypes[i];
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
-      out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << " "
-      << " e = combination of " << this->theInvolvedPosGenerators[i][j].ToString()
-      << ", f= combination of " << this->theInvolvedNegGenerators[i][j].ToString();
+      out << "h-> " << this->CartanSAsByComponent[i][j].ToString() << ", ";
   }
-  out << "Positive weight subsystem: " << this->theWeylNonEmbedded.RootsOfBorel.ToString();
+  for (int i=0; i<this->theHs.size; i++)
+  { out << "h: " << this->theHs[i] << ", "
+    << " e = combination of " << this->theInvolvedPosGenerators[i].ToString()
+    << ", f= combination of " << this->theInvolvedNegGenerators[i].ToString();
+  }
+  out << "Positive weight subsystem: " << this->theWeylNonEmbeddeD.RootsOfBorel.ToString();
   if (this->PosRootsPerpendicularPrecedingWeights.size>0)
     out << " Positive roots that commute with the weight subsystem: "
     << this->PosRootsPerpendicularPrecedingWeights.ToString();
   out << "<br>Symmetric Cartan matrix scaled: "
-  << this->theWeylNonEmbedded.CartanSymmetric.ToString(theFormat);
+  << this->theWeylNonEmbeddeD.CartanSymmetric.ToString(theFormat);
+  out << "<br>Symmetric Cartan default scale: "
+  << this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.ToString(theFormat);
   out << "Character ambient Lie algebra: "
   << this->theCharFundamentalCoordsRelativeToCartan.ToString();
   out << "<br>Decomposition ambient Lie algebra: "

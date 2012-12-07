@@ -657,6 +657,7 @@ public:
   std::string javaScriptDisplayingIndicator;
   std::string DisplayPathServerBase;
   std::string PhysicalPathServerBase;
+  int numOutputFiles;
   std::string DisplayPathOutputFolder;
   std::string PhysicalPathOutputFolder;
   std::string DisplayNameDefaultOutput;
@@ -685,6 +686,9 @@ public:
   }
   std::string ElementToStringSyntacticStack();
   std::string ElementToStringSyntactic(bool usePolishForm=false)
+  ;
+  std::string WriteDefaultLatexFileReturnHtmlLink
+  (const std::string& fileContent, bool useLatexDviPSpsTopdf=false)
   ;
   std::string GetCalculatorLink(const std::string& input)
   { return CGI::GetCalculatorLink(this->DisplayNameCalculator, input);
@@ -1028,10 +1032,10 @@ static bool EvaluateDereferenceOneArgument
   static bool StandardUnionNoRepetition
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool StandardPlus
+  static bool StandardPower
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
-  static bool StandardPower
+  static bool StandardPlus
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardTimes
@@ -1105,6 +1109,12 @@ static bool EvaluateDereferenceOneArgument
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fInvertMatrix
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fDrawPolarRfunctionTheta
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  ;
+  static bool fSuffixNotationForPostScript
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger

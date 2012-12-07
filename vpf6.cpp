@@ -1050,6 +1050,40 @@ bool Data::IsEqualToZero()const
 
 CommandList::CommandList()
 { this->theGlobalVariableS=0;
+  this->numOutputFiles=0;
+}
+
+std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
+(const std::string& fileContent, bool useLatexDviPSpsTopdf)
+{ std::fstream theFile;
+  std::stringstream fileName;
+  std::stringstream systemCommand1, systemCommand2, systemCommand3;
+
+  fileName << this->PhysicalNameDefaultOutput << this->numOutputFiles;
+  CGI::OpenFileCreateIfNotPresent(theFile, fileName.str()+".tex", false, true, false);
+  theFile << fileContent;
+  theFile.flush();
+  theFile.close();
+  systemCommand1 << " latex -output-directory="
+  << this->PhysicalPathOutputFolder << " " << fileName.str()+".tex";
+//  std::cout << "<br>system command:<br>" << systemCommand1.str();
+  this->SystemCommands.AddOnTop(systemCommand1.str());
+  if (useLatexDviPSpsTopdf)
+  { systemCommand2 << " dvips -o " <<  fileName.str() << ".ps "
+    << fileName.str() << ".dvi";
+//    std::cout << "<br>system command:<br>" << systemCommand2.str();
+    this->SystemCommands.AddOnTop(systemCommand2.str());
+    systemCommand3 << " ps2png " << fileName.str() << ".ps "
+    << fileName.str() << ".png";
+//    std::cout << "<br>system command:<br>" << systemCommand3.str();
+    this->SystemCommands.AddOnTop(systemCommand3.str());
+  }
+  std::stringstream out;
+  out << "<img src=\"" << this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\">"
+  << "</img><a href=\""<< this->DisplayNameDefaultOutput << this->numOutputFiles << ".png\">"
+  << "output png</a>";
+  this->numOutputFiles++;
+  return out.str();
 }
 
 void Expression::MakePolyAtom
@@ -3637,6 +3671,90 @@ bool Expression::HasBoundVariables()
     if (this->children[i].HasBoundVariables())
       return true;
   return false;
+}
+
+bool CommandList::fDrawPolarRfunctionTheta
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fDrawPolarRfunctionTheta");
+  if (theExpression.children.size!=3)
+    return theExpression.SetError
+    ("Drawing polar coordinates takes three arguments: function, lower angle \
+      bound and upper angle bound. ");
+  Expression& lowerE=theExpression.children[1];
+  Expression& upperE=theExpression.children[2];
+  Expression functionE=theExpression.children[0];
+  Rational upperBound, lowerBound;
+  if (!lowerE.EvaluatesToRational(&upperBound) || !upperE.EvaluatesToRational(&lowerBound))
+    return
+    theExpression.SetError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.");
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  theCommands.fSuffixNotationForPostScript(theCommands, inputIndexBoundVars, functionE, comments);
+  std::stringstream out, resultStream;
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
+  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << "$" << theExpression.children[0].ToString() << "$";
+  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
+  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  std::string funString=functionE.GetAtomicValue().GetValuE<std::string>();
+  resultStream << funString << " t cos mul " << funString << " t sin mul" << "}";
+  resultStream << "\\end{pspicture}\\end{document}";
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
+  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
+bool CommandList::fSuffixNotationForPostScript
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  std::stringstream out;
+  if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
+  { out << "...";
+  } else if (theExpression.EvaluatesToAtom())
+  { Rational tempRat;
+    if (theExpression.EvaluatesToRational(&tempRat))
+      out << tempRat.DoubleValue() << " ";
+    else
+      out << theExpression.ToString();
+  }
+  else
+  { int theOp=theExpression.theOperation;
+    int startIndex=0;
+    if (theOp==theCommands.opApplyFunction())
+      startIndex=1;
+    Expression tempE;
+
+    for (int i=startIndex; i<theExpression.children.size; i++)
+    { tempE=theExpression.children[i];
+      theCommands.fSuffixNotationForPostScript(theCommands, inputIndexBoundVars, tempE, comments);
+      out << tempE.GetAtomicValue().GetValuE<std::string>() << " ";
+    }
+    if (startIndex==1)
+    { tempE=theExpression.children[0];
+      theCommands.fSuffixNotationForPostScript(theCommands, inputIndexBoundVars, tempE, comments);
+      out << tempE.GetAtomicValue().GetValuE<std::string>() << " ";
+    }
+    if (theOp==theCommands.opDivide())
+      out << "div ";
+    else if (theOp==theCommands.opPlus())
+      out << "add ";
+    else if (theOp==theCommands.opMinus())
+    { if (theExpression.children.size==1)
+        out << "-1 mul ";
+      else
+        out << "sub ";
+    } else if (theOp==theCommands.opTimes())
+      out << "mul";
+    else if (theOp==theCommands.opThePower())
+      out << "exp ";
+  }
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
 }
 
 bool CommandList::fIsInteger

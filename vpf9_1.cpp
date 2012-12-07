@@ -2809,15 +2809,18 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
  GlobalVariables& theGlobalVariables)
 { Vector<Rational> Difference;
   //format of the system
-  //let an element of the simple lie algebra be written so that the first theWeyl.RootSystem.size
-  // coordinates correspond to the Chevalley-Weyl generators in the canonical format (first negative spaces, then cartan, then positive).
-  //then ad(e) is a linear operator which has theWeyl.RootSystem.size+theDimension rows and columns.
+  //let an element of the simple lie algebra be written so that the first
+  //theWeyl.RootSystem.size
+  //coordinates correspond to the Chevalley-Weyl generators in the
+  //canonical format (first negative spaces, then cartan, then positive).
+  //then ad(e) is a linear operator which has theWeyl.RootSystem.size+theDimension
+  //rows and columns.
   //Then ad(e)ad(e)(f)=-2e, so this gives us a linear system for f.
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  Matrix<Rational>  theSystem, targetElt;
+  Matrix<Rational> theSystem, targetElt;
   int NumRoots=this->theWeyl.RootSystem.size;
   int NumRows=NumRoots+theDimension;
-  theSystem.init( NumRows, NumRows);
+  theSystem.init(NumRows, NumRows);
   targetElt.init(NumRows, 1);
   targetElt.NullifyAll();
   theSystem.NullifyAll();
@@ -2825,7 +2828,8 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
   for (int i=0; i<h.size; i++)
     targetElt.elements[i+this->GetNumPosRoots()][0]=h[i];
   Matrix<Rational> result;
-  bool hasSolution = theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, targetElt, result);
+  bool hasSolution =
+  theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, targetElt, result);
   if (hasSolution)
   { output.MakeZero(*this->owner, this->indexInOwner);
     ChevalleyGenerator tempGen;
@@ -2856,7 +2860,8 @@ void SemisimpleLieAlgebra::MakeChevalleyTestReport(int i, int j, int k, int Tota
     return;
   std::stringstream out2, out3;
   int x=(i*Total*Total+j*Total+k+1);
-  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of " << Total << " k: " << k+1 << " of " << Total;
+  out2 << "i: " << i+1 << " of " << Total << " j: " << j+1 << " of "
+  << Total << " k: " << k+1 << " of " << Total;
   out3 << "Total progress: " << x << " out of " << (Total*Total*Total);
   ProgressReport theReport(&theGlobalVariables);
   theReport.Report(out2.str()+out3.str());
@@ -2907,11 +2912,11 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   theDomainRootSA.theCentralizerDiagram.ComputeDynkinStrinG();
   tempAutosCentralizer.initIncomplete(CentralizerDiagramAutomorphisms.size);
   for (int i=0; i<CentralizerDiagramAutomorphisms.size; i++)
-    tempAutosCentralizer.MaxMultiplicities.TheObjects[i] = CentralizerDiagramAutomorphisms.TheObjects[i].size-1;
+    tempAutosCentralizer.MaxMultiplicities[i] = CentralizerDiagramAutomorphisms[i].size-1;
   tempList.SetSize(theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size);
   int tempSize=0;
   for (int i=0; i<theDomainRootSA.theCentralizerDiagram.sameTypeComponents.size; i++)
-  { tempList.TheObjects[i]=theDomainRootSA.theCentralizerDiagram.sameTypeComponents.TheObjects[i].size;
+  { tempList[i]=theDomainRootSA.theCentralizerDiagram.sameTypeComponents[i].size;
     tempSize+=tempList[i];
   }
   permComponentsCentralizer.initPermutation(tempList, tempSize);

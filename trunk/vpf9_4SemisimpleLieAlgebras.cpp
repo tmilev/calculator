@@ -81,7 +81,7 @@ GlobalVariables* theGlobalVariables)
       return;
     }
     newCandidate.ComputeSystem
-    (this->GetSSowner(), *this->owners, this->indexInOwners, theGlobalVariables)
+    (theGlobalVariables)
     ;
 //    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
     this->Hcandidates.AddOnTop(newCandidate);
@@ -318,14 +318,14 @@ int charSSAlgMod<CoefficientType>::GetIndexExtremeWeightRelativeToWeyl
 
 bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace)
-{ std::cout << "<br>h's: " << this->theHs << " testing: "
-  << AmbientRootTestedForWeightSpace << " for being e-possibility for "
-  << this->theHs[theIndex];
+{ //std::cout << "<br>h's: " << this->theHs << " testing: "
+  //<< AmbientRootTestedForWeightSpace << " for being e-possibility for "
+  //<< this->theHs[theIndex];
   for (int k=0; k<this->theHs.size; k++)
   { Rational desiredScalarProd=
     this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric(theIndex, k);
 //    if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
-    { std::cout << "<br>Desired scalar product of "
+    /*{ std::cout << "<br>Desired scalar product of "
       << AmbientRootTestedForWeightSpace.ToString() << " and "
       << this->theHs[k].ToString() << ", determined by indices "
       << k << " and " << theIndex << ", is " << desiredScalarProd
@@ -333,14 +333,13 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[k])
       << "*2/"
       << this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[theIndex], this->theHs[theIndex]);
-    }
+    }*/
     Rational actualScalar=
-    this->GetAmbientWeyl().RootScalarCartanRoot
-    (this->theHs[k], AmbientRootTestedForWeightSpace);
+    this->GetAmbientWeyl().RootScalarCartanRoot(this->theHs[k], AmbientRootTestedForWeightSpace);
     if (desiredScalarProd!=actualScalar)
     { //if (AmbientRootTestedForWeightSpace.ToString()=="(1, 1, 2)")
-      { std::cout << ", instead got " << actualScalar;
-      }
+      //{ std::cout << ", instead got " << actualScalar;
+      //}
       return false;
     }
   }
@@ -348,8 +347,7 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
 }
 
 bool CandidateSSSubalgebra::ComputeSystem
-(SemisimpleLieAlgebra& ownerSS, List<SemisimpleLieAlgebra>& ownersSubalgebra, int indexInOwners,
- GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables)
 { ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
   this->theCoRoots.SetSize(this->theHs.size);
@@ -378,13 +376,46 @@ bool CandidateSSSubalgebra::ComputeSystem
       if (this->IsWeightSystemSpaceIndex(i, this->GetAmbientWeyl().RootSystem[j]))
       { currentInvolvedPosGens.AddOnTop(currentGen);
         currentInvolvedNegGens.AddOnTop(currentOpGen);
-        std::cout << "<br>Generator " << currentGen.ToString() << " is good";
-      } else
-        std::cout << "<br>Generator " << currentGen.ToString() << " ain't no good";
-
+        //std::cout << "<br>Generator " << currentGen.ToString() << " is good";
+      } //else
+        //std::cout << "<br>Generator " << currentGen.ToString() << " ain't no good";
     }
   }
-  theSystemToSolve.SetSize(0);
+  return this->ComputeSystemPart2(theGlobalVariables);
+}
+
+bool CandidateSSSubalgebra::ComputeSystemPart2
+(GlobalVariables* theGlobalVariables)
+{ theSystemToSolve.SetSize(0);
+  int numPosGenCoeffs=0;
+  int numNegGenCoeffs=0;
+  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
+  { numPosGenCoeffs+=this->theInvolvedNegGenerators[i].size;
+    numNegGenCoeffs+=this->theInvolvedPosGenerators[i].size;
+  }
+  if (numPosGenCoeffs!=numNegGenCoeffs)
+  { std::cout << "This is a mathematical or programming error. Something has gone very wrong: "
+    << "I am getting that the number of involved positive generators is different from the number "
+    << " of involved negative generators, which should be impossible. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int totalNumCoeffs=numPosGenCoeffs+numNegGenCoeffs;
+  //Relations coming from being sl(2)-triple.
+  int currentNegCoeffIndexOffset=0;
+  int currentPosCoeffIndexOffset=numNegGenCoeffs;
+  ElementSemisimpleLieAlgebra posElt, negElt;
+
+  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
+  { List<ChevalleyGenerator>& curNegGens=this->theInvolvedNegGenerators[i];
+    List<ChevalleyGenerator>& curPosGens=this->theInvolvedPosGenerators[i];
+    for (int j=0; j<curNegGens.size; j++)
+    {
+    }
+    currentNegCoeffIndexOffset+=curNegGens.size;
+    currentPosCoeffIndexOffset+=curPosGens.size;
+  }
+
   return true;
 }
 

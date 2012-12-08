@@ -3690,11 +3690,13 @@ bool CommandList::fDrawPolarRfunctionTheta
     ("Failed to convert upper and lower bounds of drawing function to rational numbers.");
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
-  theCommands.fSuffixNotationForPostScript(theCommands, inputIndexBoundVars, functionE, comments);
+  theCommands.fSuffixNotationForPostScript
+  (theCommands, inputIndexBoundVars, functionE, comments);
   std::stringstream out, resultStream;
+  out << CGI::GetHtmlMathSpanPure(theExpression.children[0].ToString())
+  << "<br>";
   resultStream << "\\documentclass{article}\\usepackage{pstricks}"
   << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
-  resultStream << "$" << theExpression.children[0].ToString() << "$";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
   resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
@@ -3721,14 +3723,12 @@ bool CommandList::fSuffixNotationForPostScript
       out << tempRat.DoubleValue() << " ";
     else
       out << theExpression.ToString();
-  }
-  else
+  } else
   { int theOp=theExpression.theOperation;
     int startIndex=0;
     if (theOp==theCommands.opApplyFunction())
       startIndex=1;
     Expression tempE;
-
     for (int i=startIndex; i<theExpression.children.size; i++)
     { tempE=theExpression.children[i];
       theCommands.fSuffixNotationForPostScript(theCommands, inputIndexBoundVars, tempE, comments);
@@ -3972,15 +3972,23 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   //expression
   this->AddOperationNoFail
   ("{}", this->StandardFunction, "",
-   "The first argument of this operator represents a name of the function, the second argument represents the argument of that function.  \
-   <br>1) If the first argument of {} is rational, the operation substitutes the expression with that constant. \
-   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of the function, depending on the types of the arguments.\
-   <br>3) If the first argument is of type list and the second argument is a small integer between 1 and the number of elements in the list,\
+   "The first argument of this operator represents a name of the function, \
+   the second argument represents the argument of that function.  \
+   <br>1) If the first argument of {} is rational, the operation substitutes the \
+   expression with that constant. \
+   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of \
+   the function, depending on the types of the arguments.\
+   <br>3) If the first argument is of type list and the second argument is a small \
+   integer between 1 and the number of elements in the list,\
    the operation substitutes the list with the element indexed by the second argument.\
-   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded handler function, the handler is invoked onto the second argument.\
-   If the invocation is successful, the expression is substituted with the result, otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
-   the only noticeable difference is that the functions invoked in (2) are anonymous from the calculator standpoint (i.e. have only technical c++ names), \
-   while the functions in (4) have human-readable calculator-visible names. In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
+   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded \
+   handler function, the handler is invoked onto the second argument.\
+   If the invocation is successful, the expression is substituted with the result, \
+   otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
+   the only noticeable difference is that the functions invoked in (2) are anonymous \
+   from the calculator standpoint (i.e. have only technical c++ names), \
+   while the functions in (4) have human-readable calculator-visible names. \
+   In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
    "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if \
    IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
    \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);
@@ -3991,12 +3999,14 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
   this->AddOperationNoFail
   ("\\cup", this->StandardUnion, "",
-   "If all arguments of \\cup are of type list, substitutes the expression with a list containing \
+   "If all arguments of \\cup are of type list, substitutes the expression with \
+   a list containing \
    the union of all members (with repetition).",
    "x\\cup List{} x \\cup List{}x \\cup (a,b,x)", true);
   this->AddOperationNoFail
   ("\\sqcup", this->StandardUnionNoRepetition, "",
-   "If all arguments of \\sqcup are of type list, substitutes the expression with a list containing \
+   "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
+   containing \
    the union of all members; all repeating members are discarded.",
    "(x,y,x)\\sqcup(1,x,y,2)", true);
   this->AddOperationNoFail("Error", 0, "", "", "", false);
@@ -4361,7 +4371,7 @@ bool Data::MultiplyLRObyLSPath
     { std::stringstream out;
       out << " The Littelmann root operator must have an index whose absolute value is "
       << "between 1 and the rank of the ambient Lie algebra, instead I get index  "
-      <<  theLRO.generatorsIndices[i];
+      << theLRO.generatorsIndices[i];
       return output.SetError(out.str());
     } else
       for (int j=0; j<theLRO.Powers[i]; j++)
@@ -4396,8 +4406,8 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
 //    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
-        (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules, leftCopy.GetAmbientSSAlgebra(),
-         *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
+      (leftCopy.GetUE(), outputElt, leftCopy.owner->theObjectContainer.theCategoryOmodules,
+       leftCopy.GetAmbientSSAlgebra(), *leftCopy.owner->theGlobalVariableS, RFOne, RFZero))
   { //std::cout << "<br>failed to multiply on the left";
     return false;
   }
@@ -4411,7 +4421,8 @@ bool Data::AddEltTensorToEltTensor(const Data& left, const Data& right, Data& ou
   Data rightCopy=right;
   if (!output.MergeContexts(rightCopy, output))
   { if (comments!=0)
-      *comments << "failed to merge contexts trying to add " << left.ToString() << " to " << right.ToString();
+      *comments << "failed to merge contexts trying to add " << left.ToString() << " to "
+      << right.ToString();
     return false;
   }
   ElementTensorsGeneralizedVermas<RationalFunctionOld> result;

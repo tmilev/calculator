@@ -4219,7 +4219,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
 };
 
 struct FormatExpressions
-{ void operator=(const FormatExpressions& other);
+{
 public:
   //alphabetBases must contain at least two elements
   std::string chevalleyGgeneratorLetter;
@@ -4250,6 +4250,33 @@ public:
   bool flagUseHTML;
   bool flagUseCalculatorFormatForUEOrdered;
   bool flagQuasiDiffOpCombineWeylPart;
+  void operator=(const FormatExpressions& other)
+  { this->chevalleyGgeneratorLetter=other.chevalleyGgeneratorLetter;
+    this->chevalleyHgeneratorLetter=other.chevalleyHgeneratorLetter ;
+    this->fundamentalWeightLetter=other.fundamentalWeightLetter;
+    this->polyDefaultLetter=other.polyDefaultLetter;
+    this->CustomPlusSign=other.CustomPlusSign;
+    this->CustomCoeffMonSeparator=other.CustomCoeffMonSeparator;
+    this->FDrepLetter=other.FDrepLetter;
+    this->simpleRootLetter=other.simpleRootLetter;
+    this->DisplayNameCalculator=other.DisplayNameCalculator;
+    this->physicalPath=other.physicalPath;
+    this->htmlPathServer=other.htmlPathServer;
+    this->polyAlphabeT=other.polyAlphabeT;
+    this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
+    this->NumAmpersandsPerNewLineForLaTeX=other.NumAmpersandsPerNewLineForLaTeX;
+    this->MaxRecursionDepthPerExpression=other.MaxRecursionDepthPerExpression;
+    this->MaxLineLength=other.MaxLineLength;
+    this->MaxLinesPerPage=other.MaxLinesPerPage;
+    this->MatrixColumnVerticalLineIndex=other.MatrixColumnVerticalLineIndex;
+    this->flagPassCustomCoeffMonSeparatorToCoeffs=other.flagPassCustomCoeffMonSeparatorToCoeffs;
+    this->flagMakingExpressionTableWithLatex=other.flagMakingExpressionTableWithLatex;
+    this->flagUseLatex=other.flagUseLatex;
+    this->flagUsePNG=other.flagUsePNG;
+    this->flagUseHTML=other.flagUseHTML;
+    this->flagUseCalculatorFormatForUEOrdered=other.flagUseCalculatorFormatForUEOrdered;
+    this->flagQuasiDiffOpCombineWeylPart=other.flagQuasiDiffOpCombineWeylPart;
+  }
   FormatExpressions();
 };
 

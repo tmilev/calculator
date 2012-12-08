@@ -215,6 +215,7 @@ public:
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   List<Polynomial<Rational> > theSystemToSolve;
+  FormatExpressions theCoeffLetters;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
@@ -238,6 +239,7 @@ public:
     this->theSystemToSolve=other.theSystemToSolve;
     this->theCoRoots=other.theCoRoots;
     this->theHs=other.theHs;
+    this->theCoeffLetters=other.theCoeffLetters;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);
@@ -249,8 +251,10 @@ public:
   SemisimpleLieAlgebra& GetAmbientSS();
   WeylGroup& GetAmbientWeyl();
   bool ComputeSystem
-(SemisimpleLieAlgebra& ownerSS, List<SemisimpleLieAlgebra>& ownersSubalgebra,
- int indexInOwners, GlobalVariables* theGlobalVariables)
+(GlobalVariables* theGlobalVariables)
+ ;
+  bool ComputeSystemPart2
+(GlobalVariables* theGlobalVariables)
  ;
   bool ComputeChar
 (GlobalVariables* theGlobalVariables)

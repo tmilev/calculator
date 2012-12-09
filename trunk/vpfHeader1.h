@@ -4309,16 +4309,12 @@ public:
     this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
+  bool operator>(const ChevalleyGenerator& other)const;
   std::string ToString(FormatExpressions* inputFormat=0)const;
   bool IsNilpotent()const;
+  void CheckConsistencyWithOther(const ChevalleyGenerator& other)const;
   bool operator==(const ChevalleyGenerator& other)
-  { if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
-    { std::cout
-      << "This is a programming error: attempting to compare Chevalley generators "
-      << "of different Lie algebras. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << ".";
-      assert(false);
-    }
+  { this->CheckConsistencyWithOther(other);
     return this->theGeneratorIndex==other.theGeneratorIndex;
   }
 };
@@ -7630,7 +7626,6 @@ public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool NeedsBrackets()const;
-  std::string ToString(FormatExpressions* theFormat=0)const;
   Vector<CoefficientType> GetCartanPart()const;
   void MakeGGenerator
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
@@ -7641,7 +7636,7 @@ public:
         return false;
     return true;
   }
-  void MakeHgenerator(const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
+  void MakeHgenerator(const Vector<CoefficientType>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
   void MakeGenerator
   (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
   ;

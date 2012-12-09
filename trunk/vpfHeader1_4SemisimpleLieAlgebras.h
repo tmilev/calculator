@@ -219,6 +219,12 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
+  void GetGenericPosGenLinearCombination
+  (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+;
+  void GetGenericNegGenLinearCombination
+  (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+  ;
   void GetGenericLinearCombination
   (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
    ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -226,6 +232,9 @@ public:
   void GetGenericLinearCombinationInvolvedPosGens
   (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
+  void AddToSystem
+  (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
+  ;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;

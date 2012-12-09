@@ -154,18 +154,6 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   }
 }
 
-template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
-(const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-{ ChevalleyGenerator tempGen;
-  this->MakeZero(inputOwners, inputIndexInOwners);
-  SemisimpleLieAlgebra& owner= inputOwners[inputIndexInOwners];
-  for (int i=0; i<theH.size; i++)
-  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, owner.GetCartanIndexFromGenerator(i));
-    this->AddMonomial(tempGen, theH[i]);
-  }
-}
-
 Vector<Rational> ReflectionSubgroupWeylGroup::GetRho()
 { Vector<Rational> result;
   this->RootsOfBorel.sum(result, this->AmbientWeyl.GetDim());
@@ -5549,7 +5537,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     gLetter=theFormat->chevalleyGgeneratorLetter;
   }
   out << "The letter " << CGI::GetHtmlMathSpanPure(hLetter) << " stands for elements of the Cartan subalgebra, <br>"
-  << " the letter " <<  CGI::GetHtmlMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
+  << " the letter " << CGI::GetHtmlMathSpanPure(gLetter) << " stands for the Chevalley (root space) generators of non-zero weight. <br>"
   << " The generator " << CGI::GetHtmlMathSpanPure(hLetter+"_i") << " is the element of the Cartan subalgebra dual to the <br>"
   << "i^th simple root, that is, " << CGI::GetHtmlMathSpanPure("[" +hLetter+"_i, g]=\\langle \\alpha_i , \\gamma\\rangle g")
   << ", <br> where g is a Chevalley generator, " << CGI::GetHtmlMathSpanPure("\\gamma") << " is its weight, and <br>"

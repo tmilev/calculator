@@ -2597,7 +2597,7 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
         { if (!(leftWeight+rightWeight).IsEqualToZero())
             this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
           else
-          { ElementSemisimpleLieAlgebra& current=this->theLiebrackets.elements[i][j];
+          { ElementSemisimpleLieAlgebra<Rational>& current=this->theLiebrackets.elements[i][j];
             current.MakeHgenerator(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this->owner, this->indexInOwner);
           }
         }
@@ -2712,7 +2712,7 @@ void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int inde
 bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariables)
 { //HashedList<Vector<Rational> >& theRoots=this->theWeyl.RootSystem;
   FormatExpressions& theFormat=theGlobalVariables.theDefaultFormat;
-  ElementSemisimpleLieAlgebra g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
+  ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
   { g1.MakeGenerator
@@ -2775,37 +2775,9 @@ bool SemisimpleLieAlgebra::GetConstantOrHElement
   return false;
 }
 
-void ElementSemisimpleLieAlgebra::MakeZero(List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
-{ this->ownerArray=&owners;
-  this->indexOfOwnerAlgebra=indexAlgebra;
-  this->::MonomialCollection<ChevalleyGenerator, Rational>::MakeZero();
-}
-
-void SemisimpleLieAlgebra::LieBracket
-(const ElementSemisimpleLieAlgebra& g1, const ElementSemisimpleLieAlgebra& g2, ElementSemisimpleLieAlgebra& output)
-{ if (&output==&g1 || &output==&g2)
-  { ElementSemisimpleLieAlgebra outputNew;
-    this->LieBracket(g1, g2, outputNew);
-    output=outputNew;
-    return;
-  }
-  output.MakeZero(*this->owner, this->indexInOwner);
-  if (g1.IsEqualToZero() || g2.IsEqualToZero())
-    return;
-  int maxNumMonsFinal=g1.size*g2.size;
-  output.SetExpectedSize(maxNumMonsFinal);
-  Rational theCoeff;
-  ElementSemisimpleLieAlgebra buffer;
-  for (int i=0; i<g1.size; i++)
-    for (int j=0; j<g2.size; j++)
-    { buffer=this->theLiebrackets.elements[g1[i].theGeneratorIndex][g2[j].theGeneratorIndex];
-      buffer*=g1.theCoeffs[i]*g2.theCoeffs[j];
-      output+=buffer;
-    }
-}
-
 bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
-(Vector<Rational>& h, ElementSemisimpleLieAlgebra& e, ElementSemisimpleLieAlgebra& output,
+(Vector<Rational>& h, ElementSemisimpleLieAlgebra<Rational>& e,
+ ElementSemisimpleLieAlgebra<Rational>& output,
  GlobalVariables& theGlobalVariables)
 { Vector<Rational> Difference;
   //format of the system
@@ -2842,11 +2814,13 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
   return hasSolution;
 }
 
-void SemisimpleLieAlgebra::GetAd(Matrix<Rational>& output, ElementSemisimpleLieAlgebra& e)
+template <class CoefficientType>
+void SemisimpleLieAlgebra::GetAd
+(Matrix<CoefficientType>& output, ElementSemisimpleLieAlgebra<CoefficientType>& e)
 { int NumGenerators=this->GetNumGenerators();
   output.init(NumGenerators, NumGenerators);
   output.NullifyAll();
-  ElementSemisimpleLieAlgebra theGen, theResult;
+  ElementSemisimpleLieAlgebra<CoefficientType> theGen, theResult;
   for (int i=0; i<NumGenerators; i++)
   { theGen.MakeGenerator(i, *this->owner, this->indexInOwner);
     this->LieBracket(e, theGen, theResult);

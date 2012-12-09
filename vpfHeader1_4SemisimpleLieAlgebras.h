@@ -13,8 +13,8 @@ public:
   List<int> highestWeights;
   List<int> multiplicitiesHighestWeights;
   List<int> weightSpaceDimensions;
-  ElementSemisimpleLieAlgebra theH, theE, theF;
-  ElementSemisimpleLieAlgebra bufferHbracketE, bufferHbracketF, bufferEbracketF;
+  ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
+  ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
   List<SemisimpleLieAlgebra>* owners;
   int indexOwnerAlgebra;
   SltwoSubalgebras* container;
@@ -204,8 +204,8 @@ public:
   Vectors<Rational> theCoRoots;
   Vectors<Rational> theHs;
   List<DynkinSimpleType> theTypes;
-  List<ElementSemisimpleLieAlgebra> thePosGens;
-  List<ElementSemisimpleLieAlgebra> theNegGens;
+  List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
+  List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
 //  List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
@@ -219,6 +219,13 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
+  void GetGenericLinearCombination
+  (int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
+   ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+  ;
+  void GetGenericLinearCombinationInvolvedPosGens
+  (int theIndex, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+;
   void operator=(const CandidateSSSubalgebra& other)
   { this->CartanSAsByComponent=other.CartanSAsByComponent;
     this->theTypes=other.theTypes;

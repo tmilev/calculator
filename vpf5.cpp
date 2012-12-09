@@ -1317,7 +1317,7 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
   if (InvertedLeviInSmall.CardinalitySelection==0)
     theFinalEigenSpace.MakeEiBasis(this->GetDim());
   for (int i=0; i<InvertedLeviInSmall.CardinalitySelection; i++)
-  { ElementSemisimpleLieAlgebra& currentElt=
+  { ElementSemisimpleLieAlgebra<Rational>& currentElt=
     theHmm.imagesSimpleChevalleyGenerators[InvertedLeviInSmall.elements[i]];
     //std::cout << "<br>current element is: " << currentElt.ToString();
     MatrixTensor<CoefficientType> currentOp, tempMat;
@@ -1485,7 +1485,7 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
   output.indexDomain=tempDataG2.theIndex;
   output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
   output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
-  ElementSemisimpleLieAlgebra g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
+  ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator
   (13, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
   g_m2.MakeGenerator
@@ -1506,7 +1506,7 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 //  std::cout << "<hr>g_{-2}: " << g_m2.ToString();
 //  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
   output.imagesSimpleChevalleyGenerators.SetSize(4);
-  output.imagesSimpleChevalleyGenerators.TheObjects[1]=g_2;
+  output.imagesSimpleChevalleyGenerators[1]=g_2;
   output.imagesSimpleChevalleyGenerators.TheObjects[0]=g_1plusg_3;
   output.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m2;
   output.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m1plusg_m3;

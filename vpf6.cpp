@@ -409,7 +409,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
       ;
     return false;
   }
-  ElementSemisimpleLieAlgebra tempElt;
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
   int actualIndex=theDisplayIndex;
   if (actualIndex<0)
     actualIndex+=ownerAlgebra.GetNumPosRoots();
@@ -916,7 +916,7 @@ bool Data::MakeElementSemisimpleLieAlgebra
       ;
     return false;
   }
-  ElementSemisimpleLieAlgebra tempElt;
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
   int actualIndeX=index2-1+ownerAlgebra.GetNumPosRoots();
   tempElt.MakeGenerator
   (actualIndeX, inputOwners, inputIndexInOwners);
@@ -2538,7 +2538,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
 
 template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
-(ElementSemisimpleLieAlgebra& inputElt, quasiDiffOp<Rational>& output,
+(ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
@@ -2629,7 +2629,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   Expression tempExp;
   SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
   List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
-  ElementSemisimpleLieAlgebra theGenerator;
+  ElementSemisimpleLieAlgebra<Rational> theGenerator;
   ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
   List<ElementWeylAlgebra> actionNilrad;
   List<int> vectorIndices, dualIndices;
@@ -2648,7 +2648,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   theUEformat.NumAmpersandsPerNewLineForLaTeX=2;
   theWeylFormat.NumAmpersandsPerNewLineForLaTeX=2;
   hwContext.GetFormatExpressions(theWeylFormat);
-  List<ElementSemisimpleLieAlgebra> theGeneratorsItry;
+  List<ElementSemisimpleLieAlgebra<Rational> > theGeneratorsItry;
   for (int j=0; j<theSSalgebra.GetRank(); j++)
   { Vector<Rational> ei;
     ei.MakeEi(theSSalgebra.GetRank(), j);
@@ -3527,7 +3527,7 @@ bool CommandList::fSSAlgebra
         out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>Add to body: <br>"
         << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
         Vector<Rational> tempRoot;
-        ElementSemisimpleLieAlgebra tempElt1;
+        ElementSemisimpleLieAlgebra<Rational> tempElt1;
         for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
         { tempElt1.MakeGenerator
           (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
@@ -6279,20 +6279,6 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
   this->DecreaseStackSetCharacterRanges(2);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
-}
-
-SemisimpleLieAlgebra& ElementSemisimpleLieAlgebra::GetOwner()const
-{ if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)
-  { std::cout << "This is a programming error: a semisimple Lie algebra element has not been initialized properly. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  if ( this->indexOfOwnerAlgebra<0 || this->ownerArray->size<=this->indexOfOwnerAlgebra)
-  { std::cout << "This is a programming error: a semisimple Lie algebra container has not been initialized properly. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra];
 }
 
 std::string CommandList::ElementToStringSyntacticStack()

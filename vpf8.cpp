@@ -134,7 +134,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 }
 
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
-  (ElementSemisimpleLieAlgebra& input, ElementSemisimpleLieAlgebra& output)
+  (ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
   output.MakeZero(*this->owners, this->indexRange);
   for (int i=0; i<input.size; i++)
@@ -145,7 +145,7 @@ void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 
 void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output)
 { output.init(this->theRange().GetRank(), this->theDomain().GetRank());
-  ElementSemisimpleLieAlgebra domainElt, imageElt;
+  ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i=0; i<this->theDomain().GetRank(); i++)
   { domainElt.MakeHgenerator
     (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), *this->owners, this->indexDomain);
@@ -154,7 +154,8 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   }
 }
 
-void ElementSemisimpleLieAlgebra::MakeHgenerator
+template <class CoefficientType>
+void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
 (const Vector<Rational>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
 { ChevalleyGenerator tempGen;
   this->MakeZero(inputOwners, inputIndexInOwners);
@@ -655,7 +656,7 @@ int ParserNode::EvaluateG2InB3MultsParabolic
     return theNode.SetError(theNode.errorProgramming);
   if (highestWeight.size!=3 || parSel.size!=3)
     return theNode.SetError(theNode.errorDimensionProblem);
-  theNode.owner->initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
+//  theNode.owner->initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   theNode.outputString=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis
   .ComputeMultsLargerAlgebraHighestWeight(highestWeight, parSel, *theNode.owner, theGlobalVariables);
   theNode.ExpressionType=theNode.typeString;
@@ -5539,7 +5540,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   Vector<Rational> tempRoot;
   int numRoots=this->theWeyl.RootSystem.size;
   int theDimension = this->theWeyl.CartanSymmetric.NumRows;
-  ElementSemisimpleLieAlgebra tempElt1, tempElt2, tempElt3;
+  ElementSemisimpleLieAlgebra<Rational> tempElt1, tempElt2, tempElt3;
 //  out << beginMath << "\\begin{array}{ccc}a& a&a\\\\a&a&a\\end{array}";
   std::string hLetter="h";
   std::string gLetter="g";
@@ -5610,41 +5611,6 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   << " wish to do so on your own. " <<  theHtmlStream.str()
   << "The above table in LaTex format follows. <hr>"
   << theTableLateXStream.str() << "<hr>";
-  return out.str();
-}
-
-std::string ElementSemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out; std::string tempS;
-  if (this->IsEqualToZero())
-    out << "0";
-  MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat==0)
-    theFormat=&tempFormat.GetElement();
-  bool found=false;
-  for (int i=0; i<this->size; i++)
-    if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))
-    { tempS=this->theCoeffs[i].ToString();
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (i!=0)
-      { if (tempS!="")
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      out << tempS << this->GetOwner().GetStringFromChevalleyGenerator(this->TheObjects[i].theGeneratorIndex, theFormat);
-      found=true;
-    }
-  Vector<Rational> hComponent=this->GetCartanPart();
-  if (!hComponent.IsEqualToZero())
-  { std::string tempS=hComponent.ToStringLetterFormat(theFormat->chevalleyHgeneratorLetter);
-    if (tempS[0]!='-' && found)
-      out << "+";
-    out << tempS;
-  }
   return out.str();
 }
 
@@ -8122,36 +8088,6 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
   output=out.str();
 }
 
-void Parser::initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables)
-{ if(this->DefaultWeylLetter!='B' || this->DefaultWeylRank!=3)
-    return;
-//  this->theHmm.MakeG2InB3(*this, theGlobalVariables);
-//  SSalgebraModuleOld theModule;
-  std::stringstream out;
-//  theModule.InduceFromEmbedding(out, this->theHmm, theGlobalVariables);
-  List<ElementSemisimpleLieAlgebra> theBasis;
-  theBasis.SetSize(this->theHmm.theRange().GetNumGenerators());
-  for (int i=0; i<this->theHmm.imagesAllChevalleyGenerators.size; i++)
-  { int theIndex=i;
-    if (i>=6 && i<8)
-      theIndex=3+i;
-    if (i>=8)
-      theIndex=i+7;
-    ElementSemisimpleLieAlgebra& currentElt=theBasis.TheObjects[theIndex];
-    currentElt=this->theHmm.imagesAllChevalleyGenerators.TheObjects[i];
-  }
-  for (int i=0; i<theBasis.size; i++)
-  { int displayIndex=i-9;
-    if (displayIndex>=0)
-    { if (displayIndex<3)
-        displayIndex+=10;
-      else
-        displayIndex-=2;
-    }
-  }
-  this->testAlgebra.init(theBasis, this->theHmm.theRange(), theGlobalVariables);
-}
-
 void Parser::initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariables)
 { this->testAlgebra.initDefaultOrder(this->theHmm.theRange(), theGlobalVariables);
 }
@@ -8214,7 +8150,8 @@ int ParserNode::EvaluateModVermaRelations
 }
 
 template<class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra& left)
+void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft
+(const ElementSemisimpleLieAlgebra<Rational>& left)
 { if (this->IsEqualToZero())
   { this->MakeZero(*this->owners, this->indexInOwners);
     return;
@@ -8228,10 +8165,10 @@ void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft(const Elem
 
 template<class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
-  (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
-   GlobalVariables& theGlobalVariables)
+(const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
+ GlobalVariables& theGlobalVariables)
 { output.MakeZero(*this->owners, this->indexInOwners);
-  ElementSemisimpleLieAlgebra tempElt;
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
   output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int nextCycleSize;
@@ -8270,7 +8207,7 @@ int ParserNode::EvaluateAdjointAction
   actingNode.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
   NodeBeingActedUpon.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
   ElementUniversalEnveloping<Polynomial<Rational> >& output=theNode.UEElement.GetElement();
-  if ( !actingNode.UEElement.GetElement().AdjointRepresentationAction
+  if (!actingNode.UEElement.GetElement().AdjointRepresentationAction
   (NodeBeingActedUpon.UEElement.GetElement(), output, theGlobalVariables))
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   theNode.ExpressionType=theNode.typeUEelement;

@@ -133,7 +133,7 @@ public:
   bool Exponentiate(const Data& right, Data& output)const
   ;
   bool IsInteger()const;
-  ElementSemisimpleLieAlgebra& GetEltSimpleLieAlgebra()const;
+  ElementSemisimpleLieAlgebra<Rational>& GetEltSimpleLieAlgebra()const;
   int GetSmallInT()const;
   MonomialGeneralizedVerma<RationalFunctionOld>& GetMonGenVerma()const;
   bool operator+=(const Data& other);

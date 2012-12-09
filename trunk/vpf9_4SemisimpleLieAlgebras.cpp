@@ -404,19 +404,37 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   //Relations coming from being sl(2)-triple.
   int currentNegCoeffIndexOffset=0;
   int currentPosCoeffIndexOffset=numNegGenCoeffs;
-  ElementSemisimpleLieAlgebra posElt, negElt;
-
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > posElt, negElt, lieBracket;
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { List<ChevalleyGenerator>& curNegGens=this->theInvolvedNegGenerators[i];
     List<ChevalleyGenerator>& curPosGens=this->theInvolvedPosGenerators[i];
-    for (int j=0; j<curNegGens.size; j++)
-    {
-    }
+    this->GetGenericLinearCombination
+    (totalNumCoeffs, currentNegCoeffIndexOffset, curNegGens, negElt);
+    this->GetGenericLinearCombination
+    (totalNumCoeffs, currentPosCoeffIndexOffset, curPosGens, posElt);
+    this->GetAmbientSS().LieBracket(posElt, negElt, lieBracket);
+    std::cout << "<br>[" << posElt.ToString() << ", " << negElt.ToString() << "]="
+    << lieBracket.ToString();
     currentNegCoeffIndexOffset+=curNegGens.size;
     currentPosCoeffIndexOffset+=curPosGens.size;
   }
-
   return true;
+}
+
+void CandidateSSSubalgebra::GetGenericLinearCombination
+(int numVars, int varOffset, List<ChevalleyGenerator>& involvedGens,
+ ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+{ Polynomial<Rational> theCF;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> > tempMon;
+  output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
+  for (int i=0; i<involvedGens.size; i++)
+  { theCF.MakeDegreeOne(numVars, varOffset+i, 1);
+    tempMon.MakeGenerator
+    (involvedGens[i].theGeneratorIndex, *this->owner->owners, this->owner->indexInOwners)
+    ;
+    tempMon*=theCF;
+    output+=tempMon;
+  }
 }
 
 bool CandidateSSSubalgebra::ComputeChar
@@ -1090,7 +1108,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
 bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* outputIndex)
 { if (outputIndex!=0)
     *outputIndex=-1;
-  ElementSemisimpleLieAlgebra tempH;
+  ElementSemisimpleLieAlgebra<Rational> tempH;
   this->CheckForCorrectInitializationCrashIfNot();
   tempH.MakeHgenerator(theH, *this->owners, this->IndexInOwners);
   for (int i=0; i<this->size; i++)

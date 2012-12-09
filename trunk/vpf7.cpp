@@ -192,7 +192,7 @@ void ModuleSSalgebra<CoefficientType>::TestConsistency(GlobalVariables& theGloba
       right = this->GetActionGeneratorIndeX(j, theGlobalVariables);
       output=right;
       output.LieBracketOnTheLeft(left);
-      ElementSemisimpleLieAlgebra leftGen, rightGen, outputGen;
+      ElementSemisimpleLieAlgebra<Rational> leftGen, rightGen, outputGen;
       leftGen.MakeGenerator(i, *this->theAlgebras, this->indexAlgebra);
       rightGen.MakeGenerator(j, *this->theAlgebras, this->indexAlgebra);
       this->GetOwner().LieBracket(leftGen, rightGen, outputGen);
@@ -1123,7 +1123,7 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutFDRelationsExper
   { int IndexCurrentGenerator=this->generatorsIndices[k];
     if (IndexCurrentGenerator>=numPosRoots)
       return false;
-    ElementSemisimpleLieAlgebra& currentElt=this->owner->theOrder[IndexCurrentGenerator];
+    ElementSemisimpleLieAlgebra<Rational>& currentElt=this->owner->theOrder[IndexCurrentGenerator];
     if (!currentElt.GetCartanPart().IsEqualToZero() || currentElt.size>1)
       return false;
     int thePower=0;
@@ -1813,7 +1813,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
   this->weightsNilModPreNil.SetSize(0);
   this->indicesNilradicalLarge.SetSize(0);
   this->indicesNilradicalSmall.SetSize(0);
-  ElementSemisimpleLieAlgebra tempElt;
+  ElementSemisimpleLieAlgebra<Rational> tempElt;
   WeylGroup& theLargeWeyl=this->theHmm.theRange().theWeyl;
   WeylGroup& theSmallWeyl=this->theHmm.theDomain().theWeyl;
   int numB3NegGenerators=this->theHmm.theRange().GetNumPosRoots();
@@ -1856,7 +1856,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
   this->weightsNilModPreNil=this->weightsNilradicalLarge;
   Vector<Rational> proj;
   for (int i=0; i<this->nilradicalSmall.size; i++)
-  { ElementSemisimpleLieAlgebra& eltImage=
+  { ElementSemisimpleLieAlgebra<Rational>& eltImage=
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
     int theIndex=this->NilModPreNil.IndexOfObject(eltImage);
     if (theIndex!=-1)

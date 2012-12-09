@@ -34,6 +34,7 @@ class rootSubalgebra;
 class rootSubalgebras;
 class ChevalleyGenerator;
 class DynkinDiagramRootSubalgebra;
+template<class CoefficientType>
 class ElementSemisimpleLieAlgebra;
 template<class CoefficientType>
 class ElementUniversalEnveloping;
@@ -4839,7 +4840,8 @@ public:
         }
     }
   }
-  void operator=(const MonomialCollection<TemplateMonomial, CoefficientType>& other)
+  template<class otherType>
+  void operator=(const MonomialCollection<TemplateMonomial, otherType>& other)
   { this->theCoeffs=other.theCoeffs;
     this->::HashedList<TemplateMonomial>::operator=(other);
 //    int commentwhendone;
@@ -7621,14 +7623,15 @@ class CompleX
   CompleX(double other){this->operator=(other);}
 };
 
-class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, Rational>
+template<class CoefficientType>
+class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, CoefficientType>
 {
 public:
   List<SemisimpleLieAlgebra>* ownerArray;
   int indexOfOwnerAlgebra;
   bool NeedsBrackets()const;
   std::string ToString(FormatExpressions* theFormat=0)const;
-  Vector<Rational> GetCartanPart()const;
+  Vector<CoefficientType> GetCartanPart()const;
   void MakeGGenerator
   (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
   ;
@@ -7698,10 +7701,11 @@ public:
   static unsigned int HashFunction(const ElementSemisimpleLieAlgebra& input)
   { return input.HashFunction();
   }
-  void operator=(const ElementSemisimpleLieAlgebra& other)
+  template<class otherType>
+  void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
   { this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
     this->ownerArray=other.ownerArray;
-    this->::MonomialCollection<ChevalleyGenerator, Rational>::operator=(other);
+    this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::operator=(other);
   }
 };
 

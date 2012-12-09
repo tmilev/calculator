@@ -387,38 +387,65 @@ bool CandidateSSSubalgebra::ComputeSystem
 bool CandidateSSSubalgebra::ComputeSystemPart2
 (GlobalVariables* theGlobalVariables)
 { theSystemToSolve.SetSize(0);
-  int numPosGenCoeffs=0;
-  int numNegGenCoeffs=0;
+  ElementSemisimpleLieAlgebra<Polynomial<Rational> >
+  posEltNegWeight, posEltOtherWeight, negElt, lieBracketMinusGoalValue, goalValue;
+  Vector<Polynomial<Rational> > desiredHpart;
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
-  { numPosGenCoeffs+=this->theInvolvedNegGenerators[i].size;
-    numNegGenCoeffs+=this->theInvolvedPosGenerators[i].size;
-  }
-  if (numPosGenCoeffs!=numNegGenCoeffs)
-  { std::cout << "This is a mathematical or programming error. Something has gone very wrong: "
-    << "I am getting that the number of involved positive generators is different from the number "
-    << " of involved negative generators, which should be impossible. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  int totalNumCoeffs=numPosGenCoeffs+numNegGenCoeffs;
-  //Relations coming from being sl(2)-triple.
-  int currentNegCoeffIndexOffset=0;
-  int currentPosCoeffIndexOffset=numNegGenCoeffs;
-  ElementSemisimpleLieAlgebra<Polynomial<Rational> > posElt, negElt, lieBracket;
-  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
-  { List<ChevalleyGenerator>& curNegGens=this->theInvolvedNegGenerators[i];
-    List<ChevalleyGenerator>& curPosGens=this->theInvolvedPosGenerators[i];
-    this->GetGenericLinearCombination
-    (totalNumCoeffs, currentNegCoeffIndexOffset, curNegGens, negElt);
-    this->GetGenericLinearCombination
-    (totalNumCoeffs, currentPosCoeffIndexOffset, curPosGens, posElt);
-    this->GetAmbientSS().LieBracket(posElt, negElt, lieBracket);
-    std::cout << "<br>[" << posElt.ToString() << ", " << negElt.ToString() << "]="
-    << lieBracket.ToString();
-    currentNegCoeffIndexOffset+=curNegGens.size;
-    currentPosCoeffIndexOffset+=curPosGens.size;
+  { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
+    goalValue.MakeHgenerator
+    (desiredHpart, *this->owner->owners, this->owner->indexInOwners);
+    this->GetGenericNegGenLinearCombination(i, negElt);
+    this->GetGenericPosGenLinearCombination(i, posEltNegWeight);
+    this->GetAmbientSS().LieBracket(posEltNegWeight, negElt, lieBracketMinusGoalValue);
+    lieBracketMinusGoalValue-=goalValue;
+//    std::cout << "<br>[" << posEltNegWeight.ToString() << ", " << negElt.ToString() << "]="
+//    << lieBracketMinusGoalValue.ToString();
+    this->AddToSystem(lieBracketMinusGoalValue);
+    for (int j=0; j<this->theInvolvedPosGenerators.size; j++)
+      if (i!=j)
+      { this->GetGenericPosGenLinearCombination(j, posEltOtherWeight);
+        this->GetAmbientSS().LieBracket(negElt, posEltOtherWeight, lieBracketMinusGoalValue);
+        this->AddToSystem(lieBracketMinusGoalValue);
+      }
   }
   return true;
+}
+
+void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
+  (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+{ int offsetIndex=0;
+  int totalNumCoeffs=0;
+  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
+    totalNumCoeffs+=this->theInvolvedNegGenerators[i].size;
+  for (int i=0; i<indexNegGens; i++)
+    offsetIndex+=this->theInvolvedNegGenerators[i].size;
+  totalNumCoeffs*=2;
+  this->GetGenericLinearCombination
+  (totalNumCoeffs, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
+}
+
+void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
+  (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
+{ int offsetIndex=0;
+  int totalNumCoeffs=0;
+  for (int i=0; i<this->theInvolvedPosGenerators.size; i++)
+    totalNumCoeffs+=this->theInvolvedPosGenerators[i].size;
+  for (int i=0; i<indexPosGens; i++)
+    offsetIndex+=this->theInvolvedPosGenerators[i].size;
+  offsetIndex+=totalNumCoeffs;
+  totalNumCoeffs*=2;
+  this->GetGenericLinearCombination
+  (totalNumCoeffs, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
+}
+
+void CandidateSSSubalgebra::AddToSystem
+  (const ElementSemisimpleLieAlgebra<Polynomial<Rational> >& elementThatMustVanish)
+{ Polynomial<Rational> thePoly;
+  for (int i=0; i<elementThatMustVanish.size; i++)
+  { thePoly=elementThatMustVanish.theCoeffs[i];
+    thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
+    this->theSystemToSolve.AddOnTop(thePoly);
+  }
 }
 
 void CandidateSSSubalgebra::GetGenericLinearCombination
@@ -1784,5 +1811,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   << this->theCharFundamentalCoordsRelativeToCartan.ToString();
   out << "<br>Decomposition ambient Lie algebra: "
   << this->theCharFundCoords.ToString();
+  out << "<br>A necessary system to realize the candidate subalgebra.  ";
+  FormatExpressions tempFormat=this->theCoeffLetters;
+  for (int i=0; i<this->theSystemToSolve.size; i++)
+    out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
   return out.str();
 }

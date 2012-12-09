@@ -2832,10 +2832,22 @@ void ParserNode::Clear()
     this->IndexContextLieAlgebra=this->owner->theHmm.indexRange;
 }
 
+void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other)const
+{ if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
+  { std::cout
+    << "This is a programming error: attempting to compare Chevalley generators "
+    << "of different Lie algebras. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__) << ".";
+    assert(false);
+  }
+}
+
 std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat)const
-{ if (this-> indexOfOwnerAlgebra<0 || this->ownerArray==0)
-    return "(ErrorProgramming:Non-Initialized-Chevalley-Weyl-Generator)";
-  return this->ownerArray->TheObjects[this->indexOfOwnerAlgebra].GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+{ return (*this->ownerArray)[this->indexOfOwnerAlgebra].GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+}
+
+bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other)const
+{ return this->theGeneratorIndex>other.theGeneratorIndex;
 }
 
 std::string SemisimpleLieAlgebra::GetStringFromChevalleyGenerator

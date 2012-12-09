@@ -9695,42 +9695,6 @@ void SemisimpleLieAlgebra::LieBracket
 }
 
 template <class CoefficientType>
-std::string ElementSemisimpleLieAlgebra<CoefficientType>::ToString(FormatExpressions* theFormat)const
-{ std::stringstream out; std::string tempS;
-  if (this->IsEqualToZero())
-    out << "0";
-  MemorySaving<FormatExpressions> tempFormat;
-  if (theFormat==0)
-    theFormat=&tempFormat.GetElement();
-  bool found=false;
-  for (int i=0; i<this->size; i++)
-    if (!this->GetOwner().IsGeneratorFromCartan(this->TheObjects[i].theGeneratorIndex))
-    { tempS=this->theCoeffs[i].ToString(theFormat);
-      if (tempS=="1")
-        tempS="";
-      if (tempS=="-1")
-        tempS="-";
-      if (i!=0)
-      { if (tempS!="")
-        { if (tempS[0]!='-')
-            out << "+";
-        } else
-          out << "+";
-      }
-      out << tempS << this->GetOwner().GetStringFromChevalleyGenerator(this->TheObjects[i].theGeneratorIndex, theFormat);
-      found=true;
-    }
-  Vector<CoefficientType> hComponent=this->GetCartanPart();
-  if (!hComponent.IsEqualToZero())
-  { std::string tempS=hComponent.ToStringLetterFormat(theFormat->chevalleyHgeneratorLetter);
-    if (tempS[0]!='-' && found)
-      out << "+";
-    out << tempS;
-  }
-  return out.str();
-}
-
-template <class CoefficientType>
 SemisimpleLieAlgebra& ElementSemisimpleLieAlgebra<CoefficientType>::GetOwner()const
 { if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)
   { std::cout << "This is a programming error: a semisimple "
@@ -9772,5 +9736,17 @@ Vector<CoefficientType> ElementSemisimpleLieAlgebra<CoefficientType>::GetCartanP
       result[i]+=this->theCoeffs[currentIndex];
   }
   return result;
+}
+
+template <class CoefficientType>
+void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
+(const Vector<CoefficientType>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+{ ChevalleyGenerator tempGen;
+  this->MakeZero(inputOwners, inputIndexInOwners);
+  SemisimpleLieAlgebra& owner= inputOwners[inputIndexInOwners];
+  for (int i=0; i<theH.size; i++)
+  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, owner.GetCartanIndexFromGenerator(i));
+    this->AddMonomial(tempGen, theH[i]);
+  }
 }
 #endif

@@ -2285,82 +2285,6 @@ void MathRoutines::LieBracket(const Element& standsOnTheLeft, const Element& sta
 //  std::cout << "<br>finally:" << output.ToString(&tempFormat) << "<hr>";
 }
 
-template <class TemplateMonomial, class CoefficientType>
-void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
-  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList, bool *IvemadeARowSwitch,
-   HashedList<TemplateMonomial>* seedMonomials)
-{ MemorySaving<HashedList<TemplateMonomial> > bufferMons;
-  HashedList<TemplateMonomial>& allMons = seedMonomials==0 ? bufferMons.GetElement() : *seedMonomials;
-  if (seedMonomials==0)
-  { int topBoundNumMons=0;
-    for (int i =0; i<theList.size; i++)
-      topBoundNumMons+=theList[i].size;
-    allMons.SetExpectedSize(topBoundNumMons);
-  }
-  for (int i =0; i<theList.size; i++)
-    allMons.AddNoRepetition(theList[i]);
-  allMons.QuickSortAscending();
-  FormatExpressions tempFormat;
-  tempFormat.flagUseHTML=true;
-//  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "
-//  << allMons.ToString(&tempFormat);
-  tempFormat.flagUseLatex=true;
-  if (IvemadeARowSwitch!=0)
-    *IvemadeARowSwitch=false;
-//  std::cout << "<br><b>starting list:</b> ";
-//  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
-//    (theList[i].ToString(&tempFormat)) << ", ";
-  int currentRowIndex=0;
-  CoefficientType tempCF;
-  for (int i=0; i<allMons.size && currentRowIndex<theList.size; i++)
-  { TemplateMonomial& currentMon=allMons[i];
-    int goodRow=currentRowIndex;
-    for (; goodRow< theList.size; goodRow++)
-      if (theList[goodRow].Contains(currentMon))
-        break;
-    if (goodRow>=theList.size)
-      continue;
-    if (currentRowIndex!=goodRow)
-    { theList.SwapTwoIndices(currentRowIndex, goodRow);
-      if (IvemadeARowSwitch!=0)
-        *IvemadeARowSwitch=true;
-    }
-    MonomialCollection<TemplateMonomial, CoefficientType>& currentPivot=
-    theList[currentRowIndex];
-    int colIndex=currentPivot.GetIndex(currentMon);
-    if (colIndex==-1)
-    { std::cout << "This is a programming error. "
-      << "An internal check at the Gaussian elimination method for "
-      << " monomial collections fails. Something is wrong. Here is the List you wanted "
-      << " to perform Gaussian elimination upon. "
-      << theList.ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    tempCF=currentPivot.theCoeffs[colIndex];
-    currentPivot/=tempCF;
-    for (int j=0; j<theList.size; j++)
-      if (j!=currentRowIndex)
-      { MonomialCollection<TemplateMonomial, CoefficientType>& currentOther=theList[j];
-        int otherColIndex=currentOther.GetIndex(currentMon);
-        if (otherColIndex!=-1)
-        { tempCF=currentOther.theCoeffs[otherColIndex];
-          //std::cout << "<br>subtracting " << CGI::GetHtmlMathSpanPure(currentPivot.ToString())
-            //<< " times " << tempCF.ToString() << " from "
-            //<< CGI::GetHtmlMathSpanPure(currentOther.ToString());
-          currentOther.SubtractOtherTimesCoeff(currentPivot, &tempCF);
-          //std::cout << "<br>to get " << CGI::GetHtmlMathSpanPure(currentOther.ToString());
-        }
-      }
-    currentRowIndex++;
-  }
-//    std::cout << "<br><b>final list:</b> ";
-//  for (int i=0; i<theList.size; i++)
-//    std::cout << //"<br>" << CGI::GetHtmlMathSpanPure
-//    (theList[i].ToString(&tempFormat)) << ", ";
-}
-
 template <class CoefficientType>
 void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
 (List<quasiDiffOp<CoefficientType> >& theElts,
@@ -3406,7 +3330,7 @@ bool CommandList::fSSAlgebra
   for (int i=0; i<theType.size; i++)
   { MonomialP& currentMon=theType[i];
     int variableIndex;
-    if (!currentMon.IsOneLetterFirstDegree(variableIndex))
+    if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
       return theExpression.SetError
       ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat));
     Expression typeE= theContext.VariableImages[variableIndex];

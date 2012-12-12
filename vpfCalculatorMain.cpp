@@ -421,6 +421,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="experimentalPrintSemisimpleSubalgebras{}(g_2)";
 //  civilizedInput= "experimentalPrintSemisimpleSubalgebras{}(b_3)";
 //  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
+//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, f_4)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

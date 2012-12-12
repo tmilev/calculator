@@ -80,9 +80,10 @@ GlobalVariables* theGlobalVariables)
       //std::cout << newCandidate.ToString() << " is bad<br>";
       return;
     }
-    newCandidate.ComputeSystem
-    (theGlobalVariables)
-    ;
+    if (!newCandidate.ComputeSystem(theGlobalVariables))
+    { theReport.Report("Candidate " + newCandidate.ToString() + " ain't no good");
+      return;
+    }
 //    std::cout << newCandidate.ToString() << "<b> is good</b><br>";
     this->Hcandidates.AddOnTop(newCandidate);
     if (propagateRecursion)
@@ -348,7 +349,8 @@ bool CandidateSSSubalgebra::IsWeightSystemSpaceIndex
 
 bool CandidateSSSubalgebra::ComputeSystem
 (GlobalVariables* theGlobalVariables)
-{ ChevalleyGenerator currentGen, currentOpGen;
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystem");
+  ChevalleyGenerator currentGen, currentOpGen;
   this->theHs.AssignListList(this->CartanSAsByComponent);
   this->theCoRoots.SetSize(this->theHs.size);
   int counter=-1;
@@ -380,13 +382,16 @@ bool CandidateSSSubalgebra::ComputeSystem
       } //else
         //std::cout << "<br>Generator " << currentGen.ToString() << " ain't no good";
     }
+    if (currentInvolvedNegGens.size==0)
+      return false;
   }
   return this->ComputeSystemPart2(theGlobalVariables);
 }
 
 bool CandidateSSSubalgebra::ComputeSystemPart2
 (GlobalVariables* theGlobalVariables)
-{ theSystemToSolve.SetSize(0);
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
+  theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<Rational> >
   posEltNegWeight, posEltOtherWeight, negElt, lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
@@ -408,6 +413,33 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
+  return this->AttemptToSolveSystem(theGlobalVariables);
+}
+
+bool CandidateSSSubalgebra::AttemptToSolveSystem(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
+  this->flagSystemSolved=false;
+  this->transformedSystem=this->theSystemToSolve;
+  MonomialCollection<MonomialP, Rational>::GaussianEliminationByRows(this->transformedSystem);
+/*  std::cout << this->theSystemToSolve;
+  int numVars=this->theSystemToSolve[0].NumVars;
+  int numPosCoeff=numVars/2;
+  PolynomialSubstitution<Rational> thePolSub;
+  thePolSub.SetSize(numVars);
+  for (int i=0; i<numPosCoeff; i++)
+  { Polynomial<Rational>& currentP=thePolSub[i];
+    currentP.MakeMonomial(numPosCoeff, i, 1, 1);
+  }
+  for (int i=numPosCoeff; i<numVars; i++)
+  { Polynomial<Rational>& currentP=thePolSub[i];
+    currentP.MakeConst(numPosCoeff, i);
+  }
+  this->subbedSystem=this->theSystemToSolve;
+  std::cout << "subbing";
+  this->subbedSystem.Substitution(thePolSub);
+
+  if (this->subbedSystem.IsALinearSystemWithSolution(&this->aSolution))
+    this->flagSystemSolved=true;*/
   return true;
 }
 
@@ -444,7 +476,7 @@ void CandidateSSSubalgebra::AddToSystem
   for (int i=0; i<elementThatMustVanish.size; i++)
   { thePoly=elementThatMustVanish.theCoeffs[i];
     thePoly.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-    this->theSystemToSolve.AddOnTop(thePoly);
+    this->theSystemToSolve.AddOnTopNoRepetition(thePoly);
   }
 }
 
@@ -1578,7 +1610,7 @@ void rootSubalgebra::ToString
     out << "k_{ss}: ";
   out << tempS;
   if (sl2s!=0)
-  { out <<" &nbsp&nbsp&nbsp Contained in: ";
+  { out << " &nbsp&nbsp&nbsp Contained in: ";
     for (int i=0; i<this->indicesSubalgebrasContainingK.size; i++)
     { if (useHtml)
         out << "<a href=\"./rootHtml_rootSA"
@@ -1789,6 +1821,8 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   out << this->theTypeTotal;
   out << ". ";
+  if (!this->flagSystemSolved)
+    out << " <b> Subalgebra candidate not realized! </b> ";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { out << "Component " << this->theTypes[i];
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)
@@ -1815,5 +1849,42 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   FormatExpressions tempFormat=this->theCoeffLetters;
   for (int i=0; i<this->theSystemToSolve.size; i++)
     out << "<br>" << this->theSystemToSolve[i].ToString(&tempFormat) << "= 0";
+  out << "<br>The above system after transformation.  ";
+  for (int i=0; i<this->transformedSystem.size; i++)
+    out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
+  if (this->flagSystemSolved)
+  { out << "<br>Solution of above system: " << this->aSolution.ToString();
+  }
   return out.str();
+}
+
+bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolution)
+{ MacroRegisterFunctionWithName("PolynomialSystem::IsALinearSystemWithSolution");
+  if (this->size<=0)
+    return false;
+  Matrix<Rational> theSystem;
+  Matrix<Rational> theColumnVect, theSolution;
+  int numVars=(*this)[0].NumVars;
+  theSystem.init(this->size, numVars);
+  theSystem.NullifyAll();
+  theColumnVect.init(this->size, 1);
+  theColumnVect.NullifyAll();
+  for (int i=0; i<this->size; i++)
+  { Polynomial<Rational>& curP=(*this)[i];
+    for (int j=0; j<curP.size; j++)
+    { MonomialP& curMon=curP[j];
+      int theIndex;
+      if (curMon.IsOneLetterFirstDegree(&theIndex))
+        theSystem(j,theIndex)=curP.theCoeffs[j];
+      else if (curMon.IsAConstant())
+        theColumnVect(j, 0)=curP.theCoeffs[j];
+      else
+        return false;
+    }
+  }
+  if (!theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, theColumnVect, theSolution))
+    return false;
+  if (outputSolution!=0)
+    outputSolution->AssignMatDetectRowOrColumn(theSolution);
+  return true;
 }

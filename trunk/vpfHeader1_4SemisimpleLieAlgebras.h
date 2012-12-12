@@ -193,6 +193,20 @@ public:
   std::string ToString(FormatExpressions* theFormat=0);
 };
 
+class PolynomialSystem : public List<Polynomial<Rational> >
+{
+  public:
+  void Substitution(const List<Polynomial<Rational> >& theSub)
+  { for (int i=0; i<this->size; i++)
+      (*this)[i].Substitution(theSub);
+  }
+  void operator=(List<Polynomial<Rational> >& other)
+  { this->::List<Polynomial<Rational> >::operator=(other);
+  }
+  bool IsALinearSystemWithSolution(Vector<Rational>* outputSolution=0);
+};
+
+
 class SemisimpleSubalgebras;
 
 class CandidateSSSubalgebra
@@ -208,6 +222,7 @@ public:
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
 //  List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
+  Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
   List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
   DynkinType theTypeTotal;
@@ -215,13 +230,17 @@ public:
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   List<Polynomial<Rational> > theSystemToSolve;
+  List<MonomialCollection<MonomialP, Rational> > transformedSystem;
   FormatExpressions theCoeffLetters;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
-  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1){}
+  bool flagSystemSolved;
+  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false){}
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
+  bool AttemptToSolveSystem(GlobalVariables* theGlobalVariables)
+  ;
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
@@ -256,6 +275,9 @@ public:
     this->theCoRoots=other.theCoRoots;
     this->theHs=other.theHs;
     this->theCoeffLetters=other.theCoeffLetters;
+    this->flagSystemSolved=other.flagSystemSolved;
+    this->transformedSystem=other.transformedSystem;
+    this->aSolution=other.aSolution;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);

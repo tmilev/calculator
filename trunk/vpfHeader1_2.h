@@ -9749,4 +9749,6 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
     this->AddMonomial(tempGen, theH[i]);
   }
 }
+
+
 #endif

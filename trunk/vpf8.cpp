@@ -4654,7 +4654,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
   output.MakeZero(inputLPoly.NumVars+1);
   for (int i=0; i<inputLPoly.size; i++)
   { int theIndex;
-    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(theIndex))
+    if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex))
       output[theIndex]=inputLPoly.theCoeffs[i];
     else
       *output.LastObject()=inputLPoly.theCoeffs[i];

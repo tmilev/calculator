@@ -3,6 +3,30 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
+bool CommandList::fSolveSeparableBilinearSystem
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
+  Vector<Polynomial<Rational> > thePolys;
+  Context theContext(theCommands);
+  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 0, theCommands.fPolynomial, comments))
+    return theExpression.SetError("Failed to extract list of polynomials. ");
+  if (theExpression.errorString!="")
+    return true;
+  HashedList<MonomialP> theMonsInPlay;
+  FormatExpressions theFormat;
+  theContext.GetFormatExpressions(theFormat);
+  for (int i=0; i<thePolys.size; i++)
+    theMonsInPlay.AddNoRepetition(thePolys[i]);
+  std::cout << "The context vars:<br>" << theContext.VariableImages.ToString();
+  std::cout << "The mons in play: <br>" << theMonsInPlay.ToString();
+  std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);
+
+  std::stringstream out;
+  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  return true;
+}
+
+
 bool CommandList::fSSsubalgebras
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;

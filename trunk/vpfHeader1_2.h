@@ -5113,7 +5113,7 @@ template <class Object>
 inline std::string List<Object>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   for (int i=0; i<this->size; i++)
-    out << this->TheObjects[i].ToString() << "\n";
+    out << this->TheObjects[i].ToString(theFormat) << "\n";
   return out.str();
 }
 

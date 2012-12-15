@@ -390,9 +390,7 @@ void MakeVariableNonBounD
     this->IndexBoundVars=other.IndexBoundVars;
   }
   void operator=(const Expression& other);
-  bool operator>(const Expression& other)const
-  { return this->ToString()>other.ToString();
-  }
+  bool operator>(const Expression& other)const;
 };
 
 class ExpressionPairs
@@ -516,6 +514,8 @@ class Context
   }
   bool MergeContextWith(const Context& other)
   { this->VariableImages.AddNoRepetition(other.VariableImages);
+    this->VariableImages.QuickSortAscending();
+//    std::cout << "Variable images sorted: " << this->VariableImages.ToString();
     if (this->indexAmbientSSalgebra==-1)
       this->indexAmbientSSalgebra=other.indexAmbientSSalgebra;
     if (other.indexAmbientSSalgebra==-1)
@@ -524,7 +524,7 @@ class Context
   }
   template <class dataType>
   dataType GetPolynomialMonomial(int theIndex, GlobalVariables& theGlobalVariables)const;
-  bool GetPolySubFromVaraibleSuperSet(const Context& theSuperset, PolynomialSubstitution<Rational>& output)const
+  bool GetPolySubFromVariableSuperSet(const Context& theSuperset, PolynomialSubstitution<Rational>& output)const
 ;
 };
 
@@ -1289,6 +1289,9 @@ bool fGetTypeHighestWeightParabolic
   static bool fFactor
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
+  static bool fSolveSeparableBilinearSystem
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+;
   static bool fMinPoly
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 ;
@@ -1451,7 +1454,7 @@ bool CommandList::GetVector
     output.TheObjects[0]=outputData.GetValuE<theType>();
     return true;
   }
-  if (targetDimNonMandatory!=-1)
+  if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=theExpression.children.size)
       return false;
   Vector<Data> outputData;

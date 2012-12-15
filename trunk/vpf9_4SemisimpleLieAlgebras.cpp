@@ -413,34 +413,37 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  return this->AttemptToSolveSystem(theGlobalVariables);
+  Vector<Polynomial<Rational> > theMinPolys;
+  this->transformedSystem=this->theSystemToSolve;
+  this->flagSystemSolved=this->SolveSeparableQuadraticSystemRecursively
+  (this->transformedSystem, theMinPolys, theGlobalVariables);
+  return this->flagSystemSolved;
 }
 
-bool CandidateSSSubalgebra::AttemptToSolveSystem(GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
+bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
+  ( List<Polynomial<Rational> >& inputOutputTheSystem,
+   Vector<Polynomial<Rational> >& ouptutTheOneVarMinPolys,
+   GlobalVariables* theGlobalVariables
+   )
+{/* MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->flagSystemSolved=false;
   this->transformedSystem=this->theSystemToSolve;
-  MonomialCollection<MonomialP, Rational>::GaussianEliminationByRows(this->transformedSystem);
-/*  std::cout << this->theSystemToSolve;
-  int numVars=this->theSystemToSolve[0].NumVars;
-  int numPosCoeff=numVars/2;
-  PolynomialSubstitution<Rational> thePolSub;
-  thePolSub.SetSize(numVars);
-  for (int i=0; i<numPosCoeff; i++)
-  { Polynomial<Rational>& currentP=thePolSub[i];
-    currentP.MakeMonomial(numPosCoeff, i, 1, 1);
-  }
-  for (int i=numPosCoeff; i<numVars; i++)
-  { Polynomial<Rational>& currentP=thePolSub[i];
-    currentP.MakeConst(numPosCoeff, i);
-  }
-  this->subbedSystem=this->theSystemToSolve;
-  std::cout << "subbing";
-  this->subbedSystem.Substitution(thePolSub);
-
-  if (this->subbedSystem.IsALinearSystemWithSolution(&this->aSolution))
-    this->flagSystemSolved=true;*/
-  return true;
+  MonomialCollection<MonomialP, Rational>::GaussianEliminationByRowsDeleteZeroRows
+  (this->transformedSystem);
+  int indexPivotPol=-1;
+  for (int i=0; i<inputOutputTheSystem.size; i++)
+    if (inputOutputTheSystem[i].GetConstantTerm().IsEqualToZero())
+    { indexPivotPol=i;
+      break;
+    }
+  if (indexPivotPol==-1)
+    return false;
+  List<Polynomial<Rational> > systemCopy=inputOutputTheSystem;
+  Polynomial<Rational>& pivotPol=systemCopy[indexPivotPol];
+  MonomialP& firstMon=pivotPol[0];
+  Rational cfFirstMon=pivotPol.theCoeffs[0];
+  cfFirstMon.themon*/
+  return false;
 }
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination

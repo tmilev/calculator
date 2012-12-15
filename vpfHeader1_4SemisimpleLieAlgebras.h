@@ -230,7 +230,7 @@ public:
   charSSAlgMod<Rational> theCharFundCoords;
   Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
   List<Polynomial<Rational> > theSystemToSolve;
-  List<MonomialCollection<MonomialP, Rational> > transformedSystem;
+  List<Polynomial<Rational> > transformedSystem;
   FormatExpressions theCoeffLetters;
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
@@ -239,8 +239,6 @@ public:
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
-  bool AttemptToSolveSystem(GlobalVariables* theGlobalVariables)
-  ;
   void GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
   ;
@@ -297,6 +295,12 @@ public:
   bool ComputeChar
 (GlobalVariables* theGlobalVariables)
 
+  ;
+  bool SolveSeparableQuadraticSystemRecursively
+  ( List<Polynomial<Rational> >& inputOutputTheSystem,
+   Vector<Polynomial<Rational> >& ouptutTheOneVarMinPolys,
+   GlobalVariables* theGlobalVariables
+   )
   ;
   bool isGoodForTheTop
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const

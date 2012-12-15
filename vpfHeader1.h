@@ -4649,6 +4649,16 @@ public:
    bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
    )
    ;
+  static void GaussianEliminationByRowsDeleteZeroRows
+  (List<MonomialCollection<TemplateMonomial, CoefficientType> >& theList,
+   bool *IvemadeARowSwitch=0, HashedList<TemplateMonomial>* seedMonomials=0
+   )
+  { MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationByRows
+    (theList, IvemadeARowSwitch, seedMonomials);
+    for (int j=theList.size-1; j>=0; j--)
+      if (theList[j].IsEqualToZero())
+        theList.size--;
+  }
   int SubtractMonomialNoCoeffCleanUpReturnsCoeffIndex
   (const TemplateMonomial& inputMon, const CoefficientType& inputCoeff);
   void CleanUpZeroCoeffs()
@@ -6341,7 +6351,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
   }
   for (int i =0; i<theList.size; i++)
     allMons.AddNoRepetition(theList[i]);
-  allMons.QuickSortAscending();
+  allMons.QuickSortDescending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;
 //  std::cout << "<hr>Gaussian elimnation. All mons(" << allMons.size << " total): "

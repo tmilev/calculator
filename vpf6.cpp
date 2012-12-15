@@ -286,7 +286,7 @@ bool Data::SetContextResizesContextArray
   if (oldContext.indexAmbientSSalgebra!=-1 && oldContext.indexAmbientSSalgebra!=desiredNewContext.indexAmbientSSalgebra)
     return false;
   PolynomialSubstitution<Rational> polySub;
-  if (!oldContext.GetPolySubFromVaraibleSuperSet(desiredNewContext, polySub))
+  if (!oldContext.GetPolySubFromVariableSuperSet(desiredNewContext, polySub))
     return false;
   this->theContextIndex=candidateIndex;
   MemorySaving<RationalFunctionOld> tempRF;
@@ -5056,6 +5056,7 @@ bool CommandList::ExtractPMTDtreeContext
     }
     return true;
   }
+  outputContext.VariableImages.QuickSortAscending();
   outputContext.VariableImages.AddNoRepetition(theInput);
 //  std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ToString() << " with resulting accummulated context: " << outputContext.ToString();
   return true;
@@ -5576,6 +5577,27 @@ int Expression::GetNumCols()const
     if (this->children[i].format==this->formatMatrixRow && this->children[i].theOperation==this->theBoss->opList())
       theMax=MathRoutines::Maximum(this->children[i].children.size, theMax);
   return theMax;
+}
+
+bool Expression::operator>(const Expression& other)const
+{ if (this->children.size>other.children.size)
+    return true;
+  if (other.children.size>this->children.size)
+    return false;
+  if (this->theBoss==0)
+    return this->ToString()>other.ToString();
+  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
+  if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
+    return false;
+  if (this->EvaluatesToRational() && other.EvaluatesToRational())
+    return this->GetRationalValue()>other.GetRationalValue();
+  for (int i=0; i<this->children.size; i++)
+  { if (this->children[i]>other.children[i])
+      return true;
+    if (other.children[i]>this->children[i])
+      return false;
+  }
+  return false;
 }
 
 std::string Expression::ToString
@@ -6310,7 +6332,7 @@ void Context::operator=(const Context& other)
   this->VariableImages=other.VariableImages;
 }
 
-bool Context::GetPolySubFromVaraibleSuperSet
+bool Context::GetPolySubFromVariableSuperSet
 (const Context& theSuperset, PolynomialSubstitution<Rational>& output)const
 { PolynomialSubstitution<Rational> theSub;
   output.SetSize(this->VariableImages.size);

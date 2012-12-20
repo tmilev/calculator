@@ -6117,6 +6117,10 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   int cutOffCounter=0;
   bool useCustomPlus=false;
   bool useCustomTimes=false;
+  int MaxLineLength=theFormat==0? 200 : theFormat->MaxLineLength;
+  int NumAmpersandsPerNewLineForLaTeX=theFormat==0? 1: theFormat->NumAmpersandsPerNewLineForLaTeX;
+  bool flagUseLaTeX=theFormat==0? false: theFormat->flagUseLatex;
+  bool flagUseHTML=theFormat==0? false: theFormat->flagUseHTML;
   std::string oldCustomTimes="";
   if (theFormat!=0)
   { useCustomPlus=(theFormat->CustomPlusSign!="");
@@ -6161,16 +6165,16 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
     }
     out << tempS1;
     cutOffCounter+=tempS1.size();
-    if (theFormat!=0)
-      if (cutOffCounter>theFormat->MaxLineLength)
+    if (MaxLineLength>0)
+      if (cutOffCounter>MaxLineLength)
       { cutOffCounter=0;
-        if (theFormat->flagUseLatex && i!=sortedMons.size-1)
+        if (flagUseLaTeX && i!=sortedMons.size-1)
         { out << " \\\\";
-          for (int k=0; k<theFormat->NumAmpersandsPerNewLineForLaTeX; k++)
+          for (int k=0; k<NumAmpersandsPerNewLineForLaTeX; k++)
             out << "&";
           out << " ";
         }
-        if (theFormat->flagUseHTML && !theFormat->flagUseLatex)
+        if (flagUseHTML && !flagUseLaTeX)
           out << " <br>";
       }
   }

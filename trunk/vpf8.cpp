@@ -2874,9 +2874,7 @@ void Lattice::Reduce
   //if (flagTesting)
   //  this->TestGaussianEliminationEuclideanDomainRationals(testMatrix);
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  LargeInt tempInt, tempInt2;
-  tempInt.MakeMOne(); tempInt2.MakeOne();
-  this->basis.GaussianEliminationEuclideanDomain(tempInt, tempInt2);
+  this->basis.GaussianEliminationEuclideanDomain();
   int numRowsToTrim=0;
   for (int i=this->basis.NumRows-1; i>=0; i--)
   { bool foundNonZeroRow=false;
@@ -2906,7 +2904,7 @@ void Lattice::TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> &
   std::stringstream out;
   std::cout << "Test output: " << output.ToString();
   out << "Test output: " << output.ToString();
-  output.GaussianEliminationEuclideanDomain((Rational) -1, (Rational) 1);
+  output.GaussianEliminationEuclideanDomain();
   std::cout << "<br>After gaussian elimination:" << output.ToString();
   out << "<br>After gaussian elimination:" << output.ToString();
 //  tempDebugString=out.str();
@@ -7687,6 +7685,11 @@ class ImpreciseDouble
   void AssignFloor()
   { this->theValue=floor(this->theValue);
   }
+  void operator/=(const ImpreciseDouble& other)
+  { ImpreciseDouble copyMe;
+    copyMe=*this;
+    *this=copyMe/other;
+  }
   inline ImpreciseDouble operator/(const ImpreciseDouble& other)const
   { ImpreciseDouble result;
     result=*this;
@@ -7734,7 +7737,7 @@ int ParserNode::EvaluateLatticeImprecise
     for (int j=0; j<theMat.NumCols; j++)
       theMat.elements[i][j]=tempRoots[i][j];
   std::cout << "starting matrix: " << theMat.ToString();
-  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  theMat.GaussianEliminationEuclideanDomain(0, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
   std::cout << "<br>final matrix: " << theMat.ToString();
   return theNode.errorNoError;
 }
@@ -7751,7 +7754,7 @@ void DrawOperations::projectionMultiplicityMergeOnBasisChange(DrawOperations& th
   ProgressReport theReport(&theGlobalVariables);
   std::stringstream out;
   out << "before elimination:\n" << theMat.ToString();
-  theMat.GaussianEliminationEuclideanDomain(ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
+  theMat.GaussianEliminationEuclideanDomain(0, ImpreciseDouble::GetMinusOne(), ImpreciseDouble::GetOne());
   out << "after elimination:\n" << theMat.ToString();
   theReport.Report(out.str());
 }

@@ -5580,28 +5580,14 @@ int Expression::GetNumCols()const
 }
 
 bool Expression::operator>(const Expression& other)const
-{ if (this->children.size>other.children.size)
-    return true;
-  if (other.children.size>this->children.size)
-    return false;
-  if (this->theBoss==0)
-    return this->ToString()>other.ToString();
-  RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
-  if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
-    return false;
-  if (this->EvaluatesToRational() && other.EvaluatesToRational())
+{ if (this->EvaluatesToRational() && other.EvaluatesToRational())
     return this->GetRationalValue()>other.GetRationalValue();
-  for (int i=0; i<this->children.size; i++)
-  { if (this->children[i]>other.children[i])
-      return true;
-    if (other.children[i]>this->children[i])
-      return false;
-  }
-  return false;
+  return this->ToString()>other.ToString();
 }
 
 std::string Expression::ToString
-(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces, std::stringstream* outComments, bool isFinal, Expression* startingExpression)const
+(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces,
+ std::stringstream* outComments, bool isFinal, Expression* startingExpression)const
 { if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
       return "(...)";
@@ -5677,9 +5663,8 @@ std::string Expression::ToString
     if (tempS.size()>0)
       if (tempS[0]!='-')
         out << "+";
-    out  << tempS;
-  }
-  else if (this->theOperation==this->theBoss->opMinus())
+    out << tempS;
+  } else if (this->theOperation==this->theBoss->opMinus())
   { if ( this->children.size==1)
       out << "-" << this->children[0].ToString
       (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
@@ -5987,7 +5972,7 @@ std::string CommandList::ToString()
   out2 << "<br>Computation time: "
   << elapsedSecs << " seconds (" << elapsedSecs*1000 << " milliseconds).<br>";
   std::stringstream tempStreamTime;
-  tempStreamTime <<  " Of them "
+  tempStreamTime << " Of them "
   << this->StartTimeEvaluationInSecondS
   << " seconds (" << this->StartTimeEvaluationInSecondS*1000 << " millisecond(s)) boot + "
   << elapsedSecs-this->StartTimeEvaluationInSecondS << " ("

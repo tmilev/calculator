@@ -422,6 +422,10 @@ g_{-2} v_\\lambda\
 //  civilizedInput= "experimentalPrintSemisimpleSubalgebras{}(b_3)";
 //  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
 //  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(a_2, f_4)";
+//  civilizedInput="SolveNseparableQuasiLinearSystem{}(   x_{12}x_{24}-x_{10}x_{22}-2x_{8}x_{20}-x_{7}x_{19}+1, x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21},x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21},x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19},x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20},x_{11}x_{23}+x_{10}x_{22}+x_{8}x_{20}-1,x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20},x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19},x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19},x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1,x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13},x_{6}x_{18}-x_{4}x_{16}-2x_{2}x_{14}-x_{1}x_{13}+1,x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15},x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15},x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14},x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)";
+  //civilizedInput="SolveNseparableQuasiLinearSystem{}(x*y-1)";
+ // civilizedInput="SolveNseparableQuasiLinearSystem{}(x*y, x*z)";
+ //civilizedInput="gcd{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+   2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+   x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+   x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},   x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-   4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-   2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

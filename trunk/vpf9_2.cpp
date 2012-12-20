@@ -3280,10 +3280,12 @@ void RationalFunctionOld::gcd
 //  std::cout << "<hr>the product: " << buffer2.ToString() << " and the lcm: " << buffer1.ToString() << "<br>";
   buffer2.DivideBy(buffer1, output, buffer3);
   if (!buffer3.IsEqualToZero() || output.IsEqualToZero() )
-  { std::cout << "This is a programming error. While computing the gcd of left=" << left.ToString()
-    << " and right=" << right.ToString() << " I got that left*right= " << buffer2.ToString()
-    << ", and that lcm(left,right)=" << buffer1.ToString() << " but at the same time "
-    << "right*left=lcm (left, right)*(" << output.ToString() << ") +(" << buffer3.ToString() << ")"
+  { std::cout << "This is a programming error. <br>While computing the gcd of left=" << left.ToString()
+    << " <br>and right=" << right.ToString() << " <br>I got that left*right= " << buffer2.ToString()
+    << "<br>, and that lcm(left,right)=" << buffer1.ToString() << " <br>but at the same time "
+    << "right*left divided by lcm (left, right) equals <br>" << output.ToString()
+    << "<br> with remainder "
+    << buffer3.ToString() << ", "
     << " which is imposible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -3335,7 +3337,7 @@ void RationalFunctionOld::lcm
       { MaxTotalDeg= currentMon.TotalDegree();
         maxMonNoTIndex=i;
       }
-      if (MaxTotalDeg>currentMon.TotalDegree())
+      if (MaxTotalDeg<currentMon.TotalDegree())
       { MaxTotalDeg=currentMon.TotalDegree();
         maxMonNoTIndex=i;
       }

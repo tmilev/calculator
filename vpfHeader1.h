@@ -288,7 +288,6 @@ class MathRoutines
 public:
   typedef bool (*MonomialOrder) (const MonomialP& left, const MonomialP& right)
   ;
-
   int InvertModN(int X, int N)
   { int q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     int vD[2], vP[2], temp;
@@ -1805,7 +1804,10 @@ void NonPivotPointsToEigenVector
   //In the Gaussian elimination below, we define non-pivot points to be indices of the columns
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
-  inline static void GaussianEliminationByRows(Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints){ Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);  }
+  inline static void GaussianEliminationByRows
+  (Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
+  { Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
+  }
   static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
   void GaussianEliminationByRows(Matrix<Element>& otherMatrix, Selection& outputNonPivotColumns)
   { Matrix<Element>::GaussianEliminationByRows(*this, otherMatrix, outputNonPivotColumns);
@@ -1814,10 +1816,11 @@ void NonPivotPointsToEigenVector
   (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
 ;
   void GaussianEliminationEuclideanDomain
-  (Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit)
-  ;
-  inline  void GaussianEliminationEuclideanDomain
-  (const Element& theRingMinusUnit, const Element& theRingUnit) {this->GaussianEliminationEuclideanDomain(0, theRingMinusUnit, theRingUnit);}
+  (Matrix<Element>* otherMatrix=0, const Element& theRingMinusUnit=-1,
+   const Element& theRingUnit=1
+  , bool (*comparisonGEQFunction) (const Element& left, const Element& right)=0,
+   GlobalVariables* theGlobalVariables=0
+   );
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
   (Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
   Element GetDeterminant();
@@ -1943,59 +1946,6 @@ ParallelComputing::GlobalPointerCounter-=this->ActualNumRows*this->ActualNumCols
   this->NumRows=0;
   this->ActualNumRows=0;
   this->ActualNumCols=0;
-}
-
-template <class Element>
-void Matrix<Element>::GaussianEliminationEuclideanDomain
-(Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit)
-{ int col=0;
-  Element tempElt;
-  int row=0;
-  while(row<this->NumRows && col<this->NumCols)
-  { //std::cout << "<br>****************row: " << row << " status: " << this->ToString(true, false);
-    int findPivotRow=-1;
-    for (int i=row; i<this->NumRows; i++)
-      if(!this->elements[i][col].IsEqualToZero())
-      { findPivotRow=i;
-        break;
-      }
-    if (findPivotRow!=-1)
-    { this->SwitchTwoRowsWithCarbonCopy(row, findPivotRow, otherMatrix);
-      if (this->elements[row][col]<0)
-        this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
-      int ExploringRow= row+1;
-//      std::cout << "<br>before second while: " << this->ToString(true, false);
-      while (ExploringRow<this->NumRows)
-      { Element& PivotElt=this->elements[row][col];
-        Element& otherElt=this->elements[ExploringRow][col];
-        if (otherElt<0)
-          this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
-        if (PivotElt<=otherElt)
-        { tempElt=otherElt/PivotElt;
-          tempElt.AssignFloor();
-          this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
-        }
-        if (this->elements[ExploringRow][col].IsEqualToZero())
-          ExploringRow++;
-        else
-          this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
-//        std::cout << "<br>second while cycle end: " << this->ToString(true, false);
-      }
-      Element& PivotElt = this->elements[row][col];
-      for (int i=0; i<row; i++)
-      { tempElt =this->elements[i][col]/PivotElt;
-//        std::cout << " the floor of " << tempElt.ToString();
-        tempElt.AssignFloor();
-//        std::cout << " is " << tempElt.ToString();
-        this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
-        if (this->elements[i][col].IsNegative())
-          this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
-      }
-      row++;
-    }
-    col++;
-//    std::cout << "end of cycle status: " << this->ToString(true, false) << "<br>****************";
-  }
 }
 
 template <class Element>
@@ -4440,7 +4390,12 @@ private:
 public:
   Vector<Rational> monBody;
   Rational& operator[](int i)const
-  { return this->monBody[i];
+  { if (this->monBody.size<=i || i<0)
+    { std::cout << "This is a programming error: requesting exponent of variable of index "
+      << i+1 << " in a monomial that has " << this->monBody.size << " variables. ";
+      assert(false);
+    }
+    return this->monBody[i];
   }
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
   { output << theMon.ToString();
@@ -4925,6 +4880,8 @@ public:
     output.MultiplyBy(other, theCoeff);
   }
   //////////////////////////////////////////////
+  void AssignFloor()const
+  {}
   void AssignMonomialWithExponent(Vector<Rational>& r, const CoefficientType& theCoeff=1)
   { MonomialP tempM=r;
     this->MakeZero(r.size);
@@ -5044,7 +5001,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   bool IsNegative()const
   { CoefficientType tempC;
-    if(!this->IsAConstant(tempC))
+    if(!this->IsAConstant(&tempC))
       return false;
     return tempC.IsNegative();
   }
@@ -5098,7 +5055,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
         result=i;
     return result;
   }
-  int GetIndexMaxMonomialLexicographicLastVariableStrongest();
+  int GetIndexMaxMonomialLexicographicLastVariableStrongest()const;
   int GetIndexMaxMonomialTotalDegThenLexicographic()const;
 //  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
@@ -5128,6 +5085,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     }
     return constME<other;
   }
+
   bool operator>(const Polynomial<CoefficientType>& other)const
   { if (other.size==0)
     { if (this->size==0)
@@ -5151,10 +5109,33 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       return true;
     if(other.theCoeffs[otherMaxMonIndex]>this->theCoeffs[thisMaxMonIndex])
       return false;
-    return this->ToString()>other.ToString();
+    return false;
+  }
+  bool operator<=(const Polynomial<CoefficientType>& other)const
+  { return ! (*this>other);
   }
   //has to be rewritten please don't use!
   bool IsGreaterThanZeroLexicographicOrder();
+  static bool IsGEQcompareByTopMonomialTotalDegThenLexicographic
+  (const Polynomial<CoefficientType>& left, const Polynomial<CoefficientType>& right)
+  { if (left.IsEqualToZero())
+      return right.IsEqualToZero();
+    if (right.IsEqualToZero())
+      return true;
+    return left[left.GetIndexMaxMonomialTotalDegThenLexicographic()]
+    .MonomialP::IsGEQTotalDegThenLexicographic
+    (right[right.GetIndexMaxMonomialTotalDegThenLexicographic()]);
+  }
+  static bool IsGEQcompareByTopMonomialLexicographicLastVarStrongest
+  (const Polynomial<CoefficientType>& left, const Polynomial<CoefficientType>& right)
+  { if (left.IsEqualToZero())
+      return right.IsEqualToZero();
+    if (right.IsEqualToZero())
+      return true;
+    return left[left.GetIndexMaxMonomialLexicographicLastVariableStrongest()]
+    .MonomialP::IsGEQLexicographicLastVariableStrongest
+    (right[right.GetIndexMaxMonomialLexicographicLastVariableStrongest()]);
+  }
   bool IsEqualTo(const Polynomial<CoefficientType>& p)const{return *this==p;}
   void operator-=(int x)
   { MonomialP tempMon;
@@ -5196,6 +5177,17 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     //  assert(false);
    // }
     this->::ElementAssociativeAlgebra<MonomialP, CoefficientType>::operator*=((ElementAssociativeAlgebra<MonomialP, CoefficientType>) other);
+  }
+  void operator/=(const Polynomial<CoefficientType>& other)
+  { Polynomial<CoefficientType> tempMe=*this;
+    Polynomial<CoefficientType> tempRemainder;
+    tempMe.DivideBy(other, *this, tempRemainder);
+  }
+  void operator/=(int other)
+  { this->::MonomialCollection<MonomialP, CoefficientType>::operator/= (other);
+  }
+  void operator/=(const CoefficientType& other)
+  { this->::MonomialCollection<MonomialP, CoefficientType>::operator/= (other);
   }
   template <class otherType>
   inline void operator*=(const otherType& other)
@@ -5623,6 +5615,11 @@ public:
   void ClearDenominators
   (RationalFunctionOld& outputWasMultipliedBy)
   ;
+  void operator+=(const Polynomial<Rational>& other)
+  { RationalFunctionOld tempOther;
+    tempOther=other;
+    *this+=tempOther;
+  }
   void operator+=(const RationalFunctionOld& other)
   { if (this==&other)
     { *this*=(Rational)2;
@@ -6202,7 +6199,7 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
 }
 
 template <class Element>
-int Polynomial<Element>::GetIndexMaxMonomialLexicographicLastVariableStrongest()
+int Polynomial<Element>::GetIndexMaxMonomialLexicographicLastVariableStrongest()const
 { if (this->size==0)
     return -1;
   int result;
@@ -6259,7 +6256,7 @@ bool Polynomial<Element>::IsProportionalTo(const Polynomial<Element>& other, Ele
 template <class Element>
 void Polynomial<Element>::DivideBy
 (const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
-{ MacroRegisterFunctionWithName("Polynomial<Element>::DivideBy");
+{ MacroRegisterFunctionWithName("Polynomial_Element::DivideBy");
   if (&outputRemainder==this || &outputQuotient==&outputRemainder)
   { Polynomial<Element> newQuot, newRemaind;
     this->DivideBy(inputDivisor, newQuot, newRemaind);
@@ -7550,6 +7547,102 @@ public:
     pointerGV->theIndicatorVariables.ProgressReportStringS.size--;
   }
 };
+
+template <class Element>
+void Matrix<Element>::GaussianEliminationEuclideanDomain
+(Matrix<Element>* otherMatrix, const Element& theRingMinusUnit, const Element& theRingUnit,
+ bool (*comparisonGEQFunction) (const Element& left, const Element& right),
+ GlobalVariables* theGlobalVariables
+ )
+{ MacroRegisterFunctionWithName("Matrix_Element::GaussianEliminationEuclideanDomain");
+  ProgressReport theReport(theGlobalVariables);
+  if (otherMatrix==this)
+  { std::cout << "This is a programming error: the Carbon copy in the Gaussian elimination "
+    << " coincides with the matrix which we are row-reducing "
+    << "(most probably this is a wrong pointer may be a typo). "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int col=0;
+  Element tempElt;
+  int row=0;
+  while(row<this->NumRows && col<this->NumCols)
+  { //std::cout << "<br>****************row: " << row << " status: " << this->ToString(true, false);
+    int foundPivotRow=-1;
+    for (int i=row; i<this->NumRows; i++)
+      if(!this->elements[i][col].IsEqualToZero())
+      { foundPivotRow=i;
+        break;
+      }
+    if (foundPivotRow!=-1)
+    { /*if (this->elements[foundPivotRow][col].IsEqualToZero())
+      { std::cout << "This is a programming error. "
+        << "Something is very wrong: I am getting 0 for a pivot element in "
+        << "Gaussian elimination over Euclidean domains. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }*/
+      this->SwitchTwoRowsWithCarbonCopy(row, foundPivotRow, otherMatrix);
+      /*if (this->elements[row][col].IsEqualToZero())
+      { std::cout << "This is a programming error. "
+        << "Something is very wrong: I am getting 0 for a pivot element in "
+        << "Gaussian elimination over Euclidean domains. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }*/
+      if (this->elements[row][col].IsNegative())
+        this->RowTimesScalarWithCarbonCopy(row, theRingMinusUnit, otherMatrix);
+      int ExploringRow= row+1;
+//      std::cout << "<br>before second while: " << this->ToString(true, false);
+      while (ExploringRow<this->NumRows)
+      { if (theGlobalVariables!=0)
+        { std::stringstream out;
+          out << "Pivotting on row of index " << row +1 << " with exploring row of index "
+          << ExploringRow+1 << "; total rows: " << this->NumRows;
+          theReport.Report(out.str());
+        }
+        Element& PivotElt=this->elements[row][col];
+        Element& otherElt=this->elements[ExploringRow][col];
+        /*if (PivotElt.IsEqualToZero())
+        { std::cout << "This is a programming error. "
+          << "Something is very wrong: I am getting 0 for a pivot element in "
+          << "Gaussian elimination over Euclidean domains. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }*/
+        if (otherElt.IsNegative())
+          this->RowTimesScalarWithCarbonCopy(ExploringRow, theRingMinusUnit, otherMatrix);
+        bool isSmallerOrEqualTo= comparisonGEQFunction==0 ? PivotElt<=otherElt :
+        comparisonGEQFunction(otherElt, PivotElt);
+        if (isSmallerOrEqualTo)
+        { tempElt=otherElt;
+          tempElt/=PivotElt;
+          tempElt.AssignFloor();
+          this->SubtractRowsWithCarbonCopy(ExploringRow, row, 0, tempElt, otherMatrix);
+        }
+        if (this->elements[ExploringRow][col].IsEqualToZero())
+          ExploringRow++;
+        else
+          this->SwitchTwoRowsWithCarbonCopy(ExploringRow, row, otherMatrix);
+//        std::cout << "<br>second while cycle end: " << this->ToString(true, false);
+      }
+      Element& PivotElt = this->elements[row][col];
+      for (int i=0; i<row; i++)
+      { tempElt =this->elements[i][col];
+        tempElt/=PivotElt;
+//        std::cout << " the floor of " << tempElt.ToString();
+        tempElt.AssignFloor();
+//        std::cout << " is " << tempElt.ToString();
+        this->SubtractRowsWithCarbonCopy(i, row, 0, tempElt, otherMatrix);
+        if (this->elements[i][col].IsNegative())
+          this->AddTwoRowsWithCarbonCopy(row, i, 0, theRingUnit, otherMatrix);
+      }
+      row++;
+    }
+    col++;
+//    std::cout << "end of cycle status: " << this->ToString(true, false) << "<br>****************";
+  }
+}
 
 template <class CoefficientType>
 void Vectors<CoefficientType>::SelectABasis

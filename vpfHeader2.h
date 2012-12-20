@@ -1123,6 +1123,34 @@ static bool EvaluateDereferenceOneArgument
   static bool fFreudenthalEval
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
+    static bool fGCDOrLCM
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments, bool doGCD)
+  ;
+  static bool fLCM
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
+  { return theCommands.fGCDOrLCM(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  }
+  static bool fGCD
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+   std::stringstream* comments)
+  { return theCommands.fGCDOrLCM(theCommands, inputIndexBoundVars, theExpression, comments, true);
+  }
+  static bool fPolynomialDivisionQuotient
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  std::stringstream* comments)
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, inputIndexBoundVars, theExpression, comments, true);
+  }
+  static bool fPolynomialDivisionRemainder
+  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  std::stringstream* comments)
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  }
+  static bool fPolynomialDivisionQuotientRemainder
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool returnQuotient)
+ ;
   static bool fPrintAllPartitions
   (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
   ;
@@ -1433,7 +1461,7 @@ bool CommandList::GetVector
   Context& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
   if (theExpression.theOperation!=this->opList())
-  { if (targetDimNonMandatory!=-1)
+  { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return false;
     Data outputData;

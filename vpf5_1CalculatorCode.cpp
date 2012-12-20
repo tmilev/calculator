@@ -3,6 +3,53 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
+bool CommandList::fGCDOrLCM
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool doGCD)
+{ MacroRegisterFunctionWithName("CommandList::fGCD");
+  Vector<Polynomial<Rational> > thePolys;
+  Context theContext(theCommands);
+  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 2, theCommands.fPolynomial, comments))
+    return theExpression.SetError("Failed to extract a list of 2 polynomials. ");
+  if (theExpression.errorString!="")
+    return true;
+  Polynomial<Rational> outputP;
+  std::cout << "context: " << theContext.VariableImages.ToString();
+  if (doGCD)
+    RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
+  else
+    RationalFunctionOld::lcm(thePolys[0], thePolys[1], outputP);
+  Data tempData;
+  int theContextIndex=
+  theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(theContext);
+  tempData.MakePoly(theCommands, outputP, theContextIndex);
+  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
+bool CommandList::fPolynomialDivisionQuotientRemainder
+(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+ std::stringstream* comments, bool returnQuotient)
+{ MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
+  Vector<Polynomial<Rational> > thePolys;
+  Context theContext(theCommands);
+  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 2, theCommands.fPolynomial, comments))
+    return theExpression.SetError("Failed to extract a list of 2 polynomials. ");
+  if (theExpression.errorString!="")
+    return true;
+  Polynomial<Rational> outputR, outputQ;
+  thePolys[0].DivideBy(thePolys[1], outputQ, outputR);
+  Data tempData;
+  int theContextIndex=
+  theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(theContext);
+  if (returnQuotient)
+    tempData.MakePoly(theCommands, outputQ, theContextIndex);
+  else
+    tempData.MakePoly(theCommands, outputR, theContextIndex);
+  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  return true;
+}
+
 bool CommandList::fSolveSeparableBilinearSystem
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
@@ -12,20 +59,64 @@ bool CommandList::fSolveSeparableBilinearSystem
     return theExpression.SetError("Failed to extract list of polynomials. ");
   if (theExpression.errorString!="")
     return true;
+  int numVars=theContext.VariableImages.size;
   HashedList<MonomialP> theMonsInPlay;
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
   for (int i=0; i<thePolys.size; i++)
     theMonsInPlay.AddNoRepetition(thePolys[i]);
-  std::cout << "The context vars:<br>" << theContext.VariableImages.ToString();
-  std::cout << "The mons in play: <br>" << theMonsInPlay.ToString();
+  std::cout << "<br>The context vars:<br>" << theContext.VariableImages.ToString();
+  std::cout << "<br>The mons in play: <br>" << theMonsInPlay.ToString();
   std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);
-
+  Selection linearIndices;
+  linearIndices.MakeFullSelection(theContext.VariableImages.size);
+  for (int i=0; i<theMonsInPlay.size; i++)
+  { bool foundIndex=false;
+    for (int j=theMonsInPlay[i].monBody.size-1; j>=0; j--)
+      if (theMonsInPlay[i][j]!=0)
+      { if (foundIndex)
+          linearIndices.RemoveSelection(j);
+        foundIndex=true;
+      }
+  }
+  Matrix<RationalFunctionOld> theSystem, theConstantTerms;
+  theSystem.init(thePolys.size, linearIndices.CardinalitySelection);
+  theConstantTerms.init(thePolys.size, 1);
+  RationalFunctionOld theZero;
+  theZero.MakeZero(theContext.VariableImages.size, theCommands.theGlobalVariableS);
+  theSystem.NullifyAll(theZero);
+  theConstantTerms.NullifyAll(theZero);
+  MonomialP newMon;
+  Polynomial<Rational> tempP;
+  for (int j=0; j<thePolys.size; j++)
+    for(int k=0; k<thePolys[j].size; k++)
+    { MonomialP& curMon=thePolys[j][k];
+      bool found=false;
+      for (int i=0; i<linearIndices.CardinalitySelection; i++)
+        if (curMon.monBody[i]!=0)
+        { newMon=curMon;
+          newMon.monBody[i]=0;
+          tempP.MakeZero(numVars);
+          tempP.AddMonomial(newMon, thePolys[j].theCoeffs[k]);
+          theSystem(j,i)+=tempP;
+          found=true;
+          break;
+        }
+      if (!found)
+      { tempP.MakeZero(numVars);
+        tempP.SubtractMonomial(curMon, thePolys[j].theCoeffs[k]);
+        theConstantTerms(j,0)+=tempP;
+      }
+    }
+  std::cout << "<br>The system matrix: <br>" << theSystem.ToString(&theFormat);
+  std::cout << "<br>The column vector: <br>" << theConstantTerms.ToString(&theFormat);
+  Selection tempSel;
+  theSystem.GaussianEliminationByRows(theConstantTerms, tempSel);
   std::stringstream out;
+  out << theSystem.ToString(&theFormat) << theConstantTerms.ToString(&theFormat);
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }
-
 
 bool CommandList::fSSsubalgebras
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
@@ -148,6 +239,9 @@ bool CommandList::fGroebnerBuchberger
    , theCommands.theGlobalVariableS);
 */
   std::stringstream out;
+  out << "Letter/expression ordrer: ";
+  for (int i=0; i<theContext.VariableImages.size; i++)
+    out << theContext.VariableImages[i].ToString() << " < ";
   out << "<br>Starting basis: ";
   std::stringstream out1, out2, out3;
   for(int i=0; i<inputVector.size; i++)
@@ -157,10 +251,10 @@ bool CommandList::fGroebnerBuchberger
 //  for(int i=0; i<outputGroebner.size; i++)
 //    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
 //  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
-  out << "<br>Minimal Groebner basis algorithm 2:";
+  out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)
-    out3 << outputGroebner2[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out3.str());
+    out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
+    << "<br> ";
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

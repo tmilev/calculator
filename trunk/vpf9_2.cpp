@@ -3170,19 +3170,25 @@ void RationalFunctionOld::TransformToReducedGroebnerBasis
   for (int lowestNonExplored=0; lowestNonExplored< theBasis.size; lowestNonExplored++)
   { //warning! currentPoly may expire if theBasis.TheObjects changes size
 //    Polynomial<Rational> & currentPoly=;
-    for (int j=lowestNonExplored+1; j<theBasis.size; j++)
+    for (int j=0; j<theBasis.size; j++)
     { Polynomial<Rational>& currentLeft= theBasis[lowestNonExplored];
       Polynomial<Rational>& currentRight= theBasis[j];
       int leftIndex=currentLeft.GetIndexMaxMonomial(theMonOrder);
       int rightIndex=currentRight.GetIndexMaxMonomial(theMonOrder);
       MonomialP& leftHighestMon=currentLeft[leftIndex];
       MonomialP& rightHighestMon=currentRight[rightIndex];
+      if (leftHighestMon.monBody.size!=rightHighestMon.monBody.size ||
+          leftHighestMon.monBody.size!=theNumVars)
+      { std::cout << "This is a programming error: wrong number of variables in monomials while "
+        << "carrying out Buchberger algorithm. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
       for (int k=0; k<leftHighestMon.monBody.size; k++)
         if (leftHighestMon[k]>rightHighestMon[k])
         { rightShift[k]=leftHighestMon[k]-rightHighestMon[k];
           leftShift[k]=0;
-        }
-        else
+        } else
         { leftShift[k]=rightHighestMon[k]-leftHighestMon[k];
           rightShift[k]=0;
         }
@@ -3220,12 +3226,13 @@ void RationalFunctionOld::TransformToReducedGroebnerBasis
       }
     }
   }
-  /*if (theGlobalVariables!=0)
-  { std::cout << "<br> ... and the basis before reduction is: <br>";
+  if (theGlobalVariables!=0)
+  { std::cout << "<br> ... and the basis before reduction is (" << theBasis.size
+    << " elements): <br>";
     for (int i=0; i<theBasis.size; i++)
       std::cout << "<br>" << theBasis[i].ToString(&theGlobalVariables->theDefaultFormat)
       << ", ";
-  }*/
+  }
   RationalFunctionOld::GroebnerBasisMakeMinimal(theBasis, theMonOrder);
 
 }
@@ -3286,7 +3293,11 @@ void RationalFunctionOld::gcd
     << "right*left divided by lcm (left, right) equals <br>" << output.ToString()
     << "<br> with remainder "
     << buffer3.ToString() << ", "
-    << " which is imposible. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << " which is imposible. "
+    << " <br>The Groebner basis follows. <br>";
+    for (int i=0; i<bufferList.size; i++)
+      std::cout << bufferList[i].ToString() << "<br>";
+    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
 
@@ -3319,11 +3330,13 @@ void RationalFunctionOld::lcm
   tempList.size=0;
   tempList.AddOnTop(leftTemp);
   tempList.AddOnTop(rightTemp);
-//  std::cout << "<br>In the beginning: <br>";
-//  for (int i=0; i<tempList.size; i++)
-//  { std::cout << "the groebner basis element with index " << i << " is " << tempList[i].ToString() << "<br>\n";
-//  }
-  RationalFunctionOld::TransformToReducedGroebnerBasis(tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, 0);
+  std::cout << "<br>In the beginning: <br>";
+  for (int i=0; i<tempList.size; i++)
+  { std::cout << tempList[i].ToString() << "<br>\n";
+  }
+  RationalFunctionOld::TransformToReducedGroebnerBasis
+  (tempList, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
+   MonomialP::LeftIsGEQLexicographicLastVariableStrongest );
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << tempList[i].ToString() << "<br>\n";
@@ -3345,7 +3358,10 @@ void RationalFunctionOld::lcm
   }
   if (maxMonNoTIndex==-1)
   { std::cout << "This is a programming error: failed to obtain lcm of two rational functions. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << "The list of polynomials is: ";
+    for (int i=0; i<tempList.size; i++)
+      std::cout << tempList[i].ToString() << ", ";
+    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   output=tempList[maxMonNoTIndex];

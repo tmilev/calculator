@@ -230,14 +230,14 @@ bool CommandList::fGroebnerBuchberger
   MathRoutines::MonomialOrder theMonOrder=
   useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographic :
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+
   RationalFunction<Rational>::TransformToReducedGroebnerBasisImprovedAlgorithm
 (outputGroebner2, theMonOrder, theCommands.theGlobalVariableS
 )
 ;
-/*  RationalFunctionOld::TransformToReducedGroebnerBasis
+  RationalFunctionOld::TransformToReducedGroebnerBasis
   (outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, theMonOrder
    , theCommands.theGlobalVariableS);
-*/
   std::stringstream out;
   out << "Letter/expression ordrer: ";
   for (int i=0; i<theContext.VariableImages.size; i++)
@@ -247,10 +247,10 @@ bool CommandList::fGroebnerBuchberger
   for(int i=0; i<inputVector.size; i++)
     out1 << inputVector[i].ToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
-//  out << "<br>Minimal Groebner basis algorithm 1:";
-//  for(int i=0; i<outputGroebner.size; i++)
-//    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
-//  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
+  out << "<br>Minimal Groebner basis algorithm 1(" << outputGroebner.size << " elements):";
+  for(int i=0; i<outputGroebner.size; i++)
+    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
+  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)
     out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))

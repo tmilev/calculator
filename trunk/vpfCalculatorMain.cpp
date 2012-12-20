@@ -426,6 +426,8 @@ g_{-2} v_\\lambda\
   //civilizedInput="SolveNseparableQuasiLinearSystem{}(x*y-1)";
  // civilizedInput="SolveNseparableQuasiLinearSystem{}(x*y, x*z)";
  //civilizedInput="gcd{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+   2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+   x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+   x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},   x_{13}^{3}x_{15}x_{18}x_{21}^{2}x_{22}-2x_{13}^{3}x_{17}^{2}x_{21}^{3}-   4x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}-   2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-   x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )";
+//  civilizedInput="gcd{}(  y^2  , 1+ y^2 )";
+  //civilizedInput="gcd{}(x+ x*y^3,  x y z+1)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

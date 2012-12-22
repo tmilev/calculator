@@ -227,17 +227,16 @@ bool CommandList::fGroebnerBuchberger
   MonomialP bufferMon1, bufferMon2;
   theContext.GetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
 
-  MathRoutines::MonomialOrder theMonOrder=
+  GroebnerBasisComputation theGroebnerComputation;
+  theGroebnerComputation.theMonOrdeR=
   useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographic :
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-
   RationalFunction<Rational>::TransformToReducedGroebnerBasisImprovedAlgorithm
-(outputGroebner2, theMonOrder, theCommands.theGlobalVariableS
-)
-;
-  RationalFunctionOld::TransformToReducedGroebnerBasis
-  (outputGroebner, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2, theMonOrder
-   , theCommands.theGlobalVariableS);
+(outputGroebner2, theGroebnerComputation.theMonOrdeR, theCommands.theGlobalVariableS
+);
+  theGroebnerComputation.TransformToReducedGroebnerBasis
+  (outputGroebner, theCommands.theGlobalVariableS);
+
   std::stringstream out;
   out << "Letter/expression ordrer: ";
   for (int i=0; i<theContext.VariableImages.size; i++)

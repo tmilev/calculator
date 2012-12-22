@@ -243,6 +243,8 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
   ("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
    //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
+  GroebnerBasisComputation theComputation;
+  theComputation.theMonOrdeR=theMonOrder;
   HashedListSpecialized<PairInts > indexPairs;
 //  Pair<int, int> currentPair;
   indexPairs.SetExpectedSize(theBasis.size*theBasis.size);
@@ -314,8 +316,8 @@ void RationalFunction<CoefficientType>::TransformToReducedGroebnerBasisImprovedA
           out << "Dividing spoly: " << leftBuf.ToString(& theGlobalVariables->theDefaultFormat);
           reportInner.Report(out.str());
         }
-        RationalFunctionOld::RemainderDivisionWithRespectToBasis
-        (leftBuf, theBasis, outputRemainder, buffer1, monLCM, theMonOrder, theGlobalVariables)
+        theComputation.RemainderDivisionWithRespectToBasis
+        (leftBuf, theBasis, &outputRemainder, theGlobalVariables)
         ;
         if (theGlobalVariables!=0)
         { std::stringstream out;

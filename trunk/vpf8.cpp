@@ -2720,13 +2720,10 @@ void RationalFunctionOld::GetRelations
     currentPoly+=tempP;
 //  std::cout << currentPoly.ToString(false, tempFormat) << "<br>";
   }
-  Polynomial<Rational>  buffer1, buffer2, buffer3, buffer4;
-  MonomialP bufferMon1, bufferMon2;
-  RationalFunctionOld::TransformToReducedGroebnerBasis
-  (
-   theGroebnerBasis, buffer1, buffer2, buffer3, buffer4, bufferMon1, bufferMon2,
-   & MonomialP::LeftIsGEQLexicographicLastVariableWeakest, & theGlobalVariables
-  );
+  GroebnerBasisComputation theComputation;
+  theComputation.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableWeakest;
+  theComputation.TransformToReducedGroebnerBasis
+  (theGroebnerBasis, &theGlobalVariables);
 //  std::cout << "<br>the ending generators:<br> ";
 //  for (int i=0; i<theGroebnerBasis.size; i++)
 //  { std::cout << theGroebnerBasis.TheObjects[i].ToString(false, tempFormat) << "<br>";

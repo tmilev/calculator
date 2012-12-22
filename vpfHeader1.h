@@ -5367,6 +5367,40 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
 //std::iostream& operator<<(std::iostream& output, const RationalFunctionOld& theRF);
 //std::iostream& operator>>(std::iostream& input, RationalFunctionOld& theRF);
 
+class GroebnerBasisComputation
+{
+  public:
+  MathRoutines::MonomialOrder theMonOrdeR;
+  Polynomial<Rational> SoPolyBuf;
+  Polynomial<Rational> remainderDivision;
+  Polynomial<Rational> bufPoly;
+  Polynomial<Rational> bufPolyForGaussianElimination;
+  MonomialP SoPolyLeftShift;
+  MonomialP SoPolyRightShift;
+  MonomialP bufferMoN1;
+  List<Polynomial<Rational> > theBasiS;
+  List<MonomialP> leadingMons;
+
+  bool TransformToReducedGroebnerBasis
+  (List<Polynomial<Rational> >& inputOutpuT,
+   GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1)
+   ;
+  bool TransformToReducedGroebnerBasisImprovedAlgorithm
+  (List<Polynomial<Rational> >& inputOutpuT,
+   GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
+  GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest)
+  {}
+  void RemainderDivisionWithRespectToBasis
+(Polynomial<Rational>& inputOutput, List<Polynomial<Rational> >& theBasiS,
+ Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0
+ );
+ void AddPolyToBasis
+ (Polynomial<Rational>& inputOutputToBeModifiedAndAdded, GlobalVariables* theGlobalVariables)
+ ;
+  void initTheBasis(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void init();
+};
+
 class RationalFunctionOld
 {
 private:
@@ -5749,43 +5783,24 @@ public:
     return false;
   }
   static void GroebnerBasisMakeMinimal
-(List<Polynomial<Rational> >& theBasis,
-  MathRoutines::MonomialOrder theMonomialOrder
- )
+(List<Polynomial<Rational> >& theBasis, MathRoutines::MonomialOrder theMonomialOrder)
   ;
   static void GetRelations
-  ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
-   )
+  (List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables)
    ;
-  static void TransformToReducedGroebnerBasis
-(List<Polynomial<Rational> >& theBasis, Polynomial<Rational>& buffer1,
- Polynomial<Rational>& buffer2, Polynomial<Rational>& buffer3,
- Polynomial<Rational>& buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2,
- MathRoutines::MonomialOrder theMonomialOrder=0, GlobalVariables* theGlobalVariables=0
-)
-;
-  static void RemainderDivisionWithRespectToBasis
-(Polynomial<Rational>& inputIsModified, List<Polynomial<Rational> >& theBasis,
- Polynomial<Rational>& outputRemainder, Polynomial<Rational>& buffer1,
- MonomialP& bufferMon1,
- MathRoutines::MonomialOrder theMonOrder, GlobalVariables* theGlobalVariables=0
- )
- ;
   static bool gcdQuicK
-  (const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational> & output)
-  ;
-  static void gcd
-  (const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational> & output, GlobalVariables* theContext=0)
+  (const Polynomial<Rational>& left, const Polynomial<Rational>& right,
+   Polynomial<Rational>& output)
   ;
   static void ScaleClearDenominator
   (List<RationalFunctionOld>& input, Vector<Polynomial<Rational> >& output)
   ;
-  static void gcd(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, Polynomial<Rational> & buffer5, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
-  static void lcm(const Polynomial<Rational>& left, const Polynomial<Rational>& right, Polynomial<Rational>& output, Polynomial<Rational>& buffer1, Polynomial<Rational> & buffer2, Polynomial<Rational> & buffer3, Polynomial<Rational> & buffer4, MonomialP& bufferMon1, MonomialP& bufferMon2, List<Polynomial<Rational> >& bufferList);
-  static inline void lcm(Polynomial<Rational>& left, Polynomial<Rational> & right, Polynomial<Rational> & output)
-  { Polynomial<Rational> buffer1, buffer2, buffer3, buffer4; List<Polynomial<Rational> > bufferList; MonomialP tempMon1, tempMon2;
-    RationalFunctionOld::lcm(left, right, output, buffer1, buffer2, buffer3, buffer4, tempMon1, tempMon2, bufferList);
-  }
+  static void gcd
+  (const Polynomial<Rational>& left, const Polynomial<Rational>& right,
+  Polynomial<Rational>& output, GlobalVariables* theGlobalVariables=0);
+  static void lcm
+  (const Polynomial<Rational>& left, const Polynomial<Rational>& right,
+  Polynomial<Rational>& output, GlobalVariables* theGlobalVariables=0);
   inline void operator-=(int other)
   { *this-=(Rational) other;
   }
@@ -7470,6 +7485,7 @@ public:
   MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso1;
   MemorySaving<rootSubalgebras> rootSAAttemptExtensionIso2;
   MemorySaving<rootSubalgebras> rootSAsGenerateAll;
+  MemorySaving<GroebnerBasisComputation> theGroebnerBasisComputation;
 
   MemorySaving<Cone> coneBuffer1NewSplit;
   MemorySaving<Cone> coneBuffer2NewSplit;

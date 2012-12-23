@@ -231,9 +231,6 @@ bool CommandList::fGroebnerBuchberger
   theGroebnerComputation.theMonOrdeR=
   useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographic :
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-  RationalFunction<Rational>::TransformToReducedGroebnerBasisImprovedAlgorithm
-(outputGroebner2, theGroebnerComputation.theMonOrdeR, theCommands.theGlobalVariableS
-);
   theGroebnerComputation.TransformToReducedGroebnerBasis
   (outputGroebner, theCommands.theGlobalVariableS);
 
@@ -250,6 +247,10 @@ bool CommandList::fGroebnerBuchberger
   for(int i=0; i<outputGroebner.size; i++)
     out2 << outputGroebner[i].ToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
+
+  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
+(outputGroebner2, theCommands.theGlobalVariableS);
+
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)
     out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))

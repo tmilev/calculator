@@ -5380,6 +5380,7 @@ class GroebnerBasisComputation
   MonomialP bufferMoN1;
   List<Polynomial<Rational> > theBasiS;
   List<MonomialP> leadingMons;
+  List<Rational> leadingCoeffs;
 
   bool TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
@@ -5390,6 +5391,9 @@ class GroebnerBasisComputation
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest)
   {}
+  void MakeMinimalBasis
+()
+  ;
   void RemainderDivisionWithRespectToBasis
 (Polynomial<Rational>& inputOutput, List<Polynomial<Rational> >& theBasiS,
  Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0
@@ -5397,6 +5401,13 @@ class GroebnerBasisComputation
  void AddPolyToBasis
  (Polynomial<Rational>& inputOutputToBeModifiedAndAdded, GlobalVariables* theGlobalVariables)
  ;
+   //Criterion from Cox, Little, O'Shea:
+  static bool CriterionCLOsh
+(HashedListSpecialized
+ <Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignIdentity> >&
+ thePairs, List<MonomialP>& theLeadingMons, MonomialP& leadingTermLCM)
+  ;
+
   void initTheBasis(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
   void init();
 };
@@ -5782,9 +5793,6 @@ public:
     assert(false);
     return false;
   }
-  static void GroebnerBasisMakeMinimal
-(List<Polynomial<Rational> >& theBasis, MathRoutines::MonomialOrder theMonomialOrder)
-  ;
   static void GetRelations
   (List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables)
    ;

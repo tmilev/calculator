@@ -443,7 +443,7 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
   MonomialP& firstMon=pivotPol[0];
   Rational cfFirstMon=pivotPol.theCoeffs[0];
   cfFirstMon.themon*/
-  return false;
+  return true;
 }
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
@@ -1855,6 +1855,13 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "<br>The above system after transformation.  ";
   for (int i=0; i<this->transformedSystem.size; i++)
     out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
+  out << "<br><b>For the calculator: </b><br>GroebnerBuchbergerLex{}(";
+  for (int i=0; i<this->transformedSystem.size; i++)
+  { out << this->transformedSystem[i].ToString(&tempFormat);
+    if (i!=this->transformedSystem.size-1)
+      out << ", ";
+  }
+  out << ")";
   if (this->flagSystemSolved)
   { out << "<br>Solution of above system: " << this->aSolution.ToString();
   }

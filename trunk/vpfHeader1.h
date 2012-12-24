@@ -401,11 +401,7 @@ public:
   template <class Element>
   static void LieBracket(const Element& standsOnTheLeft, const Element& standsOnTheRight, Element& output);
   //this function just redirects to the class CGI function with the same name.
-  //the stupid c++ does not allow me to use an incomplete CGI type.
-  //They give a million bullshit reasons why this is a feature of c++, but
-  // the only true reason is they are too lazy to sort the call graph topologically
-  //(i.e. so to rearrange the call graph on the real line so that all edges point from left to right).
-  //That is why we have to do it for them. In case you wondered, them = the c++ committee.
+  //Reason: cannot use an incomplete CGI type.
   static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
 };
 
@@ -2831,9 +2827,6 @@ ParallelComputing::GlobalPointerCounter++;
     this->FreeExtended();
     return true;
   }
-  //Rational(const Rational& right);
-  //grrr the below function is not needed for the gcc but needed for the MS compiler
-  //that is bull(on MS's part), one shouldn't need to call an extra copy constructor.
 public:
   inline static std::string GetXMLClassName(){ return "Rational";}
   int NumShort;
@@ -3245,7 +3238,8 @@ public:
     if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
     { std::cout << "This is a programming error: attempting to take a bilinear form represented by matrix with "
       << TheBilinearForm.NumRows << " rows and " << TheBilinearForm.NumCols << " columns "
-      << " of vectors of dimension " << r1.size << " and " << r2.size << ". ";
+      << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     result=0;

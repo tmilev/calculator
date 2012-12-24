@@ -6,7 +6,6 @@
 #include "vpfHeader1.h"
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
-
 class Lattice
 {
   void TestGaussianEliminationEuclideanDomainRationals(Matrix<Rational> & output);
@@ -2441,15 +2440,14 @@ public:
   }
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very
-  //convenient for computing with Verma modules
-  //format of the order of the generators:
+  //convenient for computing with Verma modules.
+  //Format of the order of the generators:
   // first come the negative roots, in increasing height, then the elements of
   //the Cartan subalgebra, then the positive roots, in increasing height
   //The order of the positive roots is the same as the order in which roots are kept
-  //in WeylGroup::RootSystem
-  // The order of the negative roots is reverse to the order in which they are kept in
-  //WeylGroup::RootSystem
-  // with the "zero level roots" - i.e. the elements of the Cartan subalgebra - put in between.
+  //in WeylGroup::RootSystem.
+  // The "zero level roots" - i.e. the elements of the Cartan subalgebra lie in between
+  // the negative and positive rootss.
   void Simplify
   (ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0 )
@@ -3991,25 +3989,10 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateDrawWeightSupportWithMults
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateHWMTABilinearForm
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateHWTAABilinearForm
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
   static int EvaluateSplitGenVermaBthreeOverGtwo
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateFreudenthal
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateHWV
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
   static int EvaluateIsInProperSubmoduleVermaModule
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateLittelmannPaths
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateSplitIrrepOverLeviParabolic
@@ -4024,16 +4007,6 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateMakeWeylFromParSel
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateLittelmannPathFromWayPoints
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAllLittelmannPaths
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateLittelmannEAlpha
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-
   static int EvaluateGetCoxeterBasis
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -4067,10 +4040,6 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateG2ParabolicSupport
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-
-  static int EvaluateGroebner
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
   static int EvaluateG2InB3MultsParabolic
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -4086,16 +4055,12 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateParabolicWeylGroups
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateActByWeylAlgebraElement
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
   static int EvaluateParabolicWeylGroupsBruhatGraph
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateVPF
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-
   static int EvaluateLatticeImprecise
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -4108,15 +4073,6 @@ bool GetRootSRationalDontUseForFunctionArguments
   static int EvaluateAdjointAction
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateWeylAction
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, false, false);}
-  static int EvaluateWeylRhoAction
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluateWeylAction(theNode, theArgumentList, theGlobalVariables, false, true, false);}
-  static int EvaluateWeylMinusRhoAction
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluateWeylAction(theNode, theArgumentList,  theGlobalVariables, false, true, true);}
   static int EvaluateSolveLPolyEqualsZeroOverCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
@@ -5934,6 +5890,139 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element &output, const E
 }
 
 template<class CoefficientType>
+Rational ModuleSSalgebra<CoefficientType>::hwTrace
+(const Pair
+ <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+ MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
+ & thePair, ProgressReport* theProgressReport
+   )
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwTrace");
+  int indexInCache=this->cachedPairs.GetIndex(thePair);
+  if (indexInCache!=-1)
+    return this->cachedTraces[indexInCache];
+  if (thePair.Object1.generatorsIndices.size==0)
+    return 1;
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > newPair;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft=newPair.Object1;
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight=newPair.Object2;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight=thePair.Object2;
+  newLeft=thePair.Object1;
+  (*newLeft.Powers.LastObject())-=1;
+  int theIndex= *newLeft.generatorsIndices.LastObject();
+  if (*newLeft.Powers.LastObject()==0)
+  { newLeft.generatorsIndices.size--;
+    newLeft.Powers.size--;
+  }
+  int theIndexMinus=
+  2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
+  int theSimpleIndex= theIndex-this->GetOwner().GetNumPosRoots()-this->GetOwner().GetRank();
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
+  Accum.Powers.ReservE(oldRight.Powers.size);
+  Accum.generatorsIndices.ReservE(oldRight.generatorsIndices.size);
+  Vector<Rational> RemainingWeight;
+  Rational result=0;
+  Rational summand;
+  WeylGroup& theWeyl=this->GetOwner().theWeyl;
+//  std::stringstream tempStr;
+//  tempStr << thePair.Object2;
+//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
+//    std::cout << "<hr><hr>";
+//  std::cout << "<br>Computing (" << thePair.Object1 << ", " << thePair.Object2 << ")";
+//  if (this->cachedPairs.size<this->MaxNumCachedPairs)
+//  { indexInCache=this->cachedPairs.size;
+//    this->cachedPairs.AddOnTop(thePair);
+//    this->cachedTraces.AddOnTop(0);
+//  }
+  for (int i=0; i<oldRight.generatorsIndices.size; i++)
+  { if (oldRight.generatorsIndices[i]==theIndexMinus)
+    { summand=0;
+      newRight=Accum;
+      newRight.MultiplyByGeneratorPowerOnTheRight
+      (oldRight.generatorsIndices[i], oldRight.Powers[i]-1);
+      RemainingWeight.MakeZero(theWeyl.GetDim());
+      for (int j=i+1; j<oldRight.generatorsIndices.size; j++)
+      { newRight.MultiplyByGeneratorPowerOnTheRight
+        (oldRight.generatorsIndices[j], oldRight.Powers[j]);
+        RemainingWeight+=theWeyl.RootSystem[oldRight.generatorsIndices[j]]* oldRight.Powers[j];
+      }
+      RemainingWeight+=this->theHWFDpartSimpleCoordS;
+//      std::cout << "<br>Remaining weight: " << RemainingWeight.ToString();
+      summand+=theWeyl.GetScalarProdSimpleRoot(RemainingWeight, theSimpleIndex);
+      summand*=2;
+      summand/=theWeyl.CartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
+//      std::cout << "<br>The scalar product: " << summand.ToString();
+      summand+=1;
+      summand-=oldRight.Powers[i];
+ //     std::cout << "<br>summand: " << summand.ToString();
+      if (!summand.IsEqualToZero())
+        summand*=this->hwTrace(newPair, theProgressReport);
+//      std::cout << "<br>summand after recursion: " << summand.ToString();
+      summand*=oldRight.Powers[i];
+      result+=summand;
+    }
+    Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
+    Accum.Powers.AddOnTop(oldRight.Powers[i]);
+  }
+//  if (indexInCache!=-1)
+//    this->cachedTraces[indexInCache]=result;
+//  if (ProjectInformation::GetMainProjectInfo().CustomStackTrace.size<35)
+  if (this->cachedPairs.size<this->MaxNumCachedPairs)
+  { this->cachedPairs.AddOnTop(thePair);
+    this->cachedTraces.AddOnTop(result);
+  }
+  if (theProgressReport!=0 && this->cachedPairs.size<500000)
+  { std::stringstream tempStream;
+    tempStream << "Number of cached pairs: " << this->cachedPairs.size
+    << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
+    theProgressReport->Report(tempStream.str());
+  }
+
+//  std::cout << "<br>Computed (" << thePair.Object1 << ", "
+//  << thePair.Object2 << ")=" << result.ToString();
+//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
+//    std::cout << "<hr><hr>";
+
+  return result;
+}
+
+template<class CoefficientType>
+void ModuleSSalgebra<CoefficientType>::ApplyTAA
+(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
+{ for (int i=0; i<theMon.generatorsIndices.size; i++)
+    theMon.generatorsIndices[i]=
+    this->GetOwner().GetNumPosRoots()*2+
+    this->GetOwner().GetRank()-theMon.generatorsIndices[i]-1;
+  theMon.Powers.ReverseOrderElements();
+  theMon.generatorsIndices.ReverseOrderElements();
+}
+
+template<class CoefficientType>
+Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
+  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
+   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
+   ProgressReport* theProgressReport)
+{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly");
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
+  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
+  if (leftMon>rightMon)
+    MathRoutines::swap(left, right);
+  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
+  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
+  thePair.Object1=*left;
+  thePair.Object2=*right;
+//  std::cout << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
+  this->ApplyTAA(thePair.Object1);
+  Rational result= this->hwTrace(thePair, theProgressReport);
+  if (theProgressReport!=0)
+  { std::stringstream tempStream;
+    tempStream << this->cachedPairs.size << " total cached pairs";
+    theProgressReport->Report(tempStream.str());
+  }
+  return result;
+}
+
+template<class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::SetNumVariables
 (int GoalNumVars)
 { for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
@@ -7144,6 +7233,23 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
   //for (int i=0; i<theOwner.size; i++)
   //{ //std::cout << "<hr><hr>Module" << i+1 << "<br>" << theOwner[i].ToString();
   //}
+}
+
+template <class CoefficientType>
+void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
+(List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
+ const CoefficientType& theRingUnit)
+{ assert(TheIndexInOwner<theOwner.size);
+  MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
+  CoefficientType currentCoeff;
+  currentCoeff=theRingUnit;
+  tensorMon.theMons.SetSize(1);
+  MonomialGeneralizedVerma<CoefficientType>& theMon=tensorMon.theMons[0];
+  ModuleSSalgebra<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
+  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
+  theMon.MakeConst(theOwner, TheIndexInOwner);
+  this->MakeZero();
+  this->AddMonomial(tensorMon, theRingUnit);
 }
 
 template <class CoefficientType>
@@ -9754,5 +9860,23 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
   }
 }
 
-
+template <class CoefficientType>
+void charSSAlgMod<CoefficientType>::MakeFromWeight
+(const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
+ int inputIndexInOwner)
+{ this->MakeZero(inputOwners, inputIndexInOwner);
+  if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
+  { std::cout << "This is a programming error: attempting to create a character "
+    << " from highest weight in simple coords "
+    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size
+    << " coordinates) while the owner semisimple "
+    << " Lie algebra is of rank " << this->GetOwner().GetRank()
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  MonomialChar<CoefficientType> theMon;
+  theMon.weightFundamentalCoords=
+  this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
+  this->AddMonomial(theMon,1);
+}
 #endif

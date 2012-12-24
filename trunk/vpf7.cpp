@@ -6,139 +6,6 @@
 ProjectInformationInstance ProjectInfoVpf7cpp
 (__FILE__, "Implementation file intended for small fast changes. ");
 
-template<class CoefficientType>
-Rational ModuleSSalgebra<CoefficientType>::hwTrace
-(const Pair
- <MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
- MonomialTensor<int, MathRoutines::IntUnsignIdentity> >
- & thePair, ProgressReport* theProgressReport
-   )
-{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwTrace");
-  int indexInCache=this->cachedPairs.GetIndex(thePair);
-  if (indexInCache!=-1)
-    return this->cachedTraces[indexInCache];
-  if (thePair.Object1.generatorsIndices.size==0)
-    return 1;
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > newPair;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newLeft=newPair.Object1;
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity>& newRight=newPair.Object2;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& oldRight=thePair.Object2;
-  newLeft=thePair.Object1;
-  (*newLeft.Powers.LastObject())-=1;
-  int theIndex= *newLeft.generatorsIndices.LastObject();
-  if (*newLeft.Powers.LastObject()==0)
-  { newLeft.generatorsIndices.size--;
-    newLeft.Powers.size--;
-  }
-  int theIndexMinus=
-  2*this->GetOwner().GetNumPosRoots() + this->GetOwner().GetRank()-theIndex-1;
-  int theSimpleIndex= theIndex-this->GetOwner().GetNumPosRoots()-this->GetOwner().GetRank();
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> Accum;
-  Accum.Powers.ReservE(oldRight.Powers.size);
-  Accum.generatorsIndices.ReservE(oldRight.generatorsIndices.size);
-  Vector<Rational> RemainingWeight;
-  Rational result=0;
-  Rational summand;
-  WeylGroup& theWeyl=this->GetOwner().theWeyl;
-//  std::stringstream tempStr;
-//  tempStr << thePair.Object2;
-//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
-//    std::cout << "<hr><hr>";
-//  std::cout << "<br>Computing (" << thePair.Object1 << ", " << thePair.Object2 << ")";
-//  if (this->cachedPairs.size<this->MaxNumCachedPairs)
-//  { indexInCache=this->cachedPairs.size;
-//    this->cachedPairs.AddOnTop(thePair);
-//    this->cachedTraces.AddOnTop(0);
-//  }
-  for (int i=0; i<oldRight.generatorsIndices.size; i++)
-  { if (oldRight.generatorsIndices[i]==theIndexMinus)
-    { summand=0;
-      newRight=Accum;
-      newRight.MultiplyByGeneratorPowerOnTheRight
-      (oldRight.generatorsIndices[i], oldRight.Powers[i]-1);
-      RemainingWeight.MakeZero(theWeyl.GetDim());
-      for (int j=i+1; j<oldRight.generatorsIndices.size; j++)
-      { newRight.MultiplyByGeneratorPowerOnTheRight
-        (oldRight.generatorsIndices[j], oldRight.Powers[j]);
-        RemainingWeight+=theWeyl.RootSystem[oldRight.generatorsIndices[j]]* oldRight.Powers[j];
-      }
-      RemainingWeight+=this->theHWFDpartSimpleCoordS;
-//      std::cout << "<br>Remaining weight: " << RemainingWeight.ToString();
-      summand+=theWeyl.GetScalarProdSimpleRoot(RemainingWeight, theSimpleIndex);
-      summand*=2;
-      summand/=theWeyl.CartanSymmetric.elements[theSimpleIndex][theSimpleIndex];
-//      std::cout << "<br>The scalar product: " << summand.ToString();
-      summand+=1;
-      summand-=oldRight.Powers[i];
- //     std::cout << "<br>summand: " << summand.ToString();
-      if (!summand.IsEqualToZero())
-        summand*=this->hwTrace(newPair, theProgressReport);
-//      std::cout << "<br>summand after recursion: " << summand.ToString();
-      summand*=oldRight.Powers[i];
-      result+=summand;
-    }
-    Accum.generatorsIndices.AddOnTop(oldRight.generatorsIndices[i]);
-    Accum.Powers.AddOnTop(oldRight.Powers[i]);
-  }
-//  if (indexInCache!=-1)
-//    this->cachedTraces[indexInCache]=result;
-//  if (ProjectInformation::GetMainProjectInfo().CustomStackTrace.size<35)
-  if (this->cachedPairs.size<this->MaxNumCachedPairs)
-  { this->cachedPairs.AddOnTop(thePair);
-    this->cachedTraces.AddOnTop(result);
-  }
-  if (theProgressReport!=0 && this->cachedPairs.size<500000)
-  { std::stringstream tempStream;
-    tempStream << "Number of cached pairs: " << this->cachedPairs.size
-    << " at recursion depth " << ProjectInformation::GetMainProjectInfo().CustomStackTrace.size;
-    theProgressReport->Report(tempStream.str());
-  }
-
-//  std::cout << "<br>Computed (" << thePair.Object1 << ", "
-//  << thePair.Object2 << ")=" << result.ToString();
-//  if (tempStr.str()=="g_{1}^{1}g_{2}^{1}")
-//    std::cout << "<hr><hr>";
-
-  return result;
-}
-
-template<class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::ApplyTAA
-(MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
-{ for (int i=0; i<theMon.generatorsIndices.size; i++)
-    theMon.generatorsIndices[i]=
-    this->GetOwner().GetNumPosRoots()*2+
-    this->GetOwner().GetRank()-theMon.generatorsIndices[i]-1;
-  theMon.Powers.ReverseOrderElements();
-  theMon.generatorsIndices.ReverseOrderElements();
-}
-
-template<class CoefficientType>
-Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
-  (const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& leftMon,
-   const MonomialTensor<int, MathRoutines::IntUnsignIdentity>& rightMon,
-   ProgressReport* theProgressReport)
-{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly");
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* left=&leftMon;
-  const MonomialTensor<int, MathRoutines::IntUnsignIdentity>* right=&rightMon;
-  if (leftMon>rightMon)
-    MathRoutines::swap(left, right);
-  Pair<MonomialTensor<int, MathRoutines::IntUnsignIdentity>,
-  MonomialTensor<int, MathRoutines::IntUnsignIdentity> > thePair;
-  thePair.Object1=*left;
-  thePair.Object2=*right;
-//  std::cout << "<br>Computing " << thePair.Object1 << " times " << thePair.Object2 << "<br>";
-  this->ApplyTAA(thePair.Object1);
-  Rational result= this->hwTrace(thePair, theProgressReport);
-  if (theProgressReport!=0)
-  { std::stringstream tempStream;
-    tempStream << this->cachedPairs.size << " total cached pairs";
-    theProgressReport->Report(tempStream.str());
-  }
-  return result;
-}
-
 void SemisimpleLieAlgebra::GetChevalleyGeneratorAsLieBracketsSimpleGens
   (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
    Rational& outputMultiplyLieBracketsToGetGenerator)
@@ -320,26 +187,6 @@ int ParserNode::EvaluateChar
 }
 
 template <class CoefficientType>
-void charSSAlgMod<CoefficientType>::MakeFromWeight
-(const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
- int inputIndexInOwner)
-{ this->MakeZero(inputOwners, inputIndexInOwner);
-  if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
-  { std::cout << "This is a programming error: attempting to create a character "
-    << " from highest weight in simple coords "
-    << inputWeightSimpleCoords.ToString() << "(" << inputWeightSimpleCoords.size
-    << " coordinates) while the owner semisimple "
-    << " Lie algebra is of rank " << this->GetOwner().GetRank()
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  MonomialChar<CoefficientType> theMon;
-  theMon.weightFundamentalCoords=
-  this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
-  this->AddMonomial(theMon,1);
-}
-
-template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::TensorAndDecompose
 (MonomialChar<CoefficientType>& other, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
  charSSAlgMod<CoefficientType>& output, GlobalVariables& theGlobalVariables)
@@ -484,63 +331,6 @@ void Parser::SetNumVarsModulePolys(int NumVars)
 
 SemisimpleLieAlgebra& ParserNode::GetContextLieAlgebra()
 { return this->owner->theAlgebras[this->IndexContextLieAlgebra];
-}
-
-int ParserNode::EvaluateHWV(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
-  Vector<Rational> parSel;
-  List<RationalFunctionOld> weight;
-  theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
-  theNode.impliedNumVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->MaxFoundVars);
-  theNode.owner->SetNumVarsModulePolys(theNode.impliedNumVars);
-
-  if (!leftNode.GetListDontUseForFunctionArguments<RationalFunctionOld>
-      (weight, theGlobalVariables, theNode.typeRationalFunction, theNode.impliedNumVars))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (!rightNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  int theDim=theNode.GetContextLieAlgebra().GetRank();
-  if (parSel.size!=theDim || weight.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  Vector<RationalFunctionOld> theWeight;
-  theWeight=weight;
-  RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeConst(theNode.impliedNumVars, 1, &theGlobalVariables);
-  RFZero.MakeZero(theNode.impliedNumVars, &theGlobalVariables);
-  std::string report;
-  ElementTensorsGeneralizedVermas<RationalFunctionOld>& theElt=theNode.theGenVermaElt.GetElement();
-  List<ModuleSSalgebra<RationalFunctionOld> >& theMods=theNode.owner->theModulePolys;
-  int indexOfModule=-1;
-  Selection selectionParSel;
-  selectionParSel=parSel;
-  for (int i=0; i<theMods.size; i++)
-  { ModuleSSalgebra<RationalFunctionOld>& currentMod=theMods[i];
-    if (theWeight==currentMod.theHWFundamentalCoordsBaseField &&
-          selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
-    { indexOfModule=i;
-      break;
-    }
-  }
-  if (indexOfModule==-1)
-  { indexOfModule=theMods.size;
-    theMods.SetSize(theMods.size+1);
-  }
-  ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
-  if (!theMod.flagIsInitialized)
-  { assert(theWeight[0].NumVars==RFOne.NumVars);
-    bool isGood=theMod.MakeFromHW
-    (theNode.owner->theAlgebras, 0, theWeight, parSel, theGlobalVariables, RFOne, RFZero, &report);
-
-    out << report;
-    if (!isGood)
-      return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  }
-  theElt.MakeHWV(theMods, indexOfModule, RFOne);
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeGenVermaElt;
-  return theNode.errorNoError;
 }
 
 bool partFractions::ArgumentsAllowed
@@ -801,86 +591,6 @@ bool LittelmannPath::MinimaAreIntegral()
     if (!theMinima[i].IsSmallInteger())
       return false;
   return true;
-}
-
-int ParserNode::EvaluateLittelmannPaths
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ //std::stringstream out;
-  Vector<Rational> theWeight;
-  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  if (theWeight.size!=theWeyl.GetDim())
-    return theNode.SetError(theNode.errorDimensionProblem);
-  Vector<Rational> theWeightInSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
-  LittelmannPath& thePath=theNode.theLittelmann.GetElement();
-  thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theWeyl);
-//  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeLittelman;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateLittelmannPathFromWayPoints
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ //std::stringstream out;
-  Vectors<Rational> theWeights;
-  int theDim;
-  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, theWeights, theDim))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  if (theDim!=theWeyl.GetDim())
-    return theNode.SetError(theNode.errorDimensionProblem);
-//  for (int i=0; i<theWeights.size; i++)
-//    theWeights[i]= theWeyl.GetSimpleCoordinatesFromFundamental(theWeights[i]);
-  LittelmannPath& thePath=theNode.theLittelmann.GetElement();
-  thePath.MakeFromWaypoints(theWeights, theWeyl);
-//  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeLittelman;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateLittelmannEAlpha
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  if (theIndex>theWeyl.GetDim() || theIndex==0 || theIndex< - theWeyl.GetDim())
-    return theNode.SetError(theNode.errorBadIndex);
-  LittelmannPath& thePath=theNode.theLittelmann.GetElement();
-  thePath=theNode.owner->TheObjects[theArgumentList[1]].theLittelmann.GetElement();
-  if (theIndex<0)
-    thePath.ActByFalpha(-theIndex-1);
-  else
-    thePath.ActByEalpha(theIndex-1);
-  theNode.ExpressionType=theNode.typeLittelman;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateAllLittelmannPaths
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  theNode.EvaluateLittelmannPaths(theNode, theArgumentList, theGlobalVariables);
-  if (theNode.ErrorType!=theNode.errorNoError)
-    return theNode.ErrorType;
-  LittelmannPath& thePath=theNode.theLittelmann.GetElement();
-  List<LittelmannPath> allPaths;
-  std::stringstream out;
-  List<List<int> > outputIndices;
-  if (thePath.GenerateOrbit(allPaths, outputIndices, theGlobalVariables, 1000))
-    out << "Number of paths: " << allPaths.size;
-  else
-    out << "<b>Number of paths has been trimmed to " << allPaths.size
-    << " (the hard-coded limit for a path's orbit size is " << 1000 << ")</b>";
-  out << "; Weyl dimension formula: "
-  << theWeyl.WeylDimFormulaSimpleCoords(*thePath.Waypoints.LastObject()).ToString();
-  out << ".<br> A printout of the paths follows. The waypoints of the "
-  << "Littelmann paths are given in simple coordinates.";
-  for (int i=0; i<allPaths.size; i++)
-  { out << "\n<br>\n" << allPaths[i].ToString();
-    out << " corresponds to sequence "
-    << allPaths[0].ElementToStringOperatorSequenceStartingOnMe(outputIndices[i]);
-  }
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
 }
 
 void LittelmannPath::MakeFromWeightInSimpleCoords
@@ -1301,47 +1011,6 @@ int ParserNode::EvaluateTransposeAntiAuto
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateHWMTABilinearForm
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> weight;
-  ParserNode& leftNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& rightNode=theNode.owner->TheObjects[theArgumentList[1]];
-  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[2]];
-  if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
-  if (weight.size!=theSSalgebra.GetRank())
-    return theNode.SetError(theNode.errorDimensionProblem);
-  ElementUniversalEnveloping<Polynomial<Rational> >& leftElt=leftNode.UEElement.GetElement();
-  ElementUniversalEnveloping<Polynomial<Rational> >& rightElt=rightNode.UEElement.GetElement();
-  Polynomial<Rational> theRingZero, theRingUnit;
-  theNode.impliedNumVars=MathRoutines::Maximum(leftNode.impliedNumVars, rightNode.impliedNumVars);
-  int& numVars= theNode.impliedNumVars;
-  theRingZero.MakeZero(numVars);
-  theRingUnit.MakeOne(numVars);
-  Vector<Polynomial<Rational> > theHW;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
-  std::stringstream out;
-  out << "Highest weight in dual coords: " << weight.ToString() << "<br>";
-  theHW.SetSize(weight.size);
-  for (int i=0; i<weight.size; i++)
-    theHW[i].MakeConst(numVars, weight[i]);
-  leftElt.GetOwner().OrderSSalgebraForHWbfComputation();
-  if(!leftElt.HWMTAbilinearForm
-     (rightElt, theNode.polyValue.GetElement(), &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  Polynomial<Rational>  symmTerm;
-  if(!rightElt.HWMTAbilinearForm
-     (leftElt, symmTerm, &theHW, theGlobalVariables, theRingUnit, theRingZero, &out))
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  leftElt.GetOwner().OrderSSLieAlgebraStandard();
-  theNode.polyValue.GetElement()+=symmTerm;
-  theNode.ExpressionType=theNode.typePoly;
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
@@ -1591,23 +1260,6 @@ int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
 //  ;
   theNode.ExpressionType=theNode.typeGenVermaElt;
   return theNode.errorNoError;
-}
-
-template <class CoefficientType>
-void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
-(List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
- const CoefficientType& theRingUnit)
-{ assert(TheIndexInOwner<theOwner.size);
-  MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
-  CoefficientType currentCoeff;
-  currentCoeff=theRingUnit;
-  tensorMon.theMons.SetSize(1);
-  MonomialGeneralizedVerma<CoefficientType>& theMon=tensorMon.theMons[0];
-  ModuleSSalgebra<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
-  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
-  theMon.MakeConst(theOwner, TheIndexInOwner);
-  this->MakeZero();
-  this->AddMonomial(tensorMon, theRingUnit);
 }
 
 template <class CoefficientType>

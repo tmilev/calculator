@@ -3185,6 +3185,9 @@ void GroebnerBasisComputation::AddPolyToBasis
     }
   }
   this->theBasiS.AddOnTop(inputOutputToBeModifiedAndAdded);
+  for (int i=0; i<this->theBasiS.size; i++)
+  {
+  }
 }
 
 void GroebnerBasisComputation::initTheBasis

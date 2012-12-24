@@ -7873,20 +7873,6 @@ std::string ElementWeylGroup::ToString
   return out.str();
 }
 
-int ParserNode::EvaluateActByWeylAlgebraElement
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Polynomial<Rational> & result= theNode.polyValue.GetElement();
-  ElementWeylAlgebra& left = theNode.owner->TheObjects[theArgumentList[0]].WeylAlgebraElement.GetElement();
-  Polynomial<Rational> & right = theNode.owner->TheObjects[theArgumentList[1]].polyValue.GetElement();
-  theNode.impliedNumVars=MathRoutines::Maximum(left.NumVariables, right.NumVars);
-  result=right;
-  result.SetNumVariablesSubDeletedVarsByOne(theNode.impliedNumVars);
-  left.SetNumVariables(theNode.impliedNumVars);
-  left.ActOnPolynomial(result);
-  theNode.ExpressionType=theNode.typePoly;
-  return theNode.errorNoError;
-}
-
 bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
 { assert(thePoly.NumVars==this->NumVariables);
   Polynomial<Rational> result;
@@ -8296,27 +8282,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateSlTwoInSlN
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("actByWeyl",
-   "(RF,...)",
-   "Act by the Weyl group on a weight vector whose coordinates are given in simple basis coordinates. \
-   For example, for the Weyl group of A_2 (sl(3)),  the vector (1, -x_1) corresponds to a-x_1b, where a and b are the\
-    first and second simple Vectors<Rational>, and x_1 is a variable. The coordinates can be arbitrary polynomials \
-    (rational functions work too but *very* slow). ",
-   "actByWeyl(x_1, x_2, x_3)",
-    & ParserNode::EvaluateWeylAction
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("actByWeylRho",
-   "(RF,...)",
-   "Act using the \\rho-modified action on a weight vector whose coordinates are given in simple basis coordinates. \
-   For an element of the Weyl group w, the \\rho-modified action of w on \\alpha is given by w(\\alpha+\\rho)-\\rho, \
-   where \\rho is the half-sum of the positive Vectors<Rational> of the ambient Vector<Rational> system. \
-   This function is the affine \\rho-modification of the function ActByWeyl. The following example calls the action of the Weyl group\
-    of so(7); the half-sum of the positive Vectors<Rational> of so(7) in simple coordinates equals (5/2,8/2,9/2).",
-   "actByWeylRho(x_1-5/2, x_2-8/2,x_3-9/2)",
-    & ParserNode::EvaluateWeylRhoAction
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("partialFraction",
    "((Rational,...),...)",
    "Gives the partial fraction corresponding to the vector partition function of the arguments.<br> \
@@ -8564,16 +8529,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    DefaultWeylLetter, DefaultWeylRank, true,
     & ParserNode::EvaluateModVermaRelations
    );
-
-  this->AddOneFunctionToDictionaryNoFail
-  ("actByWeylAlgebraElement",
-   "(WeylAlgebraElement, Polynomial)",
-   "<b>Not fully tested.</b> Act by a weyl algebra element (the first argument)\
-    on the a polynomial (the second argument).",
-   "actByWeylAlgebraElement(x_1d_1+x_2d_2, x_1x_2)",
-//   DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateActByWeylAlgebraElement
-   );
   this->AddOneFunctionToDictionaryNoFail
   ("weightSupportGtwoGenVermaModule",
    "((Rational,...), (Rational,...))",
@@ -8636,65 +8591,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'B', 3, false,
     & ParserNode::EvaluateChar
    );
-   this->AddOneFunctionToDictionaryNoFail
-  ("v",
-   "((Polynomial,...),(Rational,...))",
-   "<b>Experimental. </b> Highest weight vector of a generalized Verma module.\
-   The first argument gives the highest weight of the module; the second argument gives the parabolic subalgebra. \
-   In the second argument, a zero stands for a Vector<Rational> space that is a Vector<Rational> of the Levi part of the parabolic subalgebra. \
-   A non-zero element indicates that the corresponding Vector<Rational> space that is not in the Levi part of \
-   the parabolic subalgebra.",
-    "v((1,0,1), (1,0,0))",
-   'B', 3, true,
-    & ParserNode::EvaluateHWV
-   );
-   this->AddOneFunctionToDictionaryNoFail
-  ("littelmann",
-   "(Rational,...)",
-   "<b>For testing purposes. Will remain in future versions only as a hidden function.</b> Returns the Littelmann path obtained by connecting the \
-   zero weight to the argument weight given in fundamental coordinates.",
-    "littelmann(1,0,0)",
-   'B', 3, false,
-    & ParserNode::EvaluateLittelmannPaths
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("eAlpha",
-   "(Integer, LittelmannPath)",
-   "<b>For testing purposes. Will remain in future versions only as a hidden function. </b> \
-   The Littelmann e_\\alpha and f_\\alpha operators. \
-   The integer index gives the index of the simple Vector<Rational>. Positive indices correspond to the Littelmann e_\\alpha operators, \
-   Negative indices correspond to the f_\\alpha operators.",
-    "eAlpha(-1, eAlpha(-2, littelmann(1,0,0))",
-   'B', 3, false,
-    & ParserNode::EvaluateLittelmannEAlpha
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("allLittelmannPaths",
-   "(Rational,...)",
-   "<b>Experimental. Has passed a few tests. </b> Gives all Littelmann paths starting from the path that \
-   connects with a straight line the zero weight with the weight given by the argument in fundamental \
-   coordinates. The number of paths is capped at 1000; if you request a computation whose answer \
-   has more than 1000 paths, you will be informed with an appropriate error message. \
-   Reference: P. Littelmann, Paths and Vector<Rational> operators in representation theory. Let e_{\\alpha_i}, f_{\\alpha_i} \
-   be the Vector<Rational> operators as defined in the cited article, where \\alpha_i denotes the i^th simple \
-   Vector<Rational>. In the printouts, for i>=1, the expression g_{-i} denotes the Vector<Rational> operator f_{\\alpha_i}, \
-   and the expression g_{i} denotes the Vector<Rational> operator e_{\\alpha_i}. The notation g_{i} is a valid calculator input \
-   and is also used to denote the i^th Chevalley-Weyl generator (i<0 allowed). \
-    ",
-    "allLittelmannPaths(0,1)",
-   'G', 2, true,
-    & ParserNode::EvaluateAllLittelmannPaths
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("littelmannPathsFromWaypoints",
-   "((Rational,...),...)",
-   "<b>For testing purposes. Will remain in future versions only as a hidden function. \
-   </b> Gives a Littelmann path from waypoints given in simple \
-   coordinates.",
-    "littelmannPathsFromWaypoints((0,0,0),(1,2,2))",
-   'B', 3, true,
-    & ParserNode::EvaluateLittelmannPathFromWayPoints
-   );
   this->AddOneFunctionToDictionaryNoFail
   ("irreducibleRep",
    "((Rational,...),...)",
@@ -8716,18 +8612,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     "mta(g_1)",
    'A', 2, true,
     & ParserNode::EvaluateMinusTransposeAuto
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("hwMTAbf",
-   "(UE, UE, (Rational,...))",
-   "<b>Experimental, might be hidden or changed in future versions. \
-   </b> Highest weight bilinear form. Let M be a Verma module with highest weight vector v, and let P:M->M\
-   be a projection map onto Cv that maps every weight vector of M of weight different from the \
-   highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwMTAbf(u_1,u_2):=\
-   Tr_M (P ( mta(u_2) u_1 +mta(u_1)u_2 ) ), where mta() is the minus transpose automorphism of g.",
-    "hwMTAbf(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))",
-   'G', 2, false,
-    & ParserNode::EvaluateHWMTABilinearForm
    );
   this->AddOneFunctionToDictionaryNoFail
   ("taa",

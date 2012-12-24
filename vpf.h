@@ -53,7 +53,7 @@
 #ifndef vpf_h_already_included
 #define vpf_h_already_included
 //This header file includes the various sub-headers.
-//The split into sub-headers is needed to speed up compilation times.
+//The splitting into sub-headers is needed to speed up compilation times.
 #include "vpfHeader1.h"
 #include "vpfHeader1_2.h"
 #include "vpfHeader1_3.h"

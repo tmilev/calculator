@@ -3542,9 +3542,9 @@ static void ProjectOntoHyperPlane
   }
   Vector<CoefficientType> operator/(const CoefficientType& other)const
   { if (other.IsEqualToZero())
-    { std::cout << "This is a programming error: division by zero at file "
-      << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__
-      << ". Division by zero error are supposed to be handled at an earlier level. ";
+    { std::cout << "This is a programming error: division by zero. "
+      << " Division by zero error are supposed to be handled at an earlier level. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     Vector<CoefficientType> result;
@@ -4386,7 +4386,8 @@ public:
   Rational& operator[](int i)const
   { if (this->monBody.size<=i || i<0)
     { std::cout << "This is a programming error: requesting exponent of variable of index "
-      << i+1 << " in a monomial that has " << this->monBody.size << " variables. ";
+      << i+1 << " in a monomial that has " << this->monBody.size << " variables. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
     return this->monBody[i];
@@ -6047,7 +6048,7 @@ void Polynomial<Element>::Evaluate
     { int numCycles;
       if (!this->TheObjects[i][j].IsSmallInteger(&numCycles) )
       { std::cout << "This is a programming error. Attempting to evaluate a polynomial whose"
-        <<  i+1 << "^{th} variable is raised is raised to the power " << this->TheObjects[i][j].ToString()
+        <<  i+1 << "^{th} variable is raised to the power " << this->TheObjects[i][j].ToString()
         << ". Raising variables to power is allowed only if the power is a small integer. "
         << "If the user has requested such an operation, it"
         << " *must* be intercepted at an earlier level (and the user must be informed)."
@@ -6159,8 +6160,10 @@ void Polynomial<Element>::MakeLinPolyFromRootNoConstantTerm(const Vector<Rationa
 template <class Element>
 void Polynomial<Element>::MakeMonomial(int inputNumVars, int LetterIndex, const Rational& Power, const Element& Coeff)
 { if (LetterIndex<0 || LetterIndex>=inputNumVars)
-  { std::cout << "This is a programming error: you asked to create a monomial of " << inputNumVars << " variables "
-    << " of the form x_{" << LetterIndex+1 << "}.  An error check should be performed at an earlier point in the program. "
+  { std::cout << "This is a programming error: you asked to create a monomial of "
+    << inputNumVars << " variables "
+    << " of the form x_{" << LetterIndex+1
+    << "}.  An error check should be performed at an earlier point in the program. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -6305,8 +6308,10 @@ void Polynomial<Element>::DivideBy
   assert(remainderMaxMonomial<outputRemainder.size);
   if (inputMaxMonomial>=tempInput.size || inputMaxMonomial<0)
   { std::cout << "This is a programming error: the index of the maximal input monomial is "
-    << inputMaxMonomial << " while the polynomial has " << tempInput.size << "  monomials. I am attempting to divide "
-    << this->ToString() << " by " << inputDivisor.ToString() << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    << inputMaxMonomial << " while the polynomial has " << tempInput.size
+    << "  monomials. I am attempting to divide "
+    << this->ToString() << " by " << inputDivisor.ToString() << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
@@ -7577,7 +7582,7 @@ void Matrix<Element>::GaussianEliminationEuclideanDomain
   if (otherMatrix==this)
   { std::cout << "This is a programming error: the Carbon copy in the Gaussian elimination "
     << " coincides with the matrix which we are row-reducing "
-    << "(most probably this is a wrong pointer may be a typo). "
+    << "(most probably this is a wrong pointer typo). "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -7680,7 +7685,8 @@ void Vectors<CoefficientType>::SelectABasis
   for (int i=0; i<this->size; i++)
   { if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
-      out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
+      out << "Selecting a basis in dimension " << theDim << ", processed " << i
+      << " out of " << this->size;
       theReport.Report(out.str());
     }
     for (int j=0; j<theDim; j++)
@@ -7694,7 +7700,8 @@ void Vectors<CoefficientType>::SelectABasis
     currentRow=theDim-theSel.CardinalitySelection;
     if (theGlobalVariables.GetFeedDataToIndicatorWindowDefault()!=0)
     { std::stringstream out;
-      out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of " << this->size;
+      out << "Selecting a basis in dimension " << theDim << ", processed " << i << " out of "
+      << this->size;
       theReport.Report(out.str());
     }
     if (currentRow==theDim)

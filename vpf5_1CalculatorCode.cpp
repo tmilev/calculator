@@ -240,6 +240,9 @@ bool CommandList::fGroebnerBuchberger
     out << theContext.VariableImages[i].ToString() << " < ";
   out << "<br>Starting basis: ";
   std::stringstream out1, out2, out3;
+  theFormat.thePolyMonOrder= useGr ?
+  MonomialP::LeftGreaterThanTotalDegThenLexicographic :
+  MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   for(int i=0; i<inputVector.size; i++)
     out1 << inputVector[i].ToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
@@ -248,8 +251,8 @@ bool CommandList::fGroebnerBuchberger
     out2 << outputGroebner[i].ToString(&theFormat) << ", ";
   out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
 
-  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
-(outputGroebner2, theCommands.theGlobalVariableS);
+//  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
+//(outputGroebner2, theCommands.theGlobalVariableS);
 
   out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
   for(int i=0; i<outputGroebner2.size; i++)

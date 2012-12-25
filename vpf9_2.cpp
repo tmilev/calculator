@@ -7,7 +7,7 @@
 ProjectInformationInstance ProjectInfoVpf9_2cpp(__FILE__, "Main implementation file, part 3. ");
 
 void ReflectionSubgroupWeylGroup::WriteToFile(std::fstream& output, GlobalVariables* theGlobalVariables)
-{  output << "generator_reflections: ";
+{ output << "generator_reflections: ";
   this->simpleGenerators.WriteToFile(output, theGlobalVariables);
   output << "\nouter_generators: ";
   this->ExternalAutomorphisms.WriteToFile(output, theGlobalVariables);
@@ -2837,7 +2837,18 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
  // std::string tempS;
 //  bool changed=true;
   while (this->basisCandidates.size>0)
-  { if (this->AddPolyToBasis(theGlobalVariables))
+  { if (theGlobalVariables!=0 && this->flagDoProgressReport)
+    { std::stringstream out;
+      out << "Current basis size: " << theBasiS.size << ", number of candidates: "
+      << this->basisCandidates.size << "<br> Current basis: ";
+      for (int i=0; i<this->theBasiS.size; i++)
+        out << "<br>" << this->theBasiS[i].ToString(&theGlobalVariables->theDefaultFormat);
+      out << "<br> Candidates: ";
+      for (int i=0; i<this->basisCandidates.size; i++)
+        out << "<br>" << this->basisCandidates[i].ToString(&theGlobalVariables->theDefaultFormat);
+      theReport.Report(out.str());
+    }
+    if (this->AddPolyToBasis(theGlobalVariables))
       continue;
     bool found =false;
     for (int i=0; i<this->theBasiS.size &&!found; i++)
@@ -2878,13 +2889,6 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
         found= this->AddPolyToBasis(theGlobalVariables);
       }
   }
-//  if (theGlobalVariables!=0)
-//  { std::cout << "<br> ... and the basis before reduction is (" << theBasis.size
-//    << " elements): <br>";
-//    for (int i=0; i<theBasis.size; i++)
-//      std::cout << "<br>" << theBasis[i].ToString(&theGlobalVariables->theDefaultFormat)
-//      << ", ";
-//  }
   this->MakeMinimalBasis();
   inputOutpuT=this->theBasiS;
   return true;

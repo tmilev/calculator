@@ -4891,7 +4891,7 @@ public:
 };
 
 template <class Object>
-void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
+void List<Object>::QuickSortAscendingNoOrder(int BottomIndex, int TopIndex)
 { if (TopIndex<=BottomIndex)
     return;
   int HighIndex = TopIndex;
@@ -4904,8 +4904,27 @@ void List<Object>::QuickSortAscending(int BottomIndex, int TopIndex)
   if (this->TheObjects[HighIndex]>this->TheObjects[BottomIndex])
     HighIndex--;
   this->SwapTwoIndices(BottomIndex, HighIndex);
-  this->QuickSortAscending(BottomIndex, HighIndex-1);
-  this->QuickSortAscending(HighIndex+1, TopIndex);
+  this->QuickSortAscendingNoOrder(BottomIndex, HighIndex-1);
+  this->QuickSortAscendingNoOrder(HighIndex+1, TopIndex);
+}
+
+template <class Object>
+void List<Object>::QuickSortAscendingOrder
+(int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder)
+{ if (TopIndex<=BottomIndex)
+    return;
+  int HighIndex = TopIndex;
+  for (int LowIndex = BottomIndex+1; LowIndex<=HighIndex; LowIndex++)
+    if (theOrder(this->TheObjects[LowIndex],(this->TheObjects[BottomIndex])))
+    { this->SwapTwoIndices(LowIndex, HighIndex);
+      LowIndex--;
+      HighIndex--;
+    }
+  if (theOrder(this->TheObjects[HighIndex],this->TheObjects[BottomIndex]))
+    HighIndex--;
+  this->SwapTwoIndices(BottomIndex, HighIndex);
+  this->QuickSortAscendingOrder(BottomIndex, HighIndex-1, theOrder);
+  this->QuickSortAscendingOrder(HighIndex+1, TopIndex, theOrder);
 }
 
 template <class Object>
@@ -6190,86 +6209,6 @@ std::ostream& operator<<
     cutOffCounter+=tempS1.size();
   }
   return output;
-}
-
-template <class TemplateMonomial, class CoefficientType>
-std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
-(FormatExpressions* theFormat)const
-{ if (this->size==0)
-    return "0";
-  std::stringstream out;
-  std::string tempS1, tempS2;
-  List<TemplateMonomial> sortedMons;
-  sortedMons=*this;
-  sortedMons.QuickSortDescending();
-//  out << "(hash: " << this->HashFunction() << ")";
-  int cutOffCounter=0;
-  bool useCustomPlus=false;
-  bool useCustomTimes=false;
-  int MaxLineLength=theFormat==0? 200 : theFormat->MaxLineLength;
-  int NumAmpersandsPerNewLineForLaTeX=theFormat==0? 1: theFormat->NumAmpersandsPerNewLineForLaTeX;
-  bool flagUseLaTeX=theFormat==0? false: theFormat->flagUseLatex;
-  bool flagUseHTML=theFormat==0? false: theFormat->flagUseHTML;
-  std::string oldCustomTimes="";
-  if (theFormat!=0)
-  { useCustomPlus=(theFormat->CustomPlusSign!="");
-    useCustomTimes=(theFormat->CustomCoeffMonSeparator!="");
-    if (theFormat->flagPassCustomCoeffMonSeparatorToCoeffs==false)
-    { oldCustomTimes=theFormat->CustomCoeffMonSeparator;
-      theFormat->CustomCoeffMonSeparator="";
-    }
-  }
-  for (int i=0; i<sortedMons.size; i++)
-  { TemplateMonomial& currentMon=sortedMons[i];
-    CoefficientType& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
-    if (currentCoeff.NeedsBrackets())
-      tempS1="("+currentCoeff.ToString(theFormat)+ ")";
-    else
-      tempS1=currentCoeff.ToString(theFormat);
-    tempS2=currentMon.ToString(theFormat);
-    if (!useCustomTimes)
-    { if (tempS1=="1" && tempS2!="1")
-        tempS1="";
-      if (tempS1=="-1"&& tempS2!="1")
-        tempS1="-";
-      if(tempS2!="1")
-        tempS1+=tempS2;
-    } else
-    { tempS1+=oldCustomTimes;
-      tempS1+=tempS2;
-    }
-    if (i>0)
-    { if (!useCustomPlus)
-      { if (tempS1.size()>0)
-        { if (tempS1[0]!='-')
-          { out << "+";
-            cutOffCounter+=1;
-          }
-        } else
-        { out << "+";
-          cutOffCounter+=1;
-        }
-      } else
-        out << theFormat->CustomPlusSign;
-    }
-    out << tempS1;
-    cutOffCounter+=tempS1.size();
-    if (MaxLineLength>0)
-      if (cutOffCounter>MaxLineLength)
-      { cutOffCounter=0;
-        if (flagUseLaTeX && i!=sortedMons.size-1)
-        { out << " \\\\";
-          for (int k=0; k<NumAmpersandsPerNewLineForLaTeX; k++)
-            out << "&";
-          out << " ";
-        }
-        if (flagUseHTML && !flagUseLaTeX)
-          out << " <br>";
-      }
-  }
-  if (theFormat!=0)
-    theFormat->CustomCoeffMonSeparator=oldCustomTimes;
-  return out.str();
 }
 
 template <class CoefficientType>

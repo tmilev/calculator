@@ -5374,8 +5374,10 @@ class GroebnerBasisComputation
   MonomialP SoPolyRightShift;
   MonomialP bufferMoN1;
   List<Polynomial<Rational> > theBasiS;
+  List<Polynomial<Rational> > basisCandidates;
   List<MonomialP> leadingMons;
   List<Rational> leadingCoeffs;
+  int NumVars;
 
   bool TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
@@ -5384,17 +5386,19 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasisImprovedAlgorithm
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
-  GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest)
+  GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest),
+  NumVars(-1)
   {}
   void MakeMinimalBasis
 ()
   ;
   void RemainderDivisionWithRespectToBasis
 (Polynomial<Rational>& inputOutput, List<Polynomial<Rational> >& theBasiS,
- Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0
+ Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
+  int basisIndexToIgnore=-1
  );
- void AddPolyToBasis
- (Polynomial<Rational>& inputOutputToBeModifiedAndAdded, GlobalVariables* theGlobalVariables)
+ bool AddPolyToBasis
+ (GlobalVariables* theGlobalVariables)
  ;
    //Criterion from Cox, Little, O'Shea:
   static bool CriterionCLOsh

@@ -719,6 +719,72 @@ std::string Rational::ToString(FormatExpressions* notUsed)const
   return out.str();
 }
 
+//Format expression monomial orders (for the ToString() function follow.
+template<>
+typename List<MonomialP>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<MonomialP>()
+{ return this->thePolyMonOrder;
+}
+
+template<>
+typename List<MonomialChar<RationalFunctionOld> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialChar<RationalFunctionOld> >()
+{ return 0;
+}
+
+template<>
+typename List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >()
+{ return 0;
+}
+
+template<>
+typename List<MonomialGeneralizedVerma<RationalFunctionOld> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialGeneralizedVerma<RationalFunctionOld> >()
+{ return 0;
+}
+
+template<>
+typename List<ChevalleyGenerator >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<ChevalleyGenerator>()
+{ return 0;
+}
+
+template<>
+typename List<MonomialMatrix>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialMatrix>()
+{ return 0;
+}
+
+template<>
+typename List<MonomialChar<Rational> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialChar<Rational> >()
+{ return 0;
+}
+
+template<>
+typename List<MonomialUniversalEnveloping<Rational> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Rational> >()
+{ return 0;
+}
+
+template<>
+typename List<MonomialTensorGeneralizedVermas<RationalFunctionOld> >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialTensorGeneralizedVermas<RationalFunctionOld> >()
+{ return 0;
+}
+
+template<>
+typename List<quasiDiffMon>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<quasiDiffMon>()
+{ return 0;
+}
+
+template<>
+typename List<MonomialUniversalEnveloping<Polynomial<Rational> > >::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<Polynomial<Rational> > >()
+{ return 0;
+}
+
 FormatExpressions::FormatExpressions()
 { this->ExtraLinesCounterLatex=0;
   this->chevalleyGgeneratorLetter="g";
@@ -738,6 +804,7 @@ FormatExpressions::FormatExpressions()
   this->MaxLinesPerPage=40;
   this->NumAmpersandsPerNewLineForLaTeX=0;
   this->MaxRecursionDepthPerExpression=500;
+  this->thePolyMonOrder=0;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const

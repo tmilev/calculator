@@ -55,6 +55,7 @@ class MonomialTensorGeneralizedVermas;
 template<class CoefficientType>
 class ElementTensorsGeneralizedVermas;
 struct branchingData;
+class quasiDiffMon;
 template<class CoefficientType>
 class quasiDiffOp;
 
@@ -709,13 +710,20 @@ template <class Object>
 class List
 { friend std::ostream& operator<< <Object>(std::ostream& output, const List<Object>& theList);
   friend std::iostream& operator>> <Object>(std::iostream& input, List<Object>& theList);
+public:
+  typedef bool (*OrderLeftGreaterThanRight) (const Object& left, const Object& right)
+  ;
 private:
   friend class Polynomial<Rational> ;
   friend class IntegerPoly;
   friend class partFractions;
   friend class partFraction;
   void ExpandArrayOnTop(int increase);
-  void QuickSortAscending(int BottomIndex, int TopIndex);
+  void QuickSortAscendingNoOrder(int BottomIndex, int TopIndex);
+  //submitting zero comparison function is not allowed!
+  //that is why the function is private.
+  void QuickSortAscendingOrder
+  (int BottomIndex, int TopIndex, List<Object>::OrderLeftGreaterThanRight theOrder);
   void QuickSortDescending(int BottomIndex, int TopIndex);
   inline void initConstructorCallOnly()
   { this->TheObjects=0;
@@ -787,8 +795,18 @@ public:
   }
   void PopIndexSwapWithLast(int index);
   void PopLastObject();
-  void QuickSortAscending(){ this->QuickSortAscending(0, this->size-1);}
-  void QuickSortDescending(){this->QuickSortAscending(); this->ReverseOrderElements();}
+  //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
+  //comparison function
+  void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  { if (theOrder==0)
+      this->QuickSortAscendingNoOrder(0, this->size-1);
+    else
+      this->QuickSortAscendingOrder(0, this->size-1, theOrder);
+  }
+  void QuickSortDescending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
+  { this->QuickSortAscending(theOrder);
+    this->ReverseOrderElements();
+  }
   // the below function is named a bit awkwardly because otherwise there is a risk of confusion
   // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
   // so the awkward name is necessary.
@@ -4163,68 +4181,6 @@ bool ComputeNormalFromSelectionAndExtraRoot
   }
 };
 
-struct FormatExpressions
-{
-public:
-  //alphabetBases must contain at least two elements
-  std::string chevalleyGgeneratorLetter;
-  std::string chevalleyHgeneratorLetter;
-  std::string fundamentalWeightLetter;
-  std::string polyDefaultLetter;
-  std::string CustomPlusSign;
-  std::string CustomCoeffMonSeparator;
-  std::string FDrepLetter;
-  std::string simpleRootLetter;
-  std::string DisplayNameCalculator;
-  std::string physicalPath;
-  std::string htmlPathServer;
-  List<std::string> polyAlphabeT;
-  std::string GetPolyLetter(int index)const;
-  std::string GetChevalleyHletter(int index)const;
-  std::string GetChevalleyGletter(int index)const;
-  int ExtraLinesCounterLatex;
-  int NumAmpersandsPerNewLineForLaTeX;
-  int MaxRecursionDepthPerExpression;
-  int MaxLineLength;
-  int MaxLinesPerPage;
-  int MatrixColumnVerticalLineIndex;
-  bool flagPassCustomCoeffMonSeparatorToCoeffs;
-  bool flagMakingExpressionTableWithLatex;
-  bool flagUseLatex;
-  bool flagUsePNG;
-  bool flagUseHTML;
-  bool flagUseCalculatorFormatForUEOrdered;
-  bool flagQuasiDiffOpCombineWeylPart;
-  void operator=(const FormatExpressions& other)
-  { this->chevalleyGgeneratorLetter=other.chevalleyGgeneratorLetter;
-    this->chevalleyHgeneratorLetter=other.chevalleyHgeneratorLetter ;
-    this->fundamentalWeightLetter=other.fundamentalWeightLetter;
-    this->polyDefaultLetter=other.polyDefaultLetter;
-    this->CustomPlusSign=other.CustomPlusSign;
-    this->CustomCoeffMonSeparator=other.CustomCoeffMonSeparator;
-    this->FDrepLetter=other.FDrepLetter;
-    this->simpleRootLetter=other.simpleRootLetter;
-    this->DisplayNameCalculator=other.DisplayNameCalculator;
-    this->physicalPath=other.physicalPath;
-    this->htmlPathServer=other.htmlPathServer;
-    this->polyAlphabeT=other.polyAlphabeT;
-    this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
-    this->NumAmpersandsPerNewLineForLaTeX=other.NumAmpersandsPerNewLineForLaTeX;
-    this->MaxRecursionDepthPerExpression=other.MaxRecursionDepthPerExpression;
-    this->MaxLineLength=other.MaxLineLength;
-    this->MaxLinesPerPage=other.MaxLinesPerPage;
-    this->MatrixColumnVerticalLineIndex=other.MatrixColumnVerticalLineIndex;
-    this->flagPassCustomCoeffMonSeparatorToCoeffs=other.flagPassCustomCoeffMonSeparatorToCoeffs;
-    this->flagMakingExpressionTableWithLatex=other.flagMakingExpressionTableWithLatex;
-    this->flagUseLatex=other.flagUseLatex;
-    this->flagUsePNG=other.flagUsePNG;
-    this->flagUseHTML=other.flagUseHTML;
-    this->flagUseCalculatorFormatForUEOrdered=other.flagUseCalculatorFormatForUEOrdered;
-    this->flagQuasiDiffOpCombineWeylPart=other.flagQuasiDiffOpCombineWeylPart;
-  }
-  FormatExpressions();
-};
-
 class ChevalleyGenerator
 {
 public:
@@ -4275,18 +4231,7 @@ public:
   List<int> generatorsIndices;
   List<CoefficientType> Powers;
   std::string ToString
-  (FormatExpressions* theFormat=0)const
-  { if (this->generatorsIndices.size==0)
-      return "1";
-    std::string theLetter= theFormat==0 ?  "g" : theFormat->chevalleyGgeneratorLetter;
-    std::stringstream out;
-    for (int i=0; i< this->generatorsIndices.size; i++)
-    { out << theLetter << "_{" << this->generatorsIndices[i] << "}";
-      if (!(this->Powers[i]==1))
-        out << "^{" << this->Powers[i] << "}";
-    }
-    return out.str();
-  }
+  (FormatExpressions* theFormat=0)const;
   bool IsEqualToOne()const
   { return this->generatorsIndices.size==0;
   }
@@ -4471,9 +4416,21 @@ public:
   (const MonomialP& left, const MonomialP& right)
   { return left.IsGEQLexicographicLastVariableStrongest(right);
   }
+  static bool LeftGreaterThanLexicographicLastVariableStrongest
+  (const MonomialP& left, const MonomialP& right)
+  { if (left==(right))
+      return false;
+    return left.IsGEQLexicographicLastVariableStrongest(right);
+  }
   static bool LeftIsGEQLexicographicLastVariableWeakest
   (const MonomialP& left, const MonomialP& right)
   { return left.IsGEQLexicographicLastVariableWeakest(right);
+  }
+  static bool LeftGreaterThanTotalDegThenLexicographic
+  (const MonomialP& left, const MonomialP& right)
+  { if (left==right)
+      return false;
+    return left.IsGEQTotalDegThenLexicographic(right);
   }
   static bool LeftIsGEQTotalDegThenLexicographic
   (const MonomialP& left, const MonomialP& right)
@@ -4528,6 +4485,72 @@ public:
   void WriteToFile(std::fstream& output)
   { this->monBody.WriteToFile(output);
   }
+};
+
+struct FormatExpressions
+{
+public:
+  //alphabetBases must contain at least two elements
+  std::string chevalleyGgeneratorLetter;
+  std::string chevalleyHgeneratorLetter;
+  std::string fundamentalWeightLetter;
+  std::string polyDefaultLetter;
+  std::string CustomPlusSign;
+  std::string CustomCoeffMonSeparator;
+  std::string FDrepLetter;
+  std::string simpleRootLetter;
+  std::string DisplayNameCalculator;
+  std::string physicalPath;
+  std::string htmlPathServer;
+  List<std::string> polyAlphabeT;
+  std::string GetPolyLetter(int index)const;
+  std::string GetChevalleyHletter(int index)const;
+  std::string GetChevalleyGletter(int index)const;
+  int ExtraLinesCounterLatex;
+  int NumAmpersandsPerNewLineForLaTeX;
+  int MaxRecursionDepthPerExpression;
+  int MaxLineLength;
+  int MaxLinesPerPage;
+  int MatrixColumnVerticalLineIndex;
+  bool flagPassCustomCoeffMonSeparatorToCoeffs;
+  bool flagMakingExpressionTableWithLatex;
+  bool flagUseLatex;
+  bool flagUsePNG;
+  bool flagUseHTML;
+  bool flagUseCalculatorFormatForUEOrdered;
+  bool flagQuasiDiffOpCombineWeylPart;
+  List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
+  template <typename TemplateMonomial>
+  typename List<TemplateMonomial>::OrderLeftGreaterThanRight GetMonOrder();
+  void operator=(const FormatExpressions& other)
+  { this->chevalleyGgeneratorLetter=other.chevalleyGgeneratorLetter;
+    this->chevalleyHgeneratorLetter=other.chevalleyHgeneratorLetter ;
+    this->fundamentalWeightLetter=other.fundamentalWeightLetter;
+    this->polyDefaultLetter=other.polyDefaultLetter;
+    this->CustomPlusSign=other.CustomPlusSign;
+    this->CustomCoeffMonSeparator=other.CustomCoeffMonSeparator;
+    this->FDrepLetter=other.FDrepLetter;
+    this->simpleRootLetter=other.simpleRootLetter;
+    this->DisplayNameCalculator=other.DisplayNameCalculator;
+    this->physicalPath=other.physicalPath;
+    this->htmlPathServer=other.htmlPathServer;
+    this->polyAlphabeT=other.polyAlphabeT;
+    this->ExtraLinesCounterLatex=other.ExtraLinesCounterLatex;
+    this->NumAmpersandsPerNewLineForLaTeX=other.NumAmpersandsPerNewLineForLaTeX;
+    this->MaxRecursionDepthPerExpression=other.MaxRecursionDepthPerExpression;
+    this->MaxLineLength=other.MaxLineLength;
+    this->MaxLinesPerPage=other.MaxLinesPerPage;
+    this->MatrixColumnVerticalLineIndex=other.MatrixColumnVerticalLineIndex;
+    this->flagPassCustomCoeffMonSeparatorToCoeffs=other.flagPassCustomCoeffMonSeparatorToCoeffs;
+    this->flagMakingExpressionTableWithLatex=other.flagMakingExpressionTableWithLatex;
+    this->flagUseLatex=other.flagUseLatex;
+    this->flagUsePNG=other.flagUsePNG;
+    this->flagUseHTML=other.flagUseHTML;
+    this->flagUseCalculatorFormatForUEOrdered=other.flagUseCalculatorFormatForUEOrdered;
+    this->flagQuasiDiffOpCombineWeylPart=other.flagQuasiDiffOpCombineWeylPart;
+    this->thePolyMonOrder=other.thePolyMonOrder;
+  }
+  FormatExpressions();
 };
 
 template <class Element>
@@ -5378,7 +5401,7 @@ class GroebnerBasisComputation
   List<MonomialP> leadingMons;
   List<Rational> leadingCoeffs;
   int NumVars;
-
+  bool flagDoProgressReport;
   bool TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1)
@@ -5387,7 +5410,7 @@ class GroebnerBasisComputation
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
   GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest),
-  NumVars(-1)
+  NumVars(-1), flagDoProgressReport(true)
   {}
   void MakeMinimalBasis
 ()
@@ -8678,6 +8701,20 @@ void MonomialTensor<CoefficientType, inputHashFunction>::MultiplyByGeneratorPowe
 }
 
 template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
+std::string MonomialTensor<CoefficientType, inputHashFunction>::ToString(FormatExpressions* theFormat)const
+{ if (this->generatorsIndices.size==0)
+    return "1";
+  std::string theLetter= theFormat==0 ?  "g" : theFormat->chevalleyGgeneratorLetter;
+  std::stringstream out;
+  for (int i=0; i< this->generatorsIndices.size; i++)
+  { out << theLetter << "_{" << this->generatorsIndices[i] << "}";
+    if (!(this->Powers[i]==1))
+      out << "^{" << this->Powers[i] << "}";
+  }
+  return out.str();
+}
+
+template <class CoefficientType, unsigned int inputHashFunction(const CoefficientType&)>
 bool MonomialTensor<CoefficientType, inputHashFunction>::SimplifyEqualConsecutiveGenerators(int lowestNonReducedIndex)
 { if (this->generatorsIndices.size<1)
     return false;
@@ -8743,6 +8780,88 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
     out << "</table>";
   if (useLatex)
     out << "\\end{array}\\right)";
+  return out.str();
+}
+
+template <class TemplateMonomial, class CoefficientType>
+std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
+(FormatExpressions* theFormat)const
+{ if (this->size==0)
+    return "0";
+  std::stringstream out;
+  std::string tempS1, tempS2;
+  List<TemplateMonomial> sortedMons;
+  sortedMons=*this;
+  typename List<TemplateMonomial>::OrderLeftGreaterThanRight
+  theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
+  sortedMons.QuickSortDescending(theOrder);
+//  out << "(hash: " << this->HashFunction() << ")";
+  int cutOffCounter=0;
+  bool useCustomPlus=false;
+  bool useCustomTimes=false;
+  int MaxLineLength=theFormat==0? 200 : theFormat->MaxLineLength;
+  int NumAmpersandsPerNewLineForLaTeX=theFormat==0? 1: theFormat->NumAmpersandsPerNewLineForLaTeX;
+  bool flagUseLaTeX=theFormat==0? false: theFormat->flagUseLatex;
+  bool flagUseHTML=theFormat==0? false: theFormat->flagUseHTML;
+  std::string oldCustomTimes="";
+  if (theFormat!=0)
+  { useCustomPlus=(theFormat->CustomPlusSign!="");
+    useCustomTimes=(theFormat->CustomCoeffMonSeparator!="");
+    if (theFormat->flagPassCustomCoeffMonSeparatorToCoeffs==false)
+    { oldCustomTimes=theFormat->CustomCoeffMonSeparator;
+      theFormat->CustomCoeffMonSeparator="";
+    }
+  }
+  for (int i=0; i<sortedMons.size; i++)
+  { TemplateMonomial& currentMon=sortedMons[i];
+    CoefficientType& currentCoeff=this->theCoeffs[this->GetIndex(currentMon)];
+    if (currentCoeff.NeedsBrackets())
+      tempS1="("+currentCoeff.ToString(theFormat)+ ")";
+    else
+      tempS1=currentCoeff.ToString(theFormat);
+    tempS2=currentMon.ToString(theFormat);
+    if (!useCustomTimes)
+    { if (tempS1=="1" && tempS2!="1")
+        tempS1="";
+      if (tempS1=="-1"&& tempS2!="1")
+        tempS1="-";
+      if(tempS2!="1")
+        tempS1+=tempS2;
+    } else
+    { tempS1+=oldCustomTimes;
+      tempS1+=tempS2;
+    }
+    if (i>0)
+    { if (!useCustomPlus)
+      { if (tempS1.size()>0)
+        { if (tempS1[0]!='-')
+          { out << "+";
+            cutOffCounter+=1;
+          }
+        } else
+        { out << "+";
+          cutOffCounter+=1;
+        }
+      } else
+        out << theFormat->CustomPlusSign;
+    }
+    out << tempS1;
+    cutOffCounter+=tempS1.size();
+    if (MaxLineLength>0)
+      if (cutOffCounter>MaxLineLength)
+      { cutOffCounter=0;
+        if (flagUseLaTeX && i!=sortedMons.size-1)
+        { out << " \\\\";
+          for (int k=0; k<NumAmpersandsPerNewLineForLaTeX; k++)
+            out << "&";
+          out << " ";
+        }
+        if (flagUseHTML && !flagUseLaTeX)
+          out << " <br>";
+      }
+  }
+  if (theFormat!=0)
+    theFormat->CustomCoeffMonSeparator=oldCustomTimes;
   return out.str();
 }
 #endif

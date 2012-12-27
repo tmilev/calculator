@@ -219,7 +219,7 @@ void CandidateSSSubalgebra::AddHincomplete
       i--;
     }
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);
-//  this->theHorbitIndices.LastObject()->AddOnTop(indexOfOrbit);
+  this->theHorbitIndices.LastObject()->AddOnTop(indexOfOrbit);
 //  this->theHWeylGroupElts.LastObject()->AddOnTop(theWE);
   this->theInvolvedPosGenerators.LastObject()->SetSize
   (this->theInvolvedPosGenerators.LastObject()->size+1);
@@ -242,8 +242,8 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.DirectSumWith(tempWeylnonScaled.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
   this->CartanSAsByComponent.LastObject()->size=0;
-//  this->theHorbitIndices.SetSize(this->theHorbitIndices.size+1);
-//  this->theHorbitIndices.LastObject()->size=0;
+  this->theHorbitIndices.SetSize(this->theHorbitIndices.size+1);
+  this->theHorbitIndices.LastObject()->size=0;
 //  this->theHWeylGroupElts.SetSize(this->theHWeylGroupElts.size+1);
 //  this->theHWeylGroupElts.LastObject()->size=0;
   this->theInvolvedNegGenerators.SetSize(this->theInvolvedNegGenerators.size+1);
@@ -393,23 +393,30 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
 { MacroRegisterFunctionWithName("CandidateSSSubalgebra::ComputeSystemPart2");
   theSystemToSolve.SetSize(0);
   ElementSemisimpleLieAlgebra<Polynomial<Rational> >
-  posEltNegWeight, posEltOtherWeight, negElt, lieBracketMinusGoalValue, goalValue;
+  lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
+  this->totalNumUnknowns=0;
+  for (int i=1; i<this->theInvolvedNegGenerators.size; i++)
+    this->totalNumUnknowns+=this->theInvolvedNegGenerators[i].size;
+  this->totalNumUnknowns*=2;
+  this->theUnknownNegGens.SetSize(this->theInvolvedNegGenerators.size);
+  this->theUnknownPosGens.SetSize(this->theInvolvedPosGenerators.size);
+  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
+  { this->GetGenericNegGenLinearCombination(i, this->theUnknownNegGens[i]);
+    this->GetGenericPosGenLinearCombination(i, this->theUnknownPosGens[i]);
+  }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
     goalValue.MakeHgenerator
     (desiredHpart, *this->owner->owners, this->owner->indexInOwners);
-    this->GetGenericNegGenLinearCombination(i, negElt);
-    this->GetGenericPosGenLinearCombination(i, posEltNegWeight);
-    this->GetAmbientSS().LieBracket(posEltNegWeight, negElt, lieBracketMinusGoalValue);
+    this->GetAmbientSS().LieBracket
+    (this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
     lieBracketMinusGoalValue-=goalValue;
-//    std::cout << "<br>[" << posEltNegWeight.ToString() << ", " << negElt.ToString() << "]="
-//    << lieBracketMinusGoalValue.ToString();
     this->AddToSystem(lieBracketMinusGoalValue);
     for (int j=0; j<this->theInvolvedPosGenerators.size; j++)
       if (i!=j)
-      { this->GetGenericPosGenLinearCombination(j, posEltOtherWeight);
-        this->GetAmbientSS().LieBracket(negElt, posEltOtherWeight, lieBracketMinusGoalValue);
+      { this->GetAmbientSS().LieBracket
+        (this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
@@ -448,29 +455,41 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ int offsetIndex=0;
-  int totalNumCoeffs=0;
-  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
-    totalNumCoeffs+=this->theInvolvedNegGenerators[i].size;
-  for (int i=0; i<indexNegGens; i++)
+{ if (indexNegGens==0)
+  { Polynomial<Rational> tempP;
+    slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
+    output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
+    for (int j=0; j<curSl2.theF.size; j++)
+    { tempP.MakeConst(this->totalNumUnknowns, curSl2.theF.theCoeffs[j]);
+      output.AddMonomial(curSl2.theF[j], tempP);
+    }
+    return;
+  }
+  int offsetIndex=0;
+  for (int i=1; i<indexNegGens; i++)
     offsetIndex+=this->theInvolvedNegGenerators[i].size;
-  totalNumCoeffs*=2;
   this->GetGenericLinearCombination
-  (totalNumCoeffs, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
+  (this->totalNumUnknowns, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
 }
 
 void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ int offsetIndex=0;
-  int totalNumCoeffs=0;
-  for (int i=0; i<this->theInvolvedPosGenerators.size; i++)
-    totalNumCoeffs+=this->theInvolvedPosGenerators[i].size;
-  for (int i=0; i<indexPosGens; i++)
+{ if (indexPosGens==0)
+  { Polynomial<Rational> tempP;
+    slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
+    output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
+    for (int j=0; j<curSl2.theE.size; j++)
+    { tempP.MakeConst(this->totalNumUnknowns, curSl2.theE.theCoeffs[j]);
+      output.AddMonomial(curSl2.theE[j], tempP);
+    }
+    return;
+  }
+  int offsetIndex=0;
+  for (int i=1; i<indexPosGens; i++)
     offsetIndex+=this->theInvolvedPosGenerators[i].size;
-  offsetIndex+=totalNumCoeffs;
-  totalNumCoeffs*=2;
+  offsetIndex+=this->totalNumUnknowns/2;
   this->GetGenericLinearCombination
-  (totalNumCoeffs, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
+  (this->totalNumUnknowns, offsetIndex, this->theInvolvedPosGenerators[indexPosGens], output);
 }
 
 void CandidateSSSubalgebra::AddToSystem
@@ -1826,6 +1845,12 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << ". ";
   if (!this->flagSystemSolved)
     out << " <b> Subalgebra candidate not realized! </b> ";
+  out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:";
+  for (int i=0; i<this->theUnknownNegGens.size; i++)
+  { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;
+    out << this->theUnknownPosGens[i].ToString(theFormat);
+  }
+  out << "<br>";
   for (int i=0; i<this->CartanSAsByComponent.size; i++)
   { out << "Component " << this->theTypes[i];
     for (int j=0; j<this->CartanSAsByComponent[i].size; j++)

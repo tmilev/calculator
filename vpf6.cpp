@@ -5698,7 +5698,7 @@ std::string Expression::ToString
       default:
         out << this->children[0].ToString
         (theFormat, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "{{}" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << "}";
+        << "{}(" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << ")";
         break;
     }
   }
@@ -5737,7 +5737,7 @@ std::string Expression::ToString
         for (int i=0; i<this->children.size; i++)
         { out << this->children[i].ToString(theFormat, false, false, outComments);
           if (i!=this->children.size-1)
-            out << ", ";
+            out << ", \\\\ ";
         }
         out << ")";
         break;

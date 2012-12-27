@@ -220,7 +220,10 @@ public:
   List<DynkinSimpleType> theTypes;
   List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
   List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
-//  List<List<int> > theHorbitIndices;
+  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
+  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
+
+  List<List<int> > theHorbitIndices;
 //  List<List<ElementWeylGroup> > theHWeylGroupElts;
   Vector<Rational> aSolution;
   List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
@@ -235,7 +238,10 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   bool flagSystemSolved;
-  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false){}
+  int totalNumUnknowns;
+  CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false),
+  totalNumUnknowns(0)
+  {}
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 ;
@@ -264,7 +270,7 @@ public:
     this->theTypeTotal=other.theTypeTotal;
     this->thePosGens=other.thePosGens;
     this->theNegGens=other.theNegGens;
-//    this->theHorbitIndices=other.theHorbitIndices;
+    this->theHorbitIndices=other.theHorbitIndices;
 //    this->theHWeylGroupElts=other.theHWeylGroupElts;
     this->theInvolvedPosGenerators=other.theInvolvedPosGenerators;
     this->theInvolvedNegGenerators=other.theInvolvedNegGenerators;
@@ -276,6 +282,9 @@ public:
     this->flagSystemSolved=other.flagSystemSolved;
     this->transformedSystem=other.transformedSystem;
     this->aSolution=other.aSolution;
+    this->totalNumUnknowns=other.totalNumUnknowns;
+    this->theUnknownNegGens=other.theUnknownNegGens;
+    this->theUnknownPosGens=other.theUnknownPosGens;
   }
   bool IsWeightSystemSpaceIndex
 (int theIndex, const Vector<Rational>& AmbientRootTestedForWeightSpace);

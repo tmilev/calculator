@@ -2674,21 +2674,31 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
 }
 
 void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
-(Polynomial<Rational>& inputOutput, List<Polynomial<Rational> >& theBasiS,
+(Polynomial<Rational>& inputOutput,
  Polynomial<Rational>* outputRemainder, GlobalVariables* theGlobalVariables,
  int basisIndexToIgnore
  )
 { //Reference: Cox, Little, O'Shea, Ideals, Varieties and Algorithms, page 62
+  MacroRegisterFunctionWithName("GroebnerBasisComputation::RemainderDivisionWithRespectToBasis");
+  if (&inputOutput==outputRemainder ||
+      &inputOutput==&this->bufPoly || outputRemainder==&this->bufPoly)
+  { std::cout
+    << "This is a programming error: the input, the output  "
+    << " and the buffer member object must be pairwise distinct when carrying out "
+    << " multi-polynomial division. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   MemorySaving<Polynomial<Rational> > tempPoly;
   if (outputRemainder==0)
     outputRemainder=&tempPoly.GetElement();
   ProgressReport theReportStart(theGlobalVariables);
   ProgressReport theReport(theGlobalVariables);
-  if (theGlobalVariables!=0)
-    theReportStart.Report
-    ("Computing remainder " +
-     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +
-     theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
+  if (theGlobalVariables!=0 && this->flagDoProgressReport)
+  { theReportStart.Report
+    ("Computing remainder  division");
+    //+     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
+  }
   outputRemainder->MakeZero(this->NumVars);
   Polynomial<Rational>& currentRemainder=inputOutput;
   Rational leadingMonCoeff;
@@ -2699,22 +2709,22 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     int indexLeadingMonRemainder= currentRemainder.GetIndexMaxMonomial(this->theMonOrdeR);
     leadingMonCoeff=currentRemainder.theCoeffs[indexLeadingMonRemainder];
     highestMonCurrentDivHighestMonOther=currentRemainder[indexLeadingMonRemainder];
-    while (i<theBasiS.size && !divisionOcurred)
-    { int indexLeadingMonBasis=theBasiS[i].GetIndexMaxMonomial(this->theMonOrdeR);
-      MonomialP& highestMonBasis=theBasiS[i][indexLeadingMonBasis];
+    while (i<this->theBasiS.size && !divisionOcurred)
+    { MonomialP& highestMonBasis=this->leadingMons[i];
       bool shouldDivide=(i==basisIndexToIgnore)
       ? false :highestMonCurrentDivHighestMonOther.IsDivisibleBy(highestMonBasis);
       if (shouldDivide)
       { highestMonCurrentDivHighestMonOther/=highestMonBasis;
-        this->bufPoly=theBasiS[i];
-        leadingMonCoeff/=theBasiS[i].theCoeffs[indexLeadingMonBasis];
+        this->bufPoly=this->theBasiS[i];
+        leadingMonCoeff/=this->leadingCoeffs[i];
         this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
-        if (theGlobalVariables!=0)
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
-          out << "<br>Current remainder "
-          << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat)
-          << ". Subtracting from it  "
-          << this->bufPoly.ToString(&theGlobalVariables->theDefaultFormat);
+          out << "Highest mon of current remainder: "
+          << currentRemainder[indexLeadingMonRemainder].ToString() << ". "
+          << "\n<br>" << currentRemainder.size << " monomials in current remainder."
+          << "\n<br>" << outputRemainder->size << " monomials in output remainder."
+          ;
           theReport.Report(out.str());
           //std::cout << out.str();
         }
@@ -2727,11 +2737,6 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     if (!divisionOcurred)
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
-      if (theGlobalVariables!=0)
-      { std::stringstream out;
-        out << "<br>Current remainder " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
-        theReport.Report(out.str());
-      }
     }
   }
 //  std::cout << " <br>final remainder: "
@@ -2750,57 +2755,13 @@ bool GroebnerBasisComputation::AddPolyToBasis
   }
   MacroRegisterFunctionWithName("GroebnerBasisComputation::AddPolyToBasis");
   this->RemainderDivisionWithRespectToBasis
-    (*this->basisCandidates.LastObject(), this->theBasiS, &this->remainderDivision, theGlobalVariables);
+    (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
   this->basisCandidates.PopLastObject();
   if (this->remainderDivision.IsEqualToZero())
     return false;
-  Rational eliminationCF;
-  for (int i=0; i<this->leadingMons.size; i++)
-  { int indexInRemainder=this->remainderDivision.GetIndex(this->leadingMons[i]);
-    if (indexInRemainder!=-1)
-    { eliminationCF=this->remainderDivision.theCoeffs[indexInRemainder];
-      eliminationCF/=this->theBasiS[i].
-      theCoeffs[this->theBasiS[i].GetIndex(this->leadingMons[i])];
-      bufPolyForGaussianElimination=this->theBasiS[i];
-      bufPolyForGaussianElimination*=eliminationCF;
-      this->remainderDivision-=bufPolyForGaussianElimination;
-    }
-  }
-  if (this->remainderDivision.IsEqualToZero())
-  { std::cout << "This is a programming error: non-zero remainder is linearly dependent with basis. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
   this->remainderDivision.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
   int indexMaxMon=this->remainderDivision.GetIndexMaxMonomial(this->theMonOrdeR);
   MonomialP& theNewLeadingMon=this->remainderDivision[indexMaxMon];
-  if (this->leadingMons.Contains(theNewLeadingMon))
-  { std::cout << "This is a programming error: one of the preceding polynomials "
-    << " has the same leading monomial as the row-reduced non-zero new candidate. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  for (int i=0; i<this->theBasiS.size; i++)
-  { int indexInbasisElt=this->theBasiS[i].GetIndex(theNewLeadingMon);
-    if (indexInbasisElt!=-1)
-    { eliminationCF=this->theBasiS[i].theCoeffs[indexInbasisElt];
-      eliminationCF/=this->remainderDivision.theCoeffs[indexMaxMon];
-      bufPolyForGaussianElimination=this->remainderDivision;
-      bufPolyForGaussianElimination*=eliminationCF;
-      this->theBasiS[i]-=bufPolyForGaussianElimination;
-      this->theBasiS[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
-      this->leadingCoeffs[i]=
-      this->theBasiS[i].theCoeffs[this->theBasiS[i].GetIndex(this->leadingMons[i])];
-    }
-  }
-  for (int i=0; i<this->leadingMons.size; i++)
-    if (this->leadingMons[i].IsDivisibleBy(theNewLeadingMon))
-    { this->basisCandidates.AddOnTop(this->theBasiS[i]);
-      this->leadingMons.PopIndexSwapWithLast(i);
-      this->leadingCoeffs.PopIndexSwapWithLast(i);
-      this->theBasiS.PopIndexSwapWithLast(i);
-      i--;
-    }
   this->theBasiS.AddOnTop(this->remainderDivision);
   this->leadingMons.AddOnTop(theNewLeadingMon);
   this->leadingCoeffs.AddOnTop(this->remainderDivision.theCoeffs[indexMaxMon]);
@@ -2836,23 +2797,11 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
   ProgressReport theReport(theGlobalVariables);
  // std::string tempS;
 //  bool changed=true;
-  while (this->basisCandidates.size>0)
-  { if (theGlobalVariables!=0 && this->flagDoProgressReport)
-    { std::stringstream out;
-      out << "Current basis size: " << theBasiS.size << ", number of candidates: "
-      << this->basisCandidates.size << "<br> Current basis: ";
-      for (int i=0; i<this->theBasiS.size; i++)
-        out << "<br>" << this->theBasiS[i].ToString(&theGlobalVariables->theDefaultFormat);
-      out << "<br> Candidates: ";
-      for (int i=0; i<this->basisCandidates.size; i++)
-        out << "<br>" << this->basisCandidates[i].ToString(&theGlobalVariables->theDefaultFormat);
-      theReport.Report(out.str());
-    }
-    if (this->AddPolyToBasis(theGlobalVariables))
-      continue;
-    bool found =false;
-    for (int i=0; i<this->theBasiS.size &&!found; i++)
-      for (int j=i+1; j<this->theBasiS.size && !found; j++)
+  bool found=true;
+  while (found)
+  { found=false;
+    for (int i=0; i<this->theBasiS.size; i++)
+      for (int j=i+1; j<this->theBasiS.size; j++)
       { Polynomial<Rational>& currentLeft= this->theBasiS[i];
         Polynomial<Rational>& currentRight= this->theBasiS[j];
         int leftIndex=currentLeft.GetIndexMaxMonomial(this->theMonOrdeR);
@@ -2874,20 +2823,46 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
           { this->SoPolyLeftShift[k]=rightHighestMon[k]-leftHighestMon[k];
             this->SoPolyRightShift[k]=0;
           }
-  /*      std::cout << "<hr>Sopoly of indices " << lowestNonExplored +1 << " and "
-        << j+1 << " ("
-        << currentLeft.ToString(&theGlobalVariables->theDefaultFormat)
-        << " and "
-        << currentRight.ToString(&theGlobalVariables->theDefaultFormat)
-        << ") = ";*/
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
+        { std::stringstream out;
+          out << "Computing Sopoly of indices " << i +1 << " out of "
+          << this->theBasiS.size << " and "
+          << j+1 << " out of " << this->theBasiS.size;
+          theReport.Report(out.str());
+        }
         this->bufPoly=currentLeft;
         this->bufPoly.MultiplyBy(this->SoPolyLeftShift, currentRight.theCoeffs[rightIndex]);
         this->SoPolyBuf=currentRight;
         this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.theCoeffs[leftIndex]);
         this->SoPolyBuf-=(this->bufPoly);
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
-        found= this->AddPolyToBasis(theGlobalVariables);
       }
+    while (this->basisCandidates.size>0)
+    { while (this->basisCandidates.size>0)
+      { if(this->AddPolyToBasis(theGlobalVariables))
+          found=true;
+        if (theGlobalVariables!=0 && this->flagDoProgressReport)
+        { std::stringstream out;
+          out << theBasiS.size << " basis elements, " << this->basisCandidates.size
+          << " candidates. ";
+          theReport.Report(out.str());
+//          std::cout << "<br>" << out.str();
+        }
+      }
+      for (int i=0; i<this->theBasiS.size; i++)
+      { this->bufPolyForGaussianElimination=this->theBasiS[i];
+        this->RemainderDivisionWithRespectToBasis
+        (this->bufPolyForGaussianElimination, &this->remainderDivision,
+         theGlobalVariables, i);
+        if (!(this->remainderDivision==this->theBasiS[i]))
+        { this->basisCandidates.AddOnTop(this->remainderDivision);
+          this->leadingMons.PopIndexSwapWithLast(i);
+          this->leadingCoeffs.PopIndexSwapWithLast(i);
+          this->theBasiS.PopIndexSwapWithLast(i);
+          i--;
+        }
+      }
+    }
   }
   this->MakeMinimalBasis();
   inputOutpuT=this->theBasiS;
@@ -3022,7 +2997,7 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasisImprovedAlgorithm
           reportInner.Report(out.str());
         }
         this->RemainderDivisionWithRespectToBasis
-        (leftBuf, this->theBasiS, &outputRemainder, theGlobalVariables)
+        (leftBuf, &outputRemainder, theGlobalVariables)
         ;
         if (theGlobalVariables!=0)
         { std::stringstream out;

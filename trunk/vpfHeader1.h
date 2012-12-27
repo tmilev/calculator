@@ -5416,7 +5416,7 @@ class GroebnerBasisComputation
 ()
   ;
   void RemainderDivisionWithRespectToBasis
-(Polynomial<Rational>& inputOutput, List<Polynomial<Rational> >& theBasiS,
+(Polynomial<Rational>& inputOutput,
  Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );

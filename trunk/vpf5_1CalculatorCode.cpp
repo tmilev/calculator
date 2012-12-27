@@ -233,31 +233,32 @@ bool CommandList::fGroebnerBuchberger
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   theGroebnerComputation.TransformToReducedGroebnerBasis
   (outputGroebner, theCommands.theGlobalVariableS);
-
   std::stringstream out;
   out << "Letter/expression ordrer: ";
   for (int i=0; i<theContext.VariableImages.size; i++)
-    out << theContext.VariableImages[i].ToString() << " < ";
-  out << "<br>Starting basis: ";
-  std::stringstream out1, out2, out3;
+  { out << theContext.VariableImages[i].ToString();
+    if (i!=theContext.VariableImages.size-1)
+      out << ", ";
+  }
+  out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   theFormat.thePolyMonOrder= useGr ?
   MonomialP::LeftGreaterThanTotalDegThenLexicographic :
   MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   for(int i=0; i<inputVector.size; i++)
-    out1 << inputVector[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out1.str());
+    out << "<br>"
+    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
   out << "<br>Minimal Groebner basis algorithm 1(" << outputGroebner.size << " elements):";
   for(int i=0; i<outputGroebner.size; i++)
-    out2 << outputGroebner[i].ToString(&theFormat) << ", ";
-  out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(out2.str());
-
+    out << "<br> "
+    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
 //  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
 //(outputGroebner2, theCommands.theGlobalVariableS);
 
-  out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
-  for(int i=0; i<outputGroebner2.size; i++)
-    out << CGI::GetHtmlMathDivFromLatexAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
-    << "<br> ";
+//  out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
+//  for(int i=0; i<outputGroebner2.size; i++)
+//    out << "<br> "
+//    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
+//    ;
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

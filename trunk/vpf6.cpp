@@ -3448,7 +3448,7 @@ bool CommandList::fSSAlgebra
         << " The resulting Lie bracket pairing table follows. <hr> "
         << tempData.GetAmbientSSAlgebra().ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
         out << "Ready for LaTeX consumption version of the first three columns: ";
-        out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>Add to body: <br>"
+        out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
         << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
         Vector<Rational> tempRoot;
         ElementSemisimpleLieAlgebra<Rational> tempElt1;
@@ -3463,8 +3463,10 @@ bool CommandList::fSSAlgebra
         out << "\\end{longtable}";
       }
       WeylGroup& theWeyl=theSSalgebra.theWeyl;
-      out << "<br>Symmetric Cartan matrix follows.<br>"
-      << " The entry in the i-th row and j-th column defines the scalar product of the i^th and j^th roots.<br>"
+      out << "<hr>Symmetric Cartan matrix.<br>"
+      << "We define the symmetric Cartan matrix by requesing that the entry in "
+      << "the i-th row and j-th column "
+      << " be the scalar product of the i^th and j^th roots.<br>"
       << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
       Rational tempRat;
       Matrix<Rational> tempMat;

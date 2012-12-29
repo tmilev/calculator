@@ -2670,10 +2670,15 @@ void SemisimpleLieAlgebra::ExploitTheCyclicTrick(int i, int j, int k)
   this->ExploitSymmetryChevalleyConstants(k, i);
 }
 
-int SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(Vector<Rational>& alpha, Vector<Rational>& beta)
+int SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot
+(const Vector<Rational>& alpha, const Vector<Rational>& beta)
 { int result=-1;
-  Vector<Rational> tempRoot;
-  tempRoot=(beta);
+  Vector<Rational> tempRoot=beta;
+  if (alpha.IsEqualToZero())
+  { std::cout << "This is a programming error: calling function GetMaxQForWhichBetaMinusQAlphaIsARoot"
+    << " with zero value for alpha is not allowed. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   while (this->theWeyl.IsARoot(tempRoot))
   { result++;
     tempRoot-=(alpha);
@@ -2681,7 +2686,8 @@ int SemisimpleLieAlgebra::GetMaxQForWhichBetaMinusQAlphaIsARoot(Vector<Rational>
   return result;
 }
 
-void SemisimpleLieAlgebra::ComputeOneChevalleyConstant (int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
+void SemisimpleLieAlgebra::ComputeOneChevalleyConstant
+(int indexGamma, int indexDelta, int indexMinusEpsilon, int indexMinusZeta, int indexEta)
 {//using formula (**), 2.9, page 49, Samelson, Notes on Lie algebras, 1989
   Vector<Rational>& gamma= this->theWeyl.RootSystem.TheObjects[indexGamma];
   Vector<Rational>& delta= this->theWeyl.RootSystem.TheObjects[indexDelta];

@@ -5402,6 +5402,10 @@ class GroebnerBasisComputation
   List<Rational> leadingCoeffs;
   int NumVars;
   bool flagDoProgressReport;
+  bool flagDoSortBasis;
+ bool AddPolyAndReduceBasis
+ (GlobalVariables* theGlobalVariables)
+ ;
   bool TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1)
@@ -5409,9 +5413,7 @@ class GroebnerBasisComputation
   bool TransformToReducedGroebnerBasisImprovedAlgorithm
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables=0, int upperComputationBound=-1);
-  GroebnerBasisComputation():theMonOrdeR(MonomialP::LeftIsGEQLexicographicLastVariableStrongest),
-  NumVars(-1), flagDoProgressReport(true)
-  {}
+  GroebnerBasisComputation();
   void MakeMinimalBasis
 ()
   ;
@@ -5420,7 +5422,7 @@ class GroebnerBasisComputation
  Polynomial<Rational>* outputRemainder=0, GlobalVariables* theGlobalVariables=0,
   int basisIndexToIgnore=-1
  );
- bool AddPolyToBasis
+ bool AddRemainderToBasis
  (GlobalVariables* theGlobalVariables)
  ;
    //Criterion from Cox, Little, O'Shea:

@@ -395,9 +395,17 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   ElementSemisimpleLieAlgebra<Polynomial<Rational> >
   lieBracketMinusGoalValue, goalValue;
   Vector<Polynomial<Rational> > desiredHpart;
+  SemisimpleLieAlgebra& nonEmbeddedMe=
+  this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe];
   this->totalNumUnknowns=0;
-  for (int i=1; i<this->theInvolvedNegGenerators.size; i++)
+  for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
     this->totalNumUnknowns+=this->theInvolvedNegGenerators[i].size;
+  if (this->theWeylNonEmbeddeD.RootSystem.size==0)
+  { std::cout << "This is a programming error: the root system of the "
+    << " candidate subalgebra has not been computed "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
   this->totalNumUnknowns*=2;
   this->theUnknownNegGens.SetSize(this->theInvolvedNegGenerators.size);
   this->theUnknownPosGens.SetSize(this->theInvolvedPosGenerators.size);
@@ -417,6 +425,16 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
       if (i!=j)
       { this->GetAmbientSS().LieBracket
         (this->theUnknownNegGens[i], this->theUnknownPosGens[j], lieBracketMinusGoalValue);
+        this->AddToSystem(lieBracketMinusGoalValue);
+        Vector<Rational> posRoot1, posRoot2;
+        posRoot1.MakeEi(this->theWeylNonEmbeddeD.GetDim(), i);
+        posRoot2.MakeEi(this->theWeylNonEmbeddeD.GetDim(), j);
+        int q= nonEmbeddedMe.GetMaxQForWhichBetaMinusQAlphaIsARoot
+        (posRoot1, -posRoot2);
+        lieBracketMinusGoalValue=this->theUnknownPosGens[j];
+        for (int k=0; k<q+1; k++)
+          this->GetAmbientSS().LieBracket
+          (this->theUnknownNegGens[i], lieBracketMinusGoalValue, lieBracketMinusGoalValue);
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
@@ -455,7 +473,7 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
   (int indexNegGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ if (indexNegGens==0)
+{/* if (indexNegGens==0)
   { Polynomial<Rational> tempP;
     slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
     output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
@@ -464,9 +482,9 @@ void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
       output.AddMonomial(curSl2.theF[j], tempP);
     }
     return;
-  }
+  }*/
   int offsetIndex=0;
-  for (int i=1; i<indexNegGens; i++)
+  for (int i=0; i<indexNegGens; i++)
     offsetIndex+=this->theInvolvedNegGenerators[i].size;
   this->GetGenericLinearCombination
   (this->totalNumUnknowns, offsetIndex, this->theInvolvedNegGenerators[indexNegGens], output);
@@ -474,7 +492,7 @@ void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
 
 void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
-{ if (indexPosGens==0)
+{ /*if (indexPosGens==0)
   { Polynomial<Rational> tempP;
     slTwoSubalgebra& curSl2=this->owner->theSl2s[this->theHorbitIndices[0][0]];
     output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
@@ -483,9 +501,9 @@ void CandidateSSSubalgebra::GetGenericPosGenLinearCombination
       output.AddMonomial(curSl2.theE[j], tempP);
     }
     return;
-  }
+  }*/
   int offsetIndex=0;
-  for (int i=1; i<indexPosGens; i++)
+  for (int i=0; i<indexPosGens; i++)
     offsetIndex+=this->theInvolvedPosGenerators[i].size;
   offsetIndex+=this->totalNumUnknowns/2;
   this->GetGenericLinearCombination

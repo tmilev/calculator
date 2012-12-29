@@ -251,14 +251,14 @@ bool CommandList::fGroebnerBuchberger
   for(int i=0; i<outputGroebner.size; i++)
     out << "<br> "
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
-//  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
-//(outputGroebner2, theCommands.theGlobalVariableS);
+/*  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
+(outputGroebner2, theCommands.theGlobalVariableS);
 
-//  out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
-//  for(int i=0; i<outputGroebner2.size; i++)
-//    out << "<br> "
-//    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
-//    ;
+  out << "<br>Minimal Groebner basis algorithm 2 (" << outputGroebner2.size << " elements):";
+  for(int i=0; i<outputGroebner2.size; i++)
+    out << "<br> "
+    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
+  ;*/
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
   return true;
 }

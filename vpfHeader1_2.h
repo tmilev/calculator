@@ -1895,7 +1895,7 @@ public:
   void ExploitSymmetryAndCyclicityChevalleyConstants(int indexI, int indexJ);
   void ExploitSymmetryChevalleyConstants(int indexI, int indexJ);
   void ExploitTheCyclicTrick(int i, int j, int k);
-  int GetMaxQForWhichBetaMinusQAlphaIsARoot(Vector<Rational> & alpha, Vector<Rational> & beta);
+  int GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta);
   Rational GetConstant(const Vector<Rational> & root1, const Vector<Rational> & root2);
   void ComputeCommonAdEigenVectors
 (int theDegree, List<ElementUniversalEnveloping<Polynomial<Rational> > >& theGenerators,

@@ -368,7 +368,7 @@ x_{5}x_{17}+x_{4}x_{16}+x_{2}x_{14}-1,\
 x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14},\
 x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
 x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
-x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)");
+x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 
   this->AddNonBoundVarMustBeNew
   ("GroebnerBuchbergerGrLex", & this->fGroebnerBuchbergerGrLex, "",

@@ -75,6 +75,7 @@ GlobalVariables::GlobalVariables()
 { this->FeedDataToIndicatorWindowDefault=0;
   this->MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000000;
   this->callSystem=0;
+  this->flagGaussianEliminationProgressReport=false;
 }
 
 ProjectInformationInstance::ProjectInformationInstance(const char* fileName, const std::string& fileDescription)

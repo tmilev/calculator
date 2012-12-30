@@ -1640,7 +1640,10 @@ public:
     if (theCarbonCopy!=0)
       theCarbonCopy->RowTimesScalar(rowIndex, scalar);
   }
-  void AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar);
+  void AddTwoRows
+  (int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar,
+   GlobalVariables* theGlobalVariables=0
+   );
   inline void AddTwoRowsWithCarbonCopy(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar, Matrix<Element>* theCarbonCopy)
   { this->AddTwoRows(fromRowIndex, ToRowIndex, StartColIndex, scalar);
     if (theCarbonCopy!=0)
@@ -1819,12 +1822,20 @@ void NonPivotPointsToEigenVector
   // that do not have a pivot 1 in them.
   // In the above example, the third (index 2) and fifth (index 4) columns do not have a pivot 1 in them.
   inline static void GaussianEliminationByRows
-  (Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints)
-  { Matrix<Element>::GaussianEliminationByRows(theMatrix, otherMatrix, outputNonPivotPoints, true);
+  (Matrix<Element>& theMatrix, Matrix<Element>& otherMatrix, Selection& outputNonPivotPoints,
+   GlobalVariables* theGlobalVariables=0)
+  { Matrix<Element>::GaussianEliminationByRows
+    (theMatrix, otherMatrix, outputNonPivotPoints, true, theGlobalVariables);
   }
-  static void GaussianEliminationByRows(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection, bool returnNonPivotPoints);
-  void GaussianEliminationByRows(Matrix<Element>& otherMatrix, Selection& outputNonPivotColumns)
-  { Matrix<Element>::GaussianEliminationByRows(*this, otherMatrix, outputNonPivotColumns);
+  static void GaussianEliminationByRows
+  (Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
+   bool returnNonPivotPoints, GlobalVariables* theGlobalVariables=0)
+  ;
+  void GaussianEliminationByRows
+  (Matrix<Element>& otherMatrix, Selection& outputNonPivotColumns,
+   GlobalVariables* theGlobalVariables=0)
+  { Matrix<Element>::GaussianEliminationByRows
+    (*this, otherMatrix, outputNonPivotColumns, theGlobalVariables);
   }
   void GaussianEliminationByRowsNoRowSwapPivotPointsByRows
   (int firstNonProcessedRow, Matrix<Element>& output, List<int>& outputPivotPointCols, Selection* outputNonPivotPoints__WarningSelectionNotInitialized)
@@ -2275,16 +2286,6 @@ inline int Matrix<Element>::FindPivot(int columnIndex, int RowStartIndex, int Ro
 }
 
 template <typename Element>
-inline void Matrix<Element>::AddTwoRows(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar)
-{ Element tempElement;
-  for (int i = StartColIndex; i< this->NumCols; i++)
-  { tempElement=this->elements[fromRowIndex][i];
-    tempElement*=scalar;
-    this->elements[ToRowIndex][i]+=tempElement;
-  }
-}
-
-template <typename Element>
 inline void Matrix<Element>::SubtractRows(int indexRowWeSubtractFrom, int indexSubtracted, int StartColIndex, const Element& scalar)
 { Element tempElement;
   for (int i = StartColIndex; i< this->NumCols; i++)
@@ -2373,68 +2374,6 @@ void Matrix<Element>::GaussianEliminationByRowsNoRowSwapPivotPointsByRows
       if (outputPivotPointCols.TheObjects[i]!=-1)
         outputNonPivotPoints__WarningSelectionNotInitialized->selected[outputPivotPointCols.TheObjects[i]]=false;
     outputNonPivotPoints__WarningSelectionNotInitialized->ComputeIndicesFromSelection();
-  }
-}
-
-template <typename Element>
-void Matrix<Element>::GaussianEliminationByRows
-(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
- bool returnNonPivotPoints)
-{ int tempI;
-  int NumFoundPivots = 0;
-  int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
-  Element tempElement;
-  outputSelection.init(mat.NumCols);
-  //mat.ComputeDebugString();
-  for (int i=0; i<mat.NumCols; i++)
-  { if (NumFoundPivots == MaxRankMat)
-    { if (returnNonPivotPoints)
-        for (int j =i; j<mat.NumCols; j++)
-          outputSelection.AddSelectionAppendNewIndex(j);
-      return;
-    }
-    tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
-    if (tempI!=-1)
-    { if (tempI!=NumFoundPivots)
-      { mat.SwitchTwoRows(NumFoundPivots, tempI);
-        output.SwitchTwoRows (NumFoundPivots, tempI);
-      }
-      tempElement=mat.elements[NumFoundPivots][i];
-//      std::string tempS;
-//      if (i==9 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic)
-//      { std::cout << tempS;
-//      }
-//      tempS=tempElement.ToString();
-      tempElement.Invert();
-//      assert(tempElement.checkConsistency());
-//      tempS=tempElement.ToString();
-      mat.RowTimesScalar(NumFoundPivots, tempElement);
-      output.RowTimesScalar(NumFoundPivots, tempElement);
-//      assert(tempElement.checkConsistency());
-      for (int j = 0; j<mat.NumRows; j++)
-        if (j!=NumFoundPivots)
-          if (!mat.elements[j][i].IsEqualToZero())
-          { //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-            //{ tempS=tempElement.ToString();
-              //mat.ComputeDebugString();
-            //}
-            tempElement=(mat.elements[j][i]);
-            tempElement.Minus();
-            //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
-              //tempS=tempElement.ToString();
-            mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
-            output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
-            //assert(tempElement.checkConsistency());
-            //mat.ComputeDebugString();
-          }
-      NumFoundPivots++;
-      if (!returnNonPivotPoints)
-        outputSelection.AddSelectionAppendNewIndex(i);
-    }
-    else
-      if (returnNonPivotPoints)
-        outputSelection.AddSelectionAppendNewIndex(i);
-    //mat.ComputeDebugString();
   }
 }
 
@@ -7438,6 +7377,8 @@ private:
 public:
   double MaxComputationTimeSecondsNonPositiveMeansNoLimit;
   FormatExpressions theDefaultFormat;
+//progress report flags:
+  bool flagGaussianEliminationProgressReport;
 
   IndicatorWindowVariables theIndicatorVariables;
   DrawingVariables theDrawingVariables;
@@ -8865,5 +8806,97 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   if (theFormat!=0)
     theFormat->CustomCoeffMonSeparator=oldCustomTimes;
   return out.str();
+}
+
+template <typename Element>
+inline void Matrix<Element>::AddTwoRows
+(int fromRowIndex, int ToRowIndex, int StartColIndex, const Element& scalar,
+ GlobalVariables* theGlobalVariables)
+{ ProgressReport theReport(theGlobalVariables);
+  bool doProgressReport=
+  theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
+  Element tempElement;
+  for (int i = StartColIndex; i< this->NumCols; i++)
+  { tempElement=this->elements[fromRowIndex][i];
+    tempElement*=scalar;
+    if (doProgressReport)
+    { std::stringstream out;
+      out << "Processing row, element " << i+1 << " out of " << this->NumCols;
+      theReport.Report(out.str());
+    }
+    this->elements[ToRowIndex][i]+=tempElement;
+  }
+}
+
+template <typename Element>
+void Matrix<Element>::GaussianEliminationByRows
+(Matrix<Element>& mat, Matrix<Element>& output, Selection& outputSelection,
+ bool returnNonPivotPoints, GlobalVariables* theGlobalVariables)
+{ int tempI;
+  int NumFoundPivots = 0;
+  int MaxRankMat = MathRoutines::Minimum(mat.NumRows, mat.NumCols);
+  Element tempElement;
+  outputSelection.init(mat.NumCols);
+  bool doProgressReport= theGlobalVariables==0 ? false : theGlobalVariables->flagGaussianEliminationProgressReport;
+  ProgressReport theReport(theGlobalVariables);
+  //mat.ComputeDebugString();
+  for (int i=0; i<mat.NumCols; i++)
+  { if (NumFoundPivots == MaxRankMat)
+    { if (returnNonPivotPoints)
+        for (int j =i; j<mat.NumCols; j++)
+          outputSelection.AddSelectionAppendNewIndex(j);
+      return;
+    }
+    tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
+    if (tempI!=-1)
+    { if (tempI!=NumFoundPivots)
+      { mat.SwitchTwoRows(NumFoundPivots, tempI);
+        output.SwitchTwoRows (NumFoundPivots, tempI);
+      }
+      tempElement=mat.elements[NumFoundPivots][i];
+//      std::string tempS;
+//      if (i==9 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic)
+//      { std::cout << tempS;
+//      }
+//      tempS=tempElement.ToString();
+      tempElement.Invert();
+//      assert(tempElement.checkConsistency());
+//      tempS=tempElement.ToString();
+      mat.RowTimesScalar(NumFoundPivots, tempElement);
+      output.RowTimesScalar(NumFoundPivots, tempElement);
+//      assert(tempElement.checkConsistency());
+      for (int j = 0; j<mat.NumRows; j++)
+        if (j!=NumFoundPivots)
+          if (!mat.elements[j][i].IsEqualToZero())
+          { //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
+            //{ tempS=tempElement.ToString();
+              //mat.ComputeDebugString();
+            //}
+            tempElement=(mat.elements[j][i]);
+            tempElement.Minus();
+            //if (i==9 && j==8 && Matrix<Element>::flagAnErrorHasOccurredTimeToPanic==true)
+              //tempS=tempElement.ToString();
+            if (doProgressReport)
+            { std::stringstream out;
+              out << "Gaussian elimination (" << mat.NumRows << "x" << mat.NumCols
+              << "): column " << i+1 << " out of " << mat.NumCols
+              << ".\n<br>Pivot row: " << NumFoundPivots+1 << ", eliminating row "
+              << j+1 << " out of " << mat.NumRows;
+              theReport.Report(out.str());
+            }
+            mat.AddTwoRows(NumFoundPivots, j, i, tempElement, theGlobalVariables);
+            output.AddTwoRows(NumFoundPivots, j, 0, tempElement, theGlobalVariables);
+            //assert(tempElement.checkConsistency());
+            //mat.ComputeDebugString();
+          }
+      NumFoundPivots++;
+      if (!returnNonPivotPoints)
+        outputSelection.AddSelectionAppendNewIndex(i);
+    }
+    else
+      if (returnNonPivotPoints)
+        outputSelection.AddSelectionAppendNewIndex(i);
+    //mat.ComputeDebugString();
+  }
 }
 #endif

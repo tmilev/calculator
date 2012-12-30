@@ -5512,8 +5512,10 @@ void CommandList::EvaluateCommands()
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, thePairs, &comments);
   if (this->RecursionDeptH!=0)
-  { std::cout << "This is a programming error: the starting recursion depth before evaluation was 0, but after evaluation it is "
-    << this->RecursionDeptH << ". Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__ << ".";
+  { std::cout << "This is a programming error: the starting recursion depth "
+    << "before evaluation was 0, but after evaluation it is "
+    << this->RecursionDeptH << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
   this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;

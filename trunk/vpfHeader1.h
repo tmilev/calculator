@@ -956,15 +956,15 @@ public:
       nameWithoutFolderInfo << fileName[i];
     return nameWithoutFolderInfo.str();
   }
-  inline static std::string GetHtmlLinkFromFileName(const std::string& fileName)
-  { return CGI::GetHtmlLinkFromFileName(fileName, "");
+  inline static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName)
+  { return CGI::GetHtmlLinkFromProjectFileName(fileName, "");
   }
   static std::string GetCalculatorLink
   (const std::string& DisplayNameCalculator, const std::string& input)
   ;
   static std::string GetAnimateShowHideJavascriptMustBEPutInHTMLHead();
   static std::string GetSliderSpanStartsHidden(const std::string& content, const std::string& label="Expand/collapse", const std::string& desiredID="");
-  static std::string GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc);
+  static std::string GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc);
   static std::string GetStackTraceEtcErrorMessage(const std::string& file, int line);
   static std::string GetHtmlSwitchMenuDoNotEncloseInTags()
   { std::stringstream output;

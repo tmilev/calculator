@@ -1309,10 +1309,9 @@ void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::
   this->FileDescriptions.AddOnTop(fileDescription);
 }
 
-std::string CGI::GetHtmlLinkFromFileName(const std::string& fileName, const std::string& fileDesc)
+std::string CGI::GetHtmlLinkFromProjectFileName(const std::string& fileName, const std::string& fileDesc)
 { std::stringstream out;
-  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/"
-  << 1130
+  out << " <a href=\"https://sourceforge.net/p/vectorpartition/code/HEAD"
   << "/tree/trunk/"
   << CGI::RemovePathFromFileName(fileName) << "\">"
   << CGI::RemovePathFromFileName(fileName);
@@ -1330,7 +1329,8 @@ std::string ProjectInformation::ToString()
   out << "<div id=\"sourceDetails\" style=\"display: none\">";
   for (int i=0; i<this->FileNames.size; i++)
   { out << " <br>\n";
-    out << CGI::GetHtmlLinkFromFileName(this->FileNames[i], this->FileDescriptions[i]);
+    out << CGI::GetHtmlLinkFromProjectFileName
+    (this->FileNames[i], this->FileDescriptions[i]);
   }
   out << "<br>The calculator is a simple console application (like the C++ \"Hello world!\")."
   << " It is managed by an <a href=\"http://httpd.apache.org/\">Apache web server</a>. ";

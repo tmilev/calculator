@@ -102,7 +102,7 @@ RegisterFunctionCall::~RegisterFunctionCall()
 std::string ProjectInformation::GetStackTraceReport()
 { std::stringstream out;
   for (int i=this->CustomStackTrace.size-1; i>=0; i--)
-  { out << "<tr><td>" << CGI::GetHtmlLinkFromFileName(this->CustomStackTrace[i].fileName)
+  { out << "<tr><td>" << CGI::GetHtmlLinkFromProjectFileName(this->CustomStackTrace[i].fileName)
     << "</td><td>" << this->CustomStackTrace[i].line << "</td>";
     if (this->CustomStackTrace[i].functionName!="")
       out << "<td>" << this->CustomStackTrace[i].functionName << "</td>";
@@ -116,7 +116,7 @@ std::string CGI::GetStackTraceEtcErrorMessage(const std::string& file, int line)
   out << "<br>A partial stack trace follows (function calls not explicitly logged not included). "
   << "<br>The first two stack trace lines may belong to the same function.";
   out << "<table><tr><td>file</td><td>line</td><td>function name (if known)</td></tr><tr><td> "
-  << CGI::GetHtmlLinkFromFileName(file) << "</td><td> " << line << "</td></tr>";
+  << CGI::GetHtmlLinkFromProjectFileName(file) << "</td><td> " << line << "</td></tr>";
   out << ProjectInformation::GetMainProjectInfo().GetStackTraceReport();
   out  << "</table>";
   return out.str();
@@ -2370,7 +2370,7 @@ bool partFractions::splitPartial(GlobalVariables& theGlobalVariables, Vector<Rat
     reducedForGood.ComputeOneCheckSum(tempRat, theGlobalVariables);
     if (tempRat!=this->CheckSum)
     { std::cout << "This is a programming error. The checksums of the partial fraction decomposition do not match. "
-      << " Please debug file " << CGI::GetHtmlLinkFromFileName(__FILE__) << " line " << __LINE__;
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
   }

@@ -111,7 +111,10 @@ bool CommandList::fSolveSeparableBilinearSystem
   std::cout << "<br>The system matrix: <br>" << theSystem.ToString(&theFormat);
   std::cout << "<br>The column vector: <br>" << theConstantTerms.ToString(&theFormat);
   Selection tempSel;
-  theSystem.GaussianEliminationByRows(theConstantTerms, tempSel);
+  bool oldReportFlag=true;
+  MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
+  theSystem.GaussianEliminationByRows(theConstantTerms, tempSel, theCommands.theGlobalVariableS);
+  MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
   std::stringstream out;
   out << theSystem.ToString(&theFormat) << theConstantTerms.ToString(&theFormat);
   theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());

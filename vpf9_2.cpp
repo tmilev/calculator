@@ -2742,6 +2742,16 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     if (!divisionOcurred)
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
+      if (theGlobalVariables!=0 && this->flagDoProgressReport)
+      { std::stringstream out;
+        out << "Number of intermediate remainders: " << numIntermediateRemainders
+        << "\n<br> Highest mon of current remainder is no longer reducible. "
+        << "\n<br>" << currentRemainder.size << " monomials in current remainder."
+        << "\n<br>" << outputRemainder->size << " monomials in output remainder."
+        ;
+        theReport.Report(out.str());
+          //std::cout << out.str();
+      }
     }
   }
 //  std::cout << " <br>final remainder: "

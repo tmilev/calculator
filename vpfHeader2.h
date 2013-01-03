@@ -195,7 +195,7 @@ class Function
   bool flagMayActOnBoundVars;
   MemorySaving<List<Expression> > theArgumentPatterns;
   MemorySaving<List<bool> > theArgumentPatternIsParsed;
-  typedef  bool (*FunctionAddress)(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments);
+  typedef  bool (*FunctionAddress)(CommandList& theCommands, Expression& theExpression, std::stringstream* comments);
   FunctionAddress theFunction;
   std::string ToString(CommandList& theBoss)const;
   void operator =(const Function& other)
@@ -236,7 +236,7 @@ class Function
 };
 
 class Expression
-{ void reset(int inputIndexBoundVars)
+{ void reset()
   { this->theBoss=0;
     this->children.size=0;
     this->theOperation=-1;
@@ -259,9 +259,8 @@ class Expression
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
   };
-  void reset(CommandList& newBoss, int inputIndexBoundVars)
-  { this->reset(inputIndexBoundVars);
-    this->theBoss=&newBoss;
+  void reset(CommandList& newBoss)
+  { this->theBoss=&newBoss;
   }
   void AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
@@ -270,18 +269,18 @@ class Expression
   const Data& GetAtomicValue()const;
   Rational GetRationalValue()const;
   void MakeMonomialGenVerma
-  (const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+  (const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss)
  ;
   void MakeElementTensorsGeneralizedVermas
-  (const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss, int inputIndexBoundVars)
+  (const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss)
  ;
   void MakePolyAtom
-(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
+(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss)
   ;
   void MakePolY
-(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
+(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss)
   ;
-  void MakeRFAtom(const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
+  void MakeRFAtom(const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss);
   void MakeAtom(const Data& inputData, CommandList& newBoss)
   ;
   void MakeAtom(const Rational& inputRat, CommandList& newBoss)
@@ -292,36 +291,36 @@ class Expression
   void MakeAtom(const VariableNonBound& input, CommandList& newBoss)
   ;
   bool MakeStringAtom
-(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
+(CommandList& newBoss, const std::string& theString, const Context& inputContext)
 ;
   bool MakeStringAtom
-(CommandList& newBoss, int inputIndexBoundVars, const std::string& theString)
+(CommandList& newBoss, const std::string& theString)
 ;
-  void MakeInt(int theInt, CommandList& newBoss, int inputIndexBoundVars)
+  void MakeInt(int theInt, CommandList& newBoss)
   ;
 void MakeVariableNonBounD
-  (CommandList& owner, int inputIndexBoundVars, const std::string& varName)
+  (CommandList& owner, const std::string& varName)
 ;
   void MakeFunction
-  (CommandList& owner, int inputIndexBoundVars, const Expression& argument, const std::string& functionName)
+  (CommandList& owner, const Expression& argument, const std::string& functionName)
 ;
   bool EvaluatesToAtom()const;
   bool EvaluatesToVariableNonBound()const;
   void MakeFunction
-  (CommandList& owner, int inputIndexBoundVars, const Expression& argument, int functionIndex)
+  (CommandList& owner, const Expression& argument, int functionIndex)
 ;
   Function::FunctionAddress GetFunctionAddressFromVarName();
   Function& GetFunctionFromVarNamE();
   void MakeProducT
-  (CommandList& owner, int inputIndexBoundVars, const Expression& left, const Expression& right)
+  (CommandList& owner, const Expression& left, const Expression& right)
   ;
   void MakeFunction
-  (CommandList& owner, int inputIndexBoundVars, const Expression& theFunction, const Expression& theArgument)
+  (CommandList& owner, const Expression& theFunction, const Expression& theArgument)
   ;
   int GetNumCols()const
   ;
   void MakeXOX
-  (CommandList& owner, int inputIndexBoundVars, int theOp, const Expression& left, const Expression& right)
+  (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
   std::string ToString
   (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false,
@@ -345,7 +344,7 @@ void MakeVariableNonBounD
   }
   std::string GetOperation()const;
   Expression()
-  { this->reset(-1);
+  { this->reset();
   }
   inline bool SetError (const std::string& theError)
   { Data tempData(*this->theBoss);
@@ -602,6 +601,7 @@ public:
   int MaxLatexChars;
   int MaxNumCachedExpressionPerContext;
   ///////////////////////////////////////////////////////////////////////////
+  bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
   bool flagFirstErrorEncountered;
   bool flagMaxRecursionErrorEncountered;
@@ -996,14 +996,14 @@ public:
     return whichDigit<10 && whichDigit>=0;
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
-  bool CollectSummands(int inputIndexBoundVars, Expression& theExpression);
-  bool CallCalculatorFunction(Function::FunctionAddress theFun,  int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments=0)
-  { if (!theFun(*this, inputIndexBoundVars, theExpression, comments))
+  bool CollectSummands(Expression& theExpression);
+  bool CallCalculatorFunction(Function::FunctionAddress theFun, Expression& theExpression, std::stringstream* comments=0)
+  { if (!theFun(*this, theExpression, comments))
       return false;
     return theExpression.errorString=="";
   }
 bool CollectSummands
-(List<Expression>& summands, bool needSimplification, int inputIndexBoundVars, Expression& theExpression)
+(List<Expression>& summands, bool needSimplification, Expression& theExpression)
 ;
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
@@ -1014,70 +1014,70 @@ bool CollectSummands
   ;
 
   static bool StandardUnion
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
 static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
 static bool EvaluateDereferenceOneArgument
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool StandardUnionNoRepetition
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardPower
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardPlus
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardTimes
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardTensor
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardDivide
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardIsDenotedBy
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardLieBracket
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardMinus
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardFunction
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool StandardEqualEqual
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoAssociatE
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* coments, int theOperation)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* coments, int theOperation)
   ;
   static bool EvaluateDoExtractBaseMultiplication
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool EvaluateDoDistribute
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
   ;
   static bool DoThePower
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool DoTheOperation
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theOperation)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theOperation)
   ;
   static bool EvaluateDoLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
   ;
   static bool EvaluateDoRightDistributeBracketIsOnTheRight
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP)
   ;
   static bool EvaluateIf
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   template<class theType>
   bool fGetMatrix
@@ -1095,284 +1095,284 @@ static bool EvaluateDereferenceOneArgument
   ;
 
   static bool fMatrix
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
   ;
   static bool fDet
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fInvertMatrix
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fDrawPolarRfunctionTheta
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fSuffixNotationForPostScript
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fIsInteger
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fFreudenthalEval
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
     static bool fGCDOrLCM
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments, bool doGCD)
   ;
   static bool fLCM
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
-  { return theCommands.fGCDOrLCM(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  { return theCommands.fGCDOrLCM(theCommands, theExpression, comments, false);
   }
   static bool fGCD
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
-  { return theCommands.fGCDOrLCM(theCommands, inputIndexBoundVars, theExpression, comments, true);
+  { return theCommands.fGCDOrLCM(theCommands, theExpression, comments, true);
   }
   static bool fPolynomialDivisionQuotient
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
   std::stringstream* comments)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, inputIndexBoundVars, theExpression, comments, true);
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, theExpression, comments, true);
   }
   static bool fPolynomialDivisionRemainder
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
   std::stringstream* comments)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, theExpression, comments, false);
   }
   static bool fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool returnQuotient)
  ;
   static bool fPrintAllPartitions
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintB3G2branchingTableCharsOnly
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   bool fPrintB3G2branchingIntermediate
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
  Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Context& theContext
  )
  ;
   static bool fPrintB3G2branchingTableInit
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
    branchingData& theG2B3data, int& desiredHeight, Context& outputContext)
   ;
   static bool fDecomposeCharGenVerma
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintB3G2branchingTable
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fDifferential
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fPrintB3G2branchingTableCommon
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
   Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Context& theContext
   )
   ;
   static bool fPolynomial
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
   ;
   bool fSplitFDpartB3overG2Init
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
  branchingData& theG2B3Data, Context& outputContext
  )
  ;
   static bool fSplitFDpartB3overG2CharsOnly
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fElementUniversalEnvelopingAlgebra
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
   ;
   static bool fSSAlgebraShort
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+{ return theCommands.fSSAlgebra(theCommands, theExpression, comments, false);
 }
   static bool fSSAlgebraVerbose
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-{ return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, true);
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+{ return theCommands.fSSAlgebra(theCommands, theExpression, comments, true);
 }
 template<class CoefficientType>
 bool fGetTypeHighestWeightParabolic
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Context* outputContext=0)
  ;
  static bool fGroebnerBuchbergerGrLex
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  { return theCommands.fGroebnerBuchberger
-  (theCommands, inputIndexBoundVars, theExpression, comments, true);
+  (theCommands, theExpression, comments, true);
  }
  static bool fGroebnerBuchbergerLex
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  { return theCommands.fGroebnerBuchberger
-  (theCommands, inputIndexBoundVars, theExpression, comments, false);
+  (theCommands, theExpression, comments, false);
  }
  static bool fGroebnerBuchberger
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool useGr)
  ;
  static bool fParabolicWeylGroups
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  ;
  static bool fParabolicWeylGroupsBruhatGraph
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  ;
   static bool fKLcoeffs
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  ;
   static bool fEmbedSSalgInSSalg
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
  ;
   static bool fWeylOrbit
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool useFundCoords, bool useRho)
  ;
   static bool fWeylOrbitFund
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, true, false);
+{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, true, false);
 }
   static bool fWeylOrbitSimple
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, false, false);
+{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, false, false);
 }
   static bool fWeylOrbitFundRho
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, inputIndexBoundVars, theExpression, comments, true, true);
+{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, true, true);
 }
   static bool fSSAlgebra
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
-  { return theCommands.fSSAlgebra(theCommands, inputIndexBoundVars, theExpression, comments, false);
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  { return theCommands.fSSAlgebra(theCommands, theExpression, comments, false);
   }
   static bool fSSAlgebra
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments, bool Verbose)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, bool Verbose)
 ;
   static bool fSplitFDpartB3overG2CharsOutput
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
  branchingData& theG2B3Data
  )
 ;
   static bool fSplitFDpartB3overG2old
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSplitFDpartB3overG2
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSplitGenericGenVermaTensorFD
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSplitFDpartB3overG2inner
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
   branchingData& theG2B3Data)
 ;
   static bool fDrawWeightSupportWithMults
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fDrawWeightSupport
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
 
   static bool fHWTAABF
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fElementSSAlgebra
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fWeylDimFormula
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fLittelmannOperator
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fAnimateLittelmannPaths
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSqrt
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fFactor
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fSolveSeparableBilinearSystem
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fMinPoly
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fLSPath
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fTestMonomialBaseConjecture
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fJacobiSymbol
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fHWVinner
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
  Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
   Vectors<Polynomial<Rational> >& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
  Vector<CoefficientType>& outputWeight,
  Selection& outputInducingSel, Context* outputContext=0)
 ;
   static bool fHWV
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fWriteGenVermaModAsDiffOperatorUpToLevel
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fWriteGenVermaModAsDiffOperators
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fEmbedG2inB3
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fCasimir
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   static bool fRootSAsAndSltwos
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments, bool showSLtwos)
 ;
   static bool fprintRootSAs
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
   { return theCommands.fRootSAsAndSltwos
-    (theCommands, inputIndexBoundVars, theExpression, comments, false);
+    (theCommands, theExpression, comments, false);
   }
   static bool fprintSltwos
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+  (CommandList& theCommands, Expression& theExpression,
    std::stringstream* comments)
   { return theCommands.fRootSAsAndSltwos
-    (theCommands, inputIndexBoundVars, theExpression, comments, true);
+    (theCommands, theExpression, comments, true);
   }
   static bool fSSsubalgebras
-  (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 ;
   void AddEmptyHeadedCommand();
   CommandList();
@@ -1462,7 +1462,7 @@ bool CommandList::GetVector
     { Expression tempExpression=theExpression;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, -1, tempExpression, comments))
+            (conversionFunction, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1490,7 +1490,7 @@ bool CommandList::GetVector
     { Expression tempExpression=currentE;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, -1, tempExpression, comments))
+            (conversionFunction, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1528,7 +1528,7 @@ bool CommandList::fGetMatrix
     { Expression tempExpression=theExpression;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, -1, tempExpression, comments))
+            (conversionFunction, tempExpression, comments))
           return false;
       if (!theExpression.EvaluatesToAtom())
         return false;

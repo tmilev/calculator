@@ -438,37 +438,21 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
         this->AddToSystem(lieBracketMinusGoalValue);
       }
   }
-  Vector<Polynomial<Rational> > theMinPolys;
-  this->transformedSystem=this->theSystemToSolve;
   this->flagSystemSolved=this->SolveSeparableQuadraticSystemRecursively
-  (this->transformedSystem, theMinPolys, theGlobalVariables);
+  (theGlobalVariables);
   return this->flagSystemSolved;
 }
 
 bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
-  ( List<Polynomial<Rational> >& inputOutputTheSystem,
-   Vector<Polynomial<Rational> >& ouptutTheOneVarMinPolys,
-   GlobalVariables* theGlobalVariables
-   )
-{/* MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
+(GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("CandidateSSSubalgebra::AttemptToSolveSystem");
   this->flagSystemSolved=false;
+  this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
-  MonomialCollection<MonomialP, Rational>::GaussianEliminationByRowsDeleteZeroRows
-  (this->transformedSystem);
-  int indexPivotPol=-1;
-  for (int i=0; i<inputOutputTheSystem.size; i++)
-    if (inputOutputTheSystem[i].GetConstantTerm().IsEqualToZero())
-    { indexPivotPol=i;
-      break;
-    }
-  if (indexPivotPol==-1)
-    return false;
-  List<Polynomial<Rational> > systemCopy=inputOutputTheSystem;
-  Polynomial<Rational>& pivotPol=systemCopy[indexPivotPol];
-  MonomialP& firstMon=pivotPol[0];
-  Rational cfFirstMon=pivotPol.theCoeffs[0];
-  cfFirstMon.themon*/
-  return true;
+  GroebnerBasisComputation theComputation;
+  theComputation.TransformToReducedGroebnerBasis
+  (this->transformedSystem, theGlobalVariables, 10000);
+  return !this->flagSystemProvedToHaveNoSolution;
 }
 
 void CandidateSSSubalgebra::GetGenericNegGenLinearCombination
@@ -1861,8 +1845,10 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   std::stringstream out;
   out << this->theTypeTotal;
   out << ". ";
+  if (this->flagSystemProvedToHaveNoSolution)
+    out << " <b> Subalgebra candidate proved to be impossible! </b> ";
   if (!this->flagSystemSolved)
-    out << " <b> Subalgebra candidate not realized! </b> ";
+    out << " <b> Subalgebra not realized, but it might have a solution. </b> ";
   out << "<br>" << this->theUnknownNegGens.size << "*2 (unknown) gens:";
   for (int i=0; i<this->theUnknownNegGens.size; i++)
   { out << "<br>" << this->theUnknownNegGens[i].ToString(theFormat) << ", " ;

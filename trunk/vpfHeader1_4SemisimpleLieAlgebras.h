@@ -238,9 +238,10 @@ public:
   SemisimpleSubalgebras* owner;
   int indexInOwnersOfNonEmbeddedMe;
   bool flagSystemSolved;
+  bool flagSystemProvedToHaveNoSolution;
   int totalNumUnknowns;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false),
-  totalNumUnknowns(0)
+  flagSystemProvedToHaveNoSolution(false), totalNumUnknowns(0)
   {}
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -303,13 +304,9 @@ public:
  ;
   bool ComputeChar
 (GlobalVariables* theGlobalVariables)
-
   ;
   bool SolveSeparableQuadraticSystemRecursively
-  ( List<Polynomial<Rational> >& inputOutputTheSystem,
-   Vector<Polynomial<Rational> >& ouptutTheOneVarMinPolys,
-   GlobalVariables* theGlobalVariables
-   )
+  (GlobalVariables* theGlobalVariables)
   ;
   bool isGoodForTheTop
   (WeylGroup& ownerWeyl, const Vector<Rational>& HneW)const

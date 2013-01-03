@@ -4556,7 +4556,7 @@ public:
 )
   { ParserFunction newFunction;
     bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
-    if (!this->theFunctionList.AddNoRepetition(newFunction))
+    if (!this->theFunctionList.AddOnTopNoRepetition(newFunction))
       return false;
     this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
     this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
@@ -5418,7 +5418,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetBasisFromSpanOfEleme
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
   { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction.TheObjects[i];
@@ -6531,7 +6531,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements[i].size; j++)
-      outputCorrespondingMonomials.AddNoRepetition(theElements[i][j]);
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
   outputCoordinates.SetSize(theElements.size);
   Polynomial<Rational>  ZeroPoly;
   ZeroPoly.MakeZero((int)numVars);
@@ -6674,7 +6674,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpan
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSize(theElements.size);
   Polynomial<Rational>  ZeroPoly;
   ZeroPoly.MakeZero((int)numVars);
@@ -7723,7 +7723,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIM
         if (this->IsDominantWeight(currentWeight))
         { int currentIndexShift=this->RootsOfBorel[i].SumCoords().NumShort;
           currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
+          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight))
           { numTotalWeightsFound++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -7912,7 +7912,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
     { this->AmbientWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], theOrbit[i], false, tempRoot);
 //      int oldsize=theOrbit.size;
 //      std::string debugString=tempRoot.ToString() ;
-      theOrbit.AddNoRepetition(tempRoot);
+      theOrbit.AddOnTopNoRepetition(tempRoot);
 //      if (oldsize<theOrbit.size)
 //        std::cout << "<br>" << debugString << " with hash " << tempRoot.HashFunction() << " added, ";
 //      else
@@ -7921,7 +7921,7 @@ bool ReflectionSubgroupWeylGroup::GenerateOrbitReturnFalseIfTruncated
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
     { ExternalAutosOverAmbientField.GetElement()=this->ExternalAutomorphisms[j];
       theOrbit[i].GetCoordsInBasiS(ExternalAutosOverAmbientField.GetElement(), tempRoot);
-      theOrbit.AddNoRepetition(tempRoot);
+      theOrbit.AddOnTopNoRepetition(tempRoot);
     }
     if (UpperLimitNumElements>0)
       if (theOrbit.size>=UpperLimitNumElements)
@@ -8432,7 +8432,7 @@ bool WeylGroup::GenerateOrbit
       //if (this->flagAnErrorHasOcurredTimeToPanic)
       //{ currentRoot.ComputeDebugString();
       //}
-      if (output.AddNoRepetition(currentRoot))
+      if (output.AddOnTopNoRepetition(currentRoot))
         if (outputSubset!=0)
         { tempEW.AddOnTop(j);
           outputSubset->AddOnTop(tempEW);
@@ -8603,7 +8603,7 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
         if (this->IsDominantWeight(currentWeight))
         { int currentIndexShift=this->RootsOfBorel[i].SumCoords().NumShort;
           currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-          if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
+          if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight))
           { numTotalWeightsFound++;
             outputWeightsByHeight[currentIndexShift].AdjustHashes();
           }
@@ -9336,7 +9336,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   MonomialChar<CoefficientType> tempCharMon;
   this->theCharOverH.Reset();
   for (int i=0; i<thePaths.size; i++)
-  { this->theModuleWeightsSimpleCoords.AddNoRepetition(*thePaths[i].Waypoints.LastObject());
+  { this->theModuleWeightsSimpleCoords.AddOnTopNoRepetition(*thePaths[i].Waypoints.LastObject());
     tempCharMon.weightFundamentalCoords= theWeyl.GetFundamentalCoordinatesFromSimple(*thePaths[i].Waypoints.LastObject());
     this->theCharOverH.AddMonomial(tempCharMon,1);
   }

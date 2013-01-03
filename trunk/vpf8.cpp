@@ -127,7 +127,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
       for (int j=0; j<this->smallerAlgebraChamber[i].Normals.size; j++)
       { this->TransformToWeylProjective(k, this->smallerAlgebraChamber[i].Normals[j], wallToSliceWith);
         wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-        this->projectivizedChambeR.splittingNormals.AddNoRepetition(wallToSliceWith);
+        this->projectivizedChambeR.splittingNormals.AddOnTopNoRepetition(wallToSliceWith);
       }
   out << "projectivized chamber chopped non-dominant part:\n"  << this->projectivizedChambeR.ToString(false, false);
   theReport.Report(out.str());
@@ -885,7 +885,7 @@ void ConeComplex::GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(Ve
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
     { tempRoot=this->TheObjects[i].Normals[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-      outputHashed.AddNoRepetition(tempRoot);
+      outputHashed.AddOnTopNoRepetition(tempRoot);
     }
   output=(outputHashed);
 }
@@ -898,10 +898,10 @@ void ConeComplex::RefineMakeCommonRefinement(const ConeComplex& other, GlobalVar
     this->init();
     this->ConvexHull=tempCone;
     this->AddNonRefinedChamberOnTopNoRepetition(tempCone, theGlobalVariables);
-    this->splittingNormals.AddNoRepetition(newWalls);
+    this->splittingNormals.AddOnTopNoRepetition(newWalls);
   }
   other.GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals(newWalls);
-  this->splittingNormals.AddNoRepetition(newWalls);
+  this->splittingNormals.AddOnTopNoRepetition(newWalls);
   this->indexLowestNonRefinedChamber=0;
   this->Refine(theGlobalVariables);
 }
@@ -1592,7 +1592,7 @@ void ConeComplex::TransformToWeylProjective
           wallToSliceWith.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
           if (k>0)
             this->NewHyperplanesToSliceWith.AddOnTopNoRepetition(wallToSliceWith);
-          this->theHyperplanes.AddNoRepetition(wallToSliceWith);
+          this->theHyperplanes.AddOnTopNoRepetition(wallToSliceWith);
         }
   this->log << "\n Affine walls to slice with:";
   for (int i=0; i<this->NewHyperplanesToSliceWith.size; i++)
@@ -2205,11 +2205,11 @@ void ConeComplex::GetNewVerticesAppend
     { theLinearAlgebra.NonPivotPointsToEigenVector(nonPivotPoints, tempRoot, (Rational) 1, (Rational) 0);
       tempRoot.ScaleByPositiveRationalToIntegralMinHeight();
       if (myDyingCone.IsInCone(tempRoot))
-        outputVertices.AddNoRepetition(tempRoot);
+        outputVertices.AddOnTopNoRepetition(tempRoot);
       else
       { tempRoot.Minus();
         if (myDyingCone.IsInCone(tempRoot))
-          outputVertices.AddNoRepetition(tempRoot);
+          outputVertices.AddOnTopNoRepetition(tempRoot);
       }
     }
   }
@@ -2250,7 +2250,7 @@ bool ConeComplex::SplitChamber
     if (tempRat.IsPositive())
       newPlusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsEqualToZero())
-      ZeroVertices.AddNoRepetition(myDyingCone.Vertices.TheObjects[i]);
+      ZeroVertices.AddOnTopNoRepetition(myDyingCone.Vertices.TheObjects[i]);
     if (tempRat.IsNegative())
       newMinusCone.Vertices.AddOnTop(myDyingCone.Vertices.TheObjects[i]);
   }
@@ -2307,7 +2307,7 @@ bool ConeComplex::AddNonRefinedChamberOnTopNoRepetition
 (Cone& newCone, GlobalVariables& theGlobalVariables)
 { newCone.Normals.QuickSortAscending();
   this->ConvexHull.MakeConvexHullOfMeAnd(newCone, theGlobalVariables);
-  return this->AddNoRepetition(newCone);
+  return this->AddOnTopNoRepetition(newCone);
 }
 
 void ConeComplex::RefineOneStep(GlobalVariables& theGlobalVariables)
@@ -2634,7 +2634,7 @@ void ConeComplex::initFromCones
     for (int j=0; j<this->TheObjects[i].Normals.size; j++)
     { tempRoot=this->TheObjects[i].Normals[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
-      this->splittingNormals.AddNoRepetition(tempRoot);
+      this->splittingNormals.AddOnTopNoRepetition(tempRoot);
       std::stringstream out;
       out << "Extracting walls from cone " << i+1 << " out of " << this->size << " total distinct chambers.";
       out << "\nProcessed " << j+1 << " out of " << this->TheObjects[i].Normals.size << " walls of the current chamber.";
@@ -2838,7 +2838,7 @@ bool ConeComplex::findMaxLFOverConeProjective
     { tempRoot=inputLFsLastCoordConst[i]-inputLFsLastCoordConst[j];
       tempRoot.ScaleToIntegralMinHeightFirstNonZeroCoordinatePositive();
       if (!tempRoot.IsEqualToZero())
-        this->splittingNormals.AddNoRepetition(tempRoot);
+        this->splittingNormals.AddOnTopNoRepetition(tempRoot);
     }
   std::cout << this->ToString(false, true);
   this->Refine(theGlobalVariables);

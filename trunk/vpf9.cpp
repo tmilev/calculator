@@ -4402,7 +4402,7 @@ void ReflectionSubgroupWeylGroup::ComputeRootSubsystem()
     { currentRoot=(this->RootSubsystem[i]);
       this->AmbientWeyl.ReflectBetaWRTAlpha
       (this->simpleGenerators[j], currentRoot, false, currentRoot);
-      this->RootSubsystem.AddNoRepetition(currentRoot);
+      this->RootSubsystem.AddOnTopNoRepetition(currentRoot);
     }
   Vectors<Rational> tempRoots;
   tempRoots=(this->RootSubsystem);

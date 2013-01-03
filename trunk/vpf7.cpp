@@ -657,8 +657,8 @@ bool LittelmannPath::GenerateOrbit
         { found=false;
           currentPath.ActByEalpha(theIndex);
           if (!currentPath.IsEqualToZero())
-  //          hashedOutput.AddNoRepetition(currentPath);
-            if (hashedOutput.AddNoRepetition(currentPath))
+  //          hashedOutput.AddOnTopNoRepetition(currentPath);
+            if (hashedOutput.AddOnTopNoRepetition(currentPath))
             { found=true;
               currentSequence.AddOnTop(theIndex);
               outputOperators.AddOnTop(currentSequence);
@@ -675,7 +675,7 @@ bool LittelmannPath::GenerateOrbit
         { found=false;
           currentPath.ActByFalpha(theIndex);
           if (!currentPath.IsEqualToZero())
-            if (hashedOutput.AddNoRepetition(currentPath))
+            if (hashedOutput.AddOnTopNoRepetition(currentPath))
             { found=true;
               currentSequence.AddOnTop(-theIndex-1);
               outputOperators.AddOnTop(currentSequence);
@@ -907,7 +907,7 @@ bool ElementUniversalEnveloping<CoefficientType>::GetBasisFromSpanOfElements
   Vectors<CoefficientTypeQuotientField> outputCoordsBeforeReduction;
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordsBeforeReduction.SetSize(theElements.size);
   for (int i=0; i<theElements.size; i++)
   { Vector<CoefficientTypeQuotientField>& currentList=outputCoordsBeforeReduction.TheObjects[i];
@@ -1196,7 +1196,7 @@ bool ReflectionSubgroupWeylGroup::DrawContour
     for (int j=0; j<this->simpleGenerators.size; j++)
     { tempRoot=theOrbit[i];
       theWeyl.ReflectBetaWRTAlpha(this->simpleGenerators[j], tempRoot, false, tempRoot);
-      if (theOrbit.AddNoRepetition(tempRoot))
+      if (theOrbit.AddOnTopNoRepetition(tempRoot))
         theDV.drawLineBetweenTwoVectorsBuffer(theOrbit[i], tempRoot, DrawingVariables::PenStyleNormal, theColor);
       if (theOrbit.size>UpperBoundVertices)
         return false;
@@ -1432,7 +1432,7 @@ std::string CGI::GetCalculatorLink
 
 std::string CGI::GetHtmlMathSpanPure(const std::string& input)
 { std::stringstream out;
-  if (input.size()< 300)
+  if (input.size()< 700)
     out << "<span class=\"math\">" << input << "</span>";
   else
     out << "<b>LaTeX output is long and I dare not use jsmath. "

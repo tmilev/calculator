@@ -121,7 +121,7 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
           if (currentWeightRaisedToDominantWRTAmbientAlgebra.IsNegativeOrZero())
           { int currentIndexShift=this->AmbientWeyl.RootsOfBorel[i].SumCoords().NumShort;
             currentIndexShift=(currentIndexShift+bufferIndexShift)%topHeightRootSystemPlusOne;
-            if (outputWeightsByHeight[currentIndexShift].AddNoRepetition(currentWeight))
+            if (outputWeightsByHeight[currentIndexShift].AddOnTopNoRepetition(currentWeight))
             { numTotalWeightsFound++;
               outputWeightsByHeight[currentIndexShift].AdjustHashes();
             }
@@ -405,7 +405,7 @@ bool CommandList::fCasimir
   }
   Data tempData;
   tempData.MakeUE(theCommands, theCasimir, theExpression.GetAtomicValue().theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands);
   return true;
 }
 
@@ -509,7 +509,7 @@ bool CommandList::fEmbedG2inB3
   output.Simplify(*theCommands.theGlobalVariableS, 1, 0);
   Data tempData;
   tempData.MakeUE(theCommands, output, b3Data.theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands);
   return true;
 }
 
@@ -1933,7 +1933,7 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
           resultChar-=theCentralCharacter;
           resultChar.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
           resultChar*=-1;
-          theCentralChars.AddNoRepetition(resultChar);
+          theCentralChars.AddOnTopNoRepetition(resultChar);
         }
       }
     }
@@ -2205,7 +2205,7 @@ bool CommandList::fSplitFDpartB3overG2inner
           (theG2CasimirCopy, *theCommands.theGlobalVariableS, 1, 0);
           charDiff=theG2B3Data.theChars[j];
           charDiff-=*theG2B3Data.theChars.LastObject();
-          theG2B3Data.theCharacterDifferences.AddNoRepetition(charDiff);
+          theG2B3Data.theCharacterDifferences.AddOnTopNoRepetition(charDiff);
           //std::cout << "<br>To obtain " << currentTensorElt.ToString() << "<hr>";
         }
       }
@@ -2649,7 +2649,7 @@ void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo
       std::string DebugString=current.ToString();
       std::string DebugString2=theDim.ToString();
       if (theDim< dimBound)
-        output.AddNoRepetition(current);
+        output.AddOnTopNoRepetition(current);
       current[k]-=1;
     }
   }
@@ -2841,7 +2841,7 @@ bool CommandList::fLittelmannOperator
     return theExpression.SetError("The index of the Littelmann root operator is expected to be non-zero");
   Data answer;
   answer.MakeLittelmannRootOperator(theIndex, theCommands);
-  theExpression.MakeAtom(answer, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(answer, theCommands);
   return true;
 }
 
@@ -2871,7 +2871,7 @@ bool CommandList::fLSPath
   Data thePath;
 
   thePath.MakeLSpath(theCommands, ownerSSalgebra, waypoints);
-  theExpression.MakeAtom(thePath, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(thePath, theCommands);
   return true;
 
 }
@@ -3229,7 +3229,7 @@ bool CommandList::fSqrt
   AlgebraicNumber theRat=theData.GetValuE<AlgebraicNumber> ();
   theRat.SqrtMe();
   theData.MakeRationalRadical(theCommands, theRat);
-  theExpression.MakeAtom(theData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(theData, theCommands);
   return true;
 }
 

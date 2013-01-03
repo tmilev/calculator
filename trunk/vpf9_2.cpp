@@ -2735,6 +2735,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
         }
         currentRemainder-=this->bufPoly;
         divisionOcurred=true;
+        this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
         i++;
@@ -2742,6 +2743,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     if (!divisionOcurred)
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
+      this->NumberOfComputations++;
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
         out << "Number of intermediate remainders: " << numIntermediateRemainders
@@ -2803,8 +2805,10 @@ bool GroebnerBasisComputation::AddRemainderToBasis
 GroebnerBasisComputation::GroebnerBasisComputation()
 { this->theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
   this->NumVars=-1;
+  this->NumberOfComputations=0;
   this->flagDoProgressReport=true;
   this->flagDoSortBasis=true;
+  this->MaxNumComputations=0;
 }
 
 void GroebnerBasisComputation::initTheBasis
@@ -2823,12 +2827,14 @@ void GroebnerBasisComputation::initTheBasis
   this->leadingMons.ReservE(inputOutpuT.size);
   this->leadingCoeffs.SetSize(0);
   this->leadingCoeffs.ReservE(inputOutpuT.size);
+  this->NumberOfComputations=0;
 }
 
 bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables, int upperComputationBound)
 { MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
+  this->MaxNumComputations=upperComputationBound;
   this->initTheBasis(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   this->SoPolyLeftShift.MakeConst(this->NumVars);
@@ -2876,6 +2882,10 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
         this->SoPolyBuf.MultiplyBy(this->SoPolyRightShift, currentLeft.theCoeffs[leftIndex]);
         this->SoPolyBuf-=(this->bufPoly);
         this->basisCandidates.AddOnTop(this->SoPolyBuf);
+        this->NumberOfComputations++;
+        if (this->MaxNumComputations>0)
+          if (this->NumberOfComputations>this->MaxNumComputations)
+            return false;
 //        if (this->AddPolyAndReduceBasis(theGlobalVariables))
 //        { i=0;
 //          j=-1;
@@ -2883,8 +2893,11 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
 //        }
       }
     changed=this->AddPolyAndReduceBasis(theGlobalVariables);
+    if (this->MaxNumComputations>0)
+      if (this->NumberOfComputations>this->MaxNumComputations)
+        return false;
   }
-  this->MakeMinimalBasis();
+//  this->MakeMinimalBasis();
   inputOutpuT=this->theBasiS;
   return true;
 }
@@ -2896,9 +2909,13 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
   while (this->basisCandidates.size>0)
   { bool addedNew=false;
     while (this->basisCandidates.size>0)
-    { this->RemainderDivisionWithRespectToBasis
+    { this->NumberOfComputations++;
+      this->RemainderDivisionWithRespectToBasis
       (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
       this->basisCandidates.PopLastObject();
+      if (this->MaxNumComputations>0)
+        if (this->NumberOfComputations>this->MaxNumComputations)
+          return true;
       if(this->AddRemainderToBasis(theGlobalVariables))
       { changed=true;
         addedNew=true;
@@ -2923,9 +2940,13 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
         theReport.Report(out.str());
 //        std::cout << "<br>" << out.str();
       }
+      this->NumberOfComputations++;
       this->RemainderDivisionWithRespectToBasis
       (this->bufPolyForGaussianElimination, &this->remainderDivision,
       theGlobalVariables, i);
+      if (this->MaxNumComputations>0)
+        if (this->NumberOfComputations>this->MaxNumComputations)
+          return true;
       if (!(this->remainderDivision==this->theBasiS[i]))
       { this->basisCandidates.AddOnTop(this->remainderDivision);
         this->leadingMons.PopIndexSwapWithLast(i);
@@ -3423,7 +3444,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
   outputCorrespondingMonomials.MakeZero(*theElements.TheObjects[0].owner);
   for (int i=0; i<theElements.size; i++)
     for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddNoRepetition(theElements.TheObjects[i].TheObjects[j]);
+      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSize(theElements.size);
   Rational tempRat;
   for (int i=0; i<theElements.size; i++)

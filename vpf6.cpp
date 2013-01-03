@@ -217,7 +217,7 @@ bool Data::ConvertToTypE<RationalFunctionOld>()
     case Data::typeVariableNonBound:
       tempData.GetElement()=*this;
       tempData.GetElement().theContextIndex=-1;
-      tempExp.GetElement().MakeAtom(tempData.GetElement(), *this->owner, -1);
+      tempExp.GetElement().MakeAtom(tempData.GetElement(), *this->owner);
       tempIndex=this->GetContext().VariableImages.GetIndex(tempExp.GetElement());
       if (tempIndex==-1)
         return false;
@@ -368,7 +368,7 @@ bool Data::IsOfType<VariableNonBound>()const
 bool Expression::EvaluatesToAtom()const
 { if (this->theDatA==-1)
     return false;
-  return this->theOperation!= this->theBoss->opVariableBound();
+  return this->theOperation!= this->theBoss->opBind();
 }
 
 bool Expression::EvaluatesToRational(Rational* whichRational)const
@@ -817,7 +817,7 @@ void Data::MakeVariableNonBound(CommandList& theBoss, const VariableNonBound& in
   Expression tempExp;
   this->theContextIndex=-1;
   this->owner=&theBoss;
-  tempExp.MakeAtom(*this, theBoss, -1);
+  tempExp.MakeAtom(*this, theBoss);
   Context tempContext;
   tempContext.VariableImages.AddOnTop(tempExp);
   this->theContextIndex=theBoss.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(tempContext);
@@ -1090,14 +1090,14 @@ void Expression::MakePolyAtom
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
 { Data tempData;
   tempData.MakePoly(newBoss, inputData, inputContextIndex);
-  this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+  this->MakeAtom(tempData, newBoss);
 }
 
 bool Expression::MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
 { Data tempData;
   tempData.MakeString(newBoss, theString, inputContext);
-  this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+  this->MakeAtom(tempData, newBoss);
   return true;
 }
 
@@ -1111,7 +1111,7 @@ void Expression::MakeRFAtom
 (const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
 { Data tempData;
   tempData.MakeRF(newBoss, inputData, inputContextIndex);
-  this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+  this->MakeAtom(tempData, newBoss);
 }
 
 inline int IntIdentity(const int& x)
@@ -1144,7 +1144,7 @@ bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   newExpr.format=formatOptions;
   newExpr.children.AddOnTop(leftE.theData);
@@ -1163,7 +1163,7 @@ bool CommandList::ReplaceOXXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(opElt.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(leftE.theData);
@@ -1180,7 +1180,7 @@ bool CommandList::ReplaceOXEByE(int formatOptions)
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(left.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(right.theData);
@@ -1195,7 +1195,7 @@ bool CommandList::ReplaceOEByE(int formatOptions)
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
   newExpr.format= formatOptions;
   newExpr.children.AddOnTop(right.theData);
@@ -1286,11 +1286,12 @@ SyntacticElement CommandList::GetEmptySyntacticElement()
   return result;
 }
 
-std::string ExpressionPairs::ToString()
+std::string BoundVariablesSubstitution::ToString()
 { std::stringstream out;
   out << "the pairs: ";
-  for (int i=0; i<this->BoundVariableIndices.size; i++)
-    out << this->BoundVariableIndices[i] << "->" << this->variableImages[i].ToString() << "<br>";
+  for (int i=0; i<this->theBoundVariables.size; i++)
+    out << this->theBoundVariables[i].ToString() << "->"
+    << this->variableImages[i].ToString() << "<br>";
   return out.str();
 }
 
@@ -1321,7 +1322,7 @@ void CommandList::ParseFillDictionary
         { currentData.MakeRational(*this, currentDigit);
           currentElement.controlIndex=this->conInteger();
           currentElement.theData.reset(*this, -1);
-          currentElement.theData.MakeAtom(currentData, *this, -1);
+          currentElement.theData.MakeAtom(currentData, *this);
           (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
         } else
         { currentData.MakeString(*this, current, -1);
@@ -1363,7 +1364,6 @@ bool CommandList::ReplaceOXbyEX(int inputFormat)
 bool CommandList::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   theElt.theData.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
-  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
   theElt.theData.format=inputFormat;
   theElt.controlIndex=this->conExpression();
   return true;
@@ -1371,14 +1371,8 @@ bool CommandList::ReplaceOXbyEXusingO(int theControlIndex, int inputFormat)
 
 bool CommandList::ReplaceAbyE()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
+//  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
   theElt.controlIndex=this->conExpression();
-  return true;
-}
-
-bool CommandList::CreateNewExpressionContext()
-{ this->theExpressionContext.SetSize(this->theExpressionContext.size+1);
-  this->theExpressionContext.LastObject()->reset();
   return true;
 }
 
@@ -1392,7 +1386,7 @@ bool CommandList::ReplaceListXEYByListY(int theControlIndex, int inputFormat)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
 
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this,-1);
   newExpr.theOperation=this->opList();
   newExpr.children.AddListOnTop(left.theData.children);
   newExpr.children.AddOnTop(right.theData);
@@ -1409,7 +1403,7 @@ bool CommandList::ReplaceListXEByList(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->opList();
   newExpr.children.AddListOnTop(left.theData.children);
   newExpr.children.AddOnTop(right.theData);
@@ -1424,7 +1418,7 @@ bool CommandList::ReplaceListXEByList(int theControlIndex, int inputFormat)
 bool CommandList::ReplaceYXdotsXByListYXdotsX(int theControlIndex, int inputFormat, int numXs)
 { SyntacticElement& main = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this,-1);
   newExpr.theOperation=this->opList();
   newExpr.children.AddOnTop(main.theData);
   newExpr.format=inputFormat;
@@ -1437,7 +1431,7 @@ bool CommandList::ReplaceEXEByList(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->opList();
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -1453,7 +1447,7 @@ bool CommandList::ReplaceEEByEusingO(int theControlIndex)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   //    newExpr.inputIndexBoundVars=
   newExpr.children.AddOnTop(left.theData);
@@ -1469,7 +1463,7 @@ bool CommandList::ReplaceEXXEXEByEusingO(int theControlIndex)
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-6];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(middle.theData);
@@ -1485,7 +1479,7 @@ bool CommandList::ReplaceEOEXByEX(int formatOptions)
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(middle.controlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -1642,16 +1636,15 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return true;
   }
 ////end of rules that change this->counterInSyntacticSoup
-  if (lastE.theData.IndexBoundVars==-1)
+/*  if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
     << this->ElementToStringSyntacticStack()
-    << " does not have properly initialized context. " << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
+    << " does not have properly initialized context. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__,  __LINE__);
     assert(false);
-  }
+  }*/
   if (secondToLastS==":" && lastS=="=")
-  { this->theExpressionContext.LastObject()->flagOpDefineEncountered=true;
     return this->ReplaceXXByCon(this->conDefine());
-  }
   if (secondToLastS==":=" && lastS==":")
     return this->ReplaceXXByCon(this->conIsDenotedBy());
   if (secondToLastS=="{" && lastS=="}")
@@ -1760,6 +1753,10 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceXEXEXByEusingO(this->conLieBracket());
   if (this->isSeparatorFromTheLeftForDefinition(seventhToLastS) && lastS=="Expression" && secondToLastS==":=" && thirdToLastS=="Expression" && fourthToLastS=="if" && fifthToLastS==":" && sixthToLastS=="Expression" && this->isSeparatorFromTheRightForDefinition(lookAhead))
     return this->ReplaceEXXEXEByEusingO(this->conDefineConditional());
+  if (lastS==";")
+  { this->NonBoundVariablesStack.LastObject()->Clear();
+    this->BoundVariablesStack.LastObject()->Clear();
+  }
   if (this->isSeparatorFromTheLeftForStatement(fourthToLastS) && thirdToLastS=="Expression" && secondToLastS==";" && lastS=="Expression" && this->isSeparatorFromTheRightForStatement(lookAhead))
     return this->ReplaceEEndCommandEbyE();
   if (lastS==";" && lookAhead==";")
@@ -2772,7 +2769,7 @@ bool CommandList::fHWVinner
   theElt.MakeHWV(theMods, indexOfModule, RFOne);
 //  std::cout << "<br>theElt:" << theElt.ToString();
   outputData.MakeElementTensorGeneralizedVermas(theCommands, theElt, outputContextIndex);
-  theExpression.MakeAtom(outputData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(outputData, theCommands);
 //  std::cout << "<hr>" << outputData.ToString();
   return true;
 }
@@ -3154,7 +3151,7 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(finalContext);
   Data outputData;
   outputData.MakeUE(theCommands, outputUE, finalContextIndex);
-  theExpression.MakeAtom(outputData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(outputData, theCommands);
   return true;
 }
 
@@ -3567,7 +3564,7 @@ bool CommandList::fSSAlgebra
     }
   if (!Verbose)
   { *comments << out.str();
-    theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+    theExpression.MakeAtom(tempData, theCommands);
     theExpression.theOperation=theCommands.opAtom();
     theExpression.children.SetSize(0);
   } else
@@ -3591,7 +3588,7 @@ bool Expression::HasBoundVariables()
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  if (this->theOperation==this->theBoss->opVariableBound())
+  if (this->theOperation==this->theBoss->opBind())
     return true;
   for (int i=0; i<this->children.size; i++)
     if (this->children[i].HasBoundVariables())
@@ -3686,9 +3683,9 @@ bool CommandList::fSuffixNotationForPostScript
 bool CommandList::fIsInteger
 (CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
 { if (theExpression.IsInteger())
-    theExpression.MakeAtom(1, theCommands, inputIndexBoundVars);
+    theExpression.MakeAtom(1, theCommands);
   else
-    theExpression.MakeAtom(0, theCommands, inputIndexBoundVars);
+    theExpression.MakeAtom(0, theCommands);
   return true;
 }
 
@@ -3800,7 +3797,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagMaxTransformationsErrorEncountered=false;
   this->flagMaxRecursionErrorEncountered=false;
   this->theObjectContainer.theNonBoundVars.Clear();
-  this->theExpressionContext.SetSize(0);
   this->ExpressionStack.Clear();
 
   this->theData.Clear();
@@ -3920,7 +3916,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);
   //the following is the binding variable operation
   this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
-  this->AddOperationNoFail("VariableBound", 0, "", "", "", false);
+  this->AddOperationNoFail("Bind", 0, "", "", "", false);
   this->AddOperationNoFail("OperationList", 0, "", "", "", false);
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
   this->AddOperationNoFail
@@ -4056,7 +4052,7 @@ bool CommandList::CollectSummands
     { current.reset(*this, inputIndexBoundVars);
       current.theOperation=this->opTimes();
       current.children.SetSize(2);
-      current.children[0].MakeAtom(theCoeffs[i], *this, inputIndexBoundVars);
+      current.children[0].MakeAtom(theCoeffs[i], *this);
       current.children[1]=summandsNoCoeff[i];
     } else
       current=summandsNoCoeff[i];
@@ -4064,7 +4060,7 @@ bool CommandList::CollectSummands
   if (!constTerm.IsEqualToZero() || summandsWithCoeff.size==0)
   { summandsWithCoeff.SetSize(summandsWithCoeff.size+1);
     Expression& current=summandsWithCoeff[summandsWithCoeff.size-1];
-    current.MakeAtom(constTerm, *this, inputIndexBoundVars);
+    current.MakeAtom(constTerm, *this);
   }
   if (summandsWithCoeff.size==1)
   { theExpression=summandsWithCoeff[0];
@@ -4109,7 +4105,7 @@ bool CommandList::DoThePower
   if (!LeftD.Exponentiate(RightD, outputD))
     return false;
 //  std::cout << "<br>Exponentiation was successful and the result is: " << outputD.ToString();
-  theExpression.MakeAtom(outputD, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(outputD, theCommands);
   return true;
 }
 
@@ -4132,7 +4128,7 @@ bool CommandList::DoTheOperation
   if (!theCruncher(LeftD, RightD, outputD, comments))
     return false;
 //  std::cout << "<br> multiplication successful, result: " << outputD.ToString();
-  theExpression.MakeAtom(outputD, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(outputD, theCommands);
   return true;
 }
 
@@ -4548,7 +4544,7 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
   { const Data& leftD=leftE.GetAtomicValue();
     const Data& rightD=rightE.GetAtomicValue();
     if (leftD.type==leftD.typeRational && rightD.type==rightD.typeRational)
-    { theExpression.MakeAtom(leftD*rightD, theCommands, inputIndexBoundVars);
+    { theExpression.MakeAtom(leftD*rightD, theCommands);
       return true;
     }
   }
@@ -4575,7 +4571,8 @@ bool CommandList::EvaluateDoExtractBaseMultiplication
     }
     //handle Rational1*(Rational2*Anything):=(Rational1*Rational2)*Anything
     if (leftE.EvaluatesToRational() && rightLeftE.EvaluatesToRational())
-    { leftE.MakeAtom(leftE.GetRationalValue()*rightLeftE.GetRationalValue(), theCommands, inputIndexBoundVars);
+    { leftE.MakeAtom
+      (leftE.GetRationalValue()*rightLeftE.GetRationalValue(), theCommands);
       rightE.AssignChild(1);
       result=true;
     } else if (leftE.EvaluatesToAtom() && rightLeftE.EvaluatesToAtom()) //<- handle atom*(atom*anything)
@@ -4714,7 +4711,7 @@ bool CommandList::StandardPlus
       DataCruncher::CruncherDataTypes theCruncher= theCommands.GetAdditiveCruncher(leftE.GetAtomicValue().type, rightE.GetAtomicValue().type);
       if (theCruncher!=0)
         if (theCruncher(leftE.GetAtomicValue(), rightE.GetAtomicValue(), outputD, comments))
-        { theExpression.MakeAtom(outputD, theCommands, inputIndexBoundVars);
+        { theExpression.MakeAtom(outputD, theCommands);
           return true;
         }
     }
@@ -4758,7 +4755,7 @@ bool CommandList::EvaluateDereferenceOneArgument
       return false;
     if (!theFunData.OperatorDereference(functionArgumentNode.GetAtomicValue(), tempData, comments))
       return false;
-    theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+    theExpression.MakeAtom(tempData, theCommands);
     return true;
   }
   if (functionArgumentNode.children.size!=2)
@@ -4771,7 +4768,7 @@ bool CommandList::EvaluateDereferenceOneArgument
   const Data& rightD=rightE.GetAtomicValue();
   if (!theFunData.OperatorDereference(leftD, rightD, tempData, comments))
     return false;
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands);
   return true;
 }
 
@@ -4840,7 +4837,7 @@ bool CommandList::StandardFunction
         }
         std::cout << " to get: " << thePattern.ToString();
       }
-      ExpressionPairs tempPairs;
+      BoundVariablesSubstitution tempPairs;
       if (theCommands.ExpressionMatchesPattern(thePattern, result, tempPairs))
       { isGood=true;
         break;
@@ -4889,7 +4886,7 @@ bool CommandList::StandardLieBracket
   { //std::cout  << "<br>Lie bracket unsucessful";
     return false;
   }
-  theExpression.MakeAtom(newData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(newData, theCommands);
   return true;
 }
 
@@ -4957,7 +4954,7 @@ bool CommandList::StandardUnionNoRepetition
       return false;
   HashedList<Expression> tempList;
   for (int i=0; i<theExpression.children.size; i++)
-    tempList.AddNoRepetition(theExpression.children[i].children);
+    tempList.AddOnTopNoRepetition(theExpression.children[i].children);
   theExpression.theOperation=theCommands.opList();
   theExpression.theDatA=-1;
   theExpression.children=tempList;
@@ -4978,7 +4975,7 @@ bool CommandList::StandardDivide
       return theExpression.SetError("Error: division by zero.");
     tempRat.Invert();
     theExpression.theOperation=theCommands.opTimes();
-    rightE.MakeAtom(tempRat, theCommands, inputIndexBoundVars);
+    rightE.MakeAtom(tempRat, theCommands);
     return true;
   }
   if (!leftE.EvaluatesToAtom() || !rightE.EvaluatesToAtom())
@@ -4993,7 +4990,7 @@ bool CommandList::StandardDivide
   if (!theCruncher(LeftD, RightD, outputD, comments))
     return false;
 //  std::cout << "<br> multiplication successful, result: " << outputD.ToString();
-  theExpression.MakeAtom(outputD, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(outputD, theCommands);
   return true;
 }
 
@@ -5059,7 +5056,7 @@ bool CommandList::ExtractPMTDtreeContext
     return true;
   }
   outputContext.VariableImages.QuickSortAscending();
-  outputContext.VariableImages.AddNoRepetition(theInput);
+  outputContext.VariableImages.AddOnTopNoRepetition(theInput);
 //  std::cout << "<br>ExtractPMTDtreeContext accounted " << theInput.ToString() << " with resulting accummulated context: " << outputContext.ToString();
   return true;
 }
@@ -5185,13 +5182,15 @@ bool CommandList::ExpressionsAreEqual
 }
 
 bool CommandList::ExpressionMatchesPattern
-  (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
+  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
    std::stringstream* theLog)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
   assert(thePattern.theBoss==this && input.theBoss==this);
 //  static int ExpressionMatchesPatternDebugCounter=-1;
-  const static bool printLocalDebugInfo=false;
+  static const bool printLocalDebugInfo=false;
+//  if (input.ToString()=="f{}((a)):=a+5")
+//    printLocalDebugInfo=true;
   //ExpressionMatchesPatternDebugCounter++;
 //  std::cout << " ExpressionMatchesPatternDebugCounter: " << ExpressionMatchesPatternDebugCounter;
 //  printLocalDebugInfo=(ExpressionMatchesPatternDebugCounter>-1);
@@ -5207,15 +5206,15 @@ bool CommandList::ExpressionMatchesPattern
     this->evaluationErrors.AddOnTop(out.str());
     return false;
   }
-  if (this->opDefine()==input.theOperation)
-    return false;
-  int opVarB=this->opVariableBound();
+//  if (this->opDefine()==input.theOperation)
+//    return false;
+  int opVarB=this->opBind();
   if (thePattern.theOperation== opVarB)
-  { int indexLeft= matchedExpressions.BoundVariableIndices.GetIndex(thePattern.theDatA);
+  { int indexLeft= matchedExpressions.theBoundVariables.GetIndex(thePattern.children[0]);
     if (indexLeft==-1)
-    { matchedExpressions.BoundVariableIndices.AddOnTop(thePattern.theDatA);
+    { matchedExpressions.theBoundVariables.AddOnTop(thePattern.children[0]);
       matchedExpressions.variableImages.AddOnTop(input);
-      indexLeft=matchedExpressions.BoundVariableIndices.size-1;
+      indexLeft=matchedExpressions.theBoundVariables.size-1;
     }
     if (!(matchedExpressions.variableImages[indexLeft]==input))
       return false;
@@ -5233,10 +5232,23 @@ bool CommandList::ExpressionMatchesPattern
   return true;
 }
 
+StackMaintainerRules::StackMaintainerRules(CommandList* inputBoss)
+{ this->theBoss=inputBoss;
+  if (this->theBoss!=0)
+    this->startingRuleStackSize=inputBoss->RuleStack.size;
+}
+
+StackMaintainerRules::~StackMaintainerRules()
+{ if (this->theBoss!=0)
+    this->theBoss->RuleStack.SetSize(this->startingRuleStackSize);
+  this->theBoss=0;
+}
+
 bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments)
+(Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* comments)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound");
+  StackMaintainerRules theRuleStackMaintainer(this);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
     out << "Recursion depth limit of " << this->MaxRecursionDeptH
@@ -5259,28 +5271,32 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     return true;
   }
   this->ExpressionStack.AddOnTop(theExpression);
-  int indexInCache=-1;
-  if (theExpression.IndexBoundVars!=-1)
-  { indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.GetIndex(theExpression);
-    if (indexInCache!=-1)
-    { theExpression=
-      this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache];
-    } else
-      if (this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
-      { this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.AddOnTop(theExpression);
-        indexInCache=this->theExpressionContext[theExpression.IndexBoundVars].cachedExpressions.size-1;
-        this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions.SetSize(indexInCache+1);
-      }
+  Expression theExpressionWithContext;
+  theExpressionWithContext.reset(*this,-1);
+  theExpressionWithContext.theOperation=this->opList();
+  theExpressionWithContext.children.SetSize(2);
+  theExpressionWithContext.children[1]=theExpression;
+  theExpressionWithContext.children[0].MakeInt
+  (this->RuleContextIdentifier, *this, -1);
+  int indexInCache=this->cachedExpressions.GetIndex(theExpressionWithContext);
+  if (indexInCache!=-1)
+  { theExpression=
+    this->imagesCachedExpressions[indexInCache];
+  } else if (this->cachedExpressions.size<this->MaxNumCachedExpressionPerContext)
+  { this->cachedExpressions.AddOnTop(theExpressionWithContext);
+    indexInCache=this->cachedExpressions.size-1;
+    this->imagesCachedExpressions.SetSize(indexInCache+1);
   }
   //reduction phase:
   bool resultExpressionIsFree=true;
   bool ReductionOcurred=true;
-  int counter=0;
+  int counterNumTransformations=0;
+
   while (ReductionOcurred)
   { ReductionOcurred=false;
-    counter++;
+    counterNumTransformations++;
     if (indexInCache!=-1)
-      this->theExpressionContext[theExpression.IndexBoundVars].imagesCachedExpressions[indexInCache]=theExpression;
+      this->imagesCachedExpressions[indexInCache]=theExpression;
 //////------Handling naughty expressions------
     if (this->theGlobalVariableS->GetElapsedSeconds()!=0)
       if (this->theGlobalVariableS->GetElapsedSeconds()>this->theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit/2)
@@ -5292,7 +5308,7 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
         this->flagTimeLimitErrorDetected=true;
         break;
       }
-    if (counter>this->MaxAlgTransformationsPerExpression)
+    if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
         out << "<br>Maximum number of algebraic transformations of "
@@ -5304,75 +5320,85 @@ bool CommandList::EvaluateExpressionReturnFalseIfExpressionIsBound
     }
 //////------Handling naughty expressions end------
 /////-------Evaluating children -------
-    bool foundError=false;
+    //bool foundError=false;
     for (int i=0; i<theExpression.children.size; i++)
-    { if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(theExpression.children[i], bufferPairs, comments))
+    { Expression& currentChild=theExpression.children[i];
+      if(!this->EvaluateExpressionReturnFalseIfExpressionIsBound(currentChild, bufferPairs, comments))
         resultExpressionIsFree=false;
       if (theExpression.children[i].errorString!="")
-      { foundError=true;
+      { //foundError=true;
         break;
       }
+      if (theExpression.theOperation==this->opEndStatement())
+        if (currentChild.theOperation==this->opDefine() || currentChild.theOperation==this->opDefineConditional())
+        { this->RuleStack.AddOnTop(currentChild);
+          this->RuleContextIdentifier++;
+          //std::cout << "Added to rule stack rule " << currentChild.ToString();
+        }
     }
     //->/////-------Default operation handling-------
     Function::FunctionAddress theFun=this->operations[theExpression.theOperation].GetFunction(*this);
     if (theFun!=0)
-      if (theFun(*this, theExpression.IndexBoundVars, theExpression, comments))
+      if (theFun(*this, -1, theExpression, comments))
       { ReductionOcurred=true;
         continue;
       }
     //->/////-------Default operation handling end-------
-    if (foundError || !resultExpressionIsFree)
-      break;
+    //if (foundError || !resultExpressionIsFree)
+      //break;
 /////-------Evaluating children end-------
 /////-------User-defined pattern matching------
-    for (int i=0; i<theExpression.IndexBoundVars; i++)
-      if (this->theCommands.children[i].errorString=="")
-      { Expression& currentPattern=this->theCommands.children[i];
-        if (currentPattern.errorString=="")
-          if (currentPattern.theOperation==this->opDefine() || currentPattern.theOperation==this->opDefineConditional())
-          { this->TotalNumPatternMatchedPerformed++;
-            bufferPairs.reset();
-            if(this->ProcessOneExpressionOnePatternOneSub
-            (theExpression.IndexBoundVars, currentPattern, theExpression, bufferPairs, comments))
-            { ReductionOcurred=true;
-              break;
-            }
+    for (int i=0; i<this->RuleStack.size; i++)
+    { Expression& currentPattern=this->RuleStack[i];
+      if (currentPattern.errorString=="")
+        if (currentPattern.theOperation==this->opDefine() || currentPattern.theOperation==this->opDefineConditional())
+        { this->TotalNumPatternMatchedPerformed++;
+          bufferPairs.reset();
+          if(this->ProcessOneExpressionOnePatternOneSub
+          (currentPattern, theExpression, bufferPairs, comments))
+          { ReductionOcurred=true;
+            break;
           }
-      }
+        }
+    }
     if (ReductionOcurred)
       continue;
 /////-------User-defined pattern matching end------
   }
   this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
-  if (theExpression.theOperation==this->opVariableBound())
+  if (theExpression.theOperation==this->opBind())
     return false;
   return resultExpressionIsFree;
 }
 
 Expression* CommandList::PatternMatch
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   Expression* condition, std::stringstream* theLog, bool logAttempts)
+(Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
+ Expression* condition, std::stringstream* theLog, bool logAttempts)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
-    out << "Error: while trying to evaluate expression, the maximum recursion depth of " << this->MaxRecursionDeptH
-    << " was exceeded";
+    out << "Error: while trying to evaluate expression, the maximum recursion depth of "
+    << this->MaxRecursionDeptH << " was exceeded";
     theExpression.errorString=out.str();
     return 0;
   }
+//  if (theExpression.ToString()=="f{}((a)):=a+5")
+//  { std::cout << "!here";
+//  }
   if (!this->ExpressionMatchesPattern(thePattern, theExpression, bufferPairs, theLog))
     return 0;
   if (theLog!=0 && logAttempts)
-    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> " << thePattern.ToString();
+    (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
+    << thePattern.ToString();
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specializing condition pattern: " << tempExp.ToString();
-  this->SpecializeBoundVars(tempExp, inputIndexBoundVars, bufferPairs);
+  this->SpecializeBoundVars(tempExp, bufferPairs);
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>Specialized condition: " << tempExp.ToString() << "; evaluating...";
-  ExpressionPairs tempPairs;
+  BoundVariablesSubstitution tempPairs;
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (tempExp, tempPairs, theLog);
   if (theLog!=0 && logAttempts)
@@ -5384,23 +5410,30 @@ Expression* CommandList::PatternMatch
 }
 
 void CommandList::SpecializeBoundVars
-(Expression& toBeSubbed, int targetinputIndexBoundVars, ExpressionPairs& matchedPairs)
+(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  toBeSubbed.IndexBoundVars=targetinputIndexBoundVars;
-  if (toBeSubbed.theOperation==this->opVariableBound())
-  { int indexMatching= matchedPairs.BoundVariableIndices.GetIndex(toBeSubbed.theDatA);
-    toBeSubbed=matchedPairs.variableImages[indexMatching];
+  if (toBeSubbedIn.theOperation==this->opBind())
+  { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn.children[0]);
+    if (indexMatching==-1)
+    { std::cout << "This is a programming error. I am asked to specialize the bound variable "
+      << toBeSubbedIn.children[0].ToString()
+      << " but it is not contained as the first element of a matched pair. "
+      << " The matched pairs are: " << matchedPairs.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    toBeSubbedIn=matchedPairs.variableImages[indexMatching];
 //    this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
     return;
   }
-  for (int i=0; i<toBeSubbed.children.size; i++)
-    this->SpecializeBoundVars(toBeSubbed.children[i], targetinputIndexBoundVars, matchedPairs);
+  for (int i=0; i<toBeSubbedIn.children.size; i++)
+    this->SpecializeBoundVars(toBeSubbedIn.children[i], matchedPairs);
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
 }
 
 bool CommandList::ProcessOneExpressionOnePatternOneSub
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
-   std::stringstream* theLog, bool logAttempts)
+(Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
+ std::stringstream* theLog, bool logAttempts)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   assert(thePattern.theOperation==this->opDefine() ||
   thePattern.theOperation==this->opDefineConditional());
@@ -5417,7 +5450,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   Expression* toBeSubbed=0;
   if ((thePattern.theOperation==this->opDefine()) || isConditionalDefine)
     toBeSubbed=this->PatternMatch
-    (inputIndexBoundVars, currentPattern, theExpression, bufferPairs, theCondition, theLog);
+    (currentPattern, theExpression, bufferPairs, theCondition, theLog, logAttempts);
   if (toBeSubbed==0)
     return false;
   if (theLog!=0 && logAttempts)
@@ -5426,8 +5459,7 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
     *toBeSubbed=thePattern.children[2];
   else
     *toBeSubbed=thePattern.children[1];
-  toBeSubbed->IndexBoundVars= inputIndexBoundVars;
-  this->SpecializeBoundVars(*toBeSubbed, inputIndexBoundVars, bufferPairs);
+  this->SpecializeBoundVars(*toBeSubbed, bufferPairs);
   return true;
 }
 
@@ -5439,7 +5471,7 @@ bool CommandList::ExpressionHasBoundVars(Expression& theExpression)
     theExpression.errorString=out.str();
     return false;
   }
-  if (theExpression.theOperation==this->opVariableBound())
+  if (theExpression.theOperation==this->opBind())
     return true;
   else
     for (int i=0; i<theExpression.children.size; i++)
@@ -5457,18 +5489,17 @@ bool CommandList::ExtractExpressions
   this->registerNumNonClosedBeginArray=0;
   for (int i=0; i<this->numEmptyTokensStart; i++)
     (*this->CurrentSyntacticStacK)[i]=this->GetEmptySyntacticElement();
-  this->CreateNewExpressionContext();
   this->parsingLog="";
+  this->NonBoundVariablesStack.SetSize(1);
+  this->BoundVariablesStack.SetSize(1);
+  this->NonBoundVariablesStack.LastObject()->Clear();
+  this->BoundVariablesStack.LastObject()->Clear();
   for (this->counterInSyntacticSoup=0; this->counterInSyntacticSoup<(*this->CurrrentSyntacticSouP).size; this->counterInSyntacticSoup++)
   { if (this->counterInSyntacticSoup+1<(*this->CurrrentSyntacticSouP).size)
       lookAheadToken=this->controlSequences[(*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup+1].controlIndex];
     else
       lookAheadToken=";";
     (*this->CurrentSyntacticStacK).AddOnTop((*this->CurrrentSyntacticSouP)[this->counterInSyntacticSoup]);
-    if ((*this->CurrentSyntacticStacK).LastObject()->controlIndex==this->conEndStatement())
-      this->CreateNewExpressionContext();
-    Expression& currentExpression=(*this->CurrentSyntacticStacK).LastObject()->theData;
-    currentExpression.IndexBoundVars=this->theExpressionContext.size-1;
     while(this->ApplyOneRule(lookAheadToken))
     {}
   }
@@ -5497,7 +5528,7 @@ bool CommandList::ExtractExpressions
 void CommandList::EvaluateCommands()
 { MacroRegisterFunctionWithName("CommandList::EvaluateCommands");
   std::stringstream out;
-  ExpressionPairs thePairs;
+  BoundVariablesSubstitution thePairs;
 
 //  this->theLogs.resize(this->theCommands.size());
 //this->ToString();
@@ -5508,7 +5539,9 @@ void CommandList::EvaluateCommands()
     out << "<hr>";
   }
   Expression StartingExpression=this->theCommands;
-  this->RecursionDeptH=0;
+  this->RuleStack.SetSize(0);
+  this->RuleContextIdentifier=0;
+
   this->EvaluateExpressionReturnFalseIfExpressionIsBound
   (this->theCommands, thePairs, &comments);
   if (this->RecursionDeptH!=0)
@@ -5625,8 +5658,11 @@ std::string Expression::ToString
     out << this->GetAtomicValue().ToString(&dataComments, isFinal, theFormat);
     additionalDataComments=dataComments.str();
   } else if (this->theOperation==this->theBoss->opDefine())
-    out << this->children[0].ToString(theFormat, false, false, outComments)
-    << ":=" << this->children[1].ToString(theFormat, false, false, outComments);
+  { bool firstChildWantsBrackets=(this->children[0].theOperation==this->theBoss->opDefine());
+    bool secondChildWantsBrackets=(this->children[1].theOperation==this->theBoss->opDefine());
+    out << this->children[0].ToString(theFormat, firstChildWantsBrackets, false, outComments)
+    << ":=" << this->children[1].ToString(theFormat, secondChildWantsBrackets, false, outComments);
+  }
   else if (this->theOperation==this->theBoss->opIsDenotedBy())
     out << this->children[0].ToString(theFormat, false, false, outComments)
     << ":=:" << this->children[1].ToString(theFormat, false, false, outComments);
@@ -5669,7 +5705,7 @@ std::string Expression::ToString
         out << "+";
     out << tempS;
   } else if (this->theOperation==this->theBoss->opMinus())
-  { if ( this->children.size==1)
+  { if (this->children.size==1)
       out << "-" << this->children[0].ToString
       (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
     else
@@ -5678,12 +5714,10 @@ std::string Expression::ToString
       << "-" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
     }
   }
-  else if (this->theOperation==this->theBoss->opVariableBound())
-  { if (this->IndexBoundVars<0 || this->IndexBoundVars>= this->theBoss->theExpressionContext.size)
-      out << "(BadContext=" << this->IndexBoundVars << ")";
-    assert(this->theBoss->theExpressionContext[this->IndexBoundVars].BoundVariables.size>0);
-    assert(this->theBoss->theExpressionContext[this->IndexBoundVars].BoundVariables.size>this->theDatA);
-    out << "{{" << this->theBoss->theExpressionContext[this->IndexBoundVars].BoundVariables[this->theDatA] << "}}";
+  else if (this->theOperation==this->theBoss->opBind())
+  { out << "{{" << this->children[0].ToString
+    (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
+    << "}}";
   }
   else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
@@ -5741,7 +5775,7 @@ std::string Expression::ToString
         for (int i=0; i<this->children.size; i++)
         { out << this->children[i].ToString(theFormat, false, false, outComments);
           if (i!=this->children.size-1)
-            out << ", \\\\ ";
+            out << ", ";
         }
         out << ")";
         break;
@@ -6036,25 +6070,13 @@ std::string CommandList::ToString()
       out  << ", ";
   }
   out << "<hr>";
-  for (int k=0; k<this->theExpressionContext.size; k++)
-  { ExpressionContext& currentContext=this->theExpressionContext[k];
-    out <<"<hr>" << "Context " << k+1;
-    out << "<br>\n Cached expressions (" << currentContext.cachedExpressions.size
-    << " total):\n<br>\n";
-    for (int i=0; i<currentContext.cachedExpressions.size; i++)
-    { out << currentContext.cachedExpressions[i].ToString(0, false, false, 0, false)
-      << " -> " << currentContext.imagesCachedExpressions[i].ToString(0, false, false, 0, false);
-      if (i!=currentContext.cachedExpressions.size-1)
-        out << "<br>";
-    }
-    if (currentContext.BoundVariables.size>0)
-    { out << "Bound variables:<br>\n ";
-      for (int i=0; i<currentContext.BoundVariables.size; i++)
-      { out << currentContext.BoundVariables[i];
-        if (i!=currentContext.BoundVariables.size-1)
-          out << ", ";
-      }
-    }
+  out << "\n Cached expressions (" << this->cachedExpressions.size
+  << " total):\n<br>\n";
+  for (int i=0; i<this->cachedExpressions.size; i++)
+  { out << this->cachedExpressions[i].ToString(0, false, false, 0, false)
+    << " -> " << this->imagesCachedExpressions[i].ToString(0, false, false, 0, false);
+    if (i!=this->cachedExpressions.size-1)
+      out << "<br>";
   }
   out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());//, "Expand/collapse.");
   return out2.str();
@@ -6077,7 +6099,7 @@ Rational Expression::GetConstantTerm()const
 
 bool Expression::NeedBracketsForFunctionName() const
 { return !(
-  this->theOperation==this->theBoss->opVariableBound() ||
+  this->theOperation==this->theBoss->opBind() ||
   (this->theOperation==this->theBoss->opAtom() && this->EvaluatesToVariableNonBound())
   || ( this->theOperation==this->theBoss->opApplyFunction() && this->format==this->formatFunctionUseUnderscore)
   );
@@ -6120,13 +6142,13 @@ void Expression::MakeInt(int theValue, CommandList& newBoss, int inputIndexBound
   this->theOperation=newBoss.opAtom();
 }
 
-void Expression::MakeAtom(const Rational& inputData, CommandList& newBoss, int inputIndexBoundVars)
-{ this->MakeAtom(Data(inputData, newBoss), newBoss, inputIndexBoundVars);
+void Expression::MakeAtom(const Rational& inputData, CommandList& newBoss)
+{ this->MakeAtom(Data(inputData, newBoss), newBoss);
 }
 
-void Expression::MakeAtom(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
+void Expression::MakeAtom(const Data& inputData, CommandList& newBoss)
 { this->theBoss=&newBoss;
-  this->reset(newBoss, inputIndexBoundVars);
+  this->reset(newBoss, -1);
   this->theDatA=newBoss.theData.AddNoRepetitionOrReturnIndexFirst(inputData);
   assert(this->theDatA<newBoss.theData.size);
   this->theOperation=newBoss.opAtom();
@@ -6135,13 +6157,13 @@ void Expression::MakeAtom(const Data& inputData, CommandList& newBoss, int input
 void Expression::MakeVariableNonBounD(CommandList& newBoss, int inputIndexBoundVars, const std::string& input)
 { VariableNonBound theVar;
   theVar.theName=input;
-  this->MakeAtom(theVar, newBoss, inputIndexBoundVars);
+  this->MakeAtom(theVar, newBoss);
 }
 
-void Expression::MakeAtom(const VariableNonBound& input, CommandList& newBoss, int inputIndexBoundVars)
+void Expression::MakeAtom(const VariableNonBound& input, CommandList& newBoss)
 { Data tempData;
   tempData.MakeVariableNonBound(newBoss, input);
-  this->MakeAtom(tempData, newBoss, inputIndexBoundVars);
+  this->MakeAtom(tempData, newBoss);
 }
 
 bool CommandList::ReplaceIntIntBy10IntPlusInt()
@@ -6150,7 +6172,7 @@ bool CommandList::ReplaceIntIntBy10IntPlusInt()
   Data tempData(left.theData.GetAtomicValue());
   tempData*=10;
   tempData+=right.theData.GetAtomicValue();
-  left.theData.MakeAtom(tempData, *this, this->theExpressionContext.size-1);
+  left.theData.MakeAtom(tempData, *this);
   this->DecreaseStackSetCharacterRanges(1);
   return true;
 }
@@ -6170,7 +6192,7 @@ bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(lefT.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -6184,12 +6206,11 @@ bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
 bool CommandList::ReplaceEEndCommandEbyE()
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  assert(left.theData.IndexBoundVars!=-1);
   if (left.theData.theOperation==this->opEndStatement())
     left.theData.children.AddOnTop(right.theData);
   else
   { Expression newExpr;
-    newExpr.reset(*this, this->theExpressionContext.size-1);
+    newExpr.reset(*this, -1);
     newExpr.theOperation=this->opEndStatement();
     newExpr.children.AddOnTop(left.theData);
     newExpr.children.AddOnTop(right.theData);
@@ -6205,7 +6226,7 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this, this->theExpressionContext.size-1);
+  newExpr.reset(*this, -1);
   newExpr.theOperation=this->GetOperationIndexFromControlIndex(theControlIndex);
   newExpr.children.AddOnTop(left.theData);
   newExpr.children.AddOnTop(right.theData);
@@ -6296,7 +6317,7 @@ bool CommandList::ReplaceXByCon(int theCon, int theFormat)
 bool CommandList::ReplaceXByConCon
 (int con1, int con2, int format1, int format2)
 { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size+1);
-  (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this, this->theExpressionContext.size-1);
+  (*this->CurrentSyntacticStacK).LastObject()->theData.reset(*this, -1);
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=con1;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1].controlIndex=con2;
   (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=format1;
@@ -6372,33 +6393,56 @@ Context::GetPolynomialMonomial
   return output;
 }
 
+bool CommandList::IsBoundVarInContext(const std::string& input)
+{ for (int i=0; i<this->BoundVariablesStack.size; i++)
+    if (this->BoundVariablesStack[i].Contains(input))
+      return true;
+  return false;
+}
+
+bool CommandList::IsNonBoundVarInContext(const std::string& input)
+{ for (int i=0; i<this->NonBoundVariablesStack.size; i++)
+    if (this->NonBoundVariablesStack[i].Contains(input))
+      return true;
+  return false;
+}
+
 bool CommandList::RegisterBoundVariable()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   const std::string& theVarString=theElt.theData.GetAtomicValue().GetValuE<std::string>();
-  if (!this->GetCurrentContextBoundVars().Contains(theVarString))
-  { if (!this->theExpressionContext.LastObject()->flagOpDefineEncountered)
-      this->GetCurrentContextBoundVars().AddOnTop(theVarString);
-    else
-    { theElt.controlIndex=this->conError();
-      theElt.ErrorString=  "Error: bound variables cannot be declared after the definition operation := .";
-    }
-  } else
-  { this->DecreaseStackSetCharacterRanges(2);
+  if (this->IsNonBoundVarInContext(theVarString))
+  { std::stringstream out;
+    out << "Syntax error. In the same syntactic scope, the string " << theVarString
+    << " is first used to denote a non-bound variable"
+    << " but later to denote a bound variable. This is not allowed. ";
+    theElt.ErrorString=out.str();
+    this->DecreaseStackSetCharacterRanges(2);
     this->ReplaceXXYByY();
   }
+  if (!this->IsBoundVarInContext(theVarString))
+    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theVarString);
+  Expression stringExpression;
+  stringExpression.MakeStringAtom(*this, -1, theVarString);
+  theElt.theData.theBoss=this;
+  theElt.theData.children.AddOnTop(stringExpression);
+  theElt.theData.theOperation=this->opBind();
+  this->DecreaseStackSetCharacterRanges(2);
+  this->ReplaceXXYByY();
   return true;
 }
 
 bool CommandList::ReplaceVXdotsXbyEXdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
   const std::string& theVarString=theElt.theData.GetAtomicValue().GetValuE<std::string>();
-  int indexBoundVar=this->GetCurrentContextBoundVars().GetIndex(theVarString);
-  if (indexBoundVar!=- 1)
-  { theElt.theData.theOperation=this->opVariableBound();
-    theElt.theData.theDatA=indexBoundVar;
+  if (this->IsBoundVarInContext(theVarString))
+  { theElt.theData.theOperation=this->opBind();
+    theElt.theData.children.SetSize(1);
+    theElt.theData.children[0].MakeStringAtom(*this, -1, theVarString);
   } else
-    theElt.theData.MakeVariableNonBounD(*this, -1, theVarString);
-  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
+  { theElt.theData.MakeVariableNonBounD(*this, -1, theVarString);
+    if (!this->IsNonBoundVarInContext(theVarString))
+      this->NonBoundVariablesStack.LastObject()->AddOnTop(theVarString);
+  }
   theElt.controlIndex=this->conExpression();
   return true;
 }
@@ -6476,7 +6520,7 @@ void CommandList::AddNonBoundVarMustBeNew
   Function theF(funHandler, theName, argList, description, exampleArgs, visible);
   theV.HandlerFunctionIndex= this->theFunctions.AddNoRepetitionOrReturnIndexFirst(theF);
   theV.theName=theName;
-  this->theObjectContainer.theNonBoundVars.AddNoRepetition(theV);
+  this->theObjectContainer.theNonBoundVars.AddOnTopNoRepetition(theV);
 }
 
 void Data::MakeLittelmannRootOperator
@@ -6552,6 +6596,6 @@ bool CommandList::fFreudenthalEval
     return theExpression.SetError(reportString);
   Data theData;
   theData.MakeChar(theCommands, resultChar);
-  theExpression.MakeAtom(theData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(theData, theCommands);
   return true;
 }

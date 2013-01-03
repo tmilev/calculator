@@ -243,7 +243,7 @@ class Expression
     this->theDatA=-1;
     this->errorString="";
     this->format=this->formatDefault;
-    this->IndexBoundVars=inputIndexBoundVars;
+//    this->IndexBoundVars=inputIndexBoundVars;
   }
   public:
   int theOperation;
@@ -253,7 +253,7 @@ class Expression
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
   int format;
-  int IndexBoundVars;
+//  int IndexBoundVars;
   CommandList* theBoss;
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
@@ -282,14 +282,14 @@ class Expression
 (const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars)
   ;
   void MakeRFAtom(const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss, int inputIndexBoundVars);
-  void MakeAtom(const Data& inputData, CommandList& newBoss, int inputIndexBoundVars)
+  void MakeAtom(const Data& inputData, CommandList& newBoss)
   ;
-  void MakeAtom(const Rational& inputRat, CommandList& newBoss, int inputIndexBoundVars)
+  void MakeAtom(const Rational& inputRat, CommandList& newBoss)
   ;
-  void MakeAtom(int input, CommandList& newBoss, int inputIndexBoundVars)
-  { this->MakeAtom((Rational) input, newBoss, inputIndexBoundVars);
+  void MakeAtom(int input, CommandList& newBoss)
+  { this->MakeAtom((Rational) input, newBoss);
   }
-  void MakeAtom(const VariableNonBound& input, CommandList& newBoss, int inputIndexBoundVars)
+  void MakeAtom(const VariableNonBound& input, CommandList& newBoss)
   ;
   bool MakeStringAtom
 (CommandList& newBoss, int inputIndexBoundVars, const std::string& theString, const Context& inputContext)
@@ -324,7 +324,8 @@ void MakeVariableNonBounD
   (CommandList& owner, int inputIndexBoundVars, int theOp, const Expression& left, const Expression& right)
   ;
   std::string ToString
-  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false, std::stringstream* outComments=0, bool isFinal=true,
+  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false,
+   std::stringstream* outComments=0, bool isFinal=true,
    Expression* startingExpression=0)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static unsigned int HashFunction(const Expression& input)
@@ -349,7 +350,7 @@ void MakeVariableNonBounD
   inline bool SetError (const std::string& theError)
   { Data tempData(*this->theBoss);
     tempData.SetError(theError);
-    this->MakeAtom(tempData, *this->theBoss, this->IndexBoundVars);
+    this->MakeAtom(tempData, *this->theBoss);
     this->errorString=theError;
     return true;
   }
@@ -387,20 +388,20 @@ void MakeVariableNonBounD
     this->errorString=other.errorString;
     this->children.SetSize(other.children.size);
     this->format=other.format;
-    this->IndexBoundVars=other.IndexBoundVars;
+//    this->IndexBoundVars=other.IndexBoundVars;
   }
   void operator=(const Expression& other);
   bool operator>(const Expression& other)const;
 };
 
-class ExpressionPairs
+class BoundVariablesSubstitution
 {
 public:
   std::string ToString();
-  HashedList<int, MathRoutines::IntUnsignIdentity> BoundVariableIndices;
+  HashedList<Expression> theBoundVariables;
   HashedList<Expression> variableImages;
   void reset()
-  { this->BoundVariableIndices.Clear();
+  { this->theBoundVariables.Clear();
     this->variableImages.Clear();
   }
 };
@@ -429,27 +430,6 @@ class SyntacticElement
   }
   SyntacticElement(const SyntacticElement& other)
   { this->operator=(other);
-  }
-};
-
-class ExpressionContext
-{
-public:
-  HashedList<std::string, MathRoutines::hashString> BoundVariables;
-  HashedList<Expression> cachedExpressions;
-  List<Expression> imagesCachedExpressions;
-  bool flagOpDefineEncountered;
-  void operator=(const ExpressionContext& other)
-  { this->BoundVariables=other.BoundVariables;
-    this->cachedExpressions=other.cachedExpressions;
-    this->imagesCachedExpressions=other.imagesCachedExpressions;
-    this->flagOpDefineEncountered=other.flagOpDefineEncountered;
-  }
-  void reset()
-  { this->BoundVariables.Clear();
-    this->cachedExpressions.Clear();
-    this->imagesCachedExpressions.SetSize(0);
-    this->flagOpDefineEncountered=false;
   }
 };
 
@@ -513,7 +493,7 @@ class Context
   { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
   }
   bool MergeContextWith(const Context& other)
-  { this->VariableImages.AddNoRepetition(other.VariableImages);
+  { this->VariableImages.AddOnTopNoRepetition(other.VariableImages);
     this->VariableImages.QuickSortAscending();
 //    std::cout << "Variable images sorted: " << this->VariableImages.ToString();
     if (this->indexAmbientSSalgebra==-1)
@@ -584,6 +564,15 @@ public:
   }
 };
 
+struct StackMaintainerRules
+{
+public:
+  CommandList* theBoss;
+  int startingRuleStackSize;
+  StackMaintainerRules(CommandList* inputBoss);
+  ~StackMaintainerRules();
+};
+
 class CommandList
 { template <class dataType>
   bool EvaluatePMTDtreeFromContextRecursive
@@ -634,9 +623,15 @@ public:
   List<SyntacticElement>* CurrrentSyntacticSouP;
   List<SyntacticElement>* CurrentSyntacticStacK;
 
-  List<ExpressionContext> theExpressionContext;
+  HashedList<Expression> cachedExpressions;
+  List<Expression> imagesCachedExpressions;
   ////
   HashedList<Expression> ExpressionStack;
+  List<HashedList<std::string, MathRoutines::hashString> > NonBoundVariablesStack;
+  List<HashedList<std::string, MathRoutines::hashString> > BoundVariablesStack;
+
+  int RuleContextIdentifier;
+  List<Expression> RuleStack;
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
@@ -670,6 +665,8 @@ public:
   std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ToStringFunctionHandlers();
+  bool IsBoundVarInContext(const std::string& input);
+  bool IsNonBoundVarInContext(const std::string& input);
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
@@ -742,9 +739,6 @@ public:
   }
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
-  }
-  HashedList<std::string, MathRoutines::hashString>& GetCurrentContextBoundVars()
-  { return this->theExpressionContext.LastObject()->BoundVariables;
   }
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
 ;
@@ -842,7 +836,6 @@ public:
   bool ReplaceIntIntBy10IntPlusInt()
   ;
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
-  bool CreateNewExpressionContext();
   bool RegisterBoundVariable();
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
@@ -948,8 +941,8 @@ public:
   int opUnionNoRepetition()
   { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
   }
-  int opVariableBound()
-  { return this->operations.GetIndexIMustContainTheObject("VariableBound");
+  int opBind()
+  { return this->operations.GetIndexIMustContainTheObject("Bind");
   }
   int opPlus()
   { return this->operations.GetIndexIMustContainTheObject("+");
@@ -985,15 +978,15 @@ public:
   (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
   ;
   void SpecializeBoundVars
-(Expression& toBeSubbed, int targetCommandIndex, ExpressionPairs& matchedPairs)
+(Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
   ;
   bool ExpressionHasBoundVars(Expression& theExpression);
   Expression* PatternMatch
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+  (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
    Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
-  (int inputIndexBoundVars, Expression& thePattern, Expression& theExpression, ExpressionPairs& bufferPairs,
+  (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
     std::stringstream* theLog=0, bool logAttempts=false)
   ;
   bool isADigit(const std::string& input, int& whichDigit)
@@ -1013,7 +1006,7 @@ bool CollectSummands
 (List<Expression>& summands, bool needSimplification, int inputIndexBoundVars, Expression& theExpression)
 ;
   bool ExpressionMatchesPattern
-  (const Expression& thePattern, const Expression& input, ExpressionPairs& matchedExpressions,
+  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
    std::stringstream* theLog=0)
   ;
   bool ExpressionsAreEqual
@@ -1414,7 +1407,7 @@ static bool TypeHighestWeightParabolic
     ;
   void EvaluateCommands();
   bool EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, ExpressionPairs& bufferPairs, std::stringstream* comments=0)
+(Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* comments=0)
  ;
   void Evaluate(const std::string& theInput)
   { MacroRegisterFunctionWithName("CommandList::Evaluate");
@@ -1469,7 +1462,7 @@ bool CommandList::GetVector
     { Expression tempExpression=theExpression;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+            (conversionFunction, -1, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1497,7 +1490,7 @@ bool CommandList::GetVector
     { Expression tempExpression=currentE;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+            (conversionFunction, -1, tempExpression, comments))
           return false;
       if (!tempExpression.EvaluatesToAtom())
         return false;
@@ -1535,7 +1528,7 @@ bool CommandList::fGetMatrix
     { Expression tempExpression=theExpression;
       if (conversionFunction!=0)
         if (!this->CallCalculatorFunction
-            (conversionFunction, theExpression.IndexBoundVars, tempExpression, comments))
+            (conversionFunction, -1, tempExpression, comments))
           return false;
       if (!theExpression.EvaluatesToAtom())
         return false;

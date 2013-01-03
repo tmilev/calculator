@@ -23,7 +23,7 @@ bool CommandList::fGCDOrLCM
   int theContextIndex=
   theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(theContext);
   tempData.MakePoly(theCommands, outputP, theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands);
   return true;
 }
 
@@ -46,7 +46,7 @@ bool CommandList::fPolynomialDivisionQuotientRemainder
     tempData.MakePoly(theCommands, outputQ, theContextIndex);
   else
     tempData.MakePoly(theCommands, outputR, theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands, inputIndexBoundVars);
+  theExpression.MakeAtom(tempData, theCommands);
   return true;
 }
 
@@ -64,7 +64,7 @@ bool CommandList::fSolveSeparableBilinearSystem
   FormatExpressions theFormat;
   theContext.GetFormatExpressions(theFormat);
   for (int i=0; i<thePolys.size; i++)
-    theMonsInPlay.AddNoRepetition(thePolys[i]);
+    theMonsInPlay.AddOnTopNoRepetition(thePolys[i]);
   std::cout << "<br>The context vars:<br>" << theContext.VariableImages.ToString();
   std::cout << "<br>The mons in play: <br>" << theMonsInPlay.ToString();
   std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);

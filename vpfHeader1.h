@@ -1097,7 +1097,6 @@ class HashedList: public List<Object>
 private:
   void AddObjectOnBottom(const Object& o);
   void AddListOnTop(List<Object>& theList);
-  bool AddOnTopNoRepetition(const Object& o);
   void PopIndexShiftUp(int index);
   void PopIndexShiftDown(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
@@ -1203,7 +1202,7 @@ public:
     this->AddOnTop(o);
     return this->size-1;
   }
-  bool AddNoRepetition(const Object& o)
+  bool AddOnTopNoRepetition(const Object& o)
   { if (this->GetIndex(o)!=-1)
       return false;
     this->AddOnTop(o);
@@ -1212,10 +1211,10 @@ public:
   inline void AdjustHashes()
   { this->SetExpectedSize(this->size);
   }
-  void AddNoRepetition(const List<Object>& theList)
+  void AddOnTopNoRepetition(const List<Object>& theList)
   { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
-      this->AddNoRepetition(theList.TheObjects[i]);
+      this->AddOnTopNoRepetition(theList.TheObjects[i]);
   }
   void PopLastObject()
   { this->PopIndexSwapWithLast(this->size-1);
@@ -5340,6 +5339,8 @@ class GroebnerBasisComputation
   List<MonomialP> leadingMons;
   List<Rational> leadingCoeffs;
   int NumVars;
+  int NumberOfComputations;
+  int MaxNumComputations;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
  bool AddPolyAndReduceBasis
@@ -6337,7 +6338,7 @@ void MonomialCollection<TemplateMonomial, CoefficientType>::GaussianEliminationB
     allMons.SetExpectedSize(topBoundNumMons);
   }
   for (int i =0; i<theList.size; i++)
-    allMons.AddNoRepetition(theList[i]);
+    allMons.AddOnTopNoRepetition(theList[i]);
   allMons.QuickSortDescending();
   FormatExpressions tempFormat;
   tempFormat.flagUseHTML=true;

@@ -433,6 +433,9 @@ g_{-2} v_\\lambda\
 //  civilizedInput="GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )";
 //  civilizedInput="a:=Polynomial{}(x+y);";
 //  civilizedInput="GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )";
+//  civilizedInput="a:=(c:=d; d:=f);\na";
+//civilizedInput="({{a}}:={{b}}):=b;";
+//civilizedInput="(f{}{{a}}:={{b}}):=(g{}a:=b);f{}a:=a+5;f{}a;";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

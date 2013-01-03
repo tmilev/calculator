@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 #endif
   theGlobalVariables.SetFeedDataToIndicatorWindowDefault(&makeReport);
   theGlobalVariables.SetTimerFunction(&GetElapsedTimeInSeconds);
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=200;
+  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=10;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");

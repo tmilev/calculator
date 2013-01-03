@@ -4,7 +4,7 @@
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
 bool CommandList::fGCDOrLCM
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
@@ -28,7 +28,7 @@ bool CommandList::fGCDOrLCM
 }
 
 bool CommandList::fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool returnQuotient)
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Vector<Polynomial<Rational> > thePolys;
@@ -51,7 +51,7 @@ bool CommandList::fPolynomialDivisionQuotientRemainder
 }
 
 bool CommandList::fSolveSeparableBilinearSystem
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 { MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
   Vector<Polynomial<Rational> > thePolys;
   Context theContext(theCommands);
@@ -117,22 +117,22 @@ bool CommandList::fSolveSeparableBilinearSystem
   MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
   std::stringstream out;
   out << theSystem.ToString(&theFormat) << theConstantTerms.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  theExpression.MakeStringAtom(theCommands, out.str());
   return true;
 }
 
 bool CommandList::fSSsubalgebras
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::fSSsubalgebras");
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, theExpression, comments))
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, theExpression, comments))
     return false;
   SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+    theExpression.MakeStringAtom(theCommands, out.str());
     return true;
   }
   else
@@ -150,21 +150,21 @@ bool CommandList::fSSsubalgebras
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  theExpression.MakeStringAtom(theCommands, out.str());
   return true;
 }
 
 bool CommandList::fEmbedSSalgInSSalg
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::fEmbedSSalgInSSalg");
   if (theExpression.children.size!=2)
     return theExpression.SetError("I expect two arguments - the two semisimple subalgebras.");
   Expression& EsmallSA=theExpression.children[0];
   Expression& ElargeSA=theExpression.children[1];
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, EsmallSA, comments))
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, EsmallSA, comments))
     return false;
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, inputIndexBoundVars, ElargeSA, comments))
+  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, ElargeSA, comments))
     return false;
 
   SemisimpleLieAlgebra& ownerSS=ElargeSA.GetAtomicValue().GetAmbientSSAlgebra();
@@ -173,7 +173,7 @@ bool CommandList::fEmbedSSalgInSSalg
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+    theExpression.MakeStringAtom(theCommands, out.str());
     return true;
   }
   else
@@ -195,12 +195,12 @@ bool CommandList::fEmbedSSalgInSSalg
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  theExpression.MakeStringAtom(theCommands, out.str());
   return true;
 }
 
 bool CommandList::fGroebnerBuchberger
-(CommandList& theCommands, int inputIndexBoundVars, Expression& theExpression,
+(CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments, bool useGr)
 { MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
@@ -262,6 +262,6 @@ bool CommandList::fGroebnerBuchberger
     out << "<br> "
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
   ;*/
-  theExpression.MakeStringAtom(theCommands, inputIndexBoundVars, out.str());
+  theExpression.MakeStringAtom(theCommands, out.str());
   return true;
 }

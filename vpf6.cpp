@@ -5421,17 +5421,11 @@ void CommandList::SpecializeBoundVars
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.theOperation==this->opBind())
   { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn.children[0]);
-    if (indexMatching==-1)
-    { std::cout << "This is a programming error. I am asked to specialize the bound variable "
-      << toBeSubbedIn.children[0].ToString()
-      << " but it is not contained as the first element of a matched pair. "
-      << " The matched pairs are: " << matchedPairs.ToString()
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
+    if (indexMatching!=-1)
+    { toBeSubbedIn=matchedPairs.variableImages[indexMatching];
+      //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
+      return;
     }
-    toBeSubbedIn=matchedPairs.variableImages[indexMatching];
-//    this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
-    return;
   }
   for (int i=0; i<toBeSubbedIn.children.size; i++)
     this->SpecializeBoundVars(toBeSubbedIn.children[i], matchedPairs);

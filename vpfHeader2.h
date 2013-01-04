@@ -411,19 +411,19 @@ class SyntacticElement
   int controlIndex;
   int IndexFirstChar;
   int IndexLastCharPlusOne;
-  std::string ErrorString;
+  std::string errorString;
   Expression theData;
   void operator=(const SyntacticElement& other)
   { this->controlIndex=other.controlIndex;
     this->theData=other.theData;
-    this->ErrorString=other.ErrorString;
+    this->errorString=other.errorString;
     this->IndexFirstChar=other.IndexFirstChar;
     this->IndexLastCharPlusOne=other.IndexLastCharPlusOne;
   }
   std::string ToString(CommandList& theBoss)const;
   SyntacticElement()
   { this->controlIndex=0;//controlIndex=0 *MUST* point to the empty control sequence.
-    this->ErrorString="";
+    this->errorString="";
     this->IndexFirstChar=-1;
     this->IndexLastCharPlusOne=-1;
   }

@@ -436,6 +436,7 @@ g_{-2} v_\\lambda\
 //  civilizedInput="a:=(c:=d; d:=f);\na";
 //civilizedInput="({{a}}:={{b}}):=b;";
 //civilizedInput="(f{}{{a}}:={{b}}):=(g{}a:=b);f{}a:=a+5;f{}a;";
+//  civilizedInput="b:=({{b}}:=b)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -5507,12 +5507,12 @@ bool CommandList::ExtractExpressions
   bool success=false;
   if ((*this->CurrentSyntacticStacK).size==this->numEmptyTokensStart+1)
   { SyntacticElement& result=(*this->CurrentSyntacticStacK)[this->numEmptyTokensStart];
-    if (result.ErrorString=="" && result.controlIndex==this->conExpression())
+    if (result.errorString=="" && result.controlIndex==this->conExpression())
     { outputExpression=result.theData;
       success=true;
     }
-    else if (result.ErrorString!="")
-      errorLog << "Syntax error with message: " << result.ErrorString;
+    else if (result.errorString!="")
+      errorLog << "Syntax error with message: " << result.errorString;
     else
     { errorLog << "Syntax error: your command simplifies to a single syntactic element but it is not an expression. <br>";
       errorLog << "It simplifies to:<br> " << this->ElementToStringSyntacticStack();
@@ -5577,8 +5577,8 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
   if (makeTable)
   { out << "</td></tr><tr><td>";
     out << this->theData.ToString(0, 10);
-    if (this->ErrorString!="")
-      out << "</td></tr><tr><td>" << this->ErrorString;
+    if (this->errorString!="")
+      out << "</td></tr><tr><td>" << this->errorString;
     out << "</td></tr></table>";
   }
   return out.str();
@@ -6417,9 +6417,11 @@ bool CommandList::RegisterBoundVariable()
     out << "Syntax error. In the same syntactic scope, the string " << theVarString
     << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
-    theElt.ErrorString=out.str();
+    theElt.errorString=out.str();
+    theElt.controlIndex=this->conError();
     this->DecreaseStackSetCharacterRanges(2);
     this->ReplaceXXYByY();
+    return true;
   }
   if (!this->IsBoundVarInContext(theVarString))
     this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theVarString);

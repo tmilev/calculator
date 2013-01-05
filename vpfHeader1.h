@@ -113,21 +113,31 @@ class Expression;
 //The documentation of pthreads.h can be found at:
 // https://computing.llnl.gov/tutorials/pthreads/#MutexOverview
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//The below class is a wrapper for mutexes. All system dependent machinery for mutexes should be put here.
+//The below class is a wrapper for mutexes. All system dependent machinery for
+//mutexes should be put here.
 //MutexWrapper specification:
 //The mutex has two states: locked and unlocked.
-//When the caller calls UnlockMe() this unlocks the mutex if it were locked, otherwise does nothing, and immediately returns.
+//When the caller calls UnlockMe() this unlocks the mutex if it were locked,
+//otherwise does nothing, and immediately returns.
 //When the caller calls LockMe() there are two cases.
-//1) First, If the mutex is unlocked, the mutex state changes to locked and execution of the caller continues.
-//The preceding two operations are atomic: if the mutex happens to be unlocked, no other processor instruction
+//1) First, If the mutex is unlocked, the mutex state changes to
+//locked and execution of the caller continues.
+//The preceding two operations are atomic: if the mutex happens to be unlocked,
+//no other processor instruction
 //can be executed before the mutex's state is changed to locked.
-//2) Second, if the mutex is locked, the calling thread must pause execution, without consuming computational/processor power.
-// As soon as the mutex is unlocked (by another thread or by the system), the calling thread is allowed to wake up and perform the sequence described in 1).
-// The wake-up time is unspecified/not guaranteed to be immediate: another thread might "jump in" and overtake, again locking the calling thread.
-// In order to have guaranteed wake-up when coordinating two threads only, use the controller object (which uses two mutexes to achieve guaranteed wake-up).
+//2) Second, if the mutex is locked, the calling thread must pause execution,
+//without consuming computational/processor power.
+// As soon as the mutex is unlocked (by another thread or by the system),
+//the calling thread is allowed to wake up and perform the sequence described in 1).
+// The wake-up time is unspecified/not guaranteed to be immediate: another thread
+//might "jump in" and overtake, again locking the calling thread.
+// In order to have guaranteed wake-up when coordinating two threads only, use the
+//controller object (which uses two mutexes to achieve guaranteed wake-up).
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//This is not guaranteed to work on Windows. Might cause crash. Must be fixed to a proper set of Windows routines.
-//This is not possible at the moment since none of my legally owned (but outdated) versions of Windows support the multitasking routines
+//This is not guaranteed to work on Windows. Might cause crash.
+//Must be fixed to a proper set of Windows routines.
+//This is not possible at the moment since none of my legally owned (but outdated)
+//versions of Windows support the multitasking routines
 //that are officially documented at Microsoft's network.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class MutexWrapper
@@ -141,7 +151,8 @@ public:
   bool isLockedUnsafeUseForWINguiOnly()
   { return this->locked;
   }
-  //locks the mutex if the mutex is free. If not it suspends calling thread until mutex becomes free and then locks it.
+  //locks the mutex if the mutex is free. If not it suspends calling thread until
+  //mutex becomes free and then locks it.
   inline void LockMe()
   {
 #ifndef WIN32
@@ -1123,11 +1134,14 @@ public:
   }
   void Clear()
   { //if the hashed list is somewhat sparse, and the index is somewhat large,
-    //(above 20 entries), we clear the hash by finding the occupied hashes and nullifying them one by one.
+    //(above 20 entries), we clear the hash by finding the occupied hashes and
+    //nullifying them one by one.
     //else, we simply go through the entire hash index and nullify everything.
     //Note: for better performance, 20 entries should probably be changed to 100+,
-    //however the smaller number is a good consistency test (it would make it easier to detect a faulty hash).
-    //If this program ever gets to do some hard-core number crunching, the 20 entries should be increased.
+    //however the smaller number is a good consistency test (it would make it easier to
+    //detect a faulty hash).
+    //If this program ever gets to do some hard-core number crunching, the 20 entries
+    //should be increased.
     if (this->IsSparse() && this->TheHashedArrays.size>20)
       for (int i=0; i<this->size; i++)
       { int hashIndex=this->GetHash(this->TheObjects[i]);
@@ -1173,7 +1187,8 @@ public:
         if (theIndex>=this->size)
         { std::cout << "This is a programming error: "
           << " hash lookup array of index " << i << ", entry of index " << j << " reports index "
-          << theIndex << " but I have only " << this->size << " entries. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          << theIndex << " but I have only " << this->size << " entries. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
         if (this->GetHash(this->TheObjects[theIndex])!=(unsigned) i)
@@ -1775,7 +1790,8 @@ void NonPivotPointsToEigenVector
   { if (this->NumRows!=right.NumRows || this->NumCols!=right.NumCols)
     { std::cout << "This is a programming error: attempting to subtract from matrix with "
       << this->NumRows << " rows and "
-      << this->NumCols << " columns " << " a matrix with " << right.NumRows << " rows and " << right.NumCols
+      << this->NumCols << " columns " << " a matrix with " << right.NumRows
+      << " rows and " << right.NumCols
       << " columns. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
@@ -4730,7 +4746,8 @@ public:
   template <class otherType>
   inline void operator/=(const otherType& other)
   { if (other==0)
-    { std::cout << "This is a programming error. A MonmialCollection/= division by zero has been requested: division by zero error should"
+    { std::cout << "This is a programming error. A MonomialCollection division "
+      << "by zero has been requested: division by zero error should"
       << " be handled before calling operator/=. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
       assert(false);

@@ -37,7 +37,7 @@ void CommandList::initPredefinedVars()
    ;
   this->AddNonBoundVarMustBeNew
 ("PolyDivRemainder", &this->fPolynomialDivisionRemainder, "",
-   "Remainder of polynomial division polynomials under division with remainder. ",
+   "Remainder of polynomial division under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\n b:=Polynomial{}(x_1^2+x_3);\
    \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;")
    ;
@@ -380,7 +380,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   this->AddNonBoundVarMustBeNew
   ("GroebnerBuchbergerLex", & this->fGroebnerBuchbergerLex, "",
    "Transforms to Groebner basis using the Buchberger algorithm, relative to the \
-   lexicographic order. In the lexicographic order, monomials are first compared  only by \
+   lexicographic order. In the lexicographic order, monomials are compared  only by \
    lexicographic order.\
    The lexicographic order is inherited from the comparison of the underlying expressions.\
    ",

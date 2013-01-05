@@ -239,9 +239,10 @@ public:
   int indexInOwnersOfNonEmbeddedMe;
   bool flagSystemSolved;
   bool flagSystemProvedToHaveNoSolution;
+  bool flagSystemGroebnerBasisFound;
   int totalNumUnknowns;
   CandidateSSSubalgebra(): owner(0), indexInOwnersOfNonEmbeddedMe(-1), flagSystemSolved(false),
-  flagSystemProvedToHaveNoSolution(false), totalNumUnknowns(0)
+  flagSystemProvedToHaveNoSolution(false), flagSystemGroebnerBasisFound(false), totalNumUnknowns(0)
   {}
   void GetGenericPosGenLinearCombination
   (int indexPosGens, ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
@@ -281,6 +282,8 @@ public:
     this->theHs=other.theHs;
     this->theCoeffLetters=other.theCoeffLetters;
     this->flagSystemSolved=other.flagSystemSolved;
+    this->flagSystemGroebnerBasisFound=other.flagSystemGroebnerBasisFound;
+    this->flagSystemProvedToHaveNoSolution=other.flagSystemProvedToHaveNoSolution;
     this->transformedSystem=other.transformedSystem;
     this->aSolution=other.aSolution;
     this->totalNumUnknowns=other.totalNumUnknowns;

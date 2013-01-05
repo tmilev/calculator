@@ -450,6 +450,7 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
   GroebnerBasisComputation theComputation;
+  this->flagSystemGroebnerBasisFound=
   theComputation.TransformToReducedGroebnerBasis
   (this->transformedSystem, theGlobalVariables, 10000);
   return !this->flagSystemProvedToHaveNoSolution;
@@ -1884,6 +1885,9 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
   out << "<br>The above system after transformation.  ";
   for (int i=0; i<this->transformedSystem.size; i++)
     out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
+  if (!this->flagSystemGroebnerBasisFound)
+    out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
+
   out << "<br><b>For the calculator: </b><br>GroebnerBuchbergerLex{}(";
   for (int i=0; i<this->transformedSystem.size; i++)
   { out << this->transformedSystem[i].ToString(&tempFormat);

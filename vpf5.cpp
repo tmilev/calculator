@@ -179,7 +179,7 @@ bool CommandList::fWeylDimFormula
   }
   int newContext=theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(tempContext);
   RationalFunctionOld rfOne;
-  rfOne.MakeOne(tempContext.VariableImages.size, theCommands.theGlobalVariableS);
+  rfOne.MakeOne(theCommands.theGlobalVariableS);
   Vector<RationalFunctionOld> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
@@ -344,43 +344,6 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   return true;
 }
 
-int ParserNode::EvaluateSplitIrrepOverLeviParabolic
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> theWeightFundCoords, parSel;
-  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
-  WeylGroup& theWeyl=theNode.GetContextLieAlgebra().theWeyl;
-  int theDim=theNode.owner->theHmm.theRange().GetRank();
-  if (! weightNode.GetRootRationalDontUseForFunctionArguments(theWeightFundCoords, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (theWeightFundCoords.size!=theDim || parSel.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  std::stringstream out;
-  out << "Your input weight in fundamental coordinates: "
-  << theWeyl.GetFundamentalCoordinatesFromSimple
-  (theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords))
-  .ToString();
-  out << ". <br>Your input weight in simple coordinates: "
-  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
-  out << ".<br>Your parabolic subalgebra selection: " << parSel.ToString() << ".";
-  ModuleSSalgebra<Rational> theMod;
-
-  Selection emptySel, selParSel;
-  emptySel.init(theDim);
-  theMod.MakeFromHW
-  (theNode.owner->theAlgebras, 0, theWeightFundCoords, emptySel, theGlobalVariables, 1, 0, 0, false);
-  std::string report;
-  selParSel=parSel;
-  theMod.SplitOverLevi(& report, selParSel, theGlobalVariables, 1, 0);
-  out << "<br>" << report;
-
-  theNode.ExpressionType=theNode.typeString;
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
 bool CommandList::fCasimir
 (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
@@ -392,8 +355,8 @@ bool CommandList::fCasimir
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   RationalFunctionOld rfOne, rfZero;
-  rfOne.MakeOne(0, theCommands.theGlobalVariableS);
-  rfZero.MakeZero(0, theCommands.theGlobalVariableS);
+  rfOne.MakeOne(theCommands.theGlobalVariableS);
+  rfZero.MakeZero(theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
@@ -1516,11 +1479,11 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 
 template<class CoefficientType>
 bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
-{ MacroRegisterFunctionWithName("Polynomial<CoefficientType>::FindOneVarRatRoots");
-  if (this->GetNumVars()>1)
+{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::FindOneVarRatRoots");
+  if (this->GetMinNumVars()>1)
     return false;
   output.SetSize(0);
-  if (this->GetNumVars()==0 ||this->size==0)
+  if (this->GetMinNumVars()==0 ||this->IsEqualToZero())
     return true;
   Polynomial<CoefficientType> myCopy;
   myCopy=*this;
@@ -1529,7 +1492,7 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
   this->GetConstantTerm(lowestTerm);
   if (lowestTerm==0)
   { Polynomial<Rational> x1, tempP;
-    x1.MakeMonomial(1, 0,1, 1);
+    x1.MakeMonomiaL(0, 1, 1);
     myCopy.DivideBy(x1, myCopy, tempP);
     List<Rational> tempList;
     bool result=myCopy.FindOneVarRatRoots(tempList);
@@ -1616,8 +1579,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
   Expression tempExpression;
   RationalFunctionOld rfZero, rfOne;
-  rfZero.MakeZero(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
-  rfOne.MakeOne(theHWs[0][0].NumVars, theCommands.theGlobalVariableS);
+  rfZero.MakeZero(theCommands.theGlobalVariableS);
+  rfOne.MakeOne(theCommands.theGlobalVariableS);
   latexTable2 << "\\begin{longtable}{|rll|}\\caption"
   << "{Values of $x_1$ for each $v_{\\lambda,i}$}\\label{tableCriticalValuesvlambda}"
   << "\\endhead";
@@ -3077,9 +3040,9 @@ class Incrementable
 template <class CoefficientType>
 void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& thePoints, const Vector<CoefficientType>& ValuesAtThePoints)
 { Polynomial<CoefficientType> theLagrangeInterpolator, tempP;
-  this->MakeZero(1);
+  this->MakeZero();
   for (int i=0; i<thePoints.size; i++)
-  { theLagrangeInterpolator.MakeConst(1, 1);
+  { theLagrangeInterpolator.MakeConsT(1, 1);
     for (int j=0; j<thePoints.size; j++)
       if (i!=j)
       { tempP.MakeDegreeOne(1, 0, 1, -thePoints[j]);
@@ -3094,17 +3057,21 @@ void Polynomial<CoefficientType>::Interpolate(const Vector<CoefficientType>& the
 template <class CoefficientType>
 bool Polynomial<CoefficientType>::
 FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream* comments)
-{ MacroRegisterFunctionWithName("Polynomial<CoefficientType>::FactorMeOutputIsSmallestDivisor");
-  if (this->NumVars!=1)
+{ MacroRegisterFunctionWithName("Polynomial_CoefficientType::FactorMeOutputIsSmallestDivisor");
+  if (this->GetMinNumVars()>1)
     return false;
+  if (this->GetMinNumVars()==0)
+    return true;
   Polynomial<Rational> thePoly=*this;
   Rational theMultiple=thePoly.ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-  int upperBoundDegDivisors=thePoly.TotalDegree()/2;
+  Rational tempRat=thePoly.TotalDegree()/2;
+  int upperBoundDegDivisors=0;
+  if (!tempRat.IsSmallInteger(&upperBoundDegDivisors))
+    return false;
   List<int> thePoints;
   List<List<unsigned int> > thePrimeFactorsAtPoints;
   List<List<int> > thePrimeFactorsMults;
   List<LargeInt> theValuesAtPoints;
-  Rational tempRat;
   thePoints.SetSize(upperBoundDegDivisors+1);
   theValuesAtPoints.SetSize(upperBoundDegDivisors+1);
   thePrimeFactorsAtPoints.SetSize(upperBoundDegDivisors+1);
@@ -3191,7 +3158,7 @@ bool CommandList::fFactor
       (theCommands.fPolynomial,  theExpression, comments))
     return false;
   Polynomial<Rational> thePoly=theExpression.GetAtomicValue().GetValuE<Polynomial<Rational> >();
-  if (thePoly.GetNumVars()!=1)
+  if (thePoly.GetMinNumVars()>1)
     return theExpression.SetError("I have been taught to factor one variable polys only. ");
   Polynomial<Rational> smallestDiv;
   List<Polynomial<Rational> > theFactors;

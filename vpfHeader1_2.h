@@ -134,10 +134,11 @@ public:
   std::string ToString(bool useHtml, bool useLatex, FormatExpressions* thePolyFormat);
   void ComputeDebugString(){this->DebugString=this->ToString(false, false);}
   Rational Evaluate(const Vector<Rational> & input);
-  void AddLatticeShift(const Polynomial<Rational> & input, const Vector<Rational> & inputShift);
+  void AddLatticeShift(const Polynomial<Rational>& input, const Vector<Rational>& inputShift);
   void AddAssumingLatticeIsSame(const QuasiPolynomial& other);
   void MakeRougherLattice(const Lattice& latticeToRoughenBy);
-  void MakeFromPolyShiftAndLattice(const Polynomial<Rational> & inputPoly, const Vector<Rational> & theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
+  void MakeFromPolyShiftAndLattice
+  (const Polynomial<Rational>& inputPoly, const MonomialP& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables);
   void MakeZeroLatTiceZn(int theDim);
   void MakeZeroOverLattice(Lattice& theLattice);
 //  bool ExtractLinearMapAndTranslationFromSub
@@ -217,7 +218,9 @@ public:
   static void EvaluateIntPoly
   (const Polynomial<LargeInt>& input, const Vector<Rational> & values, Rational& output)
   ;
-  static void MakePolynomialFromOneNormal(Vector<Rational> & normal, Vector<Rational> & shiftRational, int theMult,  Polynomial<Rational> & output);
+  static void MakePolynomialFromOneNormal
+  (Vector<Rational>& normal, MonomialP& shiftRational, int theMult,
+   Polynomial<Rational>& output);
   void ComputeNormals
 (partFractions& owner, Vectors<Rational>& output, int theDimension, Matrix<Rational>& buffer)
   ;
@@ -1897,17 +1900,6 @@ public:
   void ExploitTheCyclicTrick(int i, int j, int k);
   int GetMaxQForWhichBetaMinusQAlphaIsARoot(const Vector<Rational>& alpha, const Vector<Rational>& beta);
   Rational GetConstant(const Vector<Rational> & root1, const Vector<Rational> & root2);
-  void ComputeCommonAdEigenVectors
-(int theDegree, List<ElementUniversalEnveloping<Polynomial<Rational> > >& theGenerators,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& generatorsBeingActedOn,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
- GlobalVariables& theGlobalVariables)
-  ;
-  void ComputeCommonAdEigenVectorsFixedWeight
-(Vector<Rational> & theWeight, Vectors<Rational>& theHs, List<ElementUniversalEnveloping<Polynomial<Rational> > >& theGenerators,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
- GlobalVariables& theGlobalVariables)
-;
   bool CheckClosedness(std::string& output, GlobalVariables& theGlobalVariables);
   void ElementToStringVermaMonomials(std::string& output);
   void ElementToStringEmbedding(std::string& output);
@@ -2292,7 +2284,6 @@ public:
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<Polynomial<CoefficientType> >& input,
    SemisimpleLieAlgebraOrdered& owner)
   ;
-  void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower, const CoefficientType& theRingUnit);
   bool IsAPowerOfASingleGenerator()
   { if (this->size!=1)
@@ -2410,7 +2401,7 @@ public:
   }
   void GetDegree(Polynomial<Rational> & output)
   { if (this->Powers.size==0)
-    { output.MakeZero(0);
+    { output.MakeZero();
       return;
     }
     output=this->Powers[0];
@@ -2562,10 +2553,13 @@ public:
   (GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
-  int GetNumVars()const
-  { if (this->size<1)
-      return 0;
-    return this->theCoeffs[0].GetNumVars();
+  int GetMinNumVars()const
+  { int result=0;
+    for (int i=0; i<this->size; i++)
+    { result=MathRoutines::Maximum(result, this->theCoeffs[i].GetMinNumVars());
+      result=MathRoutines::Maximum(result, (*this)[i].GetMinNumVars());
+    }
+    return result;
   }
   inline void MultiplyBy
   (const MonomialUniversalEnveloping<CoefficientType>& standsOnTheRight, const CoefficientType& theCoeff)
@@ -2579,10 +2573,10 @@ public:
    const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   static void GetCoordinateFormOfSpanOfElements
-  (int numVars, List<ElementUniversalEnveloping<CoefficientType> >& theElements,
-   Vectors<CoefficientType>& outputCoordinates, ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
+  (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
+   Vectors<CoefficientType>& outputCoordinates,
+   ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
    GlobalVariables& theGlobalVariables)
-
 ;
   bool GetCoordsInBasis
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<CoefficientType>& output,
@@ -2600,19 +2594,15 @@ static bool GetBasisFromSpanOfElements
   (List<ElementUniversalEnveloping<CoefficientType> >& theElements,
    Vectors<CoefficientTypeQuotientField>& outputCoords,
    List<ElementUniversalEnveloping<CoefficientType> >& outputTheBasis,
-   const CoefficientTypeQuotientField& theFieldUnit, const CoefficientTypeQuotientField& theFieldZero,
+   const CoefficientTypeQuotientField& theFieldUnit,
+   const CoefficientTypeQuotientField& theFieldZero,
    GlobalVariables& theGlobalVariables)
    ;
-  static void GetCoordinateFormOfSpanOfElements
-  (List<ElementUniversalEnveloping<CoefficientType> >& theElements, Vectors<Rational>& outputCoordinates,
-   ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
-   GlobalVariables& theGlobalVariables)
-   ;
+
   void AssignFromCoordinateFormWRTBasis
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis,
    Vector<CoefficientType>& input, SemisimpleLieAlgebra& owner)
   ;
-  void SetNumVariables(int newNumVars);
   void RaiseToPower(int thePower);
   bool IsAPowerOfASingleGenerator()const
   { if (this->size!=1)
@@ -2673,16 +2663,9 @@ static bool GetBasisFromSpanOfElements
   ElementUniversalEnveloping<CoefficientType>(const ElementUniversalEnveloping<CoefficientType>& other){this->operator=(other);}
 };
 
-class ElementWeylAlgebra
+class ElementWeylAlgebra : public MonomialCollection<MonomialWeylAlgebra, Rational>
 {
-private:
-  //the standard order is as follows. First come the variables, then the
-  //differential operators, i.e. for 2 variables the order is x_1 x_2 \partial_{x_1}\partial_{x_2}
-  Polynomial<Rational> StandardOrder;
 public:
-  //NumVariables must equal 2*StandardOrder.NumVars
-  int NumVariables;
-  std::string ToString(FormatExpressions* theFormat=0);
   void MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars);
   void MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars);
   void MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars);
@@ -2691,52 +2674,44 @@ public:
   void Makedi(int i, int NumVars);
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
-  void MakeZero(int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
   (int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables);
-  bool ActOnPolynomial(Polynomial<Rational> & thePoly);
-  const Polynomial<Rational>& GetStandardOrder()const
-  { return this->StandardOrder;
-  }
-  void GetStandardOrder(Polynomial<Rational>& output)
-  { output=this->StandardOrder;
-  }
+  bool ActOnPolynomial(Polynomial<Rational>& thePoly);
   void SetNumVariables(int newNumVars);
-  void TimesConstant(Rational& theConstant){ this->StandardOrder*=(theConstant);}
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
-  void MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTheRight);
   void LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
   void LieBracketOnTheLeftMakeReport(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRightMakeReport(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables, std::string& report);
   void LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables);
-  void Assign(const ElementWeylAlgebra& other)
-  { this->StandardOrder=(other.StandardOrder);
-    this->NumVariables=other.NumVariables;
-  }
-  void AssignStandardOrder(const Polynomial<Rational>& inputStandardOrder)
-  { this->StandardOrder=inputStandardOrder;
-    this->NumVariables=inputStandardOrder.NumVars/2;
-  }
-  void AssignPolynomial(const Polynomial<Rational>& thePoly)
-  { this->StandardOrder=thePoly;
-    this->StandardOrder.IncreaseNumVariables(thePoly.NumVars);
-    this->NumVariables=thePoly.NumVars;
-  }
-  void Subtract(const ElementWeylAlgebra& other)
-  { this->StandardOrder-=(other.StandardOrder);
-  }
-  void MakeConst(int NumVars, const Rational& theConst);
+  void MakeConst(const Rational& theConst);
   void SubstitutionTreatPartialsAndVarsAsIndependent
   (PolynomialSubstitution<Rational>& theSub)
   ;
+  void MakeOne(int ExpectedNumVars=0)
+  { MonomialWeylAlgebra tempMon;
+    tempMon.polynomialPart.MakeOne(ExpectedNumVars);
+    tempMon.differentialPart.MakeOne(ExpectedNumVars);
+    this->MakeZero();
+    this->AddMonomial(tempMon, 1);
+  }
   void RaiseToPower(int thePower);
-  void Add(const ElementWeylAlgebra& other){ this->StandardOrder+=other.StandardOrder;}
-  void MultiplyTwoMonomials(MonomialP& left, MonomialP& right, Polynomial<Rational> & OrderedOutput);
-  ElementWeylAlgebra(){ this->NumVariables=0; }
+  void MultiplyTwoMonomials
+(MonomialWeylAlgebra& left, MonomialWeylAlgebra& right,
+ ElementWeylAlgebra& output)
+;
+  void AssignPolynomial(const Polynomial<Rational>& input)
+  { this->MakeZero();
+    MonomialWeylAlgebra tempM;
+    for (int i=0; i<input.size; i++)
+    { tempM.polynomialPart=input[i];
+      this->AddMonomial(tempM, input.theCoeffs[i]);
+    }
+  }
   void operator=(const std::string& input);
-  void operator+=(const ElementWeylAlgebra& other){this->Add(other);}
-  inline void operator*=(const ElementWeylAlgebra& other){ this->MultiplyOnTheRight(other);}
-  void operator-=(const ElementWeylAlgebra& other){this->Subtract(other);}
+  inline void operator*=(const Rational& other)
+  { this->MonomialCollection<MonomialWeylAlgebra, Rational>::operator*=(other);
+  }
+  void operator*=(const ElementWeylAlgebra& other);
   bool IsLetter(char theLetter);
   bool IsIndex(char theIndex);
   bool IsNumber(char theNumber);
@@ -3428,7 +3403,6 @@ public:
   (MonomialTensor<int, MathRoutines::IntUnsignIdentity>& theMon)
   ;
   void GetFDchar(charSSAlgMod<CoefficientType>& output);
-  void SetNumVariables(int GoalNumVars);
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
 //  List<ElementUniversalEnveloping<CoefficientType> > theGeneratingWordsLittelmannForm;
 //  HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingMonsPBWform;
@@ -3442,10 +3416,10 @@ public:
   (int generatorIndex, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
  ;
-  int GetNumVars()
+  int GetMinNumVars()
   { if (this->theHWFundamentalCoordsBaseField.size<=0)
       return -1;
-    return this->theHWFundamentalCoordsBaseField[0].GetNumVars();
+    return this->theHWFundamentalCoordsBaseField[0].GetMinNumVars();
   }
   int GetDim()
   { return this->theGeneratingWordsNonReduced.size;
@@ -3897,10 +3871,10 @@ public:
   int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
   void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
   void CopyValue(const ParserNode& other);
-  bool ConvertToType
-(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
-  ;
-  bool ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables);
+//  bool ConvertToType
+//(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
+//  ;
+//  bool ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables);
   //the order of the types matters, they WILL be compared by numerical value!
   enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
   typeUEelement, typeGenVermaElt, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
@@ -3935,24 +3909,6 @@ public:
 ;
   std::string ElementToStringErrorCode(bool useHtml);
   void TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<Rational>& theSub, int theDimension);
-  template <class CoefficientType>
-bool GetRootRationalDontUseForFunctionArguments
-(Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
-;
-  template <class CoefficientType>
-CoefficientType& GetElement();
-  template <class CoefficientType>
-bool GetListDontUseForFunctionArguments
-(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int ExpressionType, int theImpliedNumVars)
-;
-bool GetRootRationalFromFunctionArguments
-(//List<int>& argumentList,
- Vector<Rational> & output, GlobalVariables& theGlobalVariables)
-;
-bool GetRootSRationalDontUseForFunctionArguments
-(
- Vectors<Rational>& output, int& outputDim, GlobalVariables& theGlobalVariables)
-;
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
@@ -3981,9 +3937,6 @@ bool GetRootSRationalDontUseForFunctionArguments
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
   ;
   static int EvaluateLattice
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateMultiplyEltGenVermaOnTheRight
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
   static int EvaluateDrawWeightSupportWithMults
@@ -4339,8 +4292,7 @@ public:
 
   std::string javaScriptDisplayingIndicator;
   std::string afterSystemCommands;
-  int GetNumVarsModulePolys();
-  void SetNumVarsModulePolys(int NumVars);
+//  void SetNumVarsModulePolys(int NumVars);
 //  SemisimpleLieAlgebra theLieAlgebra;
   void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
   { this->ToString(includeLastNode, DebugString, true, theGlobalVariables, theFormat);
@@ -5879,7 +5831,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::MakeZero(int numVars, 
 }
 
 template <class Element>
-void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element &output, const Element& theRingOne, const Element& theRingZero)
+void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element& output, const Element& theRingOne, const Element& theRingZero)
 { int tempI;
   output=theRingOne;
   Element tempRat;
@@ -5895,13 +5847,13 @@ void Matrix<Element>::ComputeDeterminantOverwriteMatrix(Element &output, const E
     this->SwitchTwoRows(i, tempI);
     if(tempI!=i)
       output*=-1;
-    tempRat.Assign(this->elements[i][i]);
+    tempRat=(this->elements[i][i]);
     output*=(tempRat);
     tempRat.Invert();
     this->RowTimesScalar(i, tempRat);
     for (int j=i+1; j<dim; j++)
       if (!this->elements[j][i].IsEqualToZero())
-      { tempRat.Assign(this->elements[j][i]);
+      { tempRat=(this->elements[j][i]);
         tempRat.Minus();
         this->AddTwoRows (i, j, i, tempRat);
       }
@@ -6039,36 +5991,6 @@ Rational ModuleSSalgebra<CoefficientType>::hwtaabfSimpleGensOnly
     theProgressReport->Report(tempStream.str());
   }
   return result;
-}
-
-template<class CoefficientType>
-void ModuleSSalgebra<CoefficientType>::SetNumVariables
-(int GoalNumVars)
-{ for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
-    this->actionsGeneratorsMaT[i].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->actionsGeneratorS.size; i++)
-    for (int j=0; j<this->actionsGeneratorS[i].size; j++)
-      for (int k=0; k<this->actionsGeneratorS[i][j].size; k++)
-        this->actionsGeneratorS[i][j][k].SetNumVariables(GoalNumVars);
-  List<MonomialUniversalEnveloping<CoefficientType> > oldGeneratingWordsNonReduced;
-  oldGeneratingWordsNonReduced=(this->theGeneratingWordsNonReduced);
-  this->theGeneratingWordsNonReduced.Clear();
-  for (int i=0; i<oldGeneratingWordsNonReduced.size; i++)
-  { oldGeneratingWordsNonReduced[i].SetNumVariables(GoalNumVars);
-    this->theGeneratingWordsNonReduced.AddOnTop(oldGeneratingWordsNonReduced[i]);
-  }
-  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
-    for (int j=0; j<this->theGeneratingWordsGrouppedByWeight[i].size; j++)
-      this->theGeneratingWordsGrouppedByWeight[i][j].SetNumVariables(GoalNumVars);
-  for (int i=0; i<this->theBilinearFormsAtEachWeightLevel.size; i++)
-  { this->theBilinearFormsAtEachWeightLevel[i].SetNumVariables(GoalNumVars);
-    this->theBilinearFormsInverted[i].SetNumVariables(GoalNumVars);
-  }
-  for (int i=0; i<this->theHWDualCoordsBaseFielD.size; i++)
-  { this->theHWDualCoordsBaseFielD[i].SetNumVariables(GoalNumVars);
-    this->theHWFundamentalCoordsBaseField[i].SetNumVariables(GoalNumVars);
-    this->theHWSimpleCoordSBaseField[i].SetNumVariables(GoalNumVars);
-  }
 }
 
 template<class Element>
@@ -6261,46 +6183,6 @@ void MonomialUniversalEnveloping<CoefficientType>::MakeZero
 }
 
 template <class CoefficientType>
-bool ParserNode::GetRootRationalDontUseForFunctionArguments
-(Vector<CoefficientType>& output, GlobalVariables& theGlobalVariables)
-{ if (this->ExpressionType!=this->typeArray)
-  { output.SetSize(1);
-    if (!this->ConvertToType(this->typeRational, 0, theGlobalVariables))
-      return false;
-    output.TheObjects[0]=this->rationalValue;
-    return true;
-  }
-  output.SetSize(this->children.size);
-  for (int i=0; i<output.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
-      return false;
-    output.TheObjects[i]=currentNode.rationalValue;
-  }
-  return true;
-}
-
-template <class CoefficientType>
-bool ParserNode::GetListDontUseForFunctionArguments
-(List<CoefficientType>& output, GlobalVariables& theGlobalVariables, int goalExpressionType, int theImpliedNumVars)
-{ if (this->ExpressionType!=this->typeArray)
-  { output.SetSize(1);
-    if (!this->ConvertToType(goalExpressionType, theImpliedNumVars, theGlobalVariables))
-      return false;
-    output.TheObjects[0]=this->GetElement<CoefficientType>();
-    return true;
-  }
-  output.SetSize(this->children.size);
-  for (int i=0; i<output.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(goalExpressionType, theImpliedNumVars, theGlobalVariables))
-      return false;
-    output.TheObjects[i]=currentNode.GetElement<CoefficientType>();
-  }
-  return true;
-}
-
-template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
 (SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -6419,7 +6301,7 @@ void ElementUniversalEnveloping<CoefficientType>::SubstitutionCoefficients
   CoefficientType tempCF;
   for (int i=0; i<this->size; i++)
   { currentMon=this->TheObjects[i];
-    this->theCoeffs[i].Substitution(theSub, this->theCoeffs[i].GetNumVars(), 1);
+    this->theCoeffs[i].Substitution(theSub);
     endResult.AddMonomial(currentMon, tempCF);
   }
   if (theContext!=0)
@@ -6522,9 +6404,10 @@ void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfElements
-  (int numVars, List<ElementUniversalEnveloping<CoefficientType> >& theElements,
-   Vectors<CoefficientType>& outputCoordinates, ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
-   GlobalVariables& theGlobalVariables)
+(List<ElementUniversalEnveloping<CoefficientType> >& theElements,
+ Vectors<CoefficientType>& outputCoordinates,
+ ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials,
+ GlobalVariables& theGlobalVariables)
 { if (theElements.size==0)
     return;
   outputCorrespondingMonomials.MakeZero(*theElements[0].owners, theElements[0].indexInOwners);
@@ -6534,7 +6417,7 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
       outputCorrespondingMonomials.AddOnTopNoRepetition(theElements[i][j]);
   outputCoordinates.SetSize(theElements.size);
   Polynomial<Rational>  ZeroPoly;
-  ZeroPoly.MakeZero((int)numVars);
+  ZeroPoly.MakeZero();
   for (int i=0; i<theElements.size; i++)
   { Vector<CoefficientType>& current=outputCoordinates[i];
     current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
@@ -6619,27 +6502,6 @@ bool MonomialUniversalEnvelopingOrdered<CoefficientType>::GetElementUniversalEnv
 }
 
 template <class CoefficientType>
-void ElementUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int newNumVars)
-{ //this->ComputeDebugString();
-  if (this->size==0)
-    return;
-  int currentNumVars=this->TheObjects[0].Coefficient.NumVars;
-  if (currentNumVars==newNumVars)
-    return;
-  ElementUniversalEnvelopingOrdered Accum;
-  Accum.MakeZero(*this->owner);
-  MonomialUniversalEnvelopingOrdered<CoefficientType> tempMon;
-  for (int i=0; i<this->size; i++)
-  { tempMon=this->TheObjects[i];
-    tempMon.SetNumVariables(newNumVars);
-    Accum.AddMonomial(tempMon);
-  }
-//  Accum.ComputeDebugString();
-  this->operator=(Accum);
- // this->ComputeDebugString();
-}
-
-template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::SetNumVariables(int newNumVars)
 { //the below commented out code causes problems in substitution code!
   //if (this->Coefficient.NumVars==newNumVars)
@@ -6677,7 +6539,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::GetCoordinateFormOfSpan
       outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
   outputCoordinates.SetSize(theElements.size);
   Polynomial<Rational>  ZeroPoly;
-  ZeroPoly.MakeZero((int)numVars);
+  ZeroPoly.MakeZero();
   for (int i=0; i<theElements.size; i++)
   { Vector<Polynomial<CoefficientType> >& current=outputCoordinates[i];
     current.initFillInObject(outputCorrespondingMonomials.size, ZeroPoly);
@@ -6694,8 +6556,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficien
 (PolynomialSubstitution<Rational>& theSub)
 { if (theSub.size<1)
     return;
-  this->Coefficient.Substitution(theSub, theSub[0].NumVars);
-  this->SetNumVariables(theSub[0].NumVars);
+  this->Coefficient.Substitution(theSub);
 }
 
 template <class CoefficientType>
@@ -6721,7 +6582,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeConst
   if (coeff.IsEqualToZero())
     return;
   Polynomial<Rational>  tempP;
-  tempP.MakeConst((int)numVars, coeff);
+  tempP.MakeConsT(coeff, numVars);
   tempMon.MakeConst(inputOwners, inputIndexInOwners);
   this->AddMonomial(tempMon, tempP);
 }
@@ -6763,30 +6624,6 @@ void ElementUniversalEnveloping<CoefficientType>::operator*=
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::SetNumVariables(int newNumVars)
-{ //this->ComputeDebugString();
-  if (this->size==0)
-    return;
-  int currentNumVars=this->theCoeffs[0].NumVars;
-  if (currentNumVars==newNumVars)
-    return;
-  ElementUniversalEnveloping<CoefficientType> Accum;
-  Accum.MakeZero(*this->owners, this->indexInOwners);
-  MonomialUniversalEnveloping<CoefficientType> tempMon;
-  CoefficientType tempCoeff;
-  for (int i=0; i<this->size; i++)
-  { tempMon=this->TheObjects[i];
-    tempMon.SetNumVariables(newNumVars);
-    tempCoeff=this->theCoeffs[i];
-    tempCoeff.SetNumVariables(newNumVars);
-    Accum.AddMonomial(tempMon, tempCoeff);
-  }
-//  Accum.ComputeDebugString();
-  this->operator=(Accum);
- // this->ComputeDebugString();
-}
-
-template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::RaiseToPower(int thePower)
 { ElementUniversalEnveloping<CoefficientType> buffer;
   buffer=*this;
@@ -6818,8 +6655,8 @@ template <class CoefficientType>
 void MonomialUniversalEnvelopingOrdered<CoefficientType>::MultiplyByGeneratorPowerOnTheRight(int theGeneratorIndex, int thePower)
 { if (thePower==0)
     return;
-  Polynomial<Rational>  tempP;
-  tempP.MakeConst(this->Coefficient.NumVars, thePower);
+  Polynomial<Rational> tempP;
+  tempP.MakeConsT(thePower);
   this->MultiplyByGeneratorPowerOnTheRight(theGeneratorIndex, tempP);
 }
 
@@ -7045,9 +6882,9 @@ void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Elem
 { this->SetSize(theMat.NumCols);
   MonomialP tempM;
   for (int i=0; i<this->size; i++)
-  { this->TheObjects[i].MakeZero((int)theMat.NumRows-1);
+  { this->TheObjects[i].MakeZero();
     for (int j=0; j<theMat.NumRows-1; j++)
-    { tempM.MakeConst((int)theMat.NumRows-1);
+    { tempM.MakeOne(theMat.NumRows-1);
       tempM[j]=1;
       this->TheObjects[i].AddMonomial(tempM, theMat.elements[j][i]);
     }
@@ -7587,7 +7424,7 @@ Vector<CoefficientType> WeylGroup::GetSimpleCoordinatesFromFundamental
   Vector<CoefficientType> result;
   result=inputInFundamentalCoords;
 //  std::cout << "<br>transition matrix from fundamental to simple: " << tempMat.ToString();
-  tempMat.ActOnVectorColumn(result, result[0].GetZero());
+  tempMat.ActOnVectorColumn(result);
   return result;
 }
 

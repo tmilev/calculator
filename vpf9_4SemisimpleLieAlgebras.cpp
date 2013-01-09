@@ -450,9 +450,10 @@ bool CandidateSSSubalgebra::SolveSeparableQuadraticSystemRecursively
   this->flagSystemProvedToHaveNoSolution=false;
   this->transformedSystem=this->theSystemToSolve;
   GroebnerBasisComputation theComputation;
+  theComputation.MaxNumComputations=10000;
   this->flagSystemGroebnerBasisFound=
   theComputation.TransformToReducedGroebnerBasis
-  (this->transformedSystem, theGlobalVariables, 10000);
+  (this->transformedSystem, theGlobalVariables);
   return !this->flagSystemProvedToHaveNoSolution;
 }
 
@@ -1887,14 +1888,22 @@ std::string CandidateSSSubalgebra::ToString(FormatExpressions* theFormat)const
     out << "<br>" << this->transformedSystem[i].ToString(&tempFormat) << "= 0";
   if (!this->flagSystemGroebnerBasisFound)
     out << "<br><b>Failed to find Groebner basis of the above system (the computation is too large).</b>";
-
-  out << "<br><b>For the calculator: </b><br>GroebnerBuchbergerLex{}(";
+  if (this->owner!=0 && this->theHorbitIndices.size>0)
+    if (this->theHorbitIndices[0].size>0)
+      if (this->theUnknownPosGens.size>0)
+      { slTwoSubalgebra& theFirstSl2=this->owner->theSl2s[ this->theHorbitIndices[0][0]];
+        out << "<br>First positive generator seed realization.<br> "
+        << this->theUnknownPosGens[0].ToString(theFormat) << " -> " << theFirstSl2.theE.ToString(theFormat);
+        out << "<br>First negative generator seed realization.<br> "
+        << this->theUnknownNegGens[0].ToString(theFormat) << " -> " << theFirstSl2.theF.ToString(theFormat);
+      }
+  out << "<br><b>For the calculator: </b><br>GroebnerLexUpperLimit{}(";
   for (int i=0; i<this->transformedSystem.size; i++)
-  { out << this->transformedSystem[i].ToString(&tempFormat);
-    if (i!=this->transformedSystem.size-1)
-      out << ", ";
+  { out << this->transformedSystem[i].ToString(&tempFormat)
+    //if (i!=this->transformedSystem.size-1)
+    << ", ";
   }
-  out << ")";
+  out << " 10000)";
   if (this->flagSystemSolved)
   { out << "<br>Solution of above system: " << this->aSolution.ToString();
   }
@@ -1907,7 +1916,9 @@ bool PolynomialSystem::IsALinearSystemWithSolution(Vector<Rational>* outputSolut
     return false;
   Matrix<Rational> theSystem;
   Matrix<Rational> theColumnVect, theSolution;
-  int numVars=(*this)[0].NumVars;
+  int numVars=0;
+  for (int i=0; i<this->size; i++)
+    numVars=MathRoutines::Maximum(numVars, (*this)[i].GetMinNumVars());
   theSystem.init(this->size, numVars);
   theSystem.NullifyAll();
   theColumnVect.init(this->size, 1);

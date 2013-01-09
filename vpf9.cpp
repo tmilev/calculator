@@ -733,6 +733,12 @@ FormatExpressions::GetMonOrder<MonomialChar<RationalFunctionOld> >()
 }
 
 template<>
+typename List<MonomialWeylAlgebra>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<MonomialWeylAlgebra>()
+{ return 0;
+}
+
+template<>
 typename List<MonomialUniversalEnveloping<RationalFunctionOld> >::OrderLeftGreaterThanRight
 FormatExpressions::GetMonOrder<MonomialUniversalEnveloping<RationalFunctionOld> >()
 { return 0;
@@ -806,6 +812,8 @@ FormatExpressions::FormatExpressions()
   this->NumAmpersandsPerNewLineForLaTeX=0;
   this->MaxRecursionDepthPerExpression=500;
   this->thePolyMonOrder=0;
+  this->flagExpressionIsFinal=false;
+  this->flagExpressionNewLineAllowed=true;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -1772,7 +1780,7 @@ void partFraction::PrepareFraction
     powerDropB=0;
   else
     powerDropA=0;
-  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetNumVars());
+  outputCommonCoeff.MakeOne(AminusNbetaPoly.GetMinNumVars());
   for (int i=0; i<powerDropB; i++)
     outputCommonCoeff*=(AminusNbetaPoly);
   output.DecreasePowerOneFrac(indexA, powerDropA);
@@ -1932,7 +1940,7 @@ void partFraction::GetNElongationPolyWithMonomialContribution
 (List<Vector<Rational> >& startingVectors, List<int>& theSelectedIndices, List<int>& theCoefficients,
  List<int>& theGreatestElongations, int theIndex, Polynomial<LargeInt>& output, int theDimension)
 { MonomialP tempM;
-  tempM.MakeConst(theDimension);
+  tempM.MakeOne(theDimension);
   for (int i=0; i<theIndex; i++)
   { int tempI= theSelectedIndices[i];
     for (int j=0; j<theDimension; j++)
@@ -2037,7 +2045,7 @@ void partFraction::ApplySzenesVergneFormulA
     oneFracWithMultiplicitiesAndElongations& currentFrac=tempFrac.TheObjects[theSelectedIndices.TheObjects[i]];
     int LargestElongation= currentFrac.GetLargestElongation();
     currentFrac.AddMultiplicity(-1, LargestElongation);
-    tempM.monBody.SetSize(theDim);
+    tempM.MakeOne(theDim);
     for (int j=0; j<i; j++)
     { int tempElongation=(int) this->TheObjects[theSelectedIndices[j]].GetLargestElongation();
       for (int k=0; k<theDim; k++)
@@ -2114,9 +2122,9 @@ void partFraction::ComputeIndicesNonZeroMults()
 
 void partFraction::GetAlphaMinusNBetaPoly
 (partFractions& owner, int indexA, int indexB, int n, Polynomial<LargeInt>& output)
-{ output.MakeZero(owner.AmbientDimension);
+{ output.MakeZero();
   MonomialP tempM;
-  tempM.monBody.SetSize(owner.AmbientDimension);
+  tempM.MakeOne(owner.AmbientDimension);
   for (int i=0; i<n; i++)
   { for (int j=0; j<owner.AmbientDimension; j++)
       tempM[j]= owner.startingVectors[indexA][j]- owner.startingVectors[indexB][j]*(i+1);
@@ -2127,9 +2135,9 @@ void partFraction::GetAlphaMinusNBetaPoly
 void partFraction::GetNElongationPoly
 (List<Vector<Rational> >& startingVectors, int index, int baseElongation, int LengthOfGeometricSeries,
  Polynomial<LargeInt>& output, int theDimension)
-{ output.MakeZero(theDimension);
+{ output.MakeZero();
   MonomialP tempM;
-  tempM.monBody.SetSize(theDimension);
+  tempM.MakeOne(theDimension);
   if (LengthOfGeometricSeries>0)
     for (int i=0; i<LengthOfGeometricSeries; i++)
     { for (int j=0; j<theDimension; j++)
@@ -2146,14 +2154,18 @@ void partFraction::GetNElongationPoly
 }
 
 void partFraction::MakePolynomialFromOneNormal
-(Vector<Rational>& normal, Vector<Rational>& shiftRational, int theMult, Polynomial<Rational> & output)
+(Vector<Rational>& normal, MonomialP& shiftRational, int theMult, Polynomial<Rational>& output)
 { int theDimension= normal.size;
-  output.MakeConst(theDimension, 1);
+  output.MakeOne(theDimension);
   if (theMult==1)
     return;
   Rational tempRat, tempRat2;
   Polynomial<Rational> tempP;
-  tempRat=Vector<Rational>::ScalarEuclidean(normal, shiftRational);
+  Vector<Rational> shiftRationalVector;
+  shiftRationalVector.MakeZero(normal.size);
+  for (int i=0; i<normal.size; i++)
+    shiftRationalVector[i]=shiftRational[i];
+  tempRat=Vector<Rational>::ScalarEuclidean(normal, shiftRationalVector);
   for (int j=0; j<theMult-1; j++)
   { tempP.MakeLinPolyFromRootNoConstantTerm(normal);
     if (partFraction::flagAnErrorHasOccurredTimeToPanic)
@@ -2648,8 +2660,8 @@ void partFraction::GetPolyReduceMonomialByMonomial
     return;
   }
   MonomialP tempMon;
-  tempMon.MakeConst(owner.AmbientDimension);
-  output.MakeZero(owner.AmbientDimension);
+  tempMon.MakeOne(owner.AmbientDimension);
+  output.MakeZero();
   LargeInt theCoeff=1;
   if (StartMonomialPower>0)
   { if (DenPowerReduction!=startDenominatorPower)
@@ -3139,7 +3151,7 @@ void oneFracWithMultiplicitiesAndElongations::GetPolyDenominator(Polynomial<Larg
 { assert(MultiplicityIndex<this->Multiplicities.size);
   MonomialP tempM;
   output.MakeOne(theExponent.size);
-  tempM.monBody.SetSize(theExponent.size);
+  tempM.MakeOne(theExponent.size);
   for (int i=0; i<theExponent.size; i++)
     tempM[i]=theExponent[i]*this->Elongations[MultiplicityIndex];
   output.AddMonomial(tempM, -1);
@@ -3501,11 +3513,20 @@ int SelectionWithMultiplicities::CardinalitySelectionWithoutMultiplicities()
 { return this->elements.size;
 }
 
-int ::SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
+int SelectionWithDifferentMaxMultiplicities::getTotalNumSubsets()
 { int result=1;
   for (int i=0; i<this->MaxMultiplicities.size; i++)
-    result*=(this->MaxMultiplicities.TheObjects[i]+1);
-  assert(result>=0);
+  { result*=(this->MaxMultiplicities[i]+1);
+    if (result<0)
+    { std::cout << "This is a programming error: I was asked to enumerate all "
+      << " subsets of a multi-set, however the number of subsets is larger than  "
+      << " the maximum value allowed for int on the system (on a 32 bit machine that is around "
+      << " 2 billion). This can be fixed, however I do not have time at the moment. If you "
+      << " encounter this error, write me an email and I will take the time to fix this issue. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
   return result;
 }
 
@@ -3788,9 +3809,9 @@ void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool 
 void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
 { int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
   Polynomial<Rational>  AscalarB, tempP;
-  AscalarB.MakeZero((int)this->CartanSymmetric.NumRows);
+  AscalarB.MakeZero();
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempP.MakeZero(this->CartanSymmetric.NumRows);
+  { tempP.MakeZero();
     tempP=theRoot[i];
     tempP*=(CartanSymmetric.elements[index][i]);
     AscalarB+=(tempP);
@@ -4810,19 +4831,19 @@ int KLpolys::ComputeProductfromSimpleReflectionsActionList(int x, int y)
 void KLpolys::ComputeKLxy(int x, int y)
 { Polynomial<Rational> Accum, tempP1, tempP2;
   if (x==y)
-  { this->theKLPolys[x][y].MakeConst(1, 1);
+  { this->theKLPolys[x][y].MakeOne(1);
     return;
   }
   if (!this->IndexGEQIndex(y, x))
-  { this->theKLPolys[x][y].MakeZero(1);
+  { this->theKLPolys[x][y].MakeZero();
     return;
   }
 //  std::cout << " <br>Computing KL " << x << ", " << y << "; ";
-  Accum.MakeZero(1);
+  Accum.MakeZero();
   MonomialP tempM;
   for (int i=0; i<this->size; i++)
     if (this->IndexGreaterThanIndex(i, x) && this->IndexGEQIndex(y, i))
-    { tempP1.MakeZero(1);
+    { tempP1.MakeZero();
       for (int j=0; j<this->theRPolys[x][i].size; j++)
       { tempM=this->theRPolys[x][i][j];
         tempM.Invert();
@@ -4835,7 +4856,7 @@ void KLpolys::ComputeKLxy(int x, int y)
         tempI=-1;
       Rational powerQ= -(*this->TheWeylGroup)[x].size+2*(*this->TheWeylGroup)[i].size -(*this->TheWeylGroup)[y].size;
       powerQ/=2;
-      tempP2.MakeMonomial(1, 0, powerQ, tempI);
+      tempP2.MakeMonomiaL(0, powerQ, tempI, 1);
       tempP1*=tempP2;
       tempP1*=(this->theKLPolys[i][y]);
       if (!this->Explored[i])
@@ -4848,12 +4869,12 @@ void KLpolys::ComputeKLxy(int x, int y)
       }
       Accum+=tempP1;
     }
-  this->theKLPolys[x][y].MakeZero(1);
+  this->theKLPolys[x][y].MakeZero();
   Rational lengthDiff= (*this->TheWeylGroup)[y].size-(*this->TheWeylGroup)[x].size;
   lengthDiff/=2;
 //  std::cout << "Accum: " << Accum.ToString();
   for (int i=0; i<Accum.size; i++)
-    if(Accum[i].monBody.IsPositiveOrZero())
+    if(Accum[i].HasPositiveOrZeroExponents())
     { tempM=Accum[i];
       tempM[0].Minus();
       tempM[0]+=lengthDiff;
@@ -4870,7 +4891,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
     return true;
   }
   if (this->IndexGreaterThanIndex(x, y))
-  { this->theRPolys[x][y].MakeZero(1);
+  { this->theRPolys[x][y].MakeZero();
     return true;
   }
   int sx= this->SimpleReflectionsActionList[x][SimpleReflectionIndex];
@@ -4889,7 +4910,7 @@ bool KLpolys::ComputeRxy(int x, int y, int SimpleReflectionIndex)
   }
   if (!boolX && boolY)
   { Polynomial<Rational> qMinus1;
-    qMinus1.MakeMonomial(1, 0, 1, 1);
+    qMinus1.MakeMonomiaL(0, 1, 1, 1);
     this->theRPolys[x][y]=qMinus1;
     this->theRPolys[x][y]*=(this->theRPolys[sx][sy]);
     qMinus1-=1;
@@ -4949,31 +4970,9 @@ void partFraction::EvaluateIntPoly
   //if(this->flagAnErrorHasOccurredTimeToPanic)
   //{ output.ToString(tempS1);
   //}
-  for (int i=0; i<input.size; i++)
-  { Rational tempRat1, tempRat2;
-    tempRat1=input.theCoeffs[i];
-    for (int j=0; j<input.NumVars; j++)
-    { tempRat2=values[j];
-      if (tempRat2.IsEqualToZero())
-      { tempRat1.MakeZero();
-        break;
-      }
-      tempRat2.RaiseToPower(input[i][j].NumShort);
-      tempRat1.MultiplyBy(tempRat2);
-      ParallelComputing::SafePointDontCallMeFromDestructors();
-    }
-//    if(this->flagAnErrorHasOccurredTimeToPanic)
-//    { output.ToString(tempS2);
-//      tempRat1.ToString(tempS1);
-//      if (i==5)
-//      { //Rational::flagAnErrorHasOccurredTimeToPanic=true;
-//      }
-//    }
-    output+=(tempRat1);
-//    if(this->flagAnErrorHasOccurredTimeToPanic)
-//    { output.ToString(tempS2);
-//    }
-  }
+  Polynomial<Rational> tempInput;
+  tempInput=input; //<-implicit type conversion here!
+  tempInput.Evaluate(values, output);
 }
 
 void LaTeXProcedures::beginPSTricks(std::fstream& output)

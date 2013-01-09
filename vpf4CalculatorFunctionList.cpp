@@ -385,7 +385,30 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    The lexicographic order is inherited from the comparison of the underlying expressions.\
    ",
    "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
-
+  this->AddNonBoundVarMustBeNew
+  ("GroebnerLexUpperLimit", & this->fGroebnerBuchbergerLexUpperLimit, "",
+   "Attempts to transforms to Groebner basis using the Buchberger algorithm, relative to the \
+   lexicographic order. The last argument gives an upper bound to the polynomial operations that\
+   can be done by the algorithm. If the upper bound is exceeded, the algorithm produces a \
+   (non-Groebner) ideal basis and terminates. \
+   The lexicographic order is inherited from the comparison of the underlying expressions.\
+   ",
+   "GroebnerLexUpperLimit{}(\
+   x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+2x_{2}x_{14}+x_{1}x_{13}-3, \
+   2x_{6}x_{18}+3x_{5}x_{17}+x_{4}x_{16}+3x_{3}x_{15}+2x_{2}x_{14}+x_{1}x_{13}-4, \
+   x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, \
+   x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, \
+   x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+x_{3}x_{15}+x_{2}x_{14}-2, \
+   x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, \
+   x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, \
+   x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, \
+   x_{12}x_{24}+2x_{11}x_{23}+x_{10}x_{22}+2x_{9}x_{21}+2x_{8}x_{20}+x_{7}x_{19}-3, \
+   x_{11}x_{23}+x_{10}x_{22}+x_{9}x_{21}+2x_{8}x_{20}+x_{7}x_{19}-2, \
+   x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, \
+   x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, \
+   x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, \
+   x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, \
+   x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, 10000 )");
   this->AddNonBoundVarMustBeNew
   ("experimentalPrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

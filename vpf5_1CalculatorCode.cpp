@@ -14,7 +14,7 @@ bool CommandList::fGCDOrLCM
   if (theExpression.errorString!="")
     return true;
   Polynomial<Rational> outputP;
-  std::cout << "context: " << theContext.VariableImages.ToString();
+//  std::cout << "context: " << theContext.VariableImages.ToString();
   if (doGCD)
     RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
   else
@@ -69,10 +69,10 @@ bool CommandList::fSolveSeparableBilinearSystem
   std::cout << "<br>The mons in play: <br>" << theMonsInPlay.ToString();
   std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);
   Selection linearIndices;
-  linearIndices.MakeFullSelection(theContext.VariableImages.size);
+  linearIndices.MakeFullSelection(numVars);
   for (int i=0; i<theMonsInPlay.size; i++)
   { bool foundIndex=false;
-    for (int j=theMonsInPlay[i].monBody.size-1; j>=0; j--)
+    for (int j=theMonsInPlay[i].GetMinNumVars()-1; j>=0; j--)
       if (theMonsInPlay[i][j]!=0)
       { if (foundIndex)
           linearIndices.RemoveSelection(j);
@@ -83,7 +83,7 @@ bool CommandList::fSolveSeparableBilinearSystem
   theSystem.init(thePolys.size, linearIndices.CardinalitySelection);
   theConstantTerms.init(thePolys.size, 1);
   RationalFunctionOld theZero;
-  theZero.MakeZero(theContext.VariableImages.size, theCommands.theGlobalVariableS);
+  theZero.MakeZero(theCommands.theGlobalVariableS);
   theSystem.NullifyAll(theZero);
   theConstantTerms.NullifyAll(theZero);
   MonomialP newMon;
@@ -93,17 +93,17 @@ bool CommandList::fSolveSeparableBilinearSystem
     { MonomialP& curMon=thePolys[j][k];
       bool found=false;
       for (int i=0; i<linearIndices.CardinalitySelection; i++)
-        if (curMon.monBody[i]!=0)
+        if (curMon[i]!=0)
         { newMon=curMon;
-          newMon.monBody[i]=0;
-          tempP.MakeZero(numVars);
+          newMon[i]=0;
+          tempP.MakeZero();
           tempP.AddMonomial(newMon, thePolys[j].theCoeffs[k]);
           theSystem(j,i)+=tempP;
           found=true;
           break;
         }
       if (!found)
-      { tempP.MakeZero(numVars);
+      { tempP.MakeZero();
         tempP.SubtractMonomial(curMon, thePolys[j].theCoeffs[k]);
         theConstantTerms(j,0)+=tempP;
       }
@@ -199,9 +199,24 @@ bool CommandList::fEmbedSSalgInSSalg
   return true;
 }
 
+bool CommandList::fGroebnerBuchbergerLexUpperLimit
+(CommandList& theCommands, Expression& theExpression,
+ std::stringstream* comments)
+{ MacroRegisterFunctionWithName("CommandList::fGroebnerBuchbergerLexUpperLimit");
+  if (theExpression.children.size<2)
+    return theExpression.SetError("Function takes at least two arguments. ");
+  Expression& numComputationsE=*theExpression.children.LastObject();
+  int upperNumComputations=0;
+  if (!numComputationsE.IsSmallInteger(&upperNumComputations))
+    return theExpression.SetError("Failed to convert last argument of the expression to a small integer. ");
+
+  theExpression.children.SetSize(theExpression.children.size-1);
+  return theCommands.fGroebnerBuchberger(theCommands, theExpression, comments, false, upperNumComputations);
+}
+
 bool CommandList::fGroebnerBuchberger
 (CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr)
+ std::stringstream* comments, bool useGr, int upperBoundComputations)
 { MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
@@ -232,8 +247,10 @@ bool CommandList::fGroebnerBuchberger
 
   GroebnerBasisComputation theGroebnerComputation;
   theGroebnerComputation.theMonOrdeR=
-  useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographic :
+  useGr ? MonomialP::LeftIsGEQTotalDegThenLexicographicLastVariableStrongest :
   MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
+  theGroebnerComputation.MaxNumComputations=upperBoundComputations;
+  bool success=
   theGroebnerComputation.TransformToReducedGroebnerBasis
   (outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
@@ -245,15 +262,31 @@ bool CommandList::fGroebnerBuchberger
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
   theFormat.thePolyMonOrder= useGr ?
-  MonomialP::LeftGreaterThanTotalDegThenLexicographic :
+  MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest :
   MonomialP::LeftGreaterThanLexicographicLastVariableStrongest;
   for(int i=0; i<inputVector.size; i++)
     out << "<br>"
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
-  out << "<br>Minimal Groebner basis algorithm 1(" << outputGroebner.size << " elements):";
-  for(int i=0; i<outputGroebner.size; i++)
-    out << "<br> "
-    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
+  if (success)
+  { out << "<br>Minimal Groebner basis with "
+    <<  outputGroebner.size << " elements, computed using algorithm 1.";
+    for(int i=0; i<outputGroebner.size; i++)
+      out << "<br> "
+      << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
+  } else
+  { out << "<br>Minimal Groebner basis not computed due to exceeding the user-given limit of  "
+    << upperBoundComputations << " polynomial operations. ";
+    out << "<br>A partial result, a (non-Groebner) basis of the ideal with "
+    << theGroebnerComputation.theBasiS.size
+    << " elements follows ";
+    out << "<br>GroebnerLexUpperLimit{}(";
+    for (int i=0; i<theGroebnerComputation.theBasiS.size; i++)
+    { out << theGroebnerComputation.theBasiS[i].ToString(&theFormat);
+      if (i!=theGroebnerComputation.theBasiS.size-1)
+        out << ", <br>";
+    }
+    out << ");";
+  }
 /*  theGroebnerComputation.TransformToReducedGroebnerBasisImprovedAlgorithm
 (outputGroebner2, theCommands.theGlobalVariableS);
 

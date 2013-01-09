@@ -299,10 +299,10 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   Vector<Polynomial<Rational> > tempVect, tempVect2;
   tempVect.SetSize(input.theDomain().theWeyl.GetDim()+input.theRange().theWeyl.GetDim());
   for (int i=0; i<tempVect.size; i++)
-    tempVect[i].MakeMonomial(tempVect.size, i, 1, (Rational) 1);
+    tempVect[i].MakeMonomiaL(i, 1, (Rational) 1, tempVect.size);
   tempMatPoly.init(input.theDomain().theWeyl.GetDim(), tempVect.size);
-  Polynomial<Rational>  polyZero;
-  polyZero.MakeZero(tempVect.size);
+  Polynomial<Rational> polyZero;
+  polyZero.MakeZero();
   theFormat.polyAlphabeT.SetSize(5);
   theFormat.polyAlphabeT[0]="x_1";
   theFormat.polyAlphabeT[1]="x_2";
@@ -323,7 +323,7 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   { Matrix<Rational> & currentLoExt=this->theLinearOperatorsExtended[i];
     for (int j=0; j<currentLoExt.NumRows; j++)
       for (int k=0; k<currentLoExt.NumCols; k++)
-        tempMatPoly.elements[j][k].MakeConst(tempVect.size, currentLoExt.elements[j][k]);
+        tempMatPoly.elements[j][k].MakeConsT(currentLoExt.elements[j][k], tempVect.size);
     tempMatPoly.ActOnVectorColumn(tempVect, tempVect2, polyZero);
     for (int j=0; j<tempVect2.size; j++)
       tempVect2[j]+=this->theTranslationsProjectedBasisChanged[i][j];
@@ -582,18 +582,6 @@ int ParserNode::EvaluateCreateFromDirectionsAndSalamiSlice
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateG2InB3Computation
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> parSel;
-  theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables);
-  if (parSel.size!=3)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis.IncrementComputation
-    (parSel, theGlobalVariables)
-    ;
-  return theNode.errorNoError;
-}
-
 void GeneralizedVermaModuleCharacters::ReadFromDefaultFile(GlobalVariables* theGlobalVariables)
 { std::fstream input;
   if (!CGI::FileExists( "/home/todor/math/vectorpartition/trunk/GenVermaComputation.txt"))
@@ -636,14 +624,8 @@ std::string GeneralizedVermaModuleCharacters::ElementToStringMultiplicitiesRepor
 int ParserNode::EvaluateG2InB3MultsParabolic
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vector<Rational> highestWeight, parSel;
-  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
-  if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
-  if (!nodeSel.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
-  if (highestWeight.size!=3 || parSel.size!=3)
-    return theNode.SetError(theNode.errorDimensionProblem);
+//  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
+//  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
 //  theNode.owner->initTestAlgebraNeedsToBeRewrittenG2InB3(theGlobalVariables);
   theNode.outputString=tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis
   .ComputeMultsLargerAlgebraHighestWeight(highestWeight, parSel, *theNode.owner, theGlobalVariables);
@@ -1652,7 +1634,7 @@ int ParserNode::EvaluateWeylAction
   out << "Number of elements: " << theWeyl.size << "<br>";
   Vector<RationalFunctionOld> theOrbitElement;
   RationalFunctionOld RFZero;
-  RFZero.MakeZero(theNode.impliedNumVars, &theGlobalVariables);
+  RFZero.MakeZero(&theGlobalVariables);
   std::stringstream tempStream;
   tempStream << "\\begin{array}{rcl}";
   for (int i=0; i<theWeyl.size; i++)
@@ -1711,7 +1693,7 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
 { Polynomial<Rational> & theLinPoly=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].polyValue.GetElement();
  // int numNonParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[1]].intValue;
   //int numParams =  theNode.owner->TheObjects[theArgumentList.TheObjects[2]].intValue;
-  ParserNode& theShiftNode= theNode.owner->TheObjects[theArgumentList[1]];
+//  ParserNode& theShiftNode= theNode.owner->TheObjects[theArgumentList[1]];
   Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList[2]].theLattice.GetElement();
   Cone& currentCone=theNode.owner->TheObjects[theArgumentList[3]].theCone.GetElement();
   int numNonParam=theNode.owner->TheObjects[theArgumentList[4]].intValue;
@@ -1726,8 +1708,6 @@ int ParserNode::EvaluateFindExtremaInDirectionOverLattice
     for (int i=0; i<theNEqBeforeCheck.size; i++)
       theNEq[i]=theNEqBeforeCheck[i];
   }
-  if (!theShiftNode.GetRootRationalDontUseForFunctionArguments(theShift, theGlobalVariables))
-    return theNode.SetError(errorDimensionProblem);
   if (theShift.size!=theNEq.size-1)
     return theNode.SetError(errorDimensionProblem);
 /*  if (theNEq.size!=numNonParams+numParams+1)
@@ -1759,8 +1739,6 @@ int ParserNode::EvaluateSliceCone
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Cone& theCone=theNode.owner->TheObjects[theArgumentList.TheObjects[0]].theCone.GetElement();
   Vector<Rational> theDirection;
-  if (! theNode.owner->TheObjects[theArgumentList.TheObjects[1]].GetRootRationalDontUseForFunctionArguments(theDirection, theGlobalVariables))
-    return theNode.errorProgramming;
   if (theCone.GetDim()!=theDirection.size)
     return theNode.errorDimensionProblem;
   if (theCone.flagIsTheZeroCone || theCone.Normals.size==0)
@@ -2702,6 +2680,21 @@ std::string ConeComplex::ToString(bool useLatex, bool useHtml)
   return out.str();
 }
 
+int RationalFunctionOld::GetMinNumVars()const
+{ switch(this->expressionType)
+  { case RationalFunctionOld::typeRational:
+      return 0;
+    case RationalFunctionOld::typePoly:
+      return this->Numerator.GetElementConst().GetMinNumVars();
+    case RationalFunctionOld::typeRationalFunction:
+      return MathRoutines::Maximum
+      (this->Numerator.GetElementConst().GetMinNumVars(),
+       this->Denominator.GetElementConst().GetMinNumVars());
+    default: //this should never happen! maybe assert(false) here...
+      return -1;
+  }
+}
+
 void RationalFunctionOld::GetRelations
   ( List<Polynomial<Rational> >& theGenerators, GlobalVariables& theGlobalVariables
    )
@@ -2710,8 +2703,12 @@ void RationalFunctionOld::GetRelations
   List<Polynomial<Rational> > theGroebnerBasis;
   theGroebnerBasis=theGenerators;
   int numStartingGenerators=theGenerators.size;
-  int numStartingVariables= theGenerators.TheObjects[0].NumVars;
-  Polynomial<Rational>  tempP;
+
+  int numStartingVariables=0;
+  for (int i=0; i<theGenerators.size; i++)
+    numStartingVariables=MathRoutines::Maximum
+    (numStartingVariables, theGenerators[0].GetMinNumVars());
+  Polynomial<Rational> tempP;
   FormatExpressions tempFormat;
   for (int i=0; i<numStartingGenerators; i++)
   { Polynomial<Rational> & currentPoly=theGroebnerBasis.TheObjects[i];
@@ -2809,8 +2806,9 @@ bool ConeComplex::findMaxLFOverConeProjective
   HyperPlanesCorrespondingToLF.SetSize(inputLinPolys.size);
   for (int i=0; i<inputLinPolys.size; i++)
   { Polynomial<Rational> & currentPoly=inputLinPolys.TheObjects[i];
-    if (currentPoly.TotalDegree()!=1 || theDim!=currentPoly.NumVars)
-    { std::cout << "u messed up the dim! The num vars is " << currentPoly.NumVars << " and the dim of the cone is " << theDim;
+    if (currentPoly.TotalDegree()!=1 )
+    { std::cout << "You messed up the total degree which must be one, instead it is "
+      << currentPoly.TotalDegree() << ". The dimension of the cone is " << theDim;
       return false;
     }
     Vector<Rational>& newWall=HyperPlanesCorrespondingToLF.TheObjects[i];
@@ -2930,28 +2928,6 @@ void Lattice::RefineByOtherLattice(const Lattice& other)
   this->Reduce();
 }
 
-bool ParserNode::GetRootSRationalDontUseForFunctionArguments
-(Vectors<Rational>& output, int& outputDim, GlobalVariables& theGlobalVariables)
-{ if (this->ExpressionType!=this->typeArray)
-  { if (this->ExpressionType!=this->typeRational)
-      return false;
-    output.SetSize(1);
-    output[0].SetSize(1);
-    output[0][0]=this->rationalValue;
-    outputDim=1;
-    return true;
-  }
-  output.SetSize(this->children.size);
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[this->children[i]];
-    currentNode.GetRootRationalDontUseForFunctionArguments(output[i], theGlobalVariables);
-    if (output[i].size!=output[0].size)
-      return false;
-    outputDim=output[0].size;
-  }
-  return true;
-}
-
 bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
 (List<int>& theArgumentList, List<Vectors<Rational> >& output, int& outputRootsSize, int& outputDim,
  GlobalVariables& theGlobalVariables)
@@ -2970,16 +2946,14 @@ bool ParserNode::GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
   output.SetSize(theArgumentList.size);
   outputRootsSize=firstNode.children.size;
   Vectors<Rational> tempRoots;
-  int currentDim;
-  for (int i=0; i<theArgumentList.size; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[theArgumentList[i]];
-    if(!currentNode.GetRootSRationalDontUseForFunctionArguments(tempRoots, currentDim, theGlobalVariables))
-      return false;
-    if (i==0)
-      outputDim=currentDim;
-    if (currentDim!=outputDim)
-      return false;
-  }
+//  int currentDim;
+//  for (int i=0; i<theArgumentList.size; i++)
+//  { //ParserNode& currentNode=this->owner->TheObjects[theArgumentList[i]];
+//    if (i==0)
+//      outputDim=currentDim;
+//    if (currentDim!=outputDim)
+//      return false;
+//  }
   return true;
 }
 
@@ -3444,23 +3418,15 @@ bool ParserNode::GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVaria
   return true;
 }
 
-bool ParserNode::GetRootRationalFromFunctionArguments
-(//List<int>& argumentList,
- Vector<Rational>& output, GlobalVariables& theGlobalVariables)
-{ Vectors<Rational> tempRoots;
-  int theDim;
-  this->GetRootsEqualDimNoConversionNoEmptyArgument(this->children, tempRoots, theDim);
-  if (tempRoots.size!=1)
-    return false;
-  output = tempRoots[0];
-  return true;
-}
-
 void QuasiPolynomial::MakeFromPolyShiftAndLattice
-(const Polynomial<Rational> & inputPoly, const Vector<Rational>& theShift, const Lattice& theLattice, GlobalVariables& theGlobalVariables)
+(const Polynomial<Rational>& inputPoly, const MonomialP& theShift,
+ const Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { this->AmbientLatticeReduced=theLattice;
   this->LatticeShifts.SetSize(1);
-  this->LatticeShifts.TheObjects[0]=theShift;
+  Vector<Rational>& firstShift=this->LatticeShifts[0];
+  firstShift.SetSize(theLattice.GetDim());
+  for (int i=0; i<theLattice.GetDim(); i++)
+    firstShift[i]=theShift(i);
   this->AmbientLatticeReduced.ReduceVector(this->LatticeShifts.TheObjects[0]);
   this->valueOnEachLatticeShift.SetSize(1);
   this->valueOnEachLatticeShift.TheObjects[0]=inputPoly;
@@ -3521,12 +3487,12 @@ void partFraction::ComputePolyCorrespondingToOneMonomial
    Lattice& theLattice, GlobalVariables& theGlobalVariables)
 { Polynomial<Rational> tempP, outputPolyPart;
   Rational tempRat2;
-  outputPolyPart.MakeConst(theMon.monBody.size, 1);
-  for (int i=0; i<theMon.monBody.size; i++)
-  { this->MakePolynomialFromOneNormal(normals[i], theMon.monBody, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
+  outputPolyPart.MakeOne(theMon.GetMinNumVars());
+  for (int i=0; i<theMon.GetMinNumVars(); i++)
+  { this->MakePolynomialFromOneNormal(normals[i], theMon, this->TheObjects[this->IndicesNonZeroMults[i]].Multiplicities[0], tempP);
     outputPolyPart*=(tempP);
   }
-  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon.monBody, theLattice, theGlobalVariables);
+  outputQP.MakeFromPolyShiftAndLattice(outputPolyPart, theMon, theLattice, theGlobalVariables);
   this->AlreadyAccountedForInGUIDisplay=true;
 }
 
@@ -3876,7 +3842,8 @@ int ParserNode::EvaluateVectorPFIndicator
   return theNode.errorNoError;
 }
 
-void QuasiPolynomial::AddLatticeShift(const Polynomial<Rational> & input, const Vector<Rational>& inputShift)
+void QuasiPolynomial::AddLatticeShift
+(const Polynomial<Rational>& input, const Vector<Rational>& inputShift)
 { Vector<Rational> theShift=inputShift;
   this->AmbientLatticeReduced.ReduceVector(theShift);
   int index=this->LatticeShifts.IndexOfObject(theShift);
@@ -3884,7 +3851,7 @@ void QuasiPolynomial::AddLatticeShift(const Polynomial<Rational> & input, const 
   { index=this->LatticeShifts.size;
     this->LatticeShifts.AddOnTop(theShift);
     this->valueOnEachLatticeShift.ExpandOnTop(1);
-    this->valueOnEachLatticeShift.LastObject()->MakeZero(input.NumVars);
+    this->valueOnEachLatticeShift.LastObject()->MakeZero();
   }
   this->valueOnEachLatticeShift.TheObjects[index]+=input;
   if (this->valueOnEachLatticeShift.TheObjects[index].IsEqualToZero())
@@ -4001,10 +3968,12 @@ bool Lattice::SubstitutionHomogeneous
 }
 
 bool Lattice::GetHomogeneousSubMatFromSubIgnoreConstantTerms
-(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational> & output, GlobalVariables& theGlobalVariables)
+(const PolynomialSubstitution<Rational>& theSub, Matrix<Rational>& output, GlobalVariables& theGlobalVariables)
 { if (theSub.size<1)
     return false;
-  int theTargetDim=theSub.TheObjects[0].NumVars;
+  int theTargetDim=0;
+  for (int i=0; i<theSub.size; i++)
+   theTargetDim=MathRoutines::Maximum(theTargetDim,  theSub[i].GetMinNumVars());
   output.init(theSub.size, theTargetDim);
   for (int i=0; i<theSub.size; i++)
   { Polynomial<Rational>& currentPoly=theSub.TheObjects[i];
@@ -4646,7 +4615,7 @@ bool Cone::GetRootFromLPolyConstantTermGoesToLastVariable
 (Polynomial<Rational>& inputLPoly, Vector<Rational>& output)
 { if (!inputLPoly.IsLinear())
     return false;
-  output.MakeZero(inputLPoly.NumVars+1);
+  output.MakeZero(inputLPoly.GetMinNumVars()+1);
   for (int i=0; i<inputLPoly.size; i++)
   { int theIndex;
     if (inputLPoly[i].::MonomialP::IsOneLetterFirstDegree(&theIndex))
@@ -4681,17 +4650,7 @@ bool Cone::SolveLQuasiPolyEqualsZeroIAmProjective
 
 bool ParserFunctionArgumentTree::ConvertOneArgumentIndex
   (ParserNode& theNode, int theIndex, int& lowestNestedIndexNonExplored, GlobalVariables& theGlobalVariables)
-{ int theType=this->functionArguments.TheObjects[theIndex];
-  if (theType==theNode.typeDots)
-  { int oldlowestNestedIndexNonExplored=lowestNestedIndexNonExplored-1;
-    return this->ConvertOneArgumentIndex(theNode, theIndex-1, oldlowestNestedIndexNonExplored, theGlobalVariables);
-  }
-  if (theType==theNode.typeArray)
-  { List<int> tempList;
-    lowestNestedIndexNonExplored++;
-    return this->nestedArgumentsOfArguments.TheObjects[lowestNestedIndexNonExplored-1].ConvertArguments(theNode, tempList, theGlobalVariables);
-  }
-  return theNode.ConvertToType(theType, theNode.impliedNumVars, theGlobalVariables);
+{ assert(false); return false;
 }
 
 bool ParserFunctionArgumentTree::ConvertArguments
@@ -4846,19 +4805,6 @@ bool ParserFunctionArgumentTree::MakeFromString
     }
   }
   return false;
-}
-
-int ParserNode::EvaluateSolveLPolyEqualsZeroOverCone
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ ParserNode& polyNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
-  ParserNode& coneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
-  if (polyNode.polyValue.GetElement().NumVars!=coneNode.theCone.GetElement().GetDim()-1)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  Cone& currentCone=coneNode.theCone.GetElement();
-  currentCone.SolveLPolyEqualsZeroIAmProjective(polyNode.polyValue.GetElement(), theNode.theCone.GetElement(), theGlobalVariables);
-  FormatExpressions theFormat;
-  theNode.outputString=theNode.theCone.GetElement().ToString(false, true, theFormat);
-  return theNode.errorNoError;
 }
 
 int ParserNode::EvaluateDrawConeAffine
@@ -5361,17 +5307,17 @@ void Lattice::GetRougherLatticeFromAffineHyperplaneDirectionAndLattice
 int ParserNode::EvaluateClosestPointToHyperplaneAlongTheNormal
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Lattice& currentLattice=theNode.owner->TheObjects[theArgumentList.TheObjects[3]].theLattice.GetElement();
-  ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
-  ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
-  ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
+//  ParserNode& theHyperplaneNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
+//  ParserNode& theDirectionNode=theNode.owner->TheObjects[theArgumentList.TheObjects[0]];
+//  ParserNode& theShiftNode=theNode.owner->TheObjects[theArgumentList.TheObjects[1]];
   //ParserNode& theRayNode=theNode.owner->TheObjects[theArgumentList.TheObjects[2]];
   Vector<Rational> theAffineNormal, theRay, theRayMultiple, theShift;//, theRay;
-  if (!theHyperplaneNode.GetRootRationalDontUseForFunctionArguments(theAffineNormal, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
-  if (!theDirectionNode.GetRootRationalDontUseForFunctionArguments(theRay, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
-  if (!theShiftNode.GetRootRationalDontUseForFunctionArguments(theShift, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
+//  if (!theHyperplaneNode.GetRootRationalDontUseForFunctionArguments(theAffineNormal, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
+//  if (!theDirectionNode.GetRootRationalDontUseForFunctionArguments(theRay, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
+//  if (!theShiftNode.GetRootRationalDontUseForFunctionArguments(theShift, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
 //  if (!theRayNode.GetRootRational(theRay, theGlobalVariables))
 //    return theNode.SetError(theNode.errorProgramming);
   //int theDim=t;
@@ -5396,13 +5342,13 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
   { outputError= " Computation too large. ";
     return false;
   }
-  Polynomial<Rational>  basisMonsZeroWeight, basisMonsAll;
-  basisMonsZeroWeight.MakeZero(this->theDimension);
+  Polynomial<Rational> basisMonsZeroWeight, basisMonsAll;
+  basisMonsZeroWeight.MakeZero();
   basisMonsZeroWeight.SetExpectedSize(numCycles);
-  basisMonsAll.MakeZero(this->theDimension);
+  basisMonsAll.MakeZero();
   basisMonsAll.SetExpectedSize(numCycles);
   MonomialP theMon;
-  theMon.MakeConst(this->theDimension);
+  theMon.MakeOne(this->theDimension);
   Vector<Rational> theWeight;
   Vector<Rational> theCartanAction;
   theCartanAction.SetSize(this->theDimension);
@@ -5448,10 +5394,10 @@ bool slTwoInSlN::ComputeInvariantsOfDegree
 //  std::cout << "<br>invariants Vector<Rational> form: " << tempRoots.ToString();
 //  std::cout << "<br> .... and the invariants are: ";
   for (int i=0; i<output.size; i++)
-  { Polynomial<Rational>& current=output.TheObjects[i];
-    current.MakeZero(this->theDimension);
+  { Polynomial<Rational>& current=output[i];
+    current.MakeZero();
     for (int j=0; j<basisMonsZeroWeight.size; j++)
-      if (!tempRoots.TheObjects[i].TheObjects[j].IsEqualToZero())
+      if (!tempRoots[i][j].IsEqualToZero())
       { theMon=(basisMonsZeroWeight[j]);
         current.AddMonomial(theMon, tempRoots[i][j]);
       }
@@ -6931,12 +6877,12 @@ void WeylGroup::DrawRootSystem
 int ParserNode::EvaluateG2ParabolicSupport
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vector<Rational> highestWeight, parSel;
-  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
-  if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
-  if (!nodeSel.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorProgramming);
+//  ParserNode& nodeHW=theNode.owner->TheObjects[theArgumentList[0]];
+//  ParserNode& nodeSel=theNode.owner->TheObjects[theArgumentList[1]];
+//  if(!nodeHW.GetRootRationalDontUseForFunctionArguments(highestWeight, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
+//  if (!nodeSel.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
+//    return theNode.SetError(theNode.errorProgramming);
   if (highestWeight.size!=2 || parSel.size!=2)
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
@@ -7005,10 +6951,10 @@ int ParserNode::EvaluateAnimateRootSystem
   Vectors<Rational> tempRootsX;
   tempRootsX.SetSize(theArgumentList.size-1);
   for (int i=1; i<theArgumentList.size; i++)
-  { ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList[i]];
-    if (!currentNode.GetRootRationalDontUseForFunctionArguments(tempRootsX[i-1], theGlobalVariables))
-      return theNode.SetError(theNode.errorBadOrNoArgument);
-    else if (tempRootsX[i-1].size!=theDim)
+  { //ParserNode& currentNode=theNode.owner->TheObjects[theArgumentList[i]];
+//    if (!currentNode.GetRootRationalDontUseForFunctionArguments(tempRootsX[i-1], theGlobalVariables))
+//      return theNode.SetError(theNode.errorBadOrNoArgument);
+//    else if (tempRootsX[i-1].size!=theDim)
       return theNode.SetError(theNode.errorDimensionProblem);
 
   }
@@ -7240,8 +7186,8 @@ void AnimationBuffer::DrawNoInit(DrawingVariables& theDrawingVariables, GlobalVa
 int ParserNode::EvaluateAnimateRootSystemBluePoint
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vector<Rational> tempRoot;
-  ParserNode& aNode=theNode.owner->TheObjects[theArgumentList[3]];
-  aNode.GetRootRationalDontUseForFunctionArguments(tempRoot, theGlobalVariables);
+//  ParserNode& aNode=theNode.owner->TheObjects[theArgumentList[3]];
+//  aNode.GetRootRationalDontUseForFunctionArguments(tempRoot, theGlobalVariables);
   return theNode.EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, & tempRoot);
 }
 
@@ -7873,37 +7819,6 @@ std::string ElementWeylGroup::ToString
   return out.str();
 }
 
-bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
-{ assert(thePoly.NumVars==this->NumVariables);
-  Polynomial<Rational> result;
-  result.MakeZero(this->NumVariables);
-  MonomialP tempMon;
-  Rational coeffMon;
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { MonomialP& currentActingMon=this->StandardOrder[i];
-    if (!currentActingMon.monBody.IsIntegral())
-    { std::cout << "Element weyl algebra called inappropriately. Not raising alarm, although I should. ";
-      return false;
-    }
-    for (int j=0; j<thePoly.size; j++)
-    { MonomialP& currentMon=thePoly[j];
-      tempMon=currentMon;
-      coeffMon=thePoly.theCoeffs[j];
-      coeffMon*=this->StandardOrder.theCoeffs[i];
-      for (int k=0; k<this->NumVariables; k++)
-      { for (int numDiff=currentActingMon[k+this->NumVariables].NumShort; numDiff>0; numDiff--)
-        { coeffMon*=tempMon[k];
-          tempMon[k]-=1;
-        }
-        tempMon[k]+=currentActingMon[k];
-      }
-      result.AddMonomial(tempMon, coeffMon);
-    }
-  }
-  thePoly=result;
-  return true;
-}
-
 std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
 (List<List<List<int> > >& arrows, List<List<int> >& Layers, int GraphWidth, bool useAmbientIndices)
 { std::stringstream out;
@@ -8070,25 +7985,23 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
 { if (theSub.size<1)
     return;
 //  FormatExpressions tempFormat;
-  Rational rationalOne=1;
 //  int commentMEWhenDone;
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
-      this->SetNumVariables(theSub[0].NumVars);
 //      assert(this->checkConsistency());
       return;
     case RationalFunctionOld::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
-      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
+      this->Numerator.GetElement().Substitution(theSub, 1);
 //      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      assert(this->checkConsistency());
       return;
     case RationalFunctionOld::typeRationalFunction:
-      this->Numerator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
-      this->Denominator.GetElement().Substitution(theSub, theSub[0].NumVars, rationalOne);
+      this->Numerator.GetElement().Substitution(theSub, 1);
+      this->Denominator.GetElement().Substitution(theSub, 1);
       this->Simplify();
 //      assert(this->checkConsistency());
       return;
@@ -8107,8 +8020,8 @@ int ParserNode::EvaluateModVermaRelations
   ( theNode.UEElement.GetElement().ToString(&theGlobalVariables.theDefaultFormat))
 ;
   Polynomial<Rational>  polyOne, polyZero;
-  polyOne.MakeConst(theNode.impliedNumVars, 1);
-  polyZero.MakeZero(theNode.impliedNumVars);
+  polyOne.MakeOne(theNode.impliedNumVars);
+  polyZero.MakeZero();
   theNode.UEElement.GetElement().Simplify(theGlobalVariables, polyOne, polyZero);
   out << "<br>And after simplification: "
   << CGI::GetHtmlMathDivFromLatexAddBeginArrayL
@@ -8117,7 +8030,7 @@ int ParserNode::EvaluateModVermaRelations
   assert(false);
 
 //  theNode.UEElement.GetElement().ModOutVermaRelations(theGlobalVariables);
-  theNode.impliedNumVars=theNode.UEElement.GetElement().GetNumVars();
+  theNode.impliedNumVars=theNode.UEElement.GetElement().GetMinNumVars();
   theNode.ExpressionType=theNode.typeUEelement;
   theNode.outputString=out.str();
   return theNode.errorNoError;
@@ -8178,8 +8091,6 @@ int ParserNode::EvaluateAdjointAction
 { ParserNode& actingNode= theNode.owner->TheObjects[theArgumentList[0]];
   ParserNode& NodeBeingActedUpon=theNode.owner->TheObjects[theArgumentList[1]];
   theNode.impliedNumVars= MathRoutines::Maximum(actingNode.impliedNumVars, NodeBeingActedUpon.impliedNumVars);
-  actingNode.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
-  NodeBeingActedUpon.UEElement.GetElement().SetNumVariables(theNode.impliedNumVars);
   ElementUniversalEnveloping<Polynomial<Rational> >& output=theNode.UEElement.GetElement();
   if (!actingNode.UEElement.GetElement().AdjointRepresentationAction
   (NodeBeingActedUpon.UEElement.GetElement(), output, theGlobalVariables))
@@ -8190,16 +8101,16 @@ int ParserNode::EvaluateAdjointAction
 
 int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)
 { ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
+//  ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
   if (leftNode.Operation!=Parser::tokenG && leftNode.Operation!=Parser::tokenH)
     return this->SetError(this->errorBadIndex);
   Vector<Rational> theWeight;
-  if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
-    return this->SetError(this->errorBadIndex);
+//  if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
+//    return this->SetError(this->errorBadIndex);
   ElementUniversalEnveloping<Polynomial<Rational> >& theUEElement=this->UEElement.GetElement();
   Polynomial<Rational>  polyOne, PolyZero;
-  polyOne.MakeConst(0, (Rational) 1);
-  PolyZero.MakeZero(0);
+  polyOne.MakeOne();
+  PolyZero.MakeZero();
   if (leftNode.Operation==Parser::tokenG)
   { if (!this->GetContextLieAlgebra().theWeyl.IsARoot(theWeight))
       return this->SetError(this->errorDunnoHowToDoOperation);
@@ -8427,14 +8338,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateDrawConeAffine
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("runGtwoInBthree",
-   "(Integer, Integer, Integer)",
-   "Run the G_2 in B_3 computation. Experimental, don't use.",
-   "runGtwoInBthree(1,0,0)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateG2InB3Computation
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemOld",
    "(Integer, Integer)",
    "Draw the Vector<Rational> system in its Coxeter plane. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank, which must be at most 8. The example draws E6.",
@@ -8576,31 +8479,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    'A', 7, true,
     & ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
    );
-   this->AddOneFunctionToDictionaryNoFail
-  ("char",
-   "(Rational,...)",
-   "<b>Not fully tested, however several tests against LiE work just fine. </b> Creates a character corresponding to an \
-    irreducible highest weight module with respect to the ambient simple Lie algebra. \
-    The argument of the function is the highest weight \
-    given in fundamental coordinates. Some arithmetic operations between characters are allowed. \
-    Multiplication of characters (i.e. tensor decomposition) is implemented via the Brauer-Klimyk formula. \
-    The basic algorithms used are the same as in LiE, however \
-    the current implementation is more than 10 times slower (for technical reasons), \
-    so for heavy computations you might want to use LiE instead. ",
-    "(char(0,0,1)*char(1,0,0)-char(0,1,0))*char(0,0,1)",
-   'B', 3, false,
-    & ParserNode::EvaluateChar
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("irreducibleRep",
-   "((Rational,...),...)",
-   "<b>Experimental, not tested. \
-   </b> Creates an irreducible finite dimensional representation from highest weight given in fundamental \
-   coordinates.",
-    "irreducibleRep(1,1)",
-   'A', 2, true,
-    & ParserNode::EvaluateRepresentationFromHWFundCoords
-   );
   this->AddOneFunctionToDictionaryNoFail
   ("mta",
    "(UE)",
@@ -8637,18 +8515,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateIsInProperSubmoduleVermaModule
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("splitIrrepOverLeviParabolic",
-   "( (Rational, ...), (Rational, ...))",
-   "<b>Might be hidden or changed in future versions. \
-   </b>Splits an irreducible finite dimensional representation with highest weight \
-   given by the first argument over the Levi part of the parabolic subalgebra given by the \
-   second argument. The splitting both splits the characters and finds the singular vectors \
-   that realize this splitting",
-    "splitIrrepOverLeviParabolic((1,1),(0,1))",
-   'B', 2, true,
-    & ParserNode::EvaluateSplitIrrepOverLeviParabolic
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("splitCharOverLeviParabolic",
    "( Char, (Rational, ...))",
    "<b>Please don't use. At the time this function is for testing purposes only. Might be hidden or changed in future versions. \
@@ -8656,16 +8522,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     "splitCharOverLeviParabolic(char(1,1),(0,1))",
    'B', 2, true,
     & ParserNode::EvaluateSplitCharOverLeviParabolic
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("makeWeylFromParabolicSelection",
-   "(Rational, ...)",
-   "<b>Please don't use. For testing purposes. \
-   </b>Prints out information about the Weyl subgroup of the Levi part of the parabolic subalgebra given by \
-   the argument.",
-    "makeWeylFromParabolicSelection(0,0,1,0)",
-   'F', 4, true,
-    & ParserNode::EvaluateMakeWeylFromParSel
    );
 /*  this->AddOneFunctionToDictionaryNoFail
   ("splitGenVermaBthreeOverGtwo",

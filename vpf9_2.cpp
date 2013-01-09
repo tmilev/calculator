@@ -89,39 +89,45 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
   return true;
 }
 
-void ElementWeylAlgebra::MultiplyTwoMonomials(MonomialP& left, MonomialP& right, Polynomial<Rational>& OrderedOutput)
-{ MonomialP buffer;
-  SelectionWithDifferentMaxMultiplicities tempSel;
-  assert(left.monBody.size%2==0);
-  int theDimension=left.monBody.size/2;
-  tempSel.Multiplicities.initFillInObject(theDimension, 0);
-  tempSel.MaxMultiplicities.SetSize(theDimension);
-  for (int i=0; i<theDimension; i++)
-  { if (!left[theDimension+i].IsSmallInteger())
-    { std::cout << "This is a programming error. You have requested operations with elements of weyl algebra"
-      << "that have monomials of exponent " << left[theDimension+i] << " which I cannot handle. "
-      << "Error catching should be done at an earlier level. "
+void ElementWeylAlgebra::MultiplyTwoMonomials
+(MonomialWeylAlgebra& left, MonomialWeylAlgebra& right, ElementWeylAlgebra& output)
+{ SelectionWithDifferentMaxMultiplicities tempSel;
+  int theDimensioN=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
+  tempSel.Multiplicities.initFillInObject(theDimensioN, 0);
+  tempSel.MaxMultiplicities.SetSize(theDimensioN);
+  for (int i=0; i<theDimensioN; i++)
+  { int powerDiffOp=0;
+    if (!left.differentialPart[i].IsSmallInteger(&powerDiffOp))
+    { std::cout << "This is a programming error. Requested operations "
+      << " with elements of weyl algebra"
+      << " that have monomials of exponent " << left.differentialPart[i]
+      << " which I cannot handle. "
+      << " If this is bad user input, it should have been caught at an earlier level. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    tempSel.MaxMultiplicities[i]=left[theDimension+i].NumShort;
+    tempSel.MaxMultiplicities[i]=powerDiffOp;
   }
-  tempSel.elements.initFillInObject(theDimension, 0);
-  buffer.MakeConst(left.monBody.size);
-  assert(left.monBody.size==right.monBody.size);
-  OrderedOutput.MakeZero(left.monBody.size);
+  tempSel.elements.initFillInObject(theDimensioN, 0);
+  MonomialWeylAlgebra buffer;
+  buffer.MakeOne(theDimensioN);
+  output.MakeZero();
   int numCycles= tempSel.getTotalNumSubsets();
   Rational coeffBuff;
   for (int i=0; i<numCycles; i++)
   { coeffBuff=1;
-    for (int k=0; k< theDimension; k++)
+    for (int k=0; k<theDimensioN; k++)
     { int multDrop=tempSel.Multiplicities[k];
-      coeffBuff*=Rational::NChooseK(left[theDimension+k].NumShort, multDrop)
-      *Rational::NChooseK(right[k].NumShort, multDrop)* Rational::Factorial(multDrop);
-      buffer[k]=left[k]+right[k]-multDrop;
-      buffer[k+theDimension]= left[k+theDimension]+right[k+theDimension]-multDrop;
+      int theDOPower=0;
+      int thePolPower=0;
+      left.differentialPart[k].IsSmallInteger(&theDOPower);
+      right.polynomialPart[k].IsSmallInteger(&thePolPower);
+      coeffBuff*=Rational::NChooseK(theDOPower, multDrop)
+      *Rational::NChooseK(thePolPower, multDrop)* Rational::Factorial(multDrop);
+      buffer.polynomialPart[k]=left.polynomialPart[k]+right.polynomialPart[k]-multDrop;
+      buffer.differentialPart[k]= left.differentialPart[k]+right.differentialPart[k]-multDrop;
     }
-    OrderedOutput.AddMonomial(buffer, coeffBuff);
+    output.AddMonomial(buffer, coeffBuff);
     tempSel.IncrementSubset();
   }
 }
@@ -138,191 +144,221 @@ void ElementWeylAlgebra::LieBracketOnTheRightMakeReport(ElementWeylAlgebra& stan
 
 void ElementWeylAlgebra::LieBracketOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1.Assign(*this);
+  tempEl1=(*this);
   tempEl1.MultiplyOnTheLeft(standsOnTheLeft, theGlobalVariables);
   //tempEl1.ComputeDebugString(false);
-  tempEl2.Assign(standsOnTheLeft);
+  tempEl2=(standsOnTheLeft);
   tempEl2.MultiplyOnTheLeft(*this, theGlobalVariables);
   //tempEl2.ComputeDebugString(false);
-  this->Assign(tempEl1);
-  this->Subtract(tempEl2);
+  *this=(tempEl1);
+  *this-=(tempEl2);
   //this->ComputeDebugString(false);
-}
-
-void ElementWeylAlgebra::MakeConst(int NumVars, const Rational& theConst)
-{ this->MakeZero(NumVars);
-  MonomialP tempM;
-  tempM.MakeConst(this->NumVariables*2);
-  this->StandardOrder.AddMonomial(tempM, theConst);
 }
 
 void ElementWeylAlgebra::LieBracketOnTheRight(ElementWeylAlgebra& standsOnTheRight, GlobalVariables& theGlobalVariables)
 { ElementWeylAlgebra tempEl1, tempEl2;
-  tempEl1.Assign(standsOnTheRight);
+  tempEl1=(standsOnTheRight);
   tempEl1.MultiplyOnTheLeft(*this, theGlobalVariables);
   //tempEl1.ComputeDebugString(false);
-  tempEl2.Assign(*this);
+  tempEl2=(*this);
   tempEl2.MultiplyOnTheLeft(standsOnTheRight, theGlobalVariables);
   //tempEl2.ComputeDebugString(false);
-  this->Assign(tempEl1);
-  this->Subtract(tempEl2);
+  *this=(tempEl1);
+  *this-=(tempEl2);
   //this->ComputeDebugString(false);
 }
 
-void ElementWeylAlgebra::MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
-{ Polynomial<Rational> buffer;
-  Polynomial<Rational> Accum;
-  Accum.MakeZero(this->NumVariables*2);
-  for (int j=0; j<standsOnTheLeft.StandardOrder.size; j++)
-    for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(standsOnTheLeft.StandardOrder[j], this->StandardOrder[i], buffer);
-      buffer*=standsOnTheLeft.StandardOrder.theCoeffs[j]*this->StandardOrder.theCoeffs[i];
+void ElementWeylAlgebra::MultiplyOnTheLeft
+(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables)
+{ ElementWeylAlgebra buffer;
+  ElementWeylAlgebra Accum;
+  Accum.MakeZero();
+  for (int j=0; j<standsOnTheLeft.size; j++)
+    for (int i=0; i<this->size; i++)
+    { this->MultiplyTwoMonomials(standsOnTheLeft[j], (*this)[i], buffer);
+      buffer*=standsOnTheLeft.theCoeffs[j]*this->theCoeffs[i];
       Accum+=(buffer);
     }
-  this->StandardOrder=Accum;
+  *this=Accum;
 }
 
-void ElementWeylAlgebra::MultiplyOnTheRight(const ElementWeylAlgebra& standsOnTheRight)
-{ Polynomial<Rational>  buffer;
-  Polynomial<Rational>  Accum;
-  Accum.MakeZero(this->NumVariables*2);
-  for (int j=0; j<standsOnTheRight.StandardOrder.size; j++)
-    for (int i=0; i<this->StandardOrder.size; i++)
-    { this->MultiplyTwoMonomials(this->StandardOrder[i], standsOnTheRight.StandardOrder[j], buffer);
-      buffer*=this->StandardOrder.theCoeffs[i]*standsOnTheRight.StandardOrder.theCoeffs[j];
+void ElementWeylAlgebra::operator*=(const ElementWeylAlgebra& standsOnTheRight)
+{ ElementWeylAlgebra buffer;
+  ElementWeylAlgebra Accum;
+  Accum.MakeZero();
+  for (int j=0; j<standsOnTheRight.size; j++)
+    for (int i=0; i<this->size; i++)
+    { this->MultiplyTwoMonomials((*this)[i], standsOnTheRight[j], buffer);
+      buffer*=this->theCoeffs[i]*standsOnTheRight.theCoeffs[j];
       Accum+=(buffer);
     }
-  this->StandardOrder=Accum;
+  *this=Accum;
 }
 
-std::string ElementWeylAlgebra::ToString(FormatExpressions* theFormat)
-{ if (this->NumVariables>100)
-    return this->StandardOrder.ToString();
+void ElementWeylAlgebra::RaiseToPower(int thePower)
+{ ElementWeylAlgebra WeylOne;
+  WeylOne.MakeOne(this->GetMinNumVars());
+  MathRoutines::RaiseToPower(*this, thePower, WeylOne);
+}
+
+std::string MonomialWeylAlgebra::ToString(FormatExpressions* theFormat)const
+{ if (this->IsAConstant())
+    return "1";
   FormatExpressions tempFormat;
-  tempFormat.polyAlphabeT.SetSize(this->NumVariables*2);
-  for (int i=0; i<this->NumVariables; i++)
+  std::stringstream out;
+  int NumVariables=this->GetMinNumVars();
+  tempFormat.polyAlphabeT.SetSize(NumVariables);
+  for (int i=0; i<NumVariables; i++)
   { std::stringstream tempStream;
-    if (theFormat!=0)
-      tempFormat.polyAlphabeT[i]=theFormat->GetPolyLetter(i);
-    else
-    { std::stringstream tempStream2;
-      tempStream2 << "x_{" << i+1 << "}";
-      tempFormat.polyAlphabeT[i]=tempStream2.str();
-    }
     tempStream << "\\partial";
-    if (tempFormat.polyAlphabeT[i][0]!='x')
-      tempStream << "_{" << tempFormat.polyAlphabeT[i] << "}";
+    if (theFormat==0)
+      tempStream << "_{" << i+1 << "}";
+    else if (theFormat->GetPolyLetter(i)[0]!='x')
+      tempStream << "_{" << theFormat->GetPolyLetter(i) << "}";
     else
       tempStream << "_{" << i+1 << "}";
-    tempFormat.polyAlphabeT[i+NumVariables]=tempStream.str();
+    tempFormat.polyAlphabeT[i]=tempStream.str();
   }
-  return this->StandardOrder.ToString(&tempFormat);
-}
-
-void ElementWeylAlgebra::SetNumVariables(int newNumVars)
-{ if (newNumVars<this->NumVariables)
-    this->NumVariables=newNumVars;
-  Polynomial<Rational> Accum;
-  Accum.MakeZero(newNumVars*2);
-  Accum.ReservE(this->StandardOrder.size);
-  MonomialP tempM;
-  for (int i=0; i<this->StandardOrder.size; i++)
-  { tempM.MakeConst(newNumVars*2);
-    for (int j=0; j< this->NumVariables; j++)
-    { tempM[j]=this->StandardOrder[i][j];
-      tempM[j+newNumVars]=this->StandardOrder[i][j+this->NumVariables];
-    }
-    Accum.AddMonomial(tempM, this->StandardOrder.theCoeffs[i]);
-  }
-  this->NumVariables= newNumVars;
-  this->StandardOrder=(Accum);
+  std::string firstS=this->polynomialPart.ToString(theFormat);
+  std::string secondS=this->differentialPart.ToString(&tempFormat);
+  if (firstS!="1")
+    out << firstS;
+  if (secondS!="1")
+    out << secondS;
+  return out.str();
 }
 
 void ElementWeylAlgebra::MakeGEpsPlusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero(NumVars*2);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i]=1;
-  tempMon[j+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[j]=1;
-  tempMon[i+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon,1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i]=1;
+  tempMon.differentialPart[j+NumVars]=1;
+  this->AddMonomial(tempMon, 1);
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[j]=1;
+  tempMon.differentialPart[i+NumVars]=1;
+  this->AddMonomial(tempMon,1);
 }
 
 void ElementWeylAlgebra::MakeGEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero(NumVars*2);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i]=1;
-  tempMon[j+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon,1);
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[j+NumVars]=1;
-  tempMon[i+this->NumVariables+NumVars]=1;
-  this->StandardOrder.AddMonomial(tempMon,1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i]=1;
+  tempMon.differentialPart[j]=1;
+  this->AddMonomial(tempMon,1);
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[j+NumVars]=1;
+  tempMon.differentialPart[i+NumVars]=1;
+  this->AddMonomial(tempMon,1);
 }
 
 void ElementWeylAlgebra::MakeGMinusEpsMinusEpsInTypeD(int i, int j, int NumVars)
-{ this->MakeZero(NumVars*2);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i+NumVars]=1;
-  tempMon[j+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon,1);
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[j+NumVars]=1;
-  tempMon[i+this->NumVariables]=1;
-  this->StandardOrder.AddMonomial(tempMon,1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i+NumVars]=1;
+  tempMon.differentialPart[j]=1;
+  this->AddMonomial(tempMon, 1);
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[j+NumVars]=1;
+  tempMon.differentialPart[i]=1;
+  this->AddMonomial(tempMon,1);
 }
 
 void ElementWeylAlgebra::Makedidj(int i, int j, int NumVars)
-{ this->MakeZero(NumVars);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i+NumVars]+=1;
-  tempMon[j+NumVars]+=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.differentialPart[i]=1;
+  tempMon.differentialPart[j]=1;
+  this->AddMonomial(tempMon, 1);
 }
 
 void ElementWeylAlgebra::Makexixj(int i, int j, int NumVars)
-{ this->MakeZero(NumVars);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i]+=1;
-  tempMon[j]+=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i]=1;
+  tempMon.polynomialPart[j]=1;
+  this->AddMonomial(tempMon, 1);
 }
 
 void ElementWeylAlgebra::Makexi(int i, int NumVars)
-{ this->MakeZero(NumVars);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i]+=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i]=1;
+  this->AddMonomial(tempMon, 1);
 }
 
 void ElementWeylAlgebra::Makedi(int i, int NumVars)
-{ this->MakeZero(NumVars);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i+NumVars]+=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.differentialPart[i]=1;
+  this->AddMonomial(tempMon, 1);
 }
 
 void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
-{ this->MakeZero(NumVars);
-  MonomialP tempMon;
-  tempMon.MakeConst(this->NumVariables*2);
-  tempMon[i]=1;
-  tempMon[NumVars+j]=1;
-  this->StandardOrder.AddMonomial(tempMon, 1);
+{ this->MakeZero();
+  MonomialWeylAlgebra tempMon;
+  tempMon.MakeOne(NumVars);
+  tempMon.polynomialPart[i]=1;
+  tempMon.differentialPart[j]=1;
+  this->AddMonomial(tempMon, 1);
 }
 
-void ElementWeylAlgebra::MakeZero(int NumVars)
-{ this->NumVariables=NumVars;
-  this->StandardOrder.MakeZero(this->NumVariables*2);
+void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+(int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables)
+{ if (inputPower>0)
+  { output.MakeOneLetterMon(indexVar, 1, theGlobalVariables);
+    output.RaiseToPower(inputPower);
+    return;
+  }
+  inputPower*=-1;
+  output.MakeOneLetterMon(indexVar+numVars, 1, theGlobalVariables);
+  output.RaiseToPower(inputPower);
+  Polynomial<Rational> newMult;
+  newMult.MakeDegreeOne(numVars*2, indexVar, 1);
+  for (int i=0; i<inputPower; i++)
+  { output/=newMult;
+    newMult-=1;
+  }
+//  output/=den;
+}
+
+bool ElementWeylAlgebra::ActOnPolynomial(Polynomial<Rational>& thePoly)
+{ Polynomial<Rational> result;
+  result.MakeZero();
+  MonomialP resultMon;
+  Rational coeff;
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<thePoly.size; j++)
+    { MonomialP& currentPolMon=thePoly[j];
+      MonomialWeylAlgebra& currentOpMon=(*this)[i];
+      resultMon=currentPolMon;
+      coeff=thePoly.theCoeffs[j];
+      coeff*=this->theCoeffs[i];
+      for (int k=0; k<currentOpMon.GetMinNumVars(); k++)
+      { int numDiff=0;
+        if (!currentOpMon.differentialPart[k].IsSmallInteger(&numDiff))
+          return false;
+        for (; numDiff>0; numDiff--)
+        { coeff*=resultMon[k];
+          if (coeff.IsEqualToZero())
+            break;
+          resultMon[k]-=1;
+        }
+        if (coeff.IsEqualToZero())
+          break;
+      }
+      resultMon*=currentOpMon.polynomialPart;
+      result.AddMonomial(resultMon, coeff);
+    }
+  thePoly=result;
+  return true;
 }
 
 bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
@@ -365,7 +401,7 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   int halfNumberVariables = rootsInPlay.size;
   int numberVariables = halfNumberVariables*2;
   MonomialP tempM;
-  tempM.MakeConst((int)numberVariables);
+  tempM.MakeOne(numberVariables);
   Matrix<Rational> coeffsF;
   coeffsF.init(1, halfNumberVariables);
   for (int i=0; i<numRootsChar2; i++)
@@ -422,9 +458,9 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
           indexEquation=outputSystemToBeSolved.size;
 //          IndicesEquationsByRootSpace.AddOnTop(indexEquation);
           outputSystemToBeSolved.SetSize(outputSystemToBeSolved.size+1);
-          outputSystemToBeSolved.LastObject()->MakeZero(numberVariables);
+          outputSystemToBeSolved.LastObject()->MakeZero();
         }
-        tempM.MakeConst((int)numberVariables);
+        tempM.MakeOne(numberVariables);
         tempM[i]=1;
         tempM[j+halfNumberVariables]=1;
         Rational tempCoeff= this->GetConstant(rootsInPlay[i], -rootsInPlay[j]);
@@ -435,14 +471,14 @@ void SemisimpleLieAlgebra::initHEFSystemFromECoeffs
   int oldSize=outputSystemToBeSolved.size;
   outputSystemToBeSolved.SetSize(oldSize+this->theWeyl.CartanSymmetric.NumRows);
   for(int i=oldSize; i<outputSystemToBeSolved.size; i++)
-    outputSystemToBeSolved[i].MakeZero(numberVariables);
+    outputSystemToBeSolved[i].MakeZero();
   //outputSystemToBeSolved.ComputeDebugString();
 //  ElementSemisimpleLieAlgebra g1, g2;
   for (int i=0; i<rootsInPlay.size; i++)
   { assert(rootsInPlay.size==halfNumberVariables);
     this->GetConstantOrHElement(rootsInPlay[i], -rootsInPlay[i], tempRat, tempRoot);
     for (int j=0; j<this->theWeyl.CartanSymmetric.NumRows; j++)
-    { tempM.MakeConst((int)numberVariables);
+    { tempM.MakeOne(numberVariables);
       tempM[i]=1;
       tempM[i+halfNumberVariables]=1;
       outputSystemToBeSolved[j+oldSize].AddMonomial(tempM, tempRoot[j]);
@@ -1462,269 +1498,9 @@ void ParserNode::EvaluateInteger(GlobalVariables& theGlobalVariables)
   }
 }
 
-void ParserNode::EvaluateThePower(GlobalVariables& theGlobalVariables)
-{ this->ExpressionType=this->typeError;
-  if (this->children.size!=2 || !this->AllChildrenAreOfDefinedNonErrorType())
-  { this->SetError(this->errorOperationByUndefinedOrErrorType);
-    return;
-  }
-  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
-  if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
-  { this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-    if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEelement)
-      if (leftNode.UEElement.GetElement().IsAPowerOfASingleGenerator())
-        { rightNode.ConvertToType(this->typePoly, this->impliedNumVars, theGlobalVariables);
-          leftNode.UEElement.GetElement().SetNumVariables(this->impliedNumVars);
-          MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
-          tempMon.operator=(leftNode.UEElement.GetElement().TheObjects[0]);
-          tempMon.Powers[0]*=rightNode.polyValue.GetElement();
-          this->UEElement.GetElement().MakeZero(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-          this->UEElement.GetElement().AddMonomial(tempMon, tempMon.Powers[0].GetOne());
-          this->ExpressionType=this->typeUEelement;
-          return;
-        }
-    if ((rightNode.ExpressionType==this->typeRational || rightNode.ExpressionType==this->typePoly) && leftNode.ExpressionType==this->typeUEElementOrdered)
-      if (leftNode.UEElementOrdered.GetElement().IsAPowerOfASingleGenerator())
-      { rightNode.ConvertToType(this->typePoly, this->impliedNumVars, theGlobalVariables);
-        leftNode.UEElementOrdered.GetElement().SetNumVariables(this->impliedNumVars);
-        MonomialUniversalEnvelopingOrdered<Polynomial<Rational> > tempMon;
-        tempMon.operator=(leftNode.UEElementOrdered.GetElement().TheObjects[0]);
-        tempMon.Powers.TheObjects[0]*=(rightNode.polyValue.GetElement());
-        this->UEElementOrdered.GetElement().MakeZero(this->owner->testAlgebra);
-        this->UEElementOrdered.GetElement().AddMonomial(tempMon);
-        this->ExpressionType=this->typeUEElementOrdered;
-        return;
-      }
-    this->SetError(this->errorDunnoHowToDoOperation);
-    return;
-  }
-  int thePower= rightNode.intValue;
-  this->impliedNumVars=leftNode.impliedNumVars;
-  Polynomial<Rational>  PolyOne;
-  PolyOne.MakeConst(this->impliedNumVars, 1);
-  switch(leftNode.ExpressionType)
-  { case ParserNode::typeIntegerOrIndex:
-      this->rationalValue=leftNode.intValue;
-      this->rationalValue.RaiseToPower(thePower);
-      this->ExpressionType=this->typeRational;
-      break;
-    case ParserNode::typeRational:
-      this->rationalValue=leftNode.rationalValue;
-      this->rationalValue.RaiseToPower(thePower);
-      this->ExpressionType=this->typeRational;
-      break;
-    case ParserNode::typePoly:
-      this->polyValue.GetElement()=leftNode.polyValue.GetElement();
-      if (thePower>=0)
-      { this->polyValue.GetElement().RaiseToPower(thePower, (Rational) 1);
-        this->ExpressionType=this->typePoly;
-      } else
-      { this->ratFunction.GetElement().context=&theGlobalVariables;
-        this->ratFunction.GetElement()=this->polyValue.GetElement();
-        this->ratFunction.GetElement().RaiseToPower(thePower);
-        this->ExpressionType=this->typeRationalFunction;
-      }
-      break;
-    case ParserNode::typeRationalFunction:
-      this->ratFunction.GetElement()=leftNode.ratFunction.GetElementConst();
-      this->ratFunction.GetElement().RaiseToPower(thePower);
-      this->ExpressionType=this->typeRationalFunction;
-      break;
-    case ParserNode::typeUEelement:
-      this->UEElement.GetElement()=leftNode.UEElement.GetElement();
-      this->UEElement.GetElement().RaiseToPower(thePower);
-      this->ExpressionType=this->typeUEelement;
-    break;
-    case ParserNode::typeUEElementOrdered:
-      this->UEElementOrdered.GetElement()=leftNode.UEElementOrdered.GetElement();
-      this->UEElementOrdered.GetElement().RaiseToPower(thePower, PolyOne);
-      this->ExpressionType=this->typeUEElementOrdered;
-    break;
-    case ParserNode::typeWeylAlgebraElement:
-      if (thePower<0)
-      { this->SetError(errorDunnoHowToDoOperation);
-        return;
-      }
-      this->WeylAlgebraElement.GetElement()=leftNode.WeylAlgebraElement.GetElement();
-      this->WeylAlgebraElement.GetElement().RaiseToPower(thePower);
-      this->ExpressionType=this->typeWeylAlgebraElement;
-    break;
-    default: this->SetError(this->errorDunnoHowToDoOperation); return;
-  }
-}
-
-void ParserNode::EvaluateUnderscore(GlobalVariables& theGlobalVariables)
-{ this->ExpressionType=this->typeError;
-  if (this->children.size!=2)
-  { this->SetError(this->errorProgramming);
-    return;
-  }
-  ParserNode& leftNode=this->owner->TheObjects[this->children.TheObjects[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children.TheObjects[1]];
-  if (rightNode.ExpressionType!=this->typeIntegerOrIndex)
-  { if (rightNode.ExpressionType==this->typeArray)
-      this->EvaluateUnderscoreLeftArgumentIsArray(theGlobalVariables);
-    else
-      this->SetError(this->errorBadIndex);
-    return;
-  }
-  int theIndex= rightNode.intValue;
-  int theDimension= this->GetContextLieAlgebra().theWeyl.CartanSymmetric.NumRows;
-  if (leftNode.Operation==Parser::tokenH)
-  { theIndex--;
-    if (theIndex>=theDimension || theIndex<0)
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    Vector<Rational> tempRoot;
-    tempRoot.MakeEi(theDimension, theIndex);
-    Polynomial<Rational>  polyZero;
-    polyZero.MakeZero(0);
-    this->UEElement.GetElement().MakeHgenerator
-    (tempRoot, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyZero.GetOne(), polyZero);
-    this->ExpressionType=this->typeUEelement;
-    return;
-  }
-  if (leftNode.Operation==Parser::tokenG)
-  { theIndex=this->GetContextLieAlgebra().GetRootIndexFromDisplayIndex(theIndex);
-    theIndex=this->GetContextLieAlgebra().GetGeneratorFromRootIndex(theIndex);
-    if (theIndex<0 || theIndex>this->GetContextLieAlgebra().theWeyl.RootSystem.size+theDimension)
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    Polynomial<Rational>  polyZero;
-    polyZero.MakeZero(0);
-    this->UEElement.GetElement().MakeOneGeneratorCoeffOne
-    (theIndex, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyZero.GetOne(), polyZero);
-    this->ExpressionType=this->typeUEelement;
-    return;
-  }
-  if (leftNode.Operation==Parser::tokenPartialDerivative)
-  { theIndex--;
-    if (theIndex<0 || theIndex>1000)
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    this->owner->MaxFoundVars=MathRoutines::Maximum(theIndex+1, this->owner->MaxFoundVars);
-    this->impliedNumVars=theIndex+1;
-    this->WeylAlgebraElement.GetElement().Makedi(theIndex, this->impliedNumVars);
-    this->ExpressionType=this->typeWeylAlgebraElement;
-  }
-  if (leftNode.Operation==Parser::tokenF)
-  { if (theIndex>0 && theIndex<=this->GetContextLieAlgebra().GetNumPosRoots())
-      theIndex+= this->GetContextLieAlgebra().GetNumPosRoots()+this->GetContextLieAlgebra().GetRank()-1;
-    else if (theIndex==0)
-      theIndex=this->GetContextLieAlgebra().GetNumPosRoots()+this->GetContextLieAlgebra().GetRank()-1;
-    else if (theIndex<0)
-      theIndex+= this->GetContextLieAlgebra().GetNumPosRoots();
-    else
-      theIndex--;
-    if (theIndex<0 || theIndex>this->GetContextLieAlgebra().theWeyl.RootSystem.size+this->GetContextLieAlgebra().GetRank())
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    Polynomial<Rational>  polyOne;
-    polyOne.MakeOne(0);
-    this->UEElementOrdered.GetElement().MakeOneGenerator(theIndex, polyOne, this->owner->testAlgebra, &theGlobalVariables);
-    this->ExpressionType=this->typeUEElementOrdered;
-    return;
-  }
-  if (leftNode.Operation==Parser::tokenX)
-    leftNode.Operation=Parser::tokenVariable;
-  if (leftNode.Operation==Parser::tokenVariable)
-  { theIndex--;
-    if (theIndex<0 || theIndex>1000)
-    { this->SetError(this->errorBadIndex);
-      return;
-    }
-    this->impliedNumVars=theIndex+1;
-    this->owner->MaxFoundVars=MathRoutines::Maximum(this->impliedNumVars, this->owner->MaxFoundVars);
-    this->polyValue.GetElement().MakeMonomial(this->impliedNumVars, theIndex, 1, (Rational) 1);
-    this->ExpressionType=this->typePoly;
-    return;
-  }
-}
-
-bool ParserNode::ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
-{ for (int i=0; i<this->children.size; i++)
-    if (!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(theType, GoalNumVars, theGlobalVariables))
-      return false;
-  return true;
-}
-
-void ParserNode::InitForAddition(GlobalVariables* theContext)
-{ this->intValue=0;
-  this->rationalValue.MakeZero();
-  switch(this->ExpressionType)
-  { case ParserNode::typePoly:
-      this->polyValue.GetElement().MakeZero(this->impliedNumVars);
-      break;
-    case ParserNode::typeUEelement:
-      this->UEElement.GetElement().MakeZero(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-      break;
-    case ParserNode::typeUEElementOrdered:
-      this->UEElementOrdered.GetElement().MakeZero(this->owner->testAlgebra);
-      break;
-    case ParserNode::typeWeylAlgebraElement:
-      this->WeylAlgebraElement.GetElement().MakeZero(this->impliedNumVars);
-      break;
-    case ParserNode::typeRationalFunction:
-      this->ratFunction.GetElement().MakeZero(this->impliedNumVars, theContext);
-      break;
-    case ParserNode::typeQuasiPolynomial:
-      this->theQP.GetElement().MakeZeroLatTiceZn(this->impliedNumVars);
-      break;
-    case ParserNode::typeAnimation:
-      this->theAnimation.GetElement().MakeZero();
-      break;
-    case ParserNode::typeGenVermaElt:
-      this->theGenVermaElt.GetElement().MakeZero();//this->owner->theModulePolys);
-      this->impliedNumVars=this->owner->MaxFoundVars;
-      this->owner->SetNumVarsModulePolys(this->impliedNumVars);
-    break;
-    case ParserNode::typeCharSSFDMod:
-      this->theChar.GetElement().MakeZero(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-      break;
-    default:
-      break;
-  }
-}
-
-void ParserNode::InitForMultiplication(GlobalVariables* theContext)
-{ this->intValue=1;
-  this->rationalValue=1;
-  if(this->ExpressionType==this->typePoly)
-    this->polyValue.GetElement().MakeConst(this->impliedNumVars, (Rational)1);
-  if(this->ExpressionType==this->typeUEelement)
-    this->UEElement.GetElement().AssignInt(1, this->impliedNumVars, this->GetContextLieAlgebra());
-  if(this->ExpressionType==this->typeUEElementOrdered)
-  { Polynomial<Rational>  PolyOne;
-    PolyOne.MakeConst(this->impliedNumVars, 1);
-    this->UEElementOrdered.GetElement().MakeConst(PolyOne, this->owner->testAlgebra);
-  }
-  if(this->ExpressionType==this->typeWeylAlgebraElement)
-    this->WeylAlgebraElement.GetElement().MakeConst(this->impliedNumVars, (Rational) 1);
-  if (this->ExpressionType==this->typeRationalFunction)
-    this->ratFunction.GetElement().MakeConst(this->impliedNumVars, (Rational) 1, theContext);
-  if (this->ExpressionType==this->typeCharSSFDMod)
-    this->theChar.GetElement().MakeTrivial(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-}
-
 int ParserNode::GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables)
-{ int result=this->typeUndefined;
-  for (int i=0; i<this->children.size; i++)
-  { int childExpressionType=this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType;
-    if (childExpressionType>result)
-      result=childExpressionType;
-  }
-  this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-  for (int i=0; i<this->children.size; i++)
-    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(result, this->impliedNumVars, theGlobalVariables))
-    { this->SetError(this->owner->TheObjects[this->children.TheObjects[i]].ErrorType);
-      return this->typeError;
-    }
-  return result;
+{ assert(false);
+  return -1;
 }
 
 void ParserNode::ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables)
@@ -1737,7 +1513,7 @@ void ParserNode::EvaluateMinus(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForAddition(&theGlobalVariables);
+//  this->InitForAddition(&theGlobalVariables);
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
     switch (this->ExpressionType)
@@ -1776,7 +1552,7 @@ void ParserNode::EvaluateMinusUnary(GlobalVariables& theGlobalVariables)
     return;
   }
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForAddition(&theGlobalVariables);
+//  this->InitForAddition(&theGlobalVariables);
   ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[0]];
   switch (this->ExpressionType)
   { case ParserNode::typeIntegerOrIndex: this->intValue-=currentChild.intValue; break;
@@ -1819,48 +1595,6 @@ bool ParserNode::AllChildrenAreOfDefinedNonErrorType()
     if (this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeError || this->owner->TheObjects[this->children.TheObjects[i]].ExpressionType==this->typeUndefined)
       return false;
   return true;
-}
-
-void ParserNode::EvaluateLieBracket(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=2 || !this->AllChildrenAreOfDefinedNonErrorType())
-  { this->ExpressionType=this->typeError;
-    return;
-  }
-  this->ExpressionType=this->typeUEelement;
-  if (this->OneChildrenOrMoreAreOfType(this->typeWeylAlgebraElement))
-  { this->ExpressionType=this->typeWeylAlgebraElement;
-    if (this->OneChildrenOrMoreAreOfType(this->typeUEelement) || this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered))
-    { this->SetError(this->errorMultiplicationByNonAllowedTypes);
-      return;
-    }
-  }
-  if (this->OneChildrenOrMoreAreOfType(this->typeUEElementOrdered) && !this->OneChildrenOrMoreAreOfType(this->typeUEelement))
-    this->ExpressionType= this->typeUEElementOrdered;
-  this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-  for (int i=0; i<this->children.size; i++)
-    if(!this->owner->TheObjects[this->children.TheObjects[i]].ConvertToType(this->ExpressionType, this->impliedNumVars, theGlobalVariables))
-    { this->SetError(this->errorDunnoHowToDoOperation);
-      return;
-    }
-  if (this->ExpressionType==this->typeUEelement)
-  { ElementUniversalEnveloping<Polynomial<Rational> >& left= this->owner->TheObjects[this->children[0]].UEElement.GetElement();
-    ElementUniversalEnveloping<Polynomial<Rational> >& right= this->owner->TheObjects[this->children[1]].UEElement.GetElement();
-    left.LieBracketOnTheRight(right, this->UEElement.GetElement());
-  } else if (this->ExpressionType==this->typeUEElementOrdered)
-  { ElementUniversalEnvelopingOrdered<Polynomial<Rational> >& left=this->owner->TheObjects[this->children.TheObjects[0]].UEElementOrdered.GetElement();
-    ElementUniversalEnvelopingOrdered<Polynomial<Rational> >& right= this->owner->TheObjects[this->children.TheObjects[1]].UEElementOrdered.GetElement();
-    left.LieBracketOnTheRight(right, this->UEElementOrdered.GetElement());
-    Polynomial<Rational>  polyOne, polyZero;
-    polyOne.MakeConst(this->impliedNumVars, (Rational)1);
-    polyZero.MakeZero(this->impliedNumVars);
-    this->UEElementOrdered.GetElement().Simplify(&theGlobalVariables, polyOne, polyZero);
-  } else if (this->ExpressionType==this->typeWeylAlgebraElement)
-  { ElementWeylAlgebra& left=this->owner->TheObjects[this->children.TheObjects[0]].WeylAlgebraElement.GetElement();
-    ElementWeylAlgebra& right= this->owner->TheObjects[this->children.TheObjects[1]].WeylAlgebraElement.GetElement();
-    this->WeylAlgebraElement.GetElement().Assign(left);
-    this->WeylAlgebraElement.GetElement().LieBracketOnTheRight(right, theGlobalVariables);
-  } else
-    this->SetError(this->errorProgramming);
 }
 
 void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
@@ -2311,41 +2045,12 @@ void ParserNode::EvaluateFunction(GlobalVariables& theGlobalVariables)
 }
 
 void ParserNode::EvaluateOrder(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=1)
-  { this->SetError(this->errorBadOrNoArgument);
-    return;
-  }
-  ParserNode& theArgument=this->owner->TheObjects[this->children[0]];
-  this->impliedNumVars=theArgument.impliedNumVars;
-  if (!theArgument.ConvertToType(this->typeUEElementOrdered, this->impliedNumVars, theGlobalVariables))
-  { this->SetError(this->errorConversionError);
-    return;
-  }
-  this->UEElementOrdered.GetElement()=theArgument.UEElementOrdered.GetElement();
+{ assert(false);
   this->ExpressionType=this->typeUEElementOrdered;
 }
 
 void ParserNode::EvaluatePrintWeyl(GlobalVariables& theGlobalVariables)
-{ std::stringstream out;
-  WeylGroup& theWeyl=this->owner->theHmm.theRange().theWeyl;
-  theWeyl.ComputeWeylGroup(51840);
-  out << "<br>Symmetric Cartan matrix in Bourbaki order:<br><div class=\"math\">"
-  << this->owner->theHmm.theRange().theWeyl.CartanSymmetric.ToString() << "</div>Root system:";
-  out << "<br>Size of Weyl group by formula: " << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString();
-  out << "<br>Explicitly computed elements: " << theWeyl.size;
-  out << "<br>Each element is parametrized by a list of simple reflections. <br>For example an element parametrized by 1,2 corresponds to the element <span class=\"math\">s_{\\alpha_1}s_{\\alpha_2}</span>,";
-  out << " where <span class=\"math\">s_{\\beta}</span> is the reflection with respect to <span class=\"math\">\\beta</span> and <span class=\"math\">\\alpha_i</span> is the i^th simple Vector<Rational>";
-  for (int i=0; i<theWeyl.size; i++)
-  { ElementWeylGroup& current=theWeyl.TheObjects[i];
-    out << "<br>";
-    if (current.size==0)
-      out << "id";
-    else
-      for (int j=0; j<current.size; j++)
-        out << current.TheObjects[j]+1 << ",";
-  }
-  this->outputString=out.str();
-  this->ExpressionType=this->typeString;
+{ assert(false);
 }
 
 class slTwoInSlN;
@@ -2589,6 +2294,22 @@ std::string VectorPartition::ToString(bool useHtml)
   return out.str();
 }
 
+bool RationalFunctionOld::ConvertToType(int theType)
+{ if (theType<this->expressionType)
+    return false;
+  if (theType==this->expressionType)
+    return true;
+  if (this->expressionType==this->typeRational && this->expressionType<theType)
+  { this->expressionType=this->typePoly;
+    this->Numerator.GetElement().MakeConsT(this->ratValue);
+  }
+  if (this->expressionType==this->typePoly && this->expressionType<theType)
+  { this->expressionType=this->typeRationalFunction;
+    this->Denominator.GetElement().MakeConsT(1);
+  }
+  return true;
+}
+
 void RationalFunctionOld::Invert()
 { //std::cout << "inverting " << this->ToString();
   assert(this->checkConsistency());
@@ -2699,7 +2420,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     ("Computing remainder  division");
     //+     inputOutput.ToString(&theGlobalVariables->theDefaultFormat) + " mod " +theBasiS.ToString(&theGlobalVariables->theDefaultFormat));
   }
-  outputRemainder->MakeZero(this->NumVars);
+  outputRemainder->MakeZero();
   Polynomial<Rational>& currentRemainder=inputOutput;
   Rational leadingMonCoeff;
   MonomialP& highestMonCurrentDivHighestMonOther=this->bufferMoN1;
@@ -2722,7 +2443,12 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
         this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
         if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
-          out << "Number of intermediate remainders: " << numIntermediateRemainders
+          out
+          << "Total number of polynomial operations so far: " << this->NumberOfComputations;
+          if (this->MaxNumComputations>0)
+            out << ", with a limit of no more than " << this->MaxNumComputations << " operations.";
+          out
+          << "\n<br>Number of intermediate remainders: " << numIntermediateRemainders
           << "\n<br> Highest mon of current remainder: "
           << currentRemainder[indexLeadingMonRemainder].ToString() << ". "
           << "\n<br>Current index we are dividing by: " << i+1
@@ -2733,8 +2459,31 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           theReport.Report(out.str());
           //std::cout << out.str();
         }
+        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        { std::cout << "<br>Dividing "
+          << currentRemainder.ToString()
+          <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
+          << this->bufPoly.ToString() ;
+          Polynomial<Rational> currentRemainder1;
+          currentRemainder1=currentRemainder;
+          currentRemainder1-=this->bufPoly;
+          std::cout << " I must get: " << currentRemainder1.ToString();
+        }
         currentRemainder-=this->bufPoly;
         divisionOcurred=true;
+        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
+          << "<br>Current divisor index: " << i+1;
+          if(this->NumberOfComputations>this->MaxNumComputations+1010)
+          { std::cout
+            << "<br>This may or may not be a programming error. While handling computation excess limit, "
+            << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+            << " I have no explanation for this issue right now, so I am crashing to let you know "
+            << " something is fishy. ";
+            std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+            assert(false);
+          }
+        }
         this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
@@ -2744,6 +2493,18 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
       this->NumberOfComputations++;
+      if (this->NumberOfComputations>this->MaxNumComputations+1000)
+      { std::cout
+        << "This may or may not be a programming error. While handling computation excess limit, "
+        << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+        << " I have no explanation for this issue right now, so I am crashing to let you know "
+        << " something is fishy. ";
+        std::cout << "<br>Current remainder:<br> " << currentRemainder.ToString();
+
+        std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      this->ConsistencyCheck();
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
         out << "Number of intermediate remainders: " << numIntermediateRemainders
@@ -2804,10 +2565,10 @@ bool GroebnerBasisComputation::AddRemainderToBasis
 
 GroebnerBasisComputation::GroebnerBasisComputation()
 { this->theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-  this->NumVars=-1;
   this->NumberOfComputations=0;
   this->flagDoProgressReport=true;
   this->flagDoSortBasis=true;
+  this->flagBasisGuaranteedToGenerateIdeal=false;
   this->MaxNumComputations=0;
 }
 
@@ -2820,7 +2581,6 @@ void GroebnerBasisComputation::initTheBasis
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->NumVars=inputOutpuT[0].NumVars;
   this->theBasiS.SetSize(0);
   this->theBasiS.ReservE(inputOutpuT.size);
   this->leadingMons.SetSize(0);
@@ -2830,19 +2590,30 @@ void GroebnerBasisComputation::initTheBasis
   this->NumberOfComputations=0;
 }
 
+void GroebnerBasisComputation::ConsistencyCheck()
+{ if (this->NumberOfComputations>this->MaxNumComputations+1000)
+  { std::cout
+    << "This may or may not be a programming error. While handling computation excess limit, "
+    << " I got that NumberOfComputations is much larger than MaxNumComputations. "
+    << " I have no explanation for this issue right now, so I am crashing to let you know "
+    << " something is fishy. ";
+    std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+}
+
 bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
-   GlobalVariables* theGlobalVariables, int upperComputationBound)
+   GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
-  this->MaxNumComputations=upperComputationBound;
   this->initTheBasis(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
-  this->SoPolyLeftShift.MakeConst(this->NumVars);
-  this->SoPolyRightShift.MakeConst(this->NumVars);
   ProgressReport theReport(theGlobalVariables);
  // std::string tempS;
 //  bool changed=true;
+  this->flagBasisGuaranteedToGenerateIdeal=false;
   this->AddPolyAndReduceBasis(theGlobalVariables);
+  this->flagBasisGuaranteedToGenerateIdeal=true;
   bool changed=true;
   while (changed)
   { changed=false;
@@ -2854,14 +2625,11 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
         int rightIndex=currentRight.GetIndexMaxMonomial(this->theMonOrdeR);
         MonomialP& leftHighestMon=currentLeft[leftIndex];
         MonomialP& rightHighestMon=currentRight[rightIndex];
-        if (leftHighestMon.monBody.size!=rightHighestMon.monBody.size ||
-            leftHighestMon.monBody.size!=this->NumVars)
-        { std::cout << "This is a programming error: wrong number of variables in monomials while "
-          << "carrying out Buchberger algorithm. "
-          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-          assert(false);
-        }
-        for (int k=0; k<leftHighestMon.monBody.size; k++)
+        int numVars=
+        MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+        this->SoPolyLeftShift.MakeOne(numVars);
+        this->SoPolyRightShift.MakeOne(numVars);
+        for (int k=0; k<numVars; k++)
           if (leftHighestMon[k]>rightHighestMon[k])
           { this->SoPolyRightShift[k]=leftHighestMon[k]-rightHighestMon[k];
             this->SoPolyLeftShift[k]=0;
@@ -2892,7 +2660,9 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
 //          changed=true;
 //        }
       }
+    this->flagBasisGuaranteedToGenerateIdeal=true;
     changed=this->AddPolyAndReduceBasis(theGlobalVariables);
+    this->flagBasisGuaranteedToGenerateIdeal=true;
     if (this->MaxNumComputations>0)
       if (this->NumberOfComputations>this->MaxNumComputations)
         return false;
@@ -2909,17 +2679,21 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
   while (this->basisCandidates.size>0)
   { bool addedNew=false;
     while (this->basisCandidates.size>0)
-    { this->NumberOfComputations++;
-      this->RemainderDivisionWithRespectToBasis
+    { this->RemainderDivisionWithRespectToBasis
       (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
       this->basisCandidates.PopLastObject();
-      if (this->MaxNumComputations>0)
-        if (this->NumberOfComputations>this->MaxNumComputations)
-          return true;
       if(this->AddRemainderToBasis(theGlobalVariables))
       { changed=true;
         addedNew=true;
       }
+      this->NumberOfComputations++;
+      if (this->MaxNumComputations>0)
+        if (this->NumberOfComputations>this->MaxNumComputations)
+        { if (!this->flagBasisGuaranteedToGenerateIdeal)
+            this->theBasiS.AddListOnTop(this->basisCandidates);
+          this->ConsistencyCheck();
+          return true;
+        }
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
         out << "Reducing: " << theBasiS.size << " basis elements, "
@@ -2928,6 +2702,8 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
 //          std::cout << "<br>" << out.str();
       }
     }
+    this->flagBasisGuaranteedToGenerateIdeal=true;
+
     if (!addedNew)
       break;
     for (int i=0; i<this->theBasiS.size; i++)
@@ -2946,9 +2722,12 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
       theGlobalVariables, i);
       if (this->MaxNumComputations>0)
         if (this->NumberOfComputations>this->MaxNumComputations)
+        { this->ConsistencyCheck();
           return true;
+        }
       if (!(this->remainderDivision==this->theBasiS[i]))
-      { this->basisCandidates.AddOnTop(this->remainderDivision);
+      { this->flagBasisGuaranteedToGenerateIdeal=false;
+        this->basisCandidates.AddOnTop(this->remainderDivision);
         this->leadingMons.PopIndexSwapWithLast(i);
         this->leadingCoeffs.PopIndexSwapWithLast(i);
         this->theBasiS.PopIndexSwapWithLast(i);
@@ -3036,10 +2815,7 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasisImprovedAlgorithm
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  int theNumVars=this->theBasiS[0].GetNumVars();
   MonomialP leftShift, rightShift, monLCM;
-  leftShift.monBody.SetSize(theNumVars);
-  rightShift.monBody.SetSize(theNumVars);
   Polynomial<Rational> leftBuf, rightBuf, buffer1;
   Polynomial<Rational>& outputRemainder=rightBuf; //to save some RAM
   ProgressReport reportOuter(theGlobalVariables);
@@ -3059,7 +2835,10 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasisImprovedAlgorithm
       << ".\n<br>Remaining cases current round: " << indexPairs.size;
       reportOuter.Report(out.str());
     }
-    for (int k=0; k<theNumVars; k++)
+    int numVars=MathRoutines::Maximum(leftHighestMon.GetMinNumVars(), rightHighestMon.GetMinNumVars());
+    leftShift.MakeOne(numVars);
+    rightShift.MakeOne(numVars);
+    for (int k=0; k<numVars; k++)
     { if (leftHighestMon[k]>0 && rightHighestMon[k]>0)
         isGood=true;
       if (leftHighestMon[k]>rightHighestMon[k])
@@ -3156,6 +2935,63 @@ void RationalFunctionOld::gcd
 //  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
+void RationalFunctionOld::MakeOneLetterMon
+  (int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables,
+   int ExpectedNumVars)
+{ if ( theIndex<0)
+  { std::cout << "This is a programming error: I am asked to create Monomial "
+    << " which has a variable of negative index " << theIndex << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->expressionType=this->typePoly;
+  ExpectedNumVars=MathRoutines::Maximum(theIndex+1, ExpectedNumVars);
+  this->Numerator.GetElement().MakeDegreeOne
+  (ExpectedNumVars, theIndex, theCoeff);
+  this->context=&theGlobalVariables;
+}
+
+void RationalFunctionOld::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
+{ int oldNumVars=this->GetMinNumVars();
+  this->Numerator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  this->Denominator.GetElement().SetNumVariablesSubDeletedVarsByOne(newNumVars);
+  if (newNumVars<oldNumVars)
+    this->Simplify();
+//    assert(this->checkConsistency());
+}
+
+void RationalFunctionOld::operator=(const RationalFunctionOld& other)
+{// int commentmewhendone2;
+  //other.checkConsistency();
+  //this->checkConsistency();
+  this->expressionType=other.expressionType;
+  if (other.context!=0)
+    this->context=other.context;
+  switch (this->expressionType)
+  { case RationalFunctionOld::typeRational:
+      this->ratValue=other.ratValue;
+      //The below is for testing purposes. I think it is generally better to comment those lines!
+      //this->Numerator.FreeMemory();
+      //this->Denominator.FreeMemory();
+      break;
+    case RationalFunctionOld::typePoly:
+      assert(!other.Numerator.IsZeroPointer() );
+      this->Numerator.GetElement()=other.Numerator.GetElementConst();
+      //The below is for testing purposes. I think it is generally better to comment those lines!
+      //this->Denominator.FreeMemory();
+      break;
+    case RationalFunctionOld::typeRationalFunction:
+      assert(!other.Numerator.IsZeroPointer() && !other.Denominator.IsZeroPointer());
+      this->Numerator.GetElement()=other.Numerator.GetElementConst();
+      this->Denominator.GetElement()=other.Denominator.GetElementConst();
+      break;
+    default: break;
+  }
+//    int commentmewhendone;
+//    other.checkConsistency();
+//    this->checkConsistency();
+}
+
 void RationalFunctionOld::lcm
 (const Polynomial<Rational>& left, const Polynomial<Rational>& right,
  Polynomial<Rational>& output, GlobalVariables* theGlobalVariables)
@@ -3173,13 +3009,12 @@ void RationalFunctionOld::lcm
 
   leftTemp=(left);
   rightTemp=(right);
-  assert(left.NumVars==right.NumVars);
-  int theNumVars=left.NumVars;
-  leftTemp.SetNumVariablesSubDeletedVarsByOne((int)theNumVars+1);
-  rightTemp.SetNumVariablesSubDeletedVarsByOne((int)theNumVars+1);
+  int theNumVars=MathRoutines::Maximum(left.GetMinNumVars(), right.GetMinNumVars());
+  leftTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
+  rightTemp.SetNumVariablesSubDeletedVarsByOne(theNumVars+1);
   leftTemp.ScaleToIntegralNoGCDCoeffs();
   rightTemp.ScaleToIntegralNoGCDCoeffs();
-  tempP.MakeMonomial((int)theNumVars+1,(int) theNumVars, 1, (Rational) 1);
+  tempP.MakeMonomiaL(theNumVars, 1, (Rational) 1, theNumVars+1);
   leftTemp*=(tempP);
   tempP*=-1;
   tempP+=1;
@@ -3195,7 +3030,7 @@ void RationalFunctionOld::lcm
   GroebnerBasisComputation& theComp=theGlobalVariables==0?
   bufComp.GetElement(): theGlobalVariables->theGroebnerBasisComputation.GetElement();
   theComp.theMonOrdeR=MonomialP::LeftIsGEQLexicographicLastVariableStrongest;
-  theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables, -1);
+  theComp.TransformToReducedGroebnerBasis(theBasis, theGlobalVariables);
 //  std::cout << "<br><br> ... and the basis is: <br>";
 //  for (int i=0; i<tempList.size; i++)
 //  { std::cout << tempList[i].ToString() << "<br>\n";
@@ -3230,7 +3065,7 @@ void RationalFunctionOld::lcm
 void RationalFunctionOld::operator*=(const MonomialP& other)
 { //std::cout << "<br>Multiplying " << this->ToString() << " times " << other.ToString();
   Polynomial<Rational> otherP;
-  otherP.MakeZero(other.monBody.size);
+  otherP.MakeZero();
   otherP.AddMonomial(other, 1);
   //std::cout << ", otherP is: " << otherP.ToString();
   (*this)*=otherP;
@@ -3238,16 +3073,8 @@ void RationalFunctionOld::operator*=(const MonomialP& other)
 }
 
 void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
-{ if (this->NumVars!=other.NumVars)
-  { int NewNumVars=MathRoutines::Maximum(other.NumVars, this->NumVars);
-    Polynomial<Rational> otherNew=other;
-    otherNew.SetNumVariables(NewNumVars);
-    this->SetNumVariables(NewNumVars);
-    *this*=otherNew;
-    return;
-  }
-  if (other.IsEqualToZero())
-  { this->MakeZero(this->NumVars, this->context);
+{ if (other.IsEqualToZero())
+  { this->MakeZero(this->context);
     return;
   }
   if (this->expressionType== this->typeRational)
@@ -3294,7 +3121,7 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
 void RationalFunctionOld::operator*=(const Rational& other)
 { //assert(this->checkConsistency());
   if (other.IsEqualToZero())
-  { this->MakeZero(this->NumVars, this->context);
+  { this->MakeZero(this->context);
     return;
   }
   switch(this->expressionType)
@@ -3311,20 +3138,14 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 {// int commentChecksWhenDoneDebugging=-1;
   //this->checkConsistency();
   //other.checkConsistency();
-
-  if (this->NumVars!=other.NumVars || this==&other)
-  { RationalFunctionOld tempRF;
-    tempRF=other;
-    int maxNumVars=MathRoutines::Maximum(this->NumVars, other.NumVars);
-    this->SetNumVariables(maxNumVars);
-    tempRF.SetNumVariables(maxNumVars);
-    *this*=tempRF;
+  if (this==&other)
+  { this->RaiseToPower(2);
     return;
   }
   if (other.context!=0)
     this->context=other.context;
   if (other.IsEqualToZero() || this->IsEqualToZero())
-  { this->MakeZero(this->NumVars, this->context);
+  { this->MakeZero(this->context);
     return;
   }
   if (other.expressionType==this->typeRational)
@@ -3434,34 +3255,6 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
   output.MakeDegreeOne((int)(theRank+numPosRoots), theIndex+theRank, (Rational) 1);
 }
 
-
-template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfElements
-(List<ElementUniversalEnveloping<CoefficientType> >& theElements, Vectors<Rational>& outputCoordinates,
- ElementUniversalEnveloping<CoefficientType>& outputCorrespondingMonomials, GlobalVariables& theGlobalVariables)
-{ if (theElements.size==0)
-    return;
-  outputCorrespondingMonomials.MakeZero(*theElements.TheObjects[0].owner);
-  for (int i=0; i<theElements.size; i++)
-    for (int j=0; j<theElements.TheObjects[i].size; j++)
-      outputCorrespondingMonomials.AddOnTopNoRepetition(theElements.TheObjects[i].TheObjects[j]);
-  outputCoordinates.SetSize(theElements.size);
-  Rational tempRat;
-  for (int i=0; i<theElements.size; i++)
-  { Vector<Rational>& current=outputCoordinates.TheObjects[i];
-    current.MakeZero(outputCorrespondingMonomials.size);
-    ElementUniversalEnveloping<CoefficientType>& currentElt=theElements.TheObjects[i];
-    for (int j=0; j<currentElt.size; j++)
-    { MonomialUniversalEnveloping<CoefficientType>& currentMon=currentElt.TheObjects[j];
-      if (currentMon.Coefficient.size>0)
-        tempRat=currentMon.Coefficient.TheObjects[0].Coefficient;
-      else
-        tempRat.MakeZero();
-      current.TheObjects[outputCorrespondingMonomials.GetIndex(currentMon)]=tempRat;
-    }
-  }
-}
-
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::AssignFromCoordinateFormWRTBasis
   (List<ElementUniversalEnveloping<CoefficientType> >& theBasis,
@@ -3477,92 +3270,6 @@ void ElementUniversalEnveloping<CoefficientType>::AssignFromCoordinateFormWRTBas
       tempElt.operator*=(input.TheObjects[i]);
       this->operator+=(tempElt);
     }
-}
-
-void SemisimpleLieAlgebra::ComputeCommonAdEigenVectors
-(int theDegree, List<ElementUniversalEnveloping<Polynomial<Rational> > >& theGenerators,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& generatorsBeingActedOn,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
- GlobalVariables& theGlobalVariables)
-{ SelectionWithMaxMultiplicity theSel;
- int numGenerators=generatorsBeingActedOn.size;
-  theSel.initMaxMultiplicity(numGenerators+1, theDegree);
-  int numCycles=theSel.NumCombinationsOfCardinality(theDegree);
-  List<ElementUniversalEnveloping<Polynomial<Rational> > > candidateElements, theBracketsOfTheElements;
-  ElementUniversalEnveloping<Polynomial<Rational> > tempElt, tempElt2, currentOutput, Accum, UEUnit;
-  theBracketsOfTheElements.size=0;
-  theSel.IncrementSubsetFixedCardinality(theDegree);
-  int numVars=this->GetRank();
-  Polynomial<Rational>  polyOne, polyZero;
-  polyOne.MakeOne(numVars);
-  polyZero.MakeZero(numVars);
-  for (int i=0; i<numCycles; i++, theSel.IncrementSubsetFixedCardinality(theDegree))
-  { Accum.MakeConst((Rational) 1, 0, *this->owner, this->indexInOwner);
-    for (int j=0; j<theSel.elements.size; j++)
-      if (theSel.elements.TheObjects[j]<numGenerators)
-      { int generatorIndex=theSel.elements.TheObjects[j];
-        int generatorPower=theSel.Multiplicities.TheObjects[generatorIndex];
-        tempElt.operator=(generatorsBeingActedOn.TheObjects[generatorIndex]);
-        tempElt.RaiseToPower(generatorPower);
-        Accum*=(tempElt);
-      }
-    tempElt.operator=(Accum);
-    tempElt.SetNumVariables(numVars);
-    candidateElements.AddOnTop(tempElt);
-//    out << "<br>" << Accum.ToString(true);
-    for (int j=0; j<theGenerators.size; j++)
-    { tempElt2.operator=(theGenerators.TheObjects[j]);
-      tempElt2.SetNumVariables(numVars);
-      tempElt2.LieBracketOnTheRight(tempElt, currentOutput);
-//      currentOutput.ComputeDebugString();
-//      std::cout<< currentOutput.DebugString;
-      currentOutput.Simplify(theGlobalVariables, polyOne, polyZero);
-      currentOutput.ModOutVermaRelations(&theGlobalVariables, 0, polyOne, polyZero);
-      theBracketsOfTheElements.AddOnTop(currentOutput);
-      out << "<br>";
-      //out << "<div class=\"math\">";
-      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultFormat) << "," << Accum.ToString(&theGlobalVariables.theDefaultFormat) << "]=";
-      //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ToString(&theGlobalVariables.theDefaultFormat);
-      //out << "  (mod Verma relations)";
-      //out << "\\end{eqnarray*}</div>";
-    }
-  }
-  out << "<br>number of monomials of given degree: " << candidateElements.size;
-  Vectors<Polynomial<Rational> > theBasisRootForm;
-  ElementUniversalEnveloping<Polynomial<Rational> > theMonBasis;
-  ElementUniversalEnveloping<Polynomial<Rational> >::GetCoordinateFormOfSpanOfElements
-  (numVars, theBracketsOfTheElements, theBasisRootForm, theMonBasis, theGlobalVariables);
-  std::string tempS;
-  out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
-  for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
-  Matrix<RationalFunctionOld> theSystem;
-  theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
-  for (int k=0; k<theGenerators.size; k++)
-    for (int i=0; i<candidateElements.size; i++)
-    { Vector<Polynomial<Rational> >& currentRoot=theBasisRootForm.TheObjects[k+i*theGenerators.size];
-      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ToString();
-      for (int j=0; j<currentRoot.size; j++)
-        theSystem.elements[currentRoot.size*k+j][i]=currentRoot.TheObjects[j];
-    }
-  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString() << "</div>";
-  List<List<RationalFunctionOld> > theEigenVectors;
-  RationalFunctionOld oneRF, minusOneRF, zeroRF;
-  oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
-  minusOneRF.MakeConst(numVars, (Rational) -1, &theGlobalVariables);
-  zeroRF.MakeConst(numVars, (Rational) 0, &theGlobalVariables);
-
-  theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
-  out << "<br> the dim of the eigen space: " << theEigenVectors.size;
-  Vector<Polynomial<Rational> > tempProot;
-
-  for (int i=0; i<theEigenVectors.size; i++)
-  { List<RationalFunctionOld>& currentEigen=theEigenVectors.TheObjects[i];
-    RationalFunctionOld::ScaleClearDenominator(currentEigen, tempProot);
-    tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultFormat);
-  }
 }
 
 void RationalFunctionOld::ScaleClearDenominator
@@ -3582,139 +3289,6 @@ void RationalFunctionOld::ScaleClearDenominator
   for (int i=0; i<buffer.size; i++)
   { buffer[i].GetNumerator(tempP);
     output[i]=tempP;
-  }
-}
-
-void SemisimpleLieAlgebra::ComputeCommonAdEigenVectorsFixedWeight
-(Vector<Rational>& theWeight, Vectors<Rational>& theHs, List<ElementUniversalEnveloping<Polynomial<Rational> > >& theGenerators,
- List<ElementUniversalEnveloping<Polynomial<Rational> > >& output, std::stringstream& out,
- GlobalVariables& theGlobalVariables)
-{ VectorPartition theVP;
-  int numGenerators= this->GetNumPosRoots();
-  int numVars=this->GetRank();
-  Polynomial<Rational>  polyOne, polyZero;
-  polyOne.MakeOne(numVars);
-  polyZero.MakeZero(numVars);
-  int theRank=this->GetRank();
-  theVP.PartitioningRoots.SetSize(numGenerators);
-  List<ElementUniversalEnveloping<Polynomial<Rational> > > generatorsBeingActedOn;
-  generatorsBeingActedOn.SetSize(numGenerators);
-  theVP.PartitioningRoots.operator=(this->theWeyl.RootsOfBorel);
-  out << "<br>" << theWeight.ToString() << "<br> the H's: " << theHs.ToString();
-  out << "<br> Partitioning Vectors<Rational>: " << theVP.PartitioningRoots.ToString();
-  Polynomial<Rational>  polyZeroZeroVars;
-  polyZeroZeroVars.MakeZero(0);
-  for (int i=0; i<numGenerators; i++)
-  { ElementUniversalEnveloping<Polynomial<Rational> >& currentUE=generatorsBeingActedOn.TheObjects[i];
-    currentUE.MakeOneGeneratorCoeffOne(i, *this->owner, this->indexInOwner, polyZeroZeroVars.GetOne(), polyZeroZeroVars);
-  }
-  theVP.theRoot=theWeight;
-  theVP.ComputeAllPartitions();
-  out << "<br><br>" << theVP.ToString(true);
-  Vector<Rational> accumulatedHweight, tempRoot;
-  for (int i=0; i<theVP.thePartitions.size; i++)
-  { List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
-    accumulatedHweight.MakeZero(theRank);
-    for (int generatorIndex=0; generatorIndex<currentPartition.size; generatorIndex++)
-    { int generatorPower=currentPartition.TheObjects[generatorIndex];
-      accumulatedHweight+=theVP.PartitioningRoots[generatorIndex]* generatorPower;
-    }
-    bool isGood=true;
-    for (int j=0; j<theHs.size; j++)
-    { Vector<Rational>& currentH=theHs.TheObjects[j];
-      Rational theTargetScalar;
-      Rational currentScalar;
-      bool found=false;
-      for (int k=0; k<currentH.size; k++)
-        if (currentH.TheObjects[k]!=0)
-        { tempRoot.MakeEi(currentH.size, k);
-          currentScalar=this->theWeyl.RootScalarCartanRoot(tempRoot, accumulatedHweight);
-          if (!found)
-          { theTargetScalar=currentScalar;
-            found=true;
-          }
-          if (theTargetScalar!=currentScalar)
-          { isGood=false;
-            break;
-          }
-        }
-      if (!isGood)
-        break;
-    }
-    if (isGood)
-    { out << "<br>" << accumulatedHweight.ToString();
-      out << " is good";
-    } else
-    { theVP.thePartitions.PopIndexSwapWithLast(i);
-      i--;
-    }
-  }
-  List<ElementUniversalEnveloping<Polynomial<Rational> > > candidateElements, theBracketsOfTheElements;
-  ElementUniversalEnveloping<Polynomial<Rational> > tempElt, tempElt2, currentOutput, Accum, UEUnit;
-  theBracketsOfTheElements.size=0;
-  for (int i=0; i<theVP.thePartitions.size; i++)
-  { Accum.MakeConst((Rational) 1, 0, *this->owner, this->indexInOwner);
-    List<int>& currentPartition=theVP.thePartitions.TheObjects[i];
-    for (int generatorIndex=0; generatorIndex<currentPartition.size; generatorIndex++)
-    { int generatorPower=currentPartition.TheObjects[generatorIndex];
-      tempElt.operator=(generatorsBeingActedOn.TheObjects[generatorIndex]);
-      tempElt.RaiseToPower(generatorPower);
-      Accum*=(tempElt);
-    }
-    tempElt.operator=(Accum);
-    tempElt.SetNumVariables(numVars);
-    candidateElements.AddOnTop(tempElt);
-//    out << "<br>" << Accum.ToString(true);
-    for (int j=0; j<theGenerators.size; j++)
-    { tempElt2.operator=(theGenerators.TheObjects[j]);
-      tempElt2.SetNumVariables(numVars);
-      tempElt2.LieBracketOnTheRight(tempElt, currentOutput);
-//      currentOutput.ComputeDebugString();
-//      std::cout<< currentOutput.DebugString;
-      currentOutput.Simplify(theGlobalVariables, polyOne, polyZero);
-      currentOutput.ModOutVermaRelations(&theGlobalVariables, 0, polyOne, polyZero);
-      theBracketsOfTheElements.AddOnTop(currentOutput);
-      out << "<br>";
-      //out << "<div class=\"math\">";
-      out << "[" << theGenerators[j].ToString(&theGlobalVariables.theDefaultFormat) << ","
-      << Accum.ToString(&theGlobalVariables.theDefaultFormat) << "]=";
-      //out << "\\begin{eqnarray*}&&";
-      out << currentOutput.ToString(&theGlobalVariables.theDefaultFormat);
-      //out << "  (mod Verma relations)";
-      //out << "\\end{eqnarray*}</div>";
-    }
-  }
-  out << "<br>number of monomials of given degree: " << candidateElements.size;
-  Vectors<Polynomial<Rational> > theBasisRootForm;
-  ElementUniversalEnveloping<Polynomial<Rational> > theMonBasis;
-  ElementUniversalEnveloping<Polynomial<Rational> >::GetCoordinateFormOfSpanOfElements(numVars, theBracketsOfTheElements, theBasisRootForm, theMonBasis, theGlobalVariables);
-  std::string tempS;
-  out << "<br>...and the monomial basis is(" << theMonBasis.size << " elements total): ";
-  for (int i=0; i<theMonBasis.size; i++)
-    out << theMonBasis[i].ToString(&theGlobalVariables.theDefaultFormat) << ", ";
-  Matrix<RationalFunctionOld> theSystem;
-  theSystem.init(theMonBasis.size*theGenerators.size, candidateElements.size);
-  for (int k=0; k<theGenerators.size; k++)
-    for (int i=0; i<candidateElements.size; i++)
-    { Vector<Polynomial<Rational> >& currentRoot=theBasisRootForm[k+i*theGenerators.size];
-      //out << "<br>Vector<Rational> index" << i << ": " << currentRoot.ToString();
-      for (int j=0; j<currentRoot.size; j++)
-        theSystem.elements[currentRoot.size*k+j][i]=currentRoot[j];
-    }
-  out << "<br>...and the system is: <div class=\"math\">" << theSystem.ToString() << "</div>";
-  List<List<RationalFunctionOld> > theEigenVectors;
-  RationalFunctionOld oneRF, minusOneRF, zeroRF;
-  oneRF.MakeConst(numVars, (Rational) 1, &theGlobalVariables);
-  minusOneRF.MakeConst(numVars, (Rational) -1, &theGlobalVariables);
-  zeroRF.MakeConst(numVars, (Rational) 0, &theGlobalVariables);
-  theSystem.FindZeroEigenSpacE(theEigenVectors, oneRF, minusOneRF, zeroRF, theGlobalVariables);
-  out << "<br> the dim of the eigen space: " << theEigenVectors.size;
-  Vector<Polynomial<Rational> > tempProot;
-  for (int i=0; i<theEigenVectors.size; i++)
-  { List<RationalFunctionOld>& currentEigen=theEigenVectors[i];
-    RationalFunctionOld::ScaleClearDenominator(currentEigen, tempProot);
-    tempElt.AssignFromCoordinateFormWRTBasis(candidateElements, tempProot, *this);
-    out << "<br>" << tempElt.ToString(&theGlobalVariables.theDefaultFormat);
   }
 }
 
@@ -3786,186 +3360,6 @@ bool ElementSemisimpleLieAlgebra<CoefficientType>::MustUseBracketsWhenDisplaying
     if (this->theCoeffs[0]==1)
       return false;
   return true;
-}
-
-bool ParserNode::ConvertToNextType
-(int GoalType, int GoalNumVariables, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
-{ ErrorHasOccured=false;
-  assert(this->impliedNumVars<=GoalNumVariables);
-  this->impliedNumVars=GoalNumVariables;
-  switch(this->ExpressionType)
-  { case ParserNode::typePoly:
-      assert(this->polyValue.GetElement().NumVars<=GoalNumVariables);
-      this->polyValue.GetElement().SetNumVariablesSubDeletedVarsByOne(GoalNumVariables);
-      break;
-    case ParserNode::typeUEelement:
-      assert(this->UEElement.GetElement().GetNumVars()<=GoalNumVariables);
-      this->UEElement.GetElement().SetNumVariables(GoalNumVariables);
-      break;
-    case ParserNode::typeUEElementOrdered:
-      assert(this->UEElementOrdered.GetElement().GetNumVars()<=GoalNumVariables);
-      this->UEElementOrdered.GetElement().SetNumVariables(GoalNumVariables);
-      break;
-    case ParserNode::typeRationalFunction:
-      assert(this->ratFunction.GetElement().NumVars<=GoalNumVariables);
-      this->ratFunction.GetElement().SetNumVariablesSubDeletedVarsByOne(GoalNumVariables);
-      break;
-    case ParserNode::typeWeylAlgebraElement:
-      assert(this->WeylAlgebraElement.GetElement().NumVariables<=GoalNumVariables);
-      this->WeylAlgebraElement.GetElement().SetNumVariables(GoalNumVariables);
-      break;
-  }
-  if (GoalType==this->ExpressionType)
-    return false;
-  if (this->ExpressionType==this->typeIntegerOrIndex)
-  { this->rationalValue= this->intValue;
-    this->ExpressionType=this->typeRational;
-    return true;
-  }
-  if (this->ExpressionType==this->typeRational)
-  { if (GoalType<this->typeRational)
-    { if (this->rationalValue.IsSmallInteger())
-      { this->ExpressionType=this->typeIntegerOrIndex;
-        this->intValue=this->rationalValue.NumShort;
-        return true;
-      }
-      return false;
-    }
-    if (GoalType==this->typeCharSSFDMod)
-    { MonomialChar<Rational> tempMon;
-      tempMon.weightFundamentalCoords.MakeZero(this->GetContextLieAlgebra().GetRank());
-//      tempMon.Coefficient=this->rationalValue;
-      this->theChar.GetElement().MakeZero(this->owner->theAlgebras, this->IndexContextLieAlgebra);
-//      this->theChar.GetElement()+=tempMon;
-      this->ExpressionType=this->typeCharSSFDMod;
-      return true;
-    }
-    this->polyValue.GetElement().MakeConst(GoalNumVariables, this->rationalValue);
-    this->ExpressionType=this->typePoly;
-    return true;
-  }
-  if (this->ExpressionType==this->typePoly)
-  { if (GoalType<this->typePoly)
-    { if(this->polyValue.GetElement().IsAConstant(&this->rationalValue))
-      { this->ExpressionType=this->typeRational;
-        return true;
-      }
-      return false;
-    }
-    int typeToConvertTo=this->typeRationalFunction;
-    if (GoalType==this->typeUEElementOrdered || GoalType==this->typeUEelement)
-      typeToConvertTo=this->typeUEElementOrdered;
-    if (GoalType==this->typeWeylAlgebraElement)
-      typeToConvertTo=this->typeWeylAlgebraElement;
-    switch (typeToConvertTo)
-    { case ParserNode::typeUEelement:
-        this->UEElement.GetElement().MakeConst(this->polyValue.GetElement(), this->owner->theAlgebras, this->IndexContextLieAlgebra);
-        this->ExpressionType=this->typeUEelement;
-        return true;
-      case ParserNode::typeWeylAlgebraElement:
-        this->WeylAlgebraElement.GetElement().AssignPolynomial(this->polyValue.GetElement());
-        this->ExpressionType=this->typeWeylAlgebraElement;
-        return true;
-      case ParserNode::typeRationalFunction:
-        this->ratFunction.GetElement()=this->polyValue.GetElement();
-        this->ExpressionType=this->typeRationalFunction;
-        return true;
-      case ParserNode::typeUEElementOrdered:
-        this->UEElementOrdered.GetElement().MakeConst(this->polyValue.GetElement(), this->owner->testAlgebra);
-        this->ExpressionType=this->typeUEElementOrdered;
-        return true;
-    }
-  }
-  if (this->ExpressionType==this->typeRationalFunction)
-  { if (GoalType<this->typeRationalFunction)
-    { if (this->ratFunction.GetElement().expressionType==RationalFunctionOld::typePoly)
-      { this->polyValue=this->ratFunction.GetElement().Numerator;
-        this->ExpressionType=this->typePoly;
-        return true;
-      }
-      if (this->ratFunction.GetElement().expressionType==RationalFunctionOld::typeRational)
-      { this->polyValue.GetElement().MakeConst(this->ratFunction.GetElement().NumVars, this->ratFunction.GetElement().ratValue);
-        this->ExpressionType=this->typePoly;
-        return true;
-      }
-      return false;
-    }
-    return false;
-  }
-  if (this->ExpressionType==this->typeUEelement && GoalType==this->typeUEElementOrdered)
-  { Polynomial<Rational>  unitPoly, zeroPoly;
-    unitPoly.MakeConst(this->UEElement.GetElement().GetNumVars(), (Rational) 1);
-    zeroPoly.MakeZero(unitPoly.NumVars);
-    if (this->UEElementOrdered.GetElement().AssignElementUniversalEnveloping(this->UEElement.GetElement(), this->owner->testAlgebra, unitPoly, zeroPoly, &theGlobalVariables))
-    { this->ExpressionType=this->typeUEElementOrdered;
-      return true;
-    } else
-    { ErrorHasOccured=true;
-      return false;
-    }
-  }
-  if (this->ExpressionType==this->typeUEElementOrdered && GoalType==this->typeUEelement)
-  { if (!this->UEElementOrdered.GetElement().GetElementUniversalEnveloping(this->UEElement.GetElement(), this->owner->theHmm.theRange()))
-    { ErrorHasOccured=true;
-      return false;
-    }
-    this->ExpressionType=this->typeUEelement;
-    return true;
-  }
-  return false;
-}
-
-bool ParserNode::ConvertToType
-(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
-{ if (this->ExpressionType==this->typeError)
-    return false;
-  if (theType==this->typeUndefined)
-    return false;
-  if (GoalNumVars< this->impliedNumVars)
-    return false;
-  this->impliedNumVars=GoalNumVars;
-  this->owner->MaxFoundVars=MathRoutines::Maximum(this->impliedNumVars, this->owner->MaxFoundVars);
-  switch(this->ExpressionType)
-  { case ParserNode::typeMapPolY:
-      this->polyBeingMappedTo.GetElement().SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
-    case ParserNode::typePoly:
-      this->polyValue.GetElement().SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
-      break;
-    case ParserNode::typeRationalFunction:
-      this->ratFunction.GetElement().SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
-      break;
-    case ParserNode::typeUEelement:
-      this->UEElement.GetElement().SetNumVariables(GoalNumVars);
-      break;
-    case ParserNode::typeUEElementOrdered:
-      this->UEElementOrdered.GetElement().SetNumVariables(GoalNumVars);
-      break;
-    case ParserNode::typeMapWeylAlgebra:
-      this->weylEltBeingMappedTo.GetElement().SetNumVariables(GoalNumVars);
-    case ParserNode::typeWeylAlgebraElement:
-      this->WeylAlgebraElement.GetElement().SetNumVariables(GoalNumVars); break;
-    case ParserNode::typeAnimation:
-      break;
-    case ParserNode::typeQuasiPolynomial:
-      if (GoalNumVars!=this->theQP.GetElement().GetNumVars())
-      { this->SetError(this->errorDimensionProblem);
-        return false;
-      }
-      break;
-    case ParserNode::typeGenVermaElt:
-      this->impliedNumVars=this->owner->MaxFoundVars;
-      GoalNumVars=this->impliedNumVars;
-      this->owner->SetNumVarsModulePolys(GoalNumVars);
-      this->theGenVermaElt.GetElement().SetNumVariables(GoalNumVars); break;
-    default: break;
-  }
-  bool ConversionError;
-  while (this->ConvertToNextType(theType, GoalNumVars, ConversionError, theGlobalVariables))
-    if (ConversionError)
-    { this->SetError(this->errorConversionError);
-      return false;
-    }
-  return this->ExpressionType==theType;
 }
 
 template <class CoefficientType>
@@ -4089,19 +3483,7 @@ std::string ParserNode::ElementToStringValueAndType
 }
 
 int ParserNode::EvaluateSubstitution(GlobalVariables& theGlobalVariables)
-{ if (this->children.size!=2)
-    return this->SetError(this->errorBadOrNoArgument);
-  ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
-  ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
-  this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-  if(!leftNode.ConvertToType(this->typeWeylAlgebraElement, this->impliedNumVars, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  if(!rightNode.ConvertToType(this->typeWeylAlgebraElement, this->impliedNumVars, theGlobalVariables))
-    return this->SetError(this->errorBadOrNoArgument);
-  this->WeylAlgebraElement.GetElement()=leftNode.WeylAlgebraElement.GetElementConst();
-  this->weylEltBeingMappedTo.GetElement()=rightNode.WeylAlgebraElement.GetElementConst();
-  this->ExpressionType=this->typeMapWeylAlgebra;
-  return this->errorNoError;
+{ assert(false);
 }
 
 void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
@@ -4121,97 +3503,14 @@ void ParserNode::EvaluateDereferenceArray(GlobalVariables& theGlobalVariables)
   { this->SetError(this->errorBadIndex);
     return;
   }
-  ParserNode& relevantChild=this->owner->TheObjects[firstChild.children.TheObjects[arrayIndex]];
-  this->CopyValue(relevantChild);
+//  ParserNode& relevantChild=this->owner->TheObjects[firstChild.children.TheObjects[arrayIndex]];
+//  this->CopyValue(relevantChild);
   return;
 }
 
 int ParserNode::EvaluateApplySubstitution(GlobalVariables& theGlobalVariables)
-{ if (this->children.size<2)
-    return this->SetError(this->errorProgramming);
-  this->impliedNumVars=this->GetMaxImpliedNumVarsChildren();
-  Polynomial<Rational>  currentLeft, currentRight;
-  Vectors<Rational> leftHandSide;
-  PolynomialSubstitution<Rational> theSubInitial;
-  leftHandSide.ReservE(this->impliedNumVars*2);
-  theSubInitial.ReservE(this->impliedNumVars*2);
-  Vector<Rational> currentLeftRoot;
-  for (int i=0; i<this->children.size-1; i++)
-  { ParserNode& currentNode=this->owner->TheObjects[this->children.TheObjects[i]];
-    if (!currentNode.ConvertToType(this->typeMapWeylAlgebra, this->impliedNumVars, theGlobalVariables))
-      return this->SetError(this->errorBadOrNoArgument);
-    currentNode.WeylAlgebraElement.GetElement().GetStandardOrder(currentLeft);
-    currentNode.weylEltBeingMappedTo.GetElement().GetStandardOrder(currentRight);
-    if (currentLeft.IsLinear())
-    { currentLeft.GetRootFromLinPolyConstTermLastVariable(currentLeftRoot);
-      theSubInitial.AddOnTop(currentRight);
-      *theSubInitial.LastObject()-=*currentLeftRoot.LastObject();
-      currentLeftRoot.size--;
-      leftHandSide.AddOnTop(currentLeftRoot);
-    } else
-      return this->SetError(this->errorBadOrNoArgument);
-  }
-  int NumVarsDoubled=this->impliedNumVars*2;
-  Matrix<Rational> tempMat;
-  Selection tempSel;
-  int currentRank=leftHandSide.GetRankOfSpanOfElements(&tempMat, &tempSel);
-  Vector<Rational> ei;
-  Polynomial<Rational> tempP;
-  std::stringstream report, out;
-  bool found=false;
-  int numImpliedDsubs=0;
-  int numImpliedXsubs=0;
-  for (int i=0; i<NumVarsDoubled && currentRank<NumVarsDoubled; i++)
-  { ei.MakeEi(this->impliedNumVars*2, i);
-    leftHandSide.AddOnTop(ei);
-    int candidateRank=leftHandSide.GetRankOfSpanOfElements(&tempMat, &tempSel);
-    if (candidateRank>currentRank)
-    { currentRank=candidateRank;
-      tempP.MakeLinPolyFromRootNoConstantTerm(ei);
-      theSubInitial.AddOnTop(tempP);
-      if (found)
-        report << ",";
-      found=true;
-      report << tempP.ToString(&theGlobalVariables.theDefaultFormat)
-      << " \\mapsto " << tempP.ToString(&theGlobalVariables.theDefaultFormat);
-      if (i<NumVarsDoubled/2)
-        numImpliedXsubs++;
-      else
-        numImpliedDsubs++;
-    } else
-      leftHandSide.size--;
-  }
-  Matrix<Rational>  matLeft;
-  matLeft.AssignRootsToRowsOfMatrix(leftHandSide);
-  matLeft.Invert();
-  PolynomialSubstitution<Rational> theSub;
-  theSub.SetSize(NumVarsDoubled);
-  for (int i=0; i<NumVarsDoubled; i++)
-  { (theSub[i]).MakeZero(NumVarsDoubled);
-    for (int j=0; j<NumVarsDoubled; j++)
-    { tempP=theSubInitial[j];
-      tempP*=matLeft.elements[i][j];
-      theSub[i]+=tempP;
-    }
-  }
-  out << "<hr> The substitution carried out was: <br>\n ( " << theSub.ToString();
-  ParserNode& lastNode=this->owner->TheObjects[*this->children.LastObject()];
-  if (lastNode.ExpressionType==this->typePoly)
-    out << lastNode.polyValue.GetElement().ToString(&theGlobalVariables.theDefaultFormat) << ")";
-  else
-    out << " ... )";
-  if (found)
-  { out << "<hr> I modified your input  by generating the following susbstitutions.\n<br>\n" << report.str();
-    out << "<hr>";
-    if (numImpliedDsubs==NumVarsDoubled/2)
-      out << "<br>All substitutions are done in 2n variables, where n is the implied number of variables"
-      << "(for reasons specific to the internal implementation of Weyl algebra elements); this explains the last "
-      << " n automatically generated substitutions. \n<br>\n\n";
-  }
-  lastNode.ConvertToType(lastNode.ExpressionType, this->impliedNumVars, theGlobalVariables);
-  this->CopyValue(lastNode);
-  this->outputString=out.str();
-  return this->CarryOutSubstitutionInMe(theSub, theGlobalVariables);
+{ assert(false);
+  return -1;
 }
 
 void ParserNode::TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<Rational>& theSub, int theDimension)
@@ -4233,7 +3532,7 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
   Polynomial<Rational>  polyOneAfterSub, polyZeroAfterSub;
   switch(this->ExpressionType)
   { case ParserNode::typeWeylAlgebraElement:
-      this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
+//      this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
       this->ExpressionType=this->typeWeylAlgebraElement;
       return this->errorNoError;
     case ParserNode::typeIntegerOrIndex:
@@ -4253,14 +3552,12 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
       return this->errorNoError;
     case ParserNode::typeUEElementOrdered:
       this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
-      this->UEElementOrdered.GetElement().SetNumVariables(this->impliedNumVars);
       this->UEElementOrdered.GetElement().SubstitutionCoefficients(theSub, & theGlobalVariables);
       return this->errorNoError;
     case ParserNode::typeUEelement:
       this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
       polyOneAfterSub.MakeOne(this->impliedNumVars);
-      polyZeroAfterSub.MakeZero(this->impliedNumVars);
-      this->UEElement.GetElement().SetNumVariables(this->impliedNumVars);
+      polyZeroAfterSub.MakeZero();
       this->UEElement.GetElement().SubstitutionCoefficients
       (theSub, & theGlobalVariables, polyOneAfterSub, polyZeroAfterSub);
       return this->errorNoError;
@@ -4286,90 +3583,12 @@ int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSu
   }
 }
 
-void ParserNode::CopyValue(const ParserNode& other)
-{ this->intValue=other.intValue;
-  this->ErrorType=other.ErrorType;
-  this->rationalValue=other.rationalValue;
-  this->IndexContextLieAlgebra=other.IndexContextLieAlgebra;
-  this->children=(other.children);
-  this->Evaluated= other.Evaluated;
-  this->outputString= other.outputString;
-  this->ExpressionType=other.ExpressionType;
-  this->impliedNumVars=other.impliedNumVars;
-  switch (other.ExpressionType)
-  { case ParserNode::typeError:
-    case ParserNode::typeIntegerOrIndex:
-    case ParserNode::typeRational:
-    case ParserNode::typeUndefined:
-    case ParserNode::typeString:
-      break;
-    case ParserNode::typeWeylAlgebraElement:
-      this->WeylAlgebraElement.GetElement().Assign(other.WeylAlgebraElement.GetElementConst());
-      break;
-    case ParserNode::typeUEelement:
-      this->UEElement.GetElement().operator=(other.UEElement.GetElementConst());
-      break;
-    case ParserNode::typeUEElementOrdered:
-      this->UEElementOrdered.GetElement().operator=(other.UEElementOrdered.GetElementConst());
-      break;
-    case ParserNode::typePoly:
-      this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
-      break;
-    case ParserNode::typeMapPolY:
-      this->polyValue.GetElement().operator=(other.polyValue.GetElementConst());
-      this->polyBeingMappedTo.GetElement().operator=(other.polyBeingMappedTo.GetElementConst());
-      break;
-    case ParserNode::typeMapWeylAlgebra:
-      this->WeylAlgebraElement.GetElement().operator=(other.WeylAlgebraElement.GetElementConst());
-      this->weylEltBeingMappedTo.GetElement().operator=(other.weylEltBeingMappedTo.GetElementConst());
-      break;
-    case ParserNode::typeArray:
-      break;
-    case ParserNode::typeRationalFunction:
-      this->ratFunction.GetElement().operator=(other.ratFunction.GetElementConst());
-      break;
-    case ParserNode::typeCone:
-      this->theCone=other.theCone;
-      break;
-    case ParserNode::typePartialFractions:
-      this->thePFs=other.thePFs;
-      break;
-    case ParserNode::typePiecewiseQP:
-      this->thePiecewiseQP=other.thePiecewiseQP;
-    case ParserNode::typeQuasiPolynomial:
-      this->theQP=other.theQP;
-      break;
-    case ParserNode::typeLattice:
-      this->theLattice=other.theLattice;
-      break;
-    case ParserNode::typeFile:
-      break;
-    case ParserNode::typeAnimation:
-      this->theAnimation=other.theAnimation;
-      break;
-    case ParserNode::typeCharSSFDMod:
-      this->theChar=other.theChar;
-      break;
-    case ParserNode::typeLittelman:
-      this->theLittelmann=other.theLittelmann;
-      break;
-    case ParserNode::typeGenVermaElt:
-      this->theGenVermaElt=other.theGenVermaElt;
-      break;
-    default:
-      this->SetError(errorProgramming);
-      this->outputString="The lazy programmer(s) forgot to implement the correct \
-      copying procedure for the parser node. Feel free to send them anry emails!";
-      break;
-  }
-}
-
 void ParserNode::operator=(const ParserNode& other)
 { this->owner=other.owner;
   this->indexParentNode=other.indexParentNode;
   this->indexInOwner=other.indexInOwner;
   this->Operation=other.Operation;
-  this->CopyValue(other);
+//  this->CopyValue(other);
 }
 
 bool Parser::lookAheadTokenAllowsMapsTo(int theToken)
@@ -4474,19 +3693,6 @@ bool Parser::StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3
   return false;
 }
 
-void ElementWeylAlgebra::SubstitutionTreatPartialsAndVarsAsIndependent
-(PolynomialSubstitution<Rational>& theSub)
-{ assert(theSub.size==this->NumVariables*2);
-//  std::cout << "<br>...and the sub is: " << theSub.ToString();
-  this->StandardOrder.Substitution(theSub, this->NumVariables*2, (Rational) 1);
-}
-
-void ElementWeylAlgebra::RaiseToPower(int thePower)
-{ ElementWeylAlgebra WeylOne;
-  WeylOne.MakeConst(this->NumVariables, (Rational) 1);
-  MathRoutines::RaiseToPower(*this, thePower, WeylOne);
-}
-
 void HomomorphismSemisimpleLieAlgebra::GetWeightsWrtKInSimpleCoordsK
 (Vectors<Rational>& outputWeights, List<ElementSemisimpleLieAlgebra<Rational> >& inputElts,
  GlobalVariables& theGlobalVariables)
@@ -4546,16 +3752,16 @@ bool ElementSemisimpleLieAlgebra<CoefficientType>::GetCoordsInBasis
 }
 
 bool RationalFunctionOld::gcdQuicK
-  (const Polynomial<Rational> & left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
+(const Polynomial<Rational>& left, const Polynomial<Rational> & right, Polynomial<Rational> & output)
 { if (left.TotalDegree()>1 && right.TotalDegree()>1)
     return false;
-  Polynomial<Rational>  quotient, remainder;
+  Polynomial<Rational> quotient, remainder;
   if (left.TotalDegree()>right.TotalDegree())
   { left.DivideBy(right, quotient, remainder);
     if (remainder.IsEqualToZero())
       output=right;
     else
-      output.MakeConst(left.NumVars, (Rational) 1);
+      output.MakeOne(left.GetMinNumVars());
   } else
   { //std::string tempS1, tempS2, tempS3, tempS4;
 //    tempS1=left.ToString(theGlobalVariables.theDefaultPolyFormat);
@@ -4566,7 +3772,7 @@ bool RationalFunctionOld::gcdQuicK
     if (remainder.IsEqualToZero())
       output=left;
     else
-      output.MakeConst(left.NumVars, (Rational) 1);
+      output.MakeOne(left.GetMinNumVars());
   }
   return true;
 }
@@ -4589,31 +3795,18 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
     case ParserNode::typePoly:
     case ParserNode::typeRationalFunction:
       this->ExpressionType=this->typeRationalFunction;
-      this->InitForMultiplication(&theGlobalVariables);
-      if (!rightNode.ConvertToType(this->typeRationalFunction, this->impliedNumVars, theGlobalVariables))
-      { this->SetError(this->errorConversionError);
-        return;
-      }
-      leftNode.ConvertToType(this->typeRationalFunction, this->impliedNumVars, theGlobalVariables);
+//      this->InitForMultiplication(&theGlobalVariables);
       this->ratFunction.GetElement()=leftNode.ratFunction.GetElementConst();
       this->ratFunction.GetElement()/=rightNode.ratFunction.GetElement();
       this->ExpressionType=this->typeRationalFunction;
       this->ReduceRatFunction();
       break;
     case ParserNode::typeUEelement:
-      if (!rightNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
-      { this->SetError(this->errorDunnoHowToDoOperation);
-        return;
-      }
       this->UEElement.GetElement()=leftNode.UEElement.GetElement();
       this->UEElement.GetElement()/=rightNode.rationalValue;
       this->ExpressionType=this->typeUEelement;
       break;
     case ParserNode::typeUEElementOrdered:
-      if (!rightNode.ConvertToType(this->typeRational, this->impliedNumVars, theGlobalVariables))
-      { this->SetError(this->errorDunnoHowToDoOperation);
-        return;
-      }
       this->UEElementOrdered.GetElement()=leftNode.UEElementOrdered.GetElement();
       this->UEElementOrdered.GetElement()/=rightNode.rationalValue;
       this->ExpressionType=this->typeUEElementOrdered;
@@ -4625,7 +3818,7 @@ void ParserNode::EvaluateDivide(GlobalVariables& theGlobalVariables)
 
 void RationalFunctionOld::RaiseToPower(int thePower)
 { MacroRegisterFunctionWithName("RationalFunctionOld::RaiseToPower");
-  Polynomial<Rational>  theNum, theDen;
+  Polynomial<Rational> theNum, theDen;
   this->checkConsistency();
   if (thePower<0)
   { this->Invert();
@@ -4637,7 +3830,7 @@ void RationalFunctionOld::RaiseToPower(int thePower)
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    this->MakeOne(this->NumVars, this->context);
+    this->MakeOne(this->context);
     return;
   }
   switch (this->expressionType)
@@ -4662,12 +3855,12 @@ void RationalFunctionOld::ClearDenominators
   switch(this->expressionType)
   { case RationalFunctionOld::typeRational:
       this->ratValue.GetDenominator(tempRat);
-      outputWasMultipliedBy.MakeConst(this->NumVars, tempRat, this->context);
+      outputWasMultipliedBy.MakeConsT(tempRat, this->context);
       this->ratValue*=tempRat;
     break;
     case RationalFunctionOld::typePoly:
       this->Numerator.GetElement().ClearDenominators(tempRat);
-      outputWasMultipliedBy.MakeConst(this->NumVars, tempRat, this->context);
+      outputWasMultipliedBy.MakeConsT(tempRat, this->context);
     break;
     case RationalFunctionOld::typeRationalFunction:
       RationalFunctionOld tempRF;
@@ -5069,72 +4262,11 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
   assert(this->checkConsistency());
 }
 
-int ParserNode::EvaluateTimes(GlobalVariables& theGlobalVariables)
-{ if (!this->AllChildrenAreOfDefinedNonErrorType())
-    return this->SetError(this->errorOperationByUndefinedOrErrorType);
-  assert(this->children.size==2);
-  ParserNode& right=this->owner->TheObjects[this->children[1]];
-  if (right.ExpressionType==this->typeGenVermaElt)
-  { List<int> argumentList;
-    argumentList.AddOnTop(this->children[0]);
-    argumentList.AddOnTop(this->children[1]);
-    return this->EvaluateMultiplyEltGenVermaOnTheRight(*this, argumentList, theGlobalVariables);
-  }
-  else
-    this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForMultiplication(&theGlobalVariables);
-  LargeInt theInt;
-  std::string tempS;
-  for (int i=0; i<this->children.size; i++)
-  { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
-    switch (this->ExpressionType)
-    { case ParserNode::typeIntegerOrIndex:
-        theInt=this->intValue;
-        theInt*=currentChild.intValue;
-        if (theInt.value.size>1)
-        { this->ExpressionType= this->typeRational;
-          this->rationalValue=theInt;
-        } else
-          this->intValue=theInt.value.TheObjects[0]*theInt.sign;
-      break;
-      case ParserNode::typeCharSSFDMod:
-        theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=MathRoutines::Maximum
-        (theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit, 30);
-//        tempS=(this->theChar.GetElement().MultiplyBy(currentChild.theChar.GetElement(), theGlobalVariables));
-        if (tempS!="")
-        { this->ExpressionType=this->typeError;
-          this->ErrorType=this->errorImplicitRequirementNotSatisfied;
-          this->outputString=tempS;
-        } else
-        { this->ExpressionType=this->typeCharSSFDMod;
-          this->outputString="The tensor product decomposition is computed using the Brauer-Klimyk formula, Humphreys,  \
-          Introduction to Lie algebras and representation theory (Springer, Third printing, revised, 1980), page 142, exercise 9. \
-          A faster implementation of the formula, together with detailed algorithm explanation, \
-          is available from the online interface of LiE. ";
-        }
-        break;
-      case ParserNode::typeRational: this->rationalValue*=currentChild.rationalValue; break;
-      case ParserNode::typeRationalFunction: this->ratFunction.GetElement()*=currentChild.ratFunction.GetElement(); break;
-      case ParserNode::typePoly: this->polyValue.GetElement()*=(currentChild.polyValue.GetElement()); break;
-      case ParserNode::typeUEelement: this->UEElement.GetElement()*=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement()*=currentChild.UEElementOrdered.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().MultiplyOnTheRight(currentChild.WeylAlgebraElement.GetElement()); break;
-      case ParserNode::typeLattice:
-        this->theLattice.GetElement()=this->owner->TheObjects[this->children.TheObjects[0]].theLattice.GetElement();
-        this->theLattice.GetElement().IntersectWith(this->owner->TheObjects[this->children.TheObjects[1]].theLattice.GetElement());
-        this->outputString=this->theLattice.GetElement().ToString();
-        return this->errorNoError;
-      default: return this->SetError(this->errorMultiplicationByNonAllowedTypes);
-    }
-  }
-  return this->errorNoError;
-}
-
 int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
 { if (!this->AllChildrenAreOfDefinedNonErrorType())
     return this->SetError(this->errorOperationByUndefinedOrErrorType);
   this->ConvertChildrenAndMyselfToStrongestExpressionChildren(theGlobalVariables);
-  this->InitForAddition(&theGlobalVariables);
+//  this->InitForAddition(&theGlobalVariables);
   LargeInt theInt;
   for (int i=0; i<this->children.size; i++)
   { ParserNode& currentChild=this->owner->TheObjects[this->children.TheObjects[i]];
@@ -5153,7 +4285,6 @@ int ParserNode::EvaluatePlus(GlobalVariables& theGlobalVariables)
       case ParserNode::typePoly: this->polyValue.GetElement()+=(currentChild.polyValue.GetElement()); break;
       case ParserNode::typeUEElementOrdered: this->UEElementOrdered.GetElement().operator+=(currentChild.UEElementOrdered.GetElement()); break;
       case ParserNode::typeUEelement: this->UEElement.GetElement()+=currentChild.UEElement.GetElement(); break;
-      case ParserNode::typeWeylAlgebraElement: this->WeylAlgebraElement.GetElement().Add(currentChild.WeylAlgebraElement.GetElement()); break;
       case ParserNode::typeCharSSFDMod:
         this->theChar.GetElement()+=currentChild.theChar.GetElement();
         break;
@@ -5322,36 +4453,70 @@ bool CGI::AttemptToCivilize(std::string& readAhead, std::stringstream& out)
   return false;
 }
 
-template < >
-Rational& ParserNode::GetElement<Rational>()
-{ return this->rationalValue;
+void MonomialP::MakeEi(int LetterIndex, int Power, int ExpectedNumVars)
+{ ExpectedNumVars=MathRoutines::Maximum(ExpectedNumVars, LetterIndex+1);
+  this->MakeOne(ExpectedNumVars);
+  (*this)[LetterIndex]=Power;
 }
 
-template < >
-RationalFunctionOld& ParserNode::GetElement<RationalFunctionOld>()
-{ return this->ratFunction.GetElement();
+void MonomialP::ExponentMeBy(const Rational& theExp)
+{ for (int i=0; i<this->monBody.size; i++)
+    this->monBody[i]*=theExp;
 }
 
-template < >
-Polynomial<Rational> & ParserNode::GetElement<Polynomial<Rational> >()
-{ return this->polyValue.GetElement();
-}
-
-bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& m)const
-{ if (this->monBody.size!=m.monBody.size)
-  { std::cout << "This is a programming error: comparing two monomials with different number of variables. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  for (int i=this->monBody.size-1; i>=0; i--)
-  { if ((*this)[i]>m[i])
+bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other)const
+{ for (int i=other.monBody.size-1; i>=this->monBody.size; i--)
+  { if (other.monBody[i]>0)
+      return false;
+    if (other.monBody[i]<0)
       return true;
-    if ((*this)[i]<m[i])
+  }
+  for (int i=this->monBody.size-1; i>=other.monBody.size; i--)
+  { if (this->monBody[i]>0)
+      return true;
+    if (this->monBody[i]<0)
+      return false;
+  }
+  int highestIndex=MathRoutines::Maximum(this->GetMinNumVars(), other.GetMinNumVars())-1;
+  for (int i=highestIndex; i>=0; i--)
+  { if (this->monBody[i]>other.monBody[i])
+      return true;
+    if (this->monBody[i]<other.monBody[i])
       return false;
   }
   return true;
 }
 
+bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& other)const
+{ int commonSize=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars());
+  for (int i=0; i<commonSize; i++)
+  { if (this->monBody[i]>other.monBody[i])
+      return true;
+    if (this->monBody[i]<other.monBody[i])
+      return false;
+  }
+  for (int i=this->monBody.size; i<other.monBody.size; i++)
+  { if (other.monBody[i]>0)
+      return false;
+    if (other.monBody[i]<0)
+      return true;
+  }
+  for (int i=other.monBody.size; i<this->monBody.size; i++)
+  { if (this->monBody[i]>0)
+      return true;
+    if (this->monBody[i]<0)
+      return false;
+  }
+  return true;
+}
+
+bool MonomialP::IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other)const
+{ if (this->TotalDegree()>other.TotalDegree())
+    return true;
+  if (this->TotalDegree()<other.TotalDegree())
+    return false;
+  return this->IsGEQLexicographicLastVariableStrongest(other);
+}
 
 bool MonomialP::IsGEQpartialOrder(MonomialP& m)
 { if (this->monBody.size!=m.monBody.size)
@@ -5365,35 +4530,18 @@ bool MonomialP::IsGEQpartialOrder(MonomialP& m)
   return true;
 }
 
-bool MonomialP::IsGEQLexicographicLastVariableWeakest(const MonomialP& m)const
-{ if (this->monBody.size!=m.monBody.size)
-  { std::cout << "This is a programming error: comparing two monomials with different number of variables. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  for (int i=0; i<this->monBody.size; i++)
-  { if ((*this)[i]>m[i])
-      return true;
-    if ((*this)[i]<m[i])
-      return false;
-  }
-  return true;
+void MonomialP::operator*=(const MonomialP& other)
+{ this->SetNumVariablesSubDeletedVarsByOne
+  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+  for (int i=0; i<other.monBody.size; i++)
+    this->monBody[i]+=other.monBody[i];
 }
 
-void MonomialP::MultiplyBy(const MonomialP& other)
-{ int numCycles=MathRoutines::Minimum(this->monBody.size, other.monBody.size);
-  for (int i=0; i<numCycles; i++)
-    (*this)[i]+=other[i];
-  this->SetNumVariablesSubDeletedVarsByOne
+void MonomialP::operator/=(const MonomialP& other)
+{ this->SetNumVariablesSubDeletedVarsByOne
   (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
-}
-
-void MonomialP::DivideBy(const MonomialP& other)
-{ int numCycles=MathRoutines::Minimum(this->monBody.size, other.monBody.size);
-  for (int i=0; i<numCycles; i++)
-    (*this)[i]-=other[i];
-  this->SetNumVariablesSubDeletedVarsByOne
-  (MathRoutines::Maximum(this->monBody.size, other.monBody.size));
+  for (int i=0; i<other.monBody.size; i++)
+    this->monBody[i]-=other.monBody[i];
 }
 
 void MonomialP::SetNumVariablesSubDeletedVarsByOne(int newNumVars)
@@ -5433,10 +4581,10 @@ std::string MonomialP::ToString(FormatExpressions* theFormat)const
   if (this->IsAConstant())
     return "1";
   for (int i=0; i<this->monBody.size; i++)
-    if (!(*this)[i].IsEqualToZero())
+    if (!(this->monBody[i].IsEqualToZero()))
     { out << theFormat->GetPolyLetter(i);
-      if (!((*this)[i]==1))
-        out << "^{" << (*this)[i] << "}";
+      if (!(this->monBody[i]==1))
+        out << "^{" << this->monBody[i] << "}";
     }
   return out.str();
 }

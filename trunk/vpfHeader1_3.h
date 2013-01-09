@@ -97,16 +97,6 @@ public:
     this->rootIndex=other.rootIndex;
     this->theRegistry=other.theRegistry;
   }
-  void MakeOneVarPolyIntoNVarPoly
-  (const Polynomial<Rational>& thePoly, Polynomial<Rational>& theOutput, int numVars, int desiredIndex)
-  { MonomialP tempM;
-    tempM.MakeConst(numVars);
-    theOutput.MakeZero(numVars);
-    for (int i =0; i<thePoly.size; i++)
-    { tempM[desiredIndex]=thePoly[i][0];
-      theOutput.AddMonomial(tempM, thePoly.theCoeffs[i]);
-    }
-  }
   void operator=(const Rational& other);
   bool AssignOperation
   (Polynomial<Rational>& theOperationIsModified, const List<AlgebraicNumber>& theOperationArguments)
@@ -119,9 +109,9 @@ public:
   bool operator+=(const AlgebraicNumber& other)
   { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
     Polynomial<Rational> theOperation;
-    theOperation.MakeZero(2);
+    theOperation.MakeZero();
     MonomialP tempM;
-    tempM.MakeConst(2);
+    tempM.MakeOne(2);
     tempM[0]=1;
     theOperation.AddMonomial(tempM, 1);
     tempM[0]=0;
@@ -136,9 +126,9 @@ public:
   bool operator*=(const AlgebraicNumber& other)
   { MacroRegisterFunctionWithName("AlgebraicNumber::operator+=");
     Polynomial<Rational> theOperation;
-    theOperation.MakeZero(2);
+    theOperation.MakeZero();
     MonomialP tempM;
-    tempM.MakeConst(2);
+    tempM.MakeOne(2);
     tempM[0]=1;
     tempM[1]=1;
     theOperation.AddMonomial(tempM, 1);
@@ -301,7 +291,7 @@ public:
     output.SetExpectedSize(input.size);
     ElementZmodP theCF;
     theCF.theModulo=newModulo;
-    output.MakeZero(input.GetNumVars());
+    output.MakeZero();
     for (int i=0; i<input.size; i++)
     { theCF=input.theCoeffs[i];
       output.AddMonomial(input[i], theCF);

@@ -14,11 +14,11 @@ void AlgebraicNumber::SqrtMe()
 
 void AlgebraicNumber::RadicalMe(int theRad)
 { Polynomial<Rational> newMinPoly;
-  newMinPoly.MakeZero(1);
+  newMinPoly.MakeZero();
   MonomialP tempM;
   for (int i=0; i<this->GetMinPoly().size; i++)
   { tempM=this->GetMinPoly()[i];
-    tempM.monBody*=theRad;
+    tempM.ExponentMeBy(theRad);
     newMinPoly.AddMonomial(tempM, this->GetMinPoly().theCoeffs[i]);
   }
   this->rootIndex=0;
@@ -42,11 +42,11 @@ ReduceMod
  )const
 { if (toBeReduced.IsEqualToZero())
     return;
-  if (toBeReduced.GetNumVars()!=theNs.size)
+  if (toBeReduced.GetMinNumVars()!=theNs.size)
   { std::cout << "This is a programming error: function AlgebraicNumber::ReduceModAnBm"
     << " expects as input a polynomial of  " << theNs.size << " variables, but got the "
     << toBeReduced.ToString() << " polynomial of "
-    << toBeReduced.GetNumVars() << "variables instead. "
+    << toBeReduced.GetMinNumVars() << "variables instead. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -85,9 +85,20 @@ bool AlgebraicNumber::AssignOperation
   thePolys.SetSize(theOperationArguments.size);
   theNs.SetSize(theOperationArguments.size);
   int ProductNs=1;
+  int tempN=0;
   for (int i=0; i<theOperationArguments.size; i++)
-  { this->MakeOneVarPolyIntoNVarPoly(theOperationArguments[i].GetMinPoly(), thePolys[i], theOperationArguments.size, i);
-    theNs[i]=thePolys[i].TotalDegree();
+  { thePolys[i]=theOperationArguments[i].GetMinPoly();
+    thePolys[i].ShiftVariableIndicesToTheRight(i);
+    if (!thePolys[i].TotalDegree().IsSmallInteger(&tempN))
+    { std::cout << "This may or may not be a programming error. "
+      << "I am getting an algebraic operation with a polynomial whose exponent is too large "
+      << " or is not an integer. If this is not an error , it "
+      << "should be handled at a higher level, however"
+      << " I don't have time to fix this right now. Crashing to let you know of the situation. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    theNs[i]=tempN;
     ProductNs*=theNs[i];
     thePolys[i].PopMonomial
     (thePolys[i].GetIndexMaxMonomialLexicographicLastVariableStrongest(), tempM, tempRat);
@@ -95,7 +106,8 @@ bool AlgebraicNumber::AssignOperation
   }
   int ProductNsPlusOne= ProductNs+1;
   if (ProductNsPlusOne>=LargeIntUnsigned::SquareRootOfCarryOverBound)
-  { std::cout << "Minimal polynomial out of bounds: the upper bound for the minimal poly "
+  { std::cout << "This is a programming error. "
+    << "Minimal polynomial out of bounds: the upper bound for the minimal poly "
     << " degree is <" << LargeIntUnsigned::SquareRootOfCarryOverBound
     << " which has been exceeded. Until proper error handling is implemented, I shall crash. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -131,8 +143,8 @@ bool AlgebraicNumber::AssignOperation
     assert(false);
   }
   Polynomial<Rational> newMinPoly;
-  newMinPoly.MakeZero(1);
-  tempM.monBody.SetSize(1);
+  newMinPoly.MakeZero();
+  tempM.MakeOne(1);
   for (int i=0; i<theEigenVectors[0].size; i++)
   { tempM[0]=i;
     newMinPoly.AddMonomial(tempM, theEigenVectors[0][i]);
@@ -150,11 +162,11 @@ const Polynomial<Rational>& AlgebraicNumber::GetMinPoly()const
 bool AlgebraicNumber::AssignRadical(const LargeInt& undertheRadical, int theRadical)
 { Polynomial<Rational> theMinPoly;
   MonomialP tempM;
-  tempM.monBody.SetSize(1);
-  tempM.monBody[0]=theRadical;
-  theMinPoly.MakeZero(1);
+  tempM.MakeOne(1);
+  tempM[0]=theRadical;
+  theMinPoly.MakeZero();
   theMinPoly.AddMonomial(tempM, 1);
-  tempM.monBody[0]=0;
+  tempM[0]=0;
   theMinPoly.AddMonomial(tempM, undertheRadical);
   this->rootIndex=0;
   this->minPolyIndex=this->theRegistry->theMinPolys.AddNoRepetitionOrReturnIndexFirst(theMinPoly);

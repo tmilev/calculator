@@ -176,7 +176,7 @@ bool Data::ConvertToTypE<Polynomial<Rational> >()
   MemorySaving<Data> tempData;
   switch (this->type)
   { case Data::typeRational:
-      output.MakeConst(this->GetContext().VariableImages.size, this->GetValuE<Rational>());
+      output.MakeConsT(this->GetValuE<Rational>(), this->GetContext().VariableImages.size);
       this->MakePoly(*this->owner, output, this->theContextIndex);
       return true;
     case Data::typePoly:
@@ -203,9 +203,8 @@ bool Data::ConvertToTypE<RationalFunctionOld>()
   int tempIndex;
   switch (this->type)
   { case Data::typeRational:
-      output.GetElement().MakeConst
-      (this->GetContext().VariableImages.size, this->GetValuE<Rational>(),
-       this->owner->theGlobalVariableS);
+      output.GetElement().MakeConsT
+      (this->GetValuE<Rational>(), this->owner->theGlobalVariableS);
       this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
     case Data::typePoly:
@@ -222,7 +221,7 @@ bool Data::ConvertToTypE<RationalFunctionOld>()
       if (tempIndex==-1)
         return false;
       output.GetElement().MakeOneLetterMon
-      (this->GetContext().VariableImages.size, tempIndex, 1, *this->owner->theGlobalVariableS);
+      (tempIndex, 1, *this->owner->theGlobalVariableS);
       this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
     default:
@@ -238,9 +237,9 @@ bool Data::ConvertToTypE<ElementUniversalEnveloping<RationalFunctionOld> >()
   { std::cout << "theAlgebraIndex equals -1 for data " << this->ToString();
     return false;
   }
-  int numVars=this->GetNumContextVars();
+//  int numVars=this->GetNumContextVars();
   RationalFunctionOld RFOne;
-  RFOne.MakeOne(numVars, this->owner->theGlobalVariableS);
+  RFOne.MakeOne(this->owner->theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> conversionBuffer;
 //  std::cout << "<hr><hr>attempting to convert: " << this->ToString();
   switch (this->type)
@@ -250,7 +249,7 @@ bool Data::ConvertToTypE<ElementUniversalEnveloping<RationalFunctionOld> >()
       this->MakeUE(*this->owner, conversionBuffer, this->theContextIndex);
       return true;
     case Data::typePoly:
-      if (this->GetValuE<Polynomial<Rational> >().NumVars!=this->GetNumContextVars())
+      if (this->GetValuE<Polynomial<Rational> >().GetMinNumVars()>this->GetNumContextVars())
         return false;
       RFOne*=this->GetValuE<Polynomial<Rational> >();
       conversionBuffer.MakeConst(RFOne, this->owner->theObjectContainer.theLieAlgebras, theAlgebraIndex);
@@ -420,8 +419,8 @@ bool Data::MakeElementSemisimpleLieAlgebra
   this->owner=&inputOwner;
   this->type=this->typeElementUE;
   RationalFunctionOld rfOne, rfZero;
-  rfOne.MakeOne(0, this->owner->theGlobalVariableS);
-  rfZero.MakeZero(0, this->owner->theGlobalVariableS);
+  rfOne.MakeOne(this->owner->theGlobalVariableS);
+  rfZero.MakeZero(this->owner->theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> tempUE;
 //  std::cout << "tempelt: " << tempElt.ToString();
   tempUE.AssignElementLieAlgebra(tempElt, inputOwners, inputIndexInOwners, rfOne, rfZero);
@@ -921,8 +920,8 @@ bool Data::MakeElementSemisimpleLieAlgebra
   tempElt.MakeGenerator
   (actualIndeX, inputOwners, inputIndexInOwners);
   RationalFunctionOld rfOne, rfZero;
-  rfOne.MakeOne(0, this->owner->theGlobalVariableS);
-  rfZero.MakeZero(0, this->owner->theGlobalVariableS);
+  rfOne.MakeOne(this->owner->theGlobalVariableS);
+  rfZero.MakeZero(this->owner->theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> tempUE;
   tempUE.AssignElementLieAlgebra(tempElt, inputOwners, inputIndexInOwners, rfOne, rfZero);
   Context newContext(*this->owner);
@@ -1822,8 +1821,8 @@ bool CommandList::fHWTAABF
   //std::cout << "<br>Right context: " << rightD.GetContext().ToString();
 
   RationalFunctionOld theRingZero, theRingUnit;
-  theRingZero.MakeZero(leftD.GetNumContextVars(), theCommands.theGlobalVariableS);
-  theRingUnit.MakeOne(rightD.GetNumContextVars(), theCommands.theGlobalVariableS);
+  theRingZero.MakeZero(theCommands.theGlobalVariableS);
+  theRingUnit.MakeOne(theCommands.theGlobalVariableS);
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   std::stringstream out;
   Vector<RationalFunctionOld> hwDualCoords;
@@ -2084,10 +2083,10 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
 //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
-  int theNumVars=hwContext.VariableImages.size;
+//  int theNumVars=hwContext.VariableImages.size;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
+  RFOne.MakeOne(theCommands.theGlobalVariableS);
+  RFZero.MakeZero(theCommands.theGlobalVariableS);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -2159,16 +2158,16 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
     varShift=this->GetNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
-  { tempRF.MakeOneLetterMon(numVars, i+varShift, 1, theGlobalVariables);
+  { tempRF.MakeOneLetterMon(i+varShift, 1, theGlobalVariables);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
-  tempRF.MakeOne(numVars, &theGlobalVariables);
+  tempRF.MakeOne(&theGlobalVariables);
   output.AddMonomial(tempMon, tempRF);
 }
 
 template <class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
-   (bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
+(bool shiftPowersByNumVarsBaseField, ElementUniversalEnveloping<Polynomial<Rational> >& output, GlobalVariables& theGlobalVariables)
 { List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   Polynomial<Rational> tempRF;
@@ -2177,10 +2176,10 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
   tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
-    varShift=this->GetNumVars();
+    varShift=this->GetMinNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
-  { tempRF.MakeMonomial(numVars, i+varShift, 1, 1);
+  { tempRF.MakeMonomiaL(i+varShift, 1, 1, numVars);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(numVars);
@@ -2194,11 +2193,7 @@ class quasiDiffMon
     return output;
   }
   public:
-  //theWeylMon is a polynomial monomial in 2n variables if the Weyl algebra is in n variables.
-  //The first n variables are the x_i generators, the second n variables are the
-  //\partial_i (derivative)
-  //generators.
-  MonomialP theWeylMon;
+  MonomialWeylAlgebra theWeylMon;
   MonomialMatrix theMatMon;
   static unsigned int HashFunction(const quasiDiffMon& input)
   { return input.theWeylMon.HashFunction()*SomeRandomPrimes[0]+input.theMatMon.HashFunction()*SomeRandomPrimes[1];
@@ -2343,26 +2338,21 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
 template <class CoefficientType>
 void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>& standsOnTheRight)
 { quasiDiffOp<CoefficientType> output;
-  ElementWeylAlgebra leftElt, rightElt;
-  Polynomial<CoefficientType> tempP;
+  ElementWeylAlgebra leftElt, rightElt, tempElt;
   quasiDiffMon outputMon;
   output.MakeZero();
   for (int j=0; j<standsOnTheRight.size; j++)
-  { quasiDiffMon& currentRightMon =standsOnTheRight[j];
-    tempP.MakeZero(currentRightMon.theWeylMon.monBody.size);
-    tempP.AddMonomial(currentRightMon.theWeylMon, standsOnTheRight.theCoeffs[j]);
-    rightElt.AssignStandardOrder(tempP);
+  { rightElt.MakeZero();
+    rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.theCoeffs[j]);
     for (int i=0; i<this->size; i++)
-    { quasiDiffMon& currentLeftMon =(*this)[i];
-      tempP.MakeZero(currentLeftMon.theWeylMon.monBody.size);
-      tempP.AddMonomial(currentLeftMon.theWeylMon, this->theCoeffs[i]);
-      leftElt.AssignStandardOrder(tempP);
+    { leftElt.MakeZero();
+      leftElt.AddMonomial((*this)[i], this->theCoeffs[i]);
       outputMon.theMatMon= (*this)[i].theMatMon;
       outputMon.theMatMon*=standsOnTheRight[j].theMatMon;
       leftElt*=rightElt;
-      for (int k=0; k<leftElt.GetStandardOrder().size; k++)
-      { outputMon.theWeylMon=(leftElt.GetStandardOrder())[k];
-        output.AddMonomial(outputMon, leftElt.GetStandardOrder().theCoeffs[k]);
+      for (int k=0; k<leftElt.size; k++)
+      { outputMon.theWeylMon=leftElt[k];
+        output.AddMonomial(outputMon, leftElt.theCoeffs[k]);
       }
     }
   }
@@ -2376,12 +2366,12 @@ std::string quasiDiffOp<CoefficientType>::ToString(FormatExpressions* theFormat)
     combineWeylPart=theFormat->flagQuasiDiffOpCombineWeylPart;
   if (!combineWeylPart)
     return this->MonomialCollection<quasiDiffMon, CoefficientType>::ToString(theFormat);
-  MatrixTensor<Polynomial<Rational> > reordered;
+  MatrixTensor<ElementWeylAlgebra> reordered;
   reordered.MakeZero();
-  Polynomial<Rational> tempP;
+  ElementWeylAlgebra tempP;
   for (int i=0; i<this->size; i++)
   { quasiDiffMon& currentMon=(*this)[i];
-    tempP.MakeZero(currentMon.theWeylMon.monBody.size);
+    tempP.MakeZero();
     tempP.AddMonomial(currentMon.theWeylMon, this->theCoeffs[i]);
     reordered.AddMonomial(currentMon.theMatMon, tempP);
   }
@@ -2412,25 +2402,6 @@ void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theS
   }
 }
 
-void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables)
-{ if (inputPower>0)
-  { output.MakeOneLetterMon(numVars*2, indexVar, 1, theGlobalVariables);
-    output.RaiseToPower(inputPower);
-    return;
-  }
-  inputPower*=-1;
-  output.MakeOneLetterMon(numVars*2, indexVar+numVars, 1, theGlobalVariables);
-  output.RaiseToPower(inputPower);
-  Polynomial<Rational> newMult;
-  newMult.MakeDegreeOne(numVars*2, indexVar, 1);
-  for (int i=0; i<inputPower; i++)
-  { output/=newMult;
-    newMult-=1;
-  }
-//  output/=den;
-}
-
 template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
 (MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
@@ -2438,18 +2409,18 @@ bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator");
   Rational tempRat;
   int expConstPart, powerMonCoeff;
-  int varShift=this->GetNumVars();
+  int varShift=this->GetMinNumVars();
   int numVars=varShift+indicesNilrad.size;
   ElementWeylAlgebra tempElt, tempElt2;
   Polynomial<Rational> tempMon;
-  outputDO.MakeConst(numVars, 1);
+  outputDO.MakeConsT(1);
   for (int i=0; i<indicesNilrad.size; i++)
   { monUE.Powers[i].GetConstantTerm(tempRat, 0);
     tempRat.IsSmallInteger(&expConstPart);
     monCoeff[i+varShift].IsSmallInteger(&powerMonCoeff);
     tempElt.Makexidj(i+varShift, i+varShift, numVars);
     tempElt.RaiseToPower(powerMonCoeff);
-    tempMon.MakeMonomial(numVars, i+varShift, expConstPart, 1);
+    tempMon.MakeMonomiaL(i+varShift, expConstPart, 1, numVars);
     tempElt2.AssignPolynomial(tempMon);
     tempElt.MultiplyOnTheLeft(tempElt2, theGlobalVariables);
     outputDO*=tempElt;
@@ -2467,10 +2438,8 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables);
-  int numVars=theGenElt.GetNumVars();
 //  Polynomial<Rational> Pone, Pzero;
   result.AssignElementLieAlgebra(inputElt, *this->theAlgebras, this->indexAlgebra, 1, 0);
-  theGenElt.SetNumVariables(numVars);
   std::stringstream out;
 //  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify(theGlobalVariables);
@@ -2485,7 +2454,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 
 //  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
   ElementWeylAlgebra weylPartSummand;
-  Polynomial<Rational> tempP, theCoeff;
+  Polynomial<Rational> tempP1, theCoeff;
   quasiDiffMon monQDO, monQDO2;
   Rational tempRat;
   output.MakeZero();
@@ -2501,8 +2470,8 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
       for (int k=0; k<tempMat1.size; k++)
       { if (tempMat1.theCoeffs[k].expressionType==RationalFunctionOld::typeRationalFunction)
           return false;
-        tempMat1.theCoeffs[k].GetNumerator(tempP);
-        tempMT.AddMonomial(tempMat1[k], tempP);
+        tempMat1.theCoeffs[k].GetNumerator(tempP1);
+        tempMT.AddMonomial(tempMat1[k], tempP1);
       }
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart*=tempMT;
@@ -2514,18 +2483,17 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
         return false;
 //      std::cout << "<br>Weyl part of " << currentMon.ToString() << " with coeff "
 //      << result.theCoeffs[i].ToString() << ": " << weylPartSummand.ToString();
-      weylPartSummand.GetStandardOrder(tempP);
-      for (int j=0; j<tempP.size; j++)
+      for (int j=0; j<weylPartSummand.size; j++)
         for (int k=0; k<endoPart.size; k++)
         { monQDO.theMatMon=endoPart[k];
-          monQDO.theWeylMon=tempP[j];
+          monQDO.theWeylMon=weylPartSummand[j];
           Polynomial<Rational>& currentEndoCoeff=endoPart.theCoeffs[k];
           for (int m=0; m<currentEndoCoeff.size; m++)
           { monQDO2=monQDO;
-            for (int n=0; n<currentEndoCoeff.NumVars; n++)
-              monQDO2.theWeylMon[n]+=currentEndoCoeff[m][n];
+            for (int n=0; n<currentEndoCoeff.GetMinNumVars(); n++)
+              monQDO2.theWeylMon.polynomialPart[n]+=currentEndoCoeff[m][n];
             tempRat=currentEndoCoeff.theCoeffs[m];
-            tempRat*=tempP.theCoeffs[j];
+            tempRat*=weylPartSummand.theCoeffs[j];
             tempRat*=result.theCoeffs[i].theCoeffs[l];
   //          std::cout << "<br>adding " << monQDO.ToString() << " times " << tempRF.ToString()  << " to "
   //          << output.ToString();
@@ -2610,8 +2578,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
       Polynomial<Rational> Pone, Pzero;
-      Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetNumVars());
-      Pzero.MakeZero(elementsNegativeNilrad.size+theMod.GetNumVars());
+      Pone.MakeOne(elementsNegativeNilrad.size+theMod.GetMinNumVars());
+      Pzero.MakeZero();
       theMod.GetGenericUnMinusElt(true, genericElt, *theCommands.theGlobalVariableS);
       quasiDiffOp<Polynomial<Rational> >::prepareFormatFromShiftAndNumWeylVars
       (hwContext.VariableImages.size, elementsNegativeNilrad.size, theWeylFormat);
@@ -2721,10 +2689,9 @@ bool CommandList::fHWVinner
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
-  int theNumVars=hwContext.VariableImages.size;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
+  RFOne.MakeOne(theCommands.theGlobalVariableS);
+  RFZero.MakeZero(theCommands.theGlobalVariableS);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -2745,15 +2712,7 @@ bool CommandList::fHWVinner
   }
   ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
-  { for (int i=0; i<highestWeightFundCoords.size; i++)
-      if (highestWeightFundCoords[i].NumVars>RFOne.NumVars)
-      { std::cout << "This is a programming error: the highest weight I was given has " << highestWeightFundCoords[i].NumVars
-        << " variables but the context I was given indicates  " << RFOne.NumVars << " variables. "
-        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      } else
-        highestWeightFundCoords[i].SetNumVariables(RFOne.NumVars);
-    bool isGood=theMod.MakeFromHW
+  { bool isGood=theMod.MakeFromHW
     (theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, highestWeightFundCoords, selectionParSel,
      *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
     if (comments!=0)
@@ -2855,8 +2814,8 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   hwContext.indexAmbientSSalgebra=indexOfAlgebra;
   int theNumVars=hwContext.VariableImages.size;
   RationalFunctionOld RFOne, RFZero;
-  RFOne.MakeConst(theNumVars, 1, theCommands.theGlobalVariableS);
-  RFZero.MakeZero(theNumVars, theCommands.theGlobalVariableS);
+  RFOne.MakeOne(theCommands.theGlobalVariableS);
+  RFZero.MakeZero(theCommands.theGlobalVariableS);
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
@@ -4323,9 +4282,8 @@ bool Data::MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& out
     theGhostHasAppeared=true;
   }
   RationalFunctionOld RFOne, RFZero;
-  int numVars=leftCopy.GetNumContextVars();
-  RFZero.MakeZero(numVars, leftCopy.owner->theGlobalVariableS);
-  RFOne.MakeConst(numVars, 1, leftCopy.owner->theGlobalVariableS);
+  RFZero.MakeZero(leftCopy.owner->theGlobalVariableS);
+  RFOne.MakeOne(leftCopy.owner->theGlobalVariableS);
   ElementTensorsGeneralizedVermas<RationalFunctionOld> outputElt;
 //    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
@@ -5555,7 +5513,10 @@ void CommandList::EvaluateCommands()
   }
   this->theGlobalVariableS->theDefaultFormat.flagMakingExpressionTableWithLatex=true;
   this->theGlobalVariableS->theDefaultFormat.flagUseLatex=true;
-  out << this->theCommands.ToString(&this->theGlobalVariableS->theDefaultFormat, false, false, &comments, true, &StartingExpression); //<< "</td></tr>";
+  this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
+  this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
+  out << this->theCommands.ToString
+  (&this->theGlobalVariableS->theDefaultFormat, &comments, &StartingExpression);
   this->outputString=out.str();
   if (comments.str()!="")
   { std::stringstream commentsStream;
@@ -5576,7 +5537,7 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
     out << theBoss.controlSequences[this->controlIndex];
   if (makeTable)
   { out << "</td></tr><tr><td>";
-    out << this->theData.ToString(0, 10);
+    out << this->theData.ToString(0);
     if (this->errorString!="")
       out << "</td></tr><tr><td>" << this->errorString;
     out << "</td></tr></table>";
@@ -5625,8 +5586,8 @@ bool Expression::operator>(const Expression& other)const
 }
 
 std::string Expression::ToString
-(FormatExpressions* theFormat, bool AddBrackets, bool AddCurlyBraces,
- std::stringstream* outComments, bool isFinal, Expression* startingExpression)const
+(FormatExpressions* theFormat, std::stringstream* outComments,
+ Expression* startingExpression)const
 { if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
       return "(...)";
@@ -5641,6 +5602,9 @@ std::string Expression::ToString
 //  if (this->theBoss->flagLogSyntaxRules && recursionDepth<=1)
 //  { out << "(ContextIndex=" << this->IndexBoundVars << ")";
 //  }
+  bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
+  bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
+  int charCounter=0;
   std::string additionalDataComments;
   if (this->errorString!="")
   { if (outComments!=0)
@@ -5651,56 +5615,78 @@ std::string Expression::ToString
   { out << "(NotInitialized)";
     return out.str();
   }
-  if (AddBrackets)
-    out << "(";
-  if (AddCurlyBraces)
-    out << "{";
   if (this->EvaluatesToAtom())
   { std::stringstream dataComments;
     out << this->GetAtomicValue().ToString(&dataComments, isFinal, theFormat);
     additionalDataComments=dataComments.str();
   } else if (this->theOperation==this->theBoss->opDefine())
-  { bool firstChildWantsBrackets=(this->children[0].theOperation==this->theBoss->opDefine());
-    bool secondChildWantsBrackets=(this->children[1].theOperation==this->theBoss->opDefine());
-    out << this->children[0].ToString(theFormat, firstChildWantsBrackets, false, outComments)
-    << ":=" << this->children[1].ToString(theFormat, secondChildWantsBrackets, false, outComments);
+  { std::string firstE=this->children[0].ToString(theFormat, outComments);
+    std::string secondE=this->children[1].ToString(theFormat, outComments);
+    if (this->children[0].theOperation==this->theBoss->opDefine())
+      out << "(" << firstE << ")";
+    else
+      out << firstE;
+    out << ":=";
+    if (this->children[1].theOperation==this->theBoss->opDefine())
+      out << "(" << secondE << ")";
+    else
+      out << secondE;
   }
   else if (this->theOperation==this->theBoss->opIsDenotedBy())
-    out << this->children[0].ToString(theFormat, false, false, outComments)
-    << ":=:" << this->children[1].ToString(theFormat, false, false, outComments);
+    out << this->children[0].ToString(theFormat, outComments)
+    << ":=:" << this->children[1].ToString(theFormat, outComments);
   else if (this->theOperation==this->theBoss->opDefineConditional())
-    out <<  this->children[0].ToString(theFormat, false, false, outComments) << " :if "
-    << this->children[1].ToString(theFormat, true, false, outComments)
-    << ":=" << this->children[2].ToString(theFormat, false, false, outComments);
+    out <<  this->children[0].ToString(theFormat, outComments) << " :if "
+    << this->children[1].ToString(theFormat, outComments)
+    << ":=" << this->children[2].ToString(theFormat, outComments);
   else if (this->theOperation==this->theBoss->opDivide() )
-    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
-    << "/" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+  { std::string firstE= this->children[0].ToString(theFormat, outComments);
+    std::string secondE=this->children[1].ToString(theFormat, outComments);
+    bool firstNeedsBrackets=
+    !(this->children[0].theOperation==this->theBoss->opTimes()||
+      this->children[0].theOperation==this->theBoss->opDivide()||
+      this->children[0].EvaluatesToAtom());
+    bool secondNeedsBrackets= !this->children[1].EvaluatesToAtom();
+    if (firstNeedsBrackets)
+      out << "(" << firstE << ")";
+    else
+      out << firstE;
+    out << "/";
+    if (secondNeedsBrackets)
+      out << "(" << secondE << ")";
+    else
+      out << secondE;
+  }
   else if (this->theOperation==this->theBoss->opTensor() )
-  { out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
-    << "\\otimes " << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+  { out << this->children[0].ToString(theFormat, outComments)
+    << "\\otimes " << this->children[1].ToString(theFormat, outComments);
   } else if (this->theOperation==this->theBoss->opTimes() )
-  { std::string tempS=this->children[0].ToString(theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
-    //if (false)
-   // {
+  { std::string tempS=this->children[0].ToString(theFormat, outComments);
     if (tempS=="-1")
       tempS="-";
     if (tempS=="1")
       tempS="";
-    //} else
-      //tempS="("+tempS+")";
     out << tempS;
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
-    out << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+    out << this->children[1].ToString(theFormat, outComments);
   } else if (this->theOperation==this->theBoss->opThePower())
-    out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForThePower(), false, outComments)
-    << "^{" << this->children[1].ToString(theFormat, false, false, outComments) << "}";
+  { std::string firstE=this->children[0].ToString(theFormat, outComments);
+    std::string secondE=this->children[1].ToString(theFormat, outComments);
+    if (this->children[0].EvaluatesToAtom())
+      out << firstE;
+    else
+      out << "(" << firstE << ")";
+    out << "^{" << secondE << "}";
+  }
   else if (this->theOperation==this->theBoss->opPlus() )
   { assert(this->children.size>=2);
-    std::string tempS2= this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments);
-    std::string tempS=this->children[1].ToString(theFormat, this->children[1].NeedBracketsForAddition(), false, outComments);
+    std::string tempS2= this->children[0].ToString(theFormat, outComments);
+    std::string tempS=this->children[1].ToString(theFormat, outComments);
     out << tempS2;
-    if (tempS2.size()% 200>100)
+//    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
+//    << allowNewLine;
+    if (allowNewLine && tempS2.size()>100)
       out << "\\\\\n";
     if (tempS.size()>0)
       if (tempS[0]!='-')
@@ -5709,47 +5695,47 @@ std::string Expression::ToString
   } else if (this->theOperation==this->theBoss->opMinus())
   { if (this->children.size==1)
       out << "-" << this->children[0].ToString
-      (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments);
+      (theFormat, outComments);
     else
     { assert(children.size==2);
-      out << this->children[0].ToString(theFormat, this->children[0].NeedBracketsForAddition(), false, outComments)
-      << "-" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForMultiplication(), false, outComments);
+      out << this->children[0].ToString(theFormat, outComments)
+      << "-" << this->children[1].ToString(theFormat, outComments);
     }
   }
   else if (this->theOperation==this->theBoss->opBind())
-  { out << "{{" << this->children[0].ToString
-    (theFormat, this->children[0].NeedBracketsForMultiplication(), false, outComments)
-    << "}}";
+  { out << "{{" << this->children[0].ToString(theFormat, outComments) << "}}";
   }
   else if (this->theOperation==this->theBoss->opApplyFunction())
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
-        out <<  this->children[0].ToString
-        (theFormat, false, this->children[0].NeedBracketsForFunctionName(), outComments)
-        << "_" << this->children[1].ToString
-        (theFormat, false, this->children[1].NeedBracketsForFunctionName(), outComments) << "";
+        if (allowNewLine)
+          theFormat->flagExpressionNewLineAllowed=false;
+        out <<  this->children[0].ToString(theFormat, outComments)
+        << "_{" << this->children[1].ToString(theFormat, outComments) << "}";
+        if (allowNewLine)
+          theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
         out <<  this->children[0].ToString
-        (theFormat, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "\\cdot(" << this->children[1].ToString(theFormat, false, false, outComments) << ")";
+        (theFormat, outComments)
+        << "\\cdot(" << this->children[1].ToString(theFormat, outComments) << ")";
         break;
       default:
         out << this->children[0].ToString
-        (theFormat, this->children[0].NeedBracketsForFunctionName(), false, outComments)
-        << "{}(" << this->children[1].ToString(theFormat, this->children[1].NeedBracketsForFunctionArgument(), false, outComments) << ")";
+        (theFormat, outComments)
+        << "{}(" << this->children[1].ToString(theFormat, outComments) << ")";
         break;
     }
   }
   else if (this->theOperation==this->theBoss->opEqualEqual())
-    out << this->children[0].ToString(theFormat, false, false, outComments)
-    << "==" << this->children[1].ToString(theFormat, false, false, outComments);
+    out << this->children[0].ToString(theFormat, outComments)
+    << "==" << this->children[1].ToString(theFormat, outComments);
   else if (this->theOperation==this->theBoss->opList())
   { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat, false, false, outComments);
+        { out << this->children[i].ToString(theFormat, outComments);
           if (i!=this->children.size-1)
             out << "& ";
         }
@@ -5763,7 +5749,7 @@ std::string Expression::ToString
           out << "c";
         out << "} ";
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat, false, false, outComments);
+        { out << this->children[i].ToString(theFormat, outComments);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
         }
@@ -5775,24 +5761,30 @@ std::string Expression::ToString
       default:
         out << "(";
         for (int i=0; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat, false, false, outComments);
+        { std::string currentChildString=this->children[i].ToString(theFormat, outComments);
+          out << currentChildString;
+          charCounter+=currentChildString.size();
           if (i!=this->children.size-1)
-            out << ", ";
+          { out << ", ";
+            if (allowNewLine && charCounter >200 )
+              out << "\\\\";
+          }
+          charCounter%=200;
         }
         out << ")";
         break;
     }
   } else if (this->theOperation==this->theBoss->opLieBracket())
-    out << "[" << this->children[0].ToString(theFormat, false, false, outComments)
-    << "," << this->children[1].ToString(theFormat, false, false, outComments)
+    out << "[" << this->children[0].ToString(theFormat, outComments)
+    << "," << this->children[1].ToString(theFormat, outComments)
     << "]";
   else if (this->theOperation==this->theBoss->opUnion())
-    out << this->children[0].ToString(theFormat, false, false, outComments)
-    << "\\cup " << this->children[1].ToString(theFormat, false, false, outComments)
+    out << this->children[0].ToString(theFormat, outComments)
+    << "\\cup " << this->children[1].ToString(theFormat, outComments)
     ;
   else if (this->theOperation==this->theBoss->opUnionNoRepetition())
-    out << this->children[0].ToString(theFormat, false, false, outComments)
-    << "\\sqcup " << this->children[1].ToString(theFormat, false, false, outComments)
+    out << this->children[0].ToString(theFormat, outComments)
+    << "\\sqcup " << this->children[1].ToString(theFormat, outComments)
     ;
   else if (this->theOperation==this->theBoss->opEndStatement())
   { if (startingExpression==0)
@@ -5804,19 +5796,21 @@ std::string Expression::ToString
         createTable=(startingExpression->theOperation==this->theBoss->opEndStatement() && startingExpression->children.size==this->children.size);
       if (createTable)
       { out << "<hr> "
-        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( startingExpression->children[i].ToString(theFormat, false, false, 0));
+        << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
+        (startingExpression->children[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
         if (!this->children[i].IsString() || !isFinal)
-          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(this->children[i].ToString(theFormat, false, false, outComments));
+          out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
+          (this->children[i].ToString(theFormat, outComments));
         else
           out << this->children[i].GetAtomicValue().GetValuE<std::string>();
         if (i!=this->children.size-1)
           out << ";";
       }
       else
-      { out << this->children[i].ToString(theFormat, false, false, outComments);
+      { out << this->children[i].ToString(theFormat, outComments);
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -5828,10 +5822,6 @@ std::string Expression::ToString
   }
   else
     out << "(ProgrammingError:NotDocumented)" ;
-  if (AddBrackets)
-    out << ")";
-  if (AddCurlyBraces)
-    out << "}";
   if (this->errorString!="")
     out << ")";
   if (outComments!=0)
@@ -6075,8 +6065,8 @@ std::string CommandList::ToString()
   out << "\n Cached expressions (" << this->cachedExpressions.size
   << " total):\n<br>\n";
   for (int i=0; i<this->cachedExpressions.size; i++)
-  { out << this->cachedExpressions[i].ToString(0, false, false, 0, false)
-    << " -> " << this->imagesCachedExpressions[i].ToString(0, false, false, 0, false);
+  { out << this->cachedExpressions[i].ToString()
+    << " -> " << this->imagesCachedExpressions[i].ToString();
     if (i!=this->cachedExpressions.size-1)
       out << "<br>";
   }
@@ -6097,45 +6087,6 @@ Rational Expression::GetConstantTerm()const
     if (this->children[0].EvaluatesToRational())
       return this->children[0].GetRationalValue();
   return 1;
-}
-
-bool Expression::NeedBracketsForFunctionName() const
-{ return !(
-  this->theOperation==this->theBoss->opBind() ||
-  (this->theOperation==this->theBoss->opAtom() && this->EvaluatesToVariableNonBound())
-  || ( this->theOperation==this->theBoss->opApplyFunction() && this->format==this->formatFunctionUseUnderscore)
-  );
-}
-
-bool Expression::NeedBracketsForMultiplication()const
-{ //return this->children.size()>1;
-  return
-  this->theOperation==this->theBoss->opPlus() ||
-  this->theOperation==this->theBoss->opMinus()
-  ;
-}
-
-bool Expression::NeedBracketsForAddition()const
-{ if (this->theOperation==this->theBoss->opTimes())
-    if (this->children[0].IsInteger())
-      if (this->children[0].GetAtomicValue().GetValuE<Rational>()==(-1))
-        return true;
-  return
-  false
-  ;
-}
-
-bool Expression::NeedBracketsForFunctionArgument()const
-{ return this->format!=formatNoBracketsForFunctionArgument;
-}
-
-bool Expression::NeedBracketsForThePower()const
-{ return
-  this->theOperation==this->theBoss->opPlus() ||
-  this->theOperation==this->theBoss->opMinus() ||
-  this->theOperation==this->theBoss->opTimes() ||
-  this->theOperation==this->theBoss->opDivide()
-  ;
 }
 
 void Expression::MakeInt(int theValue, CommandList& newBoss)
@@ -6352,7 +6303,7 @@ bool Context::GetPolySubFromVariableSuperSet
   { int theNewIndex=theSuperset.VariableImages.GetIndex(this->VariableImages[i]);
     if (theNewIndex==-1)
       return false;
-    output[i].MakeMonomial(theSuperset.VariableImages.size, theNewIndex ,1);
+    output[i].MakeMonomiaL(theNewIndex, 1, 1, theSuperset.VariableImages.size);
   }
   return true;
 }
@@ -6367,7 +6318,7 @@ ElementUniversalEnveloping<RationalFunctionOld> Context::GetPolynomialMonomial
   }
   ElementUniversalEnveloping<RationalFunctionOld> output;
   RationalFunctionOld theRF;
-  theRF.MakeOneLetterMon(this->VariableImages.size, theIndex, 1, theGlobalVariables);
+  theRF.MakeOneLetterMon(theIndex, 1, theGlobalVariables, this->VariableImages.size);
 //  std::cout << "<br>this->indexAmbientSSalgebra=  " << this->indexAmbientSSalgebra;
   output.MakeConst(theRF, this->theOwner->theObjectContainer.theLieAlgebras, this->indexAmbientSSalgebra);
   return output;
@@ -6391,7 +6342,7 @@ RationalFunctionOld
 Context::GetPolynomialMonomial
 (int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
 { RationalFunctionOld output;
-  output.MakeOneLetterMon(this->VariableImages.size, inputNonZeroIndex, 1, theGlobalVariables);
+  output.MakeOneLetterMon(inputNonZeroIndex, 1, theGlobalVariables, this->VariableImages.size);
   return output;
 }
 

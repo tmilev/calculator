@@ -323,8 +323,7 @@ void MakeVariableNonBounD
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
   std::string ToString
-  (FormatExpressions* theFormat=0, bool AddBrackets=false, bool AddCurlyBraces=false,
-   std::stringstream* outComments=0, bool isFinal=true,
+  (FormatExpressions* theFormat=0, std::stringstream* outComments=0,
    Expression* startingExpression=0)const;
   std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
   static unsigned int HashFunction(const Expression& input)
@@ -374,11 +373,6 @@ void MakeVariableNonBounD
     ;
   }
   Rational GetConstantTerm() const;
-  bool NeedBracketsForMultiplication()const;
-  bool NeedBracketsForFunctionArgument()const;
-  bool NeedBracketsForAddition()const;
-  bool NeedBracketsForFunctionName()const;
-  bool NeedBracketsForThePower()const;
   bool operator==(const Expression& other)const;
   void CopyValueFromNoChildrenCopy(const Expression& other)
   { this->theBoss=other.theBoss;
@@ -1218,9 +1212,13 @@ bool fGetTypeHighestWeightParabolic
  { return theCommands.fGroebnerBuchberger
   (theCommands, theExpression, comments, false);
  }
+  static bool fGroebnerBuchbergerLexUpperLimit
+(CommandList& theCommands, Expression& theExpression,
+ std::stringstream* comments)
+ ;
  static bool fGroebnerBuchberger
 (CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr)
+ std::stringstream* comments, bool useGr, int upperBoundComputations=0)
  ;
  static bool fParabolicWeylGroups
 (CommandList& theCommands, Expression& theExpression,

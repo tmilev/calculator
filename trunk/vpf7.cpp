@@ -169,23 +169,6 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
   }
 }
 
-int ParserNode::EvaluateChar
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ int theDim=theNode.owner->theHmm.theRange().GetRank();
-  Vector<Rational> theWeight;
-  if (! theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables) )
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (theWeight.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  charSSAlgMod<Rational>& output=theNode.theChar.GetElement();
-
-  output.MakeFromWeight
-  (theNode.owner->theHmm.theRange().theWeyl.GetSimpleCoordinatesFromFundamental(theWeight),
-   theNode.owner->theAlgebras, 0);
-  theNode.ExpressionType=theNode.typeCharSSFDMod;
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 std::string MonomialChar<CoefficientType>::TensorAndDecompose
 (MonomialChar<CoefficientType>& other, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
@@ -310,23 +293,6 @@ std::string charSSAlgMod<CoefficientType>::ElementToStringCharacter
   }
   out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theMod.ToString());
   return out.str();
-}
-
-int Parser::GetNumVarsModulePolys()
-{ int result=0;
-  for (int i=0; i<this->theModulePolys.size; i++)
-    result=MathRoutines::Maximum(this->theModulePolys[i].GetNumVars(), result);
-  return result;
-}
-
-void Parser::SetNumVarsModulePolys(int NumVars)
-{ for (int i=0; i<this->theModulePolys.size; i++)
-    this->theModulePolys[i].SetNumVariables(NumVars);
-  for (int i=0; i<this->size; i++)
-  { ParserNode& current=this->TheObjects[i];
-    if (current.ExpressionType==current.typeGenVermaElt)
-      current.theGenVermaElt.GetElement().SetNumVariables(NumVars);
-  }
 }
 
 SemisimpleLieAlgebra& ParserNode::GetContextLieAlgebra()
@@ -699,32 +665,6 @@ std::string LittelmannPath:: ElementToStringOperatorSequenceStartingOnMe
   return tempMon.ToString();
 }
 
-int ParserNode::EvaluateRepresentationFromHWFundCoords
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> theWeight;
-  WeylGroup& theWeyl=theNode.owner->theHmm.theRange().theWeyl;
-  if (!theNode.GetRootRationalFromFunctionArguments(theWeight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (theWeight.size!=theWeyl.GetDim())
-  { //std::cout << "read dim: " << theWeight.size << " not equal to " << theWeyl.GetDim();
-    return theNode.SetError(theNode.errorDimensionProblem);
-  }
-  std::stringstream out;
-  std::string report;
-  ModuleSSalgebra<Rational> theModule;
-  Vector<Rational> fullParSel;
-  fullParSel.MakeZero(theWeight.size);
-  if (!theModule.MakeFromHW
-      (theNode.owner->theAlgebras, 0, theWeight, fullParSel, theGlobalVariables, 1, 0, &report))
-  { theNode.outputString=report;
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  }
-  out << report;
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::ExpressAsLinearCombinationHomogenousElement
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous,
@@ -1080,18 +1020,14 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vector<Rational> weight;
   ParserNode& ueNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& weightNode=theNode.owner->TheObjects[theArgumentList[1]];
-  if (!weightNode.GetRootRationalDontUseForFunctionArguments(weight, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
   SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
   if (weight.size!=theSSalgebra.GetRank())
     return theNode.SetError(theNode.errorDimensionProblem);
   ElementUniversalEnveloping<Polynomial<Rational> >& theUE=ueNode.UEElement.GetElement();
   Polynomial<Rational> theRingZero, theRingUnit;
   theNode.impliedNumVars=ueNode.impliedNumVars;
-  int& numVars= theNode.impliedNumVars;
-  theRingZero.MakeZero(numVars);
-  theRingUnit.MakeOne(numVars);
+  theRingZero.MakeZero();
+  theRingUnit.MakeOne();
   Vector<Polynomial<Rational> > theHW;
   WeylGroup& theWeyl=theSSalgebra.theWeyl;
   weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
@@ -1100,7 +1036,7 @@ int ParserNode::EvaluateIsInProperSubmoduleVermaModule
   out << "Highest weight in dual coords: " << weight.ToString() << "<br>";
   theHW.SetSize(weight.size);
   for (int i=0; i<weight.size; i++)
-    theHW[i].MakeConst(numVars, weight[i]);
+    theHW[i].MakeConsT( weight[i]);
   theUE.GetOwner().OrderSSalgebraForHWbfComputation();
   out << theUE.IsInProperSubmodule(&theHW, theGlobalVariables, theRingUnit, theRingZero);
   theUE.GetOwner().OrderSSLieAlgebraStandard();
@@ -1141,11 +1077,8 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { Vector<Rational> parSel;
   ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& selNode=theNode.owner->TheObjects[theArgumentList[1]];
 //  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
   int theDim=theNode.owner->theHmm.theRange().GetRank();
-  if (! selNode.GetRootRationalDontUseForFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
   if (parSel.size!=theDim)
     return theNode.SetError(theNode.errorDimensionProblem);
   std::stringstream out;
@@ -1158,28 +1091,6 @@ int ParserNode::EvaluateSplitCharOverLeviParabolic
   emptySel.MakeZero(theDim);
   theChar.SplitOverLeviMonsEncodeHIGHESTWeight(&report,  tempChar, parSel, emptySel, subWeyl, theGlobalVariables);
   out << report;
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateMakeWeylFromParSel
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> parSel;
-  int theDim=theNode.owner->theHmm.theRange().GetRank();
-  if (! theNode.GetRootRationalFromFunctionArguments(parSel, theGlobalVariables))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (parSel.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  std::stringstream out;
-  ReflectionSubgroupWeylGroup tempWeyl;
-  Selection tempSel;
-  tempSel=parSel;
-  tempWeyl.MakeParabolicFromSelectionSimpleRoots
-  (theNode.owner->theHmm.theRange().theWeyl, tempSel, theGlobalVariables, 1)
-  ;
-  tempWeyl.ComputeRootSubsystem();
-  out << tempWeyl.ToString(false);
   theNode.outputString=out.str();
   theNode.ExpressionType=theNode.typeString;
   return theNode.errorNoError;
@@ -1224,42 +1135,6 @@ bool ElementUniversalEnveloping<CoefficientType>::ConvertToRationalCoeff
     output+=tempMon;
   }
   return true;
-}
-
-int ParserNode::EvaluateMultiplyEltGenVermaOnTheRight
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ if (theArgumentList.size!=2)
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  ParserNode& left=theNode.owner->TheObjects[theArgumentList[0]];
-  ParserNode& right=theNode.owner->TheObjects[theArgumentList[1]];
-  theNode.impliedNumVars=MathRoutines::Maximum(left.impliedNumVars, right.impliedNumVars);
-  theNode.impliedNumVars=MathRoutines::Maximum(theNode.impliedNumVars, theNode.owner->MaxFoundVars);
-  theNode.owner->SetNumVarsModulePolys(theNode.impliedNumVars);
-  if (!right.ConvertToType(theNode.typeGenVermaElt, theNode.impliedNumVars, theGlobalVariables))
-    return theNode.SetError(theNode.errorConversionError);
-  if (!left.ConvertToType(theNode.typeUEelement, theNode.impliedNumVars, theGlobalVariables))
-  { if (!left.ConvertToType(theNode.typeGenVermaElt, theNode.impliedNumVars, theGlobalVariables))
-      return theNode.SetError(theNode.errorConversionError);
-    theNode.theGenVermaElt=left.theGenVermaElt;
-//    theNode.theGenVermaElt.GetElement().MultiplyBy(right.theGenVermaElt.GetElement(), theGlobalVariables);
-    theNode.ExpressionType=theNode.typeGenVermaElt;
-    return theNode.errorNoError;
-  }
-  theNode.theGenVermaElt=right.theGenVermaElt;
-  ElementUniversalEnveloping<RationalFunctionOld> tempElt;
-  tempElt.Assign(left.UEElement.GetElement());
-  RationalFunctionOld RFone, RFZero;
-  RFone.MakeConst(theNode.impliedNumVars, 1, &theGlobalVariables);
-  RFZero.MakeConst(theNode.impliedNumVars, 0, &theGlobalVariables);
-//  FormatExpressions theFormat;
-//  theFormat.MakeAlphabetArbitraryWithIndex("g", "h");
-//  std::cout << "<br>Acting on " << theNode.theGenVermaElt.GetElement().ToString(theGlobalVariables)
-//  << " by " << tempElt.ToString(theGlobalVariables, theFormat);
-//  theNode.theGenVermaElt.GetElement().MultiplyMeByUEEltOnTheLeft
-//  (theNode.owner->theModulePolys, tempElt, theGlobalVariables, RFone, RFZero)
-//  ;
-  theNode.ExpressionType=theNode.typeGenVermaElt;
-  return theNode.errorNoError;
 }
 
 template <class CoefficientType>

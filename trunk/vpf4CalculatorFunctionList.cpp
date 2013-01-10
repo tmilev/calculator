@@ -6,9 +6,12 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedVars()
 { this->AddNonBoundVarMustBeNew
-("gcd", &this->fGCD, "",
-   "gcd of two polynomials.",
-   "gcd{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
+("gcdPoly", &this->fGCD, "",
+   "Greatest common divisor polynomial of two polynomials. \
+   The divisor is scaled so that all coefficients are relatively prime integers, \
+   and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
+   has positive coefficient.",
+   "gcdPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
    2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+\
    x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+\
    x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},\
@@ -18,9 +21,12 @@ void CommandList::initPredefinedVars()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddNonBoundVarMustBeNew
-("lcm", &this->fLCM, "",
-   "lcm of two polynomials.",
-   "lcm{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
+("lcmPoly", &this->fLCM, "",
+   "Least common multiple of two polynomials.\
+   The output is scaled so that all coefficients are relatively prime integers, \
+   and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
+   has positive coefficient.",
+   "lcmPoly{}(-x_{13}^{2}x_{15}^{3}x_{21}^{2}x_{22}-2x_{13}^{2}x_{14}x_{15}x_{17}x_{21}^{3}+\
    2x_{13}^{2}x_{15}^{2}x_{16}x_{21}^{3}+2x_{13}^{2}x_{15}^{2}x_{17}x_{20}x_{21}^{2}+\
    x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}+\
    x_{13}^{2}x_{15}x_{17}^{2}x_{19}x_{21}^{2},\
@@ -33,13 +39,13 @@ void CommandList::initPredefinedVars()
 ("PolyDivQuotient", &this->fPolynomialDivisionQuotient, "",
    "Quotient of two polynomials under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\nb:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;")
+   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
    ;
   this->AddNonBoundVarMustBeNew
 ("PolyDivRemainder", &this->fPolynomialDivisionRemainder, "",
    "Remainder of polynomial division under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\n b:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;")
+   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
    ;
   this->AddNonBoundVarMustBeNew ("suffixNotationForPostScript", &this->fSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \

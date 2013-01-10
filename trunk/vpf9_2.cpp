@@ -311,19 +311,28 @@ void ElementWeylAlgebra::Makexidj(int i, int j, int NumVars)
 }
 
 void ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-(int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables)
-{ if (inputPower>0)
-  { output.MakeOneLetterMon(indexVar, 1, theGlobalVariables);
-    output.RaiseToPower(inputPower);
-    return;
+(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO,
+ Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
+{ outputDenominator.MakeOne();
+  MonomialWeylAlgebra tempMon;
+  outputDO.MakeZero();
+  int inputPower=0;
+  if (!inputRationalPower.IsSmallInteger(&inputPower))
+  { std::cout << "This is a programming error: "
+    << " I can give you a differential operator only from integer exponent. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
+  if (inputPower>=0)
+    tempMon.polynomialPart.MakeEi(indexVar, inputPower);
+  else
+    tempMon.differentialPart.MakeEi(indexVar, -inputPower);
+  outputDO.AddMonomial(tempMon, 1);
   inputPower*=-1;
-  output.MakeOneLetterMon(indexVar+numVars, 1, theGlobalVariables);
-  output.RaiseToPower(inputPower);
   Polynomial<Rational> newMult;
-  newMult.MakeDegreeOne(numVars*2, indexVar, 1);
+  newMult.MakeDegreeOne(0, indexVar, 1);
   for (int i=0; i<inputPower; i++)
-  { output/=newMult;
+  { outputDenominator*=newMult;
     newMult-=1;
   }
 //  output/=den;
@@ -2459,7 +2468,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           theReport.Report(out.str());
           //std::cout << out.str();
         }
-        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Dividing "
           << currentRemainder.ToString()
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
@@ -2468,10 +2477,10 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           currentRemainder1=currentRemainder;
           currentRemainder1-=this->bufPoly;
           std::cout << " I must get: " << currentRemainder1.ToString();
-        }
+        }*/
         currentRemainder-=this->bufPoly;
         divisionOcurred=true;
-        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i+1;
           if(this->NumberOfComputations>this->MaxNumComputations+1010)
@@ -2483,7 +2492,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
             std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
-        }
+        }*/
         this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
@@ -2493,7 +2502,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
     { outputRemainder->AddMonomial(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
       currentRemainder.PopMonomial(indexLeadingMonRemainder);
       this->NumberOfComputations++;
-      if (this->NumberOfComputations>this->MaxNumComputations+1000)
+      /*if (this->NumberOfComputations>this->MaxNumComputations+1000)
       { std::cout
         << "This may or may not be a programming error. While handling computation excess limit, "
         << " I got that NumberOfComputations is much larger than MaxNumComputations. "
@@ -2503,8 +2512,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
 
         std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
-      }
-      this->ConsistencyCheck();
+      }*/
       if (theGlobalVariables!=0 && this->flagDoProgressReport)
       { std::stringstream out;
         out << "Number of intermediate remainders: " << numIntermediateRemainders
@@ -2935,7 +2943,7 @@ void RationalFunctionOld::gcd
 //  std::cout << "<br>and the result of gcd (product/lcm)= " << output.ToString() << "<hr>";
 }
 
-void RationalFunctionOld::MakeOneLetterMon
+void RationalFunctionOld::MakeOneLetterMoN
   (int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables,
    int ExpectedNumVars)
 { if ( theIndex<0)
@@ -3060,6 +3068,7 @@ void RationalFunctionOld::lcm
   }
   output=theBasis[maxMonNoTIndex];
   output.SetNumVariablesSubDeletedVarsByOne(theNumVars);
+  output.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 }
 
 void RationalFunctionOld::operator*=(const MonomialP& other)
@@ -3236,7 +3245,8 @@ void RationalFunctionOld::Simplify()
 void RationalFunctionOld::SimplifyLeadingCoefficientOnly()
 { if (this->expressionType!=this->typeRationalFunction)
     return;
-  Rational tempRat= this->Denominator.GetElement().theCoeffs[this->Denominator.GetElement().GetIndexMaxMonomialTotalDegThenLexicographic()];
+  Rational tempRat=
+  this->Denominator.GetElement().theCoeffs[this->Denominator.GetElement().GetIndexMaxMonomialLexicographicLastVariableStrongest()];
   tempRat.Invert();
   this->Denominator.GetElement()*=(tempRat);
   this->Numerator.GetElement()*=(tempRat);
@@ -4464,6 +4474,26 @@ void MonomialP::ExponentMeBy(const Rational& theExp)
     this->monBody[i]*=theExp;
 }
 
+bool MonomialP::operator>(const MonomialP& other)const
+{ if (this->monBody==other.monBody)
+    return false;
+  return this->IsGEQTotalDegThenLexicographicLastVariableStrongest(other);
+}
+
+bool MonomialP::operator==(const MonomialP& other)const
+{ for (int i=other.monBody.size-1; i>=this->monBody.size; i--)
+    if (other.monBody[i]!=0)
+      return false;
+  for (int i=this->monBody.size-1; i>=other.monBody.size; i--)
+    if (this->monBody[i]!=0)
+      return false;
+  int highestIndex=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())-1;
+  for (int i=highestIndex; i>=0; i--)
+    if (this->monBody[i]!=other.monBody[i])
+      return false;
+  return true;
+}
+
 bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other)const
 { for (int i=other.monBody.size-1; i>=this->monBody.size; i--)
   { if (other.monBody[i]>0)
@@ -4477,7 +4507,7 @@ bool MonomialP::IsGEQLexicographicLastVariableStrongest(const MonomialP& other)c
     if (this->monBody[i]<0)
       return false;
   }
-  int highestIndex=MathRoutines::Maximum(this->GetMinNumVars(), other.GetMinNumVars())-1;
+  int highestIndex=MathRoutines::Minimum(this->GetMinNumVars(), other.GetMinNumVars())-1;
   for (int i=highestIndex; i>=0; i--)
   { if (this->monBody[i]>other.monBody[i])
       return true;

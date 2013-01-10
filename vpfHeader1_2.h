@@ -2675,7 +2675,9 @@ public:
   void Makedidj(int i, int j, int NumVars);
   void Makexidj(int i, int j, int NumVars);
   static void GetStandardOrderDiffOperatorCorrespondingToNraisedTo
-  (int inputPower, int numVars, int indexVar, RationalFunctionOld& output, GlobalVariables& theGlobalVariables);
+(const Rational& inputRationalPower, int indexVar, ElementWeylAlgebra& outputDO,
+ Polynomial<Rational>& outputDenominator, GlobalVariables& theGlobalVariables)
+   ;
   bool ActOnPolynomial(Polynomial<Rational>& thePoly);
   void SetNumVariables(int newNumVars);
   void MultiplyOnTheLeft(ElementWeylAlgebra& standsOnTheLeft, GlobalVariables& theGlobalVariables);
@@ -3500,9 +3502,8 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
    ;
-bool GetActionMonGenVermaModuleAsDiffOperator
-(MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
- ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
+bool GetActionEulerOperatorPart
+(MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
    ;
    ModuleSSalgebra() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
    {}

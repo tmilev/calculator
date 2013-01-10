@@ -298,8 +298,6 @@ typedef void (*drawClearScreenFunction)();
 class MathRoutines
 {
 public:
-  typedef bool (*MonomialOrder) (const MonomialP& left, const MonomialP& right)
-  ;
   int InvertModN(int X, int N)
   { int q, r, p, d; // d - divisor, q - quotient, r - remainder, p is the number to be divided
     int vD[2], vP[2], temp;
@@ -3123,8 +3121,8 @@ ParallelComputing::GlobalPointerCounter++;
   Rational operator+(const Rational& right)const;
   Rational operator-(const Rational& right)const;
   Rational operator/(const Rational& right)const;
-  bool operator!=(const Rational& right)const{ return !this->IsEqualTo(right);}
-  bool operator!=(const int& right)const{ return !((*this)==right);}
+  inline bool operator!=(const Rational& right)const{ return !this->IsEqualTo(right);}
+  inline bool operator!=(const int& right)const{ return !((*this)==right);}
   inline bool operator>(const Rational& right)const{return this->IsGreaterThan(right); }
   inline bool operator<(const Rational& right)const{return right.IsGreaterThan(*this); }
   inline bool operator>(const int right)const{Rational tempRat; tempRat.AssignInteger(right); return this->IsGreaterThan(tempRat); }
@@ -4305,6 +4303,12 @@ private:
   //Note that by the above token I decided to declare operator[] as non-const
   //function and operator() as a const function but returning a copy of the
   //underlying element, rather than a reference to the element.
+  //
+  //IMPORTANT. The default monomial order, implemented by operator>, is the graded lexicographic
+  //last variable strongest order. Other monomial orders are not referred by operator>, but
+  // by their explicit names.
+  //Note that the MonomialCollection::ToString method uses the FormatExpressions::thePolyMonOrder
+  //to sort monomials when displaying polynomials to the screen.
   List<Rational> monBody;
 public:
   friend std::ostream& operator << (std::ostream& output, const MonomialP& theMon)
@@ -4348,8 +4352,8 @@ public:
   }
   void ExponentMeBy(const Rational& theExp);
   //Warning: HashFunction must return the same result
-  //for monomials that coincide as monomials but might have different
-  //declared number of variables.
+  //for equal monomials represented by different monBodies.
+  // Two such different representation may differ by extra entries filled in with zeroes.
   static inline unsigned int HashFunction(const MonomialP& input)
   { unsigned int result=0;
     int numCycles=MathRoutines::Minimum(input.monBody.size, SomeRandomPrimesSize);
@@ -4361,11 +4365,7 @@ public:
   void MakeOne(int ExpectedNumVars=0)
   { this->monBody.initFillInObject(ExpectedNumVars, (Rational) 0);
   }
-  bool operator>(const MonomialP& other)const
-  { if (this->monBody==other.monBody)
-      return false;
-    return this->IsGEQLexicographicLastVariableStrongest(other);
-  }
+  bool operator>(const MonomialP& other)const;
   bool IsDivisibleBy(const MonomialP& other)const
   { for (int i=0; i<this->monBody.size; i++)
       if (this->monBody[i]<other.monBody[i])
@@ -4378,13 +4378,12 @@ public:
       result+=this->monBody[i];
     return result;
   }
-  void MultiplyBy(const MonomialP& other)
+  inline void MultiplyBy(const MonomialP& other)
   { this->operator*=(other);
   }
-  void DivideBy(const MonomialP& other)
+  inline void DivideBy(const MonomialP& other)
   { this->operator/=(other);
   }
-  void MonomialExponentToColumnMatrix(Matrix<Rational> & output);
   bool IsLinear()const
   { return this->IsAConstant() || this->IsLinearNoConstantTerm();
   }
@@ -4425,7 +4424,6 @@ public:
         return i;
     return -1;
   }
-  void IncreaseNumVariables(int increase);
   bool IsGEQpartialOrder(MonomialP& m);
   static bool LeftIsGEQLexicographicLastVariableStrongest
   (const MonomialP& left, const MonomialP& right)
@@ -4455,7 +4453,6 @@ public:
   bool IsGEQLexicographicLastVariableStrongest(const MonomialP& other)const;
   bool IsGEQLexicographicLastVariableWeakest(const MonomialP& other)const;
   bool IsGEQTotalDegThenLexicographicLastVariableStrongest(const MonomialP& other)const;
-  void DecreaseNumVariables(int increment);
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
   bool IsAConstant()const
   { for (int i=0; i<this->monBody.size; i++)
@@ -4471,16 +4468,13 @@ public:
       this->monBody[i].Minus();
   }
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData);
-  int SizeWithoutCoefficient();
   void RaiseToPower(const Rational& thePower)
   { for (int i=0; i<this->monBody.size; i++)
       this->monBody[i]*=thePower;
   }
   void operator*=(const MonomialP& other);
   void operator/=(const MonomialP& other);
-  bool operator==(const MonomialP& other)const
-  { return this->monBody==other.monBody;
-  }
+  bool operator==(const MonomialP& other)const;
   template <class CoefficientType>
   void operator=(const Vector<CoefficientType>& other)
   { this->monBody=(other);
@@ -5035,7 +5029,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   { if (this->IsEqualToZero())
       return 1;
     Rational result=this->ScaleToIntegralMinHeightOverTheRationalsReturnsWhatIWasMultipliedBy();
-    if (this->theCoeffs[this->GetIndexMaxMonomialTotalDegThenLexicographic()].IsNegative())
+    if (this->theCoeffs[this->GetIndexMaxMonomialLexicographicLastVariableStrongest()].IsNegative())
     { *this*=-1;
       result*=-1;
     }
@@ -5127,10 +5121,10 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   ;
   bool IsProportionalTo(const Polynomial<CoefficientType>& other, CoefficientType& TimesMeEqualsOther, const CoefficientType& theRingUnit)const;
   void DrawElement(GlobalVariables& theGlobalVariables, DrawElementInputOutput& theDrawData, FormatExpressions& PolyFormatLocal);
-  const MonomialP& GetMaxMonomial(MathRoutines::MonomialOrder theMonOrder)
-  {return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
+  const MonomialP& GetMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
+  { return (*this)[this->GetIndexMaxMonomial(theMonOrder)];
   }
-  int GetIndexMaxMonomial(MathRoutines::MonomialOrder theMonOrder)
+  int GetIndexMaxMonomial(List<MonomialP>::OrderLeftGreaterThanRight theMonOrder)const
   { if (this->size==0)
       return -1;
     int result=0;
@@ -5140,7 +5134,6 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
     return result;
   }
   int GetIndexMaxMonomialLexicographicLastVariableStrongest()const;
-  int GetIndexMaxMonomialTotalDegThenLexicographic()const;
 //  void ComponentInFrontOfVariableToPower(int VariableIndex, ListPointers<Polynomial<CoefficientType> >& output, int UpToPower);
   int GetMaxPowerOfVariableIndex(int VariableIndex);
   bool operator<=(const CoefficientType& other)const
@@ -5183,8 +5176,8 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
       return true;
     if (this->TotalDegree()<other.TotalDegree())
       return false;
-    int thisMaxMonIndex= this->GetIndexMaxMonomialTotalDegThenLexicographic();
-    int otherMaxMonIndex= other.GetIndexMaxMonomialTotalDegThenLexicographic();
+    int thisMaxMonIndex= this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
+    int otherMaxMonIndex= other.GetIndexMaxMonomialLexicographicLastVariableStrongest();
     if( (*this)[thisMaxMonIndex]>other[otherMaxMonIndex])
       return true;
     if( other[otherMaxMonIndex]>(*this)[thisMaxMonIndex])
@@ -5417,7 +5410,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
 class GroebnerBasisComputation
 {
   public:
-  MathRoutines::MonomialOrder theMonOrdeR;
+  List<MonomialP>::OrderLeftGreaterThanRight theMonOrdeR;
   Polynomial<Rational> SoPolyBuf;
   Polynomial<Rational> remainderDivision;
   Polynomial<Rational> bufPoly;
@@ -5625,7 +5618,7 @@ public:
   { this->SetNumVariablesSubDeletedVarsByOne(GoalNumVars);
   }
   void SetNumVariablesSubDeletedVarsByOne(int newNumVars);
-  void MakeOneLetterMon
+  void MakeOneLetterMoN
   (int theIndex, const Rational& theCoeff, GlobalVariables& theGlobalVariables,
    int ExpectedNumVars=0)
 ;
@@ -5854,15 +5847,17 @@ void MonomialP::Substitution
 //  output.ComputeDebugString();
   for (int i=0; i<this->monBody.size; i++)
     if (this->monBody[i]!=0)
-    { if (!this->monBody[i].IsSmallInteger())
+    { int theExponent=0;
+      if (!this->monBody[i].IsSmallInteger(&theExponent))
       { std::cout << "This is a programming error. I cannot carry out a substitution in a monomial "
-        << " that has exponent which is not a small integer: it is " << this->monBody[i] << " instead. "
+        << " that has exponent which is not a small integer: it is "
+        << this->monBody[i] << " instead. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();
       tempPoly=TheSubstitution[i];
-      tempPoly.RaiseToPower(this->monBody[i].NumShort, 1);
+      tempPoly.RaiseToPower(theExponent, 1);
 //      tempPoly.ComputeDebugString();
       output*=(tempPoly);
 //      output.ComputeDebugString();
@@ -6231,26 +6226,7 @@ bool MonomialCollection<TemplateMonomial, Element>::HasGEQMonomial(TemplateMonom
 
 template <class Element>
 int Polynomial<Element>::GetIndexMaxMonomialLexicographicLastVariableStrongest()const
-{ if (this->size==0)
-    return -1;
-  int result;
-  result = 0;
-  for (int i=1; i<this->size; i++)
-    if (this->TheObjects[i].IsGEQLexicographicLastVariableStrongest(this->TheObjects[result]))
-      result=i;
-  return result;
-}
-
-template <class Element>
-int Polynomial<Element>::GetIndexMaxMonomialTotalDegThenLexicographic()const
-{ if (this->size==0)
-    return -1;
-  int result;
-  result = 0;
-  for (int i=1; i<this->size; i++)
-    if ((*this)[i].IsGEQTotalDegThenLexicographicLastVariableStrongest((*this)[result]))
-      result=i;
-  return result;
+{ return this->GetIndexMaxMonomial(MonomialP::LeftGreaterThanTotalDegThenLexicographicLastVariableStrongest);
 }
 
 template <class Element>

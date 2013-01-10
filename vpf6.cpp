@@ -220,7 +220,7 @@ bool Data::ConvertToTypE<RationalFunctionOld>()
       tempIndex=this->GetContext().VariableImages.GetIndex(tempExp.GetElement());
       if (tempIndex==-1)
         return false;
-      output.GetElement().MakeOneLetterMon
+      output.GetElement().MakeOneLetterMoN
       (tempIndex, 1, *this->owner->theGlobalVariableS);
       this->MakeRF(*this->owner, output.GetElement(), this->theContextIndex);
       return true;
@@ -2158,7 +2158,7 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
     varShift=this->GetNumVars();
   int numVars=varShift+eltsNilrad.size;
   for (int i=0; i<eltsNilrad.size; i++)
-  { tempRF.MakeOneLetterMon(i+varShift, 1, theGlobalVariables);
+  { tempRF.MakeOneLetterMoN(i+varShift, 1, theGlobalVariables);
     tempMon.MultiplyByGeneratorPowerOnTheRight(eltsNilrad[i][0].generatorsIndices[0], tempRF);
   }
   tempRF.MakeOne(&theGlobalVariables);
@@ -2346,7 +2346,7 @@ void quasiDiffOp<CoefficientType>::operator*=(const quasiDiffOp<CoefficientType>
     rightElt.AddMonomial(standsOnTheRight[j].theWeylMon, standsOnTheRight.theCoeffs[j]);
     for (int i=0; i<this->size; i++)
     { leftElt.MakeZero();
-      leftElt.AddMonomial((*this)[i], this->theCoeffs[i]);
+      leftElt.AddMonomial((*this)[i].theWeylMon, this->theCoeffs[i]);
       outputMon.theMatMon= (*this)[i].theMatMon;
       outputMon.theMatMon*=standsOnTheRight[j].theMatMon;
       leftElt*=rightElt;
@@ -2403,27 +2403,29 @@ void quasiDiffOp<CoefficientType>::prepareFormatFromShiftAndNumWeylVars(int theS
 }
 
 template <class CoefficientType>
-bool ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator
-(MonomialP& monCoeff, MonomialUniversalEnveloping<Polynomial<Rational> >& monUE,
- ElementWeylAlgebra& outputDO, List<int>& indicesNilrad, GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionMonGenVermaModuleAsDiffOperator");
-  Rational tempRat;
-  int expConstPart, powerMonCoeff;
+bool ModuleSSalgebra<CoefficientType>::GetActionEulerOperatorPart
+(MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName
+  ("ModuleSSalgebra_CoefficientType::GetActionMonGenVermaModuleAsDiffOperator");
   int varShift=this->GetMinNumVars();
-  int numVars=varShift+indicesNilrad.size;
-  ElementWeylAlgebra tempElt, tempElt2;
-  Polynomial<Rational> tempMon;
-  outputDO.MakeConsT(1);
-  for (int i=0; i<indicesNilrad.size; i++)
-  { monUE.Powers[i].GetConstantTerm(tempRat, 0);
-    tempRat.IsSmallInteger(&expConstPart);
-    monCoeff[i+varShift].IsSmallInteger(&powerMonCoeff);
-    tempElt.Makexidj(i+varShift, i+varShift, numVars);
-    tempElt.RaiseToPower(powerMonCoeff);
-    tempMon.MakeMonomiaL(i+varShift, expConstPart, 1, numVars);
-    tempElt2.AssignPolynomial(tempMon);
-    tempElt.MultiplyOnTheLeft(tempElt2, theGlobalVariables);
-    outputDO*=tempElt;
+  int powerMonCoeff=0;
+  ElementWeylAlgebra currentMonContribution;
+  outputDO.MakeOne();
+  //std::cout << "<br>Getting Euler part contribution of " << theCoeff.ToString();
+  for (int i=0; i<theCoeff.GetMinNumVars(); i++)
+  { if (!theCoeff[i].IsSmallInteger(&powerMonCoeff))
+    { std::cout << "This is a programming error. "
+      << "Getting euler operator part of action on generalized Verma module: I have an "
+      << "exponent with non-small integer entry. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    currentMonContribution.Makexidj(i+varShift, i+varShift, 0);
+    currentMonContribution.RaiseToPower(powerMonCoeff);
+    outputDO*=currentMonContribution;
+    //std::cout << "<br>Accounted index " << i+1 << "  out of " << theCoeff.GetMinNumVars()
+    //<< ", power is " << powerMonCoeff << ", current output DO has "
+    //<< outputDO.size << " monomials.";
   }
   return true;
 }
@@ -2432,7 +2434,7 @@ template <class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 (ElementSemisimpleLieAlgebra<Rational>& inputElt, quasiDiffOp<Rational>& output,
   GlobalVariables& theGlobalVariables)
-{ MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator");
+{ MacroRegisterFunctionWithName("ModuleSSalgebra_CoefficientType::GetActionGenVermaModuleAsDiffOperator");
   List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   List<int> indicesNilrad;
   this->GetElementsNilradical(eltsNilrad, true, &indicesNilrad);
@@ -2452,14 +2454,21 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   idMT.MakeIdSpecial();
   MatrixTensor<RationalFunctionOld> tempMat1;
 
+  int varShift=this->GetMinNumVars();
+
 //  std::cout  << "<br>Num elements nilrad: " << indicesNilrad.size;
-  ElementWeylAlgebra weylPartSummand;
-  Polynomial<Rational> tempP1, theCoeff;
+  ElementWeylAlgebra weylPartSummand, exponentContribution, oneIndexContribution,
+  eulerOperatorContribution;
+  Polynomial<Rational> tempP1, negativeExponentDenominatorContribution, theCoeff;
   quasiDiffMon monQDO, monQDO2;
+  //static int problemCounter=0;
+  //problemCounter++;
   Rational tempRat;
   output.MakeZero();
+  Rational currentShift;
   for (int i=0; i<result.size; i++)
-  { MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon=result[i];
+  { //problemCounter++;
+    MonomialUniversalEnveloping<Polynomial<Rational> >& currentMon=result[i];
     endoPart=idMT;
     for (int j=currentMon.Powers.size-1; j>=indicesNilrad.size; j--)
     { int thePower=0;
@@ -2476,13 +2485,38 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
       MathRoutines::RaiseToPower(tempMT, thePower, idMT);
       endoPart*=tempMT;
     }
+    exponentContribution.MakeOne();
+    theCoeff=result.theCoeffs[i];
+    for (int j=0; j<indicesNilrad.size; j++)
+    { //if (problemCounter==249)
+        //std::cout << "ere be problem!";
+      //problemCounter++;
+      currentMon.Powers[j].GetConstantTerm(currentShift);
+      ElementWeylAlgebra::GetStandardOrderDiffOperatorCorrespondingToNraisedTo
+      (currentShift, j+varShift, oneIndexContribution,
+      negativeExponentDenominatorContribution, theGlobalVariables);
+      exponentContribution*=oneIndexContribution;
+      theCoeff.DivideBy(negativeExponentDenominatorContribution, theCoeff, tempP1);
+      if (!tempP1.IsEqualToZero())
+      { std::cout << "This is a mathematical error! Something is very wrong with embedding "
+        << " semisimple Lie algebras in Weyl algebras. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+    }
 //    std::cout << "<br>Endo part of " << currentMon.ToString() << ": " << endoPart.ToString();
-    for (int l=0; l<result.theCoeffs[i].size; l++)
-    { if (!this->GetActionMonGenVermaModuleAsDiffOperator
-          (result.theCoeffs[i][l], currentMon, weylPartSummand, indicesNilrad, theGlobalVariables))
+//    std::cout << "<br>Exponent contribution of " << currentMon.ToString() << ": "
+//    << exponentContribution.ToString();
+    for (int l=0; l<theCoeff.size; l++)
+    { //problemCounter++;
+      //if (problemCounter==249)
+        //std::cout << "ere be problem!";
+      if (!this->GetActionEulerOperatorPart
+         (theCoeff[l], eulerOperatorContribution, theGlobalVariables))
         return false;
-//      std::cout << "<br>Weyl part of " << currentMon.ToString() << " with coeff "
-//      << result.theCoeffs[i].ToString() << ": " << weylPartSummand.ToString();
+      weylPartSummand=exponentContribution;
+      weylPartSummand*=eulerOperatorContribution;
+      weylPartSummand*=theCoeff.theCoeffs[l];
       for (int j=0; j<weylPartSummand.size; j++)
         for (int k=0; k<endoPart.size; k++)
         { monQDO.theMatMon=endoPart[k];
@@ -2490,14 +2524,15 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
           Polynomial<Rational>& currentEndoCoeff=endoPart.theCoeffs[k];
           for (int m=0; m<currentEndoCoeff.size; m++)
           { monQDO2=monQDO;
-            for (int n=0; n<currentEndoCoeff.GetMinNumVars(); n++)
-              monQDO2.theWeylMon.polynomialPart[n]+=currentEndoCoeff[m][n];
+            monQDO2.theWeylMon.polynomialPart*=currentEndoCoeff[m];
             tempRat=currentEndoCoeff.theCoeffs[m];
             tempRat*=weylPartSummand.theCoeffs[j];
-            tempRat*=result.theCoeffs[i].theCoeffs[l];
-  //          std::cout << "<br>adding " << monQDO.ToString() << " times " << tempRF.ToString()  << " to "
+  //          if (problemCounter==5)
+  //          std::cout << "<br>adding " << monQDO.ToString() << " times "
+  //          << tempRat.ToString()  << " to "
   //          << output.ToString();
             output.AddMonomial(monQDO2, tempRat);
+  //          if (problemCounter==5)
   //          std::cout << " to get " << output.ToString();
           }
         }
@@ -2597,7 +2632,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
 //        std::cout << theUEformat.polyAlphabeT[k] << ", ";
       out << "<tr><td>Generic element U(n_-):</td><td>"
       << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td> </tr>";
-      latexReport << "& \\multicolumn{" << theGeneratorsItry.size << "}{c}{Element acting}\\\\<br>\n ";
+      latexReport << "& \\multicolumn{" << theGeneratorsItry.size
+      << "}{c}{Element acting}\\\\<br>\n ";
       latexReport << "Action on ";
       out << "<tr><td></td><td colspan=\"" << theGeneratorsItry.size
       << "\"> Element acting</td></td></tr>";
@@ -2612,7 +2648,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
       { actionOnGenericElt.AssignElementLieAlgebra
-        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, Pone, Pzero)
+        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra,
+         Pone, Pzero)
         ;
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
@@ -2655,7 +2692,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       << "</td>";
       theWeylFormat.NumAmpersandsPerNewLineForLaTeX=0;
       theWeylFormat.MaxLineLength=300;
-      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat) << "\\end{array}$";
+      latexReport << " & $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat)
+      << "\\end{array}$";
       if (j!=0)
         latexReport2 << "&&";
       latexReport2 << " $\\begin{array}{l}" << theQDOs[j].ToString(&theWeylFormat)
@@ -2664,7 +2702,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       theWeylFormat.CustomCoeffMonSeparator="";
     }
 //    theQDOs[0].GenerateBasisLieAlgebra(theQDOs, &theWeylFormat, theCommands.theGlobalVariableS);
-    //std::cout << "<br>Dimension generated Lie algebra: " << theQDOs.size;
+ //   std::cout << "<br><b>Dimension generated Lie algebra: " << theQDOs.size << "</b>";
     //std::cout << "<br>The qdos: ";
     //for (int j=0; j<theQDOs.size; j++)
     //  std::cout << "<br>" << theQDOs[j].ToString();
@@ -6318,7 +6356,7 @@ ElementUniversalEnveloping<RationalFunctionOld> Context::GetPolynomialMonomial
   }
   ElementUniversalEnveloping<RationalFunctionOld> output;
   RationalFunctionOld theRF;
-  theRF.MakeOneLetterMon(theIndex, 1, theGlobalVariables, this->VariableImages.size);
+  theRF.MakeOneLetterMoN(theIndex, 1, theGlobalVariables, this->VariableImages.size);
 //  std::cout << "<br>this->indexAmbientSSalgebra=  " << this->indexAmbientSSalgebra;
   output.MakeConst(theRF, this->theOwner->theObjectContainer.theLieAlgebras, this->indexAmbientSSalgebra);
   return output;
@@ -6342,7 +6380,7 @@ RationalFunctionOld
 Context::GetPolynomialMonomial
 (int inputNonZeroIndex, GlobalVariables& theGlobalVariables)const
 { RationalFunctionOld output;
-  output.MakeOneLetterMon(inputNonZeroIndex, 1, theGlobalVariables, this->VariableImages.size);
+  output.MakeOneLetterMoN(inputNonZeroIndex, 1, theGlobalVariables, this->VariableImages.size);
   return output;
 }
 

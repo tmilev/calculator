@@ -1502,7 +1502,7 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
   }
   if (this->IsAConstant())
     return true;
-  int indexHighest= this->GetIndexMaxMonomialTotalDegThenLexicographic();
+  int indexHighest= this->GetIndexMaxMonomialLexicographicLastVariableStrongest();
   highestTerm=this->theCoeffs[indexHighest];
   if (!highestTerm.IsSmallInteger() || !lowestTerm.IsSmallInteger())
     return false;

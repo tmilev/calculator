@@ -4366,12 +4366,7 @@ public:
   { this->monBody.initFillInObject(ExpectedNumVars, (Rational) 0);
   }
   bool operator>(const MonomialP& other)const;
-  bool IsDivisibleBy(const MonomialP& other)const
-  { for (int i=0; i<this->monBody.size; i++)
-      if (this->monBody[i]<other.monBody[i])
-        return false;
-    return true;
-  }
+  bool IsDivisibleBy(const MonomialP& other)const;
   Rational TotalDegree()const
   { Rational result=0;
     for (int i=0; i<this->monBody.size; i++)

@@ -377,44 +377,74 @@ x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
 x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 
   this->AddNonBoundVarMustBeNew
-  ("GroebnerBuchbergerGrLex", & this->fGroebnerBuchbergerGrLex, "",
-   "Transforms to Groebner basis using the Buchberger algorithm, relative to the graded \
+  ("GroebnerLexUpperLimit", & this->fGroebnerLex, "",
+   "Transforms to a reduced Groebner basis using the  \
+    lexicographic order. \
+    The lexicographic order is inherited from the comparison of the underlying expressions.\
+    <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> \
+    A non-positive number signifies no upper limit, however please do not use (this is a public \
+    web server and multiple instances of a large computation might hog it up). \
+    The resulting printout will let your know whether the upper limit was hit or not. \
+    <br>\
+    <b>Description of the algorithm.</b>\
+    Let f_1 and f_2 be two polynomials. Following Cox, Little, O'Shea, \
+    \"Ideals, Varieties, Algorithms\", page 81,\
+    denote by S(f_1, f_2) the symmetric difference of f_1 and f_2. More precisely, let\
+    x^{\\gamma_1} be the leading monomial of f_1 and x^{\\gamma_2} \
+    be the leading monomial of f_2, with leading coefficients c_1 and c_2. Then define \
+    S(f_1, f_2):= c_2* f_1* lcm (x^\\gamma_1, \\gamma_2)/x^\\gamma_1 -\
+    c_1* f_2 *lcm (x^\\gamma_1, x^\\gamma_2)/x^\\gamma_2. \
+    Here lcm stands for least common multiple of monomials, defined in the obvious way. \
+    <br>\n1. Allocate two buckets of polynomials - one \"main\" bucket and\
+    additional bucket. At any given momonet in the algorithm, \
+    the union of main bucket and the additional bucket should give a basis of the ideal.  \
+    <br>\n2. Move all input elements into the additional bucket.\
+    <br>\n3. Call the <b>reduce additional bucket</b> subroutine. In the c++ implementation\
+    the function is  called GroebnerBasisComputation::AddPolyAndReduceBasis.\
+    <br>\n4. Set changed to be true.\
+    <br>\n5. While (changed)\
+    <br>\n5.1 For all elements f_1, f_2 in the main bucket form the symmetric difference \
+    S(f_1, f_2) and add it to the additional bucket. \
+    <br>\n5.2 Call the <b>reduce additional bucket</b> subroutine.  \
+    and set changed to be equal to the result of the subroutine.\
+    <br><b>Reduce additional bucket</b> subroutine.\
+    <br>\n1. Set changedMainBucket to be false.\
+    <br>\n2.While (additional bucket is not empty)\
+    <br>\n2.1. While (additional bucket is not empty)\
+    <br>\n2.1.1 Remove the top element from the additional bucket; call that element currentElement.\
+    <br>\n2.1.2 Divide currentElement by the elements of the main bucket, and \
+    record the resulting remainder element in currentRemainder.\
+    Here we use the multivariate \
+    polynomial division algorithm, page 62 of Cox, Little, O'Shea, \
+    \"Ideals, Varieties, Algorithms\".\
+    <br>\n2.1.3 If currentRemainder is non-zero, add it to the main bucket \
+    and set changedMainBucket to be true. \
+    <br>\n2.2 For each element in the main bucket \
+    <br>\n2.2.1 Call the considered element currentElement.\
+    <br>\n2.2.2 Divide currentElement by the remaining elements (excluding currentElement itself)\
+    in the main bucket. Call the remainder of the division currentRemainder.\
+    <br>\n2.2.3 If currentRemainder is not equal to currentElement, \
+    remove currentElement from the main bucket and add currentRemainder to the additional bucket. \
+    Note that this operation modifies the main bucket: each element of the main bucket must be\
+    traversed exactly once by the current cycle, but the division is carried with \
+    the modified state of the main bucket. \
+    <br>\n3. Return changedMainBucket. \
+   ",
+   "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
+   \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
+  this->AddNonBoundVarMustBeNew
+  ("GroebnerGrLexUpperLimit", & this->fGroebnerGrLex, "",
+   "Transforms to a reduced Groebner basis relative to the graded \
    lexicographic order. In the graded lexicographic order, monomials are first compared by\
-   total degree, then by lexicographic order.\
-   The lexicographic order is inherited from the comparison of the underlying expressions. ",
-   "GroebnerBuchbergerGrLex{}(a^2+b^2+1, x-a^4, y-b^4 )");
-  this->AddNonBoundVarMustBeNew
-  ("GroebnerBuchbergerLex", & this->fGroebnerBuchbergerLex, "",
-   "Transforms to Groebner basis using the Buchberger algorithm, relative to the \
-   lexicographic order. In the lexicographic order, monomials are compared  only by \
-   lexicographic order.\
-   The lexicographic order is inherited from the comparison of the underlying expressions.\
-   ",
-   "GroebnerBuchbergerLex{}(s^2+c^2+1, a-s^4, b-c^4 )");
-  this->AddNonBoundVarMustBeNew
-  ("GroebnerLexUpperLimit", & this->fGroebnerBuchbergerLexUpperLimit, "",
-   "Attempts to transforms to Groebner basis using the Buchberger algorithm, relative to the \
-   lexicographic order. The last argument gives an upper bound to the polynomial operations that\
-   can be done by the algorithm. If the upper bound is exceeded, the algorithm produces a \
-   (non-Groebner) ideal basis and terminates. \
-   The lexicographic order is inherited from the comparison of the underlying expressions.\
-   ",
-   "GroebnerLexUpperLimit{}(\
-   x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+2x_{2}x_{14}+x_{1}x_{13}-3, \
-   2x_{6}x_{18}+3x_{5}x_{17}+x_{4}x_{16}+3x_{3}x_{15}+2x_{2}x_{14}+x_{1}x_{13}-4, \
-   x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13}, \
-   x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13}, x_{3}x_{17}+x_{2}x_{16}-x_{1}x_{14}, \
-   x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+x_{3}x_{15}+x_{2}x_{14}-2, \
-   x_{6}x_{17}+x_{5}x_{16}+x_{3}x_{14}, x_{3}x_{18}+x_{2}x_{17}-x_{1}x_{15}, \
-   x_{5}x_{18}+x_{4}x_{17}+x_{2}x_{15}, \
-   x_{6}x_{24}+2x_{5}x_{23}-x_{4}x_{22}+2x_{3}x_{21}-2x_{2}x_{20}-x_{1}x_{19}, \
-   x_{12}x_{24}+2x_{11}x_{23}+x_{10}x_{22}+2x_{9}x_{21}+2x_{8}x_{20}+x_{7}x_{19}-3, \
-   x_{11}x_{23}+x_{10}x_{22}+x_{9}x_{21}+2x_{8}x_{20}+x_{7}x_{19}-2, \
-   x_{9}x_{21}+x_{8}x_{20}+x_{7}x_{19}-1, x_{11}x_{21}+x_{10}x_{20}-x_{8}x_{19}, \
-   x_{12}x_{21}-x_{11}x_{20}+x_{9}x_{19}, x_{9}x_{23}+x_{8}x_{22}-x_{7}x_{20}, \
-   x_{12}x_{23}-x_{11}x_{22}-x_{9}x_{20}, x_{9}x_{24}-x_{8}x_{23}+x_{7}x_{21}, \
-   x_{11}x_{24}-x_{10}x_{23}-x_{8}x_{21}, \
-   x_{12}x_{18}+2x_{11}x_{17}-x_{10}x_{16}+2x_{9}x_{15}-2x_{8}x_{14}-x_{7}x_{13}, 10000 )");
+   total degree, then by lexicographic order. \
+   The lexicographic order is inherited from the comparison of the underlying expressions. \
+   <b>The first argument gives an upper bound to the number of polynomial operations allowed.</b> \
+   A non-positive number signifies no upper limit, however please do not use (this is a public \
+   web server and multiple instances of a large computation might hog it up). \
+   The resulting printout will let your know whether the upper limit was hit or not. \
+   For a description of the algorithm used see the description of function GroebnerLexUpperLimit.",
+   "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+1, x-a^4, y-b^4 );\n \
+   GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
   this->AddNonBoundVarMustBeNew
   ("experimentalPrintSemisimpleSubalgebras", &this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \

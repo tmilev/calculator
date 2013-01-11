@@ -2447,6 +2447,12 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
       if (shouldDivide)
       { numIntermediateRemainders++;
         highestMonCurrentDivHighestMonOther/=highestMonBasis;
+        if (!highestMonCurrentDivHighestMonOther.HasPositiveOrZeroExponents())
+        { std::cout << "This is a programming error: the pivot monomial in the polynomial "
+          << " division algorithm has negative exponent(s). This is not allowed. "
+          << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+          assert(false);
+        }
         this->bufPoly=this->theBasiS[i];
         leadingMonCoeff/=this->leadingCoeffs[i];
         this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
@@ -2468,7 +2474,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           theReport.Report(out.str());
           //std::cout << out.str();
         }
-/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Dividing "
           << currentRemainder.ToString()
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
@@ -2477,10 +2483,10 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           currentRemainder1=currentRemainder;
           currentRemainder1-=this->bufPoly;
           std::cout << " I must get: " << currentRemainder1.ToString();
-        }*/
+        }
         currentRemainder-=this->bufPoly;
         divisionOcurred=true;
-/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i+1;
           if(this->NumberOfComputations>this->MaxNumComputations+1010)
@@ -2492,7 +2498,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
             std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
-        }*/
+        }
         this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else
@@ -4478,6 +4484,17 @@ bool MonomialP::operator>(const MonomialP& other)const
 { if (this->monBody==other.monBody)
     return false;
   return this->IsGEQTotalDegThenLexicographicLastVariableStrongest(other);
+}
+
+bool MonomialP::IsDivisibleBy(const MonomialP& other)const
+{ for (int i=other.monBody.size-1; i>=this->monBody.size; i--)
+    if (other.monBody[i]>0)
+      return false;
+  int upperLimit=MathRoutines::Minimum(this->monBody.size, other.monBody.size);
+  for (int i=0; i<upperLimit; i++)
+    if (this->monBody[i]<other.monBody[i])
+      return false;
+  return true;
 }
 
 bool MonomialP::operator==(const MonomialP& other)const

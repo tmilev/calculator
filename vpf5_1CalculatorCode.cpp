@@ -199,30 +199,27 @@ bool CommandList::fEmbedSSalgInSSalg
   return true;
 }
 
-bool CommandList::fGroebnerBuchbergerLexUpperLimit
+bool CommandList::fGroebner
 (CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
-{ MacroRegisterFunctionWithName("CommandList::fGroebnerBuchbergerLexUpperLimit");
-  if (theExpression.children.size<2)
-    return theExpression.SetError("Function takes at least two arguments. ");
-  Expression& numComputationsE=*theExpression.children.LastObject();
-  int upperNumComputations=0;
-  if (!numComputationsE.IsSmallInteger(&upperNumComputations))
-    return theExpression.SetError("Failed to convert last argument of the expression to a small integer. ");
-
-  theExpression.children.SetSize(theExpression.children.size-1);
-  return theCommands.fGroebnerBuchberger(theCommands, theExpression, comments, false, upperNumComputations);
-}
-
-bool CommandList::fGroebnerBuchberger
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr, int upperBoundComputations)
+ std::stringstream* comments, bool useGr)
 { MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
-
   List<Polynomial<Rational> > outputGroebner, outputGroebner2;
   Context theContext;
+  if (theExpression.children.size<2)
+    return theExpression.SetError("Function takes at least two arguments. ");
+  Expression& numComputationsE=theExpression.children[0];
+  Rational upperBound=0;
+  if (!numComputationsE.EvaluatesToRational(&upperBound))
+    return theExpression.SetError
+    ("Failed to convert the first argument of the expression to rational number.");
+  if (upperBound>1000000)
+    return theExpression.SetError
+    ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
+     You may use negative or zero upper bound to give no bound, but please don't. ");
+  int upperBoundComputations=(int) upperBound.DoubleValue();
+  theExpression.children.PopIndexShiftDown(0);
   if (!theCommands.GetVector<Polynomial<Rational> >
       (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments))
     return theExpression.SetError("Failed to extract polynomial expressions");

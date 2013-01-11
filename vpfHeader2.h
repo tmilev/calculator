@@ -1200,25 +1200,21 @@ bool fGetTypeHighestWeightParabolic
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Context* outputContext=0)
  ;
- static bool fGroebnerBuchbergerGrLex
+ static bool fGroebnerGrLex
 (CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
- { return theCommands.fGroebnerBuchberger
+ { return theCommands.fGroebner
   (theCommands, theExpression, comments, true);
  }
- static bool fGroebnerBuchbergerLex
+ static bool fGroebnerLex
 (CommandList& theCommands, Expression& theExpression,
  std::stringstream* comments)
- { return theCommands.fGroebnerBuchberger
+ { return theCommands.fGroebner
   (theCommands, theExpression, comments, false);
  }
-  static bool fGroebnerBuchbergerLexUpperLimit
+ static bool fGroebner
 (CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
- ;
- static bool fGroebnerBuchberger
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr, int upperBoundComputations=0)
+ std::stringstream* comments, bool useGr)
  ;
  static bool fParabolicWeylGroups
 (CommandList& theCommands, Expression& theExpression,

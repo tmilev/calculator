@@ -238,11 +238,11 @@ int main(int argc, char **argv)
 //  std::cout << "<hr>";
   std::string civilizedInput, inputRankString, inputWeylString;
   if (inputStringNames.Contains("textInput"))
-    civilizedInput= inputStrings[inputStringNames.IndexOfObject("textInput")];
+    civilizedInput= inputStrings[inputStringNames.GetIndex("textInput")];
   if (inputStringNames.Contains("textDim"))
-    inputRankString= inputStrings[inputStringNames.IndexOfObject("textDim")];
+    inputRankString= inputStrings[inputStringNames.GetIndex("textDim")];
   if (inputStringNames.Contains("textType"))
-    inputWeylString= inputStrings[inputStringNames.IndexOfObject("textType")];
+    inputWeylString= inputStrings[inputStringNames.GetIndex("textType")];
   CGI::CivilizedStringTranslationFromCGI(civilizedInput, civilizedInput);
   List<std::string> optionsType, optionsRank;
   optionsType.AddOnTop("A");
@@ -538,8 +538,8 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 //  std::cout << "</div>";
   std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
   bool isFirst=true;
-  for (int i=0; i<theParser.theObjectContainer.theNonBoundVars.size; i++)
-  { VariableNonBound& currentVar=theParser.theObjectContainer.theNonBoundVars[i];
+  for (int i=0; i<theParser.theObjectContainer.theVariablesNonBound.size; i++)
+  { VariableNonBound& currentVar=theParser.theObjectContainer.theVariablesNonBound[i];
     if (true)
     { if (!isFirst)
         std::cout << ",";

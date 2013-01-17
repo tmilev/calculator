@@ -6,181 +6,6 @@
 //the following  include contains all the c++ math routines used in the calculator.
 #include "vpfHeader1_3.h"
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
-class Context;
-
-class Data
-{
-public:
-  CommandList* owner;
-  int theIndex;
-  int theContextIndex;
-  int type;
-  MemorySaving<std::string> theError;
-//  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theElementTensorGenVermas;
-  enum DataType
-  { typeError=1, typeZmodP, typeRational, typePoly, typeRationalFunction, typeSSalgebra,
-    typeEltTensorGenVermasOverRF, typeMonomialGenVerma, typeElementUE, typeEltSumGenVermas,
-    typeLSpath, typeLittelmannRootOperator, typeString, typeVariableNonBound,
-    typeCharSSalgFinite,
-    typeDifferentialForm, typeRationalRadical
-  };
-  void operator=(const Data& other);
-  bool operator==(const Data& other)const;
-  unsigned int HashFunction()const;
-  static inline unsigned int HashFunction(const Data& input)  {return input.HashFunction();}
-  Data (const Rational& x, CommandList& inputOwner);
-  Data(CommandList& theOwner): theIndex(-1), theContextIndex(-1){this->type=this->typeError; this->owner=&theOwner;}
-  Data():owner(0), theIndex(-1), theContextIndex(-1){this->type=this->typeError;}
-  Data(const Data& otherData) {this->operator=(otherData);}
-  bool SetError(const std::string& inputError);
-  bool IsEqualToOne()const;
-  void MakeLittelmannRootOperator
-(int inputIndex, CommandList& theBoss)
-  ;
-  void MakeLSpath
-  (CommandList& theBoss, SemisimpleLieAlgebra& owner, List<Vector<Rational> >& waypts)
-  ;
-  void MakeSSAlgebra
-  (CommandList& theBoss, char WeylLetter, int WeylRank)
-  ;
-  void MakeChar
-  (CommandList& theBoss, charSSAlgMod<Rational>& theChar)
-  ;
-  void MakeSSAlgebra
-  (CommandList& theBoss, const Matrix<Rational>& cartanSymmetric)
-  ;
-  void MakeRational
-(CommandList& theBoss, const Rational& inputRational)
-;
-  void MakeRationalRadical
-(CommandList& theBoss, const AlgebraicNumber& inputRationalRad)
-;
-  void MakeRF
-(CommandList& theBoss, const RationalFunctionOld& inputRF, int inputContextIndex)
-;
-  template<class dataType>
-  void Make(CommandList& theBoss, const dataType& input)
-  ;
-  void MakeUE
-(CommandList& theBoss, const ElementUniversalEnveloping<RationalFunctionOld>& inputUE, int inputContextIndex)
-;
-  void MakeVariableNonBound
-(CommandList& theBoss, const VariableNonBound& input)
-;
-  void MakeString
-(CommandList& theBoss, const std::string& inputString, const Context& inputContext)
-;
-  void MakeString
-(CommandList& theBoss, const std::string& inputString, int contextIndex)
-;
-  void MakePoly
-(CommandList& theBoss, const Polynomial<Rational>& inputPoly, int inputContextIndex)
-;
-  void MakeElementTensorGeneralizedVermas
-(CommandList& theBoss, ElementTensorsGeneralizedVermas<RationalFunctionOld>& theElt, int inputContextIndex)
-  ;
-  int GetNumContextVars()const;
-  void reset(CommandList& inputOwner)
-  { this->owner=&inputOwner;
-    this->theIndex=-1;
-    this->theContextIndex=-1;
-    this->type=-1;
-    this->theError.FreeMemory();
-  }
-  bool MakeElementSemisimpleLieAlgebra
-(CommandList& inputOwner, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
- int theDisplayIndex, std::stringstream* comments)
-  ;
-  static bool MergeContexts
-  (Data& left, Data& right)
-  ;
-  bool SetContextResizesContextArray(const Context& inputContext);
-  const Context& GetContext()const;
-  bool MakeElementSemisimpleLieAlgebra
-(CommandList& inputOwner, int inputIndexInOwners, int index1, int index2, std::stringstream* comments)
- ;
-  const ElementUniversalEnveloping<RationalFunctionOld>& GetUE()const;
-  const RationalFunctionOld& GetRF()const;
-  int GetIndexAmbientSSLieAlgebra()const;
-  SemisimpleLieAlgebra& GetAmbientSSAlgebra()const;
-  template<class theType>
-  bool IsOfType()const;
-
-  template<class theType>
-  bool ConvertToTypE
-  ()
-  ;
-  bool MergeContext
-  (Context& outputInputContext);
-  template<class theType>
-  bool MergeContextsAndConvertToType
-  (Context& outputInputContext)
-  ;
-  template<class theType>
-  bool ConvertToTypeResizesContextArrays
-  (const Context& desiredNewContext)
-  ;
-
-  template<class theType>
-  theType GetValueCopy()const;
-  template<class theType>
-  const theType& GetValuE()const;
-  bool IsEqualToZero()const;
-  bool IsSmallInteger(int* whichInteger=0)const
-  ;
-  bool Add(const Data& right, Data& output)const
-  ;
-  bool Exponentiate(const Data& right, Data& output)const
-  ;
-  bool IsInteger()const;
-  ElementSemisimpleLieAlgebra<Rational>& GetEltSimpleLieAlgebra()const;
-  int GetSmallInT()const;
-  MonomialGeneralizedVerma<RationalFunctionOld>& GetMonGenVerma()const;
-  bool operator+=(const Data& other);
-  bool operator*=(const Rational& other);
-  bool operator/=(const Data& other);
-  bool operator*=(const Data& other);
-  std::string ToString(std::stringstream* comments=0, bool isFinal=true, FormatExpressions* inputFormat=0)const;
-  std::string ElementToStringDataType()const;
-  bool operator!=(const Data& other)const;
-  static bool LieBracket
-  (const Data& left, const Data& right, Data& output, std::stringstream* comments)
-  ;
-  bool OperatorDereference
-  (const Data& argument, Data& output, std::stringstream* comments)const
-  ;
-  bool OperatorDereference
-  (const Data& argument1, const Data& argument2, Data& output, std::stringstream* comments)const
-  ;
-  static bool DivideRFOrPolyOrRatByRFOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyLRObyLSPath(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyLRObyLRO(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyRatOrPolyOrRFByRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyRatOrPolyByRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyRatOrAlgebraicByRatOrAlgebraic
-  (const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyEltTensorByCoeff(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
-  { if (right.type==Data::typeRational || right.type==Data::typePoly || right.type==Data::typeRationalFunction)
-      return Data::MultiplyAnyByEltTensor(right, left, output, comments);
-    return false;
-  }
-  static bool MultiplyUEByAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool MultiplyAnyByUE(const Data& left, const Data& right, Data& output, std::stringstream* comments=0)
-  { if (left.type==Data::typeRational || left.type==Data::typePoly || left.type==Data::typeRationalFunction)
-      return Data::MultiplyUEByAny(right, left, output, comments);
-    return false;
-  }
-  static bool AddRatOrAlgebraicToRatOrAlgebraic(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddUEToAny(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddEltTensorToEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddRatOrPolyToRatOrPoly(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool AddRatOrPolyOrRFToRatOrPolyOrRF(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-  static bool TensorAnyByEltTensor(const Data& left, const Data& right, Data& output, std::stringstream* comments=0);
-
-  Data operator/(const Data& right)const;
-  Data operator*(const Data& right)const;
-};
 
 class Function
 {
@@ -195,7 +20,8 @@ class Function
   bool flagMayActOnBoundVars;
   MemorySaving<List<Expression> > theArgumentPatterns;
   MemorySaving<List<bool> > theArgumentPatternIsParsed;
-  typedef  bool (*FunctionAddress)(CommandList& theCommands, Expression& theExpression, std::stringstream* comments);
+  typedef bool (*FunctionAddress)
+  (CommandList& theCommands, const Expression& input, Expression& output);
   FunctionAddress theFunction;
   std::string ToString(CommandList& theBoss)const;
   void operator =(const Function& other)
@@ -239,78 +65,233 @@ class Expression
 { void reset()
   { this->theBoss=0;
     this->children.size=0;
-    this->theOperation=-1;
-    this->theDatA=-1;
-    this->errorString="";
+    this->theData=-1;
     this->format=this->formatDefault;
 //    this->IndexBoundVars=inputIndexBoundVars;
   }
   public:
-  int theOperation;
-  int theDatA;
+  //Definitions.
+  //1. Fundamentals.
+  //1.1. An atom is an expression with zero children.
+  //     *******************************************
+  //     We will say informally "an atom equals (the integer) X" to mean that
+  //     the theData of the corresponding atom equals X.
+  //     We will say informally "an atom equals (the keyword) X" to mean that
+  //     the theData of the corresponding atom equals the integer CommandList::opX().
+  //     Note that this language use is completely informal, and could be ambiguous:
+  //     the theData entry of an atom can be intepretted either as keyword or as an
+  //     an actual piece of data (not necessarily equal to CommandList::opX() for some X).
+  //     Whenever this ambiguity becomes and issue, the informal language should be dropped,
+  //     and explicit reference to the Expression::theData and Expression::children members
+  //     should be made.
+  //1.2. A list is an expression with 1 or more children whose theData entry equals
+  //     CommandList::opList().*
+  //1.3. An expression with 1 or more children whose is not allowed to have theData entry different
+  //     from CommandList::opList(). The system is instructed to
+  //     crash and burn shall such a configuration be detected.
+  //2. Basic building blocks
+  //2.1. A quote, or a frozen expression, is list whose first entry is an atom equal to Quote.
+  //2.2. A sequence is a list whose first entry is an atom equal to Sequence.
+  //2.3. A bound variable is a list with two atomic entries, the first of which
+  //     equals Bind.
+  //2.4. A non-bound variable is a list with two atomic entries. The first entry equals NonBound.
+  //     The second entry equals an integer that uniquely identifies the variable.
+  //     In the current implementation, the integer is the index in the object container.
+  //2.5. A string is a list with two entries
+  //     whose first entry is an atom equal to String and whose second entry
+  //     is an integer that uniquely identifies the string.
+  //     In the current implementation, the integer is the index in the object container.
+  //2.6. A rational number is a list with two entries
+  //     whose first entry is an atom equal to Rational and
+  //     whose second entry is an integer that uniquely identifies the rational number.
+  //     In the current implementation, the integer is the index in the object container.
+  //2.7. An error is a list with two entries whose first entry is an atom equal to Error,
+  //     and whose second entry is a string.
+  //*Note that CommandList::opList() is required to equal zero for reasons of program speed.
+  //However you MAY NOT assume that: you should always call CommandList::opList() explicitly.
+  //Instead, if you want to have a list of mathematical objects, use the Sequence
+  //data structure. A sequence is a List whose first entry is an atom whose value
+  //is opSequence.
+  int theData;
   List<Expression> children;
-  std::string errorString;
+  CommandList* theBoss;
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
   int format;
-//  int IndexBoundVars;
-  CommandList* theBoss;
+  friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
+  { output << theMon.ToString();
+    return output;
+  }
   enum format
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
   };
-  void reset(CommandList& newBoss)
+  typedef  bool (*OperationCruncher)
+  (const Expression& left, const Expression& right, Expression& output);
+  void reset(CommandList& newBoss, int newNumChildren=0)
   { this->theBoss=&newBoss;
+    this->theData=-1;
+    if (newNumChildren>=0)
+      this->children.SetSize(newNumChildren);
   }
-  void AssignChild(int childIndex)
+  bool AssignChild(int childIndex)
   { Expression tempExp=this->children[childIndex];
     this->operator=(tempExp);
+    return true;
   }
-  const Data& GetAtomicValue()const;
-  Rational GetRationalValue()const;
+  bool IsLisT()const;
+  bool IsListNElements(int N=-1)const
+  { if (!this->IsLisT())
+      return false;
+    if (N==-1)
+      return true;
+    return this->children.size==N;
+  }
+  bool IsListNElementsStartingWithAtom(int theOp=-1, int N=-1)const
+  { if (N!=-1)
+      if (this->children.size!=N)
+        return false;
+    if (!this->children[0].IsAtoM())
+      return false;
+    if (theOp==-1)
+      return true;
+    return this->children[0].theData==theOp;
+  }
+  bool IsListStartingWithAtom(int theOp=-1)const
+  { if (!this->IsLisT())
+      return false;
+    if (!this->children[0].IsAtoM())
+      return false;
+    if (theOp==-1)
+      return true;
+    return this->children[0].theData==theOp;
+  }
+  bool IsListOfTwoAtomsStartingWith(int theOp)const
+  { if (!this->IsListStartingWithAtom(theOp))
+      return false;
+    if (this->children.size!=2)
+      return false;
+    return this->children[1].IsAtoM();
+  }
+  bool IsAtoM(int desiredDataUseMinusOneForAny=-1)const
+  { if (this->IsLisT())
+      return false;
+    if (desiredDataUseMinusOneForAny==-1)
+      return true;
+    return this->theData==desiredDataUseMinusOneForAny;
+  }
+  Expression& operator[](int n)const
+  { return this->children[n];
+  }
+  bool IsSequenceNElementS(int N=-2)const;
+  bool IsError(std::string* outputErrorMessage=0)const;
+  bool IsContext()const;
+
+  template <class theType>
+  bool ConvertToType(Expression& output);
+  template <class theType>
+  bool IsOfType(theType* whichElement=0)const
+  { bool result=
+    this->IsListNElementsStartingWithAtom(this->GetOpType<theType>())
+    && this->children.size>1 && this->children.LastObject()->IsAtoM();
+    ;
+    if (whichElement==0)
+      return result;
+    *whichElement=this->GetValuE<theType>();
+    return result;
+  }
+  template <class theType>
+  const theType& GetValuE()const
+  { return this->GetValuENonConstUseWithCaution<theType>();
+  }
+  template <class theType>
+  theType& GetValuENonConstUseWithCaution()const;
+
+  template<class theType>
+  int GetOpType()const;
+  template<class theType>
+  int AddObjectReturnIndex(const theType& inputValue)const;
+
+  //note: the following always returns true:
+  template <class theType>
+  bool AssignValue(const theType& inputValue, CommandList& owner)
+  { int theIndex =this->AddObjectReturnIndex(inputValue);
+    this->reset(owner, 2);
+    this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
+    this->children[1].MakeAtom(theIndex, owner);
+    return true;
+  }
+  //note: the following always returns true:
+  template <class theType>
+  bool AssignValueWithContext
+  (const theType& inputValue, const Expression& theContext, CommandList& owner)
+  { int theIndex =this->AddObjectReturnIndex(inputValue);
+    this->reset(owner, 3);
+    this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
+    this->children[1]=theContext;
+    this->children[2].MakeAtom(theIndex, owner);
+    return true;
+  }
+  bool SetContextAtLeastEqualTo(Expression& inputOutputMinContext);
+  int GetNumContextVariables()const;
+
+  template <class dataType>
+  bool ContextGetPolynomialMonomial
+  (const Expression& input, dataType& output, GlobalVariables& theGlobalVariables)const;
+
+  Expression GetContext()const;
+
+  Expression ContextGetContextVariable(int variableIndex);
+  int ContextGetIndexAmbientSSalg()const;
+  void ContextGetFormatExpressions(FormatExpressions& output)const;
+  int ContextGetNumContextVariables()const;
+  static bool ContextMergeContexts
+  (const Expression& leftContext, const Expression& rightContext, Expression& outputContext);
+  static bool ContextConvertBothToCommonContext
+  (Expression& leftE, Expression& rightE, Expression& outputContext)
+  { if (!Expression::ContextMergeContexts(leftE.GetContext(), rightE.GetContext(), outputContext))
+      return false;
+    if (!leftE.SetContextAtLeastEqualTo(outputContext))
+      return false;
+    if (!rightE.SetContextAtLeastEqualTo(outputContext))
+      return false;
+    return true;
+  }
+  bool ContextGetPolySubFromSuperContext
+  (const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
+  ;
+  Expression ContextGetPolynomialVariables()const;
+  Expression ContextGetSSLieAlg()const;
+
+  void SetContextAmbientAlgebra(int indexInObjectContainer);
+  SemisimpleLieAlgebra* GetAmbientSSAlgebraNonConstUseWithCaution()const;
+  const SemisimpleLieAlgebra* GetAmbientSSAlgebra()const
+  { return this->GetAmbientSSAlgebraNonConstUseWithCaution();
+  }
+
+  bool IsEqualToZero()const;
+  bool IsEqualToOne()const;
   void MakeMonomialGenVerma
   (const MonomialGeneralizedVerma<RationalFunctionOld>& inputMon, CommandList& newBoss)
  ;
   void MakeElementTensorsGeneralizedVermas
   (const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss)
  ;
-  void MakePolyAtom
-(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss)
-  ;
-  void MakePolY
-(const Polynomial<Rational>& inputData, int inputContextIndex, CommandList& newBoss)
-  ;
-  void MakeRFAtom(const RationalFunctionOld& inputData, int inputContextIndex, CommandList& newBoss);
-  void MakeAtom(const Data& inputData, CommandList& newBoss)
-  ;
-  void MakeAtom(const Rational& inputRat, CommandList& newBoss)
-  ;
   void MakeAtom(int input, CommandList& newBoss)
-  { this->MakeAtom((Rational) input, newBoss);
+  { this->reset(newBoss);
+    this->theData=input;
   }
-  void MakeAtom(const VariableNonBound& input, CommandList& newBoss)
-  ;
-  bool MakeStringAtom
-(CommandList& newBoss, const std::string& theString, const Context& inputContext)
-;
-  bool MakeStringAtom
-(CommandList& newBoss, const std::string& theString)
-;
-  void MakeInt(int theInt, CommandList& newBoss)
-  ;
 void MakeVariableNonBounD
   (CommandList& owner, const std::string& varName)
 ;
   void MakeFunction
   (CommandList& owner, const Expression& argument, const std::string& functionName)
 ;
-  bool EvaluatesToAtom()const;
   bool EvaluatesToVariableNonBound()const;
   void MakeFunction
   (CommandList& owner, const Expression& argument, int functionIndex)
 ;
-  Function::FunctionAddress GetFunctionAddressFromVarName();
-  Function& GetFunctionFromVarNamE();
+  Function::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   void MakeProducT
   (CommandList& owner, const Expression& left, const Expression& right)
   ;
@@ -321,6 +302,9 @@ void MakeVariableNonBounD
   ;
   void MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
+  ;
+  std::string Lispify
+  ()const
   ;
   std::string ToString
   (FormatExpressions* theFormat=0, std::stringstream* outComments=0,
@@ -335,7 +319,7 @@ void MakeVariableNonBounD
   int HashFunctionRecursive(int RecursionDepth, int MaxRecursionDepth)const
   { if (RecursionDepth>MaxRecursionDepth)
       return 0;
-    int result=(this->theOperation+1)*SomeRandomPrimes[0]+(this->theDatA+SomeRandomPrimes[1])*SomeRandomPrimes[2];
+    int result=this->theData*SomeRandomPrimes[0];
     int numCycles=MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
     for (int i=0; i<numCycles; i++)
       result+=this->children[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
@@ -345,40 +329,37 @@ void MakeVariableNonBounD
   Expression()
   { this->reset();
   }
-  inline bool SetError (const std::string& theError)
-  { Data tempData(*this->theBoss);
-    tempData.SetError(theError);
-    this->MakeAtom(tempData, *this->theBoss);
-    this->errorString=theError;
-    return true;
-  }
+  bool SetError (const std::string& theError, CommandList& owner);
   Expression(const Expression& other)
   { this->operator=(other);
   }
-  bool HasBoundVariables();
-//  bool IsRationalAtom()const;
-  bool EvaluatesToRational(Rational* whichRational=0)const;
-  bool IsString()const;
-  bool IsElementUE()const;
-  bool IsInteger()const;
-  bool IsSmallInteger(int* whichinteger)const;
-  bool EvaluatesToSmallInteger(int* whichInteger=0)const;
+  Expression(CommandList& inputBoss)
+  { this->reset(inputBoss);
+  }
+  bool CheckInitialization()const
+  { if (this->theBoss==0)
+    { std::cout << "This is a programming error: Expression has non-initialized "
+      << "owner. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      return false;
+    }
+    return true;
+  }
+  bool IsSmallInteger(int* whichInteger=0)const;
+  bool IsInteger(LargeInt* whichInteger=0)const;
+  bool HasBoundVariables()const;
   bool AreEqualExcludingChildren(const Expression& other) const
   { return
     this->theBoss==other.theBoss &&
-    this->theDatA==other.theDatA &&
-    this->theOperation==other.theOperation &&
-    this->children.size==other.children.size &&
-    this->errorString==other.errorString
+    this->theData==other.theData &&
+    this->children.size==other.children.size
     ;
   }
-  Rational GetConstantTerm() const;
+//  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
   void CopyValueFromNoChildrenCopy(const Expression& other)
   { this->theBoss=other.theBoss;
-    this->theDatA=other.theDatA;
-    this->theOperation=other.theOperation;
-    this->errorString=other.errorString;
+    this->theData=other.theData;
     this->children.SetSize(other.children.size);
     this->format=other.format;
 //    this->IndexBoundVars=other.IndexBoundVars;
@@ -462,45 +443,6 @@ class VariableNonBound
   }
 };
 
-class Context
-{ public:
-  HashedList<Expression> VariableImages;
-  int indexAmbientSSalgebra;
-  CommandList* theOwner;
-  Context(CommandList& inputOwner):indexAmbientSSalgebra(-1)
-  { this->theOwner=&inputOwner;
-  }
-  Context():indexAmbientSSalgebra(-1),theOwner(0){}
-  Context(const Context& other)
-  { this->operator=(other);
-  }
-  void GetFormatExpressions(FormatExpressions& output)const;
-  void operator=(const Context& other);
-  bool operator==(const Context& other)
-  { return this->VariableImages==other.VariableImages &&
-    indexAmbientSSalgebra==other.indexAmbientSSalgebra;
-  }
-  std::string ToString()const;
-  static inline unsigned int HashFunction(const Context& input){return input.HashFunction();}
-  unsigned int HashFunction()const
-  { return this->VariableImages.HashFunction()*SomeRandomPrimes[0]+this->indexAmbientSSalgebra*SomeRandomPrimes[1];
-  }
-  bool MergeContextWith(const Context& other)
-  { this->VariableImages.AddOnTopNoRepetition(other.VariableImages);
-    this->VariableImages.QuickSortAscending();
-//    std::cout << "Variable images sorted: " << this->VariableImages.ToString();
-    if (this->indexAmbientSSalgebra==-1)
-      this->indexAmbientSSalgebra=other.indexAmbientSSalgebra;
-    if (other.indexAmbientSSalgebra==-1)
-      return true;
-    return this->indexAmbientSSalgebra==other.indexAmbientSSalgebra;
-  }
-  template <class dataType>
-  dataType GetPolynomialMonomial(int theIndex, GlobalVariables& theGlobalVariables)const;
-  bool GetPolySubFromVariableSuperSet(const Context& theSuperset, PolynomialSubstitution<Rational>& output)const
-;
-};
-
 class ObjectContainer
 { //Following are containers for data structures that are implemented in C++.
   //These objects are dynamically allocated and used by the calculator as requested
@@ -516,9 +458,8 @@ public:
   HashedList<charSSAlgMod<Rational> > theChars;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
-  HashedList<Context> theContexts;
   HashedList<std::string, MathRoutines::hashString> theStrings;
-  HashedList<VariableNonBound> theNonBoundVars;
+  HashedList<VariableNonBound> theVariablesNonBound;
   HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   HashedList<LittelmannPath> theLSpaths;
@@ -526,35 +467,6 @@ public:
   HashedList<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
   std::string ToString();
-};
-
-class DataCruncher
-{
-public:
-  typedef  bool (*CruncherDataTypes)(const Data& left, const Data& right, Data& output, std::stringstream* comments);
-  int leftType;
-  int RightType;
-  int theOperation;
-  CruncherDataTypes theCruncher;
-  DataCruncher():leftType(-1), RightType(-1), theOperation(-1), theCruncher(0){}
-  DataCruncher(int inputOp, int inputLeftType, int inputRightType, CruncherDataTypes inputCruncher)
-  { this->leftType=inputLeftType;
-    this->RightType=inputRightType;
-    this->theCruncher=inputCruncher;
-    this->theOperation=inputOp;
-  }
-  bool operator==(const DataCruncher& other)
-  { return this->leftType==other.leftType && this->RightType==other.RightType && this->theOperation==other.theOperation;
-  }
-  void operator=(const DataCruncher& other)
-  { this->leftType=other.leftType;
-    this->RightType=other.RightType;
-    this->theCruncher=other.theCruncher;
-    this->theOperation=other.theOperation;
-  }
-  static unsigned int HashFunction(const DataCruncher& input)
-  { return input.leftType*SomeRandomPrimes[0]+input.RightType*SomeRandomPrimes[1]+input.theOperation*SomeRandomPrimes[2];
-  }
 };
 
 struct StackMaintainerRules
@@ -566,17 +478,54 @@ public:
   ~StackMaintainerRules();
 };
 
+struct ExpressionPairCruncherIds
+{
+  int theOp;
+  int leftType;
+  int rightType;
+  bool operator==(const ExpressionPairCruncherIds& other)const
+  { return this->leftType==other.leftType && this->rightType==other.rightType && this->theOp==other.theOp;
+  }
+  void operator=(const ExpressionPairCruncherIds& other)
+  { this->leftType=other.leftType;
+    this->rightType=other.rightType;
+    this->theOp=other.theOp;
+  }
+  ExpressionPairCruncherIds():theOp(-1), leftType(-1), rightType(-1){}
+  ExpressionPairCruncherIds(int inputOp, int inputLeft, int inputRight)
+  : theOp(inputOp), leftType(inputLeft), rightType(inputRight)
+  {}
+  static unsigned int HashFunction(const ExpressionPairCruncherIds& input)
+  { return (unsigned int) input.leftType*SomeRandomPrimes[0]+
+    (unsigned int) input.rightType*SomeRandomPrimes[1]+
+    (unsigned int) input.theOp*SomeRandomPrimes[2];
+  }
+};
+
 class CommandList
 { template <class dataType>
-  bool EvaluatePMTDtreeFromContextRecursive
-(dataType& output, const Context& inputContext,
- const Expression& theInput, std::stringstream* errorLog=0)
+  bool EvaluatePMTDtree
+(Expression& output, const Expression& inputContext, const Expression& input)
   ;
-template <class dataType>
-  bool ExtractPMTDtreeContext
-  (Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
-  ;
+
 public:
+//Calculator functions have as arguments two expressions passed by reference,
+//const Expression& input and Expression& output. Calculator functions
+//return bool. It is forbidden to pass the same object as input and output.
+//If a calculator function returns false this
+//means that the calculator failed to evaluate the
+//function. If that is the case, the value of output is not specified and
+//*MUST NOT* be used.
+//If a function returns true this means that output contains the result of the function.
+//Note that the output of a function may be of type Error. Error results come, like any other
+//result, with a true return from the function.
+//The input of a function *MUST* contain the arguments of the function
+//in entries of index 1... input.children.size. The first entry (index 0) of input
+//must contain the name of the function called.
+//Note that functions are not required to check whether the first entry (the function name)
+//is as expected. In addition, the name of the function may be used as an additional argument:
+//for example, fAssociate is allowed for arbitrary function names.
+
 //control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
 //operations parametrize the expression elements
@@ -584,9 +533,11 @@ public:
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
 //operations are in fact realized as elements of type VariableNonBound.
   HashedList<VariableNonBound> operations;
-
   HashedList<Function> theFunctions;
-  List<int> targetProperties;
+
+  HashedList<ExpressionPairCruncherIds> theCruncherIds;
+  List<Expression::OperationCruncher> theCruncherS;
+
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
   int RecursionDeptH;
@@ -607,7 +558,7 @@ public:
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;
   int numEmptyTokensStart;
-  Expression theCommands;
+  Expression theProgramExpression;
 //  std::vector<std::stringstream> theLogs;
   int registerNumNonClosedBeginArray;
   int counterInSyntacticSoup;
@@ -636,8 +587,6 @@ public:
   std::string DisplayNameCalculator;
   std::string parsingLog;
   GlobalVariables* theGlobalVariableS;
-  HashedList<Data> theData;
-  HashedList<DataCruncher> theDataCrunchers;
   ObjectContainer theObjectContainer;
   double StartTimeEvaluationInSecondS;
 
@@ -659,6 +608,7 @@ public:
   std::string ToString();
   std::string ElementToStringNonBoundVars();
   std::string ToStringFunctionHandlers();
+  std::stringstream Comments;
   bool IsBoundVarInContext(const std::string& input);
   bool IsNonBoundVarInContext(const std::string& input);
   SyntacticElement GetSyntacticElementEnd()
@@ -697,40 +647,50 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
-  void RegisterCruncherNoFail(int theOp, int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
-  { DataCruncher d(theOp, inputLeftType, inputRightType, inputCruncher);
-    if (this->theDataCrunchers.Contains(d))
-    { std::cout << "This is a programming error: attempting to add more than one handler for the same "
+  void RegisterCruncherNoFail
+  (int theOp, int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
+  { ExpressionPairCruncherIds epc(inputLeftType, inputRightType, theOp);
+    if (this->theCruncherIds.Contains(epc))
+    { std::cout
+      << "This is a programming error: attempting to add more than one handler for the same "
       << "pair of data types. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    this->theDataCrunchers.AddOnTop(d);
+    this->theCruncherIds.AddOnTop(epc);
+    this->theCruncherS.AddOnTop(inputCruncher);
   }
-  void RegisterDivCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  void RegisterDivCruncherNoFail
+  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
   { this->RegisterCruncherNoFail(this->opDivide(), inputLeftType, inputRightType, inputCruncher);
   }
-  void RegisterMultiplicativeDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  void RegisterMultiplicativeDataCruncherNoFail
+  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
   { this->RegisterCruncherNoFail(this->opTimes(), inputLeftType, inputRightType, inputCruncher);
   }
-  void RegisterAdditiveDataCruncherNoFail(int inputLeftType, int inputRightType, DataCruncher::CruncherDataTypes inputCruncher)
+  void RegisterAdditiveDataCruncherNoFail
+  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
   { this->RegisterCruncherNoFail(this->opPlus(), inputLeftType, inputRightType, inputCruncher);
   }
-  DataCruncher::CruncherDataTypes GetMultiplicativeCruncher(int inputLeftType, int inputRightType)
+  Expression::OperationCruncher GetMultiplicativeCruncher
+  (int inputLeftType, int inputRightType)
   { return this->GetOpCruncher(this->opTimes(), inputLeftType, inputRightType);
   }
-  DataCruncher::CruncherDataTypes GetDivCruncher(int inputLeftType, int inputRightType)
-  { return this->GetOpCruncher(this->opDivide(), inputLeftType, inputRightType);
-  }
-  DataCruncher::CruncherDataTypes GetAdditiveCruncher(int inputLeftType, int inputRightType)
+  Expression::OperationCruncher GetAdditiveCruncher(int inputLeftType, int inputRightType)
   { return this->GetOpCruncher(this->opPlus(), inputLeftType, inputRightType);
   }
-  DataCruncher::CruncherDataTypes GetOpCruncher(int theOp, int inputLeftType, int inputRightType)
-  { DataCruncher d(theOp, inputLeftType, inputRightType, 0);
-    int theIndex=this->theDataCrunchers.GetIndex(d);
+  Expression::OperationCruncher GetAdditiveCruncher
+  (const Expression& leftE, const Expression& rightE);
+  Expression::OperationCruncher GetOpCruncher
+  (int theOp, int inputLeftType, int inputRightType)
+  { ExpressionPairCruncherIds d(theOp, inputLeftType, inputRightType);
+    int theIndex=this->theCruncherIds.GetIndex(d);
     if (theIndex==-1)
       return 0;
-    return this->theDataCrunchers[theIndex].theCruncher;
+    return this->theCruncherS[theIndex];
   }
+  Function::FunctionAddress GetfOp
+  (int theOp, const Expression& left, const Expression& right)
+;
   bool LookAheadAllowsThePower(const std::string& lookAhead)
   { return lookAhead!="{}";
   }
@@ -754,22 +714,22 @@ public:
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceEOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceECByC();
-  bool ReplaceEXEByList(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceYXByListX(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { return this->ReplaceYXdotsXByListYXdotsX(theControlIndex, inputFormat, 1);
+  bool ReplaceEXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceYXBySequenceX(int theControlIndex, int inputFormat=Expression::formatDefault)
+  { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
   }
   bool ReplaceXOXbyEusingO(int theControlIndex, int inputFormat=Expression::formatDefault)
   ;
-  bool ReplaceYByListY(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { return this->ReplaceYXdotsXByListYXdotsX(theControlIndex, inputFormat, 0);
+  bool ReplaceYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
+  { return this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 0);
   }
-  bool ReplaceXXYByListY(int theControlIndex, int inputFormat=Expression::formatDefault)
-  { this->ReplaceYByListY(theControlIndex, inputFormat);
+  bool ReplaceXXYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault)
+  { this->ReplaceYBySequenceY(theControlIndex, inputFormat);
     return this->ReplaceXXYByY();
   }
-  bool ReplaceYXdotsXByListYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
-  bool ReplaceListXEByList(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceListXEYByListY(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
+  bool ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceSequenceXEYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceCEByC();
   bool ReplaceCCByC();
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
@@ -875,14 +835,17 @@ public:
   int conIsDenotedBy()
   { return this->controlSequences.GetIndexIMustContainTheObject(":=:");
   }
-  int conList()
-  { return this->controlSequences.GetIndexIMustContainTheObject("OperationList");
+  int conLisT()
+  { return this->controlSequences.GetIndexIMustContainTheObject("");
   }
-  int conListNoRepetition()
-  { return this->controlSequences.GetIndexIMustContainTheObject("ListNoRepetition");
+  int conSequence()
+  { return this->controlSequences.GetIndexIMustContainTheObject("Sequence");
   }
-  int conListMatrixRow()
-  { return this->controlSequences.GetIndexIMustContainTheObject("ListMatrixRows");
+  int conSequenceNoRepetition()
+  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceNoRepetition");
+  }
+  int conSequenceMatrixRow()
+  { return this->controlSequences.GetIndexIMustContainTheObject("SequenceMatrixRows");
   }
   int conMatrixRow()
   { return this->controlSequences.GetIndexIMustContainTheObject("MatrixRow");
@@ -920,14 +883,53 @@ public:
   int opEqualEqual()
   { return this->operations.GetIndexIMustContainTheObject("==");
   }
-  int opAtom()
-  { return this->operations.GetIndexIMustContainTheObject("Atom");
+  int opError()
+  { return this->operations.GetIndexIMustContainTheObject("Error");
   }
-  int opList()
-  { return this->operations.GetIndexIMustContainTheObject("OperationList");
+  int opLisT()
+  { return this->operations.GetIndexIMustContainTheObject("");
+  }
+  int opSequence()
+  { return this->operations.GetIndexIMustContainTheObject("Sequence");
+  }
+  int opRational()
+  { return this->operations.GetIndexIMustContainTheObject("Rational");
+  }
+  int opAlgNumber()
+  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
+  }
+  int opPoly()
+  { return this->operations.GetIndexIMustContainTheObject("Polynomial<Rational>");
+  }
+  int opRationalFunction()
+  { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
+  }
+  int opString()
+  { return this->operations.GetIndexIMustContainTheObject("string");
+  }
+  int opElementUEoverRF()
+  { return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
+  }
+  int opElementTensorGVM()
+  { return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
+  }
+  int opCharSSAlgMod()
+  { return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
+  }
+  int opSSLieAlg()
+  { return this->operations.GetIndexIMustContainTheObject("SSLieAlg");
+  }
+  int opLittelmannPath()
+  { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
+  }
+  int opLRO()
+  { return this->operations.GetIndexIMustContainTheObject("LRO");
   }
   int opUnion()
   { return this->operations.GetIndexIMustContainTheObject("\\cup");
+  }
+  int opPolynomialVariables()
+  { return this->operations.GetIndexIMustContainTheObject("PolyVars");
   }
   int opEndStatement()
   { return this->operations.GetIndexIMustContainTheObject(";");
@@ -935,8 +937,14 @@ public:
   int opUnionNoRepetition()
   { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
   }
+  int opContext()
+  { return this->operations.GetIndexIMustContainTheObject("Context");
+  }
   int opBind()
   { return this->operations.GetIndexIMustContainTheObject("Bind");
+  }
+  int opVariableNonBound()
+  { return this->operations.GetIndexIMustContainTheObject("NonBound");
   }
   int opPlus()
   { return this->operations.GetIndexIMustContainTheObject("+");
@@ -957,7 +965,7 @@ public:
   { return this->operations.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical
-  (Expression& theExpression, List<Expression>& output, int theOp)
+  (const Expression& input, List<Expression>& output, int theOp)
 ;
   bool AppendMultiplicandsReturnTrueIfOrderNonCanonical
   (Expression& theExpression, List<Expression>& output, int RecursionDepth, int MaxRecursionDepth)
@@ -967,14 +975,9 @@ public:
   (Expression& theExpression, List<Expression>& output)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
-  template <class dataType>
-  bool EvaluatePMTDtree
-  (dataType& output, Context& outputContext, const Expression& theInput, std::stringstream* errorLog=0)
-  ;
   void SpecializeBoundVars
 (Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
   ;
-  bool ExpressionHasBoundVars(Expression& theExpression);
   Expression* PatternMatch
   (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
    Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
@@ -990,11 +993,29 @@ public:
     return whichDigit<10 && whichDigit>=0;
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
-  bool CollectSummands(Expression& theExpression);
-  bool CallCalculatorFunction(Function::FunctionAddress theFun, Expression& theExpression, std::stringstream* comments=0)
-  { if (!theFun(*this, theExpression, comments))
+  bool fCollectSummands(Expression& theExpression);
+  template <class theType>
+  bool CallConversionFunctionReturnsNonConstUseCarefully
+  (Function::FunctionAddress theFun, const Expression& input, theType*& outputData,
+   std::string* outputError=0)
+  { Expression tempE;
+    if (!theFun(*this, input, tempE))
+    { if (outputError!=0)
+        *outputError="I was unsuccessful in callin the conversion function.";
       return false;
-    return theExpression.errorString=="";
+    }
+    if (tempE.IsOfType<theType>())
+      return true;
+    if (!tempE.IsError(outputError))
+      if (outputError!=0)
+        *outputError="Successfully called the conversion function but did not get the desired type.";
+    return false;
+  }
+  bool CallCalculatorFunction
+  (Function::FunctionAddress theFun, const Expression& input, Expression& output)
+  { if (!theFun(*this, input, output))
+      return false;
+    return !output.IsError();
   }
 bool CollectSummands
 (List<Expression>& summands, bool needSimplification, Expression& theExpression)
@@ -1007,366 +1028,352 @@ bool CollectSummands
   (const Expression& left, const Expression& right)
   ;
 
-  static bool StandardUnion
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fUnion
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
 static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool EvaluateDereferenceOneArgument
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+static bool fStandardFunction
+(CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool StandardUnionNoRepetition
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fUnionNoRepetition
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardPower
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fPlus
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardPlus
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-  ;
-  static bool StandardTimes
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fStandardTimes
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool StandardTensor
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardDivide
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fDivide
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool StandardIsDenotedBy
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool fExpressionHasBoundVars
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+
   static bool StandardLieBracket
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardMinus
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-  ;
-  static bool StandardFunction
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fMinus
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool StandardEqualEqual
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool EvaluateDoAssociatE
-(CommandList& theCommands, Expression& theExpression, std::stringstream* coments, int theOperation)
+  static bool fAssociate
+(CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool EvaluateDoExtractBaseMultiplication
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fExtractBaseMultiplication
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool EvaluateDoDistribute
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
+  static bool fDistribute
+(CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool DoThePower
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  static bool fThePower
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.fOperationBinary(theCommands, input, output, theCommands.opThePower());
+  }
+  static bool fOperationBinary
+  (CommandList& theCommands, const Expression& input, Expression& output, int theOperation)
   ;
-  static bool DoTheOperation
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theOperation)
+  static bool fLeftDistributeBracketIsOnTheLeft
+(CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool EvaluateDoLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP, int theAdditiveOp)
-  ;
-  static bool EvaluateDoRightDistributeBracketIsOnTheRight
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, int theMultiplicativeOP)
+  static bool fRightDistributeBracketIsOnTheRight
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool EvaluateIf
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   template<class theType>
   bool fGetMatrix
-  (Expression& theExpression,
-   Matrix<theType>& outputMat, Context* inputOutputStartingContext=0,
-   int targetNumColsNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
-   std::stringstream* comments=0)
+  (const Expression& theExpression, Matrix<theType>& outputMat,
+   Expression* inputOutputStartingContext=0,
+   int targetNumColsNonMandatory=-1, Function::FunctionAddress conversionFunction=0)
   ;
   template <class theType>
   bool GetVector
-  (Expression& theExpression,
-   Vector<theType>& output, Context* inputOutputStartingContext=0,
-   int targetDimNonMandatory=-1, Function::FunctionAddress conversionFunction=0,
-   std::stringstream* comments=0)
+  (const Expression& theExpressioN, Vector<theType>& output,
+   Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
+   Function::FunctionAddress conversionFunction=0)
+  ;
+  template <class dataType>
+  static bool fExtractPMTDtreeContext
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+
+  template <class dataType>
+  static bool fExtractAndEvaluatePMTDtree
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
 
   static bool fMatrix
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDet
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fInvertMatrix
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDrawPolarRfunctionTheta
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fSuffixNotationForPostScript
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fIsInteger
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fFreudenthalEval
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
     static bool fGCDOrLCM
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments, bool doGCD)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
   ;
   static bool fLCM
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
-  { return theCommands.fGCDOrLCM(theCommands, theExpression, comments, false);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.fGCDOrLCM(theCommands, input, output, false);
   }
   static bool fGCD
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
-  { return theCommands.fGCDOrLCM(theCommands, theExpression, comments, true);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.fGCDOrLCM(theCommands, input, output, true);
   }
   static bool fPolynomialDivisionQuotient
-  (CommandList& theCommands, Expression& theExpression,
-  std::stringstream* comments)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, theExpression, comments, true);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, input, output, true);
   }
   static bool fPolynomialDivisionRemainder
-  (CommandList& theCommands, Expression& theExpression,
-  std::stringstream* comments)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, theExpression, comments, false);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, input, output, false);
   }
   static bool fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool returnQuotient)
+(CommandList& theCommands, const Expression& input, Expression& output, bool returnQuotient)
  ;
   static bool fPrintAllPartitions
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fPrintB3G2branchingTableCharsOnly
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   bool fPrintB3G2branchingIntermediate
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
- Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Context& theContext
+(CommandList& theCommands, const Expression& input, Expression& output,
+ Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext
  )
  ;
   static bool fPrintB3G2branchingTableInit
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-   branchingData& theG2B3data, int& desiredHeight, Context& outputContext)
+  (CommandList& theCommands, const Expression& input, Expression& output,
+   branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
   ;
   static bool fDecomposeCharGenVerma
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fPrintB3G2branchingTable
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDifferential
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fPrintB3G2branchingTableCommon
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Context& theContext
+(CommandList& theCommands, const Expression& input, Expression& output,
+  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext
   )
   ;
   static bool fPolynomial
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   bool fSplitFDpartB3overG2Init
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
- branchingData& theG2B3Data, Context& outputContext
- )
+(CommandList& theCommands, const Expression& input, Expression& output,
+ branchingData& theG2B3Data, Expression& outputContext)
  ;
   static bool fSplitFDpartB3overG2CharsOnly
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fElementUniversalEnvelopingAlgebra
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool fElementTensorGeneralizedVermas
+  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fSSAlgebraShort
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ return theCommands.fSSAlgebra(theCommands, theExpression, comments, false);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.fSSAlgebra(theCommands, input, output, false);
 }
   static bool fSSAlgebraVerbose
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ return theCommands.fSSAlgebra(theCommands, theExpression, comments, true);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.fSSAlgebra(theCommands, input, output, true);
 }
 template<class CoefficientType>
 bool fGetTypeHighestWeightParabolic
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments,
+(CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
- Context* outputContext=0)
+ Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra)
  ;
  static bool fGroebnerGrLex
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  { return theCommands.fGroebner
-  (theCommands, theExpression, comments, true);
+  (theCommands, input, output, true);
  }
  static bool fGroebnerLex
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  { return theCommands.fGroebner
-  (theCommands, theExpression, comments, false);
+  (theCommands, input, output, false);
  }
  static bool fGroebner
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
  ;
  static bool fParabolicWeylGroups
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  ;
  static bool fParabolicWeylGroupsBruhatGraph
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  ;
   static bool fKLcoeffs
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  ;
   static bool fEmbedSSalgInSSalg
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
  ;
   static bool fWeylOrbit
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useFundCoords, bool useRho)
+(CommandList& theCommands, const Expression& input, Expression& output,
+ bool useFundCoords, bool useRho)
  ;
   static bool fWeylOrbitFund
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, true, false);
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.fWeylOrbit(theCommands, input, output, true, false);
 }
   static bool fWeylOrbitSimple
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, false, false);
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.fWeylOrbit(theCommands, input, output, false, false);
 }
   static bool fWeylOrbitFundRho
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
-{ return theCommands.fWeylOrbit(theCommands, theExpression, comments, true, true);
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return theCommands.fWeylOrbit(theCommands, input, output, true, true);
 }
   static bool fSSAlgebra
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-  { return theCommands.fSSAlgebra(theCommands, theExpression, comments, false);
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.fSSAlgebra(theCommands, input, output, false);
   }
   static bool fSSAlgebra
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments, bool Verbose)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
   static bool fSplitFDpartB3overG2CharsOutput
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3Data
  )
 ;
   static bool fSplitFDpartB3overG2old
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSplitFDpartB3overG2
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSplitGenericGenVermaTensorFD
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSplitFDpartB3overG2inner
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-  branchingData& theG2B3Data)
+(CommandList& theCommands, branchingData& theG2B3Data, Expression& output)
 ;
   static bool fDrawWeightSupportWithMults
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fDrawWeightSupport
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
   static bool fHWTAABF
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fElementSSAlgebra
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fWeylDimFormula
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fLittelmannOperator
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fAnimateLittelmannPaths
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSqrt
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fFactor
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fSolveSeparableBilinearSystem
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fMinPoly
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fLSPath
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fTestMonomialBaseConjecture
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fJacobiSymbol
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fHWVinner
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, Expression& output,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Context& hwContext, int indexOfAlgebra)
+ Selection& selectionParSel, Expression& hwContext, int indexOfAlgebra)
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-  Vectors<Polynomial<Rational> >& theHws, Context& hwContext, Selection& selInducing, int indexOfAlgebra)
+(CommandList& theCommands, const Expression& input, Expression& output,
+  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
+  Selection& selInducing, int indexOfAlgebra)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeight,
- Selection& outputInducingSel, Context* outputContext=0)
+ Selection& outputInducingSel, Expression* outputContext=0)
 ;
   static bool fHWV
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fWriteGenVermaModAsDiffOperatorUpToLevel
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fWriteGenVermaModAsDiffOperators
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fEmbedG2inB3
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fCasimir
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fRootSAsAndSltwos
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments, bool showSLtwos)
+  (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 ;
   static bool fprintRootSAs
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.fRootSAsAndSltwos
-    (theCommands, theExpression, comments, false);
+    (theCommands, input, output, false);
   }
   static bool fprintSltwos
-  (CommandList& theCommands, Expression& theExpression,
-   std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.fRootSAsAndSltwos
-    (theCommands, theExpression, comments, true);
+    (theCommands, input, output, true);
   }
   static bool fSSsubalgebras
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   void AddEmptyHeadedCommand();
   CommandList();
@@ -1380,14 +1387,13 @@ static bool TypeHighestWeightParabolic
    bool visible=true)
    ;
 //  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
-//    if (theIndex!=this->theNonBoundVars.size-1)
+//    if (theIndex!=this->theVariablesNonBound.size-1)
 //      assert(false);
 //  }
-  int GetIndexNonBoundVar(const std::string& theName)
-  { VariableNonBound tempVar;
-    tempVar.theName=theName;
-    return this->theObjectContainer.theNonBoundVars.GetIndex(tempVar);
-  }
+  Function::FunctionAddress GetFunctionAddressFromOperation
+  (int theOp)
+;
+
   int AddNonBoundVarReturnVarIndex
 (const std::string& theName, const Function::FunctionAddress& funHandler,
   const std::string& argList, const std::string& description, const std::string& exampleArgs)
@@ -1400,8 +1406,9 @@ static bool TypeHighestWeightParabolic
 (Expression& outputExpression, std::string* outputErrors)
     ;
   void EvaluateCommands();
-  bool EvaluateExpressionReturnFalseIfExpressionIsBound
-(Expression& theExpression, BoundVariablesSubstitution& bufferPairs, std::stringstream* comments=0)
+  bool EvaluateExpression
+(const Expression& input, Expression& output, BoundVariablesSubstitution& bufferPairs,
+ bool& outputIsFree)
  ;
   void Evaluate(const std::string& theInput)
   { MacroRegisterFunctionWithName("CommandList::Evaluate");
@@ -1411,7 +1418,7 @@ static bool TypeHighestWeightParabolic
     }
     this->StartTimeEvaluationInSecondS=this->theGlobalVariableS->GetElapsedSeconds();
     this->inputString=theInput;
-    this->ParseAndExtractExpressions(theInput, this->theCommands, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
+    this->ParseAndExtractExpressions(theInput, this->theProgramExpression, this->syntacticSouP, this->syntacticStacK, & this->syntaxErrors);
     this->EvaluateCommands();
   }
   bool ParseAndExtractExpressions
@@ -1440,124 +1447,93 @@ static bool TypeHighestWeightParabolic
 
 template <class theType>
 bool CommandList::GetVector
-(Expression& theExpression,
- Vector<theType>& output, Context* inputOutputStartingContext,
- int targetDimNonMandatory, Function::FunctionAddress conversionFunction,
- std::stringstream* comments)
-{ MemorySaving<Context> tempContext;
-  Context& startContext=
+(const Expression& theExpressioN, Vector<theType>& output, Expression* inputOutputStartingContext,
+ int targetDimNonMandatory, Function::FunctionAddress conversionFunction)
+{ MemorySaving<Expression> tempContext;
+  Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
-  if (theExpression.theOperation!=this->opList())
+  Expression theConverted;
+  if (!theExpressioN.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return false;
-    Data outputData;
-    if (!theExpression.EvaluatesToAtom())
-    { Expression tempExpression=theExpression;
-      if (conversionFunction!=0)
-        if (!this->CallCalculatorFunction
-            (conversionFunction, tempExpression, comments))
-          return false;
-      if (!tempExpression.EvaluatesToAtom())
+    theConverted=theExpressioN;
+    if (!theExpressioN.IsOfType<theType>())
+    { if (conversionFunction==0)
         return false;
-      outputData=tempExpression.GetAtomicValue();
-    } else
-      outputData=theExpression.GetAtomicValue();
-    if (!outputData.MergeContextsAndConvertToType<theType>(startContext))
+      this->CallCalculatorFunction(conversionFunction, theExpressioN, theConverted);
+      if (!theConverted.IsOfType<theType>())
+        return false;
+    }
+    if (!theConverted.SetContextAtLeastEqualTo(startContext))
       return false;
     output.SetSize(1);
-    output.TheObjects[0]=outputData.GetValuE<theType>();
+    output[0]=theConverted.GetValuE<theType>();
     return true;
   }
   if (targetDimNonMandatory>0)
-    if (targetDimNonMandatory!=theExpression.children.size)
+    if (targetDimNonMandatory!=theExpressioN.children.size-1)
       return false;
-  Vector<Data> outputData;
-  outputData.SetSize(theExpression.children.size);
-  for (int i=0; i<theExpression.children.size; i++)
-  { Expression& currentE=theExpression.children[i];
-    bool needsConversion=true;
-    if (currentE.EvaluatesToAtom())
-      if (currentE.GetAtomicValue().IsOfType<theType>())
-        needsConversion=false;
-    if (needsConversion)
-    { Expression tempExpression=currentE;
-      if (conversionFunction!=0)
-        if (!this->CallCalculatorFunction
-            (conversionFunction, tempExpression, comments))
-          return false;
-      if (!tempExpression.EvaluatesToAtom())
+  targetDimNonMandatory=theExpressioN.children.size-1;
+  output.SetSize(targetDimNonMandatory);
+  for (int i=0; i<targetDimNonMandatory; i++)
+  { Expression& currentE=theExpressioN.children[i+1];
+    theConverted=currentE;
+    if (!currentE.IsOfType<theType>())
+    { if (conversionFunction==0)
         return false;
-      outputData[i]=tempExpression.GetAtomicValue();
-    } else
-      outputData[i]=currentE.GetAtomicValue();
-    if (outputData[i].theContextIndex!=-1)
-      if (!startContext.MergeContextWith(outputData[i].GetContext()))
+      this->CallCalculatorFunction(conversionFunction, currentE, theConverted);
+      if (!currentE.IsOfType<theType>())
         return false;
-  }
-  output.SetSize(theExpression.children.size);
-  for (int i=0; i<outputData.size; i++)
-  { if (!outputData[i].ConvertToTypeResizesContextArrays<theType>(startContext))
+    }
+    if (!theConverted.SetContextAtLeastEqualTo(startContext))
       return false;
-    output[i]=outputData[i].GetValuE<theType>();
+    output[i-1]=theConverted.GetValuE<theType>();
   }
   return true;
 }
 
 template <class theType>
 bool CommandList::fGetMatrix
-(Expression& theExpression,
- Matrix<theType>& outputMat, Context* inputOutputStartingContext,
- int targetNumColsNonMandatory, Function::FunctionAddress conversionFunction,
- std::stringstream* comments)
-{ MemorySaving<Context> tempContext;
-  Context& startContext=
+(const Expression& theExpression, Matrix<theType>& outputMat,
+ Expression* inputOutputStartingContext,
+ int targetNumColsNonMandatory, Function::FunctionAddress conversionFunction)
+{ MemorySaving<Expression> tempContext;
+  Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
-  if (theExpression.theOperation!=this->opList())
-  { if (targetNumColsNonMandatory!=-1)
+  Expression theConverted;
+  if (!theExpression.IsSequenceNElementS())
+  { if (targetNumColsNonMandatory>0)
       if (targetNumColsNonMandatory!=1)
         return false;
-    Data outputData;
-    if (!theExpression.EvaluatesToAtom())
-    { Expression tempExpression=theExpression;
-      if (conversionFunction!=0)
-        if (!this->CallCalculatorFunction
-            (conversionFunction, tempExpression, comments))
+    theConverted=theExpression;
+    if (!theConverted.IsOfType<theType>())
+    { if (conversionFunction!=0)
+        if (!this->CallCalculatorFunction(conversionFunction, theExpression, theConverted))
           return false;
-      if (!theExpression.EvaluatesToAtom())
+      if (!theConverted.IsOfType<theType>())
         return false;
-      outputData=tempExpression.GetAtomicValue();
-    } else
-      outputData=theExpression.GetAtomicValue();
-    if (!outputData.MergeContextsAndConvertToType<theType>(startContext))
+    }
+    if (!theConverted.SetContextAtLeastEqualTo(startContext))
       return false;
     outputMat.init(1,1);
-    outputMat.elements[0][0]=outputData.GetValuE<theType>();
+    outputMat(0,0)=theConverted.GetValuE<theType>();
     return true;
   }
-  int targetNumRows=theExpression.children.size;
-  for (int i=0; i<theExpression.children.size; i++)
-  { Expression& currentE=theExpression.children[i];
-    if (i==0)
-    { int numCols=1;
-      if (currentE.theOperation==this->opList())
-        numCols=currentE.children.size;
-      if (targetNumColsNonMandatory!=-1)
-        if (numCols!=targetNumColsNonMandatory)
-        { if (comments!=0)
-            *comments << "Error getting matrix: target number of columns is "
-            << targetNumColsNonMandatory << " but the first row has " << numCols << " columns instead. ";
-          return false;
-        }
-      targetNumColsNonMandatory=numCols;
-      outputMat.init(targetNumRows, targetNumColsNonMandatory);
-    }
-    Vector<theType> currentRow;
+  Vector<theType> currentRow;
+  int numRows=theExpression.children.size-1;
+  for (int i=0; i<numRows; i++)
+  { Expression& currentE=theExpression.children[i+1];
     if (!this->GetVector
-        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction, comments))
+        (currentE, currentRow, &startContext, targetNumColsNonMandatory,
+        conversionFunction))
       return false;
+    if (i==0)
+    { targetNumColsNonMandatory=currentRow.size;
+      outputMat.init(numRows, targetNumColsNonMandatory);
+    }
     for (int j=0; j<targetNumColsNonMandatory; j++)
-      outputMat.elements[i][j]=currentRow[j];
+      outputMat(i,j)=currentRow[j];
   }
   return true;
 }

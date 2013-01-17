@@ -3846,7 +3846,7 @@ void QuasiPolynomial::AddLatticeShift
 (const Polynomial<Rational>& input, const Vector<Rational>& inputShift)
 { Vector<Rational> theShift=inputShift;
   this->AmbientLatticeReduced.ReduceVector(theShift);
-  int index=this->LatticeShifts.IndexOfObject(theShift);
+  int index=this->LatticeShifts.GetIndex(theShift);
   if (index==-1)
   { index=this->LatticeShifts.size;
     this->LatticeShifts.AddOnTop(theShift);
@@ -7827,7 +7827,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
   if (!useAmbientIndices)
   { DisplayIndicesSimpleGenerators.SetSize(this->simpleGenerators.size);
     for (int i=0; i<this->simpleGenerators.size; i++)
-      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
+      DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
   }
   out << "\\xymatrix{";
   bool GraphWidthIsOdd=((GraphWidth%2)!=0);
@@ -7851,7 +7851,7 @@ std::string ReflectionSubgroupWeylGroup::ElementToStringFromLayersAndArrows
           currentOffset++;
       for (int k=0; k<arrows[i][j].size; k++)
       { out << " \\ar[d";
-        int indexInLayer=Layers[i+1].IndexOfObject(arrows[i][j][k]);
+        int indexInLayer=Layers[i+1].GetIndex(arrows[i][j][k]);
         assert(indexInLayer!=-1);
         int nextOffset=indexInLayer+nextRowOffset;
         if (Layers[i+1].size%2==0)
@@ -7924,7 +7924,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
   latexFormat.flagUseLatex=true;
   bool isGood=true;
   for (int i=0; i<this->simpleGenerators.size; i++)
-  { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.IndexOfObject(this->simpleGenerators[i])+1;
+  { DisplayIndicesSimpleGenerators[i]=this->AmbientWeyl.RootsOfBorel.GetIndex(this->simpleGenerators[i])+1;
     if (DisplayIndicesSimpleGenerators[i]==0)
     { isGood=false;
       break;

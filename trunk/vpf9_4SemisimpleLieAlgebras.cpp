@@ -641,7 +641,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
       continue;
     theCandidate=baseCandidate;
     tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
-    int indexSubalgebra=this->SimpleComponentsSubalgebras.IndexOfObject(tempAlgebra);
+    int indexSubalgebra=this->SimpleComponentsSubalgebras.GetIndex(tempAlgebra);
     bool mustComputeSSalgebra=(indexSubalgebra==-1);
     if (mustComputeSSalgebra)
     { indexSubalgebra=this->SimpleComponentsSubalgebras.size;
@@ -952,7 +952,7 @@ bool slTwoSubalgebra::ModuleDecompositionFitsInto(const slTwoSubalgebra& other)
 
 bool slTwoSubalgebra::ModuleDecompositionFitsInto(const List<int>& highestWeightsLeft, const List<int>& multiplicitiesHighestWeightsLeft, const List<int>& highestWeightsRight, const List<int>& multiplicitiesHighestWeightsRight)
 { for (int i=0; i<highestWeightsLeft.size; i++)
-  { int theIndex= highestWeightsRight.IndexOfObject(highestWeightsLeft[i]);
+  { int theIndex= highestWeightsRight.GetIndex(highestWeightsLeft[i]);
     if (theIndex==-1)
       return false;
     else

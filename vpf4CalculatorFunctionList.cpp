@@ -131,11 +131,11 @@ this->AddNonBoundVarMustBeNew ("drawPolar", &this->fDrawPolarRfunctionTheta, "",
    the third- the number of columns.\
    ", "X:=FunctionToMatrix{}(A,5,6);\n A{}({{a}},{{b}}):=a+b;\n X;");
   this->AddNonBoundVarMustBeNew
-  ("Union", & this->StandardUnion, "",
+  ("Union", & this->fUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); Union{}X; A{}({{i}},{{j}}):=i*i-j*j; Union{}X ");
   this->AddNonBoundVarMustBeNew
-  ("UnionNoRepetition", & this->StandardUnionNoRepetition, "",
+  ("UnionNoRepetition", & this->fUnionNoRepetition, "",
    "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
   this->AddNonBoundVarMustBeNew
@@ -415,7 +415,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     <br>\n2.1.2 Divide currentElement by the elements of the main bucket, and \
     record the resulting remainder element in currentRemainder.\
     Here we use the multivariate \
-    polynomial division algorithm, page 62 of Cox, Little, O'Shea, \
+    polynomial divis ion algorithm, page 62 of Cox, Little, O'Shea, \
     \"Ideals, Varieties, Algorithms\".\
     <br>\n2.1.3 If currentRemainder is non-zero, add it to the main bucket \
     and set changedMainBucket to be true. \
@@ -491,6 +491,6 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
-  this->NumPredefinedVars=this->theObjectContainer.theNonBoundVars.size;
+  this->NumPredefinedVars=this->theObjectContainer.theVariablesNonBound.size;
 }
 

@@ -5500,7 +5500,7 @@ void rootSubalgebra::KmodTimesKmod(int index1, int index2, List<int>& oppositeKm
       else
         if (this->IsARoot(tempRoot))
           for (int k=0; k<this->kModules.size; k++)
-            if (this->kModules[k].IndexOfObject(tempRoot)!=-1)
+            if (this->kModules[k].GetIndex(tempRoot)!=-1)
             { output.AddOnTopNoRepetition(k);
               break;
             }
@@ -5521,10 +5521,10 @@ void rootSubalgebra::ComputeKModules()
   this->LowestWeightsGmodK.ReservE(AllRoots.size);
   this->HighestWeightsGmodK.ReservE(AllRoots.size);
   for (int i=0; i<AllRoots.size; i++)
-  { if (this->AllRootsK.IndexOfObject(AllRoots[i])==-1)
+  { if (this->AllRootsK.GetIndex(AllRoots[i])==-1)
     { this->ComputeLowestWeightInTheSameKMod(AllRoots[i], tempLW);
       this->ComputeHighestWeightInTheSameKMod(AllRoots[i], tempHW);
-      int x=this->LowestWeightsGmodK.IndexOfObject(tempLW);
+      int x=this->LowestWeightsGmodK.GetIndex(tempLW);
       if (x==-1)
       { this->LowestWeightsGmodK.AddOnTop(tempLW);
         this->HighestWeightsGmodK.AddOnTop(tempHW);
@@ -5540,7 +5540,7 @@ void rootSubalgebra::ComputeKModules()
     { if (AllRoots[i].IsPositiveOrZero())
       { Vector<Rational> tempHW;
         this->ComputeHighestWeightInTheSameKMod(AllRoots[i], tempHW);
-        int x=this->HighestRootsK.IndexOfObject(tempHW);
+        int x=this->HighestRootsK.GetIndex(tempHW);
         if (x==-1)
         { this->HighestRootsK.AddOnTop(tempHW);
           x=this->HighestRootsK.size -1;

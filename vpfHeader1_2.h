@@ -2352,6 +2352,7 @@ class MonomialUniversalEnveloping : public MonomialTensor<CoefficientType>
 {
 private:
 public:
+
   std::string ToString
   (FormatExpressions* theFormat=0)const
   ;
@@ -2620,7 +2621,7 @@ static bool GetBasisFromSpanOfElements
 (const PolynomialSubstitution<Rational>& theSub)
   ;
   void MakeCasimir
-(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
+(const SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   void LieBracketOnTheRight
@@ -2644,6 +2645,10 @@ static bool GetBasisFromSpanOfElements
       this->AddMonomial(tempMon, theCoeff);
     }
   }
+  void operator=(const Rational& other)
+  { this->MakeConst(other, 0, *this->owners, this->indexInOwners);
+  }
+
   void operator=(const ElementUniversalEnveloping<CoefficientType>& other)
   { this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>::operator=(other);
     this->owners=other.owners;
@@ -4900,7 +4905,7 @@ void List<Object>::SwapTwoIndices(int index1, int index2)
 }
 
 template<class Object>
-int List<Object>::IndexOfObject(const Object& o) const
+int List<Object>::GetIndex(const Object& o) const
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i]==o)
       return i;
@@ -4969,7 +4974,7 @@ void List<Object>::initFillInObject(int theSize, const Object& o)
 
 template <class Object>
 bool List<Object>::AddOnTopNoRepetition(const Object& o)
-{ if (this->IndexOfObject(o)!=-1)
+{ if (this->GetIndex(o)!=-1)
     return false;
   this->AddOnTop(o);
   return true;
@@ -6185,14 +6190,14 @@ void MonomialUniversalEnveloping<CoefficientType>::MakeZero
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
-(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
+(const SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { //std::stringstream out;
   this->MakeZero(*theOwner.owner, theOwner.indexInOwner);
   WeylGroup& theWeyl= this->GetOwner().theWeyl;
   int theDimension=theWeyl.CartanSymmetric.NumRows;
-  Vector<Rational>  tempRoot1, tempRoot2;
-  Matrix<Rational>  killingForm;
+  Vector<Rational> tempRoot1, tempRoot2;
+  Matrix<Rational> killingForm;
   killingForm.init(theDimension, theDimension);
   for (int i=0; i<theDimension; i++)
   { tempRoot1.MakeEi(theDimension, i);
@@ -6577,13 +6582,14 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficient
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeConst
-(const Rational& coeff, int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+(const Rational& coeff, int numVars, List<SemisimpleLieAlgebra>& inputOwners,
+ int inputIndexInOwners)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   this->MakeZero(inputOwners, inputIndexInOwners);
   if (coeff.IsEqualToZero())
     return;
-  Polynomial<Rational>  tempP;
-  tempP.MakeConsT(coeff, numVars);
+  CoefficientType tempP;
+  tempP= coeff;
   tempMon.MakeConst(inputOwners, inputIndexInOwners);
   this->AddMonomial(tempMon, tempP);
 }

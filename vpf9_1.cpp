@@ -41,7 +41,7 @@ bool rootSubalgebra::CheckForSmallRelations(coneRelation& theRel, Vectors<Ration
           if (!tempRoot.IsEqualToZero())
           { theRel.BetaCoeffs.SetSize(0);
             theRel.Betas.SetSize(0);
-            tempI= nilradicalRoots.IndexOfObject(tempRoot);
+            tempI= nilradicalRoots.GetIndex(tempRoot);
             if (tempI!=-1)
             { tempBool=true;
               theRel.BetaCoeffs.SetSize(1);
@@ -937,7 +937,7 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, Ve
           tempRoot-=(theRelation.Alphas.TheObjects[i]);
           //tempRoot.ComputeDebugString();
           theRelation.Alphas.TheObjects[i]+=(tempRoot);
-          int tempI=theRelation.Betas.IndexOfObject(tempRoot);
+          int tempI=theRelation.Betas.GetIndex(tempRoot);
           if (tempI==-1)
           { theRelation.Betas.AddOnTop(tempRoot);
             theRelation.BetaCoeffs.AddOnTop(theRelation.AlphaCoeffs.TheObjects[i]);
@@ -1233,7 +1233,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
   HashedList<Vector<Rational> >& AllRoots= this->GetAmbientWeyl().RootSystem;
   for(int i=0; i<AllRoots.size; i++)
   { Vector<Rational> linComb;
-    if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
+    if (this->AllRootsK.GetIndex(AllRoots.TheObjects[i])==-1)
     { for (int j=0; j<theDimension; j++)
       { linComb.TheObjects[j].MakeZero();
         for(int k=0; k<theDimension; k++)
@@ -1249,7 +1249,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRoot(bool DoEnu
       if (this->LinCombToString(AllRoots.TheObjects[i], x, linComb, tempS))
       { out << tempS << "\n";
         counter++;
-        if (this->LowestWeightsGmodK.IndexOfObject(AllRoots.TheObjects[i]) !=-1)
+        if (this->LowestWeightsGmodK.GetIndex(AllRoots.TheObjects[i]) !=-1)
           out2 << tempS << "\n";
       }
     }
@@ -1285,7 +1285,7 @@ void rootSubalgebra::GetLinearCombinationFromMaxRankRootsAndExtraRootMethod2(Glo
       tempMat.Invert(theGlobalVariables);
       for(int i=0; i<AllRoots.size; i++)
       { Vector<Rational> linComb;
-        if (this->AllRootsK.IndexOfObject(AllRoots.TheObjects[i])==-1)
+        if (this->AllRootsK.GetIndex(AllRoots.TheObjects[i])==-1)
         { for (int j=0; j<theDimension; j++)
           { linComb.TheObjects[j].MakeZero();
             for(int k=0; k<theDimension; k++)
@@ -1922,7 +1922,7 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
 
 bool coneRelation::CheckForBugs(rootSubalgebra& owner, Vectors<Rational>& NilradicalRoots)
 { for (int i=0; i<this->Alphas.size; i++)
-  { int tempI= owner.HighestWeightsGmodK.IndexOfObject(this->Alphas.TheObjects[i]);
+  { int tempI= owner.HighestWeightsGmodK.GetIndex(this->Alphas.TheObjects[i]);
     if (tempI==-1)
       return false;
     if (NilradicalRoots.Contains(this->Alphas.TheObjects[i]))

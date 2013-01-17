@@ -4,68 +4,50 @@
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
 bool CommandList::fGCDOrLCM
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool doGCD)
+(CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
-  Context theContext(theCommands);
-  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 2, theCommands.fPolynomial, comments))
-    return theExpression.SetError("Failed to extract a list of 2 polynomials. ");
-  if (theExpression.errorString!="")
-    return true;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.fPolynomial))
+    return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   Polynomial<Rational> outputP;
 //  std::cout << "context: " << theContext.VariableImages.ToString();
   if (doGCD)
     RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
   else
     RationalFunctionOld::lcm(thePolys[0], thePolys[1], outputP);
-  Data tempData;
-  int theContextIndex=
-  theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(theContext);
-  tempData.MakePoly(theCommands, outputP, theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands);
-  return true;
+  return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
 bool CommandList::fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool returnQuotient)
+(CommandList& theCommands, const Expression& input, Expression& output, bool returnQuotient)
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Vector<Polynomial<Rational> > thePolys;
-  Context theContext(theCommands);
-  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 2, theCommands.fPolynomial, comments))
-    return theExpression.SetError("Failed to extract a list of 2 polynomials. ");
-  if (theExpression.errorString!="")
-    return true;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.fPolynomial))
+    return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   Polynomial<Rational> outputR, outputQ;
   thePolys[0].DivideBy(thePolys[1], outputQ, outputR);
-  Data tempData;
-  int theContextIndex=
-  theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(theContext);
   if (returnQuotient)
-    tempData.MakePoly(theCommands, outputQ, theContextIndex);
+    return output.AssignValueWithContext(outputQ, theContext, theCommands);
   else
-    tempData.MakePoly(theCommands, outputR, theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands);
-  return true;
+    return output.AssignValueWithContext(outputR, theContext, theCommands);
 }
 
 bool CommandList::fSolveSeparableBilinearSystem
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
   Vector<Polynomial<Rational> > thePolys;
-  Context theContext(theCommands);
-  if (!theCommands.GetVector(theExpression, thePolys, &theContext, 0, theCommands.fPolynomial, comments))
-    return theExpression.SetError("Failed to extract list of polynomials. ");
-  if (theExpression.errorString!="")
-    return true;
-  int numVars=theContext.VariableImages.size;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVector(input, thePolys, &theContext, 0, theCommands.fPolynomial))
+    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  int numVars=theContext.GetNumContextVariables();
   HashedList<MonomialP> theMonsInPlay;
   FormatExpressions theFormat;
-  theContext.GetFormatExpressions(theFormat);
+  theContext.ContextGetFormatExpressions(theFormat);
   for (int i=0; i<thePolys.size; i++)
     theMonsInPlay.AddOnTopNoRepetition(thePolys[i]);
-  std::cout << "<br>The context vars:<br>" << theContext.VariableImages.ToString();
+  std::cout << "<br>The context vars:<br>" << theContext.ToString();
   std::cout << "<br>The mons in play: <br>" << theMonsInPlay.ToString();
   std::cout << "<br>The mons in play, formatted: <br>" << theMonsInPlay.ToString(&theFormat);
   Selection linearIndices;
@@ -117,23 +99,26 @@ bool CommandList::fSolveSeparableBilinearSystem
   MathRoutines::swap(oldReportFlag, theCommands.theGlobalVariableS->flagGaussianEliminationProgressReport);
   std::stringstream out;
   out << theSystem.ToString(&theFormat) << theConstantTerms.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fSSsubalgebras
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::fSSsubalgebras");
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, theExpression, comments))
-    return false;
-  SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
+
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSowner;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input[1], theSSowner, &errorString))
+    return output.SetError(errorString, theCommands);
+
+  SemisimpleLieAlgebra& ownerSS=*theSSowner;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    theExpression.MakeStringAtom(theCommands, out.str());
-    return true;
+    return output.AssignValue(out.str(), theCommands);
   }
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
@@ -150,31 +135,35 @@ bool CommandList::fSSsubalgebras
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fEmbedSSalgInSSalg
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
   MacroRegisterFunctionWithName("CommandList::fEmbedSSalgInSSalg");
-  if (theExpression.children.size!=2)
-    return theExpression.SetError("I expect two arguments - the two semisimple subalgebras.");
-  Expression& EsmallSA=theExpression.children[0];
-  Expression& ElargeSA=theExpression.children[1];
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, EsmallSA, comments))
-    return false;
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, ElargeSA, comments))
-    return false;
+  if (!input.IsListNElements(3))
+    return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
+  Expression& EsmallSA=input[1];
+  Expression& ElargeSA=input[2];
 
-  SemisimpleLieAlgebra& ownerSS=ElargeSA.GetAtomicValue().GetAmbientSSAlgebra();
-  SemisimpleLieAlgebra& smallSS=EsmallSA.GetAtomicValue().GetAmbientSSAlgebra();
+  std::string errorString;
+  SemisimpleLieAlgebra* theSmallSapointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, EsmallSA, theSmallSapointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra* thelargeSapointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, ElargeSA, thelargeSapointer, &errorString))
+    return output.SetError(errorString, theCommands);
+
+  SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
+  SemisimpleLieAlgebra& smallSS=*theSmallSapointer;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
     << " As soon as the algorithms are mature enough, higher ranks will be allowed. </b>";
-    theExpression.MakeStringAtom(theCommands, out.str());
-    return true;
+    return output.AssignValue(out.str(), theCommands);
   }
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
@@ -195,52 +184,49 @@ bool CommandList::fEmbedSSalgInSSalg
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fGroebner
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool useGr)
+(CommandList& theCommands, const Expression& input, Expression& output, bool useGr)
 { MacroRegisterFunctionWithName("CommandList::fGroebnerBuchberger");
   Vector<Polynomial<Rational> > inputVector;
   Vector<Polynomial<ElementZmodP> > inputVectorZmodP;
   List<Polynomial<Rational> > outputGroebner, outputGroebner2;
-  Context theContext;
-  if (theExpression.children.size<2)
-    return theExpression.SetError("Function takes at least two arguments. ");
-  Expression& numComputationsE=theExpression.children[0];
+  Expression theContext;
+  if (input.children.size<3)
+    return output.SetError("Function takes at least two arguments. ", theCommands);
+  Expression& numComputationsE=input[1];
   Rational upperBound=0;
-  if (!numComputationsE.EvaluatesToRational(&upperBound))
-    return theExpression.SetError
-    ("Failed to convert the first argument of the expression to rational number.");
+  if (!numComputationsE.IsOfType(&upperBound))
+    return output.SetError
+    ("Failed to convert the first argument of the expression to rational number.", theCommands);
   if (upperBound>1000000)
-    return theExpression.SetError
+    return output.SetError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
-     You may use negative or zero upper bound to give no bound, but please don't. ");
+     You may use negative or zero upper bound to give no bound, but please don't. ", theCommands);
   int upperBoundComputations=(int) upperBound.DoubleValue();
-  theExpression.children.PopIndexShiftDown(0);
+  output=input;
+  output.children.PopIndexShiftDown(1);
   if (!theCommands.GetVector<Polynomial<Rational> >
-      (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments))
-    return theExpression.SetError("Failed to extract polynomial expressions");
-  if (theExpression.errorString!="")
-    return true;
-  theContext.VariableImages.QuickSortAscending();
-  theCommands.GetVector<Polynomial<Rational> >
-  (theExpression, inputVector, &theContext, -1, theCommands.fPolynomial, comments);
+      (output, inputVector, &theContext, -1, theCommands.fPolynomial))
+    return output.SetError("Failed to extract polynomial expressions", theCommands);
+  //theContext.VariableImages.QuickSortAscending();
+  //theCommands.GetVector<Polynomial<Rational> >
+  //(output, inputVector, &theContext, -1, theCommands.fPolynomial);
 
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
 
   FormatExpressions theFormat;
-  theContext.GetFormatExpressions(theFormat);
+  theContext.ContextGetFormatExpressions(theFormat);
 //  int theNumVars=theContext.VariableImages.size;
   outputGroebner=inputVector;
   outputGroebner2=inputVector;
 //  std::cout << outputGroebner.ToString(&theFormat);
   Polynomial<Rational> buffer1, buffer2, buffer3, buffer4;
   MonomialP bufferMon1, bufferMon2;
-  theContext.GetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
+  theContext.ContextGetFormatExpressions(theCommands.theGlobalVariableS->theDefaultFormat);
 
   GroebnerBasisComputation theGroebnerComputation;
   theGroebnerComputation.theMonOrdeR=
@@ -252,9 +238,9 @@ bool CommandList::fGroebner
   (outputGroebner, theCommands.theGlobalVariableS);
   std::stringstream out;
   out << "Letter/expression ordrer: ";
-  for (int i=0; i<theContext.VariableImages.size; i++)
-  { out << theContext.VariableImages[i].ToString();
-    if (i!=theContext.VariableImages.size-1)
+  for (int i=0; i<theContext.GetNumContextVariables(); i++)
+  { out << theContext.ContextGetContextVariable(i).ToString();
+    if (i!=theContext.GetNumContextVariables()-1)
       out << ", ";
   }
   out << "<br>Starting basis (" << inputVector.size  << " elements): ";
@@ -292,6 +278,5 @@ bool CommandList::fGroebner
     out << "<br> "
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(outputGroebner2[i].ToString(&theFormat))
   ;*/
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }

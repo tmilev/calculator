@@ -152,93 +152,83 @@ bool ReflectionSubgroupWeylGroup::GetAlLDominantWeightsHWFDIMwithRespectToAmbien
 }
 
 bool CommandList::fWeylDimFormula
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  SemisimpleLieAlgebra* theSSowner=0;
-  if (theExpression.children.size!=2)
-  { theExpression.SetError("This function takes 2 arguments");
-    return true;
-  }
-  Expression LieAlgebraNameNode=theExpression.children[0];
-  if (!theCommands.fSSAlgebra(theCommands, LieAlgebraNameNode, comments))
-  { theExpression.SetError("Failed to convert the first argument of "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
-    return true;
-  }
-  if (LieAlgebraNameNode.errorString!="")
-  { theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
-    return true;
-  }
-  theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
+  if (!input.IsListNElements(3))
+    return output.SetError("This function takes 2 arguments", theCommands);
+
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSowner;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input[1], theSSowner, &errorString))
+    return output.SetError(errorString, theCommands);
+
   Vector<RationalFunctionOld> theWeight;
-  Context tempContext(theCommands);
+  Expression newContext(theCommands);
   if (!theCommands.GetVector<RationalFunctionOld>
-      (theExpression.children[1], theWeight, &tempContext, theSSowner->GetRank(),
-       theCommands.fPolynomial, comments))
-  { theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
-    return true;
-  }
-  int newContext=theCommands.theObjectContainer.theContexts.AddNoRepetitionOrReturnIndexFirst(tempContext);
+      (input[2], theWeight, &newContext, theSSowner->GetRank(),
+       theCommands.fPolynomial))
+    return output.SetError
+    ("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
   rfOne.MakeOne(theCommands.theGlobalVariableS);
   Vector<RationalFunctionOld> theWeightInSimpleCoords;
-  theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
+  FormatExpressions theFormat;
+  newContext.ContextGetFormatExpressions(theFormat);
+  theWeightInSimpleCoords =
+  theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
-  if (comments!=0)
-    *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
-  RationalFunctionOld tempRF= theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
+  theCommands.Comments << "<br>Weyl dim formula input: simple coords: "
+  << theWeightInSimpleCoords.ToString(&theFormat) << ", fundamental coords: "
+  << theWeight.ToString(&theFormat);
+  RationalFunctionOld tempRF=
+  theSSowner->theWeyl.WeylDimFormulaSimpleCoords(theWeightInSimpleCoords);
   //std::cout << "<br>The result: " << tempRF.ToString();
-  theExpression.MakeRFAtom(tempRF, newContext, theCommands);
-  return true;
+  return output.AssignValueWithContext(tempRF, newContext, theCommands);
 }
 
 bool CommandList::fAnimateLittelmannPaths
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  if (!input.IsListNElements(3))
+    return output.SetError("This function takes 2 arguments", theCommands);
   SemisimpleLieAlgebra* theSSowner=0;
-  if (theExpression.children.size!=2)
-  { theExpression.SetError("This function takes 2 arguments");
-    return true;
-  }
-  Expression LieAlgebraNameNode=theExpression.children[0];
-  if (!theCommands.fSSAlgebra(theCommands, LieAlgebraNameNode, comments))
-    return theExpression.SetError
-    ("Failed to convert the first argument of "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
-  if (LieAlgebraNameNode.errorString!="")
-    return theExpression.SetError("While trying to generate Lie algebra from the first argument of the Weyl dim formula, I got the error: " + LieAlgebraNameNode.errorString);
-  theSSowner=&LieAlgebraNameNode.GetAtomicValue().GetAmbientSSAlgebra();
+  std::string errorMessage;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input[1], theSSowner, &errorMessage))
+    return output.SetError(errorMessage, theCommands);
   Vector<Rational> theWeight;
-  Context tempContext(theCommands);
+  Expression tempContext(theCommands);
   if (!theCommands.GetVector<Rational>
-      (theExpression.children[1], theWeight, &tempContext, theSSowner->GetRank(), 0, comments))
-    return theExpression.SetError("Failed to convert the argument of the function to a highest weight vector");
+      (input[2], theWeight, &tempContext, theSSowner->GetRank(), 0))
+    return output.SetError
+    ("Failed to convert the argument of the function to a highest weight vector", theCommands);
   Vector<Rational> theWeightInSimpleCoords;
   theWeightInSimpleCoords = theSSowner->theWeyl.GetSimpleCoordinatesFromFundamental(theWeight);
   //std::cout << "The fundamental coords: " << theWeight.ToString();
-  if (comments!=0)
-    *comments << "<br>Your input in simple coords: " << theWeightInSimpleCoords.ToString();
+  theCommands.Comments
+  << "<br>Function fAnimateLittelmannPaths: your input in simple coords: "
+  << theWeightInSimpleCoords.ToString();
   LittelmannPath thePath;
   thePath.MakeFromWeightInSimpleCoords(theWeightInSimpleCoords, theSSowner->theWeyl);
-  theExpression.MakeStringAtom
-  (theCommands, thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), tempContext)
-;
-  return true;
+  return output.AssignValue
+  (thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
 }
 
 bool CommandList::fRootSAsAndSltwos
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments, bool showSLtwos)
+(CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 { MacroRegisterFunctionWithName("CommandList::fRootSAsAndSltwos");
   //bool showIndicator=true;
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, theExpression, comments))
-    return false;
-  if (theExpression.errorString!="")
-    return true;
+  std::string errorString;
+  SemisimpleLieAlgebra* ownerSS;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input, ownerSS, &errorString))
+    return output.SetError(errorString, theCommands);
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
-  char weylLetter=ownerSS.theWeyl.WeylLetter;
-  int theRank=ownerSS.theWeyl.GetDim();
+  char weylLetter=ownerSS->theWeyl.WeylLetter;
+  int theRank=ownerSS->theWeyl.GetDim();
 
   outMainPath << theCommands.PhysicalPathOutputFolder <<  weylLetter << theRank << "/";
   outMainDisplayPath << theCommands.DisplayPathOutputFolder
@@ -280,9 +270,9 @@ bool CommandList::fRootSAsAndSltwos
     << "<br>Appologies for this technical (Apache server configuration) problem. "
     << "<br>Alleviating it is around the bottom of a very long to-do list.</b>"
     << "<br> The computation is slow, up to around 10 minutes for E_8.";
-    SltwoSubalgebras theSl2s(ownerSS.owner, ownerSS.indexInOwner);
-    ownerSS.FindSl2Subalgebras
-    (*ownerSS.owner, ownerSS.indexInOwner, theSl2s, *theCommands.theGlobalVariableS);
+    SltwoSubalgebras theSl2s(ownerSS->owner, ownerSS->indexInOwner);
+    ownerSS->FindSl2Subalgebras
+    (*ownerSS->owner, ownerSS->indexInOwner, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();
     std::string DisplayPathSl2=outSltwoDisplayPath.str();
     theSl2s.ElementToHtml(&theFormat, theCommands.theGlobalVariableS);
@@ -296,62 +286,69 @@ bool CommandList::fRootSAsAndSltwos
   out << "<iframe src=\""
   << (showSLtwos ? outSltwoFileDisplayName.str() : outRootHtmlDisplayName.str())
   << "\" width=\"800\" height=\"600\" ></iframe>";
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (theExpression.children.size!=4)
-    return theExpression.SetError("The function expects 4 arguments.");
-  Expression& typeNode=theExpression.children[0];
-  Expression& weightNode=theExpression.children[1];
-  Expression& inducingParNode=theExpression.children[2];
-  Expression& splittingParNode=theExpression.children[3];
-  bool success=theCommands.fSSAlgebra(theCommands, typeNode, comments);
-  if (!success || typeNode.errorString!="")
-    return theExpression.SetError("Failed to construct semisimple Lie algebra from the first argument. See comments.");
+  if (!input.IsListNElements(5))
+    return output.SetError
+    ("Function  fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
+  Expression& typeNode=input[1];
+  Expression& weightNode=input[2];
+  Expression& inducingParNode=input[3];
+  Expression& splittingParNode=input[4];
+  SemisimpleLieAlgebra* ownerSSPointer=0;
+  std::string errorString;
+  if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, typeNode, ownerSSPointer, &errorString))
+    return output.SetError(errorString, theCommands);
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
-  SemisimpleLieAlgebra& ownerSS=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
-  Context finalContext;
+  Expression finalContext;
   if (!theCommands.GetVector<RationalFunctionOld>
-      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.fPolynomial, comments))
-    return theExpression.SetError("Failed to extract highest weight from the second argument.");
-  if (!theCommands.GetVector<Rational>(inducingParNode, inducingParSel, &finalContext, theDim, 0, comments))
-    return theExpression.SetError("Failed to extract parabolic selection from the third argument");
-  if (!theCommands.GetVector<Rational>(splittingParNode, splittingParSel, &finalContext, theDim, 0, comments))
-    return theExpression.SetError("Failed to extract parabolic selection from the fourth argument");
-  if (comments!=0)
-  { *comments << "Your input weight in fundamental coordinates: "
-    << theWeightFundCoords.ToString();
-    *comments << "<br>Your input weight in simple coordinates: " << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString();
-    *comments << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << ".";
-    *comments << "<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString() << ".";
-  }
+      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.fPolynomial))
+    return output.SetError
+    ("Failed to extract highest weight from the second argument.", theCommands)
+    ;
+  if (!theCommands.GetVector<Rational>
+      (inducingParNode, inducingParSel, &finalContext, theDim, 0))
+    return output.SetError("Failed to extract parabolic selection from the third argument", theCommands);
+  if (!theCommands.GetVector<Rational>
+      (splittingParNode, splittingParSel, &finalContext, theDim, 0))
+    return output.SetError("Failed to extract parabolic selection from the fourth argument", theCommands);
+  theCommands.Comments
+  << "Your input weight in fundamental coordinates: "
+  << theWeightFundCoords.ToString();
+  theCommands.Comments << "<br>Your input weight in simple coordinates: "
+  << theWeyl.GetSimpleCoordinatesFromFundamental(theWeightFundCoords).ToString()
+  << "<br>Your inducing parabolic subalgebra: " << inducingParSel.ToString() << "."
+  <<"<br>The parabolic subalgebra I should split over: " << splittingParSel.ToString()
+  << ".";
   ModuleSSalgebra<RationalFunctionOld> theMod;
   Selection selInducing= inducingParSel;
   Selection selSplittingParSel=splittingParSel;
   theMod.MakeFromHW
-  (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, false);
+  (*ownerSS.owner, ownerSS.indexInOwner, theWeightFundCoords, selInducing,
+   *theCommands.theGlobalVariableS, 1, 0, 0, false);
   std::string report;
   theMod.SplitOverLevi(& report, selSplittingParSel, *theCommands.theGlobalVariableS, 1, 0);
-  theExpression.MakeStringAtom(theCommands, report, finalContext);
-  return true;
+  return output.AssignValue(report, theCommands);
 }
 
 bool CommandList::fCasimir
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  if (!theCommands.fSSAlgebra(theCommands, theExpression, comments))
-    return theExpression.SetError("Failed to convert the argument "+theExpression.ToString()+ " to a semisimple Lie algebra. ");
-  if (theExpression.errorString!="")
-    return theExpression.SetError("While trying to generate Lie algebra for the Casimir element, I got the error: " + theExpression.errorString);
-  SemisimpleLieAlgebra& theSSowner=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSalg;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input, theSSalg, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
     theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=50;
   RationalFunctionOld rfOne, rfZero;
@@ -360,41 +357,34 @@ bool CommandList::fCasimir
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir;
   theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
-  if (comments!=0)
-  { *comments << "Context Lie algebra: " << theSSowner.GetLieAlgebraName
-    (theSSowner.theWeyl.WeylLetter, theSSowner.GetRank());
-    *comments << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
-    <<  ". The Casimir element of the ambient Lie algebra. ";
-  }
-  Data tempData;
-  tempData.MakeUE(theCommands, theCasimir, theExpression.GetAtomicValue().theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands);
+  theCommands.Comments << "Context Lie algebra: "
+  << theSSowner.GetLieAlgebraName(theSSowner.theWeyl.WeylLetter, theSSowner.GetRank())
+  << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
+  <<  ". The Casimir element of the ambient Lie algebra. ";
+  output.AssignValue(theCasimir, theCommands);
   return true;
 }
 
 bool CommandList::fDrawWeightSupportWithMults
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  if (theExpression.children.size!=2)
-  { std::stringstream errorStream;
-    errorStream << "Error: the function for drawing weight support takes two"
-    << " arguments (type and highest weight)"
-    << ", but you gave " << theExpression.children.size << " arguments instead. ";
-    return theExpression.SetError(errorStream.str());
-  }
-  Expression& typeNode=theExpression.children[0];
-  Expression& hwNode=theExpression.children[1];
-  if (!theCommands.fSSAlgebra(theCommands, typeNode, comments))
-    return false;
-  if (typeNode.errorString!="")
-    return theExpression.SetError(typeNode.errorString);
-  SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
+  if (input.IsListNElements(3))
+    return output.SetError
+    ("Error: the function for drawing weight support takes two  arguments (type and highest weight)",
+     theCommands);
+  Expression& typeNode=input[1];
+  Expression& hwNode=input[2];
+  SemisimpleLieAlgebra* theSSalgpointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, typeNode, theSSalgpointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theAlg=*theSSalgpointer;
   Vector<Rational> highestWeightFundCoords;
-  Context tempContext;
+  Expression theContext;
   if (!theCommands.GetVector<Rational>
-      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0, comments))
-    return false;
+      (hwNode, highestWeightFundCoords, &theContext, theAlg.GetRank(), 0))
+    return output.SetError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theAlg.theWeyl;
   highestWeightSimpleCoords= theWeyl.GetSimpleCoordinatesFromFundamental(highestWeightFundCoords);
@@ -407,32 +397,26 @@ bool CommandList::fDrawWeightSupportWithMults
   std::string report;
   theChar.DrawMeWithMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
-  theExpression.MakeStringAtom(theCommands, out.str(), tempContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fDrawWeightSupport
-(CommandList& theCommands, Expression& theExpression,
- std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  if (theExpression.children.size!=2)
-  { std::stringstream errorStream;
-    errorStream << "Error: the function for drawing weight support takes two arguments"
-    << " (type and highest weight)"
-    << ", but you gave " << theExpression.children.size << " arguments instead. ";
-    return theExpression.SetError(errorStream.str());
-  }
-  Expression& typeNode=theExpression.children[0];
-  Expression& hwNode=theExpression.children[1];
-  if (!theCommands.fSSAlgebra(theCommands, typeNode, comments))
-    return false;
-  if (typeNode.errorString!="")
-    return theExpression.SetError(typeNode.errorString);
-  SemisimpleLieAlgebra& theAlg=typeNode.GetAtomicValue().GetAmbientSSAlgebra();
+  if (input.IsListNElements(3))
+    return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
+  Expression& typeNode=input[1];
+  Expression& hwNode=input[2];
+  std::string errorString;
+  SemisimpleLieAlgebra* theAlgPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, typeNode, theAlgPointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
-  Context tempContext;
+  Expression tempContext;
   if (!theCommands.GetVector<Rational>
-      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0, comments))
+      (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
   WeylGroup& theWeyl=theAlg.theWeyl;
@@ -446,34 +430,30 @@ bool CommandList::fDrawWeightSupport
   std::string report;
   theChar.DrawMeNoMults(report, *theCommands.theGlobalVariableS, theDV, 10000);
   out << report << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
-  theExpression.MakeStringAtom(theCommands, out.str(), tempContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fEmbedG2inB3
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ theCommands.fElementUniversalEnvelopingAlgebra(theCommands, theExpression, comments);
-  if (!theExpression.IsElementUE())
-    return theExpression.SetError("Failed to convert argument to element of the Universal enveloping algebra. ");
-  SemisimpleLieAlgebra& ownerSS=theExpression.GetAtomicValue().GetAmbientSSAlgebra();
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ theCommands.fElementUniversalEnvelopingAlgebra(theCommands, input, output);
+  if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+    return output.SetError
+    ("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
+  SemisimpleLieAlgebra& ownerSS=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
   if (ownerSS.GetRank()!=2 || ownerSS.theWeyl.WeylLetter!='G')
-    return theExpression.SetError("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.");
-  Data g2Data, b3Data;
-  b3Data.MakeSSAlgebra(theCommands, 'B', 3);
-  g2Data.MakeSSAlgebra(theCommands, 'G', 2);
+    return output.SetError
+    ("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   HomomorphismSemisimpleLieAlgebra theHmm;
   theCommands.MakeHmmG2InB3(theHmm);
 
-  ElementUniversalEnveloping<RationalFunctionOld> argument=theExpression.GetAtomicValue().GetUE();
-  ElementUniversalEnveloping<RationalFunctionOld> output;
-  if(!theHmm.ApplyHomomorphism(argument, output, *theCommands.theGlobalVariableS))
-    return theExpression.SetError("Failed to apply homomorphism for unspecified reason");
+  ElementUniversalEnveloping<RationalFunctionOld> argument=
+  output.GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >();
+  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
+  if(!theHmm.ApplyHomomorphism(argument, outputUE, *theCommands.theGlobalVariableS))
+    return output.SetError("Failed to apply homomorphism for unspecified reason", theCommands);
 //  std::cout << theHmm.ToString(*theCommands.theGlobalVariableS);
-  output.Simplify(*theCommands.theGlobalVariableS, 1, 0);
-  Data tempData;
-  tempData.MakeUE(theCommands, output, b3Data.theContextIndex);
-  theExpression.MakeAtom(tempData, theCommands);
-  return true;
+  outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
+  return output.AssignValue(outputUE, theCommands);
 }
 
 std::string CGI::GetAnimateShowHideJavascriptMustBEPutInHTMLHead()
@@ -1379,27 +1359,26 @@ void ModuleSSalgebra<CoefficientType>::SplitFDpartOverFKLeviRedSubalg
 }
 
 bool CommandList::fSplitFDpartB3overG2CharsOnly
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments
+(CommandList& theCommands, const Expression& input, Expression& output
  )
 { branchingData theG2B3Data;
   return theCommands.fSplitFDpartB3overG2CharsOutput
-  (theCommands, theExpression, comments, theG2B3Data);
+  (theCommands, input, output, theG2B3Data);
 }
 
 bool CommandList::fSplitFDpartB3overG2Init
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
- branchingData& theG2B3Data, Context& outputContext
- )
+(CommandList& theCommands, const Expression& input, Expression& output,
+ branchingData& theG2B3Data, Expression& outputContext)
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2Init");
-  if (theExpression.theOperation!=theCommands.opList() || theExpression.children.size!=3)
-    return theExpression.SetError("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments");
+  if (!input.IsListNElements(4))
+    return output.SetError
+    ("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments",
+     theCommands);
   if (!theCommands.GetVector<RationalFunctionOld>
-      (theExpression, theG2B3Data.theWeightFundCoords, &outputContext, 3, theCommands.fPolynomial, comments))
-  { std::stringstream errorStream;
-    errorStream << "Failed to extract highest weight in fundamental coordinates from the expression "
-    << theExpression.ToString() << ".";
-    return theExpression.SetError(errorStream.str());
-  }
+      (input, theG2B3Data.theWeightFundCoords, &outputContext, 3,
+       theCommands.fPolynomial))
+    output.SetError
+    ("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
   theG2B3Data.selInducing.init(3);
   for (int i=0; i<theG2B3Data.theWeightFundCoords.size; i++)
@@ -1410,16 +1389,18 @@ bool CommandList::fSplitFDpartB3overG2Init
 }
 
 bool CommandList::fSplitFDpartB3overG2CharsOutput
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
+(CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3Data
  )
 { MacroRegisterFunctionWithName("fSplitFDpartB3overG2CharsOutput");
-  Context theContext(theCommands);
-  theCommands.fSplitFDpartB3overG2Init(theCommands, theExpression, comments, theG2B3Data, theContext);
-  if (theExpression.errorString!="")
+  Expression theContext(theCommands);
+  theCommands.fSplitFDpartB3overG2Init
+  (theCommands, input, output, theG2B3Data, theContext);
+  if (output.IsError())
     return true;
   std::stringstream out;
-  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: " << theG2B3Data.selInducing.ToString();
+  out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString()
+  << "<br>Parabolic selection: " << theG2B3Data.selInducing.ToString();
   std::string report;
   Vectors<RationalFunctionOld> outputWeightsFundCoordS;
   Vectors<RationalFunctionOld> outputWeightsSimpleCoords;
@@ -1435,33 +1416,44 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
   startingChar.SplitCharOverRedSubalg
   (&report, tempChar, theG2B3Data, *theCommands.theGlobalVariableS);
   out << report;
-  theExpression.MakeStringAtom(theCommands, out.str(), theContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
-{ Data tempDataB3, tempDataG2;
-  tempDataB3.MakeSSAlgebra(*this, 'B', 3);
-  tempDataG2.MakeSSAlgebra(*this, 'G', 2);
+{ SemisimpleLieAlgebra tempb3alg, tempg2alg;
+  tempb3alg.theWeyl.MakeArbitrary('B',3);
+  tempg2alg.theWeyl.MakeArbitrary('G',2);
+  SemisimpleLieAlgebra& g2Alg =
+  this->theObjectContainer.theLieAlgebras
+  [this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg)];
+  SemisimpleLieAlgebra& b3Alg =
+  this->theObjectContainer.theLieAlgebras
+  [this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg)];
+  g2Alg.owner=&this->theObjectContainer.theLieAlgebras;
+  g2Alg.indexInOwner=this->theObjectContainer.theLieAlgebras.GetIndex(g2Alg);
+  b3Alg.owner=&this->theObjectContainer.theLieAlgebras;
+  b3Alg.indexInOwner=this->theObjectContainer.theLieAlgebras.GetIndex(b3Alg);
   output.owners=&this->theObjectContainer.theLieAlgebras;
-  output.indexRange=tempDataB3.theIndex;
-  output.indexDomain=tempDataG2.theIndex;
+  int indexB3=b3Alg.indexInOwner;
+  int indexG2=g2Alg.indexInOwner;
+  output.indexRange=indexB3;
+  output.indexDomain=indexG2;
   output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
   output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
   g_2.MakeGenerator
-  (13, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (13, this->theObjectContainer.theLieAlgebras, indexB3);
   g_m2.MakeGenerator
-  (7, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (7, this->theObjectContainer.theLieAlgebras, indexB3);
   g_1plusg_3.MakeGenerator
-  (12, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (12, this->theObjectContainer.theLieAlgebras, indexB3);
   tempElt.MakeGenerator
-  (14, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (14, this->theObjectContainer.theLieAlgebras, indexB3);
   g_1plusg_3+=tempElt;
   g_m1plusg_m3.MakeGenerator
-  (6, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (6, this->theObjectContainer.theLieAlgebras, indexB3);
   tempElt.MakeGenerator
-  (8, this->theObjectContainer.theLieAlgebras, tempDataB3.theIndex);
+  (8, this->theObjectContainer.theLieAlgebras, indexB3);
   g_m1plusg_m3+=tempElt;
 
 //  std::cout << "<hr>g_2: " << g_2.ToString();
@@ -1470,9 +1462,9 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 //  std::cout << "<hr>g_{-1}+g_{-3}: " << g_m1plusg_m3.ToString();
   output.imagesSimpleChevalleyGenerators.SetSize(4);
   output.imagesSimpleChevalleyGenerators[1]=g_2;
-  output.imagesSimpleChevalleyGenerators.TheObjects[0]=g_1plusg_3;
-  output.imagesSimpleChevalleyGenerators.TheObjects[3]=g_m2;
-  output.imagesSimpleChevalleyGenerators.TheObjects[2]=g_m1plusg_m3;
+  output.imagesSimpleChevalleyGenerators[0]=g_1plusg_3;
+  output.imagesSimpleChevalleyGenerators[3]=g_m2;
+  output.imagesSimpleChevalleyGenerators[2]=g_m1plusg_m3;
   output.ComputeHomomorphismFromImagesSimpleChevalleyGenerators(*this->theGlobalVariableS);
   output.GetRestrictionAmbientRootSystemToTheSmallerCartanSA(output.RestrictedRootSystem, *this->theGlobalVariableS);
 }
@@ -1536,9 +1528,8 @@ bool Polynomial<CoefficientType>::FindOneVarRatRoots(List<Rational>& output)
 }
 
 bool CommandList::fPrintB3G2branchingIntermediate
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
- Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Context& theContext
- )
+(CommandList& theCommands, const Expression& input, Expression& output,
+ Vectors<RationalFunctionOld>& theHWs, branchingData& theG2B3Data, Expression& theContext)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingIntermediate");
   std::stringstream out, timeReport;
   std::stringstream latexTable, latexTable2;
@@ -1574,7 +1565,7 @@ bool CommandList::fPrintB3G2branchingIntermediate
     << "\\endhead \n<br>";
   }
 //  std::cout << theContext.ToString();
-  theContext.GetFormatExpressions(theG2B3Data.theFormat);
+  theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
   theG2B3Data.theFormat.flagUseLatex=true;
   theG2B3Data.theFormat.NumAmpersandsPerNewLineForLaTeX=0;
   Expression tempExpression;
@@ -1587,8 +1578,8 @@ bool CommandList::fPrintB3G2branchingIntermediate
   for (int i=0; i<theHWs.size; i++)
   { theG2B3Data.theWeightFundCoords=theHWs[i];
     theCommands.fSplitFDpartB3overG2inner
-    (theCommands, tempExpression, comments, theG2B3Data);
-    timeReport << tempExpression.GetAtomicValue().GetValuE<std::string>();
+    (theCommands, theG2B3Data, tempExpression);
+    timeReport << tempExpression.GetValuE<std::string>();
     RationalFunctionOld numEigenVectors;
     numEigenVectors=rfZero;
     for (int j=0; j<theG2B3Data.theSmallCharFDpart.size; j++)
@@ -1729,49 +1720,49 @@ bool CommandList::fPrintB3G2branchingIntermediate
   out <<"<br><br><br>";
   out << latexTable.str();
   out <<"<br>";
-  theExpression.MakeStringAtom(theCommands, out.str(), theContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fPrintB3G2branchingTableInit
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-   branchingData& theG2B3data, int& desiredHeight, Context& outputContext)
+(CommandList& theCommands, const Expression& input, Expression& output,
+ branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableInit");
-  if (theExpression.children.size!=2)
-    return theExpression.SetError("I need two arguments: first is height, second is parabolic selection. ");
+  if (input.children.size!=2)
+    return output.SetError
+    ("I need two arguments: first is height, second is parabolic selection. ", theCommands);
   desiredHeight=0;
-  if (!theExpression.children[0].IsSmallInteger(&desiredHeight))
-    return theExpression.SetError("the first argument must be a small integer");
+  if (!input[1].IsSmallInteger(&desiredHeight))
+    return output.SetError("the first argument must be a small integer", theCommands);
   if (desiredHeight<0)
     desiredHeight=0;
-  Expression& weightNode= theExpression.children[1];
-  theCommands.fSplitFDpartB3overG2Init(theCommands, weightNode, comments, theG2B3data, outputContext);
-  if (weightNode.errorString!="")
-    return theExpression.SetError(weightNode.errorString);
+  Expression& weightNode= input[2];
+  theCommands.fSplitFDpartB3overG2Init
+  (theCommands, weightNode, output, theG2B3data, outputContext);
+  if (output.IsError())
+    return true;
   return false;
 }
 
-
 bool CommandList::fPrintB3G2branchingTable
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTable");
   Vectors<RationalFunctionOld> theHWs;
   branchingData theG2B3Data;
-  Context theContext(theCommands);
-  theCommands.fPrintB3G2branchingTableCommon
-  (theCommands, theExpression, comments, theHWs, theG2B3Data, theContext);
-  if (theExpression.errorString!="")
+  Expression theContext(theCommands);
+  if (!theCommands.fPrintB3G2branchingTableCommon
+      (theCommands, input, output, theHWs, theG2B3Data, theContext))
+    return false;
+  if (output.IsError())
     return true;
 //  std::cout << " <br>the highest weights: " << theHWs.ToString();
-  theCommands.fPrintB3G2branchingIntermediate
-  (theCommands, theExpression, comments, theHWs, theG2B3Data, theContext)
+  return theCommands.fPrintB3G2branchingIntermediate
+  (theCommands, input, output, theHWs, theG2B3Data, theContext)
   ;
-  return true;
 }
 
 bool CommandList::fPrintB3G2branchingTableCommon
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Context& theContext
+(CommandList& theCommands, const Expression& input, Expression& output,
+  Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext
   )
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCommon");
   std::stringstream out, timeReport;
@@ -1779,12 +1770,13 @@ bool CommandList::fPrintB3G2branchingTableCommon
   Vector<RationalFunctionOld> theHWrf;
   SelectionWithMaxMultiplicity theHWenumerator;
   int desiredHeight=0;
-  theCommands.fPrintB3G2branchingTableInit
-  (theCommands, theExpression, comments, theG2B3Data, desiredHeight, theContext);
-  if (theExpression.errorString!="")
+  if (! theCommands.fPrintB3G2branchingTableInit
+    (theCommands, input, output, theG2B3Data, desiredHeight, theContext))
+    return false;
+  if (output.IsError())
     return true;
   Selection invertedSelInducing=theG2B3Data.selInducing;
-  theContext.GetFormatExpressions(theG2B3Data.theFormat);
+  theContext.ContextGetFormatExpressions(theG2B3Data.theFormat);
   invertedSelInducing.InvertSelection();
   outputHWs.SetSize(0);
   for (int j=0; j<=desiredHeight; j++)
@@ -1803,14 +1795,14 @@ bool CommandList::fPrintB3G2branchingTableCommon
 }
 
 bool CommandList::fPrintB3G2branchingTableCharsOnly
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableCharsOnly");
   branchingData theg2b3data;
-  Context theContext(theCommands);
+  Expression theContext(theCommands);
   Vectors<RationalFunctionOld> theHWs;
   theCommands.fPrintB3G2branchingTableCommon
-  (theCommands, theExpression, comments, theHWs, theg2b3data, theContext);
-  if (theExpression.errorString!="")
+  (theCommands, input, output, theHWs, theg2b3data, theContext);
+  if (output.IsError())
     return true;
   charSSAlgMod<RationalFunctionOld> theCharacter, outputChar;
   Vector<Rational> theHW;
@@ -1929,44 +1921,39 @@ bool CommandList::fPrintB3G2branchingTableCharsOnly
   << "<br>%text body<br>"
   << latexTable.str()
   << "<br>%end of text body <br>\\end{document}";
-  theExpression.MakeStringAtom(theCommands, out.str(), theContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fSplitFDpartB3overG2
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2");
   branchingData theG2B3Data;
-  Context theContext(theCommands);
+  Expression theContext(theCommands);
   theCommands.fSplitFDpartB3overG2Init
-  (theCommands, theExpression, comments, theG2B3Data, theContext);
-  if (theExpression.errorString!="")
+  (theCommands, input, output, theG2B3Data, theContext);
+  if (output.IsError())
     return true;
   std::stringstream out;
   Vectors<RationalFunctionOld> theHWs;
   theHWs.AddOnTop(theG2B3Data.theWeightFundCoords);
-  theCommands.fPrintB3G2branchingIntermediate
-  (theCommands, theExpression, comments, theHWs, theG2B3Data, theContext);
-  return true;
+  return theCommands.fPrintB3G2branchingIntermediate
+  (theCommands, input, output, theHWs, theG2B3Data, theContext);
 }
 
 bool CommandList::fSplitFDpartB3overG2old
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2old");
   branchingData theG2B3Data;
   theCommands.fSplitFDpartB3overG2CharsOutput
-  (theCommands, theExpression, comments, theG2B3Data);
-  if (theExpression.errorString!="")
+  (theCommands, input, output, theG2B3Data);
+  if (output.IsError())
     return true;
   std::stringstream out;
-
-  theCommands.fSplitFDpartB3overG2inner
-  (theCommands, theExpression, comments, theG2B3Data);
+  theCommands.fSplitFDpartB3overG2inner(theCommands, theG2B3Data, output);
   out << "<br>Highest weight: " << theG2B3Data.theWeightFundCoords.ToString() << "<br>Parabolic selection: "
   << theG2B3Data.selInducing.ToString() << "<br>common Levi part of G_2 and B_3: "
   << theG2B3Data.selSmallParSel.ToString();
-
-    out
+  out
   << "<table border=\"1\"><tr><td>word</td><td>B_3-weight simple coords</td><td>B_3-weight fund. coords </td>"
   << "<td>G_2 simple coordinates</td><td>G2-fund. coords</td><td>G2-dual coordinates</td><td>character</td></tr>";
     std::stringstream readyForLatexConsumptionTable1, readyForLatexConsumptionTable2;
@@ -2011,9 +1998,7 @@ bool CommandList::fSplitFDpartB3overG2old
   }
   out << "</table>";
   out << "<br>Time final: " << theCommands.theGlobalVariableS->GetElapsedSeconds();
-  Context theContext;
-  theExpression.MakeStringAtom(theCommands, out.str(), theContext);
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 void branchingData::resetOutputData()
@@ -2045,8 +2030,7 @@ ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output)
 }
 
 bool CommandList::fSplitFDpartB3overG2inner
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments,
-  branchingData& theG2B3Data)
+(CommandList& theCommands, branchingData& theG2B3Data, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2inner");
 //  std::stringstream out;
 //  std::cout << "Highest weight: " << theWeightFundCoords.ToString() << "; Parabolic selection: " << selInducing.ToString();
@@ -2066,7 +2050,7 @@ bool CommandList::fSplitFDpartB3overG2inner
   splittingParSel=theG2B3Data.SelSplittingParSel;
 
   theCommands.theObjectContainer.theCategoryOmodules.AddOnTopNoRepetition(theModCopy);
-  int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.IndexOfObject(theModCopy);
+  int theModIndex=theCommands.theObjectContainer.theCategoryOmodules.GetIndex(theModCopy);
   ModuleSSalgebra<RationalFunctionOld>& theMod=
   theCommands.theObjectContainer.theCategoryOmodules[theModIndex];
   std::stringstream out;
@@ -2178,8 +2162,7 @@ bool CommandList::fSplitFDpartB3overG2inner
     (currentUEelt, theG2B3Data.theShapovalovProducts[k], &theMod.theHWDualCoordsBaseFielD,
      *theCommands.theGlobalVariableS,1,0,0);
   }
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 template <class CoefficientType>
@@ -2381,13 +2364,13 @@ bool charSSAlgMod<CoefficientType>::SplitCharOverRedSubalg
 }
 
 bool CommandList::fJacobiSymbol
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { //this function is not implemented yet.
   return false;
-  if (theExpression.children.size!=2)
+  if (input.children.size!=3)
     return false;
-  Expression& leftE=theExpression.children[0];
-  Expression& rightE=theExpression.children[1];
+  Expression& leftE=input[1];
+  Expression& rightE=input[2];
   int leftInt, rightInt;
   if (!leftE.IsSmallInteger(&leftInt) || !rightE.IsSmallInteger(&rightInt))
     return false;
@@ -2396,12 +2379,14 @@ bool CommandList::fJacobiSymbol
 }
 
 bool CommandList::fParabolicWeylGroups
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
-  if(!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, theExpression, comments)  )
-    return theExpression.SetError("Failed to create Lie algebra.");
-  SemisimpleLieAlgebra& theSSalgebra=
-  theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra* theSSPointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input, theSSPointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
   ReflectionSubgroupWeylGroup theSubgroup;
   std::stringstream out;
@@ -2411,25 +2396,24 @@ bool CommandList::fParabolicWeylGroups
     ;
     out << "<hr>" << CGI::GetHtmlMathDivFromLatexFormulA(theSubgroup.ToString());
   }
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fParabolicWeylGroupsBruhatGraph
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fParabolicWeylGroupsBruhatGraph");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   Selection parabolicSel;
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
-  Context hwContext(theCommands);
+  Expression hwContext(theCommands);
+  SemisimpleLieAlgebra* theSSalgPointer;
   if(!theCommands.fGetTypeHighestWeightParabolic
-  (theCommands, theExpression, comments, theHWfundcoords, parabolicSel, &hwContext)  )
-    return theExpression.SetError("Failed to extract highest weight vector data");
+    (theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer))
+    return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
-    if (theExpression.errorString!="")
+    if (output.IsError())
       return true;
-  SemisimpleLieAlgebra& theSSalgebra=
-  theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
+  SemisimpleLieAlgebra& theSSalgebra=*theSSalgPointer;
 
   WeylGroup& theAmbientWeyl=theSSalgebra.theWeyl;
   ReflectionSubgroupWeylGroup theSubgroup;
@@ -2442,7 +2426,8 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   CGI::OpenFileCreateIfNotPresent(outputFile2, filename2+".tex", false, true, false);
   if (!theSubgroup.MakeParabolicFromSelectionSimpleRoots
       (theAmbientWeyl, parabolicSel, *theCommands.theGlobalVariableS, 500))
-    return theExpression.SetError("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit");
+    return output.SetError
+    ("<br><br>Failed to generate Weyl subgroup, 500 elements is the limit", theCommands);
   theSubgroup.FindQuotientRepresentatives(2000);
   out << "<br>Number elements of the coset: " << theSubgroup.RepresentativesQuotientAmbientOrder.size;
   out << "<br>Number of elements of the Weyl group of the Levi part: " << theSubgroup.size;
@@ -2450,7 +2435,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   outputFile << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   outputFile2 << "\\documentclass{article}\\usepackage[all,cmtip]{xy}\\begin{document}\n";
   FormatExpressions theFormat;
-  hwContext.GetFormatExpressions(theFormat);
+  hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
   { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
         theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
@@ -2526,32 +2511,37 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   theCommands.theGlobalVariableS->System(command3);
   theCommands.theGlobalVariableS->System(command4);
   std::cout << "-->";
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fPrintAllPartitions
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPrintAllPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (theExpression.children.size!=2)
-    return theExpression.SetError("Function fPrintAllPartitions expects 2 arguments.");
-  if (!theCommands.CallCalculatorFunction
-      (theCommands.fSSAlgebra, theExpression.children[0], comments))
-    return theExpression.SetError("Failed to generate Lie algebra from first argument");
-  SemisimpleLieAlgebra& theSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
-  Context theContext;
+  if (input.IsListNElements(3))
+    return output.SetError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
+
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSowner;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input[1], theSSowner, &errorString))
+    return output.SetError(errorString, theCommands);
+
+  SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
+  Expression theContext;
   Vector<Rational> theHW;
 //  std::cout << theExpression.ToString() << " rank "
-//  << theSSalgebra.GetRank() << " child one : " << theExpression.children[1].ToString();
+//  << theSSalgebra.GetRank() << " child one : " << input[2].ToString();
   if (!theCommands.GetVector<Rational>
-      (theExpression.children[1], theHW, &theContext, theSSalgebra.GetRank()))
-    return theExpression.SetError("Failed to extract weight you want partitioned from "+ theExpression.children[1].ToString());
+      (input[2], theHW, &theContext, theSSalgebra.GetRank()))
+    return output.SetError
+    ("Failed to extract weight you want partitioned from "+ input[2].ToString(), theCommands);
   Vector<int> theHWint;
   theHWint.SetSize(theHW.size);
   for (int i=0; i<theHW.size; i++)
     if (!theHW[i].IsSmallInteger(&theHWint[i]) || theHW[i]<0)
-      return theExpression.SetError("The input weight you gave is bad: it must consist of non-negative small integers");
+      return output.SetError
+      ("The input weight you gave is bad: it must consist of non-negative small integers", theCommands);
   std::stringstream out;
   out << "<br>the weight you want partitioned: " << theHWint;
   Vector<int> thePartition;
@@ -2587,8 +2577,7 @@ bool CommandList::fPrintAllPartitions
   }
   out << "<br>Done in " << totalCycles << " cycles.";
   out << "<br>" << counter << " total partitions ";
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo
@@ -2620,20 +2609,20 @@ void WeylGroup::GetHighestWeightsAllRepsDimLessThanOrEqualTo
 }
 
 bool CommandList::fTestMonomialBaseConjecture
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (theExpression.children.size!=2)
-    return theExpression.SetError("fTestMonomialBaseConjecture takes two arguments as input");
-  Expression& rankE=theExpression.children[0];
-  Expression& dimE=theExpression.children[1];
+  if (input.IsListNElements(3))
+    return output.SetError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
+  Expression& rankE=input[1];
+  Expression& dimE=input[2];
   int rankBound=0;
   int dimBound=0;
   if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound))
-    return theExpression.SetError("The rank and  dim bounds must be small integers");
+    return output.SetError("The rank and  dim bounds must be small integers", theCommands);
   if (rankBound<2 || rankBound > 100 || dimBound <1 || dimBound > 10000)
-    return theExpression.SetError
-    ("The rank bound must be an integer between 2 and 100, and the dim bound must be an integer between 1 and 10000");
+    return output.SetError
+    ("The rank bound must be an integer between 2 and 100, and the dim bound must be an integer between 1 and 10000", theCommands);
   std::stringstream out;
   List<int> theRanks;
   List<char> theWeylLetters;
@@ -2785,68 +2774,67 @@ bool CommandList::fTestMonomialBaseConjecture
     latexReport << "Conjecture C fails.";
   latexReport << "\\end{document}";
   out << "<br><br>\n\n\n\n\n" << latexReport.str();
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fLittelmannOperator
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fLittelmannOperator");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (theExpression.HasBoundVariables())
+  if (input.HasBoundVariables())
     return false;
   int theIndex=0;
-  if (!theExpression.EvaluatesToSmallInteger(&theIndex))
-    return theExpression.SetError
+  if (!input.IsSmallInteger(&theIndex))
+    return output.SetError
     ("The argument of the Littelmann root operator is expected to be a small integer, instead you gave me"
-     +theExpression.ToString());
+     +input.ToString(), theCommands);
   if (theIndex==0)
-    return theExpression.SetError("The index of the Littelmann root operator is expected to be non-zero");
-  Data answer;
-  answer.MakeLittelmannRootOperator(theIndex, theCommands);
-  theExpression.MakeAtom(answer, theCommands);
-  return true;
+    return output.SetError
+    ("The index of the Littelmann root operator is expected to be non-zero", theCommands);
+  return output.AssignValue(theIndex, theCommands);
 }
 
 bool CommandList::fLSPath
-  (CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+  (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fLSPath");
-  if (theExpression.children.size<2)
-    return theExpression.SetError("LSPath needs at least two arguments.");
-  if (!theCommands.CallCalculatorFunction
-      (theCommands.fSSAlgebra, theExpression.children[0], comments))
-    return theExpression.SetError("Failed to create semisimple Lie algebra from first argument");
-  SemisimpleLieAlgebra& ownerSSalgebra=theExpression.children[0].GetAtomicValue().GetAmbientSSAlgebra();
-  theExpression.children.PopIndexShiftDown(0);
-  if (theExpression.children.size<1)
-    return theExpression.SetError("Error: no waypoints. ");
+  if (!input.children.size<3)
+    return output.SetError("LSPath needs at least two arguments.", theCommands);
+
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSowner;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.fSSAlgebra, input[1], theSSowner, &errorString))
+    return output.SetError(errorString, theCommands);
+
+  SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
+  output=input;
+  output.children.PopIndexShiftDown(1);
+  if (input.children.size<2)
+    return output.SetError("Error: no waypoints. ", theCommands);
   Matrix<Rational> outputMat;
   Vectors<Rational> waypoints;
-  if (!theCommands.fGetMatrix<Rational>(theExpression, outputMat, 0, -1, 0, comments))
-    return theExpression.SetError("Failed to extract waypoints");
-  if (theExpression.errorString!="")
-    return true;
+  if (!theCommands.fGetMatrix<Rational>(output, outputMat, 0, -1, 0))
+    return output.SetError("Failed to extract waypoints", theCommands);
   if (outputMat.NumCols!=ownerSSalgebra.GetRank())
-    return theExpression.SetError("Error: waypoints must have as many coordinates as is the rank of the ambient Lie algebra");
+    return output.SetError
+    ("Error: waypoints must have as many coordinates as is the rank of the ambient Lie algebra", theCommands);
   outputMat.GetListRowsToVectors(waypoints);
   waypoints=ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
-  Data thePath;
-
-  thePath.MakeLSpath(theCommands, ownerSSalgebra, waypoints);
-  theExpression.MakeAtom(thePath, theCommands);
-  return true;
-
+  LittelmannPath theLSpath;
+  theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
+  return output.AssignValue(theLSpath, theCommands);
 }
 
 bool CommandList::fInvertMatrix
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ Matrix<Rational> mat, output, tempMat;
-  if (!theCommands.fGetMatrix<Rational>(theExpression, mat, 0, -1, 0, comments))
-    return theExpression.SetError("Failed to extract matrix with rational coefficients");
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Matrix<Rational> mat, outputMat, tempMat;
+  if (!theCommands.fGetMatrix<Rational>(input, mat, 0, -1, 0))
+    return output.SetError
+    ("Failed to extract matrix with rational coefficients", theCommands);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)
-    return theExpression.SetError("The matrix is not square");
-  output.MakeIdMatrix(mat.NumRows);
+    return output.SetError("The matrix is not square", theCommands);
+  outputMat.MakeIdMatrix(mat.NumRows);
   int tempI;
   int NumFoundPivots = 0;
   std::stringstream out;
@@ -2857,28 +2845,28 @@ bool CommandList::fInvertMatrix
   theFormat.MatrixColumnVerticalLineIndex=mat.NumCols-1;
   out << "Computing " << CGI::GetHtmlMathSpanPure(mat.ToString(&theFormat) + "^{-1}");
   tempMat=mat;
-  tempMat.AppendMatrixOnTheRight(output);
+  tempMat.AppendMatrixOnTheRight(outputMat);
   out << "<br>" << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat)) ;
   for (int i=0; i<mat.NumCols; i++)
   { tempI = mat.FindPivot(i, NumFoundPivots, mat.NumRows - 1);
     if (tempI!=-1)
     { if (tempI!=NumFoundPivots)
       { mat.SwitchTwoRows(NumFoundPivots, tempI);
-        output.SwitchTwoRows (NumFoundPivots, tempI);
+        outputMat.SwitchTwoRows (NumFoundPivots, tempI);
         out << "<br>switch row " << NumFoundPivots+1 << " and row " << tempI+1 << ": ";
         tempMat=mat;
-        tempMat.AppendMatrixOnTheRight(output);
-        out << "<br>" << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
+        tempMat.AppendMatrixOnTheRight(outputMat);
+        out << "<br>" << CGI::GetHtmlMathSpanPure(outputMat.ToString(&theFormat));
       }
       tempElement=mat.elements[NumFoundPivots][i];
       tempElement.Invert();
       if (tempElement!=1)
         out << "<br> multiply row " << NumFoundPivots+1 << " by " << tempElement << ": ";
       mat.RowTimesScalar(NumFoundPivots, tempElement);
-      output.RowTimesScalar(NumFoundPivots, tempElement);
+      outputMat.RowTimesScalar(NumFoundPivots, tempElement);
       if (tempElement!=1)
       { tempMat=mat;
-        tempMat.AppendMatrixOnTheRight(output);
+        tempMat.AppendMatrixOnTheRight(outputMat);
         out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
       }
       bool found = false;
@@ -2888,7 +2876,7 @@ bool CommandList::fInvertMatrix
           { tempElement=(mat.elements[j][i]);
             tempElement.Minus();
             mat.AddTwoRows(NumFoundPivots, j, i, tempElement);
-            output.AddTwoRows(NumFoundPivots, j, 0, tempElement);
+            outputMat.AddTwoRows(NumFoundPivots, j, 0, tempElement);
             if(!found)
               out << "<br>";
             else
@@ -2900,7 +2888,7 @@ bool CommandList::fInvertMatrix
       if (found)
       { out << ": <br> ";
         tempMat=mat;
-        tempMat.AppendMatrixOnTheRight(output);
+        tempMat.AppendMatrixOnTheRight(outputMat);
         out << CGI::GetHtmlMathSpanPure(tempMat.ToString(&theFormat));
       }
       NumFoundPivots++;
@@ -2911,36 +2899,29 @@ bool CommandList::fInvertMatrix
   else
     out << "<br>The inverse of the starting matrix can be read off on the matrix to the left of the id matrix: "
     << CGI::GetHtmlMathSpanPure(output.ToString(&theFormat));
-  theExpression.MakeStringAtom(theCommands, out.str());
-  return true;
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fDifferential
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { return false;
   /* if (!theExpression.EvaluatesToAtom())
     if (!theCommands.CallCalculatorFunction
         (theCommands., inputIndexBoundVars, theExpression, comments))
-      return theExpression.SetError("Failed to convert argument of differential to differential form. ");
+      return output.SetError("Failed to convert argument of differential to differential form. ");
   Data theData;
   theData=theExpression.GetAtomicValue();
   if (!theData.ConvertToTypE<DifferentialForm<Rational> >())
-    return theExpression.SetError("Failed to convert argument of differential to differential form.");
+    return output.SetError("Failed to convert argument of differential to differential form.");
 
   theCommands.fPolynomial(the)*/
   return true;
 }
 
 bool CommandList::fMinPoly
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ if (!theExpression.EvaluatesToAtom())
-    return false;
-  Data theData;
-  theData=theExpression.GetAtomicValue();
-  if (!theData.ConvertToTypE<AlgebraicNumber>())
-    return false;
-  const AlgebraicNumber& theRA=theData.GetValuE<AlgebraicNumber>();
-  theExpression.MakePolyAtom(theRA.GetMinPoly(), -1, theCommands);
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ std::cout << "Error: not implemented. ";
+  assert(false);
   return true;
 }
 
@@ -3151,52 +3132,37 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
 }
 
 bool CommandList::fFactor
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fFactor");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction
-      (theCommands.fPolynomial,  theExpression, comments))
+  if (!theCommands.CallCalculatorFunction(theCommands.fPolynomial, input, output))
     return false;
-  Polynomial<Rational> thePoly=theExpression.GetAtomicValue().GetValuE<Polynomial<Rational> >();
+  Expression theContext=output.GetContext();
+  Polynomial<Rational> thePoly=output.GetValuE<Polynomial<Rational> >();
   if (thePoly.GetMinNumVars()>1)
-    return theExpression.SetError("I have been taught to factor one variable polys only. ");
+    return output.SetError
+    ("I have been taught to factor one variable polys only. ", theCommands);
   Polynomial<Rational> smallestDiv;
   List<Polynomial<Rational> > theFactors;
   while (!thePoly.IsAConstant())
-  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, comments))
+  { if(!thePoly.FactorMeOutputIsSmallestDivisor(smallestDiv, &theCommands.Comments))
       return false;
     Rational tempRat=smallestDiv.ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();
     thePoly/=tempRat;
     theFactors.AddOnTop(smallestDiv);
   }
-  int theContextIndex=theExpression.GetAtomicValue().theContextIndex;
-  theExpression.theOperation=theCommands.opList();
-  theExpression.children.SetSize(theFactors.size);
-  for (int i=0; i<theFactors.size; i++)
-    theExpression.children[i].MakePolyAtom
-  (theFactors[i], theContextIndex, theCommands);
-  theExpression.theDatA=-1;
-  std::cout << "<hr>At this point of time, theExpression is: " << theExpression.ToString();
+  output.reset(theCommands, theFactors.size+1);
+  output[0].MakeAtom(theCommands.opSequence(), theCommands);
+  for (int i=1; i<=theFactors.size; i++)
+    output[i].AssignValueWithContext(theFactors[i], theContext, theCommands);
+  std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }
 
 bool CommandList::fSqrt
-(CommandList& theCommands, Expression& theExpression, std::stringstream* comments)
-{ if (!theExpression.EvaluatesToAtom())
-    return false;
-  Data theData;
-  theData=theExpression.GetAtomicValue();
-  if (!theData.ConvertToTypE<AlgebraicNumber>())
-    return false;
-  static bool hereIgo=true;
-  if (hereIgo)
-  { std::cout << "Here i go again on my own. ";
-    hereIgo=false;
-  }
-  AlgebraicNumber theRat=theData.GetValuE<AlgebraicNumber> ();
-  theRat.SqrtMe();
-  theData.MakeRationalRadical(theCommands, theRat);
-  theExpression.MakeAtom(theData, theCommands);
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ std::cout << "not implemented";
+  assert(false);
   return true;
 }
 

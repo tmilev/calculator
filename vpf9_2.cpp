@@ -1431,7 +1431,7 @@ void SemisimpleLieAlgebra::CreateEmbeddingFromFDModuleHaving1dimWeightSpaces(Vec
       currentMat.init(weightSupport.size, weightSupport.size);
       currentMat.NullifyAll();
       for (int j=0; j<weightSupport.size; j++)
-      { int indexTarget= weightSupport.IndexOfObject(current+weightSupport.TheObjects[j]);
+      { int indexTarget= weightSupport.GetIndex(current+weightSupport.TheObjects[j]);
         if (indexTarget!=-1)
         { highestWeight = -1+ this->GetLengthStringAlongAlphaThroughBeta(current, weightSupport.TheObjects[j], distanceToHW, weightSupport);
           if (current.IsNegativeOrZero())

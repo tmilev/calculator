@@ -1385,7 +1385,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
   for (int i=0; i<this->nilradicalSmall.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& eltImage=
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
-    int theIndex=this->NilModPreNil.IndexOfObject(eltImage);
+    int theIndex=this->NilModPreNil.GetIndex(eltImage);
     if (theIndex!=-1)
     { this->NilModPreNil.PopIndexSwapWithLast(theIndex);
       this->weightsNilModPreNil.PopIndexSwapWithLast(theIndex);

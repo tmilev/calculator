@@ -783,6 +783,7 @@ public:
   void initFillInObject(int theSize, const Object& o);
   inline void AddObjectOnTopCreateNew();
   void ReservE(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
+  void InsertAtIndexShiftElementsUp(const Object& o, int desiredIndex);
   void AddOnTop(const Object& o);
   void AddListOnTop(const List<Object>& theList);
   bool AddOnTopNoRepetition(const Object& o);
@@ -792,7 +793,7 @@ public:
       this->AddOnTopNoRepetition(theList[i]);
   }
   int AddNoRepetitionOrReturnIndexFirst(const Object& o)
-  { int indexOfObject=this->IndexOfObject(o);
+  { int indexOfObject=this->GetIndex(o);
     if (indexOfObject==-1)
     { this->AddOnTop(o);
       return this->size-1;
@@ -829,9 +830,9 @@ public:
   void ToString(std::string& output, FormatExpressions* theFormat=0)const
   { output= this->ToString(theFormat);
   }
-  int IndexOfObject(const Object& o) const;
+  int GetIndex(const Object& o) const;
   bool Contains(const Object& o)const
-  { return this->IndexOfObject(o)!=-1;
+  { return this->GetIndex(o)!=-1;
   }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
@@ -1114,7 +1115,6 @@ private:
   void SwapTwoIndices(int index1, int index2);
   void AssignLight(const ListLight<Object>& from);
   void SetSize(int theSize);
-  int IndexOfObject(const Object& o);
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
 protected:

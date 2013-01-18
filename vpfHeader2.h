@@ -10,39 +10,35 @@ static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file c
 class Function
 {
   public:
-  //the functions may not possess a name.
-  //If you want your function to possess a name, use a VariableNonBound which has a member function handler.
-  std::string theName;
   MemorySaving<List<std::string> > theArgumentList;
   std::string theDescription;
   std::string theExample;
-  bool flagNameIsVisible;
   bool flagMayActOnBoundVars;
+  bool flagIamVisible;
   MemorySaving<List<Expression> > theArgumentPatterns;
   MemorySaving<List<bool> > theArgumentPatternIsParsed;
   typedef bool (*FunctionAddress)
   (CommandList& theCommands, const Expression& input, Expression& output);
   FunctionAddress theFunction;
-  std::string ToString(CommandList& theBoss)const;
+  static std::string GetString(CommandList& theBoss, int opIndex);
   void operator =(const Function& other)
-  { this->theName=other.theName;
-    this->theArgumentList=other.theArgumentList;
+  { this->theArgumentList=other.theArgumentList;
     this->theDescription=other.theDescription;
     this->theExample=other.theExample;
     this->theFunction=other.theFunction;
-    this->flagNameIsVisible=other.flagNameIsVisible;
     this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
+    this->flagIamVisible=other.flagIamVisible;
   }
   bool operator==(const Function& other)const
   { return this->theArgumentList==other.theArgumentList &&
-    this->theFunction==other.theFunction && this->theName==other.theName;
+    this->theFunction==other.theFunction;
   }
   Function(){this->theFunction=0;}
   Function
-  (const Function::FunctionAddress& functionPointer, const std::string& functionName, const std::string& argumentList,
-   const std::string& description, const std::string& inputExample, bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
+  (const Function::FunctionAddress& functionPointer, const std::string& argumentList,
+   const std::string& description, const std::string& inputExample,
+   bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
   { this->theFunction=functionPointer;
-    this->theName=functionName;
     this->theDescription=description;
     this->theExample=inputExample;
     if (argumentList!="")
@@ -50,14 +46,14 @@ class Function
       this->theArgumentPatternIsParsed.GetElement().AddOnTop(false);
       this->theArgumentPatterns.GetElement().SetSize(1);
     }
-    this->flagNameIsVisible=inputflagNameIsVisible;
     this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
+    this->flagIamVisible=inputflagNameIsVisible;
   }
   inline static unsigned int HashFunction(const Function& input)
   { return input.HashFunction();
   }
   unsigned int HashFunction()const
-  { return (unsigned int) MathRoutines::hashString(this->theName);
+  { return (unsigned int) this->theFunction;
   }
 };
 
@@ -130,7 +126,7 @@ class Expression
   (const Expression& left, const Expression& right, Expression& output);
   void reset(CommandList& newBoss, int newNumChildren=0)
   { this->theBoss=&newBoss;
-    this->theData=-1;
+    this->theData=0;
     if (newNumChildren>=0)
       this->children.SetSize(newNumChildren);
   }
@@ -147,16 +143,7 @@ class Expression
       return true;
     return this->children.size==N;
   }
-  bool IsListNElementsStartingWithAtom(int theOp=-1, int N=-1)const
-  { if (N!=-1)
-      if (this->children.size!=N)
-        return false;
-    if (!this->children[0].IsAtoM())
-      return false;
-    if (theOp==-1)
-      return true;
-    return this->children[0].theData==theOp;
-  }
+  bool IsListNElementsStartingWithAtom(int theOp=-1, int N=-1)const;
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;
@@ -191,14 +178,13 @@ class Expression
   bool ConvertToType(Expression& output);
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
-  { bool result=
-    this->IsListNElementsStartingWithAtom(this->GetOpType<theType>())
-    && this->children.size>1 && this->children.LastObject()->IsAtoM();
-    ;
+  { if(!(this->IsListNElementsStartingWithAtom(this->GetOpType<theType>()) &&
+        this->children.size>1 && this->children.LastObject()->IsAtoM()))
+      return false;
     if (whichElement==0)
-      return result;
+      return true;
     *whichElement=this->GetValuE<theType>();
-    return result;
+    return true;
   }
   template <class theType>
   const theType& GetValuE()const
@@ -215,8 +201,8 @@ class Expression
   //note: the following always returns true:
   template <class theType>
   bool AssignValue(const theType& inputValue, CommandList& owner)
-  { int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->reset(owner, 2);
+  { this->reset(owner, 2);
+    int theIndex =this->AddObjectReturnIndex(inputValue);
     this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
     this->children[1].MakeAtom(theIndex, owner);
     return true;
@@ -225,8 +211,8 @@ class Expression
   template <class theType>
   bool AssignValueWithContext
   (const theType& inputValue, const Expression& theContext, CommandList& owner)
-  { int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->reset(owner, 3);
+  { this->reset(owner, 3);
+    int theIndex =this->AddObjectReturnIndex(inputValue);
     this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
     this->children[1]=theContext;
     this->children[2].MakeAtom(theIndex, owner);
@@ -325,7 +311,6 @@ void MakeVariableNonBounD
       result+=this->children[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
     return result;
   }
-  std::string GetOperation()const;
   Expression()
   { this->reset();
   }
@@ -407,42 +392,6 @@ class SyntacticElement
   }
 };
 
-class VariableNonBound
-{
-  public:
-  friend std::ostream& operator << (std::ostream& output, const VariableNonBound& theV)
-  { output << theV.ToString();
-    return output;
-  }
-  std::string theName;
-  int HandlerFunctionIndex;
-  inline static unsigned int HashFunction(const VariableNonBound& input)
-  { return MathRoutines::hashString(input.theName);
-  }
-  VariableNonBound(const char x[]):theName(x), HandlerFunctionIndex(-1){}
-  VariableNonBound(const std::string& input):theName(input), HandlerFunctionIndex(-1) {}
-  VariableNonBound():HandlerFunctionIndex(-1) {}
-  std::string GetHandlerFunctionName(CommandList& owner);
-  std::string ToString()const{return this->theName;}
-  //C++ does have horrible syntax:
-//the following returns a pointer to a function that return bool and takes theCommands, commandIndex and Expression
-// as input
-//[Edit:] masked the horror in a typedef. Now the horror lies in a single isolated line. Nevertheless, a horror.
-  Function::FunctionAddress GetFunction
-  (CommandList& owner)const
-  ;
-  unsigned int HashFunction()const
-  { return VariableNonBound::HashFunction(*this);
-  }
-  void operator=(const VariableNonBound& other)
-  { this->theName=other.theName;
-    this->HandlerFunctionIndex=other.HandlerFunctionIndex;
-  }
-  bool operator==(const VariableNonBound& other)const
-  { return this->theName==other.theName;
-  }
-};
-
 class ObjectContainer
 { //Following are containers for data structures that are implemented in C++.
   //These objects are dynamically allocated and used by the calculator as requested
@@ -459,7 +408,6 @@ public:
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
   HashedList<AlgebraicNumber> theAlgebraicNumbers;
   HashedList<std::string, MathRoutines::hashString> theStrings;
-  HashedList<VariableNonBound> theVariablesNonBound;
   HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedList<Expression> ExpressionWithNotation;
   HashedList<LittelmannPath> theLSpaths;
@@ -511,20 +459,47 @@ class CommandList
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
-//return bool. It is forbidden to pass the same object as input and output.
+//return bool. It is forbidden to pass the same object as input and output*.
 //If a calculator function returns false this
 //means that the calculator failed to evaluate the
 //function. If that is the case, the value of output is not specified and
-//*MUST NOT* be used.
+//*MUST NOT* be used in the calling function.
 //If a function returns true this means that output contains the result of the function.
 //Note that the output of a function may be of type Error. Error results come, like any other
 //result, with a true return from the function.
-//The input of a function *MUST* contain the arguments of the function
-//in entries of index 1... input.children.size. The first entry (index 0) of input
-//must contain the name of the function called.
-//Note that functions are not required to check whether the first entry (the function name)
-//is as expected. In addition, the name of the function may be used as an additional argument:
-//for example, fAssociate is allowed for arbitrary function names.
+//-----------------------------------------------
+//In addition functions are split into two flavors: inner functions (or just "functions")
+// and outer functions (or "laws").
+//1.Outer functions ("laws").
+//  The first entry (index 0) of the input of an outer function *MUST* be name of
+//  the function called.
+//  The remaining entries of input (indices 1...) as usual should
+//  contain the arguments of the function.
+//2. Inner functions ("functions").
+//   Inner functions do not need to contain the name of the function as argument of the
+//   function.
+//In general, functions given as input through the calculator interface correspond to
+//outer functions. Conversely, the majority of the built-in functions
+//correspond to inner functions, with certain exceptions. Those exceptions usually include
+//various "laws" - distributive law, associative law, etc.
+//
+//The distinction between inner functions and outer functions is not conceptual,
+//but rather a practical. In addition, inner and outer functions come with the
+//following style guideline, which you are expected to follow should you decide to
+//extend the calculator.
+//- Outer functions ("laws") should never return successfully with
+//  output identically equal to their input. This corresponds to
+//  applying a law that does not change the expession, which results in an infinite cycle.
+//  (That cycle will be detected, nevertheless don't do it).
+//
+//
+//----------------------------------------------------------
+//*At the current implementation, there is one particular
+//criminal violation of this rule.
+//The violation is consciously done in order to speed up
+//the calculator evalution. As with all crimes, it is not really necessary and can be
+//avoided. As with all crimes, it is forbidden. Shall the program crash because of it,
+//the responsible programmer will suffer the consequences.
 
 //control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
@@ -532,8 +507,9 @@ public:
 //operations are the labels of the nodes of the expression tree
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
 //operations are in fact realized as elements of type VariableNonBound.
-  HashedList<VariableNonBound> operations;
-  HashedList<Function> theFunctions;
+  HashedList<std::string, MathRoutines::hashString> operationS;
+  HashedList<Function> InnerFunctionHandlers;
+  HashedList<Function> OuterFunctionHandlers;
 
   HashedList<ExpressionPairCruncherIds> theCruncherIds;
   List<Expression::OperationCruncher> theCruncherS;
@@ -866,103 +842,100 @@ public:
   { return this->controlSequences.GetIndexIMustContainTheObject(")");
   }
   int opApplyFunction()
-  { return this->operations.GetIndexIMustContainTheObject("{}");
+  { return this->operationS.GetIndexIMustContainTheObject("{}");
   }
   int opIsDenotedBy()
-  { return this->operations.GetIndexIMustContainTheObject(":=:");
+  { return this->operationS.GetIndexIMustContainTheObject(":=:");
   }
   int opDefine()
-  { return this->operations.GetIndexIMustContainTheObject(":=");
+  { return this->operationS.GetIndexIMustContainTheObject(":=");
   }
   int opDefineConditional()
-  { return this->operations.GetIndexIMustContainTheObject("if:=");
+  { return this->operationS.GetIndexIMustContainTheObject("if:=");
   }
   int opThePower()
-  { return this->operations.GetIndexIMustContainTheObject("^");
+  { return this->operationS.GetIndexIMustContainTheObject("^");
   }
   int opEqualEqual()
-  { return this->operations.GetIndexIMustContainTheObject("==");
+  { return this->operationS.GetIndexIMustContainTheObject("==");
   }
   int opError()
-  { return this->operations.GetIndexIMustContainTheObject("Error");
+  { return this->operationS.GetIndexIMustContainTheObject("Error");
   }
   int opLisT()
-  { return this->operations.GetIndexIMustContainTheObject("");
+  { return this->operationS.GetIndexIMustContainTheObject("");
   }
   int opSequence()
-  { return this->operations.GetIndexIMustContainTheObject("Sequence");
+  { return this->operationS.GetIndexIMustContainTheObject("Sequence");
   }
   int opRational()
-  { return this->operations.GetIndexIMustContainTheObject("Rational");
+  { return this->operationS.GetIndexIMustContainTheObject("Rational");
   }
   int opAlgNumber()
-  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
+  { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
   int opPoly()
-  { return this->operations.GetIndexIMustContainTheObject("Polynomial<Rational>");
+  { return this->operationS.GetIndexIMustContainTheObject("Polynomial<Rational>");
   }
   int opRationalFunction()
-  { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
+  { return this->operationS.GetIndexIMustContainTheObject("RationalFunction");
   }
   int opString()
-  { return this->operations.GetIndexIMustContainTheObject("string");
+  { return this->operationS.GetIndexIMustContainTheObject("string");
   }
   int opElementUEoverRF()
-  { return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
+  { return this->operationS.GetIndexIMustContainTheObject("ElementUEoverRF");
   }
   int opElementTensorGVM()
-  { return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
+  { return this->operationS.GetIndexIMustContainTheObject("ElementTensorGVM");
   }
   int opCharSSAlgMod()
-  { return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
+  { return this->operationS.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
   int opSSLieAlg()
-  { return this->operations.GetIndexIMustContainTheObject("SSLieAlg");
+  { return this->operationS.GetIndexIMustContainTheObject("SSLieAlg");
   }
   int opLittelmannPath()
-  { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
+  { return this->operationS.GetIndexIMustContainTheObject("LittelmannPath");
   }
   int opLRO()
-  { return this->operations.GetIndexIMustContainTheObject("LRO");
+  { return this->operationS.GetIndexIMustContainTheObject("LRO");
   }
   int opUnion()
-  { return this->operations.GetIndexIMustContainTheObject("\\cup");
+  { return this->operationS.GetIndexIMustContainTheObject("\\cup");
   }
   int opPolynomialVariables()
-  { return this->operations.GetIndexIMustContainTheObject("PolyVars");
-  }
-  int opEndStatement()
-  { return this->operations.GetIndexIMustContainTheObject(";");
-  }
-  int opUnionNoRepetition()
-  { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
+  { return this->operationS.GetIndexIMustContainTheObject("PolyVars");
   }
   int opContext()
-  { return this->operations.GetIndexIMustContainTheObject("Context");
+  { return this->operationS.GetIndexIMustContainTheObject("Context");
+  }
+  int opEndStatement()
+  { return this->operationS.GetIndexIMustContainTheObject(";");
+  }
+  int opUnionNoRepetition()
+  { return this->operationS.GetIndexIMustContainTheObject("\\sqcup");
   }
   int opBind()
-  { return this->operations.GetIndexIMustContainTheObject("Bind");
-  }
-  int opVariableNonBound()
-  { return this->operations.GetIndexIMustContainTheObject("NonBound");
+  { return this->operationS.GetIndexIMustContainTheObject("Bind");
   }
   int opPlus()
-  { return this->operations.GetIndexIMustContainTheObject("+");
+  { return this->operationS.GetIndexIMustContainTheObject("+");
   }
   int opMinus()
-  { return this->operations.GetIndexIMustContainTheObject("-");
+  { return this->operationS.GetIndexIMustContainTheObject("-");
   }
   int opTimes()
-  { return this->operations.GetIndexIMustContainTheObject("*");
+  { return this->operationS.GetIndexIMustContainTheObject("*");
   }
   int opTensor()
-  { return this->operations.GetIndexIMustContainTheObject("\\otimes");
+  { return this->operationS.GetIndexIMustContainTheObject("\\otimes");
   }
   int opLieBracket()
-  { return this->operations.GetIndexIMustContainTheObject("[]");
+  { return this->operationS.GetIndexIMustContainTheObject("[]");
   }
   int opDivide()
-  { return this->operations.GetIndexIMustContainTheObject("/");
+  { return this->operationS.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (const Expression& input, List<Expression>& output, int theOp)
@@ -1034,7 +1007,7 @@ bool CollectSummands
 static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool fStandardFunction
+static bool outerStandardFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fUnionNoRepetition
@@ -1377,27 +1350,13 @@ static bool TypeHighestWeightParabolic
 ;
   void AddEmptyHeadedCommand();
   CommandList();
-  void AddOperationNoFail
-  (const std::string& theOpName, const Function::FunctionAddress& theFunAddress, const std::string& opArgumentList,
-   const std::string& opDescription, const std::string& opExample, bool inputNameUsed)
-   ;
-  void AddNonBoundVarMustBeNew
-  (const std::string& theName, const Function::FunctionAddress& funHandler,
-   const std::string& argList, const std::string& description, const std::string& exampleArgs,
+  void AddOperationMustBeNew
+  (const std::string& theOpName, const Function::FunctionAddress& innerHandler,
+   const Function::FunctionAddress& outerHandler,
+   const std::string& opArgumentList,
+   const std::string& opDescription, const std::string& opExample,
    bool visible=true)
    ;
-//  { int theIndex=this->AddNonBoundVarReturnVarIndex(theName, funHandler, argList, description, exampleArgs);
-//    if (theIndex!=this->theVariablesNonBound.size-1)
-//      assert(false);
-//  }
-  Function::FunctionAddress GetFunctionAddressFromOperation
-  (int theOp)
-;
-
-  int AddNonBoundVarReturnVarIndex
-(const std::string& theName, const Function::FunctionAddress& funHandler,
-  const std::string& argList, const std::string& description, const std::string& exampleArgs)
-;
   void init(GlobalVariables& inputGlobalVariables);
   void initCrunchers();
   void initPredefinedVars()

@@ -105,7 +105,6 @@ struct CGI;
 
 //The calculator parsing routines:
 class CommandList;
-class VariableNonBound;
 class Function;
 class Expression;
 

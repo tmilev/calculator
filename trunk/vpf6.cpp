@@ -57,12 +57,6 @@ int Expression::GetOpType<LittelmannPath>()const
 }
 
 template < >
-int Expression::GetOpType<VariableNonBound>()const
-{ this->CheckInitialization();
-  return this->theBoss->opVariableNonBound();
-}
-
-template < >
 int Expression::GetOpType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()const
 { this->CheckInitialization();
   return this->theBoss->opLRO();
@@ -203,16 +197,6 @@ std::string& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-VariableNonBound& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<VariableNonBound>())
-  { std::cout << "This is a programming error: expression not of required type VariableNonBound."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-    assert(false);
-  }
-  return this->theBoss->theObjectContainer.theVariablesNonBound[this->children.LastObject()->theData];
-}
-
-template < >
 RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<RationalFunctionOld>())
   { std::cout << "This is a programming error: expression not of required type RationalFunctionOld."
@@ -340,6 +324,20 @@ bool Expression::ContextGetPolynomialMonomial
   tempMon=tempP;
   output.MakeConst(tempMon, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
   return true;
+}
+
+bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
+{ if (N!=-1)
+  { if (this->children.size!=N)
+      return false;
+  } else
+    if (this->children.size==0)
+      return false;
+  if (!this->children[0].IsAtoM())
+    return false;
+  if (theOp==-1)
+    return true;
+  return this->children[0].theData==theOp;
 }
 
 int Expression::ContextGetNumContextVariables()const
@@ -807,7 +805,7 @@ void CommandList::ParseFillDictionary
         } else
         { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
           currentElement.theData.MakeAtom
-          (this->operations.AddNoRepetitionOrReturnIndexFirst(current), *this);
+          (this->operationS.AddNoRepetitionOrReturnIndexFirst(current), *this);
           (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
         }
         current="";
@@ -816,7 +814,7 @@ void CommandList::ParseFillDictionary
 }
 
 int CommandList::GetOperationIndexFromControlIndex(int controlIndex)
-{ return this->operations.GetIndex(this->controlSequences[controlIndex]);
+{ return this->operationS.GetIndex(this->controlSequences[controlIndex]);
 }
 
 int CommandList::GetExpressionIndex()
@@ -2714,16 +2712,16 @@ bool CommandList::fSSAlgebra
         return output.SetError
         ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat), theCommands);
     }
-    VariableNonBound theTypeName;
-    if (!typeE.IsOfType(&theTypeName))
+    if (!typeE.IsAtoM())
       return output.SetError
       ("I couldn't extract a type letter from "+ currentMon.ToString(&theFormat), theCommands);
-    if (theTypeName.theName.size()!=1)
+    std::string theTypeName=theCommands.operationS[typeE.theData];
+    if (theTypeName.size()!=1)
       return output.SetError
       ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
-        Instead, it is "+ theTypeName.theName + "; error while processing "
+        Instead, it is "+ theTypeName + "; error while processing "
        + currentMon.ToString(&theFormat), theCommands);
-    theWeylLetter=theTypeName.theName[0];
+    theWeylLetter=theTypeName[0];
     if (theWeylLetter=='a') theWeylLetter='A';
     if (theWeylLetter=='b') theWeylLetter='B';
     if (theWeylLetter=='c') theWeylLetter='C';
@@ -2989,9 +2987,8 @@ bool CommandList::fSuffixNotationForPostScript
   if (!input.IsLisT())
     return output.SetError("Error: typeless expression has no postscript notation. ", theCommands);
   Rational ratValue;
-  if (input.IsOfType<VariableNonBound>())
-    return output.AssignValue
-    (input.GetValuENonConstUseWithCaution<VariableNonBound>().theName, theCommands);
+  if (input.IsAtoM())
+    return output.AssignValue(theCommands.operationS[input.theData], theCommands);
   else if (input.IsOfType<Rational>(&ratValue))
     return output.AssignValue(ratValue.ToString(), theCommands);
   std::stringstream out;
@@ -3145,7 +3142,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=1000;
   this->controlSequences.Clear();
-  this->operations.Clear();
+  this->operationS.Clear();
+  this->OuterFunctionHandlers.Clear();
+  this->InnerFunctionHandlers.Clear();
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
   this->flagTimeLimitErrorDetected=false;
@@ -3153,35 +3152,33 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagMaxTransformationsErrorEncountered=false;
   this->flagMaxRecursionErrorEncountered=false;
   this->flagAbortComputationASAP=false;
-  this->theObjectContainer.theVariablesNonBound.Clear();
   this->ExpressionStack.Clear();
 
   this->theCruncherIds.Clear();
   this->theCruncherS.SetSize(0);
-  this->theFunctions.Clear();
   this->syntaxErrors="";
   this->evaluationErrors.SetSize(0);
   this->CurrentSyntacticStacK=&this->syntacticStacK;
   this->CurrrentSyntacticSouP=&this->syntacticSouP;
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string
-  this->AddOperationNoFail("", 0, "", "", "", false);
+  this->AddOperationMustBeNew("", 0, 0, "", "", "", false);
 
-  this->AddOperationNoFail
-  ("+", this->fPlus, "",
+  this->AddOperationMustBeNew
+  ("+", 0, this->fPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
-  this->AddOperationNoFail
-  ("-", this->fMinus, "",
+  this->AddOperationMustBeNew
+  ("-", 0, this->fMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
-  this->AddOperationNoFail
-  ("/", this->fDivide, "",
+  this->AddOperationMustBeNew
+  ("/", 0, this->fDivide, "",
     "1) If a and b are rational substitutes a/b with its value. \
      <br>2)If b is rational computes (anything)/b with anything* (1/b). \
      This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", true);
-  this->AddOperationNoFail
-  ("*", this->fStandardTimes, "",
+  this->AddOperationMustBeNew
+  ("*", 0, this->fStandardTimes, "",
    "<br>The following description is out of date. Must be updated.\
    <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, \
    substitutes a*b by the result of the built-in handler.<br>\n \
@@ -3194,26 +3191,26 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    4.3) If the expression is of the form a*(b*c) and b is rational but a is not, \
    substitutes the expression by b*(a*c).",
    "2*c_1*d*3", true);
-    this->AddOperationNoFail
-  ("\\otimes", this->StandardTensor, "",
+    this->AddOperationMustBeNew
+  ("\\otimes", 0,  this->StandardTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
    " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
    \n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
    g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
-  this->AddOperationNoFail
-  ("[]", this->StandardLieBracket, "",
+  this->AddOperationMustBeNew
+  ("[]", 0, this->StandardLieBracket, "",
    "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
-  this->AddOperationNoFail(":=", 0, "", "", "", true);
-  this->AddOperationNoFail
-  (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
+  this->AddOperationMustBeNew(":=", 0, 0, "", "", "", true);
+  this->AddOperationMustBeNew
+  (":=:", 0, this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
    The expression a:=:b always reduces to \
    a:=b. In addition to the transformation, the pair of expressions a,b is registered in a \
    special global \"registry\". This has the following effect. Every time \
    the expression b is met, it is displayed on the screen as a. We note that subsequent \
    occurrences of the expression a will first be replaced by b (as mandated\
    by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", true);
-  this->AddOperationNoFail("if:=", 0, "", "", "", true);
+  this->AddOperationMustBeNew("if:=", 0, 0, "", "", "", true);
   std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
   moreInfoOnIntegers
   << " LargeIntUnsigned::SquareRootOfCarryOverBound is "
@@ -3242,18 +3239,18 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
   << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
   << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
-  this->AddOperationNoFail
-  ("^", this->fThePower, "", StandardPowerStreamInfo.str(),
+  this->AddOperationMustBeNew
+  ("^", 0, this->fThePower, "", StandardPowerStreamInfo.str(),
    "3^3^3;\n3^{3^3}", true);
-  this->AddOperationNoFail
-  ("==", this->StandardEqualEqual, "",
+  this->AddOperationMustBeNew
+  ("==", 0, this->StandardEqualEqual, "",
    "If either the left or the right argument contains a bound variable does nothing. \
     Else evaluates to 1 if the left argument equals the right argument.",
    "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
   //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
   //expression
-/*  this->AddOperationNoFail
+/*  this->AddOperationMustBeNew
   ("{}", this->StandardFunction, "",
    "The first argument of this operator represents a name of the function, \
    the second argument represents the argument of that function.  \
@@ -3276,29 +3273,41 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
    \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);*/
   //the following is the binding variable operation
-  this->AddOperationNoFail("VariableNonBound", 0, "", "", "", false);
-  this->AddOperationNoFail("Bind", 0, "", "", "", false);
+  this->AddOperationMustBeNew("Bind", 0, 0, "", "", "", false);
 //  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
-  this->AddOperationNoFail
-  ("\\cup", this->fUnion, "",
+  this->AddOperationMustBeNew
+  ("\\cup", 0, this->fUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
    the union of all members (with repetition).",
    "x\\cup Sequence{} x \\cup Sequence{}x \\cup (a,b,x)", true);
-  this->AddOperationNoFail
-  ("\\sqcup", this->fUnionNoRepetition, "",
+  this->AddOperationMustBeNew
+  ("\\sqcup", 0, this->fUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
    containing \
    the union of all members; all repeating members are discarded.",
    "(x,y,x)\\sqcup(1,x,y,2)", true);
-  this->AddOperationNoFail("Error", 0, "", "", "", false);
-  this->AddOperationNoFail(";", 0, "", "", "", false);
+  this->AddOperationMustBeNew("Error", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("Sequence", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("Rational", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("AlgebraicNumber", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("Polynomial<Rational>", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("RationalFunction", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("string", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("ElementUEoverRF", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("ElementTensorGVM", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("CharSSAlgMod", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("SSLieAlg", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("LittelmannPath", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("LRO", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("PolyVars", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew("Context", 0, 0, "", "", "", false);
+  this->AddOperationMustBeNew(";", 0, 0, "", "", "", false);
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");
-  for (int i=0; i<this->operations.size; i++)
-    this->controlSequences.AddOnTop(this->operations[i].theName);//all operations are also control sequences
+  this->controlSequences.AddOnTop(this->operationS);//all operations defined up to this point are also control sequences
   this->controlSequences.AddOnTop("Expression");
   this->controlSequences.AddOnTop("Integer");
   this->controlSequences.AddOnTop(",");
@@ -3313,7 +3322,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
-  this->controlSequences.AddOnTop("Sequence");
   this->controlSequences.AddOnTop("MatrixRow");
   this->controlSequences.AddOnTop("=");
   this->controlSequences.AddOnTop("$");
@@ -3405,14 +3413,6 @@ bool CommandList::CollectSummands
   }
   *currentExp=summandsWithCoeff[summandsWithCoeff.size-1];
   return theExpression==result;
-}
-
-Function::FunctionAddress CommandList::GetFunctionAddressFromOperation
-  (int theOp)
-{ std::cout << "Function CommandList::GetFunctionAddressFromOperation not implemented yet. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
-  return 0;
 }
 
 Function::FunctionAddress CommandList::GetfOp
@@ -3676,7 +3676,7 @@ bool CommandList::EvaluateIf
   return false;
 }
 
-bool CommandList::fStandardFunction
+bool CommandList::outerStandardFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsLisT())
     return false;
@@ -3689,25 +3689,21 @@ bool CommandList::fStandardFunction
         { output=input[theIndex];
           return true;
         }
-  VariableNonBound theVar;
-  if (functionNameNode.IsOfType<VariableNonBound>(&theVar))
-  { Function::FunctionAddress theFun=theVar.GetFunction(theCommands);
-    if (theFun==0)
-      return false;
-    return theFun(theCommands, input, output);
-  }
-  if (functionNameNode.IsAtoM())
-  { int theOp=functionNameNode.theData;
-    if (theOp<0 || theOp>=theCommands.operations.size)
-      return false;
-    Function::FunctionAddress theFun=
-    theCommands.GetFunctionAddressFromOperation(theOp);
-    if (theFun==0)
-      return false;
-    return theFun(theCommands, input, output);
-  }
-  return false;
-
+  if (!functionNameNode.IsAtoM())
+    return false;
+  Function::FunctionAddress theFun=
+  theCommands.OuterFunctionHandlers[functionNameNode.theData].theFunction;
+  if(theFun!=0)
+    if (theFun(theCommands, input, output))
+      return true;
+  theFun=theCommands.InnerFunctionHandlers[functionNameNode.theData].theFunction;
+  if (theFun==0)
+    return false;
+  Expression arguments;
+  arguments.reset(theCommands, input.children.size-1);
+  for (int i=1; i<input.children.size; i++)
+    arguments[i-1]=input[i];
+  return theFun(theCommands, arguments, output);
 }
 
 bool CommandList::StandardEqualEqual
@@ -4161,7 +4157,7 @@ bool CommandList::EvaluateExpression
     if (this->flagAbortComputationASAP)
       break;
     //->/////-------Default operation handling-------
-    if (this->fStandardFunction(*this, output, tempE))
+    if (this->outerStandardFunction(*this, output, tempE))
     { ReductionOcurred=true;
       output=tempE;
       continue;
@@ -4392,13 +4388,6 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
     out << "</td></tr></table>";
   }
   return out.str();
-}
-
-Function::FunctionAddress VariableNonBound::GetFunction(CommandList& owner)const
-{ if (this->HandlerFunctionIndex==-1)
-    return 0;
-  assert(this->HandlerFunctionIndex>=0 && this->HandlerFunctionIndex <owner.theFunctions.size);
-  return owner.theFunctions[this->HandlerFunctionIndex].theFunction;
 }
 
 SemisimpleLieAlgebra* Expression::GetAmbientSSAlgebraNonConstUseWithCaution()const
@@ -4720,15 +4709,19 @@ std::string Expression::Lispify()const
   RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
     return "(error: max recursion depth ...)";
-  if (this->children.size==0)
-    return this->GetOperation();
   std::stringstream out;
-  out << "(";
-  for (int i=0; i<this->children.size; i++)
-  { out << this->children[i].Lispify();
-    if (i!=this->children.size-1)
-      out << " ";
+  if (this->children.size==0)
+  { out << this->theData;
+    return out.str();
   }
+  Expression& firstE= this->children[0];
+  out << "(";
+  if (firstE.IsAtoM())
+    out << this->theBoss->operationS[firstE.theData];
+  else
+    out << firstE.Lispify();
+  for (int i=1; i<this->children.size; i++)
+    out << " " << this->children[i].Lispify();
   out << ")";
   return out.str();
 }
@@ -4747,44 +4740,28 @@ bool Expression::IsLisT()const
   return true;
 }
 
-std::string VariableNonBound::GetHandlerFunctionName(CommandList& owner)
-{ if (this->HandlerFunctionIndex==-1)
-    return "";
-  return owner.theFunctions[this->HandlerFunctionIndex].theName;
-}
-
-void CommandList::AddOperationNoFail
-  (const std::string& theOpName,
-   const Function::FunctionAddress& theFunAddress,
-   const std::string& opArgumentList, const std::string& opDescription,
-   const std::string& opExample, bool inputNameUsed
-   )
-{ VariableNonBound theVar;
-  if (theFunAddress!=0)
-  { Function currentFunction(theFunAddress, theOpName, opArgumentList, opDescription, opExample, inputNameUsed);
-    theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(currentFunction);
-  } else
-    theVar.HandlerFunctionIndex=-1;
-  theVar.theName=theOpName;
-  if (this->operations.Contains(theOpName))
-  { assert(false);
+void CommandList::AddOperationMustBeNew
+  (const std::string& theOpName, const Function::FunctionAddress& innerHandler,
+   const Function::FunctionAddress& outerHandler,
+   const std::string& opArgumentList,
+   const std::string& opDescription, const std::string& opExample,
+   bool visible)
+{ if (this->operationS.Contains(theOpName))
+  { std::cout << "This is a programming error: I am asked to add operation "
+    << theOpName << " but it is already added. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
     return;
   }
-  this->operations.AddOnTop(theVar);
-}
-
-int CommandList:: AddNonBoundVarReturnVarIndex
-(const std::string& theName, const Function::FunctionAddress& funHandler,
-  const std::string& argList, const std::string& description, const std::string& exampleArgs
-)
-{ VariableNonBound theVar;
-  theVar.theName=theName;
-  if (funHandler!=0)
-  { Function theFun(funHandler, theName, argList, description, exampleArgs, true);
-    theVar.HandlerFunctionIndex=this->theFunctions.AddNoRepetitionOrReturnIndexFirst(theFun);
-  }
-  return
-  this->theObjectContainer.theVariablesNonBound.AddNoRepetitionOrReturnIndexFirst(theVar);
+  Function innerFunction
+  (innerHandler, opArgumentList, opDescription, opExample, visible)
+  ;
+  Function outerFunction
+  (outerHandler, opArgumentList, opDescription, opExample, visible)
+  ;
+  this->operationS.AddOnTop(theOpName);
+  this->InnerFunctionHandlers.AddOnTop(innerFunction);
+  this->OuterFunctionHandlers.AddOnTop(outerFunction);
 }
 
 std::string CommandList::ElementToStringNonBoundVars()
@@ -4793,15 +4770,29 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->theObjectContainer.theVariablesNonBound.size << " global variables " << " (= "
-  << this->NumPredefinedVars  << " predefined + " << this->theObjectContainer.theVariablesNonBound.size-this->NumPredefinedVars
+  out << "<br>\n" << this->operationS.size << " operations and global variables " << " (= "
+  << this->NumPredefinedVars  << " predefined + "
+  << this->operationS.size-this->NumPredefinedVars
   << " user-defined). <br>Predefined: \n<br>\n";
-  for (int i=0; i<this->theObjectContainer.theVariablesNonBound.size; i++)
-  { out << openTag1 << this->theObjectContainer.theVariablesNonBound[i].theName << closeTag1;
-    std::string handlerName=this->theObjectContainer.theVariablesNonBound[i].GetHandlerFunctionName(*this);
-    if (handlerName!="")
-      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
-    if (i!=this->theObjectContainer.theVariablesNonBound.size-1)
+  for (int i=0; i<this->operationS.size; i++)
+  { out << openTag1 << this->operationS[i] << closeTag1;
+    if (this->OuterFunctionHandlers[i].theFunction!=0 ||
+        this->InnerFunctionHandlers[i].theFunction!=0)
+    { out << " [";
+      if (this->OuterFunctionHandlers[i].theFunction!=0)
+      { out << "outer handler address: " << openTag2
+        << this->OuterFunctionHandlers[i].theFunction << closeTag2
+        << openTag2;
+        if (this->InnerFunctionHandlers[i].theFunction!=0)
+          out << " ";
+      }
+      if (this->InnerFunctionHandlers[i].theFunction!=0)
+        out << "inner handler address: " << openTag2
+        << this->InnerFunctionHandlers[i].theFunction << closeTag2
+        ;
+      out << "]";
+    }
+    if (i!=this->operationS.size-1)
     { out << ", ";
       if (i==this->NumPredefinedVars-1 )
         out << "<br>user-defined:\n<br>\n";
@@ -4810,37 +4801,71 @@ std::string CommandList::ElementToStringNonBoundVars()
   return out.str();
 }
 
-std::string Function::ToString(CommandList& theBoss)const
-{ std::stringstream out2;
+std::string Function::GetString(CommandList& theBoss, int opIndex)
+{ if (theBoss.InnerFunctionHandlers[opIndex].theFunction==0 &&
+      theBoss.OuterFunctionHandlers[opIndex].theFunction==0)
+    return "";
+  std::stringstream out2;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out2 << openTag2 << this->theName << closeTag2;
-  std::stringstream out;
-  if (!this->flagNameIsVisible)
-    out << "This function is invoked indirectly as an operation handler. ";
-  out << this->theDescription;
-  if (this->theExample!="")
-    out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
-  out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
-  if (this->theExample!="")
-    out2 << "<a href=\""
-    << theBoss.DisplayNameCalculator  << "?"
-    << " textType=Calculator&textDim=1&textInput="
-    << CGI::UnCivilizeStringCGI(this->theExample)
-    << "\"> " << " Example" << "</a>" ;
-  return out2.str() ;
+  if (theBoss.InnerFunctionHandlers[opIndex].theFunction!=0 &&
+      theBoss.InnerFunctionHandlers[opIndex].flagIamVisible)
+  { out2 << openTag2 << theBoss.operationS[opIndex] << closeTag2;
+    std::stringstream out;
+    Function& currentFun=theBoss.InnerFunctionHandlers[opIndex];
+    out << currentFun.theDescription;
+    if (currentFun.theExample!="")
+      out << " <br> " << currentFun.theExample << "&nbsp&nbsp&nbsp";
+    out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
+    if (currentFun.theExample!="")
+      out2 << "<a href=\""
+      << theBoss.DisplayNameCalculator  << "?"
+      << " textType=Calculator&textDim=1&textInput="
+      << CGI::UnCivilizeStringCGI(currentFun.theExample)
+      << "\"> " << " Example" << "</a>" ;
+  }
+  if (theBoss.OuterFunctionHandlers[opIndex].theFunction!=0 &&
+      theBoss.OuterFunctionHandlers[opIndex].flagIamVisible)
+  { out2 << openTag2 << theBoss.operationS[opIndex] << closeTag2;
+    std::stringstream out;
+    Function& currentFun=theBoss.OuterFunctionHandlers[opIndex];
+    out << "This function is a ``law'', i.e., is called indirectly from the outside. "
+    << " A law is a function which takes as an additional argument the name of the operation. ";
+    out << currentFun.theDescription;
+    if (currentFun.theExample!="")
+      out << " <br> " << currentFun.theExample << "&nbsp&nbsp&nbsp";
+    out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
+    if (currentFun.theExample!="")
+      out2 << "<a href=\""
+      << theBoss.DisplayNameCalculator  << "?"
+      << " textType=Calculator&textDim=1&textInput="
+      << CGI::UnCivilizeStringCGI(currentFun.theExample)
+      << "\"> " << " Example" << "</a>" ;
+  }
+  return out2.str();
 }
 
 std::string CommandList::ToStringFunctionHandlers()
 { std::stringstream out;
-  out << "\n <b>Handler functions (" << this->theFunctions.size << " total).</b><br>\n";
+  int numFuns=0;
+  for (int i=0; i<this->operationS.size; i++)
+  { if (this->InnerFunctionHandlers[i].theFunction!=0)
+      numFuns++;
+    if (this->OuterFunctionHandlers[i].theFunction!=0)
+      numFuns++;
+  }
+  out << "\n <b>Handler function regisrtations (" << numFuns << " total).</b><br>\n";
   bool found=false;
-  for (int i=0; i<this->theFunctions.size; i++)
-    if (this->theFunctions[i].flagNameIsVisible)
+  for (int i=0; i<this->operationS.size; i++)
+    if ((this->InnerFunctionHandlers[i].theFunction!=0
+         && this->InnerFunctionHandlers[i].flagIamVisible) ||
+        (this->OuterFunctionHandlers[i].theFunction!=0
+         && this->OuterFunctionHandlers[i].flagIamVisible)
+        )
     { if (found)
         out << "<br>";
       found=true;
-      out << "\n" << this->theFunctions[i].ToString(*this);
+      out << "\n" << Function::GetString(*this, i);
     }
   return out.str();
 }
@@ -4914,13 +4939,11 @@ std::string CommandList::ToString()
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\nOperators (" << this->operations.size << " total):<br>\n";
-  for (int i=0; i<this->operations.size; i++)
-  { out << "\n" << openTag1 << this->operations[i].theName << closeTag1;
-    std::string handlerName=this->operations[i].GetHandlerFunctionName(*this);
-    if (this->operations[i].GetFunction(*this)!= 0)
-      out << " [handled by: " << openTag2 << handlerName << closeTag2 << "]";
-    if(i!=this->operations.size-1)
+  out << "<br>\n Variables (" << this->operationS.size << " = "
+  << this->NumPredefinedVars << " predefined + " << this->operationS.size-this->NumPredefinedVars << " user-defined):<br>\n";
+  for (int i=0; i<this->operationS.size; i++)
+  { out << "\n" << openTag1 << this->operationS[i] << closeTag1;
+    if(i!=this->operationS.size-1)
       out << ", ";
   }
   out << this->ElementToStringNonBoundVars();
@@ -4937,12 +4960,6 @@ std::string CommandList::ToString()
   return out2.str();
 }
 
-std::string Expression::GetOperation()const
-{ if (this->theBoss==0)
-    return "(Error:NonInitialized)";
-  return this->theBoss->operations[this->theData].theName;
-}
-
 /*Rational Expression::GetConstantTerm()const
 { if (this->IsOfType<Rational>())
     return this->GetRationalValue();
@@ -4954,12 +4971,8 @@ std::string Expression::GetOperation()const
 */
 
 void Expression::MakeVariableNonBounD(CommandList& newBoss, const std::string& input)
-{ this->reset(newBoss,2);
-  this->children[0].MakeAtom(this->theBoss->opVariableNonBound(), newBoss);
-  VariableNonBound tempV;
-  tempV.theName=input;
-  this->children[1].MakeAtom
-  (this->theBoss->theObjectContainer.theVariablesNonBound.GetIndex(tempV), newBoss);
+{ this->reset(newBoss);
+  this->theData=newBoss.operationS.AddNoRepetitionOrReturnIndexFirst(input);
 }
 
 bool CommandList::ReplaceIntIntBy10IntPlusInt()
@@ -5248,17 +5261,6 @@ void CommandList::initDefaultFolderAndFileNames
 
   this->indicatorFileNamE=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
   this->indicatorFileNameDisplaY=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
-}
-
-void CommandList::AddNonBoundVarMustBeNew
-  (const std::string& theName, const Function::FunctionAddress& funHandler,
-   const std::string& argList, const std::string& description, const std::string& exampleArgs,
-   bool visible)
-{ VariableNonBound theV;
-  Function theF(funHandler, theName, argList, description, exampleArgs, visible);
-  theV.HandlerFunctionIndex= this->theFunctions.AddNoRepetitionOrReturnIndexFirst(theF);
-  theV.theName=theName;
-  this->theObjectContainer.theVariablesNonBound.AddOnTopNoRepetition(theV);
 }
 
 bool CommandList::fWriteGenVermaModAsDiffOperators

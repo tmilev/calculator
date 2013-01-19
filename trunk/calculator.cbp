@@ -32,6 +32,7 @@
 		<Unit filename="vpf5.cpp" />
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
 		<Unit filename="vpf6.cpp" />
+		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />

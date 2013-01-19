@@ -4,9 +4,9 @@
 ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator functions. ");
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
-void CommandList::initPredefinedVars()
-{ this->AddOperationMustBeNew
-("gcdPoly", &this->fGCD, 0,  "",
+void CommandList::initPredefinedInnerFunctions()
+{ this->AddOperationInnerHandler
+("gcdPoly", &this->fGCD, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -20,8 +20,8 @@ void CommandList::initPredefinedVars()
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
-  this->AddOperationMustBeNew
-("lcmPoly", &this->fLCM, 0, "",
+  this->AddOperationInnerHandler
+("lcmPoly", &this->fLCM, "",
    "Least common multiple of two polynomials.\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\
@@ -35,25 +35,25 @@ void CommandList::initPredefinedVars()
    2x_{13}^{3}x_{17}x_{18}x_{20}x_{21}^{2}+2x_{13}^{2}x_{14}x_{17}x_{18}x_{19}x_{21}^{2}-\
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
-  this->AddOperationMustBeNew
-("PolyDivQuotient", &this->fPolynomialDivisionQuotient, 0, "",
+  this->AddOperationInnerHandler
+("PolyDivQuotient", &this->fPolynomialDivisionQuotient, "",
    "Quotient of two polynomials under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\nb:=Polynomial{}(x_1^2+x_3);\
    \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
    ;
-  this->AddOperationMustBeNew
-("PolyDivRemainder", &this->fPolynomialDivisionRemainder, 0, "",
+  this->AddOperationInnerHandler
+("PolyDivRemainder", &this->fPolynomialDivisionRemainder, "",
    "Remainder of polynomial division under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\n b:=Polynomial{}(x_1^2+x_3);\
    \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
    ;
-  this->AddOperationMustBeNew
-  ("suffixNotationForPostScript", this->fSuffixNotationForPostScript, 0, "",
+  this->AddOperationInnerHandler
+  ("suffixNotationForPostScript", this->fSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
-this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
+this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    "Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
@@ -62,12 +62,12 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    "drawPolar{}(1+sin {} t, 0, 360)")
    ;
 
-  this->AddOperationMustBeNew
-("IsInteger", &this->fIsInteger,0, "",
+  this->AddOperationInnerHandler
+("IsInteger", &this->fIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
-  this->AddOperationMustBeNew
-  ("SemisimpleLieAlgebra", &this->fSSAlgebraShort, 0, "",
+  this->AddOperationInnerHandler
+  ("SemisimpleLieAlgebra", &this->fSSAlgebraShort, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
     such as A_n or, alternatively, in the format A^k_n, \
@@ -109,8 +109,8 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
     The roots of indices 1,..., k are the simple roots, where k is the rank of the Lie algebra. \
     The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
-  this->AddOperationMustBeNew
-  ("printSemisimpleLieAlgebra", &this->fSSAlgebraVerbose, 0, "",
+  this->AddOperationInnerHandler
+  ("printSemisimpleLieAlgebra", &this->fSSAlgebraVerbose, "",
    "Creates a quite detailed \
    printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
@@ -118,29 +118,29 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    For E_8 is quite heavy and might put a slower computer to sleep.  \
    ",
    "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
-  this->AddOperationMustBeNew
-  ("Polynomial", this->fPolynomial, 0, "",
+  this->AddOperationInnerHandler
+  ("Polynomial", this->fPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",
    "Polynomial{}((x+y+z)^2)");
-  this->AddOperationMustBeNew
-  ("UE", this->fElementUniversalEnvelopingAlgebra, 0, "",
+  this->AddOperationInnerHandler
+  ("UE", this->fElementUniversalEnvelopingAlgebra, "",
    "Creates an atomic representation of an element of a universal enveloping algebra.",
    "g:=SemisimpleLieAlgebra{} G_2;\nUE{}(g_1g_2-g_2g_1+g_3^2)");
-  this->AddOperationMustBeNew
-  ("FunctionToMatrix", this->fMatrix, 0,"",
+  this->AddOperationInnerHandler
+  ("FunctionToMatrix", this->fMatrix,"",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
    the third- the number of columns.\
    ", "X:=FunctionToMatrix{}(A,5,6);\n A{}({{a}},{{b}}):=a+b;\n X;");
-  this->AddOperationMustBeNew
-  ("Union", this->fUnion, 0, "",
+/*  this->AddOperationInnerHandler
+  ("Union", this->innerUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); Union{}X; A{}({{i}},{{j}}):=i*i-j*j; Union{}X ");
-  this->AddOperationMustBeNew
-  ("UnionNoRepetition", this->fUnionNoRepetition, 0, "",
+  this->AddOperationInnerHandler
+  ("UnionNoRepetition", this->innerUnionNoRepetition, "",
    "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
-  this->AddOperationMustBeNew
-  ("hwv", this->fHWV, 0, "",
+*/  this->AddOperationInnerHandler
+  ("hwv", this->fHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
    gives the highest weight in fundamental coordinates. \
@@ -148,8 +148,8 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    parabolic subalgebra with first simple Vector<Rational> crossed-out. The second argument is allowed to have \
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
    "g:=SemisimpleLieAlgebra{} B_3;\n v_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0)) ;  v_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\ng_{0,1}g_{-1} v_\\lambda");
-  this->AddOperationMustBeNew
-  ("hwTAAbf", this->fHWTAABF, 0, "",
+  this->AddOperationInnerHandler
+  ("hwTAAbf", this->fHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \
    Let M be a Verma module with highest weight vector v given in \
    fundamental coordinates. Let P:M->M\
@@ -157,37 +157,37 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    highest to 0. Let u_1, u_2 be two words in the universal enveloping algebra. Then define hwTAAbf(u_1,u_2):=\
    Tr_M (P ( taa(u_1) u_2 ), where taa() is the transpose anti-automorphism of g. ",
    "g:=SemisimpleLieAlgebra{} G_2;\nhwTAAbf{}(g_{-1} g_{-2}, g_{-1}g_{-2}, (2,2))");
-  this->AddOperationMustBeNew
-  ("WeylDimFormula", this->fWeylDimFormula, 0, "",
+  this->AddOperationInnerHandler
+  ("WeylDimFormula", this->fWeylDimFormula, "",
    "Weyl dimension formula. First argument gives the type of the Weyl group of the simple\
     Lie algebra in the form Type_Rank (e.g. E_6).\
    The second argument gives the highest weight in fundamental coordinates. ",
    "WeylDimFormula{}(G_2, (x,0));\nWeylDimFormula{}(B_3, (x,0,0));");
-  this->AddOperationMustBeNew
-  ("animateLittelmannPaths", this->fAnimateLittelmannPaths, 0, "",
+  this->AddOperationInnerHandler
+  ("animateLittelmannPaths", this->fAnimateLittelmannPaths, "",
    "Generates all Littelmann-Lakshmibai-Seshadri paths, draws them and animates them. Presented first on the seminar in Charles University Prague. \
    The first argument gives the type of the semisimple  Lie algebra, the second gives the highest weight. \
    ",
    "animateLittelmannPaths{}(G_2, (2,0));");
-  this->AddOperationMustBeNew
+  this->AddOperationInnerHandler
   ("DecomposeInducingRepGenVermaModule",
-   this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, 0, "",
+   this->fDecomposeFDPartGeneralizedVermaModuleOverLeviPart, "",
    "Decomposes the inducing module of a generalized Verma module over the Levi part of a parabolic smaller than the inducing one.\
    The first argument gives the type of the algebra. The second argument gives the highest weight of the module in \
    fundamental coordinates. The third argument gives the parabolic subalgebra with respect to which we induce. \
    The last argument gives the parabolic subalgebra with respect to whose Levi part we decompose.",
    "DecomposeInducingRepGenVermaModule{}(B_3,(0, 1,1),(1,0,0), (1,0,1))");
-  this->AddOperationMustBeNew
-  ("Casimir", this->fCasimir, 0, "",
+  this->AddOperationInnerHandler
+  ("Casimir", this->fCasimir, "",
    "Gives the Casimir element. ",
    "Casimir{}(G_2)");
-  this->AddOperationMustBeNew
-  ("hmmG2inB3", this->fEmbedG2inB3, 0, "",
+  this->AddOperationInnerHandler
+  ("hmmG2inB3", this->fEmbedG2inB3, "",
    "Embeds elements of the Universal enveloping of G_2 in B_3, following an embedding found in\
     a paper by McGovern.",
    "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
-  this->AddOperationMustBeNew
-  ("drawWeightSupportWithMults", this->fDrawWeightSupportWithMults, 0, "",
+  this->AddOperationInnerHandler
+  ("drawWeightSupportWithMults", this->fDrawWeightSupportWithMults, "",
    "Draws the weight support of an irreducible finite-dimensional highest weight module. \
    The first argument gives the type and the second gives the highest weight given in \
    fundamendal weight basis. \
@@ -196,13 +196,13 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    <b> Warning. Drawing text (i.e. multiplicities) \
    is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
    "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
-  this->AddOperationMustBeNew
-  ("drawWeightSupport", this->fDrawWeightSupport, 0, "",
+  this->AddOperationInnerHandler
+  ("drawWeightSupport", this->fDrawWeightSupport, "",
    "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");
-  this->AddOperationMustBeNew
-  ("SplitFDpartB3overG2CharsOnly", this->fSplitFDpartB3overG2CharsOnly, 0, "",
+  this->AddOperationInnerHandler
+  ("SplitFDpartB3overG2CharsOnly", this->fSplitFDpartB3overG2CharsOnly, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of\
     B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental \
@@ -210,8 +210,8 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic\
     subalgebra of B_3. ",
    "SplitFDpartB3overG2CharsOnly{}(x_1,2,0)");
-  this->AddOperationMustBeNew
-  ("SplitFDpartB3overG2", this->fSplitFDpartB3overG2, 0, "",
+  this->AddOperationInnerHandler
+  ("SplitFDpartB3overG2", this->fSplitFDpartB3overG2, "",
    "Splits the finite dimensional part of the inducing module of the generalized Verma module of \
    B_3(so(7)) into G_2-components. \
    The argument is gives the highest weight of the generalized Verma module in fundamental \
@@ -219,8 +219,8 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    The arguments which are not small integers indicate the non-selected roots of the inducing parabolic \
    subalgebra of B_3. ",
    "SplitFDpartB3overG2{}(x_1,1,0)");
-  this->AddOperationMustBeNew
-  ("PrintB3G2branchingTableCharsOnly",this->fPrintB3G2branchingTableCharsOnly, 0, "",
+  this->AddOperationInnerHandler
+  ("PrintB3G2branchingTableCharsOnly",this->fPrintB3G2branchingTableCharsOnly, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. The argument of the \
    function gives the maximum height \
    of the B_3-weight. The second argument indicates the parabolic subalgebra of B_3- zero entry \
@@ -229,19 +229,19 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    not in the parabolic. The expression given \
    in that coordinate is used as the corresponding highest weight. ",
    "PrintB3G2branchingTableCharsOnly{}(2, (0,0,0)); PrintB3G2branchingTableCharsOnly{}(2, (x_1,0,0))");
-  this->AddOperationMustBeNew
-  ("PrintB3G2branchingTable", this->fPrintB3G2branchingTable, 0, "",
+  this->AddOperationInnerHandler
+  ("PrintB3G2branchingTable", this->fPrintB3G2branchingTable, "",
    "Creates a table of branching of finite dimensional B_3-modules over G_2. \
     The argument of the function gives the maximum height \
    of the B_3-weight. The function works with arguments 0 or 1; values of 2 or more must be run off-line.",
    "PrintB3G2branchingTable{}(1, (0,0,0)); PrintB3G2branchingTable{}(1, (x_1,0,0))");
-  this->AddOperationMustBeNew
-  ("SplitFDTensorGenericGeneralizedVerma", this->fSplitGenericGenVermaTensorFD, 0, "",
+  this->AddOperationInnerHandler
+  ("SplitFDTensorGenericGeneralizedVerma", this->fSplitGenericGenVermaTensorFD, "",
    "Experimental, please don't use. Splits generic generalized Verma module tensor finite dimensional module. ",
    "SplitFDTensorGenericGeneralizedVerma{}(G_2, (1, 0), (x_1, x_2)); ");
-  this->AddOperationMustBeNew
+  this->AddOperationInnerHandler
   ("WriteGenVermaAsDiffOperatorsUpToWeightLevel",
-   this->fWriteGenVermaModAsDiffOperatorUpToLevel, 0, "",
+   this->fWriteGenVermaModAsDiffOperatorUpToLevel, "",
    "<b>Experimental, please don't use</b>. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The third argument gives the highest weight. \
@@ -249,8 +249,8 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    root spaces outside of the Levi part of the parabolic. \
    The second argument gives the weight level to which the computation should be carried out",
    "WriteGenVermaAsDiffOperatorsUpToWeightLevel{}(B_3, 1, (0, 0, x_3)); ");
-  this->AddOperationMustBeNew
-  ("EmbedSSalgebraInWeylAlgebra", this->fWriteGenVermaModAsDiffOperators, 0, "",
+  this->AddOperationInnerHandler
+  ("EmbedSSalgebraInWeylAlgebra", this->fWriteGenVermaModAsDiffOperators, "",
    "Experimental, please don't use. Embeds a Lie algebra \
    in the Weyl algebra with matrix coefficients.\
    The second argument gives the highest weight. \
@@ -258,23 +258,23 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    parabolic subalgebra selection. \
    The first argument gives the type of the Lie algebra. ",
    "EmbedSSalgebraInWeylAlgebra{}(B_3, (0,0,0), (0, 0, 1)); ");
-  this->AddOperationMustBeNew
-  ("WeylOrbitSimpleCoords", this->fWeylOrbitSimple, 0, "",
+  this->AddOperationInnerHandler
+  ("WeylOrbitSimpleCoords", this->fWeylOrbitSimple, "",
    "Generates a Weyl orbit printout from simple coords.\
     First argument = type. Second argument = weight in simple coords. The orbit size is cut off at max 1920 elements (type D_5).",
    "WeylOrbitSimpleCoords{}(B_2, (y, y));");
-  this->AddOperationMustBeNew
-  ("WeylOrbitFundCoords", this->fWeylOrbitFund, 0, "",
+  this->AddOperationInnerHandler
+  ("WeylOrbitFundCoords", this->fWeylOrbitFund, "",
    "Generates a Weyl orbit printout from fundamental coords.\
     First argument = type. Second argument = weight in fundamental coords. ",
    "WeylOrbitFundCoords{}(B_2, (y, 0));");
-  this->AddOperationMustBeNew
-  ("WeylOrbitFundRho", this->fWeylOrbitFundRho, 0, "",
+  this->AddOperationInnerHandler
+  ("WeylOrbitFundRho", this->fWeylOrbitFundRho, "",
    "Generates a Weyl orbit printout from fundamental coords.\
     First argument = type. Second argument = weight in fundamental coords. Doing the rho-modified action. ",
    "WeylOrbitFundRho{}(B_2, (y, 0) )");
-  this->AddOperationMustBeNew
-  ("KLcoeffs", this->fKLcoeffs, 0, "",
+  this->AddOperationInnerHandler
+  ("KLcoeffs", this->fKLcoeffs, "",
    "Computes the n by n tables of 1) Kazhdan-Lusztig polynomials, 2) R polynomials and 3) Kazhdan-Lusztig \
    polynomials evaluated at one, where n<=192  is the size of the Weyl group (i.e. no larger than D_4(so(8)).\
    The notation follows the original paper by Kazhdan and Lusztig, \"\
@@ -287,19 +287,19 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    all times, unlike\
    the other more efficient implementations).",
    "KLcoeffs{}(B_3)");
-  this->AddOperationMustBeNew
-  ("printRootSubalgebras", this->fprintRootSAs, 0, "",
+  this->AddOperationInnerHandler
+  ("printRootSubalgebras", this->fprintRootSAs, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
    "printRootSubalgebras{}(E_6)");
-  this->AddOperationMustBeNew
-  ("printSlTwoSubalgebras", this->fprintSltwos, 0, "",
+  this->AddOperationInnerHandler
+  ("printSlTwoSubalgebras", this->fprintSltwos, "",
    "Prints sl(2) subalgebras and root subalgebras. \
    The argument gives the type of the Lie algebra in the form Type_Rank (e.g. E_6).",
    "printSlTwoSubalgebras{}(E_6)");
 
-   this->AddOperationMustBeNew
-  ("parabolicsInfoBruhatGraph", this->fParabolicWeylGroupsBruhatGraph, 0, "",
+   this->AddOperationInnerHandler
+  ("parabolicsInfoBruhatGraph", this->fParabolicWeylGroupsBruhatGraph, "",
    " Makes a table with information about the Weyl group of a parabolic subalgebra of the ambient Lie algebra, \
    as well as the cosets \
    (given by minimal coset representatives) of the Weyl subgroup in question. \
@@ -315,12 +315,12 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
    <b>Please do not use for subalgebras larger than B_4 (so(9)). The vpf program has no problem handling this \
    function up to E_6 but LaTeX crashes trying to process the output. </b>",
    "parabolicsInfoBruhatGraph{}(B_3,(1,0,0),(1,0,0))");
-  this->AddOperationMustBeNew
-  ("fTestMonomialBasisConjecture", this->fTestMonomialBaseConjecture, 0, "",
+  this->AddOperationInnerHandler
+  ("fTestMonomialBasisConjecture", this->fTestMonomialBaseConjecture, "",
    "Tests the monomial basis conjecture from the Jackson-Milev paper. First argument gives rank bound. \
     Second argument gives dimension bound. ",
    "fTestMonomialBasisConjecture{}(2, 50)");
-/*  this->AddOperationMustBeNew
+/*  this->AddOperationInnerHandler
   ("DecomposeCharGenVermaToIrreps", & this->fDecomposeCharGenVerma, "",
    "<b>This is an experiment; I have no mathematical proof that this function works. \
    If you are seeing this function then I forgot to comment it out before updating the calculator. \
@@ -329,25 +329,25 @@ this->AddOperationMustBeNew ("drawPolar", this->fDrawPolarRfunctionTheta, 0, "",
     modules.\
     First argument = type. Second argument = highest weight. Non-integer entries give parabolic selection. ",
    "DecomposeCharGenVermaToIrreps{}(G_2, (x_1, 0))");*/
-  this->AddOperationMustBeNew
-  ("LSpath", this->fLSPath, 0, "",
+  this->AddOperationInnerHandler
+  ("LSpath", this->fLSPath, "",
    "Lakshmibai-Seshadri path starting at 0. The first argument gives the semisimple Lie algebra, \
     the next arguments give the waypoints of the path.",
    "LSpath{}(G_2, (0,0), (2,1) )");
-  this->AddOperationMustBeNew
-  ("LROdefine", this->fLittelmannOperator, 0, "",
+  this->AddOperationInnerHandler
+  ("LROdefine", this->fLittelmannOperator, "",
    "Littelmann root operator e_i, where e_i is the Littelmann root operator with \
    respect to root of index i. If i is negative then the e_i root operator is defined to be \
    the f_\alpha operator.",
    "e_{{i}}:=LROdefine_i; e_{-1} e_{-1} LSpath{}(G_2, (0,0), (2,1))");
-  this->AddOperationMustBeNew
-  ("InvertMatrixVerbose", this->fInvertMatrix, 0, "",
+  this->AddOperationInnerHandler
+  ("InvertMatrixVerbose", this->fInvertMatrix, "",
    "Inverts a matrix of rationals if invertible, in any other case generates an error. Makes a detailed \
    printout of all Gaussian elimantion steps. Originally intended for demonstrations to linear algebra\
    / calculus students. ",
    "InvertMatrixVerbose{}((1,2),(2,3))");
-  this->AddOperationMustBeNew
-  ("SolveNseparableQuasiLinearSystem", this->fSolveSeparableBilinearSystem, 0, "",
+  this->AddOperationInnerHandler
+  ("SolveNseparableQuasiLinearSystem", this->fSolveSeparableBilinearSystem, "",
    "Attempts to solve a polynomial system in n+m variables such that it is a linear system \
    in the first n variables with coefficients in the polynomial \
    ring generated by the remaining m  variables. \
@@ -379,8 +379,8 @@ x_{6}x_{15}+x_{5}x_{14}-x_{3}x_{13},\
 x_{5}x_{15}+x_{4}x_{14}-x_{2}x_{13},\
 x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 
-  this->AddOperationMustBeNew
-  ("GroebnerLexUpperLimit", this->fGroebnerLex, 0, "",
+  this->AddOperationInnerHandler
+  ("GroebnerLexUpperLimit", this->fGroebnerLex, "",
    "Transforms to a reduced Groebner basis using the  \
     lexicographic order. \
     The lexicographic order is inherited from the comparison of the underlying expressions.\
@@ -435,8 +435,8 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    ",
    "GroebnerLexUpperLimit{}(10000, s^2+c^2+1, a-s^4, b-c^4 );\
    \nGroebnerLexUpperLimit{}(5, s^2+c^2+1, a-s^4, b-c^4 );");
-  this->AddOperationMustBeNew
-  ("GroebnerGrLexUpperLimit", this->fGroebnerGrLex, 0, "",
+  this->AddOperationInnerHandler
+  ("GroebnerGrLexUpperLimit", this->fGroebnerGrLex, "",
    "Transforms to a reduced Groebner basis relative to the graded \
    lexicographic order. In the graded lexicographic order, monomials are first compared by\
    total degree, then by lexicographic order. \
@@ -448,31 +448,31 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    For a description of the algorithm used see the description of function GroebnerLexUpperLimit.",
    "GroebnerGrLexUpperLimit{}(10000, a^2+b^2+1, x-a^4, y-b^4 );\n \
    GroebnerGrLexUpperLimit{}(5, a^2+b^2+1, x-a^4, y-b^4 )");
-  this->AddOperationMustBeNew
-  ("experimentalPrintSemisimpleSubalgebras", this->fSSsubalgebras, 0, "",
+  this->AddOperationInnerHandler
+  ("experimentalPrintSemisimpleSubalgebras", this->fSSsubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints the semisimple subalgebras of a semisimple Lie algebra. ",
    "experimentalPrintSemisimpleSubalgebras{}(A_2)", true);
-  this->AddOperationMustBeNew
-  ("experimentalEmbedSemisimpleInSemisimple", this->fEmbedSSalgInSSalg, 0, "",
+  this->AddOperationInnerHandler
+  ("experimentalEmbedSemisimpleInSemisimple", this->fEmbedSSalgInSSalg, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints all embeddings of the first subalgebra into the second. ",
    "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true);
-//     this->AddOperationMustBeNew
+//     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",
 //   "printAllPartitions{}(A_2, (2,3))");
-//  this->AddOperationMustBeNew
+//  this->AddOperationInnerHandler
 //  ("Differential", & this->fDifferential, "",
 //   "Differential. ",
 //   "d{}{{a}}:=Differential{}a;\nx:=Polynomial{}x;\nd{}(x^2/(x+1))");
-//  this->AddOperationMustBeNew
+//  this->AddOperationInnerHandler
 //  ("\\sqrt", & this->fSqrt, "",
 //   "Square root of a rational, implemented as algebraic extension of the rationals. ",
 //   "\\sqrt{}{3+2\\sqrt{}2}");
 
-  this->AddOperationMustBeNew
-  ("FactorOneVarPolyOverRationals", this->fFactor, 0, "",
+  this->AddOperationInnerHandler
+  ("FactorOneVarPolyOverRationals", this->fFactor, "",
    "Factors a one variable polynomial over the rationals using Kroenecker's method. \
     After clearing denominators, assume the poly has integer coefficients.\
     If looking for an integer coefficient divisor of degree k, \
@@ -481,8 +481,8 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
     this gives a finite set of possibilities for the divisors, as interpolated by\
     Lagrange polynomials.",
    "FactorOneVarPolyOverRationals{}{x^2-4}", false);
-  this->AddOperationMustBeNew
-  ("Freudenthal", this->fFreudenthalEval, 0, "",
+  this->AddOperationInnerHandler
+  ("Freudenthal", this->fFreudenthalEval, "",
    "Computes the dominant weights with multiplicities of a finite dimensional \
    module of a highest weight given in fundamental coordinates. The first argument gives \
    the semisimple Lie algebra type, the second argument gives the highest weight in \
@@ -490,10 +490,135 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    "Freudenthal{}(B_3, (2,2,2))", true)
    ;
 
-//  this->AddOperationMustBeNew
+//  this->AddOperationInnerHandler
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
   this->NumPredefinedVars=this->operationS.size;
 }
 
+void CommandList::initPredefinedOuterFunctions()
+{
+  this->AddOperationOuterHandler
+  ("+", this->outerPlus, "",
+   "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
+    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
+  this->AddOperationOuterHandler
+  ("-", this->outerMinus, "",
+   "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
+   -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
+  this->AddOperationOuterHandler
+  ("/", this->outerDivide, "",
+    "1) If a and b are rational substitutes a/b with its value. \
+     <br>2)If b is rational computes (anything)/b with anything* (1/b). \
+     This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", true);
+  this->AddOperationOuterHandler
+  ("*", this->outerTimes, "",
+   "<br>The following description is out of date. Must be updated.\
+   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, \
+   substitutes a*b by the result of the built-in handler.<br>\n \
+   2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
+   3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; \
+   {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
+   4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
+   4.2) If the expression is of the form a*(b*c) and  a and b are rational, \
+   substitutes a*(b*c) by (a*b)*c. <br>\
+   4.3) If the expression is of the form a*(b*c) and b is rational but a is not, \
+   substitutes the expression by b*(a*c).",
+   "2*c_1*d*3", true);
+    this->AddOperationOuterHandler
+  ("\\otimes",  this->outerTensor, "",
+   "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
+   generalized Verma modules. ",
+   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
+   \n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
+   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
+  this->AddOperationOuterHandler
+  ("[]", this->StandardLieBracket, "",
+   "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
+  this->AddOperationOuterHandler
+  (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
+   The expression a:=:b always reduces to \
+   a:=b. In addition to the transformation, the pair of expressions a,b is registered in a \
+   special global \"registry\". This has the following effect. Every time \
+   the expression b is met, it is displayed on the screen as a. We note that subsequent \
+   occurrences of the expression a will first be replaced by b (as mandated\
+   by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", true);
+  std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
+  moreInfoOnIntegers
+  << " LargeIntUnsigned::SquareRootOfCarryOverBound is "
+  << " restricted to be smaller than the square root of a positive signed int on the system: in this way, multiplying two small integers and "
+  << " storing the result in a signed int is guaranteed to produce the correct result. "
+  << " Rationals are stored in the computer as 8 bytes+ one pointer (which is another 4 bytes on a 32 bit system). "
+  << " The pointer either equals zero, or points to a dynamically resizable structure able to hold "
+  << " arbitrary integer sizes (within the system's address space limits). If the pointer is zero, we call  "
+  << " such a rational number small. In this case its denominator and numerator are stored in "
+  << " the other 8 bytes, and should both be smaller than LargeIntUnsigned::CarryOverBound="
+  << LargeIntUnsigned::CarryOverBound
+  << " . When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
+  << " a check is performed whether the denominator and numerator are smaller in absolute value than "
+  << " LargeIntUnsigned::SquareRootOfCarryOverBound="
+  << LargeIntUnsigned::SquareRootOfCarryOverBound
+  << ". If that check passes, the two rationals are multiplied using the "
+  << " built-in processor instructions for operations with integers. If any of the check fails, both rationals are converted to the larger dynamically "
+  << " resizeable structure, sufficient memory is allocated, and multiplication/addition is carried using algorithms located in class "
+  << " LargeIntUnsigned. The algorithms are O(log(n)^2) (the number of digits squared), "
+  << " slower than the ones in the standard numerical computation libraries (such as GMP). However, the algorithms "
+  << " provide the essential convenience of having a self-contained mathematical library. An implementation of "
+  << " discrete Fourier transform multiplication algorithm (O(log(n)(log(log n))) is considered, and will be made if need arises. ";
+  StandardPowerStreamInfo
+  << "If the left argument evaluates to atom, and if the right argument is a small integer atom, "
+  << " tries to carry out the raise-to-power operation. If successful, substitutes the expression with the obtained atom. "
+  << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
+  << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
+  << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
+  this->AddOperationOuterHandler
+  ("==", this->outerEqualEqual, "",
+   "If either the left or the right argument contains a bound variable does nothing. \
+    Else evaluates to 1 if the left argument equals the right argument.",
+   "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
+   \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
+  //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
+  //expression
+/*  this->AddOperationOuterHandler
+  ("{}", this->StandardFunction, "",
+   "The first argument of this operator represents a name of the function, \
+   the second argument represents the argument of that function.  \
+   <br>1) If the first argument of {} is rational, the operation substitutes the \
+   expression with that constant. \
+   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of \
+   the function, depending on the types of the arguments.\
+   <br>3) If the first argument is of type list and the second argument is a small \
+   integer between 1 and the number of elements in the list,\
+   the operation substitutes the list with the element indexed by the second argument.\
+   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded \
+   handler function, the handler is invoked onto the second argument.\
+   If the invocation is successful, the expression is substituted with the result, \
+   otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
+   the only noticeable difference is that the functions invoked in (2) are anonymous \
+   from the calculator standpoint (i.e. have only technical c++ names), \
+   while the functions in (4) have human-readable calculator-visible names. \
+   In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
+   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if \
+   IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
+   \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);*/
+  //the following is the binding variable operation
+  this->AddOperationOuterHandler
+  ("\\cup", this->outerUnion, "",
+   "If all arguments of \\cup are of type list, substitutes the expression with \
+   a list containing \
+   the union of all members (with repetition).",
+   "x\\cup Sequence{} x \\cup Sequence{}x \\cup (a,b,x)", true);
+  this->AddOperationOuterHandler
+  ("\\sqcup", this->outerUnionNoRepetition, "",
+   "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
+   containing \
+   the union of all members; all repeating members are discarded.",
+   "(x,y,x)\\sqcup(1,x,y,2)", true);
+}
+
+void CommandList::initPredefinedInnerFunctionsWithTypes()
+{ this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(), "Adds two rational numbers. ",
+   "2+3", true);
+}

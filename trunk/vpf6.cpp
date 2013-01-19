@@ -3099,6 +3099,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   //operation List must always have index 0.
   this->AddOperationNoRepetitionAllowed("");
 
+  this->AddOperationNoRepetitionAllowed(":=");
+  this->AddOperationNoRepetitionAllowed(";");
+  this->AddOperationNoRepetitionAllowed("if:=");
+  this->AddOperationNoRepetitionAllowed("{}");
   this->AddOperationNoRepetitionAllowed("+");
   this->AddOperationNoRepetitionAllowed("-");
   this->AddOperationNoRepetitionAllowed("/");
@@ -3126,7 +3130,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("LRO");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
-  this->AddOperationNoRepetitionAllowed(";");
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
@@ -4267,8 +4270,8 @@ std::string Expression::ToString
   } else
     return "(Error:NoOwner)";
   RecursionDepthCounter theRecursionCounter(&this->theBoss->RecursionDeptH);
-  return this->Lispify();
-  /*int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
+
+  int notationIndex=theBoss->theObjectContainer.ExpressionWithNotation.GetIndex(*this);
   if (notationIndex!=-1)
     return theBoss->theObjectContainer.ExpressionNotation[notationIndex];
   std::stringstream out;
@@ -4280,47 +4283,38 @@ std::string Expression::ToString
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   int charCounter=0;
   std::string additionalDataComments;
-  if (this->errorString!="")
-  { if (outComments!=0)
-      *outComments << this->errorString << " ";
-    return "(Error:SeeComments)";
-  }
-  if (this->theOperation<0)
-  { out << "(NotInitialized)";
+  if (this->IsAtoM())
+  { out << "(Programming~ error:~ unknown~ atom: " << this->Lispify() << ")";
     return out.str();
-  }
-  if (this->EvaluatesToAtom())
-  { std::stringstream dataComments;
-    out << this->GetAtomicValue().ToString(&dataComments, isFinal, theFormat);
-    additionalDataComments=dataComments.str();
-  } else if (this->theOperation==this->theBoss->opDefine())
-  { std::string firstE=this->children[0].ToString(theFormat, outComments);
-    std::string secondE=this->children[1].ToString(theFormat, outComments);
-    if (this->children[0].theOperation==this->theBoss->opDefine())
+  } else if (this->IsOfType<Rational>())
+    out << this->GetValuE<Rational>().ToString();
+  else if (this->children[0].IsAtoM(this->theBoss->opDefine()))
+  { std::string firstE=this->children[1].ToString(theFormat, outComments);
+    std::string secondE=this->children[2].ToString(theFormat, outComments);
+    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
       out << "(" << firstE << ")";
     else
       out << firstE;
     out << ":=";
-    if (this->children[1].theOperation==this->theBoss->opDefine())
+    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
       out << "(" << secondE << ")";
     else
       out << secondE;
   }
-  else if (this->theOperation==this->theBoss->opIsDenotedBy())
+  else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
     out << this->children[0].ToString(theFormat, outComments)
     << ":=:" << this->children[1].ToString(theFormat, outComments);
-  else if (this->theOperation==this->theBoss->opDefineConditional())
+  else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
     out <<  this->children[0].ToString(theFormat, outComments) << " :if "
     << this->children[1].ToString(theFormat, outComments)
     << ":=" << this->children[2].ToString(theFormat, outComments);
-  else if (this->theOperation==this->theBoss->opDivide() )
+  else if (this->IsListStartingWithAtom(this->theBoss->opDivide() ))
   { std::string firstE= this->children[0].ToString(theFormat, outComments);
     std::string secondE=this->children[1].ToString(theFormat, outComments);
     bool firstNeedsBrackets=
-    !(this->children[0].theOperation==this->theBoss->opTimes()||
-      this->children[0].theOperation==this->theBoss->opDivide()||
-      this->children[0].EvaluatesToAtom());
-    bool secondNeedsBrackets= !this->children[1].EvaluatesToAtom();
+    !(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
+      this->children[1].IsListStartingWithAtom(this->theBoss->opDivide()));
+    bool secondNeedsBrackets= !this->children[2].IsOfType<Rational>();
     if (firstNeedsBrackets)
       out << "(" << firstE << ")";
     else
@@ -4331,11 +4325,11 @@ std::string Expression::ToString
     else
       out << secondE;
   }
-  else if (this->theOperation==this->theBoss->opTensor() )
-  { out << this->children[0].ToString(theFormat, outComments)
-    << "\\otimes " << this->children[1].ToString(theFormat, outComments);
-  } else if (this->theOperation==this->theBoss->opTimes() )
-  { std::string tempS=this->children[0].ToString(theFormat, outComments);
+  else if (this->IsListStartingWithAtom(this->theBoss->opTensor()) )
+  { out << this->children[1].ToString(theFormat, outComments)
+    << "\\otimes " << this->children[2].ToString(theFormat, outComments);
+  } else if (this->IsListStartingWithAtom(this->theBoss->opTimes() ))
+  { std::string tempS=this->children[1].ToString(theFormat, outComments);
     if (tempS=="-1")
       tempS="-";
     if (tempS=="1")
@@ -4343,17 +4337,17 @@ std::string Expression::ToString
     out << tempS;
     if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
       out << "*"; else out << " ";
-    out << this->children[1].ToString(theFormat, outComments);
-  } else if (this->theOperation==this->theBoss->opThePower())
+    out << this->children[2].ToString(theFormat, outComments);
+  } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=this->children[0].ToString(theFormat, outComments);
     std::string secondE=this->children[1].ToString(theFormat, outComments);
-    if (this->children[0].EvaluatesToAtom())
+    if (this->children[1].IsOfType<Rational>())
       out << firstE;
     else
       out << "(" << firstE << ")";
     out << "^{" << secondE << "}";
   }
-  else if (this->theOperation==this->theBoss->opPlus() )
+  else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);
     std::string tempS2= this->children[0].ToString(theFormat, outComments);
     std::string tempS=this->children[1].ToString(theFormat, outComments);
@@ -4366,7 +4360,7 @@ std::string Expression::ToString
       if (tempS[0]!='-')
         out << "+";
     out << tempS;
-  } else if (this->theOperation==this->theBoss->opMinus())
+  } else if (this->IsListStartingWithAtom(this->theBoss->opMinus()))
   { if (this->children.size==1)
       out << "-" << this->children[0].ToString
       (theFormat, outComments);
@@ -4376,10 +4370,10 @@ std::string Expression::ToString
       << "-" << this->children[1].ToString(theFormat, outComments);
     }
   }
-  else if (this->theOperation==this->theBoss->opBind())
+  else if (this->IsListStartingWithAtom(this->theBoss->opBind()))
   { out << "{{" << this->children[0].ToString(theFormat, outComments) << "}}";
   }
-  else if (this->theOperation==this->theBoss->opApplyFunction())
+  else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
@@ -4402,10 +4396,10 @@ std::string Expression::ToString
         break;
     }
   }
-  else if (this->theOperation==this->theBoss->opEqualEqual())
+  else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
     out << this->children[0].ToString(theFormat, outComments)
     << "==" << this->children[1].ToString(theFormat, outComments);
-  else if (this->theOperation==this->theBoss->opList())
+  else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=0; i<this->children.size; i++)
@@ -4448,26 +4442,28 @@ std::string Expression::ToString
         out << ")";
         break;
     }
-  } else if (this->theOperation==this->theBoss->opLieBracket())
+  } else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
     out << "[" << this->children[0].ToString(theFormat, outComments)
     << "," << this->children[1].ToString(theFormat, outComments)
     << "]";
-  else if (this->theOperation==this->theBoss->opUnion())
+  else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
     out << this->children[0].ToString(theFormat, outComments)
     << "\\cup " << this->children[1].ToString(theFormat, outComments)
     ;
-  else if (this->theOperation==this->theBoss->opUnionNoRepetition())
+  else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
     out << this->children[0].ToString(theFormat, outComments)
     << "\\sqcup " << this->children[1].ToString(theFormat, outComments)
     ;
-  else if (this->theOperation==this->theBoss->opEndStatement())
+  else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
   { if (startingExpression==0)
       out << "<table>";
-    for (int i=0; i<this->children.size; i++)
+    for (int i=1; i<this->children.size; i++)
     { out << "<tr><td valign=\"top\">";
       bool createTable=(startingExpression!=0);
       if (createTable)
-        createTable=(startingExpression->theOperation==this->theBoss->opEndStatement() && startingExpression->children.size==this->children.size);
+        createTable=
+        (startingExpression->IsListStartingWithAtom(this->theBoss->opEndStatement()) &&
+         startingExpression->children.size==this->children.size);
       if (createTable)
       { out << "<hr> "
         << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
@@ -4475,11 +4471,11 @@ std::string Expression::ToString
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
-        if (!this->children[i].IsString() || !isFinal)
+        if (!this->children[i].IsOfType<std::string>() || !isFinal)
           out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
           (this->children[i].ToString(theFormat, outComments));
         else
-          out << this->children[i].GetAtomicValue().GetValuE<std::string>();
+          out << this->children[i].GetValuE<std::string>();
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -4496,8 +4492,6 @@ std::string Expression::ToString
   }
   else
     out << "(ProgrammingError:NotDocumented)" ;
-  if (this->errorString!="")
-    out << ")";
   if (outComments!=0)
     if (additionalDataComments!="")
       *outComments << "Comments to expression " << out.str() << ": " << additionalDataComments;
@@ -4507,11 +4501,11 @@ std::string Expression::ToString
     outTrue << "<hr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
     outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
     << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
-    if (this->theOperation==this->theBoss->opEndStatement())
+    if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
       outTrue << out.str();
     else
     { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
-      if (this->IsString() && isFinal)
+      if (this->IsOfType<std::string>() && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
         outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";
@@ -4521,7 +4515,7 @@ std::string Expression::ToString
   }
 //  if (useLatex && recursionDepth==0 && this->theOperation!=theBoss->opEndStatement())
 //    return CGI::GetHtmlMathSpanFromLatexFormula(out.str());
-  return out.str();*/
+  return out.str();
 }
 
 std::string Expression::Lispify()const
@@ -4572,7 +4566,7 @@ void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 }
 
 void CommandList::AddOperationBinaryInnerHandlerWithTypes
-  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+  (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
    bool visible)
@@ -4593,7 +4587,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
 }
 
 void CommandList::AddOperationHandler
-  (const std::string& theOpName, const Expression::FunctionAddress& handler,
+  (const std::string& theOpName, Expression::FunctionAddress handler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
    bool isInner, bool visible)
@@ -4652,10 +4646,9 @@ std::string Function::GetString(CommandList& theBoss)
 { std::stringstream out2;
   if (this->flagIamVisible)
   { std::stringstream out;
-    out << "Transformation address: " << this->theFunction << ". ";
+    out << "Transformation address: " << std::hex << (int) this->theFunction << ". ";
     if (!this->flagIsInner)
-      out << "This transformation is a ``law'', i.e., (called indirectly from the outside). "
-      << " We define a ``law'' to be a transformation which takes as an "
+      out << "This transformation is a ``law'' i.e., takes as an "
       << "additional argument the name of the operation. ";
     out << this->theDescription;
     if (this->theExample!="")
@@ -4685,24 +4678,23 @@ std::string CommandList::ToStringFunctionHandlers()
         numInnerHandlers++;
   }
   out << "\n <b> " << numOpsHandled << "  operations handled, "
-  << "by a total of " << numHandlers << " handler functions (of them "
-  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer."
+  << "by a total of " << numHandlers << " handler functions ("
+  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer)."
   << "</b><br>\n";
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
   for (int i=0; i<this->operationS.size; i++)
     if (this->FunctionHandlers[i].size>0)
-    { out << openTag2 << this->operationS[i] << closeTag2;
-      if (found)
-        out << "<br>";
-      found=true;
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
-      { if (j!=0)
-          out << "<br>";
+      { if (found)
+          out << "<br>\n";
+        found=true;
+        out << openTag2 << this->operationS[i] << closeTag2;
+        if (this->FunctionHandlers[i].size>1)
+          out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
         out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
       }
-    }
   return out.str();
 }
 

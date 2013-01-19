@@ -1339,19 +1339,19 @@ static bool TypeHighestWeightParabolic
   ;
 
   void AddOperationBinaryInnerHandlerWithTypes
-  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+  (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
    bool visible=true)
    ;
   void AddOperationHandler
-  (const std::string& theOpName, const Expression::FunctionAddress& handler,
+  (const std::string& theOpName, Expression::FunctionAddress handler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
     bool isInner, bool visible=true)
 ;
   void AddOperationInnerHandler
-  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+  (const std::string& theOpName, Expression::FunctionAddress innerHandler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
    bool visible=true)
@@ -1360,7 +1360,7 @@ static bool TypeHighestWeightParabolic
      opExample, true, visible);
   }
   void AddOperationOuterHandler
-  (const std::string& theOpName, const Expression::FunctionAddress& outerHandler,
+  (const std::string& theOpName, Expression::FunctionAddress outerHandler,
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
    bool visible=true)

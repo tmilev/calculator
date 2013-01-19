@@ -75,7 +75,7 @@ int Expression::GetOpType<charSSAlgMod<Rational> >()const
 }
 
 template < >
-int Expression::GetOpType<AlgebraicNumber >()const
+int Expression::GetOpType<AlgebraicNumber>()const
 { this->CheckInitialization();
   return this->theBoss->opAlgNumber();
 }
@@ -848,6 +848,7 @@ bool CommandList::ReplaceAbyE()
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
 //  theElt.theData.IndexBoundVars=this->theExpressionContext.size-1;
   theElt.controlIndex=this->conExpression();
+//  std::cout << "replaceAbyE: " << theElt.theData.ToString();
   return true;
 }
 
@@ -4137,6 +4138,7 @@ bool CommandList::ExtractExpressions
     if (result.errorString=="" && result.controlIndex==this->conExpression())
     { outputExpression=result.theData;
       success=true;
+//      std::cout << "Success: " << result.theData.ToString();
     }
     else if (result.errorString!="")
       errorLog << "Syntax error with message: " << result.errorString;
@@ -4166,6 +4168,9 @@ void CommandList::EvaluateCommands()
     out << this->syntaxErrors;
     out << "<hr>";
   }
+//  std::cout
+//  << "Starting expression: " << this->theProgramExpression.ToString()
+//  << "<hr>";
   Expression StartingExpression=this->theProgramExpression;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;
@@ -4302,15 +4307,15 @@ std::string Expression::ToString
       out << secondE;
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
-    out << this->children[0].ToString(theFormat, outComments)
-    << ":=:" << this->children[1].ToString(theFormat, outComments);
+    out << this->children[1].ToString(theFormat, outComments)
+    << ":=:" << this->children[2].ToString(theFormat, outComments);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
-    out <<  this->children[0].ToString(theFormat, outComments) << " :if "
-    << this->children[1].ToString(theFormat, outComments)
-    << ":=" << this->children[2].ToString(theFormat, outComments);
+    out <<  this->children[1].ToString(theFormat, outComments) << " :if "
+    << this->children[2].ToString(theFormat, outComments)
+    << ":=" << this->children[3].ToString(theFormat, outComments);
   else if (this->IsListStartingWithAtom(this->theBoss->opDivide() ))
-  { std::string firstE= this->children[0].ToString(theFormat, outComments);
-    std::string secondE=this->children[1].ToString(theFormat, outComments);
+  { std::string firstE= this->children[1].ToString(theFormat, outComments);
+    std::string secondE=this->children[2].ToString(theFormat, outComments);
     bool firstNeedsBrackets=
     !(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
       this->children[1].IsListStartingWithAtom(this->theBoss->opDivide()));
@@ -4339,8 +4344,8 @@ std::string Expression::ToString
       out << "*"; else out << " ";
     out << this->children[2].ToString(theFormat, outComments);
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
-  { std::string firstE=this->children[0].ToString(theFormat, outComments);
-    std::string secondE=this->children[1].ToString(theFormat, outComments);
+  { std::string firstE=this->children[1].ToString(theFormat, outComments);
+    std::string secondE=this->children[2].ToString(theFormat, outComments);
     if (this->children[1].IsOfType<Rational>())
       out << firstE;
     else
@@ -4349,8 +4354,8 @@ std::string Expression::ToString
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);
-    std::string tempS2= this->children[0].ToString(theFormat, outComments);
-    std::string tempS=this->children[1].ToString(theFormat, outComments);
+    std::string tempS2= this->children[1].ToString(theFormat, outComments);
+    std::string tempS=this->children[2].ToString(theFormat, outComments);
     out << tempS2;
 //    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
 //    << allowNewLine;
@@ -4362,16 +4367,16 @@ std::string Expression::ToString
     out << tempS;
   } else if (this->IsListStartingWithAtom(this->theBoss->opMinus()))
   { if (this->children.size==1)
-      out << "-" << this->children[0].ToString
+      out << "-" << this->children[1].ToString
       (theFormat, outComments);
     else
     { assert(children.size==2);
-      out << this->children[0].ToString(theFormat, outComments)
-      << "-" << this->children[1].ToString(theFormat, outComments);
+      out << this->children[1].ToString(theFormat, outComments)
+      << "-" << this->children[2].ToString(theFormat, outComments);
     }
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opBind()))
-  { out << "{{" << this->children[0].ToString(theFormat, outComments) << "}}";
+  { out << "{{" << this->children[1].ToString(theFormat, outComments) << "}}";
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { assert(this->children.size>=2);
@@ -4379,30 +4384,29 @@ std::string Expression::ToString
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=false;
-        out <<  this->children[0].ToString(theFormat, outComments)
-        << "_{" << this->children[1].ToString(theFormat, outComments) << "}";
+        out <<  this->children[1].ToString(theFormat, outComments)
+        << "_{" << this->children[2].ToString(theFormat, outComments) << "}";
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  this->children[0].ToString
+        out <<  this->children[1].ToString
         (theFormat, outComments)
         << "\\cdot(" << this->children[1].ToString(theFormat, outComments) << ")";
         break;
       default:
-        out << this->children[0].ToString
-        (theFormat, outComments)
-        << "{}(" << this->children[1].ToString(theFormat, outComments) << ")";
+        out << this->children[1].ToString(theFormat, outComments)
+        << "{}(" << this->children[2].ToString(theFormat, outComments) << ")";
         break;
     }
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
-    out << this->children[0].ToString(theFormat, outComments)
-    << "==" << this->children[1].ToString(theFormat, outComments);
+    out << this->children[1].ToString(theFormat, outComments)
+    << "==" << this->children[2].ToString(theFormat, outComments);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { switch (this->format)
     { case Expression::formatMatrixRow:
-        for (int i=0; i<this->children.size; i++)
+        for (int i=1; i<this->children.size; i++)
         { out << this->children[i].ToString(theFormat, outComments);
           if (i!=this->children.size-1)
             out << "& ";
@@ -4416,7 +4420,7 @@ std::string Expression::ToString
         for (int i=0; i<this->GetNumCols(); i++)
           out << "c";
         out << "} ";
-        for (int i=0; i<this->children.size; i++)
+        for (int i=1; i<this->children.size; i++)
         { out << this->children[i].ToString(theFormat, outComments);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
@@ -4428,7 +4432,7 @@ std::string Expression::ToString
         break;
       default:
         out << "(";
-        for (int i=0; i<this->children.size; i++)
+        for (int i=1; i<this->children.size; i++)
         { std::string currentChildString=this->children[i].ToString(theFormat, outComments);
           out << currentChildString;
           charCounter+=currentChildString.size();
@@ -4443,16 +4447,16 @@ std::string Expression::ToString
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
-    out << "[" << this->children[0].ToString(theFormat, outComments)
-    << "," << this->children[1].ToString(theFormat, outComments)
+    out << "[" << this->children[1].ToString(theFormat, outComments)
+    << "," << this->children[2].ToString(theFormat, outComments)
     << "]";
   else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
-    out << this->children[0].ToString(theFormat, outComments)
-    << "\\cup " << this->children[1].ToString(theFormat, outComments)
+    out << this->children[1].ToString(theFormat, outComments)
+    << "\\cup " << this->children[2].ToString(theFormat, outComments)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
-    out << this->children[0].ToString(theFormat, outComments)
-    << "\\sqcup " << this->children[1].ToString(theFormat, outComments)
+    out << this->children[1].ToString(theFormat, outComments)
+    << "\\sqcup " << this->children[2].ToString(theFormat, outComments)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
   { if (startingExpression==0)

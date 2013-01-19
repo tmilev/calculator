@@ -7,56 +7,6 @@
 #include "vpfHeader1_3.h"
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
-class Function
-{
-  public:
-  MemorySaving<List<std::string> > theArgumentList;
-  std::string theDescription;
-  std::string theExample;
-  bool flagMayActOnBoundVars;
-  bool flagIamVisible;
-  MemorySaving<List<Expression> > theArgumentPatterns;
-  MemorySaving<List<bool> > theArgumentPatternIsParsed;
-  typedef bool (*FunctionAddress)
-  (CommandList& theCommands, const Expression& input, Expression& output);
-  FunctionAddress theFunction;
-  static std::string GetString(CommandList& theBoss, int opIndex);
-  void operator =(const Function& other)
-  { this->theArgumentList=other.theArgumentList;
-    this->theDescription=other.theDescription;
-    this->theExample=other.theExample;
-    this->theFunction=other.theFunction;
-    this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
-    this->flagIamVisible=other.flagIamVisible;
-  }
-  bool operator==(const Function& other)const
-  { return this->theArgumentList==other.theArgumentList &&
-    this->theFunction==other.theFunction;
-  }
-  Function(){this->theFunction=0;}
-  Function
-  (const Function::FunctionAddress& functionPointer, const std::string& argumentList,
-   const std::string& description, const std::string& inputExample,
-   bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
-  { this->theFunction=functionPointer;
-    this->theDescription=description;
-    this->theExample=inputExample;
-    if (argumentList!="")
-    { this->theArgumentList.GetElement().AddOnTop(argumentList);
-      this->theArgumentPatternIsParsed.GetElement().AddOnTop(false);
-      this->theArgumentPatterns.GetElement().SetSize(1);
-    }
-    this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
-    this->flagIamVisible=inputflagNameIsVisible;
-  }
-  inline static unsigned int HashFunction(const Function& input)
-  { return input.HashFunction();
-  }
-  unsigned int HashFunction()const
-  { return (unsigned int) this->theFunction;
-  }
-};
-
 class Expression
 { void reset()
   { this->theBoss=0;
@@ -81,7 +31,7 @@ class Expression
   //     and explicit reference to the Expression::theData and Expression::children members
   //     should be made.
   //1.2. A list is an expression with 1 or more children whose theData entry equals
-  //     CommandList::opList().*
+  //     0 which *MUST* be equal to CommandList::opList().
   //1.3. An expression with 1 or more children whose is not allowed to have theData entry different
   //     from CommandList::opList(). The system is instructed to
   //     crash and burn shall such a configuration be detected.
@@ -104,8 +54,8 @@ class Expression
   //2.7. An error is a list with two entries whose first entry is an atom equal to Error,
   //     and whose second entry is a string.
   //*Note that CommandList::opList() is required to equal zero for reasons of program speed.
-  //However you MAY NOT assume that: you should always call CommandList::opList() explicitly.
-  //Instead, if you want to have a list of mathematical objects, use the Sequence
+  //This is GUARANTEED, and you MAY assume it.
+  //If you want to have a list of mathematical objects, use the Sequence
   //data structure. A sequence is a List whose first entry is an atom whose value
   //is opSequence.
   int theData;
@@ -114,6 +64,10 @@ class Expression
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
   int format;
+//////
+  typedef bool (*FunctionAddress)
+  (CommandList& theCommands, const Expression& input, Expression& output);
+//////
   friend std::ostream& operator << (std::ostream& output, const Expression& theMon)
   { output << theMon.ToString();
     return output;
@@ -122,8 +76,6 @@ class Expression
   { formatDefault, formatFunctionUseUnderscore, formatTimesDenotedByStar,
     formatFunctionUseCdot, formatNoBracketsForFunctionArgument, formatMatrix, formatMatrixRow
   };
-  typedef  bool (*OperationCruncher)
-  (const Expression& left, const Expression& right, Expression& output);
   void reset(CommandList& newBoss, int newNumChildren=0)
   { this->theBoss=&newBoss;
     this->theData=0;
@@ -277,7 +229,7 @@ void MakeVariableNonBounD
   void MakeFunction
   (CommandList& owner, const Expression& argument, int functionIndex)
 ;
-  Function::FunctionAddress GetHandlerFunctionIamNonBoundVar();
+  Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   void MakeProducT
   (CommandList& owner, const Expression& left, const Expression& right)
   ;
@@ -353,6 +305,60 @@ void MakeVariableNonBounD
   bool operator>(const Expression& other)const;
 };
 
+class Function
+{
+  public:
+  Expression theArgumentTypes;
+  std::string theDescription;
+  std::string theExample;
+  bool flagIsInner;
+  bool flagMayActOnBoundVars;
+  bool flagIamVisible;
+  Expression::FunctionAddress theFunction;
+
+  std::string GetString(CommandList& theBoss);
+  void operator =(const Function& other)
+  { this->theArgumentTypes=other.theArgumentTypes;
+    this->theDescription=other.theDescription;
+    this->theExample=other.theExample;
+    this->theFunction=other.theFunction;
+    this->flagIsInner=other.flagIsInner;
+    this->flagMayActOnBoundVars=other.flagMayActOnBoundVars;
+    this->flagIamVisible=other.flagIamVisible;
+  }
+  bool operator==(const Function& other)const
+  { return this->theArgumentTypes==other.theArgumentTypes &&
+    this->theFunction==other.theFunction && this->flagIsInner==other.flagIsInner;
+  }
+  void reset(CommandList& owner)
+  { this->theArgumentTypes.reset(owner);
+    this->theFunction=0;
+    this->flagIsInner=true;
+  }
+  Function()
+  { this->theFunction=0;
+  }
+  Function
+  (const Expression::FunctionAddress& functionPointer, Expression* inputArgTypes,
+   const std::string& description, const std::string& inputExample, bool inputflagIsInner,
+   bool inputflagNameIsVisible, bool inputflagMayActOnBoundVars=false)
+  { this->theFunction=functionPointer;
+    this->theDescription=description;
+    this->theExample=inputExample;
+    if (inputArgTypes!=0)
+      this->theArgumentTypes=*inputArgTypes;
+    this->flagIsInner=inputflagIsInner;
+    this->flagIamVisible=inputflagNameIsVisible;
+    this->flagMayActOnBoundVars=inputflagMayActOnBoundVars;
+  }
+  inline static unsigned int HashFunction(const Function& input)
+  { return input.HashFunction();
+  }
+  unsigned int HashFunction()const
+  { return (unsigned int) this->theFunction;
+  }
+};
+
 class BoundVariablesSubstitution
 {
 public:
@@ -426,24 +432,24 @@ public:
   ~StackMaintainerRules();
 };
 
-struct ExpressionPairCruncherIds
+struct ExpressionTripleCrunchers
 {
   int theOp;
   int leftType;
   int rightType;
-  bool operator==(const ExpressionPairCruncherIds& other)const
+  bool operator==(const ExpressionTripleCrunchers& other)const
   { return this->leftType==other.leftType && this->rightType==other.rightType && this->theOp==other.theOp;
   }
-  void operator=(const ExpressionPairCruncherIds& other)
+  void operator=(const ExpressionTripleCrunchers& other)
   { this->leftType=other.leftType;
     this->rightType=other.rightType;
     this->theOp=other.theOp;
   }
-  ExpressionPairCruncherIds():theOp(-1), leftType(-1), rightType(-1){}
-  ExpressionPairCruncherIds(int inputOp, int inputLeft, int inputRight)
+  ExpressionTripleCrunchers():theOp(-1), leftType(-1), rightType(-1){}
+  ExpressionTripleCrunchers(int inputOp, int inputLeft, int inputRight)
   : theOp(inputOp), leftType(inputLeft), rightType(inputRight)
   {}
-  static unsigned int HashFunction(const ExpressionPairCruncherIds& input)
+  static unsigned int HashFunction(const ExpressionTripleCrunchers& input)
   { return (unsigned int) input.leftType*SomeRandomPrimes[0]+
     (unsigned int) input.rightType*SomeRandomPrimes[1]+
     (unsigned int) input.theOp*SomeRandomPrimes[2];
@@ -508,11 +514,10 @@ public:
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
 //operations are in fact realized as elements of type VariableNonBound.
   HashedList<std::string, MathRoutines::hashString> operationS;
-  HashedList<Function> InnerFunctionHandlers;
-  HashedList<Function> OuterFunctionHandlers;
+  List<List<Function> > FunctionHandlers;
 
-  HashedList<ExpressionPairCruncherIds> theCruncherIds;
-  List<Expression::OperationCruncher> theCruncherS;
+  HashedList<ExpressionTripleCrunchers> theCruncherIds;
+  List<Function> theCruncherS;
 
   List<Expression> buffer1, buffer2;
   int MaxRecursionDeptH;
@@ -623,48 +628,7 @@ public:
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);
-  void RegisterCruncherNoFail
-  (int theOp, int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
-  { ExpressionPairCruncherIds epc(inputLeftType, inputRightType, theOp);
-    if (this->theCruncherIds.Contains(epc))
-    { std::cout
-      << "This is a programming error: attempting to add more than one handler for the same "
-      << "pair of data types. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    this->theCruncherIds.AddOnTop(epc);
-    this->theCruncherS.AddOnTop(inputCruncher);
-  }
-  void RegisterDivCruncherNoFail
-  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
-  { this->RegisterCruncherNoFail(this->opDivide(), inputLeftType, inputRightType, inputCruncher);
-  }
-  void RegisterMultiplicativeDataCruncherNoFail
-  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
-  { this->RegisterCruncherNoFail(this->opTimes(), inputLeftType, inputRightType, inputCruncher);
-  }
-  void RegisterAdditiveDataCruncherNoFail
-  (int inputLeftType, int inputRightType, Expression::OperationCruncher inputCruncher)
-  { this->RegisterCruncherNoFail(this->opPlus(), inputLeftType, inputRightType, inputCruncher);
-  }
-  Expression::OperationCruncher GetMultiplicativeCruncher
-  (int inputLeftType, int inputRightType)
-  { return this->GetOpCruncher(this->opTimes(), inputLeftType, inputRightType);
-  }
-  Expression::OperationCruncher GetAdditiveCruncher(int inputLeftType, int inputRightType)
-  { return this->GetOpCruncher(this->opPlus(), inputLeftType, inputRightType);
-  }
-  Expression::OperationCruncher GetAdditiveCruncher
-  (const Expression& leftE, const Expression& rightE);
-  Expression::OperationCruncher GetOpCruncher
-  (int theOp, int inputLeftType, int inputRightType)
-  { ExpressionPairCruncherIds d(theOp, inputLeftType, inputRightType);
-    int theIndex=this->theCruncherIds.GetIndex(d);
-    if (theIndex==-1)
-      return 0;
-    return this->theCruncherS[theIndex];
-  }
-  Function::FunctionAddress GetfOp
+  Expression::FunctionAddress GetInnerFunctionFromOp
   (int theOp, const Expression& left, const Expression& right)
 ;
   bool LookAheadAllowsThePower(const std::string& lookAhead)
@@ -966,10 +930,9 @@ public:
     return whichDigit<10 && whichDigit>=0;
   }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
-  bool fCollectSummands(Expression& theExpression);
   template <class theType>
   bool CallConversionFunctionReturnsNonConstUseCarefully
-  (Function::FunctionAddress theFun, const Expression& input, theType*& outputData,
+  (Expression::FunctionAddress theFun, const Expression& input, theType*& outputData,
    std::string* outputError=0)
   { Expression tempE;
     if (!theFun(*this, input, tempE))
@@ -985,7 +948,7 @@ public:
     return false;
   }
   bool CallCalculatorFunction
-  (Function::FunctionAddress theFun, const Expression& input, Expression& output)
+  (Expression::FunctionAddress theFun, const Expression& input, Expression& output)
   { if (!theFun(*this, input, output))
       return false;
     return !output.IsError();
@@ -1001,28 +964,49 @@ bool CollectSummands
   (const Expression& left, const Expression& right)
   ;
 
-  static bool fUnion
+  static bool outerUnion
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
-(CommandList& theCommands, const Expression& input, Expression& output)
-;
-static bool outerStandardFunction
-(CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool fUnionNoRepetition
+  static bool outerUnionNoRepetition
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fPlus
+  static bool innerTimes
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
+  }
+  static bool innerOperationBinary
+  (CommandList& theCommands, const Expression& input, Expression& output,
+   int theOp)
+  { for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)
+      if (theCommands.FunctionHandlers[theOp][i].flagIsInner)
+        if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output))
+          return true;
+    return false;
+  }
+
+  static bool innerUnion
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fStandardTimes
+  static bool innerUnionNoRepetition
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardTensor
+
+  static bool EvaluateCarryOutActionSSAlgebraOnGeneralizedVermaModule
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fDivide
+  static bool outerStandardFunction
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerPlus
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerTimes
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerTensor
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool outerDivide
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool StandardIsDenotedBy
@@ -1035,33 +1019,29 @@ static bool outerStandardFunction
   static bool StandardLieBracket
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fMinus
+  static bool outerMinus
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool StandardEqualEqual
+  static bool outerEqualEqual
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fAssociate
+  static bool outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fExtractBaseMultiplication
+  static bool outerExtractBaseMultiplication
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fDistribute
-(CommandList& theCommands, const Expression& input, Expression& output)
+  static bool outerDistribute
+(CommandList& theCommands, const Expression& input, Expression& output,
+  int AdditiveOp, int multiplicativeOp)
   ;
-  static bool fThePower
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fOperationBinary(theCommands, input, output, theCommands.opThePower());
-  }
-  static bool fOperationBinary
-  (CommandList& theCommands, const Expression& input, Expression& output, int theOperation)
+  static bool outerLeftDistributeBracketIsOnTheLeft
+(CommandList& theCommands, const Expression& input, Expression& output,
+  int AdditiveOp, int multiplicativeOp)
   ;
-  static bool fLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, const Expression& input, Expression& output)
-  ;
-  static bool fRightDistributeBracketIsOnTheRight
-  (CommandList& theCommands, const Expression& input, Expression& output)
+  static bool outerRightDistributeBracketIsOnTheRight
+  (CommandList& theCommands, const Expression& input, Expression& output,
+  int AdditiveOp, int multiplicativeOp)
   ;
   static bool EvaluateIf
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1070,13 +1050,13 @@ static bool outerStandardFunction
   bool fGetMatrix
   (const Expression& theExpression, Matrix<theType>& outputMat,
    Expression* inputOutputStartingContext=0,
-   int targetNumColsNonMandatory=-1, Function::FunctionAddress conversionFunction=0)
+   int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
   ;
   template <class theType>
   bool GetVector
   (const Expression& theExpressioN, Vector<theType>& output,
    Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
-   Function::FunctionAddress conversionFunction=0)
+   Expression::FunctionAddress conversionFunction=0)
   ;
   template <class dataType>
   static bool fExtractPMTDtreeContext
@@ -1348,18 +1328,53 @@ static bool TypeHighestWeightParabolic
   static bool fSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerAddRatToRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   void AddEmptyHeadedCommand();
   CommandList();
-  void AddOperationMustBeNew
-  (const std::string& theOpName, const Function::FunctionAddress& innerHandler,
-   const Function::FunctionAddress& outerHandler,
-   const std::string& opArgumentList,
+  void AddOperationNoRepetitionAllowed
+  (const std::string& theOpName)
+  ;
+
+  void AddOperationBinaryInnerHandlerWithTypes
+  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+   int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
    bool visible=true)
    ;
+  void AddOperationHandler
+  (const std::string& theOpName, const Expression::FunctionAddress& handler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing,
+   const std::string& opDescription, const std::string& opExample,
+    bool isInner, bool visible=true)
+;
+  void AddOperationInnerHandler
+  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing,
+   const std::string& opDescription, const std::string& opExample,
+   bool visible=true)
+  { this->AddOperationHandler
+    (theOpName, innerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
+     opExample, true, visible);
+  }
+  void AddOperationOuterHandler
+  (const std::string& theOpName, const Expression::FunctionAddress& outerHandler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing,
+   const std::string& opDescription, const std::string& opExample,
+   bool visible=true)
+  { this->AddOperationHandler
+    (theOpName, outerHandler, opArgumentListIgnoredForTheTimeBeing, opDescription,
+     opExample, false, visible);
+  }
+
+
   void init(GlobalVariables& inputGlobalVariables);
-  void initCrunchers();
-  void initPredefinedVars()
+
+  void initPredefinedOuterFunctions();
+  void initPredefinedInnerFunctionsWithTypes();
+  void initPredefinedInnerFunctions()
   ;
   bool ExtractExpressions
 (Expression& outputExpression, std::string* outputErrors)
@@ -1407,7 +1422,7 @@ static bool TypeHighestWeightParabolic
 template <class theType>
 bool CommandList::GetVector
 (const Expression& theExpressioN, Vector<theType>& output, Expression* inputOutputStartingContext,
- int targetDimNonMandatory, Function::FunctionAddress conversionFunction)
+ int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
 { MemorySaving<Expression> tempContext;
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
@@ -1456,7 +1471,7 @@ template <class theType>
 bool CommandList::fGetMatrix
 (const Expression& theExpression, Matrix<theType>& outputMat,
  Expression* inputOutputStartingContext,
- int targetNumColsNonMandatory, Function::FunctionAddress conversionFunction)
+ int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)
 { MemorySaving<Expression> tempContext;
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;

@@ -3061,75 +3061,6 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
   return result;
 }
 
-void CommandList::initCrunchers()
-{ /*this->RegisterCruncherNoFail(this->opTensor(),  Data::typeEltTensorGenVermasOverRF, Data::typeEltTensorGenVermasOverRF, Data::TensorAnyByEltTensor);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-
-  this->RegisterCruncherNoFail(this->opApplyFunction(), Data::typeElementUE, Data::typeEltTensorGenVermasOverRF, Data::MultiplyAnyByEltTensor);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRational, Data::MultiplyEltTensorByCoeff);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typePoly, Data::MultiplyEltTensorByCoeff);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeRationalFunction, Data::MultiplyEltTensorByCoeff);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::MultiplyUEByAny);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::MultiplyUEByAny);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::MultiplyUEByAny);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeElementUE, Data::typeElementUE, Data::MultiplyUEByAny);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeElementUE, Data::MultiplyAnyByUE);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeElementUE, Data::MultiplyAnyByUE);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeElementUE, Data::MultiplyAnyByUE);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeRationalRadical, Data::MultiplyRatOrAlgebraicByRatOrAlgebraic);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalRadical, Data::typeRational, Data::MultiplyRatOrAlgebraicByRatOrAlgebraic);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalRadical, Data::typeRationalRadical, Data::MultiplyRatOrAlgebraicByRatOrAlgebraic);
-
-  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typePoly, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::DivideRFOrPolyOrRatByRFOrPoly);
-  this->RegisterDivCruncherNoFail(Data::typeRational, Data::typePoly, Data::DivideRFOrPolyOrRatByRFOrPoly);
-
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRationalFunction, Data::typeRational, Data::MultiplyRatOrPolyOrRFByRatOrPolyOrRF);
-
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::MultiplyRatOrPolyByRatOrPoly);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::MultiplyRatOrPolyByRatOrPoly);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeLittelmannRootOperator, Data::typeLSpath, Data::MultiplyLRObyLSPath);
-  this->RegisterMultiplicativeDataCruncherNoFail(Data::typeLittelmannRootOperator, Data::typeLittelmannRootOperator, Data::MultiplyLRObyLRO);
-
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeEltTensorGenVermasOverRF, Data::typeEltTensorGenVermasOverRF, Data::AddEltTensorToEltTensor);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRational, Data::AddUEToAny);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typePoly, Data::AddUEToAny);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeRationalFunction, Data::AddUEToAny);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeElementUE, Data::typeElementUE, Data::AddUEToAny);
-
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRational, Data::typeRationalFunction, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typePoly, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalFunction, Data::typeRational, Data::AddRatOrPolyOrRFToRatOrPolyOrRF);
-
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalRadical, Data::typeRational, Data::AddRatOrAlgebraicToRatOrAlgebraic);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRational, Data::typeRationalRadical, Data::AddRatOrAlgebraicToRatOrAlgebraic);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRationalRadical, Data::typeRationalRadical, Data::AddRatOrAlgebraicToRatOrAlgebraic);
-
-  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typePoly, Data::AddRatOrPolyToRatOrPoly);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typePoly, Data::typeRational, Data::AddRatOrPolyToRatOrPoly);
-  this->RegisterAdditiveDataCruncherNoFail(Data::typeRational, Data::typePoly, Data::AddRatOrPolyToRatOrPoly);
-*/
-}
-
 void CommandList::init(GlobalVariables& inputGlobalVariables)
 { this->theGlobalVariableS=& inputGlobalVariables;
   this->MaxAlgTransformationsPerExpression=100000;
@@ -3142,9 +3073,12 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=1000;
   this->controlSequences.Clear();
+
   this->operationS.Clear();
-  this->OuterFunctionHandlers.Clear();
-  this->InnerFunctionHandlers.Clear();
+  this->FunctionHandlers.SetSize(0);
+  this->operationS.SetExpectedSize(300);
+  this->FunctionHandlers.SetExpectedSize(300);
+
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
   this->flagTimeLimitErrorDetected=false;
@@ -3162,147 +3096,37 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->CurrrentSyntacticSouP=&this->syntacticSouP;
   //operation List is the very first operation. It signifies a non-atomic expression.
   //operation List is signified by the empty string
-  this->AddOperationMustBeNew("", 0, 0, "", "", "", false);
+  //operation List must always have index 0.
+  this->AddOperationNoRepetitionAllowed("");
 
-  this->AddOperationMustBeNew
-  ("+", 0, this->fPlus, "",
-   "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
-    Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
-  this->AddOperationMustBeNew
-  ("-", 0, this->fMinus, "",
-   "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
-   -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
-  this->AddOperationMustBeNew
-  ("/", 0, this->fDivide, "",
-    "1) If a and b are rational substitutes a/b with its value. \
-     <br>2)If b is rational computes (anything)/b with anything* (1/b). \
-     This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", true);
-  this->AddOperationMustBeNew
-  ("*", 0, this->fStandardTimes, "",
-   "<br>The following description is out of date. Must be updated.\
-   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, \
-   substitutes a*b by the result of the built-in handler.<br>\n \
-   2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
-   3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; \
-   {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
-   4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
-   4.2) If the expression is of the form a*(b*c) and  a and b are rational, \
-   substitutes a*(b*c) by (a*b)*c. <br>\
-   4.3) If the expression is of the form a*(b*c) and b is rational but a is not, \
-   substitutes the expression by b*(a*c).",
-   "2*c_1*d*3", true);
-    this->AddOperationMustBeNew
-  ("\\otimes", 0,  this->StandardTensor, "",
-   "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
-   generalized Verma modules. ",
-   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
-   \n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
-   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
-  this->AddOperationMustBeNew
-  ("[]", 0, this->StandardLieBracket, "",
-   "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
-  this->AddOperationMustBeNew(":=", 0, 0, "", "", "", true);
-  this->AddOperationMustBeNew
-  (":=:", 0, this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
-   The expression a:=:b always reduces to \
-   a:=b. In addition to the transformation, the pair of expressions a,b is registered in a \
-   special global \"registry\". This has the following effect. Every time \
-   the expression b is met, it is displayed on the screen as a. We note that subsequent \
-   occurrences of the expression a will first be replaced by b (as mandated\
-   by the a:=b command), but then displayed on the screen as a.", "x:=:y;\ny;\nz;\nz:=y;\nz ", true);
-  this->AddOperationMustBeNew("if:=", 0, 0, "", "", "", true);
-  std::stringstream StandardPowerStreamInfo, moreInfoOnIntegers;
-  moreInfoOnIntegers
-  << " LargeIntUnsigned::SquareRootOfCarryOverBound is "
-  << " restricted to be smaller than the square root of a positive signed int on the system: in this way, multiplying two small integers and "
-  << " storing the result in a signed int is guaranteed to produce the correct result. "
-  << " Rationals are stored in the computer as 8 bytes+ one pointer (which is another 4 bytes on a 32 bit system). "
-  << " The pointer either equals zero, or points to a dynamically resizable structure able to hold "
-  << " arbitrary integer sizes (within the system's address space limits). If the pointer is zero, we call  "
-  << " such a rational number small. In this case its denominator and numerator are stored in "
-  << " the other 8 bytes, and should both be smaller than LargeIntUnsigned::CarryOverBound="
-  << LargeIntUnsigned::CarryOverBound
-  << " . When requesting an arithmetic operation, if both rationals are small, (i.e. their pointer zero)"
-  << " a check is performed whether the denominator and numerator are smaller in absolute value than "
-  << " LargeIntUnsigned::SquareRootOfCarryOverBound="
-  << LargeIntUnsigned::SquareRootOfCarryOverBound
-  << ". If that check passes, the two rationals are multiplied using the "
-  << " built-in processor instructions for operations with integers. If any of the check fails, both rationals are converted to the larger dynamically "
-  << " resizeable structure, sufficient memory is allocated, and multiplication/addition is carried using algorithms located in class "
-  << " LargeIntUnsigned. The algorithms are O(log(n)^2) (the number of digits squared), "
-  << " slower than the ones in the standard numerical computation libraries (such as GMP). However, the algorithms "
-  << " provide the essential convenience of having a self-contained mathematical library. An implementation of "
-  << " discrete Fourier transform multiplication algorithm (O(log(n)(log(log n))) is considered, and will be made if need arises. ";
-  StandardPowerStreamInfo
-  << "If the left argument evaluates to atom, and if the right argument is a small integer atom, "
-  << " tries to carry out the raise-to-power operation. If successful, substitutes the expression with the obtained atom. "
-  << " A small integer is defined at compile time in the variable LargeIntUnsigned::SquareRootOfCarryOverBound (currently equal to "
-  << LargeIntUnsigned::SquareRootOfCarryOverBound << "). "
-  << CGI::GetHtmlSpanHidableStartsHiddeN(moreInfoOnIntegers.str());
-  this->AddOperationMustBeNew
-  ("^", 0, this->fThePower, "", StandardPowerStreamInfo.str(),
-   "3^3^3;\n3^{3^3}", true);
-  this->AddOperationMustBeNew
-  ("==", 0, this->StandardEqualEqual, "",
-   "If either the left or the right argument contains a bound variable does nothing. \
-    Else evaluates to 1 if the left argument equals the right argument.",
-   "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
-   \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
-  //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
-  //expression
-/*  this->AddOperationMustBeNew
-  ("{}", this->StandardFunction, "",
-   "The first argument of this operator represents a name of the function, \
-   the second argument represents the argument of that function.  \
-   <br>1) If the first argument of {} is rational, the operation substitutes the \
-   expression with that constant. \
-   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of \
-   the function, depending on the types of the arguments.\
-   <br>3) If the first argument is of type list and the second argument is a small \
-   integer between 1 and the number of elements in the list,\
-   the operation substitutes the list with the element indexed by the second argument.\
-   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded \
-   handler function, the handler is invoked onto the second argument.\
-   If the invocation is successful, the expression is substituted with the result, \
-   otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
-   the only noticeable difference is that the functions invoked in (2) are anonymous \
-   from the calculator standpoint (i.e. have only technical c++ names), \
-   while the functions in (4) have human-readable calculator-visible names. \
-   In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
-   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if \
-   IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
-   \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);*/
-  //the following is the binding variable operation
-  this->AddOperationMustBeNew("Bind", 0, 0, "", "", "", false);
-//  this->AddOperationNoFail("Matrix", 0, "Matrix", "", "", "");
-  this->AddOperationMustBeNew
-  ("\\cup", 0, this->fUnion, "",
-   "If all arguments of \\cup are of type list, substitutes the expression with \
-   a list containing \
-   the union of all members (with repetition).",
-   "x\\cup Sequence{} x \\cup Sequence{}x \\cup (a,b,x)", true);
-  this->AddOperationMustBeNew
-  ("\\sqcup", 0, this->fUnionNoRepetition, "",
-   "If all arguments of \\sqcup are of type list, substitutes the expression with a list \
-   containing \
-   the union of all members; all repeating members are discarded.",
-   "(x,y,x)\\sqcup(1,x,y,2)", true);
-  this->AddOperationMustBeNew("Error", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("Sequence", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("Rational", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("AlgebraicNumber", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("Polynomial<Rational>", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("RationalFunction", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("string", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("ElementUEoverRF", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("ElementTensorGVM", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("CharSSAlgMod", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("SSLieAlg", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("LittelmannPath", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("LRO", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("PolyVars", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew("Context", 0, 0, "", "", "", false);
-  this->AddOperationMustBeNew(";", 0, 0, "", "", "", false);
+  this->AddOperationNoRepetitionAllowed("+");
+  this->AddOperationNoRepetitionAllowed("-");
+  this->AddOperationNoRepetitionAllowed("/");
+  this->AddOperationNoRepetitionAllowed("*");
+  this->AddOperationNoRepetitionAllowed("\\otimes");
+  this->AddOperationNoRepetitionAllowed("[]");
+  this->AddOperationNoRepetitionAllowed(":=:");
+  this->AddOperationNoRepetitionAllowed("^");
+  this->AddOperationNoRepetitionAllowed("==");
+  this->AddOperationNoRepetitionAllowed("Bind");
+  this->AddOperationNoRepetitionAllowed("\\cup");
+  this->AddOperationNoRepetitionAllowed("\\sqcup");
+  this->AddOperationNoRepetitionAllowed("Error");
+  this->AddOperationNoRepetitionAllowed("Sequence");
+  this->AddOperationNoRepetitionAllowed("Rational");
+  this->AddOperationNoRepetitionAllowed("AlgebraicNumber");
+  this->AddOperationNoRepetitionAllowed("Polynomial<Rational>");
+  this->AddOperationNoRepetitionAllowed("RationalFunction");
+  this->AddOperationNoRepetitionAllowed("string");
+  this->AddOperationNoRepetitionAllowed("ElementUEoverRF");
+  this->AddOperationNoRepetitionAllowed("ElementTensorGVM");
+  this->AddOperationNoRepetitionAllowed("CharSSAlgMod");
+  this->AddOperationNoRepetitionAllowed("SSLieAlg");
+  this->AddOperationNoRepetitionAllowed("LittelmannPath");
+  this->AddOperationNoRepetitionAllowed("LRO");
+  this->AddOperationNoRepetitionAllowed("PolyVars");
+  this->AddOperationNoRepetitionAllowed("Context");
+  this->AddOperationNoRepetitionAllowed(";");
 
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
@@ -3338,16 +3162,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //  this->controlSequences.AddOnTop("c...c");
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
-  this->initPredefinedVars();
-  this->initCrunchers();
-}
-
-bool CommandList::fCollectSummands(Expression& theExpression)
-{ List<Expression>& summands= this->buffer1;
-  summands.SetSize(0);
-  bool needSimplification=this->AppendSummandsReturnTrueIfOrderNonCanonical
-  (theExpression, summands);
-  return this->CollectSummands(summands, needSimplification, theExpression);
+  this->initPredefinedOuterFunctions();
+  this->initPredefinedInnerFunctionsWithTypes();
+  this->initPredefinedInnerFunctions();
 }
 
 bool CommandList::CollectSummands
@@ -3415,25 +3232,12 @@ bool CommandList::CollectSummands
   return theExpression==result;
 }
 
-Function::FunctionAddress CommandList::GetfOp
+Expression::FunctionAddress CommandList::GetInnerFunctionFromOp
 (int theOp, const Expression& left, const Expression& right)
 { std::cout << "Function CommandList::GetfOp not implemented yet. "
   << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   assert(false);
   return 0;
-}
-
-bool CommandList::fOperationBinary
-(CommandList& theCommands, const Expression& input, Expression& output, int theOperation)
-{ if (!input.IsListNElements(3) )
-    return false;
-//  std::cout << leftE.ElementToStringPolishForm() <<  "<br>" << rightE.ElementToStringPolishForm();
-//  std::cout << "<br>attempting to make standard multiplication between <br>" << RightD.ToString() << " and " << LeftD.ToString();
-  Function::FunctionAddress theCruncher=
-  theCommands.GetfOp(theOperation, input[1], input[2]);
-  if (theCruncher==0)
-    return false;
-  return theCruncher(theCommands, input, output);
 }
 
 template <class CoefficientType>
@@ -3464,44 +3268,42 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::TensorOnTheRight
   *this=output;
 }
 
-bool CommandList::StandardTensor
+bool CommandList::outerTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::StandardTensor");
-  if (theCommands.fOperationBinary(theCommands, input, output, theCommands.opTensor()))
-    return true;
-  if (theCommands.fDistribute(theCommands, input, output))
+  if (theCommands.outerDistribute
+      (theCommands, input, output, theCommands.opPlus(), theCommands.opTensor()))
     return true;
   //std::cout << "<br>After distribute: " << theExpression.ToString();
-  if (theCommands.fAssociate(theCommands, input, output))
+  if (theCommands.outerAssociate(theCommands, input, output))
     return true;
-//  if (theCommands.EvaluateDoExtractBaseMultiplication(theCommands, input, output))
-//    return true;
+  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
+    return true;
 //  if (theExpression.children.size!=2)
 //    return false;
   //std::cout << "<br>After do associate: " << theExpression.ToString();
   return false;
 }
 
-bool CommandList::fStandardTimes
+bool CommandList::outerTimes
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fStandardTimes");
-  if (theCommands.fOperationBinary(theCommands, input, output, theCommands.opTimes()))
-    return true;
-  if (theCommands.fDistribute(theCommands, input, output))
+  if (theCommands.outerDistribute
+      (theCommands, input, output, theCommands.opPlus(), theCommands.opTimes()))
     return true;
   //std::cout << "<br>After distribute: " << theExpression.ToString();
-  if (theCommands.fAssociate(theCommands, input, output))
+  if (theCommands.outerAssociate(theCommands, input, output))
     return true;
-  if (theCommands.fExtractBaseMultiplication(theCommands, input, output))
+  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
     return true;
   return false;
 }
 
-bool CommandList::fExtractBaseMultiplication
+bool CommandList::outerExtractBaseMultiplication
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::EvaluateDoExtractBaseMultiplication");
@@ -3537,12 +3339,14 @@ bool CommandList::fExtractBaseMultiplication
       (leftE.GetValuE<Rational>()*rightLeftE.GetValuE<Rational>(), theCommands);
       rightE.AssignChild(1);
       result=true;
-    } else if (leftE.IsOfType<Rational>() && rightLeftE.IsOfType<Rational>()) //<- handle atom*(atom*anything)
+    } else if (leftE.IsOfType<Rational>() && rightLeftE.IsOfType<Rational>())
+    //<- handle a*(b*anything)
+    //on condition that a*b has an inner handler
     { Expression tempExp, newExpr;
       tempExp.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightLeftE);
-      if (theCommands.fOperationBinary(theCommands, tempExp, newExpr, theCommands.opTimes()))
-      { Expression tempExp2=rightE.children[2];
-        output.MakeProducT(theCommands, newExpr, tempExp2);
+      if (theCommands.innerTimes(theCommands, tempExp, newExpr))
+      { tempExp=rightE.children[2];
+        output.MakeProducT(theCommands, newExpr, tempExp);
         return true;
       }
     }
@@ -3554,7 +3358,7 @@ bool CommandList::fExtractBaseMultiplication
   return result;
 }
 
-bool CommandList::fAssociate
+bool CommandList::outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
@@ -3602,19 +3406,19 @@ bool CommandList::StandardIsDenotedBy
   return true;
 }
 
-bool CommandList::fDistribute
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
-    return false;
-  if (input[1].IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
-    return theCommands.fLeftDistributeBracketIsOnTheLeft(theCommands, input, output);
-  if (input[2].IsListNElementsStartingWithAtom(theCommands.opPlus(), 3))
-    return theCommands.fRightDistributeBracketIsOnTheRight(theCommands, input, output);
-  return false;
+bool CommandList::outerDistribute
+(CommandList& theCommands, const Expression& input, Expression& output,
+ int AdditiveOp, int multiplicativeOp)
+{ if (theCommands.outerLeftDistributeBracketIsOnTheLeft
+      (theCommands, input, output, AdditiveOp, multiplicativeOp))
+    return true;
+  return theCommands.outerRightDistributeBracketIsOnTheRight
+  (theCommands, input, output, AdditiveOp, multiplicativeOp);
 }
 
-bool CommandList::fLeftDistributeBracketIsOnTheLeft
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerLeftDistributeBracketIsOnTheLeft
+(CommandList& theCommands, const Expression& input, Expression& output,
+ int AdditiveOp, int multiplicativeOp)
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -3631,8 +3435,9 @@ bool CommandList::fLeftDistributeBracketIsOnTheLeft
   return true;
 }
 
-bool CommandList::fRightDistributeBracketIsOnTheRight
-(CommandList& theCommands, const Expression& input, Expression& output)
+bool CommandList::outerRightDistributeBracketIsOnTheRight
+(CommandList& theCommands, const Expression& input, Expression& output,
+ int AdditiveOp, int multiplicativeOp)
 { if (input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
@@ -3649,13 +3454,17 @@ bool CommandList::fRightDistributeBracketIsOnTheRight
   return true;
 }
 
-bool CommandList::fPlus
+bool CommandList::outerPlus
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fStandardPlus");
-  if (!theCommands.fOperationBinary(theCommands, input, output, theCommands.opPlus()))
+{ MacroRegisterFunctionWithName("CommandList::outerPlus");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
     return false;
+  List<Expression>& summands= theCommands.buffer1;
+  summands.SetSize(0);
   output=input;
-  return theCommands.fCollectSummands(output);
+  bool needSimplification=theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
+  (output, summands);
+  return theCommands.CollectSummands(summands, needSimplification, output);
 }
 
 bool CommandList::EvaluateIf
@@ -3691,22 +3500,33 @@ bool CommandList::outerStandardFunction
         }
   if (!functionNameNode.IsAtoM())
     return false;
-  Function::FunctionAddress theFun=
-  theCommands.OuterFunctionHandlers[functionNameNode.theData].theFunction;
-  if(theFun!=0)
-    if (theFun(theCommands, input, output))
-      return true;
-  theFun=theCommands.InnerFunctionHandlers[functionNameNode.theData].theFunction;
-  if (theFun==0)
-    return false;
-  Expression arguments;
-  arguments.reset(theCommands, input.children.size-1);
-  for (int i=1; i<input.children.size; i++)
-    arguments[i-1]=input[i];
-  return theFun(theCommands, arguments, output);
+  for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
+  { Function& theFun=
+    theCommands.FunctionHandlers[functionNameNode.theData][i];
+    if (!theFun.flagIsInner)
+    { if (theFun.theFunction(theCommands, input, output))
+        return true;
+    } else
+    { Expression arguments;
+      arguments.reset(theCommands, input.children.size-1);
+      for (int i=1; i<input.children.size; i++)
+        arguments[i-1]=input[i];
+      bool isGood=true;
+      //the following if clause needs to be rewritten.
+      if (theFun.theArgumentTypes.children.size==2)
+        if (!input[1].IsListNElementsStartingWithAtom(theFun.theArgumentTypes.children[0].theData) ||
+            !input[2].IsListNElementsStartingWithAtom(theFun.theArgumentTypes.children[1].theData)
+            )
+          isGood=false;
+      if (isGood)
+        if (theFun.theFunction(theCommands, arguments, output))
+          return true;
+    }
+  }
+  return false;
 }
 
-bool CommandList::StandardEqualEqual
+bool CommandList::outerEqualEqual
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.IsSequenceNElementS(3))
     return false;
@@ -3766,9 +3586,9 @@ bool Expression::IsInteger(LargeInt* whichInteger)const
   return theRat.IsInteger(whichInteger);
 }
 
-bool CommandList::fUnion
+bool CommandList::outerUnion
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsLisT())
+{ if (!input.IsListNElementsStartingWithAtom(theCommands.opUnion()))
     return false;
   int numElts=1;
   for (int i=1; i<input.children.size; i++)
@@ -3786,7 +3606,7 @@ bool CommandList::fUnion
   return true;
 }
 
-bool CommandList::fUnionNoRepetition
+bool CommandList::outerUnionNoRepetition
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsLisT())
     return false;
@@ -3809,15 +3629,16 @@ bool CommandList::fUnionNoRepetition
   return true;
 }
 
-bool CommandList::fDivide
+bool CommandList::outerDivide
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fDivide");
+{ MacroRegisterFunctionWithName("CommandList::outerDivide");
   if (input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
-  return theCommands.fOperationBinary(theCommands, input, output, theCommands.opDivide());
+
+  return false;
 }
 
-bool CommandList::fMinus
+bool CommandList::outerMinus
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!(input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 3) ||
         input.IsListNElementsStartingWithAtom(theCommands.opMinus(), 2)) )
@@ -4740,28 +4561,57 @@ bool Expression::IsLisT()const
   return true;
 }
 
-void CommandList::AddOperationMustBeNew
-  (const std::string& theOpName, const Function::FunctionAddress& innerHandler,
-   const Function::FunctionAddress& outerHandler,
-   const std::string& opArgumentList,
-   const std::string& opDescription, const std::string& opExample,
-   bool visible)
+void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->operationS.Contains(theOpName))
-  { std::cout << "This is a programming error: I am asked to add operation "
-    << theOpName << " but it is already added. "
+  { std::cout << "This is a programming error: operation " << theOpName << " already created. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
-    return;
+  }
+  this->operationS.AddOnTop(theOpName);
+  this->FunctionHandlers.SetSize(this->operationS.size);
+}
+
+void CommandList::AddOperationBinaryInnerHandlerWithTypes
+  (const std::string& theOpName, const Expression::FunctionAddress& innerHandler,
+   int leftType, int rightType,
+   const std::string& opDescription, const std::string& opExample,
+   bool visible)
+{ int indexOp=this->operationS.GetIndex(theOpName);
+  if (indexOp==-1)
+  { this->operationS.AddOnTop(theOpName);
+    indexOp=this->operationS.size-1;
+    this->FunctionHandlers.SetSize(this->operationS.size);
+    this->FunctionHandlers.LastObject()->SetSize(0);
   }
   Function innerFunction
-  (innerHandler, opArgumentList, opDescription, opExample, visible)
+  (innerHandler, 0, opDescription, opExample, true, visible)
   ;
-  Function outerFunction
-  (outerHandler, opArgumentList, opDescription, opExample, visible)
+  innerFunction.theArgumentTypes.reset(*this, 2);
+  innerFunction.theArgumentTypes[0].MakeAtom(leftType, *this);
+  innerFunction.theArgumentTypes[1].MakeAtom(rightType, *this);
+  this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
+}
+
+void CommandList::AddOperationHandler
+  (const std::string& theOpName, const Expression::FunctionAddress& handler,
+   const std::string& opArgumentListIgnoredForTheTimeBeing,
+   const std::string& opDescription, const std::string& opExample,
+   bool isInner, bool visible)
+{ int indexOp=this->operationS.GetIndex(theOpName);
+  if (indexOp==-1)
+  { this->operationS.AddOnTop(theOpName);
+    indexOp=this->operationS.size-1;
+    this->FunctionHandlers.SetSize(this->operationS.size);
+  }
+  if (opArgumentListIgnoredForTheTimeBeing!="")
+  { std::cout << "This section of code is not implemented yet. Crashing to let you know. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  Function theFun
+  (handler, 0, opDescription, opExample, isInner, visible)
   ;
-  this->operationS.AddOnTop(theOpName);
-  this->InnerFunctionHandlers.AddOnTop(innerFunction);
-  this->OuterFunctionHandlers.AddOnTop(outerFunction);
+  this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
 std::string CommandList::ElementToStringNonBoundVars()
@@ -4776,20 +4626,17 @@ std::string CommandList::ElementToStringNonBoundVars()
   << " user-defined). <br>Predefined: \n<br>\n";
   for (int i=0; i<this->operationS.size; i++)
   { out << openTag1 << this->operationS[i] << closeTag1;
-    if (this->OuterFunctionHandlers[i].theFunction!=0 ||
-        this->InnerFunctionHandlers[i].theFunction!=0)
-    { out << " [";
-      if (this->OuterFunctionHandlers[i].theFunction!=0)
-      { out << "outer handler address: " << openTag2
-        << this->OuterFunctionHandlers[i].theFunction << closeTag2
-        << openTag2;
-        if (this->InnerFunctionHandlers[i].theFunction!=0)
-          out << " ";
+    if (this->FunctionHandlers[i].size>0)
+    { out << " [handled by: ";
+      for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      { out << this->FunctionHandlers[i][j].theFunction;
+        if (this->FunctionHandlers[i][j].flagIsInner)
+          out << "(inner)";
+        else
+          out << "(outer)";
+        if (j!=this->FunctionHandlers[i].size-1)
+          out << ", ";
       }
-      if (this->InnerFunctionHandlers[i].theFunction!=0)
-        out << "inner handler address: " << openTag2
-        << this->InnerFunctionHandlers[i].theFunction << closeTag2
-        ;
       out << "]";
     }
     if (i!=this->operationS.size-1)
@@ -4801,45 +4648,24 @@ std::string CommandList::ElementToStringNonBoundVars()
   return out.str();
 }
 
-std::string Function::GetString(CommandList& theBoss, int opIndex)
-{ if (theBoss.InnerFunctionHandlers[opIndex].theFunction==0 &&
-      theBoss.OuterFunctionHandlers[opIndex].theFunction==0)
-    return "";
-  std::stringstream out2;
-  std::string openTag2="<span style=\"color:#FF0000\">";
-  std::string closeTag2="</span>";
-  if (theBoss.InnerFunctionHandlers[opIndex].theFunction!=0 &&
-      theBoss.InnerFunctionHandlers[opIndex].flagIamVisible)
-  { out2 << openTag2 << theBoss.operationS[opIndex] << closeTag2;
-    std::stringstream out;
-    Function& currentFun=theBoss.InnerFunctionHandlers[opIndex];
-    out << currentFun.theDescription;
-    if (currentFun.theExample!="")
-      out << " <br> " << currentFun.theExample << "&nbsp&nbsp&nbsp";
+std::string Function::GetString(CommandList& theBoss)
+{ std::stringstream out2;
+  if (this->flagIamVisible)
+  { std::stringstream out;
+    out << "Transformation address: " << this->theFunction << ". ";
+    if (!this->flagIsInner)
+      out << "This transformation is a ``law'', i.e., (called indirectly from the outside). "
+      << " We define a ``law'' to be a transformation which takes as an "
+      << "additional argument the name of the operation. ";
+    out << this->theDescription;
+    if (this->theExample!="")
+      out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
-    if (currentFun.theExample!="")
+    if (this->theExample!="")
       out2 << "<a href=\""
       << theBoss.DisplayNameCalculator  << "?"
       << " textType=Calculator&textDim=1&textInput="
-      << CGI::UnCivilizeStringCGI(currentFun.theExample)
-      << "\"> " << " Example" << "</a>" ;
-  }
-  if (theBoss.OuterFunctionHandlers[opIndex].theFunction!=0 &&
-      theBoss.OuterFunctionHandlers[opIndex].flagIamVisible)
-  { out2 << openTag2 << theBoss.operationS[opIndex] << closeTag2;
-    std::stringstream out;
-    Function& currentFun=theBoss.OuterFunctionHandlers[opIndex];
-    out << "This function is a ``law'', i.e., is called indirectly from the outside. "
-    << " A law is a function which takes as an additional argument the name of the operation. ";
-    out << currentFun.theDescription;
-    if (currentFun.theExample!="")
-      out << " <br> " << currentFun.theExample << "&nbsp&nbsp&nbsp";
-    out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());
-    if (currentFun.theExample!="")
-      out2 << "<a href=\""
-      << theBoss.DisplayNameCalculator  << "?"
-      << " textType=Calculator&textDim=1&textInput="
-      << CGI::UnCivilizeStringCGI(currentFun.theExample)
+      << CGI::UnCivilizeStringCGI(this->theExample)
       << "\"> " << " Example" << "</a>" ;
   }
   return out2.str();
@@ -4847,25 +4673,35 @@ std::string Function::GetString(CommandList& theBoss, int opIndex)
 
 std::string CommandList::ToStringFunctionHandlers()
 { std::stringstream out;
-  int numFuns=0;
+  int numOpsHandled=0;
+  int numHandlers=0;
+  int numInnerHandlers=0;
   for (int i=0; i<this->operationS.size; i++)
-  { if (this->InnerFunctionHandlers[i].theFunction!=0)
-      numFuns++;
-    if (this->OuterFunctionHandlers[i].theFunction!=0)
-      numFuns++;
+  { if (this->FunctionHandlers[i].size!=0)
+      numOpsHandled++;
+    numHandlers+=this->FunctionHandlers[i].size;
+    for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      if (this->FunctionHandlers[i][j].flagIsInner)
+        numInnerHandlers++;
   }
-  out << "\n <b>Handler function regisrtations (" << numFuns << " total).</b><br>\n";
+  out << "\n <b> " << numOpsHandled << "  operations handled, "
+  << "by a total of " << numHandlers << " handler functions (of them "
+  << numInnerHandlers << " inner and " << numHandlers-numInnerHandlers << " outer."
+  << "</b><br>\n";
   bool found=false;
+  std::string openTag2="<span style=\"color:#FF0000\">";
+  std::string closeTag2="</span>";
   for (int i=0; i<this->operationS.size; i++)
-    if ((this->InnerFunctionHandlers[i].theFunction!=0
-         && this->InnerFunctionHandlers[i].flagIamVisible) ||
-        (this->OuterFunctionHandlers[i].theFunction!=0
-         && this->OuterFunctionHandlers[i].flagIamVisible)
-        )
-    { if (found)
+    if (this->FunctionHandlers[i].size>0)
+    { out << openTag2 << this->operationS[i] << closeTag2;
+      if (found)
         out << "<br>";
       found=true;
-      out << "\n" << Function::GetString(*this, i);
+      for (int j=0; j<this->FunctionHandlers[i].size; j++)
+      { if (j!=0)
+          out << "<br>";
+        out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
+      }
     }
   return out.str();
 }

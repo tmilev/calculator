@@ -619,6 +619,7 @@ void CommandList::initPredefinedOuterFunctions()
 
 void CommandList::initPredefinedInnerFunctionsWithTypes()
 { this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(), "Adds two rational numbers. ",
+  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
+   "Adds two rational numbers. ",
    "2+3", true);
 }

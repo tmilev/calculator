@@ -466,6 +466,8 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 ;*/
 //  civilizedInput= "EmbedSSalgebraInWeylAlgebra{}(g_2, (0,0), (0,1));";
   //civilizedInput="1+1";
+  //civilizedInput="1+a";
+//  civilizedInput="1+a-2a_1+1/2+a_1";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

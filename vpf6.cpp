@@ -805,8 +805,9 @@ void CommandList::ParseFillDictionary
         } else
         { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
           currentElement.theData.MakeAtom
-          (this->operationS.AddNoRepetitionOrReturnIndexFirst(current), *this);
+          (this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
           (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+         // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
         }
         current="";
       }
@@ -3064,9 +3065,11 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 
 void CommandList::init(GlobalVariables& inputGlobalVariables)
 { this->theGlobalVariableS=& inputGlobalVariables;
-  this->MaxAlgTransformationsPerExpression=100000;
+//  this->MaxAlgTransformationsPerExpression=100000;
+  this->MaxAlgTransformationsPerExpression=100;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
+  this->NumErrors=0;
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
   this->flagNewContextNeeded=true;
@@ -3171,71 +3174,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->initPredefinedInnerFunctions();
 }
 
-bool CommandList::CollectSummands
-(List<Expression>& summands, bool needSimplification, Expression& theExpression)
-{ MonomialCollection<Expression, Rational> theSum;
-//  Rational constTerm=0;
-//  bool foundConstTerm=false;
-  Expression oneE; //used to record the constant term
-  oneE.AssignValue<Rational>(1, *this);
-//  std::cout << "<b>" << theExpression.ToString() << "</b>";
-//  if (theExpression.ToString()=="(4)*(a) b+(a) b")
-//    std::cout << "problem!";
-//assert(false);
-//return false;
-  theSum.MakeZero();
-  for (int i=0; i<summands.size; i++)
-  { Expression* currentSummandNoCoeff;
-    currentSummandNoCoeff=&summands[i];
-    Rational theCoeff=1;
-    if (currentSummandNoCoeff->IsListStartingWithAtom(this->opTimes()))
-    { if(currentSummandNoCoeff->children[1].IsOfType<Rational>(&theCoeff))
-        currentSummandNoCoeff=&currentSummandNoCoeff->children[2];
-    } else if (currentSummandNoCoeff->IsOfType<Rational>(&theCoeff))
-      currentSummandNoCoeff=&oneE;
-    theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
-  }
-/*
-  std::cout << "<hr>summands: ";
-  for (unsigned i=0; i< summands.size(); i++)
-    std::cout << summands[i].ToString() << ", ";
-  std::cout << " const term: " << constTerm;
-    std::cout << "<br>coeff->summand_no_coeff: ";
-  for (int i=0; i< summandsNoCoeff.size(); i++)
-    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ToString() << ", ";
-  std::cout << " const term: " << constTerm;
-*/
-  if (theSum.IsEqualToZero())
-    return theExpression.AssignValue<Rational>(0, *this);
-  List<Expression> summandsWithCoeff;
-  summandsWithCoeff.SetSize(0);
-  summandsWithCoeff.ReservE(theSum.size);
-  for (int i=0; i<theSum.size; i++)
-  { summandsWithCoeff.SetSize(summandsWithCoeff.size+1);
-    Expression& current=*summandsWithCoeff.LastObject();
-    if (theSum[i]==oneE)
-      current.AssignValue(theSum.theCoeffs[i], *this);
-    else if (!theSum.theCoeffs[i].IsEqualToOne())
-    { current.reset(*this, 3);
-      current.children[0].MakeAtom(this->opTimes(), *this);
-      current.children[1].AssignValue(theSum.theCoeffs[i], *this);
-      current.children[2]=theSum[i];
-    } else
-      current=theSum[i];
-  }
-  Expression* currentExp;
-  Expression result=theExpression;
-  currentExp=&theExpression;
-  for (int i=0; i<theSum.size-1; i++)
-  { currentExp->reset(*this, 3);
-    currentExp->children[0].MakeAtom(this->opPlus(), *this);
-    currentExp->children[1]=summandsWithCoeff[i];
-    currentExp=& currentExp->children[2];
-  }
-  *currentExp=summandsWithCoeff[summandsWithCoeff.size-1];
-  return theExpression==result;
-}
-
 Expression::FunctionAddress CommandList::GetInnerFunctionFromOp
 (int theOp, const Expression& left, const Expression& right)
 { std::cout << "Function CommandList::GetfOp not implemented yet. "
@@ -3291,22 +3229,6 @@ bool CommandList::outerTensor
   return false;
 }
 
-bool CommandList::outerTimes
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ //std::cout << "<br>At start of evaluate standard times: " << theExpression.ToString();
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::fStandardTimes");
-  if (theCommands.outerDistribute
-      (theCommands, input, output, theCommands.opPlus(), theCommands.opTimes()))
-    return true;
-  //std::cout << "<br>After distribute: " << theExpression.ToString();
-  if (theCommands.outerAssociate(theCommands, input, output))
-    return true;
-  if (theCommands.outerExtractBaseMultiplication(theCommands, input, output))
-    return true;
-  return false;
-}
-
 bool CommandList::outerExtractBaseMultiplication
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
@@ -3314,13 +3236,10 @@ bool CommandList::outerExtractBaseMultiplication
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   bool result=false;
-  Expression& leftE=input[1];
-  Expression& rightE=input[2];
+  output=input;
+  Expression& leftE=output[1];
+  Expression& rightE=output[2];
   //std::cout << "<br>handling base extraction of: " << theExpression.ToString();
-  //handle Rational*Rational:
-  Rational leftR, rightR;
-  if (leftE.IsOfType<Rational>(&leftR) && rightE.IsOfType<Rational>(&rightR))
-    return output.AssignValue(leftR*rightR, theCommands);
   //handle Anything*Rational:=Rational*Anything
   if (rightE.IsOfType<Rational>())
   { MathRoutines::swap(leftE, rightE);
@@ -3330,35 +3249,28 @@ bool CommandList::outerExtractBaseMultiplication
   if (rightE.IsListStartingWithAtom(theCommands.opTimes()))
   { if (rightE.children.size!=3)
       return result;
-    Expression& rightLeftE=rightE.children[1];
+    Expression& rightLeftE=rightE[1];
+    Expression& rightRightE=rightE[2];
     //handle Anything1*(Rational*Anything2):=Rational*(Anything1*Anything2)
     if (rightLeftE.IsOfType<Rational>())
     { MathRoutines::swap(rightLeftE, leftE);
       result=true;
 //      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
     }
-    //handle Rational1*(Rational2*Anything):=(Rational1*Rational2)*Anything
-    if (leftE.IsOfType<Rational>() && rightLeftE.IsOfType<Rational>())
-    { leftE.AssignValue
-      (leftE.GetValuE<Rational>()*rightLeftE.GetValuE<Rational>(), theCommands);
-      rightE.AssignChild(1);
-      result=true;
-    } else if (leftE.IsOfType<Rational>() && rightLeftE.IsOfType<Rational>())
     //<- handle a*(b*anything)
     //on condition that a*b has an inner handler
-    { Expression tempExp, newExpr;
-      tempExp.MakeXOX(theCommands, theCommands.opTimes(), leftE, rightLeftE);
-      if (theCommands.innerTimes(theCommands, tempExp, newExpr))
-      { tempExp=rightE.children[2];
-        output.MakeProducT(theCommands, newExpr, tempExp);
-        return true;
-      }
+    Expression tempExp, newExpr;
+    tempExp.reset(theCommands,2);
+    tempExp[0]=leftE;
+    tempExp[1]=rightLeftE;
+    if (theCommands.innerTimes(theCommands, tempExp, newExpr))
+    { output.MakeProducT(theCommands, newExpr, rightRightE);
+      result=true;
     }
   }
-  //handle 0*Anything:=0
-  if (leftE.IsOfType<Rational>())
-    if (leftE.GetValuE<Rational>().IsEqualToZero())
-      return output.AssignValue(0, theCommands);
+  //handle 0*anything=0
+  if (leftE.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
   return result;
 }
 
@@ -3465,10 +3377,67 @@ bool CommandList::outerPlus
     return false;
   List<Expression>& summands= theCommands.buffer1;
   summands.SetSize(0);
-  output=input;
-  bool needSimplification=theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
-  (output, summands);
-  return theCommands.CollectSummands(summands, needSimplification, output);
+  //bool needSimplification=
+  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
+  (input, summands);
+  MonomialCollection<Expression, Rational> theSum;
+//  Rational constTerm=0;
+//  bool foundConstTerm=false;
+  Expression oneE; //used to record the constant term
+  oneE.AssignValue<Rational>(1, theCommands);
+//  std::cout << "<b>" << theExpression.ToString() << "</b>";
+//  if (theExpression.ToString()=="(4)*(a) b+(a) b")
+//    std::cout << "problem!";
+//assert(false);
+//return false;
+  theSum.MakeZero();
+  for (int i=0; i<summands.size; i++)
+  { Expression* currentSummandNoCoeff;
+    currentSummandNoCoeff=&summands[i];
+    Rational theCoeff=1;
+    if (currentSummandNoCoeff->IsListStartingWithAtom(theCommands.opTimes()))
+    { if(currentSummandNoCoeff->children[1].IsOfType<Rational>(&theCoeff))
+        currentSummandNoCoeff=&currentSummandNoCoeff->children[2];
+    } else if (currentSummandNoCoeff->IsOfType<Rational>(&theCoeff))
+      currentSummandNoCoeff=&oneE;
+    theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
+  }
+/*
+  std::cout << "<hr>summands: ";
+  for (unsigned i=0; i< summands.size(); i++)
+    std::cout << summands[i].ToString() << ", ";
+  std::cout << " const term: " << constTerm;
+    std::cout << "<br>coeff->summand_no_coeff: ";
+  for (int i=0; i< summandsNoCoeff.size(); i++)
+    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ToString() << ", ";
+  std::cout << " const term: " << constTerm;
+*/
+  if (theSum.IsEqualToZero())
+    return output.AssignValue<Rational>(0, theCommands);
+  List<Expression> summandsWithCoeff;
+  summandsWithCoeff.SetSize(theSum.size);
+  for (int i=0; i<theSum.size; i++)
+  { Expression& current=summandsWithCoeff[i];
+    if (theSum[i]==oneE)
+      current.AssignValue(theSum.theCoeffs[i], theCommands);
+    else if (!theSum.theCoeffs[i].IsEqualToOne())
+    { current.reset(theCommands, 3);
+      current.children[0].MakeAtom(theCommands.opTimes(), theCommands);
+      current.children[1].AssignValue(theSum.theCoeffs[i], theCommands);
+      current.children[2]=theSum[i];
+    } else
+      current=theSum[i];
+  }
+  Expression* currentExp;
+  currentExp=&output;
+  for (int i=0; i<summandsWithCoeff.size-1; i++)
+  { currentExp->reset(theCommands, 3);
+    currentExp->children[0].MakeAtom(theCommands.opPlus(), theCommands);
+    currentExp->children[1]=summandsWithCoeff[i];
+    currentExp=& currentExp->children[2];
+  }
+  *currentExp=summandsWithCoeff[summandsWithCoeff.size-1];
+  return true;
 }
 
 bool CommandList::EvaluateIf
@@ -3491,10 +3460,19 @@ bool CommandList::EvaluateIf
 
 bool CommandList::outerStandardFunction
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsLisT())
+{ MacroRegisterFunctionWithName("CommandList::outerStandardFunction");
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  if (&input==&output)
+  { std::cout << "This is a programming error: the input and output object of "
+    << " outerStandardFunction must be different."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (!input.IsLisT())
     return false;
   Expression& functionNameNode =input[0];
   int theIndex;
+  std::cout << "<br>Simplifying " << input.ToString();
   if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
     if (input.children.size==2)
       if (input[1].IsSmallInteger(&theIndex))
@@ -3505,28 +3483,27 @@ bool CommandList::outerStandardFunction
   if (!functionNameNode.IsAtoM())
     return false;
   for (int i=0; i<theCommands.FunctionHandlers[functionNameNode.theData].size; i++)
-  { Function& theFun=
-    theCommands.FunctionHandlers[functionNameNode.theData][i];
-    if (!theFun.flagIsInner)
-    { if (theFun.theFunction(theCommands, input, output))
-        return true;
+    if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
+    { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
+      if (outerFun.theFunction(theCommands, input, output))
+        return output!=input;
     } else
-    { Expression arguments;
+    { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
+      Expression arguments;
       arguments.reset(theCommands, input.children.size-1);
       for (int i=1; i<input.children.size; i++)
         arguments[i-1]=input[i];
       bool isGood=true;
       //the following if clause needs to be rewritten.
-      if (theFun.theArgumentTypes.children.size==2)
-        if (!input[1].IsListNElementsStartingWithAtom(theFun.theArgumentTypes.children[0].theData) ||
-            !input[2].IsListNElementsStartingWithAtom(theFun.theArgumentTypes.children[1].theData)
+      if (innerFun.theArgumentTypes.children.size==2)
+        if (!input[1].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes.children[0].theData) ||
+            !input[2].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes.children[1].theData)
             )
           isGood=false;
       if (isGood)
-        if (theFun.theFunction(theCommands, arguments, output))
+        if (innerFun.theFunction(theCommands, arguments, output))
           return true;
     }
-  }
   return false;
 }
 
@@ -3638,8 +3615,14 @@ bool CommandList::outerDivide
 { MacroRegisterFunctionWithName("CommandList::outerDivide");
   if (input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
-
-  return false;
+  Rational tempRat;
+  if (!input[2].IsOfType<Rational>(&tempRat))
+    return false;
+  if (tempRat.IsEqualToZero())
+    return output.SetError("Error: division by zero. ", theCommands);
+  output=input;
+  tempRat.Invert();
+  return output[2].AssignValue(tempRat, theCommands);
 }
 
 bool CommandList::outerMinus
@@ -3659,8 +3642,8 @@ bool CommandList::outerMinus
 }
 
 bool Expression::operator==(const Expression& other)const
-{ if (this->theBoss==0)
-    assert(false);
+{ if (this->theBoss==0 || other.theBoss==0)
+    return this->AreEqualExcludingChildren(other) && this->children.size==0;
   return this->theBoss->ExpressionsAreEqual(*this, other);
 }
 
@@ -3928,6 +3911,7 @@ bool CommandList::EvaluateExpression
   bool ReductionOcurred=true;
   int counterNumTransformations=0;
   Expression tempE;
+  tempE.reset(*this);
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { ReductionOcurred=false;
     counterNumTransformations++;
@@ -3948,9 +3932,9 @@ bool CommandList::EvaluateExpression
     if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << "<br>Maximum number of algebraic transformations of "
-        << this->MaxAlgTransformationsPerExpression << " exceeded."
-        << " while simplifying " << output.ToString();
+        out << " While simplifying " << output.ToString()
+        << "<br>Maximum number of algebraic transformations of "
+        << this->MaxAlgTransformationsPerExpression << " exceeded.";
         output.SetError(out.str(), *this);
         this->flagAbortComputationASAP=true;
         this->flagMaxTransformationsErrorEncountered=true;
@@ -4162,7 +4146,7 @@ void CommandList::EvaluateCommands()
 
 //  this->theLogs.resize(this->theCommands.size());
 //this->ToString();
-  std::stringstream comments;
+  //std::stringstream comments;
   if (this->syntaxErrors!="")
   { out << "<hr><b>Syntax errors encountered</b><br>";
     out << this->syntaxErrors;
@@ -4176,6 +4160,7 @@ void CommandList::EvaluateCommands()
   this->RuleContextIdentifier=0;
   this->flagAbortComputationASAP=false;
   bool tempBool;
+  this->Comments.clear();
   this->EvaluateExpression
   (this->theProgramExpression, this->theProgramExpression, thePairs, tempBool);
   if (this->RecursionDeptH!=0)
@@ -4190,11 +4175,11 @@ void CommandList::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
   out << this->theProgramExpression.ToString
-  (&this->theGlobalVariableS->theDefaultFormat, &comments, &StartingExpression);
+  (&this->theGlobalVariableS->theDefaultFormat, 0, &StartingExpression);
   this->outputString=out.str();
-  if (comments.str()!="")
+  if (this->Comments.str()!="")
   { std::stringstream commentsStream;
-    commentsStream << "<b>Comments.</b><br><span>" << comments.str() << "</span>";
+    commentsStream << "<b>Comments.</b><br><span>" << this->Comments.str() << "</span>";
     this->outputCommentsString=commentsStream.str();
   }
 }
@@ -4215,7 +4200,8 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
     if (this->errorString!="")
       out << "</td></tr><tr><td>" << this->errorString;
     out << "</td></tr></table>";
-  }
+  } else
+    out << this->theData.ToString(0);
   return out.str();
 }
 
@@ -4266,6 +4252,33 @@ bool Expression::operator>(const Expression& other)const
   return this->ToString()>other.ToString();
 }
 
+bool Expression::ToStringData(std::string* whichString, FormatExpressions* theFormat)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsAtoM())
+  { if (this->theData< this->theBoss->operationS.size && this->theData>=0)
+    { if (whichString!=0)
+        *whichString=this->theBoss->operationS[this->theData];
+      return true;
+    }
+    return false;
+  }
+  if (this->IsOfType<std::string>())
+  { if (whichString!=0)
+    { if (theFormat!=0)
+      { if (theFormat->flagExpressionIsFinal)
+          *whichString=this->GetValuE<std::string>();
+      } else
+        *whichString= "(string not shown to avoid javasript problems)";
+    }
+    return true;
+  }
+  return
+  this->ToStringByType<Rational>(whichString) ||
+  this->ToStringByType<Polynomial<Rational> >(whichString)
+;
+}
+
 std::string Expression::ToString
 (FormatExpressions* theFormat, std::stringstream* outComments,
  Expression* startingExpression)const
@@ -4288,12 +4301,12 @@ std::string Expression::ToString
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   int charCounter=0;
   std::string additionalDataComments;
-  if (this->IsAtoM())
-  { out << "(Programming~ error:~ unknown~ atom: " << this->Lispify() << ")";
-    return out.str();
-  } else if (this->IsOfType<Rational>())
-    out << this->GetValuE<Rational>().ToString();
-  else if (this->children[0].IsAtoM(this->theBoss->opDefine()))
+  std::string tempS;
+  if (this->ToStringData(&tempS, theFormat))
+    out << tempS;
+  else if (this->IsAtoM())
+    out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
   { std::string firstE=this->children[1].ToString(theFormat, outComments);
     std::string secondE=this->children[2].ToString(theFormat, outComments);
     if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
@@ -4313,7 +4326,7 @@ std::string Expression::ToString
     out <<  this->children[1].ToString(theFormat, outComments) << " :if "
     << this->children[2].ToString(theFormat, outComments)
     << ":=" << this->children[3].ToString(theFormat, outComments);
-  else if (this->IsListStartingWithAtom(this->theBoss->opDivide() ))
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
   { std::string firstE= this->children[1].ToString(theFormat, outComments);
     std::string secondE=this->children[2].ToString(theFormat, outComments);
     bool firstNeedsBrackets=
@@ -4330,19 +4343,37 @@ std::string Expression::ToString
     else
       out << secondE;
   }
-  else if (this->IsListStartingWithAtom(this->theBoss->opTensor()) )
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
   { out << this->children[1].ToString(theFormat, outComments)
     << "\\otimes " << this->children[2].ToString(theFormat, outComments);
-  } else if (this->IsListStartingWithAtom(this->theBoss->opTimes() ))
-  { std::string tempS=this->children[1].ToString(theFormat, outComments);
-    if (tempS=="-1")
-      tempS="-";
-    if (tempS=="1")
-      tempS="";
-    out << tempS;
-    if (this->format==this->formatTimesDenotedByStar && tempS!="-" && tempS!="")
-      out << "*"; else out << " ";
-    out << this->children[2].ToString(theFormat, outComments);
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
+  { std::string firstE= this->children[1].ToString(theFormat, outComments);
+    std::string secondE=this->children[2].ToString(theFormat, outComments);
+    bool firstNeedsBrackets=
+    (!(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
+      this->children[1].IsListStartingWithAtom(this->theBoss->opDivide())))
+    && !this->children[1].IsOfType<Rational>();
+    bool secondNeedsBrackets;
+    if (!this->children[2].IsOfType<Rational>())
+      secondNeedsBrackets=true;
+    else
+      secondNeedsBrackets=this->children[2].GetValuE<Rational>().IsNonPositive();
+    if (firstE=="-1" )
+      firstE="-";
+    if (firstE=="1")
+      firstE="";
+    if (firstNeedsBrackets)
+      out << "(" << firstE << ")";
+    else
+      out << firstE;
+    if (this->format==this->formatTimesDenotedByStar && firstE!="-" && firstE!="")
+      out << "*";
+    else
+      out << " ";
+    if (secondNeedsBrackets)
+      out << "(" << secondE << ")";
+    else
+      out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
   { std::string firstE=this->children[1].ToString(theFormat, outComments);
     std::string secondE=this->children[2].ToString(theFormat, outComments);
@@ -4366,11 +4397,16 @@ std::string Expression::ToString
         out << "+";
     out << tempS;
   } else if (this->IsListStartingWithAtom(this->theBoss->opMinus()))
-  { if (this->children.size==1)
+  { if (this->children.size==2)
       out << "-" << this->children[1].ToString
       (theFormat, outComments);
     else
-    { assert(children.size==2);
+    { if (!(this->children.size==3))
+      { std::cout << "This is a programming error: the minus function expects"
+        << "1 or 2 arguments, instead there are " << this->children.size-1
+        << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
       out << this->children[1].ToString(theFormat, outComments)
       << "-" << this->children[2].ToString(theFormat, outComments);
     }
@@ -4399,8 +4435,7 @@ std::string Expression::ToString
         << "{}(" << this->children[2].ToString(theFormat, outComments) << ")";
         break;
     }
-  }
-  else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
+  } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
     out << this->children[1].ToString(theFormat, outComments)
     << "==" << this->children[2].ToString(theFormat, outComments);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
@@ -4493,6 +4528,11 @@ std::string Expression::ToString
     }
     if (startingExpression==0)
       out << "</table>";
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
+  { this->theBoss->NumErrors++;
+    out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
+    this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
+    << ". " << this->children[1].ToString(theFormat);
   }
   else
     out << "(ProgrammingError:NotDocumented)" ;
@@ -4529,17 +4569,7 @@ std::string Expression::Lispify()const
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
     return "(error: max recursion depth ...)";
   std::stringstream out;
-  if (this->children.size==0)
-  { out << this->theData;
-    return out.str();
-  }
-  Expression& firstE= this->children[0];
-  out << "(";
-  if (firstE.IsAtoM())
-    out << this->theBoss->operationS[firstE.theData];
-  else
-    out << firstE.Lispify();
-  for (int i=1; i<this->children.size; i++)
+  for (int i=0; i<this->children.size; i++)
     out << " " << this->children[i].Lispify();
   out << ")";
   return out.str();
@@ -4559,6 +4589,17 @@ bool Expression::IsLisT()const
   return true;
 }
 
+int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
+{ int result=this->operationS.GetIndex(theOpName);
+  if (result==-1)
+  { this->operationS.AddOnTop(theOpName);
+    this->FunctionHandlers.SetSize(this->operationS.size);
+    this->FunctionHandlers.LastObject()->SetSize(0);
+    result=this->operationS.size-1;
+  }
+  return result;
+}
+
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
 { if (this->operationS.Contains(theOpName))
   { std::cout << "This is a programming error: operation " << theOpName << " already created. "
@@ -4567,6 +4608,7 @@ void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
   }
   this->operationS.AddOnTop(theOpName);
   this->FunctionHandlers.SetSize(this->operationS.size);
+  this->FunctionHandlers.LastObject()->SetSize(0);
 }
 
 void CommandList::AddOperationBinaryInnerHandlerWithTypes
@@ -5024,7 +5066,9 @@ bool CommandList::RegisterBoundVariable()
 
 bool CommandList::ReplaceVXdotsXbyEXdotsX(int numXs)
 { SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
-  const std::string& theVarString=theElt.theData.GetValuE<std::string>();
+
+//  std::cout << "<br>index of variable: " << theElt.ToString(*this);
+  const std::string& theVarString=this->operationS[theElt.theData.theData];
   if (this->IsBoundVarInContext(theVarString))
   { theElt.theData.reset(*this, 2);
     theElt.theData[0].MakeAtom(this->opBind(), *this);

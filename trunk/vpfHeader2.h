@@ -603,6 +603,7 @@ public:
   std::string ElementToStringNonBoundVars();
   std::string ToStringFunctionHandlers();
   std::stringstream Comments;
+  FormatExpressions formatVisibleStrings;
   bool IsBoundVarInContext(const std::string& input);
   bool IsNonBoundVarInContext(const std::string& input);
   SyntacticElement GetSyntacticElementEnd()

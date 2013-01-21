@@ -509,7 +509,8 @@ void CommandList::initPredefinedOuterFunctions()
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
-    "If b is rational computes (anything)/b with anything* (1/b).", "3/5+(a+b)/5", true);
+    "If b is rational substitutes (anything)/b with anything* (1/b).",
+    "3/5+(a+b)/5; 3/2+3/0", true);
   this->AddOperationOuterHandler
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
@@ -623,7 +624,7 @@ void CommandList::initPredefinedInnerFunctionsWithTypes()
    "Multiplies two rational numbers. ",
    "2*3", true);
   this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
+  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
    "2/3; 2/0;", true);
 }

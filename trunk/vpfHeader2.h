@@ -1346,6 +1346,9 @@ static bool TypeHighestWeightParabolic
 static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerDivideRatByRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 
   void AddEmptyHeadedCommand();
   CommandList();

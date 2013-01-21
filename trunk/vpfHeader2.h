@@ -87,6 +87,15 @@ class Expression
     this->operator=(tempExp);
     return true;
   }
+  template <class theType>
+  bool ToStringByType(std::string* whichString=0)const
+  { if (!this->IsOfType<theType>())
+      return false;
+    if (whichString!=0)
+      *whichString=this->GetValuE<theType>().ToString();
+    return true;
+  }
+  bool ToStringData(std::string* whichString=0, FormatExpressions* theFormat=0)const;
   bool IsLisT()const;
   bool IsListNElements(int N=-1)const
   { if (!this->IsLisT())
@@ -294,6 +303,9 @@ void MakeVariableNonBounD
   }
 //  Rational GetConstantTerm() const;
   bool operator==(const Expression& other)const;
+  bool operator!=(const Expression& other)const
+  { return ! (*this==other);
+  }
   void CopyValueFromNoChildrenCopy(const Expression& other)
   { this->theBoss=other.theBoss;
     this->theData=other.theData;
@@ -526,6 +538,7 @@ public:
   int MaxAlgTransformationsPerExpression;
   int MaxLatexChars;
   int MaxNumCachedExpressionPerContext;
+  int NumErrors;
   ///////////////////////////////////////////////////////////////////////////
   bool flagAbortComputationASAP;
   bool flagTimeLimitErrorDetected;
@@ -909,7 +922,7 @@ public:
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opTimes());
   }
   bool AppendSummandsReturnTrueIfOrderNonCanonical
-  (Expression& theExpression, List<Expression>& output)
+  (const Expression& theExpression, List<Expression>& output)
   { return this->AppendOpandsReturnTrueIfOrderNonCanonical(theExpression, output, this->opPlus());
   }
   void SpecializeBoundVars
@@ -953,9 +966,6 @@ public:
       return false;
     return !output.IsError();
   }
-bool CollectSummands
-(List<Expression>& summands, bool needSimplification, Expression& theExpression)
-;
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
    std::stringstream* theLog=0)
@@ -1000,9 +1010,6 @@ bool CollectSummands
   static bool outerPlus
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool outerTimes
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
   static bool outerTensor
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1035,6 +1042,11 @@ bool CollectSummands
 (CommandList& theCommands, const Expression& input, Expression& output,
   int AdditiveOp, int multiplicativeOp)
   ;
+  static bool outerDistributeTimes
+(CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.outerDistribute
+    (theCommands, input, output, theCommands.opPlus(), theCommands.opTimes());
+  }
   static bool outerLeftDistributeBracketIsOnTheLeft
 (CommandList& theCommands, const Expression& input, Expression& output,
   int AdditiveOp, int multiplicativeOp)
@@ -1331,9 +1343,15 @@ static bool TypeHighestWeightParabolic
   static bool innerAddRatToRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerMultiplyRatByRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 
   void AddEmptyHeadedCommand();
   CommandList();
+  int AddOperationNoRepetitionOrReturnIndexFirst
+  (const std::string& theOpName)
+;
   void AddOperationNoRepetitionAllowed
   (const std::string& theOpName)
   ;

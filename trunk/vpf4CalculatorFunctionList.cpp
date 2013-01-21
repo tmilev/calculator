@@ -509,23 +509,19 @@ void CommandList::initPredefinedOuterFunctions()
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
-    "1) If a and b are rational substitutes a/b with its value. \
-     <br>2)If b is rational computes (anything)/b with anything* (1/b). \
-     This is equivalent to {{a}}/b:={{a}}*(1/b).", "3/5+(a+b)/5", true);
+    "If b is rational computes (anything)/b with anything* (1/b).", "3/5+(a+b)/5", true);
   this->AddOperationOuterHandler
-  ("*", this->outerTimes, "",
-   "<br>The following description is out of date. Must be updated.\
-   <br>1) If a and b are both of type built in-data, and there is a built in handler for a*b, \
-   substitutes a*b by the result of the built-in handler.<br>\n \
-   2) Reorders all multiplicative terms in regular order, e.g. ((a*b)*(c*d))*f:=a*(b*(c*(d*f))).<br> \
-   3) Applies the left and right distributive laws ({{a}}+{{b}})*{{c}}:=a*c+b*c; \
-   {{c}}*({{a}}+{{b}}):=c*a+c*b.<br> \
-   4.1) If b is rational, substitutes a*b by b*a (i.e. {{a}}{{b}}:if IsRational{} b:=b*a;). <br>\
-   4.2) If the expression is of the form a*(b*c) and  a and b are rational, \
-   substitutes a*(b*c) by (a*b)*c. <br>\
-   4.3) If the expression is of the form a*(b*c) and b is rational but a is not, \
-   substitutes the expression by b*(a*c).",
-   "2*c_1*d*3", true);
+  ("*", this->outerDistributeTimes, "",
+   "Distributive law (left and right).",
+   "(a+b)*c; \n a*(b+c)", true);
+  this->AddOperationOuterHandler
+  ("*", this->outerAssociate, "",
+   "Associative law: reorders the multiplicative tree in standard form. ",
+   "(a*b)*(c*(d*(e*f)*g)*h) - a*(b*(c*(d*(e*(f*(g*h))))))", true);
+  this->AddOperationOuterHandler
+  ("*", this->outerAssociate, "",
+   "Pulls rationals in the front of multiplicative terms.",
+   "2*((3*c)*(4*d))", true);
     this->AddOperationOuterHandler
   ("\\otimes",  this->outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
@@ -622,4 +618,12 @@ void CommandList::initPredefinedInnerFunctionsWithTypes()
   ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
    "Adds two rational numbers. ",
    "2+3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
+   "Multiplies two rational numbers. ",
+   "2*3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
+   "Divides two rational numbers. ",
+   "2/3; 2/0;", true);
 }

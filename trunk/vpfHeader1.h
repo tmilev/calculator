@@ -2969,8 +2969,10 @@ ParallelComputing::GlobalPointerCounter++;
     else
       return this->Extended->num.IsEqualToZero();
   }
-  inline bool operator<=(const Rational& other)const{ return !(other<*this);}
-  inline bool IsPositiveOrZero()
+  inline bool operator<=(const Rational& other)const
+  { return !(other<*this);
+  }
+  inline bool IsPositiveOrZero()const
   { if (this->Extended==0)
       return this->NumShort>=0;
     else
@@ -2982,7 +2984,7 @@ ParallelComputing::GlobalPointerCounter++;
     else
       return this->Extended->num.IsNegative();
   }
-  bool IsNonPositive()
+  bool IsNonPositive()const
   { if (this->Extended==0)
       return this->NumShort<=0;
     else

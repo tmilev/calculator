@@ -7,6 +7,12 @@ ProjectInformationInstance ProjectInfoVpf6cpp(__FILE__, "Implementation file for
 //the following template specialization funcitons must appear
 //here and nowhere else (discovered through extremely painful experimentation).
 
+template<>
+typename List<Expression>::OrderLeftGreaterThanRight
+FormatExpressions::GetMonOrder<Expression>()
+{ return 0;
+}
+
 //Expression::GetOpType specializations follow
 template < >
 int Expression::GetOpType<RationalFunctionOld>()const
@@ -3066,6 +3072,7 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 void CommandList::init(GlobalVariables& inputGlobalVariables)
 { this->theGlobalVariableS=& inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
+  this->formatVisibleStrings.flagExpressionIsFinal=true;
   this->MaxAlgTransformationsPerExpression=100;
   this->MaxRecursionDeptH=10000;
   this->RecursionDeptH=0;
@@ -3276,24 +3283,25 @@ bool CommandList::outerExtractBaseMultiplication
 
 bool CommandList::outerAssociate
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (input.IsListNElementsStartingWithAtom(-1, 3))
+{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theOperation=input[0].theData;
   List<Expression>& opands=theCommands.buffer1;
   opands.SetSize(0);
-  //std::cout << "<br>At start of do associate: " << theExpression.ToString();
+//  std::cout << "<br>At start of do associate: " << theExpression.ToString();
   bool needsModification=theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
   (input, opands, theOperation);
   if (!needsModification)
     return false;
-  Expression* currentExpression;
-  currentExpression=&output;
-  Expression emptyE;
-  for (int i=0; i<opands.size-1; i++)
-  { currentExpression->MakeXOX(theCommands, theOperation, opands[i], emptyE);
-    currentExpression=&currentExpression->children[1];
+  std::cout << "<br>" << input.ToString() << " needs modification.<br> ";
+  output.MakeXOX
+  (theCommands, theOperation, opands[opands.size-2], opands[opands.size-1])
+  ;
+  Expression tempE;
+  for (int i=opands.size-3; i>=0; i--)
+  { tempE.MakeXOX(theCommands, theOperation, opands[i], output);
+    output=tempE;
   }
-  *currentExpression=*opands.LastObject();
   //std::cout << "<br>At end do associate: " << theExpression.ToString();
   return true;
 }
@@ -3302,7 +3310,7 @@ bool CommandList::StandardIsDenotedBy
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::StandardIsDenotedBy");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
     return false;
   Expression& withNotation=input[2];
   Expression& theNotation=input[1];
@@ -3354,7 +3362,7 @@ bool CommandList::outerLeftDistributeBracketIsOnTheLeft
 bool CommandList::outerRightDistributeBracketIsOnTheRight
 (CommandList& theCommands, const Expression& input, Expression& output,
  int AdditiveOp, int multiplicativeOp)
-{ if (input.IsListNElementsStartingWithAtom(-1, 3))
+{ if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theAdditiveOp=theCommands.opPlus();
   int theMultiplicativeOP=input[0].theData;
@@ -3402,6 +3410,7 @@ bool CommandList::outerPlus
       currentSummandNoCoeff=&oneE;
     theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
+  std::cout << "<br>Collected sum: " << theSum.ToString();
 /*
   std::cout << "<hr>summands: ";
   for (unsigned i=0; i< summands.size(); i++)
@@ -3936,7 +3945,7 @@ bool CommandList::EvaluateExpression
     if (counterNumTransformations>this->MaxAlgTransformationsPerExpression)
     { if (!this->flagMaxTransformationsErrorEncountered)
       { std::stringstream out;
-        out << " While simplifying " << output.ToString()
+        out << " While simplifying " << output.ToString(&this->formatVisibleStrings)
         << "<br>Maximum number of algebraic transformations of "
         << this->MaxAlgTransformationsPerExpression << " exceeded.";
         output.SetError(out.str(), *this);
@@ -4533,10 +4542,13 @@ std::string Expression::ToString
     if (startingExpression==0)
       out << "</table>";
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
-  { this->theBoss->NumErrors++;
-    out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
-    this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
-    << ". " << this->children[1].ToString(theFormat);
+  { if (isFinal)
+    { this->theBoss->NumErrors++;
+      out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
+      this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
+      << ". " << this->children[1].ToString(theFormat);
+    } else
+      out << "(Error)";
   }
   else
     out << "(ProgrammingError:NotDocumented)" ;
@@ -4702,11 +4714,10 @@ std::string Function::GetString(CommandList& theBoss)
 { std::stringstream out2;
   if (this->flagIamVisible)
   { std::stringstream out;
-    out << "Transformation address: " << std::hex << (int) this->theFunction << ". ";
-    if (!this->flagIsInner)
-      out << "This transformation is a ``law'' i.e., takes as an "
-      << "additional argument the name of the operation. ";
     out << this->theDescription;
+    out << "Address: " << std::hex << (int) this->theFunction << ". ";
+    if (!this->flagIsInner)
+      out << "This is a <b>``law''</b> - takes as argument the name of the operation as well. ";
     if (this->theExample!="")
       out << " <br> " << this->theExample << "&nbsp&nbsp&nbsp";
     out2 << CGI::GetHtmlSpanHidableStartsHiddeN(out.str());

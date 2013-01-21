@@ -510,7 +510,7 @@ void CommandList::initPredefinedOuterFunctions()
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",
     "If b is rational substitutes (anything)/b with anything* (1/b).",
-    "3/5+(a+b)/5; 3/2+3/0", true);
+    "6/15+(a+b)/5; 6/4+3/0", true);
   this->AddOperationOuterHandler
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
@@ -518,7 +518,7 @@ void CommandList::initPredefinedOuterFunctions()
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
-   "(a*b)*(c*(d*(e*f)*g)*h) - a*(b*(c*(d*(e*(f*(g*h))))))", true);
+   "(a*b)*(c*(d*(e*f)*g)*h) - a*(b*(c*(d*(e*(f*(g*h))))));(a*b)*(c*(d*(e*f)*g)*h) - a*b*c*d*e*g*f*h", true);
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Pulls rationals in the front of multiplicative terms.",
@@ -626,5 +626,5 @@ void CommandList::initPredefinedInnerFunctionsWithTypes()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
-   "2/3; 2/0;", true);
+   "4/6; 2/0;", true);
 }

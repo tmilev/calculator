@@ -3613,15 +3613,19 @@ bool CommandList::outerUnionNoRepetition
 bool CommandList::outerDivide
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::outerDivide");
-  if (input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
+//  std::cout << "<br>Now I'm here 1! input: " << input.ToString() << " lisp: "
+//  << input.Lispify() ;
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opDivide(), 3))
     return false;
+//  std::cout << "<br>Now I'm here! 2";
   Rational tempRat;
   if (!input[2].IsOfType<Rational>(&tempRat))
     return false;
   if (tempRat.IsEqualToZero())
-    return output.SetError("Error: division by zero. ", theCommands);
+    return output.SetError("Division by zero. ", theCommands);
   output=input;
   tempRat.Invert();
+  output[0].MakeAtom(theCommands.opTimes(), theCommands);
   return output[2].AssignValue(tempRat, theCommands);
 }
 
@@ -4568,7 +4572,13 @@ std::string Expression::Lispify()const
   RecursionDepthCounter theCounter(&this->theBoss->RecursionDeptH);
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
     return "(error: max recursion depth ...)";
+  std::string tempS;
+  if (this->ToStringData(&tempS))
+    return tempS;
+  if (this->children.size==0)
+    return this->ToString();
   std::stringstream out;
+  out << "(";
   for (int i=0; i<this->children.size; i++)
     out << " " << this->children[i].Lispify();
   out << ")";

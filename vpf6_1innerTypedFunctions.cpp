@@ -26,3 +26,16 @@ bool CommandList::innerMultiplyRatByRat
     return false;
   return output.AssignValue(leftR*rightR, theCommands);
 }
+
+bool CommandList::innerDivideRatByRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("Data::innerDivideRatByRat");
+  if (input.children.size!=2)
+    return false;
+  Rational leftR, rightR;
+  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+    return false;
+  if (rightR.IsEqualToZero())
+    return output.SetError("Division by zero.", theCommands);
+  return output.AssignValue(leftR/rightR, theCommands);
+}

@@ -915,6 +915,7 @@ bool CommandList::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
   return true;
 }
 
+
 bool CommandList::ReplaceEEByEusingO(int theControlIndex)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
@@ -1136,9 +1137,9 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //      && this->LookAheadAllowsApplyFunction(lastS) )
 //    return this->ReplaceEOEXByEX(secondToLastE.theData.format);
   if (thirdToLastS=="Expression" && secondToLastS=="{}" && lastS=="Expression" && this->LookAheadAllowsApplyFunction(lookAhead))
-    return this->ReplaceEOEByE();
+    return this->ReplaceEXEByE(Expression::formatDefault);
   if (thirdToLastS=="Expression" && secondToLastS=="_" && lastS=="Expression" && lookAhead!="_")
-    return this->ReplaceEXEByEusingO(this->conApplyFunction(), Expression::formatFunctionUseUnderscore);
+    return this->ReplaceEXEByE(Expression::formatFunctionUseUnderscore);
   //end of ambiguity.
   if (fourthToLastS=="{"  && thirdToLastS=="{}" && secondToLastS=="Expression" && lastS=="}")
     return this->ReplaceXYYXByYY();
@@ -1300,16 +1301,10 @@ bool CommandList::fGetTypeHighestWeightParabolic
      SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
   Expression& leftE=input[1];
   Expression& middleE=input[2];
-  Expression algebraE;
-  if (!CommandList::CallCalculatorFunction(theCommands.innerSSLieAlgebra, leftE, algebraE))
-    return output.SetError("Failed to generate semisimple Lie algebra.", theCommands);
-  if (!algebraE.IsOfType<SemisimpleLieAlgebra>());
-  { std::stringstream tempStream;
-    tempStream << "Failed to create a semisimple Lie algebra from the first argument, which is "
-    << leftE.ToString();
-    return output.SetError(tempStream.str(), theCommands);
-  }
-  ambientSSalgebra=&algebraE.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
+  std::string errorString;
+  if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSAlgebraShort, leftE, ambientSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
   if (!theCommands.GetVector<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
        &CommandList::fPolynomial))
@@ -1479,17 +1474,11 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   Expression& levelNode=input[2];
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
-  if (!CommandList::innerSSLieAlgebra(theCommands, leftE, resultSSalgebraE))
-  { theCommands.Comments
-    << "Failed to create a semisimple Lie algebra from the first argument, which is "
-    << leftE.ToString();
-    return false;
-  }
-  SemisimpleLieAlgebra* theSSalgebra=0;
-  if (!resultSSalgebraE.IsOfType(theSSalgebra))
-  { theCommands.Comments << "Failed to create a semisimple Lie algebra from the first argument, which is " << leftE.ToString();
-    return false;
-  }
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSalgebra;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSAlgebraShort, leftE, theSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
@@ -2215,20 +2204,11 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   Expression& leftE=input[1];
   Expression& genVemaWeightNode=input[3];
   Expression& fdWeightNode=input[2];
-  Expression resultSSalgebraE;
-  if (!CommandList::innerSSLieAlgebra(theCommands, leftE, resultSSalgebraE))
-  { theCommands.Comments
-    << "Failed to create a semisimple Lie algebra from the first argument, which is "
-    << leftE.ToString();
-    return false;
-  }
-  SemisimpleLieAlgebra* theSSalgebra=0;
-  if (!resultSSalgebraE.IsOfType(theSSalgebra))
-  { theCommands.Comments
-    << "Failed to create a semisimple Lie algebra from the first argument, which is "
-    << leftE.ToString();
-    return false;
-  }
+  SemisimpleLieAlgebra* theSSalgebra;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSAlgebraShort, leftE, theSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
@@ -2527,9 +2507,11 @@ bool CommandList::fKLcoeffs
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSSLieAlgebra, input, output))
-    return output.SetError("Failed to created Lie algebra", theCommands);
-  SemisimpleLieAlgebra* theSSalgebra= output.GetAmbientSSAlgebraNonConstUseWithCaution();
+  std::string errorString;
+  SemisimpleLieAlgebra* theSSalgebra;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSAlgebraShort, input, theSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim())>192)
@@ -2558,11 +2540,11 @@ bool CommandList::fWeylOrbit
     return output.SetError("fWeylOrbit takes two arguments", theCommands);
   Expression& theSSalgebraNode=input[1];
   Expression& vectorNode=input[2];
-  if (!theCommands.CallCalculatorFunction(theCommands.innerSSLieAlgebra, theSSalgebraNode, output))
-    return false;
-  SemisimpleLieAlgebra* theSSalgebra=0;
-  if (!output.IsOfType(theSSalgebra))
-    return true;
+  SemisimpleLieAlgebra* theSSalgebra;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSAlgebraShort, theSSalgebraNode, theSSalgebra, &errorString))
+    return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
   if (!theCommands.GetVector(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.fPolynomial))
@@ -2663,6 +2645,7 @@ bool CommandList::innerSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
+  std::cout << "<br>Now I'm here!";
   if (!theCommands.fPolynomial(theCommands, input, output))
     return output.SetError
     ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
@@ -4902,6 +4885,21 @@ bool CommandList::ReplaceEEndCommandEbyE()
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
+
+bool CommandList::ReplaceEXEByE(int formatOptions)
+{ SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
+  SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+  Expression newExpr;
+  newExpr.reset(*this, 2);
+  newExpr[0]=left.theData;
+  newExpr[1]=right.theData;
+  newExpr.format=formatOptions;
+  left.theData=newExpr;
+  this->DecreaseStackSetCharacterRanges(2);
+//    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
+  return true;
+}
+
 
 bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];

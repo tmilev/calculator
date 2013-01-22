@@ -658,6 +658,8 @@ public:
   }
   bool ReplaceEXXEXEByEusingO(int theOp);
   bool ReplaceEEByEusingO(int theControlIndex);
+  bool ReplaceEEByE();
+  bool ReplaceEXEByE(int formatOptions);
   bool ReplaceEEndCommandEbyE();
   bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
@@ -1167,11 +1169,14 @@ public:
   static bool fElementTensorGeneralizedVermas
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fSSAlgebraShort
+  static bool innerSSLieAlgebra
+  (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
+;
+  static bool innerSSAlgebraShort
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
 }
-  static bool fSSAlgebraVerbose
+  static bool innerSSAlgebraVerbose
   (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.innerSSLieAlgebra(theCommands, input, output, true);
 }
@@ -1222,13 +1227,10 @@ bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.fWeylOrbit(theCommands, input, output, true, true);
 }
-  static bool innerSSLieAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
-  }
-  static bool innerSSLieAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
-;
+//  static bool innerSSLieAlgebra
+//  (CommandList& theCommands, const Expression& input, Expression& output)
+//  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
+//  }
   static bool fSplitFDpartB3overG2CharsOutput
 (CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3Data

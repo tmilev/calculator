@@ -110,7 +110,7 @@ bool CommandList::fSSsubalgebras
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
+      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*theSSowner;
@@ -150,11 +150,11 @@ bool CommandList::fEmbedSSalgInSSalg
   std::string errorString;
   SemisimpleLieAlgebra* theSmallSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, EsmallSA, theSmallSapointer, &errorString))
+      (theCommands.innerSSAlgebraShort, EsmallSA, theSmallSapointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra* thelargeSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, ElargeSA, thelargeSapointer, &errorString))
+      (theCommands.innerSSAlgebraShort, ElargeSA, thelargeSapointer, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;

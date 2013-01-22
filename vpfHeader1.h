@@ -926,6 +926,9 @@ class ProjectInformation
     //For more information, google "static initialization order fiasco"
     //and go to the first link. The solution used here was proposed inside that link.
     static ProjectInformation MainProjectInfo;
+    MainProjectInfo.CustomStackTrace.ReservE(30);
+    MainProjectInfo.FileNames.ReservE(30);
+    MainProjectInfo.FileDescriptions.ReservE(30);
     return MainProjectInfo;
   }
   List<stackInfo> CustomStackTrace;

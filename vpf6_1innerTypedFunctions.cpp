@@ -7,7 +7,7 @@ ProjectInformationInstance ProjectInfoVpf6_1cpp
 
 bool CommandList::innerAddRatToRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Data::innerAddRatToRat");
+{ MacroRegisterFunctionWithName("CommandList::innerAddRatToRat");
   if (input.children.size!=2)
     return false;
   Rational leftR, rightR;
@@ -18,7 +18,7 @@ bool CommandList::innerAddRatToRat
 
 bool CommandList::innerMultiplyRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Data::innerMultiplyRatByRat");
+{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
   if (input.children.size!=2)
     return false;
   Rational leftR, rightR;
@@ -29,7 +29,7 @@ bool CommandList::innerMultiplyRatByRat
 
 bool CommandList::innerDivideRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("Data::innerDivideRatByRat");
+{ MacroRegisterFunctionWithName("CommandList::innerDivideRatByRat");
   if (input.children.size!=2)
     return false;
   Rational leftR, rightR;

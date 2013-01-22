@@ -139,7 +139,7 @@ class Expression
   bool ConvertToType(Expression& output);
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
-  { if(!(this->IsListNElementsStartingWithAtom(this->GetOpType<theType>()) &&
+  { if(!(this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()) &&
         this->children.size>1 && this->children.LastObject()->IsAtoM()))
       return false;
     if (whichElement==0)
@@ -155,7 +155,7 @@ class Expression
   theType& GetValuENonConstUseWithCaution()const;
 
   template<class theType>
-  int GetOpType()const;
+  int GetTypeOperation()const;
   template<class theType>
   int AddObjectReturnIndex(const theType& inputValue)const;
 
@@ -164,7 +164,7 @@ class Expression
   bool AssignValue(const theType& inputValue, CommandList& owner)
   { this->reset(owner, 2);
     int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
+    this->children[0].MakeAtom(this->GetTypeOperation<theType>(), owner);
     this->children[1].MakeAtom(theIndex, owner);
     return true;
   }
@@ -174,7 +174,7 @@ class Expression
   (const theType& inputValue, const Expression& theContext, CommandList& owner)
   { this->reset(owner, 3);
     int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->children[0].MakeAtom(this->GetOpType<theType>(), owner);
+    this->children[0].MakeAtom(this->GetTypeOperation<theType>(), owner);
     this->children[1]=theContext;
     this->children[2].MakeAtom(theIndex, owner);
     return true;
@@ -228,9 +228,6 @@ class Expression
   { this->reset(newBoss);
     this->theData=input;
   }
-void MakeVariableNonBounD
-  (CommandList& owner, const std::string& varName)
-;
   void MakeFunction
   (CommandList& owner, const Expression& argument, const std::string& functionName)
 ;
@@ -566,8 +563,8 @@ public:
   List<Expression> imagesCachedExpressions;
   ////
   HashedList<Expression> ExpressionStack;
-  List<HashedList<std::string, MathRoutines::hashString> > NonBoundVariablesStack;
-  List<HashedList<std::string, MathRoutines::hashString> > BoundVariablesStack;
+  List<HashedList<int, MathRoutines::IntUnsignIdentity> > NonBoundVariablesStack;
+  List<HashedList<int, MathRoutines::IntUnsignIdentity> > BoundVariablesStack;
 
   int RuleContextIdentifier;
   List<Expression> RuleStack;
@@ -604,8 +601,8 @@ public:
   std::string ToStringFunctionHandlers();
   std::stringstream Comments;
   FormatExpressions formatVisibleStrings;
-  bool IsBoundVarInContext(const std::string& input);
-  bool IsNonBoundVarInContext(const std::string& input);
+  bool IsBoundVarInContext(int inputOp);
+  bool IsNonBoundVarInContext(int inputOp);
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
@@ -738,13 +735,11 @@ public:
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
-  bool ReplaceVXdotsXbyEXdotsX(int numXs);
-  bool ReplaceVXbyEX(){return this->ReplaceVXdotsXbyEXdotsX(1);}
-  bool ReplaceVbyE(){return this->ReplaceVXdotsXbyEXdotsX(0);}
   bool ReplaceIntIntBy10IntPlusInt()
   ;
   void MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output);
-  bool RegisterBoundVariable();
+  bool ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs);
+  bool ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs);
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
@@ -1174,11 +1169,11 @@ public:
   ;
   static bool fSSAlgebraShort
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.fSSAlgebra(theCommands, input, output, false);
+{ return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
 }
   static bool fSSAlgebraVerbose
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.fSSAlgebra(theCommands, input, output, true);
+{ return theCommands.innerSSLieAlgebra(theCommands, input, output, true);
 }
 template<class CoefficientType>
 bool fGetTypeHighestWeightParabolic
@@ -1227,11 +1222,11 @@ bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output)
 { return theCommands.fWeylOrbit(theCommands, input, output, true, true);
 }
-  static bool fSSAlgebra
+  static bool innerSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fSSAlgebra(theCommands, input, output, false);
+  { return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
   }
-  static bool fSSAlgebra
+  static bool innerSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
   static bool fSplitFDpartB3overG2CharsOutput
@@ -1394,8 +1389,7 @@ static bool innerDivideRatByRat
 
   void init(GlobalVariables& inputGlobalVariables);
 
-  void initPredefinedOuterFunctions();
-  void initPredefinedInnerFunctionsWithTypes();
+  void initPredefinedStandardOperations();
   void initPredefinedInnerFunctions()
   ;
   bool ExtractExpressions

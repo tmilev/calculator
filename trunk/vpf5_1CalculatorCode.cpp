@@ -8,7 +8,7 @@ bool CommandList::fGCDOrLCM
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.fPolynomial))
+  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   Polynomial<Rational> outputP;
 //  std::cout << "context: " << theContext.VariableImages.ToString();
@@ -24,7 +24,7 @@ bool CommandList::fPolynomialDivisionQuotientRemainder
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.fPolynomial))
+  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   Polynomial<Rational> outputR, outputQ;
   thePolys[0].DivideBy(thePolys[1], outputQ, outputR);
@@ -39,7 +39,7 @@ bool CommandList::fSolveSeparableBilinearSystem
 { MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVector(input, thePolys, &theContext, 0, theCommands.fPolynomial))
+  if (!theCommands.GetVector(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
   int numVars=theContext.GetNumContextVariables();
   HashedList<MonomialP> theMonsInPlay;
@@ -209,11 +209,11 @@ bool CommandList::fGroebner
   output=input;
   output.children.PopIndexShiftDown(1);
   if (!theCommands.GetVector<Polynomial<Rational> >
-      (output, inputVector, &theContext, -1, theCommands.fPolynomial))
+      (output, inputVector, &theContext, -1, theCommands.innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theContext.VariableImages.QuickSortAscending();
   //theCommands.GetVector<Polynomial<Rational> >
-  //(output, inputVector, &theContext, -1, theCommands.fPolynomial);
+  //(output, inputVector, &theContext, -1, theCommands.innerPolynomial);
 
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();

@@ -167,7 +167,7 @@ bool CommandList::fWeylDimFormula
   Expression newContext(theCommands);
   if (!theCommands.GetVector<RationalFunctionOld>
       (input[2], theWeight, &newContext, theSSowner->GetRank(),
-       theCommands.fPolynomial))
+       theCommands.innerPolynomial))
     return output.SetError
     ("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;
@@ -311,7 +311,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   int theDim=ownerSS.GetRank();
   Expression finalContext;
   if (!theCommands.GetVector<RationalFunctionOld>
-      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.fPolynomial))
+      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.innerPolynomial))
     return output.SetError
     ("Failed to extract highest weight from the second argument.", theCommands)
     ;
@@ -1376,7 +1376,7 @@ bool CommandList::fSplitFDpartB3overG2Init
      theCommands);
   if (!theCommands.GetVector<RationalFunctionOld>
       (input, theG2B3Data.theWeightFundCoords, &outputContext, 3,
-       theCommands.fPolynomial))
+       theCommands.innerPolynomial))
     output.SetError
     ("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
@@ -2914,7 +2914,7 @@ bool CommandList::fDifferential
   if (!theData.ConvertToTypE<DifferentialForm<Rational> >())
     return output.SetError("Failed to convert argument of differential to differential form.");
 
-  theCommands.fPolynomial(the)*/
+  theCommands.innerPolynomial(the)*/
   return true;
 }
 
@@ -3135,7 +3135,7 @@ bool CommandList::fFactor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fFactor");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(theCommands.fPolynomial, input, output))
+  if (!theCommands.CallCalculatorFunction(theCommands.innerPolynomial, input, output))
     return false;
   Expression theContext=output.GetContext();
   Polynomial<Rational> thePoly=output.GetValuE<Polynomial<Rational> >();

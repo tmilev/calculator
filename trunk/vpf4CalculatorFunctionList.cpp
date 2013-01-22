@@ -119,7 +119,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    ",
    "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
   this->AddOperationInnerHandler
-  ("Polynomial", this->fPolynomial, "",
+  ("Polynomial", this->innerPolynomial, "",
    "Creates an atomic representation of a polynomial expression. ",
    "Polynomial{}((x+y+z)^2)");
   this->AddOperationInnerHandler

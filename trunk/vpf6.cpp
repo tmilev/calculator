@@ -293,6 +293,7 @@ SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
+//start Expression::ContextGetPolynomialMonomial specializations.
 template< >
 bool Expression::ContextGetPolynomialMonomial
 (const Expression& input, Polynomial<Rational>& output, GlobalVariables& theGlobalVariables)const
@@ -305,7 +306,7 @@ bool Expression::ContextGetPolynomialMonomial
     assert(false);
     return false;
   }
-  output.MakeMonomiaL(theIndex, 1, 1);
+  output.MakeMonomiaL(theIndex-1, 1, 1);
   return true;
 }
 
@@ -325,12 +326,13 @@ bool Expression::ContextGetPolynomialMonomial
     return false;
   }
   Polynomial<Rational> tempP;
-  tempP.MakeMonomiaL(theVarIndex, 1, 1);
+  tempP.MakeMonomiaL(theVarIndex-1, 1, 1);
   RationalFunctionOld tempMon;
   tempMon=tempP;
   output.MakeConst(tempMon, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
   return true;
 }
+//end Expression::ContextGetPolynomialMonomial specializations.
 
 bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
 { if (N!=-1)
@@ -1254,7 +1256,7 @@ bool CommandList::fHWTAABF
   SemisimpleLieAlgebra* constSSalg= leftExpression.GetAmbientSSAlgebraNonConstUseWithCaution();
   Vector<RationalFunctionOld> weight;
   if (!theCommands.GetVector<RationalFunctionOld>
-      (weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.fPolynomial))
+      (weightExpression, weight, &finalContext, constSSalg->GetRank(), theCommands.innerPolynomial))
   { std::stringstream errorStream;
     errorStream << "Error: could not obtain highest weight from the third argument which is "
     << weightExpression.ToString();
@@ -1307,7 +1309,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
     return output.SetError(errorString, theCommands);
   if (!theCommands.GetVector<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
-       &CommandList::fPolynomial))
+       &CommandList::innerPolynomial))
   { std::stringstream tempStream;
     tempStream << "Failed to convert the second argument of HWV to a list of "
     << ambientSSalgebra->GetRank() << " polynomials. The second argument you gave is "
@@ -1483,7 +1485,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   Vector<Polynomial<Rational> > highestWeightFundCoords;
   Expression hwContext(theCommands), emptyContext(theCommands);
   if (!theCommands.GetVector
-      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, &CommandList::fPolynomial))
+      (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank, &CommandList::innerPolynomial))
   { theCommands.Comments
     << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
     << theRank << " polynomials. The second argument you gave is "
@@ -2214,7 +2216,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   Expression hwContext(theCommands), emptyContext(theCommands);
   if (!theCommands.GetVector<RationalFunctionOld>
       (genVemaWeightNode, highestWeightFundCoords, &hwContext, theRank,
-       CommandList::fPolynomial))
+       CommandList::innerPolynomial))
   { theCommands.Comments
     << "Failed to convert the third argument of fSplitGenericGenVermaTensorFD to a list of "
     << theRank << " polynomials. The second argument you gave is "
@@ -2477,11 +2479,13 @@ bool CommandList::fMatrix
   return true;
 }
 
-bool CommandList::fPolynomial
+bool CommandList::innerPolynomial
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fPolynomial");
+{ MacroRegisterFunctionWithName("CommandList::innerPolynomial");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  return theCommands.fExtractAndEvaluatePMTDtree<Polynomial<Rational> >
+  std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
+  std::cout << "<br>First elt input is:" << input[0].ToString();
+  return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
   (theCommands, input, output);
 }
 
@@ -2493,7 +2497,7 @@ bool CommandList::fElementUniversalEnvelopingAlgebra
   { output=input;
     return true;
   }
-  if (!theCommands.fExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >
+  if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >
       (theCommands, input, output))
     return output.SetError("Failed to convert to element universal enveloping.", theCommands);
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
@@ -2547,7 +2551,7 @@ bool CommandList::fWeylOrbit
     return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
-  if (!theCommands.GetVector(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.fPolynomial))
+  if (!theCommands.GetVector(vectorNode, theHWfundCoords, &theContext, theSSalgebra->GetRank(), theCommands.innerPolynomial))
     return output.SetError("Failed to extract highest weight", theCommands);
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
   if (!useFundCoords)
@@ -2646,7 +2650,7 @@ bool CommandList::innerSSLieAlgebra
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
   std::cout << "<br>Now I'm here!";
-  if (!theCommands.fPolynomial(theCommands, input, output))
+  if (!theCommands.innerPolynomial(theCommands, input, output))
     return output.SetError
     ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
   if (output.IsError())
@@ -3479,16 +3483,23 @@ bool CommandList::outerStandardFunction
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       Expression arguments;
-      arguments.reset(theCommands, input.children.size-1);
-      for (int i=1; i<input.children.size; i++)
-        arguments[i-1]=input[i];
+      if (input.children.size!=2)
+      { arguments.reset(theCommands, input.children.size-1);
+        for (int i=1; i<input.children.size; i++)
+          arguments[i-1]=input[i];
+      } else
+        arguments=input[1];
       bool isGood=true;
       //the following if clause needs to be rewritten.
       if (innerFun.theArgumentTypes.children.size==2)
-        if (!input[1].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes.children[0].theData) ||
-            !input[2].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes.children[1].theData)
-            )
+      { if (input.children.size!=3)
           isGood=false;
+        else
+        { if (!input[1].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes[0].theData) ||
+              !input[2].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes[1].theData))
+          isGood=false;
+        }
+      }
       if (isGood)
         if (innerFun.theFunction(theCommands, arguments, output))
           return true;
@@ -3641,9 +3652,10 @@ bool Expression::operator==(const Expression& other)const
 }
 
 template <class dataType>
-bool CommandList::fExtractPMTDtreeContext
+bool CommandList::innerExtractPMTDtreeContext
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
+  MacroRegisterFunctionWithName("CommandList::innerExtractPMTDtreeContext");
   if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
   { std::stringstream out;
     out << "Max recursion depth of " << theCommands.MaxRecursionDeptH
@@ -3651,26 +3663,26 @@ bool CommandList::fExtractPMTDtreeContext
     << "(i.e., your polynomial expression is too large).";
     return output.SetError(out.str(), theCommands);
   }
+  std::cout << "<br>Extracting context from: " << input.ToString();
   if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
       input.IsListStartingWithAtom(theCommands. opPlus()) ||
       input.IsListStartingWithAtom(theCommands.opMinus()) )
   { output.reset(theCommands, 1);
-    output.children[0].MakeAtom(theCommands.opContext(), theCommands);
-    Expression newContext;
-    Expression intermediateContext;
+    output[0].MakeAtom(theCommands.opContext(), theCommands);
+    Expression newContext, intermediateContext;
     for (int i=1; i<input.children.size; i++)
-      if (theCommands.fExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
-      { if (!Expression::ContextMergeContexts(newContext, intermediateContext, output))
+      if (theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
+      { if (!Expression::ContextMergeContexts(newContext, output, intermediateContext))
           return false;
-        intermediateContext=output;
+        output=intermediateContext;
       } else
         return false;
     return true;
   }
   int thePower;
-  if (input.IsListStartingWithAtom(theCommands.opThePower()))
+  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
-      return theCommands.fExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
+      return theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
   Expression theContext=input.GetContext();
   if(input.IsAtoM(theCommands.opContext()))
   { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
@@ -3685,17 +3697,19 @@ bool CommandList::fExtractPMTDtreeContext
 }
 
 template <class dataType>
-bool CommandList::fExtractAndEvaluatePMTDtree
+bool CommandList::outerExtractAndEvaluatePMTDtree
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Expression contextE;
-  if (!theCommands.fExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
+  if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
     return false;
-  return theCommands.EvaluatePMTDtree<dataType>(output, contextE, input);
+//  std::cout << "<br>Extracted context from " << input.ToString() << ": "
+//  << contextE.ToString();
+  return theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
 }
 
 template <class dataType>
 bool CommandList::EvaluatePMTDtree
-(Expression& output, const Expression& inputContext, const Expression& input)
+(const Expression& inputContext, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::EvaluatePMTDtree");
   RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>this->MaxRecursionDeptH)
@@ -3709,7 +3723,7 @@ bool CommandList::EvaluatePMTDtree
       input.IsListStartingWithAtom(this-> opPlus()) )
   { Expression currentE;
     for (int i=0; i<input.children.size; i++)
-    { if (!this->EvaluatePMTDtree<dataType>(currentE, inputContext, input[i]))
+    { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], currentE))
         return false;
       //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
@@ -3738,10 +3752,8 @@ bool CommandList::EvaluatePMTDtree
     }
     return output.AssignValueWithContext(outputData, inputContext, *this);
   }
-  if (input[0].IsAtoM(this->opThePower()))
-  { if (input.children.size!=3)
-      return false;
-    int thePower=0;
+  if (input.IsListNElementsStartingWithAtom(this->opThePower(), 3))
+  { int thePower=0;
     if (input[2].IsSmallInteger(&thePower))
     { if(!this->EvaluatePMTDtree<dataType>(output, inputContext, input[1]))
         return false;
@@ -3750,12 +3762,12 @@ bool CommandList::EvaluatePMTDtree
       return output.AssignValueWithContext(outputData, inputContext, *this);
     }
   }
+  std::cout << "<br>input: " << input.ToString();
   if (input.IsOfType<Rational>())
   { outputData=input.GetValuE<Rational>();//<-type conversion here
     return output.AssignValueWithContext(outputData, inputContext, *this);
   }
-  if (!inputContext.ContextGetPolynomialMonomial
-      (input, outputData, *this->theGlobalVariableS))
+  if (!inputContext.ContextGetPolynomialMonomial(input, outputData, *this->theGlobalVariableS))
   { this->Comments << "Expression" << input.ToString()
     << "  is not contained as a variable image in the context "
     << inputContext.ToString() << "."

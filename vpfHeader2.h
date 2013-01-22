@@ -458,9 +458,12 @@ struct ExpressionTripleCrunchers
 class CommandList
 { template <class dataType>
   bool EvaluatePMTDtree
-(Expression& output, const Expression& inputContext, const Expression& input)
+(const Expression& inputContext, const Expression& input, Expression& output)
   ;
-
+  template <class dataType>
+  static bool innerExtractPMTDtreeContext
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -473,30 +476,40 @@ public:
 //Note that the output of a function may be of type Error. Error results come, like any other
 //result, with a true return from the function.
 //-----------------------------------------------
-//In addition functions are split into two flavors: inner functions (or just "functions")
+//In addition, built-in functions are split into two flavors:
+//inner functions (or just "functions")
 // and outer functions (or "laws").
+//The only difference between inner functions and outer functions is the
+//way they are applied when the calculator reduces an expression.
+//
+//Suppose the calculator is reducing Expression X.
 //1.Outer functions ("laws").
-//  The first entry (index 0) of the input of an outer function *MUST* be name of
-//  the function called.
-//  The remaining entries of input (indices 1...) as usual should
-//  contain the arguments of the function.
-//2. Inner functions ("functions").
-//   Inner functions do not need to contain the name of the function as argument of the
-//   function.
-//In general, functions given as input through the calculator interface correspond to
-//outer functions. Conversely, the majority of the built-in functions
-//correspond to inner functions, with certain exceptions. Those exceptions usually include
-//various "laws" - distributive law, associative law, etc.
+//1.1.An outer function is called on X if the first child of X
+//    is an atom equal to the name of the outer function.
+//1.2.If the outer function returns true but its output is identically equal to the
+//    starting expression X, nothing is done (the action of the outer function is ignored).
+//1.3.If an outer function returns true and its output is different from X,
+//    X is replaced by this output.
+//2.Inner functions ("functions").
+//2.1.If the first child of X is an atom equal to the name of the inner function,
+//    we define Argument as follows.
+//2.1.1.If X has two children, Argument is set to the second child of X.
+//2.1.2.If X does not have two children, Argument is set to a list whose entries are
+//      the second, third, ... children of X. In particular, if X has only child, Argument is
+//      the empty list.
+//2.2.The inner function is called on Argument.
+//2.3.If the inner function returns true, X is substituted with
+//    the output of the inner function, else nothing is done.
 //
-//The distinction between inner functions and outer functions is not conceptual,
-//but rather a practical. In addition, inner and outer functions come with the
-//following style guideline, which you are expected to follow should you decide to
-//extend the calculator.
-//- Outer functions ("laws") should never return successfully with
-//  output identically equal to their input. This corresponds to
-//  applying a law that does not change the expession, which results in an infinite cycle.
-//  (That cycle will be detected, nevertheless don't do it).
-//
+//As explained above, the distinction between inner functions and outer functions
+//is only practical. The notions of inner and outer functions do not apply to user-defined
+//substitution rules entered via the calculator. User-defined substitution rules are
+//processed like outer functions, with the
+//major difference that even if their output coincides
+//with their input the substitution is carried out, resulting in an infinite cycle.
+//Here, by ``infinite cycle'' we either mean a 100% CPU run until the timeout& algebraic
+//safety kicks in, or error interception with a ``detected substitution cycle'' or
+//similar error message.
 //
 //----------------------------------------------------------
 //*At the current implementation, there is one particular
@@ -1058,13 +1071,9 @@ public:
    Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
    Expression::FunctionAddress conversionFunction=0)
   ;
-  template <class dataType>
-  static bool fExtractPMTDtreeContext
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
 
   template <class dataType>
-  static bool fExtractAndEvaluatePMTDtree
+  static bool outerExtractAndEvaluatePMTDtree
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
 
@@ -1140,7 +1149,7 @@ public:
   Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext
   )
   ;
-  static bool fPolynomial
+  static bool innerPolynomial
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart

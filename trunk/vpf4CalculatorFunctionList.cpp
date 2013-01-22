@@ -67,7 +67,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
-  ("SemisimpleLieAlgebra", &this->fSSAlgebraShort, "",
+  ("SemisimpleLieAlgebra", &this->innerSSAlgebraShort, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
     such as A_n or, alternatively, in the format A^k_n, \
@@ -110,7 +110,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
     The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddOperationInnerHandler
-  ("printSemisimpleLieAlgebra", &this->fSSAlgebraVerbose, "",
+  ("printSemisimpleLieAlgebra", &this->innerSSAlgebraVerbose, "",
    "Creates a quite detailed \
    printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \
@@ -540,7 +540,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationOuterHandler
   ("*", this->outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",
-   "2*((3*c)*(4*d))", true);
+   "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)", true);
 
   this->AddOperationOuterHandler
   ("/", this->outerDivide, "",

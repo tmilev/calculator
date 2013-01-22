@@ -87,15 +87,6 @@ class Expression
     this->operator=(tempExp);
     return true;
   }
-  template <class theType>
-  bool ToStringByType(std::string* whichString=0)const
-  { if (!this->IsOfType<theType>())
-      return false;
-    if (whichString!=0)
-      *whichString=this->GetValuE<theType>().ToString();
-    return true;
-  }
-  bool ToStringData(std::string* whichString=0, FormatExpressions* theFormat=0)const;
   bool IsLisT()const;
   bool IsListNElements(int N=-1)const
   { if (!this->IsLisT())
@@ -250,10 +241,9 @@ class Expression
   std::string Lispify
   ()const
   ;
-  std::string ToString
-  (FormatExpressions* theFormat=0, std::stringstream* outComments=0,
-   Expression* startingExpression=0)const;
-  std::string ElementToStringPolishForm(int recursionDepth=0, int maxRecursionDepth=1000);
+  bool ToStringData
+  (std::string& output, FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
+  std::string ToString(FormatExpressions* theFormat=0, Expression* startingExpression=0)const;
   static unsigned int HashFunction(const Expression& input)
   { return input.HashFunction();
   }

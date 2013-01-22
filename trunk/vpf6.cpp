@@ -796,27 +796,27 @@ void CommandList::ParseFillDictionary
       LookAheadChar=input[i+1];
     else
       LookAheadChar=' ';
-    if (current==" " || current=="\n")
-      current="";
-    else
-      if (this->isLeftSeparator(current[0]) || this->isRightSeparator(LookAheadChar) )
-      { if (this->controlSequences.Contains(current))
-        { currentElement.controlIndex=this->controlSequences.GetIndex(current);
-          currentElement.theData.reset(*this);
-          (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-        } else if (this->isADigit(current, currentDigit))
-        { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
-          currentElement.controlIndex=this->conInteger();
-          (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-        } else
-        { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
-          currentElement.theData.MakeAtom
-          (this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
-          (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-         // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
-        }
-        current="";
+    if (current=="\n")
+      current=" ";
+    if (this->isLeftSeparator(current[0]) ||
+        this->isRightSeparator(LookAheadChar) || current==" ")
+    { if (this->controlSequences.Contains(current))
+      { currentElement.controlIndex=this->controlSequences.GetIndex(current);
+        currentElement.theData.reset(*this);
+        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+      } else if (this->isADigit(current, currentDigit))
+      { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
+        currentElement.controlIndex=this->conInteger();
+        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+      } else
+      { currentElement.controlIndex=this->controlSequences.GetIndex("Variable");
+        currentElement.theData.MakeAtom
+        (this->AddOperationNoRepetitionOrReturnIndexFirst(current), *this);
+        (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
+       // std::cout << "<br>Adding syntactic element " << currentElement.ToString(*this);
       }
+      current="";
+    }
   }
 }
 
@@ -3678,7 +3678,9 @@ bool CommandList::fExtractPMTDtreeContext
   }
   output.reset(theCommands, 2);
   output[0].MakeAtom(theCommands.opContext(), theCommands);
-  output[1]=input;
+  output[1].reset(theCommands, 2);
+  output[1][0].MakeAtom(theCommands.opPolynomialVariables(), theCommands);
+  output[1][1]=input;
   return true;
 }
 
@@ -4173,7 +4175,7 @@ void CommandList::EvaluateCommands()
   this->theGlobalVariableS->theDefaultFormat.flagExpressionIsFinal=true;
   this->theGlobalVariableS->theDefaultFormat.flagExpressionNewLineAllowed=true;
   out << this->theProgramExpression.ToString
-  (&this->theGlobalVariableS->theDefaultFormat, 0, &StartingExpression);
+  (&this->theGlobalVariableS->theDefaultFormat, &StartingExpression);
   this->outputString=out.str();
   if (this->Comments.str()!="")
   { std::stringstream commentsStream;
@@ -4250,36 +4252,52 @@ bool Expression::operator>(const Expression& other)const
   return this->ToString()>other.ToString();
 }
 
-bool Expression::ToStringData(std::string* whichString, FormatExpressions* theFormat)const
-{ if (this->theBoss==0)
-    return false;
+bool Expression::ToStringData
+(std::string& output, FormatExpressions* theFormat, Expression* startingExpression)const
+{ std::stringstream out;
+  bool result=false;
+  bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   if (this->IsAtoM())
   { if (this->theData< this->theBoss->operationS.size && this->theData>=0)
-    { if (whichString!=0)
-        *whichString=this->theBoss->operationS[this->theData];
-      return true;
-    }
-    return false;
+      out << this->theBoss->operationS[this->theData];
+    else
+      out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
+    result=true;
+  } else if (this->IsOfType<std::string>())
+  { if (isFinal)
+      out << this->GetValuE<std::string>();
+    else
+      out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
+    result=true;
+  } else if (this->IsOfType<Rational>())
+  { out << this->GetValuE<Rational>().ToString();
+    result=true;
+  } else if (this->IsOfType<Polynomial<Rational> >())
+  { out << "Polynomial{}";
+    Expression contextE=this->GetContext();
+    out << "(" << contextE.ToString() << ", "
+    << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
+    result=true;
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
+  { std::string firstE=this->children[1].ToString(theFormat);
+    std::string secondE=this->children[2].ToString(theFormat);
+    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
+      out << "(" << firstE << ")";
+    else
+      out << firstE;
+    out << ":=";
+    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
+      out << "(" << secondE << ")";
+    else
+      out << secondE;
+    result=true;
   }
-  if (this->IsOfType<std::string>())
-  { if (whichString!=0)
-    { if (theFormat!=0)
-      { if (theFormat->flagExpressionIsFinal)
-          *whichString=this->GetValuE<std::string>();
-      } else
-        *whichString= "(string not shown to avoid javasript problems)";
-    }
-    return true;
-  }
-  return
-  this->ToStringByType<Rational>(whichString) ||
-  this->ToStringByType<Polynomial<Rational> >(whichString)
-;
+  output=out.str();
+  return result;
 }
 
 std::string Expression::ToString
-(FormatExpressions* theFormat, std::stringstream* outComments,
- Expression* startingExpression)const
+(FormatExpressions* theFormat, Expression* startingExpression)const
 { if (this->theBoss!=0)
   { if (this->theBoss->RecursionDeptH+1>this->theBoss->MaxRecursionDeptH)
       return "(...)";
@@ -4298,35 +4316,19 @@ std::string Expression::ToString
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
   int charCounter=0;
-  std::string additionalDataComments;
   std::string tempS;
-  if (this->ToStringData(&tempS, theFormat))
+  if (this->ToStringData(tempS, theFormat, startingExpression))
     out << tempS;
-  else if (this->IsAtoM())
-    out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
-  { std::string firstE=this->children[1].ToString(theFormat, outComments);
-    std::string secondE=this->children[2].ToString(theFormat, outComments);
-    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
-      out << "(" << firstE << ")";
-    else
-      out << firstE;
-    out << ":=";
-    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
-      out << "(" << secondE << ")";
-    else
-      out << secondE;
-  }
   else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
-    out << this->children[1].ToString(theFormat, outComments)
-    << ":=:" << this->children[2].ToString(theFormat, outComments);
+    out << this->children[1].ToString(theFormat)
+    << ":=:" << this->children[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
-    out <<  this->children[1].ToString(theFormat, outComments) << " :if "
-    << this->children[2].ToString(theFormat, outComments)
-    << ":=" << this->children[3].ToString(theFormat, outComments);
+    out <<  this->children[1].ToString(theFormat) << " :if "
+    << this->children[2].ToString(theFormat)
+    << ":=" << this->children[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
-  { std::string firstE= this->children[1].ToString(theFormat, outComments);
-    std::string secondE=this->children[2].ToString(theFormat, outComments);
+  { std::string firstE= this->children[1].ToString(theFormat);
+    std::string secondE=this->children[2].ToString(theFormat);
     bool firstNeedsBrackets=
     !(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
       this->children[1].IsListStartingWithAtom(this->theBoss->opDivide()));
@@ -4342,19 +4344,17 @@ std::string Expression::ToString
       out << secondE;
   }
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
-  { out << this->children[1].ToString(theFormat, outComments)
-    << "\\otimes " << this->children[2].ToString(theFormat, outComments);
+  { out << this->children[1].ToString(theFormat)
+    << "\\otimes " << this->children[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
-  { std::string firstE= this->children[1].ToString(theFormat, outComments);
-    std::string secondE=this->children[2].ToString(theFormat, outComments);
+  { std::string firstE= this->children[1].ToString(theFormat);
+    std::string secondE=this->children[2].ToString(theFormat);
     bool firstNeedsBrackets=
     (!(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
       this->children[1].IsListStartingWithAtom(this->theBoss->opDivide())))
     && !this->children[1].IsOfType<Rational>();
-    bool secondNeedsBrackets;
-    if (!this->children[2].IsOfType<Rational>())
-      secondNeedsBrackets=true;
-    else
+    bool secondNeedsBrackets=true;
+    if (this->children[2].IsOfType<Rational>())
       secondNeedsBrackets=this->children[2].GetValuE<Rational>().IsNonPositive();
     if (firstE=="-1" )
       firstE="-";
@@ -4373,8 +4373,8 @@ std::string Expression::ToString
     else
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
-  { std::string firstE=this->children[1].ToString(theFormat, outComments);
-    std::string secondE=this->children[2].ToString(theFormat, outComments);
+  { std::string firstE=this->children[1].ToString(theFormat);
+    std::string secondE=this->children[2].ToString(theFormat);
     if (this->children[1].IsOfType<Rational>())
       out << firstE;
     else
@@ -4383,8 +4383,8 @@ std::string Expression::ToString
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);
-    std::string tempS2= this->children[1].ToString(theFormat, outComments);
-    std::string tempS=this->children[2].ToString(theFormat, outComments);
+    std::string tempS2= this->children[1].ToString(theFormat);
+    tempS=this->children[2].ToString(theFormat);
     out << tempS2;
 //    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
 //    << allowNewLine;
@@ -4394,51 +4394,48 @@ std::string Expression::ToString
       if (tempS[0]!='-')
         out << "+";
     out << tempS;
-  } else if (this->IsListStartingWithAtom(this->theBoss->opMinus()))
-  { if (this->children.size==2)
-      out << "-" << this->children[1].ToString
-      (theFormat, outComments);
-    else
-    { if (!(this->children.size==3))
-      { std::cout << "This is a programming error: the minus function expects"
-        << "1 or 2 arguments, instead there are " << this->children.size-1
-        << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
-      }
-      out << this->children[1].ToString(theFormat, outComments)
-      << "-" << this->children[2].ToString(theFormat, outComments);
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 2))
+    out << "-" << this->children[1].ToString(theFormat);
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
+  { if (!(this->children.size==3))
+    { std::cout << "This is a programming error: the minus function expects"
+      << "1 or 2 arguments, instead there are " << this->children.size-1
+      << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
     }
+    out << this->children[1].ToString(theFormat)
+    << "-" << this->children[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
-    out << "{{" << this->children[1].ToString(theFormat, outComments) << "}}";
+    out << "{{" << this->children[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=false;
-        out <<  this->children[1].ToString(theFormat, outComments)
-        << "_{" << this->children[2].ToString(theFormat, outComments) << "}";
+        out <<  this->children[1].ToString(theFormat)
+        << "_{" << this->children[2].ToString(theFormat) << "}";
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
         out <<  this->children[1].ToString
-        (theFormat, outComments)
-        << "\\cdot(" << this->children[1].ToString(theFormat, outComments) << ")";
+        (theFormat)
+        << "\\cdot(" << this->children[1].ToString(theFormat) << ")";
         break;
       default:
-        out << this->children[1].ToString(theFormat, outComments)
-        << "{}(" << this->children[2].ToString(theFormat, outComments) << ")";
+        out << this->children[1].ToString(theFormat)
+        << "{}(" << this->children[2].ToString(theFormat) << ")";
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
-    out << this->children[1].ToString(theFormat, outComments)
-    << "==" << this->children[2].ToString(theFormat, outComments);
+    out << this->children[1].ToString(theFormat)
+    << "==" << this->children[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat, outComments);
+        { out << this->children[i].ToString(theFormat);
           if (i!=this->children.size-1)
             out << "& ";
         }
@@ -4452,7 +4449,7 @@ std::string Expression::ToString
           out << "c";
         out << "} ";
         for (int i=1; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat, outComments);
+        { out << this->children[i].ToString(theFormat);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
         }
@@ -4464,7 +4461,7 @@ std::string Expression::ToString
       default:
         out << "(";
         for (int i=1; i<this->children.size; i++)
-        { std::string currentChildString=this->children[i].ToString(theFormat, outComments);
+        { std::string currentChildString=this->children[i].ToString(theFormat);
           out << currentChildString;
           charCounter+=currentChildString.size();
           if (i!=this->children.size-1)
@@ -4478,16 +4475,16 @@ std::string Expression::ToString
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
-    out << "[" << this->children[1].ToString(theFormat, outComments)
-    << "," << this->children[2].ToString(theFormat, outComments)
+    out << "[" << this->children[1].ToString(theFormat)
+    << "," << this->children[2].ToString(theFormat)
     << "]";
   else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
-    out << this->children[1].ToString(theFormat, outComments)
-    << "\\cup " << this->children[2].ToString(theFormat, outComments)
+    out << this->children[1].ToString(theFormat)
+    << "\\cup " << this->children[2].ToString(theFormat)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
-    out << this->children[1].ToString(theFormat, outComments)
-    << "\\sqcup " << this->children[2].ToString(theFormat, outComments)
+    out << this->children[1].ToString(theFormat)
+    << "\\sqcup " << this->children[2].ToString(theFormat)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
   { if (startingExpression==0)
@@ -4508,14 +4505,14 @@ std::string Expression::ToString
         out << "</td><td valign=\"top\"><hr>";
         if (!this->children[i].IsOfType<std::string>() || !isFinal)
           out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-          (this->children[i].ToString(theFormat, outComments));
+          (this->children[i].ToString(theFormat));
         else
           out << this->children[i].GetValuE<std::string>();
         if (i!=this->children.size-1)
           out << ";";
       }
       else
-      { out << this->children[i].ToString(theFormat, outComments);
+      { out << this->children[i].ToString(theFormat);
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -4532,12 +4529,31 @@ std::string Expression::ToString
       << ". " << this->children[1].ToString(theFormat);
     } else
       out << "(Error)";
-  }
-  else
+  } else if (this->children.size==1)
+  { out << this->children[0].ToString(theFormat);
+  } else if (this->children.size>=2)
+  { out << this->children[0].ToString(theFormat);
+    if (this->format==this->formatFunctionUseUnderscore)
+      out << "_";
+    else if (this->format==this->formatFunctionUseCdot)
+      out << "\\cdot";
+    else
+      out << "{}";
+    if(this->format== this->formatFunctionUseUnderscore)
+      out << "{";
+    else
+      out << "(";
+    for (int i=1; i<this->children.size; i++)
+    { out << this->children[i].ToString(theFormat);
+      if (i!=this->children.size-1)
+        out << ", ";
+    }
+    if(this->format== this->formatFunctionUseUnderscore)
+      out << "}";
+    else
+      out << ")";
+  } else //<-not sure if this case is possible
     out << "(ProgrammingError:NotDocumented)" ;
-  if (outComments!=0)
-    if (additionalDataComments!="")
-      *outComments << "Comments to expression " << out.str() << ": " << additionalDataComments;
   if (startingExpression!=0)
   { std::stringstream outTrue;
     outTrue << "<table>";
@@ -4568,7 +4584,7 @@ std::string Expression::Lispify()const
   if (this->theBoss->RecursionDeptH>this->theBoss->MaxRecursionDeptH)
     return "(error: max recursion depth ...)";
   std::string tempS;
-  if (this->ToStringData(&tempS))
+  if (this->ToStringData(tempS))
     return tempS;
   if (this->children.size==0)
     return this->ToString();

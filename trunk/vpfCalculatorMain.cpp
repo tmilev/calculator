@@ -54,6 +54,7 @@ bool ComputationComplete;
 
 #ifndef WIN32
 timeval ComputationStartGlobal, LastMeasureOfCurrentTime;
+pthread_t TimerThread;
 
 GlobalVariables theGlobalVariables;
 CommandList theParser;
@@ -161,6 +162,17 @@ std::string GetSelectHTMLStringTEmp
   return out.str();
 }
 
+int main_command_input(int argc, char **argv)
+{ std::stringstream theInputStream;
+  for (int i=1; i<argc; i++)
+    theInputStream << argv[i] << " ";
+  theParser.inputStringRawestOfTheRaw =theInputStream.str();
+  theParser.Evaluate(theParser.inputStringRawestOfTheRaw);
+  std::cout << theParser.outputString;
+  std::cout << "\nTotal running time: " << GetElapsedTimeInSeconds() << " seconds.";
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -171,6 +183,9 @@ int main(int argc, char **argv)
   //Change the below line to modify the computation time of the calculator.
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
+
+	std::cout << "Content-Type: text/html\n\n";
+
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
@@ -178,7 +193,14 @@ int main(int argc, char **argv)
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   std::string inputPatH;
   std::string tempS;
-	std::cin >> theParser.inputStringRawestOfTheRaw;
+  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
+  theParser.InitJavaScriptDisplayIndicator();
+  if (argc>=1)
+    getPath(argv[0], inputPatH);
+	if (argc>1)
+    return main_command_input(argc, argv);
+  else
+    std::cin >> theParser.inputStringRawestOfTheRaw;
   ComputationComplete=false;
 	if (theParser.inputStringRawestOfTheRaw=="")
 	{
@@ -195,14 +217,8 @@ int main(int argc, char **argv)
     for (int i=0; i<MathRoutines::Minimum((int)IPAdressCaller.size(), SomeRandomPrimesSize); i++)
       IPAdressCaller[i]='A'+(IPAdressCaller[i]*SomeRandomPrimes[i])%26;
 	}
-	if (argc>=1)
-    getPath(argv[0], inputPatH);
-  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
-  theParser.InitJavaScriptDisplayIndicator();
-
 //	inputString="textInput=+asf&buttonGo=Go";
 //  inputString="weylLetterInput=B&weyRankInput=3&textInput=%2B&buttonGo=Go";
-	std::cout << "Content-Type: text/html\n\n";
   std::cout << "<html><meta name=\"keywords\" content= \"Root system, Root system Lie algebra, "
   << "Vector partition function calculator, vector partition functions, Semisimple Lie algebras, "
   << "Root subalgebras, sl(2)-triples\"> <head> <title>vpf version  "
@@ -224,7 +240,6 @@ int main(int argc, char **argv)
 //  std::cout << tempStreamX.str() << std::endl;
 //  std::cout << inputString;
 #ifndef WIN32
-  pthread_t TimerThread;
   pthread_create(&TimerThread, NULL,*RunTimer, 0);
 #endif
 //  std::cout << "Raw input: " << inputString << "<hr>";
@@ -468,6 +483,10 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   //civilizedInput="1+1";
   //civilizedInput="1+a";
 //  civilizedInput="1+a-2a_1+1/2+a_1";
+//  civilizedInput="{{a}}";
+//  civilizedInput="a";
+//  civilizedInput="(0,1)";
+//  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; g_1;";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -501,6 +520,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   std::cout << "\n</FORM>";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
+//  std::cout << "<br>Number of lists created before evaluation: " << NumListsCreated;
   if (civilizedInput!="")
   { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;

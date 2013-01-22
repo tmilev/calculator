@@ -13,80 +13,80 @@ FormatExpressions::GetMonOrder<Expression>()
 { return 0;
 }
 
-//Expression::GetOpType specializations follow
+//Expression::GetTypeOperation specializations follow
 template < >
-int Expression::GetOpType<RationalFunctionOld>()const
+int Expression::GetTypeOperation<RationalFunctionOld>()const
 { this->CheckInitialization();
   return this->theBoss->opRationalFunction();
 }
 
 template < >
-int Expression::GetOpType<Rational>()const
+int Expression::GetTypeOperation<Rational>()const
 { this->CheckInitialization();
   return this->theBoss->opRational();
 }
 
 template < >
-int Expression::GetOpType<std::string>()const
+int Expression::GetTypeOperation<std::string>()const
 { this->CheckInitialization();
   return this->theBoss->opString();
 }
 
 template < >
-int Expression::GetOpType<ElementUniversalEnveloping<RationalFunctionOld> >()const
+int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementUEoverRF();
 }
 
 template < >
-int Expression::GetOpType<int>()const
+int Expression::GetTypeOperation<int>()const
 { this->CheckInitialization();
   return this->theBoss->opRational();
 }
 
 template < >
-int Expression::GetOpType<Polynomial<Rational> >()const
+int Expression::GetTypeOperation<Polynomial<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opPoly();
 }
 
 template < >
-int Expression::GetOpType<SemisimpleLieAlgebra>()const
+int Expression::GetTypeOperation<SemisimpleLieAlgebra>()const
 { this->CheckInitialization();
   return this->theBoss->opSSLieAlg();
 }
 
 template < >
-int Expression::GetOpType<LittelmannPath>()const
+int Expression::GetTypeOperation<LittelmannPath>()const
 { this->CheckInitialization();
   return this->theBoss->opLittelmannPath();
 }
 
 template < >
-int Expression::GetOpType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()const
+int Expression::GetTypeOperation<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >()const
 { this->CheckInitialization();
   return this->theBoss->opLRO();
 }
 
 template < >
-int Expression::GetOpType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()const
+int Expression::GetTypeOperation<ElementTensorsGeneralizedVermas<RationalFunctionOld> >()const
 { this->CheckInitialization();
   return this->theBoss->opElementTensorGVM();
 }
 
 template < >
-int Expression::GetOpType<charSSAlgMod<Rational> >()const
+int Expression::GetTypeOperation<charSSAlgMod<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opCharSSAlgMod();
 }
 
 template < >
-int Expression::GetOpType<AlgebraicNumber>()const
+int Expression::GetTypeOperation<AlgebraicNumber>()const
 { this->CheckInitialization();
   return this->theBoss->opAlgNumber();
 }
 
-//Expression::GetOpType specializations end.
+//Expression::GetTypeOperation specializations end.
 
 //Expression::AddObjectReturnIndex specializations follow
 template < >
@@ -890,9 +890,9 @@ bool CommandList::ReplaceSequenceXEBySequence(int theControlIndex, int inputForm
 bool CommandList::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat, int numXs)
 { SyntacticElement& main = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   Expression newExpr;
-  newExpr.children.SetSize(2);
-  newExpr.children[0].MakeAtom(this->opSequence(), *this);
-  newExpr.children[1]=(main.theData);
+  newExpr.reset(*this, 2);
+  newExpr[0].MakeAtom(this->opSequence(), *this);
+  newExpr[1]=(main.theData);
   newExpr.format=inputFormat;
   main.theData=newExpr;
   main.controlIndex=theControlIndex;
@@ -903,11 +903,10 @@ bool CommandList::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(3);
-  newExpr.children[0].MakeAtom(this->opSequence(), *this);
-  newExpr.children[1]=(left.theData);
-  newExpr.children[2]=(right.theData);
+  newExpr.reset(*this, 3);
+  newExpr[0].MakeAtom(this->opSequence(), *this);
+  newExpr[1]=(left.theData);
+  newExpr[2]=(right.theData);
   newExpr.format=inputFormat;
   left.theData=newExpr;
   left.controlIndex=theControlIndex;
@@ -1099,19 +1098,6 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
-////add here rules that change this->counterInSyntacticSoup.
-////In general, this should be avoided, but I couldn't figure out another sane solution for the following parsing problem
-////The problem: parse {{a}+b}; {{{a} }+b;
-  if (fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS!=" " && lastS!="}")
-  { this->ReplaceVXdotsXbyEXdotsX(2);
-    this->PopTopSyntacticStack();
-    if (this->flagLogSyntaxRules)
-      this->parsingLog+= "<b> Special rule: changing Variable to expression and pushing back the last token, token " + lastS
-       +  ".</b>";
-    this->counterInSyntacticSoup--;
-    return true;
-  }
-////end of rules that change this->counterInSyntacticSoup
 /*  if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
     << this->ElementToStringSyntacticStack()
@@ -1130,9 +1116,12 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
 //  if ( thirdToLastS=="{" && secondToLastS=="{}" && lastS=="}")
 //    return this->ReplaceXXXByCon(this->conBindVariable());
   if (fifthToLastS=="{" && fourthToLastS=="{" && thirdToLastS=="Variable" && secondToLastS=="}" && lastS=="}")
-    return this->RegisterBoundVariable();
-  if (lastS=="Variable" && (lookAhead!="}" || secondToLastS!="{" || thirdToLastS!="{"))
-    return this->ReplaceVbyE();
+    return this->ReplaceXXVXdotsXbyE_BOUND_XdotsX(2);
+  if (lastS=="Variable" && ((lookAhead!="}" && lookAhead!=" ") || secondToLastS!="{" || thirdToLastS!="{"))
+    return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(0);
+  if ( thirdToLastS=="{" && secondToLastS=="Variable" && lastS=="}" && lookAhead!="}" && lookAhead!=" ")
+    return this->ReplaceVXdotsXbyE_NONBOUND_XdotsX(1);
+
   if (lastS=="=" && secondToLastS=="=")
     return this->ReplaceXXByCon(this->conEqualEqual());
   if (lastS=="Integer" && secondToLastS=="Integer")
@@ -1189,6 +1178,13 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEOEByE();
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
+  if (thirdToLastS=="Sequence" && secondToLastS=="," && lastS=="Expression")
+    return this->ReplaceSequenceXEBySequence(this->conSequence());
+  if (thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
+    return this->ReplaceOXbyEX();
+  if (thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
+    return this->ReplaceOXbyEX();
+
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
   { this->registerNumNonClosedBeginArray++;
     return this->ReplaceXXXXXByCon(this->conMatrixSeparator(), Expression::formatMatrix);
@@ -1305,7 +1301,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
   Expression& leftE=input[1];
   Expression& middleE=input[2];
   Expression algebraE;
-  if (!CommandList::CallCalculatorFunction(theCommands.fSSAlgebra, leftE, algebraE))
+  if (!CommandList::CallCalculatorFunction(theCommands.innerSSLieAlgebra, leftE, algebraE))
     return output.SetError("Failed to generate semisimple Lie algebra.", theCommands);
   if (!algebraE.IsOfType<SemisimpleLieAlgebra>());
   { std::stringstream tempStream;
@@ -1483,7 +1479,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   Expression& levelNode=input[2];
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
-  if (!CommandList::fSSAlgebra(theCommands, leftE, resultSSalgebraE))
+  if (!CommandList::innerSSLieAlgebra(theCommands, leftE, resultSSalgebraE))
   { theCommands.Comments
     << "Failed to create a semisimple Lie algebra from the first argument, which is "
     << leftE.ToString();
@@ -2220,7 +2216,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   Expression& genVemaWeightNode=input[3];
   Expression& fdWeightNode=input[2];
   Expression resultSSalgebraE;
-  if (!CommandList::fSSAlgebra(theCommands, leftE, resultSSalgebraE))
+  if (!CommandList::innerSSLieAlgebra(theCommands, leftE, resultSSalgebraE))
   { theCommands.Comments
     << "Failed to create a semisimple Lie algebra from the first argument, which is "
     << leftE.ToString();
@@ -2531,7 +2527,7 @@ bool CommandList::fKLcoeffs
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fKLcoeffs");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, input, output))
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSSLieAlgebra, input, output))
     return output.SetError("Failed to created Lie algebra", theCommands);
   SemisimpleLieAlgebra* theSSalgebra= output.GetAmbientSSAlgebraNonConstUseWithCaution();
   std::stringstream out;
@@ -2562,7 +2558,7 @@ bool CommandList::fWeylOrbit
     return output.SetError("fWeylOrbit takes two arguments", theCommands);
   Expression& theSSalgebraNode=input[1];
   Expression& vectorNode=input[2];
-  if (!theCommands.CallCalculatorFunction(theCommands.fSSAlgebra, theSSalgebraNode, output))
+  if (!theCommands.CallCalculatorFunction(theCommands.innerSSLieAlgebra, theSSalgebraNode, output))
     return false;
   SemisimpleLieAlgebra* theSSalgebra=0;
   if (!output.IsOfType(theSSalgebra))
@@ -2663,10 +2659,10 @@ bool CommandList::fWeylOrbit
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fSSAlgebra
+bool CommandList::innerSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::fSSAlgebra");
+  MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
   if (!theCommands.fPolynomial(theCommands, input, output))
     return output.SetError
     ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
@@ -3070,7 +3066,8 @@ bool CommandList::AppendOpandsReturnTrueIfOrderNonCanonical
 }
 
 void CommandList::init(GlobalVariables& inputGlobalVariables)
-{ this->theGlobalVariableS=& inputGlobalVariables;
+{ //std::cout << "<br>Num lists created before command list init: " << NumListsCreated;
+  this->theGlobalVariableS=& inputGlobalVariables;
 //  this->MaxAlgTransformationsPerExpression=100000;
   this->formatVisibleStrings.flagExpressionIsFinal=true;
   this->MaxAlgTransformationsPerExpression=100;
@@ -3176,9 +3173,9 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 //  this->controlSequences.AddOnTop("c...c");
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
-  this->initPredefinedOuterFunctions();
-  this->initPredefinedInnerFunctionsWithTypes();
+  this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
+//  std::cout << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
 }
 
 Expression::FunctionAddress CommandList::GetInnerFunctionFromOp
@@ -3246,7 +3243,7 @@ bool CommandList::outerExtractBaseMultiplication
   output=input;
   Expression& leftE=output[1];
   Expression& rightE=output[2];
-  //std::cout << "<br>handling base extraction of: " << theExpression.ToString();
+//  std::cout << "<br>handling base extraction of: " << input.ToString();
   //handle Anything*Rational:=Rational*Anything
   if (rightE.IsOfType<Rational>())
   { MathRoutines::swap(leftE, rightE);
@@ -3293,7 +3290,7 @@ bool CommandList::outerAssociate
   (input, opands, theOperation);
   if (!needsModification)
     return false;
-  std::cout << "<br>" << input.ToString() << " needs modification.<br> ";
+//  std::cout << "<br>" << input.ToString() << " needs modification.<br> ";
   output.MakeXOX
   (theCommands, theOperation, opands[opands.size-2], opands[opands.size-1])
   ;
@@ -3410,7 +3407,7 @@ bool CommandList::outerPlus
       currentSummandNoCoeff=&oneE;
     theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
-  std::cout << "<br>Collected sum: " << theSum.ToString();
+//  std::cout << "<br>Collected sum: " << theSum.ToString();
 /*
   std::cout << "<hr>summands: ";
   for (unsigned i=0; i< summands.size(); i++)
@@ -3481,7 +3478,7 @@ bool CommandList::outerStandardFunction
     return false;
   Expression& functionNameNode =input[0];
   int theIndex;
-  std::cout << "<br>Simplifying " << input.ToString();
+//  std::cout << "<br>Simplifying " << input.ToString();
   if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
     if (input.children.size==2)
       if (input[1].IsSmallInteger(&theIndex))
@@ -3803,8 +3800,8 @@ bool CommandList::ExpressionsAreEqual
 }
 
 bool CommandList::ExpressionMatchesPattern
-  (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
-   std::stringstream* theLog)
+(const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
+ std::stringstream* theLog)
 { MacroRegisterFunctionWithName("CommandList::ExpressionMatchesPattern");
   RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3993,7 +3990,12 @@ bool CommandList::EvaluateExpression
     { Expression& currentPattern=this->RuleStack[i];
       this->TotalNumPatternMatchedPerformed++;
       bufferPairs.reset();
-      if(this->ProcessOneExpressionOnePatternOneSub(currentPattern, output, bufferPairs, &this->Comments))
+//      std::cout << "<br>Checking whether "
+//      << output.ToString() << " matches " << currentPattern.ToString();
+      if(this->ProcessOneExpressionOnePatternOneSub
+         (currentPattern, output, bufferPairs, &this->Comments
+          //,true
+          ))
       { ReductionOcurred=true;
         break;
       }
@@ -4070,12 +4072,12 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
-  Expression& currentPattern=thePattern.children[0];
+  Expression& currentPattern=thePattern[1];
   Expression* theCondition=0;
   bool isConditionalDefine=
   thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4);
   if (isConditionalDefine)
-    theCondition=&thePattern.children[1];
+    theCondition=&thePattern.children[2];
   Expression* toBeSubbed=this->PatternMatch
   (currentPattern, theExpression, bufferPairs, theCondition, theLog, logAttempts);
   if (toBeSubbed==0)
@@ -4083,9 +4085,9 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   if (theLog!=0 && logAttempts)
     *theLog << "<br><b>found a match!</b>";
   if (isConditionalDefine)
-    *toBeSubbed=thePattern.children[2];
+    *toBeSubbed=thePattern[3];
   else
-    *toBeSubbed=thePattern.children[1];
+    *toBeSubbed=thePattern[2];
   this->SpecializeBoundVars(*toBeSubbed, bufferPairs);
   return true;
 }
@@ -4206,7 +4208,7 @@ std::string SyntacticElement::ToString(CommandList& theBoss)const
   if (this->controlIndex<0)
     out << "Error: control index is not initialized! This is likely a programming error.";
   else
-    out << theBoss.controlSequences[this->controlIndex];
+    out << theBoss.controlSequences[this->controlIndex] << " ";
   if (makeTable)
   { out << "</td></tr><tr><td>";
     out << this->theData.ToString(0);
@@ -4423,10 +4425,8 @@ std::string Expression::ToString
       out << this->children[1].ToString(theFormat, outComments)
       << "-" << this->children[2].ToString(theFormat, outComments);
     }
-  }
-  else if (this->IsListStartingWithAtom(this->theBoss->opBind()))
-  { out << "{{" << this->children[1].ToString(theFormat, outComments) << "}}";
-  }
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
+    out << "{{" << this->children[1].ToString(theFormat, outComments) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { assert(this->children.size>=2);
     switch(this->format)
@@ -4651,6 +4651,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes[0].MakeAtom(leftType, *this);
   innerFunction.theArgumentTypes[1].MakeAtom(rightType, *this);
+  this->FunctionHandlers[indexOp].ReservE(5);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
 
@@ -4673,6 +4674,7 @@ void CommandList::AddOperationHandler
   Function theFun
   (handler, 0, opDescription, opExample, isInner, visible)
   ;
+  this->FunctionHandlers[indexOp].ReservE(5);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
@@ -4855,21 +4857,6 @@ std::string CommandList::ToString()
   return out2.str();
 }
 
-/*Rational Expression::GetConstantTerm()const
-{ if (this->IsOfType<Rational>())
-    return this->GetRationalValue();
-  if (this->theOperation==this->theBoss->opTimes())
-    if (this->children[0].EvaluatesToRational())
-      return this->children[0].GetRationalValue();
-  return 1;
-}
-*/
-
-void Expression::MakeVariableNonBounD(CommandList& newBoss, const std::string& input)
-{ this->reset(newBoss);
-  this->theData=newBoss.operationS.AddNoRepetitionOrReturnIndexFirst(input);
-}
-
 bool CommandList::ReplaceIntIntBy10IntPlusInt()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
@@ -5047,57 +5034,64 @@ bool Expression::ContextGetPolySubFromSuperContext
   return true;
 }
 
-bool CommandList::IsBoundVarInContext(const std::string& input)
+bool CommandList::IsBoundVarInContext(int inputOp)
 { for (int i=0; i<this->BoundVariablesStack.size; i++)
-    if (this->BoundVariablesStack[i].Contains(input))
+    if (this->BoundVariablesStack[i].Contains(inputOp))
       return true;
   return false;
 }
 
-bool CommandList::IsNonBoundVarInContext(const std::string& input)
+bool CommandList::IsNonBoundVarInContext(int inputOp)
 { for (int i=0; i<this->NonBoundVariablesStack.size; i++)
-    if (this->NonBoundVariablesStack[i].Contains(input))
+    if (this->NonBoundVariablesStack[i].Contains(inputOp))
       return true;
   return false;
 }
 
-bool CommandList::RegisterBoundVariable()
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
-  const std::string& theVarString=theElt.theData.GetValuE<std::string>();
-  if (this->IsNonBoundVarInContext(theVarString))
+bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
+{ SyntacticElement& theElt=
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
+  int theBoundVar=theElt.theData.theData;
+//  std::cout << "<br>Registering bound variable index: " << theBoundVar;
+  if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
-    out << "Syntax error. In the same syntactic scope, the string " << theVarString
+    out << "Syntax error. In the same syntactic scope, the string "
+    << this->operationS[theBoundVar]
     << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString=out.str();
     theElt.controlIndex=this->conError();
-    this->DecreaseStackSetCharacterRanges(2);
+    this->DecreaseStackSetCharacterRanges(numXs);
     this->ReplaceXXYByY();
     return true;
   }
-  if (!this->IsBoundVarInContext(theVarString))
-    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theVarString);
+  if (!this->IsBoundVarInContext(theBoundVar))
+    this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theBoundVar);
   theElt.theData.reset(*this, 2);
   theElt.theData[0].MakeAtom(this->opBind(), *this);
-  theElt.theData[1].AssignValue(theVarString, *this);
-  this->DecreaseStackSetCharacterRanges(2);
+  theElt.theData[1].MakeAtom(theBoundVar, *this);
+  theElt.controlIndex=this->conExpression();
+//  std::cout << ", got to element: " << theElt.theData.ToString();
+  this->DecreaseStackSetCharacterRanges(numXs);
   this->ReplaceXXYByY();
+//  std::cout << ", finally got: "
+//  << (*this->CurrentSyntacticStacK).LastObject()->ToString(*this);
   return true;
 }
 
-bool CommandList::ReplaceVXdotsXbyEXdotsX(int numXs)
-{ SyntacticElement& theElt=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
-
+bool CommandList::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
+{ SyntacticElement& theElt=
+  (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1-numXs];
+  int theBoundVar=theElt.theData.theData;
 //  std::cout << "<br>index of variable: " << theElt.ToString(*this);
-  const std::string& theVarString=this->operationS[theElt.theData.theData];
-  if (this->IsBoundVarInContext(theVarString))
+  if (this->IsBoundVarInContext(theBoundVar))
   { theElt.theData.reset(*this, 2);
     theElt.theData[0].MakeAtom(this->opBind(), *this);
-    theElt.theData[1].AssignValue(theVarString, *this);
+    theElt.theData[1].MakeAtom(theBoundVar, *this);
   } else
-  { theElt.theData.MakeVariableNonBounD(*this, theVarString);
-    if (!this->IsNonBoundVarInContext(theVarString))
-      this->NonBoundVariablesStack.LastObject()->AddOnTop(theVarString);
+  { theElt.theData.MakeAtom(theBoundVar, *this);
+    if (!this->IsNonBoundVarInContext(theBoundVar))
+      this->NonBoundVariablesStack.LastObject()->AddOnTop(theBoundVar);
   }
   theElt.controlIndex=this->conExpression();
   return true;

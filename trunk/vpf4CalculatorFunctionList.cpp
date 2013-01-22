@@ -497,20 +497,38 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   this->NumPredefinedVars=this->operationS.size;
 }
 
-void CommandList::initPredefinedOuterFunctions()
-{
+void CommandList::initPredefinedStandardOperations()
+{ //IMPORTANT.
+  //The order of registration of operation handlers for the same operation name
+  // defines the order in which operation
+  //handlers are called. Operations handlers registered first are executed first.
+  //The order only matters for different handlers of the same operation.
+  //This order is very important, as some of the
+  //handlers will act properly only if the preceding ones have been carried through
+  //(example: outerExtractBaseMultiplication requires outerAssociate).
+  //Note that one can easily transform the code so that the order does not matter.
+  //One can do that by ``packing'' the the correct order of operations into a super-function,
+  //or by making the corresponding handlers call each other as needed.
+  //A combination of these two was indeed the original design approach, however what is used now
+  //is more modular, conceptual, and easier to test: in short, the better engineering solution.
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
+   "Adds two rational numbers. ",
+   "2+3", true);
   this->AddOperationOuterHandler
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
+
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \
    -{{b}}:=MinnusOne*b; {{a}}-{{b}}:=a+MinnusOne*b", "-1+(-5)", true);
-  this->AddOperationOuterHandler
-  ("/", this->outerDivide, "",
-    "If b is rational substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; 6/4+3/0", true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
+   "Multiplies two rational numbers. ",
+   "2*3", true);
   this->AddOperationOuterHandler
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
@@ -518,12 +536,22 @@ void CommandList::initPredefinedOuterFunctions()
   this->AddOperationOuterHandler
   ("*", this->outerAssociate, "",
    "Associative law: reorders the multiplicative tree in standard form. ",
-   "(a*b)*(c*(d*(e*f)*g)*h) - a*(b*(c*(d*(e*(f*(g*h))))));(a*b)*(c*(d*(e*f)*g)*h) - a*b*c*d*e*g*f*h", true);
+   "(a*b)*(c*(d*e)*f) - a*b*c*d*e*f;(a*b)*(c*(e*d)*f) - a*b*c*d*e*f", true);
   this->AddOperationOuterHandler
-  ("*", this->outerAssociate, "",
+  ("*", this->outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",
    "2*((3*c)*(4*d))", true);
-    this->AddOperationOuterHandler
+
+  this->AddOperationOuterHandler
+  ("/", this->outerDivide, "",
+    "If b is rational substitutes (anything)/b with anything* (1/b).",
+    "6/15+(a+b)/5; 6/4+3/0", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
+   "Divides two rational numbers. ",
+   "4/6; 2/0;", true);
+
+  this->AddOperationOuterHandler
   ("\\otimes",  this->outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
@@ -612,19 +640,4 @@ void CommandList::initPredefinedOuterFunctions()
    containing \
    the union of all members; all repeating members are discarded.",
    "(x,y,x)\\sqcup(1,x,y,2)", true);
-}
-
-void CommandList::initPredefinedInnerFunctionsWithTypes()
-{ this->AddOperationBinaryInnerHandlerWithTypes
-  ("+", this->innerAddRatToRat, this->opRational(), this->opRational(),
-   "Adds two rational numbers. ",
-   "2+3", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
-   "Multiplies two rational numbers. ",
-   "2*3", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
-   "Divides two rational numbers. ",
-   "4/6; 2/0;", true);
 }

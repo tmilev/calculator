@@ -3719,49 +3719,49 @@ bool CommandList::EvaluatePMTDtree
     return false;
   }
   dataType outputData;
+  std::cout << "<br>Context:" <<  inputContext.ToString()
+  << " Evaluating PMTD tree of " << input.ToString();
   if (input.IsListStartingWithAtom(this->opTimes()) ||
       input.IsListStartingWithAtom(this-> opPlus()) )
-  { Expression currentE;
-    for (int i=0; i<input.children.size; i++)
-    { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], currentE))
+  { for (int i=1; i<input.children.size; i++)
+    { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
         return false;
       //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (input[0].IsAtoM(this->opTimes()))
       { if (i==0)
-          outputData=currentE.GetValuE<dataType>();
+          outputData=output.GetValuE<dataType>();
         else
         { //std::cout << "<hr>Multiplying: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
           //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData*=currentE.GetValuE<dataType>();
+          outputData*=output.GetValuE<dataType>();
           //std::cout << "<br>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       } else if (input[0].IsAtoM(this->opPlus()))
       { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ToString(this->theGlobalVariableS->theDefaultLieFormat);
         if (i==0)
-        { outputData=currentE.GetValuE<dataType>();
+        { outputData=output.GetValuE<dataType>();
 //          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
 //          << ", which should equal the bufferData: " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
         } else
         { //std::cout << "<hr>Adding: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
           //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData+=currentE.GetValuE<dataType>();
+          outputData+=output.GetValuE<dataType>();
           //std::cout << "<hr>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
         }
       }
     }
     return output.AssignValueWithContext(outputData, inputContext, *this);
   }
+  int thePower;
   if (input.IsListNElementsStartingWithAtom(this->opThePower(), 3))
-  { int thePower=0;
     if (input[2].IsSmallInteger(&thePower))
-    { if(!this->EvaluatePMTDtree<dataType>(output, inputContext, input[1]))
+    { if(!this->EvaluatePMTDtree<dataType>(inputContext, input[1], output))
         return false;
       outputData=output.GetValuE<dataType>();
       outputData.RaiseToPower(thePower);
       return output.AssignValueWithContext(outputData, inputContext, *this);
     }
-  }
   std::cout << "<br>input: " << input.ToString();
   if (input.IsOfType<Rational>())
   { outputData=input.GetValuE<Rational>();//<-type conversion here

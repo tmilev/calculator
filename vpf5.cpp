@@ -160,7 +160,7 @@ bool CommandList::fWeylDimFormula
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorString))
+      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   Vector<RationalFunctionOld> theWeight;
@@ -195,7 +195,7 @@ bool CommandList::fAnimateLittelmannPaths
   SemisimpleLieAlgebra* theSSowner=0;
   std::string errorMessage;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorMessage))
+      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorMessage))
     return output.SetError(errorMessage, theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
@@ -222,14 +222,16 @@ bool CommandList::fRootSAsAndSltwos
   std::string errorString;
   SemisimpleLieAlgebra* ownerSS;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input, ownerSS, &errorString))
+      (theCommands.innerSSLieAlgebra, input, ownerSS, &errorString))
     return output.SetError(errorString, theCommands);
   CGI::SetCGIServerIgnoreUserAbort();
   std::stringstream outSltwoPath, outMainPath, outSltwoDisplayPath, outMainDisplayPath;
   theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit=10000;
-  char weylLetter=ownerSS->theWeyl.WeylLetter;
-  int theRank=ownerSS->theWeyl.GetDim();
-
+  char weylLetter;
+  int theRank;
+  if (!ownerSS->theWeyl.theDynkinType.IsSimple(&weylLetter, &theRank))
+    return output.SetError
+    ("I have been instructed to work only on simple Lie algebras only. ", theCommands);
   outMainPath << theCommands.PhysicalPathOutputFolder <<  weylLetter << theRank << "/";
   outMainDisplayPath << theCommands.DisplayPathOutputFolder
   << weylLetter << theRank << "/";
@@ -302,7 +304,7 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   SemisimpleLieAlgebra* ownerSSPointer=0;
   std::string errorString;
   if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, typeNode, ownerSSPointer, &errorString))
+      (theCommands.innerSSLieAlgebra, typeNode, ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
   Vector<RationalFunctionOld> theWeightFundCoords;
   Vector<Rational> inducingParSel, splittingParSel;
@@ -346,7 +348,7 @@ bool CommandList::fCasimir
   std::string errorString;
   SemisimpleLieAlgebra* theSSalg;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input, theSSalg, &errorString))
+      (theCommands.innerSSLieAlgebra, input, theSSalg, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSowner=*theSSalg;
   if (theCommands.theGlobalVariableS->MaxComputationTimeSecondsNonPositiveMeansNoLimit<50)
@@ -358,7 +360,6 @@ bool CommandList::fCasimir
   theCasimir.MakeCasimir(theSSowner, *theCommands.theGlobalVariableS, rfOne, rfZero);
 //  theCasimir.Simplify(*theCommands.theGlobalVariableS);
   theCommands.Comments << "Context Lie algebra: "
-  << theSSowner.GetLieAlgebraName(theSSowner.theWeyl.WeylLetter, theSSowner.GetRank())
   << ". The coefficient: " << theSSowner.theWeyl.GetKillingDivTraceRatio().ToString()
   <<  ". The Casimir element of the ambient Lie algebra. ";
   output.AssignValue(theCasimir, theCommands);
@@ -377,7 +378,7 @@ bool CommandList::fDrawWeightSupportWithMults
   SemisimpleLieAlgebra* theSSalgpointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, typeNode, theSSalgpointer, &errorString))
+      (theCommands.innerSSLieAlgebra, typeNode, theSSalgpointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theAlg=*theSSalgpointer;
   Vector<Rational> highestWeightFundCoords;
@@ -410,7 +411,7 @@ bool CommandList::fDrawWeightSupport
   std::string errorString;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, typeNode, theAlgPointer, &errorString))
+      (theCommands.innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
@@ -440,7 +441,7 @@ bool CommandList::fEmbedG2inB3
     return output.SetError
     ("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);
   SemisimpleLieAlgebra& ownerSS=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
-  if (ownerSS.GetRank()!=2 || ownerSS.theWeyl.WeylLetter!='G')
+  if (!ownerSS.IsOfSimpleType('G', 2))
     return output.SetError
     ("Error: embedding of G_2 in B_3 takes elements of U(G_2) as arguments.", theCommands);
   HomomorphismSemisimpleLieAlgebra theHmm;
@@ -1421,8 +1422,8 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
 
 void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 { SemisimpleLieAlgebra tempb3alg, tempg2alg;
-  tempb3alg.theWeyl.MakeArbitrary('B',3);
-  tempg2alg.theWeyl.MakeArbitrary('G',2);
+  tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
+  tempg2alg.theWeyl.MakeArbitrarySimple('G',2);
   SemisimpleLieAlgebra& g2Alg =
   this->theObjectContainer.theLieAlgebras
   [this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg)];
@@ -2384,7 +2385,7 @@ bool CommandList::fParabolicWeylGroups
   SemisimpleLieAlgebra* theSSPointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input, theSSPointer, &errorString))
+      (theCommands.innerSSLieAlgebra, input, theSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra& theSSalgebra=*theSSPointer;
   int numCycles=MathRoutines::TwoToTheNth(selectionParSel.MaxSize);
@@ -2438,7 +2439,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   hwContext.ContextGetFormatExpressions(theFormat);
   if (theSubgroup.size>498)
   { if (theSubgroup.AmbientWeyl.GetSizeWeylByFormula('E', 6) <=
-        theSubgroup.AmbientWeyl.GetSizeWeylByFormula(theAmbientWeyl.WeylLetter, theAmbientWeyl.GetDim()))
+        theSubgroup.AmbientWeyl.theDynkinType.GetSizeWeylByFormula())
       out << "Even I can't handle the truth, when it is so large<br>";
     else
       out << "LaTeX can't handle handle the truth, when it is so large. <br>";
@@ -2524,7 +2525,7 @@ bool CommandList::fPrintAllPartitions
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorString))
+      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& theSSalgebra=*theSSowner;
@@ -2670,11 +2671,11 @@ bool CommandList::fTestMonomialBaseConjecture
   { SemisimpleLieAlgebra& currentAlg=theCommands.theObjectContainer.theLieAlgebras[i];
     currentAlg.owner=&theCommands.theObjectContainer.theLieAlgebras;
     currentAlg.indexInOwner=i;
-    currentAlg.theWeyl.MakeArbitrary(theWeylLetters[i], theRanks[i]);
+    currentAlg.theWeyl.MakeArbitrarySimple(theWeylLetters[i], theRanks[i]);
     currentAlg.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
     currentAlg.theWeyl.GetHighestWeightsAllRepsDimLessThanOrEqualTo(theHighestWeights[i], dimBound);
     latexReport << "\\hline\\multicolumn{5}{c}{"
-    << "$" << currentAlg.GetLieAlgebraName(true) << "$}\\\\\\hline\n\n"
+    << "$" << currentAlg.GetLieAlgebraName() << "$}\\\\\\hline\n\n"
     << "$\\lambda$ & dim &\\# pairs 1& \\# pairs total  & \\# Arithmetic op.  \\\\\\hline";
     out << "<br>"
     << " <table><tr><td  border=\"1\" colspan=\"3\">"
@@ -2804,7 +2805,7 @@ bool CommandList::fLSPath
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorString))
+      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;

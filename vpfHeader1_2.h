@@ -777,6 +777,15 @@ class DynkinSimpleType
   int GetSSAlgDim()const
   { return this->GetRootSystemSize()+this->theRank;
   }
+  void GetCartanSymmetric(Matrix<Rational>& output)const;
+  void MakeAn(int n, Matrix<Rational>& output)const;
+  void MakeBn(int n, Matrix<Rational>& output)const;
+  void MakeCn(int n, Matrix<Rational>& output)const;
+  void MakeDn(int n, Matrix<Rational>& output)const;
+  void MakeEn(int n, Matrix<Rational>& output)const;
+  void MakeF4(Matrix<Rational>& output)const;
+  void MakeG2(Matrix<Rational>& output)const;
+
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
     this->theRank=other.theRank;
@@ -802,7 +811,7 @@ class DynkinSimpleType
   Rational GetDefaultRootLengthSquared(int rootIndex)const;
   Rational GetRatioRootSquaredToFirstSquared(int rootIndex)const;
   static Rational GetRatioLongRootToFirst(char inputWeylLetter, int inputRank);
-  std::string ToString()const;
+  std::string ToString(FormatExpressions* theFormat=0)const;
   void operator++(int);
   bool operator>(const DynkinSimpleType& other)const
   { if (this->theRank>other.theRank)
@@ -819,6 +828,8 @@ class DynkinSimpleType
       return false;
     return this->lengthFirstCoRootSquared>other.lengthFirstCoRootSquared;
   }
+  static void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
+
   inline bool operator<(const DynkinSimpleType& other)const
   { return other>*this;
   }
@@ -828,22 +839,31 @@ class DynkinSimpleType
 class DynkinType : public MonomialCollection<DynkinSimpleType, int>
 {
 public:
-  void GetLettersTypesMults (List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults)
-  { outputLetters.SetSize(0);
-    outputRanks.SetSize(0);
-    outputMults.SetSize(0);
-    for (int i=0; i<this->size; i++)
-    { outputLetters.AddOnTop((*this)[i].theLetter);
-      outputRanks.AddOnTop((*this)[i].theRank);
-      outputMults.AddOnTop(this->theCoeffs[i]);
-    }
+  void GetLettersTypesMults
+  (List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults,
+   List<Rational>& outputFirstCoRootLengthsSquared)const;
+  bool IsOfSimpleType(char inputType, int inputRank)const
+  { char currentType;
+    int currentRank;
+    if (!this->IsSimple(&currentType, &currentRank))
+      return false;
+    return currentType==inputType && currentRank==inputRank;
   }
+  bool IsSimple(char* outputtype=0, int* outputRank=0, Rational* outputLength=0)const
+  ;
   Rational GetSizeWeylByFormula()const;
   std::string ToString(FormatExpressions* theFormat=0)const
   { std::stringstream out;
     out << *this;
     return out.str();
   }
+  Rational GetRank()const;
+  void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);
+  void GetEpsilonMatrix(Matrix<Rational>& output)const;
+  void GetCartanSymmetric(Matrix<Rational>& output)const;
+  std::string GetLieAlgebraName(FormatExpressions* theFormat=0)const;
+  std::string GetWeylGroupName(FormatExpressions* theFormat=0)const;
+  bool HasExceptionalComponent()const;
 };
 
 class WeylGroup: public HashedList<ElementWeylGroup>
@@ -864,7 +884,6 @@ class WeylGroup: public HashedList<ElementWeylGroup>
   MemorySaving<Vectors<Rational> > buffer1VectorsNotCopied;
   MemorySaving<Vectors<Rational> > buffer2VectorsNotCopied;
   bool flagFundamentalToSimpleMatricesAreComputed;
-  Rational lengthLongestRootSquared;
   inline void ComputeFundamentalToSimpleMatrices()
   { if (flagFundamentalToSimpleMatricesAreComputed)
       return;
@@ -879,9 +898,9 @@ class WeylGroup: public HashedList<ElementWeylGroup>
 public:
   Matrix<Rational> CartanSymmetric;
   Vector<Rational> rho;
-  char WeylLetter;
   HashedList<Vector<Rational> > RootSystem;
   Vectors<Rational> RootsOfBorel;
+  DynkinType theDynkinType;
   static bool flagAnErrorHasOcurredTimeToPanic;
 //  void MakeFromParSel(Vector<Rational> & parSel, WeylGroup& input);
   void init()
@@ -889,7 +908,9 @@ public:
   }
   void ComputeRho(bool Recompute);
   std::string ToString();
-  void MakeArbitrary(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
+  void MakeFromDynkinType(const DynkinType& inputType)
+  ;
+  void MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared=0);
   void GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output);
   Rational GetKillingDivTraceRatio();
   Rational EstimateNumDominantWeightsBelow(Vector<Rational> & inputHWsimpleCoords, GlobalVariables& theGlobalVariables);
@@ -908,14 +929,10 @@ public:
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  void MakeAn(int n);
-  void MakeEn(int n);
-  void MakeBn(int n);
-  void MakeCn(int n);
-  void MakeDn(int n);
-  void MakeF4();
-  void MakeG2();
   WeylGroup();
+  bool IsOfSimpleType(char desiredType, int desiredRank)const
+  { return this->theDynkinType.IsOfSimpleType(desiredType, desiredRank);
+  }
   Matrix<Rational>* GetMatrixFundamentalToSimpleCoords()
   { this->ComputeFundamentalToSimpleMatrices();
     return &this->FundamentalToSimpleCoords;
@@ -999,8 +1016,8 @@ public:
 (Vector<Rational>& input, int UpperBoundNumBetas, Vectors<Rational>& theSet, Vectors<Rational>& output,
  List<Rational>& outputCoeffs, bool IntegralCoefficientsOnly)
  ;
-  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
-  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
+//  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities);
+//  void MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks){ this->MakeFromDynkinType(theLetters, theRanks, 0); }
   //void GetLongRootLength(Rational& output);
   static bool IsAddmisibleDynkinType(char candidateLetter, int n);
   //the below will not do anything if the inputLetter is not a valid Dynkin letter
@@ -1016,7 +1033,6 @@ public:
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vector<Rational>& other);
   bool IsStronglyPerpendicularTo(const Vector<Rational>& input, const Vectors<Rational>& others);
   void GetEpsilonCoordsWRTsubalgebra(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output);
-  void GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output);
   void ComputeWeylGroup();
   bool LeftIsHigherInBruhatOrderThanRight(ElementWeylGroup& left, ElementWeylGroup& right);
   void GetMatrixReflection(Vector<Rational> & reflectionRoot, Matrix<Rational> & output);
@@ -1152,9 +1168,7 @@ template <class CoefficientType>
   void TransformToSimpleBasisGenerators(Vectors<Rational>& theGens);
   void TransformToSimpleBasisGeneratorsWRTh(Vectors<Rational>& theGens, const Vector<Rational>& theH);
   void operator=(const WeylGroup& other);
-  bool operator==(const WeylGroup& other)
-  { return this->CartanSymmetric==other.CartanSymmetric;
-  }
+  bool operator==(const WeylGroup& other)const;
 };
 
 template <class Element>
@@ -1797,6 +1811,9 @@ public:
       assert(false);
     }
   }
+  bool IsOfSimpleType(char desiredType, int desiredRank)const
+  { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
+  }
   void GetChevalleyGeneratorAsLieBracketsSimpleGens
   (int generatorIndex, List<int>& outputIndicesFormatAd0Ad1Ad2etc,
    Rational& outputMultiplyLieBracketsToGetGenerator)
@@ -1808,12 +1825,9 @@ public:
   bool CommutatorIsNonZero(int leftIndex, int rightIndex)
   { return !this->theLiebrackets.elements[leftIndex][rightIndex].IsEqualToZero();
   }
-  std::string GetLieAlgebraName(bool includeNonTechnicalNames=true)const
-  { return this->GetLieAlgebraName(this->theWeyl.WeylLetter, this->GetRank(), includeNonTechnicalNames);
+  std::string GetLieAlgebraName()const
+  { return this->theWeyl.theDynkinType.GetLieAlgebraName();
   }
-  static std::string GetLieAlgebraName
-  (char WeylLetter, int WeylDim, bool includeNonTechnicalNames=true, bool includeTechnicalNames=true)
-  ;
   void GetMinusTransposeAuto(const ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output);
   void GenerateWeightSupportMethod2(Vector<Rational> & theHighestWeight, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
   inline int GetNumGenerators()const{ return this->theWeyl.CartanSymmetric.NumRows+this->theWeyl.RootSystem.size;}
@@ -1882,7 +1896,7 @@ public:
   (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner, char inputWeylLetter, int inputRank)
   { this->owner=&inputOwner;
     this->indexInOwner=inputIndexInOwner;
-    this->theWeyl.MakeArbitrary(inputWeylLetter, inputRank);
+    this->theWeyl.MakeArbitrarySimple(inputWeylLetter, inputRank);
   }
   void ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
@@ -4054,30 +4068,6 @@ public:
   static int EvaluateVectorPFIndicator
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
-  static int EvaluateDrawRootSystem
-  (ParserNode& theNode, char WeylLetter, int WeylRank, GlobalVariables& theGlobalVariables,
-   Vector<Rational> * bluePoint, bool wipeCanvas=true, bool LabelDynkin=false, bool DrawWeylChamber=false, Vectors<Rational>* projectionPlane=0)
-  ;
-  static int EvaluateDrawRootSystemLabelDynkin
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateDrawRootSystemOld
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational> * bluePoint)
-;
-  static int EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational> * bluePoint)
-;
-  static int EvaluateDrawRootSystemFixedProjectionPlane
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return theNode.EvaluateDrawRootSystem(theNode, theArgumentList, theGlobalVariables, 0);}
-  static int EvaluateDrawRootSystemOld
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables){return EvaluateDrawRootSystemOld(theNode, theArgumentList, theGlobalVariables,0);}
-  static int EvaluatePrintRootSAsAndSlTwos
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, bool redirectToSlTwos, bool forceRecompute)
-;
   static int EvaluateDrawConeAffine
 (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 ;
@@ -4535,7 +4525,6 @@ public:
 };
 
 class PolynomialOverModule;
-
 
 template <class CoefficientType>
 class ElementVermaModuleOrdered
@@ -8252,7 +8241,7 @@ bool WeylGroup::GenerateOrbit
   Vector<CoefficientType> currentRoot;
   ElementWeylGroup tempEW;
   if (expectedOrbitSize<=0)
-    expectedOrbitSize=(this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim())).NumShort;
+    expectedOrbitSize=(this->theDynkinType.GetSizeWeylByFormula()).NumShort;
   if (UpperLimitNumElements>0 && expectedOrbitSize>UpperLimitNumElements)
     expectedOrbitSize=UpperLimitNumElements;
   output.SetExpectedSize(expectedOrbitSize);

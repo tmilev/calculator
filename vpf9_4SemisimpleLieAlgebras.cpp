@@ -236,8 +236,8 @@ void CandidateSSSubalgebra::AddTypeIncomplete(const DynkinSimpleType& theNewType
   }
   WeylGroup tempWeyl, tempWeylnonScaled;
   Rational two=2;
-  tempWeyl.MakeArbitrary(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
-  tempWeylnonScaled.MakeArbitrary(theNewType.theLetter, theNewType.theRank);
+  tempWeyl.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank, &theNewType.lengthFirstCoRootSquared);
+  tempWeylnonScaled.MakeArbitrarySimple(theNewType.theLetter, theNewType.theRank);
   this->theWeylNonEmbeddeD.CartanSymmetric.DirectSumWith(tempWeyl.CartanSymmetric);
   this->theWeylNonEmbeddeDdefaultScale.CartanSymmetric.DirectSumWith(tempWeylnonScaled.CartanSymmetric);
   this->CartanSAsByComponent.SetSize(this->CartanSAsByComponent.size+1);
@@ -640,7 +640,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     if (theType.lengthFirstCoRootSquared<baseLength)
       continue;
     theCandidate=baseCandidate;
-    tempAlgebra.theWeyl.MakeArbitrary(theType.theLetter, theType.theRank);
+    tempAlgebra.theWeyl.MakeArbitrarySimple(theType.theLetter, theType.theRank);
     int indexSubalgebra=this->SimpleComponentsSubalgebras.GetIndex(tempAlgebra);
     bool mustComputeSSalgebra=(indexSubalgebra==-1);
     if (mustComputeSSalgebra)
@@ -653,7 +653,7 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
     if (mustComputeSSalgebra)
     { std::stringstream tempStream;
       tempStream << "\nGenerating simple Lie algebra "
-      << SemisimpleLieAlgebra::GetLieAlgebraName(theType.theLetter, theType.theRank)
+      << theType.ToString()
       << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
       theProgressReport2.Report(tempStream.str());
       theSmallAlgebra.init
@@ -705,8 +705,7 @@ void SemisimpleSubalgebras::ExtendCandidatesRecursive
   DynkinSimpleType theType;
   ProgressReport theProgressReport1(theGlobalVariables);
   DynkinSimpleType myType;
-  myType.MakeAone();
-  myType.theLetter=this->GetSSowner().theWeyl.WeylLetter;
+  myType.theLetter='F';
   myType.theRank=this->GetSSowner().GetRank();
   myType.lengthFirstCoRootSquared=this->theSl2s[0].LengthHsquared;
   if(theGlobalVariables!=0)
@@ -1561,8 +1560,9 @@ void SltwoSubalgebras::ElementToHtml
   std::stringstream out, outNotation, outNotationCommand;
   std::string fileName;
   std::fstream theFile, fileFlas;
-  outNotationCommand << "printSemisimpleLieAlgebra{}" << this->GetOwnerWeyl().WeylLetter
-  << "_" << this->GetOwnerWeyl().GetDim();
+  outNotationCommand << "printSemisimpleLieAlgebra{}("
+  << this->GetOwnerWeyl().theDynkinType.ToString() << ")"
+ ;
   outNotation
   << "Notation, structure constants and Weyl group info: "
   << CGI::GetCalculatorLink(DisplayNameCalculator, outNotationCommand.str())

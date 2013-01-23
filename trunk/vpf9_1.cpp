@@ -496,7 +496,7 @@ int rootSubalgebras::IndexSubalgebra(rootSubalgebra& input, GlobalVariables& the
     if (input.theDynkinDiagram.DynkinStrinG == right.theDynkinDiagram.DynkinStrinG && input.theCentralizerDiagram.DynkinStrinG == right.theCentralizerDiagram.DynkinStrinG)
     { result=j;
       if (!this->flagUseDynkinClassificationForIsomorphismComputation ||
-          (this->GetOwnerWeyl().WeylLetter=='E' && this->GetOwnerWeyl().GetDim()==7))
+          this->GetOwnerWeyl().IsOfSimpleType('E', 7))
       { input.ComputeAllButAmbientWeyl();
         if(!input.GenerateIsomorphismsPreservingBorel(right, theGlobalVariables, 0, false))
           result=-1;
@@ -683,16 +683,13 @@ void rootSubalgebra::ElementToHtml
   CGI::OpenFileCreateIfNotPresent(output, MyPath, false, true, false);
   this->ToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
-  << SemisimpleLieAlgebra::GetLieAlgebraName
-  (this->GetAmbientWeyl().WeylLetter, this->GetAmbientWeyl().GetDim())
+  << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
   << " Vector<Rational> subalgebra of type "
   << this->theDynkinDiagram.ElementToStrinG(true) << "</title>";
   output << "<meta name=\"keywords\" content=\""
-  << SemisimpleLieAlgebra::GetLieAlgebraName
-  (this->GetAmbientWeyl().WeylLetter, this->GetAmbientWeyl().GetDim())
+  << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
   << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
-  if (this->GetAmbientWeyl().WeylLetter=='E' || this->GetAmbientWeyl().WeylLetter=='F'
-      || this->GetAmbientWeyl().WeylLetter=='G' )
+  if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
   output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
@@ -2179,8 +2176,7 @@ void rootSubalgebras::ElementToHtml
   output << "<meta name=\"keywords\" content=\""
   << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(true)
   << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
-  if (this->GetOwnerWeyl().WeylLetter=='E' || this->GetOwnerWeyl().WeylLetter=='F'
-      || this->GetOwnerWeyl().WeylLetter=='G' )
+  if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
   this->ToString
@@ -2415,24 +2411,6 @@ void coneRelations::ToString
     out << "\n\n\\newpage" << tempS;
   }
   output=out.str();
-}
-
-std::string SemisimpleLieAlgebra::GetLieAlgebraName
-(char WeylLetter, int WeylDim, bool includeNonTechnicalNames,
- bool includeTechnicalNames)
-{ std::stringstream out;
-  if (includeTechnicalNames)
-    out << WeylLetter << "_" << WeylDim;
-  if (includeNonTechnicalNames)
-    if (WeylLetter!='E' && WeylLetter!='F' && WeylLetter!='G')
-      switch (WeylLetter)
-      { case 'A':  out << "(sl(" << WeylDim+1 << "))"; break;
-        case 'B':  out << "(so(" << 2*WeylDim+1 << "))"; break;
-        case 'C':  out << "(sp(" << 2*WeylDim << "))"; break;
-        case 'D':  out << "(so(" << 2*WeylDim << "))"; break;
-        default: out << "(" << WeylLetter << "_" << WeylDim << ")"; break;
-      }
-  return out.str();
 }
 
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS

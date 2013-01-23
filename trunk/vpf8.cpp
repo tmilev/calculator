@@ -1134,7 +1134,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
 { std::stringstream out;
   WeylGroup& LargerWeyl=theParser.theHmm.theRange().theWeyl;
   WeylGroup& SmallerWeyl=theParser.theHmm.theDomain().theWeyl;
-  if (LargerWeyl.GetDim()!=3 || LargerWeyl.WeylLetter!='B')
+  if (!LargerWeyl.IsOfSimpleType('B', 3))
     return "Error: algebra is not so(7).";
   this->initFromHomomorphism(parabolicSel, theParser.theHmm, theGlobalVariables);
   this->TransformToWeylProjectiveStep1(theGlobalVariables);
@@ -1153,7 +1153,7 @@ std::string GeneralizedVermaModuleCharacters::ComputeMultsLargerAlgebraHighestWe
   Vectors<double> theDraggableBasis;
   theDraggableBasis.MakeEiBasis(theSmallDim, 1, 0);
   WeylGroup tmpWeyl;
-  tmpWeyl.MakeAn(2);
+  tmpWeyl.MakeArbitrarySimple('A',2);
   drawOps.theBuffer.initDimensions(tmpWeyl.CartanSymmetric, theDraggableBasis, theDraggableBasis, 1);
   FormatExpressions theFormat;
   drawOps.theBuffer.BasisProjectionPlane[0][0][0]=1; drawOps.theBuffer.BasisProjectionPlane[0][0][1]=0;
@@ -1422,10 +1422,12 @@ void DynkinDiagramRootSubalgebra::ElementToStrinG
     << this->ComponentLetters[this->sameTypeComponents[j][0]]
     << "_" << this->ComponentRanks[this->sameTypeComponents[j][0]];
     if (IncludeAlgebraNames)
-      out << SemisimpleLieAlgebra::GetLieAlgebraName
-      (this->ComponentLetters[this->sameTypeComponents[j][0]][0],
-       this->ComponentRanks[this->sameTypeComponents[j][0]],
-       true, false);
+    { DynkinSimpleType tempType;
+      tempType.theLetter=this->ComponentLetters[this->sameTypeComponents[j][0]][0];
+      tempType.theRank=this->ComponentRanks[this->sameTypeComponents[j][0]];
+      tempType.lengthFirstCoRootSquared=0;
+      out << tempType.ToString();
+    }
     if (j!=this->sameTypeComponents.size-1)
       out << "+";
   }
@@ -6540,16 +6542,14 @@ void WeylGroup::GetExtremeElementInOrbit
 
 WeylGroup::WeylGroup()
 { this->flagFundamentalToSimpleMatricesAreComputed=false;
-  this->lengthLongestRootSquared=0;
-  this->WeylLetter='X';
 }
 
 Rational WeylGroup::GetLongestRootLengthSquared()
-{ if (this->lengthLongestRootSquared==0)
-    for (int i=0; i<this->CartanSymmetric.NumRows; i++)
-      if (this->lengthLongestRootSquared<this->CartanSymmetric(i,i))
-        this->lengthLongestRootSquared=this->CartanSymmetric(i,i);
-  return this->lengthLongestRootSquared;
+{ Rational result;
+  result=this->CartanSymmetric(0,0);
+  for (int i=1; i<this->CartanSymmetric.NumRows; i++)
+    result=MathRoutines::Maximum(result, this->CartanSymmetric(i,i));
+  return result;
 }
 
 bool WeylGroup::IsEigenSpaceGeneratorCoxeterElement(Vector<Rational>& input)
@@ -6862,8 +6862,7 @@ void WeylGroup::DrawRootSystem
     }
   }
   std::stringstream tempStream;
-  tempStream << this->WeylLetter << this->GetDim() << " (" << SemisimpleLieAlgebra::GetLieAlgebraName
-  (this->WeylLetter, this->GetDim(), true) << ")";
+  tempStream << this->theDynkinType.GetWeylGroupName();
   if (this->GetDim()==2 && predefinedProjectionPlane!=0)
   { theTwoPlane[1][0]=1;
     theTwoPlane[1][1]=0;
@@ -6888,7 +6887,7 @@ int ParserNode::EvaluateG2ParabolicSupport
   std::stringstream out;
   PiecewiseQuasipolynomial theChar;
   WeylGroup theWeyl;
-  theWeyl.MakeG2();
+  theWeyl.MakeArbitrarySimple('G', 2);
   theWeyl.ComputeRho(true);
   Vectors<Rational> theNegativeRoots;
   theNegativeRoots=(theWeyl.RootSystem);
@@ -6908,39 +6907,9 @@ int ParserNode::EvaluateG2ParabolicSupport
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateDrawRootSystem
-  (ParserNode& theNode, char theWeylLetter, int theDimension, GlobalVariables& theGlobalVariables,
-   Vector<Rational>* bluePoint, bool wipeCanvas, bool LabelDynkin, bool DrawWeylChamber, Vectors<Rational>* projectionPlane)
-{ WeylGroup theWeyl;
-  theWeyl.MakeArbitrary(theWeylLetter, theDimension);
-  theNode.impliedNumVars=theDimension;
-  DrawingVariables theDV;
-  DrawOperations& theDrawOperators=theDV.theBuffer;
-  theWeyl.DrawRootSystem(theDV, true, theGlobalVariables, DrawWeylChamber, bluePoint, LabelDynkin, projectionPlane);
-  theGlobalVariables.theDrawingVariables.theBuffer=theDrawOperators;
-  theGlobalVariables.theDrawingVariables.theBuffer.ComputeProjectionsEiVectors();
-  std::stringstream out;
-  out << "<hr>Below is a javascript visualization of a Vector<Rational> system drawn as described on John Stembridge's website"
-  <<" (<a href=\"http://www.math.lsa.umich.edu/~jrs/coxplane.html\">"
-  << "http://www.math.lsa.umich.edu/~jrs/coxplane.html</a>).<br>"
-  << "The darker red points can be rotated around by dragging them with the mouse pointer; they denote the simple positive Vectors<Rational>.<br> "
-  << "Mouse wheel zooms-in/out. <br>";
-  out << "<hr>Root system " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeylLetter, theDimension);
-  out << theGlobalVariables.theDrawingVariables.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDimension);
-//  out << "<br>Note that for a Vector<Rational> system of rank 4 or more there might be javascript-compilation lag.";
-  theNode.outputString=out.str();
-  theNode.theAnimation.GetElement().MakeZero();
-  theNode.theAnimation.GetElement()+=theDrawOperators;
-  theNode.ExpressionType=theNode.typeAnimation;
-  theNode.theAnimation.GetElement().flagAnimating=true;
-  theNode.theAnimation.GetElement().flagIsPausedWhileAnimating=true;
-  return theNode.errorNoError;
-
-}
-
 int ParserNode::EvaluateAnimateRootSystem
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
-{ char theWeylLetter= theNode.owner->DefaultWeylLetter;
+{ //char theWeylLetter= theNode.owner->DefaultWeylLetter;
   int theDim= theNode.owner->DefaultWeylRank;
   int NumFrameS=theNode.owner->TheObjects[theArgumentList[0]].intValue;
   if(NumFrameS<1)
@@ -6958,8 +6927,7 @@ int ParserNode::EvaluateAnimateRootSystem
       return theNode.SetError(theNode.errorDimensionProblem);
 
   }
-  int result=ParserNode::EvaluateDrawRootSystem
-  (theNode, theWeylLetter, theDim, theGlobalVariables, bluePoint, true);
+  int result=0;
   if (result==theNode.typeError)
     return result;
   theNode.ExpressionType=theNode.typeAnimation;
@@ -7308,7 +7276,7 @@ int ParserNode::EvaluateAnimationDots
   theWeylLetter+='A';
   CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
   WeylGroup theWeyl;
-  theWeyl.MakeArbitrary('A', 2);
+  theWeyl.MakeArbitrarySimple('A', 2);
   DrawOperations theDrawOps;
   Vectors<double> theFirstBasis;
   theDim=2;
@@ -7352,7 +7320,7 @@ int ParserNode::EvaluateAnimationClearScreen
   theWeylLetter+='A';
   CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDim);
   WeylGroup theWeyl;
-  theWeyl.MakeArbitrary(theWeylLetter, theDim);
+  theWeyl.MakeArbitrarySimple(theWeylLetter, theDim);
   theWeyl.ComputeRho(true);
   DrawOperations theOps;
   Vectors<double> theFirstBasis;
@@ -7368,44 +7336,6 @@ int ParserNode::EvaluateAnimationClearScreen
   theNode.theAnimation.GetElement()+=theOps;
   theNode.theAnimation.GetElement().flagAnimating=true;
   return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateDrawRootSystemOld
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
-{ char theWeylLetter= (char)theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  int theDimension= theNode.owner->TheObjects[theArgumentList[1]].intValue;
-  theWeylLetter+='A';
-  CGI::MakeSureWeylGroupIsSane(theWeylLetter, theDimension);
-  return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
-}
-
-int ParserNode::EvaluateDrawRootSystemLabelDynkin
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
-  int theDimension= theNode.owner->DefaultWeylRank;
-  return theNode.EvaluateDrawRootSystem
-  (theNode, theWeylLetter, theDimension, theGlobalVariables, 0, true, true, true);
-}
-
-int ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ int theDim;
-  Vectors<Rational> thePlane;
-  if (!theNode.GetRootsEqualDimNoConversionNoEmptyArgument(theArgumentList, thePlane, theDim))
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  if (theDim!=theNode.owner->DefaultWeylRank)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  if (thePlane.size!=2)
-    return theNode.SetError(theNode.errorBadOrNoArgument);
-  return theNode.EvaluateDrawRootSystem
-    (theNode, theNode.owner->DefaultWeylLetter, theDim, theGlobalVariables, 0, true, false, false, & thePlane);
-}
-
-int ParserNode::EvaluateDrawRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational>* bluePoint)
-{ char theWeylLetter= (char)theNode.owner->DefaultWeylLetter;
-  int theDimension= theNode.owner->DefaultWeylRank;
-  return theNode.EvaluateDrawRootSystem(theNode, theWeylLetter, theDimension, theGlobalVariables, bluePoint);
 }
 
 double DrawOperations::getAngleFromXandY(double x, double y, double neighborX, double neighborY)
@@ -7706,7 +7636,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
 (Vector<Rational>& highestWeightSimpleCoords, Vectors<Rational>& outputWeightsSimpleCoords,
  int upperBoundWeights, GlobalVariables& theGlobalVariables)
 { HashedList<Vector<Rational> > theDominantWeights;
-  double upperBoundDouble=100000/this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue();
+  double upperBoundDouble=100000/this->theDynkinType.GetSizeWeylByFormula().DoubleValue();
   int upperBoundInt = MathRoutines::Maximum((int) upperBoundDouble, 10000);
   //int upperBoundInt = 10000;
   Vector<Rational> highestWeightTrue=highestWeightSimpleCoords;
@@ -7729,7 +7659,7 @@ std::string WeylGroup::GenerateWeightSupportMethoD1
   Vectors<Rational> tempRoots;
   HashedList<Vector<Rational> > finalWeights;
   int estimatedNumWeights=(int)
-  (this->GetSizeWeylByFormula(this->WeylLetter, this->GetDim()).DoubleValue()*theDominantWeights.size);
+  (this->theDynkinType.GetSizeWeylByFormula().DoubleValue()*theDominantWeights.size);
   estimatedNumWeights= MathRoutines::Minimum(10000, estimatedNumWeights);
   finalWeights.ReservE(estimatedNumWeights);
   finalWeights.SetHashSizE(estimatedNumWeights);
@@ -8142,11 +8072,12 @@ int ParserNode::EvaluateGetCoxeterBasis
     theNode.outputString=out.str();
     return theNode.errorNoError;
   }
-  theWeyl.MakeArbitrary(theNode.owner->DefaultWeylLetter, theDimension);
+  theWeyl.MakeArbitrarySimple(theNode.owner->DefaultWeylLetter, theDimension);
   Vector<double> basis1, basis2;
   theWeyl.GetCoxeterPlane(basis1, basis2, theGlobalVariables);
   out.precision(5);
-  out << "Lie algebra of type " << SemisimpleLieAlgebra::GetLieAlgebraName(theWeyl.WeylLetter, theDimension, true)
+  out << "Lie algebra of type "
+  << theWeyl.theDynkinType.GetLieAlgebraName()
   << "<br> One orthonormal basis of coxeter plane:<br>" << basis1.ToString() << ", "
   << basis2.ToString();
   theNode.outputString=out.str();
@@ -8338,22 +8269,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
     & ParserNode::EvaluateDrawConeAffine
    );
   this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystemOld",
-   "(Integer, Integer)",
-   "Draw the Vector<Rational> system in its Coxeter plane. First argument = weyl letter (A=0, B=1,..., G=7) . Second argument=weyl rank, which must be at most 8. The example draws E6.",
-   "drawRootSystemOld(4,6)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateDrawRootSystemOld
-   );
-  this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystem",
-   "()",
-   "Draw the Vector<Rational> system of the ambient Lie algebra in its Coxeter plane. ",
-   "drawRootSystem",
-   DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateDrawRootSystem
-   );
-  this->AddOneFunctionToDictionaryNoFail
   ("drawRootSystemInCoxeterPlaneOfRootSA",
    "(Integer)",
    "<b>Experimental</b>. ",
@@ -8457,27 +8372,6 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "animateFlyThroughRootSAs",
    DefaultWeylLetter, DefaultWeylRank, false,
     & ParserNode::EvaluateAnimateRootSAs
-   );
-   this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystemIncludeWeylChamberAndDynkinLabels",
-   "()",
-   "Same as drawRootSystem but draws in addition the weyl chamber and labels the Dynkin diagram vertices.",
-   "drawRootSystemIncludeWeylChamberAndDynkinLabels",
-   DefaultWeylLetter, DefaultWeylRank, true,
-    & ParserNode::EvaluateDrawRootSystemLabelDynkin
-   );
-   this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystemFixProjection",
-   "((Rational,...),(Rational,...))",
-   "Same as drawRootSystem but draws the Vector<Rational> system in a user-defined projection plane.The first and the secondargument\
-   must be two vectors \
-   forming a basis of the projection plane. The vectors must be given in simple basis coordinates. \
-   The example projects the Vector<Rational> system of sl(8) onto the\
-   plane spanned by the Vector<Rational> of the sl(2)-subalgebra given by 4+4 partition \
-   and the weight corresponding to the element of the Cartan of sl(8) that commutes with the sl(2).",
-   "drawRootSystemFixProjection( (3,4,3,0,3,4,3), (1,2,3,4,3,2,1))",
-   'A', 7, true,
-    & ParserNode::EvaluateDrawRootSystemFixedProjectionPlane
    );
   this->AddOneFunctionToDictionaryNoFail
   ("mta",

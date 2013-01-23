@@ -1305,7 +1305,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
   Expression& middleE=input[2];
   std::string errorString;
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, leftE, ambientSSalgebra, &errorString))
+      (theCommands.innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   if (!theCommands.GetVector<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
@@ -1479,7 +1479,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   std::string errorString;
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, leftE, theSSalgebra, &errorString))
+      (theCommands.innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<Polynomial<Rational> > highestWeightFundCoords;
@@ -2006,12 +2006,12 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     theGeneratorsItry.AddOnTop(theGenerator);
   }
   theQDOs.SetSize(theGeneratorsItry.size);
-  if (false)
+/*  if (false)
     if (theSSalgebra.GetRank()==3 && theSSalgebra.theWeyl.WeylLetter=='B')
     { theGenerator=theGeneratorsItry[0];
       theGenerator+=theGeneratorsItry[2];
       theGeneratorsItry.AddOnTop(theGenerator);
-    }
+    }*/
   out << "<table border=\"1\">";
   latexReport << "\\begin{longtable}{rll}";
   for (int i =0; i<theGeneratorsItry.size; i++)
@@ -2093,7 +2093,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
     << "\\multirow{"
     << theGeneratorsItry.size
     << "}{*}{$"
-    << theSSalgebra.GetLieAlgebraName(false) << "$}"
+    << theSSalgebra.GetLieAlgebraName() << "$}"
     << " &  \\multirow{"  << theGeneratorsItry.size << "}{*}{"
     << elementsNegativeNilrad.size << "}&";
 
@@ -2209,7 +2209,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, leftE, theSSalgebra, &errorString))
+      (theCommands.innerSSLieAlgebra, leftE, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   int theRank=theSSalgebra->GetRank();
   Vector<RationalFunctionOld> highestWeightFundCoords;
@@ -2483,8 +2483,8 @@ bool CommandList::innerPolynomial
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPolynomial");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  std::cout << "<br>First elt input is:" << input[0].ToString();
+  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
+  //std::cout << "<br>First elt input is:" << input[0].ToString();
   return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
   (theCommands, input, output);
 }
@@ -2514,14 +2514,14 @@ bool CommandList::fKLcoeffs
   std::string errorString;
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input, theSSalgebra, &errorString))
+      (theCommands.innerSSLieAlgebra, input, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   std::stringstream out;
   WeylGroup& theWeyl=theSSalgebra->theWeyl;
-  if (theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim())>192)
+  if (theWeyl.theDynkinType.GetSizeWeylByFormula()>192)
   { out << "I have been instructed to run only for Weyl groups that have at most 192 elements (i.e. no larger than D_4). "
     << theSSalgebra->GetLieAlgebraName() << " has "
-    << theWeyl.GetSizeWeylByFormula(theWeyl.WeylLetter, theWeyl.GetDim()).ToString() << ".";
+    << theWeyl.theDynkinType.GetSizeWeylByFormula() << ".";
     return output.AssignValue(out.str(), theCommands);
   }
   FormatExpressions theFormat;
@@ -2547,7 +2547,7 @@ bool CommandList::fWeylOrbit
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, theSSalgebraNode, theSSalgebra, &errorString))
+      (theCommands.innerSSLieAlgebra, theSSalgebraNode, theSSalgebra, &errorString))
     return output.SetError(errorString, theCommands);
   Vector<Polynomial<Rational> > theHWfundCoords, theHWsimpleCoords, currentWeight;
   Expression theContext;
@@ -2585,8 +2585,7 @@ bool CommandList::fWeylOrbit
   LargeInt tempInt;
   bool useMathTag=outputOrbit.size<150;
   Matrix<Rational> epsCoordMat;
-  theWeyl.GetEpsilonMatrix
-  (theWeyl.WeylLetter, theSSalgebra->GetRank(), epsCoordMat);
+  theWeyl.theDynkinType.GetEpsilonMatrix(epsCoordMat);
   for (int i=0; i<outputOrbit.size; i++)
   { theFormat.simpleRootLetter="\\alpha";
     theFormat.fundamentalWeightLetter="\\psi";
@@ -2645,11 +2644,146 @@ bool CommandList::fWeylOrbit
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::innerSSLieAlgebra
+bool CommandList::innerPrintSSLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
+{ MacroRegisterFunctionWithName("CommandList::innerPrintSSLieAlgebra");
+  std::string errorString;
+  SemisimpleLieAlgebra *tempSSpointer;
+  input.CheckInitialization();
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input, tempSSpointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theSSalgebra=*tempSSpointer;
+  WeylGroup& theWeyl=theSSalgebra.theWeyl;
+  std::stringstream out;
+  FormatExpressions theFormat, latexFormat;
+  latexFormat.flagUseLatex=true;
+  latexFormat.flagUseHTML=false;
+//      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
+//      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
+  out << "<hr>Lie algebra type: " << theWeyl.theDynkinType << ". ";
+  out << "<br>Weyl group size: " << theWeyl.theDynkinType.GetSizeWeylByFormula() << "."
+  << "<br>To get extra details: ";
+  std::stringstream tempStream;
+  tempStream << "printSemisimpleLieAlgebra{}(" << theWeyl.theDynkinType << ")";
+  out << theCommands.GetCalculatorLink(tempStream.str()) << "<br>";
+  if (Verbose)
+  { out
+    << " The resulting Lie bracket pairing table follows. <hr> "
+    << theSSalgebra.ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
+    out << "Ready for LaTeX consumption version of the first three columns: ";
+    out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
+    << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
+    Vector<Rational> tempRoot;
+    ElementSemisimpleLieAlgebra<Rational> tempElt1;
+    for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
+    { tempElt1.MakeGenerator
+      (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
+      tempRoot=theSSalgebra.GetWeightOfGenerator(i);
+      out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
+      out << "&$" << theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "$";
+      out << "\\\\\n";
+    }
+    out << "\\end{longtable}" << "<hr>";
+  }
+  out << "We define the symmetric Cartan matrix by requesing that the entry in "
+  << "the i-th row and j-th column "
+  << " be the scalar product of the i^th and j^th roots. "
+  << "Symmetric Cartan matrix:<br>"
+  << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
+  Rational tempRat;
+  Matrix<Rational> tempMat;
+  tempMat = theWeyl.CartanSymmetric;
+  tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
+  out << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ToString();
+  /*  Rational theRatio;
+    for (int j=0; j<theWeyl.GetDim(); j++)
+    { theRatio=0;
+      for (int i=0; i<theWeyl.RootSystem.size; i++)
+      { Rational tempRat=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[j]);
+        theRatio+=tempRat*tempRat;
+      }
+      theRatio.Invert();
+      theRatio*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[j], theWeyl.RootSystem[j]);
+      Rational tempRat=theWeyl.GetKillingDivTraceRatio();
+      tempRat.Invert();
+  //    std::cout << "<br>" << j+1 << ": " << theRatio.ToString() << "=? " << tempRat.ToString();
+    }*/
+  //Lattice tempLattice;
+  //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
+  //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ToString(true, false);
+  //Vectors<Rational> integralRoots, integralRootsEpsForm;
+  Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
+  //integralRoots.AssignMatrixRows(tempLattice.basisRationalForm);
+  //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm, theGlobalVariables);
+  //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
+  theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
+  Vectors<Rational> simpleBasis, simplebasisEpsCoords;
+  out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
+  Vector<Rational> tempRoot;
+  theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
+  out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
+  out
+  << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
+  << " with the j^th simple root times 2 divided by the root length squared,<br> "
+  << " and 0 with the remaining simple roots): ";
+  theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
+  out << "<table>";
+  for (int i=0; i< fundamentalWeights.size; i++)
+  { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
+    << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
+    << "</td></tr>";
+  }
+  out << "</table>";
+  if (Verbose)
+  { out << "<hr>Simple basis in epsilon coordinates: <table>";
+    simpleBasis.MakeEiBasis(theWeyl.GetDim());
+    theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
+    for (int i=0; i< simplebasisEpsCoords.size; i++)
+    { out << "<tr><td>"
+      << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
+      << CGI::
+      GetHtmlMathFromLatexFormulA
+      (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
+      << "</td></tr>";
+    }
+    out << "</table>";
+    out << "Note on root system convention. Except for F_4, "
+    << "our epsilon notation follows the convention "
+    << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
+    << " <br> For F_4, we follow "
+    << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
+    << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
+    << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
+    << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
+    << "of computations, <br>and for reducing sizes of the printouts.";
+    out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
+    << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
+    Vectors<Rational> rootSystemEpsCoords;
+    theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
+    for (int i=0; i<theWeyl.RootSystem.size; i++)
+    { Vector<Rational>& current=theWeyl.RootSystem[i];
+      out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
+      << rootSystemEpsCoords[i].ToStringLetterFormat("e")
+      << "</td></tr>";
+    }
+    out << "</table>";
+    DrawingVariables theDV;
+    theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
+    out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
+    << "(computed as explained on John Stembridge's website). "
+    << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
+    << "<br>The grey lines are the edges of the Weyl chamber."
+    << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  }
+  return output.AssignValue<std::string>(out.str(), theCommands);
+}
+
+bool CommandList::innerSSLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
-  std::cout << "<br>Now I'm here!";
+  //std::cout << "<br>Now I'm here!";
   if (!theCommands.innerPolynomial(theCommands, input, output))
     return output.SetError
     ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
@@ -2660,11 +2794,9 @@ bool CommandList::innerSSLieAlgebra
   FormatExpressions theFormat;
   theContext.ContextGetFormatExpressions(theFormat);
   SemisimpleLieAlgebra tempSSalgebra;
-  tempSSalgebra.theWeyl.CartanSymmetric.init(0,0);
-  WeylGroup tempW;
-  DynkinType dynkinType;
+  DynkinType theDynkinType;
   DynkinSimpleType simpleComponent;
-  dynkinType.MakeZero();
+  theDynkinType.MakeZero();
   char theWeylLetter='X';
   for (int i=0; i<theType.size; i++)
   { MonomialP& currentMon=theType[i];
@@ -2672,41 +2804,29 @@ bool CommandList::innerSSLieAlgebra
     if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
       return output.SetError
       ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat), theCommands);
-    Expression typeE= theContext.ContextGetContextVariable(variableIndex);
-    if (typeE.children.size!=2)
+    Expression typEE= theContext.ContextGetContextVariable(variableIndex);
+    if (typEE.children.size!=2)
       return output.SetError
       ("The monomial "+ currentMon.ToString(&theFormat)+
        " appears not to be a Dynkin simple type ", theCommands);
-    Expression rankE;
-    Expression lengthE;
-    Rational firstCoRootLength=2;
+    Expression rankE=typEE[1];
+    Expression typeLetter=typEE[0];
+    Rational firstCoRootSquaredLength=2;
     bool foundLengthFromExpression=false;
-    if (typeE.IsListStartingWithAtom(theCommands.opThePower()))
-    { lengthE=typeE.children[2];
-      typeE.AssignChild(1);
-      foundLengthFromExpression=true;
-    }
-    if (typeE.IsListStartingWithAtom(theCommands.opApplyFunction()))
-    { rankE=typeE.children[2];
-      typeE.AssignChild(1);
-    }
-    if (typeE.IsListStartingWithAtom(theCommands.opThePower()))
-    { lengthE=typeE.children[2];
-      typeE.AssignChild(1);
-      foundLengthFromExpression=true;
-    }
-    if (foundLengthFromExpression)
-    { if (lengthE.IsOfType(&firstCoRootLength))
+    if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
+    { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
         return output.SetError
         ("Couldn't extract first co-root length from " + currentMon.ToString(&theFormat), theCommands);
-      if (firstCoRootLength<=0)
+      if (firstCoRootSquaredLength<=0)
         return output.SetError
         ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat), theCommands);
+      typeLetter.AssignChild(1);
+      foundLengthFromExpression=true;
     }
-    if (!typeE.IsAtoM())
+    std::string theTypeName;
+    if (!typeLetter.IsOperation(&theTypeName))
       return output.SetError
       ("I couldn't extract a type letter from "+ currentMon.ToString(&theFormat), theCommands);
-    std::string theTypeName=theCommands.operationS[typeE.theData];
     if (theTypeName.size()!=1)
       return output.SetError
       ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
@@ -2739,9 +2859,8 @@ bool CommandList::innerSSLieAlgebra
     simpleComponent.theRank= theRank;
     if (!foundLengthFromExpression)
       if (theWeylLetter=='F')
-        firstCoRootLength=1;
-    simpleComponent.lengthFirstCoRootSquared= firstCoRootLength;
-    tempW.MakeArbitrary(theWeylLetter, theRank, &firstCoRootLength);
+        firstCoRootSquaredLength=1;
+    simpleComponent.lengthFirstCoRootSquared= firstCoRootSquaredLength;
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
@@ -2751,12 +2870,9 @@ bool CommandList::innerSSLieAlgebra
       << " of " << currentMon.ToString(&theFormat) << " to a small integer";
       return output.SetError(out.str(), theCommands);
     }
-    for (int k=0; k<theMultiplicity; k++)
-    { dynkinType.AddMonomial(simpleComponent, 1);
-      tempSSalgebra.theWeyl.CartanSymmetric.DirectSumWith(tempW.CartanSymmetric);
-    }
+    theDynkinType.AddMonomial(simpleComponent, theMultiplicity);
   }
-  if (tempSSalgebra.GetRank()>20)
+  if (theDynkinType.GetRank()>20)
   { std::stringstream out;
     out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
     << " If you would like to relax this limitation edit file " << __FILE__ << " line "
@@ -2767,145 +2883,24 @@ bool CommandList::innerSSLieAlgebra
     << "(write me an email if you want to do that, I will help you). ";
     return output.SetError(out.str(), theCommands);
   }
-  bool isTheFirstTime=!theCommands.theObjectContainer.theLieAlgebras.Contains(tempSSalgebra);
-  output.AssignValue(tempSSalgebra, theCommands);
-  SemisimpleLieAlgebra& theSSalgebra=
-  output.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
-  if (isTheFirstTime)
-    theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
-  std::stringstream out;
-  if (isTheFirstTime)
-  { FormatExpressions theFormat, latexFormat;
-    latexFormat.flagUseLatex=true;
-    latexFormat.flagUseHTML=false;
-//      theFormat.chevalleyHgeneratorLetter="\\bar{h}";
-//      theFormat.chevalleyGgeneratorLetter="\\bar{g}";
-    out
-    << "Lie algebra of type " << dynkinType << " generated.";
-    if (Verbose)
-    { out
-      << " The resulting Lie bracket pairing table follows. <hr> "
-      << theSSalgebra.ToString(&theCommands.theGlobalVariableS->theDefaultFormat);
-      out << "Ready for LaTeX consumption version of the first three columns: ";
-      out << "<br>%Add to preamble: <br>\\usepackage{longtable} <br>%Add to body: <br>"
-      << " \\begin{longtable}{ccc}generator & root simple coord. & root $\\varepsilon$-notation \\\\\\hline<br>\n";
-      Vector<Rational> tempRoot;
-      ElementSemisimpleLieAlgebra<Rational> tempElt1;
-      for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
-      { tempElt1.MakeGenerator
-        (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
-        tempRoot=theSSalgebra.GetWeightOfGenerator(i);
-        out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
-        out << "&$" << theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "$";
-        out << "\\\\\n";
-      }
-      out << "\\end{longtable}";
-    }
-    WeylGroup& theWeyl=theSSalgebra.theWeyl;
-    out << "<hr>Symmetric Cartan matrix.<br>"
-    << "We define the symmetric Cartan matrix by requesing that the entry in "
-    << "the i-th row and j-th column "
-    << " be the scalar product of the i^th and j^th roots.<br>"
-    << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(theWeyl.CartanSymmetric.ToString(&latexFormat) );
-    Rational tempRat;
-    Matrix<Rational> tempMat;
-    tempMat = theWeyl.CartanSymmetric;
-    tempMat.ComputeDeterminantOverwriteMatrix(tempRat);
-    out << "<br>The determinant of the symmetric Cartan matrix is: " << tempRat.ToString();
-  /*  Rational theRatio;
-    for (int j=0; j<theWeyl.GetDim(); j++)
-    { theRatio=0;
-      for (int i=0; i<theWeyl.RootSystem.size; i++)
-      { Rational tempRat=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[j]);
-        theRatio+=tempRat*tempRat;
-      }
-      theRatio.Invert();
-      theRatio*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[j], theWeyl.RootSystem[j]);
-      Rational tempRat=theWeyl.GetKillingDivTraceRatio();
-      tempRat.Invert();
-  //    std::cout << "<br>" << j+1 << ": " << theRatio.ToString() << "=? " << tempRat.ToString();
-    }*/
-    //Lattice tempLattice;
-    //theWeyl.GetIntegralLatticeInSimpleCoordinates(tempLattice);
-    //out << "<br>The integral lattice in simple coordinates is (generated by): " << tempLattice.ToString(true, false);
-    //Vectors<Rational> integralRoots, integralRootsEpsForm;
-    Vectors<Rational> fundamentalWeights, fundamentalWeightsEpsForm;
-    //integralRoots.AssignMatrixRows(tempLattice.basisRationalForm);
-    //theWeyl.GetEpsilonCoords(integralRoots, integralRootsEpsForm, theGlobalVariables);
-    //out << "<br>The integral lattice generators in epsilon format: " << integralRootsEpsForm.ElementToStringEpsilonForm();
-    theWeyl.GetFundamentalWeightsInSimpleCoordinates(fundamentalWeights);
-    Vectors<Rational> simpleBasis, simplebasisEpsCoords;
-    out << "<hr> Half sum of positive roots: " << theWeyl.rho.ToString();
-    Vector<Rational> tempRoot;
-    theWeyl.GetEpsilonCoords(theWeyl.rho, tempRoot);
-    out << "= " << CGI::GetHtmlMathSpanPure(tempRoot.ToStringLetterFormat("\\varepsilon"));
-    out << "<hr>Size of Weyl group according to formula: "
-    << dynkinType.GetSizeWeylByFormula();
-    out
-    << "<hr>The fundamental weights (the j^th fundamental weight has scalar product 1 <br> "
-    << " with the j^th simple root times 2 divided by the root length squared,<br> "
-    << " and 0 with the remaining simple roots): ";
-    theWeyl.GetEpsilonCoords(fundamentalWeights, fundamentalWeightsEpsForm);
-    out << "<table>";
-    for (int i=0; i< fundamentalWeights.size; i++)
-    { out << "<tr><td>" << fundamentalWeights[i].ToString() << "</td><td> =</td><td> "
-      << CGI::GetHtmlMathSpanPure(fundamentalWeightsEpsForm[i].ToStringEpsilonFormat())
-      << "</td></tr>";
-    }
-    out << "</table>";
-    if (Verbose)
-    { out << "<hr>Simple basis in epsilon coordinates: <table>";
-      simpleBasis.MakeEiBasis(theWeyl.GetDim());
-      theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
-      for (int i=0; i< simplebasisEpsCoords.size; i++)
-      { out << "<tr><td>"
-        << simpleBasis[i].ToString() << " </td><td>=</td> <td>"
-        << CGI::
-        GetHtmlMathFromLatexFormulA
-        (simplebasisEpsCoords[i].ToStringEpsilonFormat(), "", "</td><td>", false, false)
-        << "</td></tr>";
-      }
-      out << "</table>";
-      out << "Note on root system convention. Except for F_4, "
-      << "our epsilon notation follows the convention "
-      << " of <br> Humphreys, Introduction to Lie algebras and representation theory, page 65."
-      << " <br> For F_4, we follow "
-      << " our own convention.  <br>Motivation: in our convention, 1) the symmetric Cartan matrix is "
-      << " integral; 2) the long roots come first. <br>Point (1) does not hold either "
-      << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
-      << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
-      << "of computations, <br>and for reducing sizes of the printouts.";
-      out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
-      << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
-      Vectors<Rational> rootSystemEpsCoords;
-      theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
-      for (int i=0; i<theWeyl.RootSystem.size; i++)
-      { Vector<Rational>& current=theWeyl.RootSystem[i];
-        out << "<tr><td>" << current.ToString() << "</td><td>=</td><td>"
-        << rootSystemEpsCoords[i].ToStringLetterFormat("e")
-        << "</td></tr>";
-      }
-      out << "</table>";
-      DrawingVariables theDV;
-      theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, true, 0, true, 0);
-      out << "<hr>Below a drawing of the root system in its corresponding Coxeter plane "
-      << "(computed as explained on John Stembridge's website). "
-      << "<br>The darker red dots can be dragged with the mouse to rotate the picture."
-      << "<br>The grey lines are the edges of the Weyl chamber."
-      << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
-    } else
-    { out << "<hr>If you want extra details (root system info, interactive "
-      << "picture in the Coxeter plane of the root system, "
-      << " with the Weyl chamber drawn, etc.), use the function";
-      std::stringstream tempStream;
-      tempStream << "printSemisimpleLieAlgebra{}" << theSSalgebra.theWeyl.WeylLetter
-      << "_" << theSSalgebra.GetRank();
-      out << theCommands.GetCalculatorLink(tempStream.str());
-      out << " instead. ";
-    }
+  tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
+  int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
+  bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);
+  if (feelsLikeTheVeryFirstTime)
+  { tempSSalgebra.owner=&theCommands.theObjectContainer.theLieAlgebras;
+    tempSSalgebra.indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
+    indexInOwner=tempSSalgebra.indexInOwner;
+    theCommands.theObjectContainer.theLieAlgebras.AddOnTop(tempSSalgebra);
   }
-  if (!Verbose)
-    theCommands.Comments << out.str();
+  SemisimpleLieAlgebra& theSSalgebra=
+  theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
+  output.AssignValue(theSSalgebra, theCommands);
+  if (feelsLikeTheVeryFirstTime)
+  { theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    Expression tempE;
+    theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
+    theCommands.Comments << tempE.GetValuE<std::string>();
+  }
   //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
 }
@@ -3270,23 +3265,11 @@ bool CommandList::outerAssociate
 { if (!input.IsListNElementsStartingWithAtom(-1, 3))
     return false;
   int theOperation=input[0].theData;
-  List<Expression>& opands=theCommands.buffer1;
-  opands.SetSize(0);
-//  std::cout << "<br>At start of do associate: " << theExpression.ToString();
-  bool needsModification=theCommands.AppendOpandsReturnTrueIfOrderNonCanonical
-  (input, opands, theOperation);
-  if (!needsModification)
+  if (!input[1].IsListNElementsStartingWithAtom(theOperation, 3))
     return false;
-//  std::cout << "<br>" << input.ToString() << " needs modification.<br> ";
-  output.MakeXOX
-  (theCommands, theOperation, opands[opands.size-2], opands[opands.size-1])
-  ;
-  Expression tempE;
-  for (int i=opands.size-3; i>=0; i--)
-  { tempE.MakeXOX(theCommands, theOperation, opands[i], output);
-    output=tempE;
-  }
-  //std::cout << "<br>At end do associate: " << theExpression.ToString();
+  Expression newRight;
+  newRight.MakeXOX(theCommands, theOperation, input[1][2], input[2]);
+  output.MakeXOX(theCommands, theOperation, input[1][1], newRight);
   return true;
 }
 
@@ -3548,8 +3531,8 @@ bool CommandList::StandardLieBracket
 
 bool Expression::SetError(const std::string& theError, CommandList& owner)
 { this->children.SetSize(2);
-  this->children[0].MakeAtom(this->theBoss->opError(), *this->theBoss);
-  this->children[1].AssignValue<std::string>(theError, *this->theBoss);
+  this->children[0].MakeAtom(owner.opError(), owner);
+  this->children[1].AssignValue<std::string>(theError, owner);
   return true;
 }
 
@@ -3663,7 +3646,7 @@ bool CommandList::innerExtractPMTDtreeContext
     << "(i.e., your polynomial expression is too large).";
     return output.SetError(out.str(), theCommands);
   }
-  std::cout << "<br>Extracting context from: " << input.ToString();
+//  std::cout << "<br>Extracting context from: " << input.ToString();
   if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
       input.IsListStartingWithAtom(theCommands. opPlus()) ||
       input.IsListStartingWithAtom(theCommands.opMinus()) )
@@ -3719,8 +3702,8 @@ bool CommandList::EvaluatePMTDtree
     return false;
   }
   dataType outputData;
-  std::cout << "<br>Context:" <<  inputContext.ToString()
-  << " Evaluating PMTD tree of " << input.ToString();
+//  std::cout << "<br>Context:" <<  inputContext.ToString()
+//  << " Evaluating PMTD tree of " << input.ToString();
   if (input.IsListStartingWithAtom(this->opTimes()) ||
       input.IsListStartingWithAtom(this-> opPlus()) )
   { for (int i=1; i<input.children.size; i++)
@@ -3762,7 +3745,7 @@ bool CommandList::EvaluatePMTDtree
       outputData.RaiseToPower(thePower);
       return output.AssignValueWithContext(outputData, inputContext, *this);
     }
-  std::cout << "<br>input: " << input.ToString();
+//  std::cout << "<br>input: " << input.ToString();
   if (input.IsOfType<Rational>())
   { outputData=input.GetValuE<Rational>();//<-type conversion here
     return output.AssignValueWithContext(outputData, inputContext, *this);
@@ -4290,19 +4273,8 @@ bool Expression::ToStringData
     out << "(" << contextE.ToString() << ", "
     << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
     result=true;
-  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
-  { std::string firstE=this->children[1].ToString(theFormat);
-    std::string secondE=this->children[2].ToString(theFormat);
-    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
-      out << "(" << firstE << ")";
-    else
-      out << firstE;
-    out << ":=";
-    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
-      out << "(" << secondE << ")";
-    else
-      out << secondE;
-    result=true;
+  } else if (this->IsOfType<SemisimpleLieAlgebra>())
+  {
   }
   output=out.str();
   return result;
@@ -4331,7 +4303,19 @@ std::string Expression::ToString
   std::string tempS;
   if (this->ToStringData(tempS, theFormat, startingExpression))
     out << tempS;
-  else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
+  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
+  { std::string firstE=this->children[1].ToString(theFormat);
+    std::string secondE=this->children[2].ToString(theFormat);
+    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
+      out << "(" << firstE << ")";
+    else
+      out << firstE;
+    out << ":=";
+    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
+      out << "(" << secondE << ")";
+    else
+      out << secondE;
+  } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
     out << this->children[1].ToString(theFormat)
     << ":=:" << this->children[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
@@ -4622,6 +4606,18 @@ bool Expression::IsLisT()const
   return true;
 }
 
+bool Expression::IsOperation(std::string* outputWhichOperation)const
+{ if (this->theBoss==0)
+    return false;
+  if (this->IsLisT())
+    return false;
+  if (this->theData<0 || this->theData>=this->theBoss->operationS.size)
+    return false;
+  if (outputWhichOperation!=0)
+    *outputWhichOperation=this->theBoss->operationS[this->theData];
+  return true;
+}
+
 int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
 { int result=this->operationS.GetIndex(theOpName);
   if (result==-1)
@@ -4740,7 +4736,8 @@ std::string Function::GetString(CommandList& theBoss)
       << " textType=Calculator&textDim=1&textInput="
       << CGI::UnCivilizeStringCGI(this->theExample)
       << "\"> " << " Example" << "</a>" ;
-  }
+  } else
+    out2 << "<b>Experimental, please don't use.</b>";
   return out2.str();
 }
 
@@ -4783,7 +4780,7 @@ std::string ObjectContainer::ToString()
   if (this->theLieAlgebras.size>0)
   { out << "Lie algebras created (" << this->theLieAlgebras.size << " total): ";
     for (int i=0; i<this->theLieAlgebras.size; i++)
-    { out << this->theLieAlgebras[i].GetLieAlgebraName(true);
+    { out << this->theLieAlgebras[i].GetLieAlgebraName();
       if (i!=this->theLieAlgebras.size-1)
         out << ", ";
     }

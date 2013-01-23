@@ -63,11 +63,11 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    ;
 
   this->AddOperationInnerHandler
-("IsInteger", &this->fIsInteger, "",
+("IsInteger", this->fIsInteger, "",
  " If the argument has no bound variables, returns 1 if the argument is an integer, 0 otherwise. ",
  "IsInteger{}a;\nIsInteger{}1;\nf{}{{a}}:=IsInteger{}a;\nf{}1;\nf{}b");
   this->AddOperationInnerHandler
-  ("SemisimpleLieAlgebra", &this->innerSSAlgebraShort, "",
+  ("SemisimpleLieAlgebra", this->innerSSLieAlgebra, "",
    "Creates a semisimple Lie algebra. \
     The type of the semisimple Lie algebra is given in the format\
     such as A_n or, alternatively, in the format A^k_n, \
@@ -110,7 +110,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
     The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddOperationInnerHandler
-  ("printSemisimpleLieAlgebra", &this->innerSSAlgebraVerbose, "",
+  ("printSemisimpleLieAlgebra", &this->innerPrintSSLieAlgebraVerbose, "",
    "Creates a quite detailed \
    printout with information about \
    the semisimple Lie algebra, including the Lie bracket pairing table. \

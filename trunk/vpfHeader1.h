@@ -4584,6 +4584,8 @@ public:
   bool flagQuasiDiffOpCombineWeylPart;
   bool flagExpressionIsFinal;
   bool flagExpressionNewLineAllowed;
+  bool flagIncludeLieAlgebraNonTechnicalNames;
+  bool flagIncludeLieAlgebraTypes;
 
   List<MonomialP>::OrderLeftGreaterThanRight thePolyMonOrder;
   template <typename TemplateMonomial>

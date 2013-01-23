@@ -645,26 +645,6 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
   output= out.str();
 }
 
-bool IsRegularWRT(Vectors<Rational>& input, Vector<Rational>& h1, Vector<Rational>& h2, WeylGroup& theWeyl)
-{ for (int i=0; i<input.size; i++)
-    if (theWeyl.RootScalarCartanRoot(h1, input.TheObjects[i]).IsEqualToZero() && theWeyl.RootScalarCartanRoot(h2, input.TheObjects[i]).IsEqualToZero())
-      return false;
-  return true;
-}
-
-void WeylGroup::MakeFromDynkinType(List<char>& theLetters, List<int>& theRanks, List<int>* theMultiplicities)
-{ WeylGroup tempW;
-  this->CartanSymmetric.init(0, 0);
-  for (int i=0; i<theLetters.size; i++)
-  { tempW.MakeArbitrary(theLetters[i], theRanks[i]);
-    int numSummands=1;
-    if (theMultiplicities!=0)
-      numSummands =(*theMultiplicities)[i];
-    for (int j=0; j<numSummands; j++)
-      this->CartanSymmetric.DirectSumWith(tempW.CartanSymmetric, (Rational) 0);
-  }
-}
-
 void DrawOperations::drawLineBetweenTwoVectorsBuffer(const Vector<Rational>& vector1, const Vector<Rational>& vector2, unsigned long thePenStyle, int ColorIndex)
 { this->TypeNthDrawOperation.AddOnTop(this->typeDrawLineBetweenTwoVectors);
   this->IndexNthDrawOperation.AddOnTop(this->theDrawLineBetweenTwoRootsOperations.size);
@@ -1028,19 +1008,24 @@ void coneRelation::ReadFromFile(std::fstream& input, GlobalVariables* theGlobalV
 
 void WeylGroup::WriteToFile(std::fstream& output)
 { output << "Weyl_group: ";
-  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
+  std::cout << "This code is not implemented yet (due to a regression).";
+  assert(false);
+//  output << this->WeylLetter << " " << this->CartanSymmetric.NumRows << "\n";
   output << "Long_root_length: ";
-  this->lengthLongestRootSquared.WriteToFile(output);
+//  this->lengthLongestRootSquared.WriteToFile(output);
   output << "\n";
   this->CartanSymmetric.WriteToFile(output);
 }
 
 void WeylGroup::ReadFromFile(std::fstream& input)
-{ std::string tempS; int tempI;
+{ std::string tempS;
+//  int tempI;
   input >> tempS;
-  input >> this->WeylLetter >> tempI >> tempS;
+  std::cout << "This code is not implemented yet (due to a regression).";
+  assert(false);
+  //input >> this->WeylLetter >> tempI >> tempS;
   assert(tempS=="Long_root_length:");
-  this->lengthLongestRootSquared.ReadFromFile(input);
+//  this->lengthLongestRootSquared.ReadFromFile(input);
   this->CartanSymmetric.ReadFromFile(input);
 }
 
@@ -1050,17 +1035,25 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
   std::stringstream out2;
   std::string tempS;
   int numNonSolvableNonReductive=0;
-  if (this->GetOwnerWeyl().WeylLetter=='B')
+  char simpleType;
+  int theRank;
+  if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theRank))
+  { std::cout << "This is a programming error: ElementToStringConeConditionNotSatisfying"
+    << " called on a non-simple Lie algebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (simpleType=='B')
     out << "$\\mathrm{so}(2n+1)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c|c}A&\\begin{array}{c}v_1\\\\ \\vdots \\\\ v_n\\end{array} &C=-C^T \\\\\\hline \\begin{array}{ccc}w_1 &\\dots&  w_n\\end{array} &0& \\begin{array}{ccc}-v_n &\\dots&  -v_1\\end{array} \\\\\\hline D=-D^T&\\begin{array}{c}-w_n\\\\ \\vdots \\\\ -w_1\\end{array} & -A^T\\end{array}\\right)\\right\\}$.\n\n";
-  if (this->GetOwnerWeyl().WeylLetter=='C')
+  if (simpleType=='C')
     out << "$\\mathrm{sp}(2n)$ is realized as a matrix Lie algebra as $\\left\\{\\left(\\begin{array}{c|c}A& C \\\\\\hline D& -A^T\\end{array}\\right)| C=C^T, D=D^T\\right\\}.$";
   out << " In this realization, the Cartan subalgebra $\\mathfrak{h}$ can be chosen to consist of the diagonal matrices of the above form.\n\n";
   if (!includeMatrixForm)
   { out << "\n\\begin{longtable}{r|l}\n\\multicolumn{2}{c}{";
-    if (this->GetOwnerWeyl().WeylLetter=='B')
+    if (simpleType=='B')
       out << " $ \\mathfrak{g}\\simeq \\mathrm{so("
       << this->GetOwnerWeyl().CartanSymmetric.NumRows*2+1 << ")}$";
-    if (this->GetOwnerWeyl().WeylLetter=='C')
+    if (simpleType=='C')
       out << " $\\mathfrak{g}\\simeq \\mathrm{sp("
       << this->GetOwnerWeyl().CartanSymmetric.NumRows*2 << ")}$";
     out << "} \\\\\\hline";
@@ -1123,8 +1116,15 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 { std::string tempS; std::stringstream out;
   Vectors<Rational> epsCoords;
   Matrix<int> tempMat;
-  int theDimension=this->GetOwnerWeyl().CartanSymmetric.NumRows;
-  if (this->GetOwnerWeyl().WeylLetter=='B')
+  char simpleType;
+  int theDimension;
+  if (!this->GetOwnerWeyl().theDynkinType.IsSimple(&simpleType, &theDimension))
+  { std::cout << "This is a programming error: ElementToStringConeConditionNotSatisfying"
+    << " called on a non-simple Lie algebra. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  if (simpleType=='B')
   { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2+1, 1, 0);
     tempMat.elements[theDimension][theDimension]=0;
@@ -1186,7 +1186,7 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
       }
     }
   }
-  if (this->GetOwnerWeyl().WeylLetter=='C')
+  if (simpleType=='C')
   { this->GetOwnerWeyl().GetEpsilonCoords(input, epsCoords);
     tempMat.MakeIdMatrix(theDimension*2, 1, 0);
     for (int i=0; i<epsCoords.size; i++)
@@ -1265,12 +1265,12 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
   { out << "\\end{tabular} & $\\mathfrak{l}=\\left(\\begin{array}{";
     for (int i=0; i<tempMat.NumCols; i++)
     { out << "c";
-      if (this->GetOwnerWeyl().WeylLetter=='B' && (i==theDimension-1 || i==theDimension))
+      if (simpleType=='B' && (i==theDimension-1 || i==theDimension))
         out << "|";
     }
     out << "}";
     for (int i=0; i< tempMat.NumRows; i++)
-    { if (this->GetOwnerWeyl().WeylLetter=='B' && (i==theDimension || i==theDimension+1))
+    { if (simpleType=='B' && (i==theDimension || i==theDimension+1))
         out << "\\hline";
       for (int j=0; j<tempMat.NumCols; j++)
       { if (tempMat.elements[i][j]!=0 && tempMat.elements[j][i]==0)
@@ -1990,8 +1990,8 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   this->theDomain().owner=this->owners;
   this->theRange().indexInOwner=1;
   this->theRange().owner=this->owners;
-  this->theDomain().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
-  this->theRange().theWeyl.MakeArbitrary(theWeylLetter, theWeylDim);
+  this->theDomain().theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
+  this->theRange().theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
   this->theDomain().ComputeChevalleyConstantS(&theGlobalVariables);
   this->theRange().ComputeChevalleyConstantS(&theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;

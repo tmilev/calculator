@@ -110,7 +110,7 @@ bool CommandList::fSSsubalgebras
   std::string errorString;
   SemisimpleLieAlgebra* theSSowner;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, input[1], theSSowner, &errorString))
+      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*theSSowner;
@@ -129,9 +129,9 @@ bool CommandList::fSSsubalgebras
   FormatExpressions theFormat;
   std::stringstream out1, out2;
   out1 << theCommands.PhysicalPathOutputFolder
-  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
   out2 << theCommands.DisplayPathOutputFolder
-  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);
@@ -150,11 +150,11 @@ bool CommandList::fEmbedSSalgInSSalg
   std::string errorString;
   SemisimpleLieAlgebra* theSmallSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, EsmallSA, theSmallSapointer, &errorString))
+      (theCommands.innerSSLieAlgebra, EsmallSA, theSmallSapointer, &errorString))
     return output.SetError(errorString, theCommands);
   SemisimpleLieAlgebra* thelargeSapointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSAlgebraShort, ElargeSA, thelargeSapointer, &errorString))
+      (theCommands.innerSSLieAlgebra, ElargeSA, thelargeSapointer, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*thelargeSapointer;
@@ -170,17 +170,17 @@ bool CommandList::fEmbedSSalgInSSalg
     << "your own risk</b>";
   SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
   DynkinSimpleType theType;
-  theType.theLetter=smallSS.theWeyl.WeylLetter;
-  theType.theRank=smallSS.GetRank();
+  if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
+    return output.SetError("I've been instructed to act on simple types only. ", theCommands);
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindAllEmbeddings
   (theType, ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
   FormatExpressions theFormat;
   std::stringstream out1, out2;
   out1 << theCommands.PhysicalPathOutputFolder
-  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
   out2 << theCommands.DisplayPathOutputFolder
-  << ownerSS.theWeyl.WeylLetter << ownerSS.GetRank() << "/";
+  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
   theFormat.physicalPath=out1.str();
   theFormat.htmlPathServer=out2.str();
   out << "<br>" << theSSsubalgebras.ToString(&theFormat);

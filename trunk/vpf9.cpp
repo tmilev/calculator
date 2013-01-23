@@ -814,6 +814,8 @@ FormatExpressions::FormatExpressions()
   this->thePolyMonOrder=0;
   this->flagExpressionIsFinal=false;
   this->flagExpressionNewLineAllowed=true;
+  this->flagIncludeLieAlgebraNonTechnicalNames=false;
+  this->flagIncludeLieAlgebraTypes=true;
 }
 
 std::string FormatExpressions::GetPolyLetter(int index)const
@@ -3086,7 +3088,7 @@ void partFractions::ComputeKostantFunctionFromWeylGroup
   Vector<Rational> tempWeight; tempWeight.SetSize(WeylGroupNumber);
   Vectors<Rational> tempRoots;
   WeylGroup tempW;
-  tempW.MakeArbitrary(WeylGroupLetter, WeylGroupNumber);
+  tempW.MakeArbitrarySimple(WeylGroupLetter, WeylGroupNumber);
   tempW.ComputeRho(true);
   theVPbasis=tempW.RootsOfBorel;
   if (WeylGroupLetter=='B')
@@ -3577,6 +3579,109 @@ void SelectionWithDifferentMaxMultiplicities::IncrementSubset()
     }
 }
 
+void DynkinType::GetLettersTypesMults
+(List<char>& outputLetters, List<int>& outputRanks, List<int>& outputMults,
+   List<Rational>& outputFirstCoRootLengthsSquared)const
+{ outputLetters.SetSize(0);
+  outputRanks.SetSize(0);
+  outputMults.SetSize(0);
+  outputFirstCoRootLengthsSquared.SetSize(0);
+  for (int i=0; i<this->size; i++)
+  { outputLetters.AddOnTop((*this)[i].theLetter);
+    outputRanks.AddOnTop((*this)[i].theRank);
+    outputFirstCoRootLengthsSquared.AddOnTop((*this)[i].lengthFirstCoRootSquared);
+    outputMults.AddOnTop(this->theCoeffs[i]);
+  }
+}
+
+std::string DynkinType::GetLieAlgebraName(FormatExpressions* theFormat)const
+{ return this->ToString(theFormat);
+}
+
+std::string DynkinType::GetWeylGroupName(FormatExpressions* theFormat)const
+{ return this->ToString(theFormat);
+}
+
+void DynkinType::MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength)
+{ DynkinSimpleType theMon;
+  theMon.theRank=rank;
+  theMon.theLetter=type;
+  if (inputFirstCoRootSqLength==0)
+    theMon.lengthFirstCoRootSquared= theMon.theLetter== 'F' ? 1 : 2;
+  else
+    theMon.lengthFirstCoRootSquared=*inputFirstCoRootSqLength;
+  if (theMon.lengthFirstCoRootSquared<=0)
+  { std::cout << "This is a programming error: co-root length must be positive, instead I got "
+    << theMon.lengthFirstCoRootSquared << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->MakeZero();
+  this->AddMonomial(theMon, 1);
+}
+
+bool DynkinType::HasExceptionalComponent()const
+{ for (int i=0; i<this->size; i++)
+    if ((*this)[i].theLetter=='E'||
+        (*this)[i].theLetter=='F'||
+        (*this)[i].theLetter=='G')
+      return true;
+  return false;
+}
+
+bool DynkinType::IsSimple(char* outputtype, int* outputRank, Rational* outputLength)const
+{ if (this->size!=1)
+    return false;
+  if (this->theCoeffs[0]!=1)
+    return false;
+  DynkinSimpleType& theMon=(*this)[0];
+  if (outputtype!=0)
+    *outputtype=theMon.theLetter;
+  if (outputRank!=0)
+    *outputRank=theMon.theRank;
+  if (outputLength!=0)
+    *outputLength=theMon.lengthFirstCoRootSquared;
+  return true;
+}
+
+Rational DynkinType::GetRank()const
+{ Rational result=0;
+  for (int i=0; i<this->size; i++)
+    result+=this->theCoeffs[i]*(*this)[i].theRank;
+  return result;
+}
+
+void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
+{ output.init(0,0);
+  Matrix<Rational> curCartan;
+  List<DynkinSimpleType> sortedMons;
+  sortedMons=*this;
+  sortedMons.QuickSortAscending();
+  for (int j=0; j<sortedMons.size; j++)
+  { int theIndex=this->GetIndex(sortedMons[j]);
+    for (int k=0; k<this->theCoeffs[theIndex]; k++)
+    { DynkinSimpleType::GetEpsilonMatrix
+      ((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
+      output.DirectSumWith(curCartan);
+    }
+  }
+}
+
+void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
+{ output.init(0,0);
+  Matrix<Rational> curCartan;
+  List<DynkinSimpleType> sortedMons;
+  sortedMons=*this;
+  sortedMons.QuickSortAscending();
+  for (int j=0; j<sortedMons.size; j++)
+  { int theIndex=this->GetIndex(sortedMons[j]);
+    for (int k=0; k<this->theCoeffs[theIndex]; k++)
+    { (*this)[theIndex].GetCartanSymmetric(curCartan);
+      output.DirectSumWith(curCartan);
+    }
+  }
+}
+
 Rational DynkinType::GetSizeWeylByFormula()const
 { Rational result=1;
   Rational tempRat;
@@ -3588,16 +3693,28 @@ Rational DynkinType::GetSizeWeylByFormula()const
   return result;
 }
 
-std::string DynkinSimpleType::ToString()const
+std::string DynkinSimpleType::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
-  out << theLetter << "^{"
-  << this->lengthFirstCoRootSquared << "}";
-  if (theRank>=10)
-    out << "_{" << theRank << "}";
-  else
-    out << "_" << theRank;
-//  if (!(*this->owner)[this->firstSimpleRootOrbitIndex].LengthHsquared.IsEqualTo
-//      (this->owner->GetOwnerWeyl().CartanSymmetric(0,0)))
+  bool includeTechnicalNames= theFormat==0 ? true : theFormat->flagIncludeLieAlgebraTypes;
+  bool includeNonTechnicalNames=theFormat==0 ? false : theFormat->flagIncludeLieAlgebraNonTechnicalNames;
+  if (!includeNonTechnicalNames && !includeTechnicalNames)
+    includeTechnicalNames=true;
+  if (includeTechnicalNames)
+  { out << theLetter << "^{" << this->lengthFirstCoRootSquared << "}";
+    if (this->theRank>=10)
+      out << "_{" << this->theRank << "}";
+    else
+      out << "_" << this->theRank;
+  }
+  if (includeNonTechnicalNames)
+    if (this->theLetter!='E' && this->theLetter!='F' && this->theLetter!='G')
+      switch (this->theLetter)
+      { case 'A':  out << "(sl(" << this->theRank+1 << "))"; break;
+        case 'B':  out << "(so(" << 2*this->theRank+1 << "))"; break;
+        case 'C':  out << "(sp(" << 2*this->theRank << "))"; break;
+        case 'D':  out << "(so(" << 2*this->theRank << "))"; break;
+        default : break;
+      }
   return out.str();
 }
 
@@ -3704,457 +3821,7 @@ Rational DynkinSimpleType::GetDefaultRootLengthSquared
   }
 }
 
-Rational DynkinSimpleType::GetRatioLongRootToFirst
-(char inputWeylLetter, int inputRank)
-{ Rational result;
-  switch (inputWeylLetter)
-  { case 'A': return 1;
-    case 'B': return 1;
-    case 'C': return 2;
-    case 'D': return 1;
-    case 'E': return 1;
-    case 'F': return 1;
-    case 'G': return 3;
-    default:
-      return -1;
-  }
-}
-
-void DynkinSimpleType::operator++(int)
-{ if (this->theRank==1)
-  { this->theRank++;
-    return;
-  }
-  if (this->theLetter=='A')
-  { if (this->theRank>=4)
-      this->theLetter='D';
-    else
-      this->theLetter='B';
-    return;
-  }
-  if (this->theLetter=='D')
-  { this->theLetter='B';
-    return;
-  }
-  if (this->theLetter=='B')
-  { if (this->theRank>=3)
-      this->theLetter='C';
-    else
-      this->theLetter='G';
-    return;
-  }
-  if (this->theLetter=='C')
-  { if (this->theRank==4)
-    { this->theLetter='F';
-      return;
-    }
-    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
-    { this->theLetter='F';
-      return;
-    }
-    this->theLetter='A';
-    this->theRank++;
-    return;
-  }
-  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
-  { this->theRank++;
-    this->theLetter='A';
-    return;
-  }
-  std::cout << "This is a programming error. This is a portion of code that should "
-  << "never be reached. Something has gone very wrong. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-  assert(false);
-}
-
-bool DynkinSimpleType::operator<(int otherRank)const
-{ return this->theRank<otherRank;
-}
-
-void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement)
-{  Rational coefficient, tempRat;
-  coefficient.Assign(DualSpaceElement.TheObjects[index]);
-  coefficient.DivideBy(this->CartanSymmetric.elements[index][index]);
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat.Assign(coefficient);
-    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    DualSpaceElement.TheObjects[i]+=(tempRat);
-  }
-}
-
-void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
-{// if (this->CartanSymmetric.elements[index][index].IsEqualToZero())
-  //  return;
-  Rational alphaShift, tempRat;
-  alphaShift.MakeZero();
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempRat.Assign(theRoot.TheObjects[i]);
-    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
-    alphaShift+=(tempRat);
-  }
-  if (this->flagAnErrorHasOcurredTimeToPanic)
-  { std::string tempS;
-    tempS=alphaShift.ToString();
-  }
-  alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
-  if (RhoAction)
-  { if(UseMinusRho)
-      alphaShift.AddInteger(1);
-    else
-      alphaShift.AddInteger(-1);
-  }
-  theRoot.TheObjects[index]+=(alphaShift);
-}
-
-void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
-  Polynomial<Rational>  AscalarB, tempP;
-  AscalarB.MakeZero();
-  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
-  { tempP.MakeZero();
-    tempP=theRoot[i];
-    tempP*=(CartanSymmetric.elements[index][i]);
-    AscalarB+=(tempP);
-  }
-  AscalarB*=(-2);
-  AscalarB/=(lengthA);
-  theRoot[index]+=(AscalarB);
-  if (RhoAction)
-    theRoot[index]+=-1;
-}
-
-void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
-{ int tempI= this->TheObjects[index].size;
-  for (int i=0; i<tempI; i++)
-  { this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], output.affinePoint, RhoAction, UseMinusRho);
-//    output.affinePoint.ComputeDebugString();
-    this->SimpleReflectionDualSpace(this->TheObjects[index].TheObjects[tempI-i-1], output.normal);
-  }
-}
-
-void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output)
-{ output=(input);
-  Vector<Rational> tempRoot;
-  for (int i=0; i<output.size; i++)
-    for (int j=i+1; j<output.size; j++)
-    { tempRoot=output.TheObjects[i]+output.TheObjects[j];
-      if (this->IsARoot(tempRoot))
-        output.AddOnTopNoRepetition(tempRoot);
-    }
-}
-
-void WeylGroup::operator=(const WeylGroup& right)
-{ this->WeylLetter=right.WeylLetter;
-//  this->ShortRootLength.Assign(right.ShortRootLength);
-//  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
-//  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
-//  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
-  this->MatrixSendsSimpleVectorsToEpsilonVectors=right.MatrixSendsSimpleVectorsToEpsilonVectors;
-//  this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
-  this->CartanSymmetric=(right.CartanSymmetric);
-  this->::HashedList<ElementWeylGroup>::operator=(right);
-  this->RootSystem=(right.RootSystem);
-  this->RootsOfBorel=(right.RootsOfBorel);
-  this->rho=right.rho;
-  this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
-  this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
-  this->lengthLongestRootSquared=right.lengthLongestRootSquared;
-  this->flagFundamentalToSimpleMatricesAreComputed=right.flagFundamentalToSimpleMatricesAreComputed;
-}
-
-void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
-{ for (int i=0; i<this->TheObjects[index].size; i++)
-    this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], theRoot, RhoAction, UseMinusRho);
-}
-
-void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
-{ Vector<Rational> tempRoot;
-  Vectors<Rational> startRoots;
-  HashedList<Vector<Rational> > tempHashedRootS;
-  int theDimension=this->CartanSymmetric.NumCols;
-  for (int i=0; i<theDimension; i++)
-  { tempRoot.MakeEi(theDimension, i);
-    startRoots.AddOnTop(tempRoot);
-  }
-
-  int estimatedNumRoots=0;
-  switch (this->GetDim())
-  { case 8: estimatedNumRoots=240; break;
-    case 7: estimatedNumRoots=126; break;
-    case 6: estimatedNumRoots=72; break;
-    case 4: estimatedNumRoots=48; break;
-    default: estimatedNumRoots= this->GetDim()*this->GetDim()*4; break;
-  }
-  this->GenerateOrbit(startRoots, false, tempHashedRootS, false, estimatedNumRoots);
-  this->RootSystem.Clear();
-  this->RootsOfBorel.size=0;
-  this->RootsOfBorel.ReservE(tempHashedRootS.size/2);
-  this->RootSystem.SetExpectedSize(tempHashedRootS.size);
-  for (int i=0; i<tempHashedRootS.size; i++)
-    if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
-      this->RootsOfBorel.AddOnTop(tempHashedRootS.TheObjects[i]);
-  this->RootsOfBorel.QuickSortAscending();
-  for (int i=this->RootsOfBorel.size-1; i>=0; i--)
-    this->RootSystem.AddOnTop(-this->RootsOfBorel.TheObjects[i]);
-  for (int i=0; i<this->RootsOfBorel.size; i++)
-    this->RootSystem.AddOnTop(this->RootsOfBorel.TheObjects[i]);
-}
-
-void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
-{ for (int i=0; i<this->TheObjects[index].size; i++)
-    this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i], theRoot, RhoAction);
-}
-
-void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
-{ this->ComputeWeylGroup();
-  output.size=0;
-  output.ReservE(this->RootSystem.size/2);
-  for (int i=0; i<this->RootSystem.size; i++)
-    if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
-      output.AddOnTop(this->RootSystem[i]);
-}
-
-void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
-{ output.size=0;
-  this->RootSystem.Clear();
-  this->GenerateRootSystemFromKillingFormMatrix();
-  output=(this->RootsOfBorel);
-}
-
-std::string WeylGroup::ToString()
-{ std::stringstream out;
-  out << "Size: " << this->size << "\n";
-//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
-  out << "rho:" << this->rho.ToString() << "\n";
-  out << "Root system(" << this->RootSystem.size << " elements):\n"
-  << this->RootSystem.ToString() << "\n";
-  out << "Elements of the group:\n";
-  for (int i=0; i<this->size; i++)
-    out << i << ". " << this->TheObjects[i].ToString() << "\n";
-  out << "<br>Symmetric cartan: "
-  << this->CartanSymmetric.ToString();
-  return out.str();
-}
-
-bool WeylGroup::IsAddmisibleDynkinType(char candidateLetter, int n)
-{ if (candidateLetter=='A' && n>0)
-    return true;
-  if (candidateLetter=='B' && n>1)
-    return true;
-  if (candidateLetter=='C' && n>1)
-    return true;
-  if (candidateLetter=='D' && n>3)
-    return true;
-  if (candidateLetter=='E' && n>5 && n<9)
-    return true;
-  if (candidateLetter=='F' && n==4)
-    return true;
-  if (candidateLetter=='G' && n==2)
-    return true;
-  return false;
-}
-
-void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRank)
-{ if (inputLetter=='G')
-    outputRank=2;
-  if (inputLetter=='F')
-    outputRank=4;
-  if (inputLetter=='E')
-  { if (outputRank>8)
-      outputRank=8;
-    if(outputRank<6)
-      outputRank=6;
-  }
-  if (inputLetter=='C' || inputLetter=='B')
-    if (outputRank<2)
-      outputRank=2;
-  if (inputLetter=='D')
-    if (outputRank<4)
-      outputRank=4;
-}
-
-void WeylGroup::MakeArbitrary(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
-{ this->init();
-  switch(WeylGroupLetter)
-  { case 'A': this->MakeAn(n); break;
-    case 'B': this->MakeBn(n); break;
-    case 'C': this->MakeCn(n); break;
-    case 'D': this->MakeDn(n); break;
-    case 'E': this->MakeEn(n); break;
-    case 'F': this->MakeF4();  break;
-    case 'G': this->MakeG2();  break;
-    default:
-      std::cout << "This is a programming error: I am asked to create a Weyl group of type "
-      << WeylGroupLetter << " but the Weyl group type is allowed to be A, B, C, D, E, F or G only."
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-  }
-  if (firstCoRootLengthSquared==0)
-    return;
-  Rational cartanMatScale=this->CartanSymmetric(0,0);
-  cartanMatScale/=4;
-  cartanMatScale*=*firstCoRootLengthSquared;
-  this->CartanSymmetric*=cartanMatScale;
-}
-
-void WeylGroup::MakeDn(int n)
-{ this->MakeAn(n);
-  if (n<3)
-    return;
-  this->WeylLetter='D';
-  this->CartanSymmetric.elements[n-1][n-2]=0;
-  this->CartanSymmetric.elements[n-2][n-1]=0;
-  this->CartanSymmetric.elements[n-3][n-1]=-1;
-  this->CartanSymmetric.elements[n-1][n-3]=-1;
-//  this->UpdateIntBuffer();
-}
-
-void WeylGroup::MakeAn(int n)
-{ if (n<0)
-    return;
-  this->init();
-  this->WeylLetter='A';
-  this->lengthLongestRootSquared=2;
-//  this->ShortRootLength=0;
-//  this->ShortLongScalarProdPositive=0;
-//  this->ShortShortScalarProdPositive=0;
-//  this->LongLongScalarProdPositive=1;
-  this->rho.SetSize(n);
-  this->CartanSymmetric.init(n, n);
-  this->CartanSymmetric.NullifyAll();
-  for (int i=0; i<n-1; i++)
-  { this->CartanSymmetric.elements[i][i]=2;
-    this->CartanSymmetric.elements[i+1][i]=-1;
-    this->CartanSymmetric.elements[i][i+1]=-1;
-  }
-  this->CartanSymmetric.elements[n-1][n-1]=2;
-//  this->UpdateIntBuffer();
-}
-
-void WeylGroup::MakeEn(int n)
-{ this->MakeAn(n);
-  if (n<4)
-    return;
-  this->WeylLetter='E';
-  this->CartanSymmetric.elements[0][1]=0;
-  this->CartanSymmetric.elements[1][0]=0;
-  this->CartanSymmetric.elements[1][2]=0;
-  this->CartanSymmetric.elements[2][1]=0;
-  this->CartanSymmetric.elements[0][2]=-1;
-  this->CartanSymmetric.elements[1][3]=-1;
-  this->CartanSymmetric.elements[2][0]=-1;
-  this->CartanSymmetric.elements[3][1]=-1;
-//  this->UpdateIntBuffer();
-}
-
-void WeylGroup::MakeF4()
-{ this->WeylLetter='F';
-  this->lengthLongestRootSquared=4;
-//  this->ShortRootLength=2;
-//  this->LongLongScalarProdPositive=2;
-//  this->ShortLongScalarProdPositive=2;
-//  this->ShortShortScalarProdPositive=1;
-  this->init();
-  this->rho.SetSize(4);
-  this->CartanSymmetric.init(4, 4);
-  this->CartanSymmetric.elements[0][0]=4 ; this->CartanSymmetric.elements[0][1]=-2; this->CartanSymmetric.elements[0][2]=0 ; this->CartanSymmetric.elements[0][3]=0 ;
-  this->CartanSymmetric.elements[1][0]=-2; this->CartanSymmetric.elements[1][1]=4 ; this->CartanSymmetric.elements[1][2]=-2; this->CartanSymmetric.elements[1][3]=0 ;
-  this->CartanSymmetric.elements[2][0]=0 ; this->CartanSymmetric.elements[2][1]=-2; this->CartanSymmetric.elements[2][2]=2 ; this->CartanSymmetric.elements[2][3]=-1;
-  this->CartanSymmetric.elements[3][0]=0 ; this->CartanSymmetric.elements[3][1]=0 ; this->CartanSymmetric.elements[3][2]=-1; this->CartanSymmetric.elements[3][3]=2 ;
-//  this->UpdateIntBuffer();
-}
-
-void WeylGroup::MakeG2()
-{ this->WeylLetter='G';
-  this->lengthLongestRootSquared=6;
-//  this->ShortRootLength=2;
-//  this->LongLongScalarProdPositive=3;
-//  this->ShortLongScalarProdPositive=3;
-//  this->ShortShortScalarProdPositive=1;
-  this->init();
-  this->rho.SetSize(2);
-  this->CartanSymmetric.init(2, 2);
-  this->CartanSymmetric.elements[0][0]=2;
-  this->CartanSymmetric.elements[1][1]=6;
-  this->CartanSymmetric.elements[1][0]=-3;
-  this->CartanSymmetric.elements[0][1]=-3;
-//  this->UpdateIntBuffer();
-}
-
-void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
-}
-
-void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
-{ Vectors<Rational> tempRoots;
-  Vectors<Rational> tempInput, tempOutput;
-  tempInput.AddOnTop(input);
-  tempRoots.MakeEiBasis(this->GetDim());
-  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
-  output=tempOutput.TheObjects[0];
-}
-
-void WeylGroup::GetEpsilonCoordsWRTsubalgebra
-(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
-{ Matrix<Rational>& basisChange = this->buffer1NotCopied.GetElement();
-  Matrix<Rational>& tempMat = this->buffer2NotCopied.GetElement();
-  DynkinDiagramRootSubalgebra& tempDyn = this->bufferDynNotCopied.GetElement();
-  Vectors<Rational>& simpleBasis = this->buffer1VectorsNotCopied.GetElement();
-  Vectors<Rational>& coordsInNewBasis = this->buffer2VectorsNotCopied.GetElement();
-  simpleBasis=(generators);
-  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
-  bool tempBool = true;
-  if (generators.size==0)
-    tempBool = false;
-  if (!tempBool)
-  { output.SetSize(input.size);
-    for(int i=0; i<input.size; i++)
-      output[i].MakeZero(0);
-    return;
-  }
-  basisChange.Resize(0, 0, true);
-  for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
-  { this->GetEpsilonMatrix
-    (tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, tempMat);
-    basisChange.DirectSumWith(tempMat, (Rational) 0);
-    //basisChange.ComputeDebugString();
-  }
-  simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
-//  std::cout << "<br>simple basis: " << simpleBasis.ToString();
-//  std::cout << "<br>to be converted: " << input.ToString();
-  coordsInNewBasis.SetSize(input.size);
-  for (int i=0; i<input.size; i++)
-    input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);
-  //basisChange.ComputeDebugString();
-  //coordsInNewBasis.ComputeDebugString();
-  basisChange.ActOnVectorsColumn(coordsInNewBasis, output);
-//  output.ComputeDebugString();
-}
-
-void WeylGroup::GetEpsilonCoords
-(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational>& input,
- Vector<Rational>& output)
-{ bool needsComputation=this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer();
-  Matrix<Rational>& tempMat=this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement();
-  if (needsComputation)
-    this->GetEpsilonMatrix(WeylLetter, WeylRank, tempMat);
-//  tempMat.ComputeDebugString();
-  Vector<Rational> result;
-  result.MakeZero(tempMat.NumRows);
-  Rational tempRat;
-  for (int i=0; i<tempMat.NumRows; i++)
-    for (int j=0; j<input.size; j++)
-    { tempRat=(tempMat.elements[i][j]);
-      tempRat*=(input[j]);
-      result[i]+=(tempRat);
-    }
-//  result.ComputeDebugString();
-  output=(result);
-}
-
-void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output)
+void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>& output)
 { if (WeylLetter=='A')
   { output.init(WeylRank+1, WeylRank);
     output.NullifyAll();
@@ -4340,23 +4007,458 @@ void WeylGroup::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Rational>
   }
 }
 
-void WeylGroup::MakeBn(int n)
-{ this->MakeAn(n);
-  if (n<1)
-    return;
-  this->WeylLetter='B';
-  this->CartanSymmetric.elements[n-1][n-1]=1;
+void DynkinSimpleType::MakeAn(int n, Matrix<Rational>& output)const
+{ if (n<=0 || n>30000)
+  { std::cout << "This is a programming error: attempting to create type An"
+    << " with n=" << n << " is illegal. If this was a bad user input, it should "
+    << " be handled at an earlier stage. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output.init(n, n);
+  output.NullifyAll();
+  for (int i=0; i<n-1; i++)
+  { output(i,i)=2;
+    output(i+1,i)=-1;
+    output(i,i+1)=-1;
+  }
+  output(n-1,n-1)=2;
 }
 
-void WeylGroup::MakeCn(int n)
-{ this->MakeAn(n);
+void DynkinSimpleType::MakeBn(int n, Matrix<Rational>& output)const
+{ this->MakeAn(n, output);
+  output(n-1,n-1)=1;
+}
+
+void DynkinSimpleType::MakeCn(int n, Matrix<Rational>& output)const
+{ this->MakeAn(n, output);
   if(n<2)
     return;
-  this->lengthLongestRootSquared=4;
-  this->WeylLetter='C';
-  this->CartanSymmetric.elements[n-1][n-1]=4;
-  this->CartanSymmetric.elements[n-2][n-1]=-2;
-  this->CartanSymmetric.elements[n-1][n-2]=-2;
+  output(n-1,n-1)= 4;
+  output(n-2,n-1)=-2;
+  output(n-1,n-2)=-2;
+}
+
+void DynkinSimpleType::MakeDn(int n, Matrix<Rational>& output)const
+{ this->MakeAn(n, output);
+  if (n<3)
+    return;
+  output(n-1,n-2)=0;
+  output(n-2,n-1)=0;
+  output(n-3,n-1)=-1;
+  output(n-1,n-3)=-1;
+}
+
+void DynkinSimpleType::MakeEn(int n, Matrix<Rational>& output)const
+{ this->MakeAn(n, output);
+  if (n<4)
+    return;
+  output(0,1)=0;
+  output(1,0)=0;
+  output(1,2)=0;
+  output(2,1)=0;
+  output(0,2)=-1;
+  output(1,3)=-1;
+  output(2,0)=-1;
+  output(3,1)=-1;
+}
+
+void DynkinSimpleType::MakeF4(Matrix<Rational>& output)const
+{ output.init(4, 4);
+  output(0,0)=4 ;  output(0,1)=-2; output(0,2)=0 ; output(0,3)=0 ;
+  output(1,0)=-2;  output(1,1)=4 ; output(1,2)=-2; output(1,3)=0 ;
+  output(2,0)=0 ;  output(2,1)=-2; output(2,2)=2 ; output(2,3)=-1;
+  output(3,0)=0 ;  output(3,1)=0 ; output(3,2)=-1; output(3,3)=2 ;
+}
+
+void DynkinSimpleType::MakeG2(Matrix<Rational>& output)const
+{ output.init(2, 2);
+  output(0,0)=2;
+  output(1,1)=6;
+  output(1,0)=-3;
+  output(0,1)=-3;
+}
+
+void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
+{ switch(this->theLetter)
+  { case 'A': this->MakeAn(this->theRank, output); break;
+    case 'B': this->MakeBn(this->theRank, output); break;
+    case 'C': this->MakeCn(this->theRank, output); break;
+    case 'D': this->MakeDn(this->theRank, output); break;
+    case 'E': this->MakeEn(this->theRank, output); break;
+    case 'F': this->MakeF4(output);                break;
+    case 'G': this->MakeG2(output);                break;
+    default:
+      std::cout
+      << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric "
+      << " from a non-initialized Dynkin simple type. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+      break;
+  }
+  if (this->theLetter!='F')
+    output*=(this->lengthFirstCoRootSquared/2);
+  else
+    output*=this->lengthFirstCoRootSquared;
+}
+
+Rational DynkinSimpleType::GetRatioLongRootToFirst
+(char inputWeylLetter, int inputRank)
+{ Rational result;
+  switch (inputWeylLetter)
+  { case 'A': return 1;
+    case 'B': return 1;
+    case 'C': return 2;
+    case 'D': return 1;
+    case 'E': return 1;
+    case 'F': return 1;
+    case 'G': return 3;
+    default:
+      return -1;
+  }
+}
+
+void DynkinSimpleType::operator++(int)
+{ if (this->theRank==1)
+  { this->theRank++;
+    return;
+  }
+  if (this->theLetter=='A')
+  { if (this->theRank>=4)
+      this->theLetter='D';
+    else
+      this->theLetter='B';
+    return;
+  }
+  if (this->theLetter=='D')
+  { this->theLetter='B';
+    return;
+  }
+  if (this->theLetter=='B')
+  { if (this->theRank>=3)
+      this->theLetter='C';
+    else
+      this->theLetter='G';
+    return;
+  }
+  if (this->theLetter=='C')
+  { if (this->theRank==4)
+    { this->theLetter='F';
+      return;
+    }
+    if (this->theRank==6 || this->theRank==7 || this->theRank==8)
+    { this->theLetter='F';
+      return;
+    }
+    this->theLetter='A';
+    this->theRank++;
+    return;
+  }
+  if (this->theLetter=='G'|| this->theLetter=='F' || this->theLetter=='E')
+  { this->theRank++;
+    this->theLetter='A';
+    return;
+  }
+  std::cout << "This is a programming error. This is a portion of code that should "
+  << "never be reached. Something has gone very wrong. "
+  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  assert(false);
+}
+
+bool DynkinSimpleType::operator<(int otherRank)const
+{ return this->theRank<otherRank;
+}
+
+void WeylGroup::SimpleReflectionDualSpace(int index, Vector<Rational>& DualSpaceElement)
+{  Rational coefficient, tempRat;
+  coefficient.Assign(DualSpaceElement.TheObjects[index]);
+  coefficient.DivideBy(this->CartanSymmetric.elements[index][index]);
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempRat.Assign(coefficient);
+    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
+    DualSpaceElement.TheObjects[i]+=(tempRat);
+  }
+}
+
+void WeylGroup::SimpleReflectionRoot(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
+{// if (this->CartanSymmetric.elements[index][index].IsEqualToZero())
+  //  return;
+  Rational alphaShift, tempRat;
+  alphaShift.MakeZero();
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempRat.Assign(theRoot.TheObjects[i]);
+    tempRat.MultiplyBy(this->CartanSymmetric.elements[index][i]*(-2));
+    alphaShift+=(tempRat);
+  }
+  if (this->flagAnErrorHasOcurredTimeToPanic)
+  { std::string tempS;
+    tempS=alphaShift.ToString();
+  }
+  alphaShift.DivideBy(this->CartanSymmetric.elements[index][index]);
+  if (RhoAction)
+  { if(UseMinusRho)
+      alphaShift.AddInteger(1);
+    else
+      alphaShift.AddInteger(-1);
+  }
+  theRoot.TheObjects[index]+=(alphaShift);
+}
+
+void WeylGroup::SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
+{ int lengthA=this->CartanSymmetric.elements[index][index].NumShort;
+  Polynomial<Rational>  AscalarB, tempP;
+  AscalarB.MakeZero();
+  for (int i=0; i<this->CartanSymmetric.NumCols; i++)
+  { tempP.MakeZero();
+    tempP=theRoot[i];
+    tempP*=(CartanSymmetric.elements[index][i]);
+    AscalarB+=(tempP);
+  }
+  AscalarB*=(-2);
+  AscalarB/=(lengthA);
+  theRoot[index]+=(AscalarB);
+  if (RhoAction)
+    theRoot[index]+=-1;
+}
+
+void WeylGroup::ActOnAffineHyperplaneByGroupElement(int index, affineHyperplane& output, bool RhoAction, bool UseMinusRho)
+{ int tempI= this->TheObjects[index].size;
+  for (int i=0; i<tempI; i++)
+  { this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], output.affinePoint, RhoAction, UseMinusRho);
+//    output.affinePoint.ComputeDebugString();
+    this->SimpleReflectionDualSpace(this->TheObjects[index].TheObjects[tempI-i-1], output.normal);
+  }
+}
+
+void WeylGroup::GenerateAdditivelyClosedSubset(Vectors<Rational>& input, Vectors<Rational>& output)
+{ output=(input);
+  Vector<Rational> tempRoot;
+  for (int i=0; i<output.size; i++)
+    for (int j=i+1; j<output.size; j++)
+    { tempRoot=output[i]+output[j];
+      if (this->IsARoot(tempRoot))
+        output.AddOnTopNoRepetition(tempRoot);
+    }
+}
+
+bool WeylGroup::operator==(const WeylGroup& other)const
+{ return
+  this->CartanSymmetric==other.CartanSymmetric &&
+  this->theDynkinType==other.theDynkinType;
+}
+
+void WeylGroup::operator=(const WeylGroup& right)
+{ this->theDynkinType=right.theDynkinType;
+//  this->ShortRootLength.Assign(right.ShortRootLength);
+//  this->ShortLongScalarProdPositive.Assign(right.ShortLongScalarProdPositive);
+//  this->LongLongScalarProdPositive.Assign(right.LongLongScalarProdPositive);
+//  this->ShortShortScalarProdPositive.Assign(right.ShortShortScalarProdPositive);
+  this->MatrixSendsSimpleVectorsToEpsilonVectors=right.MatrixSendsSimpleVectorsToEpsilonVectors;
+//  this->CartanSymmetricIntBuffer=(right.CartanSymmetricIntBuffer);
+  this->CartanSymmetric=(right.CartanSymmetric);
+  this->::HashedList<ElementWeylGroup>::operator=(right);
+  this->RootSystem=(right.RootSystem);
+  this->RootsOfBorel=(right.RootsOfBorel);
+  this->rho=right.rho;
+  this->FundamentalToSimpleCoords=right.FundamentalToSimpleCoords;
+  this->SimpleToFundamentalCoords=right.SimpleToFundamentalCoords;
+  this->flagFundamentalToSimpleMatricesAreComputed=right.flagFundamentalToSimpleMatricesAreComputed;
+}
+
+void WeylGroup::ActOnRootByGroupElement(int index, Vector<Rational>& theRoot, bool RhoAction, bool UseMinusRho)
+{ for (int i=0; i<this->TheObjects[index].size; i++)
+    this->SimpleReflectionRoot(this->TheObjects[index].TheObjects[i], theRoot, RhoAction, UseMinusRho);
+}
+
+void WeylGroup::GenerateRootSystemFromKillingFormMatrix()
+{ Vector<Rational> tempRoot;
+  Vectors<Rational> startRoots;
+  HashedList<Vector<Rational> > tempHashedRootS;
+  int theDimension=this->CartanSymmetric.NumCols;
+  for (int i=0; i<theDimension; i++)
+  { tempRoot.MakeEi(theDimension, i);
+    startRoots.AddOnTop(tempRoot);
+  }
+
+  int estimatedNumRoots=0;
+  switch (this->GetDim())
+  { case 8: estimatedNumRoots=240; break;
+    case 7: estimatedNumRoots=126; break;
+    case 6: estimatedNumRoots=72; break;
+    case 4: estimatedNumRoots=48; break;
+    default: estimatedNumRoots= this->GetDim()*this->GetDim()*4; break;
+  }
+  this->GenerateOrbit(startRoots, false, tempHashedRootS, false, estimatedNumRoots);
+  this->RootSystem.Clear();
+  this->RootsOfBorel.size=0;
+  this->RootsOfBorel.ReservE(tempHashedRootS.size/2);
+  this->RootSystem.SetExpectedSize(tempHashedRootS.size);
+  for (int i=0; i<tempHashedRootS.size; i++)
+    if (tempHashedRootS.TheObjects[i].IsPositiveOrZero())
+      this->RootsOfBorel.AddOnTop(tempHashedRootS.TheObjects[i]);
+  this->RootsOfBorel.QuickSortAscending();
+  for (int i=this->RootsOfBorel.size-1; i>=0; i--)
+    this->RootSystem.AddOnTop(-this->RootsOfBorel.TheObjects[i]);
+  for (int i=0; i<this->RootsOfBorel.size; i++)
+    this->RootSystem.AddOnTop(this->RootsOfBorel.TheObjects[i]);
+}
+
+void WeylGroup::ActOnRootAlgByGroupElement(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction)
+{ for (int i=0; i<this->TheObjects[index].size; i++)
+    this->SimpleReflectionRootAlg(this->TheObjects[index].TheObjects[i], theRoot, RhoAction);
+}
+
+void WeylGroup::ComputeWeylGroupAndRootsOfBorel(Vectors<Rational>& output)
+{ this->ComputeWeylGroup();
+  output.size=0;
+  output.ReservE(this->RootSystem.size/2);
+  for (int i=0; i<this->RootSystem.size; i++)
+    if (this->RootSystem.TheObjects[i].IsPositiveOrZero())
+      output.AddOnTop(this->RootSystem[i]);
+}
+
+void WeylGroup::ComputeRootsOfBorel(Vectors<Rational>& output)
+{ output.size=0;
+  this->RootSystem.Clear();
+  this->GenerateRootSystemFromKillingFormMatrix();
+  output=(this->RootsOfBorel);
+}
+
+std::string WeylGroup::ToString()
+{ std::stringstream out;
+  out << "Size: " << this->size << "\n";
+//  out <<"Number of Vectors<Rational>: "<<this->RootSystem.size<<"\n
+  out << "rho:" << this->rho.ToString() << "\n";
+  out << "Root system(" << this->RootSystem.size << " elements):\n"
+  << this->RootSystem.ToString() << "\n";
+  out << "Elements of the group:\n";
+  for (int i=0; i<this->size; i++)
+    out << i << ". " << this->TheObjects[i].ToString() << "\n";
+  out << "<br>Symmetric cartan: "
+  << this->CartanSymmetric.ToString();
+  return out.str();
+}
+
+bool WeylGroup::IsAddmisibleDynkinType(char candidateLetter, int n)
+{ if (candidateLetter=='A' && n>0)
+    return true;
+  if (candidateLetter=='B' && n>1)
+    return true;
+  if (candidateLetter=='C' && n>1)
+    return true;
+  if (candidateLetter=='D' && n>3)
+    return true;
+  if (candidateLetter=='E' && n>5 && n<9)
+    return true;
+  if (candidateLetter=='F' && n==4)
+    return true;
+  if (candidateLetter=='G' && n==2)
+    return true;
+  return false;
+}
+
+void WeylGroup::TransformToAdmissibleDynkinType(char inputLetter, int& outputRank)
+{ if (inputLetter=='G')
+    outputRank=2;
+  if (inputLetter=='F')
+    outputRank=4;
+  if (inputLetter=='E')
+  { if (outputRank>8)
+      outputRank=8;
+    if(outputRank<6)
+      outputRank=6;
+  }
+  if (inputLetter=='C' || inputLetter=='B')
+    if (outputRank<2)
+      outputRank=2;
+  if (inputLetter=='D')
+    if (outputRank<4)
+      outputRank=4;
+}
+
+void WeylGroup::MakeArbitrarySimple(char WeylGroupLetter, int n, const Rational* firstCoRootLengthSquared)
+{ this->init();
+  this->theDynkinType.MakeSimpleType(WeylGroupLetter, n, firstCoRootLengthSquared);
+  this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
+}
+
+void WeylGroup::MakeFromDynkinType(const DynkinType& inputType)
+{ this->init();
+  this->theDynkinType=inputType;
+  this->theDynkinType.GetCartanSymmetric(this->CartanSymmetric);
+}
+
+void WeylGroup::GetEpsilonCoords(List<Vector<Rational> >& input, Vectors<Rational>& output)
+{ Vectors<Rational> tempRoots;
+  tempRoots.MakeEiBasis(this->CartanSymmetric.NumRows);
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, input, output);
+}
+
+void WeylGroup::GetEpsilonCoords(const Vector<Rational>& input, Vector<Rational>& output)
+{ Vectors<Rational> tempRoots;
+  Vectors<Rational> tempInput, tempOutput;
+  tempInput.AddOnTop(input);
+  tempRoots.MakeEiBasis(this->GetDim());
+  this->GetEpsilonCoordsWRTsubalgebra(tempRoots, tempInput, tempOutput);
+  output=tempOutput.TheObjects[0];
+}
+
+void WeylGroup::GetEpsilonCoordsWRTsubalgebra
+(Vectors<Rational>& generators, List<Vector<Rational> >& input, Vectors<Rational>& output)
+{ Matrix<Rational>& basisChange = this->buffer1NotCopied.GetElement();
+  Matrix<Rational>& tempMat = this->buffer2NotCopied.GetElement();
+  DynkinDiagramRootSubalgebra& tempDyn = this->bufferDynNotCopied.GetElement();
+  Vectors<Rational>& simpleBasis = this->buffer1VectorsNotCopied.GetElement();
+  Vectors<Rational>& coordsInNewBasis = this->buffer2VectorsNotCopied.GetElement();
+  simpleBasis=(generators);
+  tempDyn.ComputeDiagramTypeModifyInput(simpleBasis, *this);
+  bool tempBool = true;
+  if (generators.size==0)
+    tempBool = false;
+  if (!tempBool)
+  { output.SetSize(input.size);
+    for(int i=0; i<input.size; i++)
+      output[i].MakeZero(0);
+    return;
+  }
+  basisChange.Resize(0, 0, true);
+  for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
+  { DynkinSimpleType::GetEpsilonMatrix
+    (tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, tempMat);
+    basisChange.DirectSumWith(tempMat, (Rational) 0);
+    //basisChange.ComputeDebugString();
+  }
+  simpleBasis.AssignListList(tempDyn.SimpleBasesConnectedComponents);
+//  std::cout << "<br>simple basis: " << simpleBasis.ToString();
+//  std::cout << "<br>to be converted: " << input.ToString();
+  coordsInNewBasis.SetSize(input.size);
+  for (int i=0; i<input.size; i++)
+    input[i].GetCoordsInBasiS(simpleBasis, coordsInNewBasis[i]);
+  //basisChange.ComputeDebugString();
+  //coordsInNewBasis.ComputeDebugString();
+  basisChange.ActOnVectorsColumn(coordsInNewBasis, output);
+//  output.ComputeDebugString();
+}
+
+void WeylGroup::GetEpsilonCoords
+(char WeylLetter, int WeylRank, Vectors<Rational>& simpleBasis, Vector<Rational>& input,
+ Vector<Rational>& output)
+{ bool needsComputation=this->MatrixSendsSimpleVectorsToEpsilonVectors.IsZeroPointer();
+  Matrix<Rational>& tempMat=this->MatrixSendsSimpleVectorsToEpsilonVectors.GetElement();
+  if (needsComputation)
+    DynkinSimpleType::GetEpsilonMatrix(WeylLetter, WeylRank, tempMat);
+//  tempMat.ComputeDebugString();
+  Vector<Rational> result;
+  result.MakeZero(tempMat.NumRows);
+  Rational tempRat;
+  for (int i=0; i<tempMat.NumRows; i++)
+    for (int j=0; j<input.size; j++)
+    { tempRat=(tempMat.elements[i][j]);
+      tempRat*=(input[j]);
+      result[i]+=(tempRat);
+    }
+//  result.ComputeDebugString();
+  output=(result);
 }
 
 bool WeylGroup::ContainsARootNonStronglyPerpendicularTo(Vectors<Rational>& theVectors, Vector<Rational>& input)
@@ -4399,7 +4501,7 @@ void WeylGroup::ComputeRho(bool Recompute)
       this->rho+=(RootSystem[i]);
   for (int i=0; i<this->CartanSymmetric.NumCols; i++)
     this->rho[i].DivideByInteger(2);
-  this->lengthLongestRootSquared=this->GetLongestRootLengthSquared();
+//  this->lengthLongestRootSquared=this->GetLongestRootLengthSquared();
   this->flagFundamentalToSimpleMatricesAreComputed=false;
 }
 

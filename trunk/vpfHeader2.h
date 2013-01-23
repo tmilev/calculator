@@ -119,6 +119,7 @@ class Expression
       return true;
     return this->theData==desiredDataUseMinusOneForAny;
   }
+  bool IsOperation(std::string* outputWhichOperation=0)const;
   Expression& operator[](int n)const
   { return this->children[n];
   }
@@ -130,7 +131,8 @@ class Expression
   bool ConvertToType(Expression& output);
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
-  { if(!(this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()) &&
+  { MacroRegisterFunctionWithName("Expression::IsOfType");
+    if(!(this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()) &&
         this->children.size>1 && this->children.LastObject()->IsAtoM()))
       return false;
     if (whichElement==0)
@@ -948,17 +950,25 @@ public:
   bool CallConversionFunctionReturnsNonConstUseCarefully
   (Expression::FunctionAddress theFun, const Expression& input, theType*& outputData,
    std::string* outputError=0)
-  { Expression tempE;
+  { MacroRegisterFunctionWithName("CommandList::CallConversionFunctionReturnsNonConstUseCarefully");
+    if (input.IsOfType<theType>())
+    { outputData=&input.GetValuENonConstUseWithCaution<theType>();
+      return true;
+    }
+    Expression tempE;
     if (!theFun(*this, input, tempE))
     { if (outputError!=0)
-        *outputError="I was unsuccessful in callin the conversion function.";
+        *outputError="I was unsuccessful in calling the conversion function.";
       return false;
     }
     if (tempE.IsOfType<theType>())
+    { outputData=&tempE.GetValuENonConstUseWithCaution<theType>();
       return true;
-    if (!tempE.IsError(outputError))
-      if (outputError!=0)
-        *outputError="Successfully called the conversion function but did not get the desired type.";
+    }
+    if (outputError!=0)
+      *outputError=
+      "Successfully called the conversion function but did not get the desired type, instead got "
+      + tempE.ToString();
     return false;
   }
   bool CallCalculatorFunction
@@ -1169,16 +1179,20 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerSSLieAlgebra
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerPrintSSLieAlgebraShort
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, false);
+  }
+  static bool innerPrintSSLieAlgebraVerbose
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  { return theCommands.innerPrintSSLieAlgebra(theCommands, input, output, true);
+  }
+  static bool innerPrintSSLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output, bool Verbose)
 ;
-  static bool innerSSAlgebraShort
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerSSLieAlgebra(theCommands, input, output, false);
-}
-  static bool innerSSAlgebraVerbose
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.innerSSLieAlgebra(theCommands, input, output, true);
-}
+
 template<class CoefficientType>
 bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,

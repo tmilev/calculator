@@ -873,7 +873,7 @@ public:
   { return this->operationS.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
   int opSSLieAlg()
-  { return this->operationS.GetIndexIMustContainTheObject("SSLieAlg");
+  { return this->operationS.GetIndexIMustContainTheObject("SemisimpleLieAlg");
   }
   int opLittelmannPath()
   { return this->operationS.GetIndexIMustContainTheObject("LittelmannPath");
@@ -1160,6 +1160,9 @@ public:
   )
   ;
   static bool innerPolynomial
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerGetGeneratorSemisimpleLieAlg
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart

@@ -119,8 +119,25 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    ",
    "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
   this->AddOperationInnerHandler
+  ("getSemisimpleLieAlgGenerator", this->innerGetGeneratorSemisimpleLieAlg, "",
+   "First argument must be a semisimple Lie algebra, second argument must \
+   be either an integer or a pair of integers.\
+   <br>\n1.If the second argument is an integer, it must be a non-zero number from -N to N,\
+   where N is the number of positive roots of the Lie algebra.\
+   In this case the function returns the Chevalley-Weyl generator labeled by the root\
+   corresponding to the integer index. The roots are indexed in the ordered displayed by the \
+   printSemisimpleLieAlgebra function. \
+   <br>\n2.If the second argument is a pair of integers, the first of this pair must be 0. \
+   The second integer must be a number between 1 and K, where K is the rank of the Lie algebra.\
+   In this case the function returns the element of the Cartan subalgebra that is dual \
+   to the simple root with the same index. Note that this element of the Cartan subalgebra\
+   is proportional to a Chevalley-Weyl generator with a coefficient of proportionality \
+   equal to 2/(simple root length squared) ).\
+    ",
+   "Polynomial{}((x+y+z)^2)");
+  this->AddOperationInnerHandler
   ("Polynomial", this->innerPolynomial, "",
-   "Creates an atomic representation of a polynomial expression. ",
+   "Creates a polynomial expression. ",
    "Polynomial{}((x+y+z)^2)");
   this->AddOperationInnerHandler
   ("UE", this->fElementUniversalEnvelopingAlgebra, "",

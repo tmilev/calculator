@@ -2489,6 +2489,11 @@ bool CommandList::innerPolynomial
   (theCommands, input, output);
 }
 
+bool CommandList::innerGetGeneratorSemisimpleLieAlg
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ return false;
+}
+
 bool CommandList::fElementUniversalEnvelopingAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fElementUniversalEnvelopingAlgebra");
@@ -3115,7 +3120,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("ElementUEoverRF");
   this->AddOperationNoRepetitionAllowed("ElementTensorGVM");
   this->AddOperationNoRepetitionAllowed("CharSSAlgMod");
-  this->AddOperationNoRepetitionAllowed("SSLieAlg");
+  this->AddOperationNoRepetitionAllowed("SemisimpleLieAlg");
   this->AddOperationNoRepetitionAllowed("LittelmannPath");
   this->AddOperationNoRepetitionAllowed("LRO");
   this->AddOperationNoRepetitionAllowed("PolyVars");
@@ -3160,10 +3165,15 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;
-//  theSSLieAlgrule.reset(*this, 2);
-//  theSSLieAlgrule[0].reset(*this, 2);
-//  theSSLieAlgrule[0][0].MakeAtom(this->opSSLieAlg(), *this);
-//  theSSLieAlgrule[0][0].MakeAtom(this->opSSLieAlg(), *this);
+  this->Evaluate
+  ("(InternalVariable1{}{{InternalVariableA}})_{{InternalVariableB}}\
+   :=getSemisimpleLieAlgGenerator{}\
+   (InternalVariable1{}InternalVariableA,\
+   InternalVariableB)")
+  ;
+  this->theProgramExpression[1][0][0].MakeAtom(this->opSSLieAlg(), *this);
+  this->theProgramExpression[2][1][1][0].MakeAtom(this->opSSLieAlg(), *this);
+  this->RuleStack.AddOnTop(this->theProgramExpression);
 
 
 
@@ -4846,6 +4856,14 @@ std::string CommandList::ToString()
   out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls
   << " (# calls LargeIntUnsigned::gcd)";
   #endif
+  if (this->RuleStack.size>0)
+  { out2 << "<hr><b>Predefined rules.</b><br>";
+    for (int i=0; i<this->RuleStack.size; i++)
+    { out2 << this->RuleStack[i].ToString();
+      if (i!=this->RuleStack.size-1)
+        out2 << "<br>";
+    }
+  }
   out2 << "<hr>" << this->ToStringFunctionHandlers() << "<hr><b>Further calculator details.</b>";
   out << "<br><b>Object container information</b>."
   << "The object container is the data structure storing all c++ built-in data types "

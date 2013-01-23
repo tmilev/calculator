@@ -684,11 +684,11 @@ void rootSubalgebra::ElementToHtml
   this->ToString(tempS, sl2s, index,  false, true, true, theGlobalVariables);
   output << "<html><title>"
   << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
-  << " Vector<Rational> subalgebra of type "
+  << " root subalgebra of type "
   << this->theDynkinDiagram.ElementToStrinG(true) << "</title>";
   output << "<meta name=\"keywords\" content=\""
   << this->GetAmbientWeyl().theDynkinType.GetLieAlgebraName()
-  << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
+  << " root subsystems, root subsystems, root systems";
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
@@ -2175,7 +2175,7 @@ void rootSubalgebras::ElementToHtml
   << "</title>";
   output << "<meta name=\"keywords\" content=\""
   << this->TheObjects[0].theDynkinDiagram.ElementToStrinG(true)
-  << " Vector<Rational> subsystems, Vector<Rational> subsystems, Vector<Rational> systems";
+  << " root subsystems, root subsystems, root systems";
   if (this->GetOwnerWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
@@ -2195,9 +2195,9 @@ void rootSubalgebras::ToString
  GlobalVariables* theGlobalVariables, const std::string& DisplayNameCalculator)
 { std::stringstream out; std::string tempS;
   if (useHtml)
-    out << " <a href=\""
-    << DisplayNameCalculator <<
-    "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
+    out << " <a href=\"" << DisplayNameCalculator
+    << "\">Calculator main page</a><br><a href=\"/tmp/manual_vector_partition.pdf\">"
+    << "Notation and conventions (incomplete). Will evolve to a manual of the program.</a><br>";
   this->ElementToStringDynkinTable(useLatex, useHtml, htmlPathPhysical, htmlPathServer, tempS);
   out << tempS;
   //this->AmbientWeyl.ComputeRho(true);
@@ -2448,8 +2448,8 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
     }
   double startStructureConstantComputation=-1;
   if (theGlobalVariables!=0)
-  { out << "done in " << theGlobalVariables->GetElapsedSeconds()- startTimer << " seconds.<br> "
-    << "Computing structure constants...";
+  { out << "done in " << theGlobalVariables->GetElapsedSeconds()- startTimer
+    << " seconds.<br> " << "Computing structure constants...";
     theReport.Report(out.str());
     startStructureConstantComputation= theGlobalVariables->GetElapsedSeconds();
   }
@@ -2522,7 +2522,9 @@ void SemisimpleLieAlgebra::ComputeChevalleyConstantS
     theReport.Report(out.str());
   }
   if (this->GetNumPosRoots()<=0)
-  { std::cout << "This is a programming error: number of positive roots of a semisimple Lie algebra is reported to be zero. "
+  { std::cout
+    << "This is a programming error: number of positive roots of a semisimple "
+    << "Lie algebra is reported to be zero. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }

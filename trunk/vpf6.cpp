@@ -3061,7 +3061,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagNewContextNeeded=true;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
-  this->MaxNumCachedExpressionPerContext=1000;
+  this->MaxNumCachedExpressionPerContext=100000;
   this->controlSequences.Clear();
 
   this->operationS.Clear();
@@ -3157,6 +3157,16 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
+  Expression theSSLieAlgrule;
+  this->RuleStack.SetSize(0);
+  this->RuleContextIdentifier=0;
+//  theSSLieAlgrule.reset(*this, 2);
+//  theSSLieAlgrule[0].reset(*this, 2);
+//  theSSLieAlgrule[0][0].MakeAtom(this->opSSLieAlg(), *this);
+//  theSSLieAlgrule[0][0].MakeAtom(this->opSSLieAlg(), *this);
+
+
+
 //  std::cout << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
 }
 
@@ -3817,13 +3827,13 @@ bool CommandList::ExpressionMatchesPattern
 //    return false;
   int opVarB=this->opBind();
   if (thePattern.IsListStartingWithAtom(opVarB))
-  { int indexLeft= matchedExpressions.theBoundVariables.GetIndex(thePattern[1]);
+  { int indexLeft= matchedExpressions.theBoundVariables.GetIndex(thePattern);
     if (indexLeft==-1)
-    { matchedExpressions.theBoundVariables.AddOnTop(thePattern[1]);
+    { matchedExpressions.theBoundVariables.AddOnTop(thePattern);
       matchedExpressions.variableImages.AddOnTop(input);
       indexLeft=matchedExpressions.theBoundVariables.size-1;
     }
-    if (!(matchedExpressions.variableImages[indexLeft]==input))
+    if (matchedExpressions.variableImages[indexLeft]!=input)
       return false;
     if (printLocalDebugInfo)
       std::cout << "<br><b>Match!</b>";
@@ -3875,8 +3885,9 @@ bool CommandList::EvaluateExpression
   }
   if (this->ExpressionStack.Contains(input))
   { std::stringstream errorStream;
-    errorStream << "I think I have detected a cycle: " << input.ToString()
-    << " is transformed to an expression that contains the starting expression. ";
+    errorStream << "I think I have detected an infinite cycle: I am asked to  "
+    << " reduce " << input.ToString()
+    << " but I have already seen that expression in the expression stack. ";
     this->flagAbortComputationASAP=true;
     return output.SetError(errorStream.str(), *this);
   }
@@ -3972,9 +3983,10 @@ bool CommandList::EvaluateExpression
       bufferPairs.reset();
 //      std::cout << "<br>Checking whether "
 //      << output.ToString() << " matches " << currentPattern.ToString();
+      //bool doLog=this->RuleStack.size==3;
       if(this->ProcessOneExpressionOnePatternOneSub
          (currentPattern, output, bufferPairs, &this->Comments
-          //,true
+          //,doLog
           ))
       { ReductionOcurred=true;
         break;
@@ -4006,7 +4018,7 @@ Expression* CommandList::PatternMatch
     return 0;
   if (theLog!=0 && logAttempts)
     (*theLog) << "<hr>found pattern: " << theExpression.ToString() << " -> "
-    << thePattern.ToString();
+    << thePattern.ToString() << " with " << bufferPairs.ToString();
   if (condition==0)
     return &theExpression;
   Expression tempExp=*condition;
@@ -4029,7 +4041,7 @@ void CommandList::SpecializeBoundVars
 (Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (toBeSubbedIn.IsListOfTwoAtomsStartingWith(this->opBind()))
-  { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn[0]);
+  { int indexMatching= matchedPairs.theBoundVariables.GetIndex(toBeSubbedIn);
     if (indexMatching!=-1)
     { toBeSubbedIn=matchedPairs.variableImages[indexMatching];
       //this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
@@ -4151,8 +4163,6 @@ void CommandList::EvaluateCommands()
 //  << "Starting expression: " << this->theProgramExpression.ToString()
 //  << "<hr>";
   Expression StartingExpression=this->theProgramExpression;
-  this->RuleStack.SetSize(0);
-  this->RuleContextIdentifier=0;
   this->flagAbortComputationASAP=false;
   bool tempBool;
   this->Comments.clear();
@@ -4274,7 +4284,10 @@ bool Expression::ToStringData
     << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
-  {
+  { out << "SemisimpleLieAlgebra{}("
+    << this->GetValuE<SemisimpleLieAlgebra>().GetLieAlgebraName()
+    << ")";
+    result=true;
   }
   output=out.str();
   return result;

@@ -128,9 +128,12 @@ std::string GetSelectHTMLStringTEmp
   << "    document.getElementById(\"textDimID\").disabled = \"disabled\";\n"
   << "  }"
   << "  else\n"
-  << "  { document.getElementById(\"textPreamble\").innerHTML=\"g:= SemisimpleLieAlgebra{}\"+"
-  << " document.getElementById(\"textTypeID\").value+\"_\"+ document.getElementById(\"textDimID\").value+\""
-  << "; h_{{i}}:=g_{0, i}; \"; \n"
+  << "  { document.getElementById(\"textPreamble\").innerHTML=\"g_{{i}}:= getChevalleyGenerator{}(\"+"
+  << " document.getElementById(\"textTypeID\").value+\"_\""
+  << "+ document.getElementById(\"textDimID\").value+\", i)"
+  << "; h_{{i}}:=getCartanGenerator{}(\""
+  << "+document.getElementById(\"textTypeID\").value+\"_\""
+  << "+ document.getElementById(\"textDimID\").value+ \", i) ; \"; \n"
   << "    document.getElementById(\"textPreamble\").style.display = '';\n"
   << "    document.getElementById(\"textTypeID\").disabled = '';\n"
   << "    document.getElementById(\"textDimID\").disabled = '';\n"
@@ -489,6 +492,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; g_1;";
 //  civilizedInput="Polynomial{}(a+b+c)";
 //civilizedInput="printSemisimpleLieAlgebra{}(g_2);";
+//civilizedInput="v_\\lambda:=hwv{}(G_2, (1,0),(0,0));";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";
@@ -526,8 +530,9 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   if (civilizedInput!="")
   { if (inputStringNames.Contains("checkUsePreamble"))
     { std::stringstream tempStream;
-      tempStream << "g:=SemisimpleLieAlgebra{}" << inputWeylString
-      << "_" << inputRankString << "; h_{{i}}:=g_{0, i};";
+      tempStream << "g_{{i}}:=getChevalleyGenerator{}(" << inputWeylString
+      << "_" << inputRankString << ", i); h_{{i}}:=getCartanGenerator{}( "
+      << inputWeylString << "_" << inputRankString << ", i) ;";
       civilizedInput=tempStream.str()+civilizedInput;
     }
     theParser.Evaluate(civilizedInput);
@@ -539,7 +544,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
       << theParser.parsingLog;
   }
 //  theComputation.flagLogSyntaxRules=inputRankString=="2";
-  std::cout << "</td>";
+  std::cout << "\n\n</td>\n\n";
   if (theParser.outputCommentsString!="")
   { std::cout << "<td valign=\"top\">";
     if (theParser.outputCommentsString.size()<10000)

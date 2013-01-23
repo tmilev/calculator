@@ -215,7 +215,8 @@ RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
 template < >
 ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-  { std::cout << "This is a programming error: expression not of required type ElementUniversalEnveloping_RationalFunction."
+  { std::cout << "This is a programming error: expression not of required"
+    << " type ElementUniversalEnveloping_RationalFunctionOld."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -1297,7 +1298,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra)
-{ if (!input.IsListNElements(4) && !input.IsListNElements(3))
+{ if (!input.IsSequenceNElementS(3) && !input.IsSequenceNElementS(2))
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
      SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
@@ -1316,7 +1317,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
     << middleE.ToString() << ".";
     return output.SetError(tempStream.str(), theCommands);
   }
-  if (input.IsListNElements(4))
+  if (input.IsSequenceNElementS(3))
   { Vector<Rational> parabolicSel;
     Expression& rightE=input[3];
     if (!theCommands.GetVector<Rational>
@@ -2489,9 +2490,51 @@ bool CommandList::innerPolynomial
   (theCommands, input, output);
 }
 
-bool CommandList::innerGetGeneratorSemisimpleLieAlg
+bool CommandList::innerGetChevGen
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ return false;
+{ if (!input.IsSequenceNElementS(2))
+    return false;
+  SemisimpleLieAlgebra* theSSalg;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
+    output.SetError(errorString, theCommands);
+  int theIndex;
+  if (!input[2].IsSmallInteger(&theIndex))
+    return false;
+  if (theIndex>theSSalg->GetNumPosRoots() || theIndex==0 || theIndex<-theSSalg->GetNumPosRoots())
+    return output.SetError("Bad Chevalley-Weyl generator index.", theCommands);
+  ElementSemisimpleLieAlgebra<Rational> theElt;
+  if (theIndex>0)
+    theIndex+=theSSalg->GetRank()-1;
+  theIndex+=theSSalg->GetNumPosRoots();
+  theElt.MakeGenerator(theIndex, *theSSalg->owner, theSSalg->indexInOwner);
+  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
+  return output.AssignValue(theUE, theCommands);
+}
+
+bool CommandList::innerGetCartanGen
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsSequenceNElementS(2))
+    return false;
+  SemisimpleLieAlgebra* theSSalg;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
+    output.SetError(errorString, theCommands);
+  int theIndex;
+  if (!input[2].IsSmallInteger(&theIndex))
+    return false;
+  if (theIndex<1 || theIndex>theSSalg->GetRank() )
+    return output.SetError("Bad Cartan subalgebra genrator index.", theCommands);
+  ElementSemisimpleLieAlgebra<Rational> theElt;
+  Vector<Rational> theH;
+  theH.MakeEi(theSSalg->GetRank(), theIndex);
+  theElt.MakeHgenerator(theH, *theSSalg->owner, theSSalg->indexInOwner);
+  ElementUniversalEnveloping<RationalFunctionOld> theUE;
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
+  return output.AssignValue(theUE, theCommands);
 }
 
 bool CommandList::fElementUniversalEnvelopingAlgebra
@@ -3165,7 +3208,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   Expression theSSLieAlgrule;
   this->RuleStack.SetSize(0);
   this->RuleContextIdentifier=0;
-  this->Evaluate
+/*  this->Evaluate
   ("(InternalVariable1{}{{InternalVariableA}})_{{InternalVariableB}}\
    :=getSemisimpleLieAlgGenerator{}\
    (InternalVariable1{}InternalVariableA,\
@@ -3174,7 +3217,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->theProgramExpression[1][0][0].MakeAtom(this->opSSLieAlg(), *this);
   this->theProgramExpression[2][1][1][0].MakeAtom(this->opSSLieAlg(), *this);
   this->RuleStack.AddOnTop(this->theProgramExpression);
-
+*/
 
 
 //  std::cout << "<br>Num lists created at command list initialization exit: " << NumListsCreated;
@@ -3524,9 +3567,9 @@ bool CommandList::outerEqualEqual
     return output.AssignValue(0, theCommands);
 }
 
-bool CommandList::StandardLieBracket
+bool CommandList::outerLieBracket
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsSequenceNElementS(2))
+{ if (!input.IsListNElements(3))
     return false;
   Expression& leftE=input[1];
   Expression& rightE=input[2];
@@ -4298,6 +4341,9 @@ bool Expression::ToStringData
     << this->GetValuE<SemisimpleLieAlgebra>().GetLieAlgebraName()
     << ")";
     result=true;
+  } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+  { out << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString();
+    result=true;
   }
   output=out.str();
   return result;
@@ -4361,8 +4407,7 @@ std::string Expression::ToString
       out << "(" << secondE << ")";
     else
       out << secondE;
-  }
-  else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
+  } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
   { out << this->children[1].ToString(theFormat)
     << "\\otimes " << this->children[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
@@ -4576,7 +4621,7 @@ std::string Expression::ToString
   if (startingExpression!=0)
   { std::stringstream outTrue;
     outTrue << "<table>";
-    outTrue << "<hr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
+    outTrue << "<tr><th>Input in LaTeX</th><th>Result in LaTeX</th></tr>";
     outTrue << "<tr><td colspan=\"2\">Double click LaTeX image to get the LaTeX code. "
     << "Javascript LaTeXing courtesy of <a href=\"http://www.math.union.edu/~dpvc/jsmath/\">jsmath</a>: many thanks for your great work!</td></tr>";
     if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
@@ -4955,7 +5000,6 @@ bool CommandList::ReplaceEXEByE(int formatOptions)
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
-
 
 bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];

@@ -1034,7 +1034,7 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
 
-  static bool StandardLieBracket
+  static bool outerLieBracket
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerMinus
@@ -1162,7 +1162,10 @@ public:
   static bool innerPolynomial
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool innerGetGeneratorSemisimpleLieAlg
+  static bool innerGetChevGen
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerGetCartanGen
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
@@ -1491,7 +1494,7 @@ bool CommandList::GetVector
     { if (conversionFunction==0)
         return false;
       this->CallCalculatorFunction(conversionFunction, currentE, theConverted);
-      if (!currentE.IsOfType<theType>())
+      if (!theConverted.IsOfType<theType>())
         return false;
     }
     if (!theConverted.SetContextAtLeastEqualTo(startContext))

@@ -96,18 +96,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
     (for F_4, Humphreys' convention dictates long root length squared 2). \
     If the upper index is present, the root length squared of the first simple root equals \
     (upper index)*(default first root length squared)^2/4.\
-    <br> A semisimple Lie algebra is treated as a function \
-    that returns the elements of a semisimple Lie algebra.  \
-    Let h_i:=(SemisimpleLieAlgebra{}G_2)_(0,i). Then h_i stands for the \
-    element of the Cartan dual to the i^th root, i.e., for the element which \
-    has the same action on a root space as the scalar product with the i^th simple root.\
-    Let g_i:=(SemisimpleLieAlgebra{}G_2)_(i). Then g_i stands for the i^th Chevalley-Weyl \
-    generator, where the Chevalley-Weyl generators are ordered according to the graded \
-    lexicographic order in the simple coordinates of the roots. \
-    The indices run in the ranges -r,..., -1 and 1,..., r, \
-    where r is the number of roots in the root system. \
-    The roots of indices 1,..., k are the simple roots, where k is the rank of the Lie algebra. \
-    The labeling scheme is best illustated by running the function printSemisimpleLieAlgebra. ",
+    ",
    "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
   this->AddOperationInnerHandler
   ("printSemisimpleLieAlgebra", &this->innerPrintSSLieAlgebraVerbose, "",
@@ -119,22 +108,24 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    ",
    "printSemisimpleLieAlgebra{}(F_4);\nprintSemisimpleLieAlgebra{}(2G^5_2+B_3);");
   this->AddOperationInnerHandler
-  ("getSemisimpleLieAlgGenerator", this->innerGetGeneratorSemisimpleLieAlg, "",
+  ("getChevalleyGenerator", this->innerGetChevGen, "",
    "First argument must be a semisimple Lie algebra, second argument must \
-   be either an integer or a pair of integers.\
-   <br>\n1.If the second argument is an integer, it must be a non-zero number from -N to N,\
+   be an integer from -N to N,\
    where N is the number of positive roots of the Lie algebra.\
-   In this case the function returns the Chevalley-Weyl generator labeled by the root\
+   The function returns the Chevalley-Weyl generator labeled by the root\
    corresponding to the integer index. The roots are indexed in the ordered displayed by the \
-   printSemisimpleLieAlgebra function. \
-   <br>\n2.If the second argument is a pair of integers, the first of this pair must be 0. \
-   The second integer must be a number between 1 and K, where K is the rank of the Lie algebra.\
+   printSemisimpleLieAlgebra function. ",
+   "[getChevalleyGenerator{}(G_2, 6), getChevalleyGenerator{}(G_2, -6)]");
+  this->AddOperationInnerHandler
+  ("getCartanGenerator", this->innerGetCartanGen, "",
+   "First argument must be a semisimple Lie algebra, second argument must \
+   be a number between 1 and K, where K is the rank of the Lie algebra.\
    In this case the function returns the element of the Cartan subalgebra that is dual \
    to the simple root with the same index. Note that this element of the Cartan subalgebra\
    is proportional to a Chevalley-Weyl generator with a coefficient of proportionality \
-   equal to 2/(simple root length squared) ).\
-    ",
-   "Polynomial{}((x+y+z)^2)");
+   equal to 2/(simple root length squared) ).",
+   "getCartanGenerator{}(G_2, 1)");
+
   this->AddOperationInnerHandler
   ("Polynomial", this->innerPolynomial, "",
    "Creates a polynomial expression. ",
@@ -569,15 +560,17 @@ void CommandList::initPredefinedStandardOperations()
    "4/6; 2/0;", true);
 
   this->AddOperationOuterHandler
-  ("\\otimes",  this->outerTensor, "",
+  ("\\otimes", this->outerTensor, "",
    "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
-   " g:= SemisimpleLieAlgebra{}G_2; h_{{i}}:=g_{0, i};\nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
-   \n g_{-1}(v_\\lambda\\otimes v_\\lambda);\n\
-   g_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
+   "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);  \
+   \nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
+   \ng_{-1}(v_\\lambda\\otimes v_\\lambda);\
+   \ng_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
   this->AddOperationOuterHandler
-  ("[]", this->StandardLieBracket, "",
-   "Lie bracket.", "g:=SemisimpleLieAlgebra{}A_1; [g_1,g_{-1}] ", true);
+  ("[]", this->outerLieBracket, "",
+   "Lie bracket.",
+   "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
   this->AddOperationOuterHandler
   (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \
    The expression a:=:b always reduces to \

@@ -2535,7 +2535,7 @@ public:
    ;
   void AssignElementLieAlgebra
 (const ElementSemisimpleLieAlgebra<Rational>& input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
- const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+ const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
   bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<CoefficientType>, CoefficientType>& output);
   void MakeOneGenerator

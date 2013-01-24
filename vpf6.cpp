@@ -4379,6 +4379,9 @@ bool Expression::ToStringData
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
   { out << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString();
     result=true;
+  } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+  { out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();
+    result=true;
   }
   output=out.str();
   return result;

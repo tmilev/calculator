@@ -492,7 +492,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 //  civilizedInput="g:=SemisimpleLieAlgebra{}G_2; g_1;";
 //  civilizedInput="Polynomial{}(a+b+c)";
 //civilizedInput="printSemisimpleLieAlgebra{}(g_2);";
-civilizedInput="v_\\lambda:=hwv{}(G_2, (1,0),(0,0));";
+//civilizedInput="v_\\lambda:=hwv{}(G_2, (1,0),(0,0));";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

@@ -179,6 +179,14 @@ charSSAlgMod<Rational>
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
+template < >
+int Expression::AddObjectReturnIndex(const
+LittelmannPath
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theLSpaths
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
 //Expression::AddObjectReturnIndex specializations end
 
 //start Expression::GetValuENonConstUseWithCaution specializations.
@@ -428,6 +436,17 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
   assert(false);
   return false;
+}
+
+bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
+{ Expression leftC=leftE.GetContext();
+  Expression rightC=rightE.GetContext();
+  Expression outputC;
+  if (!leftC.ContextMergeContexts(leftC, rightC, outputC))
+    return false;
+  if (!leftE.SetContextAtLeastEqualTo(outputC))
+    return false;
+  return rightE.SetContextAtLeastEqualTo(outputC);
 }
 
 Expression Expression::ContextGetContextVariable(int variableIndex)
@@ -1265,10 +1284,10 @@ bool CommandList::fHWTAABF
     return output.SetError("Function expects three arguments.", theCommands);
   Expression leftExpression, rightExpression, finalContext;
   Expression& weightExpression=input.children[3];
-  if (!theCommands.fElementUniversalEnvelopingAlgebra
+  if (!theCommands.innerElementUniversalEnvelopingAlgebra
       (theCommands, input.children[1], leftExpression))
     return output.SetError("Failed to convert left expression to element UE.", theCommands);
-  if (!theCommands.fElementUniversalEnvelopingAlgebra
+  if (!theCommands.innerElementUniversalEnvelopingAlgebra
       (theCommands, input.children[2], rightExpression ))
     return output.SetError("Failed to convert left expression to element UE.", theCommands);
   if (!Expression::ContextMergeContexts
@@ -2572,9 +2591,9 @@ bool CommandList::innerGetCartanGen
   return output.AssignValue(theUE, theCommands);
 }
 
-bool CommandList::fElementUniversalEnvelopingAlgebra
+bool CommandList::innerElementUniversalEnvelopingAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fElementUniversalEnvelopingAlgebra");
+{ MacroRegisterFunctionWithName("CommandList::innerElementUniversalEnvelopingAlgebra");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (input.IsOfType<ElementUniversalEnveloping<RationalFunctionOld > >())
   { output=input;

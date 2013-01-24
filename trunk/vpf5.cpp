@@ -436,7 +436,7 @@ bool CommandList::fDrawWeightSupport
 
 bool CommandList::fEmbedG2inB3
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ theCommands.fElementUniversalEnvelopingAlgebra(theCommands, input, output);
+{ theCommands.innerElementUniversalEnvelopingAlgebra(theCommands, input, output);
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
     return output.SetError
     ("Failed to convert argument to element of the Universal enveloping algebra. ", theCommands);

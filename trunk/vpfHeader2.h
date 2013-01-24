@@ -58,6 +58,24 @@ class Expression
   //If you want to have a list of mathematical objects, use the Sequence
   //data structure. A sequence is a List whose first entry is an atom whose value
   //is opSequence.
+  //
+  //-------------------------------------------------------
+  //
+  //Expressions of built-in types.
+  //1. An expression of built-in type represent hard-coded C++ types.
+  //2. An expression is said to be of built-in type if it is a list of 2 or 3 elements
+  //   starting with an atom
+  //   equal to one of a set of hard-coded names, and ending in an atom whose value
+  //   is an integer that uniquely (up to operator==) identifies the C++ structure.
+  //3. A context is a list of 1 or more elements starting with the atom Context. If
+  //   a context has only one child (which must then be equal to the atom Context),
+  //   then we say that we have an "empty context".
+  //4. If an expression of built-in type has 3 children, the middle child
+  //   must be a context. If an expression of built-in type has 2 children, we say that
+  //   the expression does not have context.
+  //5. Two expressions of built-in type with equal types and C++ identifiers, one having a
+  //   context that is empty, and the other having no context,
+  //   are considered to represent one and the same element.
   int theData;
   List<Expression> children;
   CommandList* theBoss;
@@ -180,6 +198,7 @@ class Expression
   (const Expression& input, dataType& output, GlobalVariables& theGlobalVariables)const;
 
   Expression GetContext()const;
+  static bool MergeContexts(Expression& leftE, Expression& rightE);
 
   Expression ContextGetContextVariable(int variableIndex);
   int ContextGetIndexAmbientSSalg()const;
@@ -948,6 +967,14 @@ public:
     whichDigit=input[0]-'0';
     return whichDigit<10 && whichDigit>=0;
   }
+  static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
+  { if (&input==&output)
+    { std::cout << "This is a programming error: the input expression, equal to "
+      << input.ToString() << " has the same address as the output expression. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+  }
 //  bool OrderMultiplicationTreeProperly(int commandIndex, Expression& theExpression);
   template <class theType>
   bool CallConversionFunctionReturnsNonConstUseCarefully
@@ -1174,6 +1201,7 @@ public:
   static bool innerGetCartanGen
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+
   static bool fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1184,10 +1212,7 @@ public:
   static bool fSplitFDpartB3overG2CharsOnly
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fElementUniversalEnvelopingAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
-  ;
-  static bool fElementTensorGeneralizedVermas
+  static bool innerElementUniversalEnvelopingAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerSSLieAlgebra
@@ -1367,13 +1392,50 @@ static bool TypeHighestWeightParabolic
   static bool innerAddRatToRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+
 static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerDivideRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerDivideRFOrPolyOrRatByRFOrPoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyRatOrPolyByRatOrPoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddUEToAny
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyLRObyLRO
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyLRObyLSPath
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddEltTensorToEltTensor
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddRatOrPolyToRatOrPoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyUEByAny
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 
+static bool innerTensorEltTensorByEltTensor
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyAnyByEltTensor
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
   void AddEmptyHeadedCommand();
   CommandList();
   int AddOperationNoRepetitionOrReturnIndexFirst

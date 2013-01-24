@@ -131,7 +131,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    "Creates a polynomial expression. ",
    "Polynomial{}((x+y+z)^2)");
   this->AddOperationInnerHandler
-  ("UE", this->fElementUniversalEnvelopingAlgebra, "",
+  ("UE", this->innerElementUniversalEnvelopingAlgebra, "",
    "Creates an atomic representation of an element of a universal enveloping algebra.",
    "g:=SemisimpleLieAlgebra{} G_2;\nUE{}(g_1g_2-g_2g_1+g_3^2)");
   this->AddOperationInnerHandler

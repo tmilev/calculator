@@ -313,6 +313,22 @@ bool Expression::ContextGetPolynomialMonomial
 
 template< >
 bool Expression::ContextGetPolynomialMonomial
+(const Expression& input, RationalFunctionOld& output, GlobalVariables& theGlobalVariables)const
+{ int theIndex= this->ContextGetPolynomialVariables().children.GetIndex(input);
+  if (theIndex==-1)
+  { std::cout << "This is a programming error: Expression::ContextGetPolynomialMonomial is called on "
+    << " expression " << input.ToString() << " but "
+    << " the context does not contain that expression. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    return false;
+  }
+  output.MakeOneLetterMoN(theIndex-1, 1, theGlobalVariables);
+  return true;
+}
+
+template< >
+bool Expression::ContextGetPolynomialMonomial
 (const Expression& input, ElementUniversalEnveloping<RationalFunctionOld>& output,
  GlobalVariables& theGlobalVariables)const
 { this->CheckInitialization();
@@ -611,6 +627,11 @@ void Expression::MakeFunction
   (CommandList& owner, const Expression& theFunction, const Expression& theArgument)
 { this->MakeXOX(owner, owner.opApplyFunction(), theFunction, theArgument);
   this->format=this->formatFunctionUseUnderscore;
+}
+
+void Expression::MakeEmptyContext(CommandList& owner)
+{ this->reset(owner,1);
+  this->children[0].MakeAtom(owner.opContext(), owner);
 }
 
 void Expression::MakeXOX
@@ -1297,7 +1318,8 @@ template<class CoefficientType>
 bool CommandList::fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
- Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra)
+ Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
+ Expression::FunctionAddress ConversionFun)
 { if (!input.IsSequenceNElementS(3) && !input.IsSequenceNElementS(2))
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
@@ -1310,7 +1332,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
     return output.SetError(errorString, theCommands);
   if (!theCommands.GetVector<CoefficientType>
       (middleE, outputWeightHWFundcoords, &outputHWContext, ambientSSalgebra->GetRank(),
-       &CommandList::innerPolynomial))
+       ConversionFun))
   { std::stringstream tempStream;
     tempStream << "Failed to convert the second argument of HWV to a list of "
     << ambientSSalgebra->GetRank() << " polynomials. The second argument you gave is "
@@ -1348,7 +1370,8 @@ bool CommandList::fDecomposeCharGenVerma
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
   if (!theCommands.fGetTypeHighestWeightParabolic<RationalFunctionOld>
-      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg))
+      (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg,
+       theCommands.innerRationalFunction))
    return false;
   if (output.IsError())
     return true;
@@ -1455,7 +1478,8 @@ bool CommandList::fHWV
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
   if(!theCommands.fGetTypeHighestWeightParabolic
-      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra)  )
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
+       theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
   else
     if (output.IsError())
@@ -2489,6 +2513,17 @@ bool CommandList::innerPolynomial
   return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
   (theCommands, input, output);
 }
+
+bool CommandList::innerRationalFunction
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPolynomial");
+  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
+  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
+  //std::cout << "<br>First elt input is:" << input[0].ToString();
+  return theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
+  (theCommands, input, output);
+}
+
 
 bool CommandList::innerGetChevGen
 (CommandList& theCommands, const Expression& input, Expression& output)
@@ -4923,7 +4958,7 @@ std::string CommandList::ToString()
   out << "<br>\n Variables (" << this->operationS.size << " = "
   << this->NumPredefinedVars << " predefined + " << this->operationS.size-this->NumPredefinedVars << " user-defined):<br>\n";
   for (int i=0; i<this->operationS.size; i++)
-  { out << "\n" << openTag1 << this->operationS[i] << closeTag1;
+  { out << "\n" << i << ": " << openTag1 << this->operationS[i] << closeTag1;
     if(i!=this->operationS.size-1)
       out << ", ";
   }
@@ -5262,7 +5297,8 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
   Selection theParSel;
   SemisimpleLieAlgebra* theSSalgebra;
   if (!theCommands.fGetTypeHighestWeightParabolic<Polynomial<Rational> >
-      (theCommands, input, output, theHWs[0], theParSel, theContext, theSSalgebra))
+      (theCommands, input, output, theHWs[0], theParSel, theContext, theSSalgebra,
+       theCommands.innerPolynomial))
     return output.SetError
     ("Failed to extract type, highest weight, parabolic selection", theCommands);
   if (output.IsError())
@@ -5282,7 +5318,7 @@ bool CommandList::fFreudenthalEval
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
   if (!theCommands.fGetTypeHighestWeightParabolic<Rational>
-      (theCommands, input, output, hwFundamental, tempSel, context, theSSalg))
+      (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())
     return true;

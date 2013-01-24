@@ -847,7 +847,7 @@ void CommandList::ParseFillDictionary
       { currentElement.controlIndex=this->controlSequences.GetIndex(current);
         currentElement.theData.reset(*this);
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);
-      } else if (this->isADigit(current, currentDigit))
+      } else if (MathRoutines::isADigit(current, currentDigit))
       { currentElement.theData.AssignValue<Rational>(currentDigit, *this);
         currentElement.controlIndex=this->conInteger();
         (*this->CurrrentSyntacticSouP).AddOnTop(currentElement);

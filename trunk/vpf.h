@@ -54,6 +54,7 @@
 #define vpf_h_already_included
 //This header file includes the various sub-headers.
 //The splitting into sub-headers is needed to speed up compilation times.
+#include "vpfMacros.h"
 #include "vpfHeader1.h"
 #include "vpfHeader1_2.h"
 #include "vpfHeader1_3.h"

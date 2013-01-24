@@ -339,15 +339,17 @@ template< >
 bool Expression::ContextGetPolynomialMonomial
 (const Expression& input, ElementUniversalEnveloping<RationalFunctionOld>& output,
  GlobalVariables& theGlobalVariables)const
-{ this->CheckInitialization();
+{ MacroRegisterFunctionWithName("Expression::ContextGetPolynomialMonomial");
+  this->CheckInitialization();
   int theVarIndex= this->ContextGetPolynomialVariables().children.GetIndex(input);
   int algebraIndex=this->ContextGetIndexAmbientSSalg();
   if (theVarIndex==-1 || algebraIndex==-1)
-  { std::cout
+  { /*std::cout
     << "This is a programming error:  Expression::ContextGetPolynomialMonomial "
-    << "should never fail. Something is wrong with the context. "
+    << "should never fail. Something is wrong with the current context, which is "
+    << this->ToString() << ". "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+    assert(false);*/
     return false;
   }
   Polynomial<Rational> tempP;
@@ -451,6 +453,14 @@ bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
 
 Expression Expression::ContextGetContextVariable(int variableIndex)
 { return this->ContextGetPolynomialVariables()[variableIndex+1];
+}
+
+void Expression::ContextSetSSLieAlgebra(int indexInOwners, CommandList& owner)
+{ this->reset(owner, 2);
+  this->children[0].MakeAtom(owner.opContext(), owner);
+  this->children[1].reset(owner, 2);
+  this->children[1][0].MakeAtom(owner.opSSLieAlg(), owner);
+  this->children[1][1].MakeAtom(indexInOwners, owner);
 }
 
 Expression Expression::ContextGetPolynomialVariables()const
@@ -2565,7 +2575,9 @@ bool CommandList::innerGetChevGen
   theElt.MakeGenerator(theIndex, *theSSalg->owner, theSSalg->indexInOwner);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
-  return output.AssignValue(theUE, theCommands);
+  Expression theContext;
+  theContext.ContextSetSSLieAlgebra(theSSalg->indexInOwner, theCommands);
+  return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
 bool CommandList::innerGetCartanGen
@@ -2584,11 +2596,14 @@ bool CommandList::innerGetCartanGen
     return output.SetError("Bad Cartan subalgebra genrator index.", theCommands);
   ElementSemisimpleLieAlgebra<Rational> theElt;
   Vector<Rational> theH;
+  theIndex--;
   theH.MakeEi(theSSalg->GetRank(), theIndex);
   theElt.MakeHgenerator(theH, *theSSalg->owner, theSSalg->indexInOwner);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
-  return output.AssignValue(theUE, theCommands);
+  Expression theContext;
+  theContext.ContextSetSSLieAlgebra(theSSalg->indexInOwner, theCommands);
+  return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
 bool CommandList::innerElementUniversalEnvelopingAlgebra
@@ -3868,9 +3883,8 @@ bool CommandList::EvaluatePMTDtree
     return output.AssignValueWithContext(outputData, inputContext, *this);
   }
   if (!inputContext.ContextGetPolynomialMonomial(input, outputData, *this->theGlobalVariableS))
-  { this->Comments << "Expression" << input.ToString()
-    << "  is not contained as a variable image in the context "
-    << inputContext.ToString() << "."
+  { this->Comments << "Failed to  extract monomial from expression " << input.ToString()
+    << " with context " << inputContext.ToString() << "."
     << " This could be a programming error. ";
     return false;
   }
@@ -4391,7 +4405,8 @@ bool Expression::ToStringData
     << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
-  { out << "SemisimpleLieAlgebra{}("
+  { out << "SSLieAlg{}("
+    //<< this->GetContext().ToString(theFormat) << ", "
     << this->GetValuE<SemisimpleLieAlgebra>().GetLieAlgebraName()
     << ")";
     result=true;

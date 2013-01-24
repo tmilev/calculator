@@ -222,7 +222,7 @@ class Expression
   Expression ContextGetPolynomialVariables()const;
   Expression ContextGetSSLieAlg()const;
 
-  void SetContextAmbientAlgebra(int indexInObjectContainer);
+  void ContextSetSSLieAlgebra(int indexInOwners, CommandList& owner);
   SemisimpleLieAlgebra* GetAmbientSSAlgebraNonConstUseWithCaution()const;
   const SemisimpleLieAlgebra* GetAmbientSSAlgebra()const
   { return this->GetAmbientSSAlgebraNonConstUseWithCaution();

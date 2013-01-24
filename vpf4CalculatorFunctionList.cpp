@@ -97,7 +97,9 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
     If the upper index is present, the root length squared of the first simple root equals \
     (upper index)*(default first root length squared)^2/4.\
     ",
-   "g:=SemisimpleLieAlgebra{}G_2; g_1; g_2; g_{0,1}; [[g_1,g_2], [g_{-1}, g_{-2}]]");
+   "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+   \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+    \n[g_1,g_{-1}]; \n[g_2, g_{-2}]; \n[h_{1}, g_6]; \n[h_2, g_{-6}]");
   this->AddOperationInnerHandler
   ("printSemisimpleLieAlgebra", &this->innerPrintSSLieAlgebraVerbose, "",
    "Creates a quite detailed \

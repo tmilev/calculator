@@ -961,12 +961,6 @@ public:
   (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
     std::stringstream* theLog=0, bool logAttempts=false)
   ;
-  bool isADigit(const std::string& input, int& whichDigit)
-  { if (input.size()!=1)
-      return false;
-    whichDigit=input[0]-'0';
-    return whichDigit<10 && whichDigit>=0;
-  }
   static void CheckInputNotSameAsOutput(const Expression& input, const Expression& output)
   { if (&input==&output)
     { std::cout << "This is a programming error: the input expression, equal to "

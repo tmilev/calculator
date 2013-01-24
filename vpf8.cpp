@@ -14,7 +14,18 @@ void LargeIntUnsigned::AssignString(const std::string& input)
   this->MakeZero();
   for (unsigned int i=0; i<input.size(); i++)
   { this->operator*=(10);
-    this->operator+=((unsigned) MathRoutines::GetIntFromDigit(input[i]));
+    int whichDigit=input[i]-'0';
+    if (whichDigit>9 || whichDigit<0)
+    { std::cout << "This is a programming error: LargeIntUnsigned::AssignString"
+      << " called on the string " << input << " which does not consist entirely of digits. "
+      << " Please note that LargeIntUnsigned::AssignString is a no-fail function, intended for "
+      << " internal use only. "
+      << " If you want to parse arbitrary unsafe expressions coming from the user, please use the "
+      << " big gun (a.k.a. CommandList). "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->operator+=((unsigned) whichDigit);
   }
 }
 
@@ -3654,8 +3665,8 @@ void LargeInt::AssignString(const std::string& input)
   if (input[0]=='-')
     startingIndex=1;
   for (unsigned int i=startingIndex; i<input.size(); i++)
-  { int x=MathRoutines::GetIntFromDigit(input[i]);
-    if (x==-1)
+  { int x=input[i]-'0';
+    if (x<0 || x>9)
       return;
     if (i>startingIndex)
       this->value*=10;

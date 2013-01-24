@@ -240,6 +240,9 @@ class Expression
   void MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
+  void MakeEmptyContext
+  (CommandList& owner)
+  ;
   std::string Lispify
   ()const
   ;
@@ -1077,7 +1080,7 @@ public:
   ;
   template <class theType>
   bool GetVector
-  (const Expression& theExpressioN, Vector<theType>& output,
+  (const Expression& input, Vector<theType>& output,
    Expression* inputOutputStartingContext=0, int targetDimNonMandatory=-1,
    Expression::FunctionAddress conversionFunction=0)
   ;
@@ -1162,6 +1165,9 @@ public:
   static bool innerPolynomial
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  static bool innerRationalFunction
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerGetChevGen
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
@@ -1203,7 +1209,8 @@ template<class CoefficientType>
 bool fGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
- Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra)
+ Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
+ Expression::FunctionAddress ConversionFun)
  ;
  static bool fGroebnerGrLex
 (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1458,21 +1465,23 @@ static bool innerDivideRatByRat
 
 template <class theType>
 bool CommandList::GetVector
-(const Expression& theExpressioN, Vector<theType>& output, Expression* inputOutputStartingContext,
+(const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext,
  int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
 { MemorySaving<Expression> tempContext;
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
+  if (!startContext.IsContext())
+    startContext.MakeEmptyContext(*this);
   Expression theConverted;
-  if (!theExpressioN.IsSequenceNElementS())
+  if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return false;
-    theConverted=theExpressioN;
-    if (!theExpressioN.IsOfType<theType>())
+    theConverted=input;
+    if (!input.IsOfType<theType>())
     { if (conversionFunction==0)
         return false;
-      this->CallCalculatorFunction(conversionFunction, theExpressioN, theConverted);
+      this->CallCalculatorFunction(conversionFunction, input, theConverted);
       if (!theConverted.IsOfType<theType>())
         return false;
     }
@@ -1483,23 +1492,28 @@ bool CommandList::GetVector
     return true;
   }
   if (targetDimNonMandatory>0)
-    if (targetDimNonMandatory!=theExpressioN.children.size-1)
+    if (targetDimNonMandatory!=input.children.size-1)
       return false;
-  targetDimNonMandatory=theExpressioN.children.size-1;
+  targetDimNonMandatory=input.children.size-1;
   output.SetSize(targetDimNonMandatory);
   for (int i=0; i<targetDimNonMandatory; i++)
-  { Expression& currentE=theExpressioN.children[i+1];
+  { Expression& currentE=input[i+1];
     theConverted=currentE;
     if (!currentE.IsOfType<theType>())
     { if (conversionFunction==0)
         return false;
-      this->CallCalculatorFunction(conversionFunction, currentE, theConverted);
-      if (!theConverted.IsOfType<theType>())
+      if (!this->CallCalculatorFunction(conversionFunction, currentE, theConverted))
         return false;
+      if (!theConverted.IsOfType<theType>())
+      { this->Comments << "<br>Converting function evaluated on " << currentE.ToString()
+        << " returned true, but the output of the function is not of the desired type. "
+        << "Instead, the function output is " << theConverted.ToString();
+        return false;
+      }
     }
     if (!theConverted.SetContextAtLeastEqualTo(startContext))
       return false;
-    output[i-1]=theConverted.GetValuE<theType>();
+    output[i]=theConverted.GetValuE<theType>();
   }
   return true;
 }

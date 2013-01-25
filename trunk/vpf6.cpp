@@ -2582,13 +2582,15 @@ bool CommandList::innerGetChevGen
 
 bool CommandList::innerGetCartanGen
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsSequenceNElementS(2))
+{ std::cout << "<br>Here I am with input: " << input.ToString();
+  if (!input.IsSequenceNElementS(2))
     return false;
   SemisimpleLieAlgebra* theSSalg;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
     output.SetError(errorString, theCommands);
+  std::cout << "<br>Here I am at next phase: " << input.ToString();
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -2603,6 +2605,7 @@ bool CommandList::innerGetCartanGen
   theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
   Expression theContext;
   theContext.ContextSetSSLieAlgebra(theSSalg->indexInOwner, theCommands);
+  std::cout << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
@@ -2616,10 +2619,13 @@ bool CommandList::innerElementUniversalEnvelopingAlgebra
   }
   if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >
       (theCommands, input, output))
-    return output.SetError("Failed to convert to element universal enveloping.", theCommands);
+    return output.SetError
+    ("Failed to convert " +input.ToString() + " to element universal enveloping.", theCommands);
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if (!output.IsOfType(&outputUE))
     return output.SetError("Failed to convert to element universal enveloping.", theCommands);
+  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
+  << output.GetContext().ToString();
   outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
   return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
 }
@@ -3798,17 +3804,18 @@ bool CommandList::innerExtractPMTDtreeContext
   if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
       return theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
-  Expression theContext=input.GetContext();
+  Expression theContext;
   if(input.IsAtoM(theCommands.opContext()))
   { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
     return false;
   }
-  output.reset(theCommands, 2);
-  output[0].MakeAtom(theCommands.opContext(), theCommands);
-  output[1].reset(theCommands, 2);
-  output[1][0].MakeAtom(theCommands.opPolynomialVariables(), theCommands);
-  output[1][1]=input;
-  return true;
+
+  theContext.reset(theCommands, 2);
+  theContext[0].MakeAtom(theCommands.opContext(), theCommands);
+  theContext[1].reset(theCommands, 2);
+  theContext[1][0].MakeAtom(theCommands.opPolynomialVariables(), theCommands);
+  theContext[1][1]=input;
+  return Expression::ContextMergeContexts(theContext, input.GetContext(), output);
 }
 
 template <class dataType>
@@ -3844,7 +3851,7 @@ bool CommandList::EvaluatePMTDtree
       //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
       if (input[0].IsAtoM(this->opTimes()))
-      { if (i==0)
+      { if (i==1)
           outputData=output.GetValuE<dataType>();
         else
         { //std::cout << "<hr>Multiplying: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
@@ -3854,7 +3861,7 @@ bool CommandList::EvaluatePMTDtree
         }
       } else if (input[0].IsAtoM(this->opPlus()))
       { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ToString(this->theGlobalVariableS->theDefaultLieFormat);
-        if (i==0)
+        if (i==1)
         { outputData=output.GetValuE<dataType>();
 //          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
 //          << ", which should equal the bufferData: " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
@@ -4411,7 +4418,9 @@ bool Expression::ToStringData
     << ")";
     result=true;
   } else if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
-  { out << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString();
+  { out << "UEE{}(" //<< this->GetContext().ToString() << ", "
+    << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString()
+    << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();

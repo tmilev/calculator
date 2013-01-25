@@ -135,7 +135,9 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
   this->AddOperationInnerHandler
   ("UE", this->innerElementUniversalEnvelopingAlgebra, "",
    "Creates an atomic representation of an element of a universal enveloping algebra.",
-   "g:=SemisimpleLieAlgebra{} G_2;\nUE{}(g_1g_2-g_2g_1+g_3^2)");
+   "g_{{i}}:=getChevalleyGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+   \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
+   \nUE{}(g_1g_2-g_2g_1+g_3^2)");
   this->AddOperationInnerHandler
   ("FunctionToMatrix", this->fMatrix,"",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \

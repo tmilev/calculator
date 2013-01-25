@@ -193,8 +193,9 @@ LittelmannPath
 template < >
 Rational& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<Rational>())
-  { std::cout << "This is a programming error: expression not of required type Rational."
-    << ". Please debug file " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+  { std::cout << "This is a programming error: expression not of required type Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
   return this->theBoss->theObjectContainer.theRationals[this->children.LastObject()->theData];
@@ -204,6 +205,7 @@ template < >
 std::string& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<std::string>())
   { std::cout << "This is a programming error: expression not of required type std::string. "
+    << " The expression equals " << this->ToString() << "."
     <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -214,6 +216,7 @@ template < >
 RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<RationalFunctionOld>())
   { std::cout << "This is a programming error: expression not of required type RationalFunctionOld."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -225,6 +228,7 @@ ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValuENonConstUse
 { if (!this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
   { std::cout << "This is a programming error: expression not of required"
     << " type ElementUniversalEnveloping_RationalFunctionOld."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -235,6 +239,7 @@ template < >
 Polynomial<Rational>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<Polynomial<Rational> >())
   { std::cout << "This is a programming error: expression not of required type Polynomial_Rational."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -245,6 +250,7 @@ template < >
 LittelmannPath& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<LittelmannPath>())
   { std::cout << "This is a programming error: expression not of required type LittelmannPath."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -255,6 +261,7 @@ template < >
 MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
   { std::cout << "This is a programming error: expression not of required type MonomialTensor_int."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
@@ -265,6 +272,7 @@ template < >
 ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { std::cout << "This is a programming error: expression not of required type ElementTensorsGeneralizedVermas_RationalFunction."
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -275,6 +283,7 @@ template < >
 charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<charSSAlgMod<Rational> >())
   { std::cout << "This is a programming error: expression not of required type charSSAlgMod_Rational. "
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -285,6 +294,7 @@ template < >
 AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<AlgebraicNumber>())
   { std::cout << "This is a programming error: expression not of required type AlgebraicNumber. "
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -295,6 +305,7 @@ template < >
 SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
 { if (!this->IsOfType<SemisimpleLieAlgebra>())
   { std::cout << "This is a programming error: expression not of required type AlgebraicNumber. "
+    << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
@@ -304,60 +315,79 @@ SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
 //end Expression::GetValuENonConstUseWithCaution specializations.
 //start Expression::ContextGetPolynomialMonomial specializations.
 template< >
-bool Expression::ContextGetPolynomialMonomial
-(const Expression& input, Polynomial<Rational>& output, GlobalVariables& theGlobalVariables)const
-{ int theIndex= this->ContextGetPolynomialVariables().children.GetIndex(input);
-  if (theIndex==-1)
-  { std::cout << "This is a programming error: Expression::ContextGetPolynomialMonomial is called on "
-    << " expression " << input.ToString() << " but "
-    << " the context does not contain that expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-    return false;
-  }
-  output.MakeMonomiaL(theIndex-1, 1, 1);
-  return true;
-}
-
-template< >
-bool Expression::ContextGetPolynomialMonomial
-(const Expression& input, RationalFunctionOld& output, GlobalVariables& theGlobalVariables)const
-{ int theIndex= this->ContextGetPolynomialVariables().children.GetIndex(input);
-  if (theIndex==-1)
-  { std::cout << "This is a programming error: Expression::ContextGetPolynomialMonomial is called on "
-    << " expression " << input.ToString() << " but "
-    << " the context does not contain that expression. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-    return false;
-  }
-  output.MakeOneLetterMoN(theIndex-1, 1, theGlobalVariables);
-  return true;
-}
-
-template< >
-bool Expression::ContextGetPolynomialMonomial
-(const Expression& input, ElementUniversalEnveloping<RationalFunctionOld>& output,
- GlobalVariables& theGlobalVariables)const
-{ MacroRegisterFunctionWithName("Expression::ContextGetPolynomialMonomial");
+bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->CheckInitialization();
-  int theVarIndex= this->ContextGetPolynomialVariables().children.GetIndex(input);
-  int algebraIndex=this->ContextGetIndexAmbientSSalg();
-  if (theVarIndex==-1 || algebraIndex==-1)
-  { /*std::cout
-    << "This is a programming error:  Expression::ContextGetPolynomialMonomial "
-    << "should never fail. Something is wrong with the current context, which is "
-    << this->ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);*/
+  if (this->IsAtoM())
     return false;
+  if (this->IsOfType<Rational>())
+  { Polynomial<Rational> resultP;
+    resultP.MakeConsT(this->GetValuE<Rational>());
+    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
   }
-  Polynomial<Rational> tempP;
-  tempP.MakeMonomiaL(theVarIndex-1, 1, 1);
-  RationalFunctionOld tempMon;
-  tempMon=tempP;
-  output.MakeConst(tempMon, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
-  return true;
+  if (this->IsOfType<Polynomial<Rational> >())
+  { output=*this;
+    return true;
+  }
+  Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
+  int indexInPolyVars=myPolyVars.children.GetIndex(this->children[0]);
+  if (indexInPolyVars==-1)
+    return false;
+  Polynomial<Rational> resultP;
+  resultP.MakeMonomiaL(indexInPolyVars-1, 1, 1);
+  return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+}
+
+template< >
+bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
+{ MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
+  this->CheckInitialization();
+  if (this->IsAtoM())
+    return false;
+  if (this->IsOfType<Rational>())
+  { Polynomial<Rational> resultP;
+    resultP.MakeConsT(this->GetValuE<Rational>());
+    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<Polynomial<Rational> >())
+  { RationalFunctionOld resultRF;
+    resultRF.context=this->theBoss->theGlobalVariableS;
+    resultRF=this->GetValuE<Polynomial<Rational> >();
+    return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
+  }
+  if (this->IsOfType<RationalFunctionOld>())
+  { output=*this;
+    return true;
+  }
+  Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
+  int indexInPolyVars=myPolyVars.children.GetIndex(this->children[0]);
+  if (indexInPolyVars==-1)
+    return false;
+  RationalFunctionOld resultRF;
+  resultRF.MakeOneLetterMoN(indexInPolyVars-1, 1, *this->theBoss->theGlobalVariableS);
+  return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
+}
+
+template< >
+bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
+(Expression& output)const
+{ MacroRegisterFunctionWithName
+  ("Expression::ConvertToType_ElementUniversalEnveloping_RationalFunctionOld");
+  this->CheckInitialization();
+  if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+  { output=*this;
+    return true;
+  }
+  int algebraIndex=this->GetContext().ContextGetIndexAmbientSSalg();
+  if (algebraIndex==-1)
+    return false;
+  if (!this->ConvertToType<RationalFunctionOld>(output))
+    return false;
+  RationalFunctionOld tempRF=output.GetValuE<RationalFunctionOld>();
+  ElementUniversalEnveloping<RationalFunctionOld> resultElt;
+  resultElt.MakeConst
+  (tempRF, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
+  return output.AssignValueWithContext(resultElt, this->GetContext(), *this->theBoss);
 }
 //end Expression::ContextGetPolynomialMonomial specializations.
 
@@ -388,7 +418,8 @@ int Expression::ContextGetNumContextVariables()const
 }
 
 bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
-{ if (!inputOutputMinContext.IsContext())
+{ this->CheckInitialization();
+  if (!inputOutputMinContext.IsContext())
     return false;
   if (this->IsOfType<Rational>())
     return true;
@@ -429,15 +460,16 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     newETGV.Substitution(polySub);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->theBoss);
   }
-  std::cout
-  << "This may or may not be a programing error. "
-  << "Function Expression::SetContextAtLeastEqualTo"
-  << " does not cover all expression data types. "
-  << " I cannot decide at the moment whether this should be the desired behavior of this "
-  << " function. Letting you know of my indecision by humbly crashing in flames. "
-  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
-  assert(false);
-  return false;
+  if (this->IsBuiltInType())
+  { this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type "
+    << " but is not handled by Expression::SetContextAtLeastEqualTo";
+    return false;
+  }
+  Expression tempE=*this;
+  this->reset(*this->theBoss, 2);
+  this->children[0]=tempE;
+  this->children[1]=inputOutputMinContext;
+  return true;
 }
 
 bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
@@ -3188,9 +3220,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.Clear();
 
   this->operationS.Clear();
+  this->builtInTypes.Clear();
   this->FunctionHandlers.SetSize(0);
   this->operationS.SetExpectedSize(300);
   this->FunctionHandlers.SetExpectedSize(300);
+  this->builtInTypes.SetHashSizE(30);
 
   this->syntacticSouP.SetSize(0);
   this->syntacticStacK.SetSize(0);
@@ -3230,17 +3264,17 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
-  this->AddOperationNoRepetitionAllowed("Rational");
-  this->AddOperationNoRepetitionAllowed("AlgebraicNumber");
-  this->AddOperationNoRepetitionAllowed("Polynomial<Rational>");
-  this->AddOperationNoRepetitionAllowed("RationalFunction");
-  this->AddOperationNoRepetitionAllowed("string");
-  this->AddOperationNoRepetitionAllowed("ElementUEoverRF");
-  this->AddOperationNoRepetitionAllowed("ElementTensorGVM");
-  this->AddOperationNoRepetitionAllowed("CharSSAlgMod");
-  this->AddOperationNoRepetitionAllowed("SemisimpleLieAlg");
-  this->AddOperationNoRepetitionAllowed("LittelmannPath");
-  this->AddOperationNoRepetitionAllowed("LRO");
+  this->AddOperationBuiltInType("Rational");
+  this->AddOperationBuiltInType("AlgebraicNumber");
+  this->AddOperationBuiltInType("Polynomial<Rational>");
+  this->AddOperationBuiltInType("RationalFunction");
+  this->AddOperationBuiltInType("string");
+  this->AddOperationBuiltInType("ElementUEoverRF");
+  this->AddOperationBuiltInType("ElementTensorGVM");
+  this->AddOperationBuiltInType("CharSSAlgMod");
+  this->AddOperationBuiltInType("SemisimpleLieAlg");
+  this->AddOperationBuiltInType("LittelmannPath");
+  this->AddOperationBuiltInType("LRO");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
 
@@ -3824,8 +3858,8 @@ bool CommandList::outerExtractAndEvaluatePMTDtree
 { Expression contextE;
   if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
     return false;
-//  std::cout << "<br>Extracted context from " << input.ToString() << ": "
-//  << contextE.ToString();
+  std::cout << "<br>Extracted context from " << input.ToString() << ": "
+  << contextE.ToString();
   return theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
 }
 
@@ -3848,8 +3882,7 @@ bool CommandList::EvaluatePMTDtree
   { for (int i=1; i<input.children.size; i++)
     { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
         return false;
-      //std::cout << "<hr>Status outputBuffer data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-      //std::cout << "<hr>Status bufferData data after variable change: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
+      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
       if (input[0].IsAtoM(this->opTimes()))
       { if (i==1)
           outputData=output.GetValuE<dataType>();
@@ -3884,18 +3917,20 @@ bool CommandList::EvaluatePMTDtree
       outputData.RaiseToPower(thePower);
       return output.AssignValueWithContext(outputData, inputContext, *this);
     }
-//  std::cout << "<br>input: " << input.ToString();
-  if (input.IsOfType<Rational>())
-  { outputData=input.GetValuE<Rational>();//<-type conversion here
-    return output.AssignValueWithContext(outputData, inputContext, *this);
-  }
-  if (!inputContext.ContextGetPolynomialMonomial(input, outputData, *this->theGlobalVariableS))
-  { this->Comments << "Failed to  extract monomial from expression " << input.ToString()
-    << " with context " << inputContext.ToString() << "."
+  Expression intermediate=input;
+  Expression tempContext=inputContext;
+  if (!intermediate.SetContextAtLeastEqualTo(tempContext))
+  { this->Comments << "Failed to set context " << tempContext.ToString()
+    << " onto expression " << intermediate.ToString() << "."
     << " This could be a programming error. ";
     return false;
   }
-  return output.AssignValueWithContext(outputData, inputContext, *this);
+  if (!intermediate.ConvertToType<dataType>(output))
+  { this->Comments << "Failed to convert " << intermediate.ToString()
+    << " to the desired type. ";
+    return false;
+  }
+  return true;
 }
 
 bool CommandList::ExpressionsAreEqual
@@ -4353,13 +4388,23 @@ int Expression::ContextGetIndexAmbientSSalg()const
   return -1;
 }
 
+bool Expression::HasContext(int* whichChild)const
+{ for (int i=1; i<this->children.size; i++)
+    if (this->children[i].IsContext())
+    { if (whichChild!=0)
+        *whichChild=i;
+      return true;
+    }
+  return false;
+}
+
 Expression Expression::GetContext()const
 { this->CheckInitialization();
-  for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsContext())
-      return this->children[i];
+  int contextIndex;
+  if (this->HasContext(&contextIndex))
+    return this->children[contextIndex];
   Expression output;
-  output.reset(*this->theBoss,1);
+  output.reset(*this->theBoss, 1);
   output[0].MakeAtom(this->theBoss->opContext(), *this->theBoss);
   return output;
 }
@@ -4767,6 +4812,18 @@ bool Expression::IsOperation(std::string* outputWhichOperation)const
   return true;
 }
 
+bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
+{ std::string tempS;
+  if (!this->IsOperation(&tempS))
+    return false;
+  if (this->theBoss->builtInTypes.Contains(tempS))
+  { if (outputWhichOperation!=0)
+      *outputWhichOperation=tempS;
+    return true;
+  }
+  return false;
+}
+
 int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
 { int result=this->operationS.GetIndex(theOpName);
   if (result==-1)
@@ -4776,6 +4833,11 @@ int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& t
     result=this->operationS.size-1;
   }
   return result;
+}
+
+void CommandList::AddOperationBuiltInType(const std::string& theOpName)
+{ this->AddOperationNoRepetitionAllowed(theOpName);
+  this->builtInTypes.AddOnTop(theOpName);
 }
 
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)

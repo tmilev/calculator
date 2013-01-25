@@ -138,6 +138,7 @@ class Expression
     return this->theData==desiredDataUseMinusOneForAny;
   }
   bool IsOperation(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInType(std::string* outputWhichOperation=0)const;
   Expression& operator[](int n)const
   { return this->children[n];
   }
@@ -146,7 +147,7 @@ class Expression
   bool IsContext()const;
 
   template <class theType>
-  bool ConvertToType(Expression& output);
+  bool ConvertToType(Expression& output)const;
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");
@@ -193,10 +194,7 @@ class Expression
   bool SetContextAtLeastEqualTo(Expression& inputOutputMinContext);
   int GetNumContextVariables()const;
 
-  template <class dataType>
-  bool ContextGetPolynomialMonomial
-  (const Expression& input, dataType& output, GlobalVariables& theGlobalVariables)const;
-
+  bool HasContext(int* whichChild=0)const;
   Expression GetContext()const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
 
@@ -550,6 +548,7 @@ public:
 //As operations can be thought of as functions, and functions are named by the class VariableNonBound,
 //operations are in fact realized as elements of type VariableNonBound.
   HashedList<std::string, MathRoutines::hashString> operationS;
+  HashedList<std::string, MathRoutines::hashString> builtInTypes;
   List<List<Function> > FunctionHandlers;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
@@ -1436,6 +1435,9 @@ static bool innerMultiplyAnyByEltTensor
   (const std::string& theOpName)
 ;
   void AddOperationNoRepetitionAllowed
+  (const std::string& theOpName)
+  ;
+  void AddOperationBuiltInType
   (const std::string& theOpName)
   ;
 

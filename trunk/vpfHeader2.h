@@ -70,10 +70,12 @@ class Expression
   //3. A context is a list of 1 or more elements starting with the atom Context. If
   //   a context has only one child (which must then be equal to the atom Context),
   //   then we say that we have an "empty context".
-  //4. If an expression of built-in type has 3 children, the middle child
+  //4. An expression is said to have context if it is a list of at least two elements,
+  //   the second element of which is a context.
+  //5. If an expression of built-in type has 3 children, the middle child
   //   must be a context. If an expression of built-in type has 2 children, we say that
   //   the expression does not have context.
-  //5. Two expressions of built-in type with equal types and C++ identifiers, one having a
+  //6. Two expressions of built-in type with equal types and C++ identifiers, one having a
   //   context that is empty, and the other having no context,
   //   are considered to represent one and the same element.
   int theData;
@@ -151,8 +153,11 @@ class Expression
   template <class theType>
   bool IsOfType(theType* whichElement=0)const
   { MacroRegisterFunctionWithName("Expression::IsOfType");
-    if(!(this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()) &&
-        this->children.size>1 && this->children.LastObject()->IsAtoM()))
+    if (this->theBoss==0)
+      return false;
+    if (!this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()))
+      return false;
+    if(this->children.size<2 || !this->children.LastObject()->IsAtoM())
       return false;
     if (whichElement==0)
       return true;
@@ -174,10 +179,11 @@ class Expression
   //note: the following always returns true:
   template <class theType>
   bool AssignValue(const theType& inputValue, CommandList& owner)
-  { this->reset(owner, 2);
+  { this->reset(owner, 3);
     int theIndex =this->AddObjectReturnIndex(inputValue);
     this->children[0].MakeAtom(this->GetTypeOperation<theType>(), owner);
-    this->children[1].MakeAtom(theIndex, owner);
+    this->children[1].MakeEmptyContext(owner);
+    this->children[2].MakeAtom(theIndex, owner);
     return true;
   }
   //note: the following always returns true:
@@ -193,10 +199,13 @@ class Expression
   }
   bool SetContextAtLeastEqualTo(Expression& inputOutputMinContext);
   int GetNumContextVariables()const;
-
-  bool HasContext(int* whichChild=0)const;
+  bool RemoveContext();
+  bool HasContext()const;
   Expression GetContext()const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
+
+  template<class dataType>
+  bool GetContextForConversionIgnoreMyContext(Expression& output)const;
 
   Expression ContextGetContextVariable(int variableIndex);
   int ContextGetIndexAmbientSSalg()const;
@@ -257,7 +266,7 @@ class Expression
   void MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
-  void MakeEmptyContext
+  bool MakeEmptyContext
   (CommandList& owner)
   ;
   std::string Lispify

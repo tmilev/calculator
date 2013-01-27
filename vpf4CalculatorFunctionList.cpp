@@ -131,7 +131,7 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
   this->AddOperationInnerHandler
   ("Polynomial", this->innerPolynomial, "",
    "Creates a polynomial expression. ",
-   "Polynomial{}((x+y+z)^2)");
+   "Polynomial{}((x-2y+z-1)^2(x+y-z))");
   this->AddOperationInnerHandler
   ("UE", this->innerElementUniversalEnvelopingAlgebra, "",
    "Creates an atomic representation of an element of a universal enveloping algebra.",

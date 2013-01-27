@@ -318,8 +318,6 @@ template< >
 bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_Polynomial_Rational");
   this->CheckInitialization();
-  if (this->IsAtoM())
-    return false;
   if (this->IsOfType<Rational>())
   { Polynomial<Rational> resultP;
     resultP.MakeConsT(this->GetValuE<Rational>());
@@ -329,8 +327,18 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
   { output=*this;
     return true;
   }
+  if (!this->HasContext())
+    return false;
+  Expression expressionRemovedContext=*this;
+  expressionRemovedContext.RemoveContext();
+  std::cout << "<br>Converting to polynomial: " << this->ToString()
+  << ", without context: " << expressionRemovedContext.ToString();
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.children.GetIndex(this->children[0]);
+  int indexInPolyVars=myPolyVars.children.GetIndex(expressionRemovedContext);
+  std::cout << "<br>Expression without context " << expressionRemovedContext.ToString()
+  << " (Lisp: " << expressionRemovedContext.Lispify()
+  << ") has index " << indexInPolyVars << " in " << myPolyVars.ToString()
+  << ". Lisp: " << myPolyVars.Lispify();
   if (indexInPolyVars==-1)
     return false;
   Polynomial<Rational> resultP;
@@ -342,12 +350,10 @@ template< >
 bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
 { MacroRegisterFunctionWithName("ConvertToType_RationalFunctionOld");
   this->CheckInitialization();
-  if (this->IsAtoM())
-    return false;
   if (this->IsOfType<Rational>())
-  { Polynomial<Rational> resultP;
-    resultP.MakeConsT(this->GetValuE<Rational>());
-    return output.AssignValueWithContext(resultP, this->GetContext(), *this->theBoss);
+  { RationalFunctionOld resultRF;
+    resultRF.MakeConsT(this->GetValuE<Rational>(), this->theBoss->theGlobalVariableS);
+    return output.AssignValueWithContext(resultRF, this->GetContext(), *this->theBoss);
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { RationalFunctionOld resultRF;
@@ -359,8 +365,15 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   { output=*this;
     return true;
   }
+  if (!this->HasContext())
+    return false;
+  Expression expressionRemovedContext=*this;
+  expressionRemovedContext.RemoveContext();
+  std::cout << "<br>Converting to rational function: " << this->ToString()
+  << ", without context: " << expressionRemovedContext.ToString();
+
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.children.GetIndex(this->children[0]);
+  int indexInPolyVars=myPolyVars.children.GetIndex(expressionRemovedContext);
   if (indexInPolyVars==-1)
     return false;
   RationalFunctionOld resultRF;
@@ -389,7 +402,39 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
   (tempRF, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
   return output.AssignValueWithContext(resultElt, this->GetContext(), *this->theBoss);
 }
+
 //end Expression::ContextGetPolynomialMonomial specializations.
+//begin Expression::GetContextForConversionIgnoreMyContext specializations.
+template <>
+bool Expression::GetContextForConversionIgnoreMyContext<Polynomial<Rational> >
+(Expression& output)const
+{ this->CheckInitialization();
+  if (this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >())
+    return output.MakeEmptyContext(*this->theBoss);
+  output.reset(*this->theBoss, 2);
+  output[0].MakeAtom(this->theBoss->opContext(), *this->theBoss);
+  output[1].reset(*this->theBoss, 2);
+  output[1][0].MakeAtom(this->theBoss->opPolynomialVariables(), *this->theBoss);
+  output[1][1]=*this;
+  return true;
+}
+
+template <>
+bool Expression::GetContextForConversionIgnoreMyContext<RationalFunctionOld>
+(Expression& output)const
+{ if (this->IsOfType<RationalFunctionOld>())
+    return output.MakeEmptyContext(*this->theBoss);
+  return this->GetContextForConversionIgnoreMyContext<Polynomial<Rational> >(output);
+}
+
+template <>
+bool Expression::GetContextForConversionIgnoreMyContext
+<ElementUniversalEnveloping<RationalFunctionOld> >(Expression& output)const
+{ if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
+    return output.MakeEmptyContext(*this->theBoss);
+  return this->GetContextForConversionIgnoreMyContext<RationalFunctionOld>(output);
+}
+//end Expression::GetContextForConversionIgnoreMyContext specializations.
 
 bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
 { if (N!=-1)
@@ -418,11 +463,15 @@ int Expression::ContextGetNumContextVariables()const
 }
 
 bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
-{ this->CheckInitialization();
+{ MacroRegisterFunctionWithName("Expression::SetContextAtLeastEqualTo");
+  this->CheckInitialization();
   if (!inputOutputMinContext.IsContext())
-    return false;
-  if (this->IsOfType<Rational>())
-    return true;
+  { this->theBoss->Comments << "<br>Waring: non-initialized input context in "
+    << "Expression::SetContextAtLeastEqualTo.";
+    inputOutputMinContext.MakeEmptyContext(*this->theBoss);
+  }
+  std::cout << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
+  << " in expression " << this->ToString();
   Expression newContext;
   Expression myOldContext=this->GetContext();
   if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext))
@@ -437,6 +486,14 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     << " substitution from what is supposed to be a super-context. Something is wrong. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
+  }
+  if (this->IsOfType<Rational>())
+  { if (this->children.size==2)
+    { this->children.SetSize(3);
+      this->children[2]=this->children[1];
+    }
+    this->children[1]=inputOutputMinContext;
+    return true;
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
   { ElementUniversalEnveloping<RationalFunctionOld> newUE=
@@ -463,7 +520,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   if (this->IsBuiltInType())
   { this->theBoss->Comments << "Expression " << this->ToString() << " is of built-in type "
     << " but is not handled by Expression::SetContextAtLeastEqualTo";
-    return false;
+    //return false;
   }
   Expression tempE=*this;
   this->reset(*this->theBoss, 2);
@@ -690,9 +747,10 @@ void Expression::MakeFunction
   this->format=this->formatFunctionUseUnderscore;
 }
 
-void Expression::MakeEmptyContext(CommandList& owner)
+bool Expression::MakeEmptyContext(CommandList& owner)
 { this->reset(owner,1);
   this->children[0].MakeAtom(owner.opContext(), owner);
+  return true;
 }
 
 void Expression::MakeXOX
@@ -2581,8 +2639,17 @@ bool CommandList::innerRationalFunction
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
   //std::cout << "<br>First elt input is:" << input[0].ToString();
-  return theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
+  bool result= theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
   (theCommands, input, output);
+  if (!output.IsOfType<RationalFunctionOld>())
+  { std::cout << "<br>This is a programming error: outerExtractAndEvaluatePMTDtree returned true "
+    << "from input" << input.ToString()
+    << " but the result is not of type RationalFunctionOld, instead it is "
+    << output.ToString() << ". "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return result;
 }
 
 
@@ -3838,17 +3905,12 @@ bool CommandList::innerExtractPMTDtreeContext
   if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
     if (input[2].IsSmallInteger(&thePower))
       return theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
-  Expression theContext;
   if(input.IsAtoM(theCommands.opContext()))
   { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
     return false;
   }
-
-  theContext.reset(theCommands, 2);
-  theContext[0].MakeAtom(theCommands.opContext(), theCommands);
-  theContext[1].reset(theCommands, 2);
-  theContext[1][0].MakeAtom(theCommands.opPolynomialVariables(), theCommands);
-  theContext[1][1]=input;
+  Expression theContext;
+  input.GetContextForConversionIgnoreMyContext<dataType>(theContext);
   return Expression::ContextMergeContexts(theContext, input.GetContext(), output);
 }
 
@@ -3922,7 +3984,7 @@ bool CommandList::EvaluatePMTDtree
   if (!intermediate.SetContextAtLeastEqualTo(tempContext))
   { this->Comments << "Failed to set context " << tempContext.ToString()
     << " onto expression " << intermediate.ToString() << "."
-    << " This could be a programming error. ";
+    << " <b>This could be a programmSetContextAtLeastEqualToing error.</b> ";
     return false;
   }
   if (!intermediate.ConvertToType<dataType>(output))
@@ -4388,24 +4450,12 @@ int Expression::ContextGetIndexAmbientSSalg()const
   return -1;
 }
 
-bool Expression::HasContext(int* whichChild)const
-{ for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsContext())
-    { if (whichChild!=0)
-        *whichChild=i;
-      return true;
-    }
-  return false;
-}
-
 Expression Expression::GetContext()const
 { this->CheckInitialization();
-  int contextIndex;
-  if (this->HasContext(&contextIndex))
-    return this->children[contextIndex];
+  if (this->HasContext())
+    return this->children[1];
   Expression output;
-  output.reset(*this->theBoss, 1);
-  output[0].MakeAtom(this->theBoss->opContext(), *this->theBoss);
+  output.MakeEmptyContext(*this->theBoss);
   return output;
 }
 
@@ -4812,9 +4862,30 @@ bool Expression::IsOperation(std::string* outputWhichOperation)const
   return true;
 }
 
+bool Expression::RemoveContext()
+{ this->CheckInitialization();
+  if (!this->HasContext())
+    return true;
+  this->children.PopIndexShiftDown(1);
+  if (this->children.size==1)
+    this->AssignChild(0);
+  return true;
+}
+
+bool Expression::HasContext()const
+{ this->CheckInitialization();
+  if (this->children.size<2)
+    return false;
+  return this->children[1].IsListStartingWithAtom(this->theBoss->opContext());
+}
+
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
 { std::string tempS;
-  if (!this->IsOperation(&tempS))
+  if (!this->IsListNElementsStartingWithAtom())
+    return false;
+  if (this->children.size<2 || !this->children.LastObject()->IsAtoM())
+    return false;
+  if (!this->children[0].IsOperation(&tempS))
     return false;
   if (this->theBoss->builtInTypes.Contains(tempS))
   { if (outputWhichOperation!=0)

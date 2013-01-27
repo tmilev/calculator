@@ -331,14 +331,14 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
     return false;
   Expression expressionRemovedContext=*this;
   expressionRemovedContext.RemoveContext();
-  std::cout << "<br>Converting to polynomial: " << this->ToString()
-  << ", without context: " << expressionRemovedContext.ToString();
+//  std::cout << "<br>Converting to polynomial: " << this->ToString()
+//  << ", without context: " << expressionRemovedContext.ToString();
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
   int indexInPolyVars=myPolyVars.children.GetIndex(expressionRemovedContext);
-  std::cout << "<br>Expression without context " << expressionRemovedContext.ToString()
-  << " (Lisp: " << expressionRemovedContext.Lispify()
-  << ") has index " << indexInPolyVars << " in " << myPolyVars.ToString()
-  << ". Lisp: " << myPolyVars.Lispify();
+//  std::cout << "<br>Expression without context " << expressionRemovedContext.ToString()
+//  << " (Lisp: " << expressionRemovedContext.Lispify()
+//  << ") has index " << indexInPolyVars << " in " << myPolyVars.ToString()
+//  << ". Lisp: " << myPolyVars.Lispify();
   if (indexInPolyVars==-1)
     return false;
   Polynomial<Rational> resultP;
@@ -470,8 +470,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
     << "Expression::SetContextAtLeastEqualTo.";
     inputOutputMinContext.MakeEmptyContext(*this->theBoss);
   }
-  std::cout << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
-  << " in expression " << this->ToString();
+//  std::cout << "<br>Setting context at least equal to " << inputOutputMinContext.ToString()
+//  << " in expression " << this->ToString();
   Expression newContext;
   Expression myOldContext=this->GetContext();
   if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext))
@@ -544,33 +544,40 @@ Expression Expression::ContextGetContextVariable(int variableIndex)
 { return this->ContextGetPolynomialVariables()[variableIndex+1];
 }
 
-void Expression::ContextSetSSLieAlgebra(int indexInOwners, CommandList& owner)
-{ this->reset(owner, 2);
-  this->children[0].MakeAtom(owner.opContext(), owner);
-  this->children[1].reset(owner, 2);
-  this->children[1][0].MakeAtom(owner.opSSLieAlg(), owner);
-  this->children[1][1].MakeAtom(indexInOwners, owner);
-}
-
-Expression Expression::ContextGetPolynomialVariables()const
-{ if (this->theBoss==0)
-  { std::cout
-    << "This is a programming error: calling Expression::ContextGetPolynomialVariables "
-    << " is forbidden for non-initialized expressions. "
+bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
+{ if (!this->IsContext())
+  { std::cout << "This is a programming error: calling Expression::ContextSetSSLieAlgebrA "
+    << "on a non-context expression. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  Expression output;
-  for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsListNElementsStartingWithAtom
-        (this->theBoss->opPolynomialVariables()))
-    { output=this->children[i];
-      break;
-    }
-  if (output.children.size==0)
-  { output.reset(*this->theBoss, 1);
-    output[0].MakeAtom(this->theBoss->opPolynomialVariables(), *this->theBoss);
+  int index=this->ContextGetIndexAmbientSSalg();
+  if (index!=-1 && index!=indexInOwners)
+    return false;
+  if (index==indexInOwners)
+    return true;
+  this->children.SetSize(this->children.size+1);
+  this->children.LastObject()->reset(owner, 2);
+  this->children.LastObject()->children[0].MakeAtom(owner.opSSLieAlg(), owner);
+  this->children.LastObject()->children[1].MakeAtom(indexInOwners, owner);
+  return true;
+}
+
+Expression Expression::ContextGetPolynomialVariables()const
+{ MacroRegisterFunctionWithName("Expression::ContextGetPolynomialVariables");
+  this->CheckInitialization();
+  if (!this->IsContext())
+  { std::cout << "This is a programming error: calling Expression::ContextGetPolynomialVariables"
+    << " on a non-context expression. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
   }
+  for (int i=1; i<this->children.size; i++)
+    if (this->children[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+      return this->children[i];
+  Expression output;
+  output.reset(*this->theBoss, 1);
+  output[0].MakeAtom(this->theBoss->opPolynomialVariables(), *this->theBoss);
   return output;
 }
 
@@ -1476,6 +1483,8 @@ bool CommandList::fGetTypeHighestWeightParabolic
       if (!outputWeightHWFundcoords[i].IsSmallInteger())
         outputInducingSel.AddSelectionAppendNewIndex(i);
   }
+  outputHWContext.ContextSetSSLieAlgebrA(ambientSSalgebra->indexInOwner, theCommands);
+  std::cout << "final context of fGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 
@@ -2675,13 +2684,13 @@ bool CommandList::innerGetChevGen
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
   Expression theContext;
-  theContext.ContextSetSSLieAlgebra(theSSalg->indexInOwner, theCommands);
+  theContext.ContextMakeContextSSLieAlgebrA(theSSalg->indexInOwner, theCommands);
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
 bool CommandList::innerGetCartanGen
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ std::cout << "<br>Here I am with input: " << input.ToString();
+{ //std::cout << "<br>Here I am with input: " << input.ToString();
   if (!input.IsSequenceNElementS(2))
     return false;
   SemisimpleLieAlgebra* theSSalg;
@@ -2689,7 +2698,7 @@ bool CommandList::innerGetCartanGen
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerSSLieAlgebra, input[1], theSSalg, &errorString))
     output.SetError(errorString, theCommands);
-  std::cout << "<br>Here I am at next phase: " << input.ToString();
+  //std::cout << "<br>Here I am at next phase: " << input.ToString();
   int theIndex;
   if (!input[2].IsSmallInteger(&theIndex))
     return false;
@@ -2703,8 +2712,8 @@ bool CommandList::innerGetCartanGen
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
   theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
   Expression theContext;
-  theContext.ContextSetSSLieAlgebra(theSSalg->indexInOwner, theCommands);
-  std::cout << "<br>And the context is: " << theContext.ToString();
+  theContext.ContextMakeContextSSLieAlgebrA(theSSalg->indexInOwner, theCommands);
+  //std::cout << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
@@ -3769,7 +3778,7 @@ bool CommandList::outerLieBracket
 }
 
 bool Expression::SetError(const std::string& theError, CommandList& owner)
-{ this->children.SetSize(2);
+{ this->reset(owner, 2);
   this->children[0].MakeAtom(owner.opError(), owner);
   this->children[1].AssignValue<std::string>(theError, owner);
   return true;
@@ -3920,8 +3929,8 @@ bool CommandList::outerExtractAndEvaluatePMTDtree
 { Expression contextE;
   if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
     return false;
-  std::cout << "<br>Extracted context from " << input.ToString() << ": "
-  << contextE.ToString();
+//  std::cout << "<br>Extracted context from " << input.ToString() << ": "
+//  << contextE.ToString();
   return theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
 }
 
@@ -4498,12 +4507,16 @@ bool Expression::ToStringData
       out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
     result=true;
   } else if (this->IsOfType<Rational>())
-  { out << this->GetValuE<Rational>().ToString();
+  { if (this->HasContext())
+      out << "Rational{}(" << this->children[1].ToString() << ", ";
+    out << this->GetValuE<Rational>().ToString();
+    if (this->HasContext())
+      out << ")";
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
   { out << "Polynomial{}";
     Expression contextE=this->GetContext();
-    out << "(" << contextE.ToString() << ", "
+    out << "(" << contextE.ToString(theFormat) << ", "
     << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
@@ -4518,7 +4531,9 @@ bool Expression::ToStringData
     << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();
+  { out << "ETGVM{}("
+    << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString()
+    << ")";
     result=true;
   }
   output=out.str();
@@ -4762,13 +4777,10 @@ std::string Expression::ToString
     if (startingExpression==0)
       out << "</table>";
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
-  { if (isFinal)
-    { this->theBoss->NumErrors++;
-      out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
-      this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
-      << ". " << this->children[1].ToString(theFormat);
-    } else
-      out << "(Error)";
+  { this->theBoss->NumErrors++;
+    out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
+    this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
+    << ". " << this->children[1].ToString(theFormat);
   } else if (this->children.size==1)
   { out << this->children[0].ToString(theFormat);
   } else if (this->children.size>=2)
@@ -5341,7 +5353,7 @@ bool Expression::ContextGetPolySubFromSuperContext
   { int theNewIndex=polyVarsElargerContext.children.GetIndex(polyVarsEsmallContext[i]);
     if (theNewIndex==-1)
       return false;
-    output[i].MakeMonomiaL(theNewIndex, 1, 1, numVars);
+    output[i-1].MakeMonomiaL(theNewIndex, 1, 1, numVars);
   }
   return true;
 }

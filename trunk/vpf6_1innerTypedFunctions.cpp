@@ -69,23 +69,30 @@ bool CommandList::innerMultiplyAnyByEltTensor
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (input.children.size!=2)
+  { std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
+  }
+  if (!input[1].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+  { std::cout << "<br>input[1] is not tensor product, instead it is " << input[1].ToString() ;
+    return false;
+  }
   static bool theGhostHasAppeared=false;
   output=input[1];
   Expression leftCopy=input[0];
-  if (input.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-    return false;
-//  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
+  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
-  { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
+  { std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
     return false;
   }
+  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   ElementUniversalEnveloping<RationalFunctionOld>* leftUE;
   std::string errorString;
 //  std::cout << "<br>after merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerElementUniversalEnvelopingAlgebra, leftCopy, leftUE, &errorString))
+  { std::cout << "Error to convert: " << errorString;
     return false;
+  }
 //  std::cout << "<br>after conversion, before multiplying the tensor, left copy is: " << leftCopy.ToString();
   if (!theGhostHasAppeared)
   { std::cout << "Ere I am J.H. ... The ghost in the machine...<br>";

@@ -562,15 +562,42 @@ void CommandList::initPredefinedStandardOperations()
   ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
    "Divides two rational numbers. ",
    "4/6; 2/0;", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
+   "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
+   Not fully tested and documented at the moment.  \
+   Will get more documented in the future. ",
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
+   \nv:=hwv{}(G_2, (1,0),(0,0));\
+   \n2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyAnyByEltTensor, this->opPoly(), this->opElementTensorGVM(),
+   "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
+   Not fully tested and documented at the moment.  \
+   Will get more documented in the future. ",
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
+   \nz:=Polynomial{}y;\
+   \nv:=hwv{}(G_2, (z,1),(1,0));\
+   \n(2*z) v;\n", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
+   "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
+   Not fully tested and documented at the moment.  \
+   Will get more documented in the future. ",
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
+   \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
+   \n1/z v", true);
 
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",
-   "Please do note use (or use at your own risk): this is work-in-progress. Will be documented when implemented and tested. Tensor product of \
+   "Please do note use (or use at your own risk): this is work-in-progress. \
+   Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
-   "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);  \
-   \nv_\\lambda:=hwv{}(G_2, (1,0),(0,0));\
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);  \
+   \nv_\\lambda:=hwv{}(X, (1,0),(0,0));\
    \ng_{-1}(v_\\lambda\\otimes v_\\lambda);\
    \ng_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
+
   this->AddOperationOuterHandler
   ("[]", this->outerLieBracket, "",
    "Lie bracket.",

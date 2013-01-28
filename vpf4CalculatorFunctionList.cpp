@@ -572,7 +572,7 @@ void CommandList::initPredefinedStandardOperations()
    \n2/5 v;\n(3/4 v)\\otimes v;\n3/4 (v\\otimes v);\n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opPoly(), this->opElementTensorGVM(),
-   "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
+   "Handles multiplying polynomial by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
@@ -581,12 +581,30 @@ void CommandList::initPredefinedStandardOperations()
    \n(2*z) v;\n", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opRationalFunction(), this->opElementTensorGVM(),
-   "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
+   "Handles multiplying rational function number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \
    Will get more documented in the future. ",
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n1/z v", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyAnyByEltTensor, this->opElementUEoverRF(), this->opElementTensorGVM(),
+   "Handles acting by element Universal enveloping on an element of tensor product of generalized Verma modules. \
+   Not fully tested and documented at the moment.  \
+   Will get more documented in the future. ",
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
+   \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
+   \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
+
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("\\otimes", this->innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
+   "Tensor product of two generalized Verma modules. \
+   Not fully tested and documented at the moment.  \
+   Will get more documented in the future. ",
+   "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X, i);  \
+   \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
+   \ng_{-1}(v\\otimes v);\
+   \ng_{-1}g_{-1}(v\\otimes v)", true);
 
   this->AddOperationOuterHandler
   ("\\otimes", this->outerTensor, "",
@@ -594,9 +612,9 @@ void CommandList::initPredefinedStandardOperations()
    Will be documented when implemented and tested. Tensor product of \
    generalized Verma modules. ",
    "X:=G_2;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);  \
-   \nv_\\lambda:=hwv{}(X, (1,0),(0,0));\
-   \ng_{-1}(v_\\lambda\\otimes v_\\lambda);\
-   \ng_{-1}g_{-1}(v_\\lambda\\otimes v_\\lambda); ", true);
+   \nv:=hwv{}(X, (1,0),(0,0));\
+   \ng_{-1}(v\\otimes v);\
+   \ng_{-1}g_{-1}(v\\otimes v); ", true);
 
   this->AddOperationOuterHandler
   ("[]", this->outerLieBracket, "",
@@ -644,37 +662,12 @@ void CommandList::initPredefinedStandardOperations()
     Else evaluates to 1 if the left argument equals the right argument.",
    "x==y;\nx==1;\nIsEqualToX{} {{a}}:=a==x;\nIsEqualToX{}y;\nIsEqualToX{}x;\
    \nIsEqualToX{}1;\nx:=1;\nIsEqualToX{}1", true);
-  //the following operation for function application is chosen on purpose so that it corresponds to LaTeX-undetectable
-  //expression
-/*  this->AddOperationOuterHandler
-  ("{}", this->StandardFunction, "",
-   "The first argument of this operator represents a name of the function, \
-   the second argument represents the argument of that function.  \
-   <br>1) If the first argument of {} is rational, the operation substitutes the \
-   expression with that constant. \
-   <br>2) If the first argument is of type Data, looks for a built-in c++ handler of \
-   the function, depending on the types of the arguments.\
-   <br>3) If the first argument is of type list and the second argument is a small \
-   integer between 1 and the number of elements in the list,\
-   the operation substitutes the list with the element indexed by the second argument.\
-   <br>4) If the first argument of {} is of type NonBoundVariable and has a hard-coded \
-   handler function, the handler is invoked onto the second argument.\
-   If the invocation is successful, the expression is substituted with the result, \
-   otherwise remains unchanged. <br> (2) and (4) are essentially equivalent: \
-   the only noticeable difference is that the functions invoked in (2) are anonymous \
-   from the calculator standpoint (i.e. have only technical c++ names), \
-   while the functions in (4) have human-readable calculator-visible names. \
-   In future versions, (1) might be merged into (2) and (2) might be merged in (4).",
-   "Fibonacci{}0:=1;\nFibonacci{}1:=1;\nFibonacci{}({{x}}):if \
-   IsInteger{}x:=Fibonacci{}(x-1)+Fibonacci{}(x-2);\nFibonacci{}100;\nFibonacci{}x;\
-   \n5{}x;\n(x,y,z){}2;\n(1,2,3){}4 ", true);*/
-  //the following is the binding variable operation
   this->AddOperationOuterHandler
   ("\\cup", this->outerUnion, "",
    "If all arguments of \\cup are of type list, substitutes the expression with \
    a list containing \
    the union of all members (with repetition).",
-   "x\\cup Sequence{} x \\cup Sequence{}x \\cup (a,b,x)", true);
+   "x\\cup MakeSequence{} x \\cup MakeSequence{}x \\cup (a,b,x)", true);
   this->AddOperationOuterHandler
   ("\\sqcup", this->outerUnionNoRepetition, "",
    "If all arguments of \\sqcup are of type list, substitutes the expression with a list \

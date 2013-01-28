@@ -1331,9 +1331,9 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
   if (thirdToLastS=="Sequence" && secondToLastS=="," && lastS=="Expression")
     return this->ReplaceSequenceXEBySequence(this->conSequence());
-  if (thirdToLastS=="(" && secondToLastS=="Sequence" && lastS==")")
-    return this->ReplaceOXbyEX();
-  if (thirdToLastS=="{" && secondToLastS=="Sequence" && lastS=="}")
+  if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
+    return this->ReplaceXXYBySequenceY(this->conSequence());
+  if (secondToLastS=="Sequence" && lastS!=",")
     return this->ReplaceOXbyEX();
 
   if (fifthToLastS=="\\begin" && fourthToLastS=="{" && thirdToLastS=="array" && secondToLastS=="}" && lastS=="Expression")
@@ -3371,6 +3371,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("{");
   this->controlSequences.AddOnTop("}");
   this->controlSequences.AddOnTop(":");
+  this->controlSequences.AddOnTop("MakeSequence");
   this->controlSequences.AddOnTop("SequenceMatrixRows");
   this->controlSequences.AddOnTop("MatrixRow");
   this->controlSequences.AddOnTop("=");
@@ -3466,7 +3467,7 @@ bool CommandList::outerTensor
 bool CommandList::outerExtractBaseMultiplication
 (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::EvaluateDoExtractBaseMultiplication");
+  MacroRegisterFunctionWithName("CommandList::outerExtractBaseMultiplication");
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   bool result=false;
@@ -3714,24 +3715,14 @@ bool CommandList::outerStandardFunction
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       Expression arguments;
-      if (input.children.size!=2)
+      if (input.children.size==2)
+        arguments=input[1];
+      else
       { arguments.reset(theCommands, input.children.size-1);
         for (int i=1; i<input.children.size; i++)
           arguments[i-1]=input[i];
-      } else
-        arguments=input[1];
-      bool isGood=true;
-      //the following if clause needs to be rewritten.
-      if (innerFun.theArgumentTypes.children.size==2)
-      { if (input.children.size!=3)
-          isGood=false;
-        else
-        { if (!input[1].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes[0].theData) ||
-              !input[2].IsListNElementsStartingWithAtom(innerFun.theArgumentTypes[1].theData))
-          isGood=false;
-        }
       }
-      if (isGood)
+      if (innerFun.inputFitsMyInnerType(arguments))
         if (innerFun.theFunction(theCommands, arguments, output))
           return true;
     }
@@ -4507,10 +4498,10 @@ bool Expression::ToStringData
       out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
     result=true;
   } else if (this->IsOfType<Rational>())
-  { if (this->HasContext())
+  { if (this->HasNonEmptyContext())
       out << "Rational{}(" << this->children[1].ToString() << ", ";
     out << this->GetValuE<Rational>().ToString();
-    if (this->HasContext())
+    if (this->HasNonEmptyContext())
       out << ")";
     result=true;
   } else if (this->IsOfType<Polynomial<Rational> >())
@@ -4531,9 +4522,11 @@ bool Expression::ToStringData
     << ")";
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { out << "ETGVM{}("
-    << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString()
-    << ")";
+  {  if (this->HasContext())
+      out << "ETGVM{}(" << this->children[1].ToString() << ", ";
+    out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();
+    if (this->HasContext())
+      out << ")";
     result=true;
   }
   output=out.str();
@@ -4891,6 +4884,12 @@ bool Expression::HasContext()const
   return this->children[1].IsListStartingWithAtom(this->theBoss->opContext());
 }
 
+bool Expression::HasNonEmptyContext()const
+{ if (!this->HasContext())
+    return false;
+  return !this->GetContext().IsListNElementsStartingWithAtom(this->theBoss->opContext(), 1);
+}
+
 bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
 { std::string tempS;
   if (!this->IsListNElementsStartingWithAtom())
@@ -4952,7 +4951,7 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
   innerFunction.theArgumentTypes.reset(*this, 2);
   innerFunction.theArgumentTypes[0].MakeAtom(leftType, *this);
   innerFunction.theArgumentTypes[1].MakeAtom(rightType, *this);
-  this->FunctionHandlers[indexOp].ReservE(5);
+  this->FunctionHandlers[indexOp].ReservE(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
 
@@ -5011,6 +5010,18 @@ std::string CommandList::ElementToStringNonBoundVars()
     }
   }
   return out.str();
+}
+
+bool Function::inputFitsMyInnerType(const Expression& input)
+{ if (!this->flagIsInner)
+    return false;
+  if (this->theArgumentTypes.children.size!=2)
+    return true;
+  if (input.children.size!=2)
+    return false;
+  return
+  input[0].IsListStartingWithAtom(this->theArgumentTypes[0].theData) &&
+  input[1].IsListStartingWithAtom(this->theArgumentTypes[1].theData);
 }
 
 std::string Function::GetString(CommandList& theBoss)

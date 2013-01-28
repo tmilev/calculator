@@ -531,7 +531,11 @@ void CommandList::initPredefinedStandardOperations()
   ("+", this->outerPlus, "",
    "Collects all terms (over the rationals), adding up terms proportional up to a rational number. \
     Zero summands are removed, unless zero is the only term left. ", "1+a-2a_1+1/2+a_1", true);
-
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddEltTensorToEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
+   "Adds two elements of tensor products of generalized Verma modules. ",
+   "v:=hwv{}(G_2, (1,0),(0,0));\
+   \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \

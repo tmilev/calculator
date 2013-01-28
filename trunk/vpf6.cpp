@@ -3715,10 +3715,15 @@ bool CommandList::outerStandardFunction
     if (!theCommands.FunctionHandlers[functionNameNode.theData][i].flagIsInner)
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       if (outerFun.theFunction(theCommands, input, output))
-        return output!=input;
+        if(output!=input)
+          return true;
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       Expression arguments;
+      //if (functionNameNode.ToString()=="+")
+      //{ bool tempbool=true;
+      //   std::cout << "<br>Here i am!";
+      //}
       if (input.children.size==2)
         arguments=input[1];
       else

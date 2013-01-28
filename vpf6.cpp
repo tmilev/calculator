@@ -503,7 +503,10 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   }
   if (this->IsOfType<Polynomial<Rational> >())
   { Polynomial<Rational> newPoly=this->GetValuE<Polynomial<Rational> >();
-    newPoly.Substitution(polySub);
+    std::cout << "<br>Subbing " << polySub.ToString() << " in "
+    << newPoly.ToString();
+    if (!newPoly.SubstitutioN(polySub))
+      return false;
     return this->AssignValueWithContext(newPoly, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsOfType<RationalFunctionOld>())
@@ -584,11 +587,9 @@ Expression Expression::ContextGetPolynomialVariables()const
 bool Expression::ContextMergeContexts
 (const Expression& leftContext, const Expression& rightContext, Expression& outputContext)
 { if (&leftContext==&outputContext || &rightContext==&outputContext)
-  { std::cout
-    << "This is a programming error: at least one of the inputs "
-    << "coincides with the output of Expression::ContextMergeContexts."
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
+  { Expression leftCopy=leftContext;
+    Expression rightCopy=rightContext;
+    return Expression::ContextMergeContexts(leftCopy, rightCopy, outputContext);
   }
   int leftSSindex=leftContext.ContextGetIndexAmbientSSalg();
   int rightSSindex=rightContext.ContextGetIndexAmbientSSalg();
@@ -600,6 +601,7 @@ bool Expression::ContextMergeContexts
     return false;
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
+  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   HashedList<Expression> varUnion;
   varUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
   for (int i =1; i<leftPolyV.children.size; i++)
@@ -626,6 +628,7 @@ bool Expression::ContextMergeContexts
     ssAlgE[0].MakeAtom(owner.opSSLieAlg(), owner);
     ssAlgE[1].MakeAtom(leftSSindex, owner);
   }
+  std::cout << "<br>The result of the merge is: " << outputContext.ToString();
   return true;
 }
 

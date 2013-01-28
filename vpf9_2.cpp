@@ -3540,65 +3540,6 @@ void ParserNode::TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<
   this->impliedNumVars=minNumberVarsAfterSub;
 }
 
-int ParserNode::CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables)
-{ int theDimension=this->impliedNumVars;
-  Rational ratOne;
-  ratOne.MakeOne();
-  QuasiPolynomial tempQP;
-  Polynomial<Rational>  polyOneAfterSub, polyZeroAfterSub;
-  switch(this->ExpressionType)
-  { case ParserNode::typeWeylAlgebraElement:
-//      this->WeylAlgebraElement.GetElement().SubstitutionTreatPartialsAndVarsAsIndependent(theSub);
-      this->ExpressionType=this->typeWeylAlgebraElement;
-      return this->errorNoError;
-    case ParserNode::typeIntegerOrIndex:
-    case ParserNode::typeRational:
-    case ParserNode::typePoly:
- //     std::cout << "<br> ... and the sub is: " << theSub.ToString();
-      theSub.SetSize(theDimension);
-      for (int i=0; i<theDimension; i++)
-        theSub.TheObjects[i].SetNumVariablesSubDeletedVarsByOne(theDimension);
-   //   std::cout << "<br> ... and the sub is: " << theSub.ToString();
-      this->polyValue.GetElement().Substitution(theSub, theDimension, ratOne);
-      this->ExpressionType=this->typePoly;
-      return this->errorNoError;
-    case ParserNode::typeArray:
-      for (int i=0; i<this->children.size; i++)
-        this->owner->TheObjects[this->children.TheObjects[i]].CarryOutSubstitutionInMe(theSub, theGlobalVariables);
-      return this->errorNoError;
-    case ParserNode::typeUEElementOrdered:
-      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
-      this->UEElementOrdered.GetElement().SubstitutionCoefficients(theSub, & theGlobalVariables);
-      return this->errorNoError;
-    case ParserNode::typeUEelement:
-      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, this->impliedNumVars);
-      polyOneAfterSub.MakeOne(this->impliedNumVars);
-      polyZeroAfterSub.MakeZero();
-      this->UEElement.GetElement().SubstitutionCoefficients
-      (theSub, & theGlobalVariables, polyOneAfterSub, polyZeroAfterSub);
-      return this->errorNoError;
-    case ParserNode::typeLattice:
-      if (theDimension!=this->theLattice.GetElement().GetDim())
-        return this->SetError(this->errorDimensionProblem);
-      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, theDimension);
-      if (!this->theLattice.GetElement().SubstitutionHomogeneous(theSub, theGlobalVariables))
-        return this->SetError(this->errorImplicitRequirementNotSatisfied);
-      this->outputString=this->theLattice.GetElement().ToString(true, false);
-      return this->errorNoError;
-    case ParserNode::typeQuasiPolynomial:
-      if(theDimension!=this->theQP.GetElement().GetNumVars())
-        return this->SetError(this->errorDimensionProblem);
-      this->TrimSubToMinNumVarsChangeImpliedNumVars(theSub, theDimension);
-      tempQP=this->theQP.GetElement();
-      if (!tempQP.SubstitutionLessVariables(theSub, this->theQP.GetElement(), theGlobalVariables))
-        return this->SetError(this->errorImplicitRequirementNotSatisfied);
-      this->outputString=this->theQP.GetElement().ToString(true, false);
-      return this->errorNoError;
-    default:
-      return this->SetError(this->errorDunnoHowToDoOperation);
-  }
-}
-
 void ParserNode::operator=(const ParserNode& other)
 { this->owner=other.owner;
   this->indexParentNode=other.indexParentNode;

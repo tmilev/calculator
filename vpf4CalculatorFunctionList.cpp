@@ -21,7 +21,7 @@ void CommandList::initPredefinedInnerFunctions()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddOperationInnerHandler
-("lcmPoly", &this->fLCM, "",
+("lcmPoly", &this->innerLCM, "",
    "Least common multiple of two polynomials.\
    The output is scaled so that all coefficients are relatively prime integers, \
    and so that the leading monomial under the graded lexicographic order (x_2>x_1, etc.)\

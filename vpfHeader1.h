@@ -4406,7 +4406,7 @@ public:
     return (*whichLetter)!=-1;
   }
   template <class Element>
-  void Substitution
+  bool SubstitutioN
 (const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)
   ;
   void MakeEi(int LetterIndex, int Power=1, int ExpectedNumVars=0);
@@ -5047,7 +5047,7 @@ FactorMeOutputIsSmallestDivisor(Polynomial<Rational>& output, std::stringstream*
   }
   void ScaleToPositiveMonomials(MonomialP& outputScale);
   void DecreaseNumVariables(int increment, Polynomial<CoefficientType>& output);
-  void Substitution
+  bool SubstitutioN
   (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit=1,
    const CoefficientType& theRingZero=0)
    ;
@@ -5307,7 +5307,11 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
   { for (int i=0; i<this->size; i++)
       this->TheObjects[i].MakeZero((int)NumVars);
   }
-  std::string ToString(int numDisplayedEltsMinus1ForAll=-1){std::string tempS; this->ToString(tempS, numDisplayedEltsMinus1ForAll); return tempS;}
+  std::string ToString(int numDisplayedEltsMinus1ForAll=-1)const
+  { std::string tempS;
+    this->ToString(tempS, numDisplayedEltsMinus1ForAll);
+    return tempS;
+  }
   void ComputeDebugString();
   bool operator==(const PolynomialSubstitution& right);
   void Substitution(PolynomialSubstitution<Element>& theSub, int NumVarsTarget)
@@ -5332,7 +5336,7 @@ class PolynomialSubstitution: public List<Polynomial<Element> >
     tempMat.AssignMatrixIntWithDen(theMat, Den);
     this->MakeLinearSubConstTermsLastRow(tempMat);
   }
-  void ToString(std::string& output, int numDisplayedEltsMinus1ForAll)
+  void ToString(std::string& output, int numDisplayedEltsMinus1ForAll)const
   { std::stringstream out;
     output.clear();
     FormatExpressions PolyFormatLocal;
@@ -5822,7 +5826,7 @@ public:
 };
 
 template <class Element>
-void MonomialP::Substitution
+bool MonomialP::SubstitutioN
 (const List<Polynomial<Element> >& TheSubstitution, Polynomial<Element>& output, const Element& theRingUnit)
 { MacroRegisterFunctionWithName("MonomialP::Substitution");
   if (TheSubstitution.size<this->GetMinNumVars())
@@ -5835,7 +5839,7 @@ void MonomialP::Substitution
   }
   output.MakeConsT(1);
   if (this->IsAConstant())
-    return;
+    return true;
   Polynomial<Element> tempPoly;
 //  std::cout << "<hr>subbing in monomial " << this->ToString();
 //  output.ComputeDebugString();
@@ -5843,11 +5847,11 @@ void MonomialP::Substitution
     if (this->monBody[i]!=0)
     { int theExponent=0;
       if (!this->monBody[i].IsSmallInteger(&theExponent))
-      { std::cout << "This is a programming error. I cannot carry out a substitution in a monomial "
+      { std::cout << " I cannot carry out a substitution in a monomial "
         << " that has exponent which is not a small integer: it is "
         << this->monBody[i] << " instead. "
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-        assert(false);
+        return false;
       }
       //TheSubstitution.TheObjects[i]->ComputeDebugString();
       tempPoly=TheSubstitution[i];
@@ -5856,6 +5860,7 @@ void MonomialP::Substitution
       output*=(tempPoly);
 //      output.ComputeDebugString();
     }
+  return true;
 //  std::cout << " to get: " << output.ToString();
 }
 
@@ -6485,11 +6490,11 @@ Rational Polynomial<Element>::TotalDegree()const
 }
 
 template <class CoefficientType>
-void Polynomial<CoefficientType>::Substitution
+bool Polynomial<CoefficientType>::SubstitutioN
 (const List<Polynomial<CoefficientType> >& TheSubstitution, const CoefficientType& theRingUnit,
  const CoefficientType& theRingZero)
 { MacroRegisterFunctionWithName("Polynomial<CoefficientType>::Substitution");
-  if (TheSubstitution.size!=this->GetMinNumVars())
+  if (TheSubstitution.size<this->GetMinNumVars())
   { std::cout << "This is a programming error: attempting to carry out a substitution"
     << "in a polynomial of " << this->GetMinNumVars() << " variables while specifying the images of only "
     << TheSubstitution.size << " of the variables. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -6499,7 +6504,8 @@ void Polynomial<CoefficientType>::Substitution
 //  int commentGrandMasterCheckWhenDone;
 //  this->GrandMasterConsistencyCheck();
   for(int i=0; i<this->size; i++)
-  { this->TheObjects[i].Substitution(TheSubstitution, TempPoly, theRingUnit);
+  { if(!this->TheObjects[i].SubstitutioN(TheSubstitution, TempPoly, theRingUnit))
+      return false;
     TempPoly*=this->theCoeffs[i];
     Accum+=(TempPoly);
     //std::cout << "<br>So far accum is :<br> " << Accum.ToString(theFormat);
@@ -6507,6 +6513,7 @@ void Polynomial<CoefficientType>::Substitution
   *this=(Accum);
 //  this->GrandMasterConsistencyCheck();
   //std::cout << "<hr>to finally get<br>" << output.ToString(theFormat);
+  return true;
 }
 
 template <class Element>

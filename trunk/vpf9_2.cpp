@@ -2474,7 +2474,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           theReport.Report(out.str());
           //std::cout << out.str();
         }
-        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Dividing "
           << currentRemainder.ToString()
           <<  " by " << theBasiS[i].ToString() << "<br>i.e. subtracting "
@@ -2483,10 +2483,10 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           currentRemainder1=currentRemainder;
           currentRemainder1-=this->bufPoly;
           std::cout << " I must get: " << currentRemainder1.ToString();
-        }
+        }*/
         currentRemainder-=this->bufPoly;
         divisionOcurred=true;
-        if (this->NumberOfComputations>this->MaxNumComputations+1000)
+/*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
           << "<br>Current divisor index: " << i+1;
           if(this->NumberOfComputations>this->MaxNumComputations+1010)
@@ -2498,7 +2498,7 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
             std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
             assert(false);
           }
-        }
+        }*/
         this->NumberOfComputations++;
         //std::cout << " to get " << currentRemainder.ToString(&theGlobalVariables->theDefaultFormat);
       } else

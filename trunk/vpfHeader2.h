@@ -201,6 +201,7 @@ class Expression
   int GetNumContextVariables()const;
   bool RemoveContext();
   bool HasContext()const;
+  bool HasNonEmptyContext()const;
   Expression GetContext()const;
   static bool MergeContexts(Expression& leftE, Expression& rightE);
 
@@ -370,6 +371,7 @@ class Function
     this->theFunction=0;
     this->flagIsInner=true;
   }
+  bool inputFitsMyInnerType(const Expression& input);
   Function()
   { this->theFunction=0;
   }
@@ -1036,7 +1038,7 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output,
    int theOp)
   { for (int i=0; i<theCommands.FunctionHandlers[theOp].size; i++)
-      if (theCommands.FunctionHandlers[theOp][i].flagIsInner)
+      if (theCommands.FunctionHandlers[theOp][i].inputFitsMyInnerType(input))
         if (theCommands.FunctionHandlers[theOp][i].theFunction(theCommands, input, output))
           return true;
     return false;

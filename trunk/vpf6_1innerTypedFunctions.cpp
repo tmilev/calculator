@@ -43,10 +43,11 @@ bool CommandList::innerDivideRatByRat
 bool CommandList::innerTensorEltTensorByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerTensorEltTensorByEltTensor");
-  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (input.children.size!=2)
     return false;
+  std::cout << "<br>Attempting to tensor " << input[0].ToString() << " and " << input[1].ToString();
+
   Expression leftCopy=input[0];
   output=input[1];
   if (!output.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
@@ -73,7 +74,8 @@ bool CommandList::innerMultiplyAnyByEltTensor
     return false;
   }
   if (!input[1].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { std::cout << "<br>input[1] is not tensor product, instead it is " << input[1].ToString() ;
+  { std::cout << "<br>input[1] is not tensor product, instead it is " << input[1].ToString()
+    << "."; //",stack trace:  "  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     return false;
   }
   static bool theGhostHasAppeared=false;

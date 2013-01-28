@@ -338,6 +338,7 @@ bool CommandList::innerAddEltTensorToEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAddEltTensorToEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  std::cout << "<br>adding element gvm and element gvm. ";
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (input.children.size!=2)
     return false;

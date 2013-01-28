@@ -601,7 +601,7 @@ bool Expression::ContextMergeContexts
     return false;
   Expression leftPolyV=leftContext.ContextGetPolynomialVariables();
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
-  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
+//  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   HashedList<Expression> varUnion;
   varUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
   for (int i =1; i<leftPolyV.children.size; i++)
@@ -628,7 +628,7 @@ bool Expression::ContextMergeContexts
     ssAlgE[0].MakeAtom(owner.opSSLieAlg(), owner);
     ssAlgE[1].MakeAtom(leftSSindex, owner);
   }
-  std::cout << "<br>The result of the merge is: " << outputContext.ToString();
+//  std::cout << "<br>The result of the merge is: " << outputContext.ToString();
   return true;
 }
 
@@ -3948,7 +3948,7 @@ bool CommandList::EvaluatePMTDtree
   { for (int i=1; i<input.children.size; i++)
     { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
         return false;
-      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
+//      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
       if (input[0].IsAtoM(this->opTimes()))
       { if (i==1)
           outputData=output.GetValuE<dataType>();
@@ -5368,7 +5368,7 @@ bool Expression::ContextGetPolySubFromSuperContext
   { int theNewIndex=polyVarsElargerContext.children.GetIndex(polyVarsEsmallContext[i]);
     if (theNewIndex==-1)
       return false;
-    output[i-1].MakeMonomiaL(theNewIndex, 1, 1, numVars);
+    output[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
   }
   return true;
 }

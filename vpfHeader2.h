@@ -1625,12 +1625,12 @@ bool CommandList::GetVector
   //4. Set contexts of converted expressions to the new common context.
   output.SetSize(targetDimNonMandatory);
   for (int i=0; i<targetDimNonMandatory; i++)
-  { std::cout << "<br>Setting context " << startContext.ToString()
-    << " onto " << convertedExpressions[i].ToString() << ".";
+  { //std::cout << "<br>Setting context " << startContext.ToString()
+    //<< " onto " << convertedExpressions[i].ToString() << ".";
     if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
       return false;
-    std::cout << "<br>Context conversion successful with output "
-    << convertedExpressions[i].ToString();
+    //std::cout << "<br>Context conversion successful with output "
+    //<< convertedExpressions[i].ToString();
     output[i]=convertedExpressions[i].GetValuE<theType>();
   }
   return true;

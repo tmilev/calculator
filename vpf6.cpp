@@ -1329,7 +1329,8 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     return this->ReplaceEOEByE();
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
-  if (thirdToLastS=="Sequence" && secondToLastS=="," && lastS=="Expression")
+  if (thirdToLastS=="Sequence" && secondToLastS=="," && lastS=="Expression" &&
+      (lookAhead=="," || lookAhead==")"))
     return this->ReplaceSequenceXEBySequence(this->conSequence());
   if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
     return this->ReplaceXXYBySequenceY(this->conSequence());

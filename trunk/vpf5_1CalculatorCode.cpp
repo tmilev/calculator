@@ -3,7 +3,7 @@
 #include "vpf.h"
 ProjectInformationInstance ProjectInfoVpf5_1cpp(__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
-bool CommandList::fGCDOrLCM
+bool CommandList::innerGCDOrLCM
 (CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
 { MacroRegisterFunctionWithName("CommandList::fGCD");
   Vector<Polynomial<Rational> > thePolys;
@@ -11,7 +11,8 @@ bool CommandList::fGCDOrLCM
   if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   Polynomial<Rational> outputP;
-//  std::cout << "context: " << theContext.VariableImages.ToString();
+  std::cout << "<br>context: " << theContext.ToString();
+  std::cout << "<br>The polys: " << thePolys.ToString();
   if (doGCD)
     RationalFunctionOld::gcd(thePolys[0], thePolys[1], outputP);
   else

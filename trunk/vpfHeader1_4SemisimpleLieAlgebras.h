@@ -198,7 +198,7 @@ class PolynomialSystem : public List<Polynomial<Rational> >
   public:
   void Substitution(const List<Polynomial<Rational> >& theSub)
   { for (int i=0; i<this->size; i++)
-      (*this)[i].Substitution(theSub);
+      (*this)[i].SubstitutioN(theSub);
   }
   void operator=(List<Polynomial<Rational> >& other)
   { this->::List<Polynomial<Rational> >::operator=(other);

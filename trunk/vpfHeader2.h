@@ -1012,7 +1012,11 @@ public:
   }
   bool CallCalculatorFunction
   (Expression::FunctionAddress theFun, const Expression& input, Expression& output)
-  { if (!theFun(*this, input, output))
+  { if (&input==&output)
+    { Expression inputCopy=input;
+      return this->CallCalculatorFunction(theFun, inputCopy, output);
+    }
+    if (!theFun(*this, input, output))
       return false;
     return !output.IsError();
   }
@@ -1147,16 +1151,16 @@ public:
   static bool fFreudenthalEval
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-    static bool fGCDOrLCM
+    static bool innerGCDOrLCM
   (CommandList& theCommands, const Expression& input, Expression& output, bool doGCD)
   ;
-  static bool fLCM
+  static bool innerLCM
   (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fGCDOrLCM(theCommands, input, output, false);
+  { return theCommands.innerGCDOrLCM(theCommands, input, output, false);
   }
   static bool fGCD
   (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fGCDOrLCM(theCommands, input, output, true);
+  { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
   static bool fPolynomialDivisionQuotient
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1541,17 +1545,22 @@ template <class theType>
 bool CommandList::GetVector
 (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext,
  int targetDimNonMandatory, Expression::FunctionAddress conversionFunction)
-{ MemorySaving<Expression> tempContext;
+{ MacroRegisterFunctionWithName("CommandList::GetVector");
+  MemorySaving<Expression> tempContext;
   Expression& startContext=
   inputOutputStartingContext==0 ? tempContext.GetElement() : *inputOutputStartingContext;
   if (!startContext.IsContext())
     startContext.MakeEmptyContext(*this);
-  Expression theConverted;
   if (!input.IsSequenceNElementS())
   { if (targetDimNonMandatory>0)
       if (targetDimNonMandatory!=1)
         return false;
-    theConverted=input;
+    Expression theConverted=input;
+    if(!theConverted.SetContextAtLeastEqualTo(startContext))
+    { this->Comments << "<br>Failed to set context " << startContext.ToString()
+      << " onto " << theConverted.ToString();
+      return false;
+    }
     if (!input.IsOfType<theType>())
     { if (conversionFunction==0)
         return false;
@@ -1563,31 +1572,66 @@ bool CommandList::GetVector
       return false;
     output.SetSize(1);
     output[0]=theConverted.GetValuE<theType>();
+    startContext=theConverted.GetContext();
     return true;
   }
   if (targetDimNonMandatory>0)
     if (targetDimNonMandatory!=input.children.size-1)
       return false;
   targetDimNonMandatory=input.children.size-1;
-  output.SetSize(targetDimNonMandatory);
+  Expression currentContext;
+  List<Expression> convertedExpressions;
+  convertedExpressions.SetSize(targetDimNonMandatory);
+  //Conversion has several phases. I am not sure these phases are the best choice,
+  //but they appear to handle every conversion I think should be assumed implicit.
+  //1. Set context of expressions to be at least equal to the starting context.
+  //2. Check types of expressions, if bad call conversion function.
+  //3. Merge contexts of converted expressions into a common context.
+  //4. Set contexts of converted expressions to the new common context.
+
+
+  //1. Set context of expressions to be at least equal to starting.
   for (int i=0; i<targetDimNonMandatory; i++)
-  { Expression& currentE=input[i+1];
-    theConverted=currentE;
-    if (!currentE.IsOfType<theType>())
+  { convertedExpressions[i]=input[i+1];
+    if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
+    { this->Comments << "<br>Failed to set starting context " << startContext.ToString()
+      << " onto " << convertedExpressions[i].ToString();
+      return false;
+    }
+  }
+  //2. Check types of expressions, if bad call conversion function.
+  for (int i=0; i<targetDimNonMandatory; i++)
+    if (!convertedExpressions[i].IsOfType<theType>())
     { if (conversionFunction==0)
         return false;
-      if (!this->CallCalculatorFunction(conversionFunction, currentE, theConverted))
+      if (!this->CallCalculatorFunction
+          (conversionFunction, convertedExpressions[i], convertedExpressions[i]))
         return false;
-      if (!theConverted.IsOfType<theType>())
-      { this->Comments << "<br>Converting function evaluated on " << currentE.ToString()
+      if (!convertedExpressions[i].IsOfType<theType>())
+      { this->Comments << "<br>Converting function evaluated on " << convertedExpressions[i].ToString()
         << " returned true, but the output of the function is not of the desired type. "
-        << "Instead, the function output is " << theConverted.ToString();
+        << "Instead, the function output is " << convertedExpressions[i].ToString();
         return false;
       }
     }
-    if (!theConverted.SetContextAtLeastEqualTo(startContext))
+  //3. Merge contexts of converted expressions into a common context.
+  for (int i=0; i<targetDimNonMandatory; i++)
+    if (!Expression::ContextMergeContexts
+        (startContext, convertedExpressions[i].GetContext(), startContext))
+    { this->Comments << "<br>Failed to merge context " << startContext.ToString()
+      << " with context " << convertedExpressions[i].GetContext().ToString();
       return false;
-    output[i]=theConverted.GetValuE<theType>();
+    }
+  //4. Set contexts of converted expressions to the new common context.
+  output.SetSize(targetDimNonMandatory);
+  for (int i=0; i<targetDimNonMandatory; i++)
+  { std::cout << "<br>Setting context " << startContext.ToString()
+    << " onto " << convertedExpressions[i].ToString() << ".";
+    if (!convertedExpressions[i].SetContextAtLeastEqualTo(startContext))
+      return false;
+    std::cout << "<br>Context conversion successful with output "
+    << convertedExpressions[i].ToString();
+    output[i]=convertedExpressions[i].GetValuE<theType>();
   }
   return true;
 }

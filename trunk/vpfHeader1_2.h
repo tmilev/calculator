@@ -3932,7 +3932,6 @@ public:
   bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
   void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
   int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
-  int CarryOutSubstitutionInMe(PolynomialSubstitution<Rational>& theSub, GlobalVariables& theGlobalVariables);
   void ReduceRatFunction();
   void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
   void Evaluate(GlobalVariables& theGlobalVariables);

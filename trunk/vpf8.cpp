@@ -3874,9 +3874,10 @@ void QuasiPolynomial::AddLatticeShift
 }
 
 void QuasiPolynomial::Substitution
-  (const Matrix<Rational> & mapFromNewSpaceToOldSpace,
-   const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
-{ //Format of the substitution.
+(const Matrix<Rational>& mapFromNewSpaceToOldSpace,
+ const Lattice& ambientLatticeNewSpace, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
+{ MacroRegisterFunctionWithName("QuasiPolynomial::Substitution");
+  //Format of the substitution.
   //If we want to carry out a substitution in P(y_1, ..., y_m),
   // of the form
   //y_1=a_11 x_1+...+a_1nx_n
@@ -3903,10 +3904,17 @@ void QuasiPolynomial::Substitution
     mapFromNewSpaceToOldSpace.RowToRoot(i, tempRoot);
     currentPoly.MakeLinPolyFromRootNoConstantTerm(tempRoot);
   }
-  Polynomial<Rational>  tempP;
+  Polynomial<Rational> tempP;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
   { tempP=this->valueOnEachLatticeShift[i];
-    tempP.Substitution(theSub);
+    bool tempB=tempP.SubstitutioN(theSub);
+    if (!tempB)
+    { std::cout << "This is a programming error: "
+      << " substitution   " << theSub.ToString() << " into polynomial "
+      << tempP.ToString() << " failed but the current function does not handle this properly. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     for (int j=0; j<allRepresentatives.size; j++)
       if (imagesAllRepresentatives.TheObjects[j]==this->LatticeShifts.TheObjects[i])
         output.AddLatticeShift(tempP, allRepresentatives.TheObjects[j]);
@@ -3915,7 +3923,8 @@ void QuasiPolynomial::Substitution
 
 void QuasiPolynomial::Substitution
 (const Vector<Rational>& inputTranslationSubtractedFromArgument, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)
-{ //format of the translation. If the starting quasipolynomial was P(y_1, ..., y_n),
+{ MacroRegisterFunctionWithName("QuasiPolynomial::Substitution");
+  //format of the translation. If the starting quasipolynomial was P(y_1, ..., y_n),
   //and the translation has coordinates (t_1, ..., t_n),
   //then the resulting quasipolynomial will be P(x_1-t_1, ..., x_n-t_n)
   PolynomialSubstitution<Rational> theSub;
@@ -3927,7 +3936,14 @@ void QuasiPolynomial::Substitution
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   for (int i=0; i<this->valueOnEachLatticeShift.size; i++)
   { tempP=this->valueOnEachLatticeShift[i];
-    tempP.Substitution(theSub);
+    bool tempB=tempP.SubstitutioN(theSub);
+    if (!tempB)
+    { std::cout << "This is a programming error: "
+      << " substitution   " << theSub.ToString() << " into polynomial "
+      << tempP.ToString() << " failed but the current function does not handle this properly. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
     output.AddLatticeShift(tempP, this->LatticeShifts.TheObjects[i]+inputTranslationSubtractedFromArgument);
   }
 }
@@ -3941,31 +3957,41 @@ void QuasiPolynomial::Substitution
 }
 
 bool QuasiPolynomial::SubstitutionLessVariables
-  (const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output, GlobalVariables& theGlobalVariables)const
-{ Matrix<Rational>  theLatticeSub;
-  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms(theSub, theLatticeSub, theGlobalVariables))
+(const PolynomialSubstitution<Rational>& theSub, QuasiPolynomial& output,
+ GlobalVariables& theGlobalVariables)const
+{ Matrix<Rational> theLatticeSub;
+  if (!this->AmbientLatticeReduced.GetHomogeneousSubMatFromSubIgnoreConstantTerms
+      (theSub, theLatticeSub, theGlobalVariables))
     return false;
-  Matrix<Rational>  theSubLatticeShift;
+  Matrix<Rational> theSubLatticeShift;
   output.AmbientLatticeReduced=this->AmbientLatticeReduced;
   if(!output.AmbientLatticeReduced.SubstitutionHomogeneous(theLatticeSub, theGlobalVariables))
     return false;
   theSubLatticeShift.init(theLatticeSub.NumRows,1);
   for (int i=0; i<theSubLatticeShift.NumRows; i++)
     theSub.TheObjects[i].GetConstantTerm(theSubLatticeShift.elements[i][0], (Rational) 0);
-  Matrix<Rational>  theShiftImage, shiftMatForm;
+  Matrix<Rational> theShiftImage, shiftMatForm;
   output.LatticeShifts.size=0;
   output.valueOnEachLatticeShift.size=0;
   output.valueOnEachLatticeShift.ReservE(this->LatticeShifts.size);
   output.LatticeShifts.ReservE(this->LatticeShifts.size);
   Vector<Rational> tempRoot;
-  Polynomial<Rational>  tempP;
+  Polynomial<Rational> tempP;
   for (int i=0; i<this->LatticeShifts.size; i++)
   { shiftMatForm.AssignVectorColumn(this->LatticeShifts.TheObjects[i]);
     shiftMatForm-=theSubLatticeShift;
-    if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theLatticeSub, shiftMatForm, theShiftImage))
+    if (theLatticeSub.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
+        (theLatticeSub, shiftMatForm, theShiftImage))
     { tempRoot.AssignMatDetectRowOrColumn(theShiftImage);
       tempP=this->valueOnEachLatticeShift[i];
-      tempP.Substitution(theSub);
+      bool tempB=tempP.SubstitutioN(theSub);
+      if (!tempB)
+      { std::cout << "This is a programming error: "
+        << " substitution   " << theSub.ToString() << " into polynomial "
+        << tempP.ToString() << " failed but the current function does not handle this properly. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
       output.AddLatticeShift(tempP, tempRoot);
     }
   }
@@ -7934,15 +7960,36 @@ void RationalFunctionOld::Substitution(const PolynomialSubstitution<Rational>& t
     case RationalFunctionOld::typePoly:
 //      std::cout <<"<hr>subbing in<br>" << this->ToString(tempFormat) << " using " << theSub.ToString()
 //      << " to get ";
-      this->Numerator.GetElement().Substitution(theSub, 1);
+      if (!this->Numerator.GetElement().SubstitutioN(theSub, 1))
+      { std::cout << "This is a programming error: "
+        << " substitution   " << theSub.ToString() << " into polynomial "
+        << this->Numerator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
 //      std::cout << "<br>finally:<br>" << this->Numerator.GetElement().ToString();
       this->Simplify();
 //      std::cout << ", which, simplified, yields<br> " << this->ToString(tempFormat);
 //      assert(this->checkConsistency());
       return;
     case RationalFunctionOld::typeRationalFunction:
-      this->Numerator.GetElement().Substitution(theSub, 1);
-      this->Denominator.GetElement().Substitution(theSub, 1);
+      if (!this->Numerator.GetElement().SubstitutioN(theSub, 1))
+      { std::cout << "This is a programming error: "
+        << " substitution   " << theSub.ToString() << " into polynomial "
+        << this->Numerator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
+      if (!this->Denominator.GetElement().SubstitutioN(theSub, 1))
+      { std::cout << "This is a programming error: "
+        << " substitution   " << theSub.ToString() << " into polynomial "
+        << this->Denominator.GetElement().ToString()
+        << " failed but the current function does not handle this properly. "
+        << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+        assert(false);
+      }
       this->Simplify();
 //      assert(this->checkConsistency());
       return;

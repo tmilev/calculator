@@ -48,7 +48,7 @@ void CommandList::initPredefinedInnerFunctions()
    \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
    ;
   this->AddOperationInnerHandler
-  ("suffixNotationForPostScript", this->fSuffixNotationForPostScript, "",
+  ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
    "Suffix notation. for postscript, used to quickly generate pstricks drawings in LaTeX.  \
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")

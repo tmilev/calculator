@@ -1142,7 +1142,7 @@ public:
   static bool fDrawPolarRfunctionTheta
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fSuffixNotationForPostScript
+  static bool innerSuffixNotationForPostScript
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fIsInteger

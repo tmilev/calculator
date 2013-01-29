@@ -3180,7 +3180,7 @@ bool CommandList::fDrawPolarRfunctionTheta
     ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
   if (upperBound<lowerBound)
     MathRoutines::swap(upperBound, lowerBound);
-  if (! theCommands.fSuffixNotationForPostScript(theCommands, input[1], functionE))
+  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
     return false;
   std::stringstream out, resultStream;
   out << CGI::GetHtmlMathSpanPure(input[1].ToString())
@@ -3199,58 +3199,47 @@ bool CommandList::fDrawPolarRfunctionTheta
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fSuffixNotationForPostScript
+bool CommandList::innerSuffixNotationForPostScript
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
   RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
   if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
     return output.AssignValue((std::string) "...", theCommands);
-  if (!input.IsLisT())
-    return output.SetError("Error: typeless expression has no postscript notation. ", theCommands);
-  Rational ratValue;
-  if (input.IsAtoM())
-    return output.AssignValue(theCommands.operationS[input.theData], theCommands);
-  else if (input.IsOfType<Rational>(&ratValue))
-    return output.AssignValue(ratValue.ToString(), theCommands);
-  std::stringstream out;
-  Expression currentE;
   std::string currentString;
+  if (input.IsOperation(&currentString))
+  { if (input.theData>=theCommands.NumPredefinedVars)
+      return output.AssignValue(currentString, theCommands);
+    if (currentString=="+")
+      return output.AssignValue<std::string>("add ", theCommands);
+    if (currentString=="*")
+      return output.AssignValue<std::string>("mul ", theCommands);
+    if (currentString=="-")
+      return output.AssignValue<std::string>("sub ", theCommands);
+    if (currentString=="/")
+      return output.AssignValue<std::string>("div ", theCommands);
+    if (currentString=="^")
+      return output.AssignValue<std::string>("exp ", theCommands);
+    return output.SetError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
+  }
+  std::stringstream out;
+  if (input.IsOfType<Rational>())
+  { out << input.GetValuE<Rational>().DoubleValue();
+    return output.AssignValue(out.str(), theCommands);
+  }
+  Expression currentE;
   for (int i=1; i<input.children.size; i++)
-  { if (!theCommands.fSuffixNotationForPostScript(theCommands, input[i], currentE))
-      return output.SetError("Failed to convert"+input[i].ToString(), theCommands);
+  { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
+      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
     if (!currentE.IsOfType(&currentString))
-      return output.SetError("Failed to convert"+input[i].ToString(), theCommands);
+      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
     out << currentString << " ";
   }
-  if (!input[0].IsAtoM())
-  { if (!theCommands.fSuffixNotationForPostScript(theCommands, input[0], currentE))
-      return output.SetError("Failed to convert "+currentE.ToString(), theCommands);
-    if (!currentE.IsOfType(&currentString))
-      return output.SetError("Failed to convert "+currentE.ToString(), theCommands);
-    out << currentString << " ";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  int theOp=input[0].theData;
-  if (theOp==theCommands.opDivide())
-  { out << "div ";
-    return output.AssignValue(out.str(), theCommands);
-  } else if (theOp==theCommands.opPlus())
-  { out << "add ";
-    return output.AssignValue(out.str(), theCommands);
-  } else if (theOp==theCommands.opMinus())
-  { if (output.children.size==2)
-      out << "-1 mul ";
-    else
-      out << "sub ";
-    return output.AssignValue(out.str(), theCommands);
-  } else if (theOp==theCommands.opTimes())
-  { out << "mul";
-    return output.AssignValue(out.str(), theCommands);
-  } else if (theOp==theCommands.opThePower())
-  { out << "exp ";
-    return output.AssignValue(out.str(), theCommands);
-  }
-  return output.SetError("Failed to convert "+ input.ToString(), theCommands);
+  if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
+    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  if (!currentE.IsOfType(&currentString))
+    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  out << currentString << " ";
+  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fIsInteger

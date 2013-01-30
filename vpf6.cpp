@@ -1488,7 +1488,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
         outputInducingSel.AddSelectionAppendNewIndex(i);
   }
   outputHWContext.ContextSetSSLieAlgebrA(ambientSSalgebra->indexInOwner, theCommands);
-  std::cout << "final context of fGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
+//  std::cout << "final context of fGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 
@@ -2736,8 +2736,8 @@ bool CommandList::innerElementUniversalEnvelopingAlgebra
   ElementUniversalEnveloping<RationalFunctionOld> outputUE;
   if (!output.IsOfType(&outputUE))
     return output.SetError("Failed to convert to element universal enveloping.", theCommands);
-  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
-  << output.GetContext().ToString();
+//  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
+//  << output.GetContext().ToString();
   outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
   return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
 }

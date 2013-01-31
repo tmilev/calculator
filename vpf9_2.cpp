@@ -2378,6 +2378,16 @@ bool RationalFunctionOld::checkConsistency()const
       return false;
     }
   }
+  if (this->expressionType!=this->typeRational &&
+      this->expressionType!=this->typePoly &&
+      this->expressionType!=this->typeRationalFunction)
+  { std::cout << "This is a programming error: "
+    << "  a rational function is not initialized properly: its type is " << this->expressionType
+    << " which is not allowed. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+    return false;
+  }
   return true;
 }
 
@@ -2999,7 +3009,8 @@ void RationalFunctionOld::operator=(const RationalFunctionOld& other)
       this->Numerator.GetElement()=other.Numerator.GetElementConst();
       this->Denominator.GetElement()=other.Denominator.GetElementConst();
       break;
-    default: break;
+    default:
+      break;
   }
 //    int commentmewhendone;
 //    other.checkConsistency();
@@ -3133,6 +3144,20 @@ void RationalFunctionOld::operator*=(const Polynomial<Rational>& other)
 //  this->ComputeDebugString();
 }
 
+void RationalFunctionOld::operator/=(const RationalFunctionOld& other)
+{ this->checkConsistency();
+  RationalFunctionOld tempRF;
+  if (other.context!=0)
+    this->context=other.context;
+  tempRF=other;
+  tempRF.checkConsistency();
+  tempRF.Invert();
+  tempRF.checkConsistency();
+  *this*=(tempRF);
+  assert(this->checkConsistency());
+}
+
+
 void RationalFunctionOld::operator*=(const Rational& other)
 { //assert(this->checkConsistency());
   if (other.IsEqualToZero())
@@ -3151,8 +3176,8 @@ void RationalFunctionOld::operator*=(const Rational& other)
 
 void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
 {// int commentChecksWhenDoneDebugging=-1;
-  //this->checkConsistency();
-  //other.checkConsistency();
+  this->checkConsistency();
+  other.checkConsistency();
   if (this==&other)
   { this->RaiseToPower(2);
     return;

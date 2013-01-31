@@ -176,6 +176,16 @@ int main_command_input(int argc, char **argv)
   return 0;
 }
 
+#include "vpfHeader3ListReferences.h"
+void TestListReferences()
+{ HashedListReferences<RationalFunctionOld> theLR;
+  RationalFunctionOld tempRF;
+  tempRF.MakeOne(& theGlobalVariables);
+  theLR.AddOnTop(tempRF);
+  std::cout << "Test : " << tempRF.ToString() << " added in list of references, "
+  << " the corresonding entry reads " << theLR[0].ToString();
+}
+
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -187,10 +197,13 @@ int main(int argc, char **argv)
   theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=1000;
   theGlobalVariables.SetCallSystem(&CallSystemWrapper);
 
+
 	std::cout << "Content-Type: text/html\n\n";
 
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
+
+  TestListReferences();
 
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
@@ -500,6 +513,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
  // civilizedInput="y:=Polynomial{}y;y";
   //civilizedInput="(a*b)*c";
 //  civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
+//  civilizedInput="1/Polynomial{}(x);";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

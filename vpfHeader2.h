@@ -5,6 +5,7 @@
 
 //the following  include contains all the c++ math routines used in the calculator.
 #include "vpfHeader1_3.h"
+
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
 class Expression

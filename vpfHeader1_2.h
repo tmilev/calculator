@@ -538,7 +538,11 @@ public:
   void TransformToWeylProjective
   (GlobalVariables& theGlobalVariables)
   ;
-  int GetDim(){if (this->size<=0) return -1; return this->TheObjects[0].GetDim();}
+  int GetDim()
+  { if (this->size<=0)
+      return -1;
+    return this->TheObjects[0].GetDim();
+  }
   bool AddNonRefinedChamberOnTopNoRepetition(Cone& newCone, GlobalVariables& theGlobalVariables);
   void PopChamberSwapWithLast(int index);
   void GetAllWallsConesNoOrientationNoRepetitionNoSplittingNormals
@@ -5141,75 +5145,6 @@ void List<Object>::AddOnTop(const Object& o)
     (this->GetNewSizeRelativeToExpectedSize(this->ActualSize+1)- this->size);
   this->TheObjects[size]=o;
   this->size++;
-}
-
-template<class Object>
-void HashedListReferences<Object>::IncreaseSizeWithZeroPointers(int increase)
-{ if (increase<=0)
-    return;
-  if (this->ActualSize<this->size+increase)
-  { Object** newArray= new Object*[this->size+increase];
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter+=increase;
-  ParallelComputing::CheckPointerCounters();
-#endif
-    for (int i=0; i<this->size; i++)
-      newArray[i]=this->TheObjects[i];
-    delete [] this->TheObjects;
-    this->TheObjects= newArray;
-    this->ActualSize+=increase;
-  }
-  for(int i=this->size; i<this->ActualSize; i++)
-    this->TheObjects[i]=0;
-  this->size+=increase;
-}
-
-template<class Object>
-void HashedListReferences<Object>::initAndCreateNewObjects(int d)
-{ this->KillAllElements();
-  this->SetSize(d);
-  for (int i=0; i<d; i++)
-    this->TheObjects[i]=new Object;
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter+=d;
-  ParallelComputing::CheckPointerCounters();
-#endif
-}
-
-template<class Object>
-void HashedListReferences<Object>::resizeToLargerCreateNewObjects(int increase)
-{ if (increase<=0)
-    return;
-  int oldsize= this->size;
-  this->SetSize(this->size+increase);
-  for (int i=oldsize; i<this->size; i++)
-    this->TheObjects[i]=new Object;
-#ifdef CGIversionLimitRAMuse
-ParallelComputing::GlobalPointerCounter+=this->size-oldsize;
-  ParallelComputing::CheckPointerCounters();
-#endif
-}
-
-template<class Object>
-void HashedListReferences<Object>::KillAllElements()
-{ for (int i =0; i<this->size; i++)
-  { delete this->TheObjects[i];
-#ifdef CGIversionLimitRAMuse
-    if (this->TheObjects[i]!=0)ParallelComputing::GlobalPointerCounter--;
-    ParallelComputing::CheckPointerCounters();
-#endif
-    this->TheObjects[i]=0;
-  }
-  this->size=0;
-}
-
-template<class Object>
-bool HashedListReferences<Object>::AddOnTop(const Object& o)
-{ if (this->Contains(o)==-1)
-  { this->AddOnTop(o);
-    return true;
-  }
-  return false;
 }
 
 class KLpolys: public HashedList<Vector<Rational> >

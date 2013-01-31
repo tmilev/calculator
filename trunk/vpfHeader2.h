@@ -5,6 +5,7 @@
 
 //the following  include contains all the c++ math routines used in the calculator.
 #include "vpfHeader1_3.h"
+#include "vpfHeader3ListReferences.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
@@ -446,7 +447,7 @@ public:
   HashedList<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedList<Polynomial<Rational> > thePolys;
   HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
-  HashedList<RationalFunctionOld> theRFs;
+  HashedListReferences<RationalFunctionOld> theRFs;
   HashedList<Rational> theRationals;
   HashedList<charSSAlgMod<Rational> > theChars;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;

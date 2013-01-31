@@ -567,6 +567,15 @@ void CommandList::initPredefinedStandardOperations()
    "Divides two rational numbers. ",
    "4/6; 2/0;", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
+   "Divides rational by polynomial (to get a rational function).",
+   "z:=Polynomial{}(x^2+y^2);\n1/z", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
+   "Divides polynomial by polynomial (to get a rational function). ",
+   "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
+   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
    Not fully tested and documented at the moment.  \

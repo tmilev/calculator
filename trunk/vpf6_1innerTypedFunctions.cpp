@@ -174,6 +174,7 @@ bool CommandList::innerDivideRFOrPolyOrRatByRFOrPoly
   theCommands.CheckInputNotSameAsOutput(input, output);
   if (input.children.size!=2)
     return false;
+  std::cout << "<br>attempting to divide " << input[0].ToString() << " by " << input[1].ToString();
   output=input[0];
   Expression rightCopy=input[1];
   RationalFunctionOld* left;
@@ -184,12 +185,23 @@ bool CommandList::innerDivideRFOrPolyOrRatByRFOrPoly
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerRationalFunction, output, left, &errorString))
     return false;
+  left->checkConsistency();
+  std::cout << "<br>numerical value of left: " << left;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerRationalFunction, rightCopy, right, &errorString))
     return false;
+  right->checkConsistency();
   if (right->IsEqualToZero())
     return output.SetError("Division error. ", theCommands);
+  std::cout << "<br>The numerical value of left " << left << ", the numberical value of right "
+  << right << "<br>";
+  for (int i=0; i<theCommands.theObjectContainer.theRFs.size; i++)
+  { std::cout << "Address of entry " << i+1 << ": "
+    << &theCommands.theObjectContainer.theRFs[i] << "<br>";
+  }
+  left->checkConsistency();
   RationalFunctionOld result=*left;
+  result.checkConsistency();
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
   result/=*right;
 //  std::cout << " to get " << result.ToString();

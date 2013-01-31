@@ -46,6 +46,7 @@
 		<Unit filename="vpfHeader1_3.h" />
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
+		<Unit filename="vpfHeader3ListReferences.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

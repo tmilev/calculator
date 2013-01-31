@@ -765,7 +765,11 @@ public:
   }
   void AssignLight(const ListLight<Object>& from);
   void ExpandOnTop(int theIncrease)
-  { int newSize=this->size+theIncrease; if(newSize<0) newSize=0; this->SetSize(newSize);}
+  { int newSize=this->size+theIncrease;
+    if(newSize<0)
+      newSize=0;
+    this->SetSize(newSize);
+  }
   void SetSize(int theSize);// <-Registering stack trace forbidden! Multithreading deadlock alert.
   void SetSizeMakeMatrix(int numRows, int numCols)
   { this->SetSize(numRows);
@@ -1043,30 +1047,6 @@ public:
   }
 };
 
-//class HashedListOfReferences is to be used in the same way as class HashedList.
-//The essential difference between HashedListOfReferences and HashedList is in the way the objects are
-//stored in memory. A copy of each object of HashedListOfReferences
-// is allocated with an individual copy constructor (call of  new Object; rather than new Object[size];),
-//and a pointer to the so allocated memory is stored.
-//Motivation for this class: when a pointer/reference to an object is requested,
-//the class returns a pointer to the individually allocated object. This piece of memory is allocated exactly once,
-//i.e. the individual piece of memory never moves, and is thus completely safe to pass a reference of the object around.
-
-template <class Object>
-class HashedListReferences
-{
-public:
-  List<Object*> theReferences;
-  MemorySaving<List<int> > IndicesOfObjectsOfGivenHashValue;
-  void KillAllElements();
-  void KillElementIndex(int i);
-  bool AddOnTop(const Object& o);
-  void resizeToLargerCreateNewObjects(int increase);
-  void IncreaseSizeWithZeroPointers(int increase);
-  void initAndCreateNewObjects(int d);
-  ~HashedListReferences(){this->KillAllElements(); };
-};
-
 template <class ObjectType1, class ObjectType2,
 unsigned int hashFunction1(const ObjectType1&),
 unsigned int hashFunction2(const ObjectType2&)
@@ -1098,8 +1078,8 @@ typedef Pair<int, int, MathRoutines::IntUnsignIdentity, MathRoutines::IntUnsignI
 
 static unsigned int NumHashResizes=0;
 
-template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
-class HashedList: public List<Object>
+template <class Object, class TemplateList, unsigned int hashFunction(const Object&)=Object::HashFunction>
+class HashTemplate: public TemplateList
 {
 private:
   void AddObjectOnBottom(const Object& o);
@@ -1165,7 +1145,7 @@ public:
   void AddOnTop(const Object& o)
   { unsigned int hashIndex =this->GetHash(o);
     this->TheHashedArrays[hashIndex].AddOnTop(this->size);
-    this->::List<Object>::AddOnTop(o);
+    this->TemplateList::AddOnTop(o);
     if (this->size>1)
       this->AdjustHashes();
   }
@@ -1212,12 +1192,6 @@ public:
     this->AddOnTop(o);
     return this->size-1;
   }
-  bool AddOnTopNoRepetition(const Object& o)
-  { if (this->GetIndex(o)!=-1)
-      return false;
-    this->AddOnTop(o);
-    return true;
-  }
   inline void AdjustHashes()
   { this->SetExpectedSize(this->size);
   }
@@ -1225,6 +1199,12 @@ public:
   { this->SetExpectedSize(this->size+theList.size);
     for (int i=0; i<theList.size; i++)
       this->AddOnTopNoRepetition(theList.TheObjects[i]);
+  }
+  bool AddOnTopNoRepetition(const Object& o)
+  { if (this->GetIndex(o)!=-1)
+      return false;
+    this->AddOnTop(o);
+    return true;
   }
   void PopLastObject()
   { this->PopIndexSwapWithLast(this->size-1);
@@ -1309,7 +1289,7 @@ public:
     { this->SetHashSizE(1);
       return;
     }
-    this->::List<Object>::SetExpectedSize(expectedSize);
+    this->TemplateList::SetExpectedSize(expectedSize);
     if (!this->IsSparseRelativeToExpectedSize(expectedSize))
       this->SetHashSizE(expectedSize*5);
   }
@@ -1321,7 +1301,7 @@ public:
     this->TheHashedArrays.initFillInObject(HS, emptyList);
     if (this->size>0)
       for (int i=0; i<this->size; i++)
-      { int theIndex=this->GetHash(this->TheObjects[i]);
+      { int theIndex=this->GetHash((*this)[i]);
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
   }
@@ -1341,11 +1321,11 @@ public:
   { this->TheHashedArrays.SetSize(1);
     this->TheHashedArrays[0].size=0;
   }
-  HashedList(const HashedList& other)
+  HashTemplate(const HashTemplate& other)
   { this->initHashesToOne();
     this->operator=(other);
   }
-  HashedList()
+  HashTemplate()
   { this->initHashesToOne();
   }
   std::string ToString(FormatExpressions* theFormat)const
@@ -1369,7 +1349,7 @@ public:
     } else
       this->TheHashedArrays=From.TheHashedArrays;
   }
-  void operator=(const List<Object>& other)
+  void operator=(const TemplateList& other)
   { if (this==&other)
       return;
     this->Clear();
@@ -1378,6 +1358,49 @@ public:
       this->AddOnTop(other.TheObjects[i]);
 //    int commentmewhendone;
 //    this->GrandMasterConsistencyCheck();
+  }
+};
+
+template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
+class HashedList: public HashTemplate<Object, List<Object>, hashFunction>
+{
+public:
+  HashedList(const HashedList& other)
+  { this->operator=(other);
+  }
+  HashedList(){}
+  inline void operator=(const HashedList& other)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
+  }
+  inline void operator=(const List<Object>& other)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::operator=(other);
+  }
+  //Note The following function specializations are declared entirely in order to
+  //facilitate autocomplete in my current IDE. If I find a better autocompletion
+  //IDE the following should be removed.
+  inline void AddOnTopNoRepetition(const List<Object>& theList)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(theList);
+  }
+  inline bool AddOnTopNoRepetition(const Object& o)
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTopNoRepetition(o);
+  }
+  inline void AddOnTop(const Object& o)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(o);
+  }
+  inline void AddOnTop(const List<Object>& theList)
+  { this->::HashTemplate<Object, List<Object>, hashFunction>::AddOnTop(theList);
+  }
+  inline bool Contains(const Object& o)const
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(o);
+  }
+  inline bool Contains(const List<Object>& theList)const
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::Contains(theList);
+  }
+  int GetIndex(const Object& o) const
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndex(o);
+  }
+  inline int GetIndexIMustContainTheObject(const Object& o) const
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
   }
 };
 
@@ -5549,11 +5572,11 @@ public:
   }
   int GetMinNumVars()const;
   void Substitution(const PolynomialSubstitution<Rational>& theSub);
-  RationalFunctionOld(const RationalFunctionOld& other): context(0), expressionType(RationalFunctionOld::typeRational)
+  RationalFunctionOld(const RationalFunctionOld& other): context(0), expressionType(RationalFunctionOld::typeError)
   { this->operator=(other);
   }
   RationalFunctionOld()
-  { this->expressionType=this->typeRational;
+  { this->expressionType=this->typeError;
     this->ratValue.MakeZero();
     this->context=0;
   }
@@ -5813,15 +5836,7 @@ public:
     *this*=(tempRF);
     assert(this->checkConsistency());
   }
-  inline void operator/=(const RationalFunctionOld& other)
-  { RationalFunctionOld tempRF;
-    if (other.context!=0)
-      this->context=other.context;
-    tempRF=other;
-    tempRF.Invert();
-    *this*=(tempRF);
-    assert(this->checkConsistency());
-  }
+  void operator/=(const RationalFunctionOld& other);
   void Minus(){this->operator*=((Rational) -1); assert(this->checkConsistency());}
 };
 

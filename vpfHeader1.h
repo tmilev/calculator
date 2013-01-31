@@ -1119,7 +1119,7 @@ public:
     //should be increased.
     if (this->IsSparse() && this->TheHashedArrays.size>20)
       for (int i=0; i<this->size; i++)
-      { int hashIndex=this->GetHash(this->TheObjects[i]);
+      { int hashIndex=this->GetHash((*this)[i]);
         this->TheHashedArrays[hashIndex].size=0;
       }
     else
@@ -1260,7 +1260,7 @@ public:
         << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
         assert(false);
       }
-      if(this->TheObjects[j]==o)
+      if((*this)[j]==o)
         return j;
     }
     return -1;

@@ -399,7 +399,7 @@ bool Expression::ConvertToType<ElementUniversalEnveloping<RationalFunctionOld> >
   RationalFunctionOld tempRF=output.GetValuE<RationalFunctionOld>();
   ElementUniversalEnveloping<RationalFunctionOld> resultElt;
   resultElt.MakeConst
-  (tempRF, this->theBoss->theObjectContainer.theLieAlgebras, algebraIndex);
+  (tempRF, this->theBoss->theObjectContainer.theLieAlgebras[algebraIndex]);
   return output.AssignValueWithContext(resultElt, this->GetContext(), *this->theBoss);
 }
 
@@ -517,7 +517,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { ElementTensorsGeneralizedVermas<RationalFunctionOld> newETGV
     =this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
-    newETGV.Substitution(polySub);
+    newETGV.Substitution(polySub, this->theBoss->theObjectContainer.theCategoryOmodules);
     return this->AssignValueWithContext(newETGV, inputOutputMinContext, *this->theBoss);
   }
   if (this->IsBuiltInType())
@@ -1487,7 +1487,13 @@ bool CommandList::fGetTypeHighestWeightParabolic
       if (!outputWeightHWFundcoords[i].IsSmallInteger())
         outputInducingSel.AddSelectionAppendNewIndex(i);
   }
-  outputHWContext.ContextSetSSLieAlgebrA(ambientSSalgebra->indexInOwner, theCommands);
+  if (!theCommands.theObjectContainer.theLieAlgebras.ContainsExactlyOnce(*ambientSSalgebra))
+  { std::cout << "This is a programming error: " << ambientSSalgebra->GetLieAlgebraName()
+    << " contained object container more than once. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
+  outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
 //  std::cout << "final context of fGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
@@ -1559,7 +1565,7 @@ bool CommandList::fDecomposeCharGenVerma
   invertedParSel.InvertSelection();
   charSSAlgMod<RationalFunctionOld> theChar, currentChar;
   MonomialChar<RationalFunctionOld> theMon;
-  theChar.MakeZero(*theSSlieAlg->owner, theSSlieAlg->indexInOwner);
+  theChar.MakeZero(*theSSlieAlg);
   FormatExpressions formatChars;
   formatChars.FDrepLetter="L";
   formatChars.fundamentalWeightLetter="\\omega";
@@ -1575,7 +1581,7 @@ bool CommandList::fDecomposeCharGenVerma
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    currentChar.MakeZero(*theSSlieAlg->owner, theSSlieAlg->indexInOwner);
+    currentChar.MakeZero(*theSSlieAlg);
     for (int j=0; j< theKLpolys.theKLcoeffs[indexInWeyl].size; j++)
       if (!theKLpolys.theKLcoeffs[indexInWeyl][j].IsEqualToZero())
       { currentHW=theHWsimpCoords;
@@ -1617,7 +1623,7 @@ bool CommandList::fHWV
     if (output.IsError())
       return true;
   return theCommands.fHWVinner
-  (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra->indexInOwner);
+  (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
 bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
@@ -1695,8 +1701,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
   hwContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.fWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHws, hwContext, selInducing,
-   theSSalgebra->indexInOwner);
+  (theCommands, input, output, theHws, hwContext, selInducing, theSSalgebra);
 }
 
 template <class CoefficientType>
@@ -1747,9 +1752,9 @@ void ModuleSSalgebra<CoefficientType>::GetGenericUnMinusElt
 { List<ElementUniversalEnveloping<CoefficientType> > eltsNilrad;
   this->GetElementsNilradical(eltsNilrad, true);
   Polynomial<Rational> tempRF;
-  output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+  output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<Polynomial<Rational> > tempMon;
-  tempMon.MakeConst(*this->theAlgebras, this->indexAlgebra);
+  tempMon.MakeConst(*this->owneR);
   int varShift=0;
   if (shiftPowersByNumVarsBaseField)
     varShift=this->GetMinNumVars();
@@ -2017,7 +2022,7 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
   ElementUniversalEnveloping<Polynomial<Rational> > theGenElt, result;
   this->GetGenericUnMinusElt(true, theGenElt, theGlobalVariables);
 //  Polynomial<Rational> Pone, Pzero;
-  result.AssignElementLieAlgebra(inputElt, *this->theAlgebras, this->indexAlgebra, 1, 0);
+  result.AssignElementLieAlgebra(inputElt, *this->owneR, 1, 0);
   std::stringstream out;
 //  std::cout << "<br>the generic elt:" << CGI::GetHtmlMathSpanPure(theGenElt.ToString());
   theGenElt.Simplify(theGlobalVariables);
@@ -2120,14 +2125,14 @@ bool ModuleSSalgebra<CoefficientType>::GetActionGenVermaModuleAsDiffOperator
 
 bool CommandList::fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
-  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing, int indexOfAlgebra)
+  Vectors<Polynomial<Rational> >& theHws, Expression& hwContext, Selection& selInducing, SemisimpleLieAlgebra* owner)
 { MacroRegisterFunctionWithName("CommandList::fWriteGenVermaModAsDiffOperatorInner");
    /////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////
   if (theHws.size==0)
     return false;
   Expression tempExp;
-  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexOfAlgebra];
+  SemisimpleLieAlgebra& theSSalgebra=*owner;
   List<ElementUniversalEnveloping<Polynomial<Rational> > > elementsNegativeNilrad;
   ElementSemisimpleLieAlgebra<Rational> theGenerator;
   ElementUniversalEnveloping<Polynomial<Rational> > genericElt, actionOnGenericElt;
@@ -2152,14 +2157,13 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   for (int j=0; j<theSSalgebra.GetRank(); j++)
   { Vector<Rational> ei;
     ei.MakeEi(theSSalgebra.GetRank(), j);
-    theGenerator.MakeGGenerator
-    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGenerator.MakeGGenerator(ei, theSSalgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
 //    theGenerator.MakeHgenerator
 //    (ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
 //    theGeneratorsItry.AddOnTop(theGenerator);
     ei.Minus();
-    theGenerator.MakeGGenerator(ei, theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra);
+    theGenerator.MakeGGenerator(ei, theSSalgebra);
     theGeneratorsItry.AddOnTop(theGenerator);
   }
   theQDOs.SetSize(theGeneratorsItry.size);
@@ -2183,8 +2187,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   { ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[i];
     tempV=theHws[i];
     if (!theMod.MakeFromHW
-        (*theSSalgebra.owner, theSSalgebra.indexInOwner, tempV, selInducing,
-         *theCommands.theGlobalVariableS, 1, 0, 0, true) )
+        (theSSalgebra, tempV, selInducing, *theCommands.theGlobalVariableS, 1, 0, 0, true) )
       return output.SetError("Failed to create module.", theCommands);
     if (i==0)
     { theMod.GetElementsNilradical(elementsNegativeNilrad, true);
@@ -2225,9 +2228,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
       out << "<tr><td>" << CGI::GetHtmlMathSpanPure(genericElt.ToString(&theUEformat)) << "</td>";
       latexReport << "$" << genericElt.ToString(&theUEformat) << "$";
       for (int j=0; j<theGeneratorsItry.size; j++)
-      { actionOnGenericElt.AssignElementLieAlgebra
-        (theGeneratorsItry[j], theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra,
-         Pone, Pzero)
+      { actionOnGenericElt.AssignElementLieAlgebra(theGeneratorsItry[j], theSSalgebra, Pone, Pzero)
         ;
         actionOnGenericElt*=(genericElt);
         theSSalgebra.OrderSetNilradicalNegativeMost(theMod.parabolicSelectionNonSelectedAreElementsLevi);
@@ -2298,7 +2299,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
 bool CommandList::fHWVinner
 (CommandList& theCommands, Expression& output,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Expression& hwContext, int indexOfAlgebra)
+ Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner)
 { MacroRegisterFunctionWithName("CommandList::fHWVinner");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
@@ -2309,13 +2310,14 @@ bool CommandList::fHWVinner
   std::string report;
   ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt;
   //=theElementData.theElementTensorGenVermas.GetElement();
-  List<ModuleSSalgebra<RationalFunctionOld> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
+  ListReferences<ModuleSSalgebra<RationalFunctionOld> >& theMods=
+  theCommands.theObjectContainer.theCategoryOmodules;
   int indexOfModule=-1;
 
   for (int i=0; i<theMods.size; i++)
   { ModuleSSalgebra<RationalFunctionOld>& currentMod=theMods[i];
     if (highestWeightFundCoords==currentMod.theHWFundamentalCoordsBaseField &&
-          selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
+        selectionParSel==currentMod.parabolicSelectionNonSelectedAreElementsLevi )
     { indexOfModule=i;
       break;
     }
@@ -2327,21 +2329,21 @@ bool CommandList::fHWVinner
   ModuleSSalgebra<RationalFunctionOld>& theMod=theMods[indexOfModule];
   if (!theMod.flagIsInitialized)
   { bool isGood=theMod.MakeFromHW
-    (theCommands.theObjectContainer.theLieAlgebras, indexOfAlgebra, highestWeightFundCoords, selectionParSel,
+    (*owner, highestWeightFundCoords, selectionParSel,
      *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
     theCommands.Comments << report;
     if (!isGood)
       return output.SetError
       ("Error while generating highest weight module. See comments for details. ", theCommands);
   }
-  theElt.MakeHWV(theMods, indexOfModule, RFOne);
+  theElt.MakeHWV(theMod, RFOne);
   return output.AssignValueWithContext<ElementTensorsGeneralizedVermas<RationalFunctionOld> >
   (theElt, hwContext, theCommands);
 }
 
 template <class CoefficientType>
 void ModuleSSalgebra<CoefficientType>::GetFDchar(charSSAlgMod<CoefficientType>& output)
-{ output.MakeZero(*this->theAlgebras, this->indexAlgebra);
+{ output.MakeZero(*this->owneR);
   if (this->theHWFundamentalCoordsBaseField.size<=0)
     return;
   MonomialChar<CoefficientType> tempMon;
@@ -2416,16 +2418,14 @@ bool CommandList::fSplitGenericGenVermaTensorFD
        list of small non-negative integers.", theCommands);
   }
   theCommands.fHWVinner
-  (theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1,
-   hwContext, theSSalgebra->indexInOwner);
+  (theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra);
   if (hwvGenVerma.IsError())
   { output=hwvGenVerma;
     return true;
   }
   Vector<RationalFunctionOld> theFDhwRF;
   theFDhwRF=theFDhw;
-  theCommands.fHWVinner
-  (theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra->indexInOwner);
+  theCommands.fHWVinner(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra);
   if (hwvFD.IsError())
   { output=hwvFD;
     return true;
@@ -2439,14 +2439,12 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   hwvFD.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
 
   ModuleSSalgebra<RationalFunctionOld>& theGenMod=theHWgenVerma[0].theMons[0].GetOwner();
-  int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
+  //int indexGenMod=theHWgenVerma[0].theMons[0].indexInOwner;
   ModuleSSalgebra<RationalFunctionOld>& theFDMod=theHWfd[0].theMons[0].GetOwner();
-  int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
+  //int indexFDMod=theHWfd[0].theMons[0].indexInOwner;
   ElementUniversalEnveloping<RationalFunctionOld> theCasimir, theCasimirMinusChar;
   charSSAlgMod<RationalFunctionOld> theHWchar, theFDLeviSplit, theFDChaR, theFDLeviSplitShifteD;
-  theHWchar.MakeFromWeight
-  (theFDMod.theHWSimpleCoordSBaseField, theCommands.theObjectContainer.theLieAlgebras,
-   theSSalgebra->indexInOwner);
+  theHWchar.MakeFromWeight(theFDMod.theHWSimpleCoordSBaseField, *theSSalgebra);
   ReflectionSubgroupWeylGroup tempSG;
   List<ElementUniversalEnveloping<RationalFunctionOld> > theLeviEigenVectors;
   Vectors<RationalFunctionOld> theEigenVectorWeightsFund;
@@ -2478,7 +2476,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   tempFormat.CustomPlusSign="";
   tempFormat.chevalleyGgeneratorLetter="\\bar{g}";
   tempFormat.chevalleyHgeneratorLetter="\\bar{h}";
-  theFDLeviSplitShifteD.MakeZero(theCommands.theObjectContainer.theLieAlgebras, theSSalgebra->indexInOwner);
+  theFDLeviSplitShifteD.MakeZero(*theSSalgebra);
   MonomialChar<RationalFunctionOld> tempMon;
   ElementUniversalEnveloping<RationalFunctionOld> currentChar;
   for (int i=0; i<theLeviEigenVectors.size; i++)
@@ -2499,7 +2497,6 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   out << "</table>";
   latexReport1 << "\\end{longtable}<br>";
   ElementTensorsGeneralizedVermas<RationalFunctionOld> tempElt, tempElt2;
-  List<ModuleSSalgebra<RationalFunctionOld> >& theMods=theCommands.theObjectContainer.theCategoryOmodules;
   theFDMod.highestWeightVectorNotation="v";
   theGenMod.highestWeightVectorNotation="w";
   out << "Let w be the highest weight vector of the generalized Verma component, "
@@ -2523,11 +2520,11 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   for (int i=0; i<theCentralCharacters.size; i++)
   { Vector<RationalFunctionOld> currentWeightSimpleCoords=
     theSSalgebra->theWeyl.GetSimpleCoordinatesFromFundamental(theEigenVectorWeightsFund[i]);
-    tempElt.MakeHWV(theMods, indexFDMod, RFOne);
+    tempElt.MakeHWV(theFDMod, RFOne);
     tempElt.MultiplyOnTheLeft
-    (theLeviEigenVectors[i], theElt, theMods, *theSSalgebra, *theCommands.theGlobalVariableS,
+    (theLeviEigenVectors[i], theElt, *theSSalgebra, *theCommands.theGlobalVariableS,
      RFOne, RFZero);
-    tempElt.MakeHWV(theMods, indexGenMod, RFOne);
+    tempElt.MakeHWV(theGenMod, RFOne);
 //      tempElt.MultiplyOnTheLeft
 //      (theGenMod.theGeneratingWordsNonReduced[0], tempElt2, theMods, theSSalgebra,
 //         *theCommands.theGlobalVariableS,
@@ -2545,7 +2542,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       { theCasimirMinusChar=theCasimir;
         theCasimirMinusChar-=theCentralCharacters[j];
         theElt.MultiplyOnTheLeft
-        (theCasimirMinusChar, tempElt2, theMods, *theSSalgebra, *theCommands.theGlobalVariableS,
+        (theCasimirMinusChar, tempElt2, *theSSalgebra, *theCommands.theGlobalVariableS,
         RFOne, RFZero);
         theElt=tempElt2;
         tempStream << "(i(\\bar c)- (" << theCentralCharacters[j].ToString() << ") )\\\\";
@@ -2684,11 +2681,12 @@ bool CommandList::innerGetChevGen
   if (theIndex>0)
     theIndex+=theSSalg->GetRank()-1;
   theIndex+=theSSalg->GetNumPosRoots();
-  theElt.MakeGenerator(theIndex, *theSSalg->owner, theSSalg->indexInOwner);
+  theElt.MakeGenerator(theIndex, *theSSalg);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
-  theContext.ContextMakeContextSSLieAlgebrA(theSSalg->indexInOwner, theCommands);
+  int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
+  theContext.ContextMakeContextSSLieAlgebrA(indexInOwner, theCommands);
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
 
@@ -2712,11 +2710,12 @@ bool CommandList::innerGetCartanGen
   Vector<Rational> theH;
   theIndex--;
   theH.MakeEi(theSSalg->GetRank(), theIndex);
-  theElt.MakeHgenerator(theH, *theSSalg->owner, theSSalg->indexInOwner);
+  theElt.MakeHgenerator(theH, *theSSalg);
   ElementUniversalEnveloping<RationalFunctionOld> theUE;
-  theUE.AssignElementLieAlgebra(theElt, *theSSalg->owner, theSSalg->indexInOwner);
+  theUE.AssignElementLieAlgebra(theElt, *theSSalg);
   Expression theContext;
-  theContext.ContextMakeContextSSLieAlgebrA(theSSalg->indexInOwner, theCommands);
+  int theAlgIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*theSSalg);
+  theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
   //std::cout << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
 }
@@ -2847,7 +2846,7 @@ bool CommandList::fWeylOrbit
     ;
     if (useRho)
     { currentWeight=theHWsimpleCoords;
-      standardElt.MakeConst(*theSSalgebra->owner, theSSalgebra->indexInOwner);
+      standardElt.MakeConst(*theSSalgebra);
       bool isGood=true;
       for (int j=0; j<orbitGeneratingSet[i].size; j++)
       { int simpleIndex=orbitGeneratingSet[i][j];
@@ -2912,8 +2911,7 @@ bool CommandList::innerPrintSSLieAlgebra
     Vector<Rational> tempRoot;
     ElementSemisimpleLieAlgebra<Rational> tempElt1;
     for (int i=0; i<theSSalgebra.GetNumGenerators(); i++)
-    { tempElt1.MakeGenerator
-      (i,*theSSalgebra.owner, theSSalgebra.indexInOwner);
+    { tempElt1.MakeGenerator(i, theSSalgebra);
       tempRoot=theSSalgebra.GetWeightOfGenerator(i);
       out << "$" << tempElt1.ToString(&theFormat) << "$&$"<< tempRoot.ToString() << "$";
       out << "&$" << theSSalgebra.theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "$";
@@ -3122,13 +3120,10 @@ bool CommandList::innerSSLieAlgebra
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
   bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);
   if (feelsLikeTheVeryFirstTime)
-  { tempSSalgebra.owner=&theCommands.theObjectContainer.theLieAlgebras;
-    tempSSalgebra.indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
-    indexInOwner=tempSSalgebra.indexInOwner;
+  { indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
     theCommands.theObjectContainer.theLieAlgebras.AddOnTop(tempSSalgebra);
   }
-  SemisimpleLieAlgebra& theSSalgebra=
-  theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
   output.AssignValue(theSSalgebra, theCommands);
   if (feelsLikeTheVeryFirstTime)
   { theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
@@ -5513,8 +5508,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
   theContext.ContextGetFormatExpressions(theFormat);
 //  std::cout << "highest weights you are asking me for: " << theHws.ToString(&theFormat);
   return theCommands.fWriteGenVermaModAsDiffOperatorInner
-  (theCommands, input, output, theHWs, theContext, theParSel,
-   theSSalgebra->indexInOwner);
+  (theCommands, input, output, theHWs, theContext, theParSel, theSSalgebra);
 }
 
 bool CommandList::fFreudenthalEval
@@ -5532,9 +5526,7 @@ bool CommandList::fFreudenthalEval
     return output.SetError("Failed to extract highest weight. ", theCommands);
   charSSAlgMod<Rational> startingChar, resultChar ;
   hwSimple=theSSalg->theWeyl.GetSimpleCoordinatesFromFundamental(hwFundamental);
-  startingChar.MakeFromWeight
-  (hwSimple, theCommands.theObjectContainer.theLieAlgebras, theSSalg->indexInOwner)
-  ;
+  startingChar.MakeFromWeight(hwSimple, *theSSalg);
   std::string reportString;
   if (!startingChar.FreudenthalEvalMeDominantWeightsOnly
       (resultChar, 10000, &reportString, theCommands.theGlobalVariableS))
@@ -5548,7 +5540,7 @@ bool CommandList::fElementSSAlgebra
     return false;
   if (!input[1].IsOfType<SemisimpleLieAlgebra>())
     return false;
-  const SemisimpleLieAlgebra& ownerAlgebra=input[1].GetValuE<SemisimpleLieAlgebra>();
+  SemisimpleLieAlgebra& ownerAlgebra=input[1].GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
   int theDisplayIndex;
   if (!input[2].IsSmallInteger(&theDisplayIndex))
   { bool isGood=
@@ -5575,16 +5567,13 @@ bool CommandList::fElementSSAlgebra
       actualIndex+=ownerAlgebra.GetNumPosRoots();
     else
       actualIndex+=ownerAlgebra.GetNumPosRoots()+ownerAlgebra.GetRank()-1;
-    theElt.MakeGenerator
-    (actualIndex, theCommands.theObjectContainer.theLieAlgebras, ownerAlgebra.indexInOwner);
+    theElt.MakeGenerator(actualIndex, ownerAlgebra);
     RationalFunctionOld rfOne, rfZero;
     rfOne.MakeOne(theCommands.theGlobalVariableS);
     rfZero.MakeZero(theCommands.theGlobalVariableS);
     ElementUniversalEnveloping<RationalFunctionOld> tempUE;
     //  std::cout << "tempelt: " << tempElt.ToString();
-    tempUE.AssignElementLieAlgebra
-    (theElt, theCommands.theObjectContainer.theLieAlgebras,
-     ownerAlgebra.indexInOwner, rfOne, rfZero);
+    tempUE.AssignElementLieAlgebra(theElt, ownerAlgebra, rfOne, rfZero);
     return output.AssignValue(tempUE, theCommands);
   }
   if (!input[2].IsSequenceNElementS(2))
@@ -5606,14 +5595,11 @@ bool CommandList::fElementSSAlgebra
   }
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   int actualIndeX=indexInCartan-1+ownerAlgebra.GetNumPosRoots();
-  tempElt.MakeGenerator
-  (actualIndeX, theCommands.theObjectContainer.theLieAlgebras, ownerAlgebra.indexInOwner);
+  tempElt.MakeGenerator(actualIndeX, ownerAlgebra);
   RationalFunctionOld rfOne, rfZero;
   rfOne.MakeOne(theCommands.theGlobalVariableS);
   rfZero.MakeZero(theCommands.theGlobalVariableS);
   ElementUniversalEnveloping<RationalFunctionOld> tempUE;
-  tempUE.AssignElementLieAlgebra
-  (tempElt, theCommands.theObjectContainer.theLieAlgebras,
-   ownerAlgebra.indexInOwner, rfOne, rfZero);
+  tempUE.AssignElementLieAlgebra(tempElt, ownerAlgebra, rfOne, rfZero);
   return output.AssignValue(tempUE, theCommands);
 }

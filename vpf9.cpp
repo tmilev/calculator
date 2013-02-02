@@ -5196,9 +5196,8 @@ void rootSubalgebra::ComputeCentralizerFromKModulesAndSortKModules()
   this->GetAmbientWeyl().TransformToSimpleBasisGenerators(this->SimpleBasisCentralizerRoots);
 }
 
-void rootSubalgebra::init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwners)
-{ this->owners=inputOwners;
-  this->indexInOwners=inputIndexInOwners;
+void rootSubalgebra::init(SemisimpleLieAlgebra& inputOwner)
+{ this->owneR=&inputOwner;
 }
 
 void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)

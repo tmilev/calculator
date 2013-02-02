@@ -1349,6 +1349,7 @@ public:
     } else
       this->TheHashedArrays=From.TheHashedArrays;
   }
+
   void operator=(const TemplateList& other)
   { if (this==&other)
       return;
@@ -4164,29 +4165,26 @@ bool ComputeNormalFromSelectionAndExtraRoot
 class ChevalleyGenerator
 {
 public:
-  List<SemisimpleLieAlgebra>* ownerArray;
-  int indexOfOwnerAlgebra;
+  SemisimpleLieAlgebra* owneR;
   int theGeneratorIndex;
-  ChevalleyGenerator(): ownerArray(0), indexOfOwnerAlgebra(-1), theGeneratorIndex(-1){}
+  ChevalleyGenerator(): owneR(0), theGeneratorIndex(-1){}
   friend std::ostream& operator << (std::ostream& output, const ChevalleyGenerator& theGen)
   { output << theGen.ToString();
     return output;
   }
   static const bool IsEqualToZero(){return false;}
-  static unsigned int HashFunction(const ChevalleyGenerator& input)
-  { return input.theGeneratorIndex+input.indexOfOwnerAlgebra*SomeRandomPrimes[0];
+  static inline unsigned int HashFunction(const ChevalleyGenerator& input)
+  { return (unsigned) input.theGeneratorIndex;
   }
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
   }
-  void MakeGenerator(List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner, int inputGeneratorIndex)
-  { this->ownerArray=&inputOwner;
-    this->indexOfOwnerAlgebra=inputIndexInOwner;
+  void MakeGenerator(SemisimpleLieAlgebra& inputOwner, int inputGeneratorIndex)
+  { this->owneR=&inputOwner;
     this->theGeneratorIndex=inputGeneratorIndex;
   }
   void operator=(const ChevalleyGenerator& other)
-  { this->ownerArray=other.ownerArray;
-    this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
+  { this->owneR=other.owneR;
     this->theGeneratorIndex=other.theGeneratorIndex;
   }
   bool operator>(const ChevalleyGenerator& other)const;
@@ -4800,7 +4798,10 @@ public:
   }
   bool IsEqualToZero()const;
   int FindMaxPowerOfVariableIndex(int VariableIndex);
-  void MakeZero(){this->::HashedList<TemplateMonomial>::Clear(); this->theCoeffs.size=0;}
+  void MakeZero()
+  { this->::HashedList<TemplateMonomial>::Clear();
+    this->theCoeffs.size=0;
+  }
   inline int GetMinNumVars()const
   { int result =0;
     for (int i=0; i<this->size; i++)
@@ -7823,12 +7824,11 @@ template<class CoefficientType>
 class ElementSemisimpleLieAlgebra :public MonomialCollection<ChevalleyGenerator, CoefficientType>
 {
 public:
-  List<SemisimpleLieAlgebra>* ownerArray;
-  int indexOfOwnerAlgebra;
+  SemisimpleLieAlgebra* owneR;
   bool NeedsBrackets()const;
   Vector<CoefficientType> GetCartanPart()const;
   void MakeGGenerator
-  (const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+  (const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
   ;
   bool IsElementCartan()
   { for (int i=0; i<this->size; i++)
@@ -7836,9 +7836,9 @@ public:
         return false;
     return true;
   }
-  void MakeHgenerator(const Vector<CoefficientType>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
+  void MakeHgenerator(const Vector<CoefficientType>& theH, SemisimpleLieAlgebra& inputOwners);
   void MakeGenerator
-  (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+  (int generatorIndex, SemisimpleLieAlgebra& inputOwner)
   ;
   void ElementToVectorNegativeRootSpacesFirst(Vector<Rational>& output)const;
   void AssignVectorNegRootSpacesCartanPosRootSpaces
@@ -7887,7 +7887,7 @@ public:
   }
   bool MustUseBracketsWhenDisplayingMeRaisedToPower();
   void MakeZero
-  (List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
+  (SemisimpleLieAlgebra& inputOwner)
   ;
   unsigned int HashFunction()const
   { return this->indexOfOwnerAlgebra*SomeRandomPrimes[0]
@@ -7898,8 +7898,7 @@ public:
   }
   template<class otherType>
   void operator=(const ElementSemisimpleLieAlgebra<otherType>& other)
-  { this->indexOfOwnerAlgebra=other.indexOfOwnerAlgebra;
-    this->ownerArray=other.ownerArray;
+  { this->owneR=other.owneR;
     this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::operator=(other);
   }
 };

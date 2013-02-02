@@ -14,13 +14,10 @@ std::string SemisimpleSubalgebras::ToString(FormatExpressions* theFormat)
 }
 
 void SemisimpleSubalgebras::FindAllEmbeddings
-  (DynkinSimpleType& theType, List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner,
-   GlobalVariables* theGlobalVariables)
+(DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindAllEmbeddings");
-  this->owners=newOwner;
-  this->indexInOwners=newIndexInOwner;
-  this->GetSSowner().FindSl2Subalgebras
-  (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
+  this->owneR=&theOwner;
+  this->GetSSowner().FindSl2Subalgebras(theOwner, this->theSl2s, *theGlobalVariables);
   CandidateSSSubalgebra theCandidate;
   theCandidate.owner=this;
   this->ExtendOneComponentOneTypeAllLengthsRecursive
@@ -28,12 +25,10 @@ void SemisimpleSubalgebras::FindAllEmbeddings
 }
 
 void SemisimpleSubalgebras::FindTheSSSubalgebras
-(List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
+(SemisimpleLieAlgebra& newOwner, GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::FindTheSSSubalgebras");
-  this->owners=newOwner;
-  this->indexInOwners=newIndexInOwner;
-  this->GetSSowner().FindSl2Subalgebras
-  (*this->owners, this->indexInOwners, this->theSl2s, *theGlobalVariables);
+  this->owneR=&newOwner;
+  this->GetSSowner().FindSl2Subalgebras(newOwner, this->theSl2s, *theGlobalVariables);
   this->FindTheSSSubalgebrasPart2(theGlobalVariables);
 }
 
@@ -49,14 +44,11 @@ void SemisimpleSubalgebras::AddCandidatesSubalgebra
 { MacroRegisterFunctionWithName("SemisimpleSubalgebras::AddCandidatesSubalgebra");
   SemisimpleLieAlgebra tempSA;
   tempSA.theWeyl=input.theWeylNonEmbeddeDdefaultScale;
-  tempSA.owner=&this->theSubalgebrasNonEmbedded;
-  tempSA.indexInOwner=this->theSubalgebrasNonEmbedded.GetIndex(tempSA);
-  if (tempSA.indexInOwner==-1)
-  { tempSA.indexInOwner=this->theSubalgebrasNonEmbedded.size;
-    this->theSubalgebrasNonEmbedded.AddOnTop(tempSA);
-    this->theSubalgebrasNonEmbedded.LastObject()->ComputeChevalleyConstantS(theGlobalVariables);
-  }
-  input.indexInOwnersOfNonEmbeddedMe=tempSA.indexInOwner;
+  bool needToComputeConstants=this->theSubalgebrasNonEmbedded.Contains(tempSA);
+  int theIndex=this->theSubalgebrasNonEmbedded.AddNoRepetitionOrReturnIndexFirst(tempSA);
+  if (needToComputeConstants)
+    this->theSubalgebrasNonEmbedded[theIndex].ComputeChevalleyConstantS(theGlobalVariables);
+  input.indexInOwnersOfNonEmbeddedMe=theIndex;
 }
 
 void SemisimpleSubalgebras::ExtendOneComponentRecursive
@@ -373,8 +365,8 @@ bool CandidateSSSubalgebra::ComputeSystem
     { Vector<Rational>& currentAmbRoot=this->GetAmbientWeyl().RootSystem[j];
       int indexCurGen=this->GetAmbientSS().GetGeneratorFromRootIndex(j);
       int opIndex= this->GetAmbientSS().GetGeneratorFromRoot(-currentAmbRoot);
-      currentGen.MakeGenerator(*this->owner->owners, this->owner->indexInOwners, indexCurGen);
-      currentOpGen.MakeGenerator(*this->owner->owners, this->owner->indexInOwners, opIndex);
+      currentGen.MakeGenerator(*this->owner->owneR, indexCurGen);
+      currentOpGen.MakeGenerator(*this->owner->owneR, opIndex);
       if (this->IsWeightSystemSpaceIndex(i, this->GetAmbientWeyl().RootSystem[j]))
       { currentInvolvedPosGens.AddOnTop(currentGen);
         currentInvolvedNegGens.AddOnTop(currentOpGen);
@@ -415,8 +407,7 @@ bool CandidateSSSubalgebra::ComputeSystemPart2
   }
   for (int i=0; i<this->theInvolvedNegGenerators.size; i++)
   { desiredHpart=this->theCoRoots[i];//<-implicit type conversion here!
-    goalValue.MakeHgenerator
-    (desiredHpart, *this->owner->owners, this->owner->indexInOwners);
+    goalValue.MakeHgenerator(desiredHpart, *this->owner->owneR);
     this->GetAmbientSS().LieBracket
     (this->theUnknownPosGens[i], this->theUnknownNegGens[i], lieBracketMinusGoalValue);
     lieBracketMinusGoalValue-=goalValue;
@@ -511,11 +502,10 @@ void CandidateSSSubalgebra::GetGenericLinearCombination
  ElementSemisimpleLieAlgebra<Polynomial<Rational> >& output)
 { Polynomial<Rational> theCF;
   ElementSemisimpleLieAlgebra<Polynomial<Rational> > tempMon;
-  output.MakeZero(*this->owner->owners, this->owner->indexInOwners);
+  output.MakeZero(*this->owner->owneR);
   for (int i=0; i<involvedGens.size; i++)
   { theCF.MakeDegreeOne(numVars, varOffset+i, 1);
-    tempMon.MakeGenerator
-    (involvedGens[i].theGeneratorIndex, *this->owner->owners, this->owner->indexInOwners)
+    tempMon.MakeGenerator(involvedGens[i].theGeneratorIndex, *this->owner->owneR)
     ;
     tempMon*=theCF;
     output+=tempMon;
@@ -555,7 +545,7 @@ bool CandidateSSSubalgebra::ComputeChar
   accumChar=this->theCharFundamentalCoordsRelativeToCartan;
 
   this->theCharFundCoords.MakeZero
-  (this->owner->theSubalgebrasNonEmbedded, this->indexInOwnersOfNonEmbeddedMe)
+  (this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe])
   ;
   while (accumChar.size>0)
   { int currentIndex=
@@ -573,7 +563,7 @@ bool CandidateSSSubalgebra::ComputeChar
       if (accumChar[currentIndex].weightFundamentalCoords[i]<0)
         return false;
     freudenthalChar.MakeZero
-    (this->owner->theSubalgebrasNonEmbedded, this->indexInOwnersOfNonEmbeddedMe);
+    (this->owner->theSubalgebrasNonEmbedded[this->indexInOwnersOfNonEmbeddedMe]);
     freudenthalChar.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     this->theCharFundCoords.AddMonomial(accumChar[currentIndex], accumChar.theCoeffs[currentIndex]);
     std::string tempS;
@@ -656,12 +646,9 @@ void SemisimpleSubalgebras::ExtendOneComponentOneTypeAllLengthsRecursive
       << theType.ToString()
       << " (total " << this->SimpleComponentsSubalgebras.size << ")...";
       theProgressReport2.Report(tempStream.str());
-      theSmallAlgebra.init
-      (this->SimpleComponentsSubalgebras, indexSubalgebra, theType.theLetter, theType.theRank);
       theSmallAlgebra.ComputeChevalleyConstantS(theGlobalVariables);
       theSmallAlgebra.FindSl2Subalgebras
-      (this->SimpleComponentsSubalgebras, theSmallAlgebra.indexInOwner,
-       theSmallSl2s, *theGlobalVariables);
+      (theSmallAlgebra, theSmallSl2s, *theGlobalVariables);
       tempStream << " done.";
       theProgressReport2.Report(tempStream.str());
     }
@@ -790,7 +777,7 @@ WeylGroup& slTwoSubalgebra::GetOwnerWeyl()
 
 bool slTwoSubalgebra::operator==(const slTwoSubalgebra& right)const
 {// See Dynkin, Semisimple Lie subalgebras of semisimple Lie algebras, chapter 7-10
-  if (this->owners!=right.owners || this->indexOwnerAlgebra!=right.indexOwnerAlgebra)
+  if (this->owneR!=right.owneR)
   { std::cout << "This is a programming error: comparing sl(2) subalgebras"
     << "that have different ambient Lie algebras. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -968,18 +955,14 @@ void slTwoSubalgebra::ElementToHtml(std::string& filePath)
   CGI::OpenFileCreateIfNotPresent(theFile, filePath, false, true, false);
 }
 
-void SltwoSubalgebras::init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner)
-{ this->owners=inputOwners;
-  this->IndexInOwners=inputIndexInOwner;
-  this->theRootSAs.ownerArray=inputOwners;
-  this->theRootSAs.indexInOwner=inputIndexInOwner;
+void SltwoSubalgebras::init(SemisimpleLieAlgebra& inputOwner)
+{ this->theRootSAs.owneR=&inputOwner;
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras
-  (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner,
-   SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+(SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::FindSl2Subalgebras");
-  output.init(&inputOwner, inputIndexInOwner);
+  output.init(inputOwner);
   output.GetOwner().ComputeChevalleyConstantS(&theGlobalVariables);
   output.theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
   (theGlobalVariables, true, true);
@@ -1033,13 +1016,13 @@ WeylGroup& rootSubalgebras::GetOwnerWeyl()
 }
 
 SemisimpleLieAlgebra& rootSubalgebras::GetOwnerSSalgebra()
-{ if (this->ownerArray==0 || this->indexInOwner<0)
+{ if (this->owneR==0)
   { std::cout << "This is a programming error. Attempting to access the "
     << " ambient Lie algebra of a non-initialized collection of root subalgebras. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return (*this->ownerArray)[this->indexInOwner];
+  return *this->owneR;
 }
 
 void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
@@ -1051,8 +1034,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasUpToIsomorphism
   rootSubalgebras rootSAsGenerateAll;
   rootSAsGenerateAll.SetSize(this->GetOwnerSSalgebra().GetRank()*2+1);
   rootSAsGenerateAll[0].genK.size=0;
-  rootSAsGenerateAll[0].owners=this->ownerArray;
-  rootSAsGenerateAll[0].indexInOwners=this->indexInOwner;
+  rootSAsGenerateAll[0].owneR=this->owneR;
   rootSAsGenerateAll[0].ComputeAll();
   this->GenerateAllReductiveRootSubalgebrasContainingInputUpToIsomorphism
   (rootSAsGenerateAll, 1, theGlobalVariables)
@@ -1096,8 +1078,7 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
   (this->SimpleBasisK, relativeRootSystem, bufferVectors, tempMat);
   slTwoSubalgebra theSl2;
   theSl2.container=&output;
-  theSl2.owners=this->owners;
-  theSl2.indexOwnerAlgebra=this->indexInOwners;
+  theSl2.owneR=this->owneR;
   SemisimpleLieAlgebra& theLieAlgebra= this->GetOwnerSSalg();
   for (int i=0; i<numCycles; i++, theRootsWithZeroCharacteristic.incrementSelection())
   { tempRoots.size=0;
@@ -1144,10 +1125,9 @@ void rootSubalgebra::GetSsl2SubalgebrasAppendListNoRepetition
       for (int k=0; k<theSl2.RootsWithScalar2WithH.size; k++)
         this->GetAmbientWeyl().ActOn(raisingElt, theSl2.RootsWithScalar2WithH[k], false, false);
 
-      theSl2.theH.MakeHgenerator
-      (characteristicH, *theLieAlgebra.owner, theLieAlgebra.indexInOwner);
-      theSl2.theE.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
-      theSl2.theF.MakeZero(*theLieAlgebra.owner, theLieAlgebra.indexInOwner);
+      theSl2.theH.MakeHgenerator(characteristicH, theLieAlgebra);
+      theSl2.theE.MakeZero(theLieAlgebra);
+      theSl2.theF.MakeZero(theLieAlgebra);
       //theSl2.ComputeDebugString(false, false, theGlobalVariables);
 //      std::cout << "<br>accounting " << characteristicH.ToString();
       if(theLieAlgebra.AttemptExtendingHEtoHEFWRTSubalgebra
@@ -1194,7 +1174,7 @@ bool SltwoSubalgebras::ContainsSl2WithGivenH(Vector<Rational>& theH, int* output
     *outputIndex=-1;
   ElementSemisimpleLieAlgebra<Rational> tempH;
   this->CheckForCorrectInitializationCrashIfNot();
-  tempH.MakeHgenerator(theH, *this->owners, this->IndexInOwners);
+  tempH.MakeHgenerator(theH, *this->owner);
   for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].theH==tempH)
     { if (outputIndex!=0)

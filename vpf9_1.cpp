@@ -307,8 +307,8 @@ void rootSubalgebra::ComputeEpsCoordsWRTk(GlobalVariables& theGlobalVariables)
 
 void rootSubalgebra::Assign(const rootSubalgebra& right)
 { this->genK=(right.genK);
-  this->owners=right.owners;
-  this->indexInOwners=right.indexInOwners;
+  this->owneR=right.owneR;
+//  this->indexInOwners=right.indexInOwners;
   this->AllRootsK=(right.AllRootsK);
   this->CentralizerKmods.Assign(right.CentralizerKmods);
   this->CentralizerRoots=(right.CentralizerRoots);
@@ -340,8 +340,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
   if (RecursionDepth>=bufferSAs.size)
     bufferSAs.SetSize(bufferSAs.size+this->GetOwnerWeyl().CartanSymmetric.NumRows);
   bufferSAs[RecursionDepth].genK = bufferSAs[RecursionDepth-1].genK;
-  bufferSAs[RecursionDepth].owners=this->ownerArray;
-  bufferSAs[RecursionDepth].indexInOwners=this->indexInOwner;
+  bufferSAs[RecursionDepth].owneR=this->owneR;
   ProgressReport theReport(&theGlobalVariables);
   for (int k=0; k<bufferSAs[RecursionDepth-1].kModules.size; k++)
     if (bufferSAs[RecursionDepth-1].HighestWeightsGmodK[k].IsPositiveOrZero())
@@ -571,8 +570,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
       if (!tempRatR.IsEqualTo(tempRatD))
         return false;
     }
-  leftSA.init(this->owners, this->indexInOwners);
-  rightSA.init(this->owners, this->indexInOwners);
+  leftSA.init(*this->owneR);
+  rightSA.init(*this->owneR);
   leftSA.genK=domainRec;
   rightSA.genK=rangeRec;
   leftSA.ComputeAllButAmbientWeyl(); rightSA.ComputeAllButAmbientWeyl();
@@ -1642,8 +1641,8 @@ void multTableKmods::ToString(std::string& output, bool useLaTeX, bool useHtml, 
 }
 
 rootSubalgebra::rootSubalgebra()
-{ this->owners=0;
-  this->indexInOwners=-1;
+{ this->owneR=0;
+//  this->indexInOwners=-1;
   this->flagAnErrorHasOccuredTimeToPanic=false;
   this->NumGmodKtableRowsAllowedLatex=35;
   this->flagMakingProgressReport=true;
@@ -2416,7 +2415,6 @@ void coneRelations::ToString
 void SemisimpleLieAlgebra::ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("SemisimpleLieAlgebra::ComputeChevalleyConstantS");
-  this->CheckConsistency();
   this->theWeyl.ComputeRho(true);
   this->ChevalleyConstants.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
   this->Computed.init(this->theWeyl.RootSystem.size, this->theWeyl.RootSystem.size);
@@ -2548,19 +2546,17 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
     for (int j=i; j<numGenerators; j++)
     { rightWeight=this->GetWeightOfGenerator(j);
       if (leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
+      { this->theLiebrackets.elements[i][j].MakeZero(*this);
         continue;
       }
       if (leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeGenerator
-        (j, *this->owner, this->indexInOwner);
+      { this->theLiebrackets.elements[i][j].MakeGenerator(j, *this);
         hRoot.MakeEi(theRank, i-numPosRoots);
         this->theLiebrackets.elements[i][j]*=Vector<Rational>::ScalarProduct(hRoot, rightWeight, this->theWeyl.CartanSymmetric);
         continue;
       }
       if (!leftWeight.IsEqualToZero() && rightWeight.IsEqualToZero())
-      { this->theLiebrackets.elements[i][j].MakeGenerator
-        (i, *this->owner, this->indexInOwner);
+      { this->theLiebrackets.elements[i][j].MakeGenerator(i, *this);
         hRoot.MakeEi(theRank, j-numPosRoots);
         this->theLiebrackets.elements[i][j]*=-Vector<Rational>::ScalarProduct(hRoot, leftWeight, this->theWeyl.CartanSymmetric);
         continue;
@@ -2568,17 +2564,16 @@ void SemisimpleLieAlgebra::ComputeMultTable(GlobalVariables& theGlobalVariables)
       if (!leftWeight.IsEqualToZero() && !rightWeight.IsEqualToZero())
       { int newIndex=this->GetGeneratorFromRoot(leftWeight+rightWeight);
         if (newIndex!=-1)
-        { this->theLiebrackets.elements[i][j].MakeGenerator
-          (newIndex, *this->owner, this->indexInOwner);
+        { this->theLiebrackets.elements[i][j].MakeGenerator(newIndex, *this);
           int leftIndex=this->GetRootIndexFromGenerator(i);
           int rightIndex=this->GetRootIndexFromGenerator(j);
           this->theLiebrackets.elements[i][j]*=this->ChevalleyConstants.elements[leftIndex][rightIndex];
         } else
         { if (!(leftWeight+rightWeight).IsEqualToZero())
-            this->theLiebrackets.elements[i][j].MakeZero(*this->owner, this->indexInOwner);
+            this->theLiebrackets.elements[i][j].MakeZero(*this);
           else
           { ElementSemisimpleLieAlgebra<Rational>& current=this->theLiebrackets.elements[i][j];
-            current.MakeHgenerator(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this->owner, this->indexInOwner);
+            current.MakeHgenerator(leftWeight*2/(this->theWeyl.RootScalarCartanRoot(leftWeight, leftWeight)), *this);
           }
         }
         continue;
@@ -2701,14 +2696,11 @@ bool SemisimpleLieAlgebra::TestForConsistency(GlobalVariables& theGlobalVariable
   ElementSemisimpleLieAlgebra<Rational> g1, g2, g3, g23, g31, g12, g123, g231, g312, temp;
   //this->ComputeDebugString(false, false, theGlobalVariables);
   for (int i=0; i<this->GetNumGenerators(); i++)
-  { g1.MakeGenerator
-    (i, *this->owner, this->indexInOwner);
+  { g1.MakeGenerator(i, *this);
     for (int j=0; j<this->GetNumGenerators(); j++)
-    { g2.MakeGenerator
-      (j, *this->owner, this->indexInOwner);
+    { g2.MakeGenerator(j, *this);
       for (int k=0; k<this->GetNumGenerators(); k++)
-      { g3.MakeGenerator
-        (k, *this->owner, this->indexInOwner);
+      { g3.MakeGenerator(k, *this);
         this->LieBracket(g2, g3, g23); this->LieBracket(g1, g23, g123);
         this->LieBracket(g3, g1, g31); this->LieBracket(g2, g31, g231);
         this->LieBracket(g1, g2, g12); this->LieBracket(g3, g12, g312);
@@ -2789,11 +2781,11 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEF
   bool hasSolution =
   theSystem.Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(theSystem, targetElt, result);
   if (hasSolution)
-  { output.MakeZero(*this->owner, this->indexInOwner);
+  { output.MakeZero(*this);
     ChevalleyGenerator tempGen;
     for (int i=0; i<this->theWeyl.RootSystem.size; i++)
       if (result.elements[i][0]!=0)
-      { tempGen.MakeGenerator(*this->owner, this->indexInOwner, i);
+      { tempGen.MakeGenerator(*this, i);
         output.AddMonomial(tempGen, result.elements[i][0]);
       }
   }
@@ -2808,7 +2800,7 @@ void SemisimpleLieAlgebra::GetAd
   output.NullifyAll();
   ElementSemisimpleLieAlgebra<CoefficientType> theGen, theResult;
   for (int i=0; i<NumGenerators; i++)
-  { theGen.MakeGenerator(i, *this->owner, this->indexInOwner);
+  { theGen.MakeGenerator(i, *this);
     this->LieBracket(e, theGen, theResult);
     for (int j=0; j<theResult.size; j++)
       output.elements[i][theResult[j].theGeneratorIndex]=theResult.theCoeffs[j];
@@ -2843,7 +2835,7 @@ void WeylGroup::GenerateRootSubsystem(Vectors<Rational>& theRoots)
 bool rootSubalgebra::attemptExtensionToIsomorphism
 (Vectors<Rational>& Domain, Vectors<Rational>& Range,
  GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
- bool actOnCentralizerOnly, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+ bool actOnCentralizerOnly, SemisimpleLieAlgebra& inputOwner,
  bool* DomainAndRangeGenerateNonIsoSAs)
 { if (outputAutomorphisms!=0)
     outputAutomorphisms->ExternalAutomorphisms.size=0;
@@ -2852,8 +2844,8 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   //rootSubalgebra::ProblemCounter++;
   rootSubalgebra& theDomainRootSA = theGlobalVariables.rootSAAttemptExtensionToIso1.GetElement();
   rootSubalgebra& theRangeRootSA = theGlobalVariables.rootSAAttemptExtensionToIso2.GetElement();
-  theDomainRootSA.init(&inputOwners, inputIndexInOwners);
-  theRangeRootSA.init(&inputOwners, inputIndexInOwners);
+  theDomainRootSA.init(inputOwner);
+  theRangeRootSA.init(inputOwner);
   theDomainRootSA.genK=(Domain);
   theRangeRootSA.genK=(Range);
   theDomainRootSA.ComputeAllButAmbientWeyl();

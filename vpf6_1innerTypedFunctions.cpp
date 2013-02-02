@@ -107,8 +107,7 @@ bool CommandList::innerMultiplyAnyByEltTensor
   SemisimpleLieAlgebra& theSSalg=*output.GetAmbientSSAlgebraNonConstUseWithCaution();
 //    std::cout << "<br>Multiplying " << leftCopy.GetUE().ToString() << " * " << output.ToString();
   if (!output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().MultiplyOnTheLeft
-      (*leftUE, outputElt, theCommands.theObjectContainer.theCategoryOmodules,
-       theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
+      (*leftUE, outputElt, theSSalg, *theCommands.theGlobalVariableS, RFOne, RFZero))
   { //std::cout << "<br>failed to multiply on the left";
     return false;
   }

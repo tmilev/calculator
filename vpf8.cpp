@@ -147,7 +147,7 @@ void GeneralizedVermaModuleCharacters::TransformToWeylProjectiveStep2
 void HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
   (ElementSemisimpleLieAlgebra<Rational>& input, ElementSemisimpleLieAlgebra<Rational>& output)
 { assert(&output!=&input);
-  output.MakeZero(*this->owners, this->indexRange);
+  output.MakeZero(this->theRange());
   for (int i=0; i<input.size; i++)
   { int currentIndex=input[i].theGeneratorIndex;
     output+=this->imagesAllChevalleyGenerators[currentIndex]*input.theCoeffs[i];
@@ -159,7 +159,7 @@ void HomomorphismSemisimpleLieAlgebra::GetMapSmallCartanDualToLargeCartanDual(Ma
   ElementSemisimpleLieAlgebra<Rational> domainElt, imageElt;
   for (int i=0; i<this->theDomain().GetRank(); i++)
   { domainElt.MakeHgenerator
-    (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), *this->owners, this->indexDomain);
+    (Vector<Rational>::GetEi(this->theDomain().GetRank(), i), this->theDomain());
     this->ApplyHomomorphism(domainElt, imageElt);
     output.AssignVectorToColumnKeepOtherColsIntactNoInit(i, imageElt.GetCartanPart());
   }
@@ -5531,8 +5531,7 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
   theTableLateXStream << "}\n";
   theTableLateXStream << "\\mathrm{roots~simple~coords}&\\varepsilon-\\mathrm{root~notation}&" << "[\\bullet, \\bullet]\n";
   for (int i=0; i<numRoots+theDimension; i++)
-  { tempElt1.MakeGenerator
-    (i, *this->owner, this->indexInOwner);
+  { tempElt1.MakeGenerator(i, *this);
     tempS=tempElt1.ToString(theFormat);
     theHtmlStream << "<td>" << tempS << "</td>";
     theTableLateXStream << " & ";
@@ -5550,13 +5549,12 @@ std::string SemisimpleLieAlgebra::ToString(FormatExpressions* theFormat)
     << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("\\varepsilon") << "&";
     theHtmlStream
     << "<td>" << this->theWeyl.GetEpsilonCoords(tempRoot).ToStringLetterFormat("e") << "</td>";
-    tempElt1.MakeGenerator(i,*this->owner, this->indexInOwner);
+    tempElt1.MakeGenerator(i, *this);
     tempS=tempElt1.ToString(theFormat);
     theTableLateXStream << tempS;
     theHtmlStream << "<td>" << tempS << "</td>";
     for (int j=0; j<numRoots+theDimension; j++)
-    { tempElt2.MakeGenerator
-      (j, *this->owner, this->indexInOwner);
+    { tempElt2.MakeGenerator(j, *this);
       this->LieBracket(tempElt1, tempElt2, tempElt3);
       tempS=tempElt3.ToString(theFormat);
       theTableLateXStream << "& ";
@@ -8028,12 +8026,12 @@ template<class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::LieBracketOnTheLeft
 (const ElementSemisimpleLieAlgebra<Rational>& left)
 { if (this->IsEqualToZero())
-  { this->MakeZero(*this->owners, this->indexInOwners);
+  { this->MakeZero(*this->owneR);
     return;
   }
   ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
   tempElt1.AssignElementLieAlgebra
-  (left, *this->owners, this->indexInOwners, this->theCoeffs[0].GetOne(), this->theCoeffs[0].GetZero());
+  (left, *this->owneR, this->theCoeffs[0].GetOne(), this->theCoeffs[0].GetZero());
   tempElt2=*this;
   tempElt2.LieBracketOnTheRight(tempElt1, *this);
 }
@@ -8042,7 +8040,7 @@ template<class CoefficientType>
 bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
 (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
  GlobalVariables& theGlobalVariables)
-{ output.MakeZero(*this->owners, this->indexInOwners);
+{ output.MakeZero(*this->owneR);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
   output=input;
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
@@ -8050,8 +8048,7 @@ bool MonomialUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
     if (!this->Powers[i].IsSmallInteger(&nextCycleSize))
       return false;
     for (int j=0; j<nextCycleSize; j++)
-    { tempElt.MakeGenerator
-        (this->generatorsIndices[i], *this->owners, this->indexInOwners) ;
+    { tempElt.MakeGenerator(this->generatorsIndices[i], *this->owneR) ;
       output.LieBracketOnTheLeft(tempElt);
     }
   }
@@ -8063,7 +8060,7 @@ bool ElementUniversalEnveloping<CoefficientType>::AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output,
    GlobalVariables& theGlobalVariables)
 { assert(&input!=&output);
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owneR);
   ElementUniversalEnveloping<CoefficientType> summand;
   for (int i=0; i<this->size; i++)
   { if(!this->TheObjects[i].AdjointRepresentationAction(input, summand, theGlobalVariables))
@@ -8085,38 +8082,6 @@ int ParserNode::EvaluateAdjointAction
     return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
   theNode.ExpressionType=theNode.typeUEelement;
   return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables)
-{ ParserNode& leftNode=this->owner->TheObjects[this->children[0]];
-//  ParserNode& rightNode=this->owner->TheObjects[this->children[1]];
-  if (leftNode.Operation!=Parser::tokenG && leftNode.Operation!=Parser::tokenH)
-    return this->SetError(this->errorBadIndex);
-  Vector<Rational> theWeight;
-//  if (!rightNode.GetRootRationalDontUseForFunctionArguments(theWeight, theGlobalVariables))
-//    return this->SetError(this->errorBadIndex);
-  ElementUniversalEnveloping<Polynomial<Rational> >& theUEElement=this->UEElement.GetElement();
-  Polynomial<Rational>  polyOne, PolyZero;
-  polyOne.MakeOne();
-  PolyZero.MakeZero();
-  if (leftNode.Operation==Parser::tokenG)
-  { if (!this->GetContextLieAlgebra().theWeyl.IsARoot(theWeight))
-      return this->SetError(this->errorDunnoHowToDoOperation);
-    theUEElement.MakeOneGeneratorCoeffOne
-    (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
-    this->ExpressionType=this->typeUEelement;
-    return this->errorNoError;
-  }
-  if (leftNode.Operation==Parser::tokenH)
-  { if (theWeight.size!=this->GetContextLieAlgebra().GetRank())
-      return this->SetError(this->errorDimensionProblem);
-    Polynomial<Rational>  PolyZero;
-    theUEElement.MakeHgenerator
-    (theWeight, this->owner->theAlgebras, this->IndexContextLieAlgebra, polyOne, PolyZero);
-    this->ExpressionType=this->typeUEelement;
-    return this->errorNoError;
-  }
-  return this->SetError(this->errorProgramming);
 }
 
 int ParserNode::EvaluateGetCoxeterBasis

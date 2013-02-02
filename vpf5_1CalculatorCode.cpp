@@ -115,12 +115,12 @@ bool CommandList::fSSsubalgebras
   MacroRegisterFunctionWithName("CommandList::fSSsubalgebras");
 
   std::string errorString;
-  SemisimpleLieAlgebra* theSSowner;
+  SemisimpleLieAlgebra* ownerSSPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], theSSowner, &errorString))
+      (theCommands.innerSSLieAlgebra, input[1], ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
 
-  SemisimpleLieAlgebra& ownerSS=*theSSowner;
+  SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
   std::stringstream out;
   if (ownerSS.GetRank()>4)
   { out << "<b>This code is completely experimental and has been set to run up to rank 4."
@@ -130,9 +130,8 @@ bool CommandList::fSSsubalgebras
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
     << "your own risk</b>";
-  SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
-  theSSsubalgebras.FindTheSSSubalgebras
-  (ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
+  SemisimpleSubalgebras theSSsubalgebras(ownerSS);
+  theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
   FormatExpressions theFormat;
   std::stringstream out1, out2;
   out1 << theCommands.PhysicalPathOutputFolder
@@ -175,13 +174,13 @@ bool CommandList::fEmbedSSalgInSSalg
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
     << "your own risk</b>";
-  SemisimpleSubalgebras theSSsubalgebras(ownerSS.owner, ownerSS.indexInOwner);
+  SemisimpleSubalgebras theSSsubalgebras(ownerSS);
   DynkinSimpleType theType;
   if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
     return output.SetError("I've been instructed to act on simple types only. ", theCommands);
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindAllEmbeddings
-  (theType, ownerSS.owner, ownerSS.indexInOwner, theCommands.theGlobalVariableS);
+  (theType, ownerSS, theCommands.theGlobalVariableS);
   FormatExpressions theFormat;
   std::stringstream out1, out2;
   out1 << theCommands.PhysicalPathOutputFolder

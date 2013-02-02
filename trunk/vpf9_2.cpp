@@ -424,18 +424,16 @@ bool SemisimpleLieAlgebra::AttemptExtendingHEtoHEFWRTSubalgebra
   Matrix<Rational> tempMat, tempMatColumn, tempMatResult;
   tempMat=(outputMatrixSystemToBeSolved);
   tempMatColumn=(outputSystemColumnVector);
-  outputF.MakeZero(*this->owner, this->indexInOwner);
-  outputE.MakeZero(*this->owner, this->indexInOwner);
+  outputF.MakeZero(*this);
+  outputE.MakeZero(*this);
 //  if(Matrix<Rational> ::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists(outputMatrixSystemToBeSolved, outputSystemColumnVector, tempMatResult))
   ChevalleyGenerator tempGen;
   if(Matrix<Rational>::Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
      (tempMat, tempMatColumn, tempMatResult))
   { for (int i=0; i<rootsInPlay.size; i++)
-    { tempGen.MakeGenerator
-      (*this->owner, this->indexInOwner, this->GetGeneratorFromRoot(-rootsInPlay[i]));
+    { tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(-rootsInPlay[i]));
       outputF.AddMonomial(tempGen, coeffsF.elements[0][i]);
-      tempGen.MakeGenerator
-      (*this->owner, this->indexInOwner, this->GetGeneratorFromRoot(rootsInPlay[i]));
+      tempGen.MakeGenerator(*this, this->GetGeneratorFromRoot(rootsInPlay[i]));
       outputE.AddMonomial(tempGen, tempMatResult.elements[i][0]);
     }
     return true;
@@ -883,7 +881,7 @@ void rootSubalgebra::ReadFromFileNilradicalGeneration
   assert(tempS=="Simple_basis_k:");
   this->SimpleBasisK.ReadFromFile(input, theGlobalVariables);
   this->genK=(this->SimpleBasisK);
-  this->init(owner.ownerArray, owner.indexInOwner);
+  this->init(*owner.owneR);
   this->ComputeAll();
 }
 
@@ -892,13 +890,13 @@ WeylGroup& rootSubalgebra::GetAmbientWeyl()
 }
 
 SemisimpleLieAlgebra& rootSubalgebra::GetOwnerSSalg()
-{ if (this->owners==0 || this->indexInOwners<0)
+{ if (this->owneR==0)
   { std::cout << "This is a programming error. Attempting to access "
     << "ambient Lie algebra of non-initialized root subalgebras. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return (*this->owners)[this->indexInOwners];
+  return (*this->owneR);
 }
 
 void rootSubalgebra::GeneratePossibleNilradicalsInit(List<Selection>& impliedSelections, int& parabolicsCounter)
@@ -1290,20 +1288,19 @@ void rootSubalgebras::ElementToStringRootSpaces(std::string& output, bool includ
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::MakeGGenerator
-(const Vector<Rational>& theRoot, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-{ this->MakeGenerator
-  (inputOwners[inputIndexInOwners].GetGeneratorFromRoot(theRoot), inputOwners, inputIndexInOwners);
+(const Vector<Rational>& theRoot, SemisimpleLieAlgebra& inputOwner)
+{ this->MakeGenerator(inputOwner.GetGeneratorFromRoot(theRoot), inputOwner);
 }
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::AssignVectorNegRootSpacesCartanPosRootSpaces
 (const Vector<Rational>& input, SemisimpleLieAlgebra& owner)
 { //Changing RootSystem order invalidates this function!
-  this->MakeZero(*owner.owner, owner.indexInOwner);
+  this->MakeZero(owner);
   ChevalleyGenerator tempGenerator;
   for (int i=0; i<input.size; i++)
     if (input[i]!=0)
-    { tempGenerator.MakeGenerator(*this->ownerArray, this->indexOfOwnerAlgebra, i);
+    { tempGenerator.MakeGenerator(*this->owneR, i);
       this->AddMonomial(tempGenerator, input[i]);
     }
 }
@@ -1318,7 +1315,7 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::ElementToVectorNegativeRootSp
 void SemisimpleLieAlgebra::ComputeOneAutomorphism
 (GlobalVariables& theGlobalVariables, Matrix<Rational>& outputAuto, bool useNegativeRootsFirst)
 { rootSubalgebra theRootSA;
-  theRootSA.init(this->owner, this->indexInOwner);
+  theRootSA.init(*this);
   int theDimension= this->theWeyl.CartanSymmetric.NumRows;
   theRootSA.genK.MakeEiBasis(theDimension);
   ReflectionSubgroupWeylGroup theAutos;
@@ -1349,15 +1346,15 @@ void SemisimpleLieAlgebra::ComputeOneAutomorphism
   for (int i=0; i<theDimension; i++)
   { domainRoot.MakeEi(theDimension, i);
     mapOnRootSpaces.ActOnVectorColumn(domainRoot, rangeRoot);
-    tempElt.MakeHgenerator(domainRoot, *this->owner, this->indexInOwner);
+    tempElt.MakeHgenerator(domainRoot, *this);
     Domain[numRoots+i]=tempElt;
-    tempElt.MakeHgenerator(rangeRoot, *this->owner, this->indexInOwner);
+    tempElt.MakeHgenerator(rangeRoot, *this);
     Range[numRoots+i]=tempElt;
     for (int i=0; i<2; i++, domainRoot.Minus(), rangeRoot.Minus())
     { int theIndex= this->theWeyl.RootSystem.GetIndex(rangeRoot);
-      tempElt.MakeGGenerator(rangeRoot, *this->owner, this->indexInOwner);
+      tempElt.MakeGGenerator(rangeRoot, *this);
       Range[theIndex]=tempElt;
-      tempElt.MakeGGenerator(domainRoot, *this->owner, this->indexInOwner);
+      tempElt.MakeGGenerator(domainRoot, *this);
       Domain.TheObjects[theIndex]=tempElt;
       NonExplored.RemoveSelection(theIndex);
     }
@@ -1692,8 +1689,7 @@ void ParserNode::EvaluateGCDorLCM(GlobalVariables& theGlobalVariables)
 }
 
 ParserNode::ParserNode()
-{ this->owner=0;
-  this->Clear();
+{
 }
 
 void Parser::ToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
@@ -1785,13 +1781,6 @@ void Parser::TokenToStringStream(std::stringstream& out, int theToken)
   }
 }
 
-void Parser::Clear()
-{ this->theValue.Clear();
-  this->theValue.UEElement.GetElement().MakeZero(this->theAlgebras, 0);
-  this->TokenStack.size=0;
-  this->ValueStack.size=0;
-}
-
 std::string ParserNode::ElementToStringErrorCode(bool useHtml)
 { std::stringstream out;
   switch (this->ErrorType)
@@ -1851,12 +1840,11 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   { tempRoot.MakeEi(theDomainDimension, i);
     for (int j=0; j<2; j++, tempRoot.Minus())
     { int index= this->theDomain().theWeyl.RootSystem.GetIndex(tempRoot);
-      tempDomain.TheObjects[index].MakeZero(*this->owners, this->indexDomain);
+      tempDomain[index].MakeZero(this->theDomain());
       ChevalleyGenerator tempGen;
-      tempGen.MakeGenerator
-      (*this->owners, this->indexDomain, this->theDomain().GetGeneratorFromRoot(tempRoot));
-      tempDomain.TheObjects[index].AddMonomial(tempGen, 1);
-      tempRange.TheObjects[index] = this->imagesSimpleChevalleyGenerators.TheObjects[i+j*theDomainDimension];
+      tempGen.MakeGenerator(this->theDomain(), this->theDomain().GetGeneratorFromRoot(tempRoot));
+      tempDomain[index].AddMonomial(tempGen, 1);
+      tempRange[index] = this->imagesSimpleChevalleyGenerators[i+j*theDomainDimension];
       NonExplored.RemoveSelection(index);
 //      std::cout <<"<br>" << tempDomain.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theDomain);
 //      std::cout <<"->" << tempRange.TheObjects[index].ElementToStringNegativeRootSpacesFirst(false, true, this->theRange);
@@ -1910,9 +1898,8 @@ bool HomomorphismSemisimpleLieAlgebra::ComputeHomomorphismFromImagesSimpleCheval
   this->domainAllChevalleyGenerators.SetSize(tempDomain.size);
   this->imagesAllChevalleyGenerators.SetSize(tempDomain.size);
   ElementSemisimpleLieAlgebra<Rational> tempElt;
-  for (int i=0; i<this->owners->TheObjects[this->indexDomain].GetNumGenerators(); i++)
-  { this->domainAllChevalleyGenerators[i].MakeGenerator(i, *this->owners, this->indexDomain);
-  }
+  for (int i=0; i<this->theDomain().GetNumGenerators(); i++)
+    this->domainAllChevalleyGenerators[i].MakeGenerator(i, this->theDomain());
   for (int i=0; i<this->imagesAllChevalleyGenerators.size; i++)
   { this->domainAllChevalleyGenerators[i].ElementToVectorNegativeRootSpacesFirst(tempRoot);
     tempMat.ActOnVectorColumn(tempRoot, imageRoot);
@@ -1948,16 +1935,15 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 (MonomialUniversalEnveloping<RationalFunctionOld>& input, const RationalFunctionOld& theCoeff,
  ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
 { ElementUniversalEnveloping<RationalFunctionOld> tempElt;
-  output.MakeZero(*this->owners, this->indexRange);
+  output.MakeZero(this->theRange());
   RationalFunctionOld polyOne;
   polyOne=theCoeff.GetOne();
-  output.MakeConst(theCoeff, *this->owners, this->indexRange);
+  output.MakeConst(theCoeff, this->theRange());
   for (int i=0; i<input.generatorsIndices.size; i++)
   { if (input.generatorsIndices[i]>=this->imagesAllChevalleyGenerators.size)
       return false;
     tempElt.AssignElementLieAlgebra
-    (this->imagesAllChevalleyGenerators[input.generatorsIndices[i]],
-     *this->owners, this->indexRange, polyOne, polyOne.GetZero());
+    (this->imagesAllChevalleyGenerators[input.generatorsIndices[i]], this->theRange(), polyOne, polyOne.GetZero());
     RationalFunctionOld& thePower=input.Powers[i];
     int theIntegralPower;
     if (!thePower.IsSmallInteger(&theIntegralPower))
@@ -1972,7 +1958,7 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 (ElementUniversalEnveloping<RationalFunctionOld>& input,
  ElementUniversalEnveloping<RationalFunctionOld>& output, GlobalVariables& theGlobalVariables)
 { assert(&output!=&input);
-  output.MakeZero(*this->owners, this->indexRange);
+  output.MakeZero(this->theRange());
   ElementUniversalEnveloping<RationalFunctionOld> tempElt;
   for (int i=0; i<input.size; i++)
   { if(!this->ApplyHomomorphism(input[i], input.theCoeffs[i], tempElt, theGlobalVariables))
@@ -1983,17 +1969,13 @@ bool HomomorphismSemisimpleLieAlgebra::ApplyHomomorphism
 }
 
 void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
-(char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
-{ this->owners=&ownerOfAlgebras;
-  this->owners->SetSize(2);
-  this->theDomain().indexInOwner=0;
-  this->theDomain().owner=this->owners;
-  this->theRange().indexInOwner=1;
-  this->theRange().owner=this->owners;
-  this->theDomain().theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
-  this->theRange().theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
+(char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras, GlobalVariables& theGlobalVariables)
+{ SemisimpleLieAlgebra tempSS;
+  tempSS.theWeyl.MakeArbitrarySimple(theWeylLetter, theWeylDim);
+  int theIndex=ownerOfAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSS);
+  this->domainAlg=&ownerOfAlgebras[theIndex];
+  this->rangeAlg=&ownerOfAlgebras[theIndex];
   this->theDomain().ComputeChevalleyConstantS(&theGlobalVariables);
-  this->theRange().ComputeChevalleyConstantS(&theGlobalVariables);
   int numPosRoots=this->theDomain().theWeyl.RootsOfBorel.size;
   this->imagesAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
   this->domainAllChevalleyGenerators.SetSize(numPosRoots*2+theWeylDim);
@@ -2001,18 +1983,14 @@ void HomomorphismSemisimpleLieAlgebra::MakeGinGWithId
   for (int i=0; i<2*numPosRoots+theWeylDim; i++)
   { ElementSemisimpleLieAlgebra<Rational>& tempElt1=this->imagesAllChevalleyGenerators[i];
     ElementSemisimpleLieAlgebra<Rational>& tempElt2=this->domainAllChevalleyGenerators[i];
-    tempElt2.MakeGenerator
-    (i, *this->owners, this->indexDomain);
-    tempElt1.MakeGenerator
-    (i, *this->owners, this->indexRange);
+    tempElt2.MakeGenerator(i, this->theDomain());
+    tempElt1.MakeGenerator(i, this->theRange());
   }
   for (int i=0; i<theWeylDim; i++)
   { ElementSemisimpleLieAlgebra<Rational>& tempElt1=this->imagesSimpleChevalleyGenerators[i];
-    tempElt1.MakeGenerator
-    (i, *this->owners, this->indexRange);
+    tempElt1.MakeGenerator(i, this->theRange());
     ElementSemisimpleLieAlgebra<Rational>& tempElt2=this->imagesSimpleChevalleyGenerators[theWeylDim+i];
-    tempElt2.MakeGenerator
-    (i+numPosRoots, *this->owners, this->indexRange);
+    tempElt2.MakeGenerator(i+numPosRoots, this->theRange());
   }
 //  std::cout << this->ToString(theGlobalVariables);
 }
@@ -2128,23 +2106,8 @@ int ParserNode::GetMaxImpliedNumVarsChildren()
   return result;
 }
 
-void ParserNode::Clear()
-{ this->indexParentNode=-1;
-  this->indexInOwner=-1;
-  this->intValue=0;
-  this->impliedNumVars=0;
-  this->ErrorType=this->errorNoError;
-  this->Operation= Parser::tokenEmpty;
-  this->Evaluated=false;
-  this->ExpressionType=this->typeUndefined;
-  this->children.size=0;
-  this->rationalValue.MakeZero();
-  if (this->owner!=0)
-    this->IndexContextLieAlgebra=this->owner->theHmm.indexRange;
-}
-
 void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& other)const
-{ if (this->ownerArray!=other.ownerArray || this->indexOfOwnerAlgebra!=other.indexOfOwnerAlgebra)
+{ if (this->owneR!=other.owneR)
   { std::cout
     << "This is a programming error: attempting to compare Chevalley generators "
     << "of different Lie algebras. "
@@ -2154,7 +2117,7 @@ void ChevalleyGenerator::CheckConsistencyWithOther(const ChevalleyGenerator& oth
 }
 
 std::string ChevalleyGenerator::ToString(FormatExpressions* inputFormat)const
-{ return (*this->ownerArray)[this->indexOfOwnerAlgebra].GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
+{ return this->owneR->GetStringFromChevalleyGenerator(this->theGeneratorIndex, inputFormat);
 }
 
 bool ChevalleyGenerator::operator>(const ChevalleyGenerator& other)const
@@ -3298,17 +3261,17 @@ void RootIndexToPoly(int theIndex, SemisimpleLieAlgebra& theAlgebra, Polynomial<
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::AssignFromCoordinateFormWRTBasis
-  (List<ElementUniversalEnveloping<CoefficientType> >& theBasis,
-   Vector<CoefficientType>& input, SemisimpleLieAlgebra& owner)
+(List<ElementUniversalEnveloping<CoefficientType> >& theBasis, Vector<CoefficientType>& input,
+ SemisimpleLieAlgebra& owner)
 { /*int numVars=0;
   if (theBasis.size>0)
-    numVars= theBasis.TheObjects[0].GetNumVars();*/
-  this->MakeZero(*owner.owner, owner.indexInOwner);
+    numVars= theBasis[0].GetNumVars();*/
+  this->MakeZero(owner);
   ElementUniversalEnveloping<CoefficientType> tempElt;
   for (int i=0; i<input.size; i++)
-    if (!input.TheObjects[i].IsEqualToZero())
-    { tempElt.operator=(theBasis.TheObjects[i]);
-      tempElt.operator*=(input.TheObjects[i]);
+    if (!input[i].IsEqualToZero())
+    { tempElt.operator=(theBasis[i]);
+      tempElt.operator*=(input[i]);
       this->operator+=(tempElt);
     }
 }
@@ -3370,11 +3333,10 @@ void SemisimpleLieAlgebraOrdered::init
   Vector<Rational> coordsInCurrentBasis;
   ElementSemisimpleLieAlgebra<Rational> currentElt;
   for (int i=0; i<owner.GetNumGenerators(); i++)
-  { currentElt.MakeGenerator
-    (i, *owner.owner, owner.indexInOwner);
+  { currentElt.MakeGenerator(i, owner);
     currentElt.GetCoordsInBasis(this->theOrder, coordsInCurrentBasis, theGlobalVariables);
     for (int j=0; j<coordsInCurrentBasis.size; j++)
-      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis.TheObjects[j];
+      this->ChevalleyGeneratorsInCurrentCoords.elements[j][i]=coordsInCurrentBasis[j];
 //    std::cout << "<br> " << currentElt.ToString() << " in new coords becomes: " << coordsInCurrentBasis.ToString();
   }
 //  std::cout << this->ChevalleyGeneratorsInCurrentCoords.ToString(true, false) << "<br><br>";
@@ -3389,8 +3351,7 @@ void SemisimpleLieAlgebraOrdered::initDefaultOrder
   defaultOrder.SetSize(owner.GetNumGenerators());
   for (int i=0; i<defaultOrder.size; i++)
   { ElementSemisimpleLieAlgebra<Rational>& currentElt=defaultOrder[i];
-    currentElt.MakeGenerator
-    (i, *owner.owner, owner.indexInOwner);
+    currentElt.MakeGenerator(i, owner);
   }
   this->init(defaultOrder, owner, theGlobalVariables);
 }

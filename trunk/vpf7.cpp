@@ -899,15 +899,14 @@ template<class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::ApplyMinusTransposeAutoOnMe()
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   ElementUniversalEnveloping<CoefficientType> result;
-  result.MakeZero(*this->owners, this->indexInOwners);
+  result.MakeZero(*this->owneR);
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theRank=this->GetOwner().GetRank();
   CoefficientType theCoeff;
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
     theCoeff=this->theCoeffs[i];
-    tempMon.owners=currentMon.owners;
-    tempMon.indexInOwners=currentMon.indexInOwners;
+    tempMon.owneR=currentMon.owneR;
     tempMon.Powers.size=0;
     tempMon.generatorsIndices.size=0;
     for (int j=0; j<currentMon.Powers.size; j++)
@@ -1058,7 +1057,7 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
   theOrbit.AddOnTop(*this);
   for (int i=0; i<theOrbit.size; i++)
     for (int j=0; j<theDim; j++)
-    { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owners, this->indexInOwners, theRingUnit);
+    { theElt.MakeOneGenerator(j+numPosRoots+theDim, *this->owneR, theRingUnit);
       theElt*=(theOrbit[i]);
       theElt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
       theElt.ModOutVermaRelations(&theGlobalVariables, subHiGoesToIthElement, theRingUnit, theRingZero);
@@ -1355,8 +1354,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
       }
     if (isInNilradical)
     { this->weightsNilradicalLarge.AddOnTop(currentWeight);
-      tempElt.MakeGenerator
-      (i, *this->theHmm.owners, this->theHmm.indexRange);
+      tempElt.MakeGenerator(i, this->theHmm.theRange());
       this->nilradicalLarge.AddOnTop(tempElt);
       this->indicesNilradicalLarge.AddOnTop(i);
     }
@@ -1371,8 +1369,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
       }
     if (isInNilradical)
     { this->weightsNilradicalSmall.AddOnTop(currentWeight);
-      tempElt.MakeGenerator
-      (i, *this->theHmm.owners, this->theHmm.indexDomain);
+      tempElt.MakeGenerator(i, this->theHmm.theDomain());
       this->nilradicalSmall.AddOnTop(tempElt);
       this->indicesNilradicalSmall.AddOnTop(i);
     }

@@ -15,8 +15,7 @@ public:
   List<int> weightSpaceDimensions;
   ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
   ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
-  List<SemisimpleLieAlgebra>* owners;
-  int indexOwnerAlgebra;
+  SemisimpleLieAlgebra* owneR;
   SltwoSubalgebras* container;
   Rational LengthHsquared;
   int indexInContainer;
@@ -36,7 +35,7 @@ public:
   Matrix<Rational> theSystemColumnVector;
   bool DifferenceTwoHsimpleRootsIsARoot;
   int DynkinsEpsilon;
-  slTwoSubalgebra(): owners(0), indexOwnerAlgebra(-1), container(0), indexInContainer(-1){}
+  slTwoSubalgebra(): owneR(0), container(0), indexInContainer(-1){}
   SltwoSubalgebras& GetContainerSl2s()
   { if (this->container==0)
     { std::cout << "This is a programming error: attempting to access the container "
@@ -48,13 +47,13 @@ public:
   }
   WeylGroup& GetOwnerWeyl();
   SemisimpleLieAlgebra& GetOwnerSSAlgebra()
-  { if (this->owners==0)
+  { if (this->owneR==0)
     { std::cout << "This is a programming error: attempting to access the ambient "
       << " Lie algebra of a non-initialized sl(2)-subalgebra. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    return (*this->owners)[this->indexOwnerAlgebra];
+    return *this->owneR;
   }
   std::string ToString(FormatExpressions* theFormat=0);
   void GetInvolvedPosGenerators(List<ChevalleyGenerator>& output);
@@ -88,7 +87,7 @@ public:
     this->DynkinsEpsilon=right.DynkinsEpsilon;
     this->hCharacteristic=right.hCharacteristic;
     this->hElementCorrespondingToCharacteristic=right.hElementCorrespondingToCharacteristic;
-    this->owners=right.owners;
+    this->owneR=right.owneR;
     this->theE=right.theE;
     this->theH=right.theH;
     this->theF=right.theF;
@@ -102,7 +101,6 @@ public:
     this->preferredAmbientSimpleBasis=right.preferredAmbientSimpleBasis;
     this->container=right.container;
     this->indexInContainer=right.indexInContainer;
-    this->indexOwnerAlgebra=right.indexOwnerAlgebra;
     this->LengthHsquared=right.LengthHsquared;
   }
   bool operator==(const slTwoSubalgebra& right)const;
@@ -121,14 +119,13 @@ public:
 class SltwoSubalgebras : public HashedList<slTwoSubalgebra>
 {
   friend class SemisimpleSubalgebras;
+  SemisimpleLieAlgebra* owner;
 public:
   List<int> MultiplicitiesFixedHweight;
   List<List<int> > IndicesSl2sContainedInRootSA;
   List<int> IndicesSl2decompositionFlas;
   Vectors<Rational> BadHCharacteristics;
   int IndexZeroWeight;
-  List<SemisimpleLieAlgebra>* owners;
-  int IndexInOwners;
   rootSubalgebras theRootSAs;
   List<std::string> texFileNamesForPNG;
   List<std::string> texStringsEachFile;
@@ -140,8 +137,7 @@ public:
     this->IndicesSl2decompositionFlas=other.IndicesSl2decompositionFlas;
     this->BadHCharacteristics =other.BadHCharacteristics;
     this->IndexZeroWeight =other.IndexZeroWeight;
-    this->owners =other.owners;
-    this->IndexInOwners =other.IndexInOwners;
+    this->owner =other.owner;
     this->theRootSAs =other.theRootSAs;
     this->texFileNamesForPNG =other.texFileNamesForPNG;
     this->texFileNamesForPNG =other.texFileNamesForPNG;
@@ -149,7 +145,7 @@ public:
     this->listSystemCommandsDVIPNG =other.listSystemCommandsDVIPNG;
   }
   void CheckForCorrectInitializationCrashIfNot()
-  { if (this->owners==0 || this->IndexInOwners<0)
+  { if (this->owner==0)
     { std::cout << "This is a programming error. "
       << " Object SltwoSubalgebras is not initialized, although it is supposed to be. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -161,17 +157,16 @@ public:
   }
   SemisimpleLieAlgebra& GetOwner()
   { this->CheckForCorrectInitializationCrashIfNot();
-    return (*this->owners)[this->IndexInOwners];
+    return *this->owner;
   }
   void ComputeModuleDecompositionsOfAmbientLieAlgebra(GlobalVariables& theGlobalVariables)
   { for(int i=0; i<this->size; i++)
       this->TheObjects[i].ComputeModuleDecompositionAmbientLieAlgebra(theGlobalVariables);
   }
-  void init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner);
-  SltwoSubalgebras(): owners(0), IndexInOwners(-1)
-  {}
-  SltwoSubalgebras(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner)
-  : owners(inputOwners), IndexInOwners(inputIndexInOwner)
+  void init(SemisimpleLieAlgebra& inputOwners);
+  SltwoSubalgebras(): owner(0){}
+  SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner)
+  : owner(0)
   {}
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
   { std::cout << "This is a programming error. This function used to work in an older"
@@ -320,28 +315,25 @@ public:
 class SemisimpleSubalgebras
 {
 public:
-  List<SemisimpleLieAlgebra>* owners;
-  int indexInOwners;
+  SemisimpleLieAlgebra* owneR;
   SltwoSubalgebras theSl2s;
   List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
-  HashedList<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
+  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
   List<SltwoSubalgebras> theSl2sOfSubalgebras;
 
   List<CandidateSSSubalgebra> Hcandidates;
   int theRecursionCounter;
   SemisimpleLieAlgebra& GetSSowner()
-  { if (this->owners==0 || this->indexInOwners<0)
+  { if (this->owneR==0)
     { std::cout << "This is a programming error: attempted to access non-initialized "
       << " semisimple Lie subalgerbas. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    return (*this->owners)[this->indexInOwners];
+    return *this->owneR;
   }
-  SemisimpleSubalgebras(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwner):
-  owners(inputOwners), indexInOwners(inputIndexInOwner)
-  { this->theSl2s.owners=inputOwners;
-    this->theSl2s.IndexInOwners=inputIndexInOwner;
+  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner):owneR(&inputOwner)
+  { this->theSl2s.owner=&inputOwner;
     this->theRecursionCounter=0;
   }
   std::string ToString(FormatExpressions* theFormat=0);
@@ -349,11 +341,10 @@ public:
   (CandidateSSSubalgebra& theCandidate, GlobalVariables* theGlobalVariables)
   ;
   void FindAllEmbeddings
-  (DynkinSimpleType& theType, List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner,
-   GlobalVariables* theGlobalVariables)
+  (DynkinSimpleType& theType, SemisimpleLieAlgebra& theOwner, GlobalVariables* theGlobalVariables)
   ;
   void FindTheSSSubalgebras
-  (List<SemisimpleLieAlgebra>* newOwner, int newIndexInOwner, GlobalVariables* theGlobalVariables)
+  (SemisimpleLieAlgebra& newOwner, GlobalVariables* theGlobalVariables)
   ;
   void FindTheSSSubalgebrasPart2
   (GlobalVariables* theGlobalVariables)

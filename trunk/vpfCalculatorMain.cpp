@@ -176,16 +176,6 @@ int main_command_input(int argc, char **argv)
   return 0;
 }
 
-#include "vpfHeader3ListReferences.h"
-void TestListReferences()
-{ HashedListReferences<RationalFunctionOld> theLR;
-  RationalFunctionOld tempRF;
-  tempRF.MakeOne(& theGlobalVariables);
-  theLR.AddOnTop(tempRF);
-  std::cout << "Test : " << tempRF.ToString() << " added in list of references, "
-  << " the corresonding entry reads " << theLR[0].ToString();
-}
-
 int main(int argc, char **argv)
 {
 #ifndef WIN32
@@ -202,8 +192,6 @@ int main(int argc, char **argv)
 
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
-
-  TestListReferences();
 
   theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;

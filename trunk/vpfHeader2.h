@@ -442,22 +442,22 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
-  List<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
-  List<SemisimpleLieAlgebra> theLieAlgebras;
-  HashedList<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
-  HashedList<Polynomial<Rational> > thePolys;
-  HashedList<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
+  ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
+  ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
+  HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
+  HashedListReferences<Polynomial<Rational> > thePolys;
+  HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedListReferences<RationalFunctionOld> theRFs;
-  HashedList<Rational> theRationals;
-  HashedList<charSSAlgMod<Rational> > theChars;
+  HashedListReferences<Rational> theRationals;
+  HashedListReferences<charSSAlgMod<Rational> > theChars;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
-  HashedList<AlgebraicNumber> theAlgebraicNumbers;
-  HashedList<std::string, MathRoutines::hashString> theStrings;
-  HashedList<std::string, MathRoutines::hashString> ExpressionNotation;
-  HashedList<Expression> ExpressionWithNotation;
-  HashedList<LittelmannPath> theLSpaths;
+  HashedListReferences<AlgebraicNumber> theAlgebraicNumbers;
+  HashedListReferences<std::string, MathRoutines::hashString> theStrings;
+  HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
+  HashedListReferences<Expression> ExpressionWithNotation;
+  HashedListReferences<LittelmannPath> theLSpaths;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
-  HashedList<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
+  HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
   std::string ToString();
 };
@@ -1360,12 +1360,12 @@ bool fGetTypeHighestWeightParabolic
   static bool fHWVinner
 (CommandList& theCommands, Expression& output,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Expression& hwContext, int indexOfAlgebra)
+ Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner)
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
   Vectors<Polynomial<Rational> >& theHws, Expression& hwContext,
-  Selection& selInducing, int indexOfAlgebra)
+  Selection& selInducing, SemisimpleLieAlgebra* owner)
   ;
   template<class CoefficientType>
 static bool TypeHighestWeightParabolic

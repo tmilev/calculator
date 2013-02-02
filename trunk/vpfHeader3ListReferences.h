@@ -68,6 +68,25 @@ public:
   void KillAllElements();
   void KillElementIndex(int i);
   void AddOnTop(const Object& o);
+  int GetIndex(const Object& o)const;
+  bool ContainsExactlyOnce(const Object& o)const
+  { bool result=false;
+    for (int i=0; i<this->size; i++)
+      if ((*this)[i]==o)
+      { if (result)
+          return false;
+        result=true;
+      }
+    return result;
+  }
+  int AddNoRepetitionOrReturnIndexFirst(const Object& o)
+  { int indexOfObject=this->GetIndex(o);
+    if (indexOfObject==-1)
+    { this->AddOnTop(o);
+      return this->size-1;
+    }
+    return indexOfObject;
+  }
   ListReferences():size(0)
   {}
   ~ListReferences()
@@ -117,9 +136,16 @@ void ListReferences<Object>::AddOnTop(const Object& o)
   (*this)[this->size-1]=o;
 }
 
+template<class Object>
+int ListReferences<Object>::GetIndex(const Object& o) const
+{ for (int i=0; i<this->size; i++)
+    if ((*this)[i]==o)
+      return i;
+  return -1;
+}
+
 template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
 class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction>
 {
 };
-
 #endif

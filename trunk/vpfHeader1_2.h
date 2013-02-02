@@ -4,6 +4,8 @@
 #define vpfHeader1_2_h_already_included
 
 #include "vpfHeader1.h"
+#include "vpfHeader3ListReferences.h"
+
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 class Lattice
@@ -1521,8 +1523,8 @@ public:
   List<Vectors<Rational> > PosRootsKConnectedComponents;
   List<Selection> theKEnumerations;
   List<int> theKComponentRanks;
-  List<SemisimpleLieAlgebra>* owners;
-  int indexInOwners;
+  SemisimpleLieAlgebra* owneR;
+//  int indexInOwners;
   rootSubalgebra();
   WeylGroup& GetAmbientWeyl();
   SemisimpleLieAlgebra& GetOwnerSSalg();
@@ -1548,7 +1550,7 @@ public:
   static bool attemptExtensionToIsomorphism
   (Vectors<Rational>& Domain, Vectors<Rational>& Range,
    GlobalVariables& theGlobalVariables, ReflectionSubgroupWeylGroup* outputAutomorphisms,
-   bool actOnCentralizerOnly, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+   bool actOnCentralizerOnly, SemisimpleLieAlgebra& inputOwner,
    bool* DomainAndRangeGenerateNonIsoSAs)
   ;
   bool CheckForSmallRelations(coneRelation& theRel, Vectors<Rational>& nilradicalRoots);
@@ -1594,7 +1596,7 @@ public:
    GlobalVariables* theGlobalVariables)
   ;
   void KmodTimesKmod(int index1, int index2, List<int>& oppositeKmods, List<int>& output);
-  void init(List<SemisimpleLieAlgebra>* inputOwners, int inputIndexInOwners);
+  void init(SemisimpleLieAlgebra& inputOwner);
   void GetSsl2SubalgebrasAppendListNoRepetition
 (SltwoSubalgebras& output, int indexInContainer, GlobalVariables& theGlobalVariables)
   ;
@@ -1632,8 +1634,7 @@ public:
   //Code used in nilradical generation:
   List<Selection> ImpiedSelectionsNilradical;
   List<List<List<int> > > storedNilradicals;
-  List<SemisimpleLieAlgebra>* ownerArray;
-  int indexInOwner;
+  SemisimpleLieAlgebra* owneR;
   int parabolicsCounterNilradicalGeneration;
   List<int> numNilradicalsBySA;
   int IndexCurrentSANilradicalsGeneration;
@@ -1724,8 +1725,7 @@ public:
     this->NumLinesPerTableLatex=20;
     this->NumColsPerTableLatex=4;
     this->UpperLimitNumElementsWeyl=0;
-    this->ownerArray=0;
-    this->indexInOwner=-1;
+    this->owneR=0;
     this->initForNilradicalGeneration();
   }
 };
@@ -1754,8 +1754,6 @@ public:
 class SemisimpleLieAlgebra
 {
 public:
-  List<SemisimpleLieAlgebra>* owner;
-  int indexInOwner;
   bool flagAnErrorHasOccurredTimeToPanic;
   WeylGroup theWeyl;
   //format:
@@ -1785,8 +1783,8 @@ public:
   { return input.theWeyl.HashFunction();
   }
   void Assign(const SemisimpleLieAlgebra& other)
-  { this->owner=other.owner;
-    this->indexInOwner=other.indexInOwner;
+  { //this->owner=other.owner;
+    //this->indexInOwner=other.indexInOwner;
     this->theWeyl=(other.theWeyl);
     this->ChevalleyConstants=other.ChevalleyConstants;
     this->theLiebrackets=(other.theLiebrackets);
@@ -1806,15 +1804,8 @@ public:
      generatorIndex<this->GetNumPosRoots()+this->GetRank()*2
      );
   }
-  SemisimpleLieAlgebra(): owner(0), indexInOwner(-1){ }
+  SemisimpleLieAlgebra(){ }
   void ComputeMultTable(GlobalVariables& theGlobalVariables);
-  void CheckConsistency()
-  { if (this->owner==0 || this->indexInOwner==-1)
-    { std::cout << "This is a programming error. Use of non-initialized semisimple Lie algebra. "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-  }
   bool IsOfSimpleType(char desiredType, int desiredRank)const
   { return this->theWeyl.IsOfSimpleType(desiredType, desiredRank);
   }
@@ -1896,12 +1887,6 @@ public:
   }
   void GenerateVermaMonomials(Vector<Rational>& highestWeight, GlobalVariables& theGlobalVariables)
   ;
-  void init
-  (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner, char inputWeylLetter, int inputRank)
-  { this->owner=&inputOwner;
-    this->indexInOwner=inputIndexInOwner;
-    this->theWeyl.MakeArbitrarySimple(inputWeylLetter, inputRank);
-  }
   void ComputeChevalleyConstantS
 (GlobalVariables* theGlobalVariables)
   ;
@@ -1948,8 +1933,7 @@ public:
    Matrix<Rational>& outputSystemColumnVector, GlobalVariables& theGlobalVariables)
   ;
   static void FindSl2Subalgebras
-  (List<SemisimpleLieAlgebra>& inputOwner, int inputIndexInOwner,
-   SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
+  (SemisimpleLieAlgebra& inputOwner, SltwoSubalgebras& output, GlobalVariables& theGlobalVariables)
    ;
   void GetSl2SubalgebraFromRootSA(GlobalVariables& theGlobalVariables);
   template<class CoefficientType>
@@ -1976,9 +1960,8 @@ class Parser;
 class HomomorphismSemisimpleLieAlgebra
 {
 public:
-  List<SemisimpleLieAlgebra>* owners;
-  int indexDomain;
-  int indexRange;
+  SemisimpleLieAlgebra* domainAlg;
+  SemisimpleLieAlgebra* rangeAlg;
   //Let rk:=Rank(Domain)
   //format of ImagesSimpleChevalleyGenerators: the first rk elements give
   //the images of the Chevalley generators corresponding to simple positive roots
@@ -1993,12 +1976,22 @@ public:
   Vectors<Rational> RestrictedRootSystem;
   Vectors<Rational> ImagesCartanDomain;
   SemisimpleLieAlgebra& theDomain()
-  { return owners->TheObjects[this->indexDomain];
+  { if (domainAlg==0)
+    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return *domainAlg;
   }
   SemisimpleLieAlgebra& theRange()
-  { return owners->TheObjects[this->indexRange];
+  { if (rangeAlg==0)
+    { std::cout << "This is a programming error: non-initialized HomomorphismSemisimpleLieAlgebra. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return *rangeAlg;
   }
-  HomomorphismSemisimpleLieAlgebra(): owners(0), indexDomain(0), indexRange(1){}
+  HomomorphismSemisimpleLieAlgebra(): domainAlg(0), rangeAlg(0){}
   std::string DebugString;
   void GetWeightsGmodKInSimpleCoordsK
   (Vectors<Rational>& outputWeights, GlobalVariables& theGlobalVariables)
@@ -2014,13 +2007,15 @@ public:
   void ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
   void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
   void MakeGinGWithId
-  (char theWeylLetter, int theWeylDim, List<SemisimpleLieAlgebra>& ownerOfAlgebras,
+  (char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras,
    GlobalVariables& theGlobalVariables)
   ;
-  void ProjectOntoSmallCartan(Vector<Rational> & input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
+  void ProjectOntoSmallCartan(Vector<Rational>& input, Vector<Rational> & output, GlobalVariables& theGlobalVariables);
   void ProjectOntoSmallCartan(Vectors<Rational>& input, Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
   void GetMapSmallCartanDualToLargeCartanDual(Matrix<Rational> & output);
-  void ComputeDebugString(GlobalVariables& theGlobalVariables){this->ToString(this->DebugString, theGlobalVariables);}
+  void ComputeDebugString(GlobalVariables& theGlobalVariables)
+  { this->ToString(this->DebugString, theGlobalVariables);
+  }
   void ComputeDebugString(bool useHtml, GlobalVariables& theGlobalVariables){this->ToString(this->DebugString, useHtml, theGlobalVariables);}
   std::string ToString(GlobalVariables& theGlobalVariables){ std::string tempS; this->ToString(tempS, theGlobalVariables); return tempS; }
   void GetRestrictionAmbientRootSystemToTheSmallerCartanSA(Vectors<Rational>& output, GlobalVariables& theGlobalVariables);
@@ -2243,7 +2238,7 @@ public:
   ;
   bool IsEqualToZero()const {return this->size==0;}
   bool GetElementUniversalEnveloping
-  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& owner);
+  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& inputOwner);
   bool ConvertToLieAlgebraElementIfPossible
   (ElementSemisimpleLieAlgebra<Rational>& output)const;
   void SubstitutionCoefficients
@@ -2374,8 +2369,7 @@ public:
   std::string ToString
   (FormatExpressions* theFormat=0)const
   ;
-  List<SemisimpleLieAlgebra>* owners;
-  int indexInOwners;
+  SemisimpleLieAlgebra* owneR;
   // SelectedIndices gives the non-zero powers of the chevalley generators participating in the monomial
   // Powers gives the powers of the Chevalley generators in the order they appear in generatorsIndices
   friend std::ostream& operator << (std::ostream& output, const MonomialUniversalEnveloping<CoefficientType>& theMon)
@@ -2392,13 +2386,15 @@ public:
     this->owners=other.owners;
     this->indexInOwners=other.indexInOwners;
   }
-  SemisimpleLieAlgebra& GetOwner()const{return this->owners->TheObjects[this->indexInOwners];}
+  SemisimpleLieAlgebra& GetOwner()const
+  { return *this->owneR;
+  }
   void MakeZero
-(int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+(int numVars, SemisimpleLieAlgebra& inputOwner)
   ;
   void MakeZero
-  (const CoefficientType& theRingZero, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-  { this->init(inputOwners, inputIndexInOwners);
+  (const CoefficientType& theRingZero, SemisimpleLieAlgebra& inputOwner)
+  { this->init(inputOwner);
   }
   bool HWTAAbilinearForm
   (const MonomialUniversalEnveloping<CoefficientType>&right, CoefficientType& output,
@@ -2427,9 +2423,8 @@ public:
     for (int i=1; i<this->generatorsIndices.size; i++)
       output+=(this->Powers[i]);
   }
-  void init(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-  { this->owners=&inputOwners;
-    this->indexInOwners=inputIndexInOwners;
+  void init(SemisimpleLieAlgebra& inputOwner)
+  { this->owneR=&inputOwner;
     this->Powers.size=0;
     this->generatorsIndices.size=0;
   }
@@ -2442,11 +2437,10 @@ public:
   bool SwitchConsecutiveIndicesIfTheyCommute
 (int theLeftIndex)
   ;
-  void MakeConst(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwner)
+  void MakeConst(SemisimpleLieAlgebra& inputOwner)
   { this->generatorsIndices.size=0;
     this->Powers.size=0;
-    this->owners=&inputOwners;
-    this->indexInOwners=inputIndexInOwner;
+    this->owneR=&inputOwner;
   }
   //we assume the standard order for being simplified to be Ascending.
   //this way the positive roots will end up being in the end, which is very
@@ -2470,18 +2464,17 @@ public:
 (int indexA, ElementUniversalEnveloping<CoefficientType>& output,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
-  MonomialUniversalEnveloping():owners(0), indexInOwners(-1){}
+  MonomialUniversalEnveloping():owneR(0){}
   bool operator>(const MonomialUniversalEnveloping& other)
   { return this->::MonomialTensor<CoefficientType>::operator>(other);
   }
   bool operator==(const MonomialUniversalEnveloping& other)const
-  { return this->owners==other.owners && this->indexInOwners==other.indexInOwners
+  { return this->owneR==other.owneR
     && this->Powers==other.Powers && this->generatorsIndices==other.generatorsIndices;
   }
   inline void operator=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<CoefficientType>::operator=(other);
-    this->owners=other.owners;
-    this->indexInOwners=other.indexInOwners;
+    this->owneR=other.owneR;
   }
   inline void operator*=(const MonomialUniversalEnveloping& other)
   { this->::MonomialTensor<CoefficientType>::operator*=(other);
@@ -2495,8 +2488,7 @@ private:
   void CleanUpZeroCoeff();
   friend class MonomialUniversalEnveloping<CoefficientType>;
 public:
-  List<SemisimpleLieAlgebra>* owners;
-  int indexInOwners;
+  SemisimpleLieAlgebra* owneR;
   bool AdjointRepresentationAction
   (const ElementUniversalEnveloping<CoefficientType>& input, ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables)
   ;
@@ -2523,7 +2515,7 @@ public:
    const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream=0)const
   { ElementUniversalEnveloping<CoefficientType> tempElt;
-    tempElt.MakeZero(*this->owners, this->indexInOwners);
+    tempElt.MakeZero(*this->owner);
     tempElt.AddMonomial(right, theRingUnit);
     return this->HWTAAbilinearForm
     (tempElt, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
@@ -2534,38 +2526,37 @@ public:
   bool ApplyMinusTransposeAutoOnMe();
   bool ApplyTransposeAntiAutoOnMe();
   void MakeHgenerator
-  (const Vector<Rational> & input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+  (const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
    ;
   void AssignElementLieAlgebra
-(const ElementSemisimpleLieAlgebra<Rational>& input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+(const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   ;
   bool GetWithSimpleGeneratorsOnly(MonomialCollection<MonomialTensor<CoefficientType>, CoefficientType>& output);
   void MakeOneGenerator
-(int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners, const CoefficientType& theRingUnit)
+(int theIndex, SemisimpleLieAlgebra& inputOwner, const CoefficientType& theRingUnit)
   ;
   void MakeOneGeneratorCoeffOne
-(int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+(int theIndex, SemisimpleLieAlgebra& inputOwners,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
  ;
   void MakeOneGeneratorCoeffOne
-  (int theIndex, int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+  (int theIndex, int numVars, SemisimpleLieAlgebra& inputOwner)
 ;
   void MakeOneGeneratorCoeffOne
-  (const Vector<Rational> & rootSpace, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+  (const Vector<Rational>& rootSpace, SemisimpleLieAlgebra& inputOwner,
   const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
   { this->MakeOneGeneratorCoeffOne
-    (inputOwners[inputIndexInOwners].GetGeneratorFromRoot(rootSpace), inputOwners, inputIndexInOwners,
-     theRingUnit, theRingZero);
+    (inputOwner.GetGeneratorFromRoot(rootSpace), inputOwner, theRingUnit, theRingZero);
   }
-  void MakeZero(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
+  void MakeZero(SemisimpleLieAlgebra& inputOwner);
   bool ConvertToLieAlgebraElementIfPossible(ElementSemisimpleLieAlgebra<Rational>& output)const;
-  void MakeConst(const Rational& coeff, int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
-  void MakeConst(const CoefficientType& coeff, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-  { this->MakeZero(inputOwners, inputIndexInOwners);
+  void MakeConst(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner);
+  void MakeConst(const CoefficientType& coeff, SemisimpleLieAlgebra& inputOwner)
+  { this->MakeZero(inputOwner);
     MonomialUniversalEnveloping<CoefficientType> tempMon;
-    tempMon.MakeConst(inputOwners, inputIndexInOwners);
+    tempMon.MakeConst(inputOwner);
     this->AddMonomial(tempMon, coeff);
   }
   void Simplify
@@ -2639,7 +2630,7 @@ static bool GetBasisFromSpanOfElements
 (const PolynomialSubstitution<Rational>& theSub)
   ;
   void MakeCasimir
-(const SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
+(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit=1, const CoefficientType& theRingZero=0)
    ;
   void LieBracketOnTheRight
@@ -2648,9 +2639,11 @@ static bool GetBasisFromSpanOfElements
   void LieBracketOnTheLeft(const ElementSemisimpleLieAlgebra<Rational>& left);
   void AssignInt(int coeff, int numVars, SemisimpleLieAlgebra& theOwner)
   { Rational tempRat=coeff;
-    this->MakeConst(tempRat, numVars, *theOwner.owner, theOwner.indexInOwner);
+    this->MakeConst(tempRat, numVars, &theOwner);
   }
-  SemisimpleLieAlgebra& GetOwner()const{return this->owners->TheObjects[this->indexInOwners];}
+  SemisimpleLieAlgebra& GetOwner()const
+  { return *this->owneR;
+  }
   template <class otherType>
   void Assign(const ElementUniversalEnveloping<otherType>& other)
   { this->owners=other.owners;
@@ -2664,13 +2657,12 @@ static bool GetBasisFromSpanOfElements
     }
   }
   void operator=(const Rational& other)
-  { this->MakeConst(other, 0, *this->owners, this->indexInOwners);
+  { this->MakeConst(other, 0, *this->owner);
   }
 
   void operator=(const ElementUniversalEnveloping<CoefficientType>& other)
   { this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>::operator=(other);
-    this->owners=other.owners;
-    this->indexInOwners=other.indexInOwners;
+    this->owneR=other.owneR;
   }
   void operator*=(const ElementUniversalEnveloping<CoefficientType>& standsOnTheRight);
   void operator*=(const CoefficientType& other)
@@ -2682,7 +2674,7 @@ static bool GetBasisFromSpanOfElements
   { this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
     ::operator/=(other);
   }
-  ElementUniversalEnveloping<CoefficientType>():owners(0), indexInOwners(-1){}
+  ElementUniversalEnveloping<CoefficientType>():owneR(0){}
   ElementUniversalEnveloping<CoefficientType>(const ElementUniversalEnveloping<CoefficientType>& other){this->operator=(other);}
 };
 
@@ -2946,22 +2938,19 @@ template <class CoefficientType>
 class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>
 {
   public:
-  List<SemisimpleLieAlgebra>* listOwners;
-  int indexInOwners;
+  SemisimpleLieAlgebra* owner;
   void Reset()
   { this->::MonomialCollection<MonomialChar<CoefficientType>, CoefficientType>::MakeZero();
-    this->listOwners=0;
-    this->indexInOwners=-1;
+    this->owner=0;
   }
-  void MakeZero(List<SemisimpleLieAlgebra>& inputOwners, int inputIndex)
+  void MakeZero(SemisimpleLieAlgebra& inputOwner)
   { this->Reset();
-    this->listOwners=&inputOwners;
-    this->indexInOwners=inputIndex;
+    this->owner=&inputOwner;
   }
   bool IsEqualToZero()
   { return this->size==0;
   }
-  charSSAlgMod(): listOwners(0), indexInOwners(-1){}
+  charSSAlgMod(): owner(0){}
   std::string ElementToStringCharacter(List<Vector<Rational> >& theWeights, List<Rational>& theMults);
   unsigned int HashFunction()const
   { return this->HashFunction(*this);
@@ -2972,8 +2961,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   }
 
   void MakeFromWeight
-(const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
- int inputIndexInOwner)
+(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra& inputOwner)
    ;
   bool SplitCharOverRedSubalg
 (std::string* Report, charSSAlgMod& output, branchingData& inputData,
@@ -3005,13 +2993,13 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
 (WeylGroup& actualAmbientWeyl, GlobalVariables& theGlobalVariables, DrawingVariables& theDrawingVars)
   ;
   SemisimpleLieAlgebra& GetOwner()
-  { if (this->listOwners==0)
+  { if (this->owner==0)
     { std::cout << "This is a programming error: requesting owner semisimple Lie algebra "
       << " of non-initialized "
       << " character. " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    return this->listOwners->TheObjects[this->indexInOwners];
+    return *this->owner;
   }
 
   bool DrawMe
@@ -3025,7 +3013,7 @@ class charSSAlgMod : public MonomialCollection<MonomialChar<CoefficientType>, Co
   int GetIndexExtremeWeightRelativeToWeyl
   (WeylGroup& theWeyl)const
   ;
-  void MakeTrivial(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners);
+  void MakeTrivial(SemisimpleLieAlgebra& inputOwner);
   std::string MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables);
   std::string operator*=(const charSSAlgMod& other);
   std::string operator*=(const MonomialChar<Rational>& other);
@@ -3305,8 +3293,7 @@ class ModuleSSalgebra
   ;
   void TestConsistency(GlobalVariables& theGlobalVariables);
 public:
-  int indexAlgebra;
-  List<SemisimpleLieAlgebra>* theAlgebras;
+  SemisimpleLieAlgebra* owneR;
   HashedList<MonomialUniversalEnveloping<CoefficientType> > theGeneratingWordsNonReduced;
   //Note: for some reason, the linker fails to resolve without the explicit template
   //specialization below.
@@ -3359,7 +3346,7 @@ public:
 
   bool operator==(const ModuleSSalgebra<CoefficientType>& other)
   { return
-    this->indexAlgebra==other.indexAlgebra
+    this->owneR==other.owneR
     && this->theHWFundamentalCoordsBaseField==other.theHWFundamentalCoordsBaseField
     && this->parabolicSelectionNonSelectedAreElementsLevi==other.parabolicSelectionNonSelectedAreElementsLevi;
   }
@@ -3388,8 +3375,7 @@ public:
     this->actionsGeneratorsMaT=other.actionsGeneratorsMaT;
     this->actionsGeneratorS=other.actionsGeneratorS;
     this->ComputedGeneratorActions=other.ComputedGeneratorActions;
-    this->theAlgebras=other.theAlgebras;
-    this->indexAlgebra=other.indexAlgebra;
+    this->owneR=other.owneR;
     this->theGeneratingWordsNonReduced= other.theGeneratingWordsNonReduced;
     this->theGeneratingWordsNonReducedInt=other.theGeneratingWordsNonReducedInt;
     this->theGeneratingWordsWeightsPlusWeightFDpart=other.theGeneratingWordsWeightsPlusWeightFDpart;
@@ -3454,12 +3440,20 @@ public:
   const CoefficientType& theRingZero)
   ;
   bool MakeFromHW
-(List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
+(SemisimpleLieAlgebra& inputAlgebra, Vector<CoefficientType>& HWFundCoords,
  const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport, bool computeSimpleGens=true)
   ;
-  SemisimpleLieAlgebra& GetOwner()const{return this->theAlgebras->TheObjects[this->indexAlgebra];}
+  SemisimpleLieAlgebra& GetOwner()const
+  { if (this->owneR==0)
+    { std::cout << "This is a programming error: calling GetOwner() on a non-initialized "
+      << " generalized Verma module. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return *this->owneR;
+  }
   void GetAdActionHomogenousElT
   (ElementUniversalEnveloping<CoefficientType>& inputHomogeneous, Vector<Rational> & weightUEEltSimpleCoords,
    List<List<ElementUniversalEnveloping<CoefficientType> > >& outputSortedByArgumentWeight,
@@ -3528,7 +3522,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
 bool GetActionEulerOperatorPart
 (MonomialP& theCoeff, ElementWeylAlgebra& outputDO, GlobalVariables& theGlobalVariables)
    ;
-   ModuleSSalgebra() : indexAlgebra(-1), theAlgebras(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
+   ModuleSSalgebra() : owneR(0), flagIsInitialized(false), MaxNumCachedPairs(1000000)
    {}
 };
 
@@ -3536,11 +3530,10 @@ template<class CoefficientType>
 class MonomialGeneralizedVerma
 {
   public:
-  List<ModuleSSalgebra<CoefficientType> >* owneR;
-  int indexInOwner;
+  ModuleSSalgebra<CoefficientType>* owneR;
   MonomialUniversalEnveloping<CoefficientType> theMonCoeffOne;
   int indexFDVector;
-  MonomialGeneralizedVerma(): owneR(0), indexInOwner(-1), indexFDVector(-1) { }
+  MonomialGeneralizedVerma(): owneR(0), indexFDVector(-1) { }
   friend std::ostream& operator << (std::ostream& output, const MonomialGeneralizedVerma<CoefficientType>& theGen)
   { output << theGen.ToString();
     return output;
@@ -3552,7 +3545,6 @@ class MonomialGeneralizedVerma
   void operator=(const MonomialGeneralizedVerma<CoefficientType>& other)
   { this->owneR=other.owneR;
     this->indexFDVector=other.indexFDVector;
-    this->indexInOwner=other.indexInOwner;
     this->theMonCoeffOne=other.theMonCoeffOne;
   }
 
@@ -3561,7 +3553,7 @@ class MonomialGeneralizedVerma
   ;
   static const bool IsEqualToZero(){return false;}
   bool operator==(const MonomialGeneralizedVerma<CoefficientType>& other)
-  { if (this->indexFDVector==other.indexFDVector && this->indexInOwner==other.indexInOwner)
+  { if (this->indexFDVector==other.indexFDVector && this->owneR==other.owneR)
       return this->theMonCoeffOne==other.theMonCoeffOne;
     return false;
   }
@@ -3570,16 +3562,17 @@ class MonomialGeneralizedVerma
     this->theMonCoeffOne.SetNumVariables(GoalNumVars);
     this->owneR->TheObjects[this->indexInOwner].SetNumVariables(GoalNumVars);
   }
-  void Substitution(const PolynomialSubstitution<Rational>& theSub);
+  void Substitution
+  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods);
   unsigned int HashFunction()const
-  { return this->indexFDVector*SomeRandomPrimes[0]+this->indexInOwner*SomeRandomPrimes[1];
+  { return this->indexFDVector*SomeRandomPrimes[0]+ ((unsigned)(this->owneR))*SomeRandomPrimes[1];
   }
   static inline unsigned int HashFunction(const MonomialGeneralizedVerma<CoefficientType>& input)
   { return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
-  { if (this->indexInOwner!=other.indexInOwner)
-      return this->indexInOwner>other.indexInOwner;
+  { if (this->owneR!=other.owneR)
+      return (unsigned int)this->owneR>(unsigned int)other.owneR;
     if (this->indexFDVector!=other.indexFDVector)
       return this->indexFDVector>other.indexFDVector;
     return this->theMonCoeffOne>other.theMonCoeffOne;
@@ -3595,14 +3588,12 @@ class MonomialGeneralizedVerma
 //    << " and this->GetOwner().GetDim()-1 is " << this->GetOwner().GetDim()-1;
     return this->GetOwner().GetDim()-1==this->indexFDVector;
   }
-  void MakeConst(List<ModuleSSalgebra<CoefficientType> >& inputOwners, int inputIndexInOwner)
-  { this->owneR=&inputOwners;
-    this->indexInOwner=inputIndexInOwner;
-    ModuleSSalgebra<CoefficientType>& bossMod=inputOwners[inputIndexInOwner];
-    this->theMonCoeffOne.MakeConst(*bossMod.theAlgebras, bossMod.indexAlgebra);
+  void MakeConst(ModuleSSalgebra<CoefficientType>& inputOwner)
+  { this->owneR=&inputOwner;
+    this->theMonCoeffOne.MakeConst(*inputOwner.owneR);
   }
   ModuleSSalgebra<CoefficientType>& GetOwner()const
-  { return this->owneR->TheObjects[this->indexInOwner];
+  { return *this->owneR;
   }
 };
 
@@ -3610,7 +3601,7 @@ template<class CoefficientType>
 class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >
 {
   public:
-  List<ModuleSSalgebra<CoefficientType> >* owneR;
+//  ModuleSSalgebra<CoefficientType>* owneR;
   void MultiplyMeByUEEltOnTheLeft
   (const ElementUniversalEnveloping<CoefficientType>& theUE, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
@@ -3621,9 +3612,9 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
   static unsigned int HashFunction(const ElementSumGeneralizedVermas<CoefficientType>& input)
   { return input.HashFunction();
   }
-  ElementSumGeneralizedVermas():owneR(0){}
+  ElementSumGeneralizedVermas(){}
   void MakeHWV
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+  (ModuleSSalgebra<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
   ;
   int GetNumVars()
   { if (this->owneR==0)
@@ -3636,15 +3627,9 @@ class ElementSumGeneralizedVermas : public MonomialCollection<MonomialGeneralize
         return -1;
     return theAnswer;
   }
-  bool ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output);
-  void MakeZero
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner)
-  { this->::MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType >::MakeZero();
-    this->owneR=&theOwner;
-  }
-  void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
-  { this->owneR=other.owneR;
-    this->::MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType>:: operator=(other);
+  bool ExtractElementUE(ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& theOwner);
+  inline void operator=(const ElementSumGeneralizedVermas<CoefficientType>& other)
+  { this->::MonomialCollection<MonomialGeneralizedVerma<CoefficientType>, CoefficientType>:: operator=(other);
   }
 };
 
@@ -3690,9 +3675,10 @@ public:
   { for (int i=0; i<this->theMons.size; i++)
       this->theMons[i].SetNumVariables(GoalNumVars);
   }
-  void Substitution(const PolynomialSubstitution<Rational>& theSub)
+  void Substitution
+  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods)
   { for (int i=0; i<this->theMons.size; i++)
-      this->theMons[i].Substitution(theSub);
+      this->theMons[i].Substitution(theSub, theMods);
   }
   std::string ToString(FormatExpressions* theFormat=0, bool includeV=true)const
   ;
@@ -3751,14 +3737,15 @@ public MonomialCollection<MonomialTensorGeneralizedVermas<CoefficientType>, Coef
 {
 public:
   bool MultiplyOnTheLeft
-  (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
-   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+  (const ElementUniversalEnveloping<CoefficientType>& theUE,
+   ElementTensorsGeneralizedVermas<CoefficientType>& output,
+   SemisimpleLieAlgebra& ownerAlgebra, GlobalVariables& theGlobalVariables,
+   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   bool MultiplyOnTheLeft
   (const MonomialUniversalEnveloping<CoefficientType>& theUE,
    ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
+   SemisimpleLieAlgebra& ownerAlgebra,
    GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   void TensorOnTheRight
@@ -3768,7 +3755,7 @@ public:
    ;
   void MultiplyByElementLieAlg
   (ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,  int indexGenerator, GlobalVariables& theGlobalVariables,
+   SemisimpleLieAlgebra& ownerAlgebra,  int indexGenerator, GlobalVariables& theGlobalVariables,
    const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
   ;
   void MultiplyBy
@@ -3785,9 +3772,10 @@ public:
   }
 
   void MakeHWV
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner, const CoefficientType& theRingUnit)
+  (ModuleSSalgebra<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
   ;
-  void Substitution(const PolynomialSubstitution<Rational>& theSub)
+  void Substitution
+  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods)
   ;
   void SetNumVariables
   (int GoalNumVars)
@@ -4329,14 +4317,6 @@ public:
 //  ElementWeylAlgebra WeylAlgebraValue;
   //Transform operations create no new nodes.
   //Replace operations create new nodes.
-  void ExpandOnTop(int numNew)
-  { this->SetSize(this->size+numNew);
-    for (int i=0; i<numNew; i++)
-    { this->TheObjects[this->size-1-i].owner=this;
-      this->TheObjects[this->size-1-i].Clear();
-      this->TheObjects[this->size-1-i].indexInOwner=this->size-1-i;
-    }
-  }
   bool ReplaceObyE()
   { this->ExpandOnTopUseOperationOffset(0, this->tokenExpression);
     this->TransformRepeatXAtoA(1);
@@ -5984,14 +5964,13 @@ std::string MonomialTensorGeneralizedVermas<CoefficientType>::ToString
 }
 
 template <class CoefficientType>
-std::string MonomialGeneralizedVerma<CoefficientType>::ToString
-  (FormatExpressions* theFormat, bool includeV)const
+std::string MonomialGeneralizedVerma<CoefficientType>::ToString(FormatExpressions* theFormat, bool includeV)const
 { if (this->owneR==0)
   { std::cout << "This is a programming error: non-initialized generalized Verma monomial (owner is 0)."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  ModuleSSalgebra<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
+  ModuleSSalgebra<CoefficientType>& theMod=*this->owneR;
   std::string tempS;
   if (tempS=="1")
     tempS="";
@@ -6076,7 +6055,7 @@ template <class CoefficientType>
 std::string MonomialUniversalEnveloping<CoefficientType>::ToString(FormatExpressions* theFormat)const
 { std::stringstream out;
   std::string tempS;
-  if (this->owners==0 || this->indexInOwners==-1)
+  if (this->owneR==0)
     return "(Error:Programming:NonInitializedMonomial)";
   if (this->generatorsIndices.size==0)
     return "1";
@@ -6103,20 +6082,19 @@ std::string MonomialUniversalEnveloping<CoefficientType>::ToString(FormatExpress
 
 template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::MakeZero
-(int numVars, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+(int numVars, SemisimpleLieAlgebra& inputOwner)
 { this->Coefficient.MakeZero(numVars);
-  this->owners=&inputOwners;
-  this->indexInOwners=inputIndexInOwners;
+  this->owneR=&inputOwner;
   this->generatorsIndices.size=0;
   this->Powers.size=0;
 }
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
-(const SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
+(SemisimpleLieAlgebra& theOwner, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { //std::stringstream out;
-  this->MakeZero(*theOwner.owner, theOwner.indexInOwner);
+  this->MakeZero(theOwner);
   WeylGroup& theWeyl= this->GetOwner().theWeyl;
   int theDimension=theWeyl.CartanSymmetric.NumRows;
   Vector<Rational> tempRoot1, tempRoot2;
@@ -6156,13 +6134,13 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
 //    *this+=tempElt1;
 // Alternative implementation using a ninja formula I cooked up after looking at the printouts:
     invertedSymCartan.ActOnVectorColumn(tempRoot1, tempRoot2);
-    tempElt1.MakeHgenerator(tempRoot1, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
-    tempElt2.MakeHgenerator(tempRoot2, *this->owners, this->indexInOwners, theRingUnit, theRingZero);
+    tempElt1.MakeHgenerator(tempRoot1, theOwner, theRingUnit, theRingZero);
+    tempElt2.MakeHgenerator(tempRoot2, theOwner, theRingUnit, theRingZero);
     tempElt1*=tempElt2;
     *this+=tempElt1;
   }
   Rational tempRat;
-  Vector<Rational>  theSum;
+  Vector<Rational> theSum;
   for (int i=0; i<theWeyl.RootSystem.size; i++)
   { //Implementation without the ninja formula:
 //    tempRat=0;
@@ -6188,9 +6166,9 @@ void ElementUniversalEnveloping<CoefficientType>::MakeCasimir
 //     tempElt2*=tempRat;
 //     *this+=tempElt2;
     //The ninja formula alternative implementation:
-    Vector<Rational> & theRoot=theWeyl.RootSystem.TheObjects[i];
-    tempElt2.MakeOneGeneratorCoeffOne(-theRoot, *theOwner.owner, theOwner.indexInOwner, theRingUnit, theRingZero);
-    tempElt1.MakeOneGeneratorCoeffOne(theRoot, *theOwner.owner, theOwner.indexInOwner, theRingUnit, theRingZero);
+    Vector<Rational>& theRoot=theWeyl.RootSystem.TheObjects[i];
+    tempElt2.MakeOneGeneratorCoeffOne(-theRoot, theOwner, theRingUnit, theRingZero);
+    tempElt1.MakeOneGeneratorCoeffOne(theRoot, theOwner, theRingUnit, theRingZero);
     tempElt2*=tempElt1;
     tempElt2*=theWeyl.RootScalarCartanRoot(theWeyl.RootSystem[i], theWeyl.RootSystem[i])/2;
     *this+=tempElt2;
@@ -6226,7 +6204,7 @@ void ElementUniversalEnveloping<CoefficientType>::SubstitutionCoefficients
 (PolynomialSubstitution<Rational>& theSub, GlobalVariables* theContext, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { ElementUniversalEnveloping<CoefficientType> endResult;
   MonomialUniversalEnveloping<CoefficientType> currentMon;
-  endResult.MakeZero(*this->owners, this->indexInOwners);
+  endResult.MakeZero(*this->owner);
   CoefficientType tempCF;
   for (int i=0; i<this->size; i++)
   { currentMon=this->TheObjects[i];
@@ -6267,21 +6245,21 @@ void ElementUniversalEnveloping<CoefficientType>::CleanUpZeroCoeff()
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeOneGenerator
-(int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners, const CoefficientType& theRingUnit)
-{ this->MakeZero(inputOwners, inputIndexInOwners);
+(int theIndex, SemisimpleLieAlgebra& inputOwner, const CoefficientType& theRingUnit)
+{ this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.init(inputOwners, inputIndexInOwners);
+  tempMon.init(inputOwner);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, theRingUnit);
   this->AddMonomial(tempMon, theRingUnit);
 }
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeOneGeneratorCoeffOne
-(int theIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+(int theIndex, SemisimpleLieAlgebra& inputOwner,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ this->MakeZero(inputOwners, inputIndexInOwners);
+{ this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.MakeZero(theRingZero, inputOwners, inputIndexInOwners);
+  tempMon.MakeZero(theRingZero, inputOwner);
   tempMon.MultiplyByGeneratorPowerOnTheRight(theIndex, theRingUnit);
   this->AddMonomial(tempMon, theRingUnit);
 }
@@ -6289,7 +6267,7 @@ void ElementUniversalEnveloping<CoefficientType>::MakeOneGeneratorCoeffOne
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::ConvertToLieAlgebraElementIfPossible
 (ElementSemisimpleLieAlgebra<Rational>& output)const
-{ output.MakeZero(*this->owners, this->indexInOwners);
+{ output.MakeZero(*this->owner);
 //  SemisimpleLieAlgebra& theOwner=this->owners->TheObjects[this->indexInOwners];
 //  int numPosRoots=theOwner.theWeyl.RootsOfBorel.size;
   Rational tempRat=0;
@@ -6306,7 +6284,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ConvertToLieAlgebraElementIfPo
       tempRat=this->theCoeffs[i].theCoeffs[0];
     else
       tempRat=0;
-    tempChevalley.MakeGenerator(*this->owners, this->indexInOwners, tempMon.generatorsIndices[0]);
+    tempChevalley.MakeGenerator(*this->owner, tempMon.generatorsIndices[0]);
     output.AddMonomial(tempChevalley, tempRat);
   }
   return true;
@@ -6314,11 +6292,11 @@ bool ElementUniversalEnveloping<CoefficientType>::ConvertToLieAlgebraElementIfPo
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::AssignElementLieAlgebra
-(const ElementSemisimpleLieAlgebra<Rational>& input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+(const ElementSemisimpleLieAlgebra<Rational>& input, SemisimpleLieAlgebra& inputOwner,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
-{ this->MakeZero(inputOwners, inputIndexInOwners);
+{ this->MakeZero(inputOwner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.MakeZero(theRingZero, inputOwners, inputIndexInOwners);
+  tempMon.MakeZero(theRingZero, inputOwner);
   tempMon.generatorsIndices.SetSize(1);
   tempMon.Powers.SetSize(1);
   tempMon.Powers[0]=theRingUnit;
@@ -6360,11 +6338,11 @@ void ElementUniversalEnveloping<CoefficientType>::GetCoordinateFormOfSpanOfEleme
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeHgenerator
-(const Vector<Rational> & input, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners,
+(const Vector<Rational>& input, SemisimpleLieAlgebra& inputOwner,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
-  this->MakeZero(inputOwners, inputIndexInOwners);
-  tempMon.MakeZero(theRingZero, inputOwners, inputIndexInOwners);
+  this->MakeZero(inputOwner);
+  tempMon.MakeZero(theRingZero, inputOwner);
   int theDimension= this->GetOwner().theWeyl.CartanSymmetric.NumRows;
   int numPosRoots=this->GetOwner().theWeyl.RootsOfBorel.size;
   tempMon.generatorsIndices.SetSize(1);
@@ -6384,16 +6362,16 @@ template <class CoefficientType>
 void MonomialUniversalEnveloping<CoefficientType>::Simplify
 (ElementUniversalEnveloping<CoefficientType>& output, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero )
-{ output.MakeZero(*this->owners, this->indexInOwners);
+{ output.MakeZero(*this->owner);
   output.AddOnTop(*this);
   this->SimplifyAccumulateInOutputNoOutputInit(output, theGlobalVariables, theRingUnit, theRingZero);
 }
 
 template <class CoefficientType>
 bool ElementUniversalEnvelopingOrdered<CoefficientType>::GetElementUniversalEnveloping
-  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& owner)
+  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& inputOwner)
 { ElementUniversalEnveloping<CoefficientType> Accum, tempElt;
-  Accum.MakeZero(*owner.owner, owner.indexInOwner);
+  Accum.MakeZero(inputOwner);
   for (int i=0; i<this->size; i++)
     if (!this->TheObjects[i].GetElementUniversalEnveloping(tempElt, owner))
       return false;
@@ -6405,24 +6383,24 @@ bool ElementUniversalEnvelopingOrdered<CoefficientType>::GetElementUniversalEnve
 
 template <class CoefficientType>
 bool MonomialUniversalEnvelopingOrdered<CoefficientType>::GetElementUniversalEnveloping
-  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& owner)
+  (ElementUniversalEnveloping<CoefficientType>& output, SemisimpleLieAlgebra& inputOwner)
 { ElementUniversalEnveloping<CoefficientType> Accum;
   ElementUniversalEnveloping<CoefficientType> tempMon;
   int theIndex;
   int theDegree;
-  Accum.MakeConst(this->Coefficient, *owner.owner, owner.indexInOwner);
+  Accum.MakeConst(this->Coefficient, inputOwner);
   for (int i=0; i<this->generatorsIndices.size; i++)
     if (this->Powers[i].IsSmallInteger(&theDegree))
     { tempMon.AssignElementLieAlgebra
-      (this->owner->theOrder[this->generatorsIndices[i]], *owner.owner, owner.indexInOwner,
+      (this->owner->theOrder[this->generatorsIndices[i]], inputOwner,
         this->Coefficient.GetOne(), this->Coefficient.GetZero());
       tempMon.RaiseToPower(theDegree);
       Accum*=(tempMon);
     } else
-      if (this->owner->theOrder.TheObjects[this->generatorsIndices.TheObjects[i]].IsACoeffOneChevalleyGenerator(theIndex, owner))
+      if (this->owner->theOrder[this->generatorsIndices[i]].IsACoeffOneChevalleyGenerator(theIndex, owner))
       { tempMon.MakeOneGeneratorCoeffOne
-        (theIndex, *owner.owner, owner.indexInOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
-        tempMon.TheObjects[0].Powers.TheObjects[0]=this->Powers.TheObjects[i];
+        (theIndex, inputOwner, this->Coefficient.GetOne(), this->Coefficient.GetZero());
+        tempMon[0].Powers[0]=this->Powers[i];
         Accum*=(tempMon);
       } else
         return false;
@@ -6505,23 +6483,21 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::SubstitutionCoefficient
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::MakeConst
-(const Rational& coeff, int numVars, List<SemisimpleLieAlgebra>& inputOwners,
- int inputIndexInOwners)
+(const Rational& coeff, int numVars, SemisimpleLieAlgebra& inputOwner)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
-  this->MakeZero(inputOwners, inputIndexInOwners);
+  this->MakeZero(inputOwner);
   if (coeff.IsEqualToZero())
     return;
   CoefficientType tempP;
   tempP= coeff;
-  tempMon.MakeConst(inputOwners, inputIndexInOwners);
+  tempMon.MakeConst(inputOwner);
   this->AddMonomial(tempMon, tempP);
 }
 
 template <class CoefficientType>
-void ElementUniversalEnveloping<CoefficientType>::MakeZero(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+void ElementUniversalEnveloping<CoefficientType>::MakeZero(SemisimpleLieAlgebra& inputOwner)
 { this->::MonomialCollection<MonomialUniversalEnveloping<CoefficientType>, CoefficientType >::MakeZero();
-  this->owners=&inputOwners;
-  this->indexInOwners=inputIndexInOwners;
+  this->owneR=&inputOwner;
 }
 
 template <class CoefficientType>
@@ -6531,7 +6507,7 @@ void ElementUniversalEnveloping<CoefficientType>::MultiplyBy
     return;
   ElementUniversalEnveloping<CoefficientType> output;
   output.SetExpectedSize(this->size);
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owner);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   CoefficientType newCoeff;
   for (int i=0; i<this->size; i++)
@@ -6559,7 +6535,7 @@ void ElementUniversalEnveloping<CoefficientType>::RaiseToPower(int thePower)
   buffer=*this;
   if (this->size==0)
     return;
-  this->MakeConst(this->theCoeffs[0].GetOne(), *this->owners, this->indexInOwners);
+  this->MakeConst(this->theCoeffs[0].GetOne(), *this->owneR);
   for (int i=0; i<thePower; i++)
     this->operator*=(buffer);
 }
@@ -6824,7 +6800,7 @@ void PolynomialSubstitution<Element>::MakeLinearSubConstTermsLastRow(Matrix<Elem
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
-  (const PolynomialSubstitution<Rational>& theSub)
+  (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods)
 { ElementTensorsGeneralizedVermas<CoefficientType> output;
   MonomialTensorGeneralizedVermas<CoefficientType> currentMon;
   output.MakeZero();
@@ -6832,7 +6808,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
   for (int i=0; i<this->size; i++)
   { currentMon=this->TheObjects[i];
 //    std::cout << "<br>currentMon before sub: " << currentMon.ToString();
-    currentMon.Substitution(theSub);
+    currentMon.Substitution(theSub, theMods);
 //    std::cout << "<br>currentMon after sub: " << currentMon.ToString();
     tempCF=this->theCoeffs[i];
 //    std::cout << "<br>cf before sub: " << tempCF.ToString();
@@ -6846,15 +6822,16 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::Substitution
 
 template <class CoefficientType>
 void MonomialGeneralizedVerma<CoefficientType>::Substitution
-(const PolynomialSubstitution<Rational>& theSub)
+(const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods)
 { //std::cout << "<br>ze ue mon before sub: " << this->theMonCoeffOne.ToString();
   this->theMonCoeffOne.Substitution(theSub);
   //std::cout << "<br>ze ue mon after sub: " << this->theMonCoeffOne.ToString();
   ModuleSSalgebra<CoefficientType> newOwner;
-  newOwner=this->owneR->TheObjects[this->indexInOwner];
+  newOwner=*this->owneR;
   newOwner.Substitution(theSub);
   //std::cout << "<br>old index in owner: " << this->indexInOwner;
-  this->indexInOwner=this->owneR->AddNoRepetitionOrReturnIndexFirst(newOwner);
+  int newModIndex=theMods.AddNoRepetitionOrReturnIndexFirst(newOwner);
+  this->owneR=&theMods[newModIndex];
   //std::cout << "<br>new index in owner: " << this->indexInOwner;
 }
 
@@ -6862,7 +6839,7 @@ template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::Substitution
 (const PolynomialSubstitution<Rational>& theSub)
 { ElementUniversalEnveloping<CoefficientType> output;
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<CoefficientType> theMon;
   CoefficientType tempCF;
   for (int i=0; i<this->size; i++)
@@ -6901,13 +6878,14 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::operator=(const ElementSu
 
 template <class CoefficientType>
 bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
-  (const ElementUniversalEnveloping<CoefficientType>& theUE, ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
-   GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+(const ElementUniversalEnveloping<CoefficientType>& theUE,
+ ElementTensorsGeneralizedVermas<CoefficientType>& output,
+ SemisimpleLieAlgebra& ownerAlgebra,
+ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { ElementTensorsGeneralizedVermas<CoefficientType> buffer;
   output.MakeZero();
   for (int i=0; i<theUE.size; i++)
-  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, theOwner, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
+  { if (!this->MultiplyOnTheLeft(theUE[i], buffer, ownerAlgebra, theGlobalVariables, theRingUnit, theRingZero))
     { ElementSumGeneralizedVermas<CoefficientType> tempOutput;
 //      std::cout << "<hr>emergency mode!";
       for (int j=0; j<this->size; j++)
@@ -6916,7 +6894,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
           return false;
         MonomialGeneralizedVerma<CoefficientType>& currentSingleMon=currentMon.theMons[0];
         if (j==0)
-          tempOutput.MakeZero(*currentSingleMon.owneR);
+          tempOutput.MakeZero();
         tempOutput.AddMonomial(currentSingleMon, this->theCoeffs[j]);
       }
       tempOutput.MultiplyMeByUEEltOnTheLeft(theUE, theGlobalVariables, theRingUnit, theRingZero);
@@ -6943,17 +6921,14 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MakeHWV
-(List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
- const CoefficientType& theRingUnit)
-{ assert(TheIndexInOwner<theOwner.size);
-  MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
+(ModuleSSalgebra<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
+{ MonomialTensorGeneralizedVermas<CoefficientType> tensorMon;
   CoefficientType currentCoeff;
   currentCoeff=theRingUnit;
   tensorMon.theMons.SetSize(1);
   MonomialGeneralizedVerma<CoefficientType>& theMon=tensorMon.theMons[0];
-  ModuleSSalgebra<CoefficientType>& theMod=theOwner.TheObjects[TheIndexInOwner];
-  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
-  theMon.MakeConst(theOwner, TheIndexInOwner);
+  theMon.indexFDVector=theOwner.theGeneratingWordsNonReduced.size-1;
+  theMon.MakeConst(theOwner);
   this->MakeZero();
   this->AddMonomial(tensorMon, theRingUnit);
 }
@@ -6962,7 +6937,7 @@ template <class CoefficientType>
 bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 (const MonomialUniversalEnveloping<CoefficientType>& theUE,
  ElementTensorsGeneralizedVermas<CoefficientType>& output,
- List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra,
+ SemisimpleLieAlgebra& ownerAlgebra,
  GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { assert(&output!=this);
 //  int commentmewhendone;
@@ -6986,7 +6961,7 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
     int theIndex=theUE.generatorsIndices[i];
     for (int j=0; j<thePower; j++)
     { //std::cout <<"<hr>Acting by generator index " << theIndex << " on " << output.ToString();
-      output.MultiplyByElementLieAlg(buffer, theOwner, ownerAlgebra, theIndex, theGlobalVariables, theRingUnit, theRingZero);
+      output.MultiplyByElementLieAlg(buffer, ownerAlgebra, theIndex, theGlobalVariables, theRingUnit, theRingZero);
 //      buffer.checkConsistency();
       output=buffer;
 //  int commentmewhendone4;
@@ -7001,20 +6976,17 @@ bool ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyOnTheLeft
 
 template <class CoefficientType>
 void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
-  (ElementTensorsGeneralizedVermas<CoefficientType>& output,
-   List<ModuleSSalgebra<CoefficientType> >& theOwner, SemisimpleLieAlgebra& ownerAlgebra, int indexGenerator, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
+(ElementTensorsGeneralizedVermas<CoefficientType>& output,
+ SemisimpleLieAlgebra& ownerAlgebra,
+ int indexGenerator, GlobalVariables& theGlobalVariables,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { output.MakeZero();
-  if (theOwner.size<=0 || this->size<0)
-  { assert(false);
-    return;
-  }
   MonomialTensorGeneralizedVermas<CoefficientType> accumMon, monActedOn;
   ElementSumGeneralizedVermas<CoefficientType> tempElt;
   ElementUniversalEnveloping<CoefficientType> theGenerator;
 
   theGenerator.MakeOneGenerator
-  (indexGenerator, *ownerAlgebra.owner, ownerAlgebra.indexInOwner, theRingUnit);
+  (indexGenerator, ownerAlgebra, theRingUnit);
   ;
 //  FormatExpressions tempFormat;
 //  tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
@@ -7023,7 +6995,7 @@ void ElementTensorsGeneralizedVermas<CoefficientType>::MultiplyByElementLieAlg
   { MonomialTensorGeneralizedVermas<CoefficientType>& currentMon=this->TheObjects[i];
     accumMon.theMons.SetSize(0);
     for (int j=0; j<currentMon.theMons.size; j++)
-    { tempElt.MakeZero(theOwner);
+    { tempElt.MakeZero();
       tempElt.AddMonomial(currentMon.theMons[j], theRingUnit);
 //      std::cout << "<hr> Acting by " << theGenerator.ToString() << " on " << tempElt.ToString() << "<br>";
       tempElt.MultiplyMeByUEEltOnTheLeft(theGenerator, theGlobalVariables, theRingUnit, theRingZero);
@@ -7053,7 +7025,7 @@ void MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLefT
 GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma<CoefficientType>::MultiplyMeByUEEltOnTheLefT");
   MonomialGeneralizedVerma<CoefficientType> currentMon;
-  output.MakeZero(*this->owneR);
+  output.MakeZero();
   ElementSumGeneralizedVermas<CoefficientType> buffer;
   ProgressReport theReport(&theGlobalVariables);
   for (int j=0; j<theUE.size; j++)
@@ -7063,7 +7035,7 @@ GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit, const C
 //    std::cout << "<br>currentMon after multi: " << currentMon.theMonCoeffOne.ToString();
     currentMon.owneR=this->owneR;
     currentMon.indexFDVector=this->indexFDVector;
-    currentMon.indexInOwner=this->indexInOwner;
+    currentMon.owneR=this->owneR;
 //    std::cout << "<hr>Applying " <<theUE.theCoeffs[j].ToString()
 //    << " times " << theUE[j].ToString() << " on " << this->ToString();
     std::stringstream reportStream;
@@ -7087,7 +7059,7 @@ void ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft
 { MacroRegisterFunctionWithName("ElementSumGeneralizedVermas<CoefficientType>::MultiplyMeByUEEltOnTheLeft");
   ElementSumGeneralizedVermas<CoefficientType> buffer, Accum;
 //std::cout << "<br>Multiplying " << this->ToString() << " by " << theUE.ToString();
-  Accum.MakeZero(*this->owneR);
+  Accum.MakeZero();
   for (int i=0; i<this->size; i++)
   {// std::cout << "<br>Multiplying " << this->TheObjects[i].ToString() << " by " << theUE.ToString() << " by " << this->theCoeffs[i].ToString();
     this->TheObjects[i].MultiplyMeByUEEltOnTheLefT(theUE, buffer, theGlobalVariables, theRingUnit, theRingZero);
@@ -7107,15 +7079,15 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)const
 { MacroRegisterFunctionWithName("MonomialGeneralizedVerma::ReduceMe");
   //std::cout << "<hr><hr>Reducing  " << this->ToString();
-  ModuleSSalgebra<CoefficientType>& theMod=this->owneR->TheObjects[this->indexInOwner];
-  output.MakeZero(*this->owneR);
+  ModuleSSalgebra<CoefficientType>& theMod=*this->owneR;
+  output.MakeZero();
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   tempMon=this->theMonCoeffOne;
   tempMon*=theMod.theGeneratingWordsNonReduced[this->indexFDVector];
   int indexCheck=theMod.theGeneratingWordsNonReduced.GetIndex(tempMon);
   if (indexCheck!=-1)
   { MonomialGeneralizedVerma<CoefficientType> basisMon;
-    basisMon.MakeConst(*this->owneR, this->indexInOwner);
+    basisMon.MakeConst(*this->owneR);
     basisMon.indexFDVector=indexCheck;
     output.AddMonomial(basisMon, theRingUnit);
 //    std::cout << "<br>Reduced " << this->ToString() << " to " << output.ToString() << " = " << basisMon.ToString();
@@ -7131,7 +7103,7 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
   //{ std::cout << "<br>generator index " << i << " has order " << theMod.GetOwner().UEGeneratorOrderIncludingCartanElts[i];
   //}
   ElementUniversalEnveloping<CoefficientType> theUEelt;
-  theUEelt.MakeZero(*this->GetOwner().theAlgebras, this->GetOwner().indexAlgebra);
+  theUEelt.MakeZero(*this->GetOwner().owneR);
   theUEelt.AddMonomial(this->theMonCoeffOne, theRingUnit);
 //  std::cout << " <br>the monomial:" << this->ToString();
   theUEelt.Simplify(theGlobalVariables, theRingUnit, theRingZero);
@@ -7172,7 +7144,6 @@ void MonomialGeneralizedVerma<CoefficientType>::ReduceMe
     }
 //    std::cout << "<br> Action is the " << currentMon.ToString() << " free action plus <br>" << tempMat1.ToString();
     newMon.owneR=this->owneR;
-    newMon.indexInOwner=this->indexInOwner;
     for (int i=0; i<tempMat1.size; i++)
     { int otherIndex=-1;
       if (tempMat1[i].dualIndex==this->indexFDVector)
@@ -7611,7 +7582,7 @@ bool charSSAlgMod<CoefficientType>::DrawMe
   (CharCartan, upperBoundWeights, &outputDetails, &theGlobalVariables);
   std::stringstream out;
   Vectors<Rational> currentOrbit;
-  WeylGroup& theWeyl=this->listOwners->TheObjects[this->indexInOwners].theWeyl;
+  WeylGroup& theWeyl=this->owner->theWeyl;
   theWeyl.DrawRootSystem(theDrawingVars, false, theGlobalVariables, true);
   int totalNumWeights=0;
   Vectors<CoefficientType> dominantWeightsNonHashed;
@@ -7844,7 +7815,7 @@ bool charSSAlgMod<CoefficientType>::SplitOverLeviMonsEncodeHIGHESTWeight
   invertedSel=splittingParSel;
   invertedSel.InvertSelection();
   complementGroup.MakeParabolicFromSelectionSimpleRoots
-  (this->listOwners->TheObjects[this->indexInOwners].theWeyl, invertedSel, theGlobalVariables,1);
+  (this->owner->theWeyl, invertedSel, theGlobalVariables,1);
   complementGroup.ComputeRootSubsystem();
   out << outputWeylSub.ToString(false);
 //  std::cout << "<hr> the Weyl subgroup: " << outputWeylSub.ToString(false);
@@ -8049,12 +8020,12 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
   ElementUniversalEnveloping<CoefficientType> currentElt, tempElt;
   for (int j=0; j<theFinalEigenSpace.size; j++)
   { out << "<tr><td>";
-    currentElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
+    currentElt.MakeZero(this->GetOwner());
     Vector<CoefficientType>& currentVect= theFinalEigenSpace[j];
     int lastNonZeroIndex=-1;
     for (int i=0; i<currentVect.size; i++)
       if (!(currentVect[i].IsEqualToZero()))
-      { tempElt.MakeZero(*this->theAlgebras, this->indexAlgebra);
+      { tempElt.MakeZero(this->GetOwner());
         tempElt.AddMonomial(this->theGeneratingWordsNonReduced[i], 1);
         tempElt*=currentVect[i];
         currentElt+=tempElt;
@@ -8088,10 +8059,10 @@ void ModuleSSalgebra<CoefficientType>::SplitOverLevi
 }
 
 template <class CoefficientType>
-void charSSAlgMod<CoefficientType>::MakeTrivial(List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
-{ this->MakeZero(inputOwners, inputIndexInOwners);
+void charSSAlgMod<CoefficientType>::MakeTrivial(SemisimpleLieAlgebra& inputOwner)
+{ this->MakeZero(inputOwner);
   MonomialChar<Rational> tempMon;
-  tempMon.weightFundamentalCoords.MakeZero(inputOwners[inputIndexInOwners].GetRank());
+  tempMon.weightFundamentalCoords.MakeZero(inputOwner.GetRank());
   this->AddMonomial(tempMon, 1);
 }
 
@@ -8403,16 +8374,12 @@ bool WeylGroup::GetAlLDominantWeightsHWFDIM
 
 template <class CoefficientType>
 void ElementSumGeneralizedVermas<CoefficientType>::MakeHWV
-  (List<ModuleSSalgebra<CoefficientType> >& theOwner, int TheIndexInOwner,
-   const CoefficientType& theRingUnit)
-{ this->MakeZero(theOwner);
+(ModuleSSalgebra<CoefficientType>& theOwner, const CoefficientType& theRingUnit)
+{ this->MakeZero();
   MonomialGeneralizedVerma<CoefficientType> theMon;
-  theMon.indexInOwner=TheIndexInOwner;
-  ModuleSSalgebra<CoefficientType>& theMod=this->owneR->TheObjects[TheIndexInOwner];
-  theMon.indexFDVector=theMod.theGeneratingWordsNonReduced.size-1;
-  theMon.theMonCoeffOne.MakeConst(*theMod.theAlgebras, theMod.indexAlgebra);
+  theMon.indexFDVector=theOwner.theGeneratingWordsNonReduced.size-1;
+  theMon.theMonCoeffOne.MakeConst(theOwner.GetOwner());
   theMon.owneR=&theOwner;
-  assert(TheIndexInOwner<theOwner.size);
   this->AddMonomial(theMon, theRingUnit);
 }
 
@@ -8563,11 +8530,11 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::ModOutVermaRelations
 
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::ModOutVermaRelations
-  (GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
+(GlobalVariables* theContext, const Vector<CoefficientType>* subHiGoesToIthElement,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   ElementUniversalEnveloping<CoefficientType> output;
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owneR);
   CoefficientType acquiredCoeff;
   for (int i=0; i<this->size; i++)
   { tempMon= this->TheObjects[i];
@@ -8587,7 +8554,7 @@ void ElementUniversalEnveloping<CoefficientType>::Simplify
   ElementUniversalEnveloping<CoefficientType> outpuT;
   MonomialUniversalEnveloping<CoefficientType> tempMon;
   CoefficientType currentCoeff;
-  outpuT.MakeZero(*this->owners, this->indexInOwners);
+  outpuT.MakeZero(*this->owneR);
   for (; this->size>0; )
   {// FormatExpressions tempFormat;
     //tempFormat.MakeAlphabetArbitraryWithIndex("g", "h");
@@ -8668,9 +8635,9 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
  const CoefficientType& theRingZero)
 { if (indexA==this->generatorsIndices.size-1)
     return;
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.init(*this->owners, this->indexInOwners);
+  tempMon.init(*this->owneR);
   tempMon.Powers.SetExpectedSize(this->generatorsIndices.size+2);
   tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
@@ -8689,10 +8656,8 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteAnBtoBAnPlusLowerOrder
   MonomialUniversalEnveloping<CoefficientType> startMon;
   startMon=tempMon;
   ElementSemisimpleLieAlgebra<Rational> adAToTheIthOfB, aElt;
-  adAToTheIthOfB.MakeGenerator
-  (rightGeneratorIndeX, *this->owners, this->indexInOwners);
-  aElt.MakeGenerator
-  (leftGeneratorIndeX, *this->owners, this->indexInOwners);
+  adAToTheIthOfB.MakeGenerator(rightGeneratorIndeX, *this->owneR);
+  aElt.MakeGenerator(leftGeneratorIndeX, *this->owneR);
   //Formula realized:
   //a^n b =\sum_{i=0}^\infty \binom{n}{i} (\ad a)^i (b)a^{n-i}
   //Proof (Dixmier): let L_x stand for left multiplication by x and R_x stand for right multiplication.
@@ -8734,9 +8699,9 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero)
 { if (theIndeX==this->generatorsIndices.size-1)
     return;
-  output.MakeZero(*this->owners, this->indexInOwners);
+  output.MakeZero(*this->owneR);
   MonomialUniversalEnveloping<CoefficientType> tempMon;
-  tempMon.init(*this->owners, this->indexInOwners);
+  tempMon.init(*this->owneR);
   tempMon.Powers.SetExpectedSize(this->generatorsIndices.size+2);
   tempMon.generatorsIndices.SetExpectedSize(this->generatorsIndices.size+2);
   tempMon.Powers.size=0;
@@ -8756,10 +8721,8 @@ void MonomialUniversalEnveloping<CoefficientType>::CommuteABntoBnAPlusLowerOrder
   MonomialUniversalEnveloping<CoefficientType> startMon, tempMon2;
   startMon=tempMon;
   ElementSemisimpleLieAlgebra<Rational> adResult, tempElt, rightGeneratorElt;
-  adResult.MakeGenerator
-  (leftGeneratorIndex, *this->owners, this->indexInOwners);
-  rightGeneratorElt.MakeGenerator
-  (rightGeneratorIndex, *this->owners, this->indexInOwners);
+  adResult.MakeGenerator(leftGeneratorIndex, *this->owneR);
+  rightGeneratorElt.MakeGenerator(rightGeneratorIndex, *this->owneR);
 //  std::cout << this->ToString() << "=";
   //Formula realized:
   //a b^n  &=&\sum_{i=0}^\infty b^{n-i}(-\ad b)^i (a) \binom{n}{i} .
@@ -8794,9 +8757,9 @@ bool MonomialUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
  const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
  const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)
 { ElementUniversalEnveloping<CoefficientType> tempElt1, tempElt2;
-  tempElt1.MakeZero(*this->owners, this->indexInOwners);
+  tempElt1.MakeZero(*this->owner);
   tempElt1.AddMonomial(*this, theRingUnit);
-  tempElt2.MakeZero(*this->owners, this->indexInOwners);
+  tempElt2.MakeZero(*this->owner);
   tempElt2.AddMonomial(right, theRingUnit);
   return tempElt1.HWTAAbilinearForm
   (tempElt2, output, subHiGoesToIthElement, theGlobalVariables, theRingUnit, theRingZero, logStream);
@@ -8806,7 +8769,7 @@ template<class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::ApplyTransposeAntiAutoOnMe()
 { MonomialUniversalEnveloping<CoefficientType> tempMon;
   ElementUniversalEnveloping<CoefficientType> result;
-  result.MakeZero(*this->owners, this->indexInOwners);
+  result.MakeZero(*this->owneR);
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   int theRank=this->GetOwner().GetRank();
   CoefficientType theCoeff;
@@ -8814,8 +8777,7 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyTransposeAntiAutoOnMe()
   for (int i=0; i<this->size; i++)
   { MonomialUniversalEnveloping<CoefficientType>& currentMon=this->TheObjects[i];
     theCoeff=this->theCoeffs[i];
-    tempMon.owners=currentMon.owners;
-    tempMon.indexInOwners=currentMon.indexInOwners;
+    tempMon.owneR=currentMon.owneR;
     tempMon.Powers.size=0;
     tempMon.generatorsIndices.size=0;
 //    for (int j=0; j<currentMon.Powers.size; j++)
@@ -8841,9 +8803,9 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyTransposeAntiAutoOnMe()
 
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
-  (const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
-   const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
-   const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)const
+(const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
+ const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables,
+ const CoefficientType& theRingUnit, const CoefficientType& theRingZero, std::stringstream* logStream)const
 { output=theRingZero;
   CoefficientType tempCF;
   ElementUniversalEnveloping<CoefficientType> TAleft;
@@ -8859,9 +8821,9 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   for (int i=0; i<numPosRoots; i++)
     this->GetOwner().UEGeneratorOrderIncludingCartanElts[i]=-1;
-  Accum.MakeZero(*this->owners, this->indexInOwners);
+  Accum.MakeZero(this->GetOwner());
   MonomialUniversalEnveloping<CoefficientType> constMon;
-  constMon.MakeConst(*this->owners, this->indexInOwners);
+  constMon.MakeConst(this->GetOwner());
 //    std::cout << "<hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr>"
 //  << "hw: " << subHiGoesToIthElement->ToString()
 //  << "<hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr><hr>"
@@ -8890,7 +8852,7 @@ bool ElementUniversalEnveloping<CoefficientType>::HWTAAbilinearForm
     for (int i=leftMon.Powers.size-1; i>=0; i--)
       if (leftMon.Powers[i].IsSmallInteger(&thePower))
         for (int k=0; k<thePower; k++)
-        { tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], *this->owners, this->indexInOwners, theRingUnit);
+        { tempElt.MakeOneGenerator(leftMon.generatorsIndices[i], this->GetOwner(), theRingUnit);
           MathRoutines::swap(tempElt, intermediateAccum);
           if (logStream!=0)
           { //*logStream << "tempElt before mult: " << tempElt.ToString(theGlobalVariables, tempFormat) << "<br>";
@@ -8936,7 +8898,7 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
   for (int i=this->generatorsIndices.size-1; i>=0; i--)
   { int IndexCurrentGenerator=this->generatorsIndices[i];
     if (IndexCurrentGenerator>=numPosRoots+theDimension)
-    { this->MakeZero(theRingZero, *this->owners, this->indexInOwners);
+    { this->MakeZero(theRingZero, *this->owneR);
       outputCoeff=theRingZero;
       return;
     }
@@ -8944,7 +8906,7 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
       return;
     if (IndexCurrentGenerator>=numPosRoots && IndexCurrentGenerator<numPosRoots+theDimension)
     { if (subHiGoesToIthElement==0)
-      { this->MakeZero(theRingZero, *this->owners, this->indexInOwners);
+      { this->MakeZero(theRingZero, *this->owneR);
         outputCoeff=theRingZero;
         return;
       }
@@ -8966,8 +8928,7 @@ void MonomialUniversalEnveloping<CoefficientType>::ModOutVermaRelations
 
 template <class CoefficientType>
 void WeylGroup::RaiseToDominantWeight
-(Vector<CoefficientType>& theWeight, int* sign, bool* stabilizerFound,
-  ElementWeylGroup* raisingElt)
+(Vector<CoefficientType>& theWeight, int* sign, bool* stabilizerFound, ElementWeylGroup* raisingElt)
 { if (sign!=0)
     *sign=1;
   if (stabilizerFound!=0)
@@ -9022,15 +8983,14 @@ bool Matrix<Element>::IsPositiveDefinite()
 
 template<class CoefficientType>
 bool ModuleSSalgebra<CoefficientType>::MakeFromHW
-(List<SemisimpleLieAlgebra>& inputAlgebras, int inputIndexAlgebra, Vector<CoefficientType>& HWFundCoords,
+(SemisimpleLieAlgebra& inputAlgebra, Vector<CoefficientType>& HWFundCoords,
  const Selection& selNonSelectedAreElementsLevi, GlobalVariables& theGlobalVariables,
 const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
  std::string* outputReport, bool computeSimpleGens)
 { MacroRegisterFunctionWithName("ModuleSSalgebra<CoefficientType>::MakeFromHW");
   ProgressReport theReport(&theGlobalVariables);
-  this->theAlgebras=&inputAlgebras;
-  this->indexAlgebra=inputIndexAlgebra;
-  SemisimpleLieAlgebra& theAlgebrA=inputAlgebras[this->indexAlgebra];
+  this->owneR=&inputAlgebra;
+  SemisimpleLieAlgebra& theAlgebrA=inputAlgebra;
 
   int theRank=theAlgebrA.GetRank();
   if (HWFundCoords.size!=theRank || selNonSelectedAreElementsLevi.MaxSize!=theRank)
@@ -9074,8 +9034,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   (this->theHWFDpartFundamentalCoordS);
   this->theHWSimpleCoordSBaseField=theWeyl.GetSimpleCoordinatesFromFundamental
   (this->theHWFundamentalCoordsBaseField);
-  this->theChaR.MakeFromWeight
-  (this->theHWSimpleCoordSBaseField, *this->theAlgebras, this->indexAlgebra);
+  this->theChaR.MakeFromWeight(this->theHWSimpleCoordSBaseField, *this->owneR);
 
  // std::cout << "<br>input fund coords base field: " << HWFundCoords.ToString();
  // std::cout << "<br>dual coords no base field: " << this->theHWDualCoordS.ToString();
@@ -9133,7 +9092,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
   MonomialTensor<int, MathRoutines::IntUnsignIdentity> tempMonInt;
   for (int i=0; i<thePaths.size; i++)
   { List<int>& currentPath= generatorsIndices[i];
-    currentNonReducedElement.MakeConst(*this->theAlgebras, this->indexAlgebra);
+    currentNonReducedElement.MakeConst(this->GetOwner());
     tempMonInt.MakeConst();
     for (int j=currentPath.size-1; j>=0; j--)
     { int theIndex=currentPath[j];
@@ -9258,7 +9217,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
         { int theIndex=this->GetOwner().GetNumPosRoots()-j-1;
           if (k==1)
             theIndex=this->GetOwner().GetNumPosRoots()+this->GetOwner().GetRank()+j;
-          tempSSElt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
+          tempSSElt.MakeGenerator(theIndex, this->GetOwner());
           if (outputReport!=0)
             out2 << "<hr>Simple generator: " << tempSSElt.ToString(&theGlobalVariables.theDefaultFormat);
           MatrixTensor<CoefficientType>& theMatrix
@@ -9306,7 +9265,7 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
     for (int i=0; i<this->parabolicSelectionSelectedAreElementsLevi.CardinalitySelection; i++)
     { int theIndex=this->parabolicSelectionSelectedAreElementsLevi.elements[i]
       + this->GetOwner().GetRank()+this->GetOwner().GetNumPosRoots();
-      tempSSelt.MakeGenerator(theIndex, *this->theAlgebras, this->indexAlgebra);
+      tempSSelt.MakeGenerator(theIndex, this->GetOwner());
       latexTableStream << "&action of $" << tempSSElt.ToString() << "$";
     }
     latexTableStream << "\\\\\n";
@@ -9455,30 +9414,29 @@ void ModuleSSalgebra<CoefficientType>::GetElementsNilradical
           ownerSS.UEGeneratorOrderIncludingCartanElts[listOfGenerators->TheObjects[j]])
         listOfGenerators->SwapTwoIndices(i, j);
   for (int i=0; i<listOfGenerators->size; i++)
-  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->theAlgebras, this->indexAlgebra);
+  { theElt.MakeOneGeneratorCoeffOne(listOfGenerators->TheObjects[i], *this->owneR);
     output.AddOnTop(theElt);
   }
 }
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::MakeGenerator
-  (int generatorIndex, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+  (int generatorIndex, SemisimpleLieAlgebra& inputOwner)
 { //Changing RootSystem order invalidates this function!
-  if (&inputOwners==0 || inputIndexInOwners==-1)
-  { std::cout << " This is a programming error: usage of non-initialized Semisimple Lie algebra. "
+  if (&inputOwner==0)
+  { std::cout << " This is a programming error: 0 pointer to Semisimple Lie algebra. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->MakeZero(inputOwners, inputIndexInOwners);
+  this->MakeZero(inputOwner);
   ChevalleyGenerator tempGenerator;
-  tempGenerator.MakeGenerator(inputOwners, inputIndexInOwners, generatorIndex);
-  this->AddMonomial(tempGenerator,1);
+  tempGenerator.MakeGenerator(inputOwner, generatorIndex);
+  this->AddMonomial(tempGenerator, 1);
 }
 
 template <class CoefficientType>
-void ElementSemisimpleLieAlgebra<CoefficientType>::MakeZero(List<SemisimpleLieAlgebra>& owners, int indexAlgebra)
-{ this->ownerArray=&owners;
-  this->indexOfOwnerAlgebra=indexAlgebra;
+void ElementSemisimpleLieAlgebra<CoefficientType>::MakeZero(SemisimpleLieAlgebra& inputOwner)
+{ this->owneR=&inputOwner;
   this->::MonomialCollection<ChevalleyGenerator, CoefficientType>::MakeZero();
 }
 
@@ -9493,7 +9451,7 @@ void SemisimpleLieAlgebra::LieBracket
     output=outputNew;
     return;
   }
-  output.MakeZero(*this->owner, this->indexInOwner);
+  output.MakeZero(*this);
   if (g1.IsEqualToZero() || g2.IsEqualToZero())
     return;
   int maxNumMonsFinal=g1.size*g2.size;
@@ -9512,13 +9470,13 @@ void SemisimpleLieAlgebra::LieBracket
 
 template <class CoefficientType>
 SemisimpleLieAlgebra& ElementSemisimpleLieAlgebra<CoefficientType>::GetOwner()const
-{ if (this->ownerArray==0 || this->indexOfOwnerAlgebra==-1)
+{ if (this->owneR==0)
   { std::cout << "This is a programming error: a semisimple "
     << "Lie algebra element has not been initialized properly. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return (*this->ownerArray)[this->indexOfOwnerAlgebra];
+  return *this->owneR;
 }
 
 template <class CoefficientType>
@@ -9538,15 +9496,14 @@ void ElementSemisimpleLieAlgebra<CoefficientType>::ActOnMe
 }
 
 template <class CoefficientType>
-Vector<CoefficientType> ElementSemisimpleLieAlgebra<CoefficientType>::GetCartanPart
-()const
+Vector<CoefficientType> ElementSemisimpleLieAlgebra<CoefficientType>::GetCartanPart()const
 { Vector<CoefficientType> result;
   ChevalleyGenerator tempGen;
   int theRank=this->GetOwner().GetRank();
   int numPosRoots=this->GetOwner().GetNumPosRoots();
   result.MakeZero(theRank);
   for (int i=0; i<theRank; i++)
-  { tempGen.MakeGenerator(*this->ownerArray, this->indexOfOwnerAlgebra, i+numPosRoots);
+  { tempGen.MakeGenerator(*this->owneR, i+numPosRoots);
     int currentIndex=this->GetIndex(tempGen);
     if (currentIndex!=-1)
       result[i]+=this->theCoeffs[currentIndex];
@@ -9556,21 +9513,19 @@ Vector<CoefficientType> ElementSemisimpleLieAlgebra<CoefficientType>::GetCartanP
 
 template <class CoefficientType>
 void ElementSemisimpleLieAlgebra<CoefficientType>::MakeHgenerator
-(const Vector<CoefficientType>& theH, List<SemisimpleLieAlgebra>& inputOwners, int inputIndexInOwners)
+(const Vector<CoefficientType>& theH, SemisimpleLieAlgebra& inputOwner)
 { ChevalleyGenerator tempGen;
-  this->MakeZero(inputOwners, inputIndexInOwners);
-  SemisimpleLieAlgebra& owner= inputOwners[inputIndexInOwners];
+  this->MakeZero(inputOwner);
   for (int i=0; i<theH.size; i++)
-  { tempGen.MakeGenerator(inputOwners, inputIndexInOwners, owner.GetCartanIndexFromGenerator(i));
+  { tempGen.MakeGenerator(inputOwner, inputOwner.GetCartanIndexFromGenerator(i));
     this->AddMonomial(tempGen, theH[i]);
   }
 }
 
 template <class CoefficientType>
 void charSSAlgMod<CoefficientType>::MakeFromWeight
-(const Vector<CoefficientType>& inputWeightSimpleCoords, List<SemisimpleLieAlgebra>& inputOwners,
- int inputIndexInOwner)
-{ this->MakeZero(inputOwners, inputIndexInOwner);
+(const Vector<CoefficientType>& inputWeightSimpleCoords, SemisimpleLieAlgebra& inputOwner)
+{ this->MakeZero(inputOwner);
   if (inputWeightSimpleCoords.size!=this->GetOwner().GetRank())
   { std::cout << "This is a programming error: attempting to create a character "
     << " from highest weight in simple coords "
@@ -9582,7 +9537,7 @@ void charSSAlgMod<CoefficientType>::MakeFromWeight
   }
   MonomialChar<CoefficientType> theMon;
   theMon.weightFundamentalCoords=
-  this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
-  this->AddMonomial(theMon,1);
+  this->owner->theWeyl.GetFundamentalCoordinatesFromSimple(inputWeightSimpleCoords);
+  this->AddMonomial(theMon, 1);
 }
 #endif

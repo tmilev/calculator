@@ -2787,7 +2787,7 @@ bool CommandList::fLSPath
     return output.SetError("Error: no waypoints. ", theCommands);
   Matrix<Rational> outputMat;
   Vectors<Rational> waypoints;
-  if (!theCommands.fGetMatrix<Rational>(output, outputMat, 0, -1, 0))
+  if (!theCommands.GetMatrix<Rational>(output, outputMat, 0, -1, 0))
     return output.SetError("Failed to extract waypoints", theCommands);
   if (outputMat.NumCols!=ownerSSalgebra.GetRank())
     return output.SetError
@@ -2802,7 +2802,7 @@ bool CommandList::fLSPath
 bool CommandList::fInvertMatrix
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> mat, outputMat, tempMat;
-  if (!theCommands.fGetMatrix<Rational>(input, mat, 0, -1, 0))
+  if (!theCommands.GetMatrix<Rational>(input, mat, 0, -1, 0))
     return output.SetError
     ("Failed to extract matrix with rational coefficients", theCommands);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)

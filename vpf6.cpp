@@ -753,7 +753,9 @@ void Expression::MakeProducT
 
 void Expression::MakeFunction
   (CommandList& owner, const Expression& theFunction, const Expression& theArgument)
-{ this->MakeXOX(owner, owner.opApplyFunction(), theFunction, theArgument);
+{ this->reset(owner, 2);
+  this->children[0]=theFunction;
+  this->children[1]=theArgument;
   this->format=this->formatFunctionUseUnderscore;
 }
 
@@ -1252,6 +1254,12 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="LogEvaluation")
+  { this->flagLogEvaluation=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
+
 /*  if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
     << this->ElementToStringSyntacticStack()
@@ -1333,7 +1341,7 @@ bool CommandList::ApplyOneRule(const std::string& lookAhead)
   if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
     return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
   if (thirdToLastS=="Sequence" && secondToLastS=="," && lastS=="Expression" &&
-      (lookAhead=="," || lookAhead==")"))
+      (lookAhead=="," || lookAhead==")" || lookAhead=="}"))
     return this->ReplaceSequenceXEBySequence(this->conSequence());
   if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
     return this->ReplaceXXYBySequenceY(this->conSequence());
@@ -2593,16 +2601,19 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CommandList::fMatrix
+bool CommandList::innerFunctionToMatrix
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (input.IsListNElements(4))
+{ std::cout << input.ToString();
+  if (!input.IsSequenceNElementS(3))
     return false;
   Expression& leftE  =input[1];
   Expression& middleE=input[2];
   Expression& rightE =input[3];
+//  std::cout << leftE.ToString() << ", " << rightE.ToString() << ", " << middleE.ToString();
   int numRows, numCols;
   if (!middleE.IsSmallInteger(&numRows) || !rightE.IsSmallInteger(&numCols))
     return false;
+//  std::cout << "<br>Rows, cols: " << numRows << ", " << numCols;
   if (numRows<=0 || numCols<=0)
     return false;
   if (numRows>1000 || numCols>1000)
@@ -2612,19 +2623,18 @@ bool CommandList::fMatrix
     return false;
   }
   output.reset(theCommands, numRows+1);
-  output.children[0].MakeAtom(theCommands.opSequence(), theCommands);
+  output[0].MakeAtom(theCommands.opSequence(), theCommands);
   output.format=output.formatMatrix;
-  output.children.SetSize(numRows);
   Expression theIndices;
   theIndices.reset(theCommands, 3);
-  theIndices.children[0].MakeAtom(theCommands.opSequence(), theCommands);
+  theIndices[0].MakeAtom(theCommands.opSequence(), theCommands);
   for (int i=0; i<numRows; i++)
-  { Expression& currentRow=output[i];
+  { Expression& currentRow=output[i+1];
     currentRow.reset(theCommands, numCols+1);
     currentRow[0].MakeAtom(theCommands.opSequence(), theCommands);
     currentRow.format=currentRow.formatMatrixRow;
     for (int j=0; j<numCols; j++)
-    { Expression& currentE=currentRow.children[j];
+    { Expression& currentE=currentRow[j+1];
       theIndices[1].AssignValue<Rational>(i+1, theCommands);
       theIndices[2].AssignValue<Rational>(j+1, theCommands);
       currentE.MakeFunction(theCommands, leftE, theIndices);
@@ -3277,6 +3287,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->NumErrors=0;
   this->DepthRecursionReached=0;
   this->flagLogSyntaxRules=false;
+  this->flagLogEvaluation=false;
   this->flagNewContextNeeded=true;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
@@ -3374,6 +3385,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("&");
   this->controlSequences.AddOnTop("%");
   this->controlSequences.AddOnTop("LogParsing");
+  this->controlSequences.AddOnTop("LogEvaluation");
 //  this->controlSequences.AddOnTop("c...c");
 //    this->thePropertyNames.AddOnTop("IsCommutative");
   this->TotalNumPatternMatchedPerformed=0;
@@ -4201,11 +4213,8 @@ bool CommandList::EvaluateExpression
       bufferPairs.reset();
 //      std::cout << "<br>Checking whether "
 //      << output.ToString() << " matches " << currentPattern.ToString();
-      //bool doLog=this->RuleStack.size==3;
       if(this->ProcessOneExpressionOnePatternOneSub
-         (currentPattern, output, bufferPairs, &this->Comments
-          //,doLog
-          ))
+         (currentPattern, output, bufferPairs, &this->Comments, this->flagLogEvaluation))
       { ReductionOcurred=true;
         break;
       }

@@ -6,8 +6,29 @@
 #include "vpfMacros.h"
 static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header. Math and general routines. ");
 
-const int SomeRandomPrimesSize= 25;
+//IMPORTANT.
+//Convention on Hash functions.
+//1. C++ objects that represent mathematically equal objects
+//   are allowed to have different bit representations in RAM memory.
+//2. Mathematically equal objects must have their object::HashFunction return identical
+//   values for mathematically identical objects, even if they are bitwise different.
+//3. Mathematical object representing 0 in an abelian group
+//   must have that their hash function return 0.
+//
+//In particular, zero rational numbers, zero polynomials/monomial collections/elements
+//of semisimple Lie algebras, etc. must have their hash functions return 0.
+//Motivation: for speed purposes, it is not desirable to fix unique
+//bitwise representations in RAM memory for mathematically equal objects.
+//For example, this means that monomials in a polynomial do not
+//need to be ordered in a specific order. Yet polynomials can be quickly compared by
+//computing their hash functions. Here, as an example we may give two 1-million monomial polynomials
+//(computed, say, by adding two 0.5 million monomial polynomials in two different orders). The
+//polynomials' monomials are ordered differently, yet the polynomials can quickly be compared.
+//Note that sorting N monomials of an arbitrary polynomial is at best O(N log(N) ) operations, while
+//computing the hash functions is only O(N) operations.
+
 //used for hashing various things.
+const int SomeRandomPrimesSize= 25;
 const int SomeRandomPrimes[SomeRandomPrimesSize]=
 { 607,  1013, 2207, 3001, 4057, 5419, 5849, 6221,  7057, 7411,
   7417, 7681, 7883, 8011, 8209, 8369, 8447, 9539, 10267, 10657,
@@ -2927,9 +2948,15 @@ ParallelComputing::GlobalPointerCounter++;
     *this-=tempRat;
   }
   void MultiplyBy(const Rational& r);
+  //IMPORTANT NOTE ON HASHFUNCTIONS
+  //The Hash function of zero MUST be equal to zero.
+  //See Note on Hashes before the definition of SomeRandomPrimes;
   unsigned int HashFunction() const
   { if (this->Extended==0)
+    { if (this->NumShort==0)
+        return 0;
       return this->NumShort*SomeRandomPrimes[0]+this->DenShort*::SomeRandomPrimes[1];
+    }
     return this->Extended->num.HashFunction()*SomeRandomPrimes[0]+this->Extended->den.HashFunction()*SomeRandomPrimes[1];
   }
   static inline unsigned int HashFunction(const Rational& input)
@@ -5669,37 +5696,7 @@ public:
     tempOther=other;
     *this+=tempOther;
   }
-  void operator+=(const RationalFunctionOld& other)
-  { if (this==&other)
-    { *this*=(Rational)2;
-      return;
-    }
-    assert(this->checkConsistency());
-    assert(other.checkConsistency());
-    if (this->context==0)
-      this->context=other.context;
-    if (other.expressionType< this->expressionType)
-    { RationalFunctionOld tempRF;
-      tempRF=other;
-      tempRF.ConvertToType(this->expressionType);
-      this->AddSameTypes(tempRF);
-      assert(this->checkConsistency());
-      return;
-    }
-    if (this->expressionType==other.expressionType)
-    { //std::string tempS;
-      //tempS=other.ToString();
-      this->AddSameTypes(other);
-      assert(this->checkConsistency());
-      return;
-    }
-    if (this->expressionType<other.expressionType)
-    { this->ConvertToType(other.expressionType);
-      this->AddSameTypes(other);
-      assert(this->checkConsistency());
-    }
-    assert(this->checkConsistency());
-  }
+  void operator+=(const RationalFunctionOld& other);
   inline bool operator==(int other)const
   { if (other==0)
       return this->IsEqualToZero();
@@ -6280,7 +6277,8 @@ template <class Element>
 void Polynomial<Element>::DivideBy
 (const Polynomial<Element>& inputDivisor, Polynomial<Element>& outputQuotient, Polynomial<Element>& outputRemainder)const
 { MacroRegisterFunctionWithName("Polynomial_Element::DivideBy");
-  if (&outputRemainder==this || &outputQuotient==&outputRemainder)
+  if (&outputRemainder==this || &outputQuotient==this ||
+      &outputRemainder==&inputDivisor || &outputQuotient==&inputDivisor )
   { Polynomial<Element> newQuot, newRemaind;
     this->DivideBy(inputDivisor, newQuot, newRemaind);
     outputQuotient=newQuot;
@@ -6318,6 +6316,7 @@ void Polynomial<Element>::DivideBy
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
+  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest
@@ -6332,15 +6331,21 @@ void Polynomial<Element>::DivideBy
     outputQuotient.AddMonomial(tempMon, tempCoeff);
     tempP=(tempInput);
     tempP.MultiplyBy(tempMon, tempCoeff);
+    std::cout << "<br>hash function tempMon: " <<  tempMon.HashFunction();
+    std::cout << "<br>HashFunctions of outputRemainder monomials: ";
+    for (int i=0; i<outputRemainder.size; i++)
+      std::cout << outputRemainder[i].HashFunction() << ", ";
+    std::cout << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();
     outputRemainder-=(tempP);
+    std::cout << " to get " << outputRemainder.ToString();
     remainderMaxMonomial= outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
     if (remainderMaxMonomial==-1)
       break;
   }
   scaleInput.Invert();
-  outputQuotient.MultiplyBy(scaleInput,1);
-  outputQuotient.MultiplyBy(scaleRemainder,1);
-  outputRemainder.MultiplyBy(scaleRemainder,1);
+  outputQuotient.MultiplyBy(scaleInput, 1);
+  outputQuotient.MultiplyBy(scaleRemainder, 1);
+  outputRemainder.MultiplyBy(scaleRemainder, 1);
 //  std::cout << "<br> " << this->ToString() << " divided by " << inputDivisor.ToString() << " yields " << outputQuotient.ToString()
 //  << " with remainder " << outputRemainder.ToString();
 

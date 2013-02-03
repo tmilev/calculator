@@ -39,13 +39,13 @@ void CommandList::initPredefinedInnerFunctions()
 ("PolyDivQuotient", &this->fPolynomialDivisionQuotient, "",
    "Quotient of two polynomials under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\nb:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
+   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", true)
    ;
   this->AddOperationInnerHandler
 ("PolyDivRemainder", &this->fPolynomialDivisionRemainder, "",
    "Remainder of polynomial division under division with remainder. ",
    "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\n b:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", false)
+   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", true)
    ;
   this->AddOperationInnerHandler
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
@@ -139,10 +139,16 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nUE{}(g_1g_2-g_2g_1+g_3^2)");
   this->AddOperationInnerHandler
-  ("FunctionToMatrix", this->fMatrix,"",
+  ("FunctionToMatrix", this->innerFunctionToMatrix,"",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
    the third- the number of columns.\
-   ", "X:=FunctionToMatrix{}(A,5,6);\n A{}({{a}},{{b}}):=a+b;\n X;");
+   ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=a/b;\n X; \\det {} X");
+  this->AddOperationInnerHandler
+  ("\\det", this->innerDeterminant, "",
+   "Tries to convert to a matrix of ratinonals or matrix of rational functions and computes the determinant if\
+   not too large. \
+   ", "X:=FunctionToMatrix{}(A,5,5);\n A_({{a}},{{b}}):=1/(a+b);\n X; \\det {} X");
+
 /*  this->AddOperationInnerHandler
   ("Union", this->innerUnion, "",
    "Makes a union of the elements of its arguments. Same action as \\cup but different syntax; useful for matrices. ",

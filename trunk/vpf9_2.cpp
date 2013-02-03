@@ -3182,6 +3182,7 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   if (this->context!=0)
   { std::stringstream out;
     out << "Multiplying " << this->ToString() << " by " << other.ToString();
+    std::cout << out.str();
     theReport.Report(out.str());
   }
   RationalFunctionOld::gcd(other.Denominator.GetElementConst(), this->Numerator.GetElement(), theGCD1, this->context);
@@ -3208,6 +3209,38 @@ void RationalFunctionOld::operator*=(const RationalFunctionOld& other)
   }
 }
 
+void RationalFunctionOld::operator+=(const RationalFunctionOld& other)
+{ if (this==&other)
+  { *this*=(Rational)2;
+    return;
+  }
+  assert(this->checkConsistency());
+  assert(other.checkConsistency());
+  if (this->context==0)
+    this->context=other.context;
+  if (other.expressionType< this->expressionType)
+  { RationalFunctionOld tempRF;
+    tempRF=other;
+    tempRF.ConvertToType(this->expressionType);
+    this->AddSameTypes(tempRF);
+    assert(this->checkConsistency());
+    return;
+  }
+  if (this->expressionType==other.expressionType)
+  { //std::string tempS;
+    //tempS=other.ToString();
+    this->AddSameTypes(other);
+    assert(this->checkConsistency());
+    return;
+  }
+  if (this->expressionType<other.expressionType)
+  { this->ConvertToType(other.expressionType);
+    this->AddSameTypes(other);
+    assert(this->checkConsistency());
+  }
+  assert(this->checkConsistency());
+}
+
 void RationalFunctionOld::Simplify()
 { MacroRegisterFunctionWithName("RationalFunctionOld::Simplify");
   if (this->expressionType==this->typeRationalFunction)
@@ -3227,6 +3260,9 @@ void RationalFunctionOld::Simplify()
 //      std::cout << "<br>dividing " << this->Numerator.GetElement().ToString() << " by " << theGCD.ToString() << "<br>";
       this->Numerator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Numerator.GetElement()=(tempP);
+      std::cout << "<br>the critical divide: " << this->Denominator.GetElement().ToString()
+      << " by " << theGCD.ToString() << ".";
+      //assert(false);
       this->Denominator.GetElement().DivideBy(theGCD, tempP, tempP2);
       this->Denominator.GetElement()=(tempP);
     }
@@ -4196,7 +4232,8 @@ void RationalFunctionOld::AddHonestRF(const RationalFunctionOld& other)
     this->Simplify();
 //    this->ComputeDebugString();
   } else
-  { this->Numerator.GetElement()*=(tempRat);
+  { std::cout << "Adding " << this->ToString() << " + " << other.ToString();
+    this->Numerator.GetElement()*=(tempRat);
     this->Denominator.GetElement()*=(tempRat);
     this->Numerator.GetElement()+=(other.Numerator.GetElementConst());
     this->ReduceMemory();

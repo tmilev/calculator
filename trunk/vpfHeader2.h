@@ -255,13 +255,7 @@ class Expression
   { this->reset(newBoss);
     this->theData=input;
   }
-  void MakeFunction
-  (CommandList& owner, const Expression& argument, const std::string& functionName)
-;
   bool EvaluatesToVariableNonBound()const;
-  void MakeFunction
-  (CommandList& owner, const Expression& argument, int functionIndex)
-;
   Expression::FunctionAddress GetHandlerFunctionIamNonBoundVar();
   void MakeProducT
   (CommandList& owner, const Expression& left, const Expression& right)
@@ -589,6 +583,7 @@ public:
   bool flagNewContextNeeded;
 
   bool flagLogSyntaxRules;
+  bool flagLogEvaluation;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;
@@ -1115,7 +1110,7 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   template<class theType>
-  bool fGetMatrix
+  bool GetMatrix
   (const Expression& theExpression, Matrix<theType>& outputMat,
    Expression* inputOutputStartingContext=0,
    int targetNumColsNonMandatory=-1, Expression::FunctionAddress conversionFunction=0)
@@ -1132,10 +1127,10 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
 
-  static bool fMatrix
+  static bool innerFunctionToMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fDet
+  static bool innerDeterminant
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool fInvertMatrix
@@ -1639,7 +1634,7 @@ bool CommandList::GetVector
 }
 
 template <class theType>
-bool CommandList::fGetMatrix
+bool CommandList::GetMatrix
 (const Expression& theExpression, Matrix<theType>& outputMat,
  Expression* inputOutputStartingContext,
  int targetNumColsNonMandatory, Expression::FunctionAddress conversionFunction)

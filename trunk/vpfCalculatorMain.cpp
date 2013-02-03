@@ -502,6 +502,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   //civilizedInput="(a*b)*c";
 //  civilizedInput="v:=hwv{}(G_2, (1,0),(0,0));\n(3/4 v)\\otimes v-3/4 (v\\otimes v)";
 //  civilizedInput="1/Polynomial{}(x);";
+//  civilizedInput="X:=FunctionToMatrix{}(A,2,2);A_({{a}},{{b}}):=x^a+y^b;X;\\det{}X";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

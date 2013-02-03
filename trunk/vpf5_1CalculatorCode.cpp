@@ -286,3 +286,41 @@ bool CommandList::fGroebner
   ;*/
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CommandList::innerDeterminant
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Matrix<Rational> matRat;
+  Matrix<RationalFunctionOld> matRF;
+  Expression theContext;
+  if (theCommands.GetMatrix(input, matRat, 0, 0, 0))
+  { if (matRat.NumRows==matRat.NumCols)
+    { if (matRat.NumRows>100)
+      { theCommands.Comments << "I have been instructed not to compute determinants of rational matrices larger than "
+        << " 100 x 100 " << ", and your matrix had " << matRat.NumRows << " rows. " << "To lift the restriction "
+        << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
+        return false;
+      }
+      //std::cout << " <br> ... and the matRat is: " << matRat.ToString();
+      return output.AssignValue(matRat.GetDeterminant(), theCommands);
+    } else
+      return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
+  }
+  if (!theCommands.GetMatrix(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
+  { theCommands.Comments << "I have been instructed to only compute determinants of matrices whose entries are "
+    << " ratinoal functions or rationals, and I failed to convert your matrix to either type. "
+    << " If this is not how you expect this function to act, correct it: the code is located in  "
+    << " file " << __FILE__ << ", line " << __LINE__ << ". ";
+    return false;
+  }
+  if (matRF.NumRows==matRF.NumCols)
+  { if (matRF.NumRows>10)
+    { theCommands.Comments << "I have been instructed not to compute determinants of matrices of rational functions "
+      << " larger than " << " 10 x 10, and your matrix had " << matRF.NumRows << " rows. "
+      << "To lift the restriction "
+      << "edit function located in file " << __FILE__ << ", line " << __LINE__ << ". ";
+      return false;
+    }
+    return output.AssignValue(matRF.GetDeterminant(), theCommands);
+  } else
+    return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
+}

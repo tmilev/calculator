@@ -549,8 +549,20 @@ void CommandList::initPredefinedStandardOperations()
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
-   "Multiplies two rational numbers. ",
+   "Multiplies two rationals. ",
    "2*3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
+   "Multiplies polynomial by a rational (polynomial comes first). ",
+   "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opRational(), this->opPoly(),
+   "Multiplies two rational by a polynomial (rational comes first). ",
+   "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
+   "Multiplies two polynomials. ",
+   "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationOuterHandler
   ("*", this->outerDistributeTimes, "",
    "Distributive law (left and right).",
@@ -563,24 +575,6 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->outerExtractBaseMultiplication, "",
    "Pulls rationals in the front of multiplicative terms.",
    "2*((3*c)*(4*d)); 3*((a*(d-d))b*c)", true);
-
-  this->AddOperationOuterHandler
-  ("/", this->outerDivide, "",
-    "If b is rational substitutes (anything)/b with anything* (1/b).",
-    "6/15+(a+b)/5; 6/4+3/0", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
-   "Divides two rational numbers. ",
-   "4/6; 2/0;", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
-   "Divides rational by polynomial (to get a rational function).",
-   "z:=Polynomial{}(x^2+y^2);\n1/z", true);
-  this->AddOperationBinaryInnerHandlerWithTypes
-  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
-   "Divides polynomial by polynomial (to get a rational function). ",
-   "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
-   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyAnyByEltTensor, this->opRational(), this->opElementTensorGVM(),
    "Handles multiplying rational number by an element of tensor product of generalized Verma modules. \
@@ -615,6 +609,23 @@ void CommandList::initPredefinedStandardOperations()
    \nz:=Polynomial{}y;\nv:=hwv{}(G_2, (z,1),(1,0));\
    \n h_1 v; \nh_2 v;\n g_1 g_{-1} v ", true);
 
+  this->AddOperationOuterHandler
+  ("/", this->outerDivide, "",
+    "If b is rational substitutes (anything)/b with anything* (1/b).",
+    "6/15+(a+b)/5; 6/4+3/0", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRatByRat, this->opRational(), this->opRational(),
+   "Divides two rational numbers. ",
+   "4/6; 2/0;", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opRational(), this->opPoly(),
+   "Divides rational by polynomial (to get a rational function).",
+   "z:=Polynomial{}(x^2+y^2);\n1/z", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("/", this->innerDivideRFOrPolyOrRatByRFOrPoly, this->opPoly(), this->opPoly(),
+   "Divides polynomial by polynomial (to get a rational function). ",
+   "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
+   \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", this->innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Tensor product of two generalized Verma modules. \

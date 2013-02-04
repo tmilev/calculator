@@ -6316,7 +6316,7 @@ void Polynomial<Element>::DivideBy
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
+//  std::cout << "<hr>Dividing " << this->ToString() << " by " << inputDivisor.ToString();
 //  std::cout << " comparing " << outputRemainder[remainderMaxMonomial].ToString()
 //  << " and " << tempInput[inputMaxMonomial].ToString();
   while (outputRemainder[remainderMaxMonomial].IsGEQLexicographicLastVariableStrongest
@@ -6331,13 +6331,13 @@ void Polynomial<Element>::DivideBy
     outputQuotient.AddMonomial(tempMon, tempCoeff);
     tempP=(tempInput);
     tempP.MultiplyBy(tempMon, tempCoeff);
-    std::cout << "<br>hash function tempMon: " <<  tempMon.HashFunction();
+/*    std::cout << "<br>hash function tempMon: " <<  tempMon.HashFunction();
     std::cout << "<br>HashFunctions of outputRemainder monomials: ";
     for (int i=0; i<outputRemainder.size; i++)
       std::cout << outputRemainder[i].HashFunction() << ", ";
-    std::cout << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();
+    std::cout << "<br>subbing " << tempP.ToString() << " from remainder " << outputRemainder.ToString();*/
     outputRemainder-=(tempP);
-    std::cout << " to get " << outputRemainder.ToString();
+//    std::cout << " to get " << outputRemainder.ToString();
     remainderMaxMonomial= outputRemainder.GetIndexMaxMonomialLexicographicLastVariableStrongest();
     if (remainderMaxMonomial==-1)
       break;

@@ -2929,7 +2929,7 @@ bool CommandList::innerPrintSSLieAlgebra
     }
     out << "\\end{longtable}" << "<hr>";
   }
-  out << "We define the symmetric Cartan matrix by requesing that the entry in "
+  out << "We define the symmetric Cartan matrix by requesting that the entry in "
   << "the i-th row and j-th column "
   << " be the scalar product of the i^th and j^th roots. "
   << "Symmetric Cartan matrix:<br>"
@@ -5037,7 +5037,9 @@ std::string Function::GetString(CommandList& theBoss)
   if (this->flagIamVisible)
   { std::stringstream out;
     out << this->theDescription;
-    out << "Address: " << std::hex << (int) this->theFunction << ". ";
+    // use of unsigned long is correct on i386 and amd64
+    // uintptr_t is only available in c++0x
+    out << "Address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - takes as argument the name of the operation as well. ";
     if (this->theExample!="")

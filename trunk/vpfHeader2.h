@@ -45,15 +45,7 @@ class Expression
   //2.4. A non-bound variable is a list with two atomic entries. The first entry equals NonBound.
   //     The second entry equals an integer that uniquely identifies the variable.
   //     In the current implementation, the integer is the index in the object container.
-  //2.5. A string is a list with two entries
-  //     whose first entry is an atom equal to String and whose second entry
-  //     is an integer that uniquely identifies the string.
-  //     In the current implementation, the integer is the index in the object container.
-  //2.6. A rational number is a list with two entries
-  //     whose first entry is an atom equal to Rational and
-  //     whose second entry is an integer that uniquely identifies the rational number.
-  //     In the current implementation, the integer is the index in the object container.
-  //2.7. An error is a list with two entries whose first entry is an atom equal to Error,
+  //2.5. An error is a list with two entries whose first entry is an atom equal to Error,
   //     and whose second entry is a string.
   //*Note that CommandList::opList() is required to equal zero for reasons of program speed.
   //This is GUARANTEED, and you MAY assume it.

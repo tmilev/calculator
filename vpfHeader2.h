@@ -1264,21 +1264,21 @@ bool fGetTypeHighestWeightParabolic
   static bool fEmbedSSalgInSSalg
 (CommandList& theCommands, const Expression& input, Expression& output)
  ;
-  static bool fWeylOrbit
+  static bool innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
  ;
   static bool fWeylOrbitFund
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.fWeylOrbit(theCommands, input, output, true, false);
+{ return theCommands.innerWeylOrbit(theCommands, input, output, true, false);
 }
   static bool fWeylOrbitSimple
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.fWeylOrbit(theCommands, input, output, false, false);
+{ return theCommands.innerWeylOrbit(theCommands, input, output, false, false);
 }
   static bool fWeylOrbitFundRho
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ return theCommands.fWeylOrbit(theCommands, input, output, true, true);
+{ return theCommands.innerWeylOrbit(theCommands, input, output, true, true);
 }
 //  static bool innerSSLieAlgebra
 //  (CommandList& theCommands, const Expression& input, Expression& output)

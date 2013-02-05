@@ -165,9 +165,10 @@ bool CommandList::fWeylDimFormula
 
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
+  std::cout << "<br>input[2] is: " << input[2].ToString();
   if (!theCommands.GetVector<RationalFunctionOld>
       (input[2], theWeight, &newContext, theSSowner->GetRank(),
-       theCommands.innerPolynomial))
+       theCommands.innerRationalFunction))
     return output.SetError
     ("Failed to convert the argument of the function to a highest weight vector", theCommands);
   RationalFunctionOld rfOne;

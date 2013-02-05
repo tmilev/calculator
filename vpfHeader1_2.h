@@ -6,6 +6,8 @@
 #include "vpfHeader1.h"
 #include "vpfHeader3ListReferences.h"
 
+
+
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 class Lattice
@@ -3565,14 +3567,16 @@ class MonomialGeneralizedVerma
   void Substitution
   (const PolynomialSubstitution<Rational>& theSub, ListReferences<ModuleSSalgebra<CoefficientType> >& theMods);
   unsigned int HashFunction()const
-  { return this->indexFDVector*SomeRandomPrimes[0]+ ((unsigned)(this->owneR))*SomeRandomPrimes[1];
+  { return this->indexFDVector*SomeRandomPrimes[0]+ (*((unsigned *)&(this->owneR)))*SomeRandomPrimes[1];
   }
   static inline unsigned int HashFunction(const MonomialGeneralizedVerma<CoefficientType>& input)
   { return input.HashFunction();
   }
   bool operator>(const MonomialGeneralizedVerma<CoefficientType>& other)
   { if (this->owneR!=other.owneR)
-      return (unsigned int)this->owneR>(unsigned int)other.owneR;
+  // use of ulong is correct on i386, amd64, and a number of other popular platforms
+  // uintptr_t is only available in c++0x
+      return (unsigned long)this->owneR>(unsigned long)other.owneR;
     if (this->indexFDVector!=other.indexFDVector)
       return this->indexFDVector>other.indexFDVector;
     return this->theMonCoeffOne>other.theMonCoeffOne;

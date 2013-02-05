@@ -388,7 +388,7 @@ class Function
   { return input.HashFunction();
   }
   unsigned int HashFunction()const
-  { return (unsigned int) this->theFunction;
+  { return *( (unsigned int *) &(this->theFunction));
   }
 };
 

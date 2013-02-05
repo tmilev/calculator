@@ -2781,11 +2781,11 @@ bool CommandList::fKLcoeffs
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fWeylOrbit
+bool CommandList::innerWeylOrbit
 (CommandList& theCommands, const Expression& input, Expression& output,
  bool useFundCoords, bool useRho)
-{ if (input.IsListNElements(3))
-    return output.SetError("fWeylOrbit takes two arguments", theCommands);
+{ if (!input.IsSequenceNElementS(2))
+    return output.SetError("innerWeylOrbit takes two arguments", theCommands);
   Expression& theSSalgebraNode=input[1];
   Expression& vectorNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;

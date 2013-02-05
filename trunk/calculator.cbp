@@ -28,12 +28,6 @@
 			<Add library="libpthread" />
 		</Linker>
 		<Unit filename="vpf.h" />
-		<Unit filename="vpf4CalculatorFunctionList.cpp" />
-		<Unit filename="vpf5.cpp" />
-		<Unit filename="vpf5_1CalculatorCode.cpp" />
-		<Unit filename="vpf6.cpp" />
-		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
-		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />
 		<Unit filename="vpf9_1.cpp" />

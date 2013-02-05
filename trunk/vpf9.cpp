@@ -4007,7 +4007,7 @@ void DynkinSimpleType::GetEpsilonMatrix(char WeylLetter, int WeylRank, Matrix<Ra
   }
 }
 
-void DynkinSimpleType::MakeAn(int n, Matrix<Rational>& output)const
+void DynkinSimpleType::GetAn(int n, Matrix<Rational>& output)const
 { if (n<=0 || n>30000)
   { std::cout << "This is a programming error: attempting to create type An"
     << " with n=" << n << " is illegal. If this was a bad user input, it should "
@@ -4025,13 +4025,13 @@ void DynkinSimpleType::MakeAn(int n, Matrix<Rational>& output)const
   output(n-1,n-1)=2;
 }
 
-void DynkinSimpleType::MakeBn(int n, Matrix<Rational>& output)const
-{ this->MakeAn(n, output);
+void DynkinSimpleType::GetBn(int n, Matrix<Rational>& output)const
+{ this->GetAn(n, output);
   output(n-1,n-1)=1;
 }
 
-void DynkinSimpleType::MakeCn(int n, Matrix<Rational>& output)const
-{ this->MakeAn(n, output);
+void DynkinSimpleType::GetCn(int n, Matrix<Rational>& output)const
+{ this->GetAn(n, output);
   if(n<2)
     return;
   output(n-1,n-1)= 4;
@@ -4039,8 +4039,8 @@ void DynkinSimpleType::MakeCn(int n, Matrix<Rational>& output)const
   output(n-1,n-2)=-2;
 }
 
-void DynkinSimpleType::MakeDn(int n, Matrix<Rational>& output)const
-{ this->MakeAn(n, output);
+void DynkinSimpleType::GetDn(int n, Matrix<Rational>& output)const
+{ this->GetAn(n, output);
   if (n<3)
     return;
   output(n-1,n-2)=0;
@@ -4049,8 +4049,8 @@ void DynkinSimpleType::MakeDn(int n, Matrix<Rational>& output)const
   output(n-1,n-3)=-1;
 }
 
-void DynkinSimpleType::MakeEn(int n, Matrix<Rational>& output)const
-{ this->MakeAn(n, output);
+void DynkinSimpleType::GetEn(int n, Matrix<Rational>& output)const
+{ this->GetAn(n, output);
   if (n<4)
     return;
   output(0,1)=0;
@@ -4063,7 +4063,7 @@ void DynkinSimpleType::MakeEn(int n, Matrix<Rational>& output)const
   output(3,1)=-1;
 }
 
-void DynkinSimpleType::MakeF4(Matrix<Rational>& output)const
+void DynkinSimpleType::GetF4(Matrix<Rational>& output)const
 { output.init(4, 4);
   output(0,0)=4 ;  output(0,1)=-2; output(0,2)=0 ; output(0,3)=0 ;
   output(1,0)=-2;  output(1,1)=4 ; output(1,2)=-2; output(1,3)=0 ;
@@ -4071,7 +4071,7 @@ void DynkinSimpleType::MakeF4(Matrix<Rational>& output)const
   output(3,0)=0 ;  output(3,1)=0 ; output(3,2)=-1; output(3,3)=2 ;
 }
 
-void DynkinSimpleType::MakeG2(Matrix<Rational>& output)const
+void DynkinSimpleType::GetG2(Matrix<Rational>& output)const
 { output.init(2, 2);
   output(0,0)=2;
   output(1,1)=6;
@@ -4081,13 +4081,13 @@ void DynkinSimpleType::MakeG2(Matrix<Rational>& output)const
 
 void DynkinSimpleType::GetCartanSymmetric(Matrix<Rational>& output)const
 { switch(this->theLetter)
-  { case 'A': this->MakeAn(this->theRank, output); break;
-    case 'B': this->MakeBn(this->theRank, output); break;
-    case 'C': this->MakeCn(this->theRank, output); break;
-    case 'D': this->MakeDn(this->theRank, output); break;
-    case 'E': this->MakeEn(this->theRank, output); break;
-    case 'F': this->MakeF4(output);                break;
-    case 'G': this->MakeG2(output);                break;
+  { case 'A': this->GetAn(this->theRank, output); break;
+    case 'B': this->GetBn(this->theRank, output); break;
+    case 'C': this->GetCn(this->theRank, output); break;
+    case 'D': this->GetDn(this->theRank, output); break;
+    case 'E': this->GetEn(this->theRank, output); break;
+    case 'F': this->GetF4(output);                break;
+    case 'G': this->GetG2(output);                break;
     default:
       std::cout
       << "This is a programming error: requesting DynkinSimpleType::GetCartanSymmetric "
@@ -4422,9 +4422,9 @@ void WeylGroup::GetEpsilonCoordsWRTsubalgebra
     return;
   }
   basisChange.Resize(0, 0, true);
-  for (int i=0; i<tempDyn.SimpleBasesConnectedComponents.size; i++)
+  for (int i=0; i<tempDyn.SimpleComponentTypes.size; i++)
   { DynkinSimpleType::GetEpsilonMatrix
-    (tempDyn.DynkinTypeStrings[i].at(0), tempDyn.SimpleBasesConnectedComponents[i].size, tempMat);
+    (tempDyn.SimpleComponentTypes[i].theLetter, tempDyn.SimpleComponentTypes[i].theRank, tempMat);
     basisChange.DirectSumWith(tempMat, (Rational) 0);
     //basisChange.ComputeDebugString();
   }
@@ -5529,13 +5529,13 @@ void rootSubalgebra::MakeProgressReportPossibleNilradicalComputation
   if (this->flagMakingProgressReport)
   { std::stringstream out1, out2, out3, out4, out5;
     if (this->flagFirstRoundCounting)
-    { out1 << "Counting ss part " << this->theDynkinDiagram.DynkinStrinG;
+    { out1 << "Counting ss part " << this->theDynkinDiagram.ToString();
       out2 << "# nilradicals for fixed ss part: " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasCounted++;
       out3 << owner.NumSubalgebrasCounted << " total subalgebras counted";
     }
     else
-    { out1 << "Computing ss part " << this->theDynkinDiagram.DynkinStrinG;
+    { out1 << "Computing ss part " << this->theDynkinDiagram.ToString();
       out2 << this->NumNilradicalsAllowed << " Nilradicals processed out of " << this->NumTotalSubalgebras;
       owner.NumSubalgebrasProcessed++;
       out3 << "Total # subalgebras processed: " << owner.NumSubalgebrasProcessed;
@@ -5558,8 +5558,8 @@ void rootSubalgebra::GenerateKmodMultTable
   int numTotal= this->kModules.size* this->kModules.size;
   std::stringstream out;
   out << "Computing pairing table for the module decomposition of the root subalgebra of type "
-  << this->theDynkinDiagram.ElementToStrinG(true)
-  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ElementToStrinG(true);
+  << this->theDynkinDiagram.ToString()
+  << "\n<br>\nwith centralizer " << this->theCentralizerDiagram.ToString();
   ProgressReport theReport(theGlobalVariables);
   theReport.Report(out.str());
   ProgressReport theReport2(theGlobalVariables);

@@ -557,7 +557,8 @@ bool WeylGroup::IsRegular(Vector<Rational>& input, int* indexFirstPerpendicularR
 Rational DynkinDiagramRootSubalgebra::GetSizeCorrespondingWeylGroupByFormula()
 { Rational output=1;
   for (int i=0; i<this->SimpleBasesConnectedComponents.size; i++)
-    output*=WeylGroup::GetSizeWeylByFormula(this->DynkinTypeStrings.TheObjects[i].at(0), this->SimpleBasesConnectedComponents.TheObjects[i].size);
+    output*=WeylGroup::GetSizeWeylByFormula
+    (this->SimpleComponentTypes[i].theLetter, this->SimpleComponentTypes[i].theRank);
   return output;
 }
 
@@ -608,13 +609,13 @@ void rootSubalgebras::ElementToStringCentralizerIsomorphisms(std::string& output
     Rational numInnerIsos = current.theCentralizerDiagram.GetSizeCorrespondingWeylGroupByFormula();
     if (useHtml)
       out << "<td>";
-    current.theDynkinDiagram.ElementToStrinG(tempS, true);
+    tempS=current.theDynkinDiagram.ToString();
     out << tempS;
     if (useHtml)
       out << "</td><td>";
     if (useLatex)
       out << " & ";
-    current.theCentralizerDiagram.ElementToStrinG(tempS, true);
+    tempS=current.theCentralizerDiagram.ToString();
     out << tempS;
     if (useHtml)
       out << "</td><td>";
@@ -1069,7 +1070,7 @@ void rootSubalgebras::ElementToStringConeConditionNotSatisfying(std::string& out
       else
         out << "\\hline\\begin{tabular}{r}";
       out << "$\\Delta(\\mathfrak{k})$ is of type "
-      << currentRootSA.theDynkinDiagram.DynkinStrinG << "; ";
+      << currentRootSA.theDynkinDiagram.ToString() << "; ";
       if (!includeMatrixForm)
         out << "\\\\";
       currentRootSA.GetAmbientWeyl().GetEpsilonCoords(currentRootSA.PositiveRootsK, tempRoots2);

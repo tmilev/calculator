@@ -1383,17 +1383,17 @@ static bool TypeHighestWeightParabolic
   static bool fCasimir
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fRootSAsAndSltwos
+  static bool innerRootSAsAndSltwos
   (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
 ;
   static bool fprintRootSAs
   (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fRootSAsAndSltwos
+  { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, false);
   }
   static bool fprintSltwos
   (CommandList& theCommands, const Expression& input, Expression& output)
-  { return theCommands.fRootSAsAndSltwos
+  { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
   static bool fSSsubalgebras

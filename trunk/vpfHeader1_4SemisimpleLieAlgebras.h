@@ -146,7 +146,7 @@ public:
   }
   void CheckForCorrectInitializationCrashIfNot()
   { if (this->owner==0)
-    { std::cout << "This is a programming error. "
+    { std::cout << "<br>This is a programming error. "
       << " Object SltwoSubalgebras is not initialized, although it is supposed to be. "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
@@ -166,7 +166,7 @@ public:
   void init(SemisimpleLieAlgebra& inputOwners);
   SltwoSubalgebras(): owner(0){}
   SltwoSubalgebras(SemisimpleLieAlgebra& inputOwner)
-  : owner(0)
+  : owner(&inputOwner)
   {}
   void ComputeModuleDecompositionsOfMinimalContainingRegularSAs(GlobalVariables& theGlobalVariables)
   { std::cout << "This is a programming error. This function used to work in an older"

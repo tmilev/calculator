@@ -785,14 +785,29 @@ class DynkinSimpleType
   int GetSSAlgDim()const
   { return this->GetRootSystemSize()+this->theRank;
   }
+  void MakeArbitrary(char inputLetter, int inputRank, Rational inputLengthFirstCorRootSquared=0)
+  { if ((inputLetter!= 'A' && inputLetter!='B' &&
+         inputLetter!= 'C' && inputLetter!='D' &&
+         inputLetter!= 'E' && inputLetter!='F' &&
+         inputLetter!= 'G') || inputRank<=0 )
+    { std::cout << "This is a programming error. Requested to create a simple Dynkin type "
+      << "of type " << inputLetter << " and rank " << inputRank << ". This is not allowed: "
+      << " I only accept types A, B, C, D, E, F and G and non-negative ranks. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->theRank=inputRank;
+    this->theLetter=inputLetter;
+    this->lengthFirstCoRootSquared=inputLengthFirstCorRootSquared;
+  }
   void GetCartanSymmetric(Matrix<Rational>& output)const;
-  void MakeAn(int n, Matrix<Rational>& output)const;
-  void MakeBn(int n, Matrix<Rational>& output)const;
-  void MakeCn(int n, Matrix<Rational>& output)const;
-  void MakeDn(int n, Matrix<Rational>& output)const;
-  void MakeEn(int n, Matrix<Rational>& output)const;
-  void MakeF4(Matrix<Rational>& output)const;
-  void MakeG2(Matrix<Rational>& output)const;
+  void GetAn(int n, Matrix<Rational>& output)const;
+  void GetBn(int n, Matrix<Rational>& output)const;
+  void GetCn(int n, Matrix<Rational>& output)const;
+  void GetDn(int n, Matrix<Rational>& output)const;
+  void GetEn(int n, Matrix<Rational>& output)const;
+  void GetF4(Matrix<Rational>& output)const;
+  void GetG2(Matrix<Rational>& output)const;
 
   void operator=(const DynkinSimpleType& other)
   { this->theLetter=other.theLetter;
@@ -1330,33 +1345,18 @@ public:
 class DynkinDiagramRootSubalgebra
 {
 public:
-  std::string DynkinStrinG;
-  void ElementToStrinG
-  (std::string& output, bool IncludeAlgebraNames)
-  ;
-  std::string ElementToStrinG
-  (bool IncludeAlgebraNames=false)
-  { std::string result;
-    this->ElementToStrinG(result, IncludeAlgebraNames);
-    return result;
-  }
-  void ComputeDynkinStrinG()
-  { this->ElementToStrinG(this->DynkinStrinG, false);
-  }
-  std::string SetComponent
-  (const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
-  ;
+//  std::string DynkinStrinG;
   List<Vectors<Rational> > SimpleBasesConnectedComponents;
   //to each connected component of the simple bases corresponds
   //its dynkin string with the same index
-  List<std::string> DynkinTypeStrings;
-  List<int> ComponentRanks;
-  List<std::string> ComponentLetters;
+  List<DynkinSimpleType> SimpleComponentTypes;
   List<int> indicesThreeNodes;
   List<List<int> > indicesEnds;
   List<List<int> > sameTypeComponents;
   List<int> indexUniComponent;
   List<int> indexInUniComponent;
+  std::string ToString
+  (bool IncludeAlgebraNames=false)const;
   int RankTotal();
   int NumRootsGeneratedByDiagram();
   void Sort();

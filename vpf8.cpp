@@ -793,11 +793,7 @@ bool PiecewiseQuasipolynomial::MakeVPF
   FormatExpressions theFormat;
   std::stringstream out;
   std::string whatWentWrong;
-  if (!theFracs.ArgumentsAllowed(theRoots, whatWentWrong, theGlobalVariables))
-  { out << whatWentWrong;
-    outputstring= out.str();
-    return false;
-  }
+
   theFracs.initFromRoots(theRoots, theGlobalVariables);
   out << CGI::GetHtmlMathDivFromLatexFormulA(theFracs.ToString(theGlobalVariables, theFormat));
   theFracs.split(theGlobalVariables, 0);
@@ -1295,7 +1291,7 @@ void GeneralizedVermaModuleCharacters::SortMultiplicities(GlobalVariables& theGl
 void DynkinDiagramRootSubalgebra::ComputeDynkinString
 (int indexComponent, WeylGroup& theWeyl)
 { assert(indexComponent<this->SimpleBasesConnectedComponents.size);
-  std::stringstream out;
+  DynkinSimpleType& outputType=this->SimpleComponentTypes[indexComponent];
   Vectors<Rational>& currentComponent= this->SimpleBasesConnectedComponents[indexComponent];
   List<int>& currentEnds=this->indicesEnds[indexComponent];
   if (this->numberOfThreeValencyNodes(indexComponent, theWeyl)==1)
@@ -1337,15 +1333,15 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     currentComponent.AddOnTop(tripleNode);
     for (int i=0; i<3; i++)
       currentComponent.AddListOnTop(tempDiagram.SimpleBasesConnectedComponents[i]);
+    Rational theCoRootLength=4;
+    theCoRootLength/=theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0]);
     if ( indicesLongComponents.size==1 || indicesLongComponents.size==0)
-      out << this->SetComponent("D", currentComponent.size, indexComponent);
+      outputType.MakeArbitrary('D', currentComponent.size, theCoRootLength);
     else
-    {//type E
-      assert(indicesLongComponents.size==2);
-      out << this->SetComponent("E", currentComponent.size, indexComponent);
-    }
-  }else
+      outputType.MakeArbitrary('E', currentComponent.size, theCoRootLength);
+  } else
   { Rational length1, length2, tempRat;
+    Rational colength1, colength2;
     theWeyl.RootScalarCartanRoot(currentComponent[0], currentComponent[0], length1);
     int numLength1=1;
     int numLength2=0;
@@ -1358,10 +1354,10 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
       }
     if (numLength2==0 )
     { //type A
-      if (length1.IsEqualTo(theWeyl.GetLongestRootLengthSquared()))
-        out << this->SetComponent("A", numLength1, indexComponent);
-      else
-        out << this->SetComponent("A'", numLength1, indexComponent);
+//      if (length1.IsEqualTo(theWeyl.GetLongestRootLengthSquared()))
+        outputType.MakeArbitrary('A', numLength1, ((Rational) 4)/length1);
+//      else
+//        out << this->SetComponent("A'", numLength1, indexComponent);
     }
     else
     {//the longer root should have smaller index
@@ -1374,30 +1370,31 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
         numGreaterLength=numLength1;
         numSmallerLength=numLength2;
       }
+      colength1=(Rational) 4/length1;
+      colength2=(Rational) 4/length2;
       if (greaterlength>theWeyl.RootScalarCartanRoot
           (currentComponent[currentEnds[0]], currentComponent[currentEnds[0]]))
         currentEnds.SwapTwoIndices(0, 1);
       if (numLength1==numLength2)
       {//B2, C2, F4 or G2
         if (numLength1!=1)
-        { out << this->SetComponent("F", 4, indexComponent);
-          assert(numLength1==2);
-        } else
+          outputType.MakeArbitrary('F', 4, colength1);
+        else
         { Rational lengthRatio=length1/length2;
           if (lengthRatio<1)
             lengthRatio.Invert();
           if (lengthRatio==3)
-          { out << this->SetComponent("G", 2, indexComponent);
+          { outputType.MakeArbitrary('G', 2, colength2);
             currentEnds.SwapTwoIndices(0,1);//<- in G_2, the longer root comes second.
           }
           else
-            out << this->SetComponent("B", 2, indexComponent);
+            outputType.MakeArbitrary('B', 2, colength1);
         }
       } else
       { if (numGreaterLength>numSmallerLength)
-          out << this->SetComponent("B", currentComponent.size, indexComponent);
+          outputType.MakeArbitrary('B', currentComponent.size, colength1);
         else
-          out << this->SetComponent("C", currentComponent.size, indexComponent);
+          outputType.MakeArbitrary('C', currentComponent.size, colength2);
       }
     }
     currentComponent.SwapTwoIndices(0, currentEnds[0]);
@@ -1410,39 +1407,15 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
         }
       }
   }
-  this->DynkinTypeStrings[indexComponent]=out.str();
 }
 
-std::string DynkinDiagramRootSubalgebra::SetComponent(const std::string& WeylLetterWithLength, int WeylRank, int componentIndex)
-{ this->ComponentLetters[componentIndex]=WeylLetterWithLength;
-  this->ComponentRanks[componentIndex]=WeylRank;
-  std::stringstream tempStream;
-  tempStream << WeylLetterWithLength << "_" << WeylRank;
-  this->DynkinTypeStrings[componentIndex]=tempStream.str();
-  return tempStream.str();
-}
-
-void DynkinDiagramRootSubalgebra::ElementToStrinG
-  (std::string& output, bool IncludeAlgebraNames)
+std::string DynkinDiagramRootSubalgebra::ToString(bool IncludeAlgebraNames)const
 { std::stringstream out;
-  for (int j=0; j<this->sameTypeComponents.size; j++)
-  { int numSameTypeComponents= this->sameTypeComponents[j].size;
-    if (numSameTypeComponents!=1)
-      out << numSameTypeComponents;
-    out
-    << this->ComponentLetters[this->sameTypeComponents[j][0]]
-    << "_" << this->ComponentRanks[this->sameTypeComponents[j][0]];
-    if (IncludeAlgebraNames)
-    { DynkinSimpleType tempType;
-      tempType.theLetter=this->ComponentLetters[this->sameTypeComponents[j][0]][0];
-      tempType.theRank=this->ComponentRanks[this->sameTypeComponents[j][0]];
-      tempType.lengthFirstCoRootSquared=0;
-      out << tempType.ToString();
-    }
-    if (j!=this->sameTypeComponents.size-1)
-      out << "+";
-  }
-  output=out.str();
+  DynkinType theType;
+  theType.MakeZero();
+  for (int j=0; j<this->SimpleComponentTypes.size; j++)
+    theType.AddMonomial(this->SimpleComponentTypes[j], 1);
+  return theType.ToString();
 }
 
 void WeylGroup::GetWeylChamber
@@ -3732,8 +3705,6 @@ void ParserNode::CreateDefaultLatexAndPDFfromString
 std::string partFractions::DoTheFullComputationReturnLatexFileString
 (GlobalVariables& theGlobalVariables, Vectors<Rational>& toBePartitioned, FormatExpressions& theFormat, std::string* outputHtml)
 { std::string whatWentWrong;
-  if (!this->ArgumentsAllowed(toBePartitioned, whatWentWrong, theGlobalVariables))
-    return whatWentWrong;
   assert(false);
 //  this->theChambersOld.theDirections=toBePartitioned;
   this->AmbientDimension=toBePartitioned.GetDim();
@@ -7205,43 +7176,6 @@ int ParserNode::EvaluateAnimationPause
   return theNode.errorNoError;
 }
 
-int ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ DrawingVariables theDrawVars;
-  DrawOperations& theDrawOps=theDrawVars.theBuffer;
-  rootSubalgebras theRootSAs;
-  char theWeylLetter=theNode.owner->DefaultWeylLetter;
-  int theDim=theNode.owner->DefaultWeylRank;
-  theRootSAs.GenerateAllReductiveRootSubalgebrasUpToIsomorphism
-  (theGlobalVariables, theWeylLetter, theDim, true, false)
-  ;
-  int theIndex=theNode.owner->TheObjects[theArgumentList[0]].intValue;
-  if (theIndex<0 || theIndex>=theRootSAs.size)
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-
-  theRootSAs.GetOwnerWeyl().DrawRootSystem(theDrawVars, true, theGlobalVariables, true);
-  Vector<double> start1, start2;
-  rootSubalgebra& currentSA=theRootSAs[theIndex];
-  std::stringstream out;
-  out << "The Dynkin diagram of the Vector<Rational> Subalgebra is " << currentSA.theDynkinDiagram.DynkinStrinG << ". ";
-  if (currentSA.SimpleBasisK.size<2)
-  { out << "<br>The subalgebra is of rank less than two, using default Coxeter plane instead.";
-  } else
-  { currentSA.GetCoxeterPlane(start1, start2, theGlobalVariables);
-    theDrawOps.ModifyToOrthonormalNoShiftSecond(start2, start1);
-    theDrawOps.BasisProjectionPlane[0][0]=start1;
-    theDrawOps.BasisProjectionPlane[0][1]=start2;
-  }
-  theNode.ExpressionType=theNode.typeAnimation;
-  theNode.theAnimation.GetElement().MakeZero();
-  theNode.theAnimation.GetElement()+=(theDrawOps);
-  theNode.theAnimation.GetElement().flagAnimating=false;
-  theNode.ExpressionType=theNode.typeAnimation;
-  out << theDrawVars.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theDim);
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
 int ParserNode::EvaluateAnimateRootSAs
   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
 { DrawingVariables theDrawingVars;
@@ -7901,7 +7835,7 @@ void ReflectionSubgroupWeylGroup::ToString(std::string& output, bool displayElem
   DynkinDiagramRootSubalgebra tempDyn;
   tempDyn.ComputeDiagramTypeKeepInput(this->simpleGenerators, this->AmbientWeyl);
   out << "Dynkin diagram & subalgebra of root subsystem generated by the given root: "
-  << tempDyn.DynkinStrinG;
+  << tempDyn.ToString();
   out << "<br>Simple roots:\n<br>\n ";
   head << "\\begin{array}{rcl}";
   for (int i=0; i<this->simpleGenerators.size; i++)
@@ -8291,14 +8225,7 @@ void Parser::initFunctionList(char defaultExampleWeylLetter, int defaultExampleW
    "drawConeAffine( coneFromNormals((1,0,0,0),(0,1,0,0),(0,0,1,0),(-1,0,0,1), (0,-1,0,1), (0,0,-1,1)))",
     & ParserNode::EvaluateDrawConeAffine
    );
-  this->AddOneFunctionToDictionaryNoFail
-  ("drawRootSystemInCoxeterPlaneOfRootSA",
-   "(Integer)",
-   "<b>Experimental</b>. ",
-   "drawRootSystemInCoxeterPlaneOfRootSA(0)",
-   DefaultWeylLetter, DefaultWeylRank, false,
-    & ParserNode::EvaluateDrawRootSystemCoxeterPlaneRootSA
-   );
+
   this->AddOneFunctionToDictionaryNoFail
   ("animateRootSystem",
    "(Integer, (Rational,...),...)",

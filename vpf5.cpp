@@ -215,9 +215,9 @@ bool CommandList::fAnimateLittelmannPaths
   (thePath.GenerateOrbitAndAnimate(*theCommands.theGlobalVariableS), theCommands);
 }
 
-bool CommandList::fRootSAsAndSltwos
+bool CommandList::innerRootSAsAndSltwos
 (CommandList& theCommands, const Expression& input, Expression& output, bool showSLtwos)
-{ MacroRegisterFunctionWithName("CommandList::fRootSAsAndSltwos");
+{ MacroRegisterFunctionWithName("CommandList::innerRootSAsAndSltwos");
   //bool showIndicator=true;
   std::string errorString;
   SemisimpleLieAlgebra* ownerSS;
@@ -271,7 +271,7 @@ bool CommandList::fRootSAsAndSltwos
     << "it will cause broken links in the calculator. "
     << "<br>Appologies for this technical (Apache server configuration) problem. "
     << "<br>Alleviating it is around the bottom of a very long to-do list.</b>"
-    << "<br> The computation is slow, up to around 10 minutes for E_8.";
+    << "<br> The computation is slow, up to around 10 minutes for E_8.<br>";
     SltwoSubalgebras theSl2s(*ownerSS);
     ownerSS->FindSl2Subalgebras(*ownerSS, theSl2s, *theCommands.theGlobalVariableS);
     std::string PathSl2= outSltwoPath.str();

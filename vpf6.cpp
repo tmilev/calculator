@@ -5037,9 +5037,10 @@ std::string Function::GetString(CommandList& theBoss)
   if (this->flagIamVisible)
   { std::stringstream out;
     out << this->theDescription;
+//    out << " \nFunction memory address: " << std::hex << (int) this->theFunction << ". ";
     // use of unsigned long is correct on i386 and amd64
     // uintptr_t is only available in c++0x
-    out << "Address: " << std::hex << (unsigned long) this->theFunction << ". ";
+    out << "Function memory address: " << std::hex << (unsigned long) this->theFunction << ". ";
     if (!this->flagIsInner)
       out << "This is a <b>``law''</b> - takes as argument the name of the operation as well. ";
     if (this->theExample!="")

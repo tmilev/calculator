@@ -720,15 +720,14 @@ void slTwoSubalgebra::ElementToStringModuleDecompositionMinimalContainingRegular
   { out << "<table><tr><td align=\"center\">Char.</td>";
     for (int i=0; i<this->IndicesMinimalContainingRootSA.size; i++)
     { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[i]];
-      CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
-      out << "<td align=\"center\">Decomp. " << tempS << "</td>";
+      out << "<td align=\"center\">Decomp. " << theSA.theDynkinDiagram.ToString() << "</td>";
     }
     out << "</tr>\n";
   }
   out << "<tr><td align=\"center\"> " << this->hCharacteristic.ToString() << "</td>";
   for (int k=0; k<this->IndicesMinimalContainingRootSA.size; k++)
   { rootSubalgebra& theSA= owner.theRootSAs[this->IndicesMinimalContainingRootSA[k]];
-    CGI::clearDollarSigns(theSA.theDynkinDiagram.DynkinStrinG, tempS);
+    tempS=theSA.theDynkinDiagram.ToString();
     if (useHtml)
       out << "<td align=\"center\">";
     for (int i=0; i<this->HighestWeightsDecompositionMinimalContainingRootSA[k].size; i++)
@@ -834,7 +833,7 @@ std::string slTwoSubalgebra::ToString(FormatExpressions* theFormat)
     if (useHtml)
     { out << "<a href=\"" << htmlPathServer << "../rootHtml_rootSA"
       << this->IndicesContainingRootSAs[i] << ".html\">";
-      currentSA.theDynkinDiagram.ElementToStrinG(tempS, true);
+      tempS=currentSA.theDynkinDiagram.ToString();
     }
     out << tempS;
     if (useHtml)
@@ -975,7 +974,7 @@ void SemisimpleLieAlgebra::FindSl2Subalgebras
   for (int i=0; i<output.theRootSAs.size-1; i++)
   { std::stringstream tempStream;
     tempStream << "\nExploring root subalgebra "
-    << output.theRootSAs[i].theDynkinDiagram.ElementToStrinG() << "(" << (i+1)
+    << output.theRootSAs[i].theDynkinDiagram.ToString() << "(" << (i+1)
     << " out of " << output.theRootSAs.size-1 << " non-trivial)\n";
     theReport.Report(tempStream.str());
     output.theRootSAs[i].GetSsl2SubalgebrasAppendListNoRepetition
@@ -1466,21 +1465,19 @@ std::string SltwoSubalgebras::ElementToStringNoGenerators(FormatExpressions* the
       out << "</td><td>";
     for (int j=0; j<theSl2.IndicesMinimalContainingRootSA.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesMinimalContainingRootSA[j]];
-      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\""
       << displayPath
       << "rootHtml_rootSA" << theSl2.IndicesMinimalContainingRootSA[j]
-      << ".html\">" << tempS << "</a>" << ";  ";
+      << ".html\">" << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td><td title=\"" << tooltipContainingRegular << "\">";
     for (int j=0; j<theSl2.IndicesContainingRootSAs.size; j++)
     { rootSubalgebra& currentSA= this->theRootSAs[theSl2.IndicesContainingRootSAs[j]];
-      CGI::clearDollarSigns(currentSA.theDynkinDiagram.DynkinStrinG, tempS);
       out << "<a href=\""
       <<  displayPath
       << "rootHtml_rootSA" << theSl2.IndicesContainingRootSAs[j] << ".html\">"
-      << tempS << "</a>" << ";  ";
+      << currentSA.theDynkinDiagram.ToString() << "</a>" << ";  ";
     }
     if (useHtml)
       out << "</td></tr>\n";
@@ -1557,14 +1554,14 @@ void SltwoSubalgebras::ElementToHtml
     tempS= out.str();
     theFile << "<HMTL>"
     << "<title>sl(2)-subalgebras of "
-    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true) << "</title>";
+    << this->theRootSAs[0].theDynkinDiagram.ToString() << "</title>";
     theFile << "<meta name=\"keywords\" content=\""
-    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
+    <<  this->theRootSAs[0].theDynkinDiagram.ToString()
     << " sl(2)-triples, sl(2)-subalgebras, nilpotent orbits simple Lie algebras,"
     << " nilpotent orbits of "
-    <<  this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
+    <<  this->theRootSAs[0].theDynkinDiagram.ToString()
     << ", sl(2)-triples of "
-    << this->theRootSAs[0].theDynkinDiagram.ElementToStrinG(true)
+    << this->theRootSAs[0].theDynkinDiagram.ToString()
     << " \">";
     theFile << "<BODY>" << notation << "<a href=\"" << htmlPathServerSl2s
     << "sl2s_nopng.html\"> plain html for your copy+paste convenience</a><br>\n"
@@ -1609,7 +1606,7 @@ void rootSubalgebra::ToString
     includeKEpsCoords=false;
   int LatexLineCounter=0;
   this->ElementToStringHeaderFooter(latexHeader, latexFooter, useLatex, useHtml, includeKEpsCoords);
-  this->theDynkinDiagram.ElementToStrinG(tempS, true);
+  tempS=this->theDynkinDiagram.ToString();
   if (useLatex)
     out << "\\noindent$\\mathfrak{k}_{ss}:$ ";
   else
@@ -1640,7 +1637,7 @@ void rootSubalgebra::ToString
   tempS=this->SimpleBasisKEpsCoords.ElementToStringEpsilonForm(useLatex, useHtml, false);
   if (useHtml)
     out << "\n<br>\nSimple basis epsilon form with respect to k: " << tempS;
-  this->theCentralizerDiagram.ElementToStrinG(tempS, true);
+  tempS= this->theCentralizerDiagram.ToString();
   if(!useLatex)
     CGI::clearDollarSigns(tempS, tempS);
   if (useLatex)

@@ -6654,7 +6654,9 @@ public:
 class ElementWeylGroup: public List<int>
 {
 public:
-  void ToString(std::string& output){output=this->ToString();}
+  void ToString(std::string& output)
+  { output=this->ToString();
+  }
   std::string ToString
   (FormatExpressions* theFormat=0,  List<int>* DisplayIndicesOfSimpleRoots=0)
   { return this->ToString(-1, theFormat,  DisplayIndicesOfSimpleRoots);

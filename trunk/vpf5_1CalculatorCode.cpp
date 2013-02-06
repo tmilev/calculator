@@ -324,3 +324,13 @@ bool CommandList::innerDeterminant
   } else
     return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
 }
+
+bool CommandList::innerMatrixRational
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Matrix<Rational> outputMat;
+  if (!theCommands.GetMatrix(input, outputMat, 0, -1, 0))
+  { theCommands.Comments << "<br>Failed to expression to matrix of rationals. ";
+    return false;
+  }
+  return output.AssignValue(outputMat, theCommands);
+}

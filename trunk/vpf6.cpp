@@ -39,6 +39,12 @@ int Expression::GetTypeOperation<ElementUniversalEnveloping<RationalFunctionOld>
 }
 
 template < >
+int Expression::GetTypeOperation<Matrix<Rational> >()const
+{ this->CheckInitialization();
+  return this->theBoss->opMatRat();
+}
+
+template < >
 int Expression::GetTypeOperation<int>()const
 { this->CheckInitialization();
   return this->theBoss->opRational();
@@ -187,6 +193,15 @@ LittelmannPath
   return this->theBoss->theObjectContainer.theLSpaths
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Matrix<Rational>
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theMatRats
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
 //Expression::AddObjectReturnIndex specializations end
 
 //start Expression::GetValuENonConstUseWithCaution specializations.
@@ -310,6 +325,17 @@ SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theLieAlgebras[this->children.LastObject()->theData];
+}
+
+template < >
+Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<Matrix<Rational> >())
+  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theMatRats[this->children.LastObject()->theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -2978,8 +3004,7 @@ bool CommandList::innerPrintSSLieAlgebra
     << "</td></tr>";
   }
   out << "</table>";
-  if (Verbose)
-  { out << "<hr>Simple basis in epsilon coordinates: <table>";
+  out << "<hr>Simple basis in epsilon coordinates: <table>";
     simpleBasis.MakeEiBasis(theWeyl.GetDim());
     theWeyl.GetEpsilonCoords(simpleBasis, simplebasisEpsCoords);
     for (int i=0; i< simplebasisEpsCoords.size; i++)
@@ -3000,7 +3025,8 @@ bool CommandList::innerPrintSSLieAlgebra
     << "for the convention of Humphreys, nor for the May 2012 convention of Wikipedia. "
     << "<br>Having an integral symmetric Cartan matrix is beneficial both for the speed "
     << "of computations, <br>and for reducing sizes of the printouts.";
-    out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
+  if (Verbose)
+  { out << "<hr>Root system:<table><tr><td>Simple basis coordinates</td><td></td>"
     << "<td>Epsilon coordinates non-LaTeX'ed (convention: see above)</td></tr> ";
     Vectors<Rational> rootSystemEpsCoords;
     theWeyl.GetEpsilonCoords(theWeyl.RootSystem, rootSystemEpsCoords);
@@ -3341,7 +3367,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Sequence");
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("AlgebraicNumber");
-  this->AddOperationBuiltInType("Polynomial<Rational>");
+  this->AddOperationBuiltInType("Polynomial_Rational");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");
@@ -3350,6 +3376,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("SemisimpleLieAlg");
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
+  this->AddOperationBuiltInType("Matrix_Rational");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
 
@@ -4528,6 +4555,11 @@ bool Expression::ToStringData
   { out << "UEE{}(" //<< this->GetContext().ToString() << ", "
     << this->GetValuE<ElementUniversalEnveloping<RationalFunctionOld> >().ToString()
     << ")";
+    result=true;
+  } else if (this->IsOfType<Matrix<Rational> >())
+  { FormatExpressions tempFormat;
+    out << "innerMatrixRational{}("
+    << this->GetValuE<Matrix<Rational> > ().ToString(&tempFormat);
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   {  if (this->HasContext())

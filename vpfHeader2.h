@@ -442,6 +442,7 @@ public:
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
+  HashedListReferences<Matrix<Rational> > theMatRats;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
@@ -881,10 +882,13 @@ public:
   { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
   int opPoly()
-  { return this->operationS.GetIndexIMustContainTheObject("Polynomial<Rational>");
+  { return this->operationS.GetIndexIMustContainTheObject("Polynomial_Rational");
   }
   int opRationalFunction()
   { return this->operationS.GetIndexIMustContainTheObject("RationalFunction");
+  }
+  int opMatRat()
+  { return this->operationS.GetIndexIMustContainTheObject("Matrix_Rational");
   }
   int opString()
   { return this->operationS.GetIndexIMustContainTheObject("string");
@@ -1070,6 +1074,9 @@ public:
   ;
 
   static bool outerLieBracket
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerMatrixRational
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool outerMinus

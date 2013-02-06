@@ -139,6 +139,14 @@ this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
    \nh_{{i}}:=getCartanGenerator{}(SemisimpleLieAlgebra{}G_2, i);\
    \nUE{}(g_1g_2-g_2g_1+g_3^2)");
   this->AddOperationInnerHandler
+  ("MatrixRationals", this->innerMatrixRational,"",
+   "Creates an internal c++ matrix structure from double list of rationals. \
+   ", "s_1:=MatrixRationals{}((-1,-1,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1));\
+   \ns_2:=MatrixRationals{}((1,0,0,0), (-1,-1,-1,0), (0,0,1,0), (0,0,0,1)); \
+   \ns_3:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,-2,-1,-1), (0,0,0,1)); \
+   \ns_4:=MatrixRationals{}((1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,-1,-1)); ");
+
+  this->AddOperationInnerHandler
   ("FunctionToMatrix", this->innerFunctionToMatrix,"",
    "Creates a matrix from a function. The first argument gives the function, the second argument the number of rows, \
    the third- the number of columns.\

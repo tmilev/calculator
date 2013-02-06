@@ -1027,6 +1027,9 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerOperationBinary(theCommands, input, output, theCommands.opTimes());
   }
+  static bool innerGetElementWeylGroup
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
   static bool innerOperationBinary
   (CommandList& theCommands, const Expression& input, Expression& output,
    int theOp)

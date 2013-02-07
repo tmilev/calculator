@@ -1048,7 +1048,7 @@ bool CommandList::LookAheadAllowsApplyFunction(const std::string& lookAhead)
 { return lookAhead!="{" && lookAhead!="_" && lookAhead!="\\circ" && lookAhead!="{}" &&  lookAhead!="$";
 }
 
-bool CommandList::ReplaceSequenceXEYBySequenceY(int theControlIndex, int inputFormat)
+bool CommandList::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& afterleft = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -1056,7 +1056,7 @@ bool CommandList::ReplaceSequenceXEYBySequenceY(int theControlIndex, int inputFo
   left.theData.format=inputFormat;
   left.controlIndex=theControlIndex;
   afterleft=*this->CurrentSyntacticStacK->LastObject();
-  this->DecreaseStackSetCharacterRangeS(2);
+  this->DecreaseStackExceptLast(2);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
   return true;
 }
@@ -1383,8 +1383,6 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (secondToLastS=="Expression" && thirdToLastS=="Expression" && this->AllowsTimesInPreceding(lastS) )
     return this->ReplaceEEXByEXusingO(this->conTimes());
-  if (thirdToLastS=="Sequence" && secondToLastS=="{}" && lastS=="Expression")
-    return this->ReplaceXXYBySequenceY(this->conExpression(), lastE.theData.format);
   if (thirdToLastS=="(" && secondToLastS=="Expression" && lastS==")")
     return this->ReplaceXEXByE(secondToLastE.theData.format);
   if (thirdToLastS=="{" && secondToLastS=="Expression" && lastS=="}")
@@ -1401,11 +1399,11 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceEOEXByEX();
   if (fourthToLastS=="Expression" && thirdToLastS=="\\sqcup" && secondToLastS== "Expression" && this->isSeparatorFromTheRightGeneral(lastS))
     return this->ReplaceEOEXByEX();
-  if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
-    return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
   if (fourthToLastS=="Sequence" && thirdToLastS=="," && secondToLastS=="Expression" &&
       (lastS=="," || lastS==")" || lastS=="}"))
-    return this->ReplaceSequenceXEYBySequenceY(this->conSequence());
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conSequence());
+  if (thirdToLastS!="[" && secondToLastS=="Expression" && lastS==",")
+    return this->ReplaceYXBySequenceX(this->conSequence(), secondToLastE.theData.format);
   if (thirdToLastS=="MakeSequence" && secondToLastS=="{}" && lastS=="Expression")
     return this->ReplaceXXYBySequenceY(this->conSequence());
   if (fourthToLastS=="MakeSequence" && thirdToLastS=="{}" && secondToLastS=="Expression")
@@ -1432,9 +1430,9 @@ bool CommandList::ApplyOneRule()
   if (secondToLastS=="Expression" && lastS=="&")
     return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceXEYBySequenceY(this->conMatrixRow(), Expression::formatMatrixRow);
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
   if (fourthToLastS=="MatrixRow" && thirdToLastS=="&"  && secondToLastS=="Expression" && this->isSeparatorFromTheRightForMatrixRow(lastS))
-    return this->ReplaceSequenceXEYBySequenceY(this->conMatrixRow(), Expression::formatMatrixRow);
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="Expression" && (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
     return this->ReplaceYXBySequenceX(this->conMatrixRow(), Expression::formatMatrixRow);
   if (secondToLastS=="MatrixRow" &&  (lastS=="MatrixRowSeparator" || lastS=="MatrixSeparator"))
@@ -1442,7 +1440,7 @@ bool CommandList::ApplyOneRule()
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="Expression" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
     return this->ReplaceYXdotsXBySequenceYXdotsX(this->conMatrixRow(), Expression::formatMatrixRow, 1);
   if (fourthToLastS=="SequenceMatrixRows" && thirdToLastS=="MatrixRowSeparator" && secondToLastS=="MatrixRow" && this->isSeparatorFromTheRightForListMatrixRow(lastS))
-    return this->ReplaceSequenceXEYBySequenceY(this->conSequenceMatrixRow(), Expression::formatMatrix);
+    return this->ReplaceSequenceUXEYBySequenceZY(this->conSequenceMatrixRow(), Expression::formatMatrix);
   if (thirdToLastS=="MatrixSeparator" && secondToLastS=="SequenceMatrixRows" && lastS=="MatrixSeparator")
     return this->ReplaceXOXbyEusingO(this->conSequence(), Expression::formatMatrix);
   if (fifthToLastS=="[" && fourthToLastS=="Expression" && thirdToLastS=="," && secondToLastS=="Expression" && lastS=="]")
@@ -3234,85 +3232,6 @@ bool Expression::HasBoundVariables()const
     if (this->children[i].HasBoundVariables())
       return true;
   return false;
-}
-
-bool CommandList::fDrawPolarRfunctionTheta
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fDrawPolarRfunctionTheta");
-  if (!input.IsListNElements(4))
-    return output.SetError
-    ("Drawing polar coordinates takes three arguments: function, lower angle \
-      bound and upper angle bound. ", theCommands);
-  Expression& lowerE=input[2];
-  Expression& upperE=input[3];
-  Expression functionE;
-  Rational upperBound, lowerBound;
-  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
-    return
-    output.SetError
-    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
-  if (upperBound<lowerBound)
-    MathRoutines::swap(upperBound, lowerBound);
-  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
-    return false;
-  std::stringstream out, resultStream;
-  out << CGI::GetHtmlMathSpanPure(input[1].ToString())
-  << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
-  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
-  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
-  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
-  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
-  std::string funString=functionE.GetValuE<std::string>();
-  resultStream << funString << " t cos mul " << funString << " t sin mul" << "}";
-  resultStream << "\\end{pspicture}\\end{document}";
-  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
-  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
-  return output.AssignValue(out.str(), theCommands);
-}
-
-bool CommandList::innerSuffixNotationForPostScript
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
-  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
-  if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
-    return output.AssignValue((std::string) "...", theCommands);
-  std::string currentString;
-  if (input.IsOperation(&currentString))
-  { if (input.theData>=theCommands.NumPredefinedVars)
-      return output.AssignValue(currentString, theCommands);
-    if (currentString=="+")
-      return output.AssignValue<std::string>("add ", theCommands);
-    if (currentString=="*")
-      return output.AssignValue<std::string>("mul ", theCommands);
-    if (currentString=="-")
-      return output.AssignValue<std::string>("sub ", theCommands);
-    if (currentString=="/")
-      return output.AssignValue<std::string>("div ", theCommands);
-    if (currentString=="^")
-      return output.AssignValue<std::string>("exp ", theCommands);
-    return output.SetError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
-  }
-  std::stringstream out;
-  if (input.IsOfType<Rational>())
-  { out << input.GetValuE<Rational>().DoubleValue();
-    return output.AssignValue(out.str(), theCommands);
-  }
-  Expression currentE;
-  for (int i=1; i<input.children.size; i++)
-  { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
-    if (!currentE.IsOfType(&currentString))
-      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
-    out << currentString << " ";
-  }
-  if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
-    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
-  if (!currentE.IsOfType(&currentString))
-    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
-  out << currentString << " ";
-  return output.AssignValue(out.str(), theCommands);
 }
 
 bool CommandList::fIsInteger

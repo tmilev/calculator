@@ -732,7 +732,7 @@ public:
   }
   bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
   bool ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
-  bool ReplaceSequenceXEYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceCEByC();
   bool ReplaceCCByC();
   bool ReplaceEOEByE(int formatOptions=Expression::formatDefault)
@@ -1165,7 +1165,10 @@ public:
   static bool fInvertMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fDrawPolarRfunctionTheta
+  static bool innerDrawPolarRfunctionTheta
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool innerPlot2D
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerSuffixNotationForPostScript

@@ -640,7 +640,7 @@ public:
     result.controlIndex=this->controlSequences.GetIndex(";");
     return result;
   }
-  bool DecreaseStackSetCharacterRanges(int decrease)
+  bool DecreaseStackSetCharacterRangeS(int decrease)
   { if (decrease<=0)
       return true;
     assert((*this->CurrentSyntacticStacK).size-decrease>0);
@@ -649,6 +649,18 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
     return true;
   }
+  bool DecreaseStackExceptLast(int decrease)
+  { if (decrease<=0)
+      return true;
+    assert((*this->CurrentSyntacticStacK).size-decrease>0);
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-2].IndexLastCharPlusOne=
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].IndexLastCharPlusOne;
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-decrease-1]=
+    *this->CurrentSyntacticStacK->LastObject();
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-decrease);
+    return true;
+  }
+
   std::string ElementToStringSyntacticStack();
   std::string ElementToStringSyntactic(bool usePolishForm=false)
   ;
@@ -679,21 +691,23 @@ public:
   }
   bool LookAheadAllowsApplyFunction(const std::string& lookAhead)
 ;
-  bool LookAheadAllowsPlus(const std::string& lookAhead)
+  bool AllowsPlusInPreceding(const std::string& lookAhead)
   ;
-  bool LookAheadAllowsTimes(const std::string& lookAhead);
-  bool LookAheadAllowsTensor(const std::string& lookAhead);
+  bool AllowsTimesInPreceding(const std::string& lookAhead);
+  bool AllowsTensorInPreceding(const std::string& lookAhead);
   bool LookAheadAllowsDivide(const std::string& lookAhead);
   bool PopTopSyntacticStack()
   { (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-1);
     return true;
   }
   bool ReplaceEXXEXEByEusingO(int theOp);
+  bool ReplaceEXXEXEXByEXusingO(int theOp);
   bool ReplaceEEByEusingO(int theControlIndex);
+  bool ReplaceEEXByEXusingO(int theControlIndex);
   bool ReplaceEEByE();
-  bool ReplaceEXEByE(int formatOptions);
-  bool ReplaceEEndCommandEbyE();
-  bool ReplaceOEByE(int formatOptions=Expression::formatDefault);
+  bool ReplaceEXEXByEX(int formatOptions);
+  bool ReplaceEEndCommandEXbyEX();
+  bool ReplaceOEXByEX(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXXEXEXEXByE(int formatOptions=Expression::formatDefault);
   bool ReplaceOXEXEXEXByE(int formatOptions=Expression::formatDefault);
@@ -712,6 +726,10 @@ public:
   { this->ReplaceYBySequenceY(theControlIndex, inputFormat);
     return this->ReplaceXXYByY();
   }
+  bool ReplaceXXYXBySequenceYX(int theControlIndex, int inputFormat=Expression::formatDefault)
+  { this->ReplaceYXdotsXBySequenceYXdotsX(theControlIndex, inputFormat, 1);
+    return this->ReplaceXXYXByYX();
+  }
   bool ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int inputFormat=Expression::formatDefault, int numXs=0);
   bool ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceSequenceXEYBySequenceY(int theControlIndex, int inputFormat=Expression::formatDefault);
@@ -727,7 +745,7 @@ public:
   bool ReplaceXXByCon(int theCon, int theFormat=Expression::formatDefault)
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].controlIndex=theCon;
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2].theData.format=theFormat;
-    this->DecreaseStackSetCharacterRanges(1);
+    this->DecreaseStackSetCharacterRangeS(1);
     return true;
   }
   bool ReplaceXByCon(int theCon, int theFormat=Expression::formatDefault);
@@ -743,6 +761,12 @@ public:
     (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-2);
     return true;
   }
+  bool ReplaceXXYXByYX()
+  { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
+    (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
+    (*this->CurrentSyntacticStacK).SetSize((*this->CurrentSyntacticStacK).size-2);
+    return true;
+  }
   bool ReplaceXYYXByYY()
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
@@ -751,7 +775,7 @@ public:
   }
   bool ReplaceXYXByY()
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-    this->DecreaseStackSetCharacterRanges(2);
+    this->DecreaseStackSetCharacterRangeS(2);
     return true;
   }
   bool ReplaceXYByY()
@@ -762,10 +786,10 @@ public:
   bool ReplaceXEXByE(int inputFormat=Expression::formatDefault)
   { (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3]=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
     (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3].theData.format=inputFormat;
-    this->DecreaseStackSetCharacterRanges(2);
+    this->DecreaseStackSetCharacterRangeS(2);
     return true;
   }
-  bool ReplaceAbyE();
+  bool ReplaceAXbyEX();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
@@ -777,7 +801,7 @@ public:
   int GetOperationIndexFromControlIndex(int controlIndex);
   int GetExpressionIndex();
   SyntacticElement GetEmptySyntacticElement();
-  bool ApplyOneRule(const std::string& lookAhead);
+  bool ApplyOneRule();
   void resetStack()
   { SyntacticElement emptyElement=this->GetEmptySyntacticElement();
     (*this->CurrentSyntacticStacK).initFillInObject(this->numEmptyTokensStart, emptyElement);
@@ -847,6 +871,9 @@ public:
   }
   int conCloseBracket()
   { return this->controlSequences.GetIndexIMustContainTheObject(")");
+  }
+  int conEndProgram()
+  { return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
   }
   int opApplyFunction()
   { return this->operationS.GetIndexIMustContainTheObject("{}");

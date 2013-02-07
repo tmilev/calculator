@@ -289,7 +289,8 @@ bool CommandList::fGroebner
 
 bool CommandList::innerDeterminant
 (CommandList& theCommands, const Expression& input, Expression& output)
-{ Matrix<Rational> matRat;
+{ MacroRegisterFunctionWithName("CommandList::innerDeterminant");
+  Matrix<Rational> matRat;
   Matrix<RationalFunctionOld> matRF;
   Expression theContext;
   if (theCommands.GetMatrix(input, matRat, 0, 0, 0))

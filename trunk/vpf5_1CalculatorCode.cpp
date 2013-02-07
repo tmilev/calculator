@@ -210,7 +210,7 @@ bool CommandList::fGroebner
   if (upperBound>1000000)
     return output.SetError
     ("Error: your upper limit of polynomial operations exceeds 1000000, which is too large.\
-     You may use negative or zero upper bound to give no bound, but please don't. ", theCommands);
+     You may use negative or zero number give no computation bound, but please don't. ", theCommands);
   int upperBoundComputations=(int) upperBound.DoubleValue();
   output=input;
   output.children.PopIndexShiftDown(1);
@@ -334,4 +334,119 @@ bool CommandList::innerMatrixRational
     return false;
   }
   return output.AssignValue(outputMat, theCommands);
+}
+
+bool CommandList::innerDrawPolarRfunctionTheta
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerDrawPolarRfunctionTheta");
+  if (!input.IsListNElements(4))
+    return output.SetError
+    ("Drawing polar coordinates takes three arguments: function, lower angle \
+      bound and upper angle bound. ", theCommands);
+  Expression& lowerE=input[2];
+  Expression& upperE=input[3];
+  Expression functionE;
+  Rational upperBound, lowerBound;
+  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
+    return
+    output.SetError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
+    return false;
+  std::stringstream out, resultStream;
+  out << CGI::GetHtmlMathSpanPure(input[1].ToString())
+  << "<br>";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
+  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
+  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  std::string funString=functionE.GetValuE<std::string>();
+  resultStream << funString << " t cos mul " << funString << " t sin mul" << "}";
+  resultStream << "\\end{pspicture}\\end{document}";
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
+  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerPlot2D
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPlot2D");
+  std::cout << input.ToString();
+  if (!input.IsSequenceNElementS(3))
+    return output.SetError
+    ("Plotting coordinates takes three arguments: function, lower and upper bound. ", theCommands);
+  Expression& lowerE=input[2];
+  Expression& upperE=input[3];
+  Expression functionE;
+  Rational upperBound, lowerBound;
+  if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
+    return
+    output.SetError
+    ("Failed to convert upper and lower bounds of drawing function to rational numbers.", theCommands);
+  if (upperBound<lowerBound)
+    MathRoutines::swap(upperBound, lowerBound);
+  if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
+    return false;
+  std::stringstream out, resultStream;
+  out << CGI::GetHtmlMathSpanPure(input[1].ToString())
+  << "<br>";
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
+  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  resultStream << "\\pspl[linecolor=red, plotpoints=1000]{"
+  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
+  std::string funString=functionE.GetValuE<std::string>();
+  resultStream << funString << "}";
+  resultStream << "\\end{pspicture}\\end{document}";
+  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
+  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerSuffixNotationForPostScript
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::fSuffixNotation");
+  RecursionDepthCounter theCounter(&theCommands.RecursionDeptH);
+  if (*theCounter.theCounter ==theCommands.MaxRecursionDeptH-2)
+    return output.AssignValue((std::string) "...", theCommands);
+  std::string currentString;
+  if (input.IsOperation(&currentString))
+  { if (input.theData>=theCommands.NumPredefinedVars)
+      return output.AssignValue(currentString, theCommands);
+    if (currentString=="+")
+      return output.AssignValue<std::string>("add ", theCommands);
+    if (currentString=="*")
+      return output.AssignValue<std::string>("mul ", theCommands);
+    if (currentString=="-")
+      return output.AssignValue<std::string>("sub ", theCommands);
+    if (currentString=="/")
+      return output.AssignValue<std::string>("div ", theCommands);
+    if (currentString=="^")
+      return output.AssignValue<std::string>("exp ", theCommands);
+    return output.SetError("Cannot convert "+currentString+ " to suffix notation.", theCommands);
+  }
+  std::stringstream out;
+  if (input.IsOfType<Rational>())
+  { out << input.GetValuE<Rational>().DoubleValue();
+    return output.AssignValue(out.str(), theCommands);
+  }
+  Expression currentE;
+  for (int i=1; i<input.children.size; i++)
+  { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
+      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+    if (!currentE.IsOfType(&currentString))
+      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+    out << currentString << " ";
+  }
+  if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
+    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  if (!currentE.IsOfType(&currentString))
+    return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  out << currentString << " ";
+  return output.AssignValue(out.str(), theCommands);
 }

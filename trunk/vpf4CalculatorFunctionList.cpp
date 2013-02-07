@@ -53,13 +53,20 @@ void CommandList::initPredefinedInnerFunctions()
    ",
    "suffixNotationForPostScript{}((1/3 +a+b)*c)")
    ;
-this->AddOperationInnerHandler ("drawPolar", this->fDrawPolarRfunctionTheta, "",
+this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta, "",
    "Draws polar curve given in polar coordinates in the form \
    r=f(t), where t is the angle variable. The angle variable is measured in degrees. \
    The first argument gives the function, the second and third argument give the upper and \
    lower bounds of the angle. \
    ",
    "drawPolar{}(1+sin {} t, 0, 360)")
+   ;
+this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
+   "Makes a 2d plot of a function given in the form \
+   y=f(x). The the second and third argument give the upper and \
+   lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
+   ",
+   "plot2D{}(x+1, 0, 5)")
    ;
 
   this->AddOperationInnerHandler

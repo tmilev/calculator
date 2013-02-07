@@ -505,6 +505,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 //  civilizedInput="X:=FunctionToMatrix{}(A,2,2);A_({{a}},{{b}}):=x^a+y^b;X;\\det{}X";
 //  civilizedInput="WeylDimFormula{}(G_2, (x,0));";
 //std.cout << "x";
+//  civilizedInput="%LogParsing\n(1,1,1)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

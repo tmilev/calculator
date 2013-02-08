@@ -92,6 +92,11 @@ int Expression::GetTypeOperation<AlgebraicNumber>()const
   return this->theBoss->opAlgNumber();
 }
 
+template < >
+int Expression::GetTypeOperation<CalculusFunctionPlot>()const
+{ this->CheckInitialization();
+  return this->theBoss->opCalculusPlot();
+}
 //Expression::GetTypeOperation specializations end.
 
 //Expression::AddObjectReturnIndex specializations follow
@@ -200,6 +205,15 @@ Matrix<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theMatRats
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+CalculusFunctionPlot
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.thePlots
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 //Expression::AddObjectReturnIndex specializations end
@@ -336,6 +350,17 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theMatRats[this->children.LastObject()->theData];
+}
+
+template < >
+CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<CalculusFunctionPlot>())
+  { std::cout << "This is a programming error: expression not of required type CalculusPlot. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.thePlots[this->children.LastObject()->theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3338,6 +3363,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("LittelmannPath");
   this->AddOperationBuiltInType("LRO");
   this->AddOperationBuiltInType("Matrix_Rational");
+  this->AddOperationBuiltInType("CalculusPlot");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
 
@@ -4528,6 +4554,16 @@ bool Expression::ToStringData
     if (this->HasContext())
       out << ")";
     result=true;
+  } else if (this->IsOfType<CalculusFunctionPlot>())
+  { if (isFinal)
+    { CalculusFunctionPlot& thePlot=this->GetValuENonConstUseWithCaution<CalculusFunctionPlot>();
+      out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink
+      (thePlot.GetPlotStringAddLatexCommands(), true);
+      out << "<br><b>LaTeX code used to generate the output. </b><br>"
+      << thePlot.GetPlotStringAddLatexCommands();
+    } else
+      out << "(plot not shown)";
+    result=true;
   }
   output=out.str();
   return result;
@@ -4751,11 +4787,13 @@ std::string Expression::ToString
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
-        if (!this->children[i].IsOfType<std::string>() || !isFinal)
+        if (this->children[i].IsOfType<std::string>() && isFinal)
+          out << this->children[i].GetValuE<std::string>();
+        else if (this->children[i].IsOfType<CalculusFunctionPlot>() && isFinal)
+          out << this->children[i].ToString(theFormat);
+        else
           out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
           (this->children[i].ToString(theFormat));
-        else
-          out << this->children[i].GetValuE<std::string>();
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -4809,7 +4847,7 @@ std::string Expression::ToString
       outTrue << out.str();
     else
     { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
-      if (this->IsOfType<std::string>() && isFinal)
+      if ((this->IsOfType<std::string>()||this->IsOfType<CalculusFunctionPlot>()) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
         outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";

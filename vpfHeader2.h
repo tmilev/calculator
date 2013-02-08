@@ -423,6 +423,26 @@ class SyntacticElement
   }
 };
 
+//the following class is meant to use to draw plots for calculus students.
+class CalculusFunctionPlot
+{ public:
+  List<std::string> theFunctions;
+  List<Rational> lowerBounds;
+  List<Rational> upperBounds;
+  std::string GetPlotStringAddLatexCommands();
+  void operator=(const CalculusFunctionPlot& other)
+  { this->theFunctions=other.theFunctions;
+    this->lowerBounds=other.lowerBounds;
+    this->upperBounds=other.upperBounds;
+  }
+  bool operator==(const CalculusFunctionPlot& other)const
+  { return
+    this->theFunctions==other.theFunctions &&
+    this->lowerBounds==other.lowerBounds &&
+    this->upperBounds==other.upperBounds;
+  }
+};
+
 class ObjectContainer
 { //Following are containers for data structures that are implemented in C++.
   //These objects are dynamically allocated and used by the calculator as requested
@@ -443,6 +463,7 @@ public:
   HashedListReferences<Expression> ExpressionWithNotation;
   HashedListReferences<LittelmannPath> theLSpaths;
   HashedListReferences<Matrix<Rational> > theMatRats;
+  ListReferences<CalculusFunctionPlot> thePlots;
 //  HashedList<DifferentialForm<Rational> > theDiffForm;
   HashedListReferences<MonomialTensor<int, MathRoutines::IntUnsignIdentity> > theLittelmannOperators;
   void reset();
@@ -907,6 +928,9 @@ public:
   }
   int opAlgNumber()
   { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
+  }
+  int opCalculusPlot()
+  { return this->operationS.GetIndexIMustContainTheObject("CalculusPlot");
   }
   int opPoly()
   { return this->operationS.GetIndexIMustContainTheObject("Polynomial_Rational");

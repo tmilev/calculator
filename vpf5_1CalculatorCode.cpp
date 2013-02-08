@@ -372,19 +372,26 @@ bool CommandList::innerDrawPolarRfunctionTheta
   return output.AssignValue(out.str(), theCommands);
 }
 
+void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
+{ this->theFunctions.AddListOnTop(other.theFunctions);
+  this->lowerBounds.AddListOnTop(other.lowerBounds);
+  this->upperBounds.AddListOnTop(other.upperBounds);
+
+}
+
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands()
-{
-  std::stringstream resultStream;
+{ std::stringstream resultStream;
   resultStream << "\\documentclass{article}\\usepackage{pstricks}"
   << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
   for (int i=0; i<this->theFunctions.size; i++)
-  { resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
-    resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-    resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
-    << this->lowerBounds[i].DoubleValue() << "}{" << this->upperBounds[i].DoubleValue() << "}{";
+  { resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
+    << this->lowerBounds[i].DoubleValue() << "}{"
+    << this->upperBounds[i].DoubleValue() << "}{";
     resultStream << this->theFunctions[i] << "}";
-    resultStream << "\\end{pspicture}\n\n";
   }
+  resultStream << "\\end{pspicture}\n\n";
   resultStream << "\\end{document}";
   return resultStream.str();
 }
@@ -392,7 +399,7 @@ std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands()
 bool CommandList::innerPlot2D
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
-  std::cout << input.ToString();
+  //std::cout << input.ToString();
   if (!input.IsSequenceNElementS(3))
     return output.SetError
     ("Plotting coordinates takes three arguments: function, lower and upper bound. ", theCommands);

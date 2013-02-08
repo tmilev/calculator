@@ -926,6 +926,7 @@ bool CommandList::isRightSeparator(char c)
     case ']':
     case '(':
     case ')':
+    case '.':
       return true;
     default:
       return false;
@@ -967,6 +968,7 @@ bool CommandList::isLeftSeparator(char c)
     case '7':
     case '8':
     case '9':
+    case '.':
       return true;
     default:
       return false;
@@ -1376,8 +1378,14 @@ bool CommandList::ApplyOneRule()
     return this->ReplaceXXByCon(this->conEqualEqual());
   if (lastS=="Integer" && secondToLastS=="Integer")
     return this->ReplaceIntIntBy10IntPlusInt();
-  if (secondToLastS=="Integer" && lastS!="Integer")
+  if (secondToLastS=="Integer" && lastS!="Integer" && lastS!=".")
+  { this->registerPositionAfterDecimalPoint=0;
     return this->ReplaceAXbyEX();
+  }
+  if (thirdToLastS=="Integer" && secondToLastS=="." && lastS=="Integer" && this->registerPositionAfterDecimalPoint==0)
+  { this->registerPositionAfterDecimalPoint=1;
+    return this->ReplaceXYByY();
+  }
   //there is an ambiguity on how should function application be associated
   //Which is better: x{}y{}z:= x{} (y{}z), or x{}y{}z:=(x{}y){}z ?
   //In our implementation, we choose x{}y{}z:= x{} (y{}z). Although this is slightly harder to implement,
@@ -3374,6 +3382,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("Expression");
   this->controlSequences.AddOnTop("Integer");
   this->controlSequences.AddOnTop(",");
+  this->controlSequences.AddOnTop(".");
   this->controlSequences.AddOnTop("if");
   this->controlSequences.AddOnTop("\\cdot");
   this->controlSequences.AddOnTop("_");
@@ -4349,6 +4358,7 @@ bool CommandList::ExtractExpressions
   (*this->CurrentSyntacticStacK).ReservE((*this->CurrrentSyntacticSouP).size+this->numEmptyTokensStart);
   (*this->CurrentSyntacticStacK).SetSize(this->numEmptyTokensStart);
   this->registerNumNonClosedBeginArray=0;
+  this->registerPositionAfterDecimalPoint=0;
   for (int i=0; i<this->numEmptyTokensStart; i++)
     (*this->CurrentSyntacticStacK)[i]=this->GetEmptySyntacticElement();
   this->parsingLog="";
@@ -4617,7 +4627,10 @@ std::string Expression::ToString
     bool firstNeedsBrackets=
     !(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
       this->children[1].IsListStartingWithAtom(this->theBoss->opDivide()));
-    bool secondNeedsBrackets= !this->children[2].IsOfType<Rational>();
+    bool secondNeedsBrackets=true;
+    if (this->children[2].IsOfType<Rational>())
+      if (this->children[2].GetValuE<Rational>().IsInteger())
+        secondNeedsBrackets=false;
     if (firstNeedsBrackets)
       out << "(" << firstE << ")";
     else
@@ -5223,8 +5236,16 @@ bool CommandList::ReplaceIntIntBy10IntPlusInt()
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Rational tempRat=left.theData.GetValuE<Rational>();
-  tempRat*=10;
-  tempRat+=right.theData.GetValuE<Rational>();
+  if (this->registerPositionAfterDecimalPoint==0)
+  { tempRat*=10;
+    tempRat+=right.theData.GetValuE<Rational>();
+  } else
+  { Rational afterDecimal=right.theData.GetValuE<Rational>();
+    for (int i=0; i<this->registerPositionAfterDecimalPoint; i++)
+      afterDecimal/=10;
+    tempRat+=afterDecimal;
+    this->registerPositionAfterDecimalPoint++;
+  }
   left.theData.AssignValue(tempRat, *this);
   this->DecreaseStackSetCharacterRangeS(1);
   return true;

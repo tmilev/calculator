@@ -372,6 +372,23 @@ bool CommandList::innerDrawPolarRfunctionTheta
   return output.AssignValue(out.str(), theCommands);
 }
 
+std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands()
+{
+  std::stringstream resultStream;
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
+  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
+  for (int i=0; i<this->theFunctions.size; i++)
+  { resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
+    resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+    resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
+    << this->lowerBounds[i].DoubleValue() << "}{" << this->upperBounds[i].DoubleValue() << "}{";
+    resultStream << this->theFunctions[i] << "}";
+    resultStream << "\\end{pspicture}\n\n";
+  }
+  resultStream << "\\end{document}";
+  return resultStream.str();
+}
+
 bool CommandList::innerPlot2D
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerPlot2D");
@@ -391,21 +408,11 @@ bool CommandList::innerPlot2D
     MathRoutines::swap(upperBound, lowerBound);
   if (! theCommands.innerSuffixNotationForPostScript(theCommands, input[1], functionE))
     return false;
-  std::stringstream out, resultStream;
-  out << CGI::GetHtmlMathSpanPure(input[1].ToString())
-  << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
-  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
-  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
-  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
-  resultStream << "\\pspl[linecolor=red, plotpoints=1000]{"
-  << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
-  std::string funString=functionE.GetValuE<std::string>();
-  resultStream << funString << "}";
-  resultStream << "\\end{pspicture}\\end{document}";
-  out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
-  out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();
-  return output.AssignValue(out.str(), theCommands);
+  CalculusFunctionPlot thePlot;
+  thePlot.theFunctions.AddOnTop(functionE.GetValuE<std::string>());
+  thePlot.lowerBounds.AddOnTop(lowerBound);
+  thePlot.upperBounds.AddOnTop(upperBound);
+  return output.AssignValue(thePlot, theCommands);
 }
 
 bool CommandList::innerSuffixNotationForPostScript

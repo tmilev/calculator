@@ -557,6 +557,11 @@ void CommandList::initPredefinedStandardOperations()
    "Adds two elements of tensor products of generalized Verma modules. ",
    "v:=hwv{}(G_2, (1,0),(0,0));\
    \n(3/4 v)\\otimes v-3/4 (v\\otimes v)", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("+", this->innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
+   "Superimposes two plots. ",
+   "plot2D{}(sin{}(x * 180/3.14159), -5, 5)+ plot2D{}(1/sin{}(x * 180/3.14159), 0.01, 3.14)", true);
+
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",
    "Transforms a-b to a+(-1)*b and -b to (-1)*b. Equivalent to a rule \

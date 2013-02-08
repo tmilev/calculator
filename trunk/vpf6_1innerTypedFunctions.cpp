@@ -393,3 +393,19 @@ bool CommandList::innerAddRatOrPolyToRatOrPoly
 //  std::cout << " to get " << result.ToString();
   return output.AssignValueWithContext(result, output.GetContext(), theCommands);
 }
+
+bool CommandList::innerAddPlotToPlot
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerAddPlotToPlot");
+  //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (input.children.size!=2)
+    return false;
+  CalculusFunctionPlot leftPlot, rightPlot;
+  if(!input[0].IsOfType<CalculusFunctionPlot>(&leftPlot))
+    return false;
+  if(!input[1].IsOfType<CalculusFunctionPlot>(&rightPlot))
+    return false;
+  leftPlot+=rightPlot;
+  return output.AssignValue(leftPlot, theCommands);
+}

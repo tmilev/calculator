@@ -441,6 +441,7 @@ class CalculusFunctionPlot
     this->lowerBounds==other.lowerBounds &&
     this->upperBounds==other.upperBounds;
   }
+  void operator+=(const CalculusFunctionPlot& other);
 };
 
 class ObjectContainer
@@ -605,6 +606,7 @@ public:
   Expression theProgramExpression;
 //  std::vector<std::stringstream> theLogs;
   int registerNumNonClosedBeginArray;
+  int registerPositionAfterDecimalPoint;
   int counterInSyntacticSoup;
   List<SyntacticElement> syntacticSouP;
   List<SyntacticElement> syntacticStacK;
@@ -1487,6 +1489,9 @@ static bool innerAddEltTensorToEltTensor
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerAddRatOrPolyToRatOrPoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerAddPlotToPlot
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF

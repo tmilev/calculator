@@ -1244,7 +1244,7 @@ std::string ProjectInformation::ToString()
   << "and enable cgi scripts "
   << "from folder &nbsp&nbsp ServerBase/cgi-bin/ &nbsp&nbsp."
   << "<br>9) Configure the Apache server so the address of physical folder "
-  << "&nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /vpf/ &nbsp&nbsp."
+  << "&nbsp&nbsp ServerBase/ &nbsp&nbsp is displayed as &nbsp&nbsp /ServerBase/ &nbsp&nbsp."
   << "<br>10) The basic installation is now complete; test the calculator by "
   << "running it through your web browser."
   << "<br>11) To finish the installation install the jsmath in folder &nbsp&nbsp "

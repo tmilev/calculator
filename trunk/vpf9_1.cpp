@@ -695,7 +695,7 @@ void rootSubalgebra::ElementToHtml
   if (this->GetAmbientWeyl().theDynkinType.HasExceptionalComponent())
     output << ", exceptional Lie algebra";
   output << " \">";
-  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
+//  output << CGI::GetHtmlSwitchMenuDoNotEncloseInTags();
   output << "<body>" << tempS << "</body></html>";
   output.close();
 }
@@ -2160,7 +2160,7 @@ void rootSubalgebras::GetTableHeaderAndFooter(std::string& outputHeader, std::st
 
 void rootSubalgebras::ElementToHtml
 (std::string& header, std::string& pathPhysical, std::string& htmlPathServer,
- SltwoSubalgebras* Sl2s, GlobalVariables* theGlobalVariables)
+ SltwoSubalgebras* Sl2s, const std::string& calculatorDisplayName, GlobalVariables* theGlobalVariables)
 { std::fstream output; std::string tempS;
   std::string MyPathPhysical, childrenPathPhysical;
   std::string MyPathServer, childrenPathServer;
@@ -2182,7 +2182,7 @@ void rootSubalgebras::ElementToHtml
   output << " \">";
   this->ToString
   (tempS, Sl2s, false, true, false, &childrenPathPhysical, &childrenPathServer,
-   theGlobalVariables, "/vpf/cgi-bin/calculator");
+   theGlobalVariables, calculatorDisplayName);
   output << "<body>" << header << tempS
    << "</body></html>";
   output.close();

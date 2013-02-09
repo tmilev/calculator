@@ -2463,7 +2463,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
       tempRoot = theSSalgebra.theWeyl.GetFundamentalCoordinatesFromSimple(theHWsimplecoords);
       std::string theFundString=
       tempRoot.ToStringLetterFormat(theFormat.fundamentalWeightLetter, &theFormat);
-      out << "<td>" << ( useJavascript ? CGI::GetHtmlMathSpanPure(theFundString): theFundString)
+      out << "<td>" << (useJavascript ? CGI::GetHtmlMathSpanPure(theFundString): theFundString)
       << "</td>";
       out << "</tr>";
     }

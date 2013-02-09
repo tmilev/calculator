@@ -1519,7 +1519,7 @@ void SltwoSubalgebras::ElementToHtml
   std::string tempS;
   std::string DisplayNameCalculator= theFormat==0 ? "" : theFormat->DisplayNameCalculator;
   this->theRootSAs.ElementToHtml
-  (tempS, physicalPathSAs, htmlPathServerSAs, this, theGlobalVariables);
+  (tempS, physicalPathSAs, htmlPathServerSAs, this, DisplayNameCalculator, theGlobalVariables);
   bool usePNG=true;
   if (physicalPathSAs=="")
     usePNG=false;

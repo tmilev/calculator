@@ -5536,7 +5536,7 @@ void CommandList::InitJavaScriptDisplayIndicator()
 void CommandList::initDefaultFolderAndFileNames
   (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
 { this->PhysicalPathServerBase=inputPathBinaryBaseIsFolderBelow+"../";
-  this->DisplayPathServerBase=inputDisplayPathBase;
+  this->DisplayPathServerBase="/"+inputDisplayPathBase;
 
   this->PhysicalPathOutputFolder=this->PhysicalPathServerBase+"output/";
   this->DisplayPathOutputFolder= this->DisplayPathServerBase + "output/";
@@ -5549,6 +5549,8 @@ void CommandList::initDefaultFolderAndFileNames
 
   this->indicatorFileNamE=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
   this->indicatorFileNameDisplaY=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
+  this->DisplayNameCalculator=this->DisplayPathServerBase+"cgi-bin/calculator";
+
 }
 
 bool CommandList::fWriteGenVermaModAsDiffOperators

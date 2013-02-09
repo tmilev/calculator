@@ -193,14 +193,33 @@ int main(int argc, char **argv)
   theParser.init(theGlobalVariables);
   MacroRegisterFunctionWithName("main");
 
-  theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   ParallelComputing::cgiLimitRAMuseNumPointersInList=60000000;
   std::string inputPatH;
-  std::string tempS;
-  theParser.initDefaultFolderAndFileNames(inputPatH, "/vpf/", IPAdressCaller);
-  theParser.InitJavaScriptDisplayIndicator();
+  std::string inputDisplayPath="vpf/";
   if (argc>=1)
-    getPath(argv[0], inputPatH);
+  { getPath(argv[0], inputPatH);
+    std::cout << "input path: " << inputPatH;
+
+    bool found=false;
+    for (int j=inputPatH.size()-2; j>=0; j--)
+    { if (inputPatH[j]=='/')
+      { if (found)
+          break;
+        inputDisplayPath="";
+        found=true;
+      }
+      if (found)
+        inputDisplayPath.push_back(inputPatH[j]);
+    }
+    if (found)
+      for (unsigned j=0; j<inputDisplayPath.size()/2; j++)
+        MathRoutines::swap(inputDisplayPath[j], inputDisplayPath[inputDisplayPath.size()-1-j]);
+    std::cout << "<br>input display path: " << inputDisplayPath;
+  }
+  std::string tempS;
+  theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
+  theParser.InitJavaScriptDisplayIndicator();
+
 	if (argc>1)
     return main_command_input(argc, argv);
   else
@@ -530,7 +549,6 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   std::cout << "</textarea>\n<br>\n";
   std::cout << "<input type=\"submit\" title=\"Shift+Enter=shortcut from input text box. \" name=\"buttonGo\" "
   << "value=\"Go\" onmousedown=\"storeSettings();\" > ";
-  theParser.DisplayNameCalculator="/vpf/cgi-bin/calculator";
   if (civilizedInput!="")
     std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?"
     << theParser.inputStringRawestOfTheRaw

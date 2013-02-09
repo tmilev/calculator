@@ -1691,8 +1691,9 @@ public:
   void ElementToStringRootSpaces(std::string& output, bool includeMatrixForm, Vectors<Rational>& input, GlobalVariables& theGlobalVariables);
   void ElementToStringConeConditionNotSatisfying(std::string& output, bool includeMatrixForm, GlobalVariables& theGlobalVariables);
   void ElementToHtml
-  (std::string& header, std::string& pathPhysical, std::string& htmlPathServer,
-   SltwoSubalgebras* Sl2s, GlobalVariables* theGlobalVariables);
+(std::string& header, std::string& pathPhysical, std::string& htmlPathServer,
+ SltwoSubalgebras* Sl2s, const std::string& calculatorDisplayName, GlobalVariables* theGlobalVariables)
+;
   void ElementToStringCentralizerIsomorphisms(std::string& output, bool useLatex, bool useHtml, int fromIndex, int NumToProcess, GlobalVariables& theGlobalVariables);
   void ToString
 (std::string& output, SltwoSubalgebras* sl2s, bool useLatex, bool useHtml, bool includeKEpsCoords,

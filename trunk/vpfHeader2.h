@@ -17,7 +17,6 @@ class Expression
     this->format=this->formatDefault;
 //    this->IndexBoundVars=inputIndexBoundVars;
   }
-  public:
   //Definitions.
   //1. Fundamentals.
   //1.1. An atom is an expression with zero children.
@@ -72,8 +71,42 @@ class Expression
   //6. Two expressions of built-in type with equal types and C++ identifiers, one having a
   //   context that is empty, and the other having no context,
   //   are considered to represent one and the same element.
+  //-------------------------------------------------------
+  //-------------------------------------------------------
+  //-------------------------------------------------------
+  //Notes on Expression implementation.
+  //While the preceding notes are to be considered as fixed, the following notes
+  //are implementation specific and are subject to change.
+  //The i^th child of an expression can be accessed as const using operator[](i).
+  //The children of an expression are kept as a list of integers indicating the children's
+  //position in CommandList::theExpressionContainer.
+  //CommandList::theExpressionContainer is a Hashed List of references and must not be modified
+  //directly in any way.
+  //Motivation for this implementation choice. The original implementation
+  //had Expression contain all of its children as List<Expression>, making the copy operator=
+  //a recursive function. While this is one of the least-head-aching designs,
+  //it also proved to be remarkably slow: here is why.
+  //When processing an expression, one must traverse all of its subtrees.
+  //Making temporary copies of all subtrees is then approximately O(n^2),
+  //where n^2 is the number of nodes of the tree.
+  //
+  //For a tree with 1k nodes this is already
+  //unacceptably slow, if it could be avoided.
+  //
+  //If change is to be applied to
+  //most subtrees, then the approximate cost of O(n^2) operations obviously cannot be avoided.
+  //However, in most computations, subtrees need not be changed - in reality, most expression
+  //will arrive to the calculator in reduced or close-to-reduced form.
+  //
+  //This explains our choice of keeping all children of an expression as a reference to
+  //an ever-growing collection of Expressions.
+  //If a single instance of CommandList is to run over long periods of time,
+  //it is possible that not all such expressions are in use, and we run out of RAM memory.
+  //If that is to happen, some sort of garbage collection will have to be implemented.
+  //However, for the current calculator purposes, no such danger exists.
+  public:
   int theData;
-  List<Expression> children;
+  List<int> children;
   CommandList* theBoss;
   ///////////////////////////////////////
   //two objects are considered equal even when the the following data is different:
@@ -93,11 +126,21 @@ class Expression
   void reset(CommandList& newBoss, int newNumChildren=0)
   { this->theBoss=&newBoss;
     this->theData=0;
-    if (newNumChildren>=0)
-      this->children.SetSize(newNumChildren);
+    if (newNumChildren<0)
+      newNumChildren=0;
+    this->children.SetSize(newNumChildren);
+    for (int i=0; i<newNumChildren; i++)
+      this->children[i]=-1;
   }
-  bool AssignChild(int childIndex)
-  { Expression tempExp=this->children[childIndex];
+  bool AssignChildAtomValue(int childIndex, int theAtom, CommandList& owner);
+  void AddChildOnTop(const Expression& inputChild)
+  { this->children.SetSize(this->children.size+1);
+    this->AssignChild(this->children.size-1, inputChild);
+  }
+  bool AssignChild(int childIndexInMe, const Expression& inputChild);
+  bool AssignChild(int childIndexInMe, int childIndexInBoss);
+  bool AssignMeMyChild(int childIndex)
+  { Expression tempExp=(*this)[childIndex];
     this->operator=(tempExp);
     return true;
   }
@@ -113,18 +156,18 @@ class Expression
   bool IsListStartingWithAtom(int theOp=-1)const
   { if (!this->IsLisT())
       return false;
-    if (!this->children[0].IsAtoM())
+    if (!(*this)[0].IsAtoM())
       return false;
     if (theOp==-1)
       return true;
-    return this->children[0].theData==theOp;
+    return (*this)[0].theData==theOp;
   }
   bool IsListOfTwoAtomsStartingWith(int theOp)const
   { if (!this->IsListStartingWithAtom(theOp))
       return false;
     if (this->children.size!=2)
       return false;
-    return this->children[1].IsAtoM();
+    return (*this)[1].IsAtoM();
   }
   bool IsAtoM(int desiredDataUseMinusOneForAny=-1)const
   { if (this->IsLisT())
@@ -135,9 +178,7 @@ class Expression
   }
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
-  Expression& operator[](int n)const
-  { return this->children[n];
-  }
+  const Expression& operator[](int n)const;
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
   bool IsContext()const;
@@ -151,7 +192,7 @@ class Expression
       return false;
     if (!this->IsListNElementsStartingWithAtom(this->GetTypeOperation<theType>()))
       return false;
-    if(this->children.size<2 || !this->children.LastObject()->IsAtoM())
+    if(this->children.size<2 || !this->GetLastChild().IsAtoM())
       return false;
     if (whichElement==0)
       return true;
@@ -173,11 +214,9 @@ class Expression
   //note: the following always returns true:
   template <class theType>
   bool AssignValue(const theType& inputValue, CommandList& owner)
-  { this->reset(owner, 3);
-    int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->children[0].MakeAtom(this->GetTypeOperation<theType>(), owner);
-    this->children[1].MakeEmptyContext(owner);
-    this->children[2].MakeAtom(theIndex, owner);
+  { Expression tempE;
+    tempE.MakeEmptyContext(owner);
+    this->AssignValueWithContext(inputValue, tempE, owner);
     return true;
   }
   //note: the following always returns true:
@@ -186,10 +225,26 @@ class Expression
   (const theType& inputValue, const Expression& theContext, CommandList& owner)
   { this->reset(owner, 3);
     int theIndex =this->AddObjectReturnIndex(inputValue);
-    this->children[0].MakeAtom(this->GetTypeOperation<theType>(), owner);
-    this->children[1]=theContext;
-    this->children[2].MakeAtom(theIndex, owner);
+    Expression tempE;
+    tempE.MakeAtom(this->GetTypeOperation<theType>(), owner);
+    this->AssignChild(0, tempE);
+    this->AssignChild(1, theContext);
+    tempE.MakeAtom(theIndex, owner);
+    this->AssignChild(2, tempE);
     return true;
+  }
+  template <class theType>
+  bool AssignValueToChild(int childIndex, const theType& inputValue, CommandList& owner)
+  { Expression tempE;
+    tempE.AssignValue(inputValue, owner);
+    return this->AssignChild(childIndex, tempE);
+  }
+  template <class theType>
+  bool AssignValueWithContextToChild
+  (int childIndex, const theType& inputValue, const Expression& theContext, CommandList& owner)
+  { Expression tempE;
+    tempE.AssignValueWithContext(inputValue, theContext, owner);
+    return this->AssignChild(childIndex, tempE);
   }
   bool SetContextAtLeastEqualTo(Expression& inputOutputMinContext);
   int GetNumContextVariables()const;
@@ -260,6 +315,12 @@ class Expression
   void MakeXOX
   (CommandList& owner, int theOp, const Expression& left, const Expression& right)
   ;
+  void AssignXOXToChild
+  (int childIndex, CommandList& owner, int theOp, const Expression& left, const Expression& right)
+  { Expression tempE;
+    tempE.MakeXOX(owner, theOp, left, right);
+    this->AssignChild(childIndex, tempE);
+  }
   bool MakeEmptyContext
   (CommandList& owner)
   ;
@@ -281,11 +342,20 @@ class Expression
     int result=this->theData*SomeRandomPrimes[0];
     int numCycles=MathRoutines::Minimum(this->children.size, SomeRandomPrimesSize);
     for (int i=0; i<numCycles; i++)
-      result+=this->children[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
+      result+=(*this)[i].HashFunctionRecursive(RecursionDepth+1, MaxRecursionDepth)*SomeRandomPrimes[i];
     return result;
+  }
+  int GetIndexChild(const Expression& input)const
+  { for (int i=0; i<this->children.size; i++)
+      if (input==(*this)[i])
+        return i;
+    return -1;
   }
   Expression()
   { this->reset();
+  }
+  const Expression& GetLastChild()const
+  { return (*this)[this->children.size-1];
   }
   bool SetError (const std::string& theError, CommandList& owner);
   Expression(const Expression& other)
@@ -317,13 +387,6 @@ class Expression
   bool operator==(const Expression& other)const;
   bool operator!=(const Expression& other)const
   { return ! (*this==other);
-  }
-  void CopyValueFromNoChildrenCopy(const Expression& other)
-  { this->theBoss=other.theBoss;
-    this->theData=other.theData;
-    this->children.SetSize(other.children.size);
-    this->format=other.format;
-//    this->IndexBoundVars=other.IndexBoundVars;
   }
   void operator=(const Expression& other);
   bool operator>(const Expression& other)const;
@@ -623,6 +686,8 @@ public:
 
   int RuleContextIdentifier;
   List<Expression> RuleStack;
+
+  HashedListReferences<Expression> theExpressionContainer;
 
   std::string syntaxErrors;
   List<std::string> evaluationErrors;
@@ -1015,8 +1080,8 @@ public:
 (Expression& toBeSubbedIn, BoundVariablesSubstitution& matchedPairs)
   ;
   Expression* PatternMatch
-  (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
-   Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
+  (const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
+   const Expression* condition=0, std::stringstream* theLog=0, bool logAttempts=false)
 ;
   bool ProcessOneExpressionOnePatternOneSub
   (Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
@@ -1069,9 +1134,6 @@ public:
   bool ExpressionMatchesPattern
   (const Expression& thePattern, const Expression& input, BoundVariablesSubstitution& matchedExpressions,
    std::stringstream* theLog=0)
-  ;
-  bool ExpressionsAreEqual
-  (const Expression& left, const Expression& right)
   ;
 
   static bool outerUnion
@@ -1299,7 +1361,7 @@ public:
 ;
 
 template<class CoefficientType>
-bool fGetTypeHighestWeightParabolic
+bool innerGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
@@ -1724,10 +1786,9 @@ bool CommandList::GetMatrix
   Vector<theType> currentRow;
   int numRows=theExpression.children.size-1;
   for (int i=0; i<numRows; i++)
-  { Expression& currentE=theExpression.children[i+1];
+  { const Expression& currentE=theExpression[i+1];
     if (!this->GetVector
-        (currentE, currentRow, &startContext, targetNumColsNonMandatory,
-        conversionFunction))
+        (currentE, currentRow, &startContext, targetNumColsNonMandatory, conversionFunction))
       return false;
     if (i==0)
     { targetNumColsNonMandatory=currentRow.size;

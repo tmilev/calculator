@@ -297,10 +297,10 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   if (!input.IsListNElements(5))
     return output.SetError
     ("Function  fDecomposeFDPartGeneralizedVermaModuleOverLeviPart expects 4 arguments.", theCommands);
-  Expression& typeNode=input[1];
-  Expression& weightNode=input[2];
-  Expression& inducingParNode=input[3];
-  Expression& splittingParNode=input[4];
+  const Expression& typeNode=input[1];
+  const Expression& weightNode=input[2];
+  const Expression& inducingParNode=input[3];
+  const Expression& splittingParNode=input[4];
   SemisimpleLieAlgebra* ownerSSPointer=0;
   std::string errorString;
   if (! theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -372,8 +372,8 @@ bool CommandList::fDrawWeightSupportWithMults
     return output.SetError
     ("Error: the function for drawing weight support takes two  arguments (type and highest weight)",
      theCommands);
-  Expression& typeNode=input[1];
-  Expression& hwNode=input[2];
+  const Expression& typeNode=input[1];
+  const Expression& hwNode=input[2];
   SemisimpleLieAlgebra* theSSalgpointer;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -403,8 +403,8 @@ bool CommandList::fDrawWeightSupport
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
   if (input.IsListNElements(3))
     return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
-  Expression& typeNode=input[1];
-  Expression& hwNode=input[2];
+  const Expression& typeNode=input[1];
+  const Expression& hwNode=input[2];
   std::string errorString;
   SemisimpleLieAlgebra* theAlgPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -1714,7 +1714,7 @@ bool CommandList::fPrintB3G2branchingTableInit
     return output.SetError("the first argument must be a small integer", theCommands);
   if (desiredHeight<0)
     desiredHeight=0;
-  Expression& weightNode= input[2];
+  const Expression& weightNode= input[2];
   theCommands.fSplitFDpartB3overG2Init
   (theCommands, weightNode, output, theG2B3data, outputContext);
   if (output.IsError())
@@ -2344,8 +2344,8 @@ bool CommandList::fJacobiSymbol
   return false;
   if (input.children.size!=3)
     return false;
-  Expression& leftE=input[1];
-  Expression& rightE=input[2];
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
   int leftInt, rightInt;
   if (!leftE.IsSmallInteger(&leftInt) || !rightE.IsSmallInteger(&rightInt))
     return false;
@@ -2382,7 +2382,7 @@ bool CommandList::fParabolicWeylGroupsBruhatGraph
   Vector<RationalFunctionOld> theHWfundcoords, tempRoot, theHWsimplecoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgPointer;
-  if(!theCommands.fGetTypeHighestWeightParabolic
+  if(!theCommands.innerGetTypeHighestWeightParabolic
     (theCommands, input, output, theHWfundcoords, parabolicSel, hwContext, theSSalgPointer,
      theCommands.innerRationalFunction))
     return output.SetError("Failed to extract highest weight vector data", theCommands);
@@ -2590,8 +2590,8 @@ bool CommandList::fTestMonomialBaseConjecture
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
   if (input.IsListNElements(3))
     return output.SetError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
-  Expression& rankE=input[1];
-  Expression& dimE=input[2];
+  const Expression& rankE=input[1];
+  const Expression& dimE=input[2];
   int rankBound=0;
   int dimBound=0;
   if (!rankE.IsSmallInteger(&rankBound) || !dimE.IsSmallInteger(&dimBound))
@@ -3126,9 +3126,11 @@ bool CommandList::fFactor
     theFactors.AddOnTop(smallestDiv);
   }
   output.reset(theCommands, theFactors.size+1);
-  output[0].MakeAtom(theCommands.opSequence(), theCommands);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSequence(), theCommands);
+  output.AssignChild(0, tempE);
   for (int i=1; i<=theFactors.size; i++)
-    output[i].AssignValueWithContext(theFactors[i], theContext, theCommands);
+    output.AssignValueWithContextToChild(i, theFactors[i], theContext, theCommands);
   std::cout << "<hr>At this point of time, theExpression is: " << output.ToString();
   return true;
 }

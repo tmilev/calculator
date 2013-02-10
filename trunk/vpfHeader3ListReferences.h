@@ -147,5 +147,36 @@ int ListReferences<Object>::GetIndex(const Object& o) const
 template <class Object, unsigned int hashFunction(const Object&)=Object::HashFunction>
 class HashedListReferences : public HashTemplate<Object, ListReferences<Object>, hashFunction>
 {
+  public:
+  //Note The following function specializations are declared entirely in order to
+  //facilitate autocomplete in my current IDE. If I find a better autocompletion
+  //IDE the following should be removed.
+  inline void AddOnTopNoRepetition(const List<Object>& theList)
+  { this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTopNoRepetition(theList);
+  }
+  inline bool AddOnTopNoRepetition(const Object& o)
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTopNoRepetition(o);
+  }
+  inline void AddOnTop(const Object& o)
+  { this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTop(o);
+  }
+  inline void AddOnTop(const List<Object>& theList)
+  { this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddOnTop(theList);
+  }
+  inline bool Contains(const Object& o)const
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(o);
+  }
+  inline bool Contains(const List<Object>& theList)const
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::Contains(theList);
+  }
+  int GetIndex(const Object& o) const
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndex(o);
+  }
+  inline int GetIndexIMustContainTheObject(const Object& o) const
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
+  }
+  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)
+  { return this->::HashTemplate<Object, ListReferences<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
+  }
 };
 #endif

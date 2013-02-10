@@ -365,7 +365,8 @@ bool CommandList::innerDrawPolarRfunctionTheta
   resultStream << "\\parametricplot[linecolor=red, plotpoints=1000]{"
   << lowerBound.DoubleValue() << "}{" << upperBound.DoubleValue() << "}{";
   std::string funString=functionE.GetValuE<std::string>();
-  resultStream << funString << " t cos mul " << funString << " t sin mul" << "}";
+  resultStream << funString << " t 57.29578 mul cos mul " << funString
+  << " t 57.29578 mul sin mul " << "}";
   resultStream << "\\end{pspicture}\\end{document}";
   out << theCommands.WriteDefaultLatexFileReturnHtmlLink(resultStream.str(), true);
   out << "<br><b>LaTeX code used to generate the output. </b><br>" << resultStream.str();

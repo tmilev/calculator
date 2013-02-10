@@ -59,7 +59,7 @@ this->AddOperationInnerHandler ("drawPolar", this->innerDrawPolarRfunctionTheta,
    The first argument gives the function, the second and third argument give the upper and \
    lower bounds of the angle. \
    ",
-   "drawPolar{}(1+sin {} t, 0, 360)")
+   "drawPolar{}(1+sin {} t, 0, 6.283)")
    ;
 this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Makes a 2d plot of a function given in the form \

@@ -227,7 +227,7 @@ Rational& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theRationals[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theRationals[this->GetLastChild().theData];
 }
 
 template < >
@@ -238,7 +238,7 @@ std::string& Expression::GetValuENonConstUseWithCaution()const
     <<  CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theStrings[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theStrings[this->GetLastChild().theData];
 }
 
 template < >
@@ -249,7 +249,7 @@ RationalFunctionOld& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theRFs[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theRFs[this->GetLastChild().theData];
 }
 
 template < >
@@ -261,7 +261,7 @@ ElementUniversalEnveloping<RationalFunctionOld>& Expression::GetValuENonConstUse
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theUEs[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theUEs[this->GetLastChild().theData];
 }
 
 template < >
@@ -272,7 +272,7 @@ Polynomial<Rational>& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.thePolys[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.thePolys[this->GetLastChild().theData];
 }
 
 template < >
@@ -283,7 +283,7 @@ LittelmannPath& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theLSpaths[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theLSpaths[this->GetLastChild().theData];
 }
 
 template < >
@@ -294,7 +294,7 @@ MonomialTensor<int, MathRoutines::IntUnsignIdentity>& Expression::GetValuENonCon
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theLittelmannOperators[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theLittelmannOperators[this->GetLastChild().theData];
 }
 
 template < >
@@ -305,7 +305,7 @@ ElementTensorsGeneralizedVermas<RationalFunctionOld>& Expression::GetValuENonCon
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theTensorElts[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theTensorElts[this->GetLastChild().theData];
 }
 
 template < >
@@ -316,7 +316,7 @@ charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theChars[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theChars[this->GetLastChild().theData];
 }
 
 template < >
@@ -327,7 +327,7 @@ AlgebraicNumber& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theAlgebraicNumbers[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theAlgebraicNumbers[this->GetLastChild().theData];
 }
 
 template < >
@@ -338,7 +338,7 @@ SemisimpleLieAlgebra& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theLieAlgebras[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theLieAlgebras[this->GetLastChild().theData];
 }
 
 template < >
@@ -349,7 +349,7 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theMatRats[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.theMatRats[this->GetLastChild().theData];
 }
 
 template < >
@@ -360,7 +360,7 @@ CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.thePlots[this->children.LastObject()->theData];
+  return this->theBoss->theObjectContainer.thePlots[this->GetLastChild().theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -378,6 +378,8 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
   { output=*this;
     return true;
   }
+//  std::cout << "<hr>My mark!";
+//  std::cout << " this: " << this->Lispify();
   if (!this->HasContext())
     return false;
   Expression expressionRemovedContext=*this;
@@ -385,7 +387,7 @@ bool Expression::ConvertToType<Polynomial<Rational> >(Expression& output)const
 //  std::cout << "<br>Converting to polynomial: " << this->ToString()
 //  << ", without context: " << expressionRemovedContext.ToString();
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.children.GetIndex(expressionRemovedContext);
+  int indexInPolyVars=myPolyVars.GetIndexChild(expressionRemovedContext);
 //  std::cout << "<br>Expression without context " << expressionRemovedContext.ToString()
 //  << " (Lisp: " << expressionRemovedContext.Lispify()
 //  << ") has index " << indexInPolyVars << " in " << myPolyVars.ToString()
@@ -424,7 +426,7 @@ bool Expression::ConvertToType<RationalFunctionOld>(Expression& output)const
   << ", without context: " << expressionRemovedContext.ToString();
 
   Expression myPolyVars=this->GetContext().ContextGetPolynomialVariables();
-  int indexInPolyVars=myPolyVars.children.GetIndex(expressionRemovedContext);
+  int indexInPolyVars=myPolyVars.GetIndexChild(expressionRemovedContext);
   if (indexInPolyVars==-1)
     return false;
   RationalFunctionOld resultRF;
@@ -463,10 +465,12 @@ bool Expression::GetContextForConversionIgnoreMyContext<Polynomial<Rational> >
   if (this->IsOfType<Rational>() || this->IsOfType<Polynomial<Rational> >())
     return output.MakeEmptyContext(*this->theBoss);
   output.reset(*this->theBoss, 2);
-  output[0].MakeAtom(this->theBoss->opContext(), *this->theBoss);
-  output[1].reset(*this->theBoss, 2);
-  output[1][0].MakeAtom(this->theBoss->opPolynomialVariables(), *this->theBoss);
-  output[1][1]=*this;
+  output.AssignChildAtomValue(0, this->theBoss->opContext(), *this->theBoss);
+  Expression tempE;
+  tempE.reset(*this->theBoss, 2);
+  tempE.AssignChildAtomValue(0, this->theBoss->opPolynomialVariables(), *this->theBoss);
+  tempE.AssignChild(1, *this);
+  output.AssignChild(1, tempE);
   return true;
 }
 
@@ -487,6 +491,34 @@ bool Expression::GetContextForConversionIgnoreMyContext
 }
 //end Expression::GetContextForConversionIgnoreMyContext specializations.
 
+const Expression& Expression::operator[](int n)const
+{ this->CheckInitialization();
+  int childIndex=this->children[n];
+  if (childIndex<0)
+  { std::cout << "<hr>This is a programming error: the n-th child of "
+    << " the current expression has negative index in the expression container. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theExpressionContainer[childIndex];
+}
+
+bool Expression::AssignChild(int childIndexInMe, const Expression& inputChild)
+{ this->CheckInitialization();
+  return this->AssignChild(childIndexInMe, this->theBoss->theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(inputChild));
+}
+
+bool Expression::AssignChild(int childIndexInMe, int childIndexInBoss)
+{ this->children[childIndexInMe]=childIndexInBoss;
+  return true;
+}
+
+bool Expression::AssignChildAtomValue(int childIndex, int theAtom, CommandList& owner)
+{ Expression tempE;
+  tempE.MakeAtom(theAtom, owner);
+  return this->AssignChild(childIndex, tempE);
+}
+
 bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
 { if (N!=-1)
   { if (this->children.size!=N)
@@ -494,11 +526,11 @@ bool Expression::IsListNElementsStartingWithAtom(int theOp, int N)const
   } else
     if (this->children.size==0)
       return false;
-  if (!this->children[0].IsAtoM())
+  if (!(*this)[0].IsAtoM())
     return false;
   if (theOp==-1)
     return true;
-  return this->children[0].theData==theOp;
+  return (*this)[0].theData==theOp;
 }
 
 int Expression::ContextGetNumContextVariables()const
@@ -507,9 +539,9 @@ int Expression::ContextGetNumContextVariables()const
   if (!this->IsListNElementsStartingWithAtom(this->theBoss->opContext()))
     return 0;
   for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsListNElementsStartingWithAtom
+    if ((*this)[i].IsListNElementsStartingWithAtom
         (this->theBoss->opPolynomialVariables()))
-      return this->children[i].children.size-1;
+      return (*this)[i].children.size-1;
   return 0;
 }
 
@@ -526,6 +558,7 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
 //  << " in expression " << this->ToString();
   Expression newContext;
   Expression myOldContext=this->GetContext();
+//  std::cout << "<br>In " << this->ToString() << ", merging my old context, " << myOldContext.Lispify() << " and the input context, " << inputOutputMinContext.Lispify();
   if (!this->ContextMergeContexts(myOldContext, inputOutputMinContext, newContext))
     return false;
   if (myOldContext==newContext)
@@ -542,9 +575,9 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   if (this->IsOfType<Rational>())
   { if (this->children.size==2)
     { this->children.SetSize(3);
-      this->children[2]=this->children[1];
+      this->AssignChild(2, (*this)[1]);
     }
-    this->children[1]=inputOutputMinContext;
+    this->AssignChild(1, inputOutputMinContext);
     return true;
   }
   if (this->IsOfType<ElementUniversalEnveloping<RationalFunctionOld> > ())
@@ -579,8 +612,8 @@ bool Expression::SetContextAtLeastEqualTo(Expression& inputOutputMinContext)
   }
   Expression tempE=*this;
   this->reset(*this->theBoss, 2);
-  this->children[0]=tempE;
-  this->children[1]=inputOutputMinContext;
+  this->AssignChild(0, tempE);
+  this->AssignChild(1, inputOutputMinContext);
   return true;
 }
 
@@ -612,9 +645,11 @@ bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
   if (index==indexInOwners)
     return true;
   this->children.SetSize(this->children.size+1);
-  this->children.LastObject()->reset(owner, 2);
-  this->children.LastObject()->children[0].MakeAtom(owner.opSSLieAlg(), owner);
-  this->children.LastObject()->children[1].MakeAtom(indexInOwners, owner);
+  Expression tempE;
+  tempE.reset(owner, 2);
+  tempE.AssignChildAtomValue(0, owner.opSSLieAlg(), owner);
+  tempE.AssignChildAtomValue(1, indexInOwners, owner);
+  this->AssignChild(this->children.size-1, tempE);
   return true;
 }
 
@@ -628,11 +663,11 @@ Expression Expression::ContextGetPolynomialVariables()const
     assert(false);
   }
   for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
-      return this->children[i];
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opPolynomialVariables()))
+      return (*this)[i];
   Expression output;
   output.reset(*this->theBoss, 1);
-  output[0].MakeAtom(this->theBoss->opPolynomialVariables(), *this->theBoss);
+  output.AssignChildAtomValue(0, this->theBoss->opPolynomialVariables(), *this->theBoss);
   return output;
 }
 
@@ -655,30 +690,35 @@ bool Expression::ContextMergeContexts
   Expression rightPolyV=rightContext.ContextGetPolynomialVariables();
 //  std::cout << "<br>Merging contexts: " << leftContext.ToString() << " and " << rightContext.ToString();
   HashedList<Expression> varUnion;
+  List<int> varUnionIndices;
   varUnion.SetExpectedSize(leftPolyV.children.size+rightPolyV.children.size-2);
   for (int i =1; i<leftPolyV.children.size; i++)
     varUnion.AddOnTopNoRepetition(leftPolyV[i]);
   for (int i =1; i<rightPolyV.children.size; i++)
     varUnion.AddOnTopNoRepetition(rightPolyV[i]);
   varUnion.QuickSortAscending();
+  varUnionIndices.SetSize(varUnion.size);
   CommandList& owner=*leftContext.theBoss;
-  outputContext.children.ReservE(3);
+  for (int i=0; i<varUnion.size; i++)
+    varUnionIndices[i]=owner.theExpressionContainer.GetIndex(varUnion[i]);
+  outputContext.children.ReservE(5+varUnion.size);
   outputContext.reset(owner, 1);
-  outputContext[0].MakeAtom(owner.opContext(), owner);
+  outputContext.AssignChildAtomValue(0, owner.opContext(), owner);
   if (varUnion.size>0)
-  { outputContext.children.SetSize(outputContext.children.size+1);
-    Expression& polyVarsE=*outputContext.children.LastObject();
-    polyVarsE.children.ReservE(varUnion.size+1);
+  { Expression polyVarsE;
     polyVarsE.reset(owner,1);
-    polyVarsE[0].MakeAtom(owner.opPolynomialVariables(), owner);
-    polyVarsE.children.AddListOnTop(varUnion);
+    polyVarsE.children.ReservE(varUnion.size+1);
+    polyVarsE.AssignChildAtomValue(0, owner.opPolynomialVariables(), owner);
+    polyVarsE.children.AddListOnTop(varUnionIndices);
+    outputContext.AddChildOnTop(polyVarsE);
   }
   if (leftSSindex!=-1)
   { outputContext.children.SetSize(outputContext.children.size+1);
-    Expression& ssAlgE=*outputContext.children.LastObject();
+    Expression ssAlgE;
     ssAlgE.reset(owner, 2);
-    ssAlgE[0].MakeAtom(owner.opSSLieAlg(), owner);
-    ssAlgE[1].MakeAtom(leftSSindex, owner);
+    ssAlgE.AssignChildAtomValue(0, owner.opSSLieAlg(), owner);
+    ssAlgE.AssignChildAtomValue(1, leftSSindex, owner);
+    outputContext.AssignChild(outputContext.children.size-1, ssAlgE);
   }
 //  std::cout << "<br>The result of the merge is: " << outputContext.ToString();
   return true;
@@ -708,7 +748,7 @@ bool Expression::IsError(std::string* outputErrorMessage)const
     return false;
   if (!this->IsListNElementsStartingWithAtom(this->theBoss->opError(), 2))
     return false;
-  return this->children[1].IsOfType<std::string>(outputErrorMessage);
+  return (*this)[1].IsOfType<std::string>(outputErrorMessage);
 }
 
 bool Expression::IsSequenceNElementS(int N)const
@@ -720,23 +760,10 @@ bool Expression::IsSequenceNElementS(int N)const
 void Expression::operator=(const Expression& other)
 { if (this==&other)
     return;
-  this->CopyValueFromNoChildrenCopy(other);
-  this->children.SetSize(other.children.size);
-  if (this->children.size>0)
-  { if (this->theBoss==0)
-    { std::cout
-      << "This is a programming error: expressions that do not have initialized boss "
-      << "are not allowed to have children. "
-      << "The error was noticed while trying to copy such an expression "
-      << "(I am not displaying the expression as its ToString() method"
-      << " cannot be computed correctly if it doesn't have a boss). "
-      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-      assert(false);
-    }
-    RecursionDepthCounter recursionCounter(&this->theBoss->RecursionDeptH);
-    for (int i=0; i<other.children.size; i++)
-      this->children[i]=(other.children[i]);
-  }
+  this->theBoss=other.theBoss;
+  this->theData=other.theData;
+  this->children=other.children;
+  this->format=other.format;
 }
 
 bool Expression::IsEqualToOne()const
@@ -781,7 +808,7 @@ std::string CommandList::WriteDefaultLatexFileReturnHtmlLink
     << fileName.str() << ".dvi";
 //    std::cout << "<br>system command:<br>" << systemCommand2.str();
     this->SystemCommands.AddOnTop(systemCommand2.str());
-    systemCommand3 << " ps2png " << fileName.str() << ".ps "
+    systemCommand3 << " convert " << fileName.str() << ".ps "
     << fileName.str() << ".png";
 //    std::cout << "<br>system command:<br>" << systemCommand3.str();
     this->SystemCommands.AddOnTop(systemCommand3.str());
@@ -806,14 +833,14 @@ void Expression::MakeProducT
 void Expression::MakeFunction
   (CommandList& owner, const Expression& theFunction, const Expression& theArgument)
 { this->reset(owner, 2);
-  this->children[0]=theFunction;
-  this->children[1]=theArgument;
+  this->AssignChild(0, theFunction);
+  this->AssignChild(1, theArgument);
   this->format=this->formatFunctionUseUnderscore;
 }
 
 bool Expression::MakeEmptyContext(CommandList& owner)
-{ this->reset(owner,1);
-  this->children[0].MakeAtom(owner.opContext(), owner);
+{ this->reset(owner, 1);
+  this->AssignChildAtomValue(0, owner.opContext(), owner);
   return true;
 }
 
@@ -822,10 +849,9 @@ void Expression::MakeXOX
 { this->reset(owner);
   this->theData=owner.opLisT();
   this->children.SetSize(3);
-  this->children[0].MakeAtom(theOp, owner);
-  this->children[0].theData=theOp;
-  this->children[1]=left;
-  this->children[2]=right;
+  this->AssignChildAtomValue(0, theOp, owner);
+  this->AssignChild(1, left);
+  this->AssignChild(2, right);
 }
 
 bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
@@ -834,13 +860,12 @@ bool CommandList::ReplaceOXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(4);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(opElt.controlIndex), *this);
+  newExpr.reset(*this, 4);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(opElt.controlIndex), *this);
   newExpr.format=formatOptions;
-  newExpr.children[1]=(leftE.theData);
-  newExpr.children[2]=(middleE.theData);
-  newExpr.children[3]=(rightE.theData);
+  newExpr.AssignChild(1, leftE.theData);
+  newExpr.AssignChild(2, middleE.theData);
+  newExpr.AssignChild(3, rightE.theData);
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
   this->DecreaseStackSetCharacterRangeS(7);
@@ -854,12 +879,11 @@ bool CommandList::ReplaceOXXEXEXEXByE(int formatOptions)
   SyntacticElement& middleE= (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& rightE = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(4);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(opElt.controlIndex), *this);
-  newExpr.children[1]=(leftE.theData);
-  newExpr.children[2]=(middleE.theData);
-  newExpr.children[3]=(rightE.theData);
+  newExpr.reset(*this, 4);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(opElt.controlIndex), *this);
+  newExpr.AssignChild(1, leftE.theData);
+  newExpr.AssignChild(2, middleE.theData);
+  newExpr.AssignChild(3, rightE.theData);
   newExpr.format= formatOptions;
   opElt.theData=newExpr;
   opElt.controlIndex=this->conExpression();
@@ -872,10 +896,9 @@ bool CommandList::ReplaceOXEByE(int formatOptions)
 { SyntacticElement& left=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(2);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(left.controlIndex), *this);
-  newExpr.children[1]=(right.theData);
+  newExpr.reset(*this, 2);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(left.controlIndex), *this);
+  newExpr.AssignChild(1, right.theData);
   newExpr.format= formatOptions;
   left.theData=newExpr;
   left.controlIndex=this->conExpression();
@@ -888,10 +911,9 @@ bool CommandList::ReplaceOEXByEX(int formatOptions)
 { SyntacticElement& middle=(*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(2);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(middle.controlIndex), *this);
-  newExpr.children[1]=(right.theData);
+  newExpr.reset(*this, 2);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(middle.controlIndex), *this);
+  newExpr.AssignChild(1, right.theData);
   newExpr.format= formatOptions;
   middle.theData=newExpr;
   middle.controlIndex=this->conExpression();
@@ -1079,7 +1101,7 @@ bool CommandList::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int input
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& afterleft = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
-  left.theData.children.AddOnTop(right.theData);
+  left.theData.AddChildOnTop(right.theData);
   left.theData.format=inputFormat;
   left.controlIndex=theControlIndex;
   afterleft=*this->CurrentSyntacticStacK->LastObject();
@@ -1091,7 +1113,7 @@ bool CommandList::ReplaceSequenceUXEYBySequenceZY(int theControlIndex, int input
 bool CommandList::ReplaceSequenceXEBySequence(int theControlIndex, int inputFormat)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
-  left.theData.children.AddOnTop(right.theData);
+  left.theData.AddChildOnTop(right.theData);
   left.theData.format=inputFormat;
   left.controlIndex=theControlIndex;
   this->DecreaseStackSetCharacterRangeS(2);
@@ -1103,8 +1125,8 @@ bool CommandList::ReplaceYXdotsXBySequenceYXdotsX(int theControlIndex, int input
 { SyntacticElement& main = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-numXs-1];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr[0].MakeAtom(this->opSequence(), *this);
-  newExpr[1]=(main.theData);
+  newExpr.AssignChildAtomValue(0, this->opSequence(), *this);
+  newExpr.AssignChild(1, main.theData);
   newExpr.format=inputFormat;
   main.theData=newExpr;
   main.controlIndex=theControlIndex;
@@ -1116,9 +1138,9 @@ bool CommandList::ReplaceEXEBySequence(int theControlIndex, int inputFormat)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr[0].MakeAtom(this->opSequence(), *this);
-  newExpr[1]=(left.theData);
-  newExpr[2]=(right.theData);
+  newExpr.AssignChildAtomValue(0, this->opSequence(), *this);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, right.theData);
   newExpr.format=inputFormat;
   left.theData=newExpr;
   left.controlIndex=theControlIndex;
@@ -1131,12 +1153,11 @@ bool CommandList::ReplaceEEByEusingO(int theControlIndex)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(3);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.reset(*this, 3);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
   //    newExpr.inputIndexBoundVars=
-  newExpr.children[1]=(left.theData);
-  newExpr.children[2]=(right.theData);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, right.theData);
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(1);
   //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
@@ -1147,12 +1168,11 @@ bool CommandList::ReplaceEEXByEXusingO(int theControlIndex)
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-3];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(3);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.reset(*this, 3);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
   //    newExpr.inputIndexBoundVars=
-  newExpr.children[1]=(left.theData);
-  newExpr.children[2]=(right.theData);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, right.theData);
   left.theData=newExpr;
   this->DecreaseStackExceptLast(1);
   //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
@@ -1165,10 +1185,10 @@ bool CommandList::ReplaceEXXEXEByEusingO(int theControlIndex)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
   newExpr.reset(*this, 4);
-  newExpr[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
-  newExpr[1]=(left.theData);
-  newExpr[2]=(middle.theData);
-  newExpr[3]=(right.theData);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, middle.theData);
+  newExpr.AssignChild(3, right.theData);
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(5);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
@@ -1180,12 +1200,11 @@ bool CommandList::ReplaceEXXEXEXByEXusingO(int theControlIndex)
   SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-7];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
-  newExpr.reset(*this);
-  newExpr.children.SetSize(4);
-  newExpr[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
-  newExpr[1]=(left.theData);
-  newExpr[2]=(middle.theData);
-  newExpr[3]=(right.theData);
+  newExpr.reset(*this, 4);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, middle.theData);
+  newExpr.AssignChild(3, right.theData);
   left.theData=newExpr;
   this->DecreaseStackExceptLast(5);
 //    std::cout << (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size()-1].theData.ElementToStringPolishForm();
@@ -1199,9 +1218,9 @@ bool CommandList::ReplaceEOEXByEX(int formatOptions)
   Expression newExpr;
   newExpr.reset(*this);
   newExpr.children.SetSize(3);
-  newExpr.children[0].MakeAtom(this->GetOperationIndexFromControlIndex(middle.controlIndex),*this);
-  newExpr.children[1]=(left.theData);
-  newExpr.children[2]=(right.theData);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(middle.controlIndex),*this);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, right.theData);
   newExpr.format=formatOptions;
   left.theData=newExpr;
   middle=*(*this->CurrentSyntacticStacK).LastObject();
@@ -1497,15 +1516,15 @@ bool CommandList::fHWTAABF
   (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fHWTAABF");
   RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  if (input.IsListNElements(3))
+  if (!input.IsListNElements(4))
     return output.SetError("Function expects three arguments.", theCommands);
   Expression leftExpression, rightExpression, finalContext;
-  Expression& weightExpression=input.children[3];
+  const Expression& weightExpression=input[3];
   if (!theCommands.innerElementUniversalEnvelopingAlgebra
-      (theCommands, input.children[1], leftExpression))
+      (theCommands, input[1], leftExpression))
     return output.SetError("Failed to convert left expression to element UE.", theCommands);
   if (!theCommands.innerElementUniversalEnvelopingAlgebra
-      (theCommands, input.children[2], rightExpression ))
+      (theCommands, input[2], rightExpression ))
     return output.SetError("Failed to convert left expression to element UE.", theCommands);
   if (!Expression::ContextMergeContexts
       (leftExpression.GetContext(), rightExpression.GetContext(), finalContext))
@@ -1551,7 +1570,7 @@ bool CommandList::fHWTAABF
 }
 
 template<class CoefficientType>
-bool CommandList::fGetTypeHighestWeightParabolic
+bool CommandList::innerGetTypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeightHWFundcoords, Selection& outputInducingSel,
  Expression& outputHWContext, SemisimpleLieAlgebra*& ambientSSalgebra,
@@ -1560,8 +1579,8 @@ bool CommandList::fGetTypeHighestWeightParabolic
     return output.SetError
     ("Function TypeHighestWeightParabolic is expected to have two or three arguments: \
      SS algebra type, highest weight, [optional] parabolic selection. ", theCommands);
-  Expression& leftE=input[1];
-  Expression& middleE=input[2];
+  const Expression& leftE=input[1];
+  const Expression& middleE=input[2];
   std::string errorString;
   if (!CommandList::CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerSSLieAlgebra, leftE, ambientSSalgebra, &errorString))
@@ -1577,7 +1596,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
   }
   if (input.IsSequenceNElementS(3))
   { Vector<Rational> parabolicSel;
-    Expression& rightE=input[3];
+    const Expression& rightE=input[3];
     if (!theCommands.GetVector<Rational>
         (rightE, parabolicSel, &outputHWContext, ambientSSalgebra->GetRank(), 0))
     { std::stringstream tempStream;
@@ -1600,7 +1619,7 @@ bool CommandList::fGetTypeHighestWeightParabolic
   }
   int algebraIndex=theCommands.theObjectContainer.theLieAlgebras.GetIndex(*ambientSSalgebra);
   outputHWContext.ContextSetSSLieAlgebrA(algebraIndex, theCommands);
-//  std::cout << "final context of fGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
+//  std::cout << "final context of innerGetTypeHighestWeightParabolic: " << outputHWContext.ToString();
   return true;
 }
 
@@ -1613,7 +1632,7 @@ bool CommandList::fDecomposeCharGenVerma
   Selection parSel, invertedParSel;
   SemisimpleLieAlgebra* theSSlieAlg=0;
   output.reset(theCommands);
-  if (!theCommands.fGetTypeHighestWeightParabolic<RationalFunctionOld>
+  if (!theCommands.innerGetTypeHighestWeightParabolic<RationalFunctionOld>
       (theCommands, input, output, theHWfundcoords, parSel, theContext, theSSlieAlg,
        theCommands.innerRationalFunction))
    return false;
@@ -1721,7 +1740,7 @@ bool CommandList::fHWV
   Vector<RationalFunctionOld> theHWfundcoords;
   Expression hwContext(theCommands);
   SemisimpleLieAlgebra* theSSalgebra=0;
-  if(!theCommands.fGetTypeHighestWeightParabolic
+  if(!theCommands.innerGetTypeHighestWeightParabolic
       (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
        theCommands.innerRationalFunction) )
     return output.SetError("Failed to extract highest weight vector data", theCommands);
@@ -1740,9 +1759,9 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorUpToLevel
     return output.SetError
     ("Function fSplitGenericGenVermaTensorFD is expected to have three arguments: \
      SS algebra type, Number, List{}. ", theCommands);
-  Expression& leftE=input[1];
-  Expression& genVemaWeightNode=input[3];
-  Expression& levelNode=input[2];
+  const Expression& leftE=input[1];
+  const Expression& genVemaWeightNode=input[3];
+  const Expression& levelNode=input[2];
   Expression resultSSalgebraE;
   resultSSalgebraE=leftE;
   std::string errorString;
@@ -2468,9 +2487,9 @@ bool CommandList::fSplitGenericGenVermaTensorFD
     return output.SetError
     ("Function fSplitGenericGenVermaTensorFD is expected to have three arguments: \
      SS algebra type, weight, weight. ", theCommands);
-  Expression& leftE=input[1];
-  Expression& genVemaWeightNode=input[3];
-  Expression& fdWeightNode=input[2];
+  const Expression& leftE=input[1];
+  const Expression& genVemaWeightNode=input[3];
+  const Expression& fdWeightNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -2705,9 +2724,9 @@ bool CommandList::innerFunctionToMatrix
   std::cout << input.ToString();
   if (!input.IsSequenceNElementS(3))
     return false;
-  Expression& leftE  =input[1];
-  Expression& middleE=input[2];
-  Expression& rightE =input[3];
+  const Expression& leftE  =input[1];
+  const Expression& middleE=input[2];
+  const Expression& rightE =input[3];
 //  std::cout << leftE.ToString() << ", " << rightE.ToString() << ", " << middleE.ToString();
   int numRows, numCols;
   if (!middleE.IsSmallInteger(&numRows) || !rightE.IsSmallInteger(&numCols))
@@ -2722,22 +2741,22 @@ bool CommandList::innerFunctionToMatrix
     return false;
   }
   output.reset(theCommands, numRows+1);
-  output[0].MakeAtom(theCommands.opSequence(), theCommands);
+  output.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
   output.format=output.formatMatrix;
-  Expression theIndices;
+  Expression theIndices, currentRow, currentE;
   theIndices.reset(theCommands, 3);
-  theIndices[0].MakeAtom(theCommands.opSequence(), theCommands);
+  theIndices.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
   for (int i=0; i<numRows; i++)
-  { Expression& currentRow=output[i+1];
-    currentRow.reset(theCommands, numCols+1);
-    currentRow[0].MakeAtom(theCommands.opSequence(), theCommands);
+  { currentRow.reset(theCommands, numCols+1);
+    currentRow.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
     currentRow.format=currentRow.formatMatrixRow;
     for (int j=0; j<numCols; j++)
-    { Expression& currentE=currentRow[j+1];
-      theIndices[1].AssignValue<Rational>(i+1, theCommands);
-      theIndices[2].AssignValue<Rational>(j+1, theCommands);
+    { theIndices.AssignValueToChild(1, (Rational)(i+1), theCommands);
+      theIndices.AssignValueToChild(2, (Rational)(j+1), theCommands);
       currentE.MakeFunction(theCommands, leftE, theIndices);
+      currentRow.AssignChild(j+1, currentE);
     }
+    output.AssignChild(i+1, currentRow);
   }
   return true;
 }
@@ -2885,8 +2904,8 @@ bool CommandList::innerWeylOrbit
  bool useFundCoords, bool useRho)
 { if (!input.IsSequenceNElementS(2))
     return output.SetError("innerWeylOrbit takes two arguments", theCommands);
-  Expression& theSSalgebraNode=input[1];
-  Expression& vectorNode=input[2];
+  const Expression& theSSalgebraNode=input[1];
+  const Expression& vectorNode=input[2];
   SemisimpleLieAlgebra* theSSalgebra;
   std::string errorString;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
@@ -3162,7 +3181,7 @@ bool CommandList::innerSSLieAlgebra
       if (firstCoRootSquaredLength<=0)
         return output.SetError
         ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat), theCommands);
-      typeLetter.AssignChild(1);
+      typeLetter.AssignMeMyChild(1);
       foundLengthFromExpression=true;
     }
     std::string theTypeName;
@@ -3262,7 +3281,7 @@ bool Expression::HasBoundVariables()const
   if (this->IsListOfTwoAtomsStartingWith(this->theBoss->opBind()))
     return true;
   for (int i=0; i<this->children.size; i++)
-    if (this->children[i].HasBoundVariables())
+    if ((*this)[i].HasBoundVariables())
       return true;
   return false;
 }
@@ -3312,8 +3331,12 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
-  this->controlSequences.Clear();
 
+  this->theExpressionContainer.Clear();
+//  this->theExpressionContainer.SetExpectedSize(1000);
+
+
+  this->controlSequences.Clear();
   this->operationS.Clear();
   this->builtInTypes.Clear();
   this->FunctionHandlers.SetSize(0);
@@ -3424,8 +3447,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
    (InternalVariable1{}InternalVariableA,\
    InternalVariableB)")
   ;
-  this->theProgramExpression[1][0][0].MakeAtom(this->opSSLieAlg(), *this);
-  this->theProgramExpression[2][1][1][0].MakeAtom(this->opSSLieAlg(), *this);
+  this->theProgramExpression[1][0].AssignChildAtomValue(0, this->opSSLieAlg(), *this);
+  this->theProgramExpression[2][1][1].AssignChildAtomValue(0, this->opSSLieAlg(), *this);
   this->RuleStack.AddOnTop(this->theProgramExpression);
 */
 
@@ -3495,40 +3518,42 @@ bool CommandList::outerExtractBaseMultiplication
   if (!input.IsListNElementsStartingWithAtom(theCommands.opTimes(), 3))
     return false;
   bool result=false;
-  output=input;
-  Expression& leftE=output[1];
-  Expression& rightE=output[2];
-//  std::cout << "<br>handling base extraction of: " << input.ToString();
+  //  std::cout << "<br>handling base extraction of: " << input.ToString();
   //handle Anything*Rational:=Rational*Anything
-  if (rightE.IsOfType<Rational>())
-  { MathRoutines::swap(leftE, rightE);
+  output=input;
+  if (output[2].IsOfType<Rational>())
+  { MathRoutines::swap(output.children[1], output.children[2]);
     result=true;
 //    std::cout << "swapped " << leftE.ToString() << " and " << rightE.ToString();
   }
-  if (rightE.IsListStartingWithAtom(theCommands.opTimes()))
-  { if (rightE.children.size!=3)
+//  Expression leftE=output[1];
+//  Expression rightE=output[2];
+  if (output[2].IsListStartingWithAtom(theCommands.opTimes()))
+  { if (output[2].children.size!=3)
       return result;
-    Expression& rightLeftE=rightE[1];
-    Expression& rightRightE=rightE[2];
+//    Expression rightLeftE=rightE[1];
+//    Expression rightRightE=rightE[2];
     //handle Anything1*(Rational*Anything2):=Rational*(Anything1*Anything2)
-    if (rightLeftE.IsOfType<Rational>())
-    { MathRoutines::swap(rightLeftE, leftE);
+    if (output[2][1].IsOfType<Rational>())
+    { Expression tempRight;
+      tempRight.MakeXOX(theCommands, theCommands.opTimes(), output[1], output[2][2]);
+      output.MakeXOX(theCommands, theCommands.opTimes(), output[2][1], tempRight);
       result=true;
 //      std::cout << " swapped " << rightLeftE.ToString() << " and " << leftE.ToString();
     }
     //<- handle a*(b*anything)
     //on condition that a*b has an inner handler
     Expression tempExp, newExpr;
-    tempExp.reset(theCommands,2);
-    tempExp[0]=leftE;
-    tempExp[1]=rightLeftE;
+    tempExp.reset(theCommands, 2);
+    tempExp.AssignChild(0, output[1]);
+    tempExp.AssignChild(1, output[2][1]);
     if (theCommands.innerTimes(theCommands, tempExp, newExpr))
-    { output.MakeProducT(theCommands, newExpr, rightRightE);
+    { output.MakeProducT(theCommands, newExpr, output[2][2]);
       result=true;
     }
   }
   //handle 0*anything=0
-  if (leftE.IsEqualToZero())
+  if (output[1].IsEqualToZero())
     return output.AssignValue(0, theCommands);
   return result;
 }
@@ -3552,13 +3577,14 @@ bool CommandList::StandardIsDenotedBy
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
   if (!input.IsListNElementsStartingWithAtom(theCommands.opIsDenotedBy(), 3))
     return false;
-  Expression& withNotation=input[2];
-  Expression& theNotation=input[1];
+  const Expression& withNotation=input[2];
+  const Expression& theNotation=input[1];
   theCommands.Comments << "<br>Registering notation: globally, " << withNotation.ToString()
   << " will be denoted by " << theNotation.ToString();
   theCommands.theObjectContainer.ExpressionNotation.AddOnTop(theNotation.ToString());
   theCommands.theObjectContainer.ExpressionWithNotation.AddOnTop(withNotation);
-  input[0].theData=theCommands.opDefine();
+  output=input;
+  output.AssignChildAtomValue(0, theCommands.opDefine(), theCommands);
   ////
   if (withNotation.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
     if (withNotation.GetValuENonConstUseWithCaution
@@ -3589,13 +3615,11 @@ bool CommandList::outerLeftDistributeBracketIsOnTheLeft
   int theMultiplicativeOP=input[0].theData;
   if (!input[1].IsListNElementsStartingWithAtom(theAdditiveOp,3))
     return false;
-  int theFormat=input.format;
+//  int theFormat=input.format;
   output.reset(theCommands, 3);
-  output[0].MakeAtom(theAdditiveOp, theCommands);
-  output[1].MakeXOX(theCommands, theMultiplicativeOP, input[1][1], input[2]);
-  output[2].MakeXOX(theCommands, theMultiplicativeOP, input[1][2], input[2]);
-  output[1].format=theFormat;
-  output[2].format=theFormat;
+  output.AssignChildAtomValue(0, theAdditiveOp, theCommands);
+  output.AssignXOXToChild(1, theCommands, theMultiplicativeOP, input[1][1], input[2]);
+  output.AssignXOXToChild(2, theCommands, theMultiplicativeOP, input[1][2], input[2]);
   return true;
 }
 
@@ -3608,13 +3632,11 @@ bool CommandList::outerRightDistributeBracketIsOnTheRight
   int theMultiplicativeOP=input[0].theData;
   if (!input[2].IsListNElementsStartingWithAtom(theAdditiveOp, 3))
     return false;
-  int theFormat=input.format;
+//  int theFormat=input.format;
   output.reset(theCommands, 3);
-  output[0].MakeAtom(theAdditiveOp, theCommands);
-  output[1].MakeXOX(theCommands, theMultiplicativeOP, input[1], input[2][1]);
-  output[2].MakeXOX(theCommands, theMultiplicativeOP, input[1], input[2][2]);
-  output[1].format=theFormat;
-  output[2].format=theFormat;
+  output.AssignChildAtomValue(0, theAdditiveOp, theCommands);
+  output.AssignXOXToChild(1, theCommands, theMultiplicativeOP, input[1], input[2][1]);
+  output.AssignXOXToChild(2, theCommands, theMultiplicativeOP, input[1], input[2][2]);
   return true;
 }
 
@@ -3626,8 +3648,7 @@ bool CommandList::outerPlus
   List<Expression>& summands= theCommands.buffer1;
   summands.SetSize(0);
   //bool needSimplification=
-  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical
-  (input, summands);
+  theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
   MonomialCollection<Expression, Rational> theSum;
 //  Rational constTerm=0;
 //  bool foundConstTerm=false;
@@ -3640,12 +3661,12 @@ bool CommandList::outerPlus
 //return false;
   theSum.MakeZero();
   for (int i=0; i<summands.size; i++)
-  { Expression* currentSummandNoCoeff;
+  { const Expression* currentSummandNoCoeff;
     currentSummandNoCoeff=&summands[i];
     Rational theCoeff=1;
     if (currentSummandNoCoeff->IsListStartingWithAtom(theCommands.opTimes()))
-    { if(currentSummandNoCoeff->children[1].IsOfType<Rational>(&theCoeff))
-        currentSummandNoCoeff=&currentSummandNoCoeff->children[2];
+    { if((*currentSummandNoCoeff)[1].IsOfType<Rational>(&theCoeff))
+        currentSummandNoCoeff=&((*currentSummandNoCoeff)[2]);
     } else if (currentSummandNoCoeff->IsOfType<Rational>(&theCoeff))
       currentSummandNoCoeff=&oneE;
     theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
@@ -3671,21 +3692,36 @@ bool CommandList::outerPlus
       current.AssignValue(theSum.theCoeffs[i], theCommands);
     else if (!theSum.theCoeffs[i].IsEqualToOne())
     { current.reset(theCommands, 3);
-      current.children[0].MakeAtom(theCommands.opTimes(), theCommands);
-      current.children[1].AssignValue(theSum.theCoeffs[i], theCommands);
-      current.children[2]=theSum[i];
+      current.AssignChildAtomValue(0, theCommands.opTimes(), theCommands);
+      current.AssignValueToChild(1, theSum.theCoeffs[i], theCommands);
+      current.AssignChild(2, theSum[i]);
     } else
       current=theSum[i];
   }
-  Expression* currentExp;
-  currentExp=&output;
-  for (int i=0; i<summandsWithCoeff.size-1; i++)
-  { currentExp->reset(theCommands, 3);
-    currentExp->children[0].MakeAtom(theCommands.opPlus(), theCommands);
-    currentExp->children[1]=summandsWithCoeff[i];
-    currentExp=& currentExp->children[2];
+  if (summandsWithCoeff.size>=2)
+  { if (summandsWithCoeff[0]>summandsWithCoeff[1] &&
+        summandsWithCoeff[1]>summandsWithCoeff[0])
+    { std::cout << "Bad comparison! ";
+      assert(false);
+    }
   }
-  *currentExp=summandsWithCoeff[summandsWithCoeff.size-1];
+  summandsWithCoeff.QuickSortAscending();
+  if (summandsWithCoeff.size==1)
+  { output=summandsWithCoeff[0];
+    return true;
+  }
+
+  output.MakeXOX
+  (theCommands, theCommands.opPlus(), summandsWithCoeff[summandsWithCoeff.size-1],
+   summandsWithCoeff[summandsWithCoeff.size-2]);
+  Expression result;
+  result.reset(theCommands, 3);
+  result.AssignChildAtomValue(0, theCommands.opPlus(), theCommands);
+  for (int i=summandsWithCoeff.size-3; i>=0; i--)
+  { result.AssignChild(2, output);
+    result.AssignChild(1, summandsWithCoeff[i]);
+    output=result;
+  }
   return true;
 }
 
@@ -3719,7 +3755,7 @@ bool CommandList::outerStandardFunction
   }
   if (!input.IsLisT())
     return false;
-  Expression& functionNameNode =input[0];
+  const Expression& functionNameNode =input[0];
   int theIndex;
 //  std::cout << "<br>Simplifying " << input.ToString();
   if (functionNameNode.IsListStartingWithAtom(theCommands.opSequence()))
@@ -3736,7 +3772,9 @@ bool CommandList::outerStandardFunction
     { Function& outerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       if (outerFun.theFunction(theCommands, input, output))
         if(output!=input)
+        //{ //std::cout << "input: " << input.ToString() << " output: " << output.ToString();
           return true;
+        //}
     } else
     { Function& innerFun=theCommands.FunctionHandlers[functionNameNode.theData][i];
       Expression arguments;
@@ -3749,7 +3787,7 @@ bool CommandList::outerStandardFunction
       else
       { arguments.reset(theCommands, input.children.size-1);
         for (int i=1; i<input.children.size; i++)
-          arguments[i-1]=input[i];
+          arguments.AssignChild(i-1, input[i]);
       }
       if (innerFun.inputFitsMyInnerType(arguments))
         if (innerFun.theFunction(theCommands, arguments, output))
@@ -3762,8 +3800,8 @@ bool CommandList::outerEqualEqual
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (input.IsSequenceNElementS(3))
     return false;
-  Expression& left=input[1];
-  Expression& right=input[2];
+  const Expression& left=input[1];
+  const Expression& right=input[2];
   if (left.HasBoundVariables() || right.HasBoundVariables())
     return false;
   if (left==right)
@@ -3776,8 +3814,8 @@ bool CommandList::outerLieBracket
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsListNElements(3))
     return false;
-  Expression& leftE=input[1];
-  Expression& rightE=input[2];
+  const Expression& leftE=input[1];
+  const Expression& rightE=input[2];
   if (leftE.IsOfType<Rational>() && rightE.IsOfType<Rational>())
     return output.AssignValue(0, theCommands);
   if (leftE.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >() ||
@@ -3799,8 +3837,8 @@ bool CommandList::outerLieBracket
 
 bool Expression::SetError(const std::string& theError, CommandList& owner)
 { this->reset(owner, 2);
-  this->children[0].MakeAtom(owner.opError(), owner);
-  this->children[1].AssignValue<std::string>(theError, owner);
+  this->AssignChildAtomValue(0, owner.opError(), owner);
+  this->AssignValueToChild(1, theError, owner);
   return true;
 }
 
@@ -3830,10 +3868,10 @@ bool CommandList::outerUnion
       numElts+=input[i].children.size-1;
   output.children.ReservE(numElts);
   output.reset(theCommands, 1);
-  output[0].MakeAtom(theCommands.opSequence(), theCommands);
+  output.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
   for (int i=1; i<input.children.size; i++)
     for (int j=1; j<input[i].children.size; j++)
-      output.children.AddOnTop(input[i][j]);
+      output.AddChildOnTop(input[i][j]);
   output.format=input.formatDefault;
   return true;
 }
@@ -3849,14 +3887,18 @@ bool CommandList::outerUnionNoRepetition
     else
       numElts+=input[i].children.size-1;
   HashedList<Expression> theList;
+  List<int> theIndices;
   theList.SetExpectedSize(numElts);
   for (int i=1; i<input.children.size; i++)
     for (int j=1; j<input[i].children.size; j++)
       theList.AddOnTopNoRepetition(input[i][j]);
+  theIndices.SetSize(theList.size);
+  for (int i=0; i<theList.size; i++)
+    theIndices[i]=theCommands.theExpressionContainer.AddNoRepetitionOrReturnIndexFirst(theList[i]);
   output.children.ReservE(numElts);
   output.reset(theCommands, 1);
-  output[0].MakeAtom(theCommands.opSequence(), theCommands);
-  output.children.AddListOnTop(theList);
+  output.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
+  output.children.AddListOnTop(theIndices);
   output.format=output.formatDefault;
   return true;
 }
@@ -3876,8 +3918,8 @@ bool CommandList::outerDivide
     return output.SetError("Division by zero. ", theCommands);
   output=input;
   tempRat.Invert();
-  output[0].MakeAtom(theCommands.opTimes(), theCommands);
-  return output[2].AssignValue(tempRat, theCommands);
+  output.AssignChildAtomValue(0, theCommands.opTimes(), theCommands);
+  return output.AssignValueToChild(2, tempRat, theCommands);
 }
 
 bool CommandList::outerMinus
@@ -3897,9 +3939,9 @@ bool CommandList::outerMinus
 }
 
 bool Expression::operator==(const Expression& other)const
-{ if (this->theBoss==0 || other.theBoss==0)
-    return this->AreEqualExcludingChildren(other) && this->children.size==0;
-  return this->theBoss->ExpressionsAreEqual(*this, other);
+{ if (this->theBoss!=other.theBoss)
+    return false;
+  return this->theData==other.theData && this->children==other.children;
 }
 
 template <class dataType>
@@ -3919,7 +3961,7 @@ bool CommandList::innerExtractPMTDtreeContext
       input.IsListStartingWithAtom(theCommands. opPlus()) ||
       input.IsListStartingWithAtom(theCommands.opMinus()) )
   { output.reset(theCommands, 1);
-    output[0].MakeAtom(theCommands.opContext(), theCommands);
+    output.AssignChildAtomValue(0, theCommands.opContext(), theCommands);
     Expression newContext, intermediateContext;
     for (int i=1; i<input.children.size; i++)
       if (theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
@@ -4021,25 +4063,6 @@ bool CommandList::EvaluatePMTDtree
     << " to the desired type. ";
     return false;
   }
-  return true;
-}
-
-bool CommandList::ExpressionsAreEqual
-  (const Expression& left, const Expression& right)
-{ RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH>this->MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Error: maximium recursion depth of " << this->MaxRecursionDeptH << " exceeded while comparing expressions: " ;
-    out << left.ToString() << " and " << right.ToString();
-    std::cout << out.str();
-    this->evaluationErrors.AddOnTop(out.str());
-    return false;
-  }
-  if (!left.AreEqualExcludingChildren(right))
-    return false;
-  for (int i=0; i<left.children.size; i++)
-    if (!this->ExpressionsAreEqual (left.children[i], right.children[i]))
-      return false;
   return true;
 }
 
@@ -4148,9 +4171,9 @@ bool CommandList::EvaluateExpression
   this->ExpressionStack.AddOnTop(input);
   Expression theExpressionWithContext;
   theExpressionWithContext.reset(*this, 3);
-  theExpressionWithContext[0].MakeAtom(this->opSequence(), *this);
-  theExpressionWithContext[2]=input;
-  theExpressionWithContext[1].AssignValue(this->RuleContextIdentifier, *this);
+  theExpressionWithContext.AssignChildAtomValue(0, this->opSequence(), *this);
+  theExpressionWithContext.AssignChild(2, input);
+  theExpressionWithContext.AssignValueToChild(1, this->RuleContextIdentifier, *this);
   int indexInCache=this->cachedExpressions.GetIndex(theExpressionWithContext);
   if (indexInCache!=-1)
     output= this->imagesCachedExpressions[indexInCache];
@@ -4170,6 +4193,10 @@ bool CommandList::EvaluateExpression
   while (ReductionOcurred && !this->flagAbortComputationASAP)
   { ReductionOcurred=false;
     counterNumTransformations++;
+    //if (this->flagLogEvaluation && counterNumTransformations>1 )
+    //{ this->Comments << "<br>input: " << input.ToString() << "->"
+    //  << output.ToString();
+    //}
     if (indexInCache!=-1)
       this->imagesCachedExpressions[indexInCache]=output;
 //////------Handling naughty expressions------
@@ -4200,10 +4227,10 @@ bool CommandList::EvaluateExpression
 /////-------Evaluating children -------
     //bool foundError=false;
     for (int i=0; i<output.children.size && !this->flagAbortComputationASAP; i++)
-    { Expression& currentChild=output[i];
+    { const Expression& currentChild=output[i];
       bool tempBool=true;
-      this->EvaluateExpression
-      (currentChild, currentChild, bufferPairs, tempBool);
+      if (this->EvaluateExpression(currentChild, tempE, bufferPairs, tempBool))
+        output.AssignChild(i, tempE);
       if (!tempBool)
         outputIsFree=false;
       if (currentChild.IsError())
@@ -4252,8 +4279,8 @@ bool CommandList::EvaluateExpression
 }
 
 Expression* CommandList::PatternMatch
-(Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
- Expression* condition, std::stringstream* theLog, bool logAttempts)
+(const Expression& thePattern, Expression& theExpression, BoundVariablesSubstitution& bufferPairs,
+ const Expression* condition, std::stringstream* theLog, bool logAttempts)
 { RecursionDepthCounter recursionCounter(&this->RecursionDeptH);
   if (this->RecursionDeptH>=this->MaxRecursionDeptH)
   { std::stringstream out;
@@ -4299,8 +4326,12 @@ void CommandList::SpecializeBoundVars
       return;
     }
   }
+  Expression subbedE;
   for (int i=0; i<toBeSubbedIn.children.size; i++)
-    this->SpecializeBoundVars(toBeSubbedIn[i], matchedPairs);
+  { subbedE=toBeSubbedIn[i];
+    this->SpecializeBoundVars(subbedE, matchedPairs);
+    toBeSubbedIn.AssignChild(i, subbedE);
+  }
 //  this->ExpressionHasBoundVars(toBeSubbed, RecursionDepth+1, MaxRecursionDepth);
 }
 
@@ -4315,12 +4346,12 @@ bool CommandList::ProcessOneExpressionOnePatternOneSub
   { (*theLog) << "<hr>attempting to reduce expression " << theExpression.ToString();
     (*theLog) << " by pattern " << thePattern.ToString();
   }
-  Expression& currentPattern=thePattern[1];
-  Expression* theCondition=0;
+  const Expression& currentPattern=thePattern[1];
+  const Expression* theCondition=0;
   bool isConditionalDefine=
   thePattern.IsListNElementsStartingWithAtom(this->opDefineConditional(), 4);
   if (isConditionalDefine)
-    theCondition=&thePattern.children[2];
+    theCondition=&thePattern[2];
   Expression* toBeSubbed=this->PatternMatch
   (currentPattern, theExpression, bufferPairs, theCondition, theLog, logAttempts);
   if (toBeSubbed==0)
@@ -4468,15 +4499,15 @@ int Expression::ContextGetIndexAmbientSSalg()const
 { if (!this->IsContext() )
     return -1;
   for (int i=1; i<this->children.size; i++)
-    if (this->children[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 2))
-      return this->children[i][1].theData;
+    if ((*this)[i].IsListNElementsStartingWithAtom(this->theBoss->opSSLieAlg(), 2))
+      return (*this)[i][1].theData;
   return -1;
 }
 
 Expression Expression::GetContext()const
 { this->CheckInitialization();
   if (this->HasContext())
-    return this->children[1];
+    return (*this)[1];
   Expression output;
   output.MakeEmptyContext(*this->theBoss);
   return output;
@@ -4491,16 +4522,22 @@ int Expression::GetNumCols()const
     return -1;
   int theMax=1;
   for (int i=1; i<this->children.size; i++)
-    if (this->children[i].format==this->formatMatrixRow &&
-        this->children[i].IsSequenceNElementS())
-      theMax=MathRoutines::Maximum(this->children[i].children.size-1, theMax);
+    if ((*this)[i].format==this->formatMatrixRow &&
+        (*this)[i].IsSequenceNElementS())
+      theMax=MathRoutines::Maximum((*this)[i].children.size-1, theMax);
   return theMax;
 }
 
 bool Expression::operator>(const Expression& other)const
 { if (this->IsOfType<Rational>() && other.IsOfType<Rational>())
     return this->GetValuE<Rational>()>other.GetValuE<Rational>();
-  return this->ToString()>other.ToString();
+  if (this->children.size>other.children.size)
+    return true;
+  if (other.children.size>this->children.size)
+    return false;
+  if (this->children.size==0)
+    return this->theData>other.theData;
+  return this->children>other.children;
 }
 
 bool Expression::ToStringData
@@ -4518,11 +4555,13 @@ bool Expression::ToStringData
   { if (isFinal)
       out << this->GetValuE<std::string>();
     else
-      out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
+    { out << "(string~ not~ shown~ to~ avoid~ javascript~ problems)";
+      out << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    }
     result=true;
   } else if (this->IsOfType<Rational>())
   { if (this->HasNonEmptyContext())
-      out << "Rational{}(" << this->children[1].ToString() << ", ";
+      out << "Rational{}(" << (*this)[1].ToString() << ", ";
     out << this->GetValuE<Rational>().ToString();
     if (this->HasNonEmptyContext())
       out << ")";
@@ -4559,7 +4598,7 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
   { if (this->HasContext())
-      out << "ETGVM{}(" << this->children[1].ToString() << ", ";
+      out << "ETGVM{}(" << (*this)[1].ToString() << ", ";
     out << this->GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >().ToString();
     if (this->HasContext())
       out << ")";
@@ -4603,33 +4642,33 @@ std::string Expression::ToString
   if (this->ToStringData(tempS, theFormat, startingExpression))
     out << tempS;
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDefine(), 3))
-  { std::string firstE=this->children[1].ToString(theFormat);
-    std::string secondE=this->children[2].ToString(theFormat);
-    if (this->children[1].IsListStartingWithAtom(this->theBoss->opDefine()))
+  { std::string firstE=(*this)[1].ToString(theFormat);
+    std::string secondE=(*this)[2].ToString(theFormat);
+    if ((*this)[1].IsListStartingWithAtom(this->theBoss->opDefine()))
       out << "(" << firstE << ")";
     else
       out << firstE;
     out << ":=";
-    if (this->children[2].IsListStartingWithAtom(this->theBoss->opDefine()))
+    if ((*this)[2].IsListStartingWithAtom(this->theBoss->opDefine()))
       out << "(" << secondE << ")";
     else
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opIsDenotedBy()))
-    out << this->children[1].ToString(theFormat)
-    << ":=:" << this->children[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat)
+    << ":=:" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opDefineConditional()))
-    out <<  this->children[1].ToString(theFormat) << " :if "
-    << this->children[2].ToString(theFormat)
-    << ":=" << this->children[3].ToString(theFormat);
+    out <<  (*this)[1].ToString(theFormat) << " :if "
+    << (*this)[2].ToString(theFormat)
+    << ":=" << (*this)[3].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opDivide(), 3))
-  { std::string firstE= this->children[1].ToString(theFormat);
-    std::string secondE=this->children[2].ToString(theFormat);
+  { std::string firstE= (*this)[1].ToString(theFormat);
+    std::string secondE=(*this)[2].ToString(theFormat);
     bool firstNeedsBrackets=
-    !(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
-      this->children[1].IsListStartingWithAtom(this->theBoss->opDivide()));
+    !((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
+      (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide()));
     bool secondNeedsBrackets=true;
-    if (this->children[2].IsOfType<Rational>())
-      if (this->children[2].GetValuE<Rational>().IsInteger())
+    if ((*this)[2].IsOfType<Rational>())
+      if ((*this)[2].GetValuE<Rational>().IsInteger())
         secondNeedsBrackets=false;
     if (firstNeedsBrackets)
       out << "(" << firstE << ")";
@@ -4641,18 +4680,18 @@ std::string Expression::ToString
     else
       out << secondE;
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTensor(),3) )
-  { out << this->children[1].ToString(theFormat)
-    << "\\otimes " << this->children[2].ToString(theFormat);
+  { out << (*this)[1].ToString(theFormat)
+    << "\\otimes " << (*this)[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opTimes(), 3))
-  { std::string firstE= this->children[1].ToString(theFormat);
-    std::string secondE=this->children[2].ToString(theFormat);
+  { std::string firstE= (*this)[1].ToString(theFormat);
+    std::string secondE=(*this)[2].ToString(theFormat);
     bool firstNeedsBrackets=
-    (!(this->children[1].IsListStartingWithAtom(this->theBoss->opTimes())||
-      this->children[1].IsListStartingWithAtom(this->theBoss->opDivide())))
-    && !this->children[1].IsOfType<Rational>();
+    (!((*this)[1].IsListStartingWithAtom(this->theBoss->opTimes())||
+      (*this)[1].IsListStartingWithAtom(this->theBoss->opDivide())))
+    && !(*this)[1].IsOfType<Rational>();
     bool secondNeedsBrackets=true;
-    if (this->children[2].IsOfType<Rational>())
-      secondNeedsBrackets=this->children[2].GetValuE<Rational>().IsNonPositive();
+    if ((*this)[2].IsOfType<Rational>())
+      secondNeedsBrackets=(*this)[2].GetValuE<Rational>().IsNonPositive();
     if (firstE=="-1" )
       firstE="-";
     if (firstE=="1")
@@ -4670,9 +4709,9 @@ std::string Expression::ToString
     else
       out << secondE;
   } else if (this->IsListStartingWithAtom(this->theBoss->opThePower()))
-  { std::string firstE=this->children[1].ToString(theFormat);
-    std::string secondE=this->children[2].ToString(theFormat);
-    if (this->children[1].IsOfType<Rational>())
+  { std::string firstE=(*this)[1].ToString(theFormat);
+    std::string secondE=(*this)[2].ToString(theFormat);
+    if ((*this)[1].IsOfType<Rational>())
       out << firstE;
     else
       out << "(" << firstE << ")";
@@ -4680,8 +4719,8 @@ std::string Expression::ToString
   }
   else if (this->IsListStartingWithAtom(this->theBoss->opPlus() ))
   { assert(this->children.size>=2);
-    std::string tempS2= this->children[1].ToString(theFormat);
-    tempS=this->children[2].ToString(theFormat);
+    std::string tempS2= (*this)[1].ToString(theFormat);
+    tempS=(*this)[2].ToString(theFormat);
     out << tempS2;
 //    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
 //    << allowNewLine;
@@ -4692,7 +4731,7 @@ std::string Expression::ToString
         out << "+";
     out << tempS;
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 2))
-    out << "-" << this->children[1].ToString(theFormat);
+    out << "-" << (*this)[1].ToString(theFormat);
   else if (this->IsListNElementsStartingWithAtom(this->theBoss->opMinus(), 3))
   { if (!(this->children.size==3))
     { std::cout << "This is a programming error: the minus function expects"
@@ -4700,39 +4739,39 @@ std::string Expression::ToString
       << ". " << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
-    out << this->children[1].ToString(theFormat)
-    << "-" << this->children[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat)
+    << "-" << (*this)[2].ToString(theFormat);
   } else if (this->IsListNElementsStartingWithAtom(this->theBoss->opBind(), 2))
-    out << "{{" << this->children[1].ToString(theFormat) << "}}";
+    out << "{{" << (*this)[1].ToString(theFormat) << "}}";
   else if (this->IsListStartingWithAtom(this->theBoss->opApplyFunction()))
   { assert(this->children.size>=2);
     switch(this->format)
     { case Expression::formatFunctionUseUnderscore:
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=false;
-        out <<  this->children[1].ToString(theFormat)
-        << "_{" << this->children[2].ToString(theFormat) << "}";
+        out <<  (*this)[1].ToString(theFormat)
+        << "_{" << (*this)[2].ToString(theFormat) << "}";
         if (allowNewLine)
           theFormat->flagExpressionNewLineAllowed=true;
         break;
       case Expression::formatFunctionUseCdot:
-        out <<  this->children[1].ToString
+        out <<  (*this)[1].ToString
         (theFormat)
-        << "\\cdot(" << this->children[1].ToString(theFormat) << ")";
+        << "\\cdot(" << (*this)[1].ToString(theFormat) << ")";
         break;
       default:
-        out << this->children[1].ToString(theFormat)
-        << "{}(" << this->children[2].ToString(theFormat) << ")";
+        out << (*this)[1].ToString(theFormat)
+        << "{}(" << (*this)[2].ToString(theFormat) << ")";
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opEqualEqual()))
-    out << this->children[1].ToString(theFormat)
-    << "==" << this->children[2].ToString(theFormat);
+    out << (*this)[1].ToString(theFormat)
+    << "==" << (*this)[2].ToString(theFormat);
   else if (this->IsListStartingWithAtom(this->theBoss->opSequence()))
   { switch (this->format)
     { case Expression::formatMatrixRow:
         for (int i=1; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat);
+        { out << (*this)[i].ToString(theFormat);
           if (i!=this->children.size-1)
             out << "& ";
         }
@@ -4746,7 +4785,7 @@ std::string Expression::ToString
           out << "c";
         out << "} ";
         for (int i=1; i<this->children.size; i++)
-        { out << this->children[i].ToString(theFormat);
+        { out << (*this)[i].ToString(theFormat);
           if (i!=this->children.size-1)
             out << "\\\\ \n";
         }
@@ -4758,7 +4797,7 @@ std::string Expression::ToString
       default:
         out << "(";
         for (int i=1; i<this->children.size; i++)
-        { std::string currentChildString=this->children[i].ToString(theFormat);
+        { std::string currentChildString=(*this)[i].ToString(theFormat);
           out << currentChildString;
           charCounter+=currentChildString.size();
           if (i!=this->children.size-1)
@@ -4772,16 +4811,16 @@ std::string Expression::ToString
         break;
     }
   } else if (this->IsListStartingWithAtom(this->theBoss->opLieBracket()))
-    out << "[" << this->children[1].ToString(theFormat)
-    << "," << this->children[2].ToString(theFormat)
+    out << "[" << (*this)[1].ToString(theFormat)
+    << "," << (*this)[2].ToString(theFormat)
     << "]";
   else if (this->IsListStartingWithAtom(this->theBoss->opUnion()))
-    out << this->children[1].ToString(theFormat)
-    << "\\cup " << this->children[2].ToString(theFormat)
+    out << (*this)[1].ToString(theFormat)
+    << "\\cup " << (*this)[2].ToString(theFormat)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opUnionNoRepetition()))
-    out << this->children[1].ToString(theFormat)
-    << "\\sqcup " << this->children[2].ToString(theFormat)
+    out << (*this)[1].ToString(theFormat)
+    << "\\sqcup " << (*this)[2].ToString(theFormat)
     ;
   else if (this->IsListStartingWithAtom(this->theBoss->opEndStatement()))
   { if (startingExpression==0)
@@ -4796,22 +4835,22 @@ std::string Expression::ToString
       if (createTable)
       { out << "<hr> "
         << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-        (startingExpression->children[i].ToString(theFormat));
+        ((*startingExpression)[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
         out << "</td><td valign=\"top\"><hr>";
-        if (this->children[i].IsOfType<std::string>() && isFinal)
-          out << this->children[i].GetValuE<std::string>();
-        else if (this->children[i].IsOfType<CalculusFunctionPlot>() && isFinal)
-          out << this->children[i].ToString(theFormat);
+        if ((*this)[i].IsOfType<std::string>() && isFinal)
+          out << (*this)[i].GetValuE<std::string>();
+        else if ((*this)[i].IsOfType<CalculusFunctionPlot>() && isFinal)
+          out << (*this)[i].ToString(theFormat);
         else
           out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL
-          (this->children[i].ToString(theFormat));
+          ((*this)[i].ToString(theFormat));
         if (i!=this->children.size-1)
           out << ";";
       }
       else
-      { out << this->children[i].ToString(theFormat);
+      { out << (*this)[i].ToString(theFormat);
         if (i!=this->children.size-1)
           out << ";";
       }
@@ -4824,11 +4863,11 @@ std::string Expression::ToString
   { this->theBoss->NumErrors++;
     out << "(Error~ " << this->theBoss->NumErrors << ":~ see~ comments)";
     this->theBoss->Comments << "<br>Error " << this->theBoss->NumErrors
-    << ". " << this->children[1].ToString(theFormat);
+    << ". " << (*this)[1].ToString(theFormat);
   } else if (this->children.size==1)
-  { out << this->children[0].ToString(theFormat);
+  { out << (*this)[0].ToString(theFormat);
   } else if (this->children.size>=2)
-  { out << this->children[0].ToString(theFormat);
+  { out << (*this)[0].ToString(theFormat);
     if (this->format==this->formatFunctionUseUnderscore)
       out << "_";
     else if (this->format==this->formatFunctionUseCdot)
@@ -4840,7 +4879,7 @@ std::string Expression::ToString
     else
       out << "(";
     for (int i=1; i<this->children.size; i++)
-    { out << this->children[i].ToString(theFormat);
+    { out << (*this)[i].ToString(theFormat);
       if (i!=this->children.size-1)
         out << ", ";
     }
@@ -4887,7 +4926,7 @@ std::string Expression::Lispify()const
   std::stringstream out;
   out << "(";
   for (int i=0; i<this->children.size; i++)
-    out << " " << this->children[i].Lispify();
+    out << " " << (*this)[i].Lispify();
   out << ")";
   return out.str();
 }
@@ -4924,7 +4963,7 @@ bool Expression::RemoveContext()
     return true;
   this->children.PopIndexShiftDown(1);
   if (this->children.size==1)
-    this->AssignChild(0);
+    this->AssignMeMyChild(0);
   return true;
 }
 
@@ -4932,7 +4971,9 @@ bool Expression::HasContext()const
 { this->CheckInitialization();
   if (this->children.size<2)
     return false;
-  return this->children[1].IsListStartingWithAtom(this->theBoss->opContext());
+  //std::string debugString=(*this)[1].ToString();
+  //std::cout << "<br>Trying to fetch context from: " << debugString ;
+  return (*this)[1].IsListStartingWithAtom(this->theBoss->opContext());
 }
 
 bool Expression::HasNonEmptyContext()const
@@ -4945,9 +4986,9 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
 { std::string tempS;
   if (!this->IsListNElementsStartingWithAtom())
     return false;
-  if (this->children.size<2 || !this->children.LastObject()->IsAtoM())
+  if (this->children.size<2 || !(*this)[this->children.size-1].IsAtoM())
     return false;
-  if (!this->children[0].IsOperation(&tempS))
+  if (!(*this)[0].IsOperation(&tempS))
     return false;
   if (this->theBoss->builtInTypes.Contains(tempS))
   { if (outputWhichOperation!=0)
@@ -5000,8 +5041,8 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
   (innerHandler, 0, opDescription, opExample, true, visible)
   ;
   innerFunction.theArgumentTypes.reset(*this, 2);
-  innerFunction.theArgumentTypes[0].MakeAtom(leftType, *this);
-  innerFunction.theArgumentTypes[1].MakeAtom(rightType, *this);
+  innerFunction.theArgumentTypes.AssignChildAtomValue(0, leftType, *this);
+  innerFunction.theArgumentTypes.AssignChildAtomValue(1, rightType, *this);
   this->FunctionHandlers[indexOp].ReservE(10);
   this->FunctionHandlers[indexOp].AddOnTop(innerFunction);
 }
@@ -5220,6 +5261,15 @@ std::string CommandList::ToString()
   }
   out << this->ElementToStringNonBoundVars();
   out << "<hr>";
+  out << "Children expressions (" << this->theExpressionContainer.size << " total):<br>";
+  int numExpressionsToDisplay=this->theExpressionContainer.size;
+  if (this->theExpressionContainer.size>2000)
+  { numExpressionsToDisplay=2000;
+    out << " <b>Diplaying first 2000 only </b><br>";
+  }
+  for (int i=0; i< numExpressionsToDisplay; i++)
+    out << this->theExpressionContainer[i].ToString() << ", ";
+  out << "<hr>";
   out << "\n Cached expressions (" << this->cachedExpressions.size
   << " total):\n<br>\n";
   for (int i=0; i<this->cachedExpressions.size; i++)
@@ -5257,9 +5307,9 @@ bool CommandList::ReplaceXEXEXByEusingO(int theControlIndex, int formatOptions)
   SyntacticElement& result = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-5];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
-  newExpr[1]=lefT.theData;
-  newExpr[2]=right.theData;
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.AssignChild(1, lefT.theData);
+  newExpr.AssignChild(2, right.theData);
   newExpr.format=formatOptions;
   result.theData=newExpr;
   result.controlIndex=this->conExpression();
@@ -5271,13 +5321,13 @@ bool CommandList::ReplaceEEndCommandEXbyEX()
 { SyntacticElement& left = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-4];
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   if (left.theData.IsListNElementsStartingWithAtom(this->opEndStatement()))
-    left.theData.children.AddOnTop(right.theData);
+    left.theData.AddChildOnTop(right.theData);
   else
   { Expression newExpr;
     newExpr.reset(*this, 3);
-    newExpr[0].MakeAtom(this->opEndStatement(), *this);
-    newExpr[1]=(left.theData);
-    newExpr[2]=(right.theData);
+    newExpr.AssignChildAtomValue(0, this->opEndStatement(), *this);
+    newExpr.AssignChild(1, left.theData);
+    newExpr.AssignChild(2, right.theData);
     newExpr.format=Expression::formatDefault;
     left.theData=newExpr;
   }
@@ -5291,9 +5341,9 @@ bool CommandList::ReplaceEXEByEusingO(int theControlIndex, int formatOptions)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-1];
   Expression newExpr;
   newExpr.reset(*this, 3);
-  newExpr[0].MakeAtom(this->GetOperationIndexFromControlIndex(theControlIndex), *this);
-  newExpr[1]=(left.theData);
-  newExpr[2]=(right.theData);
+  newExpr.AssignChildAtomValue(0, this->GetOperationIndexFromControlIndex(theControlIndex), *this);
+  newExpr.AssignChild(1, left.theData);
+  newExpr.AssignChild(2, right.theData);
   newExpr.format=formatOptions;
   left.theData=newExpr;
   this->DecreaseStackSetCharacterRangeS(2);
@@ -5306,8 +5356,8 @@ bool CommandList::ReplaceEXEXByEX(int formatOptions)
   SyntacticElement& right = (*this->CurrentSyntacticStacK)[(*this->CurrentSyntacticStacK).size-2];
   Expression newExpr;
   newExpr.reset(*this, 2);
-  newExpr[0]=(left.theData);
-  newExpr[1]=(right.theData);
+  newExpr.AssignChild(0,left.theData);
+  newExpr.AssignChild(1,right.theData);
   newExpr.format=formatOptions;
   left.theData=newExpr;
   this->DecreaseStackExceptLast(2);
@@ -5423,7 +5473,7 @@ bool Expression::ContextGetPolySubFromSuperContext
   output.SetSize(polyVarsElargerContext.children.size-1);
   int numVars=polyVarsElargerContext.children.size-1;
   for (int i=1; i<polyVarsEsmallContext.children.size; i++)
-  { int theNewIndex=polyVarsElargerContext.children.GetIndex(polyVarsEsmallContext[i]);
+  { int theNewIndex=polyVarsElargerContext.GetIndexChild(polyVarsEsmallContext[i]);
     if (theNewIndex==-1)
       return false;
     output[i-1].MakeMonomiaL(theNewIndex-1, 1, 1, numVars);
@@ -5465,8 +5515,8 @@ bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
   if (!this->IsBoundVarInContext(theBoundVar))
     this->BoundVariablesStack.LastObject()->AddOnTopNoRepetition(theBoundVar);
   theElt.theData.reset(*this, 2);
-  theElt.theData[0].MakeAtom(this->opBind(), *this);
-  theElt.theData[1].MakeAtom(theBoundVar, *this);
+  theElt.theData.AssignChildAtomValue(0, this->opBind(), *this);
+  theElt.theData.AssignChildAtomValue(1, theBoundVar, *this);
   theElt.controlIndex=this->conExpression();
 //  std::cout << ", got to element: " << theElt.theData.ToString();
   this->DecreaseStackSetCharacterRangeS(numXs);
@@ -5483,8 +5533,8 @@ bool CommandList::ReplaceVXdotsXbyE_NONBOUND_XdotsX(int numXs)
 //  std::cout << "<br>index of variable: " << theElt.ToString(*this);
   if (this->IsBoundVarInContext(theBoundVar))
   { theElt.theData.reset(*this, 2);
-    theElt.theData[0].MakeAtom(this->opBind(), *this);
-    theElt.theData[1].MakeAtom(theBoundVar, *this);
+    theElt.theData.AssignChildAtomValue(0, this->opBind(), *this);
+    theElt.theData.AssignChildAtomValue(1, theBoundVar, *this);
   } else
   { theElt.theData.MakeAtom(theBoundVar, *this);
     if (!this->IsNonBoundVarInContext(theBoundVar))
@@ -5562,7 +5612,7 @@ bool CommandList::fWriteGenVermaModAsDiffOperators
   Expression theContext;
   Selection theParSel;
   SemisimpleLieAlgebra* theSSalgebra;
-  if (!theCommands.fGetTypeHighestWeightParabolic<Polynomial<Rational> >
+  if (!theCommands.innerGetTypeHighestWeightParabolic<Polynomial<Rational> >
       (theCommands, input, output, theHWs[0], theParSel, theContext, theSSalgebra,
        theCommands.innerPolynomial))
     return output.SetError
@@ -5582,7 +5632,7 @@ bool CommandList::fFreudenthalEval
   Selection tempSel;
   SemisimpleLieAlgebra* theSSalg;
   Expression context;
-  if (!theCommands.fGetTypeHighestWeightParabolic<Rational>
+  if (!theCommands.innerGetTypeHighestWeightParabolic<Rational>
       (theCommands, input, output, hwFundamental, tempSel, context, theSSalg, 0))
     return output.SetError("Failed to extract highest weight and algebra", theCommands);
   if (output.IsError())

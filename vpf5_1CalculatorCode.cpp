@@ -150,8 +150,8 @@ bool CommandList::fEmbedSSalgInSSalg
   MacroRegisterFunctionWithName("CommandList::fEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))
     return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
-  Expression& EsmallSA=input[1];
-  Expression& ElargeSA=input[2];
+  const Expression& EsmallSA=input[1];
+  const Expression& ElargeSA=input[2];
 
   std::string errorString;
   SemisimpleLieAlgebra* theSmallSapointer;
@@ -202,7 +202,7 @@ bool CommandList::fGroebner
   Expression theContext;
   if (input.children.size<3)
     return output.SetError("Function takes at least two arguments. ", theCommands);
-  Expression& numComputationsE=input[1];
+  const Expression& numComputationsE=input[1];
   Rational upperBound=0;
   if (!numComputationsE.IsOfType(&upperBound))
     return output.SetError
@@ -343,8 +343,8 @@ bool CommandList::innerDrawPolarRfunctionTheta
     return output.SetError
     ("Drawing polar coordinates takes three arguments: function, lower angle \
       bound and upper angle bound. ", theCommands);
-  Expression& lowerE=input[2];
-  Expression& upperE=input[3];
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
   Expression functionE;
   Rational upperBound, lowerBound;
   if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))
@@ -403,8 +403,8 @@ bool CommandList::innerPlot2D
   if (!input.IsSequenceNElementS(3))
     return output.SetError
     ("Plotting coordinates takes three arguments: function, lower and upper bound. ", theCommands);
-  Expression& lowerE=input[2];
-  Expression& upperE=input[3];
+  const Expression& lowerE=input[2];
+  const Expression& upperE=input[3];
   Expression functionE;
   Rational upperBound, lowerBound;
   if (!lowerE.IsOfType(&upperBound) || !upperE.IsOfType(&lowerBound))

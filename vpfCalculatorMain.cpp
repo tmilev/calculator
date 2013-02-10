@@ -526,6 +526,9 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
 //std.cout << "x";
 //  civilizedInput="%LogParsing\n(1,1,1)";
 //  civilizedInput="plot2D{}(x+1, 0, 5)";
+  //civilizedInput="2a";
+//  civilizedInput="SemisimpleLieAlgebra{}G_2";
+//  civilizedInput="3/0+1";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

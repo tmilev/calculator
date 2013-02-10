@@ -827,7 +827,9 @@ public:
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
-  { if (theOrder==0)
+  { if (this->size==0)
+      return;
+    if (theOrder==0)
       this->QuickSortAscendingNoOrder(0, this->size-1);
     else
       this->QuickSortAscendingOrder(0, this->size-1, theOrder);
@@ -1423,6 +1425,9 @@ public:
   }
   inline int GetIndexIMustContainTheObject(const Object& o) const
   { return this->::HashTemplate<Object, List<Object>, hashFunction>::GetIndexIMustContainTheObject(o);
+  }
+  inline int AddNoRepetitionOrReturnIndexFirst(const Object& o)
+  { return this->::HashTemplate<Object, List<Object>, hashFunction>::AddNoRepetitionOrReturnIndexFirst(o);
   }
 };
 

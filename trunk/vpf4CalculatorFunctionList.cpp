@@ -560,7 +560,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("+", this->innerAddPlotToPlot, this->opCalculusPlot(), this->opCalculusPlot(),
    "Superimposes two plots. ",
-   "plot2D{}(sin{}(x * 180/3.14159), -5, 5)+ plot2D{}(1/sin{}(x * 180/3.14159), 0.01, 3.14)", true);
+   "plot2D{}(sin{}(x), -5, 5)+ plot2D{}(1/sin{}(x ), 0.01, 3.14)", true);
 
   this->AddOperationOuterHandler
   ("-", this->outerMinus, "",

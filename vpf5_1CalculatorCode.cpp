@@ -461,6 +461,8 @@ bool CommandList::innerSuffixNotationForPostScript
     return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
   if (!currentE.IsOfType(&currentString))
     return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  if (currentString=="sin" || currentString=="cos" || currentString=="tan" || currentString=="cot")
+    out << " 57.29578 mul ";
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
 }

@@ -661,7 +661,7 @@ void CommandList::initPredefinedStandardOperations()
   this->AddOperationBinaryInnerHandlerWithTypes
   ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),
    "Raises rational to power, provided the power is a small integer. ",
-   "{3^3}^3; 3^{3^3}; 3^3^3; ) ", true);
+   "{3^3}^3; 3^{3^3}; 3^3^3; 0^3; 0^{-3}; ", true);
 
 
   this->AddOperationBinaryInnerHandlerWithTypes

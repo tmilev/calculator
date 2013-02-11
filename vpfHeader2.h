@@ -1559,6 +1559,9 @@ static bool innerAddRatOrPolyToRatOrPoly
 static bool innerAddPlotToPlot
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerRatPowerRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 static bool innerAddRatOrPolyOrRFToRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

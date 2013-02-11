@@ -659,6 +659,12 @@ void CommandList::initPredefinedStandardOperations()
    "Polynomial{}(-x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}+x_{2}+1)/\
    \nPolynomial{}(x_{1}^{2}x_{2}x_{3}-x_{1}^{2}x_{3}-x_{2}+1) ", true);
   this->AddOperationBinaryInnerHandlerWithTypes
+  ("^", this->innerRatPowerRat, this->opRational(), this->opRational(),
+   "Raises rational to power, provided the power is a small integer. ",
+   "{3^3}^3; 3^{3^3}; 3^3^3; ) ", true);
+
+
+  this->AddOperationBinaryInnerHandlerWithTypes
   ("\\otimes", this->innerTensorEltTensorByEltTensor, this->opElementTensorGVM(), this->opElementTensorGVM(),
    "Tensor product of two generalized Verma modules. \
    Not fully tested and documented at the moment.  \

@@ -409,3 +409,23 @@ bool CommandList::innerAddPlotToPlot
   leftPlot+=rightPlot;
   return output.AssignValue(leftPlot, theCommands);
 }
+
+bool CommandList::innerRatPowerRat
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (input.children.size!=2)
+    return false;
+  Rational base, exp;
+  if(!input[0].IsOfType(&base))
+    return false;
+  if(!input[1].IsOfType(&exp))
+    return false;
+  int thePower;
+  if (!exp.IsSmallInteger(&thePower))
+    return false;
+  if (base==0 && thePower<0)
+    return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
+  base.RaiseToPower(thePower);
+  return output.AssignValue(base, theCommands);
+}

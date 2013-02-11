@@ -358,7 +358,7 @@ bool CommandList::innerDrawPolarRfunctionTheta
   std::stringstream out, resultStream;
   out << CGI::GetHtmlMathSpanPure(input[1].ToString())
   << "<br>";
-  resultStream << "\\documentclass{article}\\usepackage{pstricks}"
+  resultStream << "\\documentclass{article}\\usepackage{pstricks}\\usepackage{pst-plot}"
   << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
   resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
   resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
@@ -383,9 +383,10 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands()
 { std::stringstream resultStream;
   resultStream << "\\documentclass{article}\\usepackage{pstricks}"
-  << "\\usepackage{pst-3dplot}\\begin{document} \\pagestyle{empty}";
-  resultStream << " \\begin{pspicture}(-5, 5)(5,5)";
-  resultStream << "\\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  << "\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
+
+  resultStream << " \\psset{xunit=1cm, yunit=1cm}\\begin{pspicture}(-5, -5)(5,5)\n\n";
+  resultStream << "\\psframe*[linecolor=white](-5,-5)(5,5)\n\n \\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
   for (int i=0; i<this->theFunctions.size; i++)
   { resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
     << this->lowerBounds[i].DoubleValue() << "}{"
@@ -451,13 +452,27 @@ bool CommandList::innerSuffixNotationForPostScript
     return output.AssignValue(out.str(), theCommands);
   }
   Expression currentE;
-  for (int i=1; i<input.children.size; i++)
-  { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
-      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
-    if (!currentE.IsOfType(&currentString))
-      return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
-    out << currentString << " ";
-  }
+  bool useUsualOrder=
+  !input[0].IsAtoM(theCommands.opDivide()) &&
+  !input[0].IsAtoM(theCommands.opThePower());
+  if (input[0].IsAtoM(theCommands.opDivide()))
+    std::cout << input.Lispify();
+  if (useUsualOrder)
+    for (int i=input.children.size-1; i>=1; i--)
+    { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
+        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+      if (!currentE.IsOfType(&currentString))
+        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+      out << currentString << " ";
+    }
+  else
+    for (int i=1; i<input.children.size; i++)
+    { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))
+        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+      if (!currentE.IsOfType(&currentString))
+        return output.SetError("Failed to convert "+input[i].ToString(), theCommands);
+      out << currentString << " ";
+    }
   if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[0], currentE))
     return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
   if (!currentE.IsOfType(&currentString))

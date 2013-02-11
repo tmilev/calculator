@@ -1734,7 +1734,7 @@ bool CommandList::fDecomposeCharGenVerma
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CommandList::fHWV
+bool CommandList::innerPrintGenVermaModule
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Selection selectionParSel;
   Vector<RationalFunctionOld> theHWfundcoords;
@@ -1747,7 +1747,32 @@ bool CommandList::fHWV
   else
     if (output.IsError())
       return true;
-  return theCommands.fHWVinner
+  if (!theCommands.innerHWVCommon
+      (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra, false))
+    return output.SetError("Failed to create Generalized Verma module", theCommands);
+  if (output.IsError())
+    return true;
+  ElementTensorsGeneralizedVermas<RationalFunctionOld> theElt=
+  output.GetValuE<ElementTensorsGeneralizedVermas<RationalFunctionOld> >();
+  ModuleSSalgebra<RationalFunctionOld>&
+  theModule=theElt.GetOwnerModule();
+  return output.AssignValue(theModule.ToString(), theCommands);
+}
+
+bool CommandList::innerHWV
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Selection selectionParSel;
+  Vector<RationalFunctionOld> theHWfundcoords;
+  Expression hwContext(theCommands);
+  SemisimpleLieAlgebra* theSSalgebra=0;
+  if(!theCommands.innerGetTypeHighestWeightParabolic
+      (theCommands, input, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra,
+       theCommands.innerRationalFunction) )
+    return output.SetError("Failed to extract highest weight vector data", theCommands);
+  else
+    if (output.IsError())
+      return true;
+  return theCommands.innerHWVCommon
   (theCommands, output, theHWfundcoords, selectionParSel, hwContext, theSSalgebra);
 }
 
@@ -2421,11 +2446,131 @@ bool CommandList::fWriteGenVermaModAsDiffOperatorInner
   return output.AssignValue<std::string>(out.str(), theCommands);
 }
 
-bool CommandList::fHWVinner
+template <class CoefficientType>
+std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFormat)const
+{ if (this->owneR==0)
+    return "(Error: module not initialized)";
+  SemisimpleLieAlgebra& theAlgebrA=*this->owneR;
+  WeylGroup theWeyl;
+  theWeyl=theAlgebrA.theWeyl;
+  std::stringstream out;
+  GlobalVariables theGlobalVariables;
+  out << "<br>Semisimple Lie algebra acting on generalized Verma module: " << theAlgebrA.GetLieAlgebraName() << ".";
+  out << "<br>Parabolic selection: " << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
+  out << "<br>Highest weight of Generalized Verma module in fundamental coordinates: " << this->theHWFundamentalCoordsBaseField.ToString();
+  out << "<br>In simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
+  out << "<br>Finite dimensional part h. w. fundamental coordinates:"
+  << this->theHWFDpartFundamentalCoordS.ToString();
+  out << "<br>Finite dimensinoal part h. w. simple coords: "
+  << this->theHWFDpartSimpleCoordS.ToString();
+  out << "<br>Inducing module character (over the Cartan subalgebra): ";
+  FormatExpressions latexFormat;
+  latexFormat.flagUseLatex=true;
+  latexFormat.flagUseHTML=false;
+  if (this->theCharOverH.size<100)
+    out << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(this->theCharOverH.ToString(&latexFormat));
+  else
+    out << this->theCharOverH.ToString();
+  out << "<br>Dimensionn of the finite dimensional part of the module: " << this->GetDim();
+  out << "<br>A module basis follows.";
+  out << "<table><tr><td>Monomial label</td><td>Definition</td><td>Littelmann path string</td></tr>";
+  ElementWeylGroup tempWelt;
+  int wordCounter=0;
+  for (int i=0; i<this->theGeneratingWordsGrouppedByWeight.size; i++)
+  { List<MonomialUniversalEnveloping<CoefficientType> >& currentList=
+    this->theGeneratingWordsGrouppedByWeight[i];
+    List<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >& currentListInt=
+    this->theGeneratingWordsIntGrouppedByWeight[i];
+    for (int j=0; j<currentList.size; j++)
+    { wordCounter++;
+      tempWelt.SetSize(currentListInt[j].generatorsIndices.size);
+      for (int k=0; k<currentListInt[j].generatorsIndices.size; k++)
+        tempWelt[k]=theWeyl.RootsOfBorel.size-1 -currentListInt[j].generatorsIndices[k];
+      out << "<tr><td>m_{ " << wordCounter << "} </td><td>"
+      << currentList[j].ToString(&theGlobalVariables.theDefaultFormat) << "  v_\\lambda</td><td>"
+      << tempWelt.ToString() << "</td> </tr>";
+    }
+  }
+  out << "</table>";
+
+  out << "<br>Character: " << this->theChaR.ToString();
+  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
+  << this->actionsGeneratorsMaT.size << " computed actions) follow. "
+  << " Note that generator actions are computed on demand, only the simple "
+  << " Chevalley generators are computed by default. ";
+  out << "<table><tr><td>Generator </td><td>Action</td></tr>";
+  ElementSemisimpleLieAlgebra<Rational> tempSSElt;
+  for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
+    if (this->ComputedGeneratorActions.selected[i])
+    { tempSSElt.MakeGenerator(i, theAlgebrA);
+      out << "<tr>";
+      out << "<td>" << CGI::GetHtmlMathSpanPure(tempSSElt.ToString(theFormat)) << "</td>";
+      out << "<td>";
+      if (this->GetDim()<28)
+      { Matrix<CoefficientType> outputMat;
+        this->actionsGeneratorsMaT[i].GetMatrix(outputMat, this->GetDim());
+        //std::cout << outputMat.ToString(&latexFormat);
+        out << CGI::GetHtmlMathSpanPure(outputMat.ToString(&latexFormat), 5000) << " = ";
+        out << this->actionsGeneratorsMaT[i].ToString();
+      }
+      else
+        out << this->actionsGeneratorsMaT[i].ToString();
+      out << "</td></tr>";
+    }
+  out << "</table>";
+  std::string tempS;
+  DrawingVariables theDV;
+  this->theCharOverH.DrawMeAssumeCharIsOverCartan(theWeyl, theGlobalVariables, theDV);
+  out << " A picture of the weight support follows. "
+  << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+
+  bool isBad=false;
+  for (int k=0; k<this->theBilinearFormsAtEachWeightLevel.size; k++)
+  { Matrix<CoefficientType>& theBF=this->theBilinearFormsAtEachWeightLevel[k];
+    Matrix<CoefficientType>& theBFinverted= this->theBilinearFormsInverted[k];
+    out << "<hr>weight in simple coords: "
+    << this->theModuleWeightsSimpleCoords[k].ToString();
+    List<MonomialUniversalEnveloping<CoefficientType> >& currentList=this->theGeneratingWordsGrouppedByWeight[k];
+    for (int i=0; i<currentList.size; i++)
+    { MonomialUniversalEnveloping<CoefficientType>& currentElt=currentList[i];
+      out << "<br>monomial " << i+1 << ": "
+      << currentElt.ToString(&theGlobalVariables.theDefaultFormat);
+    }
+    out << "; Matrix of Shapovalov form associated to current weight level: <br> "
+    << theBF.ToString(&theGlobalVariables.theDefaultFormat);
+/*    if (!theBF.IsPositiveDefinite())
+    { monomialDetailStream << "<b>Is not positive definite!</b>";
+      this->flagConjectureCholds=false;
+    }
+    else
+      monomialDetailStream << " (positive definite)";*/
+    if (!theBF.IsNonNegativeAllEntries())
+      out << "<b>Has negative entries</b>";
+    else
+      out << " (positive entries only )";
+    out << " corresonding inverted matrix:<br>";
+    if (theBFinverted.NumRows>0)
+      out << theBFinverted.ToString(&theGlobalVariables.theDefaultFormat);
+    else
+    { out << "<b>The matrix of the bilinear form is not invertible!</b>";
+      isBad=true;
+    }
+  }
+  if (isBad)
+    out << "<br>Error: the Littelmann-path induced monomials do not give a monomial basis. ";
+  out << "<br>Cached Shapovalov products before generator action computation: "
+  << this->cachedPairs.size << ". Dimension : " << this->GetDim();
+  ElementSemisimpleLieAlgebra<Rational> tempSSelt;
+  out << "<br>Cached Shapovalov products final: "
+  << this->cachedPairs.size << "; dimension : " << this->GetDim();
+  return out.str();
+}
+
+bool CommandList::innerHWVCommon
 (CommandList& theCommands, Expression& output,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner)
-{ MacroRegisterFunctionWithName("CommandList::fHWVinner");
+ Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose)
+{ MacroRegisterFunctionWithName("CommandList::innerHWVCommon");
   RecursionDepthCounter therecursionIncrementer(&theCommands.RecursionDeptH);
   //  std::cout << "<br>highest weight in fundamental coords: " << highestWeightFundCoords.ToString() << "<br>";
 //  std::cout << "<br>parabolic selection: " << parabolicSel.ToString();
@@ -2456,7 +2601,8 @@ bool CommandList::fHWVinner
   { bool isGood=theMod.MakeFromHW
     (*owner, highestWeightFundCoords, selectionParSel,
      *theCommands.theGlobalVariableS, RFOne, RFZero, &report);
-    theCommands.Comments << report;
+    if (Verbose)
+      theCommands.Comments << theMod.ToString();
     if (!isGood)
       return output.SetError
       ("Error while generating highest weight module. See comments for details. ", theCommands);
@@ -2542,7 +2688,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
       ("Error: the third argument of fSplitGenericGenVermaTensorFD must be a \
        list of small non-negative integers.", theCommands);
   }
-  theCommands.fHWVinner
+  theCommands.innerHWVCommon
   (theCommands, hwvGenVerma, highestWeightFundCoords, selParSel1, hwContext, theSSalgebra);
   if (hwvGenVerma.IsError())
   { output=hwvGenVerma;
@@ -2550,7 +2696,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
   }
   Vector<RationalFunctionOld> theFDhwRF;
   theFDhwRF=theFDhw;
-  theCommands.fHWVinner(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra);
+  theCommands.innerHWVCommon(theCommands, hwvFD, theFDhwRF, selFD, hwContext, theSSalgebra);
   if (hwvFD.IsError())
   { output=hwvFD;
     return true;

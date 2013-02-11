@@ -198,7 +198,7 @@ int main(int argc, char **argv)
   std::string inputDisplayPath="vpf/";
   if (argc>=1)
   { getPath(argv[0], inputPatH);
-    std::cout << "input path: " << inputPatH;
+//    std::cout << "input path: " << inputPatH;
 
     bool found=false;
     for (int j=inputPatH.size()-2; j>=0; j--)
@@ -214,7 +214,11 @@ int main(int argc, char **argv)
     if (found)
       for (unsigned j=0; j<inputDisplayPath.size()/2; j++)
         MathRoutines::swap(inputDisplayPath[j], inputDisplayPath[inputDisplayPath.size()-1-j]);
-    std::cout << "<br>input display path: " << inputDisplayPath;
+//    std::cout << "<br>input display path: " << inputDisplayPath;
+    std::string::size_type foundExperimental=inputDisplayPath.find("experimental");
+    if (foundExperimental!=std::string::npos)
+      std::cout << "<b>This is an entirely experimental version of the calculator. </b>\n";
+
   }
   std::string tempS;
   theParser.initDefaultFolderAndFileNames(inputPatH, inputDisplayPath, IPAdressCaller);
@@ -529,6 +533,7 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
   //civilizedInput="2a";
 //  civilizedInput="SemisimpleLieAlgebra{}G_2";
 //  civilizedInput="3/0+1";
+//  civilizedInput="experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)";
   std::stringstream tempStreamXX;
   static_html4(tempStreamXX);
   std::cout << "<table>\n <tr valign=\"top\">\n <td>";

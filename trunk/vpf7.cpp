@@ -1136,46 +1136,6 @@ bool ElementUniversalEnveloping<CoefficientType>::ConvertToRationalCoeff
   return true;
 }
 
-template <class CoefficientType>
-std::string ModuleSSalgebra<CoefficientType>::ToString()const
-{ std::stringstream out;
-  GlobalVariables theGlobalVariables; FormatExpressions theformat;
-  out << "<br>Highest weight fund coords: " << this->theHWFundamentalCoordsBaseField.ToString();
-  out << "<br>in simple coordinates: " << this->theHWSimpleCoordSBaseField.ToString();
-  out << "<br>Rational part highest weight fund. coords:" << this->theHWDualCoordS.ToString();
-  out << "<br>Rational part highest weight simple coords: "
-  << this->theHWFDpartSimpleCoordS.ToString();
-  out << "<br>Type semisimple Lie algebra: "
-  << this->theAlgebras->TheObjects[this->indexAlgebra].GetLieAlgebraName();
-  out << "<br>Parabolic selection: "
-  << this->parabolicSelectionNonSelectedAreElementsLevi.ToString();
-  out << "<br>Character over H: " << this->theCharOverH.ToString();
-  out << "<br>Character: " << this->theChaR.ToString();
-  out << "<br>Actions generators matrix form (" << this->actionsGeneratorsMaT.size << "): ";
-  for (int i=0; i<this->actionsGeneratorsMaT.size; i++)
-    out << this->actionsGeneratorsMaT[i].ToString(true, false) << "";
-  out << "<br>Actions generators UE form: " << this->actionsGeneratorS.ElementToStringGeneric();
-  out << "<br>Computed generators: " << this->ComputedGeneratorActions.ToString();
-  out << "<br>" << this->theGeneratingWordsNonReduced.size << " Generating words: ";
-  for (int i=0; i<this->theGeneratingWordsNonReduced.size; i++)
-  { out << this->theGeneratingWordsNonReduced[i].ToString(&theformat) << ", ";
-  }
-  /*out << this->theGeneratingWordsGrouppedByWeight;
-  out << this->theSimpleGens;
-  out << this->actionsSimpleGens;
-  out << this->actionsSimpleGensMatrixForM;
-  this->theBilinearFormsAtEachWeightLevel=other.theBilinearFormsAtEachWeightLevel;
-  this->theBilinearFormsInverted=other.theBilinearFormsInverted;
-  this->weightsSimpleGens=other.weightsSimpleGens;
-  this->theModuleWeightsSimpleCoords=other.theModuleWeightsSimpleCoords;
-  this->theCharOverH=other.theCharOverH;
-  this->theChaR=other.theChaR;
-  this->parabolicSelectionNonSelectedAreElementsLevi=other.parabolicSelectionNonSelectedAreElementsLevi;
-  this->parabolicSelectionSelectedAreElementsLevi=other.parabolicSelectionSelectedAreElementsLevi;
-  this->flagIsInitialized=other.flagIsInitialized;*/
-  return out.str();
-}
-
 void ProjectInformation::AddProjectInfo(const std::string& fileName, const std::string& fileDescription)
 { if (this->FileNames.Contains(fileName))
     return;
@@ -1304,9 +1264,9 @@ std::string CGI::GetCalculatorLink
   return out.str();
 }
 
-std::string CGI::GetHtmlMathSpanPure(const std::string& input)
+std::string CGI::GetHtmlMathSpanPure(const std::string& input, int upperNumChars)
 { std::stringstream out;
-  if (input.size()< 700)
+  if (input.size()< (unsigned) upperNumChars)
     out << "<span class=\"math\">" << input << "</span>";
   else
     out << "<b>LaTeX output is long and I dare not use jsmath. "

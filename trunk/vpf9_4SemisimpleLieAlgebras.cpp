@@ -955,7 +955,8 @@ void slTwoSubalgebra::ElementToHtml(std::string& filePath)
 }
 
 void SltwoSubalgebras::init(SemisimpleLieAlgebra& inputOwner)
-{ this->theRootSAs.owneR=&inputOwner;
+{ this->owner=& inputOwner;
+  this->theRootSAs.owneR=&inputOwner;
 }
 
 void SemisimpleLieAlgebra::FindSl2Subalgebras

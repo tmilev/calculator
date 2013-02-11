@@ -1035,7 +1035,7 @@ public:
   (const std::string& input)
 ;
   static std::string GetHtmlMathSpanPure
-  (const std::string& input)
+  (const std::string& input, int upperNumChars=700)
 ;
   static std::string GetHtmlMathFromLatexFormulA
   (const std::string& input, const std::string& prependString, const std::string& appendStringBeforeButton, bool useDiv, bool useBeginArrayRCL)

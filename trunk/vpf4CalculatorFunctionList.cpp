@@ -173,14 +173,26 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Same action as \\sqcup (union no repetition) but different syntax; useful for matrices. ",
    "X:=FunctionToMatrix{}(A,3,4); UnionNoRepetition{}X; A{}({{i}},{{j}}):=i*i-j*j; UnionNoRepetition{}X");
 */  this->AddOperationInnerHandler
-  ("hwv", this->fHWV, "",
+  ("hwv", this->innerHWV, "",
    "Highest weight vector in a generalized Verma module. \
    The first argument gives the semisimple Lie algebra. The second argument \
    gives the highest weight in fundamental coordinates. \
    The third argument parametrizes the parabolic subalgebra, e.g. (1,0,0) stands for a \
-   parabolic subalgebra with first simple Vector<Rational> crossed-out. The second argument is allowed to have \
+   parabolic subalgebra with first simple root crossed-out. The second argument is allowed to have \
    entries that are not non-negative integers in the positions in which the third argument has 1's. ",
    "g_{{i}}:=getChevalleyGenerator{}(B_3, i);h_{{i}}:=getCartanGenerator{}(B_3, i);\n v_\\mu:=hwv{} (A_3, (1,0,1),(0,0,0)) ;  v_\\lambda:=hwv{}(B_3, (x_1,0,1),(1,0,0));\nh_1g_{-1} v_\\lambda");
+  this->AddOperationInnerHandler
+  ("printModule", this->innerPrintGenVermaModule, "",
+   "Makes a report on a finite dimensional Lie algebra module, or more generally, on \
+   a generalized Verma module (irreducible finite dimensional semisimple Lie algebra \
+   modules are a partial case of generalized Verma modules). \
+   The first argument gives the semisimple Lie algebra. The second argument \
+   gives the highest weight in fundamental coordinates. \
+   The third argument parametrizes the parabolic subalgebra, e.g. (1,0) stands for a \
+   parabolic subalgebra (lying in algebra of rank 2) with first simple root crossed-out. \
+   The second argument is allowed to have \
+   entries that are not non-negative integers in the positions in which the third argument has 1's. ",
+   "printModule{} (G_2, (2,0),(0,0))");
   this->AddOperationInnerHandler
   ("hwTAAbf", this->fHWTAABF, "",
    "Highest weight transpose anti-automorphism bilinear form, a.k.a. Shapovalov form. \

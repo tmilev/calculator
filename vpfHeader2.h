@@ -1472,10 +1472,10 @@ bool innerGetTypeHighestWeightParabolic
   static bool fJacobiSymbol
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fHWVinner
+  static bool innerHWVCommon
 (CommandList& theCommands, Expression& output,
  Vector<RationalFunctionOld>& highestWeightFundCoords,
- Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner)
+ Selection& selectionParSel, Expression& hwContext, SemisimpleLieAlgebra* owner, bool Verbose=true)
  ;
  bool fWriteGenVermaModAsDiffOperatorInner
 (CommandList& theCommands, const Expression& input, Expression& output,
@@ -1488,7 +1488,10 @@ static bool TypeHighestWeightParabolic
  Vector<CoefficientType>& outputWeight,
  Selection& outputInducingSel, Expression* outputContext=0)
 ;
-  static bool fHWV
+  static bool innerPrintGenVermaModule
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerHWV
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool fWriteGenVermaModAsDiffOperatorUpToLevel

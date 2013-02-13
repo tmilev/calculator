@@ -981,7 +981,7 @@ public:
   static bool AttemptToCivilize(std::string& readAhead, std::stringstream& out);
   static void MakeSureWeylGroupIsSane(char& theWeylLetter, int& theRank);
   static std::string RemovePathFromFileName(const std::string& fileName)
-  {unsigned startNameWithoutFolderInfo=0;
+  { unsigned startNameWithoutFolderInfo=0;
     for (unsigned i=0; i<fileName.size(); i++)
       if (fileName[i]=='/' || fileName[i]=='\\')
         startNameWithoutFolderInfo=i+1;
@@ -3253,28 +3253,31 @@ public:
     this->ScalarEuclidean(other, output, theRingZero);
     return output;
   }
-  static  void ScalarProduct
+  static void ScalarProduct
 (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& TheBilinearForm, CoefficientType& result)
   { result=Vector<CoefficientType>::ScalarProduct(r1, r2, TheBilinearForm);
   }
   static CoefficientType ScalarProduct
   (const Vector<CoefficientType>& r1, const Vector<CoefficientType>& r2, const Matrix<CoefficientType>& TheBilinearForm)
-  { CoefficientType result, tempRat;
-    if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
+  { if (r1.size!=TheBilinearForm.NumRows || r1.size!=r2.size || r1.size!=TheBilinearForm.NumCols)
     { std::cout << "This is a programming error: attempting to take a bilinear form represented by matrix with "
       << TheBilinearForm.NumRows << " rows and " << TheBilinearForm.NumCols << " columns "
       << " of vectors of dimension " << r1.size << " and " << r2.size << ". "
       << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
       assert(false);
     }
+    CoefficientType result, tempRat, accumRow;
     result=0;
     for (int i=0; i<TheBilinearForm.NumRows; i++)
+    { accumRow=0;
       for(int j =0; j<TheBilinearForm.NumCols; j++)
-      { tempRat=r1[i];
+      { tempRat=r2[j];
         tempRat*=TheBilinearForm.elements[i][j];
-        tempRat*=r2[j];
-        result+=(tempRat);
+        accumRow+=(tempRat);
       }
+      accumRow*=r1[i];
+      result+=accumRow;
+    }
     return result;
   }
   bool IsPositive()

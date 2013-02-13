@@ -365,10 +365,10 @@ bool CommandList::fCasimir
   return true;
 }
 
-bool CommandList::fDrawWeightSupportWithMults
+bool CommandList::innerDrawWeightSupportWithMults
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  if (input.IsListNElements(3))
+  if (!input.IsListNElements(3))
     return output.SetError
     ("Error: the function for drawing weight support takes two  arguments (type and highest weight)",
      theCommands);
@@ -398,10 +398,43 @@ bool CommandList::fDrawWeightSupportWithMults
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fDrawWeightSupport
+bool CommandList::innerDrawRootSystem
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
-  if (input.IsListNElements(3))
+  std::string errorString;
+  bool hasPreferredProjectionPlane= input.IsSequenceNElementS(3);
+  const Expression& typeNode= hasPreferredProjectionPlane ? input[1] : input;
+  SemisimpleLieAlgebra* theAlgPointer;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, typeNode, theAlgPointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  SemisimpleLieAlgebra& theAlg=*theAlgPointer;
+  WeylGroup& theWeyl=theAlg.theWeyl;
+  Vectors<Rational> preferredProjectionPlane;
+  if (hasPreferredProjectionPlane)
+  { preferredProjectionPlane.SetSize(2);
+    bool isGood=
+    theCommands.GetVector(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) &&
+    theCommands.GetVector(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
+    if (!isGood)
+      return output.SetError
+      ("Failed to convert second or third argument to vector of desired dimension", theCommands);
+  }
+  std::stringstream out;
+  DrawingVariables theDV;
+  theWeyl.DrawRootSystem(theDV, true, *theCommands.theGlobalVariableS, false, 0, true, 0);
+  if (hasPreferredProjectionPlane)
+  { theDV.flagFillUserDefinedProjection=true;
+    theDV.FillUserDefinedProjection=preferredProjectionPlane;
+  }
+  out << theDV.GetHtmlFromDrawOperationsCreateDivWithUniqueName(theWeyl.GetDim());
+  return output.AssignValue(out.str(), theCommands);
+}
+
+bool CommandList::innerDrawWeightSupport
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ //theNode.owner->theHmm.MakeG2InB3(theParser, theGlobalVariables);
+  if (!input.IsListNElements(3))
     return output.SetError("Wrong number of arguments, must be 2. ", theCommands);
   const Expression& typeNode=input[1];
   const Expression& hwNode=input[2];
@@ -2494,7 +2527,7 @@ bool CommandList::fPrintAllPartitions
   (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPrintAllPartitions");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (input.IsListNElements(3))
+  if (!input.IsListNElements(3))
     return output.SetError("Function fPrintAllPartitions expects 2 arguments.", theCommands);
 
   std::string errorString;
@@ -2588,7 +2621,7 @@ bool CommandList::fTestMonomialBaseConjecture
   (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fTestMonomialBaseConjecture");
   RecursionDepthCounter theRecursion(&theCommands.RecursionDeptH);
-  if (input.IsListNElements(3))
+  if (!input.IsListNElements(3))
     return output.SetError("fTestMonomialBaseConjecture takes two arguments as input", theCommands);
   const Expression& rankE=input[1];
   const Expression& dimE=input[2];

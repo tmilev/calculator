@@ -151,6 +151,7 @@ void DrawingVariables::initDrawingVariables(int cX1, int cY1)
   this->flagDrawChamberIndices=true;
   this->flagDrawingInvisibles=false;
   this->flagDrawingLinkToOrigin=true;
+  this->flagFillUserDefinedProjection=false;
   this->ColorDashes=CGI::RedGreenBlue(200, 200, 200);
   this->flag2DprojectionDraw=true;
   this->ColorChamberIndicator=CGI::RedGreenBlue(220, 220, 0);

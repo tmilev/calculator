@@ -7107,6 +7107,8 @@ public:
   bool flagDrawChamberIndices;
   bool flagDrawingInvisibles;
   bool flagDrawingLinkToOrigin;
+  bool flagFillUserDefinedProjection;
+  Vectors<Rational> FillUserDefinedProjection;
   int Selected;
   static int NumHtmlGraphics;
   int textX;

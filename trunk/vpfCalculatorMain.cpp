@@ -561,8 +561,6 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
     std::cout << "<a href=\"" << theParser.DisplayNameCalculator << "?"
     << theParser.inputStringRawestOfTheRaw
     << "\">Link to your input.</a>";
-//  std::cout << "<br>" << CGI::GetLatexEmbeddableLinkFromCalculatorInput
-//  (theParser.inputStringRawestOfTheRaw, civilizedInput);
   std::cout << "\n</FORM>";
   std::cout << theParser.javaScriptDisplayingIndicator;
   std::cout.flush();
@@ -577,6 +575,11 @@ GroebnerLexUpperLimit{}(1000, x_{6}x_{18}+2x_{5}x_{17}+x_{4}x_{16}+2x_{3}x_{15}+
     }
     theParser.Evaluate(civilizedInput);
     ComputationComplete=true;
+    if (theParser.flagProduceLatexLink)
+      std::cout << "<br>LaTeX link (\\usepackage{hyperref}):<br> "
+      << CGI::GetLatexEmbeddableLinkFromCalculatorInput
+      (theParser.inputStringRawestOfTheRaw, civilizedInput);
+
 //    std::cout << "<hr>";
     std::cout << theParser.outputString;
     if (theParser.parsingLog!="")

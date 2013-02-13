@@ -5656,12 +5656,15 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
     { std::stringstream tmpStream, tmpStream2;
       tmpStream << "textEbasisUserInput" << timesCalled << "_" << i << "_" << j;
       textEbasisNamesUserInput[i][j]=tmpStream.str();
-      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j]
-      << "\">" << "</textarea>\n";
+      out << "<textarea rows=\"1\" cols=\"2\" id=\"" << textEbasisNamesUserInput[i][j] << "\">";
+      if (this->flagFillUserDefinedProjection)
+        out << this->FillUserDefinedProjection[i][j].DoubleValue();
+      out << "</textarea>\n";
     }
     out << "<br>";
   }
-  out << "<button onclick=\"startProjectionPlaneUser" << timesCalled << "();\">Change to basis</button><br>";
+  out << "<button onclick=\"startProjectionPlaneUser" << timesCalled
+  << "();\">Change to basis</button><br>";
   out
   << "The bilinear form of the vector space follows. The ij^th element "
   << " gives the scalar product of e_i and e_j. If you enter a degenerate or non-positive definite "
@@ -5728,7 +5731,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   }
   out << "var frameCount" << timesCalled << "=0;\n";
   out << "var frameCountGoesUp" << timesCalled << "=true;\n";
-  int numFramesUserPlane=50;
+  int numFramesUserPlane=100;
   out << "function startProjectionPlaneUser" << timesCalled << "(){\n"
   << " frameCount" << timesCalled << "=0;\n";
   for (int i=0; i<theDimension; i++)
@@ -6760,7 +6763,8 @@ void WeylGroup::GetCoxeterPlane
 
 void WeylGroup::DrawRootSystem
 (DrawingVariables& outputDV, bool wipeCanvas, GlobalVariables& theGlobalVariables,
- bool drawWeylChamber, Vector<Rational>* bluePoint, bool LabelDynkinDiagramVertices, Vectors<Rational>* predefinedProjectionPlane)
+ bool drawWeylChamber, Vector<Rational>* bluePoint, bool LabelDynkinDiagramVertices,
+ Vectors<Rational>* predefinedProjectionPlane)
 { DrawOperations& output=outputDV.theBuffer;
   if (wipeCanvas)
     output.init();

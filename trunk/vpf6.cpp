@@ -1368,6 +1368,11 @@ bool CommandList::ApplyOneRule()
     this->PopTopSyntacticStack();
     return this->PopTopSyntacticStack();
   }
+  if (secondToLastS=="%" && lastS=="LatexLink")
+  { this->flagProduceLatexLink=true;
+    this->PopTopSyntacticStack();
+    return this->PopTopSyntacticStack();
+  }
 
 /*  if (lastE.theData.IndexBoundVars==-1)
   { std::cout << "<hr>The last expression, " << lastE.ToString(*this) << ", while reducing "
@@ -2630,7 +2635,7 @@ bool CommandList::fSplitGenericGenVermaTensorFD
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fSplitGenericGenVermaTensorFD");
   RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (input.IsListNElements(4))
+  if (!input.IsListNElements(4))
     return output.SetError
     ("Function fSplitGenericGenVermaTensorFD is expected to have three arguments: \
      SS algebra type, weight, weight. ", theCommands);
@@ -3477,6 +3482,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->flagLogSyntaxRules=false;
   this->flagLogEvaluation=false;
   this->flagNewContextNeeded=true;
+  this->flagProduceLatexLink=false;
   this->MaxLatexChars=2000;
   this->numEmptyTokensStart=9;
   this->MaxNumCachedExpressionPerContext=100000;
@@ -3581,6 +3587,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("%");
   this->controlSequences.AddOnTop("LogParsing");
   this->controlSequences.AddOnTop("LogEvaluation");
+  this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("EndProgram");
 //  this->controlSequences.AddOnTop("c...c");
 //    this->thePropertyNames.AddOnTop("IsCommutative");

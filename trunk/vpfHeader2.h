@@ -662,6 +662,7 @@ public:
 
   bool flagLogSyntaxRules;
   bool flagLogEvaluation;
+  bool flagProduceLatexLink;
   ///////////////////////////////////////////////////////////////////////////
   int TotalNumPatternMatchedPerformed;
   int NumPredefinedVars;
@@ -1429,10 +1430,10 @@ bool innerGetTypeHighestWeightParabolic
   static bool fSplitFDpartB3overG2inner
 (CommandList& theCommands, branchingData& theG2B3Data, Expression& output)
 ;
-  static bool fDrawWeightSupportWithMults
+  static bool innerDrawWeightSupportWithMults
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-  static bool fDrawWeightSupport
+  static bool innerDrawWeightSupport
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
@@ -1487,6 +1488,9 @@ static bool TypeHighestWeightParabolic
 (CommandList& theCommands, const Expression& input, Expression& output,
  Vector<CoefficientType>& outputWeight,
  Selection& outputInducingSel, Expression* outputContext=0)
+;
+static bool innerDrawRootSystem
+  (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerPrintGenVermaModule
   (CommandList& theCommands, const Expression& input, Expression& output)

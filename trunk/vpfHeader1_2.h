@@ -9192,6 +9192,9 @@ const CoefficientType& theRingUnit, const CoefficientType& theRingZero,
               << "\\cdot v"
               ;
             }*/
+          if (k==1)
+            this->GetActionGeneratorIndeX
+            (this->GetOwner().GetNumPosRoots()+j, theGlobalVariables, theRingUnit, theRingZero);
         }
   if (outputReport!=0)
     *outputReport= out2.str();

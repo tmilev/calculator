@@ -455,8 +455,8 @@ bool CommandList::innerSuffixNotationForPostScript
   bool useUsualOrder=
   !input[0].IsAtoM(theCommands.opDivide()) &&
   !input[0].IsAtoM(theCommands.opThePower());
-  if (input[0].IsAtoM(theCommands.opDivide()))
-    std::cout << input.Lispify();
+//  if (input[0].IsAtoM(theCommands.opDivide()))
+//    std::cout << input.Lispify();
   if (useUsualOrder)
     for (int i=input.children.size-1; i>=1; i--)
     { if (!theCommands.innerSuffixNotationForPostScript(theCommands, input[i], currentE))

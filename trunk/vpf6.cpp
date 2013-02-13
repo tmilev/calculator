@@ -2494,7 +2494,8 @@ std::string ModuleSSalgebra<CoefficientType>::ToString(FormatExpressions* theFor
   out << "</table>";
 
   out << "<br>Character: " << this->theChaR.ToString();
-  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection << " out of "
+  out << "<br>Computed generator actions (" << this->ComputedGeneratorActions.CardinalitySelection
+  << " out of "
   << this->actionsGeneratorsMaT.size << " computed actions) follow. "
   << " Note that generator actions are computed on demand, only the simple "
   << " Chevalley generators are computed by default. ";
@@ -3358,10 +3359,12 @@ bool CommandList::innerSSLieAlgebra
     if (!rankE.IsSmallInteger(&theRank))
       return output.SetError
       ("I wasn't able to extract rank from " + currentMon.ToString(&theFormat), theCommands);
-    if (theRank<1 || theRank>8)
+    if (theRank<1 || theRank>20)
       return output.SetError
-      ("The rank of a simple Lie algebra must be between 1 and 8; error while processing "
+      ("The rank of a simple Lie algebra must be between 1 and 20; error while processing "
        + currentMon.ToString(&theFormat), theCommands);
+    if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
+      return output.SetError("Type E must have rank 6,7 or 8 ", theCommands);
     simpleComponent.theLetter=theWeylLetter;
     simpleComponent.theRank= theRank;
     if (!foundLengthFromExpression)

@@ -232,7 +232,19 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
     a paper by McGovern.",
    "g:=SemisimpleLieAlgebra{}G_2; hmmG2inB3{}(g_1);\nhmmG2inB3{}(g_2) ");
   this->AddOperationInnerHandler
-  ("drawWeightSupportWithMults", this->fDrawWeightSupportWithMults, "",
+  ("drawRootSystem", this->innerDrawRootSystem, "",
+   "Draws the root system of a semisimple Lie algebra. Takes one or three arguments: \
+    if one argument is provided, that must be a semisimple Lie algebra or a semisimple Lie algebra \
+    type; if three arguments are provided, the first must be a semisimple Lie algebra or a semisimple \
+    Lie algebra type, and the second and third argument must be two rational vectors of dimension\
+    equal to the rank of the semisimple Lie algebra. \
+    The root system is drawn in a Coxeter plane.\
+    If the extra two vectors are given, they are used to initialize a preferred projection plane\
+    in the change-to-basis entries below the graphics. Clicking the obvious button creates a basis \
+    change animations ideal for presentations.",
+   "drawRootSystem{}(A_7, (1, 0 , 2, 2, 2, 0, 1), (1, 3, 2, 2, 2, 3, 1));");
+  this->AddOperationInnerHandler
+  ("drawWeightSupportWithMults", this->innerDrawWeightSupportWithMults, "",
    "Draws the weight support of an irreducible finite-dimensional highest weight module. \
    The first argument gives the type and the second gives the highest weight given in \
    fundamendal weight basis. \
@@ -242,7 +254,7 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    is very javascrtipt-processor-intensive. Use only for *small* examples, else you might hang your browser. </b>",
    "drawWeightSupportWithMults{}(B_3,(0,1,1));\n drawWeightSupportWithMults{}(G_2,(1,0))");
   this->AddOperationInnerHandler
-  ("drawWeightSupport", this->fDrawWeightSupport, "",
+  ("drawWeightSupport", this->innerDrawWeightSupport, "",
    "Same as drawWeightSupportWithMults but displays no multiplicities. Same warning for hanging up your browser \
     with javascript holds.",
    "drawWeightSupport{}(B_3,(1,1,1)); drawWeightSupport{}(G_2,(1,2))");

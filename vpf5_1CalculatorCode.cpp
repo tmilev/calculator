@@ -26,19 +26,53 @@ bool CommandList::innerGCDOrLCM
   return output.AssignValueWithContext(outputP, theContext, theCommands);
 }
 
-bool CommandList::fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, const Expression& input, Expression& output, bool returnQuotient)
+bool CommandList::innerPolynomialDivisionRemainder
+(CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVector(input, thePolys, &theContext, 2, theCommands.innerPolynomial))
-    return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
-  Polynomial<Rational> outputR, outputQ;
-  thePolys[0].DivideBy(thePolys[1], outputQ, outputR);
-  if (returnQuotient)
-    return output.AssignValueWithContext(outputQ, theContext, theCommands);
-  else
-    return output.AssignValueWithContext(outputR, theContext, theCommands);
+  if (!theCommands.GetVector(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
+    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  if (thePolys.size<2)
+    return output.SetError("Expression takes two or more arguments", theCommands);
+  GroebnerBasisComputation theGB;
+  theGB.theBasiS.SetSize(thePolys.size-1);
+  for (int i=1; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.SetError("Division by zero.", theCommands);
+    theGB.theBasiS[i-1]=thePolys[i];
+  }
+  std::cout << "<hr>The polys: " << thePolys.ToString() << "<br>The gb basis: "
+  << theGB.theBasiS.ToString() << "<hr>";
+  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
+  theGB.RemainderDivisionWithRespectToBasis
+  (thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
+  return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
+}
+
+bool CommandList::innerPolynomialDivisionVerbose
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerPolynomialDivisionVerbose");
+  Vector<Polynomial<Rational> > thePolys;
+  Expression theContext(theCommands);
+  if (!theCommands.GetVector(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
+    return output.SetError("Failed to extract list of polynomials. ", theCommands);
+  if (thePolys.size<2)
+    return output.SetError("Expression takes two or more arguments", theCommands);
+  GroebnerBasisComputation theGB;
+  theGB.flagDoLogDivision=true;
+  theGB.theBasiS.SetSize(thePolys.size-1);
+  for (int i=1; i<thePolys.size; i++)
+  { if (thePolys[i].IsEqualToZero())
+      return output.SetError("Division by zero.", theCommands);
+    theGB.theBasiS[i-1]=thePolys[i];
+  }
+  Polynomial<Rational> outputRemainder;
+  theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
+  theGB.RemainderDivisionWithRespectToBasis
+  (thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
+  return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
 }
 
 bool CommandList::fSolveSeparableBilinearSystem
@@ -377,23 +411,40 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
 { this->theFunctions.AddListOnTop(other.theFunctions);
   this->lowerBounds.AddListOnTop(other.lowerBounds);
   this->upperBounds.AddListOnTop(other.upperBounds);
-
 }
 
-std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands()
+std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)
 { std::stringstream resultStream;
   resultStream << "\\documentclass{article}\\usepackage{pstricks}"
   << "\\usepackage{pst-3dplot}\\usepackage{pst-plot}\\begin{document} \\pagestyle{empty}";
-
-  resultStream << " \\psset{xunit=1cm, yunit=1cm}\\begin{pspicture}(-5, -5)(5,5)\n\n";
-  resultStream << "\\psframe*[linecolor=white](-5,-5)(5,5)\n\n \\psaxes[labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  if (useHtml)
+    resultStream << "<br>";
+  resultStream << " \\psset{xunit=1cm, yunit=1cm}";
+  if (useHtml)
+    resultStream << "<br>";
+  resultStream << "\\begin{pspicture}(-5, -5)(5,5)\n\n";
+  if (useHtml)
+    resultStream << "<br>";
+  resultStream << "\\psframe*[linecolor=white](-5,-5)(5,5)\n\n";
+  if (useHtml)
+    resultStream << "<br>";
+  resultStream << " \\psaxes[ticks=none, labels=none]{<->}(0,0)(-4.5,-4.5)(4.5,4.5)";
+  if (useHtml)
+    resultStream << "<br>";
   for (int i=0; i<this->theFunctions.size; i++)
-  { resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
+  { resultStream << "\n\n%Function formula: " << this->theFunctionsCalculatorInput[i] << "\n\n";
+    if (useHtml)
+      resultStream << "<br>";
+    resultStream << "\\psplot[linecolor=red, plotpoints=1000]{"
     << this->lowerBounds[i].DoubleValue() << "}{"
     << this->upperBounds[i].DoubleValue() << "}{";
     resultStream << this->theFunctions[i] << "}";
   }
+  if (useHtml)
+    resultStream << "<br>";
   resultStream << "\\end{pspicture}\n\n";
+  if (useHtml)
+    resultStream << "<br>";
   resultStream << "\\end{document}";
   return resultStream.str();
 }
@@ -421,6 +472,7 @@ bool CommandList::innerPlot2D
   thePlot.theFunctions.AddOnTop(functionE.GetValuE<std::string>());
   thePlot.lowerBounds.AddOnTop(lowerBound);
   thePlot.upperBounds.AddOnTop(upperBound);
+  thePlot.theFunctionsCalculatorInput.AddOnTop(input[1].ToString());
   return output.AssignValue(thePlot, theCommands);
 }
 
@@ -477,6 +529,14 @@ bool CommandList::innerSuffixNotationForPostScript
     return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
   if (!currentE.IsOfType(&currentString))
     return output.SetError("Failed to convert "+input[0].ToString(), theCommands);
+  if (currentString=="\\sin")
+    currentString="sin";
+  if (currentString=="\\cos")
+    currentString="cos";
+  if (currentString=="\\cot")
+    currentString="cot";
+  if (currentString=="\\tan")
+    currentString="tan";
   if (currentString=="sin" || currentString=="cos" || currentString=="tan" || currentString=="cot")
     out << " 57.29578 mul ";
   out << currentString << " ";

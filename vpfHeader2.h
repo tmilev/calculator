@@ -489,20 +489,23 @@ class SyntacticElement
 //the following class is meant to use to draw plots for calculus students.
 class CalculusFunctionPlot
 { public:
+  List<std::string> theFunctionsCalculatorInput;
   List<std::string> theFunctions;
   List<Rational> lowerBounds;
   List<Rational> upperBounds;
-  std::string GetPlotStringAddLatexCommands();
+  std::string GetPlotStringAddLatexCommands(bool useHtml);
   void operator=(const CalculusFunctionPlot& other)
   { this->theFunctions=other.theFunctions;
     this->lowerBounds=other.lowerBounds;
     this->upperBounds=other.upperBounds;
+    this->theFunctionsCalculatorInput=other.theFunctionsCalculatorInput;
   }
   bool operator==(const CalculusFunctionPlot& other)const
   { return
     this->theFunctions==other.theFunctions &&
     this->lowerBounds==other.lowerBounds &&
-    this->upperBounds==other.upperBounds;
+    this->upperBounds==other.upperBounds &&
+    this->theFunctionsCalculatorInput==other.theFunctionsCalculatorInput;
   }
   void operator+=(const CalculusFunctionPlot& other);
 };
@@ -1280,16 +1283,11 @@ public:
   (CommandList& theCommands, const Expression& input, Expression& output)
   { return theCommands.innerGCDOrLCM(theCommands, input, output, true);
   }
-  static bool fPolynomialDivisionQuotient
+  static bool innerPolynomialDivisionRemainder
   (CommandList& theCommands, const Expression& input, Expression& output)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, input, output, true);
-  }
-  static bool fPolynomialDivisionRemainder
+ ;
+  static bool innerPolynomialDivisionVerbose
   (CommandList& theCommands, const Expression& input, Expression& output)
-  {return theCommands.fPolynomialDivisionQuotientRemainder(theCommands, input, output, false);
-  }
-  static bool fPolynomialDivisionQuotientRemainder
-(CommandList& theCommands, const Expression& input, Expression& output, bool returnQuotient)
  ;
   static bool fPrintAllPartitions
   (CommandList& theCommands, const Expression& input, Expression& output)

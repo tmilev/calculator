@@ -2408,6 +2408,12 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
   Rational leadingMonCoeff;
   MonomialP& highestMonCurrentDivHighestMonOther=this->bufferMoN1;
   int numIntermediateRemainders=0;
+  if (this->flagDoLogDivision)
+  { this->intermediateCoeffs.GetElement().size=0;
+    this->intermediateHighestMonDivHighestMon.GetElement().size=0;
+    this->intermediateRemainders.GetElement().size=0;
+    this->intermediateSubtractands.GetElement().size=0;
+  }
   while (!currentRemainder.IsEqualToZero())
   { bool divisionOcurred=false;
     int i=0;
@@ -2427,9 +2433,16 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
           assert(false);
         }
+        if (this->flagDoLogDivision)
+          this->intermediateHighestMonDivHighestMon.GetElement().
+          AddOnTop(highestMonCurrentDivHighestMonOther);
         this->bufPoly=this->theBasiS[i];
         leadingMonCoeff/=this->leadingCoeffs[i];
+        if (this->flagDoLogDivision)
+          this->intermediateCoeffs.GetElement().AddOnTop(leadingMonCoeff);
         this->bufPoly.MultiplyBy(highestMonCurrentDivHighestMonOther, leadingMonCoeff);
+        if (this->flagDoLogDivision)
+          this->intermediateSubtractands.GetElement().AddOnTop(this->bufPoly);
         if (theGlobalVariables!=0 && this->flagDoProgressReport)
         { std::stringstream out;
           out
@@ -2459,6 +2472,8 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           std::cout << " I must get: " << currentRemainder1.ToString();
         }*/
         currentRemainder-=this->bufPoly;
+        if (this->flagDoLogDivision)
+          this->intermediateRemainders.GetElement().AddOnTop(currentRemainder);
         divisionOcurred=true;
 /*        if (this->NumberOfComputations>this->MaxNumComputations+1000)
         { std::cout << "<br>Result:<br> " << currentRemainder.ToString()
@@ -2557,12 +2572,43 @@ GroebnerBasisComputation::GroebnerBasisComputation()
   this->flagDoProgressReport=true;
   this->flagDoSortBasis=true;
   this->flagBasisGuaranteedToGenerateIdeal=false;
+  this->flagDoLogDivision=false;
   this->MaxNumComputations=0;
 }
 
-void GroebnerBasisComputation::initTheBasis
+void GroebnerBasisComputation::initForDivisionAlone
 (List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables)
-{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initTheBasis");
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initForDivisionAlone");
+  if (inputOutpuT.size<=0)
+  { std::cout << "This is a programming error: I cannot transform an "
+    << "empty list to a Groebner basis. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->theBasiS=inputOutpuT;
+  this->leadingMons.SetSize(inputOutpuT.size);
+  this->leadingCoeffs.SetSize(inputOutpuT.size);
+  for (int i=0; i<this->theBasiS.size; i++)
+  { Polynomial<Rational>& curPoly=theBasiS[i];
+    int theIndex=curPoly.GetIndexMaxMonomial(this->theMonOrdeR);
+    if (theIndex==-1)
+    { std::cout << "This is a programming error: initialization for polynomial division "
+      << " with respect to at least one zero polynomial. If this is a bad user input, "
+      << " it should be handled at an earlier level. "
+      << " Here is the current basis by which we need to divide. "
+      << this->theBasiS.ToString()
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    this->leadingMons[i]=curPoly[theIndex];
+    this->leadingCoeffs[i]=curPoly.theCoeffs[theIndex];
+  }
+  this->NumberOfComputations=0;
+}
+
+void GroebnerBasisComputation::initForGroebnerComputation
+(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables)
+{ MacroRegisterFunctionWithName("GroebnerBasisComputation::initForGroebnerComputation");
   if (inputOutpuT.size<=0)
   { std::cout << "This is a programming error: I cannot transform an "
     << "empty list to a Groebner basis. "
@@ -2594,7 +2640,7 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasis
   (List<Polynomial<Rational> >& inputOutpuT,
    GlobalVariables* theGlobalVariables)
 { MacroRegisterFunctionWithName("RationalFunctionOld::TransformToReducedGroebnerBasis");
-  this->initTheBasis(inputOutpuT, theGlobalVariables);
+  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->basisCandidates=inputOutpuT;
   ProgressReport theReport(theGlobalVariables);
  // std::string tempS;
@@ -2783,7 +2829,7 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasisImprovedAlgorithm
   ("RationalFunction_CoefficientType::TransformToReducedGroebnerBasisImprovedAlgorithm");
    //This is an implementation of the algorithm on page 106, Cox, Little, O'Shea,
   //Ideals, Varieties, algorithms
-  this->initTheBasis(inputOutpuT, theGlobalVariables);
+  this->initForGroebnerComputation(inputOutpuT, theGlobalVariables);
   this->theBasiS=inputOutpuT;
   HashedListSpecialized<PairInts > indexPairs;
 //  Pair<int, int> currentPair;

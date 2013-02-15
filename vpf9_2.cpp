@@ -2378,8 +2378,8 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
 }
 
 std::string GroebnerBasisComputation::GetPolynomialStringSpacedMonomials
-  (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   const std::string& extraStyle)
+(const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+ const std::string& extraStyle, FormatExpressions* theFormat)
 { std::stringstream out;
   bool wasFirst=true;
   bool isFirst;
@@ -2394,30 +2394,8 @@ std::string GroebnerBasisComputation::GetPolynomialStringSpacedMonomials
     isFirst=wasFirst;
     wasFirst=false;
     out << "<td" << extraStyle << ">";
-    std::string coeffStr=thePoly.theCoeffs[theIndex].ToString();
-    if (thePoly[theIndex].IsAConstant())
-    { if (coeffStr[0]!='-' && !isFirst)
-        out << "+" << coeffStr;
-      else
-        out << coeffStr;
-      out << "</td>";
-      continue;
-    }
-    std::string monString=thePoly[theIndex].ToString();
-    if (coeffStr=="1")
-    { if (!isFirst)
-        out << "+";
-      out << monString << "</td>";
-      continue;
-    }
-    if (coeffStr=="-1")
-    { out << "-" << monString << "</td>";
-      continue;
-    }
-    if (coeffStr[0]!='-' && !isFirst)
-      out << "+" << coeffStr << monString;
-    else
-      out << coeffStr << monString;
+    out << Polynomial<Rational>::GetBlendCoeffAndMon
+    (thePoly[theIndex], thePoly.theCoeffs[theIndex], !isFirst, theFormat);
     out << "</td>";
   }
   if (countMons!=thePoly.size)
@@ -2437,16 +2415,28 @@ std::string GroebnerBasisComputation::GetDivisionString(FormatExpressions* theFo
   { totalMonCollection.AddOnTopNoRepetition(theRemainders[i]);
     totalMonCollection.AddOnTopNoRepetition(theSubtracands[i]);
   }
-  List<std::string> basisColorStyles;
-  basisColorStyles.SetSize(this->theBasiS.size);
+  //List<std::string> basisColorStyles;
+  //basisColorStyles.SetSize(this->theBasiS.size);
+
+  out << this->theBasiS.size << " elements in the basis. ";
   out << "<table style=\"border:1px solid black;\">";
+  out << "<tr><td colspan=\"" << totalMonCollection.size+1 << "\">";
+  out << "<table>";
   for (int i=0; i<this->theBasiS.size; i++)
-  { //Polynomial<Rational>& currentBasisElement=this->theBasiS[i];
-    //out <<
+  { out << "<tr><td>" << this->theBasiS[i].ToString(theFormat);
+    out << "</td>";
     for (int j=0; j<theRemainders.size; j++)
-    {
+    { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
+      { out << "<td></td>";
+        continue;
+      }
+      out << "<td>" << Polynomial<Rational>::GetBlendCoeffAndMon
+      (this->intermediateHighestMonDivHighestMon.GetElement()[j], this->intermediateCoeffs.GetElement()[j],
+       true, theFormat);
+      out << "</td>";
     }
   }
+  out << "</table></td></tr>";
   out << "<tr><td></td>";
   out << this->GetPolynomialStringSpacedMonomials(this->startingPoly.GetElement(), totalMonCollection, "");
   out << "</tr>";

@@ -4822,6 +4822,10 @@ public:
     result/=tempRat;
     return result;
   }
+  static std::string GetBlendCoeffAndMon
+  (const TemplateMonomial& inputMon, CoefficientType& inputCoeff,
+   bool addPlusToFront, FormatExpressions* theFormat=0)
+  ;
   void CheckNumCoeffsConsistency(const char* fileName, int lineName)const
   { if (this->theCoeffs.size!=this->size)
     { std::cout << "This is a programming error: a monomial collection has "
@@ -5493,7 +5497,7 @@ class GroebnerBasisComputation
   MemorySaving<Polynomial<Rational> > startingPoly;
   std::string GetPolynomialStringSpacedMonomials
   (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
-   const std::string& extraStyle)
+   const std::string& extraStyle, FormatExpressions* theFormat=0)
   ;
   std::string GetDivisionString(FormatExpressions* theFormat=0);
 
@@ -8780,6 +8784,37 @@ std::string Matrix<Element>::ToString(FormatExpressions* theFormat)const
     out << "</table>";
   if (useLatex)
     out << "\\end{array}\\right)";
+  return out.str();
+}
+
+template <class TemplateMonomial, class CoefficientType>
+std::string MonomialCollection<TemplateMonomial, CoefficientType>::GetBlendCoeffAndMon
+(const TemplateMonomial& inputMon, CoefficientType& inputCoeff, bool addPlusToFront,
+ FormatExpressions* theFormat)
+{ std::stringstream out;
+  std::string coeffStr=inputCoeff.ToString();
+  if (inputMon.IsAConstant())
+  { if (coeffStr[0]!='-' && addPlusToFront)
+      out << "+" << coeffStr;
+    else
+      out << coeffStr;
+    return out.str();
+  }
+  std::string monString=inputMon.ToString(theFormat);
+  if (coeffStr=="1")
+  { if (addPlusToFront)
+      out << "+";
+    out << monString;
+    return out.str();
+  }
+  if (coeffStr=="-1")
+  { out << "-" << monString;
+    return out.str();
+  }
+  if (coeffStr[0]!='-' && addPlusToFront)
+    out << "+" << coeffStr << monString;
+  else
+    out << coeffStr << monString;
   return out.str();
 }
 

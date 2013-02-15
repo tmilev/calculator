@@ -4763,9 +4763,9 @@ bool Expression::ToStringData
   { if (isFinal)
     { CalculusFunctionPlot& thePlot=this->GetValuENonConstUseWithCaution<CalculusFunctionPlot>();
       out << this->theBoss->WriteDefaultLatexFileReturnHtmlLink
-      (thePlot.GetPlotStringAddLatexCommands(), true);
+      (thePlot.GetPlotStringAddLatexCommands(false), true);
       out << "<br><b>LaTeX code used to generate the output. </b><br>"
-      << thePlot.GetPlotStringAddLatexCommands();
+      << thePlot.GetPlotStringAddLatexCommands(true);
     } else
       out << "(plot not shown)";
     result=true;

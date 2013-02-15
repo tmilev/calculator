@@ -5484,6 +5484,12 @@ class GroebnerBasisComputation
   bool flagBasisGuaranteedToGenerateIdeal;
   bool flagDoProgressReport;
   bool flagDoSortBasis;
+  bool flagDoLogDivision;
+  MemorySaving<List<Polynomial<Rational> > > intermediateRemainders;
+  MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
+  MemorySaving<List<Rational> > intermediateCoeffs;
+  MemorySaving<List<Polynomial<Rational> > > intermediateSubtractands;
+
  bool AddPolyAndReduceBasis
  (GlobalVariables* theGlobalVariables)
  ;
@@ -5514,7 +5520,8 @@ class GroebnerBasisComputation
   ;
   void ConsistencyCheck();
 
-  void initTheBasis(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForGroebnerComputation(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
+  void initForDivisionAlone(List<Polynomial<Rational> >& inputOutpuT, GlobalVariables* theGlobalVariables);
 };
 
 class RationalFunctionOld

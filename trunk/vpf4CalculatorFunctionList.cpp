@@ -36,16 +36,15 @@ void CommandList::initPredefinedInnerFunctions()
    x_{13}^{2}x_{15}x_{16}x_{18}x_{19}x_{21}^{2}  )")
    ;
   this->AddOperationInnerHandler
-("PolyDivQuotient", &this->fPolynomialDivisionQuotient, "",
-   "Quotient of two polynomials under division with remainder. ",
-   "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\nb:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", true)
+("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
+   "Returns the remainder after taking quotient of a \
+    polynomial divided by a set of polynomials using lexicographic order.",
+   "PolyDivRemainder{}(x^3+6x y+5x y^2+y^3, x^2+y^2-1, x^3+y^3-x y) ;", true)
    ;
   this->AddOperationInnerHandler
-("PolyDivRemainder", &this->fPolynomialDivisionRemainder, "",
-   "Remainder of polynomial division under division with remainder. ",
-   "a:=Polynomial{}(x_1^3x_2+x_1^2x_2^3x_3);\n b:=Polynomial{}(x_1^2+x_3);\
-   \nq:=PolyDivQuotient{}(a,b); \nr:=PolyDivRemainder{}(a,b); \na-q*b-r;", true)
+("PolyDivVerbose", &this->innerPolynomialDivisionVerbose, "",
+   "Prints polynomial division of a polynomial by a set of polynomials using the lexicographic order. ",
+   "PolyDivVerbose{}(x^3+6x y+5x y^2+y^3, x^2+y^2-1, x^3+y^3-x y) ;", true)
    ;
   this->AddOperationInnerHandler
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",
@@ -65,8 +64,12 @@ this->AddOperationInnerHandler ("plot2D", this->innerPlot2D, "",
    "Makes a 2d plot of a function given in the form \
    y=f(x). The the second and third argument give the upper and \
    lower bounds of x. Plots may be added together- adding plots superimposes the plots. \
+   Trigonometry functions must be entered in the usual calculator format, i.e., in the form \
+   sin{}x, cos{}x, etc. or in the form \\sin{}x, \\cos{}x, etc. (both forms are fine).\
+   We recall that in the calculator, {}  stands for function application (the symbols {} were\
+   chosen as they produce invisible LaTeX output).\
    ",
-   "plot2D{}(x+1, 0, 5)")
+   "plot2D{}(\\sin{}x+cos{}x, 0, 5)")
    ;
 
   this->AddOperationInnerHandler

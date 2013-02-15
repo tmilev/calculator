@@ -72,7 +72,7 @@ bool CommandList::innerPolynomialDivisionVerbose
   theGB.initForDivisionAlone(theGB.theBasiS, theCommands.theGlobalVariableS);
   theGB.RemainderDivisionWithRespectToBasis
   (thePolys[0], &outputRemainder, theCommands.theGlobalVariableS, -1);
-  return output.AssignValueWithContext(outputRemainder, theContext, theCommands);
+  return output.AssignValue(theGB.GetDivisionString(), theCommands);
 }
 
 bool CommandList::fSolveSeparableBilinearSystem

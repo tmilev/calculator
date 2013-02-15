@@ -394,12 +394,12 @@ void rootSubalgebras::ComputeActionNormalizerOfCentralizerIntersectNilradical(Se
   Vector<Rational> tempRoot;
   ProgressReport theReport(&theGlobalVariables);
   for(int i=0; i<theSubgroup.size-1; i++)
-  { this->ActionsNormalizerCentralizerNilradical.TheObjects[i].SetSize(theRootSA.kModules.size);
+  { this->ActionsNormalizerCentralizerNilradical[i].SetSize(theRootSA.kModules.size);
     for (int j=0; j<theRootSA.kModules.size; j++)
-    { tempRoot=(theRootSA.HighestWeightsGmodK.TheObjects[j]);
+    { tempRoot=(theRootSA.HighestWeightsGmodK[j]);
       theSubgroup.ActByElement(i+1, tempRoot);
       int tempI=theRootSA.GetIndexKmoduleContainingRoot(tempRoot);
-      this->ActionsNormalizerCentralizerNilradical.TheObjects[i].TheObjects[j]= tempI;
+      this->ActionsNormalizerCentralizerNilradical[i][j]= tempI;
     //  for (int k=0; k<theRootSA.kModules.TheObjects[j].size; k++)
     //  { tempRoot.Assign(theRootSA.kModules.TheObjects[j].TheObjects[k]);
     //    theSubgroup.ActByElement(i+1, tempRoot);

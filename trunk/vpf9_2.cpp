@@ -2377,6 +2377,91 @@ std::string RationalFunctionOld::ToString(FormatExpressions* theFormat)const
   return out.str();
 }
 
+std::string GroebnerBasisComputation::GetPolynomialStringSpacedMonomials
+  (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+   const std::string& extraStyle)
+{ std::stringstream out;
+  bool wasFirst=true;
+  bool isFirst;
+  int countMons=0;
+  for (int i=0; i<theMonomialOrder.size; i++)
+  { int theIndex= thePoly.GetIndex(theMonomialOrder[i]);
+    if (theIndex==-1)
+    { out << "<td" << extraStyle << ">" << "</td>";
+      continue;
+    }
+    countMons++;
+    isFirst=wasFirst;
+    wasFirst=false;
+    out << "<td" << extraStyle << ">";
+    std::string coeffStr=thePoly.theCoeffs[theIndex].ToString();
+    if (thePoly[theIndex].IsAConstant())
+    { if (coeffStr[0]!='-' && !isFirst)
+        out << "+" << coeffStr;
+      else
+        out << coeffStr;
+      out << "</td>";
+      continue;
+    }
+    std::string monString=thePoly[theIndex].ToString();
+    if (coeffStr=="1")
+    { if (!isFirst)
+        out << "+";
+      out << monString << "</td>";
+      continue;
+    }
+    if (coeffStr=="-1")
+    { out << "-" << monString << "</td>";
+      continue;
+    }
+    if (coeffStr[0]!='-' && !isFirst)
+      out << "+" << coeffStr << monString;
+    else
+      out << coeffStr << monString;
+    out << "</td>";
+  }
+  if (countMons!=thePoly.size)
+    out << "<td><b>Oh no, this is f***ed up!</b></td>";
+  return out.str();
+}
+
+std::string GroebnerBasisComputation::GetDivisionString(FormatExpressions* theFormat)
+{ std::stringstream out;
+  List<Polynomial<Rational> >& theRemainders=this->intermediateRemainders.GetElement();
+  List<Polynomial<Rational> >& theSubtracands=this->intermediateSubtractands.GetElement();
+
+  HashedList<MonomialP> totalMonCollection;
+  std::string underlineStyle=" style=\"border-bottom:1px solid black;\"";
+  totalMonCollection.AddOnTopNoRepetition(this->startingPoly.GetElement());
+  for (int i=0; i<theRemainders.size; i++)
+  { totalMonCollection.AddOnTopNoRepetition(theRemainders[i]);
+    totalMonCollection.AddOnTopNoRepetition(theSubtracands[i]);
+  }
+  List<std::string> basisColorStyles;
+  basisColorStyles.SetSize(this->theBasiS.size);
+  out << "<table style=\"border:1px solid black;\">";
+  for (int i=0; i<this->theBasiS.size; i++)
+  { //Polynomial<Rational>& currentBasisElement=this->theBasiS[i];
+    //out <<
+    for (int j=0; j<theRemainders.size; j++)
+    {
+    }
+  }
+  out << "<tr><td></td>";
+  out << this->GetPolynomialStringSpacedMonomials(this->startingPoly.GetElement(), totalMonCollection, "");
+  out << "</tr>";
+  for (int i=0; i<theRemainders.size; i++)
+  { out << "<tr><td>-</td></tr>";
+    out << "<tr><td></td>"  << this->GetPolynomialStringSpacedMonomials
+    (this->intermediateSubtractands.GetElement()[i], totalMonCollection, underlineStyle)
+    << "</tr>";
+    out << "<tr><td></td>" << this->GetPolynomialStringSpacedMonomials(theRemainders[i], totalMonCollection, "")
+    << "</tr>";
+  }
+  out << "</table>";
+  return out.str();
+}
+
 void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
 (Polynomial<Rational>& inputOutput,
  Polynomial<Rational>* outputRemainder, GlobalVariables* theGlobalVariables,
@@ -2405,6 +2490,8 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
   }
   outputRemainder->MakeZero();
   Polynomial<Rational>& currentRemainder=inputOutput;
+  if (this->flagDoLogDivision)
+    this->startingPoly.GetElement()=currentRemainder;
   Rational leadingMonCoeff;
   MonomialP& highestMonCurrentDivHighestMonOther=this->bufferMoN1;
   int numIntermediateRemainders=0;
@@ -2434,8 +2521,10 @@ void GroebnerBasisComputation::RemainderDivisionWithRespectToBasis
           assert(false);
         }
         if (this->flagDoLogDivision)
-          this->intermediateHighestMonDivHighestMon.GetElement().
+        { this->intermediateHighestMonDivHighestMon.GetElement().
           AddOnTop(highestMonCurrentDivHighestMonOther);
+          this->intermediateSelectedDivisors.GetElement().AddOnTop(i);
+        }
         this->bufPoly=this->theBasiS[i];
         leadingMonCoeff/=this->leadingCoeffs[i];
         if (this->flagDoLogDivision)

@@ -1328,16 +1328,16 @@ public:
         this->TheHashedArrays[theIndex].AddOnTop(i);
       }
   }
-  void QuickSortAscending()
+  void QuickSortAscending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
   { List<Object> theList;
     theList=*this;
-    theList.QuickSortAscending();
+    theList.QuickSortAscending(theOrder);
     this->operator=(theList);
   }
-  void QuickSortDescending()
+  void QuickSortDescending(typename List<Object>::OrderLeftGreaterThanRight theOrder=0)
   { List<Object> theList;
     theList=*this;
-    theList.QuickSortDescending();
+    theList.QuickSortDescending(theOrder);
     this->operator=(theList);
   }
   void initHashesToOne()
@@ -5489,6 +5489,13 @@ class GroebnerBasisComputation
   MemorySaving<List<MonomialP> > intermediateHighestMonDivHighestMon;
   MemorySaving<List<Rational> > intermediateCoeffs;
   MemorySaving<List<Polynomial<Rational> > > intermediateSubtractands;
+  MemorySaving<List<int> > intermediateSelectedDivisors;
+  MemorySaving<Polynomial<Rational> > startingPoly;
+  std::string GetPolynomialStringSpacedMonomials
+  (const Polynomial<Rational>& thePoly, const HashedList<MonomialP>& theMonomialOrder,
+   const std::string& extraStyle)
+  ;
+  std::string GetDivisionString(FormatExpressions* theFormat=0);
 
  bool AddPolyAndReduceBasis
  (GlobalVariables* theGlobalVariables)
@@ -7955,7 +7962,7 @@ void MemorySaving<Object>::FreeMemory()
 template <class Object>
 Object& MemorySaving<Object>::GetElement()
 { if (this->theValue==0)
-  { this->theValue=new Object;
+  { this->theValue= new Object;
 #ifdef CGIversionLimitRAMuse
   ParallelComputing::GlobalPointerCounter++;
   ParallelComputing::CheckPointerCounters();

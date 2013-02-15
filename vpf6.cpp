@@ -4793,6 +4793,7 @@ std::string Expression::ToString
 //  }
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   bool allowNewLine= (theFormat==0) ? false : theFormat->flagExpressionNewLineAllowed;
+  int lineBreak=50;
   int charCounter=0;
   std::string tempS;
   if (this->ToStringData(tempS, theFormat, startingExpression))
@@ -4880,7 +4881,7 @@ std::string Expression::ToString
     out << tempS2;
 //    std::cout << "<br>here i am! tempS2.size=" << tempS2.size() << ", allowNewLine="
 //    << allowNewLine;
-    if (allowNewLine && tempS2.size()>100)
+    if (allowNewLine && tempS2.size()>(unsigned)lineBreak)
       out << "\\\\\n";
     if (tempS.size()>0)
       if (tempS[0]!='-')
@@ -4958,10 +4959,10 @@ std::string Expression::ToString
           charCounter+=currentChildString.size();
           if (i!=this->children.size-1)
           { out << ", ";
-            if (allowNewLine && charCounter >200 )
-              out << "\\\\";
+            if (allowNewLine && charCounter >50 )
+              out << "\\\\\n";
           }
-          charCounter%=200;
+          charCounter%=50;
         }
         out << ")";
         break;

@@ -379,7 +379,7 @@ int main(int argc, char **argv)
 //  static_html6(tempStream3);
 //  std::cout << tempStream3.str();
 //  std::cout << "</div>";
-  std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray =new Array(";
+  std::cout << "\n\n<script language=\"javascript\">\n// List of words to show in drop down\n var functionNameArray = new Array(";
  /* bool isFirst=true;
   for (int i=0; i<theParser.theObjectContainer.theVariablesNonBound.size; i++)
   { VariableNonBound& currentVar=theParser.theObjectContainer.theVariablesNonBound[i];
@@ -475,7 +475,7 @@ output << "   //alert(document.cookie);\n";
 output << " }\n";
 output << " \n";
 output << " function addCookie(theName, theValue, exdays)\n";
-output << " { exdate=new Date();\n";
+output << " { exdate= new Date();\n";
 output << "   exdate.setDate(exdate.getDate() + exdays);\n";
 output << "   c_value=escape(theValue) + ((exdays==null) ? \"\" : \"; expires=\"+exdate.toUTCString());\n";
 output << "   document.cookie=theName + \"=\" + c_value;\n";

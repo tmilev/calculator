@@ -247,7 +247,7 @@ bool CommandList::fGroebner
      You may use negative or zero number give no computation bound, but please don't. ", theCommands);
   int upperBoundComputations=(int) upperBound.DoubleValue();
   output=input;
-  output.children.PopIndexShiftDown(1);
+  output.children.RemoveIndexShiftDown(1);
   if (!theCommands.GetVector<Polynomial<Rational> >
       (output, inputVector, &theContext, -1, theCommands.innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);

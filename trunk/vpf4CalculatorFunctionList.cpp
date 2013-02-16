@@ -39,13 +39,13 @@ void CommandList::initPredefinedInnerFunctions()
 ("PolyDivRemainder", &this->innerPolynomialDivisionRemainder, "",
    "Returns the remainder after taking quotient of a \
     polynomial divided by a set of polynomials using the default monomial order (lexicographic).",
-   "PolyDivRemainder{}(x^3+6x y+5x y^2+y^3, x^2+y^2-1, x^3+y^3-x y) ;", true)
+   "PolyDivRemainder{}(x^7+6x y+5x y^8+y^5, x+y^2-1, y^3-x y) ;", true)
    ;
   this->AddOperationInnerHandler
 ("PolyDivString", &this->innerPolynomialDivisionVerbose, "",
    "Prints a string representing division of \
    a polynomial by a set of polynomials using the default monomial order (lexicographic). ",
-   "PolyDivString{}(x^3+6x y+5x y^2+y^3, x^2+y^2-1, x^3+y^3-x y) ;", true)
+   "PolyDivString{}(x^7+6x y+5x y^8+y^5, x^2+2, y^3-1) ;", true)
    ;
   this->AddOperationInnerHandler
   ("suffixNotationForPostScript", this->innerSuffixNotationForPostScript, "",

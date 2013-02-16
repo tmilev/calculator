@@ -4429,9 +4429,9 @@ public:
     return true;
   }
   bool TransformXtoNothing()
-  { this->ValueStack.PopLastObject();
-    this->TokenStack.PopLastObject();
-    this->NodeIndexStack.PopLastObject();
+  { this->ValueStack.RemoveLastObject();
+    this->TokenStack.RemoveLastObject();
+    this->NodeIndexStack.RemoveLastObject();
     return true;
   }
   bool TransformRepeatXtoNothing(int repeat)
@@ -5001,7 +5001,7 @@ template <class Object>
 void List<Object>::RemoveFirstOccurenceSwapWithLast(const Object& o)
 { for (int i=0; i<this->size; i++)
     if (o==this->TheObjects[i])
-    { this->PopIndexSwapWithLast(i);
+    { this->RemoveIndexSwapWithLast(i);
       return;
     }
 }
@@ -5037,11 +5037,21 @@ inline void List<Object>::AddObjectOnTopCreateNew()
 }
 
 template <class Object>
-void List<Object>::PopIndexSwapWithLast(int index)
+void List<Object>::RemoveIndexSwapWithLast(int index)
 { if (this->size==0)
     return;
   this->size--;
   this->TheObjects[index]=this->TheObjects[this->size];
+}
+
+template <class Object>
+void List<Object>::RemoveLastObject()
+{ if (this->size==0)
+  { std::cout << "Programming error: attempting to pop empty list"
+    << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
+    assert(false);
+  }
+  this->size--;
 }
 
 template <class Object>
@@ -5354,7 +5364,7 @@ template <class CoefficientType>
 void ElementUniversalEnvelopingOrdered<CoefficientType>::CleanUpZeroCoeff()
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
-    { this->PopIndexSwapWithLast(i);
+    { this->RemoveIndexSwapWithLast(i);
       i--;
     }
 }
@@ -5534,7 +5544,7 @@ void MonomialUniversalEnvelopingOrdered<CoefficientType>::SimplifyAccumulateInOu
           }
         }
     if (reductionOccurred)
-      output.PopIndexSwapWithLast(IndexlowestNonSimplified);
+      output.RemoveIndexSwapWithLast(IndexlowestNonSimplified);
     else
       IndexlowestNonSimplified++;
 //    output.ComputeDebugString();
@@ -6251,7 +6261,7 @@ template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::CleanUpZeroCoeff()
 { for (int i=0; i<this->size; i++)
     if (this->TheObjects[i].Coefficient.IsEqualToZero())
-    { this->PopIndexSwapWithLast(i);
+    { this->RemoveIndexSwapWithLast(i);
       i--;
     }
 }
@@ -6775,7 +6785,7 @@ void ElementUniversalEnvelopingOrdered<CoefficientType>::AddMonomial(const Monom
   else
   { this->TheObjects[theIndex].Coefficient+=input.Coefficient;
     if (this->TheObjects[theIndex].Coefficient.IsEqualToZero())
-      this->PopIndexSwapWithLast(theIndex);
+      this->RemoveIndexSwapWithLast(theIndex);
   }
 }
 
@@ -8187,7 +8197,7 @@ bool WeylGroup::GenerateOrbit
         if (outputSubset!=0)
         { tempEW.AddOnTop(j);
           outputSubset->AddOnTop(tempEW);
-          tempEW.PopIndexSwapWithLast(tempEW.size-1);
+          tempEW.RemoveIndexSwapWithLast(tempEW.size-1);
         }
       if (UpperLimitNumElements>0)
         if (output.size>=UpperLimitNumElements)

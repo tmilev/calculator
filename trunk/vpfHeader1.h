@@ -818,15 +818,30 @@ public:
     }
     return indexOfObject;
   }
-
-
-  void PopIndexShiftDown(int index)
+  void RemoveIndexShiftDown(int index)
   { for (int i=index; i<this->size-1; i++)
       this->TheObjects[i]=this->TheObjects[i+1];
     this->size--;
   }
-  void PopIndexSwapWithLast(int index);
+  void RemoveIndexSwapWithLast(int index);
+  void RemoveLastObject();
+  // the below function is named a bit awkwardly because otherwise there is a risk of confusion
+  // with the RemoveIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
+  // so the awkward name is necessary.
+  void RemoveFirstOccurenceSwapWithLast(const Object& o);
   Object PopLastObject();
+  Object PopIndexSwapWithLast(int index)
+  { Object result;
+    result=(*this)[index];
+    this->RemoveIndexSwapWithLast(index);
+    return result;
+  }
+  Object PopIndexShiftDown(int index)
+  { Object result;
+    result=(*this)[index];
+    this->RemoveIndexShiftDown(index);
+    return result;
+  }
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
@@ -841,10 +856,6 @@ public:
   { this->QuickSortAscending(theOrder);
     this->ReverseOrderElements();
   }
-  // the below function is named a bit awkwardly because otherwise there is a risk of confusion
-  // with the PopIndexSwapWithLast when selecting from autocomplete list. This cost me already 2 hours of lost time,
-  // so the awkward name is necessary.
-  void RemoveFirstOccurenceSwapWithLast(const Object& o);
   bool HasACommonElementWith(List<Object>& right);
   void SwapTwoIndices(int index1, int index2);
   std::string ToString(FormatExpressions* theFormat)const;
@@ -1110,14 +1121,15 @@ class HashTemplate: public TemplateList
 private:
   void AddObjectOnBottom(const Object& o);
   void AddListOnTop(List<Object>& theList);
-  void PopIndexShiftUp(int index);
-  void PopIndexShiftDown(int index);
+  void RemoveIndexShiftDown(int index);
   void RemoveFirstOccurenceSwapWithLast(Object& o);
+  Object PopIndexShiftDown(int index);
   void SwapTwoIndices(int index1, int index2);
   void AssignLight(const ListLight<Object>& from);
   void SetSize(int theSize);
   void ReverseOrderElements();
   void ShiftUpExpandOnTop(int StartingIndex);
+
 protected:
   List<List<int> > TheHashedArrays;
 public:
@@ -1232,10 +1244,20 @@ public:
     this->AddOnTop(o);
     return true;
   }
-  void PopLastObject()
-  { this->PopIndexSwapWithLast(this->size-1);
+  Object PopLastObject()
+  { Object result=*this->LastObject();
+    this->RemoveIndexSwapWithLast(this->size-1);
+    return result;
   }
-  void PopIndexSwapWithLast(int index)
+  Object PopIndexSwapWithLast(int index)
+  { Object result=(*this)[index];
+    this->RemoveIndexSwapWithLast(index);
+    return result;
+  }
+  void RemoveLastObject()
+  { this->RemoveIndexSwapWithLast(this->size-1);
+  }
+  void RemoveIndexSwapWithLast(int index)
   { if (index<0 || index>=this->size)
     { std::cout << "This is a programming error. You are attempting to pop out index " << index << " out of hashed array "
       << " of size " << this->size << ". "<< CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -1253,7 +1275,7 @@ public:
     int hashIndexTop=this->GetHash(*oTop);
     this->TheHashedArrays[hashIndexTop].RemoveFirstOccurenceSwapWithLast(tempI);
     this->TheHashedArrays[hashIndexTop].AddOnTop(index);
-    this->List<Object>::PopIndexSwapWithLast(index);
+    this->List<Object>::RemoveIndexSwapWithLast(index);
   }
   void SwapTwoIndicesHash(int i1, int i2)
   { Object tempO;
@@ -4179,7 +4201,7 @@ bool ComputeNormalFromSelectionAndExtraRoot
     for (int i=0; i<this->size; i++)
     { output.AddOnTop(this->TheObjects[i]);
       if (output.GetRankOfSpanOfElements(&tempMat, &tempSel)< output.size)
-        output.PopLastObject();
+        output.RemoveLastObject();
     }
     this->operator=(output);
   }
@@ -4714,14 +4736,14 @@ public:
     return result;
   }
   void PopMonomial(int index)
-  { this->PopIndexSwapWithLast(index);
-    this->theCoeffs.PopIndexSwapWithLast(index);
+  { this->RemoveIndexSwapWithLast(index);
+    this->theCoeffs.RemoveIndexSwapWithLast(index);
   }
   void PopMonomial(int index, TemplateMonomial& outputMon, CoefficientType& outputCoeff)
   { outputMon=this->TheObjects[index];
     outputCoeff=this->theCoeffs[index];
-    this->PopIndexSwapWithLast(index);
-    this->theCoeffs.PopIndexSwapWithLast(index);
+    this->RemoveIndexSwapWithLast(index);
+    this->theCoeffs.RemoveIndexSwapWithLast(index);
   }
   inline int HashFunction()const
   { return this->HashFunction(*this);
@@ -4734,8 +4756,8 @@ public:
   inline bool CleanupMonIndex(int theIndex)
   { if (theIndex!=-1)
       if (this->theCoeffs[theIndex]==0)
-      { this->PopIndexSwapWithLast(theIndex);
-        this->theCoeffs.PopIndexSwapWithLast(theIndex);
+      { this->RemoveIndexSwapWithLast(theIndex);
+        this->theCoeffs.RemoveIndexSwapWithLast(theIndex);
         return true;
       }
     return false;
@@ -8233,7 +8255,7 @@ int Vectors<CoefficientType>::ArrangeFirstVectorsBeOfMaxPossibleRank
   { tempRoots.AddOnTop(this->TheObjects[i]);
     int newRank= tempRoots.GetRankOfSpanOfElements(bufferMat, bufferSel);
     if (newRank==oldRank)
-      tempRoots.PopIndexSwapWithLast(tempRoots.size-1);
+      tempRoots.RemoveIndexSwapWithLast(tempRoots.size-1);
     else
     { this->SwapTwoIndices(oldRank, i);
       assert(oldRank+1==newRank);

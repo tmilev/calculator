@@ -2054,7 +2054,7 @@ void quasiDiffOp<CoefficientType>::GenerateBasisLieAlgebra
           foundNew=true;
         for (int k=theEltsConverted.size-1; k>=0; k--)
           if (theEltsConverted[k].IsEqualToZero())
-            theEltsConverted.PopIndexSwapWithLast(k);
+            theEltsConverted.RemoveIndexSwapWithLast(k);
           else
             break;
       }
@@ -4428,7 +4428,7 @@ bool CommandList::EvaluateExpression
     }
 /////-------User-defined pattern matching end------
   }
-  this->ExpressionStack.PopIndexSwapWithLast(this->ExpressionStack.size-1);
+  this->ExpressionStack.RemoveIndexSwapWithLast(this->ExpressionStack.size-1);
   if (output.IsListStartingWithAtom(this->opBind()))
     outputIsFree=false;
   return true;
@@ -5118,7 +5118,7 @@ bool Expression::RemoveContext()
 { this->CheckInitialization();
   if (!this->HasContext())
     return true;
-  this->children.PopIndexShiftDown(1);
+  this->children.RemoveIndexShiftDown(1);
   if (this->children.size==1)
     this->AssignMeMyChild(0);
   return true;

@@ -249,8 +249,8 @@ void rootSubalgebra::MakeSureAlphasDontSumToRoot(coneRelation& theRel, Vectors<R
             theRel.Alphas.TheObjects[changedIndex]=(beta1);
             theRel.AlphaCoeffs.TheObjects[changedIndex]=(alpha1coeff);
             if (alpha2coeff.IsEqualToZero())
-            { theRel.Alphas.PopIndexSwapWithLast(otherIndex);
-              theRel.AlphaCoeffs.PopIndexSwapWithLast(otherIndex);
+            { theRel.Alphas.RemoveIndexSwapWithLast(otherIndex);
+              theRel.AlphaCoeffs.RemoveIndexSwapWithLast(otherIndex);
             } else
             { theRel.Alphas.TheObjects[otherIndex]=(alpha2);
               theRel.AlphaCoeffs.TheObjects[otherIndex]=(alpha2coeff);
@@ -358,7 +358,7 @@ void rootSubalgebras::GenerateAllReductiveRootSubalgebrasContainingInputUpToIsom
         (bufferSAs, RecursionDepth+1, theGlobalVariables);
       } else
         (*this)[currentAlgebraIndex].indicesSubalgebrasContainingK.AddOnTopNoRepetition(indexSA);
-      bufferSAs[RecursionDepth].genK.PopIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);
+      bufferSAs[RecursionDepth].genK.RemoveIndexSwapWithLast(bufferSAs[RecursionDepth].genK.size-1);
     }
 }
 
@@ -590,7 +590,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
   while(domainRec.GetRankOfSpanOfElements(&tempMat, &tempSel)==CurrentRank)
   { counter++;
     assert(leftSA.kModules.size>counter);
-    domainRec.PopIndexSwapWithLast(domainRec.size-1);
+    domainRec.RemoveIndexSwapWithLast(domainRec.size-1);
     domainRec.AddOnTop(leftSA.HighestWeightsGmodK[counter]);
   }
   //find a minimal possible new kmodule to throw in
@@ -621,7 +621,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphismNoCentralizer
             if (tempBool)
               break;
         }
-        rangeRec.PopIndexSwapWithLast(rangeRec.size-1);
+        rangeRec.RemoveIndexSwapWithLast(rangeRec.size-1);
       }
   return result;
 }
@@ -948,8 +948,8 @@ void rootSubalgebra::MakeGeneratingSingularVectors(coneRelation& theRelation, Ve
           break;
         }
         if (theRelation.Alphas.TheObjects[i].IsEqualToZero())
-        { theRelation.Alphas.PopIndexSwapWithLast(i);
-          theRelation.AlphaCoeffs.PopIndexSwapWithLast(i);
+        { theRelation.Alphas.RemoveIndexSwapWithLast(i);
+          theRelation.AlphaCoeffs.RemoveIndexSwapWithLast(i);
           i--;
           isMaximal=false;
           break;
@@ -1013,7 +1013,7 @@ void DynkinDiagramRootSubalgebra::ComputeDiagramTypeKeepInput
         }
         else
         { this->SimpleBasesConnectedComponents[indexFirstComponentConnectedToRoot].AddListOnTop(this->SimpleBasesConnectedComponents.TheObjects[j]);
-          this->SimpleBasesConnectedComponents.PopIndexSwapWithLast(j);
+          this->SimpleBasesConnectedComponents.RemoveIndexSwapWithLast(j);
           j--;
         }
       }
@@ -1906,8 +1906,8 @@ void coneRelation::FixRightHandSide(rootSubalgebra& owner, Vectors<Rational>& Ni
           this->Betas[leavingIndex]=(tempRoot);
           this->BetaCoeffs[remainingIndex].Subtract(this->BetaCoeffs[leavingIndex]);
           if (this->BetaCoeffs[remainingIndex].IsEqualToZero())
-          { this->BetaCoeffs.PopIndexSwapWithLast(remainingIndex);
-            this->Betas.PopIndexSwapWithLast(remainingIndex);
+          { this->BetaCoeffs.RemoveIndexSwapWithLast(remainingIndex);
+            this->Betas.RemoveIndexSwapWithLast(remainingIndex);
           }
           assert(NilradicalRoots.Contains(tempRoot));
           hasChanged=true;
@@ -1986,15 +1986,15 @@ void coneRelation::ComputeDiagramRelAndK(rootSubalgebra& owner)
 void coneRelation::FixRepeatingRoots(Vectors<Rational>& theRoots, List<Rational>& coeffs)
 { for (int i=0; i<theRoots.size; i++)
   { if (coeffs[i].IsEqualToZero())
-    { coeffs.PopIndexSwapWithLast(i);
-      theRoots.PopIndexSwapWithLast(i);
+    { coeffs.RemoveIndexSwapWithLast(i);
+      theRoots.RemoveIndexSwapWithLast(i);
       i--;
     }
     for (int j=i+1; j<theRoots.size; j++)
       if (theRoots[i]==(theRoots[j]))
       { coeffs[i]+=(coeffs[j]);
-        theRoots.PopIndexSwapWithLast(j);
-        coeffs.PopIndexSwapWithLast(j);
+        theRoots.RemoveIndexSwapWithLast(j);
+        coeffs.RemoveIndexSwapWithLast(j);
         j--;
       }
   }
@@ -2883,7 +2883,7 @@ bool rootSubalgebra::attemptExtensionToIsomorphism
   for (int i=0; i<Domain.size; i++)
   { isoDomain.AddOnTop(Domain[i]);
     if (isoDomain.GetRankOfSpanOfElements(&tempMat, &tempSel)<isoDomain.size)
-      isoDomain.PopLastObject();
+      isoDomain.RemoveLastObject();
     else
       isoRange.AddOnTop(Range[i]);
   }

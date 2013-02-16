@@ -1286,7 +1286,7 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
     this->generatorsSmallSub.AddOnTop(currentV);
     for (int j=0; j<currentV.size; j++)
       if (!currentV[j].IsEqualToZero() && this->selInducing.selected[j])
-      { this->generatorsSmallSub.PopLastObject();
+      { this->generatorsSmallSub.RemoveLastObject();
         this->selSmallParSel.AddSelectionAppendNewIndex(i);
         break;
       }
@@ -1344,8 +1344,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
     this->theHmm.imagesAllChevalleyGenerators[this->indicesNilradicalSmall[i]];
     int theIndex=this->NilModPreNil.GetIndex(eltImage);
     if (theIndex!=-1)
-    { this->NilModPreNil.PopIndexSwapWithLast(theIndex);
-      this->weightsNilModPreNil.PopIndexSwapWithLast(theIndex);
+    { this->NilModPreNil.RemoveIndexSwapWithLast(theIndex);
+      this->weightsNilModPreNil.RemoveIndexSwapWithLast(theIndex);
       continue;
     }
     bool isGood=false;
@@ -1353,8 +1353,8 @@ void branchingData::initAssumingParSelAndHmmInittedPart1NoSubgroups
     { proj=this->ProjectWeight(this->weightsNilModPreNil[j]);
       if (proj==this->weightsNilradicalSmall[i])
       { isGood=true;
-        this->NilModPreNil.PopIndexSwapWithLast(j);
-        this->weightsNilModPreNil.PopIndexSwapWithLast(j);
+        this->NilModPreNil.RemoveIndexSwapWithLast(j);
+        this->weightsNilModPreNil.RemoveIndexSwapWithLast(j);
         break;
       }
     }

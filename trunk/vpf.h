@@ -5,13 +5,18 @@
 //2) computations in the area of Lie representation theory;
 //3) computations with vector partition functions.
 //
-//CopyRight (C) 2009-2012: Todor Milev
+//CopyRight (C) 2009-2013: Todor Milev
 //email: todor.milev@gmail.com
 //
-//C++, javascript: Todor Milev
-//svn repository and help with C++ templates: Thomas Bliem
-//javascript autocomplete code: Madan Chaudhary
-//servers: Steven Jackson @ UMass, the Jacobs University IT staff.
+//Contributors.
+//Thomas Folz-Donahue (2013-)
+//Todor Milev (2009-)
+//
+//Additional contributions.
+//Thomas Bliem (svn server set-up, first gcc compile).
+//Madan Chaudhary (javascript autocomplete code).
+//Steven Jackson @ UMass (server set-up).
+//the Jacobs University IT staff (server set-up).
 //
 //We want to thank the following projects and tools:
 //user interface: jsmath, dojo, LaTeX, javascript, google chrome browser/firefox;

@@ -4,7 +4,7 @@
 #define vpfHeader1_h_already_included
 
 #include "vpfMacros.h"
-static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header. Math and general routines. ");
+//static ProjectInformationInstance vpfHeader1instance(__FILE__, "Main header. Math and general routines. ");
 
 //IMPORTANT.
 //Convention on Hash functions.
@@ -504,6 +504,7 @@ private:
   }
 };
 
+
 class DrawElementInputOutput
 {
  public:
@@ -817,13 +818,15 @@ public:
     }
     return indexOfObject;
   }
+
+
   void PopIndexShiftDown(int index)
   { for (int i=index; i<this->size-1; i++)
       this->TheObjects[i]=this->TheObjects[i+1];
     this->size--;
   }
   void PopIndexSwapWithLast(int index);
-  void PopLastObject();
+  Object PopLastObject();
   //If comparison function is not specified, QuickSortAscending usese operator>, else it uses the given
   //comparison function
   void QuickSortAscending(List<Object>::OrderLeftGreaterThanRight theOrder=0)
@@ -1459,7 +1462,11 @@ std::iostream& operator<< (std::iostream& output, const Matrix<Element>& theMat)
 
 template <typename Element>
 class Matrix
-{ friend std::iostream& operator<< <Element>(std::iostream& output, const Matrix<Element>& theMat);
+{ // friend std::iostream& operator<< <Element>(std::iostream& output, const Matrix<Element>& theMat);
+  friend std::ostream& operator<< (std::ostream& output, const Matrix<Element>& theMat){
+    output << theMat.ToString();
+    return output;
+  }
 //  friend std::iostream& operator>> <Element>(std::iostream& input, Matrix<Element>& theMat);
 public:
   int NumRows; int ActualNumRows;
@@ -1947,6 +1954,7 @@ void NonPivotPointsToEigenVector
   }
   Matrix<Element> operator*(const Matrix<Element>& right)const
   ;
+  Vector<Element> operator*(const Vector<Element>& v) const;
   inline void operator=(const Matrix<Element>& other);
 };
 
@@ -8045,6 +8053,23 @@ Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
   tempMat=right;
   tempMat.MultiplyOnTheLeft(*this);
   return tempMat;
+}
+
+template <class Element>
+Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
+{
+  if(v.size != this.NumCols){
+    std::cout << "matrix application mismatch: matrix with" << this.NumCols << "columns attempted to multiply vector of length" << v.size << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
+    assert(false);
+  }
+  Vector<Element> out;
+  out.Resize(this->NumRows);
+  for(int i=0;i<this->NumRows;i++){
+    out[i] = 0;
+    for(int j=0;j<this->numCols;j++){
+      out[i] += this->elements[i][j] * v[j];
+    }
+  }
 }
 
 template <class Element>

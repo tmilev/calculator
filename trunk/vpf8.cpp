@@ -458,6 +458,27 @@ void WeylGroup::GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & o
   }
 }
 
+/*
+void WeylGroup::GetElementOfMatrix(Matrix<Rational> &input, ElementWeylGroup &output)
+{ Vector<Rational> v = input * this->rho;
+  Vector<Rational> v2;
+  int i;
+  while(v != rho){
+      for(i=0;i<this->generatorMatrices.size;i++){
+          v2 = generatorMatrices[i]*v;
+          if(v2 > v){
+             v = v2;
+             output.AddOnTop(i);
+             break;
+          }
+      }
+      if(i==this.generatorMatrices.size){
+        std::cout << "matrix" << input << "did not belong to Weyl group" << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__) << std::endl;
+        }
+  }
+}
+*/
+
 GeneralizedVermaModuleCharacters tempCharsEraseWillBeErasedShouldntHaveLocalObjectsLikeThis;
 
 void GeneralizedVermaModuleCharacters::GetProjection(int indexOperator, const Vector<Rational>& input, Vector<Rational>& output)
@@ -5820,7 +5841,7 @@ std::string DrawingVariables::GetHtmlFromDrawOperationsCreateDivWithUniqueName(i
   { ////////////////////
     out << eiBasis << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
-    { out << (i==j)? 1 :0;
+    { out << ((i==j)? 1 :0);
       if(j!=theDimension-1)
         out << ",";
      }

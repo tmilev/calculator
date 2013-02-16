@@ -605,7 +605,7 @@ void CommandList::initPredefinedStandardOperations()
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opRational(), this->opPoly(),
-   "Multiplies two rational by a polynomial (rational comes first). ",
+   "Multiplies rational by a polynomial (rational comes first). ",
    "2*Polynomial{}(a+b);\nPolynomial{}(a+b)/2;\nPolynomial{}((a+b)^3)*Polynomial{}((a+c)^3);", true);
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opPoly(),
@@ -702,7 +702,7 @@ void CommandList::initPredefinedStandardOperations()
 
   this->AddOperationOuterHandler
   ("[]", this->outerLieBracket, "",
-   "Lie bracket.",
+   "Lie bracket. ",
    "X:=A_1;\ng_{{i}}:=getChevalleyGenerator{}(X,i);\nh_{{i}}:=getCartanGenerator{}(X,i);\n[g_1,g_{-1}] ", true);
   this->AddOperationOuterHandler
   (":=:", this->StandardIsDenotedBy, "", "The operation :=: is the \"is denoted by\" operation. \

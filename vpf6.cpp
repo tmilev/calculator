@@ -5742,21 +5742,21 @@ void CommandList::InitJavaScriptDisplayIndicator()
 
 void CommandList::initDefaultFolderAndFileNames
   (const std::string& inputPathBinaryBaseIsFolderBelow, const std::string& inputDisplayPathBase, const std::string& scrambledIP)
-{ this->PhysicalPathServerBase=inputPathBinaryBaseIsFolderBelow+"../";
-  this->DisplayPathServerBase="/"+inputDisplayPathBase;
+{ this->PhysicalPathServerBase = inputPathBinaryBaseIsFolderBelow + "../";
+  this->DisplayPathServerBase = "/" + inputDisplayPathBase;
 
-  this->PhysicalPathOutputFolder=this->PhysicalPathServerBase+"output/";
-  this->DisplayPathOutputFolder= this->DisplayPathServerBase + "output/";
+  this->PhysicalPathOutputFolder = this->PhysicalPathServerBase + "output/";
+  this->DisplayPathOutputFolder = this->DisplayPathServerBase + "output/";
 
   this->userLabel=scrambledIP;
 
-  this->PhysicalNameDefaultOutput=this->PhysicalPathOutputFolder+"default"+this->userLabel+"output";
-  this->DisplayNameDefaultOutputNoPath="default"+this->userLabel+"output";
-  this->DisplayNameDefaultOutput=this->DisplayPathOutputFolder+this->DisplayNameDefaultOutputNoPath;
+  this->PhysicalNameDefaultOutput = this->PhysicalPathOutputFolder + "default" + this->userLabel + "output";
+  this->DisplayNameDefaultOutputNoPath = "default" + this->userLabel + "output";
+  this->DisplayNameDefaultOutput = this->DisplayPathOutputFolder + this->DisplayNameDefaultOutputNoPath;
 
-  this->indicatorFileNamE=this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
-  this->indicatorFileNameDisplaY=this->DisplayPathOutputFolder +"indicator" + this->userLabel+ ".html" ;
-  this->DisplayNameCalculator=this->DisplayPathServerBase+"cgi-bin/calculator";
+  this->indicatorFileNamE = this->PhysicalPathOutputFolder + "indicator" + this->userLabel + ".html" ;
+  this->indicatorFileNameDisplaY = this->DisplayPathOutputFolder + "indicator" + this->userLabel + ".html" ;
+  this->DisplayNameCalculator = this->DisplayPathServerBase +"cgi-bin/calculator";
 
 }
 

@@ -292,7 +292,8 @@ bool CommandList::fGroebner
     << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(inputVector[i].ToString(&theFormat));
   if (success)
   { out << "<br>Minimal Groebner basis with "
-    <<  outputGroebner.size << " elements, computed using algorithm 1.";
+    <<  outputGroebner.size << " elements, computed using algorithm 1, "
+    << " using " << theGroebnerComputation.NumberOfComputations << " polynomial operations. ";
     for(int i=0; i<outputGroebner.size; i++)
       out << "<br> "
       << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL( outputGroebner[i].ToString(&theFormat));
@@ -411,6 +412,7 @@ void CalculusFunctionPlot::operator+=(const CalculusFunctionPlot& other)
 { this->theFunctions.AddListOnTop(other.theFunctions);
   this->lowerBounds.AddListOnTop(other.lowerBounds);
   this->upperBounds.AddListOnTop(other.upperBounds);
+  this->theFunctionsCalculatorInput.AddListOnTop(other.theFunctionsCalculatorInput);
 }
 
 std::string CalculusFunctionPlot::GetPlotStringAddLatexCommands(bool useHtml)

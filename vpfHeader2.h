@@ -1388,7 +1388,7 @@ bool innerGetTypeHighestWeightParabolic
   static bool fKLcoeffs
 (CommandList& theCommands, const Expression& input, Expression& output)
  ;
-  static bool fEmbedSSalgInSSalg
+  static bool innerEmbedSSalgInSSalg
 (CommandList& theCommands, const Expression& input, Expression& output)
  ;
   static bool innerWeylOrbit
@@ -1521,7 +1521,7 @@ static bool innerDrawRootSystem
   { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
-  static bool fSSsubalgebras
+  static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
   static bool innerAddRatToRat

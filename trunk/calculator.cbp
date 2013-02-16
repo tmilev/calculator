@@ -66,8 +66,12 @@
 		<Unit filename="vpfCalculatorMain.cpp">
 			<Option target="Debug" />
 		</Unit>
-		<Unit filename="vpfGraph.cpp" />
-		<Unit filename="vpfGraph.h" />
+		<Unit filename="vpfGraph.cpp">
+			<Option target="test" />
+		</Unit>
+		<Unit filename="vpfGraph.h">
+			<Option target="test" />
+		</Unit>
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
@@ -75,7 +79,6 @@
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHeader3ListReferences.h" />
 		<Unit filename="vpfMacros.h" />
-		<Unit filename="vpfSerializable.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

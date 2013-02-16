@@ -5214,7 +5214,7 @@ void WeylGroup::TransformToSimpleBasisGenerators(Vectors<Rational>& theGens)
       { tempRoot=(theGens[i]);
         tempRoot-=(theGens[j]);
         if (tempRoot.IsEqualToZero())
-        { theGens.PopIndexSwapWithLast(j);
+        { theGens.RemoveIndexSwapWithLast(j);
           reductionOccured=true;
         }
         if (this->RootSystem.Contains(tempRoot))
@@ -5248,7 +5248,7 @@ void WeylGroup::TransformToSimpleBasisGeneratorsWRTh
         //if (this->flagAnErrorHasOccuredTimeToPanic)
           //tempRoot.ComputeDebugString();
         if (tempRoot.IsEqualToZero())
-        { theGens.PopIndexSwapWithLast(j);
+        { theGens.RemoveIndexSwapWithLast(j);
           reductionOccured=true;
         }
         if (this->RootSystem.GetIndex(tempRoot)!=-1)

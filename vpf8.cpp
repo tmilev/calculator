@@ -223,12 +223,12 @@ void GeneralizedVermaModuleCharacters::initFromHomomorphism
   this->log << "\nWeights after basis change: " << this->GmodKNegWeightsBasisChanged.ToString();
   for (int i=0; i<this->GmodKnegativeWeightS.size; i++)
     if (this->GmodKnegativeWeightS[i].IsPositiveOrZero())
-    { this->GmodKnegativeWeightS.PopIndexSwapWithLast(i);
+    { this->GmodKnegativeWeightS.RemoveIndexSwapWithLast(i);
       i--;
     }
   for (int i=0; i<this->GmodKNegWeightsBasisChanged.size; i++)
     if (this->GmodKNegWeightsBasisChanged[i].IsPositiveOrZero())
-    { this->GmodKNegWeightsBasisChanged.PopIndexSwapWithLast(i);
+    { this->GmodKNegWeightsBasisChanged.RemoveIndexSwapWithLast(i);
       i--;
     }
   this->log << "\nNegative weights after basis change: " << this->GmodKNegWeightsBasisChanged.ToString();
@@ -1328,7 +1328,7 @@ void DynkinDiagramRootSubalgebra::ComputeDynkinString
     tripleNode=(currentComponent[tripleNodeindex]);
     Vectors<Rational> tempRoots;
     tempRoots=(currentComponent);
-    tempRoots.PopIndexSwapWithLast(tripleNodeindex);
+    tempRoots.RemoveIndexSwapWithLast(tripleNodeindex);
     DynkinDiagramRootSubalgebra tempDiagram;
     tempDiagram.ComputeDiagramTypeKeepInput(tempRoots, theWeyl);
     assert(tempDiagram.SimpleBasesConnectedComponents.size==3);
@@ -1886,8 +1886,8 @@ void ConeLatticeAndShiftMaxComputation::FindExtremaParametricStep3
     if (!trimmedCone.flagIsTheZeroCone)
       this->theConesLargerDim[i].theProjectivizedCone=trimmedCone;
     else
-    { this->theConesLargerDim.PopIndexSwapWithLast(i);
-      this->LPtoMaximizeLargerDim.PopIndexSwapWithLast(i);
+    { this->theConesLargerDim.RemoveIndexSwapWithLast(i);
+      this->LPtoMaximizeLargerDim.RemoveIndexSwapWithLast(i);
       i--;
       numKilledCones++;
     }
@@ -2269,7 +2269,7 @@ bool ConeComplex::SplitChamber
 }
 
 void ConeComplex::PopChamberSwapWithLast(int index)
-{ this->PopIndexSwapWithLast(index);
+{ this->RemoveIndexSwapWithLast(index);
 }
 
 bool Cone::MakeConvexHullOfMeAnd(const Cone& other, GlobalVariables& theGlobalVariables)
@@ -2429,7 +2429,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
           this->Normals[i]-=NormalsToSubspace[j]*tempRoot[j];
         this->Normals[i].ScaleByPositiveRationalToIntegralMinHeight();
         if (this->Normals[i].IsEqualToZero())
-        { this->Normals.PopIndexSwapWithLast(i);
+        { this->Normals.RemoveIndexSwapWithLast(i);
           i--;
         }
       }
@@ -2456,7 +2456,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
         { verticesOnWall.AddOnTop(this->Vertices.TheObjects[j]);
           int theRank=verticesOnWall.GetRankOfSpanOfElements(&tempMatX, &tempSelX);
           if (theRank< verticesOnWall.size)
-            verticesOnWall.PopLastObject();
+            verticesOnWall.RemoveLastObject();
           else
             if (theRank==DesiredRank-1)
             { wallIsGood=true;
@@ -2464,7 +2464,7 @@ bool Cone::EliminateFakeNormalsUsingVertices
             }
         }
       if (!wallIsGood)
-      { this->Normals.PopIndexSwapWithLast(i);
+      { this->Normals.RemoveIndexSwapWithLast(i);
         i--;
       }
     }
@@ -2558,7 +2558,7 @@ bool Cone::CreateFromNormalS
   this->Normals=inputNormals;
   for (int i=0; i<this->Normals.size; i++)
     if (this->Normals[i].IsEqualToZero())
-    { this->Normals.PopIndexSwapWithLast(i);
+    { this->Normals.RemoveIndexSwapWithLast(i);
       i--;
     }
   int numAddedFakeWalls=0;
@@ -3860,8 +3860,8 @@ void QuasiPolynomial::AddLatticeShift
   }
   this->valueOnEachLatticeShift.TheObjects[index]+=input;
   if (this->valueOnEachLatticeShift.TheObjects[index].IsEqualToZero())
-  { this->LatticeShifts.PopIndexSwapWithLast(index);
-    this->valueOnEachLatticeShift.PopIndexSwapWithLast(index);
+  { this->LatticeShifts.RemoveIndexSwapWithLast(index);
+    this->valueOnEachLatticeShift.RemoveIndexSwapWithLast(index);
   }
 }
 

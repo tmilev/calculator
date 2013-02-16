@@ -207,7 +207,7 @@ void CandidateSSSubalgebra::AddHincomplete
       this->PosRootsPerpendicularPrecedingWeights=this->GetAmbientWeyl().RootsOfBorel;
   for (int i=0; i<this->PosRootsPerpendicularPrecedingWeights.size; i++)
     if (this->GetAmbientWeyl().RootScalarCartanRoot(this->PosRootsPerpendicularPrecedingWeights[i], theH)!=0)
-    { this->PosRootsPerpendicularPrecedingWeights.PopIndexShiftDown(i);
+    { this->PosRootsPerpendicularPrecedingWeights.RemoveIndexShiftDown(i);
       i--;
     }
   this->CartanSAsByComponent.LastObject()->AddOnTop(theH);

@@ -61,7 +61,7 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
       { orbitRho.AddOnTop(currentRoot);
         tempEW.AddOnTop(j);
         this->AddOnTop(tempEW);
-        tempEW.PopLastObject();
+        tempEW.RemoveLastObject();
       }
     }
     for (int j=1; j<this->ExternalAutomorphisms.size; j++)
@@ -70,7 +70,7 @@ bool ReflectionSubgroupWeylGroup::ComputeSubGroupFromGeneratingReflections
       { orbitRho.AddOnTop(currentRoot);
         tempEW.AddOnTop(j+this->simpleGenerators.size);
         this->AddOnTop(tempEW);
-        tempEW.PopLastObject();
+        tempEW.RemoveLastObject();
       }
     }
     if (UpperLimitNumElements>0)
@@ -2420,11 +2420,11 @@ std::string GroebnerBasisComputation::GetDivisionString(FormatExpressions* theFo
 
   out << this->theBasiS.size << " elements in the basis. ";
   out << "<table style=\"border:1px solid black;\">";
-  out << "<tr><td colspan=\"" << totalMonCollection.size+1 << "\">";
-  out << "<table>";
   for (int i=0; i<this->theBasiS.size; i++)
   { out << "<tr><td>" << this->theBasiS[i].ToString(theFormat);
     out << "</td>";
+    out << "<td colspan=\"" << totalMonCollection.size+1 << "\">"
+    << "<table><tr>";
     for (int j=0; j<theRemainders.size; j++)
     { if (this->intermediateSelectedDivisors.GetElement()[j]!=i)
       { out << "<td></td>";
@@ -2435,8 +2435,8 @@ std::string GroebnerBasisComputation::GetDivisionString(FormatExpressions* theFo
        true, theFormat);
       out << "</td>";
     }
+    out << "</tr></table>";
   }
-  out << "</table></td></tr>";
   out << "<tr><td></td>";
   out << this->GetPolynomialStringSpacedMonomials(this->startingPoly.GetElement(), totalMonCollection, "");
   out << "</tr>";
@@ -2794,7 +2794,7 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
     while (this->basisCandidates.size>0)
     { this->RemainderDivisionWithRespectToBasis
       (*this->basisCandidates.LastObject(), &this->remainderDivision, theGlobalVariables);
-      this->basisCandidates.PopLastObject();
+      this->basisCandidates.RemoveLastObject();
       if(this->AddRemainderToBasis(theGlobalVariables))
       { changed=true;
         addedNew=true;
@@ -2841,9 +2841,9 @@ bool GroebnerBasisComputation::AddPolyAndReduceBasis
       if (!(this->remainderDivision==this->theBasiS[i]))
       { this->flagBasisGuaranteedToGenerateIdeal=false;
         this->basisCandidates.AddOnTop(this->remainderDivision);
-        this->leadingMons.PopIndexSwapWithLast(i);
-        this->leadingCoeffs.PopIndexSwapWithLast(i);
-        this->theBasiS.PopIndexSwapWithLast(i);
+        this->leadingMons.RemoveIndexSwapWithLast(i);
+        this->leadingCoeffs.RemoveIndexSwapWithLast(i);
+        this->theBasiS.RemoveIndexSwapWithLast(i);
         i--;
         changed=true;
       }
@@ -2863,8 +2863,8 @@ void GroebnerBasisComputation::MakeMinimalBasis()
         if (this->leadingMons[i].IsDivisibleBy(this->leadingMons[j]))
         { /*std::cout << "<br>" << LeadingCoeffs[i].ToString() << " is divisible by "
           << LeadingCoeffs[j].ToString();*/
-          this->leadingMons.PopIndexSwapWithLast(i);
-          this->theBasiS.PopIndexSwapWithLast(i);
+          this->leadingMons.RemoveIndexSwapWithLast(i);
+          this->theBasiS.RemoveIndexSwapWithLast(i);
           i--;
           break;
         } //else
@@ -3004,7 +3004,7 @@ bool GroebnerBasisComputation::TransformToReducedGroebnerBasisImprovedAlgorithm
       //std::cout << "<br>" << leftHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
       //<< " and " << rightHighestMon.ToString(&theGlobalVariables->theDefaultFormat)
       //<< " failed the lcm criterium";
-    indexPairs.PopIndexSwapWithLast(currentPairIndex);
+    indexPairs.RemoveIndexSwapWithLast(currentPairIndex);
   }
   this->MakeMinimalBasis();
   inputOutpuT=this->theBasiS;

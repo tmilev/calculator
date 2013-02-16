@@ -2816,7 +2816,7 @@ bool CommandList::fLSPath
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
   output=input;
-  output.children.PopIndexShiftDown(1);
+  output.children.RemoveIndexShiftDown(1);
   if (input.children.size<2)
     return output.SetError("Error: no waypoints. ", theCommands);
   Matrix<Rational> outputMat;

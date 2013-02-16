@@ -143,15 +143,14 @@ bool CommandList::fSolveSeparableBilinearSystem
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fSSsubalgebras
+bool CommandList::innerSSsubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::fSSsubalgebras");
-
+  MacroRegisterFunctionWithName("CommandList::innerSSsubalgebras");
   std::string errorString;
   SemisimpleLieAlgebra* ownerSSPointer;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerSSLieAlgebra, input[1], ownerSSPointer, &errorString))
+      (theCommands.innerSSLieAlgebra, input, ownerSSPointer, &errorString))
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSS=*ownerSSPointer;
@@ -178,10 +177,10 @@ bool CommandList::fSSsubalgebras
   return output.AssignValue(out.str(), theCommands);
 }
 
-bool CommandList::fEmbedSSalgInSSalg
+bool CommandList::innerEmbedSSalgInSSalg
 (CommandList& theCommands, const Expression& input, Expression& output)
 { //bool showIndicator=true;
-  MacroRegisterFunctionWithName("CommandList::fEmbedSSalgInSSalg");
+  MacroRegisterFunctionWithName("CommandList::innerEmbedSSalgInSSalg");
   if (!input.IsListNElements(3))
     return output.SetError("I expect two arguments - the two semisimple subalgebras.", theCommands);
   const Expression& EsmallSA=input[1];

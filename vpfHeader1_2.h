@@ -1149,6 +1149,7 @@ template <class CoefficientType>
   ;
   void GetMatrixOfElement(int theIndex, Matrix<Rational> & outputMatrix);
   void GetMatrixOfElement(ElementWeylGroup& input, Matrix<Rational> & outputMatrix);
+  void GetElementOfMatrix(Matrix<Rational> &input, ElementWeylGroup &output);
   void SimpleReflectionDualSpace(int index, Vector<Rational> & DualSpaceElement);
   void SimpleReflectionRootAlg(int index, PolynomialSubstitution<Rational>& theRoot, bool RhoAction);
   bool IsPositiveOrPerpWRTh(const Vector<Rational> & input, const Vector<Rational> & theH){ return this->RootScalarCartanRoot(input, theH).IsPositiveOrZero(); }
@@ -5044,10 +5045,14 @@ void List<Object>::PopIndexSwapWithLast(int index)
 }
 
 template <class Object>
-void List<Object>::PopLastObject()
-{ if (this->size==0)
-    return;
+Object List<Object>::PopLastObject()
+{ if (this->size==0){
+    std::cout << "Programming error: attempting to pop empty list" << MathRoutines::GetStackTraceEtcErrorMessage(__FILE__,__LINE__);
+    assert(false);
+  }
   this->size--;
+  return this->TheObjects[size];
+
 }
 
 template <class Object>

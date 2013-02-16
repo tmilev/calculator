@@ -848,7 +848,7 @@ std::string AnimationBuffer::GetHtmlFromDrawOperationsCreateDivWithUniqueName(in
   { ////////////////////
     out << eiBasis << "[" << i << "]=[";
     for (int j=0; j<theDimension; j++)
-    { out << (i==j)? 1 :0;
+    { out << ((i==j)? 1 :0);
       if(j!=theDimension-1)
         out << ",";
      }

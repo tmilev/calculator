@@ -8080,18 +8080,18 @@ Matrix<Element> Matrix<Element>::operator*(const Matrix<Element>& right)const
 template <class Element>
 Vector<Element> Matrix<Element>::operator*(const Vector<Element>& v) const
 {
-  if(v.size != this.NumCols){
-    std::cout << "matrix application mismatch: matrix with" << this.NumCols << "columns attempted to multiply vector of length" << v.size << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
+  if(v.size != NumCols){
+    std::cout << "matrix application mismatch: matrix with" << NumCols << "columns attempted to multiply vector of length" << v.size << CGI::GetStackTraceEtcErrorMessage(__FILE__,__LINE__)  << std::endl;
     assert(false);
   }
   Vector<Element> out;
-  out.Resize(this->NumRows);
-  for(int i=0;i<this->NumRows;i++){
-    out[i] = 0;
-    for(int j=0;j<this->numCols;j++){
-      out[i] += this->elements[i][j] * v[j];
+  out.MakeZero(NumRows);
+  for(int i=0;i<NumRows;i++){
+    for(int j=0;j<NumCols;j++){
+      out[i] += elements[i][j] * v[j];
     }
   }
+  return out;
 }
 
 template <class Element>

@@ -5,7 +5,16 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 //This file lists calculator funcitons only. Please do not use for any other purposes.
 
 void CommandList::initPredefinedInnerFunctions()
-{ this->AddOperationInnerHandler
+{
+
+  this->AddOperationInnerHandler
+  ("Serialize", this->innerSerialize, "",
+   "Converts a built-in data type to an expression tree. ",
+   "X:=SemisimpleLieAlgebra{}(2A_2+B_3+G_2);\
+   \nSerialize{}( X)", true)
+   ;
+
+  this->AddOperationInnerHandler
 ("gcdPoly", &this->fGCD, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \

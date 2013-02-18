@@ -536,3 +536,21 @@ bool CommandList::innerSuffixNotationForPostScript
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
 }
+
+bool CommandList::innerSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ int theType;
+  if (!input.IsBuiltInType(&theType))
+    return false;
+  if (theType==theCommands.opSemisimpleSubalgebras())
+    return Serialization::Serialize(input.GetValuE<SemisimpleSubalgebras>(), output, theCommands);
+  if (theType==theCommands.opSSLieAlg())
+    return Serialization::Serialize(input.GetValuE<SemisimpleLieAlgebra>(), output, theCommands);
+  return output.SetError("Serialization not implemented for this data type.", theCommands);
+}
+
+bool CommandList::innerDeSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{
+  return false;
+}

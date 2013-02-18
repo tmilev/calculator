@@ -29,18 +29,23 @@ static bool Serialize
   tempE.MakeAtom(theCommands.opSequence(), theCommands);
   coeffExpr.AddChildOnTop(tempE);
   monExpr.AddChildOnTop(tempE);
-  for (int i=0; i<input.size; i++)
-  { if (!Serialization::Serialize(input[i], tempE, theCommands))
+  List<TemplateMonomial> sortedMons;
+  sortedMons=input;
+  sortedMons.QuickSortAscending();
+  for (int i=0; i<sortedMons.size; i++)
+  { int theIndex= input.GetIndex(sortedMons[i]);
+    if (!Serialization::Serialize(input[theIndex], tempE, theCommands))
       return false;
     else
       monExpr.AddChildOnTop(tempE);
-    if (!Serialization::Serialize(input.theCoeffs[i], tempE, theCommands))
+    if (!Serialization::Serialize(input.theCoeffs[theIndex], tempE, theCommands))
       return false;
     else
       coeffExpr.AddChildOnTop(tempE);
   }
   output.AddChildOnTop(monExpr);
   output.AddChildOnTop(coeffExpr);
+  output.format=output.formatDefault;
   return true;
 }
 template <class Object>
@@ -70,6 +75,8 @@ static bool Serialize(const List<Object>& input, Expression& output, CommandList
   return true;
 }
 static bool Serialize
+(const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands);
+static bool Serialize
 (const DynkinSimpleType& input, Expression& output, CommandList& theCommands);
 static bool Serialize(const WeylGroup& input, Expression& output, CommandList& theCommands);
 };
@@ -81,18 +88,18 @@ bool Serialization::Serialize
   std::string theType;
   theType=input.theLetter;
   Expression typeE, tempE;
-  tempE.MakeAtom(theCommands.opThePower(), theCommands);
-  output.AddChildOnTop(tempE);
   typeE.reset(theCommands);
+  tempE.MakeAtom(theCommands.opThePower(), theCommands);
+  typeE.AddChildOnTop(tempE);
   tempE.MakeAtom
   (theCommands.operationS.AddNoRepetitionOrReturnIndexFirst(theType), theCommands);
   typeE.AddChildOnTop(tempE);
-  tempE.AssignValue(input.theRank, theCommands);
-  typeE.AddChildOnTop(tempE);
-  typeE.format=typeE.formatFunctionUseUnderscore;
-  output.AddChildOnTop(typeE);
   tempE.AssignValue(input.lengthFirstCoRootSquared, theCommands);
+  typeE.AddChildOnTop(tempE);
+  output.AddChildOnTop(typeE);
+  tempE.AssignValue(input.theRank, theCommands);
   output.AddChildOnTop(tempE);
+  output.format=output.formatFunctionUseUnderscore;
   return true;
 }
 
@@ -120,12 +127,23 @@ bool Serialization::Serialize(const SemisimpleSubalgebras& input, Expression& ou
 }
 
 bool Serialization::Serialize
-(const WeylGroup& theWeyl, Expression& output, CommandList& theCommands)
+(const WeylGroup& input, Expression& output, CommandList& theCommands)
 { output.reset(theCommands);
   Expression tempE;
-  tempE.MakeAtom(theCommands.opSemisimpleSubalgebras(), theCommands);
+  tempE.MakeAtom(theCommands.opWeylGroup(), theCommands);
   output.AddChildOnTop(tempE);
-  Serialization::Serialize(theWeyl.theDynkinType, tempE, theCommands);
+  Serialization::Serialize(input.theDynkinType, tempE, theCommands);
+  output.AddChildOnTop(tempE);
+  return true;
+}
+
+bool Serialization::Serialize
+(const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands)
+{ output.reset(theCommands);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
+  output.AddChildOnTop(tempE);
+  Serialization::Serialize(input.theWeyl.theDynkinType, tempE, theCommands);
   output.AddChildOnTop(tempE);
   return true;
 }
@@ -175,19 +193,4 @@ bool Serialization::Serialize(const CandidateSSSubalgebra& input, Expression& ou
   return true;
 }
 
-bool CommandList::innerSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ int theType;
-  if (!input.IsBuiltInType(&theType))
-    return false;
-  if (theType==theCommands.opSemisimpleSubalgebras())
-    return Serialization::Serialize(input.GetValuE<SemisimpleSubalgebras>(), output, theCommands);
-  return output.SetError("Serialization not implemented for this data type.", theCommands);
-}
-
-bool CommandList::innerDeSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{
-  return false;
-}
 #endif

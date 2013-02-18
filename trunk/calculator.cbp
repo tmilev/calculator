@@ -47,6 +47,12 @@
 		<Unit filename="testlib.h">
 			<Option target="test" />
 		</Unit>
+		<Unit filename="testlib2.cpp">
+			<Option target="test" />
+		</Unit>
+		<Unit filename="testlib2.h">
+			<Option target="test" />
+		</Unit>
 		<Unit filename="vpf.h">
 			<Option compile="1" />
 			<Option weight="0" />
@@ -66,19 +72,16 @@
 		<Unit filename="vpfCalculatorMain.cpp">
 			<Option target="Debug" />
 		</Unit>
-		<Unit filename="vpfGraph.cpp">
-			<Option target="test" />
-		</Unit>
-		<Unit filename="vpfGraph.h">
-			<Option target="test" />
-		</Unit>
+		<Unit filename="vpfCharacters.cpp" />
+		<Unit filename="vpfCharacters.h" />
+		<Unit filename="vpfGraph.cpp" />
+		<Unit filename="vpfGraph.h" />
 		<Unit filename="vpfHeader1.h" />
 		<Unit filename="vpfHeader1_2.h" />
 		<Unit filename="vpfHeader1_3.h" />
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHeader3ListReferences.h" />
-		<Unit filename="vpfHeader4Serialization.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

@@ -331,7 +331,7 @@ bool CommandList::innerDeterminant
       //std::cout << " <br> ... and the matRat is: " << matRat.ToString();
       return output.AssignValue(matRat.GetDeterminant(), theCommands);
     } else
-      return output.SetError("Requesting to comptue determinant of non-square matrix. ", theCommands);
+      return output.SetError("Requesting to compute determinant of non-square matrix. ", theCommands);
   }
   if (!theCommands.GetMatrix(input, matRF, &theContext, -1, theCommands.innerRationalFunction))
   { theCommands.Comments << "I have been instructed to only compute determinants of matrices whose entries are "
@@ -546,11 +546,27 @@ bool CommandList::innerSerialize
     return Serialization::Serialize(input.GetValuE<SemisimpleSubalgebras>(), output, theCommands);
   if (theType==theCommands.opSSLieAlg())
     return Serialization::Serialize(input.GetValuE<SemisimpleLieAlgebra>(), output, theCommands);
+  if (theType==theCommands.opPoly())
+    return Serialization::Serialize(input.GetValuE<Polynomial<Rational> >(), output, theCommands);
   return output.SetError("Serialization not implemented for this data type.", theCommands);
 }
 
 bool CommandList::innerDeSerialize
   (CommandList& theCommands, const Expression& input, Expression& output)
-{
+{ if (!input.IsListStartingWithAtom(theCommands.opSerialization()))
+    return false;
+  if (input.children.size<3)
+    return false;
+  if (!input[1].IsAtoM())
+    return false;
+  int theType=input[1].theData;
+  Expression context;
+  context.MakeEmptyContext(theCommands);
+  if (theType==theCommands.opMonomialCollection())
+  { Polynomial<Rational> tempP;
+    if (!Serialization::Deserialize(input, tempP, &context))
+      return false;
+    return output.AssignValueWithContext(tempP, context, theCommands);
+  }
   return false;
 }

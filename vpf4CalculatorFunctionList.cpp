@@ -11,9 +11,22 @@ void CommandList::initPredefinedInnerFunctions()
   ("Serialize", this->innerSerialize, "",
    "Converts a built-in data type to an expression tree. ",
    "X:=SemisimpleLieAlgebra{}(2A_2+B_3+G_2);\
-   \nSerialize{}( X)", true)
+   \nSerialize{}( X);\
+   Y:=Polynomial{}((a+b)^2);\
+   \nSerialize{}Y\
+   ", true)
    ;
-
+  this->AddOperationInnerHandler
+  ("Deserialize", this->innerDeSerialize, "",
+   "The operation opposite to serialization. ",
+   "X:=SemisimpleLieAlgebra{}(A_1+A_2);\
+   \nY:=Serialize{}( X);\
+   Deserialize{}Y;\
+   \nZ:=Polynomial{}((a+b)^2);\
+   \nW:=Serialize{}Z;\
+   Deserialize{}W\
+   ", true)
+   ;
   this->AddOperationInnerHandler
 ("gcdPoly", &this->fGCD, "",
    "Greatest common divisor polynomial of two polynomials. \

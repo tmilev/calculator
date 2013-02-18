@@ -15,6 +15,10 @@ static bool Serialize(const CandidateSSSubalgebra& input, Expression& output, Co
 static bool Serialize(const Rational& input, Expression& output, CommandList& theCommands)
 { return output.AssignValue(input, theCommands);
 }
+static bool Deserialize(const Expression& input, Rational& output)
+{ return input.IsOfType(&output);
+}
+
 template <typename TemplateMonomial, typename CoefficientType>
 static bool Serialize
 (const MonomialCollection<TemplateMonomial, CoefficientType>& input,
@@ -22,6 +26,8 @@ static bool Serialize
 { MacroRegisterFunctionWithName("Serialization::Serialize");
   output.reset(theCommands);
   Expression tempE, coeffExpr, monExpr;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
   tempE.MakeAtom(theCommands.opMonomialCollection(), theCommands);
   output.AddChildOnTop(tempE);
   coeffExpr.reset(theCommands);
@@ -48,6 +54,37 @@ static bool Serialize
   output.format=output.formatDefault;
   return true;
 }
+template <typename TemplateMonomial, typename CoefficientType>
+static bool Deserialize
+(const Expression& input, MonomialCollection<TemplateMonomial, CoefficientType>& output,
+ Expression* outputContext=0)
+{ MacroRegisterFunctionWithName("Serialization::Deserialize_MonomialCollection");
+  output.MakeZero();
+  CommandList& theCommands=*input.theBoss;
+  Expression tempE, coeffExpr, monExpr;
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opSerialization()))
+    return false;
+  if (input.children.size!=4)
+    return false;
+  const Expression& monData=input[2];
+  const Expression& coeffData=input[3];
+  int numMons=monData.children.size;
+  if (monData.children.size!=coeffData.children.size)
+    return false;
+  if (!monData.IsSequenceNElementS(numMons) || !coeffData.IsSequenceNElementS(numMons))
+    return false;
+  CoefficientType theCF;
+  TemplateMonomial theMon;
+  for (int i=0; i<monData.children.size; i++)
+  { if (!Serialization::Deserialize(monData[i], theMon))
+      return false;
+    if (!Serialization::Deserialize(coeffData[i], theCF))
+      return false;
+    output.AddMonomial(theMon, theCF);
+  }
+  return true;
+}
+static bool Deserialize(const Expression& input, MonomialP& output);
 template <class Object>
 static bool Serialize(Vector<Object>& input, Expression& output, CommandList& theCommands)
 { MacroRegisterFunctionWithName("Serialization::Serialize");
@@ -78,8 +115,41 @@ static bool Serialize
 (const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands);
 static bool Serialize
 (const DynkinSimpleType& input, Expression& output, CommandList& theCommands);
+static bool Serialize
+(const MonomialP& input, Expression& output, CommandList& theCommands);
 static bool Serialize(const WeylGroup& input, Expression& output, CommandList& theCommands);
 };
+
+bool Serialization::Serialize
+(const MonomialP& input, Expression& output, CommandList& theCommands)
+{ MacroRegisterFunctionWithName("Serialization::Serialize");
+  output.reset(theCommands);
+  output.children.ReservE(input.GetMinNumVars()+1);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opMonomialPoly(), theCommands);
+  output.AddChildOnTop(tempE);
+  for (int i=0; i<input.GetMinNumVars(); i++)
+  { tempE.AssignValue(input(i), theCommands);
+    output.AddChildOnTop(tempE);
+  }
+  return true;
+}
+
+bool Serialization::Deserialize
+(const Expression& input, MonomialP& output)
+{ MacroRegisterFunctionWithName("Serialization::Deserialize");
+  CommandList& theCommands=*input.theBoss;
+  if (!input.IsListStartingWithAtom(theCommands.opMonomialPoly()))
+    return false;
+  output.MakeOne(input.children.size-1);
+  Rational tempRat;
+  for (int i=1; i<input.children.size; i++)
+    if(!Serialization::Deserialize(input[i], tempRat))
+      return false;
+    else
+      output[i-1]=tempRat;
+  return true;
+}
 
 bool Serialization::Serialize
 (const DynkinSimpleType& input, Expression& output, CommandList& theCommands)
@@ -112,6 +182,8 @@ bool Serialization::Serialize(const SemisimpleSubalgebras& input, Expression& ou
   }
   output.reset(theCommands);
   Expression tempE;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
   tempE.MakeAtom(theCommands.opSemisimpleSubalgebras(), theCommands);
   output.AddChildOnTop(tempE);
   tempE.AssignValue(*input.owneR, theCommands);
@@ -122,6 +194,7 @@ bool Serialization::Serialize(const SemisimpleSubalgebras& input, Expression& ou
 //  List<SltwoSubalgebras> theSl2sOfSubalgebras;
   Serialization::Serialize(input.Hcandidates, tempE, theCommands);
   output.AddChildOnTop(tempE);
+  output.format=output.formatDefault;
 //  int theRecursionCounter;
   return true;
 }
@@ -141,10 +214,13 @@ bool Serialization::Serialize
 (const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands)
 { output.reset(theCommands);
   Expression tempE;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
   tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
   output.AddChildOnTop(tempE);
   Serialization::Serialize(input.theWeyl.theDynkinType, tempE, theCommands);
   output.AddChildOnTop(tempE);
+  output.format=output.formatDefault;
   return true;
 }
 

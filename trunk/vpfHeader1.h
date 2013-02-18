@@ -867,6 +867,32 @@ public:
   bool Contains(const Object& o)const
   { return this->GetIndex(o)!=-1;
   }
+  // Perform a binary search, assuming the list is sorted
+  bool BSContains(const Object& o) const{
+    int i = 0, j = this->size;
+    while(true){
+        int s=j-i;
+        if(s<0)
+            return false;
+        int n=i+s/2;
+        if(o==this->TheObjects[n])
+            return true;
+        if(o>this->TheObjects[n]){
+            if(i<n){
+                i=n;
+                continue;
+            }
+            i = n+1;
+        }
+        if(o<this->TheObjects[n]){
+            if(n<j){
+                j=n;
+                continue;
+            }
+            j = n-1;
+        }
+    }
+  }
   bool ReadFromFile(std::fstream& input){ return this->ReadFromFile(input, 0, -1);}
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables, int UpperLimitForDebugPurposes);
   bool ReadFromFile(std::fstream& input, GlobalVariables* theGlobalVariables){return this->ReadFromFile(input, theGlobalVariables, -1);}

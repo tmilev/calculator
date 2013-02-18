@@ -201,7 +201,6 @@ class PolynomialSystem : public List<Polynomial<Rational> >
   bool IsALinearSystemWithSolution(Vector<Rational>* outputSolution=0);
 };
 
-
 class SemisimpleSubalgebras;
 
 class CandidateSSSubalgebra

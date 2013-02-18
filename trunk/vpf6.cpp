@@ -3555,10 +3555,12 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
   this->AddOperationNoRepetitionAllowed("MonomialCollection");
+  this->AddOperationNoRepetitionAllowed("MonomialPoly");
+  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("AlgebraicNumber");
-  this->AddOperationBuiltInType("Polynomial_Rational");
+  this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("RationalFunction");
   this->AddOperationBuiltInType("string");
   this->AddOperationBuiltInType("ElementUEoverRF");

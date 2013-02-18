@@ -994,6 +994,18 @@ public:
   int opLisT()
   { return this->operationS.GetIndexIMustContainTheObject("");
   }
+  int opMonomialCollection()
+  { return this->operationS.GetIndexIMustContainTheObject("MonomialCollection");
+  }
+  int opMonomialPoly()
+  { return this->operationS.GetIndexIMustContainTheObject("MonomialPoly");
+  }
+  int opSerialization()
+  { return this->operationS.GetIndexIMustContainTheObject("Serialization");
+  }
+  int opCalculusPlot()
+  { return this->operationS.GetIndexIMustContainTheObject("CalculusPlot");
+  }
   int opSequence()
   { return this->operationS.GetIndexIMustContainTheObject("Sequence");
   }
@@ -1003,14 +1015,8 @@ public:
   int opAlgNumber()
   { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
-  int opMonomialCollection()
-  { return this->operationS.GetIndexIMustContainTheObject("MonomialCollection");
-  }
-  int opCalculusPlot()
-  { return this->operationS.GetIndexIMustContainTheObject("CalculusPlot");
-  }
   int opPoly()
-  { return this->operationS.GetIndexIMustContainTheObject("Polynomial_Rational");
+  { return this->operationS.GetIndexIMustContainTheObject("PolynomialRational");
   }
   int opRationalFunction()
   { return this->operationS.GetIndexIMustContainTheObject("RationalFunction");

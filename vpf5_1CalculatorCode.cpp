@@ -2,6 +2,8 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2.h"
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpfHeader4Serialization.h"
+
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
 
@@ -214,16 +216,7 @@ bool CommandList::innerEmbedSSalgInSSalg
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindAllEmbeddings
   (theType, ownerSS, theCommands.theGlobalVariableS);
-  FormatExpressions theFormat;
-  std::stringstream out1, out2;
-  out1 << theCommands.PhysicalPathOutputFolder
-  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
-  out2 << theCommands.DisplayPathOutputFolder
-  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
-  theFormat.physicalPath=out1.str();
-  theFormat.htmlPathServer=out2.str();
-  out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  return output.AssignValue(out.str(), theCommands);
+  return Serialization::Serialize(theSSsubalgebras, output, theCommands);
 }
 
 bool CommandList::fGroebner

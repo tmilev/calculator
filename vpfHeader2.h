@@ -6,6 +6,7 @@
 //the following  include contains all the c++ math routines used in the calculator.
 #include "vpfHeader1_3.h"
 #include "vpfHeader3ListReferences.h"
+#include "vpfHeader1_4SemisimpleLieAlgebras.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
@@ -178,6 +179,7 @@ class Expression
   }
   bool IsOperation(std::string* outputWhichOperation=0)const;
   bool IsBuiltInType(std::string* outputWhichOperation=0)const;
+  bool IsBuiltInType(int* outputWhichType)const;
   const Expression& operator[](int n)const;
   bool IsSequenceNElementS(int N=-2)const;
   bool IsError(std::string* outputErrorMessage=0)const;
@@ -517,6 +519,7 @@ class ObjectContainer
 public:
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
+  ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
   HashedListReferences<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theTensorElts;
   HashedListReferences<Polynomial<Rational> > thePolys;
   HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
@@ -1000,6 +1003,9 @@ public:
   int opAlgNumber()
   { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
+  int opMonomialCollection()
+  { return this->operationS.GetIndexIMustContainTheObject("MonomialCollection");
+  }
   int opCalculusPlot()
   { return this->operationS.GetIndexIMustContainTheObject("CalculusPlot");
   }
@@ -1026,6 +1032,12 @@ public:
   }
   int opSSLieAlg()
   { return this->operationS.GetIndexIMustContainTheObject("SemisimpleLieAlg");
+  }
+  int opSemisimpleSubalgebras()
+  { return this->operationS.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
+  }
+  int opCandidateSSsubalgebra()
+  { return this->operationS.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
   int opLittelmannPath()
   { return this->operationS.GetIndexIMustContainTheObject("LittelmannPath");
@@ -1521,6 +1533,12 @@ static bool innerDrawRootSystem
   { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
+  static bool innerSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerDeSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;

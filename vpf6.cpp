@@ -97,6 +97,12 @@ int Expression::GetTypeOperation<CalculusFunctionPlot>()const
 { this->CheckInitialization();
   return this->theBoss->opCalculusPlot();
 }
+
+template < >
+int Expression::GetTypeOperation<SemisimpleSubalgebras>()const
+{ this->CheckInitialization();
+  return this->theBoss->opSemisimpleSubalgebras();
+}
 //Expression::GetTypeOperation specializations end.
 
 //Expression::AddObjectReturnIndex specializations follow
@@ -350,6 +356,17 @@ Matrix<Rational>& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theMatRats[this->GetLastChild().theData];
+}
+
+template < >
+SemisimpleSubalgebras& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<SemisimpleSubalgebras>())
+  { std::cout << "This is a programming error: expression not of required type Matrix_Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theSSsubalgebras[this->GetLastChild().theData];
 }
 
 template < >
@@ -3550,6 +3567,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("LRO");
   this->AddOperationBuiltInType("Matrix_Rational");
   this->AddOperationBuiltInType("CalculusPlot");
+  this->AddOperationBuiltInType("SemisimpleSubalgebras");
+  this->AddOperationBuiltInType("CandidateSSsubalgebra");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
 
@@ -5153,6 +5172,15 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
     return true;
   }
   return false;
+}
+
+bool Expression::IsBuiltInType(int* outputWhichType)const
+{ std::string theType;
+  if (!this->IsBuiltInType(&theType))
+    return false;
+  if (outputWhichType!=0)
+    *outputWhichType=this->theBoss->operationS.GetIndex(theType);
+  return true;
 }
 
 int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)

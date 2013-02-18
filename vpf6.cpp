@@ -3554,6 +3554,8 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
+  this->AddOperationNoRepetitionAllowed("MonomialCollection");
+
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("Polynomial_Rational");
@@ -3571,7 +3573,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
-
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");

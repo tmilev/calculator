@@ -82,6 +82,7 @@
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHeader3ListReferences.h" />
+		<Unit filename="vpfHeader4Serialization.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

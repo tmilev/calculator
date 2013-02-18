@@ -1045,6 +1045,9 @@ public:
   int opLRO()
   { return this->operationS.GetIndexIMustContainTheObject("LRO");
   }
+  int opWeylGroup()
+  { return this->operationS.GetIndexIMustContainTheObject("WeylGroup");
+  }
   int opUnion()
   { return this->operationS.GetIndexIMustContainTheObject("\\cup");
   }

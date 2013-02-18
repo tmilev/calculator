@@ -1964,6 +1964,7 @@ void NonPivotPointsToEigenVector
   static bool Solve_Ax_Equals_b_ModifyInputReturnFirstSolutionIfExists
   (Matrix<Element>& A, Matrix<Element>& b, Matrix<Element>& output);
   Element GetDeterminant();
+  Element GetTrace();
   void Transpose(GlobalVariables& theGlobalVariables){this->Transpose();}
   void AssignMatrixIntWithDen(Matrix<LargeInt>& theMat, const LargeIntUnsigned& Den);
   void AssignRootsToRowsOfMatrix(const Vectors<Rational>& input)
@@ -8093,6 +8094,14 @@ Element Matrix<Element> ::GetDeterminant()
   Element result;
   tempMat.ComputeDeterminantOverwriteMatrix(result);
   return result;
+}
+
+template <class Element>
+Element Matrix<Element>::GetTrace()
+{   Element acc = 0;
+    for(int i=0; i<NumCols; i++)
+        acc += this->elements[i][i];
+    return acc;
 }
 
 template <class Element>

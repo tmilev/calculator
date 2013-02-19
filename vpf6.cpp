@@ -103,6 +103,19 @@ int Expression::GetTypeOperation<SemisimpleSubalgebras>()const
 { this->CheckInitialization();
   return this->theBoss->opSemisimpleSubalgebras();
 }
+
+template < >
+int Expression::GetTypeOperation<CoxeterGroup>()const
+{ this->CheckInitialization();
+  return this->theBoss->opCoxeterGroup();
+}
+
+template < >
+int Expression::GetTypeOperation<CoxeterElement>()const
+{ this->CheckInitialization();
+  return this->theBoss->opCoxeterElement();
+}
+
 //Expression::GetTypeOperation specializations end.
 
 //Expression::AddObjectReturnIndex specializations follow
@@ -220,6 +233,24 @@ CalculusFunctionPlot
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.thePlots
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+CoxeterGroup
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theCoxeterGroups
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+CoxeterElement
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theCoxeterElements
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 //Expression::AddObjectReturnIndex specializations end
@@ -378,6 +409,28 @@ CalculusFunctionPlot& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.thePlots[this->GetLastChild().theData];
+}
+
+template < >
+CoxeterGroup& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<CoxeterGroup>())
+  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theCoxeterGroups[this->GetLastChild().theData];
+}
+
+template < >
+CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<CoxeterElement>())
+  { std::cout << "This is a programming error: expression not of required type CoxeterGroup. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theCoxeterElements[this->GetLastChild().theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3573,6 +3626,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("CalculusPlot");
   this->AddOperationBuiltInType("SemisimpleSubalgebras");
   this->AddOperationBuiltInType("CandidateSSsubalgebra");
+  this->AddOperationBuiltInType("WeylGroup");
+  this->AddOperationBuiltInType("CoxeterGroup");
+  this->AddOperationBuiltInType("CoxeterElement");
+
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
@@ -4790,6 +4847,20 @@ bool Expression::ToStringData
       << thePlot.GetPlotStringAddLatexCommands(true);
     } else
       out << "(plot not shown)";
+    result=true;
+  } else if (this->IsOfType<CoxeterGroup>())
+  { CoxeterGroup& theGroup=this->GetValuENonConstUseWithCaution<CoxeterGroup>();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    out << theGroup.ToString(&tempFormat);
+    result=true;
+  } else if (this->IsOfType<CoxeterElement>())
+  { CoxeterElement& theElt=this->GetValuENonConstUseWithCaution<CoxeterElement>();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    out << theElt.ToString(&tempFormat);
     result=true;
   }
   output=out.str();

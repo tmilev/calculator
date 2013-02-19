@@ -2,7 +2,47 @@
 #include "vpfCharacters.h"
 #include "vpfGraph.h"
 
-CoxeterGroup::CoxeterGroup(const DynkinType D){
+bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& input, Expression& output)
+{ SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input, thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  CoxeterGroup theGroup;
+  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
+  return output.AssignValue(theGroup, theCommands);
+}
+
+bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsSequenceNElementS(2))
+    return output.SetError("Function Coxeter element takes two arguments.", theCommands);
+  //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
+  //input[1] and input[2];
+  SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input[1], thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  int theReflection;
+  if (!input[2].IsSmallInteger(& theReflection))
+  { std::cout << "something is rotten here! " << input[2].ToString() << " is not a small integer??";
+    return false;
+  }
+  CoxeterGroup theGroup;
+  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
+  CoxeterElement theElt;
+  int indexOfOwnerGroupInObjectContainer=
+  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+    //I have no idea
+  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
+//  if (theReflection>thePointer->GetRank())
+//    return output.SetError("Bad reflection index", theCommands);
+  //theElt.reflections.AddOnTop(theReflection);
+  return output.AssignValue(theElt, theCommands);
+}
+
+void CoxeterGroup::MakeFrom(const DynkinType& D){
     Matrix<Rational> M;
     D.GetCartanSymmetric(M);
     this->CartanSymmetric = M;

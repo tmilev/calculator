@@ -11,7 +11,10 @@ class Serialization
 {
 public:
 static bool Serialize(const SemisimpleSubalgebras& input, Expression& output, CommandList& theCommands);
+static bool Deserialize(const Expression& input, SemisimpleSubalgebras** output);
 static bool Serialize(const CandidateSSSubalgebra& input, Expression& output, CommandList& theCommands);
+static bool Deserialize(const Expression& input, CandidateSSSubalgebra** output);
+
 static bool Serialize(const Rational& input, Expression& output, CommandList& theCommands)
 { return output.AssignValue(input, theCommands);
 }
@@ -197,6 +200,32 @@ bool Serialization::Serialize(const SemisimpleSubalgebras& input, Expression& ou
   output.format=output.formatDefault;
 //  int theRecursionCounter;
   return true;
+}
+
+bool Serialization::Deserialize(const Expression& input, SemisimpleSubalgebras** output)
+{ /*MacroRegisterFunctionWithName("Serialization::Serialize");
+  if (input.owneR==0)
+  { std::cout << "This is a programming error: use of non-initialized Semisimple subalgebras. "
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  output.reset(theCommands);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
+  tempE.MakeAtom(theCommands.opSemisimpleSubalgebras(), theCommands);
+  output.AddChildOnTop(tempE);
+  tempE.AssignValue(*input.owneR, theCommands);
+  output.AddChildOnTop(tempE);
+//  SltwoSubalgebras theSl2s;
+//  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
+//  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
+//  List<SltwoSubalgebras> theSl2sOfSubalgebras;
+  Serialization::Serialize(input.Hcandidates, tempE, theCommands);
+  output.AddChildOnTop(tempE);
+  output.format=output.formatDefault;
+//  int theRecursionCounter;
+  return true;*/
 }
 
 bool Serialization::Serialize

@@ -1,3 +1,5 @@
+#ifndef vpfGraphHeaderAlreadyDefined
+#define vpfGraphHeaderAlreadyDefined
 #include "vpf.h"
 
 // a bit of graph theory
@@ -19,3 +21,6 @@ public:
 private:
     void TreeRecurseCopyDelete(List<int> &l, int v, int m);
 };
+
+
+#endif

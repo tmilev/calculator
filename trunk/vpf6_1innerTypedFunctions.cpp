@@ -27,6 +27,19 @@ bool CommandList::innerMultiplyRatByRat
   return output.AssignValue(leftR*rightR, theCommands);
 }
 
+bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
+  if (input.children.size!=2)
+    return false;
+  CoxeterElement leftR, rightR;
+  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+    return false;
+  leftR*=rightR;
+  return output.AssignValue(leftR, theCommands);
+}
+
+
 bool CommandList::innerDivideRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDivideRatByRat");

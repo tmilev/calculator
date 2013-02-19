@@ -322,6 +322,14 @@ public:
 
   List<CandidateSSSubalgebra> Hcandidates;
   int theRecursionCounter;
+  void operator=(const SemisimpleSubalgebras& other)
+  { this->owneR=other.owneR;
+    this->theSl2s=other.theSl2s;
+    this->SimpleComponentsSubalgebras=other.SimpleComponentsSubalgebras;
+    this->theSubalgebrasNonEmbedded=other.theSubalgebrasNonEmbedded;
+    this->theSl2sOfSubalgebras=other.theSl2sOfSubalgebras;
+  }
+
   SemisimpleLieAlgebra& GetSSowner()
   { if (this->owneR==0)
     { std::cout << "This is a programming error: attempted to access non-initialized "
@@ -331,9 +339,11 @@ public:
     }
     return *this->owneR;
   }
-  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner):owneR(&inputOwner)
+  SemisimpleSubalgebras(): owneR(0), theRecursionCounter(0)
+  { this->theSl2s.owner=0;
+  }
+  SemisimpleSubalgebras(SemisimpleLieAlgebra& inputOwner):owneR(&inputOwner), theRecursionCounter(0)
   { this->theSl2s.owner=&inputOwner;
-    this->theRecursionCounter=0;
   }
   std::string ToString(FormatExpressions* theFormat=0);
   void AddCandidatesSubalgebra

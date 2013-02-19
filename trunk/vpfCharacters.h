@@ -1,4 +1,7 @@
+#ifndef vpfCharacterHeader
+#define vpfCharacterHeader
 #include "vpf.h"
+
 
 class Character;
 
@@ -27,7 +30,13 @@ class Character: public List<int>{
 
 class CoxeterGroup: public FiniteGroup{
     public:
-    CoxeterGroup(DynkinType D);
+    CoxeterGroup(){
+      this->nGens=-1;
+    }
+    CoxeterGroup(const DynkinType& D){
+      this->MakeFrom(D);
+    }
+    void MakeFrom(const DynkinType& D);
 //    void MakeFromDynkinType(DynkinType D);
     Matrix<Rational> CartanSymmetric;
     HashedList<Vector<Rational> > rootSystem;
@@ -38,6 +47,19 @@ class CoxeterGroup: public FiniteGroup{
     List<List<int> > conjugacyClasses;
 
     int nGens;
+    std::string ToString(FormatExpressions* theFormat=0)const
+    { return this->CartanSymmetric.ToString(theFormat);
+    }
+    bool operator==(const CoxeterGroup& other)const
+    { return this->CartanSymmetric==other.CartanSymmetric;
+    }
+    void operator=(const CoxeterGroup& other)
+    { this->CartanSymmetric=other.CartanSymmetric;
+      this->rootSystem=other.rootSystem;
+      this->rhoOrbit=other.rhoOrbit;
+      this->conjugacyClasses=other.conjugacyClasses;
+      this->nGens=other.nGens;
+    }
     Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
     HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;
     void ComputeRhoOrbit();
@@ -52,3 +74,35 @@ class CoxeterGroup: public FiniteGroup{
     void ComputeSquares();
     void ComputeInitialCharacters();
 };
+
+class CoxeterElement{
+  public:
+  List<int> reflections;
+  CoxeterGroup* owner;
+  CoxeterElement():owner(0){}
+  static unsigned int HashFunction(const CoxeterElement& input)
+  { std::cout << "<b>Coxeter::Hashfunctions not implemented Yet!!!!!!!";
+    return 1;
+  }
+  std::string ToString(FormatExpressions* theFormat=0)
+  { if (this->owner==0)
+      return "(not initialized)";
+    std::cout << "<b>CoxeterElement::toString not implemented</b>";
+    std::stringstream out;
+    out << "coxeter element owner: ";
+    return this->owner->ToString(theFormat);
+  }
+  void operator*=(const CoxeterElement& other)
+  { std::cout << "<b>This operation is not implemented Yet!!!!!!!";
+  }
+  void operator=(const CoxeterElement& other)
+  { this->reflections=other.reflections;
+    this->owner=other.owner;
+  }
+  bool operator==(const CoxeterElement& other)const
+  { std::cout << "<b>CoxeterElement::operator== not implemented yet!!!!!!</b>";
+    return false;
+  }
+};
+
+#endif

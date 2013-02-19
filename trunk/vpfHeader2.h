@@ -7,6 +7,8 @@
 #include "vpfHeader1_3.h"
 #include "vpfHeader3ListReferences.h"
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
+#include "vpfCharacters.h"
+#include "vpfGraph.h"
 
 static ProjectInformationInstance ProjectInfoVpfHeader2(__FILE__, "Header file containing the calculator's parsing routines. ");
 
@@ -517,6 +519,8 @@ class ObjectContainer
   //These objects are dynamically allocated and used by the calculator as requested
   //by various predefined function handlers.
 public:
+  HashedListReferences<CoxeterElement> theCoxeterElements;
+  ListReferences<CoxeterGroup> theCoxeterGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
   ListReferences<SemisimpleSubalgebras> theSSsubalgebras;
@@ -1063,6 +1067,12 @@ public:
   int opContext()
   { return this->operationS.GetIndexIMustContainTheObject("Context");
   }
+  int opCoxeterGroup()
+  { return this->operationS.GetIndexIMustContainTheObject("CoxeterGroup");
+  }
+  int opCoxeterElement()
+  { return this->operationS.GetIndexIMustContainTheObject("CoxeterElement");
+  }
   int opEndStatement()
   { return this->operationS.GetIndexIMustContainTheObject(";");
   }
@@ -1548,6 +1558,13 @@ static bool innerDrawRootSystem
   static bool innerDeSerialize
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+  static bool innerCoxeterGroup
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerCoxeterElement
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1556,6 +1573,9 @@ static bool innerDrawRootSystem
 ;
 
 static bool innerMultiplyRatByRat
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyCoxeterEltByCoxeterElt
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerDivideRatByRat

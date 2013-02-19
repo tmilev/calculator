@@ -568,5 +568,11 @@ bool CommandList::innerDeSerialize
       return false;
     return output.AssignValueWithContext(tempP, context, theCommands);
   }
+  //if (theType==theCommands.opSemisimpleSubalgebras())
+  //{ //SemisimpleSubalgebras* tempSAs;
+    //if (!Serialization::Deserialize(input, &tempSAs))
+     // return false;
+    //return output.AssignValue(tempSAs, theCommands);
+ // }
   return false;
 }

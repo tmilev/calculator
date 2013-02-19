@@ -6,6 +6,17 @@ ProjectInformationInstance ProjectInfoVpf4cpp(__FILE__, "List of calculator func
 
 void CommandList::initPredefinedInnerFunctions()
 {
+  this->AddOperationInnerHandler
+  ("MakeCoxeterElement", this->innerCoxeterElement, "",
+   "Type, index, write better documentation.",
+   "MakeCoxeterElement{}(A_2, 1);", true)
+   ;
+
+  this->AddOperationInnerHandler
+  ("MakeCoxeterGroup", this->innerCoxeterGroup, "",
+   "Creates a coxeter Group",
+   "MakeCoxeterGroup{}(A_2);", true)
+   ;
 
   this->AddOperationInnerHandler
   ("Serialize", this->innerSerialize, "",
@@ -621,6 +632,11 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerMultiplyRatByRat, this->opRational(), this->opRational(),
    "Multiplies two rationals. ",
    "2*3", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
+   "Multiplies two coxeter elements if possible. ",
+   "x:=MakeCoxeterElement{}(A_2, 1); x*x", true);
+
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),
    "Multiplies polynomial by a rational (polynomial comes first). ",

@@ -226,6 +226,7 @@ bool Serialization::Deserialize(const Expression& input, SemisimpleSubalgebras**
   output.format=output.formatDefault;
 //  int theRecursionCounter;
   return true;*/
+  return false;
 }
 
 bool Serialization::Serialize

@@ -576,3 +576,25 @@ bool CommandList::innerDeSerialize
  // }
   return false;
 }
+
+bool CommandList::innerCharacterSSLieAlgFD
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerCharacterSSLieAlgFD");
+  Vector<Rational> theHW;
+  Selection parSel;
+  SemisimpleLieAlgebra* ownerSSLiealg;
+  Expression tempE, tempE2;
+  if (!theCommands.innerGetTypeHighestWeightParabolic
+      (theCommands, input, output, theHW, parSel, tempE, ownerSSLiealg, 0))
+    return false;
+  if (output.IsError())
+    return true;
+  if (!parSel.CardinalitySelection==0)
+    return output.SetError
+    ("I know only to compute with finite dimensional characters, for the time being.", theCommands);
+  charSSAlgMod<Rational> theElt;
+  theElt.MakeFromWeight
+  (ownerSSLiealg->theWeyl.GetSimpleCoordinatesFromFundamental(theHW), *ownerSSLiealg);
+  return output.AssignValue(theElt, theCommands);
+
+}

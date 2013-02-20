@@ -2911,14 +2911,11 @@ public:
   }
   void AccountSingleWeight
 (Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords,
- WeylGroup& theWeyl,
- Rational& theMult, CoefficientType& theCoeff, charSSAlgMod<CoefficientType>& outputAccum,
- Rational& finalCoeff
- )
+ WeylGroup& theWeyl, Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)
   ;
   std::string TensorAndDecompose
-(MonomialChar<CoefficientType>& other, List<SemisimpleLieAlgebra>& inputOwners,
- int inputIndexInOwners, charSSAlgMod<CoefficientType>& output,
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner,
+ charSSAlgMod<CoefficientType>& output,
  GlobalVariables& theGlobalVariables)
    ;
   std::string ToString
@@ -8087,6 +8084,148 @@ void charSSAlgMod<CoefficientType>::MakeTrivial(SemisimpleLieAlgebra& inputOwner
   MonomialChar<Rational> tempMon;
   tempMon.weightFundamentalCoords.MakeZero(inputOwner.GetRank());
   this->AddMonomial(tempMon, 1);
+}
+
+template <class CoefficientType>
+std::string charSSAlgMod<CoefficientType>::operator*=(const charSSAlgMod& other)
+{ GlobalVariables theGlobalVariables;
+  return this->MultiplyBy(other, theGlobalVariables);
+}
+
+template <class CoefficientType>
+std::string charSSAlgMod<CoefficientType>::MultiplyBy(const charSSAlgMod& other, GlobalVariables& theGlobalVariables)
+{ if (this->owner!=other.owner || this->owner==0)
+  { std::cout
+    << "This is a programming error: attempting to multiply characters of different or non-initialized "
+    << "semisimple Lie algebras."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  this->SetExpectedSize(other.size+this->size);
+  charSSAlgMod result, summand;
+  result.MakeZero(*this->owner);
+  std::string potentialError;
+  CoefficientType theCF;
+  for (int i=0; i<this->size; i++)
+    for (int j=0; j<other.size; j++)
+    { MonomialChar<Rational>& left = this->TheObjects[i];
+      MonomialChar<Rational>& right=other[j];
+      potentialError=left.TensorAndDecompose(right, *this->owner, summand, theGlobalVariables);
+      if (potentialError!="")
+        return potentialError;
+      theCF=this->theCoeffs[i];
+      theCF*=other.theCoeffs[j];
+      summand*=theCF;
+      result+=summand;
+    }
+  this->operator=(result);
+  return "";
+}
+
+template <class CoefficientType>
+void MonomialChar<CoefficientType>::AccountSingleWeight
+(Vector<Rational>& currentWeightSimpleCoords, Vector<Rational>& otherHighestWeightSimpleCoords,
+ WeylGroup& theWeyl,
+ Rational& theMult, charSSAlgMod<CoefficientType>& outputAccum)
+{ //This is the Brauer-Klimyk formula. Reference: Humphreys,
+  //Humphreys J. Introduction to Lie algebras and representation theory
+  //page 142, exercise 9.
+  //std::cout << "<hr>Accounting " << currentWeightSimpleCoords.ToString()
+  //<< " with coefficient " << finalCoeff.ToString();
+  MacroRegisterFunctionWithName("MonomialChar_CoefficientType::AccountSingleWeight");
+  Vector<Rational> dominant=currentWeightSimpleCoords;
+  dominant+=otherHighestWeightSimpleCoords;
+  dominant+=theWeyl.rho;
+  int sign;
+  // a weight has no stabilizer if and only if it is not stabilized by all root reflections.
+  for (int i=0; i<theWeyl.RootsOfBorel.size; i++)
+    if (theWeyl.RootScalarCartanRoot(dominant, theWeyl.RootsOfBorel[i]).IsEqualToZero())
+      return;
+//  std::cout << "<br> Before raising to dominant, in simple coords: " << dominant.ToString() << "<br>";
+  theWeyl.RaiseToDominantWeight(dominant, &sign);
+//  std::cout << "After raising to dominant: " << dominant.ToString() << "<br>";
+  dominant-=theWeyl.rho;
+  if (!theWeyl.IsDominantWeight(dominant))
+    return;
+  MonomialChar<Rational> tempMon;
+  tempMon.weightFundamentalCoords=theWeyl.GetFundamentalCoordinatesFromSimple(dominant);
+  CoefficientType coeffChange;
+  coeffChange= theMult;
+  coeffChange*=sign;
+//  std::cout << "; final contribution: " << tempMon.Coefficient.ToString()
+//  << "*" << tempMon.weightFundamentalCoords.ToString() << "<br>";
+  outputAccum.AddMonomial(tempMon, coeffChange);
+}
+
+template <class CoefficientType>
+std::string MonomialChar<CoefficientType>::TensorAndDecompose
+(MonomialChar<CoefficientType>& other, SemisimpleLieAlgebra& owner,
+ charSSAlgMod<CoefficientType>& output, GlobalVariables& theGlobalVariables)
+{ //This is the Brauer-Klimyk formula. Reference: Humphreys,
+  //Humphreys J. Introduction to Lie algebras and representation theory
+  //page 142, exercise 9.
+  MacroRegisterFunctionWithName("MonomialChar_CoefficientType::TensorAndDecompose");
+  std::stringstream errorLog;
+  std::string tempS;
+  output.MakeZero(owner);
+  WeylGroup& theWeyl=owner.theWeyl;
+  Vector<Rational> leftHWFundCoords;
+  leftHWFundCoords=this->weightFundamentalCoords;
+  Vector<Rational> rightHWFundCoords;
+  rightHWFundCoords =other.weightFundamentalCoords;
+
+  Rational leftTotalDim= theWeyl.WeylDimFormulaFundamentalCoords(leftHWFundCoords);
+  Rational rightTotalDim= theWeyl.WeylDimFormulaFundamentalCoords(rightHWFundCoords);
+  if (leftTotalDim>rightTotalDim)
+  { MathRoutines::swap(leftTotalDim, rightTotalDim);
+    MathRoutines::swap(leftHWFundCoords, rightHWFundCoords);
+  }
+  HashedList<Vector<Rational> > weightsLeftSimpleCoords;
+  List<Rational> multsLeft;
+  if (!theWeyl.FreudenthalEval
+      (leftHWFundCoords, weightsLeftSimpleCoords, multsLeft, &tempS, &theGlobalVariables, 1000000))
+  { errorLog << "Freudenthal formula generated error: " << tempS;
+    return errorLog.str();
+  }
+  HashedList<Vector<Rational> > currentOrbit;
+  const int OrbitSizeHardLimit=10000000;
+//  int theRank=theWeyl.GetDim();
+  Vector<Rational> rightHWSimpleCoords=theWeyl.GetSimpleCoordinatesFromFundamental(rightHWFundCoords);
+  Vectors<Rational> tempRoots;
+  tempRoots.SetSize(1);
+//  std::cout << "weights of smaller module: " << weightsLeftSimpleCoords.ToString();
+  for (int i=0; i<weightsLeftSimpleCoords.size; i++)
+  { tempRoots[0]=weightsLeftSimpleCoords[i];
+    theWeyl.GenerateOrbit(tempRoots, false, currentOrbit, false, 0, 0, OrbitSizeHardLimit);
+    if (currentOrbit.size>=OrbitSizeHardLimit)
+    { errorLog << "Error: orbit layer size exceeded hard-coded limit of " << OrbitSizeHardLimit << ".";
+      return errorLog.str();
+    }
+    for (int j=0; j<currentOrbit.size; j++)
+      this->AccountSingleWeight
+        (currentOrbit[j], rightHWSimpleCoords, theWeyl, multsLeft[i], output);
+  }
+//  std::cout << "<hr><hr><hr><hr>";
+  return errorLog.str();
+}
+
+template <class CoefficientType>
+std::string charSSAlgMod<CoefficientType>::ElementToStringCharacter
+(List<Vector<Rational> >& theWeights, List<Rational>& theMults)
+{ std::stringstream out;
+  MonomialChar<Rational> currentSummand;
+  charSSAlgMod theMod;
+  theMod.MakeZero(*this->listOwners, this->indexInOwners);
+  theMod.Reserve(theWeights.size);
+  theMod.SetHashSizE(theWeights.size);
+  assert(theMults.size==theWeights.size);
+  for (int i=0; i<theWeights.size; i++)
+  { currentSummand.weightFundamentalCoords=
+    this->listOwners->TheObjects[this->indexInOwners].theWeyl.GetFundamentalCoordinatesFromSimple(theWeights[i]);
+    theMod.AddMonomial(currentSummand, theMults[i]);
+  }
+  out << CGI::GetHtmlMathSpanFromLatexFormulaAddBeginArrayL(theMod.ToString());
+  return out.str();
 }
 
 template <class CoefficientType>

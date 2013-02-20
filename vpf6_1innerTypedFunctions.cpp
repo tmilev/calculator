@@ -39,7 +39,6 @@ bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
   return output.AssignValue(leftR, theCommands);
 }
 
-
 bool CommandList::innerDivideRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDivideRatByRat");
@@ -441,4 +440,31 @@ bool CommandList::innerRatPowerRat
     return output.SetError("Division by zero: trying to raise 0 to negative power. ", theCommands);
   base.RaiseToPower(thePower);
   return output.AssignValue(base, theCommands);
+}
+
+bool CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg");
+  theCommands.CheckInputNotSameAsOutput(input, output);
+  if (input.children.size!=2)
+    return false;
+  charSSAlgMod<Rational> leftC, rightC;
+  if (!input[0].IsOfType(& leftC))
+    return false;
+  if (!input[1].IsOfType(&rightC))
+    return false;
+  if (leftC.owner!=rightC.owner)
+  { theCommands.Comments
+    << "You asked me to multiply characters over different semisimple Lie algebras. "
+    << "Could this be a typo?";
+    return false;
+  }
+  std::string successString=(leftC*=rightC);
+  if (successString!="")
+  { theCommands.Comments << "I tried to multiply character " << leftC.ToString() << " by "
+    << rightC.ToString() << " but I failed with the following message: "
+    << successString;
+    return false;
+  }
+  return output.AssignValue(leftC, theCommands);
 }

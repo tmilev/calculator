@@ -8,8 +8,14 @@ void CommandList::initPredefinedInnerFunctions()
 {
   this->AddOperationInnerHandler
   ("MakeCoxeterElement", this->innerCoxeterElement, "",
-   "Type, index, write better documentation.",
+   "Needs a group name and a list of generators",
    "MakeCoxeterElement{}(A_2, 1);", true)
+   ;
+
+  this->AddOperationInnerHandler
+  ("MakeCharacter", this->innerCharacter, "",
+   "Either gets the nth character, or accepts user input as a character",
+   "MakeCharacter{}(B_3, 1);", true)
    ;
 
   this->AddOperationInnerHandler

@@ -24,6 +24,14 @@ void CommandList::initPredefinedInnerFunctions()
    "MakeCoxeterGroup{}(A_2);", true)
    ;
 
+  this->AddOperationHandler
+  ("MakeCharacterLieAlg", this->innerCharacterSSLieAlgFD, "",
+   "Creates character of a semisimple Lie algebra finite dimensional irreducible module. \
+   First argument gives type, second argument gives highest weight in fundamental coordinates.",
+   "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
+   ;
+
+
   this->AddOperationInnerHandler
   ("Serialize", this->innerSerialize, "",
    "Converts a built-in data type to an expression tree. ",
@@ -642,6 +650,12 @@ void CommandList::initPredefinedStandardOperations()
   ("*", this->innerMultiplyCoxeterEltByCoxeterElt, this->opCoxeterElement(), this->opCoxeterElement(),
    "Multiplies two coxeter elements if possible. ",
    "x:=MakeCoxeterElement{}(A_2, 1); x*x", true);
+  this->AddOperationBinaryInnerHandlerWithTypes
+  ("*", this->innerMultiplyCharSSLieAlgByCharSSLieAlg, this->opCharSSAlgMod(), this->opCharSSAlgMod(),
+   "Multiplies two semisimple Lie algebra finite dimensinal characters and decomposes using the \
+   Brauer-Klimyk formula, Humphreys J. Introduction to Lie algebras and representation theory, \
+   page 142, exercise 9. ",
+   "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true);
 
   this->AddOperationBinaryInnerHandlerWithTypes
   ("*", this->innerMultiplyRatOrPolyByRatOrPoly, this->opPoly(), this->opRational(),

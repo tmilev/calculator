@@ -211,7 +211,7 @@ int Expression::AddObjectReturnIndex(const
 charSSAlgMod<Rational>
 & inputValue)const
 { this->CheckInitialization();
-  return this->theBoss->theObjectContainer.theChars
+  return this->theBoss->theObjectContainer.theCharsSSLieAlgFD
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -368,7 +368,8 @@ charSSAlgMod<Rational>& Expression::GetValuENonConstUseWithCaution()const
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  return this->theBoss->theObjectContainer.theChars[this->GetLastChild().theData];
+  return this->theBoss->theObjectContainer.theCharsSSLieAlgFD
+  [this->GetLastChild().theData];
 }
 
 template < >
@@ -4895,6 +4896,10 @@ bool Expression::ToStringData
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;
     out << theElt.ToString(&tempFormat);
+    result=true;
+  } else if (this->IsOfType<charSSAlgMod<Rational> >())
+  { charSSAlgMod<Rational> theElt=this->GetValuENonConstUseWithCaution<charSSAlgMod<Rational> >();
+    out << theElt.ToString();
     result=true;
   }
   output=out.str();

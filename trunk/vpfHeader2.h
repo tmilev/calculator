@@ -530,7 +530,7 @@ public:
   HashedListReferences<ElementUniversalEnveloping<RationalFunctionOld> > theUEs;
   HashedListReferences<RationalFunctionOld> theRFs;
   HashedListReferences<Rational> theRationals;
-  HashedListReferences<charSSAlgMod<Rational> > theChars;
+  HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
   HashedListReferences<AlgebraicNumber> theAlgebraicNumbers;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
@@ -1572,7 +1572,9 @@ static bool innerDrawRootSystem
   static bool innerCharacter
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-
+  static bool innerCharacterSSLieAlgFD
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1587,6 +1589,9 @@ static bool innerMultiplyCoxeterEltByCoxeterElt
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerMultiplyCharacterByCharacter
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyCharSSLieAlgByCharSSLieAlg
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerDivideRatByRat

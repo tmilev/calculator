@@ -48,6 +48,7 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
     if (theReflections[i] > thePointer->GetRank() || theReflections[i] < 0)
       return output.SetError("Bad reflection index", theCommands);
   }
+  std::cout << "\n" << theGroup.rho << " " << theElt.owner->rho << std::endl;
   theElt.reflections.AddListOnTop(theReflections);
   theElt.canonicalize();
   return output.AssignValue(theElt, theCommands);
@@ -285,6 +286,43 @@ void CoxeterGroup::ComputeSquares(){
     squares = l;
 }
 
+List<Character>& ClearCharsList(const List<Character> cchars)
+{
+  List<Character> chars;
+  for(int i=0;i<cchars.size;i++)
+    chars.AddOnTop(cchars[i]);
+  List<Character> newChars;
+
+
+  bool outerChanged = false;
+  bool innerChanged = false;
+  Character X,X2;
+  for(int charindex = 0; charindex<chars.size; charindex++)
+  {
+  X = chars[charindex];
+  do
+  { for(int i=0; i<chars.size; i++)
+    { if(i == charindex)
+        continue;
+      do
+      { innerChanged = false;
+        X2 = X - chars[i];
+        if(X2[0]>=0 && X2.norm() < X.norm())
+        { X = X2;
+//          if(X.norm() == 0)
+//            return X;
+          innerChanged = true;
+//          if(X[0]<0) // negative virtual character alert
+//            for(int i=0; i<X.data.size; i++)
+//              X.data[i] = -X.data[i];
+        }
+      } while(innerChanged);
+    }
+  } while(outerChanged);
+  chars[charindex] = X;
+  }
+}
+
 void CoxeterGroup::ComputeInitialCharacters(){
   if(squares.size == 0)
     ComputeSquares();
@@ -314,11 +352,61 @@ void CoxeterGroup::ComputeInitialCharacters(){
 ///*
   List<Character> allChars;
   allChars.AddListOnTop(characterTable);
-  Character X;
+  Character X,Y;
   int n;
-  for(int loopvar=0;loopvar<10;loopvar++)
-  for(int i=0;i<allChars.size;i++)
-  { X = allChars[i].Sym2();
+
+  List<Character> products;
+  for(int loopvar=1;loopvar<50;loopvar++)
+  { for(int i=0; i<allChars.size; i++)
+    { for(int j=0; j<allChars.size; j++)
+      { products.AddOnTop(allChars[i]*allChars[j]);
+      }
+    }/*
+    for(int i=0; i<allChars.size; i++)
+    { for(int j=0; j<allChars.size; j++)
+      { for(int k=0; k<allChars.size; k++)
+        { products.AddOnTop(allChars[i]*allChars[j]);
+        }
+      }
+    }*/
+    while(products.size > 0)
+    { X = products.PopLastObject();
+      Y = X.ReducedWithChars(allChars);
+      n = Y.norm();
+      if(n>=1)
+      { std::cout << X << Y << std::endl;
+        if(n==1)
+        { characterTable.AddOnTop(Y);
+        }
+        allChars.AddOnTop(Y);
+      }
+    }
+
+    ClearCharsList(allChars);
+
+  }
+
+/*  List<Character> powers;
+  powers.AddOnTop(Xstd);
+  for(int loopvar=1;loopvar<50;loopvar++)
+  {
+
+    powers.AddOnTop(powers[loopvar-1]*Xstd);
+  }
+
+  for(int i=0; i<powers.size;i++){
+    X = powers[i].ReducedWithChars(allChars);
+    n = X.norm();
+    if(n>=1){
+      if(n==1)
+        characterTable.AddOnTop(X);
+      allChars.AddOnTop(X);
+    }
+  }
+*/
+  /*for(int i=0;i<allChars.size;i++)
+  {
+    X = allChars[i].Sym2();
     X = X.ReducedWithChars(allChars);
     n = X.norm();
     if(n>=1)
@@ -345,7 +433,7 @@ void CoxeterGroup::ComputeInitialCharacters(){
     else if (n>1){
       allChars.AddOnTop(X);
     }
-  }
+  }*/
   std::cout << "allchars " << allChars.size << '\n';
   for(int i=0;i<allChars.size;i++){
     std::cout << allChars[i] << '\n';
@@ -478,30 +566,38 @@ Character Character::operator-(const Character &other) const{
 }
 
 Character Character::ReducedWithChars(const List<Character> cchars)
-{  Character X = *this;
-   if(X.norm() == 0)
+{ Character X = *this;
+  if(X.norm() == 0)
     return X;
   List<Character> chars;
   if(cchars == 0)
     chars = this->G.characterTable;
   else
     chars = cchars;
-
-  for(int i=0; i<chars.size; i++)
-  { bool changed; // while thinks it was undeclared, lol
-    do
-    { changed = false;
-      Character X2 = X - chars[i];
-      if(X2.norm() < X.norm())
-      { X = X2;
-        if(X.norm() == 0)
-          return X;
-        changed = true;
-      }
-    } while(changed);
-  }
+  bool outerChanged = false;
+  bool innerChanged = false;
+  Character X2;
+  do
+  { for(int i=0; i<chars.size; i++)
+    { do
+      { innerChanged = false;
+        X2 = X - chars[i];
+        if(X2.norm() < X.norm())
+        { X = X2;
+          if(X.norm() == 0)
+            return X;
+          innerChanged = true;
+          if(X[0]<0) // negative virtual character alert
+            for(int i=0; i<X.data.size; i++)
+              X.data[i] = -X.data[i];
+        }
+      } while(innerChanged);
+    }
+  } while(outerChanged);
   return X;
 }
+
+
 
 int& Character::operator[](int i) const
 { return this->data[i];
@@ -541,6 +637,11 @@ unsigned int Character::HashFunction(const Character& input)
     acc += input.data[i]*SomeRandomPrimes[i];
   }
   return acc;
+}
+
+void Character::operator=(const Character& X)
+{ this->G = X.G;
+  this->data = X.data;
 }
 
 // this should probably check if G is the same, but idk how to make that happen

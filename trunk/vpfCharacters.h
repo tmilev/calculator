@@ -14,9 +14,10 @@ class FiniteGroup{
     List<Character> characterTable;
 };
 
-class Character: public List<int>{
+class Character{
     public:
     FiniteGroup G;
+    List<int> data;
 
     int IP(const Character &other) const;
     int norm() const;
@@ -25,7 +26,10 @@ class Character: public List<int>{
     Character Alt2() const;
     Character operator+(const Character &other) const;
     Character operator-(const Character &other) const;
-
+    int& operator[](int i) const;
+    std::string ToString(FormatExpressions* theFormat) const;
+    static unsigned int HashFunction(const Character& input);
+    bool operator==(const Character& other) const;
 };
 
 class CoxeterGroup: public FiniteGroup{
@@ -80,29 +84,15 @@ class CoxeterElement{
   List<int> reflections;
   CoxeterGroup* owner;
   CoxeterElement():owner(0){}
-  static unsigned int HashFunction(const CoxeterElement& input)
-  { std::cout << "<b>Coxeter::Hashfunctions not implemented Yet!!!!!!!";
-    return 1;
+  CoxeterElement(CoxeterGroup* owner, List<int> reflections){
+    this->owner = owner; this->reflections = reflections;
   }
-  std::string ToString(FormatExpressions* theFormat=0)
-  { if (this->owner==0)
-      return "(not initialized)";
-    std::cout << "<b>CoxeterElement::toString not implemented</b>";
-    std::stringstream out;
-    out << "coxeter element owner: ";
-    return this->owner->ToString(theFormat);
-  }
-  void operator*=(const CoxeterElement& other)
-  { std::cout << "<b>This operation is not implemented Yet!!!!!!!";
-  }
-  void operator=(const CoxeterElement& other)
-  { this->reflections=other.reflections;
-    this->owner=other.owner;
-  }
-  bool operator==(const CoxeterElement& other)const
-  { std::cout << "<b>CoxeterElement::operator== not implemented yet!!!!!!</b>";
-    return false;
-  }
+  void canonicalize();
+  static unsigned int HashFunction(const CoxeterElement& input);
+  std::string ToString(FormatExpressions* theFormat=0);
+  void operator*=(const CoxeterElement& other);
+  void operator=(const CoxeterElement& other);
+  bool operator==(const CoxeterElement& other) const;
 };
 
 #endif

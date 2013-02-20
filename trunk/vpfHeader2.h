@@ -520,6 +520,7 @@ class ObjectContainer
   //by various predefined function handlers.
 public:
   HashedListReferences<CoxeterElement> theCoxeterElements;
+  HashedListReferences<Character> theCharacters;
   ListReferences<CoxeterGroup> theCoxeterGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;
@@ -1073,6 +1074,9 @@ public:
   int opCoxeterElement()
   { return this->operationS.GetIndexIMustContainTheObject("CoxeterElement");
   }
+  int opCharacter()
+  { return this->operationS.GetIndexIMustContainTheObject("Character");
+  }
   int opEndStatement()
   { return this->operationS.GetIndexIMustContainTheObject(";");
   }
@@ -1565,6 +1569,10 @@ static bool innerDrawRootSystem
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 
+  static bool innerCharacter
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+
   static bool innerSSsubalgebras
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1576,6 +1584,9 @@ static bool innerMultiplyRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerMultiplyCoxeterEltByCoxeterElt
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerMultiplyCharacterByCharacter
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerDivideRatByRat

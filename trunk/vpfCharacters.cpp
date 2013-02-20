@@ -14,8 +14,11 @@ bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& 
 }
 
 bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsSequenceNElementS(2))
-    return output.SetError("Function Coxeter element takes two arguments.", theCommands);
+{ //if (!input.IsSequenceNElementS(2))
+  //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
+  if(input.children.size<1){
+    return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
+  }
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
   //input[1] and input[2];
   SemisimpleLieAlgebra* thePointer;
@@ -23,10 +26,14 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
       (theCommands.innerSSLieAlgebra, input[1], thePointer, &errorString))
     return output.SetError(errorString, theCommands);
-  int theReflection;
-  if (!input[2].IsSmallInteger(& theReflection))
-  { std::cout << "something is rotten here! " << input[2].ToString() << " is not a small integer??";
-    return false;
+  List<int> theReflections;
+  for(int i=2; i<input.children.size; i++){
+    int tmp;
+    if (!input[i].IsSmallInteger(& tmp))
+    { std::cout << "something is rotten here! " << input[i].ToString() << " is not a small integer??";
+      return false;
+    }
+    theReflections.AddOnTop(tmp);
   }
   CoxeterGroup theGroup;
   theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
@@ -34,15 +41,66 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   int indexOfOwnerGroupInObjectContainer=
   theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
   theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+
     //I have no idea
-  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
-//  if (theReflection>thePointer->GetRank())
-//    return output.SetError("Bad reflection index", theCommands);
-  //theElt.reflections.AddOnTop(theReflection);
+//  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
+  for(int i=0; i<theReflections.size; i++){
+    if (theReflections[i] > thePointer->GetRank() || theReflections[i] < 0)
+      return output.SetError("Bad reflection index", theCommands);
+  }
+  theElt.reflections.AddListOnTop(theReflections);
+  theElt.canonicalize();
   return output.AssignValue(theElt, theCommands);
 }
 
+bool CommandList::innerCharacter(CommandList& theCommands, const Expression& input, Expression& output)
+{
+  SemisimpleLieAlgebra* thePointer;
+  std::string errorString;
+  if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
+      (theCommands.innerSSLieAlgebra, input[1], thePointer, &errorString))
+    return output.SetError(errorString, theCommands);
+  CoxeterGroup theGroup;
+  theGroup.MakeFrom(thePointer->theWeyl.theDynkinType);
+  CoxeterElement theElt;
+  int indexOfOwnerGroupInObjectContainer=
+  theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
+  theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
+
+  theGroup.ComputeInitialCharacters();
+  if(input.IsSequenceNElementS(2))
+  { int theIndex;
+    if(!input[2].IsSmallInteger(&theIndex))
+      return output.SetError("Character index must be an integer", theCommands);
+    if(theIndex < 0 || theIndex > theGroup.ccCount)
+      return output.SetError("Character index must be between 0 and the number of conjugacy classes", theCommands);
+    if(theIndex >= theGroup.characterTable.size)
+      return output.SetError("Unfortunately, tom doesn't know how to calculate that one.  sorry.", theCommands);
+    return output.AssignValue(theGroup.characterTable[theIndex], theCommands);
+  }
+
+  if(input.IsSequenceNElementS(theGroup.ccCount+1))
+  { int n = theGroup.ccCount;
+    List<int> X;
+    for(int i=0; i<n; i++)
+    { int tmp;
+      if (!input[i].IsSmallInteger(& tmp))
+      { std::cout << "something is rotten here! " << input[i].ToString() << " is not a small integer??";
+        return false;
+      }
+      X.AddOnTop(tmp);
+    }
+    Character theChar;
+    theChar.G = theGroup;
+    theChar.data = X;
+    return output.AssignValue(theChar, theCommands);
+  }
+  return output.SetError("Characters may be selected by index or entered by hand.", theCommands);
+}
+
+//--------------Implementing some features of some finite Coxeter groups
 void CoxeterGroup::MakeFrom(const DynkinType& D){
+    std::cout << "MakeFrom called" << std::endl;
     Matrix<Rational> M;
     D.GetCartanSymmetric(M);
     this->CartanSymmetric = M;
@@ -57,8 +115,8 @@ void CoxeterGroup::MakeFrom(const DynkinType& D){
     }
 
     this->rootSystem = roots;
-    Vector<Rational> rho;
-    rho.MakeZero(n);
+    Vector<Rational> derp;
+    derp.MakeZero(n);
     for(int i=0;i<roots.size;i++){
         bool usethis = true;
         for(int j=0; j<n; j++)
@@ -66,10 +124,13 @@ void CoxeterGroup::MakeFrom(const DynkinType& D){
                 usethis = false;
                 break;
             }
-        if(usethis == true)
-            rho += roots[i];
+        if(usethis == true){
+            std::cout << roots[i] << std::endl;
+            derp += roots[i];
+        }
     }
-    this->rho = rho/2;
+    this->rho = derp/2;
+    std::cout << this->rho << std::endl;
 }
 
 HashedList<Vector<Rational> > CoxeterGroup::GetOrbit(const Vector<Rational> &vv) const{
@@ -230,24 +291,24 @@ void CoxeterGroup::ComputeInitialCharacters(){
 
     Character Xe;
     Xe.G = *this;
-    Xe.SetExpectedSize(ccCount);
+    Xe.data.SetExpectedSize(ccCount);
     for(int i=0; i<ccCount; i++)
-        Xe.AddOnTop(1);
+        Xe.data.AddOnTop(1);
     characterTable.AddOnTop(Xe);
 
     Character Xsgn;
     Xsgn.G = *this;
-    Xsgn.SetExpectedSize(ccCount);
+    Xsgn.data.SetExpectedSize(ccCount);
     for(int i=0; i<ccCount; i++)
-        Xsgn.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant().floorIfSmall());
+        Xsgn.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant().floorIfSmall());
     characterTable.AddOnTop(Xsgn);
 
     // does not actually belong in the character table
     Character Xstd;
     Xstd.G = *this;
-    Xstd.SetExpectedSize(ccCount);
+    Xstd.data.SetExpectedSize(ccCount);
     for(int i=0; i<ccCount; i++)
-        Xstd.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetTrace().floorIfSmall());
+        Xstd.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetTrace().floorIfSmall());
     Xstd = Xstd-Xe;
     characterTable.AddOnTop(Xstd);
 }
@@ -262,11 +323,62 @@ Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v
 }
 
 
+//-------------------------------CoxeterElement--------------------------
+
+void CoxeterElement::canonicalize()
+{ if(reflections.size < 2)
+    return;
+  reflections = owner->DecomposeTodorsVector(owner->ComposeTodorsVector(reflections));
+}
+
+void CoxeterElement::operator*=(const CoxeterElement& other)
+{ reflections = owner->DecomposeTodorsVector(owner->ApplyList(reflections, owner->ComposeTodorsVector(other.reflections)));
+}
+
+void CoxeterElement::operator=(const CoxeterElement& other)
+{ this->reflections=other.reflections;
+  this->owner=other.owner;
+}
+
+bool CoxeterElement::operator==(const CoxeterElement& other)const
+{ // this is all stuffed on one line because the auto keyword is only in cxx11
+return owner->ComposeTodorsVector(reflections) == owner->ComposeTodorsVector(other.reflections);
+}
+
+unsigned int CoxeterElement::HashFunction(const CoxeterElement& input)
+{// return input.reflections.HashFunction(); <- doesn't actually work
+  unsigned int acc;
+  int N = (input.reflections.size < SomeRandomPrimesSize) ? input.reflections.size : SomeRandomPrimesSize;
+  for(int i=0; i<N; i++){
+    acc += input.reflections[i]*SomeRandomPrimes[i];
+  }
+  return acc;
+}
+
+std::string CoxeterElement::ToString(FormatExpressions* theFormat)
+{ if (this->owner==0)
+    return "(not initialized)";
+//  std::cout << "<b>CoxeterElement::toString not implemented</b>";
+  std::stringstream out;
+  out << "(";
+  for(int i=0;i<reflections.size;i++){
+    out << reflections[i];
+    if(i<reflections.size-1)
+      out << ", ";
+  }
+  out << ")";
+//  out << "coxeter element owner: ";
+//  out << owner->ToString(theFormat);
+  return out.str();
+}
+
+
+//--------------------------------Characters----------------------------
 //This will be incorrect if it's ever extended to a complex type
 int Character::IP(const Character &other) const{
     int acc = 0;
     for(int i=0;i<G.ccCount;i++)
-        acc +=  this->TheObjects[i] * other[i] * G.ccSizes[i];
+        acc +=  this->data[i] * other[i] * G.ccSizes[i];
     return acc/G.N;
 }
 
@@ -278,18 +390,18 @@ int Character::norm() const {
 Character Character::operator*(const Character &other) const{
     Character l;
     l.G = G;
-    l.SetExpectedSize(G.ccCount);
+    l.data.SetExpectedSize(G.ccCount);
     for(int i=0; i<G.ccCount; i++)
-        l.AddOnTop(this->TheObjects[i] * other[i]);
+        l.data.AddOnTop(this->data[i] * other[i]);
     return l;
 }
 
 Character Character::Sym2() const{
     Character l;
     l.G = G;
-    l.SetExpectedSize(G.ccCount);
+    l.data.SetExpectedSize(G.ccCount);
     for(int i=0; i<G.ccCount; i++){
-        l.AddOnTop((this->TheObjects[i] * this->TheObjects[i] + this->TheObjects[G.squares[i]])/2);
+        l.data.AddOnTop((this->data[i] * this->data[i] + this->data[G.squares[i]])/2);
     }
     return l;
 }
@@ -297,9 +409,9 @@ Character Character::Sym2() const{
 Character Character::Alt2() const{
     Character l;
     l.G = G;
-    l.SetExpectedSize(G.ccCount);
+    l.data.SetExpectedSize(G.ccCount);
     for(int i=0; i<G.ccCount; i++){
-        l.AddOnTop((this->TheObjects[i] * this->TheObjects[i] - this->TheObjects[G.squares[i]])/2);
+        l.data.AddOnTop((this->data[i] * this->data[i] - this->data[G.squares[i]])/2);
     }
     return l;
 }
@@ -307,9 +419,9 @@ Character Character::Alt2() const{
 Character Character::operator+(const Character &other) const{
     Character l;
     l.G = G;
-    l.SetExpectedSize(G.ccCount);
+    l.data.SetExpectedSize(G.ccCount);
     for(int i=0; i<G.ccCount; i++){
-        l.AddOnTop(this->TheObjects[i] + other[i]);
+        l.data.AddOnTop(this->data[i] + other[i]);
     }
     return l;
 }
@@ -317,9 +429,45 @@ Character Character::operator+(const Character &other) const{
 Character Character::operator-(const Character &other) const{
     Character l;
     l.G = G;
-    l.SetExpectedSize(G.ccCount);
+    l.data.SetExpectedSize(G.ccCount);
     for(int i=0; i<G.ccCount; i++){
-        l.AddOnTop(this->TheObjects[i] - other[i]);
+        l.data.AddOnTop(this->data[i] - other[i]);
     }
     return l;
+}
+
+int& Character::operator[](int i) const
+{ return this->data[i];
+}
+
+std::string Character::ToString(FormatExpressions* theFormat) const
+{ //if (this->G==0)
+  //  return "(not initialized)";
+  // Check disabled because it shouldn't happen and doesn't work
+  std::stringstream out;
+  out << "(";
+  for(int i=0;i<data.size;i++){
+    out << data[i];
+    if(i<data.size-1)
+      out << ", ";
+  }
+  out << ")";
+  return out.str();
+}
+
+unsigned int Character::HashFunction(const Character& input)
+{
+  unsigned int acc;
+  int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
+  for(int i=0; i<N; i++){
+    acc += input.data[i]*SomeRandomPrimes[i];
+  }
+  return acc;
+}
+
+// this should probably check if G is the same, but idk how to make that happen
+bool Character::operator==(const Character& other)const
+{ if(this->data == other.data)
+    return true;
+  return false;
 }

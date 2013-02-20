@@ -116,6 +116,12 @@ int Expression::GetTypeOperation<CoxeterElement>()const
   return this->theBoss->opCoxeterElement();
 }
 
+template < >
+int Expression::GetTypeOperation<Character>()const
+{ this->CheckInitialization();
+  return this->theBoss->opCharacter();
+}
+
 //Expression::GetTypeOperation specializations end.
 
 //Expression::AddObjectReturnIndex specializations follow
@@ -251,6 +257,15 @@ CoxeterElement
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theCoxeterElements
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+Character
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theCharacters
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 //Expression::AddObjectReturnIndex specializations end
@@ -431,6 +446,17 @@ CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theCoxeterElements[this->GetLastChild().theData];
+}
+
+template < >
+Character& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<Character>())
+  { std::cout << "This is a programming error: expression not of required type Character. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theCharacters[this->GetLastChild().theData];
 }
 
 //end Expression::GetValuENonConstUseWithCaution specializations.
@@ -3629,6 +3655,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationBuiltInType("WeylGroup");
   this->AddOperationBuiltInType("CoxeterGroup");
   this->AddOperationBuiltInType("CoxeterElement");
+  this->AddOperationBuiltInType("Character");
 
   this->AddOperationNoRepetitionAllowed("PolyVars");
   this->AddOperationNoRepetitionAllowed("Context");
@@ -4857,6 +4884,13 @@ bool Expression::ToStringData
     result=true;
   } else if (this->IsOfType<CoxeterElement>())
   { CoxeterElement& theElt=this->GetValuENonConstUseWithCaution<CoxeterElement>();
+    FormatExpressions tempFormat;
+    tempFormat.flagUseLatex=true;
+    tempFormat.flagUseHTML=false;
+    out << theElt.ToString(&tempFormat);
+    result=true;
+  } else if (this->IsOfType<Character>())
+  { Character& theElt=this->GetValuENonConstUseWithCaution<Character>();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;

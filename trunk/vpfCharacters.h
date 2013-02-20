@@ -26,11 +26,14 @@ class Character{
     Character Alt2() const;
     Character operator+(const Character &other) const;
     Character operator-(const Character &other) const;
+    Character ReducedWithChars(const List<Character> chars = 0);
     int& operator[](int i) const;
     std::string ToString(FormatExpressions* theFormat) const;
+    std::string ToString() const;
     static unsigned int HashFunction(const Character& input);
     bool operator==(const Character& other) const;
 };
+std::ostream& operator<<(std::ostream& out, const Character X);
 
 class CoxeterGroup: public FiniteGroup{
     public:

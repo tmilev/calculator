@@ -16,7 +16,7 @@ bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& 
 bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression& input, Expression& output)
 { //if (!input.IsSequenceNElementS(2))
   //return output.SetError("Function Coxeter element takes two arguments.", theCommands);
-  if(input.children.size<1){
+  if(input.children.size<2){
     return output.SetError("Function CoxeterElement needs to know what group the element belongs to", theCommands);
   }
   //note that if input is list of 2 elements then input[0] is sequence atom, and your two elements are in fact
@@ -286,31 +286,72 @@ void CoxeterGroup::ComputeSquares(){
 }
 
 void CoxeterGroup::ComputeInitialCharacters(){
-    if(squares.size == 0)
-        ComputeSquares();
+  if(squares.size == 0)
+    ComputeSquares();
 
-    Character Xe;
-    Xe.G = *this;
-    Xe.data.SetExpectedSize(ccCount);
-    for(int i=0; i<ccCount; i++)
-        Xe.data.AddOnTop(1);
-    characterTable.AddOnTop(Xe);
+  Character Xe;
+  Xe.G = *this;
+  Xe.data.SetExpectedSize(ccCount);
+  for(int i=0; i<ccCount; i++)
+    Xe.data.AddOnTop(1);
+  characterTable.AddOnTop(Xe);
 
-    Character Xsgn;
-    Xsgn.G = *this;
-    Xsgn.data.SetExpectedSize(ccCount);
-    for(int i=0; i<ccCount; i++)
-        Xsgn.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant().floorIfSmall());
-    characterTable.AddOnTop(Xsgn);
+  Character Xsgn;
+  Xsgn.G = *this;
+  Xsgn.data.SetExpectedSize(ccCount);
+  for(int i=0; i<ccCount; i++)
+    Xsgn.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant().floorIfSmall());
+  characterTable.AddOnTop(Xsgn);
 
-    // does not actually belong in the character table
-    Character Xstd;
-    Xstd.G = *this;
-    Xstd.data.SetExpectedSize(ccCount);
-    for(int i=0; i<ccCount; i++)
-        Xstd.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetTrace().floorIfSmall());
-    Xstd = Xstd-Xe;
-    characterTable.AddOnTop(Xstd);
+    // may not actually belong in the character table
+  Character Xstd;
+  Xstd.G = *this;
+  Xstd.data.SetExpectedSize(ccCount);
+  for(int i=0; i<ccCount; i++)
+    Xstd.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetTrace().floorIfSmall());
+  Xstd = Xstd.ReducedWithChars();
+  characterTable.AddOnTop(Xstd);
+///*
+  List<Character> allChars;
+  allChars.AddListOnTop(characterTable);
+  Character X;
+  int n;
+  for(int loopvar=0;loopvar<10;loopvar++)
+  for(int i=0;i<allChars.size;i++)
+  { X = allChars[i].Sym2();
+    X = X.ReducedWithChars(allChars);
+    n = X.norm();
+    if(n>=1)
+    { std::cout << allChars[i] << X << std::endl;
+    }
+    if(n==1){
+      characterTable.AddOnTop(X);
+      allChars.AddOnTop(X);
+    }
+    else if (n>1){
+      allChars.AddOnTop(X);
+    }
+
+    X = allChars[i].Alt2();
+    X = X.ReducedWithChars(allChars);
+    n = X.norm();
+    if(n>=1)
+    { std::cout << allChars[i] << X << std::endl;
+    }
+    if(n==1){
+      characterTable.AddOnTop(X);
+      allChars.AddOnTop(X);
+    }
+    else if (n>1){
+      allChars.AddOnTop(X);
+    }
+  }
+  std::cout << "allchars " << allChars.size << '\n';
+  for(int i=0;i<allChars.size;i++){
+    std::cout << allChars[i] << '\n';
+  }
+  std::cout << "\n\n";
+//*/
 }
 
 Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v) const{
@@ -436,6 +477,32 @@ Character Character::operator-(const Character &other) const{
     return l;
 }
 
+Character Character::ReducedWithChars(const List<Character> cchars)
+{  Character X = *this;
+   if(X.norm() == 0)
+    return X;
+  List<Character> chars;
+  if(cchars == 0)
+    chars = this->G.characterTable;
+  else
+    chars = cchars;
+
+  for(int i=0; i<chars.size; i++)
+  { bool changed; // while thinks it was undeclared, lol
+    do
+    { changed = false;
+      Character X2 = X - chars[i];
+      if(X2.norm() < X.norm())
+      { X = X2;
+        if(X.norm() == 0)
+          return X;
+        changed = true;
+      }
+    } while(changed);
+  }
+  return X;
+}
+
 int& Character::operator[](int i) const
 { return this->data[i];
 }
@@ -451,8 +518,19 @@ std::string Character::ToString(FormatExpressions* theFormat) const
     if(i<data.size-1)
       out << ", ";
   }
-  out << ")";
+  out << ")[";
+  out << norm();
+  out << "]";
   return out.str();
+}
+
+std::string Character::ToString() const
+{ return ToString(0);
+}
+
+std::ostream& operator<<(std::ostream& out, const Character X)
+{ out << X.ToString();
+  return out;
 }
 
 unsigned int Character::HashFunction(const Character& input)

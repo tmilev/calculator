@@ -19,6 +19,8 @@ class Character{
     FiniteGroup G;
     List<int> data;
 
+    Character(){}
+
     int IP(const Character &other) const;
     int norm() const;
     Character operator*(const Character &other) const;
@@ -28,6 +30,7 @@ class Character{
     Character operator-(const Character &other) const;
     Character ReducedWithChars(const List<Character> chars = 0);
     int& operator[](int i) const;
+    void operator=(const Character& X);
     std::string ToString(FormatExpressions* theFormat) const;
     std::string ToString() const;
     static unsigned int HashFunction(const Character& input);
@@ -63,9 +66,11 @@ class CoxeterGroup: public FiniteGroup{
     void operator=(const CoxeterGroup& other)
     { this->CartanSymmetric=other.CartanSymmetric;
       this->rootSystem=other.rootSystem;
+      this->rho = other.rho;
       this->rhoOrbit=other.rhoOrbit;
       this->conjugacyClasses=other.conjugacyClasses;
       this->nGens=other.nGens;
+      std::cout << "operator=; rho=" << this->rho << "\n" << std::endl;
     }
     Vector<Rational> SimpleReflection(int i, const Vector<Rational> &right) const;
     HashedList<Vector<Rational> > GetOrbit(const Vector<Rational> &v) const;

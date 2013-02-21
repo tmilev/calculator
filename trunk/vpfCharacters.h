@@ -58,7 +58,9 @@ class CoxeterGroup: public FiniteGroup{
 
     int nGens;
     std::string ToString(FormatExpressions* theFormat=0)const
-    { return this->CartanSymmetric.ToString(theFormat);
+    { std::stringstream out;
+      out << "this: " << this << this->CartanSymmetric.ToString(theFormat);
+      return out.str();
     }
     bool operator==(const CoxeterGroup& other)const
     { return this->CartanSymmetric==other.CartanSymmetric;

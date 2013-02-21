@@ -41,7 +41,6 @@ bool CommandList::innerCoxeterElement(CommandList& theCommands, const Expression
   int indexOfOwnerGroupInObjectContainer=
   theCommands.theObjectContainer.theCoxeterGroups.AddNoRepetitionOrReturnIndexFirst(theGroup);
   theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
-
     //I have no idea
 //  std::cout << "<b>Not implemented!!!!!</b> You requested reflection indexed by " << theReflection;
   for(int i=0; i<theReflections.size; i++){

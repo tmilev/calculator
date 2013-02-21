@@ -328,6 +328,18 @@ public:
     this->SimpleComponentsSubalgebras=other.SimpleComponentsSubalgebras;
     this->theSubalgebrasNonEmbedded=other.theSubalgebrasNonEmbedded;
     this->theSl2sOfSubalgebras=other.theSl2sOfSubalgebras;
+    this->Hcandidates=other.Hcandidates;
+    this->theRecursionCounter=other.theRecursionCounter;
+  }
+  bool operator==(const SemisimpleSubalgebras& other)
+  { if (this->owneR==other.owneR)
+      return true;
+    if (this->owneR==0 || other.owneR==0)
+    { std::cout << "This is a programming error: comparing non-initialized Semisimple Lie Subalgebras. "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return *this->owneR==*other.owneR;
   }
 
   SemisimpleLieAlgebra& GetSSowner()

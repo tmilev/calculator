@@ -30,11 +30,12 @@ void CommandList::initPredefinedInnerFunctions()
    First argument gives type, second argument gives highest weight in fundamental coordinates.",
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
    ;
-
-
   this->AddOperationInnerHandler
   ("Serialize", this->innerSerialize, "",
-   "Converts a built-in data type to an expression tree. ",
+   "Attempts to convert a built-in data type to an expression tree which \
+   evaluates to the same value as the \
+   built-in type, and prepends the tree with the Serialization atom. If the conversion is not implemented\
+   the Serialize function evaluates to an error message.",
    "X:=SemisimpleLieAlgebra{}(2A_2+B_3+G_2);\
    \nSerialize{}( X);\
    Y:=Polynomial{}((a+b)^2);\

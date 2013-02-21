@@ -734,8 +734,16 @@ bool Expression::MergeContexts(Expression& leftE, Expression& rightE)
   return rightE.SetContextAtLeastEqualTo(outputC);
 }
 
-Expression Expression::ContextGetContextVariable(int variableIndex)
-{ return this->ContextGetPolynomialVariables()[variableIndex+1];
+Expression Expression::ContextGetContextVariable(int variableIndex)const
+{ Expression thePolVars=this->ContextGetPolynomialVariables();
+  if (thePolVars.children.size<=variableIndex+1)
+  { Expression errorE;
+    std::stringstream out;
+    out << "Context ~does ~not ~have ~variable ~index ~" << variableIndex+1 << ". ";
+    errorE.SetError(out.str(), *this->theBoss);
+    return errorE;
+  }
+  return thePolVars[variableIndex+1];
 }
 
 bool Expression::ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner)
@@ -4785,6 +4793,10 @@ bool Expression::ToStringData
   { charSSAlgMod<Rational> theElt=this->GetValuENonConstUseWithCaution<charSSAlgMod<Rational> >();
     out << theElt.ToString();
     result=true;
+  } else if (this->IsOfType<SemisimpleSubalgebras>())
+  { SemisimpleSubalgebras& theSubalgebras=this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
+    out << theSubalgebras.ToString();
+    result=true;
   }
   output=out.str();
   return result;
@@ -5072,7 +5084,10 @@ std::string Expression::ToString
       outTrue << out.str();
     else
     { outTrue << "<tr><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(startingExpression->ToString(theFormat));
-      if ((this->IsOfType<std::string>()||this->IsOfType<CalculusFunctionPlot>()) && isFinal)
+      if ((this->IsOfType<std::string>() ||
+           this->IsOfType<CalculusFunctionPlot>() ||
+           this->IsOfType<SemisimpleSubalgebras>()
+           ) && isFinal)
         outTrue << "</td><td>" << out.str() << "</td></tr>";
       else
         outTrue << "</td><td>" << CGI::GetHtmlMathSpanNoButtonAddBeginArrayL(out.str()) << "</td></tr>";

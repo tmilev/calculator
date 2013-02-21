@@ -36,10 +36,8 @@ void CommandList::initPredefinedInnerFunctions()
    evaluates to the same value as the \
    built-in type, and prepends the tree with the Serialization atom. If the conversion is not implemented\
    the Serialize function evaluates to an error message.",
-   "X:=SemisimpleLieAlgebra{}(2A_2+B_3+G_2);\
-   \nSerialize{}( X);\
-   Y:=Polynomial{}((a+b)^2);\
-   \nSerialize{}Y\
+   "Y:=Polynomial{}((a+b)^2);\
+   \nX:=Serialize{}Y;\nDeserialize{}X\
    ", true)
    ;
   this->AddOperationInnerHandler

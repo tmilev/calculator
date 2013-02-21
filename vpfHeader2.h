@@ -261,7 +261,7 @@ class Expression
   template<class dataType>
   bool GetContextForConversionIgnoreMyContext(Expression& output)const;
 
-  Expression ContextGetContextVariable(int variableIndex);
+  Expression ContextGetContextVariable(int variableIndex) const;
   int ContextGetIndexAmbientSSalg()const;
   void ContextGetFormatExpressions(FormatExpressions& output)const;
   int ContextGetNumContextVariables()const;

@@ -19,6 +19,15 @@ static bool innerSerializeSemisimpleLieAlgebra
 static bool innerSerializeSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+template <class TemplateMonomial, typename CoefficientType>
+static bool SerializeMonCollection
+(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
+ const Expression& theContext, Expression& output)
+;
+template <class TemplateMonomial>
+static bool SerializeMon
+(CommandList& theCommands, const MonomialP& input, const Expression& theContext, Expression& output, bool& isNonConst)
+;
 
 };
 
@@ -149,7 +158,8 @@ bool CommandList::innerSSLieAlgebra
 
 bool CommandList::innerSerialize
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ int theType;
+{ MacroRegisterFunctionWithName("innerSerialize");
+  int theType;
   if (!input.IsBuiltInType(&theType))
     return false;
   if (theType==theCommands.opSSLieAlg())
@@ -172,12 +182,95 @@ bool CommandList::innerDeSerialize
 
 bool Serialization::innerSerializeSemisimpleLieAlgebra
   (CommandList& theCommands, const Expression& input, Expression& output)
-{ return false;
+{ if (!input.IsOfType<SemisimpleLieAlgebra>())
+    return output.SetError
+    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
+     theCommands);
+  SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
+
+
+  return false;
+}
+
+template <>
+bool Serialization::SerializeMon<MonomialP>
+(CommandList& theCommands, const MonomialP& input, const Expression& theContext, Expression& output, bool& isNonConst)
+{ MacroRegisterFunctionWithName("Serialization::SerializeMon_MonomialP");
+  Expression exponentE, monE, tempE, letterE;
+  isNonConst=false;
+  output.reset(theCommands);
+  for (int j=input.GetMinNumVars()-1; j>=0; j--)
+    if (input(j)!=0)
+    { letterE=theContext.ContextGetContextVariable(j);
+      if (input(j)==1)
+        monE=letterE;
+      else
+      { exponentE.AssignValue(input(j), theCommands);
+        monE.MakeXOX(theCommands, theCommands.opThePower(), letterE, exponentE);
+      }
+      if (!isNonConst)
+        output=monE;
+      else
+      { tempE=output;
+        output.MakeXOX(theCommands, theCommands.opTimes(), monE, tempE);
+      }
+      isNonConst=true;
+    }
+  return true;
+}
+
+template <class TemplateMonomial, typename CoefficientType>
+bool Serialization::SerializeMonCollection
+(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
+ const Expression& theContext, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::SerializeMonCollection");
+  Expression termE, coeffE, tempE;
+  if (input.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  for (int i=input.size-1; i>=0; i--)
+  { MonomialP& currentMon=input[i];
+    bool isNonConst=false;
+    if (!Serialization::SerializeMon<TemplateMonomial>
+        (theCommands, currentMon, theContext, termE, isNonConst))
+      return false;
+    if (!isNonConst)
+      termE.AssignValue(input.theCoeffs[i], theCommands);
+    else
+      if (input.theCoeffs[i]!=1)
+      { tempE=termE;
+        coeffE.AssignValue(input.theCoeffs[i], theCommands);
+        termE.MakeXOX(theCommands, theCommands.opTimes(), coeffE, tempE);
+      }
+    if (i==input.size-1)
+      output=termE;
+    else
+    { tempE=output;
+      output.MakeXOX(theCommands, theCommands.opPlus(), termE, tempE);
+    }
+    output.CheckInitialization();
+  }
+  output.CheckInitialization();
+  return true;
 }
 
 bool Serialization::innerSerializePoly
   (CommandList& theCommands, const Expression& input, Expression& output)
-{
-  return false;
+{ MacroRegisterFunctionWithName("Serialization::innerSerializePoly");
+  Polynomial<Rational> thePoly;
+  if (!input.IsOfType(&thePoly))
+    return output.SetError
+    ("Asking serialization of a non-polynomial to a polynomial is not allowed. ", theCommands);
+  Expression theContext=input.GetContext();
+  Expression tempE, resultE;
+  if (!Serialization::SerializeMonCollection<MonomialP, Rational>(theCommands, thePoly, theContext, resultE))
+    return false;
+  resultE.CheckInitialization();
+  output.reset(theCommands);
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
+  tempE.MakeAtom(theCommands.operationS.GetIndexIMustContainTheObject("Polynomial"), theCommands);
+  output.AddChildOnTop(tempE);
+  output.AddChildOnTop(resultE);
+  return true;
 }
 #endif

@@ -216,7 +216,7 @@ bool CommandList::innerEmbedSSalgInSSalg
   out << "Attempting to embed " << theType.ToString() << " in " << ownerSS.GetLieAlgebraName();
   theSSsubalgebras.FindAllEmbeddings
   (theType, ownerSS, theCommands.theGlobalVariableS);
-  return Serialization::Serialize(theSSsubalgebras, output, theCommands);
+  return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
 bool CommandList::fGroebner
@@ -535,46 +535,6 @@ bool CommandList::innerSuffixNotationForPostScript
     out << " 57.29578 mul ";
   out << currentString << " ";
   return output.AssignValue(out.str(), theCommands);
-}
-
-bool CommandList::innerSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ int theType;
-  if (!input.IsBuiltInType(&theType))
-    return false;
-  if (theType==theCommands.opSemisimpleSubalgebras())
-    return Serialization::Serialize(input.GetValuE<SemisimpleSubalgebras>(), output, theCommands);
-  if (theType==theCommands.opSSLieAlg())
-    return Serialization::Serialize(input.GetValuE<SemisimpleLieAlgebra>(), output, theCommands);
-  if (theType==theCommands.opPoly())
-    return Serialization::Serialize(input.GetValuE<Polynomial<Rational> >(), output, theCommands);
-  return output.SetError("Serialization not implemented for this data type.", theCommands);
-}
-
-bool CommandList::innerDeSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsListStartingWithAtom(theCommands.opSerialization()))
-    return false;
-  if (input.children.size<3)
-    return false;
-  if (!input[1].IsAtoM())
-    return false;
-  int theType=input[1].theData;
-  Expression context;
-  context.MakeEmptyContext(theCommands);
-  if (theType==theCommands.opMonomialCollection())
-  { Polynomial<Rational> tempP;
-    if (!Serialization::Deserialize(input, tempP, &context))
-      return false;
-    return output.AssignValueWithContext(tempP, context, theCommands);
-  }
-  //if (theType==theCommands.opSemisimpleSubalgebras())
-  //{ //SemisimpleSubalgebras* tempSAs;
-    //if (!Serialization::Deserialize(input, &tempSAs))
-     // return false;
-    //return output.AssignValue(tempSAs, theCommands);
- // }
-  return false;
 }
 
 bool CommandList::innerCharacterSSLieAlgFD

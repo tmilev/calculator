@@ -10,293 +10,174 @@ ProjectInformationInstance ProjectInfoVpfHeader4Serialization
 class Serialization
 {
 public:
-static bool Serialize(const SemisimpleSubalgebras& input, Expression& output, CommandList& theCommands);
-static bool Deserialize(const Expression& input, SemisimpleSubalgebras** output);
-static bool Serialize(const CandidateSSSubalgebra& input, Expression& output, CommandList& theCommands);
-static bool Deserialize(const Expression& input, CandidateSSSubalgebra** output);
+static bool innerSerializePoly
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerSerializeSemisimpleLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerSerializeSemisimpleSubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
 
-static bool Serialize(const Rational& input, Expression& output, CommandList& theCommands)
-{ return output.AssignValue(input, theCommands);
-}
-static bool Deserialize(const Expression& input, Rational& output)
-{ return input.IsOfType(&output);
-}
-
-template <typename TemplateMonomial, typename CoefficientType>
-static bool Serialize
-(const MonomialCollection<TemplateMonomial, CoefficientType>& input,
- Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  output.reset(theCommands);
-  Expression tempE, coeffExpr, monExpr;
-  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.opMonomialCollection(), theCommands);
-  output.AddChildOnTop(tempE);
-  coeffExpr.reset(theCommands);
-  monExpr.reset(theCommands);
-  tempE.MakeAtom(theCommands.opSequence(), theCommands);
-  coeffExpr.AddChildOnTop(tempE);
-  monExpr.AddChildOnTop(tempE);
-  List<TemplateMonomial> sortedMons;
-  sortedMons=input;
-  sortedMons.QuickSortAscending();
-  for (int i=0; i<sortedMons.size; i++)
-  { int theIndex= input.GetIndex(sortedMons[i]);
-    if (!Serialization::Serialize(input[theIndex], tempE, theCommands))
-      return false;
-    else
-      monExpr.AddChildOnTop(tempE);
-    if (!Serialization::Serialize(input.theCoeffs[theIndex], tempE, theCommands))
-      return false;
-    else
-      coeffExpr.AddChildOnTop(tempE);
-  }
-  output.AddChildOnTop(monExpr);
-  output.AddChildOnTop(coeffExpr);
-  output.format=output.formatDefault;
-  return true;
-}
-template <typename TemplateMonomial, typename CoefficientType>
-static bool Deserialize
-(const Expression& input, MonomialCollection<TemplateMonomial, CoefficientType>& output,
- Expression* outputContext=0)
-{ MacroRegisterFunctionWithName("Serialization::Deserialize_MonomialCollection");
-  output.MakeZero();
-  CommandList& theCommands=*input.theBoss;
-  Expression tempE, coeffExpr, monExpr;
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opSerialization()))
-    return false;
-  if (input.children.size!=4)
-    return false;
-  const Expression& monData=input[2];
-  const Expression& coeffData=input[3];
-  int numMons=monData.children.size;
-  if (monData.children.size!=coeffData.children.size)
-    return false;
-  if (!monData.IsSequenceNElementS(numMons) || !coeffData.IsSequenceNElementS(numMons))
-    return false;
-  CoefficientType theCF;
-  TemplateMonomial theMon;
-  for (int i=0; i<monData.children.size; i++)
-  { if (!Serialization::Deserialize(monData[i], theMon))
-      return false;
-    if (!Serialization::Deserialize(coeffData[i], theCF))
-      return false;
-    output.AddMonomial(theMon, theCF);
-  }
-  return true;
-}
-static bool Deserialize(const Expression& input, MonomialP& output);
-template <class Object>
-static bool Serialize(Vector<Object>& input, Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  output.reset(theCommands, 1);
-  output.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
-  Expression tempE;
-  for (int i=0; i<input.size; i++)
-    if (!Serialization::Serialize(input[i], tempE, theCommands))
-      return false;
-    else
-      output.AddChildOnTop(tempE);
-  return true;
-}
-template <class Object>
-static bool Serialize(const List<Object>& input, Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  output.reset(theCommands, 1);
-  output.AssignChildAtomValue(0, theCommands.opSequence(), theCommands);
-  Expression tempE;
-  for (int i=0; i<input.size; i++)
-    if (!Serialization::Serialize(input[i], tempE, theCommands))
-      return false;
-    else
-      output.AddChildOnTop(tempE);
-  return true;
-}
-static bool Serialize
-(const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands);
-static bool Serialize
-(const DynkinSimpleType& input, Expression& output, CommandList& theCommands);
-static bool Serialize
-(const MonomialP& input, Expression& output, CommandList& theCommands);
-static bool Serialize(const WeylGroup& input, Expression& output, CommandList& theCommands);
 };
 
-bool Serialization::Serialize
-(const MonomialP& input, Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  output.reset(theCommands);
-  output.children.ReservE(input.GetMinNumVars()+1);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opMonomialPoly(), theCommands);
-  output.AddChildOnTop(tempE);
-  for (int i=0; i<input.GetMinNumVars(); i++)
-  { tempE.AssignValue(input(i), theCommands);
-    output.AddChildOnTop(tempE);
+bool CommandList::innerSSLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ RecursionDepthCounter recursionCounter(&theCommands.RecursionDeptH);
+  MacroRegisterFunctionWithName("CommandList::innerSSLieAlgebra");
+  //std::cout << "<br>Now I'm here!";
+  if (!theCommands.innerPolynomial(theCommands, input, output))
+    return output.SetError
+    ("Failed to extract the semismiple Lie algebra type from " + input.ToString(), theCommands);
+  if (output.IsError())
+    return true;
+  Polynomial<Rational> theType=output.GetValuE<Polynomial<Rational> >();
+  Expression theContext=output.GetContext();
+  FormatExpressions theFormat;
+  theContext.ContextGetFormatExpressions(theFormat);
+  SemisimpleLieAlgebra tempSSalgebra;
+  DynkinType theDynkinType;
+  DynkinSimpleType simpleComponent;
+  theDynkinType.MakeZero();
+  char theWeylLetter='X';
+  for (int i=0; i<theType.size; i++)
+  { MonomialP& currentMon=theType[i];
+    int variableIndex;
+    if (!currentMon.IsOneLetterFirstDegree(&variableIndex))
+      return output.SetError
+      ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat), theCommands);
+    Expression typEE= theContext.ContextGetContextVariable(variableIndex);
+    if (typEE.children.size!=2)
+      return output.SetError
+      ("The monomial "+ currentMon.ToString(&theFormat)+
+       " appears not to be a Dynkin simple type ", theCommands);
+    Expression rankE=typEE[1];
+    Expression typeLetter=typEE[0];
+    Rational firstCoRootSquaredLength=2;
+    bool foundLengthFromExpression=false;
+    if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
+    { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
+        return output.SetError
+        ("Couldn't extract first co-root length from " + currentMon.ToString(&theFormat), theCommands);
+      if (firstCoRootSquaredLength<=0)
+        return output.SetError
+        ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat), theCommands);
+      typeLetter.AssignMeMyChild(1);
+      foundLengthFromExpression=true;
+    }
+    std::string theTypeName;
+    if (!typeLetter.IsOperation(&theTypeName))
+      return output.SetError
+      ("I couldn't extract a type letter from "+ currentMon.ToString(&theFormat), theCommands);
+    if (theTypeName.size()!=1)
+      return output.SetError
+      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
+        Instead, it is "+ theTypeName + "; error while processing "
+       + currentMon.ToString(&theFormat), theCommands);
+    theWeylLetter=theTypeName[0];
+    if (theWeylLetter=='a') theWeylLetter='A';
+    if (theWeylLetter=='b') theWeylLetter='B';
+    if (theWeylLetter=='c') theWeylLetter='C';
+    if (theWeylLetter=='d') theWeylLetter='D';
+    if (theWeylLetter=='e') theWeylLetter='E';
+    if (theWeylLetter=='f') theWeylLetter='F';
+    if (theWeylLetter=='g') theWeylLetter='G';
+    if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C'
+          || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F'
+          || theWeylLetter=='G'))
+      return output.SetError
+      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; \
+       error while processing "
+       + currentMon.ToString(&theFormat), theCommands);
+    int theRank;
+    if (!rankE.IsSmallInteger(&theRank))
+      return output.SetError
+      ("I wasn't able to extract rank from " + currentMon.ToString(&theFormat), theCommands);
+    if (theRank<1 || theRank>20)
+      return output.SetError
+      ("The rank of a simple Lie algebra must be between 1 and 20; error while processing "
+       + currentMon.ToString(&theFormat), theCommands);
+    if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
+      return output.SetError("Type E must have rank 6,7 or 8 ", theCommands);
+    simpleComponent.theLetter=theWeylLetter;
+    simpleComponent.theRank= theRank;
+    if (!foundLengthFromExpression)
+      if (theWeylLetter=='F')
+        firstCoRootSquaredLength=1;
+    simpleComponent.lengthFirstCoRootSquared= firstCoRootSquaredLength;
+    int theMultiplicity=-1;
+    if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
+      theMultiplicity=-1;
+    if (theMultiplicity<0)
+    { std::stringstream out;
+      out << "I failed to convert the coefficient " << theType.theCoeffs[i]
+      << " of " << currentMon.ToString(&theFormat) << " to a small integer";
+      return output.SetError(out.str(), theCommands);
+    }
+    theDynkinType.AddMonomial(simpleComponent, theMultiplicity);
   }
+  if (theDynkinType.GetRank()>20)
+  { std::stringstream out;
+    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+    << " If you would like to relax this limitation edit file " << __FILE__ << " line "
+    << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
+    << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
+    << " You have been warned. "
+    << " Alternatively, you may want to implement a sparse structure constant table "
+    << "(write me an email if you want to do that, I will help you). ";
+    return output.SetError(out.str(), theCommands);
+  }
+  tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
+  int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
+  bool feelsLikeTheVeryFirstTime=(indexInOwner==-1);
+  if (feelsLikeTheVeryFirstTime)
+  { indexInOwner=theCommands.theObjectContainer.theLieAlgebras.size;
+    theCommands.theObjectContainer.theLieAlgebras.AddOnTop(tempSSalgebra);
+  }
+  SemisimpleLieAlgebra& theSSalgebra=theCommands.theObjectContainer.theLieAlgebras[indexInOwner];
+  output.AssignValue(theSSalgebra, theCommands);
+  if (feelsLikeTheVeryFirstTime)
+  { theSSalgebra.ComputeChevalleyConstantS(theCommands.theGlobalVariableS);
+    Expression tempE;
+    theCommands.innerPrintSSLieAlgebra(theCommands, output, tempE, false);
+    theCommands.Comments << tempE.GetValuE<std::string>();
+  }
+  //theSSalgebra.TestForConsistency(*theCommands.theGlobalVariableS);
   return true;
 }
 
-bool Serialization::Deserialize
-(const Expression& input, MonomialP& output)
-{ MacroRegisterFunctionWithName("Serialization::Deserialize");
-  CommandList& theCommands=*input.theBoss;
-  if (!input.IsListStartingWithAtom(theCommands.opMonomialPoly()))
+bool CommandList::innerSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ int theType;
+  if (!input.IsBuiltInType(&theType))
     return false;
-  output.MakeOne(input.children.size-1);
-  Rational tempRat;
-  for (int i=1; i<input.children.size; i++)
-    if(!Serialization::Deserialize(input[i], tempRat))
-      return false;
-    else
-      output[i-1]=tempRat;
+  if (theType==theCommands.opSSLieAlg())
+    return Serialization::innerSerializeSemisimpleLieAlgebra(theCommands, input, output);
+  if (theType==theCommands.opPoly())
+    return Serialization::innerSerializePoly(theCommands, input, output);
+  return output.SetError("Serialization not implemented for this data type.", theCommands);
+}
+
+bool CommandList::innerDeSerialize
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsListStartingWithAtom(theCommands.opSerialization()))
+    return false;
+  if (input.children.size<2)
+    return false;
+  output=input;
+  output.children.PopIndexShiftDown(0);
   return true;
 }
 
-bool Serialization::Serialize
-(const DynkinSimpleType& input, Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  output.reset(theCommands);
-  std::string theType;
-  theType=input.theLetter;
-  Expression typeE, tempE;
-  typeE.reset(theCommands);
-  tempE.MakeAtom(theCommands.opThePower(), theCommands);
-  typeE.AddChildOnTop(tempE);
-  tempE.MakeAtom
-  (theCommands.operationS.AddNoRepetitionOrReturnIndexFirst(theType), theCommands);
-  typeE.AddChildOnTop(tempE);
-  tempE.AssignValue(input.lengthFirstCoRootSquared, theCommands);
-  typeE.AddChildOnTop(tempE);
-  output.AddChildOnTop(typeE);
-  tempE.AssignValue(input.theRank, theCommands);
-  output.AddChildOnTop(tempE);
-  output.format=output.formatFunctionUseUnderscore;
-  return true;
+bool Serialization::innerSerializeSemisimpleLieAlgebra
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ return false;
 }
 
-bool Serialization::Serialize(const SemisimpleSubalgebras& input, Expression& output, CommandList& theCommands)
-{ MacroRegisterFunctionWithName("Serialization::Serialize");
-  if (input.owneR==0)
-  { std::cout << "This is a programming error: use of non-initialized Semisimple subalgebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  output.reset(theCommands);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.opSemisimpleSubalgebras(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.AssignValue(*input.owneR, theCommands);
-  output.AddChildOnTop(tempE);
-//  SltwoSubalgebras theSl2s;
-//  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
-//  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
-//  List<SltwoSubalgebras> theSl2sOfSubalgebras;
-  Serialization::Serialize(input.Hcandidates, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  output.format=output.formatDefault;
-//  int theRecursionCounter;
-  return true;
-}
-
-bool Serialization::Deserialize(const Expression& input, SemisimpleSubalgebras** output)
-{ /*MacroRegisterFunctionWithName("Serialization::Serialize");
-  if (input.owneR==0)
-  { std::cout << "This is a programming error: use of non-initialized Semisimple subalgebras. "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  output.reset(theCommands);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.opSemisimpleSubalgebras(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.AssignValue(*input.owneR, theCommands);
-  output.AddChildOnTop(tempE);
-//  SltwoSubalgebras theSl2s;
-//  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
-//  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
-//  List<SltwoSubalgebras> theSl2sOfSubalgebras;
-  Serialization::Serialize(input.Hcandidates, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  output.format=output.formatDefault;
-//  int theRecursionCounter;
-  return true;*/
+bool Serialization::innerSerializePoly
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{
   return false;
 }
-
-bool Serialization::Serialize
-(const WeylGroup& input, Expression& output, CommandList& theCommands)
-{ output.reset(theCommands);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opWeylGroup(), theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.theDynkinType, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  return true;
-}
-
-bool Serialization::Serialize
-(const SemisimpleLieAlgebra& input, Expression& output, CommandList& theCommands)
-{ output.reset(theCommands);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.theWeyl.theDynkinType, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  output.format=output.formatDefault;
-  return true;
-}
-
-bool Serialization::Serialize(const CandidateSSSubalgebra& input, Expression& output, CommandList& theCommands)
-{ output.reset(theCommands);
-  Expression tempE;
-  tempE.MakeAtom(theCommands.opCandidateSSsubalgebra(), theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.owner->GetSSowner().theWeyl, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.theWeylNonEmbeddeD, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.theWeylNonEmbeddeD, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.theWeylNonEmbeddeDdefaultScale, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-  Serialization::Serialize(input.CartanSAsByComponent, tempE, theCommands);
-  output.AddChildOnTop(tempE);
-
-  //Vectors<Rational> theCoRoots;
-  //Vectors<Rational> theHs;
-/*  List<DynkinSimpleType> theTypes;
-  List<ElementSemisimpleLieAlgebra<Rational> > thePosGens;
-  List<ElementSemisimpleLieAlgebra<Rational> > theNegGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownPosGens;
-  List<ElementSemisimpleLieAlgebra<Polynomial<Rational> > > theUnknownNegGens;
-
-  List<List<int> > theHorbitIndices;
-//  List<List<ElementWeylGroup> > theHWeylGroupElts;
-  Vector<Rational> aSolution;
-  List<List<ChevalleyGenerator> > theInvolvedPosGenerators;
-  List<List<ChevalleyGenerator> > theInvolvedNegGenerators;
-  DynkinType theTypeTotal;
-  charSSAlgMod<Rational> theCharFundamentalCoordsRelativeToCartan;
-  charSSAlgMod<Rational> theCharFundCoords;
-  Vectors<Rational> PosRootsPerpendicularPrecedingWeights;
-  List<Polynomial<Rational> > theSystemToSolve;
-  List<Polynomial<Rational> > transformedSystem;
-  FormatExpressions theCoeffLetters;
-  SemisimpleSubalgebras* owner;
-  int indexInOwnersOfNonEmbeddedMe;
-  bool flagSystemSolved;
-  bool flagSystemProvedToHaveNoSolution;
-  bool flagSystemGroebnerBasisFound;
-  int totalNumUnknowns;*/
-  return true;
-}
-
 #endif

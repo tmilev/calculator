@@ -26,9 +26,9 @@ static bool SerializeMonCollection
 ;
 template <class TemplateMonomial>
 static bool SerializeMon
-(CommandList& theCommands, const MonomialP& input, const Expression& theContext, Expression& output, bool& isNonConst)
+(CommandList& theCommands, const TemplateMonomial& input, const Expression& theContext,
+ Expression& output, bool& isNonConst)
 ;
-
 };
 
 bool CommandList::innerSSLieAlgebra
@@ -180,18 +180,6 @@ bool CommandList::innerDeSerialize
   return true;
 }
 
-bool Serialization::innerSerializeSemisimpleLieAlgebra
-  (CommandList& theCommands, const Expression& input, Expression& output)
-{ if (!input.IsOfType<SemisimpleLieAlgebra>())
-    return output.SetError
-    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
-     theCommands);
-  SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
-
-
-  return false;
-}
-
 template <>
 bool Serialization::SerializeMon<MonomialP>
 (CommandList& theCommands, const MonomialP& input, const Expression& theContext, Expression& output, bool& isNonConst)
@@ -219,6 +207,26 @@ bool Serialization::SerializeMon<MonomialP>
   return true;
 }
 
+template <>
+bool Serialization::SerializeMon<DynkinSimpleType>
+(CommandList& theCommands, const DynkinSimpleType& input, const Expression& theContext, Expression& output, bool& isNonConst)
+{ MacroRegisterFunctionWithName("Serialization::DynkinSimpleType");
+  Expression letterE, rankE, letterAndIndexE, indexE;
+  std::string letterS;
+  letterS=input.theLetter;
+  letterE.MakeAtom(theCommands.operationS.AddNoRepetitionOrReturnIndexFirst(letterS), theCommands);
+  indexE.AssignValue(input.lengthFirstCoRootSquared, theCommands);
+  rankE.AssignValue(input.theRank, theCommands);
+  letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
+  output.reset(theCommands);
+  output.format=output.formatFunctionUseUnderscore;
+  output.AddChildOnTop(letterAndIndexE);
+  output.AddChildOnTop(rankE);
+  std::cout << "output: " << output.ToString();
+  return true;
+}
+
+
 template <class TemplateMonomial, typename CoefficientType>
 bool Serialization::SerializeMonCollection
 (CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
@@ -228,8 +236,8 @@ bool Serialization::SerializeMonCollection
   if (input.IsEqualToZero())
     return output.AssignValue(0, theCommands);
   for (int i=input.size-1; i>=0; i--)
-  { MonomialP& currentMon=input[i];
-    bool isNonConst=false;
+  { TemplateMonomial& currentMon=input[i];
+    bool isNonConst=true;
     if (!Serialization::SerializeMon<TemplateMonomial>
         (theCommands, currentMon, theContext, termE, isNonConst))
       return false;
@@ -249,7 +257,31 @@ bool Serialization::SerializeMonCollection
     }
     output.CheckInitialization();
   }
+  std::cout << " output: " << output.ToString();
   output.CheckInitialization();
+  return true;
+}
+
+bool Serialization::innerSerializeSemisimpleLieAlgebra
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ if (!input.IsOfType<SemisimpleLieAlgebra>())
+    return output.SetError
+    ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
+     theCommands);
+  SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
+  output.reset(theCommands);
+  Expression emptyC;
+  emptyC.MakeEmptyContext(theCommands);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
+  tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
+  output.AddChildOnTop(tempE);
+  if (!Serialization::SerializeMonCollection
+  (theCommands, owner.theWeyl.theDynkinType, emptyC, tempE))
+    return false;
+  output.AddChildOnTop(tempE);
+  output.format=output.formatDefault;
   return true;
 }
 
@@ -271,6 +303,7 @@ bool Serialization::innerSerializePoly
   tempE.MakeAtom(theCommands.operationS.GetIndexIMustContainTheObject("Polynomial"), theCommands);
   output.AddChildOnTop(tempE);
   output.AddChildOnTop(resultE);
+  output.format=output.formatDefault;
   return true;
 }
 #endif

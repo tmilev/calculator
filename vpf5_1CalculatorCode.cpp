@@ -212,7 +212,11 @@ bool CommandList::innerEmbedSSalgInSSalg
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
     << "your own risk</b>";
-  SemisimpleSubalgebras theSSsubalgebras(ownerSS);
+  SemisimpleSubalgebras tempSSsas(ownerSS);
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras
+  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
+  ;
   DynkinSimpleType theType;
   if (!smallSS.theWeyl.theDynkinType.IsSimple(&theType.theLetter, &theType.theRank))
     return output.SetError("I've been instructed to act on simple types only. ", theCommands);

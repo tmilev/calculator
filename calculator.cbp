@@ -62,6 +62,7 @@
 		<Unit filename="vpf5_1CalculatorCode.cpp" />
 		<Unit filename="vpf6.cpp" />
 		<Unit filename="vpf6_1innerTypedFunctions.cpp" />
+		<Unit filename="vpf6_2serialization_code.cpp" />
 		<Unit filename="vpf7.cpp" />
 		<Unit filename="vpf8.cpp" />
 		<Unit filename="vpf9.cpp" />
@@ -82,7 +83,6 @@
 		<Unit filename="vpfHeader1_4SemisimpleLieAlgebras.h" />
 		<Unit filename="vpfHeader2.h" />
 		<Unit filename="vpfHeader3ListReferences.h" />
-		<Unit filename="vpfHeader4Serialization.h" />
 		<Unit filename="vpfMacros.h" />
 		<Extensions>
 			<code_completion />

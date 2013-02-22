@@ -1732,6 +1732,65 @@ static bool innerMultiplyAnyByEltTensor
 
 };
 
+class Serialization
+{
+public:
+static bool innerSerializePoly
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerSerializeSemisimpleLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerSerializeSemisimpleSubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+template <class TemplateMonomial, typename CoefficientType>
+static bool SerializeMonCollection
+(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
+ const Expression& theContext, Expression& output)
+;
+template <class TemplateMonomial>
+static bool SerializeMon
+(CommandList& theCommands, const TemplateMonomial& input, const Expression& theContext,
+ Expression& output, bool& isNonConst)
+;
+};
+
+template <class TemplateMonomial, typename CoefficientType>
+bool Serialization::SerializeMonCollection
+(CommandList& theCommands, const MonomialCollection<TemplateMonomial, CoefficientType>& input,
+ const Expression& theContext, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::SerializeMonCollection");
+  Expression termE, coeffE, tempE;
+  if (input.IsEqualToZero())
+    return output.AssignValue(0, theCommands);
+  for (int i=input.size-1; i>=0; i--)
+  { TemplateMonomial& currentMon=input[i];
+    bool isNonConst=true;
+    if (!Serialization::SerializeMon<TemplateMonomial>
+        (theCommands, currentMon, theContext, termE, isNonConst))
+      return false;
+    if (!isNonConst)
+      termE.AssignValue(input.theCoeffs[i], theCommands);
+    else
+      if (input.theCoeffs[i]!=1)
+      { tempE=termE;
+        coeffE.AssignValue(input.theCoeffs[i], theCommands);
+        termE.MakeXOX(theCommands, theCommands.opTimes(), coeffE, tempE);
+      }
+    if (i==input.size-1)
+      output=termE;
+    else
+    { tempE=output;
+      output.MakeXOX(theCommands, theCommands.opPlus(), termE, tempE);
+    }
+    output.CheckInitialization();
+  }
+//  std::cout << " output: " << output.ToString();
+  output.CheckInitialization();
+  return true;
+}
+
 template <class theType>
 bool CommandList::GetVector
 (const Expression& input, Vector<theType>& output, Expression* inputOutputStartingContext,

@@ -3027,36 +3027,6 @@ bool CommandList::innerFunctionToMatrix
   return true;
 }
 
-bool CommandList::innerPolynomial
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPolynomial");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
-  return theCommands.outerExtractAndEvaluatePMTDtree<Polynomial<Rational> >
-  (theCommands, input, output);
-}
-
-bool CommandList::innerRationalFunction
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerPolynomial");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  //std::cout << "<br>Evaluating innerPolynomial on: " << input.ToString();
-  //std::cout << "<br>First elt input is:" << input[0].ToString();
-  bool result= theCommands.outerExtractAndEvaluatePMTDtree<RationalFunctionOld>
-  (theCommands, input, output);
-  if (!output.IsOfType<RationalFunctionOld>())
-  { std::cout << "<br>This is a programming error: outerExtractAndEvaluatePMTDtree returned true "
-    << "from input" << input.ToString()
-    << " but the result is not of type RationalFunctionOld, instead it is "
-    << output.ToString() << ". "
-    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
-    assert(false);
-  }
-  return result;
-}
-
-
 bool CommandList::innerGetChevGen
 (CommandList& theCommands, const Expression& input, Expression& output)
 { if (!input.IsSequenceNElementS(2))
@@ -3112,27 +3082,6 @@ bool CommandList::innerGetCartanGen
   theContext.ContextMakeContextSSLieAlgebrA(theAlgIndex, theCommands);
   //std::cout << "<br>And the context is: " << theContext.ToString();
   return output.AssignValueWithContext(theUE, theContext, theCommands);
-}
-
-bool CommandList::innerElementUniversalEnvelopingAlgebra
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::innerElementUniversalEnvelopingAlgebra");
-  RecursionDepthCounter theRecursionIncrementer(&theCommands.RecursionDeptH);
-  if (input.IsOfType<ElementUniversalEnveloping<RationalFunctionOld > >())
-  { output=input;
-    return true;
-  }
-  if (!theCommands.outerExtractAndEvaluatePMTDtree<ElementUniversalEnveloping<RationalFunctionOld > >
-      (theCommands, input, output))
-    return output.SetError
-    ("Failed to convert " +input.ToString() + " to element universal enveloping.", theCommands);
-  ElementUniversalEnveloping<RationalFunctionOld> outputUE;
-  if (!output.IsOfType(&outputUE))
-    return output.SetError("Failed to convert to element universal enveloping.", theCommands);
-//  std::cout << "<br>innerElementUniversalEnvelopingAlgebra: output.Context(): "
-//  << output.GetContext().ToString();
-  outputUE.Simplify(*theCommands.theGlobalVariableS, 1, 0);
-  return output.AssignValueWithContext(outputUE, output.GetContext(), theCommands);
 }
 
 bool CommandList::fKLcoeffs
@@ -4097,128 +4046,6 @@ bool Expression::operator==(const Expression& other)const
 { if (this->theBoss!=other.theBoss)
     return false;
   return this->theData==other.theData && this->children==other.children;
-}
-
-template <class dataType>
-bool CommandList::innerExtractPMTDtreeContext
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ RecursionDepthCounter theRecursionCounter(&theCommands.RecursionDeptH);
-  MacroRegisterFunctionWithName("CommandList::innerExtractPMTDtreeContext");
-  if (theCommands.RecursionDeptH>theCommands.MaxRecursionDeptH)
-  { std::stringstream out;
-    out << "Max recursion depth of " << theCommands.MaxRecursionDeptH
-    << " exceeded while trying to evaluate to polynomial an expression "
-    << "(i.e., your polynomial expression is too large).";
-    return output.SetError(out.str(), theCommands);
-  }
-//  std::cout << "<br>Extracting context from: " << input.ToString();
-  if (input.IsListStartingWithAtom(theCommands.opTimes()) ||
-      input.IsListStartingWithAtom(theCommands. opPlus()) ||
-      input.IsListStartingWithAtom(theCommands.opMinus()) )
-  { output.reset(theCommands, 1);
-    output.AssignChildAtomValue(0, theCommands.opContext(), theCommands);
-    Expression newContext, intermediateContext;
-    for (int i=1; i<input.children.size; i++)
-      if (theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[i], newContext))
-      { if (!Expression::ContextMergeContexts(newContext, output, intermediateContext))
-          return false;
-        output=intermediateContext;
-      } else
-        return false;
-    return true;
-  }
-  int thePower;
-  if (input.IsListNElementsStartingWithAtom(theCommands.opThePower(), 3))
-    if (input[2].IsSmallInteger(&thePower))
-      return theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input[1], output);
-  if(input.IsAtoM(theCommands.opContext()))
-  { theCommands.Comments << "Error in context extraction: encountered context keyword. ";
-    return false;
-  }
-  Expression theContext;
-  input.GetContextForConversionIgnoreMyContext<dataType>(theContext);
-  return Expression::ContextMergeContexts(theContext, input.GetContext(), output);
-}
-
-template <class dataType>
-bool CommandList::outerExtractAndEvaluatePMTDtree
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ Expression contextE;
-  if (!theCommands.innerExtractPMTDtreeContext<dataType>(theCommands, input, contextE))
-    return false;
-//  std::cout << "<br>Extracted context from " << input.ToString() << ": "
-//  << contextE.ToString();
-  return theCommands.EvaluatePMTDtree<dataType>(contextE, input, output);
-}
-
-template <class dataType>
-bool CommandList::EvaluatePMTDtree
-(const Expression& inputContext, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::EvaluatePMTDtree");
-  RecursionDepthCounter theRecursionCounter(&this->RecursionDeptH);
-  if (this->RecursionDeptH>this->MaxRecursionDeptH)
-  { this->Comments << "Max recursion depth of " << this->MaxRecursionDeptH
-    << " exceeded while trying to evaluate polynomial expression "
-    << "(i.e. your polynomial expression is too large).";
-    return false;
-  }
-  dataType outputData;
-//  std::cout << "<br>Context:" <<  inputContext.ToString()
-//  << " Evaluating PMTD tree of " << input.ToString();
-  if (input.IsListStartingWithAtom(this->opTimes()) ||
-      input.IsListStartingWithAtom(this-> opPlus()) )
-  { for (int i=1; i<input.children.size; i++)
-    { if (!this->EvaluatePMTDtree<dataType>(inputContext, input[i], output))
-        return false;
-//      std::cout << "<br>Evaluated " << input[i].ToString() << " to " << output.ToString();
-      if (input[0].IsAtoM(this->opTimes()))
-      { if (i==1)
-          outputData=output.GetValuE<dataType>();
-        else
-        { //std::cout << "<hr>Multiplying: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData*=output.GetValuE<dataType>();
-          //std::cout << "<br>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
-        }
-      } else if (input[0].IsAtoM(this->opPlus()))
-      { //std::cout << "<hr>Status outputBuffer data before addition: " << outputBuffer.ToString(this->theGlobalVariableS->theDefaultLieFormat);
-        if (i==1)
-        { outputData=output.GetValuE<dataType>();
-//          std::cout << "<hr> outputBuffer has been set to: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-//          << ", which should equal the bufferData: " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-        } else
-        { //std::cout << "<hr>Adding: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat)
-          //<< " and " << bufferData.ToString(&this->theGlobalVariableS->theDefaultLieFormat);
-          outputData+=output.GetValuE<dataType>();
-          //std::cout << "<hr>Result: " << outputBuffer.ToString(&this->theGlobalVariableS->theDefaultLieFormat) << "<br>";
-        }
-      }
-    }
-    return output.AssignValueWithContext(outputData, inputContext, *this);
-  }
-  int thePower;
-  if (input.IsListNElementsStartingWithAtom(this->opThePower(), 3))
-    if (input[2].IsSmallInteger(&thePower))
-    { if(!this->EvaluatePMTDtree<dataType>(inputContext, input[1], output))
-        return false;
-      outputData=output.GetValuE<dataType>();
-      outputData.RaiseToPower(thePower);
-      return output.AssignValueWithContext(outputData, inputContext, *this);
-    }
-  Expression intermediate=input;
-  Expression tempContext=inputContext;
-  if (!intermediate.SetContextAtLeastEqualTo(tempContext))
-  { this->Comments << "Failed to set context " << tempContext.ToString()
-    << " onto expression " << intermediate.ToString() << "."
-    << " <b>This could be a programmSetContextAtLeastEqualToing error.</b> ";
-    return false;
-  }
-  if (!intermediate.ConvertToType<dataType>(output))
-  { this->Comments << "Failed to convert " << intermediate.ToString()
-    << " to the desired type. ";
-    return false;
-  }
-  return true;
 }
 
 bool CommandList::ExpressionMatchesPattern

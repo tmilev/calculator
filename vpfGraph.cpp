@@ -1,4 +1,7 @@
 #include "vpfGraph.h"
+#include "vpfHeader1_2.h"
+static ProjectInformationInstance ProjectInfoVpfGraphs
+(__FILE__, "Thomas, please enter a description when you can.");
 
 Graph::Graph(int max_vertices, int max_edges){
     this->vertices = max_vertices;

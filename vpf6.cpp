@@ -4552,13 +4552,13 @@ bool Expression::ToStringData
   { out << "Polynomial{}";
     Expression contextE=this->GetContext();
     out << "(" << contextE.ToString(theFormat) << ", "
-    << this->GetValuE<Polynomial<Rational> >().ToString() << ")";
+    << this->GetValuE<Polynomial<Rational> >().ToString(theFormat) << ")";
     result=true;
   } else if (this->IsOfType<RationalFunctionOld>())
   { out << "RationalFunction{}";
     Expression contextE=this->GetContext();
     out << "(" << contextE.ToString(theFormat) << ", "
-    << this->GetValuE<RationalFunctionOld>().ToString() << ")";
+    << this->GetValuE<RationalFunctionOld>().ToString(theFormat) << ")";
     result=true;
   } else if (this->IsOfType<SemisimpleLieAlgebra>())
   { out << "SSLieAlg{}("

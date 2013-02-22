@@ -2,6 +2,11 @@
 #include "vpfCharacters.h"
 #include "vpfGraph.h"
 
+#include "vpfHeader1_2.h"
+static ProjectInformationInstance ProjectInfoVpfCharacters
+(__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
+
+
 bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& input, Expression& output)
 { SemisimpleLieAlgebra* thePointer;
   std::string errorString;

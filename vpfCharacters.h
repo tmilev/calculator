@@ -2,6 +2,8 @@
 #define vpfCharacterHeader
 #include "vpf.h"
 
+static ProjectInformationInstance ProjectInfoVpfCharactersHEader
+(__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 class Character;
 

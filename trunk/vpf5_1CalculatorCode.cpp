@@ -2,7 +2,6 @@
 //For additional information refer to the file "vpf.h".
 #include "vpfHeader2.h"
 #include "vpfHeader1_4SemisimpleLieAlgebras.h"
-#include "vpfHeader4Serialization.h"
 
 static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "Implementation file for the calculator parser part 3: meant for built-in functions. ");
@@ -165,7 +164,11 @@ bool CommandList::innerSSsubalgebras
   else
     out << "<b>This code is completely experimental. Use the following printouts on "
     << "your own risk</b>";
-  SemisimpleSubalgebras theSSsubalgebras(ownerSS);
+  SemisimpleSubalgebras tempSSsas(ownerSS);
+  SemisimpleSubalgebras& theSSsubalgebras=
+  theCommands.theObjectContainer.theSSsubalgebras
+  [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
+  ;
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
   FormatExpressions theFormat;
   std::stringstream out1, out2;

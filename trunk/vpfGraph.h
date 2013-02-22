@@ -1,6 +1,8 @@
 #ifndef vpfGraphHeaderAlreadyDefined
 #define vpfGraphHeaderAlreadyDefined
 #include "vpf.h"
+static ProjectInformationInstance ProjectInfoVpfGraphsHeader
+(__FILE__, "Header file, graphs.");
 
 // a bit of graph theory
 // a graph is stored as a continuous block, indexed as *(data + v*max_edges), after which

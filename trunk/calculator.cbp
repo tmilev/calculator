@@ -41,18 +41,6 @@
 		<Unit filename="test.cpp">
 			<Option target="test" />
 		</Unit>
-		<Unit filename="testlib.cpp">
-			<Option target="test" />
-		</Unit>
-		<Unit filename="testlib.h">
-			<Option target="test" />
-		</Unit>
-		<Unit filename="testlib2.cpp">
-			<Option target="test" />
-		</Unit>
-		<Unit filename="testlib2.h">
-			<Option target="test" />
-		</Unit>
 		<Unit filename="vpf.h">
 			<Option compile="1" />
 			<Option weight="0" />

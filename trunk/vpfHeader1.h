@@ -8909,12 +8909,13 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   std::string tempS1, tempS2;
   List<TemplateMonomial> sortedMons;
   sortedMons=*this;
+  //If this line fails to link, you must do the following.
+  //You need to implement FormatExpressions::GetMonOrder<TemplateMonomial>()
+  // and make it return 0 (or a pointer to a monomial order, should you
+  //wish to use a custom one.
   typename List<TemplateMonomial>::OrderLeftGreaterThanRight
-// ALERT!! Some feature was disabled because I clobbered Dr. Milev's changes
-// because I forgot to svn diff prior to svn up and don't know how he made this
-// actually work.  So now I'm committing something that builds, but is broken.
-//  theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
-  theOrder= 0;
+  theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
+
   sortedMons.QuickSortDescending(theOrder);
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;

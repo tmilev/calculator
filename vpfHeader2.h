@@ -522,7 +522,7 @@ class ObjectContainer
   //by various predefined function handlers.
 public:
   HashedListReferences<CoxeterElement> theCoxeterElements;
-  HashedListReferences<Character> theCharacters;
+  HashedListReferences<Character<Rational> > theCharacters;
   ListReferences<CoxeterGroup> theCoxeterGroups;
   ListReferences<ModuleSSalgebra<RationalFunctionOld> > theCategoryOmodules;
   ListReferences<SemisimpleLieAlgebra> theLieAlgebras;

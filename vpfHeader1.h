@@ -6534,7 +6534,7 @@ int MonomialCollection<TemplateMonomial, CoefficientType>::AddMonomialNoCoeffCle
   int j= this->GetIndex(inputMon);
   if (j>=this->size)
   { std::cout << "This is a programming error: function GetIndex "
-    << " evaluated on " << inputMon << " with hash function " << inputMon.HashFunction()
+    << " evaluated on " << inputMon << " with hash function " << inputMon.HashFunction(inputMon)
     << " returns index " << j
     << " but I have only " << this->size << " elements "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -8910,7 +8910,11 @@ std::string MonomialCollection<TemplateMonomial, CoefficientType>::ToString
   List<TemplateMonomial> sortedMons;
   sortedMons=*this;
   typename List<TemplateMonomial>::OrderLeftGreaterThanRight
-  theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
+// ALERT!! Some feature was disabled because I clobbered Dr. Milev's changes
+// because I forgot to svn diff prior to svn up and don't know how he made this
+// actually work.  So now I'm committing something that builds, but is broken.
+//  theOrder= theFormat==0? 0: theFormat->GetMonOrder<TemplateMonomial>();
+  theOrder= 0;
   sortedMons.QuickSortDescending(theOrder);
 //  out << "(hash: " << this->HashFunction() << ")";
   int cutOffCounter=0;

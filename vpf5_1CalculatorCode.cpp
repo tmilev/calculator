@@ -170,16 +170,7 @@ bool CommandList::innerSSsubalgebras
   [theCommands.theObjectContainer.theSSsubalgebras.AddNoRepetitionOrReturnIndexFirst(tempSSsas)]
   ;
   theSSsubalgebras.FindTheSSSubalgebras(ownerSS, theCommands.theGlobalVariableS);
-  FormatExpressions theFormat;
-  std::stringstream out1, out2;
-  out1 << theCommands.PhysicalPathOutputFolder
-  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
-  out2 << theCommands.DisplayPathOutputFolder
-  << ownerSS.theWeyl.theDynkinType.ToString() << "/";
-  theFormat.physicalPath=out1.str();
-  theFormat.htmlPathServer=out2.str();
-  out << "<br>" << theSSsubalgebras.ToString(&theFormat);
-  return output.AssignValue(out.str(), theCommands);
+  return output.AssignValue(theSSsubalgebras, theCommands);
 }
 
 bool CommandList::innerEmbedSSalgInSSalg

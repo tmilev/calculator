@@ -302,6 +302,8 @@ class Expression
   void MakeElementTensorsGeneralizedVermas
   (const ElementTensorsGeneralizedVermas<RationalFunctionOld>& inputMon, CommandList& newBoss)
  ;
+  void MakeSerialization
+  (const std::string& secondEntry, CommandList& theCommands, int numElementsToReserve=0);
   void MakeAtom(int input, CommandList& newBoss)
   { this->reset(newBoss);
     this->theData=input;
@@ -1741,7 +1743,19 @@ static bool innerSerializePoly
 static bool innerSerializeSemisimpleLieAlgebra
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerSerializeFromObject
+(CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
+;
+static bool innerSerializeFromObject
+(CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
+;
+static bool innerSerializeFromObject
+(CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
+;
 static bool innerSerializeSemisimpleSubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerLoadSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 template <class TemplateMonomial, typename CoefficientType>

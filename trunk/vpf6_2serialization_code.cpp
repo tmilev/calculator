@@ -302,19 +302,87 @@ bool Serialization::innerSerializeSemisimpleLieAlgebra
     ("Asking serialization of non-semisimple Lie algebra to semisimple Lie algebra not allowed. ",
      theCommands);
   SemisimpleLieAlgebra& owner=input.GetValuENonConstUseWithCaution<SemisimpleLieAlgebra>();
-  output.reset(theCommands);
-  Expression emptyC;
-  emptyC.MakeEmptyContext(theCommands);
+  return Serialization::innerSerializeFromObject(theCommands, owner, output);
+}
+
+void Expression::MakeSerialization
+(const std::string& secondEntry, CommandList& theCommands, int numElementsToReserve)
+{ this->reset(theCommands);
+  this->children.ReservE(numElementsToReserve+2);
   Expression tempE;
   tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
+  this->AddChildOnTop(tempE);
   tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
-  output.AddChildOnTop(tempE);
+  this->AddChildOnTop(tempE);
+}
+
+bool Serialization::innerSerializeFromObject
+(CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
+{ return false;
+}
+
+bool Serialization::innerSerializeFromObject
+(CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerSerializeFromObject");
+  output.MakeSerialization("LoadSlTwoSubalgebras", theCommands, 1);
+  Expression theSequence, tempE;
+  theSequence.reset(theCommands);
+  tempE.MakeAtom(theCommands.opSequence(), theCommands);
+  theSequence.children.ReservE(input.size+1);
+  theSequence.AddChildOnTop(tempE);
+  for (int i=0; i<input.size; i++)
+  { if (!Serialization::innerSerializeFromObject(theCommands, input[i], tempE))
+      return false;
+    theSequence.AddChildOnTop(tempE);
+  }
+  output.AddChildOnTop(theSequence);
+  return true;
+}
+
+bool Serialization::innerSerializeFromObject
+  (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerSerializeFromObject");
+  output.MakeSerialization("SemisimpleLieAlgebra", theCommands, 1);
+  Expression emptyC, tempE;
+  emptyC.MakeEmptyContext(theCommands);
   if (!Serialization::SerializeMonCollection
-  (theCommands, owner.theWeyl.theDynkinType, emptyC, tempE))
+      (theCommands, input.theWeyl.theDynkinType, emptyC, tempE))
     return false;
   output.AddChildOnTop(tempE);
   output.format=output.formatDefault;
+  return true;
+}
+
+bool Serialization::innerLoadSemisimpleSubalgebras
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{
+  return false;
+}
+
+bool Serialization::innerSerializeSemisimpleSubalgebras
+  (CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("innerSerializeSemisimpleSubalgebrass");
+  if (!input.IsOfType<SemisimpleSubalgebras>())
+    return false;
+  SemisimpleSubalgebras& theSubalgebras=input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
+  output.reset(theCommands);
+  Expression tempE;
+  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
+  output.AddChildOnTop(tempE);
+  tempE.MakeAtom(theCommands.operationS.GetIndexIMustContainTheObject("LoadSemisimpleSubalgebras"), theCommands);
+  output.AddChildOnTop(tempE);
+  if (!Serialization::innerSerializeFromObject(theCommands, *theSubalgebras.owneR, tempE))
+    return false;
+  output.AddChildOnTop(tempE);
+
+  SltwoSubalgebras theSl2s;
+/*  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
+  HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
+  List<SltwoSubalgebras> theSl2sOfSubalgebras;
+
+  List<CandidateSSSubalgebra> Hcandidates;
+  int theRecursionCounter;
+*/
   return true;
 }
 
@@ -328,6 +396,8 @@ bool CommandList::innerSerialize
     return Serialization::innerSerializeSemisimpleLieAlgebra(theCommands, input, output);
   if (theType==theCommands.opPoly())
     return Serialization::innerSerializePoly(theCommands, input, output);
+  if (theType==theCommands.opSemisimpleSubalgebras())
+    return Serialization::innerSerializeSemisimpleSubalgebras(theCommands, input, output);
   return output.SetError("Serialization not implemented for this data type.", theCommands);
 }
 

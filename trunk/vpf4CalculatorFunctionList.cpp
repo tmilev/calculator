@@ -565,6 +565,14 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
    Prints all embeddings of the first subalgebra into the second. ",
    "experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)", true);
+  this->AddOperationInnerHandler
+  ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Prints all embeddings of the first subalgebra into the second. ",
+   "Deserialize{}(Serialize {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
+   ;
+
+
 //     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
 //   "Prints (Kostant) partitions . ",

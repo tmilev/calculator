@@ -95,8 +95,8 @@ bool CommandList::innerCharacter(CommandList& theCommands, const Expression& inp
       }
       X.AddOnTop(tmp);
     }
-    Character theChar;
-    theChar.G = theGroup;
+    Character<Rational> theChar;
+    theChar.G = &theGroup;
     theChar.data = X;
     return output.AssignValue(theChar, theCommands);
   }
@@ -249,6 +249,10 @@ Matrix<Rational> CoxeterGroup::TodorsVectorToMatrix(const Vector<Rational> &v) c
     return M;
 }
 
+int CoxeterGroup::MultiplyElements(int i, int j) const
+{ return rhoOrbit.GetIndex(ApplyList(DecomposeTodorsVector(rhoOrbit[i]),rhoOrbit[j]));
+}
+
 
 
 void CoxeterGroup::ComputeConjugacyClasses(){
@@ -290,7 +294,8 @@ void CoxeterGroup::ComputeSquares(){
     squares = l;
 }
 
-List<Character>& ClearCharsList(const List<Character> cchars)
+/*
+List<Character<Rational> >& ClearCharsList(const List<Character> cchars)
 {
   List<Character> chars;
   for(int i=0;i<cchars.size;i++)
@@ -326,34 +331,41 @@ List<Character>& ClearCharsList(const List<Character> cchars)
   chars[charindex] = X;
   }
 }
+*/
+
+class ElementGroupRing: public MonomialCollection<CoxeterElement, Rational>
+{
+  public:
+};
 
 void CoxeterGroup::ComputeInitialCharacters(){
   if(squares.size == 0)
     ComputeSquares();
 
-  Character Xe;
-  Xe.G = *this;
+  Character<Rational> Xe;
+  Xe.G = this;
   Xe.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
     Xe.data.AddOnTop(1);
   characterTable.AddOnTop(Xe);
 
-  Character Xsgn;
-  Xsgn.G = *this;
+  Character<Rational> Xsgn;
+  Xsgn.G = this;
   Xsgn.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
     Xsgn.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetDeterminant().floorIfSmall());
   characterTable.AddOnTop(Xsgn);
 
     // may not actually belong in the character table
-  Character Xstd;
-  Xstd.G = *this;
+  Character<Rational> Xstd;
+  Xstd.G = this;
   Xstd.data.SetExpectedSize(ccCount);
   for(int i=0; i<ccCount; i++)
     Xstd.data.AddOnTop(TodorsVectorToMatrix(rhoOrbit[conjugacyClasses[i][0]]).GetTrace().floorIfSmall());
-  Xstd = Xstd.ReducedWithChars();
+//  Xstd = Xstd.ReducedWithChars();
   characterTable.AddOnTop(Xstd);
-///*
+
+/*
   List<Character> allChars;
   allChars.AddListOnTop(characterTable);
   Character X,Y;
@@ -365,14 +377,14 @@ void CoxeterGroup::ComputeInitialCharacters(){
     { for(int j=0; j<allChars.size; j++)
       { products.AddOnTop(allChars[i]*allChars[j]);
       }
-    }/*
+    }
     for(int i=0; i<allChars.size; i++)
     { for(int j=0; j<allChars.size; j++)
       { for(int k=0; k<allChars.size; k++)
         { products.AddOnTop(allChars[i]*allChars[j]);
         }
       }
-    }*/
+    }
     while(products.size > 0)
     { X = products.PopLastObject();
       Y = X.ReducedWithChars(allChars);
@@ -388,7 +400,7 @@ void CoxeterGroup::ComputeInitialCharacters(){
 
     ClearCharsList(allChars);
 
-  }
+  }*/
 
 /*  List<Character> powers;
   powers.AddOnTop(Xstd);
@@ -438,12 +450,13 @@ void CoxeterGroup::ComputeInitialCharacters(){
       allChars.AddOnTop(X);
     }
   }*/
+  /*
   std::cout << "allchars " << allChars.size << '\n';
   for(int i=0;i<allChars.size;i++){
     std::cout << allChars[i] << '\n';
   }
   std::cout << "\n\n";
-//*/
+*/
 }
 
 Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v) const{
@@ -480,7 +493,7 @@ return owner->ComposeTodorsVector(reflections) == owner->ComposeTodorsVector(oth
 
 unsigned int CoxeterElement::HashFunction(const CoxeterElement& input)
 {// return input.reflections.HashFunction(); <- doesn't actually work
-  unsigned int acc;
+  unsigned int acc = 0;
   int N = (input.reflections.size < SomeRandomPrimesSize) ? input.reflections.size : SomeRandomPrimesSize;
   for(int i=0; i<N; i++){
     acc += input.reflections[i]*SomeRandomPrimes[i];
@@ -488,7 +501,8 @@ unsigned int CoxeterElement::HashFunction(const CoxeterElement& input)
   return acc;
 }
 
-std::string CoxeterElement::ToString(FormatExpressions* theFormat)
+
+std::string CoxeterElement::ToString(FormatExpressions* theFormat)const
 { if (this->owner==0)
     return "(not initialized)";
 //  std::cout << "<b>CoxeterElement::toString not implemented</b>";
@@ -506,151 +520,3 @@ std::string CoxeterElement::ToString(FormatExpressions* theFormat)
 }
 
 
-//--------------------------------Characters----------------------------
-//This will be incorrect if it's ever extended to a complex type
-int Character::IP(const Character &other) const{
-    int acc = 0;
-    for(int i=0;i<G.ccCount;i++)
-        acc +=  this->data[i] * other[i] * G.ccSizes[i];
-    return acc/G.N;
-}
-
-int Character::norm() const {
-    return this->IP(*this);
-}
-
-// The next three functions are practically identical
-Character Character::operator*(const Character &other) const{
-    Character l;
-    l.G = G;
-    l.data.SetExpectedSize(G.ccCount);
-    for(int i=0; i<G.ccCount; i++)
-        l.data.AddOnTop(this->data[i] * other[i]);
-    return l;
-}
-
-Character Character::Sym2() const{
-    Character l;
-    l.G = G;
-    l.data.SetExpectedSize(G.ccCount);
-    for(int i=0; i<G.ccCount; i++){
-        l.data.AddOnTop((this->data[i] * this->data[i] + this->data[G.squares[i]])/2);
-    }
-    return l;
-}
-
-Character Character::Alt2() const{
-    Character l;
-    l.G = G;
-    l.data.SetExpectedSize(G.ccCount);
-    for(int i=0; i<G.ccCount; i++){
-        l.data.AddOnTop((this->data[i] * this->data[i] - this->data[G.squares[i]])/2);
-    }
-    return l;
-}
-
-Character Character::operator+(const Character &other) const{
-    Character l;
-    l.G = G;
-    l.data.SetExpectedSize(G.ccCount);
-    for(int i=0; i<G.ccCount; i++){
-        l.data.AddOnTop(this->data[i] + other[i]);
-    }
-    return l;
-}
-
-Character Character::operator-(const Character &other) const{
-    Character l;
-    l.G = G;
-    l.data.SetExpectedSize(G.ccCount);
-    for(int i=0; i<G.ccCount; i++){
-        l.data.AddOnTop(this->data[i] - other[i]);
-    }
-    return l;
-}
-
-Character Character::ReducedWithChars(const List<Character> cchars)
-{ Character X = *this;
-  if(X.norm() == 0)
-    return X;
-  List<Character> chars;
-  if(cchars == 0)
-    chars = this->G.characterTable;
-  else
-    chars = cchars;
-  bool outerChanged = false;
-  bool innerChanged = false;
-  Character X2;
-  do
-  { for(int i=0; i<chars.size; i++)
-    { do
-      { innerChanged = false;
-        X2 = X - chars[i];
-        if(X2.norm() < X.norm())
-        { X = X2;
-          if(X.norm() == 0)
-            return X;
-          innerChanged = true;
-          if(X[0]<0) // negative virtual character alert
-            for(int i=0; i<X.data.size; i++)
-              X.data[i] = -X.data[i];
-        }
-      } while(innerChanged);
-    }
-  } while(outerChanged);
-  return X;
-}
-
-
-
-int& Character::operator[](int i) const
-{ return this->data[i];
-}
-
-std::string Character::ToString(FormatExpressions* theFormat) const
-{ //if (this->G==0)
-  //  return "(not initialized)";
-  // Check disabled because it shouldn't happen and doesn't work
-  std::stringstream out;
-  out << "(";
-  for(int i=0;i<data.size;i++){
-    out << data[i];
-    if(i<data.size-1)
-      out << ", ";
-  }
-  out << ")[";
-  out << norm();
-  out << "]";
-  return out.str();
-}
-
-std::string Character::ToString() const
-{ return ToString(0);
-}
-
-std::ostream& operator<<(std::ostream& out, const Character X)
-{ out << X.ToString();
-  return out;
-}
-
-unsigned int Character::HashFunction(const Character& input)
-{
-  unsigned int acc;
-  int N = (input.data.size < SomeRandomPrimesSize) ? input.data.size : SomeRandomPrimesSize;
-  for(int i=0; i<N; i++){
-    acc += input.data[i]*SomeRandomPrimes[i];
-  }
-  return acc;
-}
-
-void Character::operator=(const Character& X)
-{ this->G = X.G;
-  this->data = X.data;
-}
-
-// this should probably check if G is the same, but idk how to make that happen
-bool Character::operator==(const Character& other)const
-{ if(this->data == other.data)
-    return true;
-  return false;
-}

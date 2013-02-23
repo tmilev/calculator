@@ -117,7 +117,7 @@ int Expression::GetTypeOperation<CoxeterElement>()const
 }
 
 template < >
-int Expression::GetTypeOperation<Character>()const
+int Expression::GetTypeOperation<Character<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opCharacter();
 }
@@ -271,7 +271,7 @@ CoxeterElement
 
 template < >
 int Expression::AddObjectReturnIndex(const
-Character
+Character<Rational>
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theCharacters
@@ -459,8 +459,8 @@ CoxeterElement& Expression::GetValuENonConstUseWithCaution()const
 }
 
 template < >
-Character& Expression::GetValuENonConstUseWithCaution()const
-{ if (!this->IsOfType<Character>())
+Character<Rational>& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<Character<Rational> >())
   { std::cout << "This is a programming error: expression not of required type Character. "
     << " The expression equals " << this->ToString() << "."
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
@@ -4609,8 +4609,8 @@ bool Expression::ToStringData
     tempFormat.flagUseHTML=false;
     out << theElt.ToString(&tempFormat);
     result=true;
-  } else if (this->IsOfType<Character>())
-  { Character& theElt=this->GetValuENonConstUseWithCaution<Character>();
+  } else if (this->IsOfType<Character<Rational> >())
+  { Character<Rational>& theElt=this->GetValuENonConstUseWithCaution<Character<Rational> >();
     FormatExpressions tempFormat;
     tempFormat.flagUseLatex=true;
     tempFormat.flagUseHTML=false;

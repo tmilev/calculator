@@ -281,8 +281,6 @@ class Expression
   (const Expression& largerContext, PolynomialSubstitution<Rational>& output)const
   ;
   Expression ContextGetPolynomialVariables()const;
-  Expression ContextGetSSLieAlg()const;
-
   bool ContextSetSSLieAlgebrA(int indexInOwners, CommandList& owner);
   bool ContextMakeContextSSLieAlgebrA(int indexInOwners, CommandList& owner)
   { this->MakeEmptyContext(owner);
@@ -590,6 +588,11 @@ class CommandList
   static bool innerExtractPMTDtreeContext
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
+  //Operations parametrize the expression elements.
+  //Operations are the labels of the atom nodes of the expression tree.
+  HashedList<std::string, MathRoutines::hashString> operations;
+  HashedList<std::string, MathRoutines::hashString> builtInTypes;
+  List<List<Function> > FunctionHandlers;
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
@@ -647,13 +650,6 @@ public:
 
 //control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
-//operations parametrize the expression elements
-//operations are the labels of the nodes of the expression tree
-//As operations can be thought of as functions, and functions are named by the class VariableNonBound,
-//operations are in fact realized as elements of type VariableNonBound.
-  HashedList<std::string, MathRoutines::hashString> operationS;
-  HashedList<std::string, MathRoutines::hashString> builtInTypes;
-  List<List<Function> > FunctionHandlers;
 
   HashedList<ExpressionTripleCrunchers> theCruncherIds;
   List<Function> theCruncherS;
@@ -738,6 +734,13 @@ public:
   FormatExpressions formatVisibleStrings;
   bool IsBoundVarInContext(int inputOp);
   bool IsNonBoundVarInContext(int inputOp);
+  //to make operations read only, we make operations private and return const pointer to it.
+  inline const HashedList<std::string, MathRoutines::hashString>& GetOperations()
+  { return this->operations;
+  }
+  inline const HashedList<std::string, MathRoutines::hashString>& GetBuiltInTypes()
+  { return this->builtInTypes;
+  }
   SyntacticElement GetSyntacticElementEnd()
   { SyntacticElement result;
     result.controlIndex=this->controlSequences.GetIndex(";");
@@ -979,136 +982,136 @@ public:
   { return this->controlSequences.GetIndexIMustContainTheObject("EndProgram");
   }
   int opApplyFunction()
-  { return this->operationS.GetIndexIMustContainTheObject("{}");
+  { return this->operations.GetIndexIMustContainTheObject("{}");
   }
   int opIsDenotedBy()
-  { return this->operationS.GetIndexIMustContainTheObject(":=:");
+  { return this->operations.GetIndexIMustContainTheObject(":=:");
   }
   int opDefine()
-  { return this->operationS.GetIndexIMustContainTheObject(":=");
+  { return this->operations.GetIndexIMustContainTheObject(":=");
   }
   int opDefineConditional()
-  { return this->operationS.GetIndexIMustContainTheObject("if:=");
+  { return this->operations.GetIndexIMustContainTheObject("if:=");
   }
   int opThePower()
-  { return this->operationS.GetIndexIMustContainTheObject("^");
+  { return this->operations.GetIndexIMustContainTheObject("^");
   }
   int opEqualEqual()
-  { return this->operationS.GetIndexIMustContainTheObject("==");
+  { return this->operations.GetIndexIMustContainTheObject("==");
   }
   int opError()
-  { return this->operationS.GetIndexIMustContainTheObject("Error");
+  { return this->operations.GetIndexIMustContainTheObject("Error");
   }
   int opLisT()
-  { return this->operationS.GetIndexIMustContainTheObject("");
+  { return this->operations.GetIndexIMustContainTheObject("");
   }
   int opMonomialCollection()
-  { return this->operationS.GetIndexIMustContainTheObject("MonomialCollection");
+  { return this->operations.GetIndexIMustContainTheObject("MonomialCollection");
   }
   int opMonomialPoly()
-  { return this->operationS.GetIndexIMustContainTheObject("MonomialPoly");
+  { return this->operations.GetIndexIMustContainTheObject("MonomialPoly");
   }
   int opSerialization()
-  { return this->operationS.GetIndexIMustContainTheObject("Serialization");
+  { return this->operations.GetIndexIMustContainTheObject("Serialization");
   }
   int opCalculusPlot()
-  { return this->operationS.GetIndexIMustContainTheObject("CalculusPlot");
+  { return this->operations.GetIndexIMustContainTheObject("CalculusPlot");
   }
   int opSequence()
-  { return this->operationS.GetIndexIMustContainTheObject("Sequence");
+  { return this->operations.GetIndexIMustContainTheObject("Sequence");
   }
   int opRational()
-  { return this->operationS.GetIndexIMustContainTheObject("Rational");
+  { return this->operations.GetIndexIMustContainTheObject("Rational");
   }
   int opDouble()
-  { return this->operationS.GetIndexIMustContainTheObject("Double");
+  { return this->operations.GetIndexIMustContainTheObject("Double");
   }
   int opAlgNumber()
-  { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
+  { return this->operations.GetIndexIMustContainTheObject("AlgebraicNumber");
   }
   int opPoly()
-  { return this->operationS.GetIndexIMustContainTheObject("PolynomialRational");
+  { return this->operations.GetIndexIMustContainTheObject("PolynomialRational");
   }
   int opRationalFunction()
-  { return this->operationS.GetIndexIMustContainTheObject("RationalFunction");
+  { return this->operations.GetIndexIMustContainTheObject("RationalFunction");
   }
   int opMatRat()
-  { return this->operationS.GetIndexIMustContainTheObject("Matrix_Rational");
+  { return this->operations.GetIndexIMustContainTheObject("Matrix_Rational");
   }
   int opString()
-  { return this->operationS.GetIndexIMustContainTheObject("string");
+  { return this->operations.GetIndexIMustContainTheObject("string");
   }
   int opElementUEoverRF()
-  { return this->operationS.GetIndexIMustContainTheObject("ElementUEoverRF");
+  { return this->operations.GetIndexIMustContainTheObject("ElementUEoverRF");
   }
   int opElementTensorGVM()
-  { return this->operationS.GetIndexIMustContainTheObject("ElementTensorGVM");
+  { return this->operations.GetIndexIMustContainTheObject("ElementTensorGVM");
   }
   int opCharSSAlgMod()
-  { return this->operationS.GetIndexIMustContainTheObject("CharSSAlgMod");
+  { return this->operations.GetIndexIMustContainTheObject("CharSSAlgMod");
   }
   int opSSLieAlg()
-  { return this->operationS.GetIndexIMustContainTheObject("SemisimpleLieAlg");
+  { return this->operations.GetIndexIMustContainTheObject("SemisimpleLieAlg");
   }
   int opSemisimpleSubalgebras()
-  { return this->operationS.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
+  { return this->operations.GetIndexIMustContainTheObject("SemisimpleSubalgebras");
   }
   int opCandidateSSsubalgebra()
-  { return this->operationS.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
+  { return this->operations.GetIndexIMustContainTheObject("CandidateSSsubalgebra");
   }
   int opLittelmannPath()
-  { return this->operationS.GetIndexIMustContainTheObject("LittelmannPath");
+  { return this->operations.GetIndexIMustContainTheObject("LittelmannPath");
   }
   int opLRO()
-  { return this->operationS.GetIndexIMustContainTheObject("LRO");
+  { return this->operations.GetIndexIMustContainTheObject("LRO");
   }
   int opWeylGroup()
-  { return this->operationS.GetIndexIMustContainTheObject("WeylGroup");
+  { return this->operations.GetIndexIMustContainTheObject("WeylGroup");
   }
   int opUnion()
-  { return this->operationS.GetIndexIMustContainTheObject("\\cup");
+  { return this->operations.GetIndexIMustContainTheObject("\\cup");
   }
   int opPolynomialVariables()
-  { return this->operationS.GetIndexIMustContainTheObject("PolyVars");
+  { return this->operations.GetIndexIMustContainTheObject("PolyVars");
   }
   int opContext()
-  { return this->operationS.GetIndexIMustContainTheObject("Context");
+  { return this->operations.GetIndexIMustContainTheObject("Context");
   }
   int opCoxeterGroup()
-  { return this->operationS.GetIndexIMustContainTheObject("CoxeterGroup");
+  { return this->operations.GetIndexIMustContainTheObject("CoxeterGroup");
   }
   int opCoxeterElement()
-  { return this->operationS.GetIndexIMustContainTheObject("CoxeterElement");
+  { return this->operations.GetIndexIMustContainTheObject("CoxeterElement");
   }
   int opCharacter()
-  { return this->operationS.GetIndexIMustContainTheObject("Character");
+  { return this->operations.GetIndexIMustContainTheObject("Character");
   }
   int opEndStatement()
-  { return this->operationS.GetIndexIMustContainTheObject(";");
+  { return this->operations.GetIndexIMustContainTheObject(";");
   }
   int opUnionNoRepetition()
-  { return this->operationS.GetIndexIMustContainTheObject("\\sqcup");
+  { return this->operations.GetIndexIMustContainTheObject("\\sqcup");
   }
   int opBind()
-  { return this->operationS.GetIndexIMustContainTheObject("Bind");
+  { return this->operations.GetIndexIMustContainTheObject("Bind");
   }
   int opPlus()
-  { return this->operationS.GetIndexIMustContainTheObject("+");
+  { return this->operations.GetIndexIMustContainTheObject("+");
   }
   int opMinus()
-  { return this->operationS.GetIndexIMustContainTheObject("-");
+  { return this->operations.GetIndexIMustContainTheObject("-");
   }
   int opTimes()
-  { return this->operationS.GetIndexIMustContainTheObject("*");
+  { return this->operations.GetIndexIMustContainTheObject("*");
   }
   int opTensor()
-  { return this->operationS.GetIndexIMustContainTheObject("\\otimes");
+  { return this->operations.GetIndexIMustContainTheObject("\\otimes");
   }
   int opLieBracket()
-  { return this->operationS.GetIndexIMustContainTheObject("[]");
+  { return this->operations.GetIndexIMustContainTheObject("[]");
   }
   int opDivide()
-  { return this->operationS.GetIndexIMustContainTheObject("/");
+  { return this->operations.GetIndexIMustContainTheObject("/");
   }
   bool AppendOpandsReturnTrueIfOrderNonCanonical
   (const Expression& input, List<Expression>& output, int theOp)
@@ -1219,6 +1222,9 @@ public:
   ;
   static bool outerPlus
   (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+  static bool CollectSummands
+(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
   ;
   static bool outerTensor
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1765,7 +1771,16 @@ static bool innerSerializeFromObject
 static bool innerSerializeFromObject
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
 ;
+static bool innerDeSerializeFromObject
+(CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
+;
 static bool innerSerializeSemisimpleSubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerLoadSltwoSubalgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerLoadSltwoSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerLoadSemisimpleSubalgebras
@@ -1780,6 +1795,19 @@ template <class TemplateMonomial>
 static bool SerializeMon
 (CommandList& theCommands, const TemplateMonomial& input, const Expression& theContext,
  Expression& output, bool& isNonConst)
+;
+template <class TemplateMonomial, typename CoefficientType>
+static bool DeSerializeMonCollection
+(CommandList& theCommands, const Expression& input,
+ MonomialCollection<TemplateMonomial, CoefficientType>& output)
+ ;
+template <class TemplateMonomial>
+static bool DeSerializeMonGetContext
+(CommandList& theCommands, const Expression& input, Expression& outputContext)
+;
+template <class TemplateMonomial>
+static bool DeSerializeMon
+(CommandList& theCommands, const Expression& input, const Expression& inputContext, TemplateMonomial& outputMon)
 ;
 };
 
@@ -1815,6 +1843,31 @@ bool Serialization::SerializeMonCollection
   }
 //  std::cout << " output: " << output.ToString();
   output.CheckInitialization();
+  return true;
+}
+
+template <class TemplateMonomial, typename CoefficientType>
+bool Serialization::DeSerializeMonCollection
+(CommandList& theCommands, const Expression& input,
+ MonomialCollection<TemplateMonomial, CoefficientType>& output)
+{ MacroRegisterFunctionWithName("Serialization::DeSerializeMonCollection");
+  MonomialCollection<Expression, Rational> theSum;
+  theCommands.CollectSummands(theCommands, input, theSum);
+  Expression currentContext, finalContext;
+  finalContext.MakeEmptyContext(theCommands);
+  for (int i=0; i<theSum.size; i++)
+  { if (!Serialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
+      return false;
+    if (!finalContext.ContextMergeContexts(finalContext, currentContext, finalContext))
+      return false;
+  }
+  output.MakeZero();
+  TemplateMonomial tempM;
+  for (int i=0; i<theSum.size; i++)
+  { if (!Serialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
+      return false;
+    output.AddMonomial(tempM, theSum.theCoeffs[i]);
+  }
   return true;
 }
 

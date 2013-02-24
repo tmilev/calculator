@@ -574,10 +574,26 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
   this->AddOperationInnerHandler
   ("LoadSemisimpleSubalgebras", Serialization::innerLoadSemisimpleSubalgebras, "",
    " <b>This function is being developed and is not imiplemented fully yet. </b> \
-   Prints all embeddings of the first subalgebra into the second. ",
+   Loads a semisimpleSubalgebra from expression. ",
    "Deserialize{}(Serialize {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
    ;
-
+  this->AddOperationInnerHandler
+  ("LoadSltwoSubalgebra", Serialization::innerLoadSltwoSubalgebra, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Loads an sl(2) subalgebra from expression. ",
+   "LoadSltwoSubalgebra{}(Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -1)) \
++3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -2)))\
++2 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, -3))), \
+   3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 3)))\
++6 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 1)))\
++10/3 (Serialization{}(getChevalleyGenerator, ((B)^{2}_{3}, 2))))", true)
+   ;
+  this->AddOperationInnerHandler
+  ("LoadSlTwoSubalgebras", Serialization::innerLoadSltwoSubalgebras, "",
+   " <b>This function is being developed and is not imiplemented fully yet. </b> \
+   Loads the sl(2) subalgebras of a semisimple Lie algebra from expression. ",
+   "Deserialize{}(Serialize {}(experimentalEmbedSemisimpleInSemisimple{}(G_2, B_3)))", true)
+   ;
 
 //     this->AddOperationInnerHandler
 //  ("printAllPartitions", & this->fPrintAllPartitions, "",
@@ -615,7 +631,7 @@ x_{3}x_{15}+x_{2}x_{14}+x_{1}x_{13}-1)", false);
 //  ("minPoly", & this->fMinPoly, "",
 //   "If the argument of the function is an algebraic number returns its minimal polynomial, else does nothing. ",
 //   "minPoly{}(\\sqrt{}2+\\sqrt{}3)");
-  this->NumPredefinedVars=this->operationS.size;
+  this->NumPredefinedVars=this->operations.size;
 }
 
 void CommandList::initPredefinedStandardOperations()

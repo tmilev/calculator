@@ -3591,7 +3591,7 @@ void DynkinType::GetLettersTypesMults
   { outputLetters.AddOnTop((*this)[i].theLetter);
     outputRanks.AddOnTop((*this)[i].theRank);
     outputFirstCoRootLengthsSquared.AddOnTop((*this)[i].lengthFirstCoRootSquared);
-    outputMults.AddOnTop(this->theCoeffs[i]);
+    outputMults.AddOnTop(this->GetMult(i));
   }
 }
 
@@ -3660,7 +3660,8 @@ void DynkinType::GetEpsilonMatrix(Matrix<Rational>& output)const
   sortedMons.QuickSortAscending();
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->GetIndex(sortedMons[j]);
-    for (int k=0; k<this->theCoeffs[theIndex]; k++)
+    int theMult=this->GetMult(theIndex);
+    for (int k=0; k<theMult; k++)
     { DynkinSimpleType::GetEpsilonMatrix
       ((*this)[theIndex].theLetter, (*this)[theIndex].theRank, curCartan);
       output.DirectSumWith(curCartan);
@@ -3676,7 +3677,8 @@ void DynkinType::GetCartanSymmetric(Matrix<Rational>& output)const
   sortedMons.QuickSortAscending();
   for (int j=0; j<sortedMons.size; j++)
   { int theIndex=this->GetIndex(sortedMons[j]);
-    for (int k=0; k<this->theCoeffs[theIndex]; k++)
+    int mult=this->GetMult(theIndex);
+    for (int k=0; k<mult; k++)
     { (*this)[theIndex].GetCartanSymmetric(curCartan);
       output.DirectSumWith(curCartan);
     }
@@ -3688,7 +3690,7 @@ Rational DynkinType::GetSizeWeylByFormula()const
   Rational tempRat;
   for (int i=0; i<this->size; i++)
   { tempRat=WeylGroup::GetSizeWeylByFormula((*this)[i].theLetter, (*this)[i].theRank);
-    tempRat.RaiseToPower(this->theCoeffs[i]);
+    tempRat.RaiseToPower(this->GetMult(i));
     result*=tempRat;
   }
   return result;

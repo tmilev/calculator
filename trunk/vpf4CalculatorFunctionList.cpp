@@ -52,6 +52,12 @@ void CommandList::initPredefinedInnerFunctions()
    ", true)
    ;
   this->AddOperationInnerHandler
+  ("DoubleValue", this->innerDouble, "",
+   "Double value of a rational number.",
+   "DoubleValue{}(3/7)", true)
+   ;
+
+  this->AddOperationInnerHandler
 ("gcdPoly", &this->fGCD, "",
    "Greatest common divisor polynomial of two polynomials. \
    The divisor is scaled so that all coefficients are relatively prime integers, \

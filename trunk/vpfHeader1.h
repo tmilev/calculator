@@ -411,6 +411,9 @@ public:
     result.append(")");
     return result;
   }
+  inline static unsigned int HashDouble(const double& input)
+  { return (unsigned) (input*10000);
+  }
   inline static unsigned int IntUnsignIdentity(const int& input)
   { return (unsigned) input;
   }
@@ -7952,10 +7955,8 @@ public:
   static void GetBasisFromSpanOfElements
   (List<ElementSemisimpleLieAlgebra>& theElements, Vectors<RationalFunctionOld>& outputCoords, List<ElementSemisimpleLieAlgebra>& outputTheBasis, GlobalVariables& theGlobalVariables)
     ;
-  int GetFirstOwnerIndex()
-  { if (this->size<=0)
-      return -1;
-    return this->TheObjects[0].indexOfOwnerAlgebra;
+  SemisimpleLieAlgebra& GetOwner()
+  { return *this->owneR;
   }
   void ActOnMe
   (const ElementSemisimpleLieAlgebra& theElt, ElementSemisimpleLieAlgebra& output, SemisimpleLieAlgebra& owner)

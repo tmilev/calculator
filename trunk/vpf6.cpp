@@ -51,6 +51,12 @@ int Expression::GetTypeOperation<int>()const
 }
 
 template < >
+int Expression::GetTypeOperation<double>()const
+{ this->CheckInitialization();
+  return this->theBoss->opDouble();
+}
+
+template < >
 int Expression::GetTypeOperation<Polynomial<Rational> >()const
 { this->CheckInitialization();
   return this->theBoss->opPoly();
@@ -149,6 +155,15 @@ Rational
 & inputValue)const
 { this->CheckInitialization();
   return this->theBoss->theObjectContainer.theRationals
+  .AddNoRepetitionOrReturnIndexFirst(inputValue);
+}
+
+template < >
+int Expression::AddObjectReturnIndex(const
+double
+& inputValue)const
+{ this->CheckInitialization();
+  return this->theBoss->theObjectContainer.theDoubles
   .AddNoRepetitionOrReturnIndexFirst(inputValue);
 }
 
@@ -289,6 +304,17 @@ Rational& Expression::GetValuENonConstUseWithCaution()const
     assert(false);
   }
   return this->theBoss->theObjectContainer.theRationals[this->GetLastChild().theData];
+}
+
+template < >
+double& Expression::GetValuENonConstUseWithCaution()const
+{ if (!this->IsOfType<double>())
+  { std::cout << "This is a programming error: expression not of required type Rational. "
+    << " The expression equals " << this->ToString() << "."
+    << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__ );
+    assert(false);
+  }
+  return this->theBoss->theObjectContainer.theDoubles[this->GetLastChild().theData];
 }
 
 template < >
@@ -3480,6 +3506,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->AddOperationBuiltInType("Rational");
+  this->AddOperationBuiltInType("Double");
   this->AddOperationBuiltInType("AlgebraicNumber");
   this->AddOperationBuiltInType("PolynomialRational");
   this->AddOperationBuiltInType("RationalFunction");
@@ -4624,6 +4651,9 @@ bool Expression::ToStringData
   { SemisimpleSubalgebras& theSubalgebras=this->GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
     out << theSubalgebras.ToString();
     result=true;
+  } else if (this->IsOfType<double>())
+  { out << this->GetValuENonConstUseWithCaution<double>();
+    result=true;
   }
   output=out.str();
   return result;
@@ -5243,19 +5273,25 @@ std::string CommandList::ToString()
   out2 << "<br>Number of Lists created: " << NumListsCreated
   << "<br> Number of List resizes: " << NumListResizesTotal
   << "<br> Number HashedList hash resizing: " << NumHashResizes;
-  out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
-  << " (# successful calls Rational::TryToAddQuickly)";
-  out2 << "<br>Number small rational number multiplications: "
-  << Rational::TotalSmallMultiplications
-  << " (# successful calls Rational::TryToMultiplyQuickly)";
-  out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls
-  << " (# calls of Rational::gcd)";
-  out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions
-  << " (# calls LargeIntUnsigned::AddNoFitSize)";
-  out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications
-  << " (# calls LargeIntUnsigned::MultiplyBy)";
-  out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls
-  << " (# calls LargeIntUnsigned::gcd)";
+  if (Rational::TotalSmallAdditions>0)
+    out2 << "<br>Number small rational number additions: " << Rational::TotalSmallAdditions
+    << " (# successful calls Rational::TryToAddQuickly)";
+  if (Rational::TotalSmallMultiplications>0)
+    out2 << "<br>Number small rational number multiplications: "
+    << Rational::TotalSmallMultiplications
+    << " (# successful calls Rational::TryToMultiplyQuickly)";
+  if (Rational::TotalSmallGCDcalls>0)
+    out2 << "<br>Number small number gcd calls: " << Rational::TotalSmallGCDcalls
+    << " (# calls of Rational::gcd)";
+  if (Rational::TotalLargeAdditions>0)
+    out2 << "<br>Number large integer additions: " << Rational::TotalLargeAdditions
+    << " (# calls LargeIntUnsigned::AddNoFitSize)";
+  if (Rational::TotalLargeMultiplications>0)
+    out2 << "<br>Number large integer multiplications: " << Rational::TotalLargeMultiplications
+    << " (# calls LargeIntUnsigned::MultiplyBy)";
+  if (Rational::TotalLargeGCDcalls>0)
+    out2 << "<br>Number large number gcd calls: " << Rational::TotalLargeGCDcalls
+    << " (# calls LargeIntUnsigned::gcd)";
   #endif
   if (this->RuleStack.size>0)
   { out2 << "<hr><b>Predefined rules.</b><br>";

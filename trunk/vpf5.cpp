@@ -3168,6 +3168,18 @@ bool CommandList::fFactor
   return true;
 }
 
+bool CommandList::innerDouble
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ Rational ratValue;
+  if (input.IsOfType<double>())
+  { output=input;
+    return true;
+  }
+  if (!input.IsOfType(&ratValue))
+    return false;
+  return output.AssignValue(ratValue.DoubleValue(), theCommands);
+}
+
 bool CommandList::fSqrt
 (CommandList& theCommands, const Expression& input, Expression& output)
 { std::cout << "not implemented";

@@ -3,8 +3,36 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "C++ object to calculator expression serialization/deserialization.");
 
 template <>
+bool Serialization::SerializeMon<ChevalleyGenerator>
+(CommandList& theCommands, const ChevalleyGenerator& input, const Expression& theContext,
+ Expression& output, bool& isNonConst)
+{ isNonConst=true;
+  Expression tempE, theArguments;
+  SemisimpleLieAlgebra& owner=*input.owneR;
+  theArguments.reset(theCommands);
+  tempE.MakeAtom(theCommands.opSequence(), theCommands);
+  theArguments.AddChildOnTop(tempE);
+  if (!Serialization::SerializeMonCollection(theCommands, owner.theWeyl.theDynkinType, theContext, tempE))
+    return false;
+  theArguments.AddChildOnTop(tempE);
+  if (input.theGeneratorIndex>=owner.GetNumPosRoots() &&
+      input.theGeneratorIndex< owner.GetNumPosRoots()+owner.GetRank())
+  { output.MakeSerialization("getCartanGenerator", theCommands, 1);
+    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+    theArguments.AddChildOnTop(tempE);
+  } else
+  { output.MakeSerialization("getChevalleyGenerator", theCommands, 1);
+    tempE.AssignValue(owner.GetDisplayIndexFromGenerator(input.theGeneratorIndex), theCommands);
+    theArguments.AddChildOnTop(tempE);
+  }
+  output.AddChildOnTop(theArguments);
+  return true;
+}
+
+template <>
 bool Serialization::SerializeMon<MonomialP>
-(CommandList& theCommands, const MonomialP& input, const Expression& theContext, Expression& output, bool& isNonConst)
+(CommandList& theCommands, const MonomialP& input, const Expression& theContext,
+ Expression& output, bool& isNonConst)
 { MacroRegisterFunctionWithName("Serialization::SerializeMon_MonomialP");
   Expression exponentE, monE, tempE, letterE;
   isNonConst=false;
@@ -231,9 +259,8 @@ bool CommandList::innerSSLieAlgebra
     if (theWeylLetter=='e') theWeylLetter='E';
     if (theWeylLetter=='f') theWeylLetter='F';
     if (theWeylLetter=='g') theWeylLetter='G';
-    if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C'
-          || theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F'
-          || theWeylLetter=='G'))
+    if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' ||
+          theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
       return output.SetError
       ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; \
        error while processing "
@@ -317,8 +344,52 @@ void Expression::MakeSerialization
 }
 
 bool Serialization::innerSerializeFromObject
+(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
+{ MacroRegisterFunctionWithName("Serialization::innerSerializeFromObject");
+  Expression tempContext;
+  tempContext.MakeEmptyContext(theCommands);
+//  tempContext.ContextMakeContextSSLieAlgebrA
+//  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst
+//   (*input.owneR), theCommands);
+  Serialization::SerializeMonCollection(theCommands, input, tempContext, output);
+  return true;
+}
+
+bool Serialization::innerSerializeFromObject
 (CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
-{ return false;
+{ MacroRegisterFunctionWithName("Serialization::innerSerializeFromObject");
+  output.MakeSerialization("LoadSltwoSubalgebra", theCommands);
+  Expression tempE;
+  Serialization::innerSerializeFromObject(theCommands, input.theF, tempE);
+  output.AddChildOnTop(tempE);
+  Serialization::innerSerializeFromObject(theCommands, input.theE, tempE);
+  output.AddChildOnTop(tempE);
+
+  /*List<int> highestWeights;
+  List<int> multiplicitiesHighestWeights;
+  List<int> weightSpaceDimensions;
+  ElementSemisimpleLieAlgebra<Rational> theH, theE, theF;
+  ElementSemisimpleLieAlgebra<Rational> bufferHbracketE, bufferHbracketF, bufferEbracketF;
+  SemisimpleLieAlgebra* owneR;
+  SltwoSubalgebras* container;
+  Rational LengthHsquared;
+  int indexInContainer;
+  List<int> IndicesContainingRootSAs;
+  List<int> IndicesMinimalContainingRootSA;
+  List<List<int> > HighestWeightsDecompositionMinimalContainingRootSA;
+  List<List<int> > MultiplicitiesDecompositionMinimalContainingRootSA;
+  Vectors<Rational> preferredAmbientSimpleBasis;
+  Vector<Rational> hCharacteristic;
+  Vector<Rational> hElementCorrespondingToCharacteristic;
+  Vectors<Rational> hCommutingRootSpaces;
+  Vectors<Rational> RootsWithScalar2WithH;
+  DynkinDiagramRootSubalgebra DiagramM;
+  DynkinDiagramRootSubalgebra CentralizerDiagram;
+  PolynomialSubstitution<Rational> theSystemToBeSolved;
+  Matrix<Rational> theSystemMatrixForm;
+  Matrix<Rational> theSystemColumnVector;
+  bool DifferenceTwoHsimpleRootsIsARoot;*/
+  return true;
 }
 
 bool Serialization::innerSerializeFromObject
@@ -365,17 +436,19 @@ bool Serialization::innerSerializeSemisimpleSubalgebras
   if (!input.IsOfType<SemisimpleSubalgebras>())
     return false;
   SemisimpleSubalgebras& theSubalgebras=input.GetValuENonConstUseWithCaution<SemisimpleSubalgebras>();
-  output.reset(theCommands);
+  return Serialization::innerSerializeFromObject(theCommands, theSubalgebras, output);
+}
+
+bool Serialization::innerSerializeFromObject
+  (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
+{ output.MakeSerialization("LoadSemisimpleSubalgebras", theCommands);
   Expression tempE;
-  tempE.MakeAtom(theCommands.opSerialization(), theCommands);
-  output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.operationS.GetIndexIMustContainTheObject("LoadSemisimpleSubalgebras"), theCommands);
-  output.AddChildOnTop(tempE);
-  if (!Serialization::innerSerializeFromObject(theCommands, *theSubalgebras.owneR, tempE))
+  if (!Serialization::innerSerializeFromObject(theCommands, *input.owneR, tempE))
     return false;
   output.AddChildOnTop(tempE);
-
-  SltwoSubalgebras theSl2s;
+  if (!Serialization::innerSerializeFromObject(theCommands, input.theSl2s, tempE))
+    return false;
+  output.AddChildOnTop(tempE);
 /*  List<SemisimpleLieAlgebra> SimpleComponentsSubalgebras;
   HashedListReferences<SemisimpleLieAlgebra> theSubalgebrasNonEmbedded;
   List<SltwoSubalgebras> theSl2sOfSubalgebras;

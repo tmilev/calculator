@@ -535,6 +535,7 @@ public:
   HashedListReferences<charSSAlgMod<Rational> > theCharsSSLieAlgFD;
   AlgebraicNumberRegistry theAlgebraicNumberRegistry;
   HashedListReferences<AlgebraicNumber> theAlgebraicNumbers;
+  HashedListReferences<double, MathRoutines::HashDouble> theDoubles;
   HashedListReferences<std::string, MathRoutines::hashString> theStrings;
   HashedListReferences<std::string, MathRoutines::hashString> ExpressionNotation;
   HashedListReferences<Expression> ExpressionWithNotation;
@@ -1018,6 +1019,9 @@ public:
   }
   int opRational()
   { return this->operationS.GetIndexIMustContainTheObject("Rational");
+  }
+  int opDouble()
+  { return this->operationS.GetIndexIMustContainTheObject("Double");
   }
   int opAlgNumber()
   { return this->operationS.GetIndexIMustContainTheObject("AlgebraicNumber");
@@ -1599,6 +1603,9 @@ static bool innerMultiplyCharSSLieAlgByCharSSLieAlg
 static bool innerDivideRatByRat
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
+static bool innerDouble
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
 static bool innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1751,6 +1758,12 @@ static bool innerSerializeFromObject
 ;
 static bool innerSerializeFromObject
 (CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
+;
+static bool innerSerializeFromObject
+(CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
+;
+static bool innerSerializeFromObject
+(CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
 ;
 static bool innerSerializeSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)

@@ -6,8 +6,6 @@
 #include "vpfHeader1.h"
 #include "vpfHeader3ListReferences.h"
 
-
-
 static ProjectInformationInstance ProjectInfoVpfHeader1_2(__FILE__, "Header, math routines. ");
 
 class Lattice
@@ -1960,7 +1958,6 @@ public:
   }
 };
 
-class Parser;
 class HomomorphismSemisimpleLieAlgebra
 {
 public:
@@ -2009,7 +2006,6 @@ public:
   ;
   void ToString(std::string& output, GlobalVariables& theGlobalVariables) {this->ToString(output, false, theGlobalVariables);};
   void ToString(std::string& output, bool useHtml, GlobalVariables& theGlobalVariables);
-  void MakeG2InB3(Parser& owner, GlobalVariables& theGlobalVariables);
   void MakeGinGWithId
   (char theWeylLetter, int theWeylDim, ListReferences<SemisimpleLieAlgebra>& ownerOfAlgebras,
    GlobalVariables& theGlobalVariables)
@@ -3842,677 +3838,6 @@ public:
   }
 };
 
-class Parser;
-class ParserNode
-{
-private:
-  bool ConvertToNextType
-(int GoalType, int GoalNumVariables, bool& ErrorHasOccured, GlobalVariables& theGlobalVariables)
-;
-public:
-  std::string DebugString;
-  std::string outputString;
-  void ComputeDebugString(GlobalVariables& theGlobalVariables, FormatExpressions& theFormat){ this->ToString(this->DebugString, theGlobalVariables, theFormat); }
-  void ToString(std::string& output, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
-  Parser* owner;
-  int indexParentNode;
-  int indexInOwner;
-  int Operation; //using tokenTypes from class Parser
-  int ExpressionType;
-  int ErrorType;
-  int IndexContextLieAlgebra;
-  int impliedNumVars;
-  bool Evaluated;
-  MemorySaving<Polynomial<Rational> > polyValue;
-  MemorySaving<ElementWeylAlgebra> WeylAlgebraElement;
-  MemorySaving<ElementUniversalEnveloping<Polynomial<Rational> > > UEElement;
-  MemorySaving<ElementUniversalEnvelopingOrdered<Polynomial<Rational> > > UEElementOrdered;
-  MemorySaving<Polynomial<Rational> > polyBeingMappedTo;
-  MemorySaving<ElementWeylAlgebra> weylEltBeingMappedTo;
-  MemorySaving<RationalFunctionOld> ratFunction;
-  MemorySaving<Cone> theCone;
-  MemorySaving<Lattice> theLattice;
-  MemorySaving<QuasiPolynomial> theQP;
-  MemorySaving<charSSAlgMod<Rational> > theChar;
-  MemorySaving<partFractions> thePFs;
-  MemorySaving<PiecewiseQuasipolynomial> thePiecewiseQP;
-  MemorySaving<AnimationBuffer> theAnimation;
-  MemorySaving<LittelmannPath> theLittelmann;
-  MemorySaving<ElementTensorsGeneralizedVermas<RationalFunctionOld> > theGenVermaElt;
-  List<int> children;
-  int intValue;
-  Rational rationalValue;
-  void operator=(const ParserNode& other);
-  void Clear();
-  int GetMaxImpliedNumVarsChildren();
-  int GetMaxNumImpliedVarsFromUnderscore();
-  int GetStrongestExpressionChildrenConvertChildrenIfNeeded(GlobalVariables& theGlobalVariables);
-  void ConvertChildrenAndMyselfToStrongestExpressionChildren(GlobalVariables& theGlobalVariables);
-  void CopyValue(const ParserNode& other);
-//  bool ConvertToType
-//(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables)
-//  ;
-//  bool ConvertChildrenToType(int theType, int GoalNumVars, GlobalVariables& theGlobalVariables);
-  //the order of the types matters, they WILL be compared by numerical value!
-  enum typeExpression{typeUndefined=0, typeIntegerOrIndex, typeRational, typeLieAlgebraElement, typePoly, typeRationalFunction, typeUEElementOrdered, //=6
-  typeUEelement, typeGenVermaElt, typeWeylAlgebraElement, typeMapPolY, typeMapWeylAlgebra, typeString, typePDF, typeLattice, typeCone, //=14
-  typeArray, typeQuasiPolynomial, typePartialFractions, //=17
-  typeCharSSFDMod,
-  typePiecewiseQP,
-  typeAnimation,
-  typeLittelman,
-  typeFile, typeDots,
-  typeError //typeError must ALWAYS have the highest numerical value!!!!!
-  };
-  enum typesErrors{errorNoError=0, errorDivisionByZero, errorDivisionByNonAllowedType, errorMultiplicationByNonAllowedTypes,
-  errorUnknownOperation, errorOperationByUndefinedOrErrorType, errorProgramming, errorBadIndex, errorDunnoHowToDoOperation,
-  errorWrongNumberOfArguments,//=9
-  errorBadOrNoArgument, errorBadSyntax, errorBadSubstitution, errorConversionError, errorDimensionProblem,//=14
-  errorImplicitRequirementNotSatisfied, errorBadFileFormat };
-  void InitForAddition(GlobalVariables* theContext);
-  void InitForMultiplication(GlobalVariables* theContext);
-  std::string ElementToStringValueAndType
-  (bool useHtml, GlobalVariables& theGlobalVariables, bool displayOutputString, FormatExpressions& theFormat)
-  { return this->ElementToStringValueAndType(useHtml, 0, 3, theGlobalVariables, displayOutputString, theFormat);
-  }
-  std::string ElementToStringValueAndType
-(bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, bool displayOutputString, FormatExpressions& theFormat)
-;
-  SemisimpleLieAlgebra& GetContextLieAlgebra();
-  std::string ElementToStringValueOnlY(bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-  { return this->ElementToStringValueOnlY(useHtml, 0, 2, theGlobalVariables, theFormat);
-  }
-  std::string ElementToStringValueOnlY
-  (bool useHtml, int RecursionDepth, int maxRecursionDepth, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-;
-  std::string ElementToStringErrorCode(bool useHtml);
-  void TrimSubToMinNumVarsChangeImpliedNumVars(PolynomialSubstitution<Rational>& theSub, int theDimension);
-  bool GetRootInt(Vector<int>& output, GlobalVariables& theGlobalVariables);
-  void CopyError(ParserNode& other) {this->ExpressionType=other.ExpressionType; this->ErrorType=other.ErrorType;}
-  int SetError(int theError){this->ExpressionType=this->typeError; this->ErrorType=theError; return theError;}
-  void ReduceRatFunction();
-  void EvaluateLieBracket(GlobalVariables& theGlobalVariables);
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  int EvaluateTimes(GlobalVariables& theGlobalVariables);
-  void EvaluateDivide(GlobalVariables& theGlobalVariables);
-  void EvaluateOrder(GlobalVariables& theGlobalVariables);
-  void CreateDefaultLatexAndPDFfromString
-  (const std::string& theLatexFileString)
-  ;
-  void EvaluateInteger(GlobalVariables& theGlobalVariables);
-  bool GetRootsEqualDimNoConversionNoEmptyArgument
-(List<int>& theArgumentList, Vectors<Rational>& output, int& outputDim)
-;
-  bool GetListRootsEqualSizeEqualDimNoConversionNoEmptyArgument
-(List<int>& theArgumentList, List<Vectors<Rational> >& output, int& outputRootsSize, int& outputDim,
- GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateInvariantsExteriorPowerFundamentalRepsPlusTrivialReps
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateRepresentationFromHWFundCoords
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateLattice
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawWeightSupportWithMults
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateSplitGenVermaBthreeOverGtwo
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateIsInProperSubmoduleVermaModule
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateSplitIrrepOverLeviParabolic
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateSplitFDPartGenVermaOverLeviParabolic
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateSplitCharOverLeviParabolic
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateMakeWeylFromParSel
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateGetCoxeterBasis
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimationPause
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimationClearScreen
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateChar
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawRootSystemCoxeterPlaneRootSA
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimationDots
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimateRootSAs
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateMinusTransposeAuto
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateTransposeAntiAuto
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimationClonePreviousFrameDrawExtraLine
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateG2ParabolicSupport
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateG2InB3MultsParabolic
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateRelations
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateModOutRelsFromGmodKtimesVerma
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateCreateFromDirectionsAndSalamiSlice
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateParabolicWeylGroups
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateParabolicWeylGroupsBruhatGraph
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateVPF
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateLatticeImprecise
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateMakeCasimir
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawWeightSupport
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAdjointAction
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateSolveLPolyEqualsZeroOverCone
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateSliceCone
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateAnimateRootSystemBluePoint
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateAnimateRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  { return ParserNode::EvaluateAnimateRootSystem(theNode, theArgumentList, theGlobalVariables, 0);
-  }
-  static int EvaluateAnimateRootSystem
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables, Vector<Rational> * bluePoint)
-  ;
-  static int EvaluateCone(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
-  static int EvaluateConeFromVertices(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
-  static int EvaluateSlTwoInSlN(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables);
-  static int EvaluateVectorPFIndicator
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawConeAffine
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDrawConeProjective
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateG2InB3Computation
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateClosestPointToHyperplaneAlongTheNormal
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateDecomposeOverSubalgebra
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  int EvaluateWriteToFile(GlobalVariables& theGlobalVariables);
-  void EvaluateOuterAutos(GlobalVariables& theGlobalVariables);
-  void EvaluateMinus(GlobalVariables& theGlobalVariables);
-  void EvaluateDereferenceArray(GlobalVariables& theGlobalVariables);
-  void EvaluateMinusUnary(GlobalVariables& theGlobalVariables);
-  void EvaluatePrintWeyl(GlobalVariables& theGlobalVariables);
-  void EvaluateGCDorLCM(GlobalVariables& theGlobalVariables);
-  static int EvaluateWeylAction
-  (ParserNode& theNode,
-   List<int>& theArgumentList, GlobalVariables& theGlobalVariables,
-   bool DualAction, bool useRho, bool useMinusRho)
-  ;
-  int EvaluatePlus(GlobalVariables& theGlobalVariables);
-  static int EvaluatePartialFractions
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateSplit
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateFindExtremaInDirectionOverLattice
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int  EvaluateWeylDimFormula
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateIntersectLatticeWithPreimageLattice
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  void EvaluatePrintEmbedding(GlobalVariables& theGlobalVariables);
-  static int EvaluatePrintDecomposition
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluatePrintRootSystem
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateFactorial
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluatePrintAllPrimesEratosthenes
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateInvariantsSl2DegreeM
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateEigen
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  static int EvaluateEigenOrdered
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  void EvaluateSecretSauce(GlobalVariables& theGlobalVariables);
-  static int EvaluateSecretSauceOrdered
-    (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-  ;
-  void EvaluateThePower(GlobalVariables& theGlobalVariables);
-  void EvaluateUnderscore(GlobalVariables& theGlobalVariables);
-  int EvaluateUnderscoreLeftArgumentIsArray(GlobalVariables& theGlobalVariables);
-  void EvaluateEmbedding(GlobalVariables& theGlobalVariables);
-  int EvaluateSubstitution(GlobalVariables& theGlobalVariables);
-  int EvaluateApplySubstitution(GlobalVariables& theGlobalVariables);
-  static int EvaluateModVermaRelations
-   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  static int EvaluateModVermaRelationsOrdered
-   (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-;
-  void EvaluateFunction(GlobalVariables& theGlobalVariables);
-  void ExtractAndEvalWeylSubFromMap(GlobalVariables& theGlobalVariables);
-  bool AllChildrenAreOfDefinedNonErrorType();
-  bool OneChildrenOrMoreAreOfType(int theType);
-  ParserNode();
-};
-
-
-class ParserFunctionArgumentTree
-{ public:
-  //format: the if the function argument is composite, then it corresponds to the first non-used element of nestedArgumentsOfArguments
-  // for example, the function argument (A, (B,C), D, (E,F) )
-  // would have functionArguments: typeA, typeComposite, typeD, typeComposite
-  // and nestedArgumentsOfArguments would have two elements, the parametrizing respectively (B ,C) and (E,F)
-  List<int> functionArguments;
-  List<ParserFunctionArgumentTree> nestedArgumentsOfArguments;
-  void operator=(const ParserFunctionArgumentTree& other)
-  { this->functionArguments=other.functionArguments;
-    this->nestedArgumentsOfArguments=other.nestedArgumentsOfArguments;
-  }
-  std::string ToString(bool useHtml, bool useLatex)const;
-  void MakeZero(){this->functionArguments.size=0; this->nestedArgumentsOfArguments.size=0;}
-
-bool ConvertOneArgumentIndex
-  (ParserNode& theNode, int theIndex, int& lowestNestedIndexNonExplored, GlobalVariables& theGlobalVariables)
-  ;
-  bool ConvertArguments
-  (ParserNode& theNode, List<int>& outputArgumentIndices, GlobalVariables& theGlobalVariables)
-    ;
-  bool MakeFunctionArgumentFromString(const std::string& theArgumentList);
-  bool MakeFromString(unsigned int& currentChar, const std::string& theArgumentList);
-  bool AddArgumentNonNestedChangeInput(std::string& theArgument);
-  static int GetTokenFromArgumentStringChangeInput(std::string& theArgument)
-  { unsigned int finalSize=0;
-    for (unsigned int i=0; i< theArgument.size(); i++)
-      if (theArgument[i]!=' ')
-      { theArgument[finalSize]=theArgument[i];
-        finalSize++;
-      }
-    theArgument.resize(finalSize);
-    return ParserFunctionArgumentTree::GetTokenFromArgumentStringNoSpaces(theArgument);
-  }
-  static int GetTokenFromArgumentStringNoSpaces(const std::string& theArgument);
-  static std::string GetArgumentStringFromToken(int theArgument);
-
-};
-
-class ParserFunction
-{
-public:
-  ParserFunctionArgumentTree theArguments;
-  int (*theActualFunction)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables);
-  char exampleAmbientWeylLetter;
-  int exampleAmbientWeylRank;
-  bool flagVisible;
-  std::string functionDescription;
-  std::string functionName;
-  std::string example;
-  void operator=(const ParserFunction& other)
-  { this->theArguments=other.theArguments;
-    this->theActualFunction=other.theActualFunction;
-    this->functionDescription=other.functionDescription;
-    this->functionName=other.functionName;
-    this->example=other.example;
-    this->flagVisible=other.flagVisible;
-    this->exampleAmbientWeylRank=other.exampleAmbientWeylRank;
-    this->exampleAmbientWeylLetter=other.exampleAmbientWeylLetter;
-  }
-  std::string ToString
-(bool useHtml, bool useLatex, Parser& owner)const
-  ;
-  int CallMe
-  (ParserNode& theNode, GlobalVariables& theGlobalVariables)
-  ;
-  bool MakeMe
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables))
-  ;
-  unsigned int HashFunction()const
-  { return this->GetHashFromString(this->functionName);
-  }
-  static inline unsigned int HashFunction(const ParserFunction& input)
-  { return input.HashFunction();
-  }
-  int GetHashFromString(const std::string& input)const
-  { int numCycles=MathRoutines::Minimum(SomeRandomPrimesSize, (int) input.size());
-    int result=0;
-    for(int i=0; i<numCycles; i++)
-      result+=SomeRandomPrimes[i]*input[i];
-    return result;
-  }
-  bool operator>(const ParserFunction& other) const
-  { return this->functionName>other.functionName;
-  }
-  bool operator==(const ParserFunction& other)const
-  { return this->functionName==other.functionName;
-  }
-  ParserFunction(){}
-  void MakeFunctionNoArguments(){this->theArguments.MakeZero();}
-};
-
-//the below class was written and implemented by an idea of helios from the forum of www.cplusplus.com
-class Parser: public List<ParserNode>
-{
-public:
-  std::string DebugString;
-  std::string StringBeingParsed;
-  List<std::string> SystemCommands;
-
-  std::string DisplayNameCalculator;
-
-  std::string DisplayPathServerBase;
-  std::string PhysicalPathServerBase;
-  char DefaultWeylLetter;
-  int DefaultWeylRank;
-
-  std::string DisplayPathOutputFolder;
-  std::string PhysicalPathOutputFolder;
-
-  std::string DisplayNameDefaultOutput;
-  std::string DisplayNameDefaultOutputNoPath;
-  std::string PhysicalNameDefaultOutput;
-
-  std::string indicatorFileName;
-  std::string indicatorFileNameDisplay;
-  std::string indicatorReportFileName;
-  std::string indicatorReportFileNameDisplay;
-  std::string userLabel;
-  int MaxFoundVars;
-  bool flagDisplayIndicator;
-  ParserNode theValue;
-  HomomorphismSemisimpleLieAlgebra theHmm;
-  SemisimpleLieAlgebraOrdered testAlgebra;
-  SemisimpleLieAlgebraOrdered testSubAlgebra;
-  ModuleSSalgebra<Rational> theModulE;
-  List<ModuleSSalgebra<RationalFunctionOld> > theModulePolys;
-  List<SemisimpleLieAlgebra> theAlgebras;
-
-  std::string javaScriptDisplayingIndicator;
-  std::string afterSystemCommands;
-//  void SetNumVarsModulePolys(int NumVars);
-//  SemisimpleLieAlgebra theLieAlgebra;
-  void ComputeDebugString(bool includeLastNode, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-  { this->ToString(includeLastNode, DebugString, true, theGlobalVariables, theFormat);
-  }
-  void ToString(bool includeLastNode, std::string& output, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat);
-  enum tokenTypes
-  { tokenExpression, tokenEmpty, tokenEnd, tokenDigit, tokenInteger, tokenPlus, tokenMinus, tokenMinusUnary, tokenUnderscore,  //=8
-    tokenTimes, tokenDivide, tokenPower, tokenOpenBracket, tokenCloseBracket,//=13
-    tokenOpenLieBracket, tokenCloseLieBracket, tokenOpenCurlyBracket, tokenCloseCurlyBracket, tokenX, tokenF, //=19
-    tokenPartialDerivative, tokenComma, tokenLieBracket, tokenG, //=23
-    tokenH, tokenC, tokenEmbedding, tokenVariable, //=27
-    tokenArraY, tokenMapsTo, tokenColon, tokenDereferenceArray,
-    tokenDot,
-    tokenEndStatement, tokenFunction, tokenFunctionNoArgument,
-  };
-  HashedList<ParserFunction> theFunctionList;
-  enum functionList
-  { functionEigen, functionEigenOrdered, functionLCM, functionGCD, functionSecretSauce, functionSecretSauceOrdered, //=5
-    functionWeylDimFormula, functionOuterAutos, functionMod, functionInvariants, functionOrder, functionEmbedding, //=11
-    functionPrintDecomposition, functionPrintRootSystem, functionSlTwoInSlN, functionActByWeyl, functionActByAffineWeyl, //=16
-    functionPrintWeylGroup, functionChamberParam, functionMaximumLFoverCone, functionCone, functionLattice, //21
-    functionGetAllRepresentatives, functionInvertLattice, functionQuasiPolynomial, functionPartialFractions, functionSplit, //=26
-    functionGetVPIndicator, functionMaximumQPoverCone, functionWriteToFile, functionReadFromFile, //=30
-    functionIntersectWithSubspace, functionIntersectLatticeWithLatticePreimage, functionSubstitutionInQuasipolynomial, //=33
-    functionIntersectHyperplaneByACone,
-  };
-  List<int> TokenBuffer;
-  List<int> ValueBuffer;
-  List<int> TokenStack;
-  List<int> ValueStack;
-  List<int> NodeIndexStack;
-  int numEmptyTokensAtBeginning;
-  bool flagFunctionListInitialized;
-//  ElementSemisimpleLieAlgebra LieAlgebraValue;
-//  ElementWeylAlgebra WeylAlgebraValue;
-  //Transform operations create no new nodes.
-  //Replace operations create new nodes.
-  bool ReplaceObyE()
-  { this->ExpandOnTopUseOperationOffset(0, this->tokenExpression);
-    this->TransformRepeatXAtoA(1);
-    return true;
-  }
-  bool ReplaceYOZbyE()
-  { return this->ReplaceTwoChildrenOperationOffset(-2, 0, -1, 3, this->tokenExpression);
-  }
-  bool ReplaceOXAXbyE()
-  { return this->ReplaceOneChildOperationOffset(-1, -3, 4, this->tokenExpression);
-  }
-  bool ReplaceOYbyE()
-  { return this->ReplaceOneChildOperationOffset(0, -1, 2, this->tokenExpression);
-  }
-  bool ReplaceZYbyE(int theOperationToken)
-  { return this->ReplaceTwoChildrenOperationToken(-1,0,2, theOperationToken, this->tokenExpression);
-  }
-  bool ReplaceXYbyE(int theOperationToken)
-  { return this->ReplaceOneChildOperationToken(0, 2, theOperationToken, this->tokenExpression);
-  }
-  bool ReplaceXYCZXbyE(int theOperationToken)
-  { return this->ReplaceTwoChildrenOperationToken(-3, -1, 5, theOperationToken, this->tokenExpression);
-  }
-  bool ReplaceXYXbyA()
-  { return this->ReplaceOneChildOperationToken(-1, 3, this->tokenArraY, this->tokenArraY);
-  }
-  bool ReplaceEXEXbyE(int theOperation)
-  { return this->ReplaceTwoChildrenOperationToken(-3, -1, 4, theOperation, this->tokenExpression);
-  }
-  bool ReplaceDdotsDbyEdoTheArithmetic();
-  bool ReplaceXECdotsCEXbyE(int theDimension, int theNewToken, int theOperation);
-  bool ReplaceXECdotsCEXEXbyE(int theDimension, int theNewToken, int theOperation);
-  void FatherByLastNodeChildrenWithIndexInNodeIndex(int IndexInNodeIndex)
-  { int childIndex=this->NodeIndexStack.TheObjects[IndexInNodeIndex];
-    this->LastObject()->children.AddOnTop(childIndex);
-    this->TheObjects[childIndex].indexParentNode=this->size-1;
-  }
-  bool ReplaceOneChildOperationToken
-  (int child1Offset, int StackDecreaseNotCountingNewExpression, int theOperationToken, int theToken)
-  { int lastIndexInNodeIndex=this->TokenStack.size-1;
-    this->ExpandOnTopIncreaseStacks(theOperationToken, theToken, 0);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
-    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
-    return true;
-  }
-  bool ReplaceTwoChildrenOperationToken
-  (int child1Offset, int child2Offset, int StackDecreaseNotCountingNewExpression, int theOperationToken, int theToken)
-  { int lastIndexInNodeIndex=this->TokenStack.size-1;
-    this->ExpandOnTopIncreaseStacks(theOperationToken, theToken, 0);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child2Offset);
-    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
-    return true;
-  }
-  bool ExpandOnTopIncreaseStacks(int theOperationToken, int theToken, int theIntValue)
-  { this->ExpandOnTop(1);
-    this->LastObject()->Operation=theOperationToken;
-    this->LastObject()->intValue=theIntValue;
-    this->NodeIndexStack.AddOnTop(this->size-1);
-    this->ValueStack.AddOnTop(theIntValue);
-    this->TokenStack.AddOnTop(theToken);
-    return true;
-  }
-  bool ExpandOnTopUseOperationOffset(int OperationOffset, int theToken)
-  { return this->ExpandOnTopIncreaseStacks(this->TokenStack.TheObjects[this->TokenStack.size-1+OperationOffset], theToken, this->ValueStack.TheObjects[this->TokenStack.size-1+OperationOffset]);
-  }
-  bool ReplaceTwoChildrenOperationOffset
-  (int child1Offset, int child2Offset, int OperationOffset, int StackDecreaseNotCountingNewExpression, int theToken)
-  { int lastIndexInNodeIndex=this->TokenStack.size-1;
-    this->ExpandOnTopUseOperationOffset(OperationOffset, theToken);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child2Offset);
-    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
-    return true;
-  }
-  std::string CreateBasicStructureConstantInfoIfItDoesntExist
-  (GlobalVariables& theGlobalVariables)
-  ;
-  bool ReplaceOneChildOperationOffset
-  (int child1Offset, int OperationOffset, int StackDecreaseNotCountingNewExpression, int theToken)
-  { int lastIndexInNodeIndex=this->TokenStack.size-1;
-    this->ExpandOnTopUseOperationOffset(OperationOffset, theToken);
-    this->FatherByLastNodeChildrenWithIndexInNodeIndex(lastIndexInNodeIndex+child1Offset);
-    this->TransformRepeatXAtoA(StackDecreaseNotCountingNewExpression);
-    return true;
-  }
-  bool TransformXtoE()
-  { *this->TokenStack.LastObject()=this->tokenExpression;
-    *this->ValueStack.LastObject()=0;
-    return true;
-  }
-  bool TransformRepeatXAtoA(int repeat)
-  { int startIndex=this->ValueStack.size-1;
-    int targetIndex=startIndex-repeat;
-    this->ValueStack.SwapTwoIndices(startIndex, targetIndex);
-    this->NodeIndexStack.SwapTwoIndices(startIndex, targetIndex);
-    this->TokenStack.SwapTwoIndices(startIndex, targetIndex);
-    this->ValueStack.size-=repeat;
-    this->NodeIndexStack.size-=repeat;
-    this->TokenStack.size-=repeat;
-    return true;
-  }
-  bool TransformXtoNothing()
-  { this->ValueStack.RemoveLastObject();
-    this->TokenStack.RemoveLastObject();
-    this->NodeIndexStack.RemoveLastObject();
-    return true;
-  }
-  bool TransformRepeatXtoNothing(int repeat)
-  { for (int i=0; i<repeat; i++)
-      this->TransformXtoNothing();
-    return true;
-  }
-  bool TransformXYXtoY()
-  { this->TransformXtoNothing();
-    this->TransformRepeatXAtoA(1);
-    return true;
-  }
-  void InitAndTokenize(const std::string& input);
-  void Evaluate(GlobalVariables& theGlobalVariables);
-  std::string ParseEvaluateAndSimplify
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-;
-  void ParseEvaluateAndSimplifyPart1(const std::string& input, GlobalVariables& theGlobalVariables);
-  std::string ParseEvaluateAndSimplifyPart2
-  (const std::string& input, bool useHtml, GlobalVariables& theGlobalVariables, FormatExpressions& theFormat)
-;
-  ElementUniversalEnveloping<Polynomial<Rational> > ParseAndCompute
-  (const std::string& input, GlobalVariables& theGlobalVariables)
-  ;
-  void Parse(const std::string& input);
-  void ParseNoInit(int indexFrom, int indexTo);
-  void ParseAndCompute(const std::string& input, std::string& output, GlobalVariables& theGlobalVariables);
-  bool ApplyRules(int lookAheadToken);
-  bool lookAheadTokenProhibitsPlus(int theToken);
-  bool lookAheadTokenProhibitsTimes(int theToken);
-  bool lookAheadTokenAllowsMapsTo(int theToken);
-  bool TokenProhibitsUnaryMinus(int theToken);
-  void initTestAlgebraNeedsToBeRewritteN(GlobalVariables& theGlobalVariables);
-  void initTestAlgebraNeedsToBeRewrittenG2InB3(GlobalVariables& theGlobalVariables);
-  void initFunctionList(char defaultExampleWeylLetter, int defaultExampleWeylRank);
-  void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,
-   const std::string& theExample, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
-   )
-  { bool tempBool=this->AddOneFunctionToDictionary
-      (theFunctionName, theFunctionArguments, theFunctionDescription, theExample, 'B', 3, true, inputFunctionAddress);
-    assert(tempBool);
-  }
-  void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, bool isVisible, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
-   )
-  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, isVisible, inputFunctionAddress);
-    assert(tempBool);
-  }
-  void AddOneFunctionToDictionaryNoFail
-  (const std::string& theFunctionName, const std::string& theFunctionArguments,
-   const std::string& theFunctionDescription, const std::string& theExample, char ExampleWeylLetter,
-   int ExampleWeylRank, int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
-   )
-  { bool tempBool=this->AddOneFunctionToDictionary(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, ExampleWeylLetter, ExampleWeylRank, true, inputFunctionAddress);
-    assert(tempBool);
-  }
-  bool AddOneFunctionToDictionary
-  (const std::string& theFunctionName, const std::string& theFunctionArguments, const std::string& theFunctionDescription,
-   const std::string& theExample, char ExampleWeylLetter, int ExampleWeylRank, bool isVisible,
-   int (*inputFunctionAddress)(ParserNode& theNode, List<int>& theArguments, GlobalVariables& theGlobalVariables)
-)
-  { ParserFunction newFunction;
-    bool result=newFunction.MakeMe(theFunctionName, theFunctionArguments, theFunctionDescription, theExample, inputFunctionAddress);
-    if (!this->theFunctionList.AddOnTopNoRepetition(newFunction))
-      return false;
-    this->theFunctionList.LastObject()->exampleAmbientWeylLetter=ExampleWeylLetter;
-    this->theFunctionList.LastObject()->exampleAmbientWeylRank=ExampleWeylRank;
-    this->theFunctionList.LastObject()->flagVisible=isVisible;
-    return result;
-  }
-  void SubAby(int newToken);
-  std::string GetFunctionDescription();
-  bool StackTopIsASub(int& outputNumEntries);
-  bool StackTopIsAVector(int& outputDimension);
-  bool StackTopIsDelimiter1ECdotsCEDelimiter2(int& outputDimension, int LeftDelimiter, int RightDelimiter);
-  bool StackTopIsDelimiter1ECdotsCEDelimiter2EDelimiter3(int& outputDimension, int LeftDelimiter, int middleDelimiter, int rightDelimiter);
-  bool IsAWordSeparatingCharacter(char c);
-  bool LookUpInDictionaryAndAdd(std::string& input);
-  void TokenToStringStream(std::stringstream& out, int theToken);
-  void Clear();
-  Parser(){ this->flagFunctionListInitialized=false; this->flagDisplayIndicator=true;}
-};
-
 class PolynomialOverModule;
 
 template <class CoefficientType>
@@ -4633,6 +3958,7 @@ public:
   List<QuasiPolynomial> theQPsNonSubstituted;
   List<List<QuasiPolynomial> > theQPsSubstituted;
   List<QuasiPolynomial> theMultiplicities;
+  HomomorphismSemisimpleLieAlgebra theHmm;
 //  List<QuasiPolynomial> theMultiplicitiesExtremaCandidates;
   int UpperLimitChambersForDebugPurposes;
   int numNonZeroMults;
@@ -4648,15 +3974,14 @@ public:
   ConeComplex smallerAlgebraChamber;
   ConeComplex projectivizedChambeR;
   std::stringstream log;
-  Parser theParser;
   WeylGroup WeylSmaller;
   WeylGroup WeylLarger;
   int computationPhase;
   int NumProcessedConesParam;
   int NumProcessedExtremaEqualOne;
   std::string ComputeMultsLargerAlgebraHighestWeight
-  ( Vector<Rational> & highestWeightLargerAlgebraFundamentalCoords, Vector<Rational> & parabolicSel, Parser& theParser, GlobalVariables& theGlobalVariables
-   )
+  (Vector<Rational>& highestWeightLargerAlgebraFundamentalCoords,
+   Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
   ;
   std::string CheckMultiplicitiesVsOrbits
   (GlobalVariables& theGlobalVariables)
@@ -4665,7 +3990,7 @@ public:
   (GlobalVariables& theGlobalVariables)
   ;
   void IncrementComputation
-  (Vector<Rational> & parabolicSel, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& parabolicSel, GlobalVariables& theGlobalVariables)
   ;
   std::string PrepareReport(GlobalVariables& theGlobalVariables);
   GeneralizedVermaModuleCharacters()
@@ -4687,11 +4012,11 @@ public:
     Vector<Rational>  parSel; parSel=this->ParabolicLeviPartRootSpacesZeroStandsForSelected;
     if (theGlobalVariables!=0)
     { //this->theParser.theHmm.MakeG2InB3(this->theParser, *theGlobalVariables);
-      this->initFromHomomorphism(parSel, this->theParser.theHmm, *theGlobalVariables);
+//      this->initFromHomomorphism(parSel, this->theParser.theHmm, *theGlobalVariables);
     } else
     { GlobalVariables tempGlobalVars;
 //      this->theParser.theHmm.MakeG2InB3(this->theParser, tempGlobalVars);
-      this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
+  //    this->initFromHomomorphism(parSel, this->theParser.theHmm, tempGlobalVars);
     }
     XMLRoutines::ReadThroughFirstOpenTag(input, numReadWords, this->GetXMLClassName());
 
@@ -4722,13 +4047,13 @@ public:
 ;
   void SortMultiplicities(GlobalVariables& theGlobalVariables);
   void GetSubFromNonParamArray
-(Matrix<Rational> & output, Vector<Rational> & outputTranslation, Vectors<Rational>& NonParams, int numParams)
+(Matrix<Rational>& output, Vector<Rational>& outputTranslation, Vectors<Rational>& NonParams, int numParams)
   ;
   void initQPs
   (GlobalVariables& theGlobalVariables)
   ;
   void initFromHomomorphism
-  (Vector<Rational> & theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
+  (Vector<Rational>& theParabolicSel, HomomorphismSemisimpleLieAlgebra& input, GlobalVariables& theGlobalVariables)
   ;
   void TransformToWeylProjectiveStep1
   (GlobalVariables& theGlobalVariables)
@@ -4781,9 +4106,9 @@ public:
   { return input.HashFunction();
   }
 //  bool ProjectFromFacet(Facet& input);
-  bool ProjectFromFacetNormal(Vector<Rational> & input);
+  bool ProjectFromFacetNormal(Vector<Rational>& input);
   bool ContainsPoint(Vector<Rational> & thePoint);
-  void MakeFromNormalAndPoint(Vector<Rational> & inputPoint, Vector<Rational> &inputNormal);
+  void MakeFromNormalAndPoint(Vector<Rational>& inputPoint, Vector<Rational>& inputNormal);
   bool HasACommonPointWithPositiveTwoToTheNth_ant();
   void Assign(const affineHyperplane& right)
   { this->affinePoint=right.affinePoint;

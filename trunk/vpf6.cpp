@@ -1195,7 +1195,7 @@ void CommandList::ParseFillDictionary
 }
 
 int CommandList::GetOperationIndexFromControlIndex(int controlIndex)
-{ return this->operationS.GetIndex(this->controlSequences[controlIndex]);
+{ return this->operations.GetIndex(this->controlSequences[controlIndex]);
 }
 
 int CommandList::GetExpressionIndex()
@@ -3456,10 +3456,10 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
 
 
   this->controlSequences.Clear();
-  this->operationS.Clear();
+  this->operations.Clear();
   this->builtInTypes.Clear();
   this->FunctionHandlers.SetSize(0);
-  this->operationS.SetExpectedSize(300);
+  this->operations.SetExpectedSize(300);
   this->FunctionHandlers.SetExpectedSize(300);
   this->builtInTypes.SetHashSizE(30);
 
@@ -3501,9 +3501,6 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->AddOperationNoRepetitionAllowed("\\sqcup");
   this->AddOperationNoRepetitionAllowed("Error");
   this->AddOperationNoRepetitionAllowed("Sequence");
-  this->AddOperationNoRepetitionAllowed("MonomialCollection");
-  this->AddOperationNoRepetitionAllowed("MonomialPoly");
-  this->AddOperationNoRepetitionAllowed("Serialization");
 
   this->AddOperationBuiltInType("Rational");
   this->AddOperationBuiltInType("Double");
@@ -3531,7 +3528,7 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop(" ");//empty token must always come first!!!!
   this->controlSequences.AddOnTop("{{}}");
   this->controlSequences.AddOnTop("Variable");
-  this->controlSequences.AddOnTop(this->operationS);//all operations defined up to this point are also control sequences
+  this->controlSequences.AddOnTop(this->operations);//all operations defined up to this point are also control sequences
   this->controlSequences.AddOnTop("Expression");
   this->controlSequences.AddOnTop("Integer");
   this->controlSequences.AddOnTop(",");
@@ -3564,8 +3561,11 @@ void CommandList::init(GlobalVariables& inputGlobalVariables)
   this->controlSequences.AddOnTop("LogEvaluation");
   this->controlSequences.AddOnTop("LatexLink");
   this->controlSequences.AddOnTop("EndProgram");
-//  this->controlSequences.AddOnTop("c...c");
-//    this->thePropertyNames.AddOnTop("IsCommutative");
+//additional operations treated like regular expressions.
+  this->AddOperationNoRepetitionAllowed("MonomialCollection");
+  this->AddOperationNoRepetitionAllowed("MonomialPoly");
+  this->AddOperationNoRepetitionAllowed("Serialization");
+
   this->TotalNumPatternMatchedPerformed=0;
   this->initPredefinedStandardOperations();
   this->initPredefinedInnerFunctions();
@@ -3771,26 +3771,13 @@ bool CommandList::outerRightDistributeBracketIsOnTheRight
   return true;
 }
 
-bool CommandList::outerPlus
-(CommandList& theCommands, const Expression& input, Expression& output)
-{ MacroRegisterFunctionWithName("CommandList::outerPlus");
-  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
-    return false;
-  List<Expression>& summands= theCommands.buffer1;
-  summands.SetSize(0);
-  //bool needSimplification=
+bool CommandList::CollectSummands
+(CommandList& theCommands, const Expression& input, MonomialCollection<Expression, Rational>& outputSum)
+{ List<Expression> summands;
   theCommands.AppendSummandsReturnTrueIfOrderNonCanonical(input, summands);
-  MonomialCollection<Expression, Rational> theSum;
-//  Rational constTerm=0;
-//  bool foundConstTerm=false;
   Expression oneE; //used to record the constant term
   oneE.AssignValue<Rational>(1, theCommands);
-//  std::cout << "<b>" << theExpression.ToString() << "</b>";
-//  if (theExpression.ToString()=="(4)*(a) b+(a) b")
-//    std::cout << "problem!";
-//assert(false);
-//return false;
-  theSum.MakeZero();
+  outputSum.MakeZero();
   for (int i=0; i<summands.size; i++)
   { const Expression* currentSummandNoCoeff;
     currentSummandNoCoeff=&summands[i];
@@ -3800,19 +3787,22 @@ bool CommandList::outerPlus
         currentSummandNoCoeff=&((*currentSummandNoCoeff)[2]);
     } else if (currentSummandNoCoeff->IsOfType<Rational>(&theCoeff))
       currentSummandNoCoeff=&oneE;
-    theSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
+    outputSum.AddMonomial(*currentSummandNoCoeff, theCoeff);
   }
-//  std::cout << "<br>Collected sum: " << theSum.ToString();
-/*
-  std::cout << "<hr>summands: ";
-  for (unsigned i=0; i< summands.size(); i++)
-    std::cout << summands[i].ToString() << ", ";
-  std::cout << " const term: " << constTerm;
-    std::cout << "<br>coeff->summand_no_coeff: ";
-  for (int i=0; i< summandsNoCoeff.size(); i++)
-    std::cout << theCoeffs[i] << "->" << summandsNoCoeff[i].ToString() << ", ";
-  std::cout << " const term: " << constTerm;
-*/
+  return true;
+}
+
+bool CommandList::outerPlus
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ MacroRegisterFunctionWithName("CommandList::outerPlus");
+  if (!input.IsListNElementsStartingWithAtom(theCommands.opPlus()))
+    return false;
+  MonomialCollection<Expression, Rational> theSum;
+  theCommands.CollectSummands(theCommands, input, theSum);
+//  Rational constTerm=0;
+//  bool foundConstTerm=false;
+  Expression oneE; //used to record the constant term
+  oneE.AssignValue<Rational>(1, theCommands);
   if (theSum.IsEqualToZero())
     return output.AssignValue<Rational>(0, theCommands);
   List<Expression> summandsWithCoeff;
@@ -4555,8 +4545,8 @@ bool Expression::ToStringData
   bool result=false;
   bool isFinal=theFormat==0 ? false : theFormat->flagExpressionIsFinal;
   if (this->IsAtoM())
-  { if (this->theData< this->theBoss->operationS.size && this->theData>=0)
-      out << this->theBoss->operationS[this->theData];
+  { if (this->theData< this->theBoss->GetOperations().size && this->theData>=0)
+      out << this->theBoss->GetOperations()[this->theData];
     else
       out << "(unknown~ atom~ of~ value~ " << this->theData << ")";
     result=true;
@@ -4995,10 +4985,10 @@ bool Expression::IsOperation(std::string* outputWhichOperation)const
     return false;
   if (this->IsLisT())
     return false;
-  if (this->theData<0 || this->theData>=this->theBoss->operationS.size)
+  if (this->theData<0 || this->theData>=this->theBoss->GetOperations().size)
     return false;
   if (outputWhichOperation!=0)
-    *outputWhichOperation=this->theBoss->operationS[this->theData];
+    *outputWhichOperation=this->theBoss->GetOperations()[this->theData];
   return true;
 }
 
@@ -5035,7 +5025,7 @@ bool Expression::IsBuiltInType(std::string* outputWhichOperation)const
     return false;
   if (!(*this)[0].IsOperation(&tempS))
     return false;
-  if (this->theBoss->builtInTypes.Contains(tempS))
+  if (this->theBoss->GetBuiltInTypes().Contains(tempS))
   { if (outputWhichOperation!=0)
       *outputWhichOperation=tempS;
     return true;
@@ -5048,17 +5038,17 @@ bool Expression::IsBuiltInType(int* outputWhichType)const
   if (!this->IsBuiltInType(&theType))
     return false;
   if (outputWhichType!=0)
-    *outputWhichType=this->theBoss->operationS.GetIndex(theType);
+    *outputWhichType=this->theBoss->GetOperations().GetIndex(theType);
   return true;
 }
 
 int CommandList::AddOperationNoRepetitionOrReturnIndexFirst(const std::string& theOpName)
-{ int result=this->operationS.GetIndex(theOpName);
+{ int result=this->operations.GetIndex(theOpName);
   if (result==-1)
-  { this->operationS.AddOnTop(theOpName);
-    this->FunctionHandlers.SetSize(this->operationS.size);
+  { this->operations.AddOnTop(theOpName);
+    this->FunctionHandlers.SetSize(this->operations.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
-    result=this->operationS.size-1;
+    result=this->operations.size-1;
   }
   return result;
 }
@@ -5069,13 +5059,13 @@ void CommandList::AddOperationBuiltInType(const std::string& theOpName)
 }
 
 void CommandList::AddOperationNoRepetitionAllowed(const std::string& theOpName)
-{ if (this->operationS.Contains(theOpName))
+{ if (this->GetOperations().Contains(theOpName))
   { std::cout << "This is a programming error: operation " << theOpName << " already created. "
     << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     assert(false);
   }
-  this->operationS.AddOnTop(theOpName);
-  this->FunctionHandlers.SetSize(this->operationS.size);
+  this->operations.AddOnTop(theOpName);
+  this->FunctionHandlers.SetSize(this->operations.size);
   this->FunctionHandlers.LastObject()->SetSize(0);
 }
 
@@ -5084,11 +5074,11 @@ void CommandList::AddOperationBinaryInnerHandlerWithTypes
    int leftType, int rightType,
    const std::string& opDescription, const std::string& opExample,
    bool visible)
-{ int indexOp=this->operationS.GetIndex(theOpName);
+{ int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
-  { this->operationS.AddOnTop(theOpName);
-    indexOp=this->operationS.size-1;
-    this->FunctionHandlers.SetSize(this->operationS.size);
+  { this->operations.AddOnTop(theOpName);
+    indexOp=this->operations.size-1;
+    this->FunctionHandlers.SetSize(this->operations.size);
     this->FunctionHandlers.LastObject()->SetSize(0);
   }
   Function innerFunction
@@ -5106,11 +5096,12 @@ void CommandList::AddOperationHandler
    const std::string& opArgumentListIgnoredForTheTimeBeing,
    const std::string& opDescription, const std::string& opExample,
    bool isInner, bool visible)
-{ int indexOp=this->operationS.GetIndex(theOpName);
+{ int indexOp=this->operations.GetIndex(theOpName);
   if (indexOp==-1)
-  { this->operationS.AddOnTop(theOpName);
-    indexOp=this->operationS.size-1;
-    this->FunctionHandlers.SetSize(this->operationS.size);
+  { this->operations.AddOnTop(theOpName);
+    indexOp=this->operations.size-1;
+    this->FunctionHandlers.SetSize(this->operations.size);
+    this->FunctionHandlers.LastObject()->SetSize(0);
   }
   if (opArgumentListIgnoredForTheTimeBeing!="")
   { std::cout << "This section of code is not implemented yet. Crashing to let you know. "
@@ -5120,7 +5111,7 @@ void CommandList::AddOperationHandler
   Function theFun
   (handler, 0, opDescription, opExample, isInner, visible)
   ;
-  this->FunctionHandlers[indexOp].ReservE(5);
+  this->FunctionHandlers[indexOp].ReservE(15);
   this->FunctionHandlers[indexOp].AddOnTop(theFun);
 }
 
@@ -5130,12 +5121,12 @@ std::string CommandList::ElementToStringNonBoundVars()
   std::string closeTag1="</span>";
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  out << "<br>\n" << this->operationS.size << " operations and global variables " << " (= "
+  out << "<br>\n" << this->operations.size << " operations and global variables " << " (= "
   << this->NumPredefinedVars  << " predefined + "
-  << this->operationS.size-this->NumPredefinedVars
+  << this->operations.size-this->NumPredefinedVars
   << " user-defined). <br>Predefined: \n<br>\n";
-  for (int i=0; i<this->operationS.size; i++)
-  { out << openTag1 << this->operationS[i] << closeTag1;
+  for (int i=0; i<this->operations.size; i++)
+  { out << openTag1 << this->operations[i] << closeTag1;
     if (this->FunctionHandlers[i].size>0)
     { out << " [handled by: ";
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
@@ -5149,7 +5140,7 @@ std::string CommandList::ElementToStringNonBoundVars()
       }
       out << "]";
     }
-    if (i!=this->operationS.size-1)
+    if (i!=this->operations.size-1)
     { out << ", ";
       if (i==this->NumPredefinedVars-1 )
         out << "<br>user-defined:\n<br>\n";
@@ -5200,7 +5191,7 @@ std::string CommandList::ToStringFunctionHandlers()
   int numOpsHandled=0;
   int numHandlers=0;
   int numInnerHandlers=0;
-  for (int i=0; i<this->operationS.size; i++)
+  for (int i=0; i<this->operations.size; i++)
   { if (this->FunctionHandlers[i].size!=0)
       numOpsHandled++;
     numHandlers+=this->FunctionHandlers[i].size;
@@ -5215,13 +5206,13 @@ std::string CommandList::ToStringFunctionHandlers()
   bool found=false;
   std::string openTag2="<span style=\"color:#FF0000\">";
   std::string closeTag2="</span>";
-  for (int i=0; i<this->operationS.size; i++)
+  for (int i=0; i<this->operations.size; i++)
     if (this->FunctionHandlers[i].size>0)
       for (int j=0; j<this->FunctionHandlers[i].size; j++)
       { if (found)
           out << "<br>\n";
         found=true;
-        out << openTag2 << this->operationS[i] << closeTag2;
+        out << openTag2 << this->operations[i] << closeTag2;
         if (this->FunctionHandlers[i].size>1)
           out << " (" << j+1 << " out of " << this->FunctionHandlers[i].size << ")";
         out << "\n" << this->FunctionHandlers[i][j].GetString(*this);
@@ -5312,11 +5303,11 @@ std::string CommandList::ToString()
     if (i!=this->controlSequences.size)
       out << ", ";
   }
-  out << "<br>\n Variables (" << this->operationS.size << " = "
-  << this->NumPredefinedVars << " predefined + " << this->operationS.size-this->NumPredefinedVars << " user-defined):<br>\n";
-  for (int i=0; i<this->operationS.size; i++)
-  { out << "\n" << i << ": " << openTag1 << this->operationS[i] << closeTag1;
-    if(i!=this->operationS.size-1)
+  out << "<br>\n Variables (" << this->operations.size << " = "
+  << this->NumPredefinedVars << " predefined + " << this->operations.size-this->NumPredefinedVars << " user-defined):<br>\n";
+  for (int i=0; i<this->operations.size; i++)
+  { out << "\n" << i << ": " << openTag1 << this->operations[i] << closeTag1;
+    if(i!=this->operations.size-1)
       out << ", ";
   }
   out << this->ElementToStringNonBoundVars();
@@ -5563,7 +5554,7 @@ bool CommandList::ReplaceXXVXdotsXbyE_BOUND_XdotsX(int numXs)
   if (this->IsNonBoundVarInContext(theBoundVar))
   { std::stringstream out;
     out << "Syntax error. In the same syntactic scope, the string "
-    << this->operationS[theBoundVar]
+    << this->operations[theBoundVar]
     << " is first used to denote a non-bound variable"
     << " but later to denote a bound variable. This is not allowed. ";
     theElt.errorString=out.str();

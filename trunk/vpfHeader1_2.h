@@ -857,7 +857,7 @@ class DynkinSimpleType
   bool operator<(int otherRank)const;
 };
 
-class DynkinType : public MonomialCollection<DynkinSimpleType, int>
+class DynkinType: public MonomialCollection<DynkinSimpleType, Rational>
 {
 public:
   void GetLettersTypesMults
@@ -877,6 +877,15 @@ public:
   { std::stringstream out;
     out << *this;
     return out.str();
+  }
+  int GetMult(int SimpleTypeIdentifier)const
+  { int result;
+    if(!this->theCoeffs[SimpleTypeIdentifier].IsSmallInteger(&result))
+    { std::cout << "This is a programming error: Dynkin type has multiplicity that is not a small integer "
+      << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
+      assert(false);
+    }
+    return result;
   }
   Rational GetRank()const;
   void MakeSimpleType(char type, int rank, const Rational* inputFirstCoRootSqLength=0);

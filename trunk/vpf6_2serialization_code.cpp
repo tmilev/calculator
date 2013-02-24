@@ -3,6 +3,62 @@ static ProjectInformationInstance ProjectInfoVpf5_1cpp
 (__FILE__, "C++ object to calculator expression serialization/deserialization.");
 
 template <>
+bool Serialization::DeSerializeMonGetContext<ChevalleyGenerator>
+(CommandList& theCommands, const Expression& input, Expression& outputContext)
+{ if (!input.IsSequenceNElementS(3))
+    return false;
+  const Expression& theArguments=input[3];
+  if (!theArguments.IsSequenceNElementS(2))
+    return false;
+  DynkinType theType;
+  if (!Serialization::DeSerializeMonCollection(theCommands, theArguments[1], theType))
+    return false;
+  SemisimpleLieAlgebra tempSubalgebra;
+  tempSubalgebra.theWeyl.MakeFromDynkinType(theType);
+  int algebraIdentifier=
+  theCommands.theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempSubalgebra);
+  outputContext.ContextMakeContextSSLieAlgebrA(algebraIdentifier, theCommands);
+  return true;
+}
+
+template <>
+bool Serialization::DeSerializeMonGetContext<DynkinSimpleType>
+(CommandList& theCommands, const Expression& input, Expression& outputContext)
+{ outputContext.MakeEmptyContext(theCommands);
+  return true;
+}
+
+template <>
+bool Serialization::DeSerializeMon
+(CommandList& theCommands, const Expression& input, const Expression& inputContext,
+ ChevalleyGenerator& outputMon)
+{ int AlgIndex=inputContext.ContextGetIndexAmbientSSalg();
+  if (AlgIndex==-1)
+    return false;
+  if (!input.IsSequenceNElementS(3))
+    return false;
+  const Expression& theArguments=input[3];
+  if (!theArguments.IsSequenceNElementS(2))
+    return false;
+  const Expression& generatorIndexE=theArguments[2];
+  int generatorIndex;
+  if (!generatorIndexE.IsSmallInteger(&generatorIndex))
+    return false;
+  std::string theOperation;
+  if (!input[2].IsOperation(&theOperation))
+    return false;
+  outputMon.owneR=&theCommands.theObjectContainer.theLieAlgebras[AlgIndex];
+  if (theOperation=="getCartanGenerator")
+    generatorIndex+=outputMon.owneR->GetNumPosRoots();
+  else if (theOperation=="getChevalleyGenerator")
+    generatorIndex=outputMon.owneR->GetGeneratorFromDisplayIndex(generatorIndex);
+  if (generatorIndex<0 || generatorIndex>=outputMon.owneR->GetNumGenerators())
+    return false;
+  outputMon.theGeneratorIndex=generatorIndex;
+  return true;
+}
+
+template <>
 bool Serialization::SerializeMon<ChevalleyGenerator>
 (CommandList& theCommands, const ChevalleyGenerator& input, const Expression& theContext,
  Expression& output, bool& isNonConst)
@@ -58,13 +114,94 @@ bool Serialization::SerializeMon<MonomialP>
 }
 
 template <>
+bool Serialization::DeSerializeMon<DynkinSimpleType>
+(CommandList& theCommands, const Expression& input, const Expression& inputContext,
+ DynkinSimpleType& outputMon)
+{ MacroRegisterFunctionWithName("Serialization::DeSerializeMon_DynkinSimpleType");
+  if (input.children.size!=2)
+  { theCommands.Comments
+    << "<hr>Error while extracting Dynkin simple type: the monomial "
+    << input.ToString() << " appears not to be a Dynkin simple type<hr>";
+    return false;
+  }
+  Expression rankE=input[1];
+  Expression typeLetter=input[0];
+  Rational firstCoRootSquaredLength=2;
+  bool foundLengthFromExpression=false;
+  if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
+  { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
+    { theCommands.Comments << "<hr>Couldn't extract first co-root length from "
+      << input.ToString() << "<hr>";
+      return false;
+    }
+    if (firstCoRootSquaredLength<=0)
+    { theCommands.Comments
+      << "Couldn't extract positive rational first co-root length from "
+      << input.ToString();
+      return false;
+    }
+    typeLetter.AssignMeMyChild(1);
+    foundLengthFromExpression=true;
+  }
+  std::string theTypeName;
+  if (!typeLetter.IsOperation(&theTypeName))
+  { theCommands.Comments << "I couldn't extract a type letter from "
+    << input.ToString();
+    return false;
+  }
+  if (theTypeName.size()!=1)
+  { theCommands.Comments << "<hr>Error while extracting Dynkin simple type:"
+    << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G."
+    << "Instead, it is " << theTypeName + ". Error encountered while processing "
+    << input.ToString();
+    return false;
+  }
+  char theWeylLetter=theTypeName[0];
+  if (theWeylLetter=='a') theWeylLetter='A';
+  if (theWeylLetter=='b') theWeylLetter='B';
+  if (theWeylLetter=='c') theWeylLetter='C';
+  if (theWeylLetter=='d') theWeylLetter='D';
+  if (theWeylLetter=='e') theWeylLetter='E';
+  if (theWeylLetter=='f') theWeylLetter='F';
+  if (theWeylLetter=='g') theWeylLetter='G';
+  if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' ||
+        theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
+  { theCommands.Comments << "The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; "
+    << "error while processing " << input.ToString();
+    return false;
+  }
+  int theRank;
+  if (!rankE.IsSmallInteger(&theRank))
+  { theCommands.Comments << "I wasn't able to extract rank from "
+    << input.ToString();
+    return false;
+  }
+  if (theRank<1 || theRank>20)
+  { theCommands.Comments << "<hr>The rank of a simple Lie algebra must be between 1 and 20; error while processing "
+    << input.ToString();
+    return false;
+  }
+  if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
+  { theCommands.Comments << "<hr>Type E must have rank 6,7 or 8 ";
+    return false;
+  }
+  outputMon.theLetter=theWeylLetter;
+  outputMon.theRank= theRank;
+  if (!foundLengthFromExpression)
+    if (theWeylLetter=='F')
+      firstCoRootSquaredLength=1;
+  outputMon.lengthFirstCoRootSquared= firstCoRootSquaredLength;
+  return true;
+}
+
+template <>
 bool Serialization::SerializeMon<DynkinSimpleType>
 (CommandList& theCommands, const DynkinSimpleType& input, const Expression& theContext, Expression& output, bool& isNonConst)
 { MacroRegisterFunctionWithName("Serialization::DynkinSimpleType");
   Expression letterE, rankE, letterAndIndexE, indexE;
   std::string letterS;
   letterS=input.theLetter;
-  letterE.MakeAtom(theCommands.operationS.AddNoRepetitionOrReturnIndexFirst(letterS), theCommands);
+  letterE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(letterS), theCommands);
   indexE.AssignValue(input.lengthFirstCoRootSquared, theCommands);
   rankE.AssignValue(input.theRank, theCommands);
   letterAndIndexE.MakeXOX(theCommands, theCommands.opThePower(), letterE, indexE);
@@ -216,7 +353,6 @@ bool CommandList::innerSSLieAlgebra
   DynkinType theDynkinType;
   DynkinSimpleType simpleComponent;
   theDynkinType.MakeZero();
-  char theWeylLetter='X';
   for (int i=0; i<theType.size; i++)
   { MonomialP& currentMon=theType[i];
     int variableIndex;
@@ -224,63 +360,8 @@ bool CommandList::innerSSLieAlgebra
       return output.SetError
       ("Failed to extract type from monomial "+ currentMon.ToString(&theFormat), theCommands);
     Expression typEE= theContext.ContextGetContextVariable(variableIndex);
-    if (typEE.children.size!=2)
-      return output.SetError
-      ("The monomial "+ currentMon.ToString(&theFormat)+
-       " appears not to be a Dynkin simple type ", theCommands);
-    Expression rankE=typEE[1];
-    Expression typeLetter=typEE[0];
-    Rational firstCoRootSquaredLength=2;
-    bool foundLengthFromExpression=false;
-    if (typeLetter.IsListStartingWithAtom(theCommands.opThePower()))
-    { if (!typeLetter[2].IsOfType<Rational>(&firstCoRootSquaredLength))
-        return output.SetError
-        ("Couldn't extract first co-root length from " + currentMon.ToString(&theFormat), theCommands);
-      if (firstCoRootSquaredLength<=0)
-        return output.SetError
-        ("Couldn't extract positive rational first co-root length from " + currentMon.ToString(&theFormat), theCommands);
-      typeLetter.AssignMeMyChild(1);
-      foundLengthFromExpression=true;
-    }
-    std::string theTypeName;
-    if (!typeLetter.IsOperation(&theTypeName))
-      return output.SetError
-      ("I couldn't extract a type letter from "+ currentMon.ToString(&theFormat), theCommands);
-    if (theTypeName.size()!=1)
-      return output.SetError
-      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G.\
-        Instead, it is "+ theTypeName + "; error while processing "
-       + currentMon.ToString(&theFormat), theCommands);
-    theWeylLetter=theTypeName[0];
-    if (theWeylLetter=='a') theWeylLetter='A';
-    if (theWeylLetter=='b') theWeylLetter='B';
-    if (theWeylLetter=='c') theWeylLetter='C';
-    if (theWeylLetter=='d') theWeylLetter='D';
-    if (theWeylLetter=='e') theWeylLetter='E';
-    if (theWeylLetter=='f') theWeylLetter='F';
-    if (theWeylLetter=='g') theWeylLetter='G';
-    if (!(theWeylLetter=='A' || theWeylLetter=='B' || theWeylLetter=='C' ||
-          theWeylLetter=='D' || theWeylLetter=='E' || theWeylLetter=='F' || theWeylLetter=='G'))
-      return output.SetError
-      ("The type of a simple Lie algebra must be the letter A, B, C, D, E, F or G; \
-       error while processing "
-       + currentMon.ToString(&theFormat), theCommands);
-    int theRank;
-    if (!rankE.IsSmallInteger(&theRank))
-      return output.SetError
-      ("I wasn't able to extract rank from " + currentMon.ToString(&theFormat), theCommands);
-    if (theRank<1 || theRank>20)
-      return output.SetError
-      ("The rank of a simple Lie algebra must be between 1 and 20; error while processing "
-       + currentMon.ToString(&theFormat), theCommands);
-    if (theWeylLetter=='E' &&(theRank>8 || theRank<3))
-      return output.SetError("Type E must have rank 6,7 or 8 ", theCommands);
-    simpleComponent.theLetter=theWeylLetter;
-    simpleComponent.theRank= theRank;
-    if (!foundLengthFromExpression)
-      if (theWeylLetter=='F')
-        firstCoRootSquaredLength=1;
-    simpleComponent.lengthFirstCoRootSquared= firstCoRootSquaredLength;
+    if (!Serialization::DeSerializeMon(theCommands, typEE, theContext, simpleComponent))
+      return false;
     int theMultiplicity=-1;
     if (!theType.theCoeffs[i].IsSmallInteger(&theMultiplicity))
       theMultiplicity=-1;
@@ -291,17 +372,17 @@ bool CommandList::innerSSLieAlgebra
       return output.SetError(out.str(), theCommands);
     }
     theDynkinType.AddMonomial(simpleComponent, theMultiplicity);
-  }
-  if (theDynkinType.GetRank()>20)
-  { std::stringstream out;
-    out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
-    << " If you would like to relax this limitation edit file " << __FILE__ << " line "
-    << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
-    << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
-    << " You have been warned. "
-    << " Alternatively, you may want to implement a sparse structure constant table "
-    << "(write me an email if you want to do that, I will help you). ";
-    return output.SetError(out.str(), theCommands);
+    if (theDynkinType.GetRank()>20)
+    { std::stringstream out;
+      out << "I have been instructed to allow semisimple Lie algebras of rank 20 maximum. "
+      << " If you would like to relax this limitation edit file " << __FILE__ << " line "
+      << __LINE__ << ". Note that the Chevalley constant computation reserves a dim(g)*dim(g)"
+      << " table of RAM memory, which means the RAM memory rises with the 4^th power of dim(g). "
+      << " You have been warned. "
+      << " Alternatively, you may want to implement a sparse structure constant table "
+      << "(write me an email if you want to do that, I will help you). ";
+      return output.SetError(out.str(), theCommands);
+    }
   }
   tempSSalgebra.theWeyl.MakeFromDynkinType(theDynkinType);
   int indexInOwner=theCommands.theObjectContainer.theLieAlgebras.GetIndex(tempSSalgebra);
@@ -339,7 +420,7 @@ void Expression::MakeSerialization
   Expression tempE;
   tempE.MakeAtom(theCommands.opSerialization(), theCommands);
   this->AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.opSSLieAlg(), theCommands);
+  tempE.MakeAtom(theCommands.AddOperationNoRepetitionOrReturnIndexFirst(secondEntry), theCommands);
   this->AddChildOnTop(tempE);
 }
 
@@ -392,6 +473,35 @@ bool Serialization::innerSerializeFromObject
   return true;
 }
 
+bool Serialization::innerDeSerializeFromObject
+(CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
+{ if (!input.IsSequenceNElementS(2))
+    return false;
+  const Expression& theF=input[1];
+  const Expression& theE=input[2];
+  ElementSemisimpleLieAlgebra<Rational> eltF, eltE;
+  if (!Serialization::DeSerializeMonCollection(theCommands, theF, eltF))
+    return false;
+  if (!Serialization::DeSerializeMonCollection(theCommands, theE, eltE))
+    return false;
+  if (eltE.IsEqualToZero() || eltF.IsEqualToZero())
+    return false;
+  if (eltE.owneR!=eltF.owneR)
+    return false;
+  output.theE=eltE;
+  output.theF=eltF;
+  output.owneR=eltE.owneR;
+  return true;
+}
+
+bool Serialization::innerLoadSltwoSubalgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+{ slTwoSubalgebra tempSL2;
+  if (!Serialization::innerDeSerializeFromObject(theCommands, input, tempSL2))
+    return false;
+  return output.AssignValue(tempSL2.ToString(), theCommands);
+}
+
 bool Serialization::innerSerializeFromObject
 (CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
 { MacroRegisterFunctionWithName("Serialization::innerSerializeFromObject");
@@ -422,6 +532,12 @@ bool Serialization::innerSerializeFromObject
   output.AddChildOnTop(tempE);
   output.format=output.formatDefault;
   return true;
+}
+
+bool Serialization::innerLoadSltwoSubalgebras
+(CommandList& theCommands, const Expression& input, Expression& output)
+{
+  return false;
 }
 
 bool Serialization::innerLoadSemisimpleSubalgebras
@@ -510,7 +626,7 @@ bool Serialization::innerSerializePoly
   output.reset(theCommands);
   tempE.MakeAtom(theCommands.opSerialization(), theCommands);
   output.AddChildOnTop(tempE);
-  tempE.MakeAtom(theCommands.operationS.GetIndexIMustContainTheObject("Polynomial"), theCommands);
+  tempE.MakeAtom(theCommands.GetOperations().GetIndexIMustContainTheObject("Polynomial"), theCommands);
   output.AddChildOnTop(tempE);
   output.AddChildOnTop(resultE);
   output.format=output.formatDefault;

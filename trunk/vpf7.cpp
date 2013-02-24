@@ -169,10 +169,6 @@ void ReflectionSubgroupWeylGroup::FindQuotientRepresentatives(int UpperLimit)
   }
 }
 
-SemisimpleLieAlgebra& ParserNode::GetContextLieAlgebra()
-{ return this->owner->theAlgebras[this->IndexContextLieAlgebra];
-}
-
 bool partFractions::ArgumentsAllowed
   (Vectors<Rational>& theArguments, std::string& outputWhatWentWrong, GlobalVariables& theGlobalVariables)
 { if (theArguments.size<1)
@@ -804,26 +800,6 @@ bool ElementUniversalEnveloping<CoefficientType>::ApplyMinusTransposeAutoOnMe()
   return true;
 }
 
-int ParserNode::EvaluateMinusTransposeAuto
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ ElementUniversalEnveloping<Polynomial<Rational> >& theElt= theNode.UEElement.GetElement();
-  theElt=theNode.owner->TheObjects[theArgumentList[0]].UEElement.GetElement();
-  if (!theElt.ApplyMinusTransposeAutoOnMe())
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  theNode.ExpressionType=theNode.typeUEelement;
-  return theNode.errorNoError;
-}
-
-int ParserNode::EvaluateTransposeAntiAuto
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ ElementUniversalEnveloping<Polynomial<Rational> >& theElt= theNode.UEElement.GetElement();
-  theElt=theNode.owner->TheObjects[theArgumentList[0]].UEElement.GetElement();
-  if (!theElt.ApplyTransposeAntiAutoOnMe())
-    return theNode.SetError(theNode.errorImplicitRequirementNotSatisfied);
-  theNode.ExpressionType=theNode.typeUEelement;
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   (const ElementUniversalEnveloping<CoefficientType>& right, CoefficientType& output,
@@ -889,35 +865,6 @@ bool ElementUniversalEnveloping<CoefficientType>::HWMTAbilinearForm
   return true;
 }
 
-int ParserNode::EvaluateIsInProperSubmoduleVermaModule
-  (ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> weight;
-  ParserNode& ueNode=theNode.owner->TheObjects[theArgumentList[0]];
-  SemisimpleLieAlgebra& theSSalgebra=theNode.owner->theHmm.theRange();
-  if (weight.size!=theSSalgebra.GetRank())
-    return theNode.SetError(theNode.errorDimensionProblem);
-  ElementUniversalEnveloping<Polynomial<Rational> >& theUE=ueNode.UEElement.GetElement();
-  Polynomial<Rational> theRingZero, theRingUnit;
-  theNode.impliedNumVars=ueNode.impliedNumVars;
-  theRingZero.MakeZero();
-  theRingUnit.MakeOne();
-  Vector<Polynomial<Rational> > theHW;
-  WeylGroup& theWeyl=theSSalgebra.theWeyl;
-  weight=theWeyl.GetDualCoordinatesFromFundamental(weight);
-  std::stringstream out;
-  theGlobalVariables.MaxComputationTimeSecondsNonPositiveMeansNoLimit=30;
-  out << "Highest weight in dual coords: " << weight.ToString() << "<br>";
-  theHW.SetSize(weight.size);
-  for (int i=0; i<weight.size; i++)
-    theHW[i].MakeConsT( weight[i]);
-  theUE.GetOwner().OrderSSalgebraForHWbfComputation();
-  out << theUE.IsInProperSubmodule(&theHW, theGlobalVariables, theRingUnit, theRingZero);
-  theUE.GetOwner().OrderSSLieAlgebraStandard();
-  theNode.ExpressionType=theNode.typeString;
-  theNode.outputString=out.str();
-  return theNode.errorNoError;
-}
-
 template <class CoefficientType>
 std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
 (const Vector<CoefficientType>* subHiGoesToIthElement, GlobalVariables& theGlobalVariables, const CoefficientType& theRingUnit,
@@ -944,29 +891,6 @@ std::string ElementUniversalEnveloping<CoefficientType>::IsInProperSubmodule
     out << "<br>" << current.ToString(&theGlobalVariables.theDefaultFormat);
   }
   return out.str();
-}
-
-int ParserNode::EvaluateSplitCharOverLeviParabolic
-(ParserNode& theNode, List<int>& theArgumentList, GlobalVariables& theGlobalVariables)
-{ Vector<Rational> parSel;
-  ParserNode& charNode=theNode.owner->TheObjects[theArgumentList[0]];
-//  WeylGroup& theWeyl= theNode.owner->theHmm.theRange.theWeyl;
-  int theDim=theNode.owner->theHmm.theRange().GetRank();
-  if (parSel.size!=theDim)
-    return theNode.SetError(theNode.errorDimensionProblem);
-  std::stringstream out;
-  out << "Parabolic subalgebra selection: " << parSel.ToString() << ".";
-  charSSAlgMod<Rational>& theChar=charNode.theChar.GetElement();
-  std::string report;
-  charSSAlgMod<Rational> tempChar;
-  ReflectionSubgroupWeylGroup subWeyl;
-  Vector<Rational> emptySel;
-  emptySel.MakeZero(theDim);
-  theChar.SplitOverLeviMonsEncodeHIGHESTWeight(&report,  tempChar, parSel, emptySel, subWeyl, theGlobalVariables);
-  out << report;
-  theNode.outputString=out.str();
-  theNode.ExpressionType=theNode.typeString;
-  return theNode.errorNoError;
 }
 
 bool ReflectionSubgroupWeylGroup::DrawContour

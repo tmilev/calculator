@@ -12,8 +12,8 @@
 //   are allowed to have different bit representations in RAM memory.
 //2. Mathematically equal objects must have their object::HashFunction return identical
 //   values for mathematically identical objects, even if they are bitwise different.
-//3. Mathematical object representing 0 in an abelian group
-//   must have that their hash function return 0.
+//3. Mathematical objects representing 0 in an abelian group
+//   must have their hash function return 0.
 //
 //In particular, zero rational numbers, zero polynomials/monomial collections/elements
 //of semisimple Lie algebras, etc. must have their hash functions return 0.

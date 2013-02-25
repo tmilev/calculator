@@ -129,6 +129,7 @@ class Expression
   void reset(CommandList& newBoss, int newNumChildren=0)
   { this->theBoss=&newBoss;
     this->theData=0;
+    this->format=this->formatDefault;
     if (newNumChildren<0)
       newNumChildren=0;
     this->children.SetSize(newNumChildren);
@@ -1324,7 +1325,7 @@ public:
   static bool innerDeterminant
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
-  static bool fInvertMatrix
+  static bool innerInvertMatrix
   (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerDrawPolarRfunctionTheta
@@ -1387,9 +1388,6 @@ public:
 (CommandList& theCommands, const Expression& input, Expression& output,
   Vectors<RationalFunctionOld>& outputHWs, branchingData& theG2B3Data, Expression& theContext
   )
-  ;
-  static bool innerPolynomial
-  (CommandList& theCommands, const Expression& input, Expression& output)
   ;
   static bool innerRationalFunction
   (CommandList& theCommands, const Expression& input, Expression& output)
@@ -1591,12 +1589,6 @@ static bool innerDrawRootSystem
   { return theCommands.innerRootSAsAndSltwos
     (theCommands, input, output, true);
   }
-  static bool innerSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
-  static bool innerDeSerialize
-  (CommandList& theCommands, const Expression& input, Expression& output)
-;
   static bool innerCoxeterGroup
   (CommandList& theCommands, const Expression& input, Expression& output)
 ;
@@ -1773,31 +1765,43 @@ static bool innerMultiplyAnyByEltTensor
 class Serialization
 {
 public:
-static bool innerSerializePoly
+  static bool innerStore
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerLoad
+  (CommandList& theCommands, const Expression& input, Expression& output)
+;
+  static bool innerPolynomial
+  (CommandList& theCommands, const Expression& input, Expression& output)
+  ;
+static bool innerStoreUE
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerSerializeSemisimpleLieAlgebra
+static bool innerStorePoly
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
-static bool innerSerializeFromObject
+static bool innerStoreSemisimpleLieAlgebra
+(CommandList& theCommands, const Expression& input, Expression& output)
+;
+static bool innerStoreFromObject
 (CommandList& theCommands, const SemisimpleLieAlgebra& input, Expression& output)
 ;
-static bool innerSerializeFromObject
+static bool innerStoreFromObject
 (CommandList& theCommands, const SltwoSubalgebras& input, Expression& output)
 ;
-static bool innerSerializeFromObject
+static bool innerStoreFromObject
 (CommandList& theCommands, const slTwoSubalgebra& input, Expression& output)
 ;
-static bool innerSerializeFromObject
+static bool innerStoreFromObject
 (CommandList& theCommands, const SemisimpleSubalgebras& input, Expression& output)
 ;
-static bool innerSerializeFromObject
+static bool innerStoreFromObject
 (CommandList& theCommands, const ElementSemisimpleLieAlgebra<Rational>& input, Expression& output)
 ;
-static bool innerDeSerializeFromObject
+static bool innerLoadFromObject
 (CommandList& theCommands, const Expression& input, slTwoSubalgebra& output)
 ;
-static bool innerSerializeSemisimpleSubalgebras
+static bool innerStoreSemisimpleSubalgebras
 (CommandList& theCommands, const Expression& input, Expression& output)
 ;
 static bool innerLoadSltwoSubalgebra

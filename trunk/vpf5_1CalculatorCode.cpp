@@ -14,7 +14,7 @@ bool CommandList::innerGCDOrLCM
   std::cout << "<br>Time elapsed before calling innerGCDOrLCM: "
   << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
   std::cout << "<br>Input lispified: " << input.Lispify();
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, theCommands.innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 2, Serialization::innerPolynomial))
     return output.SetError("Failed to extract a list of 2 polynomials. ", theCommands);
   std::cout << "<br>Time elapsed after extracting two polynomials in innerGCDOrLCM: "
   << theCommands.theGlobalVariableS->GetElapsedSeconds() << " seconds.";
@@ -33,7 +33,7 @@ bool CommandList::innerPolynomialDivisionRemainder
 { MacroRegisterFunctionWithName("CommandList::fPolynomialDivisionQuotientRemainder");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
   if (thePolys.size<2)
     return output.SetError("Expression takes two or more arguments", theCommands);
@@ -58,7 +58,7 @@ bool CommandList::innerPolynomialDivisionVerbose
 { MacroRegisterFunctionWithName("CommandList::innerPolynomialDivisionVerbose");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
   if (thePolys.size<2)
     return output.SetError("Expression takes two or more arguments", theCommands);
@@ -82,7 +82,7 @@ bool CommandList::fSolveSeparableBilinearSystem
 { MacroRegisterFunctionWithName("CommandList::fSolveSeparableBilinearSystem");
   Vector<Polynomial<Rational> > thePolys;
   Expression theContext(theCommands);
-  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, theCommands.innerPolynomial))
+  if (!theCommands.GetVectorFromFunctionArguments(input, thePolys, &theContext, 0, Serialization::innerPolynomial))
     return output.SetError("Failed to extract list of polynomials. ", theCommands);
   int numVars=theContext.GetNumContextVariables();
   HashedList<MonomialP> theMonsInPlay;
@@ -240,11 +240,11 @@ bool CommandList::fGroebner
   output=input;
   output.children.RemoveIndexShiftDown(1);
   if (!theCommands.GetVectorFromFunctionArguments<Polynomial<Rational> >
-      (output, inputVector, &theContext, -1, theCommands.innerPolynomial))
+      (output, inputVector, &theContext, -1, Serialization::innerPolynomial))
     return output.SetError("Failed to extract polynomial expressions", theCommands);
   //theContext.VariableImages.QuickSortAscending();
   //theCommands.GetVector<Polynomial<Rational> >
-  //(output, inputVector, &theContext, -1, theCommands.innerPolynomial);
+  //(output, inputVector, &theContext, -1, Serialization::innerPolynomial);
 
   for (int i=0; i<inputVector.size; i++)
     inputVector[i].ScaleToIntegralMinHeightFirstCoeffPosReturnsWhatIWasMultipliedBy();

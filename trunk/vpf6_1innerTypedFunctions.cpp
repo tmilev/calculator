@@ -234,10 +234,10 @@ bool CommandList::innerMultiplyRatOrPolyByRatOrPoly
   if (!output.MergeContexts(output, rightCopy))
     return false;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerPolynomial, output, left, &errorString))
+      (Serialization::innerPolynomial, output, left, &errorString))
     return false;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerPolynomial, rightCopy, right, &errorString))
+      (Serialization::innerPolynomial, rightCopy, right, &errorString))
     return false;
   Polynomial<Rational> result=*left;
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();
@@ -394,10 +394,10 @@ bool CommandList::innerAddRatOrPolyToRatOrPoly
   if (!output.MergeContexts(output, rightCopy))
     return false;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerPolynomial, output, left, &errorString))
+      (Serialization::innerPolynomial, output, left, &errorString))
     return false;
   if (!theCommands.CallConversionFunctionReturnsNonConstUseCarefully
-      (theCommands.innerPolynomial, rightCopy, right, &errorString))
+      (Serialization::innerPolynomial, rightCopy, right, &errorString))
     return false;
   Polynomial<Rational> result=*left;
 //  std::cout << "dividing " << result.ToString() << " by " << rightCopy.GetValuE<RationalFunctionOld>().ToString();

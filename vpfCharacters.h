@@ -6,6 +6,7 @@ static ProjectInformationInstance ProjectInfoVpfCharactersHEader
 (__FILE__, "Header file, experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 class CoxeterGroup;
+class CoxeterElement;
 
 template<typename coefficient>
 class Character{
@@ -80,12 +81,14 @@ class CoxeterGroup
     void ComputeRhoOrbit();
     Matrix<Rational> TodorsVectorToInvMatrix(const Vector<Rational> &v) const;
     Matrix<Rational> TodorsVectorToMatrix(const Vector<Rational> &v) const;
+    CoxeterElement GetCoxeterElement(int i);
     // note: the list is backwards
     List<int> DecomposeTodorsVector(const Vector<Rational> &v) const;
     Vector<Rational> ComposeTodorsVector(const List<int> &l) const;
     Vector<Rational> ApplyList(const List<int> &l, const Vector<Rational> &v) const;
     Vector<Rational> SimpleConjugation(int i, const Vector<Rational> &v) const;
     int MultiplyElements(int i, int j) const;
+    int operator()(int i, int j) const;
     void ComputeConjugacyClasses();
     void ComputeSquares();
     void ComputeInitialCharacters();

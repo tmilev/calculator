@@ -2491,7 +2491,7 @@ public:
 };
 
 template <class CoefficientType>
-class ElementUniversalEnveloping: public ElementAssociativeAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
+class ElementUniversalEnveloping: public ElementMonomialAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
 {
 private:
   void CleanUpZeroCoeff();
@@ -3177,7 +3177,7 @@ class MonomialMatrix
 };
 
 template <class CoefficientType>
-class MatrixTensor: public ElementAssociativeAlgebra<MonomialMatrix, CoefficientType >
+class MatrixTensor: public ElementMonomialAlgebra<MonomialMatrix, CoefficientType >
 {
 public:
   void MakeIdSpecial()
@@ -5877,9 +5877,9 @@ void ElementUniversalEnveloping<CoefficientType>::MultiplyBy
 template <class CoefficientType>
 void ElementUniversalEnveloping<CoefficientType>::operator*=
 (const ElementUniversalEnveloping& standsOnTheRight)
-{ this->::ElementAssociativeAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
+{ this->::ElementMonomialAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>
   ::operator*=
-  ( (ElementAssociativeAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>)
+  ( (ElementMonomialAlgebra<MonomialUniversalEnveloping<CoefficientType>, CoefficientType>)
    standsOnTheRight);
 }
 

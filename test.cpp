@@ -6,7 +6,53 @@
 #include "testlib.h"
 #include <iostream>
 
+/*
+template <typename vector>
+class LinearSpace
+{ public:
+  List<vector> basis;
 
+  void AddToSpace(const vector &v);
+  int dim() const;
+  bool Contains(const vector &v) const;
+};
+
+void AddToSpace(const vector &v)
+{
+}
+*/
+
+ElementMonomialAlgebra<CoxeterElement, Rational> FromCharacter(const Character<Rational>& X)
+{ ElementMonomialAlgebra<CoxeterElement, Rational> out;
+  for(int i=0; i<X.G->ccCount; i++)
+  { for(int j=0; j<X.G->ccSizes[i]; j++)
+    { CoxeterElement tmp = X.G->GetCoxeterElement(X.G->conjugacyClasses[i][j]);
+      out.AddMonomial(tmp,X.data[i]);
+    }
+  }
+  return out;
+}
+
+
+
+// G_ij^k
+// (G_i)j = k
+//
+
+template <typename coefficient>
+Matrix<coefficient> GetMatrix(const Character<coefficient>& X)
+{ Matrix<coefficient> M;
+  M.MakeZeroMatrix(X.G->N);
+  for(int i1=0; i1<X.G->ccCount; i1++)
+  { for(int i2=0; i2<X.G->ccSizes[i1]; i2++)
+    { int i=X.G->conjugacyClasses[i1][i2];
+      for(int j=0; j<X.G->N; j++)
+      { M.elements[j][X.G->MultiplyElements(i,j)] = X.data[i1];
+      }
+    }
+  }
+  return M;
+}
 
 int skipcount(int n, const List<int>& l)
 { int o = 0;
@@ -92,17 +138,43 @@ List<Element> charpoly(const Matrix<Element>& M)
     return acc;
 }*/
 
-int chartable[10][10] = {
-{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-{1, -1, -1, 1, 1, -1, 1, 1, -1, -1},
-{3, 1, 1, -1, 1, 0, 0, -1, -1, -3},
-{3, -1, -1, -1, 1, 0, 0, -1, 1, 3},
-{2, 0, -2, 2, 0, 1, -1, 0, 0, -2},
-{2, 0, 2, 2, 0, -1, -1, 0, 0, 2},
-{1, 1, -1, 1, -1, -1, 1, -1, 1, -1},
-{1, -1, 1, 1, -1, 1, 1, -1, -1, 1},
-{3, -1, 1, -1, -1, 0, 0, 1, 1, -3},
-{3, 1, -1, -1, -1, 0, 0, 1, -1, 3}};
+int chartable[10][10] =
+{
+{1,  1,  1,  1,  1,  1,  1,  1,  1,  1},
+{1, -1, -1,  1,  1, -1,  1,  1, -1, -1},
+{3,  1,  1, -1,  1,  0,  0, -1, -1, -3},
+{3, -1, -1, -1,  1,  0,  0, -1,  1,  3},
+{2,  0, -2,  0,  0,  1, -1,  2,  0, -2},
+{2,  0,  2,  0,  0, -1, -1,  2,  0,  2},
+{1,  1, -1, -1, -1, -1,  1,  1,  1, -1},
+{1, -1,  1, -1, -1,  1,  1,  1, -1,  1},
+{3, -1,  1,  1, -1,  0,  0, -1,  1, -3},
+{3,  1, -1,  1, -1,  0,  0, -1, -1,  3}
+};
+
+bool VerifyChartable(const CoxeterGroup &G, bool printresults = false){
+  bool okay = true;
+  if(printresults)
+    std::cout << "one" << '\n';
+  for(int i=0; i<G.ccCount; i++)
+  { if(printresults)
+      std::cout << G.characterTable[i].norm() << std::endl;
+    if(G.characterTable[i].norm() != 1)
+      okay = false;
+  }
+  if(printresults)
+    std::cout << "zero" << '\n';
+  for(int i=0; i<G.ccCount; i++)
+    for(int j=0; j<G.ccCount; j++)
+    { if(j==i)
+        continue;
+      if(G.characterTable[i].IP(G.characterTable[j]) != 0)
+        okay = false;
+      if(printresults)
+        std::cout << G.characterTable[i].IP(G.characterTable[j]) << std::endl;
+    }
+  return okay;
+}
 
 
 int main(void){
@@ -225,37 +297,58 @@ int main(void){
   XstdP.MakeFromCharacter(G.characterTable[2]);
   std::cout << XstdP << std::endl;
 
-
-
-  ElementAssociativeAlgebra<CoxeterElement, Rational> x;
-  ElementAssociativeAlgebra<CoxeterElement, Rational> y;
-
-  x.MakeZero();
-  CoxeterElement tempE;
-  tempE.owner = &G;
-  tempE.reflections.AddOnTop(1);
-
-  y.MakeZero();
-  CoxeterElement tempE2;
-  tempE2.owner = &G;
-  tempE2.reflections.AddOnTop(0);
-
-  x.AddMonomial(tempE, 3);
-  y.AddMonomial(tempE2,5);
-  x*=y;
-  std::cout << "\n\n\n\nHERE I AM: " << x.ToString() << "\n\n\n";
-
-  ElementAssociativeAlgebra<CoxeterElement, Rational> all;
-  for(int i=0; i<G.rhoOrbit.size; i++){
-    CoxeterElement tmp = CoxeterElement(&G, G.DecomposeTodorsVector(G.rhoOrbit[i]));
-    all.AddMonomial(tmp,1);
+  std::cout << "\nhi there\n";
+  for(int i=0; i<G.N; i++)
+  { E.MakeEi(&G,i);
+    std::cout << XstdP*E << std::endl;
   }
 
-  x *= all;
-  std::cout << all.ToString() << std::endl;
-  std::cout << x.ToString() << std::endl;
+  std::cout << GetMatrix(G.characterTable[0]) << std::endl;
+  std::cout << GetMatrix(G.characterTable[2]) << std::endl;
 
-/*    std::cout << G.rho << std::endl;
+  E.MakeEi(&G,33);
+  std::cout << XstdP*E << std::endl;
+  std::cout << GetMatrix(G.characterTable[2])*E.data << std::endl;
+
+  ElementMonomialAlgebra<CoxeterElement, Rational> Xstdp = FromCharacter(G.characterTable[2]);
+  std::cout << Xstdp << std::endl;
+  std::cout << "here they are" << std::endl;
+  List<ElementMonomialAlgebra<CoxeterElement, Rational> > l;
+  for(int i=0; i<G.N; i++)
+  { ElementMonomialAlgebra<CoxeterElement, Rational> tmp;
+    tmp.AddMonomial(G.GetCoxeterElement(i),1);
+    tmp *= Xstdp;
+    l.AddOnTop(tmp);
+    std::cout << tmp << '\n' << std::endl;
+  }
+  Xstdp.GaussianEliminationByRows(l);
+  std::cout << l << std::endl;
+/*  Matrix<Rational> ct;
+  ct.init(G.ccCount,G.ccCount);
+  for(int i=0; i<G.ccCount; i++)
+    for(int j=0; j<G.ccCount; j++)
+    { ct.elements[i][j] = chartable[i][j];
+      ct.elements[i][j] /= G.N;
+      ct.elements[i][j] *= G.ccSizes[j];
+    }
+
+  List<Vector<Rational> > powers;
+  Vector<Rational> v;
+  v = G.characterTable[2].data;
+  std::cout << v << '\n' << ct*v << '\n';
+  powers.AddOnTop(v);
+  for(int i=1; i<50; i++)
+  { Vector<Rational> v;
+    v = G.characterTable[2].data;
+    for(int j=0; j<G.ccCount; j++)
+      v[j] *= powers[i-1][j];
+    std::cout << v << '\n' << ct*v << '\n';
+    powers.AddOnTop(v);
+  }*/
+
+
+/*
+    std::cout << G.rho << std::endl;
     G.ComputeRhoOrbit();
     std::cout << "this orbit has " << G.rhoOrbit.size << std::endl;
     std::cout << G.rhoOrbit << std::endl;
@@ -279,7 +372,7 @@ int main(void){
     std::cout << G.characterTable << std::endl;
     std::cout << G.characterTable[0].norm() << G.characterTable[1].norm() << G.characterTable[2].norm() << std::endl;
 
-//    ElementAssociativeAlgebra<FiniteGroupElement, Rational> a;
+//    ElementMonomialAlgebra<FiniteGroupElement, Rational> a;
     Character X = G.characterTable[2] - G.characterTable[0];
     std::cout << X << X.norm() << std::endl;
 

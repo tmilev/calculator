@@ -7,6 +7,11 @@ static ProjectInformationInstance ProjectInfoVpfCharacters
 (__FILE__, "Experimental code by Thomas: finite group characters sandbox. Not fully implemented yet.");
 
 
+template<>
+typename List<CoxeterElement>::OrderLeftGreaterThanRight FormatExpressions::GetMonOrder<CoxeterElement>()
+{ return 0;
+}
+
 bool CommandList::innerCoxeterGroup(CommandList& theCommands, const Expression& input, Expression& output)
 { SemisimpleLieAlgebra* thePointer;
   std::string errorString;
@@ -253,6 +258,10 @@ int CoxeterGroup::MultiplyElements(int i, int j) const
 { return rhoOrbit.GetIndex(ApplyList(DecomposeTodorsVector(rhoOrbit[i]),rhoOrbit[j]));
 }
 
+int CoxeterGroup::operator()(int i, int j) const
+{ return MultiplyElements(i,j);
+}
+
 
 
 void CoxeterGroup::ComputeConjugacyClasses(){
@@ -468,6 +477,9 @@ Vector<Rational> CoxeterGroup::SimpleReflection(int i, const Vector<Rational> &v
     return w;
 }
 
+CoxeterElement CoxeterGroup::GetCoxeterElement(int i)
+{ return CoxeterElement(this, this->DecomposeTodorsVector(rhoOrbit[i]));
+}
 
 //-------------------------------CoxeterElement--------------------------
 

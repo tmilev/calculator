@@ -37,7 +37,7 @@ public:
 
 //The default multiplication operation is the exterior product.
 template <class CoefficientType>
-class DifferentialForm: ElementAssociativeAlgebra<MonomialDiffForm, CoefficientType>
+class DifferentialForm: ElementMonomialAlgebra<MonomialDiffForm, CoefficientType>
 {
   public:
   void operator=(const Polynomial<CoefficientType>& other);
@@ -48,7 +48,7 @@ class DifferentialForm: ElementAssociativeAlgebra<MonomialDiffForm, CoefficientT
   { return this->HashFunction(*this);
   }
   static unsigned int HashFunction(const DifferentialForm<CoefficientType>& input)
-  { return ElementAssociativeAlgebra<MonomialDiffForm, CoefficientType>::HashFunction(input);
+  { return ElementMonomialAlgebra<MonomialDiffForm, CoefficientType>::HashFunction(input);
   }
 };
 

@@ -166,7 +166,7 @@ bool CommandList::fWeylDimFormula
   Vector<RationalFunctionOld> theWeight;
   Expression newContext(theCommands);
   std::cout << "<br>input[2] is: " << input[2].ToString();
-  if (!theCommands.GetVector<RationalFunctionOld>
+  if (!theCommands.GetVectoR<RationalFunctionOld>
       (input[2], theWeight, &newContext, theSSowner->GetRank(),
        theCommands.innerRationalFunction))
     return output.SetError
@@ -200,7 +200,7 @@ bool CommandList::fAnimateLittelmannPaths
     return output.SetError(errorMessage, theCommands);
   Vector<Rational> theWeight;
   Expression tempContext(theCommands);
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (input[2], theWeight, &tempContext, theSSowner->GetRank(), 0))
     return output.SetError
     ("Failed to convert the argument of the function to a highest weight vector", theCommands);
@@ -312,15 +312,15 @@ bool CommandList::fDecomposeFDPartGeneralizedVermaModuleOverLeviPart
   WeylGroup& theWeyl=ownerSS.theWeyl;
   int theDim=ownerSS.GetRank();
   Expression finalContext;
-  if (!theCommands.GetVector<RationalFunctionOld>
-      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.innerPolynomial))
+  if (!theCommands.GetVectoR<RationalFunctionOld>
+      (weightNode, theWeightFundCoords, &finalContext, theDim, theCommands.innerRationalFunction))
     return output.SetError
     ("Failed to extract highest weight from the second argument.", theCommands)
     ;
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (inducingParNode, inducingParSel, &finalContext, theDim, 0))
     return output.SetError("Failed to extract parabolic selection from the third argument", theCommands);
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (splittingParNode, splittingParSel, &finalContext, theDim, 0))
     return output.SetError("Failed to extract parabolic selection from the fourth argument", theCommands);
   theCommands.Comments
@@ -381,7 +381,7 @@ bool CommandList::innerDrawWeightSupportWithMults
     return output.SetError(errorString, theCommands);
   Vector<Rational> highestWeightFundCoords;
   Expression theContext;
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (hwNode, highestWeightFundCoords, &theContext, theSSalgpointer->GetRank(), 0))
     return output.SetError("Failed to extract highest weight vector", theCommands);
   Vector<Rational> highestWeightSimpleCoords;
@@ -414,8 +414,8 @@ bool CommandList::innerDrawRootSystem
   if (hasPreferredProjectionPlane)
   { preferredProjectionPlane.SetSize(2);
     bool isGood=
-    theCommands.GetVector(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) &&
-    theCommands.GetVector(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
+    theCommands.GetVectoR(input[2], preferredProjectionPlane[0], 0, theWeyl.GetDim(), 0) &&
+    theCommands.GetVectoR(input[3], preferredProjectionPlane[1], 0, theWeyl.GetDim(), 0);
     if (!isGood)
       return output.SetError
       ("Failed to convert second or third argument to vector of desired dimension", theCommands);
@@ -446,7 +446,7 @@ bool CommandList::innerDrawWeightSupport
   SemisimpleLieAlgebra& theAlg=*theAlgPointer;
   Vector<Rational> highestWeightFundCoords;
   Expression tempContext;
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (hwNode, highestWeightFundCoords, &tempContext, theAlg.GetRank(), 0))
     return false;
   Vector<Rational> highestWeightSimpleCoords;
@@ -1396,17 +1396,18 @@ bool CommandList::fSplitFDpartB3overG2CharsOnly
   (theCommands, input, output, theG2B3Data);
 }
 
-bool CommandList::fSplitFDpartB3overG2Init
+bool CommandList::innerSplitFDpartB3overG2Init
 (CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3Data, Expression& outputContext)
-{ MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2Init");
+{ MacroRegisterFunctionWithName("CommandList::innerSplitFDpartB3overG2Init");
   if (!input.IsListNElements(4))
     return output.SetError
     ("Splitting the f.d. part of a B_3-representation over G_2 requires 3 arguments",
      theCommands);
-  if (!theCommands.GetVector<RationalFunctionOld>
+  std::cout << input.ToString();
+  if (!theCommands.GetVectorFromFunctionArguments<RationalFunctionOld>
       (input, theG2B3Data.theWeightFundCoords, &outputContext, 3,
-       theCommands.innerPolynomial))
+       theCommands.innerRationalFunction))
     output.SetError
     ("Failed to extract highest weight in fundamental coordinates. ", theCommands);
   theCommands.MakeHmmG2InB3(theG2B3Data.theHmm);
@@ -1424,7 +1425,7 @@ bool CommandList::fSplitFDpartB3overG2CharsOutput
  )
 { MacroRegisterFunctionWithName("fSplitFDpartB3overG2CharsOutput");
   Expression theContext(theCommands);
-  theCommands.fSplitFDpartB3overG2Init
+  theCommands.innerSplitFDpartB3overG2Init
   (theCommands, input, output, theG2B3Data, theContext);
   if (output.IsError())
     return true;
@@ -1452,21 +1453,22 @@ void CommandList::MakeHmmG2InB3(HomomorphismSemisimpleLieAlgebra& output)
 { SemisimpleLieAlgebra tempb3alg, tempg2alg;
   tempb3alg.theWeyl.MakeArbitrarySimple('B',3);
   tempg2alg.theWeyl.MakeArbitrarySimple('G',2);
-  this->theObjectContainer.theLieAlgebras
+  output.domainAlg=&this->theObjectContainer.theLieAlgebras
   [this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempg2alg)];
-  SemisimpleLieAlgebra& b3Alg =
-  this->theObjectContainer.theLieAlgebras
+  output.rangeAlg =
+  &this->theObjectContainer.theLieAlgebras
   [this->theObjectContainer.theLieAlgebras.AddNoRepetitionOrReturnIndexFirst(tempb3alg)];
+
   output.theRange().ComputeChevalleyConstantS(this->theGlobalVariableS);
   output.theDomain().ComputeChevalleyConstantS(this->theGlobalVariableS);
   ElementSemisimpleLieAlgebra<Rational> g_2, g_1plusg_3, g_m2, g_m1plusg_m3, tempElt;
-  g_2.MakeGenerator         (13, b3Alg);
-  g_m2.MakeGenerator        (7,  b3Alg);
-  g_1plusg_3.MakeGenerator  (12, b3Alg);
-  tempElt.MakeGenerator     (14, b3Alg);
+  g_2.MakeGenerator         (13, output.theRange());
+  g_m2.MakeGenerator        (7,  output.theRange());
+  g_1plusg_3.MakeGenerator  (12, output.theRange());
+  tempElt.MakeGenerator     (14, output.theRange());
   g_1plusg_3+=tempElt;
-  g_m1plusg_m3.MakeGenerator(6, b3Alg);
-  tempElt.MakeGenerator     (8, b3Alg);
+  g_m1plusg_m3.MakeGenerator(6, output.theRange());
+  tempElt.MakeGenerator     (8, output.theRange());
   g_m1plusg_m3+=tempElt;
 //  std::cout << "<hr>g_2: " << g_2.ToString();
 //  std::cout << "<hr>g_{1}+g_{3}: " << g_1plusg_3.ToString();
@@ -1739,7 +1741,7 @@ bool CommandList::fPrintB3G2branchingTableInit
 (CommandList& theCommands, const Expression& input, Expression& output,
  branchingData& theG2B3data, int& desiredHeight, Expression& outputContext)
 { MacroRegisterFunctionWithName("CommandList::fPrintB3G2branchingTableInit");
-  if (input.children.size!=2)
+  if (input.children.size!=3)
     return output.SetError
     ("I need two arguments: first is height, second is parabolic selection. ", theCommands);
   desiredHeight=0;
@@ -1748,7 +1750,7 @@ bool CommandList::fPrintB3G2branchingTableInit
   if (desiredHeight<0)
     desiredHeight=0;
   const Expression& weightNode= input[2];
-  theCommands.fSplitFDpartB3overG2Init
+  theCommands.innerSplitFDpartB3overG2Init
   (theCommands, weightNode, output, theG2B3data, outputContext);
   if (output.IsError())
     return true;
@@ -1941,7 +1943,7 @@ bool CommandList::fSplitFDpartB3overG2
 { MacroRegisterFunctionWithName("CommandList::fSplitFDpartB3overG2");
   branchingData theG2B3Data;
   Expression theContext(theCommands);
-  theCommands.fSplitFDpartB3overG2Init
+  theCommands.innerSplitFDpartB3overG2Init
   (theCommands, input, output, theG2B3Data, theContext);
   if (output.IsError())
     return true;
@@ -2541,7 +2543,7 @@ bool CommandList::fPrintAllPartitions
   Vector<Rational> theHW;
 //  std::cout << theExpression.ToString() << " rank "
 //  << theSSalgebra.GetRank() << " child one : " << input[2].ToString();
-  if (!theCommands.GetVector<Rational>
+  if (!theCommands.GetVectoR<Rational>
       (input[2], theHW, &theContext, theSSalgebra.GetRank()))
     return output.SetError
     ("Failed to extract weight you want partitioned from "+ input[2].ToString(), theCommands);
@@ -2798,6 +2800,7 @@ bool CommandList::fLittelmannOperator
   if (theIndex==0)
     return output.SetError
     ("The index of the Littelmann root operator is expected to be non-zero", theCommands);
+
   return output.AssignValue(theIndex, theCommands);
 }
 
@@ -2805,7 +2808,7 @@ bool CommandList::fLSPath
   (CommandList& theCommands, const Expression& input, Expression& output)
 { RecursionDepthCounter theRecutionIncrementer(&theCommands.RecursionDeptH);
   MacroRegisterFunctionWithName("CommandList::fLSPath");
-  if (!input.children.size<3)
+  if (input.children.size<3)
     return output.SetError("LSPath needs at least two arguments.", theCommands);
 
   std::string errorString;
@@ -2815,18 +2818,11 @@ bool CommandList::fLSPath
     return output.SetError(errorString, theCommands);
 
   SemisimpleLieAlgebra& ownerSSalgebra=*theSSowner;
-  output=input;
-  output.children.RemoveIndexShiftDown(1);
-  if (input.children.size<2)
-    return output.SetError("Error: no waypoints. ", theCommands);
-  Matrix<Rational> outputMat;
   Vectors<Rational> waypoints;
-  if (!theCommands.GetMatrix<Rational>(output, outputMat, 0, -1, 0))
-    return output.SetError("Failed to extract waypoints", theCommands);
-  if (outputMat.NumCols!=ownerSSalgebra.GetRank())
-    return output.SetError
-    ("Error: waypoints must have as many coordinates as is the rank of the ambient Lie algebra", theCommands);
-  outputMat.GetListRowsToVectors(waypoints);
+  waypoints.SetSize(input.children.size-2);
+  for (int i=2; i<input.children.size; i++)
+    if (!theCommands.GetVectoR<Rational>(input[i], waypoints[i-2], 0, ownerSSalgebra.GetRank(), 0))
+      return output.SetError("Failed to extract waypoints", theCommands);
   waypoints=ownerSSalgebra.theWeyl.GetSimpleCoordinatesFromFundamental(waypoints);
   LittelmannPath theLSpath;
   theLSpath.MakeFromWaypoints(waypoints, ownerSSalgebra.theWeyl);
@@ -2836,7 +2832,7 @@ bool CommandList::fLSPath
 bool CommandList::fInvertMatrix
 (CommandList& theCommands, const Expression& input, Expression& output)
 { Matrix<Rational> mat, outputMat, tempMat;
-  if (!theCommands.GetMatrix<Rational>(input, mat, 0, -1, 0))
+  if (!theCommands.GetMatriXFromArguments<Rational>(input, mat, 0, -1, 0))
     return output.SetError
     ("Failed to extract matrix with rational coefficients", theCommands);
   if (mat.NumRows!=mat.NumCols || mat.NumCols<1)

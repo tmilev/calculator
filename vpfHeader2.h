@@ -778,14 +778,12 @@ public:
   }
   bool isSeparatorFromTheLeftGeneral(const std::string& input);
   bool isSeparatorFromTheLeftForDefinition(const std::string& input);
-  bool isSeparatorFromTheLeftForStatement(const std::string& input);
   bool isSeparatorFromTheLeftForList(const std::string& input);
   bool isSeparatorFromTheLeftForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheLeftForMatrixRow(const std::string& input);
 
   bool isSeparatorFromTheRightGeneral(const std::string& input);
   bool isSeparatorFromTheRightForDefinition(const std::string& input);
-  bool isSeparatorFromTheRightForStatement(const std::string& input);
   bool isSeparatorFromTheRightForList(const std::string& input);
   bool isSeparatorFromTheRightForListMatrixRow(const std::string& input);
   bool isSeparatorFromTheRightForMatrixRow(const std::string& input);

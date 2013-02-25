@@ -136,9 +136,16 @@ class Expression
       this->children[i]=-1;
   }
   bool AssignChildAtomValue(int childIndex, int theAtom, CommandList& owner);
-  void AddChildOnTop(const Expression& inputChild)
+  bool AddChildOnTop(const Expression& inputChild)
   { this->children.SetSize(this->children.size+1);
-    this->AssignChild(this->children.size-1, inputChild);
+    return this->AssignChild(this->children.size-1, inputChild);
+  }
+  bool AddAtomOnTop(const std::string& theOperationString);
+  bool AddAtomOnTop(int theOp)
+  { this->CheckInitialization();
+    Expression tempE;
+    tempE.MakeAtom(theOp, *this->theBoss);
+    return this->AddChildOnTop(tempE);
   }
   bool AssignChild(int childIndexInMe, const Expression& inputChild);
   bool AssignChild(int childIndexInMe, int childIndexInBoss);
@@ -596,7 +603,7 @@ class CommandList
 public:
 //Calculator functions have as arguments two expressions passed by reference,
 //const Expression& input and Expression& output. Calculator functions
-//return bool. It is forbidden to pass the same object as input and output*.
+//return bool. It is forbidden to pass the same object as input and output.
 //If a calculator function returns false this
 //means that the calculator failed to evaluate the
 //function. If that is the case, the value of output is not specified and
@@ -623,9 +630,7 @@ public:
 //2.1.If the first child of X is an atom equal to the name of the inner function,
 //    we define Argument as follows.
 //2.1.1.If X has two children, Argument is set to the second child of X.
-//2.1.2.If X does not have two children, Argument is set to a list whose entries are
-//      the second, third, ... children of X. In particular, if X has only child, Argument is
-//      the empty list.
+//2.1.2.If X does not have two children, Argument is set to be equal to X.
 //2.2.The inner function is called on Argument.
 //2.3.If the inner function returns true, X is substituted with
 //    the output of the inner function, else nothing is done.
@@ -641,12 +646,7 @@ public:
 //similar error message.
 //
 //----------------------------------------------------------
-//*At the current implementation, there is one particular
-//criminal violation of this rule.
-//The violation is consciously done in order to speed up
-//the calculator evalution. As with all crimes, it is not really necessary and can be
-//avoided. As with all crimes, it is forbidden. Shall the program crash because of it,
-//the responsible programmer will suffer the consequences.
+
 
 //control sequences parametrize the syntactical elements
   HashedList<std::string, MathRoutines::hashString> controlSequences;
@@ -898,6 +898,7 @@ public:
   bool ReplaceAXbyEX();
   bool ReplaceOXbyEX(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyEXusingO(int theControlIndex, int inputFormat=Expression::formatDefault);
+  bool ReplaceEXXSequenceXBy_Expression_with_E_instead_of_sequence(int inputFormat=Expression::formatDefault);
   bool ReplaceOXbyE(int inputFormat=Expression::formatDefault);
   bool ReplaceIntIntBy10IntPlusInt()
   ;
@@ -1857,15 +1858,23 @@ bool Serialization::DeSerializeMonCollection
   finalContext.MakeEmptyContext(theCommands);
   for (int i=0; i<theSum.size; i++)
   { if (!Serialization::DeSerializeMonGetContext<TemplateMonomial>(theCommands, theSum[i], currentContext))
+    { theCommands.Comments << "<hr>Failed to load monomial context from " << input.ToString() << "</hr>";
       return false;
+    }
     if (!finalContext.ContextMergeContexts(finalContext, currentContext, finalContext))
+    { theCommands.Comments << "<hr>Failed to merge monomial contexts: "
+      << finalContext.ToString() << " and " << currentContext.ToString() << "</hr>";
       return false;
+    }
   }
   output.MakeZero();
   TemplateMonomial tempM;
   for (int i=0; i<theSum.size; i++)
   { if (!Serialization::DeSerializeMon(theCommands, theSum[i], finalContext, tempM))
+    { theCommands.Comments << "<hr>Failed to load monomial from " << theSum[i].ToString()
+      << " using monomial context " << finalContext.ToString() << ". </hr>";
       return false;
+    }
     output.AddMonomial(tempM, theSum.theCoeffs[i]);
   }
   return true;

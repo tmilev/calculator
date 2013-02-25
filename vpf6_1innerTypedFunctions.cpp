@@ -8,10 +8,10 @@ ProjectInformationInstance ProjectInfoVpf6_1cpp
 bool CommandList::innerAddRatToRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerAddRatToRat");
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
-  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+  if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   return output.AssignValue(leftR+rightR, theCommands);
 }
@@ -19,10 +19,10 @@ bool CommandList::innerAddRatToRat
 bool CommandList::innerMultiplyRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
-  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+  if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   return output.AssignValue(leftR*rightR, theCommands);
 }
@@ -30,10 +30,10 @@ bool CommandList::innerMultiplyRatByRat
 bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyRatByRat");
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   CoxeterElement leftR, rightR;
-  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+  if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   leftR*=rightR;
   return output.AssignValue(leftR, theCommands);
@@ -42,10 +42,10 @@ bool CommandList::innerMultiplyCoxeterEltByCoxeterElt
 bool CommandList::innerDivideRatByRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerDivideRatByRat");
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   Rational leftR, rightR;
-  if (!input[0].IsOfType(&leftR) || !input[1].IsOfType(&rightR))
+  if (!input[1].IsOfType(&leftR) || !input[2].IsOfType(&rightR))
     return false;
   if (rightR.IsEqualToZero())
     return output.SetError("Division by zero.", theCommands);
@@ -56,12 +56,12 @@ bool CommandList::innerTensorEltTensorByEltTensor
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerTensorEltTensorByEltTensor");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-//  std::cout << "<br>Attempting to tensor " << input[0].ToString() << " and " << input[1].ToString();
+//  std::cout << "<br>Attempting to tensor " << input[1].ToString() << " and " << input[2].ToString();
 
-  Expression leftCopy=input[0];
-  output=input[1];
+  Expression leftCopy=input[1];
+  output=input[2];
   if (!output.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
     return false;
   if (!leftCopy.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
@@ -81,18 +81,18 @@ bool CommandList::innerMultiplyAnyByEltTensor
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyAnyByEltTensor");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
   { //std::cout << "<br>input.children.size equals " << input.children.size << " instead of 2. ";
     return false;
   }
-  if (!input[1].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
-  { //std::cout << "<br>input[1] is not tensor product, instead it is " << input[1].ToString()
+  if (!input[2].IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >())
+  { //std::cout << "<br>input[2] is not tensor product, instead it is " << input[2].ToString()
     //<< "."; //",stack trace:  "  << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
     return false;
   }
   static bool theGhostHasAppeared=false;
-  output=input[1];
-  Expression leftCopy=input[0];
+  output=input[2];
+  Expression leftCopy=input[1];
 //  std::cout << "<br>before merge left and right are: " << leftCopy.ToString() << " and " << output.ToString();
   if (!output.MergeContexts(leftCopy, output))
   { //std::cout << "<br>failed context merge of " << leftCopy.ToString() << " and " << output.ToString();
@@ -131,10 +131,10 @@ bool CommandList::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyRatOrPolyOrRFByRatOrPolyOrRF");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   RationalFunctionOld* left;
   RationalFunctionOld* right;
   std::string errorString;
@@ -157,10 +157,10 @@ bool CommandList::innerAddRatOrPolyOrRFToRatOrPolyOrRF
 { MacroRegisterFunctionWithName("CommandList::innerAddRatOrPolyOrRFToRatOrPolyOrRF");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   RationalFunctionOld* left;
   RationalFunctionOld* right;
   std::string errorString;
@@ -183,11 +183,11 @@ bool CommandList::innerDivideRFOrPolyOrRatByRFOrPoly
 { MacroRegisterFunctionWithName("CommandList::innerDivideRFOrPolyOrRatByRFOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-//  std::cout << "<br>attempting to divide " << input[0].ToString() << " by " << input[1].ToString();
-  output=input[0];
-  Expression rightCopy=input[1];
+//  std::cout << "<br>attempting to divide " << input[1].ToString() << " by " << input[2].ToString();
+  output=input[1];
+  Expression rightCopy=input[2];
   RationalFunctionOld* left;
   RationalFunctionOld* right;
   std::string errorString;
@@ -224,10 +224,10 @@ bool CommandList::innerMultiplyRatOrPolyByRatOrPoly
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyRatOrPolyByRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   Polynomial<Rational>* left;
   Polynomial<Rational>* right;
   std::string errorString;
@@ -251,12 +251,12 @@ bool CommandList::innerAddUEToAny
 { MacroRegisterFunctionWithName("CommandList::innerAddUEToAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
+  output=input[1];
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
     return false;
-  Expression rightCopy=input[1];
+  Expression rightCopy=input[2];
   ElementUniversalEnveloping<RationalFunctionOld>* right;
   std::string errorString;
   if (!output.MergeContexts(output, rightCopy))
@@ -277,12 +277,12 @@ bool CommandList::innerMultiplyUEByAny
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyUEByAny");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
+  output=input[1];
   if (!output.IsOfType<ElementUniversalEnveloping<RationalFunctionOld> >())
     return false;
-  Expression rightCopy=input[1];
+  Expression rightCopy=input[2];
   ElementUniversalEnveloping<RationalFunctionOld>* right;
   std::string errorString;
   if (!output.MergeContexts(output, rightCopy))
@@ -303,10 +303,10 @@ bool CommandList::innerMultiplyLRObyLRO
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyLRObyLRO");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() ||
       !rightCopy.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >())
     return false;
@@ -330,10 +330,10 @@ bool CommandList::innerMultiplyLRObyLSPath
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyLRObyLSPath");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   if (!output.MergeContexts(output, rightCopy))
     return false;
   if (!output.IsOfType<MonomialTensor<int, MathRoutines::IntUnsignIdentity> >() ||
@@ -363,10 +363,10 @@ bool CommandList::innerAddEltTensorToEltTensor
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
 //  std::cout << "<br>adding element gvm and element gvm. ";
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   if (!output.MergeContexts(output, rightCopy))
     return false;
   if (!output.IsOfType<ElementTensorsGeneralizedVermas<RationalFunctionOld> >() ||
@@ -384,10 +384,10 @@ bool CommandList::innerAddRatOrPolyToRatOrPoly
 { MacroRegisterFunctionWithName("CommandList::innerAddRatOrPolyToRatOrPoly");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
-  output=input[0];
-  Expression rightCopy=input[1];
+  output=input[1];
+  Expression rightCopy=input[2];
   Polynomial<Rational>* left;
   Polynomial<Rational>* right;
   std::string errorString;
@@ -411,12 +411,12 @@ bool CommandList::innerAddPlotToPlot
 { MacroRegisterFunctionWithName("CommandList::innerAddPlotToPlot");
   //std::cout << CGI::GetStackTraceEtcErrorMessage(__FILE__, __LINE__);
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   CalculusFunctionPlot leftPlot, rightPlot;
-  if(!input[0].IsOfType<CalculusFunctionPlot>(&leftPlot))
+  if(!input[1].IsOfType<CalculusFunctionPlot>(&leftPlot))
     return false;
-  if(!input[1].IsOfType<CalculusFunctionPlot>(&rightPlot))
+  if(!input[2].IsOfType<CalculusFunctionPlot>(&rightPlot))
     return false;
   leftPlot+=rightPlot;
   return output.AssignValue(leftPlot, theCommands);
@@ -426,12 +426,12 @@ bool CommandList::innerRatPowerRat
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerRatPowerRat");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   Rational base, exp;
-  if(!input[0].IsOfType(&base))
+  if(!input[1].IsOfType(&base))
     return false;
-  if(!input[1].IsOfType(&exp))
+  if(!input[2].IsOfType(&exp))
     return false;
   int thePower;
   if (!exp.IsSmallInteger(&thePower))
@@ -446,12 +446,12 @@ bool CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg
 (CommandList& theCommands, const Expression& input, Expression& output)
 { MacroRegisterFunctionWithName("CommandList::innerMultiplyCharSSLieAlgByCharSSLieAlg");
   theCommands.CheckInputNotSameAsOutput(input, output);
-  if (input.children.size!=2)
+  if (!input.IsListNElements(3))
     return false;
   charSSAlgMod<Rational> leftC, rightC;
-  if (!input[0].IsOfType(& leftC))
+  if (!input[1].IsOfType(& leftC))
     return false;
-  if (!input[1].IsOfType(&rightC))
+  if (!input[2].IsOfType(&rightC))
     return false;
   if (leftC.owner!=rightC.owner)
   { theCommands.Comments

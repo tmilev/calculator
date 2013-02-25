@@ -31,24 +31,24 @@ void CommandList::initPredefinedInnerFunctions()
    "x:=MakeCharacterLieAlg{}(G_2, (1,0));\ny:=MakeCharacterLieAlg{}(G_2, (0,1));\nx*y", true)
    ;
   this->AddOperationInnerHandler
-  ("Serialize", this->innerSerialize, "",
+  ("Store", this->innerSerialize, "",
    "Attempts to convert a built-in data type to an expression tree which \
    evaluates to the same value as the \
    built-in type, and prepends the tree with the Serialization atom. If the conversion is not implemented\
-   the Serialize function evaluates to an error message.",
+   the Store function evaluates to an error message.",
    "Y:=Polynomial{}((a+b)^2);\
-   \nX:=Serialize{}Y;\nDeserialize{}X\
+   \nX:=Store{}Y;\nDeserialize{}X\
    ", true)
    ;
   this->AddOperationInnerHandler
-  ("Deserialize", this->innerDeSerialize, "",
+  ("Load", this->innerDeSerialize, "",
    "The operation opposite to serialization. ",
    "X:=SemisimpleLieAlgebra{}(A_1+A_2);\
-   \nY:=Serialize{}( X);\
-   Deserialize{}Y;\
+   \nY:=Store{}( X);\
+   Load{}Y;\
    \nZ:=Polynomial{}((a+b)^2);\
-   \nW:=Serialize{}Z;\
-   Deserialize{}W\
+   \nW:=Store{}Z;\
+   Load{}W\
    ", true)
    ;
   this->AddOperationInnerHandler

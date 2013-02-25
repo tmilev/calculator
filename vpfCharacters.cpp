@@ -73,7 +73,7 @@ bool CommandList::innerCharacter(CommandList& theCommands, const Expression& inp
   theElt.owner=&theCommands.theObjectContainer.theCoxeterGroups[indexOfOwnerGroupInObjectContainer];
 
   theGroup.ComputeInitialCharacters();
-  if(input.IsSequenceNElementS(2))
+  if(input.IsListNElements(3))
   { int theIndex;
     if(!input[2].IsSmallInteger(&theIndex))
       return output.SetError("Character index must be an integer", theCommands);
@@ -84,7 +84,7 @@ bool CommandList::innerCharacter(CommandList& theCommands, const Expression& inp
     return output.AssignValue(theGroup.characterTable[theIndex], theCommands);
   }
 
-  if(input.IsSequenceNElementS(theGroup.ccCount+1))
+  if(input.IsListNElements(theGroup.ccCount+1+1))
   { int n = theGroup.ccCount;
     List<int> X;
     for(int i=0; i<n; i++)
